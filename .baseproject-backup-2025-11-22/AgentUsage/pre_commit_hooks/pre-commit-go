@@ -1,0 +1,155 @@
+#!/bin/bash
+# Pre-commit hook - Go code quality checks
+# Runs gofmt, go vet, and golint on staged Go files
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Get staged Go files
+go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+
+# Skip if no Go files are staged
+if [ -z "$go_files" ]; then
+    echo -e "${GREEN}✓ No Go files to check${NC}"
+    exit 0
+fi
+
+echo -e "${YELLOW}Checking staged Go files:${NC}"
+echo "$go_files"
+echo ""
+
+# Track if any checks fail
+checks_failed=0
+
+# ============================================================================
+# GOFMT FORMATTER CHECK
+# ============================================================================
+echo -e "${YELLOW}Running gofmt formatter check...${NC}"
+
+if ! command -v gofmt &> /dev/null; then
+    echo -e "${RED}✗ gofmt is not installed${NC}"
+    echo -e "${YELLOW}gofmt should come with Go. Please install Go.${NC}"
+    exit 1
+fi
+
+unformatted=$(gofmt -l $go_files)
+if [ -z "$unformatted" ]; then
+    echo -e "${GREEN}✓ gofmt formatting passed${NC}"
+else
+    echo -e "${RED}✗ gofmt formatting failed${NC}"
+    echo -e "${YELLOW}Files need formatting:${NC}"
+    echo "$unformatted" | sed 's/^/  /'
+    echo ""
+    echo -e "${YELLOW}To fix: run 'gofmt -w .' or 'gofmt -w <filename>'${NC}"
+    checks_failed=1
+fi
+
+echo ""
+
+# ============================================================================
+# GO VET CHECK
+# ============================================================================
+echo -e "${YELLOW}Running go vet check...${NC}"
+
+if ! command -v go &> /dev/null; then
+    echo -e "${RED}✗ Go is not installed${NC}"
+    exit 1
+fi
+
+if go vet $go_files 2>&1; then
+    echo -e "${GREEN}✓ go vet passed${NC}"
+else
+    echo -e "${RED}✗ go vet failed${NC}"
+    echo -e "${YELLOW}Vet found potential issues in your code${NC}"
+    checks_failed=1
+fi
+
+echo ""
+
+# ============================================================================
+# GOLINT CHECK (optional but recommended)
+# ============================================================================
+echo -e "${YELLOW}Running golint check...${NC}"
+
+if command -v golint &> /dev/null; then
+    lint_output=$(golint $go_files)
+    if [ -z "$lint_output" ]; then
+        echo -e "${GREEN}✓ golint passed${NC}"
+    else
+        echo -e "${YELLOW}⚠ golint warnings (non-blocking):${NC}"
+        echo "$lint_output" | sed 's/^/  /'
+        echo ""
+        echo -e "${YELLOW}Note: golint warnings don't block commits, but should be addressed${NC}"
+    fi
+elif command -v staticcheck &> /dev/null; then
+    # Use staticcheck as alternative to golint
+    echo -e "${YELLOW}Using staticcheck (golint alternative)...${NC}"
+    if staticcheck $go_files 2>&1; then
+        echo -e "${GREEN}✓ staticcheck passed${NC}"
+    else
+        echo -e "${YELLOW}⚠ staticcheck warnings (non-blocking)${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠ golint not installed (optional)${NC}"
+    echo -e "${YELLOW}Install with: go install golang.org/x/lint/golint@latest${NC}"
+    echo -e "${YELLOW}Or use staticcheck: go install honnef.co/go/tools/cmd/staticcheck@latest${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# GO IMPORTS CHECK (goimports if available)
+# ============================================================================
+if command -v goimports &> /dev/null; then
+    echo -e "${YELLOW}Running goimports check...${NC}"
+
+    unimported=$(goimports -l $go_files)
+    if [ -z "$unimported" ]; then
+        echo -e "${GREEN}✓ goimports passed${NC}"
+    else
+        echo -e "${RED}✗ goimports failed${NC}"
+        echo -e "${YELLOW}Files with import issues:${NC}"
+        echo "$unimported" | sed 's/^/  /'
+        echo ""
+        echo -e "${YELLOW}To fix: run 'goimports -w .' or 'goimports -w <filename>'${NC}"
+        checks_failed=1
+    fi
+    echo ""
+fi
+
+# ============================================================================
+# GO MOD VERIFY (if go.mod exists)
+# ============================================================================
+if [ -f "go.mod" ]; then
+    echo -e "${YELLOW}Running go mod verify...${NC}"
+
+    if go mod verify 2>&1; then
+        echo -e "${GREEN}✓ go mod verify passed${NC}"
+    else
+        echo -e "${RED}✗ go mod verify failed${NC}"
+        echo -e "${YELLOW}Run 'go mod tidy' to fix module dependencies${NC}"
+        checks_failed=1
+    fi
+    echo ""
+fi
+
+# ============================================================================
+# FINAL RESULTS
+# ============================================================================
+if [ $checks_failed -eq 1 ]; then
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED}Pre-commit checks failed!${NC}"
+    echo -e "${RED}Please fix the issues above before committing.${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 1
+else
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+fi

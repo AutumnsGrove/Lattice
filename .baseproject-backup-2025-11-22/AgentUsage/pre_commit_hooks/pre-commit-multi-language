@@ -1,0 +1,293 @@
+#!/bin/bash
+# Pre-commit hook - Multi-language code quality checks
+# Automatically detects and checks Python, JavaScript/TypeScript, Go, and Rust files
+# Runs appropriate formatters and linters based on file types
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}🔍 Running multi-language pre-commit checks...${NC}"
+echo ""
+
+# Get staged files by language
+python_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+js_ts_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(js\|jsx\|ts\|tsx\|mjs\|cjs\)$' || true)
+go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+rust_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.rs$' || true)
+json_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.json$' || true)
+yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(yml\|yaml\)$' || true)
+markdown_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+
+# Track overall success
+checks_failed=0
+languages_checked=0
+
+# ============================================================================
+# PYTHON CHECKS
+# ============================================================================
+if [ -n "$python_files" ]; then
+    languages_checked=$((languages_checked + 1))
+    echo -e "${YELLOW}📦 Checking Python files...${NC}"
+    echo "Files: $(echo $python_files | tr '\n' ' ')"
+    echo ""
+
+    # Black formatter check (using UV)
+    if uv run black --version &> /dev/null; then
+        echo "  Running Black formatter..."
+        if uv run black --check --quiet $python_files 2>&1; then
+            echo -e "  ${GREEN}✓ Black formatting passed${NC}"
+        else
+            echo -e "  ${RED}✗ Black formatting failed${NC}"
+            echo -e "  ${YELLOW}Fix with: uv run black ${python_files}${NC}"
+            checks_failed=1
+        fi
+    else
+        echo -e "  ${YELLOW}⚠ Black not installed (uv pip install black)${NC}"
+    fi
+
+    # Ruff linter check (using UV)
+    if uv run ruff --version &> /dev/null; then
+        echo "  Running Ruff linter..."
+        if uv run ruff check $python_files --quiet 2>&1; then
+            echo -e "  ${GREEN}✓ Ruff linting passed${NC}"
+        else
+            echo -e "  ${RED}✗ Ruff linting failed${NC}"
+            echo -e "  ${YELLOW}Fix with: uv run ruff check --fix ${python_files}${NC}"
+            checks_failed=1
+        fi
+    else
+        echo -e "  ${YELLOW}⚠ Ruff not installed (uv pip install ruff)${NC}"
+    fi
+
+    echo ""
+fi
+
+# ============================================================================
+# JAVASCRIPT/TYPESCRIPT CHECKS
+# ============================================================================
+if [ -n "$js_ts_files" ]; then
+    languages_checked=$((languages_checked + 1))
+    echo -e "${YELLOW}📦 Checking JavaScript/TypeScript files...${NC}"
+    echo "Files: $(echo $js_ts_files | tr '\n' ' ')"
+    echo ""
+
+    # Prettier formatter check
+    if command -v prettier &> /dev/null; then
+        echo "  Running Prettier formatter..."
+        if prettier --check $js_ts_files 2>&1; then
+            echo -e "  ${GREEN}✓ Prettier formatting passed${NC}"
+        else
+            echo -e "  ${RED}✗ Prettier formatting failed${NC}"
+            echo -e "  ${YELLOW}Fix with: prettier --write ${js_ts_files}${NC}"
+            checks_failed=1
+        fi
+    elif [ -f "node_modules/.bin/prettier" ]; then
+        echo "  Running Prettier formatter (local)..."
+        if npx prettier --check $js_ts_files 2>&1; then
+            echo -e "  ${GREEN}✓ Prettier formatting passed${NC}"
+        else
+            echo -e "  ${RED}✗ Prettier formatting failed${NC}"
+            echo -e "  ${YELLOW}Fix with: npx prettier --write ${js_ts_files}${NC}"
+            checks_failed=1
+        fi
+    else
+        echo -e "  ${YELLOW}⚠ Prettier not installed (npm install -D prettier)${NC}"
+    fi
+
+    # ESLint check
+    if command -v eslint &> /dev/null; then
+        echo "  Running ESLint..."
+        if eslint $js_ts_files 2>&1; then
+            echo -e "  ${GREEN}✓ ESLint passed${NC}"
+        else
+            echo -e "  ${RED}✗ ESLint failed${NC}"
+            echo -e "  ${YELLOW}Fix with: eslint --fix ${js_ts_files}${NC}"
+            checks_failed=1
+        fi
+    elif [ -f "node_modules/.bin/eslint" ]; then
+        echo "  Running ESLint (local)..."
+        if npx eslint $js_ts_files 2>&1; then
+            echo -e "  ${GREEN}✓ ESLint passed${NC}"
+        else
+            echo -e "  ${RED}✗ ESLint failed${NC}"
+            echo -e "  ${YELLOW}Fix with: npx eslint --fix ${js_ts_files}${NC}"
+            checks_failed=1
+        fi
+    else
+        echo -e "  ${YELLOW}⚠ ESLint not installed (npm install -D eslint)${NC}"
+    fi
+
+    echo ""
+fi
+
+# ============================================================================
+# GO CHECKS
+# ============================================================================
+if [ -n "$go_files" ]; then
+    languages_checked=$((languages_checked + 1))
+    echo -e "${YELLOW}📦 Checking Go files...${NC}"
+    echo "Files: $(echo $go_files | tr '\n' ' ')"
+    echo ""
+
+    # gofmt formatter check
+    if command -v gofmt &> /dev/null; then
+        echo "  Running gofmt..."
+        unformatted=$(gofmt -l $go_files)
+        if [ -z "$unformatted" ]; then
+            echo -e "  ${GREEN}✓ gofmt passed${NC}"
+        else
+            echo -e "  ${RED}✗ gofmt failed${NC}"
+            echo -e "  ${YELLOW}Unformatted files:${NC}"
+            echo "$unformatted" | sed 's/^/    /'
+            echo -e "  ${YELLOW}Fix with: gofmt -w ${go_files}${NC}"
+            checks_failed=1
+        fi
+    fi
+
+    # go vet check
+    if command -v go &> /dev/null; then
+        echo "  Running go vet..."
+        if go vet $go_files 2>&1; then
+            echo -e "  ${GREEN}✓ go vet passed${NC}"
+        else
+            echo -e "  ${RED}✗ go vet failed${NC}"
+            checks_failed=1
+        fi
+    fi
+
+    # golint check (optional)
+    if command -v golint &> /dev/null; then
+        echo "  Running golint..."
+        if golint $go_files 2>&1; then
+            echo -e "  ${GREEN}✓ golint passed${NC}"
+        else
+            echo -e "  ${YELLOW}⚠ golint warnings (non-blocking)${NC}"
+        fi
+    fi
+
+    echo ""
+fi
+
+# ============================================================================
+# RUST CHECKS
+# ============================================================================
+if [ -n "$rust_files" ]; then
+    languages_checked=$((languages_checked + 1))
+    echo -e "${YELLOW}📦 Checking Rust files...${NC}"
+    echo "Files: $(echo $rust_files | tr '\n' ' ')"
+    echo ""
+
+    # rustfmt formatter check
+    if command -v rustfmt &> /dev/null; then
+        echo "  Running rustfmt..."
+        if rustfmt --check $rust_files 2>&1; then
+            echo -e "  ${GREEN}✓ rustfmt passed${NC}"
+        else
+            echo -e "  ${RED}✗ rustfmt failed${NC}"
+            echo -e "  ${YELLOW}Fix with: rustfmt ${rust_files}${NC}"
+            checks_failed=1
+        fi
+    else
+        echo -e "  ${YELLOW}⚠ rustfmt not installed${NC}"
+    fi
+
+    # clippy linter check
+    if command -v cargo &> /dev/null; then
+        echo "  Running clippy..."
+        if cargo clippy --all-targets --all-features -- -D warnings 2>&1; then
+            echo -e "  ${GREEN}✓ clippy passed${NC}"
+        else
+            echo -e "  ${RED}✗ clippy failed${NC}"
+            checks_failed=1
+        fi
+    fi
+
+    echo ""
+fi
+
+# ============================================================================
+# JSON VALIDATION
+# ============================================================================
+if [ -n "$json_files" ]; then
+    echo -e "${YELLOW}📦 Validating JSON files...${NC}"
+
+    json_errors=0
+    for file in $json_files; do
+        if command -v jq &> /dev/null; then
+            if ! jq empty "$file" 2>/dev/null; then
+                echo -e "  ${RED}✗ Invalid JSON: $file${NC}"
+                json_errors=1
+            fi
+        elif command -v python3 &> /dev/null; then
+            if ! python3 -m json.tool "$file" >/dev/null 2>&1; then
+                echo -e "  ${RED}✗ Invalid JSON: $file${NC}"
+                json_errors=1
+            fi
+        fi
+    done
+
+    if [ $json_errors -eq 0 ]; then
+        echo -e "  ${GREEN}✓ All JSON files valid${NC}"
+    else
+        checks_failed=1
+    fi
+    echo ""
+fi
+
+# ============================================================================
+# YAML VALIDATION
+# ============================================================================
+if [ -n "$yaml_files" ]; then
+    echo -e "${YELLOW}📦 Validating YAML files...${NC}"
+
+    yaml_errors=0
+    for file in $yaml_files; do
+        if command -v yamllint &> /dev/null; then
+            if ! yamllint "$file" 2>/dev/null; then
+                echo -e "  ${RED}✗ Invalid YAML: $file${NC}"
+                yaml_errors=1
+            fi
+        elif command -v python3 &> /dev/null; then
+            if ! python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null; then
+                echo -e "  ${RED}✗ Invalid YAML: $file${NC}"
+                yaml_errors=1
+            fi
+        fi
+    done
+
+    if [ $yaml_errors -eq 0 ]; then
+        echo -e "  ${GREEN}✓ All YAML files valid${NC}"
+    else
+        checks_failed=1
+    fi
+    echo ""
+fi
+
+# ============================================================================
+# FINAL RESULTS
+# ============================================================================
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+if [ $checks_failed -eq 0 ]; then
+    if [ $languages_checked -eq 0 ]; then
+        echo -e "${GREEN}✓ No code files to check${NC}"
+    else
+        echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+        echo -e "${GREEN}  Checked: $languages_checked language(s)${NC}"
+    fi
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+else
+    echo -e "${RED}✗ Pre-commit checks failed!${NC}"
+    echo -e "${RED}  Please fix the issues above before committing.${NC}"
+    echo ""
+    echo -e "${YELLOW}To bypass these checks (not recommended):${NC}"
+    echo -e "${YELLOW}  git commit --no-verify${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 1
+fi

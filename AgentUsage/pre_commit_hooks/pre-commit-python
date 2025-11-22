@@ -1,0 +1,83 @@
+#!/bin/bash
+# Pre-commit hook - runs Black and Ruff on staged Python files
+# This hook ensures code quality by checking formatting and linting before commits
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Get staged Python files
+python_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$' || true)
+
+# Skip if no Python files are staged
+if [ -z "$python_files" ]; then
+    echo -e "${GREEN}✓ No Python files to check${NC}"
+    exit 0
+fi
+
+echo -e "${YELLOW}Checking staged Python files:${NC}"
+echo "$python_files"
+echo ""
+
+# Track if any checks fail
+checks_failed=0
+
+# Check if Black is installed (using UV)
+if ! uv run black --version &> /dev/null; then
+    echo -e "${RED}✗ Black is not installed. Install with: uv pip install black${NC}"
+    exit 1
+fi
+
+# Check if Ruff is installed (using UV)
+if ! uv run ruff --version &> /dev/null; then
+    echo -e "${RED}✗ Ruff is not installed. Install with: uv pip install ruff${NC}"
+    exit 1
+fi
+
+# Run Black check
+echo -e "${YELLOW}Running Black formatter check...${NC}"
+if uv run black --check --quiet $python_files 2>&1; then
+    echo -e "${GREEN}✓ Black formatting passed${NC}"
+else
+    echo -e "${RED}✗ Black formatting failed${NC}"
+    echo -e "${YELLOW}Files need formatting:${NC}"
+    uv run black --check $python_files 2>&1 | grep "would reformat" || true
+    echo ""
+    echo -e "${YELLOW}To fix: run 'uv run black .' or 'uv run black <filename>'${NC}"
+    checks_failed=1
+fi
+
+echo ""
+
+# Run Ruff linting
+echo -e "${YELLOW}Running Ruff linter check...${NC}"
+if uv run ruff check $python_files --quiet; then
+    echo -e "${GREEN}✓ Ruff linting passed${NC}"
+else
+    echo -e "${RED}✗ Ruff linting failed${NC}"
+    echo -e "${YELLOW}Linting violations found:${NC}"
+    uv run ruff check $python_files
+    echo ""
+    echo -e "${YELLOW}To fix: run 'uv run ruff check --fix .' or fix violations manually${NC}"
+    checks_failed=1
+fi
+
+echo ""
+
+# Exit based on results
+if [ $checks_failed -eq 1 ]; then
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED}Pre-commit checks failed!${NC}"
+    echo -e "${RED}Please fix the issues above before committing.${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 1
+else
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+fi

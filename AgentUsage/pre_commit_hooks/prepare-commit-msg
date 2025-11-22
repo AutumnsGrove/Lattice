@@ -1,0 +1,122 @@
+#!/bin/bash
+# Prepare-commit-msg hook - Branch context injector
+# Automatically adds branch name/ticket context to commit messages
+# Adds AI agent co-authorship attribution
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Colors for output (won't show in commit message, just terminal)
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Skip for merge/squash/amend commits
+if [ "$COMMIT_SOURCE" = "merge" ] || [ "$COMMIT_SOURCE" = "squash" ]; then
+    exit 0
+fi
+
+# Get current branch name
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# If we can't get branch name, exit
+if [ -z "$BRANCH" ]; then
+    exit 0
+fi
+
+# ============================================================================
+# BRANCH-BASED COMMIT PREFIX
+# ============================================================================
+# Extract ticket/issue number from branch name if present
+# Supports patterns like:
+#   - feature/ABC-123-description
+#   - fix/issue-456
+#   - hotfix/PROJ-789
+#   - feat/add-dark-mode
+
+PREFIX=""
+
+# Check for Jira-style tickets (ABC-123)
+if [[ $BRANCH =~ ([A-Z]+-[0-9]+) ]]; then
+    TICKET="${BASH_REMATCH[1]}"
+    PREFIX="[$TICKET] "
+
+# Check for GitHub issue numbers (issue-123, #123)
+elif [[ $BRANCH =~ issue-([0-9]+) ]] || [[ $BRANCH =~ \#([0-9]+) ]]; then
+    ISSUE="${BASH_REMATCH[1]}"
+    PREFIX="[#$ISSUE] "
+
+# Check for feature/fix/hotfix branches without ticket
+elif [[ $BRANCH =~ ^(feature|feat|fix|hotfix|bugfix)/ ]]; then
+    TYPE="${BASH_REMATCH[1]}"
+    # Extract readable description from branch
+    DESCRIPTION=$(echo "$BRANCH" | sed -E 's/^(feature|feat|fix|hotfix|bugfix)\///' | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+    # Don't add prefix for these, but we could add a comment
+fi
+
+# ============================================================================
+# READ EXISTING COMMIT MESSAGE
+# ============================================================================
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# ============================================================================
+# ADD BRANCH PREFIX (if not already present)
+# ============================================================================
+if [ -n "$PREFIX" ]; then
+    # Check if prefix already in message
+    if ! grep -q "^$PREFIX" "$COMMIT_MSG_FILE"; then
+        # Prepend prefix to first line
+        FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
+        REST_OF_MSG=$(tail -n +2 "$COMMIT_MSG_FILE")
+
+        # Write new message
+        echo "$PREFIX$FIRST_LINE" > "$COMMIT_MSG_FILE"
+        echo "$REST_OF_MSG" >> "$COMMIT_MSG_FILE"
+
+        echo -e "${GREEN}✓ Added branch context: $PREFIX${NC}" >&2
+    fi
+fi
+
+# ============================================================================
+# ADD CLAUDE CO-AUTHORSHIP (if not already present)
+# ============================================================================
+# Only add if this looks like an AI-assisted commit
+# (Skip for manual commits)
+
+# Check if agent attribution already exists
+if ! grep -q "Co-Authored-By: \[Model Name\]" "$COMMIT_MSG_FILE"; then
+    # Check if message is substantive (not just a default message)
+    if [ -s "$COMMIT_MSG_FILE" ] && ! grep -q "^#" "$COMMIT_MSG_FILE"; then
+        # Add co-authorship footer
+        echo "" >> "$COMMIT_MSG_FILE"
+        echo "🤖 Generated with [Claude Code](https://claude.ai/code)" >> "$COMMIT_MSG_FILE"
+        echo "via [Happy](https://happy.engineering)" >> "$COMMIT_MSG_FILE"
+        echo "" >> "$COMMIT_MSG_FILE"
+        echo "Co-Authored-By: [Model Name] <agent@localhost>" >> "$COMMIT_MSG_FILE"
+        echo "Co-Authored-By: Happy <yesreply@happy.engineering>" >> "$COMMIT_MSG_FILE"
+
+        echo -e "${GREEN}✓ Added AI agent co-authorship${NC}" >&2
+    fi
+fi
+
+# ============================================================================
+# ADD HELPFUL COMMENTS (only for terminal, not in commit)
+# ============================================================================
+# Add template/reminder if commit message is empty or default
+if [ ! -s "$COMMIT_MSG_FILE" ] || grep -q "^# Please enter the commit message" "$COMMIT_MSG_FILE"; then
+    cat >> "$COMMIT_MSG_FILE" <<EOF
+
+# Commit Message Format:
+# <type>: <brief description>
+#
+# [optional body]
+#
+# Types: feat, fix, docs, style, refactor, test, chore, perf
+# Example: feat: add user authentication system
+#
+# Current branch: $BRANCH
+EOF
+fi
+
+exit 0

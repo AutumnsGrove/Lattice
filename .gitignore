@@ -1,0 +1,16 @@
+secrets.json
+*.log
+__pycache__/
+.DS_Store
+.claude/
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

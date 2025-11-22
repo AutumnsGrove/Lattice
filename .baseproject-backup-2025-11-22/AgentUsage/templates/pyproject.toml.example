@@ -1,0 +1,73 @@
+[project]
+name = "your-project-name"
+version = "0.1.0"
+description = "Brief description of your project"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # Add your runtime dependencies here
+    # Example:
+    # "fastapi>=0.104.0",
+    # "uvicorn[standard]>=0.24.0",
+    # "sqlalchemy>=2.0.0",
+    # "pydantic>=2.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Development dependencies
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    # Code quality tools
+    "black>=23.12.0",
+    "ruff>=0.1.9",
+    "mypy>=1.8.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+select = ["E", "W", "F", "I", "B", "SIM"]
+ignore = ["E501"]  # Black handles line length
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Enable gradually
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+# Instructions:
+# 1. Copy this file to project root as pyproject.toml
+# 2. Update 'name', 'version', and 'description'
+# 3. Add your specific dependencies to the dependencies list
+# 4. Run: uv sync
+# 5. See AgentUsage/uv_usage.md for UV workflows

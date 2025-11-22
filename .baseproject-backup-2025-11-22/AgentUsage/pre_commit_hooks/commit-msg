@@ -1,0 +1,62 @@
+#!/bin/bash
+# Commit message validation hook
+# Validates against conventional commits format from AgentUsage/git_guide.md
+
+# Read commit message from file
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Get first line of commit message
+first_line=$(echo "$commit_msg" | head -n 1)
+
+# Define valid action verbs for custom format
+valid_actions="Add|Update|Fix|Refactor|Remove|Enhance"
+
+# Define valid conventional commit types
+conventional_types="feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert"
+
+# Validation flags
+is_valid=false
+error_msg=""
+
+# Check for custom format: "Action Brief description"
+if echo "$first_line" | grep -qE "^($valid_actions) "; then
+    is_valid=true
+
+    # Optional: Check for Co-Authored-By line (recommended but not required)
+    if ! echo "$commit_msg" | grep -q "Co-Authored-By: [Model Name]"; then
+        echo "Note: Consider adding 'Co-Authored-By: [Model Name] <agent@localhost>' to your commit message"
+    fi
+fi
+
+# Check for conventional commit format: "type: description" or "type(scope): description"
+if echo "$first_line" | grep -qE "^($conventional_types)(\(.+\))?: "; then
+    is_valid=true
+fi
+
+# If neither format matches, show error
+if [ "$is_valid" = false ]; then
+    echo "ERROR: Invalid commit message format"
+    echo ""
+    echo "First line: $first_line"
+    echo ""
+    echo "Expected formats:"
+    echo ""
+    echo "1. Custom format:"
+    echo "   [Action] Brief description"
+    echo "   Valid actions: Add, Update, Fix, Refactor, Remove, Enhance"
+    echo "   Example: Add user authentication feature"
+    echo ""
+    echo "2. Conventional commit format:"
+    echo "   type: description  OR  type(scope): description"
+    echo "   Valid types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+    echo "   Example: feat: add user authentication"
+    echo ""
+    echo "See AgentUsage/git_guide.md for detailed guidelines"
+    echo ""
+    echo "To bypass this check, use: git commit --no-verify"
+    exit 1
+fi
+
+# Success
+exit 0
