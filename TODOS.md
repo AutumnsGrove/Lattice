@@ -4,7 +4,7 @@
 - [ ] Initialize `grove-engine` GitHub repository
 - [ ] Set up SvelteKit project with TypeScript
 - [ ] Configure Cloudflare Workers and D1 database
-- [ ] Set up Lucia Auth for authentication
+- [ ] Implement magic link auth (6-digit email codes via Resend)
 - [ ] Configure Stripe for payments
 - [ ] Set up Resend for email
 - [ ] Check domain availability (grove.com or alternatives)

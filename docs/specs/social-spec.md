@@ -28,7 +28,7 @@ Grove Social is the community layer of the Grove platform. It provides a social 
 - **Database:** Cloudflare D1 (social data, votes, reactions)
 - **Cache:** Cloudflare KV (feed caching, session data)
 - **Storage:** Cloudflare R2 (emoji assets)
-- **Auth:** Shared with Grove Website (Lucia Auth)
+- **Auth:** Shared with Grove Website (magic links - 6-digit email codes)
 - **Real-time:** Cloudflare Durable Objects (future)
 - **API:** RESTful API with JSON responses
 
@@ -299,9 +299,8 @@ Response: { success: boolean; blog: Blog }
 - One social account can follow multiple blogs
 
 **Registration:**
-- Email/password (simple, no complex verification)
-- Optional: GitHub OAuth (if you fix it)
-- No mandatory email verification (but recommended)
+- Magic links (6-digit email codes) - simple, passwordless
+- Email verification built into signup flow
 - Welcome email with feed introduction
 
 **Profile (Minimal):**
@@ -319,15 +318,15 @@ Response: { success: boolean; blog: Blog }
 
 **API Endpoints:**
 ```typescript
-// Register
-POST /api/auth/register
-Body: { email: string; password: string; username: string }
-Response: { success: boolean; user: User }
+// Request login code
+POST /api/auth/request-code
+Body: { email: string }
+Response: { success: boolean; message: string }
 
-// Login
-POST /api/auth/login
-Body: { email: string; password: string }
-Response: { success: boolean; user: User; session: Session }
+// Verify code & login/register
+POST /api/auth/verify-code
+Body: { email: string; code: string; username?: string }
+Response: { success: boolean; user: User; session: Session; isNewUser: boolean }
 
 // Get current user
 GET /api/auth/me
@@ -357,9 +356,8 @@ CREATE TABLE social_users (
   avatar_url TEXT,
   bio TEXT,
   
-  -- Auth
-  password_hash TEXT, -- Optional if using OAuth
-  email_verified BOOLEAN DEFAULT FALSE,
+  -- Auth (magic links - no password storage needed)
+  email_verified BOOLEAN DEFAULT TRUE, -- Verified via 6-digit code on signup
   
   -- Privacy
   profile_public BOOLEAN DEFAULT TRUE,

@@ -30,7 +30,7 @@ Grove Website is the main marketing site and client management platform for Grov
 - **Database:** Cloudflare D1 (client data, subscriptions, support tickets)
 - **Storage:** Cloudflare KV (caching, session data)
 - **Payments:** Stripe
-- **Auth:** Lucia Auth (email/password)
+- **Auth:** Magic links (6-digit email codes via Resend)
 - **Email:** Resend (transactional emails)
 - **Hosting:** Cloudflare Pages
 
@@ -127,12 +127,13 @@ grove-website/
 
 **Signup Flow:**
 1. Choose plan (Starter/Professional/Business)
-2. Create account (email/password)
-3. Verify email
-4. Enter billing info (Stripe)
-5. Choose subdomain (availability check)
-6. Blog created automatically
-7. Welcome email with next steps
+2. Enter email address
+3. Receive 6-digit code via email
+4. Enter code to verify & create account
+5. Enter billing info (Stripe)
+6. Choose subdomain (availability check)
+7. Blog created automatically
+8. Welcome email with next steps
 
 **Onboarding Email Sequence:**
 - **Immediately:** Welcome + login credentials

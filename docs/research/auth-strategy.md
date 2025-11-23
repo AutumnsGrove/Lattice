@@ -1,5 +1,37 @@
 # Authentication Strategy for Grove: A Comprehensive Implementation Guide
 
+---
+
+## DECISION: Magic Links with 6-Digit Email Codes
+
+**Status:** DECIDED (November 2025)
+
+**Choice:** Email-based one-time passwords (OTP) - 6-digit codes sent via email
+
+**Rationale:**
+- Extremely simple user experience - no passwords to remember
+- More secure than traditional click-link magic links (doesn't train phishing behavior)
+- Works with corporate email scanners that break clickable magic links
+- Familiar pattern (similar to 2FA codes users already know)
+- Lower implementation complexity than OAuth
+- Zero password storage/hashing concerns
+
+**Implementation:**
+1. User enters email address
+2. System generates 6-digit code (cryptographically secure)
+3. Code sent via Resend with 15-minute expiration
+4. User enters code to authenticate
+5. Session created in KV with appropriate TTL
+
+**Tech Stack:**
+- Resend for email delivery
+- Cloudflare KV for session storage and code verification
+- D1 for user accounts
+
+---
+
+## Research Summary
+
 **Better Auth with email/password emerges as the optimal solution for Grove, offering production-ready features, excellent Cloudflare compatibility, and maintainable complexity for a solo developer.** This approach provides industry-standard security at zero ongoing cost beyond infrastructure, with clear paths to add OAuth and advanced features. The recommended architecture uses single unified accounts with role-based access, D1 for user storage, KV for sessions, and Resend for transactional emails—creating a robust foundation that scales from 10 to 1000+ users without infrastructure changes.
 
 This matters because authentication failures create user frustration and security vulnerabilities. Grove's current broken GitHub OAuth situation exemplifies the risk of choosing solutions without proper Cloudflare edge compatibility. By implementing the patterns outlined here—specifically designed for SvelteKit + Cloudflare Pages—you'll achieve a simple signup flow (under 2 minutes), enterprise-grade security, and long-term maintainability as a solo developer.
