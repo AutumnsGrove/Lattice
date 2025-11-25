@@ -693,10 +693,10 @@ bucket_name = "grove-media"
 ### Build Process
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Build for production
-npm run build
+pnpm run build
 
 # Deploy to Cloudflare
 wrangler pages deploy .svelte-kit/cloudflare

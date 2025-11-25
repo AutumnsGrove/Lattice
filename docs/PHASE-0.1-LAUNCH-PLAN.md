@@ -78,7 +78,7 @@ Create three separate repositories:
 
 ### Local Development Setup
 - [ ] Install Node.js 20+ (LTS version)
-- [ ] Install npm/yarn/pnpm (package manager)
+- [ ] Install pnpm (package manager)
 - [ ] Install wrangler CLI (Cloudflare tooling)
 - [ ] Install SvelteKit CLI tools
 - [ ] Configure VS Code extensions:

@@ -15,7 +15,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
-- **Package Manager:** npm/yarn (TBD)
+- **Package Manager:** pnpm
 
 ## Architecture Notes
 - Multi-tenant architecture with subdomain routing

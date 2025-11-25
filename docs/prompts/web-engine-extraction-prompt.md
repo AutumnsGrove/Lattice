@@ -493,8 +493,8 @@ ADMIN_GITHUB_USERNAMES=xxx
 
 ```bash
 cd /home/user/GroveEngine/package
-npm install
-npm run build  # If you add a build step
+pnpm install
+pnpm run build  # If you add a build step
 ```
 
 Verify:
@@ -506,8 +506,8 @@ Verify:
 
 ```bash
 cd /tmp/AutumnsGrove-source
-npm install
-npm run build
+pnpm install
+pnpm run build
 ```
 
 **If build fails, check:**
@@ -518,7 +518,7 @@ npm run build
 ### 5.3 Run Website Dev Server
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 **Test every feature manually:**
@@ -566,7 +566,7 @@ npm run dev
 ### 5.4 Run Type Checking
 
 ```bash
-npm run check  # svelte-check
+pnpm run check  # svelte-check
 ```
 
 Ensure no type errors in either project.
@@ -621,7 +621,7 @@ A SvelteKit blog engine with a powerful gutter content system.
 ## Installation
 
 ```bash
-npm install grove-engine
+pnpm add grove-engine
 ```
 
 ## Usage

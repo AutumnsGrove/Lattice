@@ -9,7 +9,7 @@
 | Agent | Use For | Auto-Invoke When | Model |
 |-------|---------|------------------|-------|
 | **house-research** | Codebase searches, pattern finding | Searching 20+ files, finding patterns | Haiku 4.5 |
-| **house-bash** | Command execution, verbose output | Running tests, builds, npm install, deployments | Haiku 4.5 |
+| **house-bash** | Command execution, verbose output | Running tests, builds, pnpm install, deployments | Haiku 4.5 |
 | **house-git** | Git diffs, commit analysis | Reviewing diffs >100 lines, before commits | Haiku 4.5 |
 | **house-coder** | Small code patches (0-250 lines) | Import fixes, TODO implementations, bugs <50 lines | Haiku 4.5 |
 | **house-planner** | Task orchestration & planning | Multi-file changes (3+), new features, ambiguous tasks | Sonnet 4.5 |
@@ -27,7 +27,7 @@
 
 ### house-bash
 - Running: tests, builds, linters, deployments
-- Installing: npm install, pip install, package updates
+- Installing: pnpm install, pip install, package updates
 - Executing: scripts with verbose output
 - Starting: dev servers, Docker containers
 - **Threshold**: Output >100 lines expected

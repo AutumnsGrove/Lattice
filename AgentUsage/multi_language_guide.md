@@ -12,14 +12,14 @@ This guide covers the languages used in this workspace:
 
 | Operation | Python (UV) | Go | Node.js | Rust |
 |-----------|-------------|-----|---------|------|
-| **Init Project** | `uv init` | `go mod init` | `npm init` | `cargo new` |
-| **Add Dependency** | `uv add package` | `go get pkg` | `npm install pkg` | `cargo add crate` |
-| **Install Deps** | `uv sync` | `go mod download` | `npm install` | `cargo build` |
+| **Init Project** | `uv init` | `go mod init` | `pnpm init` | `cargo new` |
+| **Add Dependency** | `uv add package` | `go get pkg` | `pnpm add pkg` | `cargo add crate` |
+| **Install Deps** | `uv sync` | `go mod download` | `pnpm install` | `cargo build` |
 | **Run Code** | `uv run script.py` | `go run main.go` | `node script.js` | `cargo run` |
-| **Run Tests** | `uv run pytest` | `go test ./...` | `npm test` | `cargo test` |
+| **Run Tests** | `uv run pytest` | `go test ./...` | `pnpm test` | `cargo test` |
 | **Build Binary** | N/A | `go build` | N/A | `cargo build --release` |
-| **Format Code** | `uv run ruff format` | `go fmt ./...` | `npm run format` | `cargo fmt` |
-| **Lint Code** | `uv run ruff check` | `go vet ./...` | `npm run lint` | `cargo clippy` |
+| **Format Code** | `uv run ruff format` | `go fmt ./...` | `pnpm run format` | `cargo fmt` |
+| **Lint Code** | `uv run ruff check` | `go vet ./...` | `pnpm run lint` | `cargo clippy` |
 
 ## Python (Primary Language)
 
@@ -174,14 +174,11 @@ project/
 
 ```bash
 # Initialize project
-npm init -y
+pnpm init
 
 # Install dependencies
-npm install express
-npm install --save-dev typescript @types/node
-
-# Or use pnpm (faster, disk-efficient)
-pnpm install express
+pnpm add express
+pnpm add -D typescript @types/node
 ```
 
 ### package.json Example
@@ -211,11 +208,11 @@ pnpm install express
 ### Common Commands
 
 ```bash
-npm install                 # Install dependencies
-npm run dev                # Run dev server
-npm test                   # Run tests
-npm run build              # Build for production
-npx tsc --init             # Initialize TypeScript
+pnpm install               # Install dependencies
+pnpm run dev               # Run dev server
+pnpm test                  # Run tests
+pnpm run build             # Build for production
+pnpm exec tsc --init       # Initialize TypeScript
 ```
 
 ## Rust Basics
@@ -325,7 +322,7 @@ echo "Building Go binaries..."
 cd ../../go && go build -o ../bin/go-tool
 
 echo "Building Node.js app..."
-cd ../node && npm install && npm run build
+cd ../node && pnpm install && pnpm run build
 
 echo "Building Rust components..."
 cd ../rust && cargo build --release
@@ -402,9 +399,9 @@ console.log(output);
 
 | Feature | UV (Python) | Go Modules | npm/pnpm | Cargo (Rust) |
 |---------|-------------|------------|----------|--------------|
-| **Speed** | Very Fast | Fast | Medium/Fast | Fast |
-| **Lock File** | uv.lock | go.sum | package-lock.json | Cargo.lock |
-| **Global Cache** | Yes | Yes | Yes (pnpm) | Yes |
+| **Speed** | Very Fast | Fast | Fast | Fast |
+| **Lock File** | uv.lock | go.sum | pnpm-lock.yaml | Cargo.lock |
+| **Global Cache** | Yes | Yes | Yes | Yes |
 | **Virtual Env** | Automatic | N/A | N/A | N/A |
 | **Version Resolution** | Automatic | Minimal | npm/pnpm | Smart |
 | **Offline Mode** | Yes | Yes | Yes | Yes |
@@ -413,7 +410,7 @@ console.log(output);
 
 - **UV**: Replaces pip, poetry, pyenv - all-in-one Python tool
 - **Go Modules**: Minimal, built into Go toolchain
-- **npm/pnpm**: npm is default, pnpm saves disk space
+- **pnpm**: Fast, disk-efficient Node.js package manager
 - **Cargo**: Excellent dependency resolution, built-in docs
 
 ## Related Guides
@@ -432,7 +429,7 @@ uv init && uv add requests && uv run python main.py
 go mod init example.com/app && go run main.go
 
 # Node.js
-npm init -y && npm install express && node index.js
+pnpm init && pnpm add express && node index.js
 
 # Rust
 cargo new app && cd app && cargo run

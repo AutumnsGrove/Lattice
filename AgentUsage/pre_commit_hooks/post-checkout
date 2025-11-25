@@ -107,18 +107,18 @@ if git diff --name-only $PREV_HEAD $NEW_HEAD | grep -q "package.json\|package-lo
             echo -e "  ${RED}✗ Failed to update Node dependencies${NC}"
         fi
 
-    # npm
-    elif [ -f "package.json" ] && command -v npm &> /dev/null; then
-        echo "  Running 'npm install'..."
-        if npm install; then
-            echo -e "  ${GREEN}✓ Node dependencies updated (npm)${NC}"
+    # pnpm fallback (if no lock file but pnpm available)
+    elif [ -f "package.json" ] && command -v pnpm &> /dev/null; then
+        echo "  Running 'pnpm install'..."
+        if pnpm install; then
+            echo -e "  ${GREEN}✓ Node dependencies updated (pnpm)${NC}"
             deps_updated=1
         else
             echo -e "  ${RED}✗ Failed to update Node dependencies${NC}"
         fi
 
     else
-        echo -e "  ${YELLOW}⚠ No Node package manager found${NC}"
+        echo -e "  ${YELLOW}⚠ No Node package manager found (install pnpm)${NC}"
     fi
     echo ""
 fi
