@@ -106,7 +106,7 @@ wrangler pages project create grove-engine --production-branch=main
 - Connect to GitHub repository (grove-engine)
 - Configure build settings:
   - Framework preset: SvelteKit
-  - Build command: `npm run build`
+  - Build command: `pnpm run build`
   - Build output directory: `.svelte-kit/cloudflare`
   - Node version: 20
 - Add environment variables with resource IDs from above

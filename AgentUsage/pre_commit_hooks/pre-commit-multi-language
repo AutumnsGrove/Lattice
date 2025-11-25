@@ -89,15 +89,15 @@ if [ -n "$js_ts_files" ]; then
         fi
     elif [ -f "node_modules/.bin/prettier" ]; then
         echo "  Running Prettier formatter (local)..."
-        if npx prettier --check $js_ts_files 2>&1; then
+        if pnpm exec prettier --check $js_ts_files 2>&1; then
             echo -e "  ${GREEN}✓ Prettier formatting passed${NC}"
         else
             echo -e "  ${RED}✗ Prettier formatting failed${NC}"
-            echo -e "  ${YELLOW}Fix with: npx prettier --write ${js_ts_files}${NC}"
+            echo -e "  ${YELLOW}Fix with: pnpm exec prettier --write ${js_ts_files}${NC}"
             checks_failed=1
         fi
     else
-        echo -e "  ${YELLOW}⚠ Prettier not installed (npm install -D prettier)${NC}"
+        echo -e "  ${YELLOW}⚠ Prettier not installed (pnpm add -D prettier)${NC}"
     fi
 
     # ESLint check
@@ -112,15 +112,15 @@ if [ -n "$js_ts_files" ]; then
         fi
     elif [ -f "node_modules/.bin/eslint" ]; then
         echo "  Running ESLint (local)..."
-        if npx eslint $js_ts_files 2>&1; then
+        if pnpm exec eslint $js_ts_files 2>&1; then
             echo -e "  ${GREEN}✓ ESLint passed${NC}"
         else
             echo -e "  ${RED}✗ ESLint failed${NC}"
-            echo -e "  ${YELLOW}Fix with: npx eslint --fix ${js_ts_files}${NC}"
+            echo -e "  ${YELLOW}Fix with: pnpm exec eslint --fix ${js_ts_files}${NC}"
             checks_failed=1
         fi
     else
-        echo -e "  ${YELLOW}⚠ ESLint not installed (npm install -D eslint)${NC}"
+        echo -e "  ${YELLOW}⚠ ESLint not installed (pnpm add -D eslint)${NC}"
     fi
 
     echo ""

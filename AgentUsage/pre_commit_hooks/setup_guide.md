@@ -180,7 +180,7 @@ Comprehensive checks for mixed-language projects:
 
 #### pre-push
 Runs tests before pushing to remote:
-- Auto-detects test framework (pytest, npm test, go test, cargo test)
+- Auto-detects test framework (pytest, pnpm test, go test, cargo test)
 - Prevents broken code from reaching remote
 - Non-blocking if no tests configured
 - **Recommended for all projects with tests**
@@ -190,7 +190,7 @@ Runs tests before pushing to remote:
 #### post-checkout
 Auto-updates dependencies when switching branches:
 - Detects changes in `package.json`, `pyproject.toml`, `go.mod`, etc.
-- Runs appropriate package manager (npm, uv, go mod, cargo)
+- Runs appropriate package manager (pnpm, uv, go mod, cargo)
 - Saves time and prevents "works on my branch" issues
 - **Recommended for team projects**
 

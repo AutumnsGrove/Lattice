@@ -44,21 +44,21 @@ if command -v prettier &> /dev/null; then
         checks_failed=1
     fi
 elif [ -f "node_modules/.bin/prettier" ]; then
-    # Local Prettier via npm
-    if npx prettier --check $js_ts_files 2>&1; then
+    # Local Prettier via pnpm
+    if pnpm exec prettier --check $js_ts_files 2>&1; then
         echo -e "${GREEN}✓ Prettier formatting passed${NC}"
     else
         echo -e "${RED}✗ Prettier formatting failed${NC}"
         echo -e "${YELLOW}Files need formatting:${NC}"
-        npx prettier --list-different $js_ts_files 2>&1 || true
+        pnpm exec prettier --list-different $js_ts_files 2>&1 || true
         echo ""
-        echo -e "${YELLOW}To fix: run 'npx prettier --write .'${NC}"
+        echo -e "${YELLOW}To fix: run 'pnpm exec prettier --write .'${NC}"
         checks_failed=1
     fi
 else
     echo -e "${RED}✗ Prettier is not installed${NC}"
-    echo -e "${YELLOW}Install with: npm install -D prettier${NC}"
-    echo -e "${YELLOW}Or globally: npm install -g prettier${NC}"
+    echo -e "${YELLOW}Install with: pnpm add -D prettier${NC}"
+    echo -e "${YELLOW}Or globally: pnpm add -g prettier${NC}"
     exit 1
 fi
 
@@ -82,20 +82,20 @@ if command -v eslint &> /dev/null; then
         checks_failed=1
     fi
 elif [ -f "node_modules/.bin/eslint" ]; then
-    # Local ESLint via npm
-    if npx eslint $js_ts_files 2>&1; then
+    # Local ESLint via pnpm
+    if pnpm exec eslint $js_ts_files 2>&1; then
         echo -e "${GREEN}✓ ESLint passed${NC}"
     else
         echo -e "${RED}✗ ESLint failed${NC}"
         echo -e "${YELLOW}Linting violations found:${NC}"
-        npx eslint $js_ts_files
+        pnpm exec eslint $js_ts_files
         echo ""
-        echo -e "${YELLOW}To fix: run 'npx eslint --fix .'${NC}"
+        echo -e "${YELLOW}To fix: run 'pnpm exec eslint --fix .'${NC}"
         checks_failed=1
     fi
 else
     echo -e "${YELLOW}⚠ ESLint is not installed (optional but recommended)${NC}"
-    echo -e "${YELLOW}Install with: npm install -D eslint${NC}"
+    echo -e "${YELLOW}Install with: pnpm add -D eslint${NC}"
 fi
 
 echo ""
@@ -116,7 +116,7 @@ if [ -n "$ts_files" ]; then
                 checks_failed=1
             fi
         elif [ -f "node_modules/.bin/tsc" ]; then
-            if npx tsc --noEmit 2>&1; then
+            if pnpm exec tsc --noEmit 2>&1; then
                 echo -e "${GREEN}✓ TypeScript type check passed${NC}"
             else
                 echo -e "${RED}✗ TypeScript type check failed${NC}"
