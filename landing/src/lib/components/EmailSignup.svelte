@@ -1,6 +1,6 @@
 <script lang="ts">
 	let email = $state('');
-	let status = $state<'idle' | 'loading' | 'success' | 'error'>('idle');
+	let status = $state<'idle' | 'loading' | 'success' | 'already_signed_up' | 'error'>('idle');
 	let errorMessage = $state('');
 
 	async function handleSubmit(e: Event) {
@@ -26,6 +26,9 @@
 			if (response.ok) {
 				status = 'success';
 				email = '';
+			} else if (response.status === 409) {
+				status = 'already_signed_up';
+				email = '';
 			} else {
 				status = 'error';
 				errorMessage = data.error || 'Something went wrong. Please try again.';
@@ -47,6 +50,17 @@
 		</svg>
 		<p class="text-grove-800 font-sans font-medium">You're on the list!</p>
 		<p class="text-grove-600 text-sm font-sans mt-1">Check your inbox for a welcome note.</p>
+		<p class="text-grove-500 text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
+	</div>
+{:else if status === 'already_signed_up'}
+	<div
+		class="bg-grove-50 border border-grove-200 rounded-lg px-6 py-4 text-center max-w-md animate-in"
+	>
+		<svg class="w-8 h-8 text-grove-600 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" stroke-linecap="round" stroke-linejoin="round" />
+		</svg>
+		<p class="text-grove-800 font-sans font-medium">You're already on the list!</p>
+		<p class="text-grove-600 text-sm font-sans mt-1">Thank you for being so excited.</p>
 		<p class="text-grove-500 text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
 	</div>
 {:else}
