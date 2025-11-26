@@ -53,6 +53,8 @@
 		<div class="flex flex-col sm:flex-row gap-3">
 			<input
 				type="email"
+				name="email"
+				autocomplete="email"
 				bind:value={email}
 				placeholder="your@email.com"
 				class="input-field flex-1"
