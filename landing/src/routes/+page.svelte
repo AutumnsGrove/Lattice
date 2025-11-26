@@ -3,7 +3,8 @@
 </script>
 
 <svelte:head>
-	<title>Grove</title>
+	<title>Grove — a place to Be</title>
+	<meta name="description" content="A quiet corner of the internet where your words can grow and flourish. Sign up to be notified when Grove launches." />
 </svelte:head>
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
