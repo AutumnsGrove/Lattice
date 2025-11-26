@@ -1,49 +1,57 @@
-# GroveEngine Extraction Prompt
+# GroveEngine Extraction Prompt (Phase 1 of 2)
 
-> **Purpose:** Guide Claude Code through extracting the web engine from AutumnsGrove website and re-implementing the site to use it as an external dependency.
+> **Purpose:** Extract reusable engine code from AutumnsGrove website into the `@groveengine/core` package.
+> **Next Step:** After extraction, use `implementation-prompt.md` to build remaining features.
 
 ---
 
 ## CONTEXT
 
-You are performing a delicate extraction operation. The goal is to:
+You are performing the first phase of building GroveEngine. This phase extracts reusable code from the existing AutumnsGrove website. A second prompt handles implementing new features required by the specs.
 
-1. **Extract** all reusable engine code from the AutumnsGrove website into the GroveEngine package
-2. **Re-implement** the AutumnsGrove website to consume GroveEngine as a dependency
-3. **Preserve** 100% of existing functionality - nothing should break
+**What this prompt covers:**
+- Extracting and converting existing components to TypeScript
+- Restructuring code to match the package architecture
+- Setting up the npm package foundation
+
+**What the second prompt covers:**
+- Magic code authentication (Resend)
+- D1 database schema and queries
+- KV session management
+- R2 media storage
+- Admin panel components
+- Customer repository template
 
 **Source Repository:** https://github.com/AutumnsGrove/AutumnsGrove
-**Target Repository:** GroveEngine (this project)
+**Target Package:** `@groveengine/core`
 
 ---
 
 ## CRITICAL PRINCIPLES
 
-Before you begin, understand these non-negotiable principles:
+### 1. TypeScript First
+- Convert ALL extracted JavaScript to TypeScript (strict mode)
+- Add proper type definitions for all exports
+- Use interfaces for component props
 
-### 1. Surgical Precision
-- Extract ONLY the engine code, not site-specific content
-- Every file must be examined individually - no bulk operations
-- Preserve exact functionality - no "improvements" during extraction
+### 2. Architectural Alignment
+- Follow the package structure defined in `docs/specs/engine-spec.md`
+- Components go in organized subfolders: `components/blog/`, `components/layout/`, `components/ui/`
+- Server utilities go in `server/`
 
-### 2. Zero Data Loss
-- All user content (markdown, images, assets) must remain in the website
-- All site-specific routes and features must continue working
-- All configuration must be properly split and documented
+### 3. Clean Extraction
+- Extract ONLY code that aligns with the engine spec
+- Skip site-specific code (Git stats, GitHub API calls for dashboard, etc.)
+- Preserve exact functionality of extracted code
 
-### 3. Verification at Every Step
-- After each phase, verify the website still builds and runs
-- Test all components in isolation before integration
-- Document any issues immediately
-
-### 4. Clean Boundaries
-- Engine code should have ZERO site-specific hardcoding
-- Website code should import from engine, not duplicate
-- Configuration should be clearly separated
+### 4. Foundation for Phase 2
+- Set up proper exports structure
+- Create placeholder files for features built in Phase 2
+- Ensure package.json is ready for additions
 
 ---
 
-## PHASE 1: SETUP & INVENTORY (Do First)
+## PHASE 1: SETUP & INVENTORY
 
 ### 1.1 Clone Source Repository
 ```bash
@@ -51,267 +59,621 @@ git clone https://github.com/AutumnsGrove/AutumnsGrove /tmp/AutumnsGrove-source
 cd /tmp/AutumnsGrove-source
 ```
 
-### 1.2 Create Working Branch for Website
-Create a new branch in the AutumnsGrove repo for the refactored version:
-```bash
-git checkout -b refactor/use-grove-engine
-```
+### 1.2 Initialize Package Structure
 
-### 1.3 Initialize GroveEngine Package Structure
-In the GroveEngine repository, create the package structure:
+Create the `@groveengine/core` package structure in the GroveEngine repository:
 
 ```
 /home/user/GroveEngine/
-├── package/                    # The NPM package
+├── package/
 │   ├── src/
-│   │   ├── auth/              # JWT & session management
-│   │   ├── components/        # Svelte components
-│   │   ├── styles/            # CSS files
-│   │   ├── utils/             # Utility functions
-│   │   └── index.js           # Main exports
+│   │   ├── lib/
+│   │   │   ├── components/
+│   │   │   │   ├── ui/                    # Extracted UI components
+│   │   │   │   │   ├── ZoomableImage.svelte
+│   │   │   │   │   ├── Lightbox.svelte
+│   │   │   │   │   ├── LightboxCaption.svelte
+│   │   │   │   │   ├── ImageGallery.svelte
+│   │   │   │   │   ├── CollapsibleSection.svelte
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── layout/                # Layout components
+│   │   │   │   │   ├── ContentWithGutter.svelte
+│   │   │   │   │   ├── LeftGutter.svelte
+│   │   │   │   │   ├── GutterItem.svelte
+│   │   │   │   │   ├── TableOfContents.svelte
+│   │   │   │   │   ├── MobileTOC.svelte
+│   │   │   │   │   ├── IconLegend.svelte
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── blog/                  # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── admin/                 # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── auth/                  # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts               # Main component exports
+│   │   │   ├── server/
+│   │   │   │   ├── auth/                  # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── db/                    # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── storage/               # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   ├── email/                 # Placeholder for Phase 2
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── stores/
+│   │   │   │   ├── theme.ts
+│   │   │   │   ├── user.ts                # Placeholder for Phase 2
+│   │   │   │   ├── siteConfig.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── utils/
+│   │   │   │   ├── gutter.ts              # Extracted from source
+│   │   │   │   ├── markdown.ts            # Extracted from source
+│   │   │   │   └── index.ts
+│   │   │   ├── types/
+│   │   │   │   ├── index.ts               # All type definitions
+│   │   │   │   ├── post.ts
+│   │   │   │   ├── user.ts
+│   │   │   │   └── config.ts
+│   │   │   └── index.ts                   # Public API exports
+│   │   └── app.d.ts
+│   ├── migrations/                        # Placeholder for Phase 2
+│   │   └── .gitkeep
 │   ├── package.json
 │   ├── svelte.config.js
-│   ├── vite.config.js
+│   ├── vite.config.ts
+│   ├── tsconfig.json
 │   └── README.md
-└── docs/                       # Keep existing docs
+└── docs/
+    ├── specs/                             # Keep existing
+    └── prompts/                           # Keep existing
 ```
 
-### 1.4 Create Todo Tracking
-Use TodoWrite to track all extraction tasks. Create these initial todos:
+### 1.3 Create Todo Tracking
 
-**Phase 1 Tasks:**
-- [ ] Clone and examine source repository
-- [ ] Create GroveEngine package structure
-- [ ] Inventory all files to extract
+Use TodoWrite to track extraction tasks:
 
-**Phase 2 Tasks:**
-- [ ] Extract authentication system
-- [ ] Extract all 11 Svelte components
-- [ ] Extract utility functions
-- [ ] Extract CSS styles
-
-**Phase 3 Tasks:**
-- [ ] Configure package.json with dependencies
-- [ ] Set up build configuration
-- [ ] Create package exports
-
-**Phase 4 Tasks:**
-- [ ] Refactor website to use engine imports
-- [ ] Update all import paths
-- [ ] Split configuration files
-
-**Phase 5 Tasks:**
-- [ ] Build and test engine package
-- [ ] Build and test refactored website
-- [ ] Verify all features work
+**Phase 1 Tasks (This Prompt):**
+- [ ] Clone source repository
+- [ ] Create package directory structure
+- [ ] Extract and convert UI components to TypeScript
+- [ ] Extract and convert layout components to TypeScript
+- [ ] Extract and convert utility functions to TypeScript
+- [ ] Create type definitions
+- [ ] Create Svelte stores
+- [ ] Configure package.json and build setup
+- [ ] Create placeholder exports for Phase 2 features
+- [ ] Verify package builds successfully
 
 ---
 
-## PHASE 2: EXTRACT ENGINE CODE
+## PHASE 2: EXTRACT & CONVERT COMPONENTS
 
-### 2.1 Extract Authentication System
+### 2.1 Extract UI Components
 
-**Source files to extract:**
-- `src/lib/auth/jwt.js` → `package/src/auth/jwt.js`
-- `src/lib/auth/session.js` → `package/src/auth/session.js`
+These components are general-purpose and reusable:
 
-**Verification:**
-- Functions are pure with no site-specific imports
-- Web Crypto API compatible (Cloudflare Workers)
-- No hardcoded secrets or URLs
-
-**Export as:**
-```javascript
-// package/src/auth/index.js
-export { signJwt, verifyJwt } from './jwt.js';
-export {
-  createSession,
-  verifySession,
-  createSessionCookie,
-  clearSessionCookie,
-  parseSessionCookie,
-  isAllowedAdmin
-} from './session.js';
-```
-
-### 2.2 Extract Svelte Components
-
-**All 11 components to extract:**
-
-| Source | Target | Priority |
-|--------|--------|----------|
-| `src/lib/components/ContentWithGutter.svelte` | `package/src/components/` | Critical |
-| `src/lib/components/TableOfContents.svelte` | `package/src/components/` | Critical |
-| `src/lib/components/ImageGallery.svelte` | `package/src/components/` | Critical |
-| `src/lib/components/ZoomableImage.svelte` | `package/src/components/` | High |
-| `src/lib/components/Lightbox.svelte` | `package/src/components/` | High |
-| `src/lib/components/LightboxCaption.svelte` | `package/src/components/` | High |
-| `src/lib/components/GutterItem.svelte` | `package/src/components/` | High |
-| `src/lib/components/LeftGutter.svelte` | `package/src/components/` | High |
-| `src/lib/components/MobileTOC.svelte` | `package/src/components/` | Medium |
-| `src/lib/components/CollapsibleSection.svelte` | `package/src/components/` | Medium |
-| `src/lib/components/IconLegend.svelte` | `package/src/components/` | Low |
+| Source File | Target File | Notes |
+|-------------|-------------|-------|
+| `src/lib/components/ZoomableImage.svelte` | `package/src/lib/components/ui/ZoomableImage.svelte` | Convert to TS, add props interface |
+| `src/lib/components/Lightbox.svelte` | `package/src/lib/components/ui/Lightbox.svelte` | Convert to TS |
+| `src/lib/components/LightboxCaption.svelte` | `package/src/lib/components/ui/LightboxCaption.svelte` | Convert to TS |
+| `src/lib/components/ImageGallery.svelte` | `package/src/lib/components/ui/ImageGallery.svelte` | Convert to TS |
+| `src/lib/components/CollapsibleSection.svelte` | `package/src/lib/components/ui/CollapsibleSection.svelte` | Convert to TS |
 
 **For each component:**
-1. Read the source file completely
-2. Identify any site-specific imports or paths
-3. Replace site-specific references with configurable props or imports from engine utils
-4. Update internal component imports to use relative paths within package
+1. Read the source file
+2. Add TypeScript `<script lang="ts">`
+3. Define props interface
+4. Update imports to use relative paths within package
+5. Add JSDoc comments for exported props
+
+**Example conversion:**
+```svelte
+<!-- Before (JavaScript) -->
+<script>
+  export let src;
+  export let alt = '';
+</script>
+
+<!-- After (TypeScript) -->
+<script lang="ts">
+  interface Props {
+    /** Image source URL */
+    src: string;
+    /** Alt text for accessibility */
+    alt?: string;
+  }
+
+  let { src, alt = '' }: Props = $props();
+</script>
+```
+
+### 2.2 Extract Layout Components
+
+These components handle content layout with the gutter system:
+
+| Source File | Target File |
+|-------------|-------------|
+| `src/lib/components/ContentWithGutter.svelte` | `package/src/lib/components/layout/ContentWithGutter.svelte` |
+| `src/lib/components/LeftGutter.svelte` | `package/src/lib/components/layout/LeftGutter.svelte` |
+| `src/lib/components/GutterItem.svelte` | `package/src/lib/components/layout/GutterItem.svelte` |
+| `src/lib/components/TableOfContents.svelte` | `package/src/lib/components/layout/TableOfContents.svelte` |
+| `src/lib/components/MobileTOC.svelte` | `package/src/lib/components/layout/MobileTOC.svelte` |
+| `src/lib/components/IconLegend.svelte` | `package/src/lib/components/layout/IconLegend.svelte` |
 
 **Critical: ContentWithGutter.svelte**
-This is the most complex component (~400 lines). It imports:
-- `TableOfContents.svelte`
-- `MobileTOC.svelte`
-- `GutterItem.svelte`
-- `$lib/utils/gutter.js`
 
-Update all these imports to relative paths:
-```javascript
-// Before (in website)
+This is the most complex component. Update internal imports:
+```typescript
+// Before (in source)
 import TableOfContents from '$lib/components/TableOfContents.svelte';
 import { parseAnchor } from '$lib/utils/gutter.js';
 
-// After (in engine package)
+// After (in package)
 import TableOfContents from './TableOfContents.svelte';
-import { parseAnchor } from '../utils/gutter.js';
+import { parseAnchor } from '../../utils/gutter';
 ```
 
-**Export as:**
-```javascript
-// package/src/components/index.js
-export { default as ContentWithGutter } from './ContentWithGutter.svelte';
-export { default as TableOfContents } from './TableOfContents.svelte';
-export { default as ImageGallery } from './ImageGallery.svelte';
+### 2.3 Create Component Index Files
+
+**package/src/lib/components/ui/index.ts:**
+```typescript
 export { default as ZoomableImage } from './ZoomableImage.svelte';
 export { default as Lightbox } from './Lightbox.svelte';
 export { default as LightboxCaption } from './LightboxCaption.svelte';
-export { default as GutterItem } from './GutterItem.svelte';
-export { default as LeftGutter } from './LeftGutter.svelte';
-export { default as MobileTOC } from './MobileTOC.svelte';
+export { default as ImageGallery } from './ImageGallery.svelte';
 export { default as CollapsibleSection } from './CollapsibleSection.svelte';
+```
+
+**package/src/lib/components/layout/index.ts:**
+```typescript
+export { default as ContentWithGutter } from './ContentWithGutter.svelte';
+export { default as LeftGutter } from './LeftGutter.svelte';
+export { default as GutterItem } from './GutterItem.svelte';
+export { default as TableOfContents } from './TableOfContents.svelte';
+export { default as MobileTOC } from './MobileTOC.svelte';
 export { default as IconLegend } from './IconLegend.svelte';
 ```
 
-### 2.3 Extract Utility Functions
+**package/src/lib/components/index.ts:**
+```typescript
+// UI Components
+export * from './ui';
 
-**Files to extract:**
+// Layout Components
+export * from './layout';
 
-#### gutter.js (100% engine - extract completely)
-- `src/lib/utils/gutter.js` → `package/src/utils/gutter.js`
-- Contains: parseAnchor, getAnchorKey, getUniqueAnchors, getAnchorLabel, getItemsForAnchor, getOrphanItems, findAnchorElement
+// Blog Components (Phase 2)
+// export * from './blog';
 
-#### github.js (extract reusable patterns)
-- `src/lib/utils/github.js` → `package/src/utils/github.js`
-- Extract: validateUsername, getHeaders, getGraphQLHeaders, getCacheKey
-- Keep in engine as reusable utilities for GitHub integration
+// Admin Components (Phase 2)
+// export * from './admin';
 
-#### markdown.js (SPLIT - this is the most delicate operation)
-
-This file has BOTH engine code and site-specific code. You must split it:
-
-**Extract to engine (package/src/utils/markdown.js):**
-```javascript
-// Pure parsing utilities - no file system access
-export function isValidUrl(string) { ... }
-export function parseMarkdownContent(content) { ... }  // Uses marked
-export function extractFrontmatter(content) { ... }   // Uses gray-matter
-export function initializeMermaid() { ... }
-```
-
-**Keep in website (src/lib/utils/content.js):**
-```javascript
-// Site-specific content loading
-import { parseMarkdownContent, extractFrontmatter } from 'grove-engine/utils';
-
-// These use import.meta.glob with hardcoded paths - must stay in website
-export function getAllPosts() { ... }
-export function getPostBySlug(slug) { ... }
-export function getAllRecipes() { ... }
-export function getHomePage() { ... }
-export function getAboutPage() { ... }
-export function getContactPage() { ... }
-```
-
-### 2.4 Extract Styles
-
-**Source file:**
-- `src/lib/styles/content.css` → `package/src/styles/content.css`
-
-**Verification:**
-- No hardcoded colors (should use CSS variables)
-- Responsive breakpoints are generic (769px tablet, 1200px desktop)
-- Dark mode uses `:global(.dark)` selectors
-
-**Export guidance:**
-In package README, document that sites should either:
-1. Import the CSS directly: `import 'grove-engine/styles/content.css'`
-2. Or extend it with their own variables
-
-### 2.5 Extract Server Hook
-
-**Source file:**
-- `src/hooks.server.js` → `package/src/hooks/auth.js`
-
-**Modification needed:**
-Convert from SvelteKit hook to exportable middleware function:
-
-```javascript
-// package/src/hooks/auth.js
-import { verifySession, parseSessionCookie } from '../auth/index.js';
-
-export function createAuthHook(options = {}) {
-  return async function handle({ event, resolve }) {
-    const token = parseSessionCookie(event.request.headers);
-    if (token) {
-      const session = await verifySession(
-        token,
-        options.sessionSecret || event.platform?.env?.SESSION_SECRET
-      );
-      if (session) {
-        event.locals.user = session;
-      }
-    }
-    return resolve(event);
-  };
-}
+// Auth Components (Phase 2)
+// export * from './auth';
 ```
 
 ---
 
-## PHASE 3: CONFIGURE ENGINE PACKAGE
+## PHASE 3: EXTRACT & CONVERT UTILITIES
 
-### 3.1 Create package.json
+### 3.1 Extract Gutter Utilities
+
+**Source:** `src/lib/utils/gutter.js`
+**Target:** `package/src/lib/utils/gutter.ts`
+
+Convert to TypeScript with proper types:
+
+```typescript
+// package/src/lib/utils/gutter.ts
+
+export interface AnchorData {
+  key: string;
+  label: string;
+}
+
+export interface GutterItem {
+  anchor: string;
+  content: string;
+  type?: string;
+}
+
+/**
+ * Parse an anchor string into key and label
+ */
+export function parseAnchor(anchor: string): AnchorData {
+  // ... implementation from source
+}
+
+/**
+ * Get unique anchor key
+ */
+export function getAnchorKey(anchor: string): string {
+  // ... implementation from source
+}
+
+/**
+ * Get unique anchors from items
+ */
+export function getUniqueAnchors(items: GutterItem[]): string[] {
+  // ... implementation from source
+}
+
+/**
+ * Get label for an anchor
+ */
+export function getAnchorLabel(anchor: string): string {
+  // ... implementation from source
+}
+
+/**
+ * Get items for a specific anchor
+ */
+export function getItemsForAnchor(items: GutterItem[], anchor: string): GutterItem[] {
+  // ... implementation from source
+}
+
+/**
+ * Get items without a valid anchor
+ */
+export function getOrphanItems(items: GutterItem[]): GutterItem[] {
+  // ... implementation from source
+}
+
+/**
+ * Find anchor element in DOM
+ */
+export function findAnchorElement(anchor: string): HTMLElement | null {
+  // ... implementation from source
+}
+```
+
+### 3.2 Extract Markdown Utilities
+
+**Source:** `src/lib/utils/markdown.js`
+**Target:** `package/src/lib/utils/markdown.ts`
+
+Extract ONLY the pure parsing utilities (not file-loading functions):
+
+```typescript
+// package/src/lib/utils/markdown.ts
+
+import { marked } from 'marked';
+
+export interface ParsedMarkdown {
+  html: string;
+  headings: Heading[];
+}
+
+export interface Heading {
+  level: number;
+  text: string;
+  id: string;
+}
+
+/**
+ * Check if a string is a valid URL
+ */
+export function isValidUrl(str: string): boolean {
+  // ... implementation from source
+}
+
+/**
+ * Parse markdown content to HTML
+ */
+export function parseMarkdownContent(content: string): string {
+  // ... implementation from source using marked
+}
+
+/**
+ * Extract headings from markdown for TOC
+ */
+export function extractHeadings(content: string): Heading[] {
+  // ... implementation
+}
+
+/**
+ * Initialize mermaid for diagrams (if used)
+ */
+export async function initializeMermaid(): Promise<void> {
+  // ... implementation from source
+}
+```
+
+**DO NOT extract:** File-loading functions that use `import.meta.glob` - these are site-specific.
+
+### 3.3 Create Utils Index
+
+**package/src/lib/utils/index.ts:**
+```typescript
+export * from './gutter';
+export * from './markdown';
+```
+
+---
+
+## PHASE 4: CREATE TYPE DEFINITIONS
+
+### 4.1 Core Types
+
+**package/src/lib/types/post.ts:**
+```typescript
+export interface Post {
+  id: string;
+  user_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  html?: string;
+  status: 'draft' | 'published' | 'archived';
+  featured_image?: string;
+  word_count: number;
+  reading_time: number;
+  published_at?: number;
+  created_at: number;
+  updated_at: number;
+  tags?: string[];
+}
+
+export interface PostListItem {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  featured_image?: string;
+  reading_time: number;
+  published_at?: number;
+  tags?: string[];
+}
+```
+
+**package/src/lib/types/user.ts:**
+```typescript
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role: 'admin' | 'editor' | 'user';
+  avatar_url?: string;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface Session {
+  id: string;
+  user_id: string;
+  expires_at: number;
+  created_at: number;
+}
+```
+
+**package/src/lib/types/config.ts:**
+```typescript
+export interface SiteConfig {
+  name: string;
+  description: string;
+  tagline?: string;
+  domain: string;
+  language: string;
+  timezone: string;
+  theme: ThemeConfig;
+  features: FeatureFlags;
+  posts: PostConfig;
+  social: SocialLinks;
+  owner: OwnerInfo;
+  seo: SeoConfig;
+}
+
+export interface ThemeConfig {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+  };
+  fonts: {
+    heading: string;
+    body: string;
+  };
+  layout: 'sidebar' | 'no-sidebar';
+}
+
+export interface FeatureFlags {
+  comments: boolean;
+  newsletter: boolean;
+  analytics: boolean;
+  rss: boolean;
+  search: boolean;
+  tableOfContents: boolean;
+  gutterLinks: boolean;
+}
+
+export interface PostConfig {
+  perPage: number;
+  showExcerpts: boolean;
+  showReadingTime: boolean;
+  showWordCount: boolean;
+  showAuthor: boolean;
+}
+
+export interface SocialLinks {
+  twitter?: string;
+  github?: string;
+  email?: string;
+  mastodon?: string;
+}
+
+export interface OwnerInfo {
+  name: string;
+  email: string;
+  bio?: string;
+}
+
+export interface SeoConfig {
+  titleSuffix: string;
+  defaultImage: string;
+}
+```
+
+**package/src/lib/types/index.ts:**
+```typescript
+export * from './post';
+export * from './user';
+export * from './config';
+```
+
+---
+
+## PHASE 5: CREATE SVELTE STORES
+
+### 5.1 Theme Store
+
+**package/src/lib/stores/theme.ts:**
+```typescript
+import { writable } from 'svelte/store';
+
+export type Theme = 'light' | 'dark' | 'system';
+
+function createThemeStore() {
+  const { subscribe, set, update } = writable<Theme>('system');
+
+  return {
+    subscribe,
+    set,
+    toggle: () => update(t => t === 'light' ? 'dark' : 'light'),
+    setSystem: () => set('system')
+  };
+}
+
+export const theme = createThemeStore();
+```
+
+### 5.2 Site Config Store
+
+**package/src/lib/stores/siteConfig.ts:**
+```typescript
+import { writable } from 'svelte/store';
+import type { SiteConfig } from '../types';
+
+function createSiteConfigStore() {
+  const { subscribe, set } = writable<SiteConfig | null>(null);
+
+  return {
+    subscribe,
+    set,
+    init: (config: SiteConfig) => set(config)
+  };
+}
+
+export const siteConfig = createSiteConfigStore();
+```
+
+### 5.3 User Store (Placeholder)
+
+**package/src/lib/stores/user.ts:**
+```typescript
+import { writable } from 'svelte/store';
+import type { User } from '../types';
+
+// Full implementation in Phase 2
+function createUserStore() {
+  const { subscribe, set } = writable<User | null>(null);
+
+  return {
+    subscribe,
+    set,
+    clear: () => set(null)
+  };
+}
+
+export const user = createUserStore();
+```
+
+### 5.4 Stores Index
+
+**package/src/lib/stores/index.ts:**
+```typescript
+export { theme } from './theme';
+export { siteConfig } from './siteConfig';
+export { user } from './user';
+```
+
+---
+
+## PHASE 6: CONFIGURE PACKAGE
+
+### 6.1 package.json
 
 ```json
 {
-  "name": "grove-engine",
+  "name": "@groveengine/core",
   "version": "0.1.0",
   "description": "SvelteKit blog engine with gutter content system",
   "type": "module",
-  "svelte": "./src/index.js",
-  "main": "./src/index.js",
-  "exports": {
-    ".": "./src/index.js",
-    "./auth": "./src/auth/index.js",
-    "./components": "./src/components/index.js",
-    "./utils": "./src/utils/index.js",
-    "./styles/*": "./src/styles/*",
-    "./hooks": "./src/hooks/index.js"
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && npm run package",
+    "package": "svelte-kit sync && svelte-package -o dist",
+    "prepublishOnly": "npm run package",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "svelte": "./dist/components/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "svelte": "./dist/components/*/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./stores": {
+      "types": "./dist/stores/index.d.ts",
+      "svelte": "./dist/stores/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "src"
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
   ],
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "@sveltejs/kit": "^2.0.0"
   },
   "dependencies": {
-    "marked": "^14.1.2",
-    "gray-matter": "^4.0.3"
+    "marked": "^14.1.2"
   },
   "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.0.0",
     "@sveltejs/kit": "^2.0.0",
-    "@sveltejs/vite-plugin-svelte": "^3.0.0",
-    "vite": "^5.0.0"
+    "@sveltejs/package": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
   },
   "keywords": [
     "svelte",
@@ -319,464 +681,235 @@ export function createAuthHook(options = {}) {
     "blog",
     "engine",
     "gutter",
-    "markdown"
+    "markdown",
+    "cloudflare"
   ],
   "author": "AutumnsGrove",
-  "license": "MIT"
-}
-```
-
-### 3.2 Create Main Export
-
-```javascript
-// package/src/index.js
-// Auth
-export * from './auth/index.js';
-
-// Components
-export * from './components/index.js';
-
-// Utils
-export * from './utils/index.js';
-
-// Hooks
-export { createAuthHook } from './hooks/auth.js';
-```
-
-### 3.3 Create Utils Index
-
-```javascript
-// package/src/utils/index.js
-export * from './gutter.js';
-export * from './markdown.js';
-export * from './github.js';
-```
-
----
-
-## PHASE 4: REFACTOR WEBSITE TO USE ENGINE
-
-### 4.1 Add Engine as Dependency
-
-In the AutumnsGrove website's package.json, add:
-
-```json
-{
-  "dependencies": {
-    "grove-engine": "file:../GroveEngine/package"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AutumnsGrove/GroveEngine"
   }
 }
 ```
 
-Note: For local development, use file path. Later change to npm registry or GitHub package.
+### 6.2 svelte.config.js
 
-### 4.2 Update All Imports
-
-**Search and replace all imports throughout the website:**
-
-#### Components
 ```javascript
-// Before
-import { ContentWithGutter } from '$lib/components';
-import TableOfContents from '$lib/components/TableOfContents.svelte';
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-// After
-import { ContentWithGutter, TableOfContents } from 'grove-engine/components';
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+  preprocess: vitePreprocess(),
+  kit: {
+    adapter: adapter()
+  }
+};
+
+export default config;
 ```
 
-#### Auth
-```javascript
-// Before
-import { verifySession, createSessionCookie } from '$lib/auth/session.js';
-import { signJwt } from '$lib/auth/jwt.js';
+### 6.3 tsconfig.json
 
-// After
-import { verifySession, createSessionCookie, signJwt } from 'grove-engine/auth';
-```
-
-#### Utils
-```javascript
-// Before
-import { parseAnchor, findAnchorElement } from '$lib/utils/gutter.js';
-import { validateUsername, getHeaders } from '$lib/utils/github.js';
-
-// After
-import { parseAnchor, findAnchorElement } from 'grove-engine/utils';
-import { validateUsername, getHeaders } from 'grove-engine/utils';
-```
-
-#### Styles
-```javascript
-// Before (in +layout.svelte or component)
-import '$lib/styles/content.css';
-
-// After
-import 'grove-engine/styles/content.css';
-```
-
-#### Hooks
-```javascript
-// Before (src/hooks.server.js)
-import { verifySession, parseSessionCookie } from '$lib/auth/session.js';
-// ... inline hook code
-
-// After (src/hooks.server.js)
-import { createAuthHook } from 'grove-engine/hooks';
-export const handle = createAuthHook();
-```
-
-### 4.3 Create Site Content Loader
-
-Create a new file that uses the engine's parsing utilities but loads site-specific content:
-
-```javascript
-// src/lib/utils/content.js
-import { parseMarkdownContent, extractFrontmatter } from 'grove-engine/utils';
-
-// Import all markdown files from site content
-const postModules = import.meta.glob('../../UserContent/Posts/*.md', { eager: true, as: 'raw' });
-const recipeModules = import.meta.glob('../../UserContent/Recipes/*.md', { eager: true, as: 'raw' });
-// ... etc
-
-export function getAllPosts() {
-  return Object.entries(postModules).map(([path, content]) => {
-    const { data, content: body } = extractFrontmatter(content);
-    const html = parseMarkdownContent(body);
-    const slug = path.split('/').pop().replace('.md', '');
-    return { slug, ...data, html };
-  });
+```json
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
 }
-
-// ... other content loading functions
 ```
 
-### 4.4 Delete Extracted Files from Website
+### 6.4 vite.config.ts
 
-Once imports are updated and working, remove the now-redundant files:
+```typescript
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
 
-**Delete from website:**
-- `src/lib/auth/` (entire directory)
-- `src/lib/components/` (entire directory - all 11 components)
-- `src/lib/utils/gutter.js`
-- `src/lib/utils/github.js` (if all utilities moved)
-- `src/lib/styles/content.css`
-
-**Keep in website:**
-- `src/lib/utils/content.js` (the new site content loader)
-- Any site-specific utilities
-- `src/lib/db/` (database schema is site-specific)
-
-### 4.5 Split Configuration Files
-
-#### wrangler.toml
-Keep site-specific configuration, remove engine defaults.
-
-#### .dev.vars
-Split into engine required secrets and site optional secrets:
-```bash
-# Engine Required
-SESSION_SECRET=xxx
-GITHUB_TOKEN=xxx
-GITHUB_CLIENT_ID=xxx
-GITHUB_CLIENT_SECRET=xxx
-
-# Site Specific
-ANTHROPIC_API_KEY=xxx
-ADMIN_GITHUB_USERNAMES=xxx
+export default defineConfig({
+  plugins: [sveltekit()]
+});
 ```
 
 ---
 
-## PHASE 5: VERIFICATION & TESTING
+## PHASE 7: CREATE PLACEHOLDER EXPORTS
 
-### 5.1 Build Engine Package
+Create placeholder files for features implemented in Phase 2:
+
+### 7.1 Server Placeholders
+
+**package/src/lib/server/auth/index.ts:**
+```typescript
+// Authentication utilities - Implemented in Phase 2
+// See: docs/prompts/implementation-prompt.md
+
+export function validateSession(): never {
+  throw new Error('Not implemented - see implementation-prompt.md');
+}
+
+export function createSession(): never {
+  throw new Error('Not implemented - see implementation-prompt.md');
+}
+```
+
+**package/src/lib/server/db/index.ts:**
+```typescript
+// Database utilities - Implemented in Phase 2
+// See: docs/prompts/implementation-prompt.md
+
+export function getPosts(): never {
+  throw new Error('Not implemented - see implementation-prompt.md');
+}
+
+export function getPostBySlug(): never {
+  throw new Error('Not implemented - see implementation-prompt.md');
+}
+```
+
+**package/src/lib/server/index.ts:**
+```typescript
+// Server utilities
+// Full implementation in Phase 2
+
+export * from './auth';
+export * from './db';
+// export * from './storage';
+// export * from './email';
+```
+
+### 7.2 Component Placeholders
+
+**package/src/lib/components/blog/index.ts:**
+```typescript
+// Blog components - Implemented in Phase 2
+// PostList, PostCard, PostView, etc.
+export {};
+```
+
+**package/src/lib/components/admin/index.ts:**
+```typescript
+// Admin components - Implemented in Phase 2
+// AdminPanel, PostEditor, MediaLibrary, etc.
+export {};
+```
+
+**package/src/lib/components/auth/index.ts:**
+```typescript
+// Auth components - Implemented in Phase 2
+// LoginForm, MagicCodeInput, etc.
+export {};
+```
+
+---
+
+## PHASE 8: CREATE MAIN EXPORTS
+
+**package/src/lib/index.ts:**
+```typescript
+// @groveengine/core - Main exports
+
+// Types
+export type * from './types';
+
+// Components
+export * from './components';
+
+// Stores
+export * from './stores';
+
+// Utils
+export * from './utils';
+
+// Note: Server utilities should be imported from '@groveengine/core/server'
+// to ensure proper tree-shaking and avoid client-side imports of server code
+```
+
+---
+
+## PHASE 9: VERIFICATION
+
+### 9.1 Build Package
 
 ```bash
 cd /home/user/GroveEngine/package
 pnpm install
-pnpm run build  # If you add a build step
+pnpm run check
+pnpm run package
 ```
 
-Verify:
+**Verify:**
 - No TypeScript errors
 - All exports resolve correctly
-- Package can be imported
+- `dist/` folder is created with compiled files
 
-### 5.2 Build Website
-
-```bash
-cd /tmp/AutumnsGrove-source
-pnpm install
-pnpm run build
-```
-
-**If build fails, check:**
-- Import paths updated correctly
-- All dependencies installed
-- No circular imports
-
-### 5.3 Run Website Dev Server
+### 9.2 Check Exports
 
 ```bash
-pnpm run dev
+# Verify the package structure
+ls -la dist/
+ls -la dist/components/
+ls -la dist/utils/
 ```
-
-**Test every feature manually:**
-
-#### Homepage
-- [ ] Page loads without errors
-- [ ] Hero section displays
-- [ ] Image gallery works (navigation, lightbox)
-- [ ] Dark mode toggle works
-
-#### Blog
-- [ ] Blog index lists all posts
-- [ ] Individual post pages render
-- [ ] ContentWithGutter layout works
-- [ ] Table of contents appears on desktop
-- [ ] Mobile TOC appears on mobile
-- [ ] Gutter items position correctly
-- [ ] Images zoom on click
-
-#### Recipes
-- [ ] Recipe index lists all recipes
-- [ ] Individual recipe pages render
-- [ ] Instruction icons display
-- [ ] Gutter positioning works
-
-#### Authentication
-- [ ] Login page loads
-- [ ] GitHub OAuth redirect works
-- [ ] Callback creates session
-- [ ] Admin routes protected
-- [ ] Logout clears session
-
-#### Admin Panel
-- [ ] Dashboard loads
-- [ ] Blog management works
-- [ ] Image upload works
-- [ ] Settings page works
-
-#### Responsive Design
-- [ ] Desktop layout (3 columns)
-- [ ] Tablet layout (2 columns)
-- [ ] Mobile layout (1 column)
-- [ ] Breakpoints work correctly
-
-### 5.4 Run Type Checking
-
-```bash
-pnpm run check  # svelte-check
-```
-
-Ensure no type errors in either project.
 
 ---
 
-## PHASE 6: COMMIT & DOCUMENT
+## PHASE 10: COMMIT
 
-### 6.1 Commit Engine Package
-
-In GroveEngine repository:
 ```bash
+cd /home/user/GroveEngine
 git add package/
-git commit -m "feat: initial extraction of web engine from AutumnsGrove
+git commit -m "feat: extract and convert components from AutumnsGrove
 
-- Extract auth system (JWT, sessions)
-- Extract 11 Svelte components
-- Extract utility functions (gutter, markdown, github)
-- Extract CSS styles
-- Create exportable auth hook
-- Configure package.json with proper exports"
+Phase 1 of GroveEngine implementation:
+- Extract UI components (ZoomableImage, Lightbox, ImageGallery, etc.)
+- Extract layout components (ContentWithGutter, TableOfContents, etc.)
+- Extract utility functions (gutter, markdown parsing)
+- Convert all code to TypeScript
+- Create type definitions (Post, User, SiteConfig)
+- Set up Svelte stores (theme, siteConfig, user)
+- Configure package.json with proper exports
+- Add placeholder exports for Phase 2 features
+
+Next: Run implementation-prompt.md for auth, database, and admin features"
 ```
-
-### 6.2 Commit Website Refactor
-
-In AutumnsGrove repository (on refactor branch):
-```bash
-git add .
-git commit -m "refactor: use grove-engine as external dependency
-
-- Replace local engine code with grove-engine imports
-- Create site-specific content loader
-- Update all import paths
-- Remove redundant files
-- Split configuration"
-```
-
-### 6.3 Create Engine README
-
-```markdown
-# Grove Engine
-
-A SvelteKit blog engine with a powerful gutter content system.
-
-## Features
-
-- **Gutter System**: Display supplementary content alongside your main content
-- **Authentication**: JWT-based session management for Cloudflare Workers
-- **Components**: 11 production-ready Svelte 5 components
-- **Responsive**: Mobile-first design with 3 breakpoints
-
-## Installation
-
-```bash
-pnpm add grove-engine
-```
-
-## Usage
-
-### Components
-
-```svelte
-<script>
-  import { ContentWithGutter, ImageGallery } from 'grove-engine/components';
-</script>
-
-<ContentWithGutter
-  content={post.html}
-  gutterContent={post.gutterItems}
-  headers={post.headers}
-  showTableOfContents={true}
-/>
-```
-
-### Authentication
-
-```javascript
-import { createSession, verifySession } from 'grove-engine/auth';
-
-const session = await createSession(user, SECRET);
-const verified = await verifySession(token, SECRET);
-```
-
-### Styles
-
-```javascript
-import 'grove-engine/styles/content.css';
-```
-
-## Components
-
-| Component | Description |
-|-----------|-------------|
-| ContentWithGutter | Main layout with left gutter, content, and TOC |
-| TableOfContents | Sticky table of contents |
-| ImageGallery | Image gallery with lightbox |
-| ZoomableImage | Clickable zoomable image |
-| Lightbox | Modal image viewer |
-| ... | ... |
-
-## License
-
-MIT
-```
-
----
-
-## ERROR HANDLING
-
-### Common Issues & Solutions
-
-#### Import Resolution Errors
-**Error:** `Cannot find module 'grove-engine/components'`
-**Solution:** Check package.json exports map, ensure paths are correct
-
-#### Component Props Mismatch
-**Error:** `Unknown prop 'x' on component`
-**Solution:** Verify prop names match between engine and website usage
-
-#### CSS Not Loading
-**Error:** Styles missing, layout broken
-**Solution:** Ensure CSS import is in +layout.svelte, check path
-
-#### Auth Hook Fails
-**Error:** `event.locals.user is undefined`
-**Solution:** Check hooks.server.js uses createAuthHook correctly
-
-#### Gutter Positioning Wrong
-**Error:** Gutter items in wrong positions
-**Solution:** Verify gutter.js imported from engine, check anchor parsing
-
----
-
-## ROLLBACK PLAN
-
-If extraction fails at any point:
-
-1. **Engine Package**: Delete `/home/user/GroveEngine/package/` directory
-2. **Website**: `git checkout main` to return to original state
-3. **Dependencies**: Remove grove-engine from website package.json
-
-The original website in the main branch remains fully functional.
 
 ---
 
 ## SUCCESS CRITERIA
 
-The extraction is complete when:
+Phase 1 is complete when:
 
-1. **Engine Package**
-   - [ ] All 11 components extracted and exported
-   - [ ] Auth system fully functional
-   - [ ] Utils properly exported
-   - [ ] Styles importable
-   - [ ] Package builds without errors
-
-2. **Website**
-   - [ ] All imports use grove-engine
-   - [ ] No duplicate engine code
-   - [ ] All features work identically to before
-   - [ ] Build succeeds
-   - [ ] Type checking passes
-
-3. **Documentation**
-   - [ ] Engine README complete
-   - [ ] All exports documented
-   - [ ] Usage examples provided
+- [ ] All 11 components extracted and converted to TypeScript
+- [ ] Utility functions extracted with proper types
+- [ ] Type definitions created for Post, User, SiteConfig
+- [ ] Svelte stores created (theme, siteConfig, user)
+- [ ] Package builds without errors (`pnpm run check` passes)
+- [ ] Package compiles to `dist/` folder
+- [ ] All exports properly configured in package.json
+- [ ] Placeholder files created for Phase 2 features
+- [ ] Changes committed to repository
 
 ---
 
-## NOTES FOR CLAUDE CODE
+## NEXT STEPS
 
-### Be Methodical
-- Read each file completely before extracting
-- Test after each major step
-- Commit frequently with clear messages
+After completing this prompt, proceed to:
+**`docs/prompts/implementation-prompt.md`** - Phase 2: Implement remaining features
 
-### Preserve Functionality
-- This is an extraction, not a refactor
-- Don't "improve" code during extraction
-- Match exact behavior
-
-### Ask Questions
-- If something is unclear, ask before proceeding
-- If a file doesn't fit neatly into categories, ask
-- If tests fail, investigate before continuing
-
-### Track Progress
-- Use TodoWrite to track all tasks
-- Mark items complete as you go
-- Add new tasks if you discover issues
+This includes:
+- Magic code authentication with Resend
+- D1 database schema and queries
+- KV session management
+- R2 media storage
+- Blog components (PostList, PostCard, PostView)
+- Admin panel components
+- Customer repository template
 
 ---
 
-## ESTIMATED EFFORT
-
-| Phase | Time |
-|-------|------|
-| Phase 1: Setup & Inventory | 30 min |
-| Phase 2: Extract Engine | 2-3 hours |
-| Phase 3: Configure Package | 30 min |
-| Phase 4: Refactor Website | 1-2 hours |
-| Phase 5: Testing | 1-2 hours |
-| Phase 6: Documentation | 30 min |
-| **Total** | **5-8 hours** |
-
----
-
-## BEGIN EXTRACTION
-
-Start with Phase 1.1 - clone the source repository and examine the current state. Use this prompt as your guide throughout the process, checking off tasks as you complete them.
-
-Good luck! 🍂
+*Last Updated: November 2025*
