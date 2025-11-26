@@ -16,6 +16,34 @@ This file tracks all development tasks, from current MVP work to future features
 - [ ] Set up D1 database for local development
 - [ ] Set up R2 bucket for media storage
 
+### npm Package Setup
+- [ ] Set up npm org `@groveengine` at npmjs.com/org/create
+- [ ] Configure `svelte-package` for library builds
+- [ ] Set up package.json exports map
+- [ ] Configure peer dependencies (Svelte 5, SvelteKit 2)
+- [ ] Create initial package version (0.1.0)
+- [ ] Set up npm publish workflow in GitHub Actions
+
+### Authentication System
+- [ ] Implement magic code auth with Resend
+- [ ] Create magic code generation (6-digit, SHA-256 hashed)
+- [ ] Set up KV storage for codes (10-min TTL)
+- [ ] Build session management (KV-based, 7-day TTL)
+- [ ] Create login/logout UI components
+- [ ] Set up secure cookie handling
+
+### Database & Migrations
+- [ ] Set up D1 migrations system
+- [ ] Create initial schema migration (users, posts, sessions, site_config)
+- [ ] Add supporting tables (tags, post_tags, media)
+- [ ] Document migration workflow for customers
+
+### Update Infrastructure
+- [ ] Set up Renovate on GroveEngine repo
+- [ ] Create customer repo template
+- [ ] Configure Renovate for customer repos (auto-merge engine updates)
+- [ ] Document update propagation flow
+
 ### Core Engine Development (Weeks 1-2)
 - [ ] Implement post CRUD operations (create, read, update, delete)
 - [ ] Build markdown editor with live preview
@@ -225,6 +253,40 @@ This file tracks all development tasks, from current MVP work to future features
 
 ---
 
+## Future Enhancements (Post-MVP)
+
+These features are planned for after the core engine is stable and deployed to initial customers.
+
+### Authentication Enhancements
+- [ ] **Username/Password Auth** - Optional alternative to magic codes
+  - Allow users to set password in addition to magic code login
+  - Secure password hashing with Argon2 or bcrypt
+  - "Remember me" functionality
+  - Password reset via email
+
+### Extensibility
+- [ ] **Theme Marketplace** - Community-contributed themes
+  - Theme submission and review process
+  - Preview themes before installing
+  - Theme versioning and updates
+  - Premium themes (revenue share model)
+
+- [ ] **Plugin System** - Extend functionality without forking
+  - Hook system for customization points
+  - Plugin manifest format
+  - Sandboxed plugin execution
+  - Plugin marketplace
+
+### Community Features
+- [ ] **Grove Social** - Multi-tenant community features
+  - Central feed aggregating opt-in posts (grove.place/feed)
+  - Voting and reactions on community posts
+  - User profiles across the Grove network
+  - Follow system for favorite blogs
+  - See `docs/specs/social-spec.md` for details
+
+---
+
 ## Phase 6+ (Future Features)
 
 ### Enhanced Social
@@ -278,7 +340,7 @@ This file tracks all development tasks, from current MVP work to future features
 ## Research & Investigation
 
 ### Technical Research Needed
-- [ ] Auth system deep dive (Lucia Auth vs alternatives)
+- [ ] Username/password auth (optional alternative to magic codes)
 - [ ] Comment system evaluation (Hyvor vs Remark42 vs custom)
 - [ ] Cloudflare limits & scaling thresholds
 - [ ] GDPR compliance requirements
@@ -440,7 +502,7 @@ This file tracks all development tasks, from current MVP work to future features
 ## Research Needed
 
 ### Technical Research
-- [ ] **Auth System Deep Dive** - Compare Lucia Auth, Auth.js, custom solutions
+- [ ] **Username/Password Auth** - Add as optional alternative to magic codes
 - [ ] **Comment System Evaluation** - Full comparison of hosted vs self-hosted options
 - [ ] **Cloudflare Limits** - Subdomain, storage, bandwidth thresholds
 - [ ] **GDPR Compliance** - Data export, deletion, privacy policy requirements
