@@ -1,0 +1,12 @@
+name = "grove-landing"
+compatibility_date = "2024-11-24"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Environment variables (secrets added via wrangler)
+# RESEND_API_KEY - add via: wrangler pages secret put RESEND_API_KEY

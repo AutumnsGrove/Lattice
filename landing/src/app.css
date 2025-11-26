@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		font-family: Georgia, Cambria, 'Times New Roman', serif;
+	}
+
+	body {
+		@apply bg-cream text-bark antialiased;
+	}
+}
+
+@layer components {
+	.btn-primary {
+		@apply bg-grove-600 hover:bg-grove-700 text-white font-sans font-medium
+			px-6 py-3 rounded-lg transition-colors duration-200
+			focus:outline-none focus:ring-2 focus:ring-grove-500 focus:ring-offset-2;
+	}
+
+	.input-field {
+		@apply w-full px-4 py-3 rounded-lg border border-grove-200
+			focus:border-grove-500 focus:ring-2 focus:ring-grove-500/20
+			focus:outline-none transition-all duration-200
+			bg-white text-bark placeholder:text-bark/40;
+	}
+}
+
+/* Subtle leaf pattern background */
+.leaf-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-25 15 10 5 15 15 15 25 5-10 15-15 25-15-10-5-15-15-15-25z' fill='%2322c55e' fill-opacity='0.03'/%3E%3C/svg%3E");
+}
