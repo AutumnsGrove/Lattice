@@ -68,6 +68,14 @@
 - [ ] Theme builder/customizer UI
 - [ ] More color/font customization options
 
+### Internal Tools
+- [ ] Integrate `grove-domain-search` package
+  - AI-powered async domain availability checker (MCP server / UV tool)
+  - Separate project - will be published as its own package
+  - Backend use only - call at various integration points
+  - Speeds up domain search from 2-3 weeks to 1-2 days
+  - Enhances client consultations with pre-vetted available domains
+
 ### Migration Tools Expansion
 - [ ] WordPress import tool
 - [ ] Ghost import tool
