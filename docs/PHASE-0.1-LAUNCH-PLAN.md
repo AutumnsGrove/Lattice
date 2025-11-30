@@ -13,6 +13,9 @@ Phase 0.1 is the critical pre-launch phase where we prepare all infrastructure, 
 
 ### Success Criteria
 - [x] Domain secured (grove.place)
+- [x] Landing page deployed at grove.place (email signup live)
+- [x] Basic branding/logo created
+- [x] Tagline established: "a place to Be"
 - [ ] GitHub repositories created and configured
 - [ ] Cloudflare account setup with necessary services
 - [ ] Development environment configured
@@ -177,11 +180,11 @@ grove-engine/
 ## 🎨 Design & Assets
 
 ### Design System
-- [ ] Choose color palette for Grove brand
+- [x] Choose color palette for Grove brand
 - [ ] Select typography (fonts)
 - [ ] Create basic design tokens
-- [ ] Design logo (simple, can evolve)
-- [ ] Create favicon
+- [x] Design logo (simple, can evolve)
+- [x] Create favicon
 
 ### Initial Mockups
 - [ ] Sketch blog post view (reader experience)

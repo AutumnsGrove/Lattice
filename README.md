@@ -63,6 +63,22 @@ See [docs/visual-overview.md](docs/visual-overview.md) for:
 - Technology stack
 - User flow diagrams
 
+## 🌲 Why Grove?
+
+Nobody wants generic blogging platforms. Neurodivergent folks especially hate them—the endless customization rabbit holes, the algorithm-driven feeds, the sense that you're always performing for an audience you can't see.
+
+Grove is different. It's:
+
+- **Queer-friendly infrastructure** — A safe digital space, especially valuable when physical environments feel hostile. Your corner of the internet, without surveillance capitalism.
+
+- **Community-owned, solarpunk-aligned** — Decentralized by design, built to be genuinely helpful rather than exploitative. No investor pressure to enshittify.
+
+- **Portable by philosophy** — Your content lives in markdown files. You can export and migrate anytime. We don't hold your data hostage.
+
+- **Built for people, not engagement metrics** — No dark patterns, no algorithmic manipulation. Just a place to Be.
+
+This isn't just a SaaS—it's about helping people have their own space online, away from big tech algorithms.
+
 ## 💰 Pricing
 
 | Plan | Price | Key Features |

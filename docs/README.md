@@ -129,6 +129,56 @@ The Grove platform has been split into three separate but integrated projects:
 
 ---
 
+## 📈 Scaling Economics
+
+### Revenue Projections
+
+| Users | MRR (Starter $12) | MRR (Pro $25) | MRR (Blended) |
+|------:|------------------:|--------------:|--------------:|
+| 100   | $1,200            | $2,500        | ~$1,700       |
+| 1,000 | $12,000           | $25,000       | ~$17,000      |
+| 10,000| $120,000          | $250,000      | ~$170,000     |
+| 100,000| $1,200,000       | $2,500,000    | ~$1,700,000   |
+
+*Blended assumes 70% Starter, 25% Professional, 5% Business tier distribution*
+
+### Cloudflare Infrastructure Costs
+
+| Users | D1 Reads/mo | R2 Storage | Workers Requests | Est. Cost |
+|------:|------------:|-----------:|-----------------:|----------:|
+| 100   | ~5M         | ~50GB      | ~1M              | $0-5/mo   |
+| 1,000 | ~50M        | ~500GB     | ~10M             | $15-25/mo |
+| 10,000| ~500M       | ~5TB       | ~100M            | $100-200/mo|
+| 100,000| ~5B        | ~50TB      | ~1B              | $500-1,500/mo|
+
+*Cloudflare's free tier covers initial development. Costs scale very favorably.*
+
+### AI-Powered Operations Strategy
+
+**Monthly Automation Overhead: ~$160/month**
+
+| Agent | Purpose | Est. Cost |
+|-------|---------|----------:|
+| Support Agent | Handle tier-1 support tickets, FAQs | ~$50/mo |
+| Dev Agent | Code reviews, bug fixes, routine maintenance | ~$80/mo |
+| Content Agent | Documentation updates, changelog writing | ~$30/mo |
+
+This AI-first approach enables:
+- **Solo founder scalability** — One person can support 1,000+ users
+- **24/7 response times** — Agents handle off-hours inquiries
+- **Consistent quality** — Automated processes reduce human error
+- **Low fixed costs** — ~$160/mo regardless of user count (until ~10K users)
+
+### Break-Even Analysis
+
+| Scenario | Users Needed | Timeline Goal |
+|----------|-------------:|---------------|
+| Cover Cloudflare + AI costs (~$200/mo) | 17 Starter users | Month 3 |
+| Sustainable side income ($500/mo) | 42 Starter users | Month 6 |
+| Full-time viable ($3,000/mo) | 250 Starter users | Month 12+ |
+
+---
+
 ## 📋 Complete Documentation Files
 
 ### Core Specifications
@@ -395,6 +445,12 @@ The Grove platform has been split into three separate but integrated projects:
 1. Check **TODOS.md** - See what's planned
 2. Don't build future features yet - Wait for client demand
 3. Focus on Phase 1 only - Prove the concept first
+
+---
+
+## 📖 Vision & Journey
+
+For the full story behind Grove—the personal journey, the philosophy, and the long-term vision—see [THE_JOURNEY.md](https://github.com/AutumnsGrove/AutumnsGrove/blob/main/THE_JOURNEY.md) in the AutumnsGrove repository.
 
 ---
 
