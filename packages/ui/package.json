@@ -1,9 +1,12 @@
 {
-  "name": "@groveplace/ui",
+  "name": "@groveengine/ui",
   "version": "0.1.0",
   "description": "Grove Design System - A calm, organic component library for the Grove blogging platform",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "svelte",
     "design-system",

@@ -1,9 +1,12 @@
 {
-  "name": "@grove/engine",
+  "name": "@groveengine/engine",
   "version": "0.1.0",
   "description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
   "author": "AutumnsGrove",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/AutumnsGrove/GroveEngine.git",
@@ -17,13 +20,59 @@
     "multi-tenant"
   ],
   "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./components/custom/*": {
+      "types": "./dist/components/custom/*.svelte.d.ts",
+      "svelte": "./dist/components/custom/*.svelte"
+    },
+    "./components/admin/*": {
+      "types": "./dist/components/admin/*.svelte.d.ts",
+      "svelte": "./dist/components/admin/*.svelte"
+    },
+    "./components/gallery/*": {
+      "types": "./dist/components/gallery/*.svelte.d.ts",
+      "svelte": "./dist/components/gallery/*.svelte"
+    },
+    "./components/ui": {
+      "types": "./dist/components/ui/index.d.ts",
+      "svelte": "./dist/components/ui/index.js"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "default": "./dist/utils/*.js"
+    },
+    "./auth/*": {
+      "types": "./dist/auth/*.d.ts",
+      "default": "./dist/auth/*.js"
+    },
+    "./server/*": {
+      "types": "./dist/server/*.d.ts",
+      "default": "./dist/server/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
   "scripts": {
     "dev": "vite dev",
     "dev:wrangler": "wrangler pages dev -- vite dev",
     "build": "vite build",
+    "build:package": "svelte-kit sync && svelte-package -o dist",
+    "package": "svelte-kit sync && svelte-package -o dist",
+    "prepublishOnly": "npm run package",
     "preview": "vite preview",
     "audit": "npm audit --audit-level=moderate",
     "audit:fix": "npm audit fix",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -31,10 +80,16 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch"
   },
+  "peerDependencies": {
+    "svelte": "^5.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "tailwindcss": "^3.4.0"
+  },
   "devDependencies": {
     "@lucide/svelte": "^0.482.0",
     "@sveltejs/adapter-cloudflare": "^7.2.4",
     "@sveltejs/kit": "^2.5.28",
+    "@sveltejs/package": "^2.3.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
@@ -46,8 +101,10 @@
     "jsdom": "^27.2.0",
     "postcss": "^8.5.6",
     "svelte": "^5.1.9",
+    "svelte-check": "^4.0.0",
     "tailwind-variants": "^0.2.1",
     "tailwindcss": "^3.4.18",
+    "typescript": "^5.6.0",
     "vite": "^5.4.10",
     "vitest": "^4.0.14"
   },
