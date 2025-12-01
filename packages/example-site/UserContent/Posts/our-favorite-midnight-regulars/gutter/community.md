@@ -1,0 +1,1 @@
+We keep a small bulletin board by the door where people can leave notes for each other. "Looking for someone to practice French with after midnight" was posted last month. It worked.

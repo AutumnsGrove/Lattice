@@ -1,0 +1,1 @@
+Traditional jasmine pearls are scented 6-7 times over the course of a month, with fresh jasmine blossoms each night. It takes about 4.4 pounds of blossoms to scent a single pound of tea.

@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		/* The Midnight Bloom - Late Night Tea Café Theme */
+		/* Warm, cozy colors inspired by candlelit tea rooms */
+
+		/* Primary: Deep Plum/Burgundy - like steeped black tea */
+		--primary: 340 45% 35%;
+		--primary-foreground: 40 30% 95%;
+
+		/* Secondary: Warm Cream - like milk in tea */
+		--secondary: 40 30% 94%;
+		--secondary-foreground: 340 30% 25%;
+
+		/* Muted: Soft Taupe */
+		--muted: 30 15% 90%;
+		--muted-foreground: 30 10% 40%;
+
+		/* Accent: Golden Amber - like honey */
+		--accent: 38 70% 50%;
+		--accent-foreground: 38 80% 10%;
+
+		/* Destructive: Muted Rose */
+		--destructive: 0 50% 50%;
+		--destructive-foreground: 0 0% 100%;
+
+		/* Background & Foreground - Warm off-white */
+		--background: 40 25% 97%;
+		--foreground: 340 30% 15%;
+
+		/* Card - Slightly warmer than background */
+		--card: 40 30% 99%;
+		--card-foreground: 340 30% 15%;
+
+		/* Popover */
+		--popover: 40 30% 99%;
+		--popover-foreground: 340 30% 15%;
+
+		/* Border & Input */
+		--border: 30 20% 85%;
+		--input: 30 20% 85%;
+		--ring: 340 45% 35%;
+
+		/* Border Radius */
+		--radius: 0.5rem;
+	}
+
+	.dark {
+		/* Dark mode - Late night ambiance */
+
+		/* Primary: Lighter Plum */
+		--primary: 340 50% 55%;
+		--primary-foreground: 40 30% 95%;
+
+		/* Secondary: Deep charcoal with warmth */
+		--secondary: 30 10% 12%;
+		--secondary-foreground: 40 20% 85%;
+
+		/* Muted: Dark warm gray */
+		--muted: 30 8% 18%;
+		--muted-foreground: 30 10% 60%;
+
+		/* Accent: Brighter golden */
+		--accent: 38 75% 55%;
+		--accent-foreground: 38 80% 10%;
+
+		/* Destructive */
+		--destructive: 0 55% 50%;
+		--destructive-foreground: 0 0% 100%;
+
+		/* Background & Foreground - Deep night */
+		--background: 260 20% 8%;
+		--foreground: 40 15% 90%;
+
+		/* Card - Slightly lighter than background */
+		--card: 260 15% 12%;
+		--card-foreground: 40 15% 90%;
+
+		/* Popover */
+		--popover: 260 15% 12%;
+		--popover-foreground: 40 15% 90%;
+
+		/* Border & Input */
+		--border: 260 10% 20%;
+		--input: 260 10% 20%;
+		--ring: 340 50% 55%;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+		font-family: Georgia, Cambria, 'Times New Roman', serif;
+	}
+	h1, h2, h3, h4, h5, h6 {
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	}
+}
+
+/* Custom scrollbar for the cozy vibe */
+@layer utilities {
+	.scrollbar-thin {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--muted)) transparent;
+	}
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+	}
+	.scrollbar-thin::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.scrollbar-thin::-webkit-scrollbar-thumb {
+		background-color: hsl(var(--muted));
+		border-radius: 3px;
+	}
+}

@@ -1,0 +1,1 @@
+This isn't meant to be gatekeeping. If you need quick caffeine, that's valid. We just can't be the place that provides it. There's a 24-hour diner two blocks over with perfectly serviceable coffee.

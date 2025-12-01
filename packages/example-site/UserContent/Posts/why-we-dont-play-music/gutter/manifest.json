@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "type": "comment",
+      "file": "sound-note.md",
+      "anchor": "anchor:sound-note"
+    },
+    {
+      "type": "comment",
+      "file": "silence.md",
+      "anchor": "anchor:silence"
+    },
+    {
+      "type": "comment",
+      "file": "headphones.md",
+      "anchor": "anchor:headphones"
+    },
+    {
+      "type": "comment",
+      "file": "sacred.md",
+      "anchor": "anchor:sacred"
+    }
+  ]
+}

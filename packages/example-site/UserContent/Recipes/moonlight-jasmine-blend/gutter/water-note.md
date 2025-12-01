@@ -1,0 +1,1 @@
+If your tap water is heavily chlorinated, let it sit uncovered for an hour before boiling, or use spring water. The tea will taste of whatever the water tastes of.

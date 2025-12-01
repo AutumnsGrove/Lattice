@@ -1,0 +1,1 @@
+**A confession**: Elena once worked at a coffee chain that shall remain nameless. The memory of those "tea lattes" still haunts her dreams.

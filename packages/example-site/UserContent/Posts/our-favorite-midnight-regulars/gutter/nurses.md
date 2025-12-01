@@ -1,0 +1,1 @@
+We keep a "nurse discount" that isn't on the menu. 50% off for anyone who's spent the night caring for others. Just show us your badge.
