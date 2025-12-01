@@ -385,5 +385,12 @@ async function importContent(targetDb, tenantId, exportData) {
 
 ---
 
-*Last Updated: November 30, 2025*
-*Status: Planning - Not yet started*
+## Related Documents
+
+- **[MIGRATION-STRATEGY.md](MIGRATION-STRATEGY.md)** - Detailed execution plan with file-by-file extraction guide
+- **[schema/multi-tenant-schema.sql](schema/multi-tenant-schema.sql)** - Complete D1 database schema for multi-tenant architecture
+
+---
+
+*Last Updated: December 1, 2025*
+*Status: Planning Complete - Ready for Execution*
