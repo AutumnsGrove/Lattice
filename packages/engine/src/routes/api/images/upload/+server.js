@@ -1,7 +1,10 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import { validateFileSignature } from "$lib/utils/validation.js";
 
+/**
+ * Enhanced Image Upload Endpoint
+ * Supports date-based organization, duplicate detection, and AI metadata
+ */
 export async function POST({ request, platform, locals }) {
   // Authentication check
   if (!locals.user) {
@@ -21,13 +24,16 @@ export async function POST({ request, platform, locals }) {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
-    const folder = formData.get("folder") || "uploads";
+    const customFilename = formData.get("filename"); // Optional: from AI analysis
+    const altText = formData.get("altText") || ""; // Optional: from AI analysis
+    const description = formData.get("description") || ""; // Optional: from AI analysis
+    const hash = formData.get("hash"); // Optional: SHA-256 hash for duplicate detection
 
     if (!file || !(file instanceof File)) {
       throw error(400, "No file provided");
     }
 
-    // Validate file type (SVG removed for security - can contain embedded JavaScript)
+    // Validate file type
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -35,7 +41,6 @@ export async function POST({ request, platform, locals }) {
       "image/webp",
     ];
 
-    // 2. Check MIME type first
     if (!allowedTypes.includes(file.type)) {
       throw error(
         400,
@@ -52,7 +57,7 @@ export async function POST({ request, platform, locals }) {
     // Read file once for both validation and upload
     const arrayBuffer = await file.arrayBuffer();
 
-    // 1. Check magic bytes to prevent MIME type spoofing (use arrayBuffer we just read)
+    // Validate magic bytes to prevent MIME type spoofing
     const buffer = new Uint8Array(arrayBuffer);
     const isValidSignature = await (async () => {
       const FILE_SIGNATURES = {
@@ -77,45 +82,119 @@ export async function POST({ request, platform, locals }) {
       throw error(400, "Invalid file signature - file may be corrupted or spoofed");
     }
 
-    // Sanitize filename
-    const sanitizedName = file.name
-      .toLowerCase()
-      .replace(/[^a-z0-9.-]/g, "-")
-      .replace(/-+/g, "-");
+    // Check for duplicates if hash provided
+    if (hash && platform?.env?.POSTS_DB) {
+      try {
+        const existing = await platform.env.POSTS_DB
+          .prepare("SELECT key, url FROM image_hashes WHERE hash = ?")
+          .bind(hash)
+          .first();
 
-    // Sanitize folder path
-    const sanitizedFolder = folder
-      .toLowerCase()
-      .replace(/[^a-z0-9/-]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^\/+|\/+$/g, "");
+        if (existing) {
+          return json({
+            success: true,
+            duplicate: true,
+            url: existing.url,
+            key: existing.key,
+            message: "Duplicate image detected - using existing upload",
+          });
+        }
+      } catch (dbError) {
+        // Table might not exist yet, continue with upload
+        console.log("Duplicate check skipped:", dbError.message);
+      }
+    }
+
+    // Generate date-based path: photos/YYYY/MM/DD/
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const datePath = `photos/${year}/${month}/${day}`;
+
+    // Determine filename
+    let filename;
+    if (customFilename) {
+      // Use AI-generated filename
+      const ext = file.type === 'image/gif' ? 'gif' :
+                  file.type === 'image/webp' ? 'webp' :
+                  file.type === 'image/png' ? 'png' : 'webp';
+      filename = `${customFilename}.${ext}`;
+    } else {
+      // Sanitize original filename
+      filename = file.name
+        .toLowerCase()
+        .replace(/[^a-z0-9.-]/g, "-")
+        .replace(/-+/g, "-");
+    }
+
+    // Add timestamp to prevent collisions
+    const timestamp = Date.now().toString(36);
+    const lastDot = filename.lastIndexOf('.');
+    if (lastDot > 0) {
+      filename = `${filename.substring(0, lastDot)}-${timestamp}${filename.substring(lastDot)}`;
+    } else {
+      filename = `${filename}-${timestamp}`;
+    }
 
     // Build the R2 key
-    const key = `${sanitizedFolder}/${sanitizedName}`;
+    const key = `${datePath}/${filename}`;
 
-    // Upload to R2 with cache headers
+    // Upload to R2 with cache headers and custom metadata
+    const metadata = {};
+    if (altText) metadata.altText = altText.substring(0, 500);
+    if (description) metadata.description = description.substring(0, 1000);
+    if (hash) metadata.hash = hash;
+
     await platform.env.IMAGES.put(key, arrayBuffer, {
       httpMetadata: {
         contentType: file.type,
-        cacheControl: 'public, max-age=31536000, immutable', // 1 year cache for immutable images
+        cacheControl: 'public, max-age=31536000, immutable',
       },
+      customMetadata: metadata,
     });
 
     // Build CDN URL
     const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 
+    // Store hash for future duplicate detection
+    if (hash && platform?.env?.POSTS_DB) {
+      try {
+        await platform.env.POSTS_DB
+          .prepare(`
+            INSERT INTO image_hashes (hash, key, url, created_at)
+            VALUES (?, ?, ?, datetime('now'))
+            ON CONFLICT(hash) DO NOTHING
+          `)
+          .bind(hash, key, cdnUrl)
+          .run();
+      } catch (dbError) {
+        // Non-critical, continue
+        console.log("Hash storage skipped:", dbError.message);
+      }
+    }
+
+    // Generate copy formats
+    const safeAlt = altText || 'Image';
+    const markdown = `![${safeAlt}](${cdnUrl})`;
+    const html = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, '&quot;')}" />`;
+    const svelte = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, '&quot;')}" />`;
+
     return json({
       success: true,
       url: cdnUrl,
       key: key,
-      filename: sanitizedName,
+      filename: filename,
       size: file.size,
       type: file.type,
-      markdown: `![Alt text](${cdnUrl})`,
-      svelte: `<img src="${cdnUrl}" alt="Description" />`,
+      altText: altText || null,
+      description: description || null,
+      markdown,
+      html,
+      svelte,
     }, {
       headers: {
-        'Cache-Control': 'public, max-age=31536000',
+        'Cache-Control': 'no-store',
       }
     });
   } catch (err) {
