@@ -1,0 +1,36 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grove Stripe Icon: Simplified single-leaf design -->
+  <!-- Based on main Grove logo, optimized for scalability -->
+
+  <!-- Main leaf shape with gradient -->
+  <path
+    d="M256 80c-53.3 80-133.3 120-133.3 200 0 66.7 53.3 120 133.3 120s133.3-53.3 133.3-120c0-80-80-120-133.3-200z"
+    fill="url(#leafGradient)"
+  />
+
+  <!-- Stem accent -->
+  <path
+    d="M256 320v106"
+    stroke="#15803d"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+
+  <!-- Vitality circle at stem base -->
+  <circle
+    cx="256"
+    cy="320"
+    r="6"
+    fill="#15803d"
+    opacity="0.6"
+  />
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="leafGradient" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="50%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+</svg>

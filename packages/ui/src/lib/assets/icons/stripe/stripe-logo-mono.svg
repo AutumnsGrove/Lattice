@@ -1,0 +1,39 @@
+<svg viewBox="0 0 240 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grove Stripe Logo: Monochrome variant for emails and high-contrast contexts -->
+
+  <!-- Icon (scaled to 60x60, positioned left) -->
+  <g transform="translate(6, 6)">
+    <!-- Main leaf shape (solid color, no gradient) -->
+    <path
+      d="M30 9.375c-6.25 9.375-15.625 14.0625-15.625 23.4375 0 7.8125 6.25 14.0625 15.625 14.0625s15.625-6.25 15.625-14.0625c0-9.375-9.375-14.0625-15.625-23.4375z"
+      fill="#16a34a"
+    />
+
+    <!-- Stem accent -->
+    <path
+      d="M30 37.5v12.5"
+      stroke="#15803d"
+      stroke-width="1"
+      stroke-linecap="round"
+    />
+
+    <!-- Vitality circle at stem base -->
+    <circle
+      cx="30"
+      cy="37.5"
+      r="0.75"
+      fill="#15803d"
+      opacity="0.6"
+    />
+  </g>
+
+  <!-- "Grove" wordmark -->
+  <text
+    x="78"
+    y="46"
+    font-family="Georgia, Cambria, 'Times New Roman', serif"
+    font-size="32"
+    font-weight="600"
+    letter-spacing="-0.64"
+    fill="#3d2914">Grove</text>
+</svg>
