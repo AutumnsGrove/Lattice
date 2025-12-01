@@ -1,0 +1,1 @@
+Elena spent six months researching "café playlists" before opening. She found over 50,000 "coffee shop vibes" playlists on Spotify alone. It felt less like curation and more like conformity.

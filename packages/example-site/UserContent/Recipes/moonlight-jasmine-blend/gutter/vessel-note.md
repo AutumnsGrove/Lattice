@@ -1,0 +1,1 @@
+At the café, we use small clay gaiwans that have absorbed years of tea. They add something to the brew that new vessels can't replicate. At home, any pre-warmed ceramic will do nicely.

@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "type": "comment",
+      "file": "speed-note.md",
+      "anchor": "anchor:speed-note"
+    },
+    {
+      "type": "comment",
+      "file": "kettle-note.md",
+      "anchor": "anchor:kettle-note"
+    },
+    {
+      "type": "comment",
+      "file": "philosophy.md",
+      "anchor": "anchor:philosophy"
+    }
+  ]
+}

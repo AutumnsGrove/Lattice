@@ -1,0 +1,27 @@
+{
+  "owner": {
+    "name": "The Midnight Bloom",
+    "email": "hello@example.grove.place"
+  },
+  "site": {
+    "title": "The Midnight Bloom",
+    "tagline": "Open when the stars come out",
+    "description": "A late-night tea café where time slows down. Serving rare teas, quiet conversations, and the comfort of a warm cup in the small hours.",
+    "copyright": "The Midnight Bloom Tea Café"
+  },
+  "social": {
+    "instagram": "https://instagram.com/midnightbloom",
+    "twitter": "https://twitter.com/midnightbloom"
+  },
+  "hours": {
+    "open": "6:00 PM",
+    "close": "4:00 AM",
+    "days": "Wednesday - Sunday"
+  },
+  "location": {
+    "address": "742 Twilight Lane",
+    "city": "Moonhaven",
+    "state": "OR",
+    "zip": "97401"
+  }
+}

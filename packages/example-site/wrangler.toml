@@ -1,0 +1,70 @@
+# GroveEngine Example Site - Cloudflare Pages Configuration
+# Deploy URL: example.grove.place
+#
+# This example site shares infrastructure with the main Grove platform
+# to demonstrate all GroveEngine features in a live environment.
+
+name = "grove-example-site"
+compatibility_date = "2025-01-01"
+
+# Cloudflare Pages Functions output directory
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# =============================================================================
+# SHARED RESOURCES - Using main Grove infrastructure
+# =============================================================================
+
+# KV Namespace - Shared cache namespace
+# Uses the same cache as the main platform for consistency
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "514e91e81cc44d128a82ec6f668303e4"  # grove-cache
+
+# R2 Bucket - Shared media storage
+# Images uploaded here are accessible across all Grove sites
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "grove-media"
+
+# D1 Database - Shared posts database
+# The example site has its own tenant_id for multi-tenant isolation
+[[d1_databases]]
+binding = "POSTS_DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+[vars]
+CACHE_TTL_SECONDS = "3600"
+SITE_NAME = "The Midnight Bloom"
+SITE_URL = "https://example.grove.place"
+
+# =============================================================================
+# DEPLOYMENT INSTRUCTIONS
+# =============================================================================
+#
+# 1. Build the site:
+#    cd packages/example-site
+#    npm run build
+#
+# 2. Deploy to Cloudflare Pages:
+#    npx wrangler pages deploy .svelte-kit/cloudflare --project-name=grove-example-site
+#
+# 3. Configure custom domain in Cloudflare Dashboard:
+#    - Add example.grove.place as a custom domain
+#    - Configure DNS CNAME record pointing to grove-example-site.pages.dev
+#
+# 4. Set secrets (if using auth features):
+#    npx wrangler secret put SESSION_SECRET
+#    npx wrangler secret put ALLOWED_ADMIN_EMAILS
+#    npx wrangler secret put RESEND_API_KEY
+#
+# =============================================================================
+# Notes
+# =============================================================================
+# - This site shares D1/R2/KV with the main Grove platform
+# - Multi-tenant isolation is handled via tenant_id in the database
+# - The example site demonstrates all GroveEngine features
+# - Admin panel is UI-only (no database writes in demo mode)

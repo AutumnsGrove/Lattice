@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "type": "comment",
+      "file": "nurses.md",
+      "anchor": "anchor:nurses"
+    },
+    {
+      "type": "comment",
+      "file": "novelist.md",
+      "anchor": "anchor:novelist"
+    },
+    {
+      "type": "comment",
+      "file": "stargazer.md",
+      "anchor": "anchor:stargazer"
+    },
+    {
+      "type": "comment",
+      "file": "community.md",
+      "anchor": "anchor:community"
+    }
+  ]
+}

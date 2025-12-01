@@ -61,6 +61,24 @@
 
 ## Future Considerations (Post-Launch)
 
+### Shop Feature (E-commerce)
+- [ ] Design shop data model (products, variants, inventory)
+- [ ] Create product management UI in admin panel
+- [ ] Build product listing page with filtering/sorting
+- [ ] Implement product detail pages
+- [ ] Add shopping cart functionality (client-side state)
+- [ ] Integrate Stripe for checkout
+- [ ] Implement order management system
+- [ ] Add order confirmation emails via Resend
+- [ ] Build order history for customers
+- [ ] Implement inventory tracking
+- [ ] Add product categories and tags
+- [ ] Support digital products/downloads
+- [ ] Add product image gallery with R2 storage
+- [ ] Implement product search
+- [ ] Add related products recommendations
+- [ ] Build shop analytics (views, conversions)
+
 ### Theme System Expansion
 - [ ] Custom CSS override option for advanced users
 - [ ] Theme marketplace (users buy/sell themes)

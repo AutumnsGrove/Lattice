@@ -1,0 +1,1 @@
+John Cage's 4'33" taught us that there's no such thing as true silence—only sounds we haven't noticed yet. We try to create space for noticing.

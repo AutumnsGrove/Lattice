@@ -1,0 +1,1 @@
+A regular once described the 3 AM atmosphere as "like being in a library, but the books are people's thoughts." We've never forgotten that.

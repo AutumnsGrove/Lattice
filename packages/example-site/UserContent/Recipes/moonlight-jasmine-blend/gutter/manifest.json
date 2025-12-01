@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "type": "comment",
+      "file": "vessel-note.md",
+      "anchor": "anchor:vessel-note"
+    },
+    {
+      "type": "comment",
+      "file": "water-note.md",
+      "anchor": "anchor:water-note"
+    },
+    {
+      "type": "comment",
+      "file": "pearls-note.md",
+      "anchor": "anchor:pearls-note"
+    },
+    {
+      "type": "comment",
+      "file": "taste-note.md",
+      "anchor": "anchor:taste-note"
+    }
+  ]
+}
