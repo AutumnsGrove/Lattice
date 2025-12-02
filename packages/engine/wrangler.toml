@@ -60,6 +60,31 @@ CACHE_TTL_SECONDS = "3600"
 #
 # RESEND_API_KEY     - API key for Resend email service (magic codes)
 #                      Get from: https://resend.com
+#
+# =============================================================================
+# Stripe Secrets (for Shop & Billing)
+# =============================================================================
+# STRIPE_SECRET_KEY  - Stripe secret key (sk_live_xxx or sk_test_xxx)
+#                      Get from: https://dashboard.stripe.com/apikeys
+#
+# STRIPE_PUBLISHABLE_KEY - Stripe publishable key (pk_live_xxx or pk_test_xxx)
+#                          Used in frontend for Stripe.js
+#
+# STRIPE_WEBHOOK_SECRET - Webhook signing secret (whsec_xxx)
+#                         Get from: https://dashboard.stripe.com/webhooks
+#
+# STRIPE_CONNECT_ENABLED - Set to "true" to enable marketplace mode
+#
+# PLATFORM_FEE_PERCENT - Platform fee percentage for Connect (default: 5)
+#
+# =============================================================================
+# Stripe Price IDs (for Platform Billing)
+# =============================================================================
+# Create these prices in Stripe Dashboard, then set:
+#
+# STRIPE_PRICE_STARTER      - Price ID for Starter plan ($12/mo)
+# STRIPE_PRICE_PROFESSIONAL - Price ID for Professional plan ($49/mo)
+# STRIPE_PRICE_BUSINESS     - Price ID for Business plan ($199/mo)
 
 # =============================================================================
 # Cloudflare Pages Notes

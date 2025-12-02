@@ -55,6 +55,14 @@
     "./server/*": {
       "types": "./dist/server/*.d.ts",
       "default": "./dist/server/*.js"
+    },
+    "./payments": {
+      "types": "./dist/payments/index.d.ts",
+      "default": "./dist/payments/index.js"
+    },
+    "./payments/*": {
+      "types": "./dist/payments/*.d.ts",
+      "default": "./dist/payments/*.js"
     }
   },
   "files": [
