@@ -1,21 +1,6 @@
 <script>
 	let { data } = $props();
 
-	// Extract headers for table of contents
-	function extractHeaders(content) {
-		const headers = [];
-		const regex = /<h([2-3])[^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[2-3]>/gi;
-		let match;
-		while ((match = regex.exec(content)) !== null) {
-			headers.push({
-				level: parseInt(match[1]),
-				id: match[2],
-				text: match[3]
-			});
-		}
-		return headers;
-	}
-
 	// Simple header extraction from raw content
 	function getHeadersFromContent(content) {
 		const headers = [];
@@ -33,6 +18,16 @@
 	}
 
 	let headers = $derived(data.post.rawContent ? getHeadersFromContent(data.post.rawContent) : []);
+
+	function scrollToHeader(event, id) {
+		event.preventDefault();
+		const element = document.getElementById(id);
+		if (element) {
+			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Update URL hash without jumping
+			history.pushState(null, '', `#${id}`);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -91,7 +86,9 @@
 				<ul>
 					{#each headers as header}
 						<li class:indent={header.level === 3}>
-							<a href="#{header.id}">{header.text}</a>
+							<a href="#{header.id}" onclick={(e) => scrollToHeader(e, header.id)}>
+								{header.text}
+							</a>
 						</li>
 					{/each}
 				</ul>
@@ -297,6 +294,7 @@
 		display: block;
 		padding: 0.25rem 0;
 		transition: color 0.2s;
+		cursor: pointer;
 	}
 
 	.toc a:hover {

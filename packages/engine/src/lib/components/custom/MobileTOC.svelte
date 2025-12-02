@@ -18,6 +18,8 @@
 		const element = document.getElementById(id);
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Update URL hash without jumping
+			history.pushState(null, '', `#${id}`);
 		}
 		closeMenu();
 	}
