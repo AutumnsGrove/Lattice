@@ -14,7 +14,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@groveengine/engine](packages/engine) | 0.1.0 | Multi-tenant blog engine for Cloudflare Workers |
+| [@autumnsgrove/groveengine](packages/engine) | 0.1.0 | Multi-tenant blog engine for Cloudflare Workers |
 | [@groveengine/ui](packages/ui) | 0.1.0 | Grove Design System - calm, organic component library |
 
 ## 📁 Project Structure
@@ -22,7 +22,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 ```
 GroveEngine/
 ├── packages/
-│   ├── engine/               # @groveengine/engine - Blog engine
+│   ├── engine/               # @autumnsgrove/groveengine - Blog engine
 │   │   ├── src/
 │   │   │   ├── lib/          # Core library code
 │   │   │   │   ├── components/   # Svelte components
@@ -58,7 +58,7 @@ GroveEngine/
 
 ```bash
 # Install the engine package
-npm install @groveengine/engine
+npm install @autumnsgrove/groveengine
 
 # Install the UI library
 npm install @groveengine/ui
@@ -86,10 +86,10 @@ export default {
 
 ```javascript
 // Import blog components
-import { ContentWithGutter, MarkdownEditor } from '@groveengine/engine';
+import { ContentWithGutter, MarkdownEditor } from '@autumnsgrove/groveengine';
 
 // Import utilities
-import { parseMarkdown } from '@groveengine/engine/utils/markdown';
+import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 ```
 
 ## 🎯 Project Status
@@ -101,7 +101,7 @@ import { parseMarkdown } from '@groveengine/engine/utils/markdown';
 **Completed:**
 - ✅ Domain secured (grove.place)
 - ✅ Blog engine migrated from AutumnsGrove
-- ✅ NPM packages published (@groveengine/engine, @groveengine/ui)
+- ✅ NPM packages published (@autumnsgrove/groveengine, @groveengine/ui)
 - ✅ Multi-tenant database schema designed
 - ✅ Grove Design System created
 - ✅ Landing page deployed

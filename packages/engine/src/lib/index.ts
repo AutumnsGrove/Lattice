@@ -1,4 +1,4 @@
-// Main entry point for @groveengine/engine
+// Main entry point for @autumnsgrove/groveengine
 
 // Custom components
 export { default as ContentWithGutter } from './components/custom/ContentWithGutter.svelte';

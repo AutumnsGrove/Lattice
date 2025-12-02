@@ -1,5 +1,5 @@
 <script>
-	import { ContentWithGutter } from '@groveengine/engine';
+	import { ContentWithGutter } from '@autumnsgrove/groveengine';
 
 	let { data } = $props();
 
