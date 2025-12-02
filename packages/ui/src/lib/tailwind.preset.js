@@ -334,7 +334,7 @@ export default {
           fontSize: theme('fontSize.body')[0],
           lineHeight: theme('fontSize.body')[1].lineHeight,
           '& h1, & h2, & h3, & h4, & h5, & h6': {
-            fontFamily: theme('fontFamily.serif').join(', '),
+            fontFamily: 'Georgia, Cambria, "Times New Roman", Times, serif',
             fontWeight: '400',
             color: theme('colors.bark.DEFAULT'),
           },
@@ -381,7 +381,7 @@ export default {
             padding: '0.125rem 0.375rem',
             borderRadius: '0.25rem',
             fontSize: '0.875em',
-            fontFamily: theme('fontFamily.mono').join(', '),
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
           },
           '& pre': {
             backgroundColor: theme('colors.bark.900'),
