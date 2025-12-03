@@ -1,30 +1,30 @@
 # TODOs for Grove Platform
 
 ## Setup Tasks
-- [ ] Initialize `grove-engine` GitHub repository
-- [ ] Set up SvelteKit project with TypeScript
-- [ ] Configure Cloudflare Workers and D1 database
-- [ ] Implement magic link auth (6-digit email codes via Resend)
-- [ ] Configure Stripe for payments
-- [ ] Set up Resend for email
+- [x] Initialize `grove-engine` GitHub repository → **DONE: GroveEngine monorepo created**
+- [x] Set up SvelteKit project with TypeScript → **DONE: SvelteKit 2.5+ with Svelte 5**
+- [x] Configure Cloudflare Workers and D1 database → **DONE: 7 migrations in place**
+- [x] Implement magic link auth (6-digit email codes via Resend) → **DONE**
+- [x] Configure Stripe for payments → **DONE: Stripe payments system with provider abstraction**
+- [x] Set up Resend for email → **DONE: Used for magic code auth**
 - [x] Check domain availability → **DONE: grove.place secured!**
-- [ ] Set up development environment with proper tooling
-- [ ] Configure Tailwind CSS
+- [x] Set up development environment with proper tooling → **DONE: pnpm workspaces, Vite, TypeScript**
+- [x] Configure Tailwind CSS → **DONE: Tailwind CSS 3.4+ configured**
 - [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
 
 ## Phase 1: GroveEngine MVP (Weeks 1-4)
-- [ ] Extract blog functionality from autumnsgrove.com
-- [ ] Implement core blog engine with post creation/editing
-- [ ] Add basic theming system (1 theme)
+- [x] Extract blog functionality from autumnsgrove.com → **DONE: Complete migration in PR #14**
+- [x] Implement core blog engine with post creation/editing → **DONE: Full CRUD with MarkdownEditor**
+- [x] Add basic theming system (1 theme) → **DONE: Theme system foundation with switcher**
 - [ ] Implement post limits (250 for Starter plan)
-- [ ] Set up R2 storage for media uploads
-- [ ] Build admin dashboard for Mom's publishing house
+- [x] Set up R2 storage for media uploads → **DONE: CDN admin upload system (PR #17, #20)**
+- [x] Build admin dashboard for Mom's publishing house → **DONE: Full admin panel with CDN uploader**
 - [ ] Test with Mom's publishing house as first client
 - [ ] Implement basic analytics
 
 ## Phase 2: Multi-tenant Infrastructure (Weeks 5-9)
 - [ ] Implement subdomain routing system
-- [ ] Set up tenant isolation in D1 database
+- [x] Set up tenant isolation in D1 database → **DONE: Multi-tenant schema designed (migration 005)**
 - [ ] Build tenant onboarding flow
 - [ ] Implement plan management (Starter/Professional/Business)
 - [ ] Add custom domain support for Business plan
@@ -32,11 +32,11 @@
 - [ ] Implement storage limits per plan
 
 ## Phase 3: Grove Website (Weeks 10-15)
-- [ ] Create marketing website
+- [x] Create marketing website → **DONE: Landing site deployed at grove.place**
 - [ ] Build pricing page with plan comparison
-- [ ] Implement billing system with Stripe
+- [x] Implement billing system with Stripe → **DONE: Stripe payments with provider abstraction (PR #19)**
 - [ ] Add customer portal
-- [ ] Build landing page with features
+- [x] Build landing page with features → **DONE: "How It Works" and footer links (PR #11)**
 - [ ] Implement signup flow
 - [ ] Add documentation/help center
 
@@ -62,7 +62,7 @@
 ## Future Considerations (Post-Launch)
 
 ### Shop Feature (E-commerce)
-- [ ] Design shop data model (products, variants, inventory)
+- [x] Design shop data model (products, variants, inventory) → **DONE: migration 007_shop_payments.sql**
 - [ ] Create product management UI in admin panel
 - [ ] Build product listing page with filtering/sorting
 - [ ] Implement product detail pages
@@ -112,10 +112,10 @@
 - [ ] SDK/client libraries (JavaScript, Python)
 
 ## Documentation Tasks
-- [ ] Update README.md with project specifics
-- [ ] Document API/architecture decisions
+- [x] Update README.md with project specifics → **DONE: PR #16**
+- [x] Document API/architecture decisions → **DONE: 7 specs in docs/specs/**
 - [ ] Add usage examples for tenants
-- [ ] Create deployment guide
+- [x] Create deployment guide → **DONE: DEPLOY-GUIDE.md, CLOUDFLARE-SETUP.md**
 - [ ] Write testing documentation
 
 ## Success Metrics
