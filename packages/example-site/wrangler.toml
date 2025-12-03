@@ -6,6 +6,7 @@
 
 name = "grove-example-site"
 compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages Functions output directory
 pages_build_output_dir = ".svelte-kit/cloudflare"
