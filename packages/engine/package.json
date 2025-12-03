@@ -4,10 +4,6 @@
   "description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
   "author": "AutumnsGrove",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/AutumnsGrove/GroveEngine.git",
