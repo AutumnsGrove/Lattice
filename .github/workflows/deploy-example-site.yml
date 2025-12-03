@@ -31,6 +31,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build engine package
+        working-directory: packages/engine
+        run: pnpm run package
+
       - name: Build site
         working-directory: packages/example-site
         run: pnpm run build
