@@ -1,5 +1,7 @@
 # TODOs for Grove Platform
 
+> **Note:** UI components and Design System have been split into [GroveUI](https://github.com/AutumnsGrove/GroveUI). This repo focuses on the core engine, example site, and hosting (grove.place).
+
 ## Setup Tasks
 - [x] Initialize `grove-engine` GitHub repository → **DONE: GroveEngine monorepo created**
 - [x] Set up SvelteKit project with TypeScript → **DONE: SvelteKit 2.5+ with Svelte 5**
@@ -10,6 +12,7 @@
 - [x] Check domain availability → **DONE: grove.place secured!**
 - [x] Set up development environment with proper tooling → **DONE: pnpm workspaces, Vite, TypeScript**
 - [x] Configure Tailwind CSS → **DONE: Tailwind CSS 3.4+ configured**
+- [x] Split UI/Design System into separate repo → **DONE: [GroveUI](https://github.com/AutumnsGrove/GroveUI)**
 - [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
 
 ## Phase 1: GroveEngine MVP (Weeks 1-4)
@@ -80,6 +83,7 @@
 - [ ] Build shop analytics (views, conversions)
 
 ### Theme System Expansion
+> *Note: UI components are managed in [GroveUI](https://github.com/AutumnsGrove/GroveUI)*
 - [ ] Custom CSS override option for advanced users
 - [ ] Theme marketplace (users buy/sell themes)
 - [ ] User-uploadable themes with validation

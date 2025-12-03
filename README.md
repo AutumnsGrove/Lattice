@@ -15,8 +15,13 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 | Package | Version | Description |
 |---------|---------|-------------|
 | [@autumnsgrove/groveengine](packages/engine) | 0.1.0 | Multi-tenant blog engine for Cloudflare Workers |
-| [@groveengine/ui](packages/ui) | 0.1.0 | Grove Design System - calm, organic component library |
 | [example-site](packages/example-site) | - | Demo site showcasing all GroveEngine features |
+
+### Related Projects
+
+| Project | Repository | Description |
+|---------|------------|-------------|
+| GroveUI | [AutumnsGrove/GroveUI](https://github.com/AutumnsGrove/GroveUI) | Grove Design System - UI components, design tokens, Tailwind preset |
 
 ## 📁 Project Structure
 
@@ -31,11 +36,6 @@ GroveEngine/
 │   │   │   │   └── utils/        # Shared utilities
 │   │   │   └── routes/       # SvelteKit routes (blog, admin, API)
 │   │   └── migrations/       # D1 database migrations (7 migrations)
-│   ├── ui/                   # @groveengine/ui - Design system
-│   │   └── src/lib/
-│   │       ├── components/   # UI components
-│   │       ├── tokens/       # Design tokens
-│   │       └── tailwind.preset.js
 │   └── example-site/         # Demo site showcasing engine features
 ├── landing/                  # Marketing site for grove.place
 ├── docs/                     # Project documentation
@@ -46,6 +46,8 @@ GroveEngine/
 └── assets/                   # Brand assets & visuals
 ```
 
+> **Note:** The UI/Design System has been split into its own repository: [GroveUI](https://github.com/AutumnsGrove/GroveUI)
+
 ## ✨ Key Features
 
 - **Gutter Annotations** - Unique sidebar annotation system for contextual notes on blog posts
@@ -53,7 +55,7 @@ GroveEngine/
 - **Magic Code Auth** - Passwordless authentication via email verification codes
 - **Multi-Tenant Architecture** - Subdomain-based isolation with per-tenant databases
 - **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
-- **Grove Design System** - Calm, organic UI components with WCAG 2.1 AA accessibility
+- **Grove Design System** - Calm, organic UI components with WCAG 2.1 AA accessibility ([separate repo](https://github.com/AutumnsGrove/GroveUI))
 - **CDN Admin Uploader** - R2-powered media upload with AI image analysis
 - **Stripe Payments** - Payment system with provider abstraction for subscriptions and shop features
 
@@ -65,26 +67,8 @@ GroveEngine/
 # Install the engine package
 npm install @autumnsgrove/groveengine
 
-# Install the UI library
-npm install @groveengine/ui
-```
-
-### Using the Design System
-
-```javascript
-// Import components
-import { Button, Card, Alert } from '@groveengine/ui/components';
-
-// Import styles
-import '@groveengine/ui/styles';
-
-// Use the Tailwind preset in your tailwind.config.js
-import grovePreset from '@groveengine/ui/tailwind';
-
-export default {
-  presets: [grovePreset],
-  // ...
-};
+# For UI components, see the GroveUI repo:
+# https://github.com/AutumnsGrove/GroveUI
 ```
 
 ### Using Engine Components
@@ -106,9 +90,9 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 **Completed:**
 - ✅ Domain secured (grove.place)
 - ✅ Blog engine migrated from AutumnsGrove
-- ✅ NPM packages published (@autumnsgrove/groveengine, @groveengine/ui)
+- ✅ NPM packages published (@autumnsgrove/groveengine)
 - ✅ Multi-tenant database schema designed (7 migrations)
-- ✅ Grove Design System created
+- ✅ Grove Design System created and split to [GroveUI](https://github.com/AutumnsGrove/GroveUI)
 - ✅ Landing page deployed with "How It Works" section
 - ✅ Stripe payments system with provider abstraction
 - ✅ CDN admin upload system with R2 storage
@@ -212,12 +196,12 @@ pnpm install
 cd packages/engine
 pnpm dev
 
-# Start development server (UI)
-cd packages/ui
-pnpm dev
-
 # Start landing page
 cd landing
+pnpm dev
+
+# Start example site
+cd packages/example-site
 pnpm dev
 ```
 
@@ -241,10 +225,6 @@ pnpm test:security
 # Build engine package for npm
 cd packages/engine
 pnpm build:package
-
-# Build UI package
-cd packages/ui
-pnpm build
 ```
 
 ## 📄 License
