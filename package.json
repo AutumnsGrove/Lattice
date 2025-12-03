@@ -8,5 +8,52 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/AutumnsGrove/GroveEngine.git"
+  },
+  "type": "module",
+  "main": "./packages/engine/dist/index.js",
+  "types": "./packages/engine/dist/index.d.ts",
+  "svelte": "./packages/engine/dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./packages/engine/dist/index.d.ts",
+      "svelte": "./packages/engine/dist/index.js",
+      "default": "./packages/engine/dist/index.js"
+    },
+    "./components/custom/*": {
+      "types": "./packages/engine/dist/components/custom/*.svelte.d.ts",
+      "svelte": "./packages/engine/dist/components/custom/*.svelte"
+    },
+    "./components/admin/*": {
+      "types": "./packages/engine/dist/components/admin/*.svelte.d.ts",
+      "svelte": "./packages/engine/dist/components/admin/*.svelte"
+    },
+    "./components/gallery/*": {
+      "types": "./packages/engine/dist/components/gallery/*.svelte.d.ts",
+      "svelte": "./packages/engine/dist/components/gallery/*.svelte"
+    },
+    "./components/ui": {
+      "types": "./packages/engine/dist/components/ui/index.d.ts",
+      "svelte": "./packages/engine/dist/components/ui/index.js"
+    },
+    "./utils/*": {
+      "types": "./packages/engine/dist/utils/*.d.ts",
+      "default": "./packages/engine/dist/utils/*.js"
+    },
+    "./auth/*": {
+      "types": "./packages/engine/dist/auth/*.d.ts",
+      "default": "./packages/engine/dist/auth/*.js"
+    },
+    "./server/*": {
+      "types": "./packages/engine/dist/server/*.d.ts",
+      "default": "./packages/engine/dist/server/*.js"
+    },
+    "./payments": {
+      "types": "./packages/engine/dist/payments/index.d.ts",
+      "default": "./packages/engine/dist/payments/index.js"
+    },
+    "./payments/*": {
+      "types": "./packages/engine/dist/payments/*.d.ts",
+      "default": "./packages/engine/dist/payments/*.js"
+    }
   }
 }
