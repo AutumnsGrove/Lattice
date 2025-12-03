@@ -33,10 +33,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          cache-dependency-path: landing/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install
+        working-directory: .
 
       - name: Build
         run: pnpm run build
