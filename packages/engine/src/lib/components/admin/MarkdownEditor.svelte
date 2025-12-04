@@ -24,7 +24,6 @@
   let textareaRef = $state(null);
   let previewRef = $state(null);
   let showPreview = $state(true);
-  let lineNumbers = $state([]);
   let cursorLine = $state(1);
   let cursorCol = $state(1);
 
@@ -277,20 +276,20 @@
   let previewHtml = $derived(content ? sanitizeMarkdown(marked.parse(content)) : "");
 
   // Reading time estimate (average 200 words per minute)
-  let readingTime = $derived(() => {
+  let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);
     return minutes < 1 ? "< 1 min" : `~${minutes} min read`;
   });
 
   // Writing goal progress
-  let goalProgress = $derived(() => {
+  let goalProgress = $derived.by(() => {
     if (!writingGoal.enabled) return 0;
     const wordsWritten = wordCount - writingGoal.sessionWords;
     return Math.min(100, Math.round((wordsWritten / writingGoal.targetWords) * 100));
   });
 
   // Campfire session elapsed time
-  let campfireElapsed = $derived(() => {
+  let campfireElapsed = $derived.by(() => {
     if (!campfireSession.active || !campfireSession.startTime) return "0:00";
     const now = Date.now();
     const elapsed = Math.floor((now - campfireSession.startTime) / 1000);
@@ -326,10 +325,10 @@
     insertAtCursor(`<!-- anchor:${name} -->\n`);
   }
 
-  // Update line numbers when content changes
-  $effect(() => {
-    const lines = content.split("\n").length;
-    lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
+  // Line numbers derived from content - only updates when line count changes
+  let lineNumbers = $derived.by(() => {
+    const count = content.split("\n").length;
+    return Array.from({ length: count }, (_, i) => i + 1);
   });
 
   // Handle cursor position tracking
@@ -480,7 +479,7 @@
   ];
 
   // Dynamic slash commands including user snippets
-  let allSlashCommands = $derived(() => {
+  let allSlashCommands = $derived.by(() => {
     const snippetCommands = snippets.map(s => ({
       id: s.id,
       label: `> ${s.name}`,
@@ -491,8 +490,8 @@
   });
 
   // Filtered slash commands based on query
-  let filteredSlashCommands = $derived(
-    allSlashCommands().filter(cmd =>
+  let filteredSlashCommands = $derived.by(() =>
+    allSlashCommands.filter(cmd =>
       cmd.label.toLowerCase().includes(slashMenu.query.toLowerCase())
     )
   );
@@ -559,7 +558,7 @@
   ];
 
   // Add theme commands dynamically
-  let paletteCommands = $derived(() => {
+  let paletteCommands = $derived.by(() => {
     const themeCommands = Object.entries(themes).map(([key, theme]) => ({
       id: `theme-${key}`,
       label: `Theme: ${theme.label} (${theme.desc})`,
@@ -569,8 +568,8 @@
     return [...basePaletteCommands, ...themeCommands];
   });
 
-  let filteredPaletteCommands = $derived(
-    paletteCommands().filter(cmd =>
+  let filteredPaletteCommands = $derived.by(() =>
+    paletteCommands.filter(cmd =>
       cmd.label.toLowerCase().includes(commandPalette.query.toLowerCase())
     )
   );
@@ -1420,17 +1419,17 @@
       <span class="status-divider">|</span>
       <span class="status-item">{wordCount} words</span>
       <span class="status-divider">|</span>
-      <span class="status-item">{readingTime()}</span>
+      <span class="status-item">{readingTime}</span>
       {#if writingGoal.enabled}
         <span class="status-divider">|</span>
         <span class="status-goal">
-          Goal: {goalProgress()}%
+          Goal: {goalProgress}%
         </span>
       {/if}
       {#if campfireSession.active}
         <span class="status-divider">|</span>
         <span class="status-campfire">
-          ~ {campfireElapsed()}
+          ~ {campfireElapsed}
         </span>
       {/if}
     </div>
@@ -1531,7 +1530,7 @@
   <div class="campfire-controls">
     <div class="campfire-ember"></div>
     <div class="campfire-stats">
-      <span class="campfire-time">{campfireElapsed()}</span>
+      <span class="campfire-time">{campfireElapsed}</span>
       <span class="campfire-words">+{wordCount - campfireSession.startWordCount} words</span>
     </div>
     <button type="button" class="campfire-end" onclick={endCampfireSession}>
