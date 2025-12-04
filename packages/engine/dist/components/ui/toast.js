@@ -1,4 +1,4 @@
-import { toast as sonnerToast } from "sonner";
+import { toast as sonnerToast } from "svelte-sonner";
 /**
  * Toast notification utility for displaying temporary messages
  * Wraps sonner toast with consistent defaults and API

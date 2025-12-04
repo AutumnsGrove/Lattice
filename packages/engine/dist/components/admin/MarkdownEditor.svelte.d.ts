@@ -6,10 +6,7 @@ type MarkdownEditor = {
     getAvailableAnchors: () => string[];
     insertAnchor: (name: any) => void;
     clearDraft: () => void;
-    getDraftStatus: () => {
-        hasDraft: boolean;
-        storedDraft: null;
-    };
+    getDraftStatus: () => any;
 };
 declare const MarkdownEditor: import("svelte").Component<{
     content?: string;
@@ -25,10 +22,7 @@ declare const MarkdownEditor: import("svelte").Component<{
     getAvailableAnchors: () => string[];
     insertAnchor: (name: any) => void;
     clearDraft: () => void;
-    getDraftStatus: () => {
-        hasDraft: boolean;
-        storedDraft: null;
-    };
+    getDraftStatus: () => any;
 }, "content">;
 type $$ComponentProps = {
     content?: string;

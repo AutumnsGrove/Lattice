@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toaster } from "sonner";
+	import { Toaster } from "svelte-sonner";
 
 	interface Props {
 		position?:

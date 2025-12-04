@@ -6,25 +6,37 @@
   import { Button, Input } from '@groveengine/ui';
   import Dialog from "../ui/Dialog.svelte";
 
+  // Import composables
+  import {
+    useAmbientSounds,
+    soundLibrary,
+    useEditorTheme,
+    themes,
+    useSnippets,
+    useDraftManager,
+    useWritingSession,
+    useSlashCommands,
+    useCommandPalette,
+  } from "./composables/index.js";
+
   // Props
   let {
     content = $bindable(""),
     onSave = () => {},
     saving = false,
     readonly = false,
-    draftKey = null, // Unique key for localStorage draft storage
-    onDraftRestored = () => {}, // Callback when draft is restored
-    // Optional metadata for full preview mode
+    draftKey = null,
+    onDraftRestored = () => {},
     previewTitle = "",
     previewDate = "",
     previewTags = [],
   } = $props();
 
-  // Local state
+  // Core refs and state
   let textareaRef = $state(null);
   let previewRef = $state(null);
+  let lineNumbersRef = $state(null);
   let showPreview = $state(true);
-  let lineNumbers = $state([]);
   let cursorLine = $state(1);
   let cursorCol = $state(1);
 
@@ -34,18 +46,10 @@
   let uploadProgress = $state("");
   let uploadError = $state(null);
 
-  // Auto-save draft state
-  let lastSavedContent = $state("");
-  let draftSaveTimer = $state(null);
-  let hasDraft = $state(false);
-  let draftRestorePrompt = $state(false);
-  let storedDraft = $state(null);
-  const AUTO_SAVE_DELAY = 2000; // 2 seconds
-
-  // Full preview mode state
+  // Full preview mode
   let showFullPreview = $state(false);
 
-  // Editor settings (configurable, persisted to localStorage)
+  // Editor settings
   let editorSettings = $state({
     typewriterMode: false,
     zenMode: false,
@@ -53,262 +57,87 @@
     wordWrap: true,
   });
 
-  // Zen mode state
+  // Zen mode
   let isZenMode = $state(false);
 
-  // Campfire session state
-  let campfireSession = $state({
-    active: false,
-    startTime: null,
-    targetMinutes: 25,
-    startWordCount: 0,
+  // Initialize composables
+  const ambientSounds = useAmbientSounds();
+  const editorTheme = useEditorTheme();
+  const snippetsManager = useSnippets();
+
+  const writingSession = useWritingSession({
+    getWordCount: () => wordCount,
   });
 
-  // Writing goals
-  let writingGoal = $state({
-    enabled: false,
-    targetWords: 500,
-    sessionWords: 0,
+  const draftManager = useDraftManager({
+    draftKey,
+    getContent: () => content,
+    setContent: (c) => (content = c),
+    onDraftRestored,
+    readonly,
   });
 
-  // Slash commands state
-  let slashMenu = $state({
-    open: false,
-    query: "",
-    position: { x: 0, y: 0 },
-    selectedIndex: 0,
+  const slashCommands = useSlashCommands({
+    getTextareaRef: () => textareaRef,
+    getContent: () => content,
+    setContent: (c) => (content = c),
+    getSnippets: () => snippetsManager.snippets,
+    onOpenSnippetsModal: () => snippetsManager.openModal(),
   });
 
-  // Command palette state
-  let commandPalette = $state({
-    open: false,
-    query: "",
-    selectedIndex: 0,
+  // Command palette actions
+  const basePaletteActions = [
+    { id: "save", label: "Save", shortcut: "⌘S", action: () => onSave() },
+    { id: "preview", label: "Toggle Preview", shortcut: "", action: () => (showPreview = !showPreview) },
+    { id: "fullPreview", label: "Full Preview", shortcut: "", action: () => (showFullPreview = true) },
+    { id: "zen", label: "Toggle Zen Mode", shortcut: "⌘⇧↵", action: () => toggleZenMode() },
+    { id: "campfire", label: "Start Campfire Session", shortcut: "", action: () => writingSession.startCampfire() },
+    { id: "bold", label: "Bold", shortcut: "⌘B", action: () => wrapSelection("**", "**") },
+    { id: "italic", label: "Italic", shortcut: "⌘I", action: () => wrapSelection("_", "_") },
+    { id: "code", label: "Insert Code Block", shortcut: "", action: () => insertCodeBlock() },
+    { id: "link", label: "Insert Link", shortcut: "", action: () => insertLink() },
+    { id: "image", label: "Insert Image", shortcut: "", action: () => insertImage() },
+    { id: "goal", label: "Set Writing Goal", shortcut: "", action: () => writingSession.promptWritingGoal() },
+    { id: "snippets", label: "Manage Snippets", shortcut: "", action: () => snippetsManager.openModal() },
+    { id: "newSnippet", label: "Create New Snippet", shortcut: "", action: () => snippetsManager.openModal() },
+    { id: "sounds", label: "Toggle Ambient Sounds", shortcut: "", action: () => ambientSounds.toggle() },
+    { id: "soundPanel", label: "Sound Settings", shortcut: "", action: () => ambientSounds.togglePanel() },
+  ];
+
+  const commandPalette = useCommandPalette({
+    getActions: () => basePaletteActions,
+    getThemes: () => themes,
+    getCurrentTheme: () => editorTheme.currentTheme,
   });
-
-  // AI Assistant state (stubs - not deployed yet)
-  let aiAssistant = $state({
-    enabled: false, // Keep disabled for now
-    panelOpen: false,
-    suggestions: [],
-    isAnalyzing: false,
-  });
-
-  // Markdown snippets state
-  let snippets = $state([]);
-  let snippetsModal = $state({
-    open: false,
-    editingId: null,
-    name: "",
-    content: "",
-    trigger: "", // Optional shortcut trigger like "sig" for signature
-  });
-
-  // Ambient sounds state
-  let ambientSounds = $state({
-    enabled: false,
-    currentSound: "forest",
-    volume: 0.3,
-    showPanel: false,
-  });
-  let audioElement = $state(null);
-
-  // Theme system
-  const themes = {
-    grove: {
-      name: "grove",
-      label: "Grove",
-      desc: "forest green",
-      accent: "#8bc48b",
-      accentDim: "#7a9a7a",
-      accentBright: "#a8dca8",
-      accentGlow: "#c8f0c8",
-      bg: "#1e1e1e",
-      bgSecondary: "#252526",
-      bgTertiary: "#1a1a1a",
-      border: "#3a3a3a",
-      borderAccent: "#4a7c4a",
-      text: "#d4d4d4",
-      textDim: "#9d9d9d",
-      statusBg: "#2d4a2d",
-      statusBorder: "#3d5a3d",
-    },
-    amber: {
-      name: "amber",
-      label: "Amber",
-      desc: "classic terminal",
-      accent: "#ffb000",
-      accentDim: "#c98b00",
-      accentBright: "#ffc940",
-      accentGlow: "#ffe080",
-      bg: "#1a1400",
-      bgSecondary: "#241c00",
-      bgTertiary: "#140e00",
-      border: "#3a3000",
-      borderAccent: "#5a4800",
-      text: "#ffcc66",
-      textDim: "#aa8844",
-      statusBg: "#2a2000",
-      statusBorder: "#3a3000",
-    },
-    matrix: {
-      name: "matrix",
-      label: "Matrix",
-      desc: "digital rain",
-      accent: "#00ff00",
-      accentDim: "#00aa00",
-      accentBright: "#44ff44",
-      accentGlow: "#88ff88",
-      bg: "#0a0a0a",
-      bgSecondary: "#111111",
-      bgTertiary: "#050505",
-      border: "#1a3a1a",
-      borderAccent: "#00aa00",
-      text: "#00dd00",
-      textDim: "#008800",
-      statusBg: "#0a1a0a",
-      statusBorder: "#1a3a1a",
-    },
-    dracula: {
-      name: "dracula",
-      label: "Dracula",
-      desc: "purple night",
-      accent: "#bd93f9",
-      accentDim: "#9580c9",
-      accentBright: "#d4b0ff",
-      accentGlow: "#e8d0ff",
-      bg: "#282a36",
-      bgSecondary: "#343746",
-      bgTertiary: "#21222c",
-      border: "#44475a",
-      borderAccent: "#6272a4",
-      text: "#f8f8f2",
-      textDim: "#a0a0a0",
-      statusBg: "#3a3c4e",
-      statusBorder: "#44475a",
-    },
-    nord: {
-      name: "nord",
-      label: "Nord",
-      desc: "arctic frost",
-      accent: "#88c0d0",
-      accentDim: "#6a9aa8",
-      accentBright: "#a3d4e2",
-      accentGlow: "#c0e8f0",
-      bg: "#2e3440",
-      bgSecondary: "#3b4252",
-      bgTertiary: "#272c36",
-      border: "#434c5e",
-      borderAccent: "#5e81ac",
-      text: "#eceff4",
-      textDim: "#a0a8b0",
-      statusBg: "#3b4252",
-      statusBorder: "#434c5e",
-    },
-    rose: {
-      name: "rose",
-      label: "Rose",
-      desc: "soft pink",
-      accent: "#f5a9b8",
-      accentDim: "#c98a96",
-      accentBright: "#ffccd5",
-      accentGlow: "#ffe0e6",
-      bg: "#1f1a1b",
-      bgSecondary: "#2a2224",
-      bgTertiary: "#171314",
-      border: "#3a3234",
-      borderAccent: "#5a4a4e",
-      text: "#e8d8dc",
-      textDim: "#a09498",
-      statusBg: "#2a2224",
-      statusBorder: "#3a3234",
-    },
-  };
-
-  let currentTheme = $state("grove");
-  const THEME_STORAGE_KEY = "grove-editor-theme";
-
-  // Sound definitions with free ambient loops
-  const soundLibrary = {
-    forest: {
-      name: "forest",
-      key: "f",
-      // Using freesound.org URLs for ambient sounds (CC0 licensed)
-      // These are placeholder paths - user can provide their own audio files
-      url: "/sounds/forest-ambience.mp3",
-      description: "birds, wind",
-    },
-    rain: {
-      name: "rain",
-      key: "r",
-      url: "/sounds/rain-ambience.mp3",
-      description: "gentle rainfall",
-    },
-    campfire: {
-      name: "fire",
-      key: "i",
-      url: "/sounds/campfire-ambience.mp3",
-      description: "crackling embers",
-    },
-    night: {
-      name: "night",
-      key: "n",
-      url: "/sounds/night-ambience.mp3",
-      description: "crickets, breeze",
-    },
-    cafe: {
-      name: "cafe",
-      key: "a",
-      url: "/sounds/cafe-ambience.mp3",
-      description: "soft murmurs",
-    },
-  };
-
-  // Line numbers container ref for scroll sync
-  let lineNumbersRef = $state(null);
 
   // Computed values
-  let wordCount = $derived(
-    content.trim() ? content.trim().split(/\s+/).length : 0
-  );
+  let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-
   let previewHtml = $derived(content ? sanitizeMarkdown(marked.parse(content)) : "");
 
-  // Reading time estimate (average 200 words per minute)
-  let readingTime = $derived(() => {
+  let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);
     return minutes < 1 ? "< 1 min" : `~${minutes} min read`;
   });
 
-  // Writing goal progress
-  let goalProgress = $derived(() => {
-    if (!writingGoal.enabled) return 0;
-    const wordsWritten = wordCount - writingGoal.sessionWords;
-    return Math.min(100, Math.round((wordsWritten / writingGoal.targetWords) * 100));
+  let goalProgress = $derived.by(() => writingSession.getGoalProgress(wordCount));
+
+  let campfireElapsed = $derived.by(() => writingSession.getCampfireElapsed());
+
+  let lineNumbers = $derived.by(() => {
+    const count = content.split("\n").length;
+    return Array.from({ length: count }, (_, i) => i + 1);
   });
 
-  // Campfire session elapsed time
-  let campfireElapsed = $derived(() => {
-    if (!campfireSession.active || !campfireSession.startTime) return "0:00";
-    const now = Date.now();
-    const elapsed = Math.floor((now - campfireSession.startTime) / 1000);
-    const mins = Math.floor(elapsed / 60);
-    const secs = elapsed % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  });
-
-  // Extract available anchors from content (headings and custom anchors)
+  // Extract available anchors from content
   let availableAnchors = $derived.by(() => {
     const anchors = [];
-    // Extract headings
     const headingRegex = /^(#{1,6})\s+(.+)$/gm;
     let match;
     while ((match = headingRegex.exec(content)) !== null) {
       anchors.push(match[0].trim());
     }
-    // Extract custom anchors
     const anchorRegex = /<!--\s*anchor:([\w-]+)\s*-->/g;
     while ((match = anchorRegex.exec(content)) !== null) {
       anchors.push(`anchor:${match[1]}`);
@@ -316,26 +145,46 @@
     return anchors;
   });
 
-  // Public function to get available anchors
+  // Filtered commands for UI
+  let filteredSlashCommands = $derived.by(() => slashCommands.getFilteredCommands());
+  let filteredPaletteCommands = $derived.by(() => {
+    // Include theme actions that actually set the theme
+    const actions = basePaletteActions.filter((cmd) =>
+      cmd.label.toLowerCase().includes(commandPalette.query.toLowerCase())
+    );
+    const themeCommands = Object.entries(themes)
+      .filter(([key, theme]) =>
+        `Theme: ${theme.label} (${theme.desc})`.toLowerCase().includes(commandPalette.query.toLowerCase())
+      )
+      .map(([key, theme]) => ({
+        id: `theme-${key}`,
+        label: `Theme: ${theme.label} (${theme.desc})`,
+        shortcut: editorTheme.currentTheme === key ? "●" : "",
+        action: () => editorTheme.setTheme(key),
+      }));
+    return [...actions, ...themeCommands];
+  });
+
+  // Public exports
   export function getAvailableAnchors() {
     return availableAnchors;
   }
 
-  // Public function to insert an anchor at cursor position
   export function insertAnchor(name) {
     insertAtCursor(`<!-- anchor:${name} -->\n`);
   }
 
-  // Update line numbers when content changes
-  $effect(() => {
-    const lines = content.split("\n").length;
-    lineNumbers = Array.from({ length: lines }, (_, i) => i + 1);
-  });
+  export function clearDraft() {
+    draftManager.clearDraft();
+  }
 
-  // Handle cursor position tracking
+  export function getDraftStatus() {
+    return draftManager.getStatus();
+  }
+
+  // Cursor position tracking
   function updateCursorPosition() {
     if (!textareaRef) return;
-
     const pos = textareaRef.selectionStart;
     const textBefore = content.substring(0, pos);
     const lines = textBefore.split("\n");
@@ -343,16 +192,16 @@
     cursorCol = lines[lines.length - 1].length + 1;
   }
 
-  // Handle tab key for indentation
+  // Keyboard handlers
   function handleKeydown(e) {
     // Escape key handling
     if (e.key === "Escape") {
-      if (slashMenu.open) {
-        slashMenu.open = false;
+      if (slashCommands.isOpen) {
+        slashCommands.close();
         return;
       }
-      if (commandPalette.open) {
-        commandPalette.open = false;
+      if (commandPalette.isOpen) {
+        commandPalette.close();
         return;
       }
       if (isZenMode) {
@@ -362,46 +211,38 @@
     }
 
     // Slash commands trigger
-    if (e.key === "/" && !slashMenu.open) {
+    if (e.key === "/" && !slashCommands.isOpen) {
       const pos = textareaRef.selectionStart;
-      const textBefore = content.substring(0, pos);
-      // Only trigger at start of line or after whitespace
-      if (pos === 0 || /\s$/.test(textBefore)) {
-        // Don't prevent default yet - let the slash be typed
-        setTimeout(() => {
-          openSlashMenu();
-        }, 0);
+      if (slashCommands.shouldTrigger("/", pos, content)) {
+        setTimeout(() => slashCommands.open(), 0);
       }
     }
 
-    // Close slash menu on space or enter if open
-    if (slashMenu.open && (e.key === " " || e.key === "Enter")) {
+    // Close slash menu on space or enter
+    if (slashCommands.isOpen && (e.key === " " || e.key === "Enter")) {
       if (e.key === "Enter") {
         e.preventDefault();
-        executeSlashCommand(slashMenu.selectedIndex);
+        slashCommands.execute(slashCommands.menu.selectedIndex);
       }
-      slashMenu.open = false;
+      slashCommands.close();
     }
 
     // Navigate slash menu
-    if (slashMenu.open) {
-      const cmdCount = filteredSlashCommands.length;
+    if (slashCommands.isOpen) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        slashMenu.selectedIndex = (slashMenu.selectedIndex + 1) % cmdCount;
+        slashCommands.navigate("down");
       }
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        slashMenu.selectedIndex = (slashMenu.selectedIndex - 1 + cmdCount) % cmdCount;
+        slashCommands.navigate("up");
       }
     }
 
     // Command palette: Cmd+K
     if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      commandPalette.open = !commandPalette.open;
-      commandPalette.query = "";
-      commandPalette.selectedIndex = 0;
+      commandPalette.toggle();
     }
 
     // Zen mode: Cmd+Shift+Enter
@@ -410,15 +251,12 @@
       toggleZenMode();
     }
 
+    // Tab for indentation
     if (e.key === "Tab") {
       e.preventDefault();
       const start = textareaRef.selectionStart;
       const end = textareaRef.selectionEnd;
-
-      // Insert 2 spaces
       content = content.substring(0, start) + "  " + content.substring(end);
-
-      // Move cursor
       setTimeout(() => {
         textareaRef.selectionStart = textareaRef.selectionEnd = start + 2;
       }, 0);
@@ -443,16 +281,15 @@
     }
   }
 
-  // Global keyboard handler for modals
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
       if (ambientSounds.showPanel) {
-        ambientSounds.showPanel = false;
+        ambientSounds.closePanel();
         e.preventDefault();
         return;
       }
-      if (snippetsModal.open) {
-        closeSnippetsModal();
+      if (snippetsManager.modal.open) {
+        snippetsManager.closeModal();
         e.preventDefault();
         return;
       }
@@ -460,126 +297,6 @@
         showFullPreview = false;
         e.preventDefault();
       }
-    }
-  }
-
-  // Slash commands definition
-  const slashCommands = [
-    { id: "heading1", label: "Heading 1", insert: "# " },
-    { id: "heading2", label: "Heading 2", insert: "## " },
-    { id: "heading3", label: "Heading 3", insert: "### " },
-    { id: "code", label: "Code Block", insert: "```\n\n```", cursorOffset: 4 },
-    { id: "quote", label: "Quote", insert: "> " },
-    { id: "list", label: "Bullet List", insert: "- " },
-    { id: "numbered", label: "Numbered List", insert: "1. " },
-    { id: "link", label: "Link", insert: "[](url)", cursorOffset: 1 },
-    { id: "image", label: "Image", insert: "![alt](url)", cursorOffset: 2 },
-    { id: "divider", label: "Divider", insert: "\n---\n" },
-    { id: "anchor", label: "Custom Anchor", insert: "<!-- anchor:name -->\n", cursorOffset: 14 },
-    { id: "newSnippet", label: "Create New Snippet...", insert: "", isAction: true, action: () => openSnippetsModal() },
-  ];
-
-  // Dynamic slash commands including user snippets
-  let allSlashCommands = $derived(() => {
-    const snippetCommands = snippets.map(s => ({
-      id: s.id,
-      label: `> ${s.name}`,
-      insert: s.content,
-      isSnippet: true,
-    }));
-    return [...slashCommands, ...snippetCommands];
-  });
-
-  // Filtered slash commands based on query
-  let filteredSlashCommands = $derived(
-    allSlashCommands().filter(cmd =>
-      cmd.label.toLowerCase().includes(slashMenu.query.toLowerCase())
-    )
-  );
-
-  function openSlashMenu() {
-    slashMenu.open = true;
-    slashMenu.query = "";
-    slashMenu.selectedIndex = 0;
-  }
-
-  function executeSlashCommand(index) {
-    const cmd = filteredSlashCommands[index];
-    if (!cmd) return;
-
-    // Handle action commands (like "Create New Snippet...")
-    if (cmd.isAction && cmd.action) {
-      // Remove the slash that triggered the menu
-      const pos = textareaRef.selectionStart;
-      const textBefore = content.substring(0, pos);
-      const lastSlashIndex = textBefore.lastIndexOf("/");
-      if (lastSlashIndex >= 0) {
-        content = content.substring(0, lastSlashIndex) + content.substring(pos);
-      }
-      slashMenu.open = false;
-      cmd.action();
-      return;
-    }
-
-    // Remove the slash that triggered the menu
-    const pos = textareaRef.selectionStart;
-    const textBefore = content.substring(0, pos);
-    const lastSlashIndex = textBefore.lastIndexOf("/");
-
-    if (lastSlashIndex >= 0) {
-      content = content.substring(0, lastSlashIndex) + cmd.insert + content.substring(pos);
-
-      setTimeout(() => {
-        const newPos = lastSlashIndex + (cmd.cursorOffset || cmd.insert.length);
-        textareaRef.selectionStart = textareaRef.selectionEnd = newPos;
-        textareaRef.focus();
-      }, 0);
-    }
-
-    slashMenu.open = false;
-  }
-
-  // Command palette actions
-  const basePaletteCommands = [
-    { id: "save", label: "Save", shortcut: "⌘S", action: () => onSave() },
-    { id: "preview", label: "Toggle Preview", shortcut: "", action: () => showPreview = !showPreview },
-    { id: "fullPreview", label: "Full Preview", shortcut: "", action: () => showFullPreview = true },
-    { id: "zen", label: "Toggle Zen Mode", shortcut: "⌘⇧↵", action: () => toggleZenMode() },
-    { id: "campfire", label: "Start Campfire Session", shortcut: "", action: () => startCampfireSession() },
-    { id: "bold", label: "Bold", shortcut: "⌘B", action: () => wrapSelection("**", "**") },
-    { id: "italic", label: "Italic", shortcut: "⌘I", action: () => wrapSelection("_", "_") },
-    { id: "code", label: "Insert Code Block", shortcut: "", action: () => insertCodeBlock() },
-    { id: "link", label: "Insert Link", shortcut: "", action: () => insertLink() },
-    { id: "image", label: "Insert Image", shortcut: "", action: () => insertImage() },
-    { id: "goal", label: "Set Writing Goal", shortcut: "", action: () => promptWritingGoal() },
-    { id: "snippets", label: "Manage Snippets", shortcut: "", action: () => openSnippetsModal() },
-    { id: "newSnippet", label: "Create New Snippet", shortcut: "", action: () => openSnippetsModal() },
-    { id: "sounds", label: "Toggle Ambient Sounds", shortcut: "", action: () => toggleAmbientSound() },
-    { id: "soundPanel", label: "Sound Settings", shortcut: "", action: () => toggleSoundPanel() },
-  ];
-
-  // Add theme commands dynamically
-  let paletteCommands = $derived(() => {
-    const themeCommands = Object.entries(themes).map(([key, theme]) => ({
-      id: `theme-${key}`,
-      label: `Theme: ${theme.label} (${theme.desc})`,
-      shortcut: currentTheme === key ? "●" : "",
-      action: () => setTheme(key),
-    }));
-    return [...basePaletteCommands, ...themeCommands];
-  });
-
-  let filteredPaletteCommands = $derived(
-    paletteCommands().filter(cmd =>
-      cmd.label.toLowerCase().includes(commandPalette.query.toLowerCase())
-    )
-  );
-
-  function executePaletteCommand(index) {
-    const cmd = filteredPaletteCommands[index];
-    if (cmd) {
-      cmd.action();
-      commandPalette.open = false;
     }
   }
 
@@ -591,306 +308,29 @@
     }
   }
 
-  // Campfire session controls
-  function startCampfireSession() {
-    campfireSession.active = true;
-    campfireSession.startTime = Date.now();
-    campfireSession.startWordCount = wordCount;
-  }
-
-  function endCampfireSession() {
-    const wordsWritten = wordCount - campfireSession.startWordCount;
-    const elapsed = campfireSession.startTime ? Math.floor((Date.now() - campfireSession.startTime) / 1000) : 0;
-
-    // Could show a summary modal here
-    campfireSession.active = false;
-    campfireSession.startTime = null;
-  }
-
-  // Writing goal prompt
-  function promptWritingGoal() {
-    const target = prompt("Set your word goal for this session:", "500");
-    if (target && !isNaN(parseInt(target))) {
-      writingGoal.enabled = true;
-      writingGoal.targetWords = parseInt(target);
-      writingGoal.sessionWords = wordCount;
-    }
-  }
-
-  // Snippet management
-  const SNIPPETS_STORAGE_KEY = "grove-editor-snippets";
-
-  function loadSnippets() {
-    try {
-      const stored = localStorage.getItem(SNIPPETS_STORAGE_KEY);
-      if (stored) {
-        snippets = JSON.parse(stored);
-      }
-    } catch (e) {
-      console.warn("Failed to load snippets:", e);
-    }
-  }
-
-  function saveSnippets() {
-    try {
-      localStorage.setItem(SNIPPETS_STORAGE_KEY, JSON.stringify(snippets));
-    } catch (e) {
-      console.warn("Failed to save snippets:", e);
-    }
-  }
-
-  function openSnippetsModal(editId = null) {
-    if (editId) {
-      const snippet = snippets.find(s => s.id === editId);
-      if (snippet) {
-        snippetsModal.editingId = editId;
-        snippetsModal.name = snippet.name;
-        snippetsModal.content = snippet.content;
-        snippetsModal.trigger = snippet.trigger || "";
-      }
-    } else {
-      snippetsModal.editingId = null;
-      snippetsModal.name = "";
-      snippetsModal.content = "";
-      snippetsModal.trigger = "";
-    }
-    snippetsModal.open = true;
-    commandPalette.open = false;
-  }
-
-  function closeSnippetsModal() {
-    snippetsModal.open = false;
-    snippetsModal.editingId = null;
-    snippetsModal.name = "";
-    snippetsModal.content = "";
-    snippetsModal.trigger = "";
-  }
-
-  function saveSnippet() {
-    if (!snippetsModal.name.trim() || !snippetsModal.content.trim()) return;
-
-    if (snippetsModal.editingId) {
-      // Update existing snippet
-      snippets = snippets.map(s =>
-        s.id === snippetsModal.editingId
-          ? {
-              ...s,
-              name: snippetsModal.name.trim(),
-              content: snippetsModal.content,
-              trigger: snippetsModal.trigger.trim() || null,
-            }
-          : s
-      );
-    } else {
-      // Create new snippet
-      const newSnippet = {
-        id: `snippet-${Date.now()}`,
-        name: snippetsModal.name.trim(),
-        content: snippetsModal.content,
-        trigger: snippetsModal.trigger.trim() || null,
-        createdAt: new Date().toISOString(),
-      };
-      snippets = [...snippets, newSnippet];
-    }
-
-    saveSnippets();
-    closeSnippetsModal();
-  }
-
-  function deleteSnippet(id) {
-    if (confirm("Delete this snippet?")) {
-      snippets = snippets.filter(s => s.id !== id);
-      saveSnippets();
-      if (snippetsModal.editingId === id) {
-        closeSnippetsModal();
-      }
-    }
-  }
-
-  function insertSnippet(snippet) {
-    insertAtCursor(snippet.content);
-    slashMenu.open = false;
-  }
-
-  // Ambient sound controls
-  const SOUNDS_STORAGE_KEY = "grove-editor-sounds";
-
-  function loadSoundSettings() {
-    try {
-      const stored = localStorage.getItem(SOUNDS_STORAGE_KEY);
-      if (stored) {
-        const settings = JSON.parse(stored);
-        ambientSounds.currentSound = settings.currentSound || "forest";
-        ambientSounds.volume = settings.volume ?? 0.3;
-        // Don't auto-enable on load - user must click to start
-      }
-    } catch (e) {
-      console.warn("Failed to load sound settings:", e);
-    }
-  }
-
-  function saveSoundSettings() {
-    try {
-      localStorage.setItem(SOUNDS_STORAGE_KEY, JSON.stringify({
-        currentSound: ambientSounds.currentSound,
-        volume: ambientSounds.volume,
-      }));
-    } catch (e) {
-      console.warn("Failed to save sound settings:", e);
-    }
-  }
-
-  function toggleAmbientSound() {
-    if (ambientSounds.enabled) {
-      stopSound();
-    } else {
-      playSound(ambientSounds.currentSound);
-    }
-  }
-
-  function playSound(soundKey) {
-    const sound = soundLibrary[soundKey];
-    if (!sound) return;
-
-    // Stop current sound if playing
-    if (audioElement) {
-      audioElement.pause();
-      audioElement = null;
-    }
-
-    // Create new audio element
-    audioElement = new Audio(sound.url);
-    audioElement.loop = true;
-    audioElement.volume = ambientSounds.volume;
-
-    // Handle playback errors gracefully
-    audioElement.onerror = () => {
-      console.warn(`Sound file not found: ${sound.url}`);
-      ambientSounds.enabled = false;
-    };
-
-    audioElement.play().then(() => {
-      ambientSounds.enabled = true;
-      ambientSounds.currentSound = soundKey;
-      saveSoundSettings();
-    }).catch((e) => {
-      console.warn("Failed to play sound:", e);
-      ambientSounds.enabled = false;
-    });
-  }
-
-  function stopSound() {
-    if (audioElement) {
-      audioElement.pause();
-      audioElement = null;
-    }
-    ambientSounds.enabled = false;
-  }
-
-  function setVolume(newVolume) {
-    ambientSounds.volume = newVolume;
-    if (audioElement) {
-      audioElement.volume = newVolume;
-    }
-    saveSoundSettings();
-  }
-
-  function selectSound(soundKey) {
-    if (ambientSounds.enabled) {
-      playSound(soundKey);
-    } else {
-      ambientSounds.currentSound = soundKey;
-      saveSoundSettings();
-    }
-  }
-
-  function toggleSoundPanel() {
-    ambientSounds.showPanel = !ambientSounds.showPanel;
-  }
-
-  // Theme controls
-  function loadTheme() {
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY);
-      if (stored && themes[stored]) {
-        currentTheme = stored;
-        applyTheme(stored);
-      }
-    } catch (e) {
-      console.warn("Failed to load theme:", e);
-    }
-  }
-
-  function saveTheme(themeName) {
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, themeName);
-    } catch (e) {
-      console.warn("Failed to save theme:", e);
-    }
-  }
-
-  function applyTheme(themeName) {
-    const theme = themes[themeName];
-    if (!theme) return;
-
-    const root = document.documentElement;
-    root.style.setProperty("--editor-accent", theme.accent);
-    root.style.setProperty("--editor-accent-dim", theme.accentDim);
-    root.style.setProperty("--editor-accent-bright", theme.accentBright);
-    root.style.setProperty("--editor-accent-glow", theme.accentGlow);
-    root.style.setProperty("--editor-bg", theme.bg);
-    root.style.setProperty("--editor-bg-secondary", theme.bgSecondary);
-    root.style.setProperty("--editor-bg-tertiary", theme.bgTertiary);
-    root.style.setProperty("--editor-border", theme.border);
-    root.style.setProperty("--editor-border-accent", theme.borderAccent);
-    root.style.setProperty("--editor-text", theme.text);
-    root.style.setProperty("--editor-text-dim", theme.textDim);
-    root.style.setProperty("--editor-status-bg", theme.statusBg);
-    root.style.setProperty("--editor-status-border", theme.statusBorder);
-  }
-
-  function setTheme(themeName) {
-    if (!themes[themeName]) return;
-    currentTheme = themeName;
-    applyTheme(themeName);
-    saveTheme(themeName);
-    commandPalette.open = false;
-  }
-
-  // Typewriter scrolling - keep cursor line centered
+  // Typewriter scrolling
   function applyTypewriterScroll() {
     if (!textareaRef || !editorSettings.typewriterMode) return;
-
     const lineHeight = parseFloat(getComputedStyle(textareaRef).lineHeight) || 24;
     const viewportHeight = textareaRef.clientHeight;
     const centerOffset = viewportHeight / 2;
     const targetScroll = (cursorLine - 1) * lineHeight - centerOffset + lineHeight / 2;
-
     textareaRef.scrollTop = Math.max(0, targetScroll);
   }
 
-  // Sync line numbers scroll with textarea
   function syncLineNumbersScroll() {
     if (lineNumbersRef && textareaRef) {
       lineNumbersRef.scrollTop = textareaRef.scrollTop;
     }
   }
 
-  // Wrap selected text with markers
+  // Text manipulation helpers
   function wrapSelection(before, after) {
     if (!textareaRef) return;
-
     const start = textareaRef.selectionStart;
     const end = textareaRef.selectionEnd;
     const selectedText = content.substring(start, end);
-
-    content =
-      content.substring(0, start) +
-      before +
-      selectedText +
-      after +
-      content.substring(end);
-
+    content = content.substring(0, start) + before + selectedText + after + content.substring(end);
     setTimeout(() => {
       textareaRef.selectionStart = start + before.length;
       textareaRef.selectionEnd = end + before.length;
@@ -898,24 +338,19 @@
     }, 0);
   }
 
-  // Insert text at cursor
   function insertAtCursor(text) {
     if (!textareaRef) return;
-
     const start = textareaRef.selectionStart;
     content = content.substring(0, start) + text + content.substring(start);
-
     setTimeout(() => {
-      textareaRef.selectionStart = textareaRef.selectionEnd =
-        start + text.length;
+      textareaRef.selectionStart = textareaRef.selectionEnd = start + text.length;
       textareaRef.focus();
     }, 0);
   }
 
   // Toolbar actions
   function insertHeading(level) {
-    const prefix = "#".repeat(level) + " ";
-    insertAtCursor(prefix);
+    insertAtCursor("#".repeat(level) + " ");
   }
 
   function insertLink() {
@@ -928,15 +363,9 @@
 
   function insertCodeBlock() {
     const start = textareaRef.selectionStart;
-    const selectedText = content.substring(
-      start,
-      textareaRef.selectionEnd
-    );
+    const selectedText = content.substring(start, textareaRef.selectionEnd);
     const codeBlock = "```\n" + (selectedText || "code here") + "\n```";
-    content =
-      content.substring(0, start) +
-      codeBlock +
-      content.substring(textareaRef.selectionEnd);
+    content = content.substring(0, start) + codeBlock + content.substring(textareaRef.selectionEnd);
   }
 
   function insertList() {
@@ -947,18 +376,12 @@
     insertAtCursor("> ");
   }
 
-  // Sync scroll between editor and preview (optional)
+  // Scroll sync
   function handleScroll() {
-    // Sync line numbers
     syncLineNumbersScroll();
-
-    // Sync preview
     if (textareaRef && previewRef && showPreview) {
-      const scrollRatio =
-        textareaRef.scrollTop /
-        (textareaRef.scrollHeight - textareaRef.clientHeight);
-      previewRef.scrollTop =
-        scrollRatio * (previewRef.scrollHeight - previewRef.clientHeight);
+      const scrollRatio = textareaRef.scrollTop / (textareaRef.scrollHeight - textareaRef.clientHeight);
+      previewRef.scrollTop = scrollRatio * (previewRef.scrollHeight - previewRef.clientHeight);
     }
   }
 
@@ -969,12 +392,17 @@
     }
   });
 
-  // Drag and drop image upload
+  // Auto-save draft effect
+  $effect(() => {
+    if (draftKey && !readonly) {
+      draftManager.scheduleSave(content);
+    }
+  });
+
+  // Drag and drop handlers
   function handleDragEnter(e) {
     e.preventDefault();
     if (readonly) return;
-
-    // Check if dragging files
     if (e.dataTransfer?.types?.includes("Files")) {
       isDragging = true;
     }
@@ -983,7 +411,6 @@
   function handleDragOver(e) {
     e.preventDefault();
     if (readonly) return;
-
     if (e.dataTransfer?.types?.includes("Files")) {
       e.dataTransfer.dropEffect = "copy";
       isDragging = true;
@@ -992,7 +419,6 @@
 
   function handleDragLeave(e) {
     e.preventDefault();
-    // Only set to false if leaving the container entirely
     if (!e.currentTarget.contains(e.relatedTarget)) {
       isDragging = false;
     }
@@ -1012,7 +438,6 @@
       return;
     }
 
-    // Upload each image
     for (const file of imageFiles) {
       await uploadImage(file);
     }
@@ -1039,7 +464,6 @@
         throw new Error(result.message || "Upload failed");
       }
 
-      // Insert markdown image at cursor
       const altText = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
       const imageMarkdown = `![${altText}](${result.url})\n`;
       insertAtCursor(imageMarkdown);
@@ -1054,7 +478,6 @@
     }
   }
 
-  // Handle paste for images
   function handlePaste(e) {
     if (readonly) return;
 
@@ -1065,7 +488,6 @@
       e.preventDefault();
       const file = imageItem.getAsFile();
       if (file) {
-        // Generate a filename for pasted images
         const timestamp = Date.now();
         const extension = file.type.split("/")[1] || "png";
         const renamedFile = new File([file], `pasted-${timestamp}.${extension}`, {
@@ -1076,114 +498,25 @@
     }
   }
 
-  // Auto-save draft to localStorage
-  $effect(() => {
-    if (!draftKey || readonly) return;
-
-    // Clear previous timer
-    if (draftSaveTimer) {
-      clearTimeout(draftSaveTimer);
+  // Command palette execution
+  function executePaletteCommand(index) {
+    const cmd = filteredPaletteCommands[index];
+    if (cmd && cmd.action) {
+      cmd.action();
+      commandPalette.close();
     }
-
-    // Don't save if content hasn't changed from last saved version
-    if (content === lastSavedContent) return;
-
-    // Schedule a draft save
-    draftSaveTimer = setTimeout(() => {
-      saveDraft();
-    }, AUTO_SAVE_DELAY);
-
-    return () => {
-      if (draftSaveTimer) {
-        clearTimeout(draftSaveTimer);
-      }
-    };
-  });
-
-  function saveDraft() {
-    if (!draftKey || readonly) return;
-
-    try {
-      const draft = {
-        content,
-        savedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(`draft:${draftKey}`, JSON.stringify(draft));
-      lastSavedContent = content;
-      hasDraft = true;
-    } catch (e) {
-      console.warn("Failed to save draft:", e);
-    }
-  }
-
-  function loadDraft() {
-    if (!draftKey) return null;
-
-    try {
-      const stored = localStorage.getItem(`draft:${draftKey}`);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {
-      console.warn("Failed to load draft:", e);
-    }
-    return null;
-  }
-
-  export function clearDraft() {
-    if (!draftKey) return;
-
-    try {
-      localStorage.removeItem(`draft:${draftKey}`);
-      hasDraft = false;
-      storedDraft = null;
-      draftRestorePrompt = false;
-    } catch (e) {
-      console.warn("Failed to clear draft:", e);
-    }
-  }
-
-  export function getDraftStatus() {
-    return { hasDraft, storedDraft };
-  }
-
-  function restoreDraft() {
-    if (storedDraft) {
-      content = storedDraft.content;
-      lastSavedContent = storedDraft.content;
-      onDraftRestored(storedDraft);
-    }
-    draftRestorePrompt = false;
-  }
-
-  function discardDraft() {
-    clearDraft();
-    lastSavedContent = content;
   }
 
   onMount(() => {
     updateCursorPosition();
-    loadSnippets();
-    loadSoundSettings();
-    loadTheme();
+    snippetsManager.load();
+    ambientSounds.loadSettings();
+    editorTheme.loadTheme();
+    draftManager.init(content);
 
-    // Check for existing draft on mount
-    if (draftKey) {
-      const draft = loadDraft();
-      if (draft && draft.content !== content) {
-        storedDraft = draft;
-        draftRestorePrompt = true;
-      } else {
-        lastSavedContent = content;
-      }
-    }
-
-    // Cleanup audio on unmount
     return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement = null;
-      }
+      ambientSounds.cleanup();
+      draftManager.cleanup();
     };
   });
 </script>
@@ -1194,7 +527,7 @@
   class="editor-container"
   class:dragging={isDragging}
   class:zen-mode={isZenMode}
-  class:campfire-mode={campfireSession.active}
+  class:campfire-mode={writingSession.isCampfireActive}
   aria-label="Markdown editor with live preview"
   ondragenter={handleDragEnter}
   ondragover={handleDragOver}
@@ -1225,21 +558,21 @@
   {/if}
 
   <!-- Draft restore prompt -->
-  {#if draftRestorePrompt && storedDraft}
+  {#if draftManager.draftRestorePrompt && draftManager.storedDraft}
     <div class="draft-prompt">
       <div class="draft-prompt-content">
         <span class="draft-icon">~</span>
         <div class="draft-message">
           <strong>Unsaved draft found</strong>
           <span class="draft-time">
-            Saved {new Date(storedDraft.savedAt).toLocaleString()}
+            Saved {new Date(draftManager.storedDraft.savedAt).toLocaleString()}
           </span>
         </div>
         <div class="draft-actions">
-          <button type="button" class="draft-btn restore" onclick={restoreDraft}>
+          <button type="button" class="draft-btn restore" onclick={() => draftManager.restoreDraft()}>
             [<span class="key">r</span>estore]
           </button>
-          <button type="button" class="draft-btn discard" onclick={discardDraft}>
+          <button type="button" class="draft-btn discard" onclick={() => draftManager.discardDraft()}>
             [<span class="key">d</span>iscard]
           </button>
         </div>
@@ -1250,98 +583,54 @@
   <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-group">
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => insertHeading(1)}
-        title="Heading 1"
-        disabled={readonly}
-      >[h<span class="key">1</span>]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => insertHeading(2)}
-        title="Heading 2"
-        disabled={readonly}
-      >[h<span class="key">2</span>]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => insertHeading(3)}
-        title="Heading 3"
-        disabled={readonly}
-      >[h<span class="key">3</span>]</button>
+      <button type="button" class="toolbar-btn" onclick={() => insertHeading(1)} title="Heading 1" disabled={readonly}>
+        [h<span class="key">1</span>]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={() => insertHeading(2)} title="Heading 2" disabled={readonly}>
+        [h<span class="key">2</span>]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={() => insertHeading(3)} title="Heading 3" disabled={readonly}>
+        [h<span class="key">3</span>]
+      </button>
     </div>
 
     <div class="toolbar-divider">|</div>
 
     <div class="toolbar-group">
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => wrapSelection("**", "**")}
-        title="Bold (Cmd+B)"
-        disabled={readonly}
-      >[<span class="key">b</span>old]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => wrapSelection("_", "_")}
-        title="Italic (Cmd+I)"
-        disabled={readonly}
-      >[<span class="key">i</span>talic]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={() => wrapSelection("`", "`")}
-        title="Inline Code"
-        disabled={readonly}
-      >[<span class="key">c</span>ode]</button>
+      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("**", "**")} title="Bold (Cmd+B)" disabled={readonly}>
+        [<span class="key">b</span>old]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("_", "_")} title="Italic (Cmd+I)" disabled={readonly}>
+        [<span class="key">i</span>talic]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("`", "`")} title="Inline Code" disabled={readonly}>
+        [<span class="key">c</span>ode]
+      </button>
     </div>
 
     <div class="toolbar-divider">|</div>
 
     <div class="toolbar-group">
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={insertLink}
-        title="Link"
-        disabled={readonly}
-      >[<span class="key">l</span>ink]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={insertImage}
-        title="Image"
-        disabled={readonly}
-      >[i<span class="key">m</span>g]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={insertCodeBlock}
-        title="Code Block"
-        disabled={readonly}
-      >[bloc<span class="key">k</span>]</button>
+      <button type="button" class="toolbar-btn" onclick={insertLink} title="Link" disabled={readonly}>
+        [<span class="key">l</span>ink]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={insertImage} title="Image" disabled={readonly}>
+        [i<span class="key">m</span>g]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={insertCodeBlock} title="Code Block" disabled={readonly}>
+        [bloc<span class="key">k</span>]
+      </button>
     </div>
 
     <div class="toolbar-divider">|</div>
 
     <div class="toolbar-group">
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={insertList}
-        title="List"
-        disabled={readonly}
-      >[lis<span class="key">t</span>]</button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        onclick={insertQuote}
-        title="Quote"
-        disabled={readonly}
-      >[<span class="key">q</span>uote]</button>
+      <button type="button" class="toolbar-btn" onclick={insertList} title="List" disabled={readonly}>
+        [lis<span class="key">t</span>]
+      </button>
+      <button type="button" class="toolbar-btn" onclick={insertQuote} title="Quote" disabled={readonly}>
+        [<span class="key">q</span>uote]
+      </button>
     </div>
 
     <div class="toolbar-spacer"></div>
@@ -1353,13 +642,17 @@
         class:active={showPreview}
         onclick={() => (showPreview = !showPreview)}
         title="Toggle Preview"
-      >{#if showPreview}[hide <span class="key">p</span>review]{:else}[show <span class="key">p</span>review]{/if}</button>
+      >
+        {#if showPreview}[hide <span class="key">p</span>review]{:else}[show <span class="key">p</span>review]{/if}
+      </button>
       <button
         type="button"
         class="toolbar-btn full-preview-btn"
         onclick={() => (showFullPreview = true)}
         title="Open Full Preview (site styling)"
-      >[<span class="key">f</span>ull]</button>
+      >
+        [<span class="key">f</span>ull]
+      </button>
     </div>
   </div>
 
@@ -1412,26 +705,20 @@
   <!-- Status Bar -->
   <div class="status-bar">
     <div class="status-left">
-      <span class="status-item">
-        Ln {cursorLine}, Col {cursorCol}
-      </span>
+      <span class="status-item">Ln {cursorLine}, Col {cursorCol}</span>
       <span class="status-divider">|</span>
       <span class="status-item">{lineCount} lines</span>
       <span class="status-divider">|</span>
       <span class="status-item">{wordCount} words</span>
       <span class="status-divider">|</span>
-      <span class="status-item">{readingTime()}</span>
-      {#if writingGoal.enabled}
+      <span class="status-item">{readingTime}</span>
+      {#if writingSession.isGoalEnabled}
         <span class="status-divider">|</span>
-        <span class="status-goal">
-          Goal: {goalProgress()}%
-        </span>
+        <span class="status-goal">Goal: {goalProgress}%</span>
       {/if}
-      {#if campfireSession.active}
+      {#if writingSession.isCampfireActive}
         <span class="status-divider">|</span>
-        <span class="status-campfire">
-          ~ {campfireElapsed()}
-        </span>
+        <span class="status-campfire">~ {campfireElapsed}</span>
       {/if}
     </div>
     <div class="status-right">
@@ -1439,7 +726,7 @@
         type="button"
         class="status-sound-btn"
         class:playing={ambientSounds.enabled}
-        onclick={toggleSoundPanel}
+        onclick={() => ambientSounds.togglePanel()}
         title="Ambient sounds"
       >
         [{soundLibrary[ambientSounds.currentSound]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
@@ -1451,7 +738,7 @@
       {/if}
       {#if saving}
         <span class="status-saving">Saving...</span>
-      {:else if draftKey && content !== lastSavedContent}
+      {:else if draftKey && draftManager.hasUnsavedChanges(content)}
         <span class="status-draft">Draft saving...</span>
       {:else}
         <span class="status-item">Markdown</span>
@@ -1461,15 +748,15 @@
 </div>
 
 <!-- Slash Commands Menu -->
-{#if slashMenu.open}
+{#if slashCommands.isOpen}
   <div class="slash-menu">
     <div class="slash-menu-header">:: commands</div>
     {#each filteredSlashCommands as cmd, i}
       <button
         type="button"
         class="slash-menu-item"
-        class:selected={i === slashMenu.selectedIndex}
-        onclick={() => executeSlashCommand(i)}
+        class:selected={i === slashCommands.menu.selectedIndex}
+        onclick={() => slashCommands.execute(i)}
       >
         <span class="slash-cmd-label">{cmd.label}</span>
       </button>
@@ -1481,29 +768,30 @@
 {/if}
 
 <!-- Command Palette -->
-{#if commandPalette.open}
-  <div class="command-palette-overlay" onclick={() => commandPalette.open = false}>
+{#if commandPalette.isOpen}
+  <div class="command-palette-overlay" onclick={() => commandPalette.close()}>
     <div class="command-palette" onclick={(e) => e.stopPropagation()}>
       <input
         type="text"
         class="command-palette-input"
         placeholder="> type a command..."
-        bind:value={commandPalette.query}
+        value={commandPalette.query}
+        oninput={(e) => commandPalette.setQuery(e.target.value)}
         onkeydown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();
-            commandPalette.selectedIndex = (commandPalette.selectedIndex + 1) % filteredPaletteCommands.length;
+            commandPalette.navigate("down");
           }
           if (e.key === "ArrowUp") {
             e.preventDefault();
-            commandPalette.selectedIndex = (commandPalette.selectedIndex - 1 + filteredPaletteCommands.length) % filteredPaletteCommands.length;
+            commandPalette.navigate("up");
           }
           if (e.key === "Enter") {
             e.preventDefault();
             executePaletteCommand(commandPalette.selectedIndex);
           }
           if (e.key === "Escape") {
-            commandPalette.open = false;
+            commandPalette.close();
           }
         }}
       />
@@ -1526,23 +814,23 @@
   </div>
 {/if}
 
-<!-- Campfire Session Controls (when active) -->
-{#if campfireSession.active}
+<!-- Campfire Session Controls -->
+{#if writingSession.isCampfireActive}
   <div class="campfire-controls">
     <div class="campfire-ember"></div>
     <div class="campfire-stats">
-      <span class="campfire-time">{campfireElapsed()}</span>
-      <span class="campfire-words">+{wordCount - campfireSession.startWordCount} words</span>
+      <span class="campfire-time">{campfireElapsed}</span>
+      <span class="campfire-words">+{writingSession.getCampfireWords(wordCount)} words</span>
     </div>
-    <button type="button" class="campfire-end" onclick={endCampfireSession}>
+    <button type="button" class="campfire-end" onclick={() => writingSession.endCampfire()}>
       [<span class="key">e</span>nd]
     </button>
   </div>
 {/if}
 
 <!-- Snippets Modal -->
-<Dialog bind:open={snippetsModal.open}>
-  <h3 slot="title">:: {snippetsModal.editingId ? "edit snippet" : "new snippet"}</h3>
+<Dialog bind:open={snippetsManager.modal.open}>
+  <h3 slot="title">:: {snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}</h3>
 
   <div class="snippets-modal-body">
     <div class="snippets-form">
@@ -1551,7 +839,7 @@
         <Input
           id="snippet-name"
           type="text"
-          bind:value={snippetsModal.name}
+          bind:value={snippetsManager.modal.name}
           placeholder="e.g., Blog signature"
         />
       </div>
@@ -1561,55 +849,52 @@
         <Input
           id="snippet-trigger"
           type="text"
-          bind:value={snippetsModal.trigger}
+          bind:value={snippetsManager.modal.trigger}
           placeholder="e.g., sig"
         />
         <span class="field-hint">Type /trigger to quickly insert</span>
       </div>
 
-          <div class="snippet-field">
-            <label for="snippet-content">Content</label>
-            <textarea
-              id="snippet-content"
-              bind:value={snippetsModal.content}
-              placeholder="Enter your markdown snippet..."
-              rows="6"
-            ></textarea>
-          </div>
+      <div class="snippet-field">
+        <label for="snippet-content">Content</label>
+        <textarea
+          id="snippet-content"
+          bind:value={snippetsManager.modal.content}
+          placeholder="Enter your markdown snippet..."
+          rows="6"
+        ></textarea>
+      </div>
 
       <div class="snippet-actions">
-        {#if snippetsModal.editingId}
-          <Button
-            variant="danger"
-            onclick={() => deleteSnippet(snippetsModal.editingId)}
-          >
+        {#if snippetsManager.modal.editingId}
+          <Button variant="danger" onclick={() => snippetsManager.deleteSnippet(snippetsManager.modal.editingId)}>
             [<span class="key">d</span>elete]
           </Button>
         {/if}
         <div class="snippet-actions-right">
-          <Button variant="outline" onclick={closeSnippetsModal}>
+          <Button variant="outline" onclick={() => snippetsManager.closeModal()}>
             [<span class="key">c</span>ancel]
           </Button>
           <Button
-            onclick={saveSnippet}
-            disabled={!snippetsModal.name.trim() || !snippetsModal.content.trim()}
+            onclick={() => snippetsManager.saveSnippet()}
+            disabled={!snippetsManager.modal.name.trim() || !snippetsManager.modal.content.trim()}
           >
-            {#if snippetsModal.editingId}[<span class="key">u</span>pdate]{:else}[<span class="key">s</span>ave]{/if}
+            {#if snippetsManager.modal.editingId}[<span class="key">u</span>pdate]{:else}[<span class="key">s</span>ave]{/if}
           </Button>
         </div>
       </div>
     </div>
 
-    {#if snippets.length > 0 && !snippetsModal.editingId}
+    {#if snippetsManager.snippets.length > 0 && !snippetsManager.modal.editingId}
       <div class="snippets-list-divider">
         <span>:: your snippets</span>
       </div>
       <div class="snippets-list">
-        {#each snippets as snippet}
+        {#each snippetsManager.snippets as snippet}
           <button
             type="button"
             class="snippet-list-item"
-            onclick={() => openSnippetsModal(snippet.id)}
+            onclick={() => snippetsManager.openModal(snippet.id)}
           >
             <span class="snippet-name">{snippet.name}</span>
             {#if snippet.trigger}
@@ -1627,11 +912,9 @@
   <div class="sound-panel">
     <div class="sound-panel-header">
       <span class="sound-panel-title">:: ambient sounds</span>
-      <button
-        type="button"
-        class="sound-panel-close"
-        onclick={() => ambientSounds.showPanel = false}
-      >[x]</button>
+      <button type="button" class="sound-panel-close" onclick={() => ambientSounds.closePanel()}>
+        [x]
+      </button>
     </div>
 
     <div class="sound-options">
@@ -1641,7 +924,7 @@
           class="sound-option"
           class:active={ambientSounds.currentSound === key}
           class:playing={ambientSounds.enabled && ambientSounds.currentSound === key}
-          onclick={() => selectSound(key)}
+          onclick={() => ambientSounds.selectSound(key)}
         >
           [<span class="key">{sound.key}</span>] {sound.name}
         </button>
@@ -1657,7 +940,7 @@
           max="1"
           step="0.05"
           value={ambientSounds.volume}
-          oninput={(e) => setVolume(parseFloat(e.target.value))}
+          oninput={(e) => ambientSounds.setVolume(parseFloat(e.target.value))}
           class="volume-slider"
         />
       </label>
@@ -1666,7 +949,7 @@
         type="button"
         class="sound-play-btn"
         class:playing={ambientSounds.enabled}
-        onclick={toggleAmbientSound}
+        onclick={() => ambientSounds.toggle()}
       >
         {#if ambientSounds.enabled}[<span class="key">s</span>top]{:else}[<span class="key">p</span>lay]{/if}
       </button>
@@ -1686,18 +969,13 @@
       <header class="full-preview-header">
         <h2>:: full preview</h2>
         <div class="full-preview-actions">
-          <button
-            type="button"
-            class="full-preview-close"
-            onclick={() => (showFullPreview = false)}
-          >
+          <button type="button" class="full-preview-close" onclick={() => (showFullPreview = false)}>
             [<span class="key">c</span>lose]
           </button>
         </div>
       </header>
       <div class="full-preview-scroll">
         <article class="full-preview-article">
-          <!-- Post Header -->
           {#if previewTitle || previewDate || previewTags.length > 0}
             <header class="content-header">
               {#if previewTitle}
@@ -1726,7 +1004,6 @@
             </header>
           {/if}
 
-          <!-- Rendered Content -->
           <div class="content-body">
             {#if previewHtml}
               {@html previewHtml}
@@ -1752,12 +1029,12 @@
     overflow: hidden;
     font-family: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
     position: relative;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
   .editor-container.dragging {
     border-color: var(--editor-accent, #8bc48b);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--editor-accent, #8bc48b) 30%, transparent);
   }
-  /* Drag overlay */
   .drag-overlay {
     position: absolute;
     inset: 0;
@@ -1791,7 +1068,6 @@
     font-size: 1.1rem;
     font-weight: 500;
   }
-  /* Upload status */
   .upload-status {
     position: absolute;
     top: 50%;
@@ -1835,11 +1111,8 @@
     font-weight: bold;
   }
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
-  /* Draft prompt */
   .draft-prompt {
     position: absolute;
     top: 0;
@@ -1901,13 +1174,11 @@
   .draft-btn.discard:hover {
     color: #d4d4d4;
   }
-  /* Terminal Key Highlight */
   .key {
     color: var(--editor-accent, #8bc48b);
     font-weight: bold;
     text-decoration: underline;
   }
-  /* Toolbar */
   .toolbar {
     display: flex;
     align-items: center;
@@ -1917,6 +1188,7 @@
     border-bottom: 1px solid var(--editor-border, var(--light-border-primary));
     flex-wrap: wrap;
     font-family: "JetBrains Mono", "Fira Code", monospace;
+    transition: opacity 0.3s ease;
   }
   .toolbar-group {
     display: flex;
@@ -1972,7 +1244,6 @@
   .toolbar-spacer {
     flex: 1;
   }
-  /* Editor Area */
   .editor-area {
     display: flex;
     flex: 1;
@@ -1996,7 +1267,6 @@
     min-height: 0;
     overflow: hidden;
   }
-  /* Line Numbers */
   .line-numbers {
     display: flex;
     flex-direction: column;
@@ -2021,7 +1291,6 @@
     color: var(--editor-accent, #8bc48b);
     background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent);
   }
-  /* Editor Textarea */
   .editor-textarea {
     flex: 1;
     padding: 1rem;
@@ -2047,7 +1316,6 @@
     opacity: 0.7;
     cursor: not-allowed;
   }
-  /* Preview Panel */
   .preview-panel {
     width: 50%;
     display: flex;
@@ -2070,12 +1338,7 @@
     padding: 1rem;
     overflow-y: auto;
     color: #d4d4d4;
-    font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 0.95rem;
     line-height: 1.7;
   }
@@ -2083,7 +1346,6 @@
     color: #5a5a5a;
     font-style: italic;
   }
-  /* Preview content styles */
   .preview-content :global(h1),
   .preview-content :global(h2),
   .preview-content :global(h3),
@@ -2157,7 +1419,6 @@
     max-width: 100%;
     border-radius: 4px;
   }
-  /* Status Bar */
   .status-bar {
     display: flex;
     justify-content: space-between;
@@ -2167,6 +1428,7 @@
     border-top: 1px solid var(--editor-status-border, var(--light-border-secondary));
     font-size: 0.75rem;
     color: var(--editor-accent-bright, #a8dca8);
+    transition: opacity 0.3s ease;
   }
   .status-left,
   .status-right {
@@ -2188,16 +1450,21 @@
     color: #7a9a7a;
     font-style: italic;
   }
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
+  .status-goal {
+    color: var(--editor-accent, #8bc48b);
+    font-weight: 500;
   }
-  /* Responsive */
+  .status-campfire {
+    color: #f0a060;
+  }
+  .status-mode {
+    color: #7ab3ff;
+    font-size: 0.75rem;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
   @media (max-width: 768px) {
     .editor-area.split {
       flex-direction: column;
@@ -2220,136 +1487,6 @@
       font-size: 0.75rem;
     }
   }
-  /* Full Preview Button */
-  .full-preview-btn {
-    background: #2d3a4d;
-    color: #7ab3ff;
-    border-color: #3d4a5d;
-  }
-  .full-preview-btn:hover {
-    background: #3d4a5d;
-    color: #9ac5ff;
-  }
-  /* Full Preview Modal */
-  .full-preview-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .full-preview-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-  }
-  .full-preview-container {
-    position: relative;
-    width: 90%;
-    max-width: 900px;
-    height: 90vh;
-    background: var(--color-bg, var(--light-bg-primary));
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  }
-  :global(.dark) .full-preview-container {
-    background: var(--color-bg-dark, #0d1117);
-  }
-  .full-preview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background: var(--color-bg-secondary, var(--light-bg-tertiary));
-    border-bottom: 1px solid var(--color-border, var(--light-border-primary));
-    flex-shrink: 0;
-  }
-  :global(.dark) .full-preview-header {
-    background: var(--color-bg-secondary-dark, var(--light-bg-primary));
-    border-color: var(--color-border-dark, var(--light-border-secondary));
-  }
-  .full-preview-header h2 {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    color: #8bc48b;
-  }
-  :global(.dark) .full-preview-header h2 {
-    color: #8bc48b;
-  }
-  .full-preview-close {
-    padding: 0.3rem 0.5rem;
-    background: transparent;
-    color: #7a9a7a;
-    border: none;
-    font-size: 0.85rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-  }
-  .full-preview-close:hover {
-    color: #a8dca8;
-  }
-  .full-preview-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem;
-  }
-  .full-preview-article {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  /* Post meta styling in full preview */
-  .full-preview-article .post-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-  }
-  .full-preview-article time {
-    color: var(--light-text-light);
-    font-size: 1rem;
-    transition: color 0.3s ease;
-  }
-  :global(.dark) .full-preview-article time {
-    color: var(--color-text-subtle-dark, #666);
-  }
-  .full-preview-article .tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .full-preview-article .tag {
-    padding: 0.25rem 0.75rem;
-    background: var(--tag-bg, #2c5f2d);
-    color: white;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  /* Line numbers scroll sync */
-  .line-numbers {
-    overflow: hidden;
-  }
-  /* Status bar enhancements */
-  .status-goal {
-    color: var(--editor-accent, #8bc48b);
-    font-weight: 500;
-  }
-  .status-campfire {
-    color: #f0a060;
-  }
-  .status-mode {
-    color: #7ab3ff;
-    font-size: 0.75rem;
-  }
-  /* Zen Mode Styles */
   .editor-container.zen-mode {
     position: fixed;
     inset: 0;
@@ -2359,14 +1496,12 @@
   }
   .editor-container.zen-mode .toolbar {
     opacity: 0.3;
-    transition: opacity 0.3s ease;
   }
   .editor-container.zen-mode .toolbar:hover {
     opacity: 1;
   }
   .editor-container.zen-mode .status-bar {
     opacity: 0.5;
-    transition: opacity 0.3s ease;
   }
   .editor-container.zen-mode .status-bar:hover {
     opacity: 1;
@@ -2374,7 +1509,6 @@
   .editor-container.zen-mode .editor-area {
     height: calc(100vh - 80px);
   }
-  /* Campfire Mode Styles */
   .editor-container.campfire-mode {
     border-color: #8b5a2b;
     box-shadow: 0 0 30px rgba(240, 160, 96, 0.15);
@@ -2393,6 +1527,7 @@
     color: #f0d0a0;
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    animation: fade-in 0.3s ease;
   }
   .campfire-ember {
     width: 12px;
@@ -2402,12 +1537,8 @@
     animation: ember-glow 2s ease-in-out infinite;
   }
   @keyframes ember-glow {
-    0%, 100% {
-      box-shadow: 0 0 8px #ff6b35, 0 0 16px rgba(240, 107, 53, 0.5);
-    }
-    50% {
-      box-shadow: 0 0 12px #f0a060, 0 0 24px rgba(240, 160, 96, 0.6);
-    }
+    0%, 100% { box-shadow: 0 0 8px #ff6b35, 0 0 16px rgba(240, 107, 53, 0.5); }
+    50% { box-shadow: 0 0 12px #f0a060, 0 0 24px rgba(240, 160, 96, 0.6); }
   }
   .campfire-stats {
     display: flex;
@@ -2436,7 +1567,6 @@
   .campfire-end:hover {
     color: #f0d0a0;
   }
-  /* Slash Commands Menu */
   .slash-menu {
     position: fixed;
     top: 50%;
@@ -2450,6 +1580,7 @@
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     z-index: 1001;
+    animation: scale-in 0.15s ease;
   }
   .slash-menu-header {
     padding: 0.5rem 0.75rem;
@@ -2486,7 +1617,6 @@
     font-size: 0.8rem;
     text-align: center;
   }
-  /* Command Palette */
   .command-palette-overlay {
     position: fixed;
     inset: 0;
@@ -2505,6 +1635,7 @@
     border-radius: 8px;
     box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
     overflow: hidden;
+    animation: slide-down 0.2s ease;
   }
   .command-palette-input {
     width: 100%;
@@ -2554,107 +1685,17 @@
     color: #6a6a6a;
     font-family: "JetBrains Mono", monospace;
   }
-  /* Mode Transitions */
-  .editor-container {
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  .toolbar,
-  .status-bar {
-    transition: opacity 0.3s ease;
-  }
-  .campfire-controls {
-    animation: fade-in 0.3s ease;
-  }
   @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .slash-menu,
-  .command-palette {
-    animation: scale-in 0.15s ease;
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   @keyframes scale-in {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-  }
-  .command-palette {
-    animation: slide-down 0.2s ease;
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
   @keyframes slide-down {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  /* Snippets Modal */
-  .snippets-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1003;
-    animation: fade-in 0.2s ease;
-  }
-  .snippets-modal {
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    background: var(--light-bg-primary);
-    border: 1px solid var(--light-border-primary);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
-    animation: scale-in 0.2s ease;
-  }
-  .snippets-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    background: #252526;
-    border-bottom: 1px solid var(--light-border-primary);
-  }
-  .snippets-modal-header h3 {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 500;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    color: #8bc48b;
-  }
-  .snippets-modal-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: #7a9a7a;
-    font-size: 0.85rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-  }
-  .snippets-modal-close:hover {
-    color: #a8dca8;
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .snippets-modal-body {
     padding: 1.25rem;
@@ -2675,27 +1716,22 @@
     font-weight: 500;
     color: #a8dca8;
   }
-  .snippet-field input,
   .snippet-field textarea {
     padding: 0.6rem 0.75rem;
     background: #252526;
     border: 1px solid var(--light-border-primary);
     border-radius: 6px;
     color: #d4d4d4;
-    font-family: inherit;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
     font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
     transition: border-color 0.2s ease;
   }
-  .snippet-field input:focus,
   .snippet-field textarea:focus {
     outline: none;
     border-color: #4a7c4a;
-  }
-  .snippet-field textarea {
-    resize: vertical;
-    min-height: 100px;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    line-height: 1.5;
   }
   .field-hint {
     font-size: 0.75rem;
@@ -2714,38 +1750,6 @@
     display: flex;
     gap: 0.5rem;
     margin-left: auto;
-  }
-  .snippet-btn {
-    padding: 0.3rem 0.5rem;
-    border-radius: 0;
-    font-size: 0.85rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-    background: transparent;
-    border: none;
-  }
-  .snippet-btn.save {
-    color: #8bc48b;
-  }
-  .snippet-btn.save:hover:not(:disabled) {
-    color: #c8f0c8;
-  }
-  .snippet-btn.save:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .snippet-btn.cancel {
-    color: #9d9d9d;
-  }
-  .snippet-btn.cancel:hover {
-    color: #d4d4d4;
-  }
-  .snippet-btn.delete {
-    color: #e08080;
-  }
-  .snippet-btn.delete:hover {
-    color: #ff9090;
   }
   .snippets-list-divider {
     display: flex;
@@ -2800,7 +1804,6 @@
     padding: 0.15rem 0.4rem;
     border-radius: 3px;
   }
-  /* Status Bar Sound Button */
   .status-sound-btn {
     display: flex;
     align-items: center;
@@ -2830,16 +1833,9 @@
     animation: sound-pulse 1.5s ease-in-out infinite;
   }
   @keyframes sound-pulse {
-    0%, 100% {
-      opacity: 0.4;
-      transform: scale(0.8);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1);
-    }
+    0%, 100% { opacity: 0.4; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
   }
-  /* Sound Panel */
   .sound-panel {
     position: fixed;
     bottom: 3.5rem;
@@ -2853,14 +1849,8 @@
     animation: slide-up 0.2s ease;
   }
   @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .sound-panel-header {
     display: flex;
@@ -2907,6 +1897,8 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.15s ease;
+    font-size: 0.65rem;
+    color: #9d9d9d;
   }
   .sound-option:hover {
     background: var(--light-bg-tertiary);
@@ -2915,21 +1907,11 @@
   .sound-option.active {
     background: var(--light-border-secondary);
     border-color: #4a7c4a;
+    color: #a8dca8;
   }
   .sound-option.playing {
     border-color: #8bc48b;
     box-shadow: 0 0 8px rgba(139, 196, 139, 0.3);
-  }
-  .sound-icon {
-    font-size: 1.25rem;
-  }
-  .sound-name {
-    font-size: 0.65rem;
-    color: #9d9d9d;
-    text-align: center;
-  }
-  .sound-option.active .sound-name {
-    color: #a8dca8;
   }
   .sound-controls {
     display: flex;
@@ -3011,14 +1993,102 @@
     font-size: 0.7rem;
     color: #6a6a6a;
   }
-  .sound-note-icon {
-    font-size: 0.85rem;
+  .full-preview-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .sound-note code {
-    background: var(--light-bg-primary);
-    padding: 0.1rem 0.3rem;
-    border-radius: 3px;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.65rem;
+  .full-preview-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+  }
+  .full-preview-container {
+    position: relative;
+    width: 90%;
+    max-width: 900px;
+    height: 90vh;
+    background: var(--color-bg, var(--light-bg-primary));
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  :global(.dark) .full-preview-container {
+    background: var(--color-bg-dark, #0d1117);
+  }
+  .full-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-secondary, var(--light-bg-tertiary));
+    border-bottom: 1px solid var(--color-border, var(--light-border-primary));
+    flex-shrink: 0;
+  }
+  :global(.dark) .full-preview-header {
+    background: var(--color-bg-secondary-dark, var(--light-bg-primary));
+    border-color: var(--color-border-dark, var(--light-border-secondary));
+  }
+  .full-preview-header h2 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    color: #8bc48b;
+  }
+  .full-preview-close {
+    padding: 0.3rem 0.5rem;
+    background: transparent;
+    color: #7a9a7a;
+    border: none;
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    cursor: pointer;
+    transition: color 0.1s ease;
+  }
+  .full-preview-close:hover {
+    color: #a8dca8;
+  }
+  .full-preview-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+  .full-preview-article {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .full-preview-article .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .full-preview-article time {
+    color: var(--light-text-light);
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
+  :global(.dark) .full-preview-article time {
+    color: var(--color-text-subtle-dark, #666);
+  }
+  .full-preview-article .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .full-preview-article .tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--tag-bg, #2c5f2d);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
 </style>
