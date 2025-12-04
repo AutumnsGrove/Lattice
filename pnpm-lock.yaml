@@ -11,8 +11,8 @@ importers:
   landing:
     dependencies:
       '@groveengine/ui':
-        specifier: ^0.3.0
-        version: 0.3.0(svelte@5.45.3)(tailwindcss@3.4.18)
+        specifier: workspace:*
+        version: link:../packages/ui
       resend:
         specifier: ^4.0.0
         version: 4.8.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -57,8 +57,8 @@ importers:
   packages/engine:
     dependencies:
       '@groveengine/ui':
-        specifier: ^0.3.0
-        version: 0.3.0(svelte@5.45.3)(tailwindcss@3.4.18)
+        specifier: workspace:*
+        version: link:../ui
       '@types/dompurify':
         specifier: ^3.0.5
         version: 3.2.0
@@ -976,12 +976,6 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
-
-  '@groveengine/ui@0.3.0':
-    resolution: {integrity: sha512-UcZN4tWlhfDacUKh8rvd2RUpBUuSC0hh6eeKrqcM1HCw+9s459GvFLCVf/intHzYeCmHhK75jKjdtl3TCntcMQ==}
-    peerDependencies:
-      svelte: ^5.0.0
-      tailwindcss: ^3.4.0
 
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
@@ -2356,9 +2350,6 @@ packages:
   tabbable@6.3.0:
     resolution: {integrity: sha512-EIHvdY5bPLuWForiR/AN2Bxngzpuwn1is4asboytXtpTgsArc+WmSJKVLlhdh71u7jFcryDqB2A8lQvj78MkyQ==}
 
-  tailwind-merge@2.5.4:
-    resolution: {integrity: sha512-0q8cfZHMu9nuYP/b5Shb7Y7Sh1B7Nnl5GqNr1U+n2p6+mybvRtayrQ+0042Z5byvTA8ihjlP8Odo8/VnHbZu4Q==}
-
   tailwind-merge@2.6.0:
     resolution: {integrity: sha512-P+Vu1qXfzediirmHOC3xKGAYeZtPcV9g76X+xg2FD4tYgR71ewMA35Y3sCz3zhiN/dwefRpJX0yBcgwi1fXNQA==}
 
@@ -2367,12 +2358,6 @@ packages:
 
   tailwind-variants@0.2.1:
     resolution: {integrity: sha512-2xmhAf4UIc3PijOUcJPA1LP4AbxhpcHuHM2C26xM0k81r0maAO6uoUSHl3APmvHZcY5cZCY/bYuJdfFa4eGoaw==}
-    engines: {node: '>=16.x', pnpm: '>=7.x'}
-    peerDependencies:
-      tailwindcss: '*'
-
-  tailwind-variants@0.3.1:
-    resolution: {integrity: sha512-krn67M3FpPwElg4FsZrOQd0U26o7UDH/QOkK8RNaiCCrr052f6YJPBUfNKnPo/s/xRzNPtv1Mldlxsg8Tb46BQ==}
     engines: {node: '>=16.x', pnpm: '>=7.x'}
     peerDependencies:
       tailwindcss: '*'
@@ -3106,15 +3091,6 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
-
-  '@groveengine/ui@0.3.0(svelte@5.45.3)(tailwindcss@3.4.18)':
-    dependencies:
-      bits-ui: 1.8.0(svelte@5.45.3)
-      clsx: 2.1.1
-      svelte: 5.45.3
-      tailwind-merge: 2.6.0
-      tailwind-variants: 0.3.1(tailwindcss@3.4.18)
-      tailwindcss: 3.4.18
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -4535,8 +4511,6 @@ snapshots:
 
   tabbable@6.3.0: {}
 
-  tailwind-merge@2.5.4: {}
-
   tailwind-merge@2.6.0: {}
 
   tailwind-merge@3.4.0: {}
@@ -4544,11 +4518,6 @@ snapshots:
   tailwind-variants@0.2.1(tailwindcss@3.4.18):
     dependencies:
       tailwind-merge: 2.6.0
-      tailwindcss: 3.4.18
-
-  tailwind-variants@0.3.1(tailwindcss@3.4.18):
-    dependencies:
-      tailwind-merge: 2.5.4
       tailwindcss: 3.4.18
 
   tailwindcss@3.4.18:
