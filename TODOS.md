@@ -16,6 +16,7 @@
 - [x] Configure Tailwind CSS → **DONE: Tailwind CSS 3.4+ configured**
 - [x] Split UI/Design System into separate repo → **DONE: [GroveUI](https://github.com/AutumnsGrove/GroveUI)**
 - [x] Migrate to @groveengine/ui package → **DONE: v0.3.0 published to npm (2025-12-03)**
+- [x] Fix CI/CD for example site → **DONE: Removed mermaid (crypto issues), fixed wrangler deploy command (2025-12-04)**
 - [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
 
 ## Phase 1: GroveEngine MVP (Weeks 1-4)
