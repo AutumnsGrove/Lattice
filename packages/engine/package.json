@@ -1,6 +1,6 @@
 {
   "name": "@autumnsgrove/groveengine",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
   "author": "AutumnsGrove",
   "license": "MIT",
@@ -114,7 +114,7 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@groveengine/ui": "workspace:*",
+    "@groveengine/ui": "^0.3.0",
     "@types/dompurify": "^3.0.5",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
