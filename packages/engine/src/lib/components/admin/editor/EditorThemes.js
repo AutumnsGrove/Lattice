@@ -1,0 +1,205 @@
+/**
+ * Editor Themes and Sound Library
+ * Centralized configuration for the MarkdownEditor theming system
+ */
+
+export const themes = {
+  grove: {
+    name: "grove",
+    label: "Grove",
+    desc: "forest green",
+    accent: "#8bc48b",
+    accentDim: "#7a9a7a",
+    accentBright: "#a8dca8",
+    accentGlow: "#c8f0c8",
+    bg: "#1e1e1e",
+    bgSecondary: "#252526",
+    bgTertiary: "#1a1a1a",
+    border: "#3a3a3a",
+    borderAccent: "#4a7c4a",
+    text: "#d4d4d4",
+    textDim: "#9d9d9d",
+    statusBg: "#2d4a2d",
+    statusBorder: "#3d5a3d",
+  },
+  amber: {
+    name: "amber",
+    label: "Amber",
+    desc: "classic terminal",
+    accent: "#ffb000",
+    accentDim: "#c98b00",
+    accentBright: "#ffc940",
+    accentGlow: "#ffe080",
+    bg: "#1a1400",
+    bgSecondary: "#241c00",
+    bgTertiary: "#140e00",
+    border: "#3a3000",
+    borderAccent: "#5a4800",
+    text: "#ffcc66",
+    textDim: "#aa8844",
+    statusBg: "#2a2000",
+    statusBorder: "#3a3000",
+  },
+  matrix: {
+    name: "matrix",
+    label: "Matrix",
+    desc: "digital rain",
+    accent: "#00ff00",
+    accentDim: "#00aa00",
+    accentBright: "#44ff44",
+    accentGlow: "#88ff88",
+    bg: "#0a0a0a",
+    bgSecondary: "#111111",
+    bgTertiary: "#050505",
+    border: "#1a3a1a",
+    borderAccent: "#00aa00",
+    text: "#00dd00",
+    textDim: "#008800",
+    statusBg: "#0a1a0a",
+    statusBorder: "#1a3a1a",
+  },
+  dracula: {
+    name: "dracula",
+    label: "Dracula",
+    desc: "purple night",
+    accent: "#bd93f9",
+    accentDim: "#9580c9",
+    accentBright: "#d4b0ff",
+    accentGlow: "#e8d0ff",
+    bg: "#282a36",
+    bgSecondary: "#343746",
+    bgTertiary: "#21222c",
+    border: "#44475a",
+    borderAccent: "#6272a4",
+    text: "#f8f8f2",
+    textDim: "#a0a0a0",
+    statusBg: "#3a3c4e",
+    statusBorder: "#44475a",
+  },
+  nord: {
+    name: "nord",
+    label: "Nord",
+    desc: "arctic frost",
+    accent: "#88c0d0",
+    accentDim: "#6a9aa8",
+    accentBright: "#a3d4e2",
+    accentGlow: "#c0e8f0",
+    bg: "#2e3440",
+    bgSecondary: "#3b4252",
+    bgTertiary: "#272c36",
+    border: "#434c5e",
+    borderAccent: "#5e81ac",
+    text: "#eceff4",
+    textDim: "#a0a8b0",
+    statusBg: "#3b4252",
+    statusBorder: "#434c5e",
+  },
+  rose: {
+    name: "rose",
+    label: "Rose",
+    desc: "soft pink",
+    accent: "#f5a9b8",
+    accentDim: "#c98a96",
+    accentBright: "#ffccd5",
+    accentGlow: "#ffe0e6",
+    bg: "#1f1a1b",
+    bgSecondary: "#2a2224",
+    bgTertiary: "#171314",
+    border: "#3a3234",
+    borderAccent: "#5a4a4e",
+    text: "#e8d8dc",
+    textDim: "#a09498",
+    statusBg: "#2a2224",
+    statusBorder: "#3a3234",
+  },
+};
+
+export const soundLibrary = {
+  forest: {
+    name: "forest",
+    key: "f",
+    url: "/sounds/forest-ambience.mp3",
+    description: "birds, wind",
+  },
+  rain: {
+    name: "rain",
+    key: "r",
+    url: "/sounds/rain-ambience.mp3",
+    description: "gentle rainfall",
+  },
+  campfire: {
+    name: "fire",
+    key: "i",
+    url: "/sounds/campfire-ambience.mp3",
+    description: "crackling embers",
+  },
+  night: {
+    name: "night",
+    key: "n",
+    url: "/sounds/night-ambience.mp3",
+    description: "crickets, breeze",
+  },
+  cafe: {
+    name: "cafe",
+    key: "a",
+    url: "/sounds/cafe-ambience.mp3",
+    description: "soft murmurs",
+  },
+};
+
+// Storage keys
+export const THEME_STORAGE_KEY = "grove-editor-theme";
+export const SOUNDS_STORAGE_KEY = "grove-editor-sounds";
+export const SNIPPETS_STORAGE_KEY = "grove-editor-snippets";
+
+/**
+ * Apply theme CSS variables to document root
+ * @param {string} themeName - Theme key from themes object
+ */
+export function applyTheme(themeName) {
+  const theme = themes[themeName];
+  if (!theme) return;
+
+  const root = document.documentElement;
+  root.style.setProperty("--editor-accent", theme.accent);
+  root.style.setProperty("--editor-accent-dim", theme.accentDim);
+  root.style.setProperty("--editor-accent-bright", theme.accentBright);
+  root.style.setProperty("--editor-accent-glow", theme.accentGlow);
+  root.style.setProperty("--editor-bg", theme.bg);
+  root.style.setProperty("--editor-bg-secondary", theme.bgSecondary);
+  root.style.setProperty("--editor-bg-tertiary", theme.bgTertiary);
+  root.style.setProperty("--editor-border", theme.border);
+  root.style.setProperty("--editor-border-accent", theme.borderAccent);
+  root.style.setProperty("--editor-text", theme.text);
+  root.style.setProperty("--editor-text-dim", theme.textDim);
+  root.style.setProperty("--editor-status-bg", theme.statusBg);
+  root.style.setProperty("--editor-status-border", theme.statusBorder);
+}
+
+/**
+ * Load theme from localStorage
+ * @returns {string} Theme name
+ */
+export function loadTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored && themes[stored]) {
+      return stored;
+    }
+  } catch (e) {
+    console.warn("Failed to load theme:", e);
+  }
+  return "grove";
+}
+
+/**
+ * Save theme to localStorage
+ * @param {string} themeName - Theme key to save
+ */
+export function saveTheme(themeName) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeName);
+  } catch (e) {
+    console.warn("Failed to save theme:", e);
+  }
+}
