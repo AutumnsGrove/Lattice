@@ -404,7 +404,7 @@
 	// Load DOMPurify only in browser
 	onMount(async () => {
 		if (browser) {
-			const module = await import('isomorphic-dompurify');
+			const module = await import('dompurify');
 			DOMPurify = module.default;
 		}
 	});

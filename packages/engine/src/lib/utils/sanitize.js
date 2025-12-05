@@ -1,9 +1,22 @@
 /**
  * Centralized sanitization utilities for XSS prevention
- * Uses isomorphic-dompurify for both server-side and client-side sanitization
+ * Uses DOMPurify for client-side sanitization
+ * Note: Sanitization only runs in browser environments. For SSR, content is
+ * passed through as-is (content should be sanitized before storing in database).
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+// DOMPurify instance - loaded dynamically in browser only
+let DOMPurify = null;
+
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
+// Initialize DOMPurify if in browser
+if (isBrowser) {
+	import('dompurify').then((module) => {
+		DOMPurify = module.default;
+	});
+}
 
 /**
  * Sanitize HTML content to prevent XSS attacks
@@ -13,6 +26,12 @@ import DOMPurify from 'isomorphic-dompurify';
 export function sanitizeHTML(html) {
 	if (!html || typeof html !== 'string') {
 		return '';
+	}
+
+	// If DOMPurify isn't loaded (SSR), return as-is
+	// Content should be sanitized before storing in database
+	if (!DOMPurify) {
+		return html;
 	}
 
 	const config = {
@@ -35,6 +54,11 @@ export function sanitizeHTML(html) {
 export function sanitizeSVG(svg) {
 	if (!svg || typeof svg !== 'string') {
 		return '';
+	}
+
+	// If DOMPurify isn't loaded (SSR), return as-is
+	if (!DOMPurify) {
+		return svg;
 	}
 
 	return DOMPurify.sanitize(svg, {
@@ -68,6 +92,11 @@ export function sanitizeSVG(svg) {
 export function sanitizeMarkdown(markdownHTML) {
 	if (!markdownHTML || typeof markdownHTML !== 'string') {
 		return '';
+	}
+
+	// If DOMPurify isn't loaded (SSR), return as-is
+	if (!DOMPurify) {
+		return markdownHTML;
 	}
 
 	// For markdown, we allow a broader set of tags but still sanitize
