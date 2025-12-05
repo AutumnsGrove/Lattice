@@ -17,6 +17,10 @@
 	let jobResults = $state(data.jobResults);
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
+	// Timer state for live elapsed time
+	let elapsedSeconds = $state(0);
+	let timerInterval: ReturnType<typeof setInterval> | null = null;
+
 	const vibeOptions = [
 		{ value: 'professional', label: 'Professional' },
 		{ value: 'creative', label: 'Creative' },
@@ -116,12 +120,48 @@
 		}
 	}
 
+	function startTimer() {
+		// Calculate initial elapsed time from started_at
+		if (currentJob?.started_at) {
+			const startTime = new Date(currentJob.started_at).getTime();
+			elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+		} else {
+			elapsedSeconds = 0;
+		}
+
+		if (timerInterval) clearInterval(timerInterval);
+
+		timerInterval = setInterval(() => {
+			if (currentJob?.started_at) {
+				const startTime = new Date(currentJob.started_at).getTime();
+				elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+			}
+		}, 1000);
+	}
+
+	function stopTimer() {
+		if (timerInterval) {
+			clearInterval(timerInterval);
+			timerInterval = null;
+		}
+	}
+
 	function formatDuration(seconds: number | null): string {
-		if (!seconds) return '-';
+		if (seconds === null || seconds === undefined) return '-';
 		if (seconds < 60) return `${seconds}s`;
 		const mins = Math.floor(seconds / 60);
 		const secs = seconds % 60;
 		return `${mins}m ${secs}s`;
+	}
+
+	function formatElapsed(seconds: number): string {
+		if (seconds < 60) return `${seconds}s`;
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		if (mins < 60) return `${mins}m ${secs}s`;
+		const hours = Math.floor(mins / 60);
+		const remainingMins = mins % 60;
+		return `${hours}h ${remainingMins}m ${secs}s`;
 	}
 
 	function formatPrice(cents: number | null): string {
@@ -138,12 +178,18 @@
 		}
 	}
 
-	// Start polling if there's an active job
+	// Start polling and timer if there's an active job
 	$effect(() => {
 		if (currentJob && (currentJob.status === 'running' || currentJob.status === 'pending')) {
 			startPolling();
+			startTimer();
+		} else {
+			stopTimer();
 		}
-		return () => stopPolling();
+		return () => {
+			stopPolling();
+			stopTimer();
+		};
 	});
 </script>
 
@@ -255,12 +301,20 @@
 				<!-- Submit -->
 				<button
 					type="submit"
-					class="btn-primary w-full"
+					class="btn-primary w-full flex items-center justify-center gap-2"
 					disabled={isSubmitting || !businessName.trim() || (currentJob?.status === 'running')}
 				>
 					{#if isSubmitting}
+						<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
 						Starting Search...
 					{:else if currentJob?.status === 'running'}
+						<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
 						Search in Progress...
 					{:else}
 						Start Domain Search
@@ -301,12 +355,21 @@
 							<span class="text-bark/60">Good Results</span>
 							<span class="text-grove-600 font-medium">{currentJob.good_results}</span>
 						</div>
-						{#if currentJob.duration_seconds}
-							<div class="flex justify-between text-sm font-sans">
-								<span class="text-bark/60">Duration</span>
-								<span class="text-bark">{formatDuration(currentJob.duration_seconds)}</span>
-							</div>
-						{/if}
+						<!-- Live elapsed time for running jobs, final duration for completed -->
+						<div class="flex justify-between text-sm font-sans">
+							<span class="text-bark/60">
+								{currentJob.status === 'running' || currentJob.status === 'pending' ? 'Elapsed' : 'Duration'}
+							</span>
+							{#if currentJob.status === 'running' || currentJob.status === 'pending'}
+								<span class="text-domain-600 font-medium font-mono tabular-nums">
+									{formatElapsed(elapsedSeconds)}
+								</span>
+							{:else if currentJob.duration_seconds}
+								<span class="text-bark font-mono tabular-nums">{formatDuration(currentJob.duration_seconds)}</span>
+							{:else}
+								<span class="text-bark/40">-</span>
+							{/if}
+						</div>
 					</div>
 
 					<!-- Progress bar -->
