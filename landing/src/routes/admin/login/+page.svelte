@@ -19,7 +19,7 @@
 				body: JSON.stringify({ email })
 			});
 
-			const result = await response.json();
+			const result = (await response.json()) as { success?: boolean; error?: string };
 
 			if (response.ok && result.success) {
 				step = 'code';
@@ -47,7 +47,7 @@
 				body: JSON.stringify({ email, code })
 			});
 
-			const result = await response.json();
+			const result = (await response.json()) as { success?: boolean; error?: string };
 
 			if (response.ok && result.success) {
 				window.location.href = '/admin/cdn';

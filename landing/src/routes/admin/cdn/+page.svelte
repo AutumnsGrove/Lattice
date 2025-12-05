@@ -114,11 +114,11 @@
 					body: formData
 				});
 
-				const result = await response.json();
+				const result = (await response.json()) as { success?: boolean; file?: CdnFile; error?: string };
 
 				if (response.ok && result.success) {
 					uploadProgress[i].progress = 100;
-					files = [result.file, ...files];
+					files = [result.file as CdnFile, ...files];
 					if (!folders.includes(folder)) {
 						folders = [...folders, folder].sort();
 					}
@@ -169,7 +169,7 @@
 					successMessage = '';
 				}, 3000);
 			} else {
-				const result = await response.json();
+				const result = (await response.json()) as { error?: string };
 				throw new Error(result.error || 'Delete failed');
 			}
 		} catch (err) {

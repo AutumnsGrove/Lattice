@@ -41,7 +41,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals, platform 
 	}
 
 	const { DB, CDN_URL } = platform.env;
-	const body = await request.json();
+	const body = (await request.json()) as { alt_text?: unknown };
 	const { alt_text } = body;
 
 	if (typeof alt_text !== 'string') {
