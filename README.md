@@ -65,7 +65,7 @@ GroveEngine/
 
 ```bash
 # Install the engine package
-npm install @autumnsgrove/groveengine
+pnpm add @autumnsgrove/groveengine
 
 # For UI components, see the GroveUI repo:
 # https://github.com/AutumnsGrove/GroveUI
