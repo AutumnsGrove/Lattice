@@ -12,6 +12,22 @@
 	];
 </script>
 
+<svelte:head>
+	<style>
+		/* Prevent horizontal overflow and zoom issues on mobile admin */
+		html, body {
+			overflow-x: hidden;
+			max-width: 100vw;
+		}
+		/* Prevent iOS zoom on input focus */
+		@media screen and (max-width: 768px) {
+			input, textarea, select {
+				font-size: 16px !important;
+			}
+		}
+	</style>
+</svelte:head>
+
 <div class="admin-layout">
 	<aside class="admin-sidebar">
 		<div class="sidebar-header">
@@ -51,6 +67,9 @@
 		display: grid;
 		grid-template-columns: 250px 1fr;
 		min-height: 100vh;
+		max-width: 100vw;
+		overflow-x: hidden;
+		touch-action: manipulation;
 	}
 
 	.admin-sidebar {
@@ -134,6 +153,9 @@
 		padding: 2rem;
 		background: hsl(var(--background));
 		overflow-y: auto;
+		overflow-x: hidden;
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	@media (max-width: 768px) {
@@ -150,6 +172,7 @@
 			display: flex;
 			overflow-x: auto;
 			padding: 0;
+			-webkit-overflow-scrolling: touch;
 		}
 
 		.sidebar-nav a {
@@ -161,6 +184,19 @@
 		.sidebar-nav a.active {
 			border-right: none;
 			border-bottom: 3px solid hsl(var(--primary));
+		}
+
+		.admin-main {
+			padding: 1rem;
+		}
+	}
+
+	/* Prevent iOS zoom on input focus - inputs must be 16px+ */
+	@media (max-width: 768px) {
+		:global(.admin-layout input),
+		:global(.admin-layout textarea),
+		:global(.admin-layout select) {
+			font-size: 16px !important;
 		}
 	}
 </style>
