@@ -3,26 +3,13 @@ compatibility_date = "2024-11-24"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
-# D1 Database binding
-[[d1_databases]]
-binding = "DB"
-database_name = "grove-engine-db"
-database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
-
-# R2 Bucket for CDN file storage (cdn.grove.place)
-[[r2_buckets]]
-binding = "CDN_BUCKET"
-bucket_name = "grove-cdn"
-# Run: npx wrangler r2 bucket create grove-cdn
-
-# Environment variables
+# Environment variables for local development
 [vars]
-CDN_URL = "http://localhost:5173/cdn"  # Development URL
+CDN_URL = "http://localhost:5173/cdn"
 
-# Production environment
-[env.production.vars]
-CDN_URL = "https://cdn.grove.place"  # Production URL
-
-# Environment variables (secrets added via wrangler)
-# RESEND_API_KEY - add via: wrangler pages secret put RESEND_API_KEY
-# ADMIN_EMAILS - add via: wrangler pages secret put ADMIN_EMAILS (comma-separated)
+# Production bindings are configured in Cloudflare Dashboard:
+# - D1 Database: DB -> grove-engine-db
+# - R2 Bucket: CDN_BUCKET -> grove-cdn
+# - Secret: RESEND_API_KEY
+# - Secret: ADMIN_EMAILS
+# - Variable: CDN_URL -> https://cdn.grove.place
