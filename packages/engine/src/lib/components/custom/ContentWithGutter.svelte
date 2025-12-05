@@ -76,13 +76,16 @@
 
 	/**
 	 * Calculate positions based on anchor locations, with collision detection
+	 * Uses getBoundingClientRect() for accurate positioning regardless of offset parent chains
 	 */
 	async function updatePositions() {
 		if (!gutterElement || !contentBodyElement) return;
 
 		await tick(); // Wait for DOM to update
 
-		const gutterTop = gutterElement.offsetTop;
+		// Use getBoundingClientRect for accurate relative positioning
+		// This works regardless of offset parent chains and CSS transforms
+		const gutterRect = gutterElement.getBoundingClientRect();
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
 		const newOverflowingAnchors = [];
@@ -94,20 +97,24 @@
 			if (!el && import.meta.env.DEV) {
 				console.warn(`Anchor element not found for: ${anchor}`);
 			}
+			// Use getBoundingClientRect for consistent positioning
+			const elRect = el ? el.getBoundingClientRect() : null;
 			return {
 				anchor,
 				key: getKey(anchor),
 				element: el,
-				top: el ? el.offsetTop : Infinity
+				elementRect: elRect,
+				top: elRect ? elRect.top : Infinity
 			};
 		}).sort((a, b) => a.top - b.top);
 
-		anchorPositions.forEach(({ anchor, key, element }) => {
+		anchorPositions.forEach(({ anchor, key, element, elementRect }) => {
 			const groupEl = anchorGroupElements[key];
 
-			if (element && groupEl) {
-				// Desired position (aligned with anchor element)
-				let desiredTop = element.offsetTop - gutterTop;
+			if (element && elementRect && groupEl) {
+				// Calculate position relative to the gutter element's top
+				// This accounts for any content above the content-body (headers, etc.)
+				let desiredTop = elementRect.top - gutterRect.top;
 
 				// Get the height of this gutter group
 				const groupHeight = groupEl.offsetHeight;
