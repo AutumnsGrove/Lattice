@@ -7,9 +7,18 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [vars]
 CDN_URL = "http://localhost:5173/cdn"
 
-# Production bindings are configured in Cloudflare Dashboard:
-# - D1 Database: DB -> grove-engine-db
-# - R2 Bucket: CDN_BUCKET -> grove-cdn
-# - Secret: RESEND_API_KEY
-# - Secret: ADMIN_EMAILS
-# - Variable: CDN_URL -> https://cdn.grove.place
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# R2 Storage binding
+[[r2_buckets]]
+binding = "CDN_BUCKET"
+bucket_name = "grove-cdn"
+
+# Secrets (configured in Cloudflare Dashboard or via wrangler secret):
+# - RESEND_API_KEY
+# - ADMIN_EMAILS
+# Production CDN_URL is set via --var flag in deployment

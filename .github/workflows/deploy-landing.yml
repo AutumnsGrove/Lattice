@@ -55,5 +55,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing
+          command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing --d1 DB=a6394da2-b7a6-48ce-b7fe-b1eb3e730e68 --r2 CDN_BUCKET=grove-cdn --var CDN_URL:https://cdn.grove.place
           workingDirectory: landing
