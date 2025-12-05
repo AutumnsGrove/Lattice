@@ -70,8 +70,8 @@ CREATE INDEX IF NOT EXISTS idx_domain_results_score ON domain_results(job_id, sc
 CREATE TABLE IF NOT EXISTS domain_search_config (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL DEFAULT 'default',
-    driver_model TEXT NOT NULL DEFAULT 'claude-sonnet-4-20250514',
-    swarm_model TEXT NOT NULL DEFAULT 'claude-3-5-haiku-20241022',
+    driver_model TEXT NOT NULL DEFAULT 'claude-sonnet-4-5-20250929',
+    swarm_model TEXT NOT NULL DEFAULT 'claude-haiku-4-5-20251001',
     max_batches INTEGER NOT NULL DEFAULT 6,
     candidates_per_batch INTEGER NOT NULL DEFAULT 50,
     target_good_results INTEGER NOT NULL DEFAULT 25,
@@ -102,8 +102,8 @@ INSERT OR IGNORE INTO domain_search_config (
 ) VALUES (
     'default-config',
     'default',
-    'claude-sonnet-4-20250514',
-    'claude-3-5-haiku-20241022',
+    'claude-sonnet-4-5-20250929',
+    'claude-haiku-4-5-20251001',
     6,
     50,
     25,

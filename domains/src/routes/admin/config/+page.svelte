@@ -1,33 +1,25 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { MODELS, SEARCH_DEFAULTS, DRIVER_MODEL_OPTIONS, SWARM_MODEL_OPTIONS } from '$lib/config';
 
 	let { data }: { data: PageData } = $props();
 
 	// Form state initialized from config
-	let driverModel = $state(data.config?.driver_model || 'claude-sonnet-4-20250514');
-	let swarmModel = $state(data.config?.swarm_model || 'claude-3-5-haiku-20241022');
-	let maxBatches = $state(data.config?.max_batches || 6);
-	let candidatesPerBatch = $state(data.config?.candidates_per_batch || 50);
-	let targetGoodResults = $state(data.config?.target_good_results || 25);
-	let creativity = $state(data.config?.creativity || 0.8);
-	let rdapDelaySeconds = $state(data.config?.rdap_delay_seconds || 10);
+	let driverModel = $state(data.config?.driver_model || MODELS.DRIVER);
+	let swarmModel = $state(data.config?.swarm_model || MODELS.SWARM);
+	let maxBatches = $state(data.config?.max_batches || SEARCH_DEFAULTS.MAX_BATCHES);
+	let candidatesPerBatch = $state(data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH);
+	let targetGoodResults = $state(data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS);
+	let creativity = $state(data.config?.creativity || SEARCH_DEFAULTS.CREATIVITY);
+	let rdapDelaySeconds = $state(data.config?.rdap_delay_seconds || SEARCH_DEFAULTS.RDAP_DELAY_SECONDS);
 
 	// UI state
 	let isSaving = $state(false);
 	let successMessage = $state('');
 	let errorMessage = $state('');
 
-	const driverModelOptions = [
-		{ value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 (Latest)' },
-		{ value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
-		{ value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' }
-	];
-
-	const swarmModelOptions = [
-		{ value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku (Fast)' },
-		{ value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku (Legacy)' },
-		{ value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet (Slower)' }
-	];
+	const driverModelOptions = DRIVER_MODEL_OPTIONS;
+	const swarmModelOptions = SWARM_MODEL_OPTIONS;
 
 	async function saveConfig() {
 		isSaving = true;
@@ -64,13 +56,13 @@
 	}
 
 	function resetToDefaults() {
-		driverModel = 'claude-sonnet-4-20250514';
-		swarmModel = 'claude-3-5-haiku-20241022';
-		maxBatches = 6;
-		candidatesPerBatch = 50;
-		targetGoodResults = 25;
-		creativity = 0.8;
-		rdapDelaySeconds = 10;
+		driverModel = MODELS.DRIVER;
+		swarmModel = MODELS.SWARM;
+		maxBatches = SEARCH_DEFAULTS.MAX_BATCHES;
+		candidatesPerBatch = SEARCH_DEFAULTS.CANDIDATES_PER_BATCH;
+		targetGoodResults = SEARCH_DEFAULTS.TARGET_GOOD_RESULTS;
+		creativity = SEARCH_DEFAULTS.CREATIVITY;
+		rdapDelaySeconds = SEARCH_DEFAULTS.RDAP_DELAY_SECONDS;
 	}
 </script>
 
