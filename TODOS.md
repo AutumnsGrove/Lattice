@@ -148,12 +148,14 @@
 - [ ] More color/font customization options
 
 ### Internal Tools
-- [ ] Integrate `grove-domain-search` package
-  - AI-powered async domain availability checker (MCP server / UV tool)
-  - Separate project - will be published as its own package
-  - Backend use only - call at various integration points
+- [x] Build domain search worker → **DONE: Deployed and tested via API (2025-12-05)**
+  - AI-powered async domain availability checker
   - Speeds up domain search from 2-3 weeks to 1-2 days
   - Enhances client consultations with pre-vetted available domains
+- [ ] Wire up domain search worker to `domains.grove.place` UI
+  - Location: `domains/src/routes/api/search/start/+server.ts` (worker call is commented out)
+  - Need to set `DOMAIN_WORKER_URL` secret in Cloudflare Pages
+  - Uncomment and test the worker integration
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
