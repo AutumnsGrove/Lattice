@@ -6,7 +6,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { createSearchJob, updateSearchJobStatus, now } from "$lib/server/db";
+import { now } from "$lib/server/db";
 
 interface StartSearchBody {
   business_name?: string;
@@ -98,26 +98,33 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
     }
 
     const workerResult = (await workerResponse.json()) as WorkerStartResponse;
+    const timestamp = now();
 
     // Store a local reference in D1 for admin tracking
-    // The job_id comes from the worker's Durable Object
-    const job = await createSearchJob(platform.env.DB, {
-      client_email: locals.user.email,
-      business_name: business_name.trim(),
-      domain_idea: domain_idea?.trim(),
-      tld_preferences: tld_preferences || ["com", "co"],
-      vibe: vibe || "professional",
-      keywords: keywords?.trim(),
-    });
-
-    // Update the job ID to match the worker's job ID
-    // and mark as running
+    // Use the worker's job_id directly to avoid ID mismatch issues
     await platform.env.DB.prepare(
-      `UPDATE domain_search_jobs
-       SET id = ?, client_id = ?, status = ?, started_at = ?, updated_at = datetime("now")
-       WHERE id = ?`,
+      `INSERT INTO domain_search_jobs
+       (id, client_id, client_email, business_name, domain_idea, tld_preferences, vibe, keywords, status, batch_num, domains_checked, domains_available, good_results, started_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-      .bind(workerResult.job_id, clientId, "running", now(), job.id)
+      .bind(
+        workerResult.job_id,
+        clientId,
+        locals.user.email,
+        business_name.trim(),
+        domain_idea?.trim() || null,
+        JSON.stringify(tld_preferences || ["com", "co"]),
+        vibe || "professional",
+        keywords?.trim() || null,
+        "running",
+        0,
+        0,
+        0,
+        0,
+        timestamp,
+        timestamp,
+        timestamp,
+      )
       .run();
 
     return json({
@@ -136,9 +143,9 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
         domains_checked: 0,
         domains_available: 0,
         good_results: 0,
-        started_at: now(),
-        created_at: now(),
-        updated_at: now(),
+        started_at: timestamp,
+        created_at: timestamp,
+        updated_at: timestamp,
       },
     });
   } catch (err) {
