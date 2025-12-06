@@ -426,14 +426,14 @@
 	}
 	@font-face {
 		font-family: 'IBM Plex Mono';
-		src: url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');
+		src: url('/fonts/IBMPlexMono-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Bodoni Moda';
-		src: url('/fonts/BodoniModa-Regular.woff2') format('woff2');
+		src: url('/fonts/BodoniModa-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
