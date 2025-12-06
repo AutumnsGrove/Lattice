@@ -14,6 +14,7 @@ interface StartSearchBody {
   vibe?: string;
   keywords?: string;
   tld_preferences?: string[];
+  ai_provider?: string; // claude | deepseek | kimi | cloudflare
 }
 
 interface WorkerStartResponse {
@@ -38,10 +39,26 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
     throw error(400, "Invalid request body");
   }
 
-  const { business_name, domain_idea, vibe, keywords, tld_preferences } = body;
+  const {
+    business_name,
+    domain_idea,
+    vibe,
+    keywords,
+    tld_preferences,
+    ai_provider,
+  } = body;
 
   if (!business_name || typeof business_name !== "string") {
     throw error(400, "Business name is required");
+  }
+
+  // Validate ai_provider if provided
+  const validProviders = ["claude", "deepseek", "kimi", "cloudflare"];
+  if (ai_provider && !validProviders.includes(ai_provider)) {
+    throw error(
+      400,
+      `Invalid AI provider. Valid options: ${validProviders.join(", ")}`,
+    );
   }
 
   const workerUrl = platform.env.DOMAIN_WORKER_URL;
@@ -66,6 +83,11 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
           vibe: vibe || "professional",
           keywords: keywords?.trim() || undefined,
         },
+        // Include provider if specified (both driver and swarm use the same)
+        ...(ai_provider && {
+          driver_provider: ai_provider,
+          swarm_provider: ai_provider,
+        }),
       }),
     });
 

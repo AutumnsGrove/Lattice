@@ -89,6 +89,7 @@
 	let vibe = $state('professional');
 	let keywords = $state('');
 	let tldPreferences = $state<string[]>(['com', 'co']);
+	let aiProvider = $state('claude');
 
 	// UI state
 	let isSubmitting = $state(false);
@@ -134,6 +135,13 @@
 		{ value: 'org', label: '.org' }
 	];
 
+	const aiProviderOptions = [
+		{ value: 'claude', label: 'Claude (Recommended)', description: 'Best quality, highest cost' },
+		{ value: 'deepseek', label: 'DeepSeek (Budget)', description: 'Great quality, very low cost' },
+		{ value: 'kimi', label: 'Kimi', description: 'Good quality, low cost' },
+		{ value: 'cloudflare', label: 'Llama 4 (Cloudflare)', description: 'Good quality, lowest cost' }
+	];
+
 	function toggleTld(tld: string) {
 		if (tldPreferences.includes(tld)) {
 			tldPreferences = tldPreferences.filter(t => t !== tld);
@@ -164,7 +172,9 @@
 					domain_idea: domainIdea.trim() || null,
 					vibe,
 					keywords: keywords.trim() || null,
-					tld_preferences: tldPreferences
+					tld_preferences: tldPreferences,
+					// Only include provider if not the default (claude)
+					...(aiProvider !== 'claude' && { ai_provider: aiProvider })
 				})
 			});
 
@@ -643,6 +653,26 @@
 						class="input-field"
 						disabled={isFormDisabled}
 					/>
+				</div>
+
+				<!-- AI Provider -->
+				<div>
+					<label for="ai_provider" class="block text-sm font-sans font-medium text-bark mb-2">
+						AI Model
+					</label>
+					<select
+						id="ai_provider"
+						bind:value={aiProvider}
+						class="input-field"
+						disabled={isFormDisabled}
+					>
+						{#each aiProviderOptions as option}
+							<option value={option.value}>{option.label}</option>
+						{/each}
+					</select>
+					<p class="mt-1 text-xs text-bark/50 font-sans">
+						{aiProviderOptions.find(p => p.value === aiProvider)?.description ?? ''}
+					</p>
 				</div>
 
 				<!-- Submit -->
