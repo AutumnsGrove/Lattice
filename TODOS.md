@@ -152,10 +152,12 @@
   - AI-powered async domain availability checker
   - Speeds up domain search from 2-3 weeks to 1-2 days
   - Enhances client consultations with pre-vetted available domains
-- [ ] Wire up domain search worker to `domains.grove.place` UI
-  - Location: `domains/src/routes/api/search/start/+server.ts` (worker call is commented out)
-  - Need to set `DOMAIN_WORKER_URL` secret in Cloudflare Pages
-  - Uncomment and test the worker integration
+- [x] Wire up domain search worker to `domains.grove.place` UI → **DONE (2025-12-05)**
+  - Worker call implemented in `domains/src/routes/api/search/start/+server.ts`
+  - Cancel button added to UI
+- [ ] Add search queue support (allow multiple concurrent searches)
+  - Currently only one search can run at a time
+  - Would need to track multiple jobs in UI state
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
