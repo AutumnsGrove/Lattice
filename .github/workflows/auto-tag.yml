@@ -1,0 +1,64 @@
+name: Auto-tag on Version Bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/engine/package.json'
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit to compare
+
+      - name: Check for version change
+        id: version
+        run: |
+          # Get current version
+          CURRENT=$(jq -r '.version' packages/engine/package.json)
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+
+          # Get previous version
+          git show HEAD~1:packages/engine/package.json > /tmp/prev-package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
+          PREVIOUS=$(jq -r '.version' /tmp/prev-package.json)
+          echo "previous=$PREVIOUS" >> $GITHUB_OUTPUT
+
+          # Check if changed
+          if [ "$CURRENT" != "$PREVIOUS" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Version changed: $PREVIOUS → $CURRENT"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "Version unchanged: $CURRENT"
+          fi
+
+      - name: Check if tag exists
+        id: tag_exists
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          TAG="v${{ steps.version.outputs.current }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG does not exist"
+          fi
+
+      - name: Create and push tag
+        if: steps.version.outputs.changed == 'true' && steps.tag_exists.outputs.exists == 'false'
+        run: |
+          TAG="v${{ steps.version.outputs.current }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+          echo "Created and pushed tag: $TAG"
