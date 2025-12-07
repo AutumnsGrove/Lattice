@@ -17,7 +17,7 @@
 - [x] Split UI/Design System into separate repo → **DONE: [GroveUI](https://github.com/AutumnsGrove/GroveUI)**
 - [x] Migrate to @groveengine/ui package → **DONE: v0.3.0 published to npm (2025-12-03)**
 - [x] Fix CI/CD for example site → **DONE: Removed mermaid (crypto issues), fixed wrangler deploy command (2025-12-04)**
-- [ ] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
+- [x] Set up pre-commit hooks (optional, see AgentUsage/pre_commit_hooks/)
 
 ## Security Audit Fixes (2025-12-05)
 > **PRIORITY: Fix before production deployment.** Audit performed by Claude Code.
@@ -42,7 +42,7 @@
   - Location: `landing/src/routes/api/admin/cdn/upload/+server.ts`
 - [x] **Order authorization** - Verify order belongs to user's tenant → **DONE (2025-12-05)**
   - Added tenant ownership check in PATCH handler
-- [ ] **Session duration** - Consider reducing from 7 days to 24 hours
+- [x] **Session duration** - Consider reducing from 7 days to 24 hours
   - Location: `session.js:8`
 
 ### Medium Priority
@@ -123,6 +123,7 @@
 
 ### Shop Feature (E-commerce)
 - [x] Design shop data model (products, variants, inventory) → **DONE: migration 007_shop_payments.sql**
+- [ ] Integrate Shopify
 - [ ] Create product management UI in admin panel
 - [ ] Build product listing page with filtering/sorting
 - [ ] Implement product detail pages
@@ -210,7 +211,7 @@
   - Fetch from `/api/search/followup?job_id=...`
   - Allow user to submit answers to resume search
   - Currently follow-up only works on searcher page, not history
-- [ ] **Searcher Page Running Job Issue** (2025-12-06)
+- [x] **Searcher Page Running Job Issue** (2025-12-06)
   - Right panel shows last COMPLETED job, not currently running job
   - Should show running job status or link to it
 - [ ] Add search queue support (allow multiple concurrent searches)
@@ -234,33 +235,6 @@
 - [ ] Webhook support for external integrations
 - [ ] SDK/client libraries (JavaScript, Python)
 
-## MarkdownEditor Refactoring
-> The MarkdownEditor.svelte is 3000+ lines and needs to be split into manageable pieces.
-> **Bug fix completed (2025-12-04):** Fixed `$derived(() => ...)` patterns causing browser freezes.
-
-### Phase 1: Extract Composables/Stores
-- [ ] Extract slash commands system into `useSlashCommands.svelte.js`
-- [ ] Extract command palette into `useCommandPalette.svelte.js`
-- [ ] Extract snippets manager into `useSnippets.svelte.js`
-- [ ] Extract ambient sounds into `useAmbientSounds.svelte.js`
-- [ ] Extract theme system into `useEditorTheme.svelte.js`
-- [ ] Extract draft/auto-save into `useDraftManager.svelte.js`
-- [ ] Extract writing goals/campfire into `useWritingSession.svelte.js`
-
-### Phase 2: Extract Subcomponents
-- [ ] Create `EditorToolbar.svelte` component
-- [ ] Create `EditorStatusBar.svelte` component
-- [ ] Create `SlashCommandMenu.svelte` component
-- [ ] Create `CommandPalette.svelte` component
-- [ ] Create `SnippetsModal.svelte` component
-- [ ] Create `AmbientSoundPanel.svelte` component
-- [ ] Create `FullPreviewModal.svelte` component
-
-### Phase 3: Styles & Polish
-- [ ] Move CSS to separate `MarkdownEditor.css` or use CSS modules
-- [ ] Consider extracting theme CSS variables to shared file
-- [ ] Add proper TypeScript types for all composables
-- [ ] Add tests for critical editor functions
 
 ## Documentation Tasks
 - [x] Update README.md with project specifics → **DONE: PR #16**
