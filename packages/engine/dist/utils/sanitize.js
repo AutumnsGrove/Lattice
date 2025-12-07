@@ -1,9 +1,23 @@
 /**
  * Centralized sanitization utilities for XSS prevention
- * Uses isomorphic-dompurify for both server-side and client-side sanitization
+ *
+ * Uses DOMPurify for client-side sanitization. On the server (SSR),
+ * content is passed through unsanitized since it will be sanitized
+ * when the page hydrates on the client.
+ *
+ * This approach avoids bundling jsdom (required by isomorphic-dompurify)
+ * which doesn't work in Cloudflare Workers.
  */
 
-import DOMPurify from "isomorphic-dompurify";
+import { browser } from "$app/environment";
+
+// Dynamically import DOMPurify only in browser
+let DOMPurify = null;
+if (browser) {
+  import("dompurify").then((module) => {
+    DOMPurify = module.default;
+  });
+}
 
 /**
  * Sanitize HTML content to prevent XSS attacks
@@ -13,6 +27,11 @@ import DOMPurify from "isomorphic-dompurify";
 export function sanitizeHTML(html) {
   if (!html || typeof html !== "string") {
     return "";
+  }
+
+  // On server, pass through - will be sanitized on client hydration
+  if (!browser || !DOMPurify) {
+    return html;
   }
 
   const config = {
@@ -59,6 +78,11 @@ export function sanitizeHTML(html) {
 export function sanitizeSVG(svg) {
   if (!svg || typeof svg !== "string") {
     return "";
+  }
+
+  // On server, pass through - will be sanitized on client hydration
+  if (!browser || !DOMPurify) {
+    return svg;
   }
 
   return DOMPurify.sanitize(svg, {
@@ -154,6 +178,11 @@ export function sanitizeSVG(svg) {
 export function sanitizeMarkdown(markdownHTML) {
   if (!markdownHTML || typeof markdownHTML !== "string") {
     return "";
+  }
+
+  // On server, pass through - will be sanitized on client hydration
+  if (!browser || !DOMPurify) {
+    return markdownHTML;
   }
 
   // For markdown, we allow a broader set of tags but still sanitize

@@ -6,11 +6,7 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter({
-			// Mark jsdom as external - it's a Node.js-only dependency of isomorphic-dompurify
-			// that doesn't run in Cloudflare Workers (DOMPurify falls back gracefully)
-			external: ['jsdom']
-		}),
+		adapter: adapter(),
 		prerender: {
 			entries: ['*']
 		}

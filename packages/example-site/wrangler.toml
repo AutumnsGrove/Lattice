@@ -11,12 +11,6 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages Functions output directory
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
-# Build configuration - exclude Node.js-only packages
-[build]
-# Mark jsdom as external since isomorphic-dompurify needs it
-# but falls back gracefully when not available
-external = ["jsdom"]
-
 # =============================================================================
 # SHARED RESOURCES - Using main Grove infrastructure
 # =============================================================================
