@@ -8,7 +8,7 @@
  * @returns {string} UUID v4 token
  */
 export function generateCSRFToken() {
-	return crypto.randomUUID();
+  return crypto.randomUUID();
 }
 
 /**
@@ -18,14 +18,14 @@ export function generateCSRFToken() {
  * @returns {boolean}
  */
 export function validateCSRFToken(request, sessionToken) {
-	if (!sessionToken) return false;
+  if (!sessionToken) return false;
 
-	const headerToken = request.headers.get('x-csrf-token');
-	const bodyToken = request.headers.get('csrf-token'); // fallback
+  const headerToken = request.headers.get("x-csrf-token");
+  const bodyToken = request.headers.get("csrf-token"); // fallback
 
-	if (!headerToken && !bodyToken) return false;
+  if (!headerToken && !bodyToken) return false;
 
-	return (headerToken === sessionToken) || (bodyToken === sessionToken);
+  return headerToken === sessionToken || bodyToken === sessionToken;
 }
 
 /**
@@ -34,39 +34,46 @@ export function validateCSRFToken(request, sessionToken) {
  * @returns {boolean}
  */
 export function validateCSRF(request) {
-	// Handle edge cases
-	if (!request || typeof request !== 'object') {
-		return false;
-	}
+  // Handle edge cases
+  if (!request || typeof request !== "object") {
+    return false;
+  }
 
-	if (!request.headers || typeof request.headers.get !== 'function') {
-		return false;
-	}
+  if (!request.headers || typeof request.headers.get !== "function") {
+    return false;
+  }
 
-	const origin = request.headers.get('origin');
-	const host = request.headers.get('host');
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
 
-	// Allow same-origin requests
-	if (origin) {
-		try {
-			const originUrl = new URL(origin);
+  // Allow same-origin requests
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
 
-			// Validate protocol (must be http or https)
-			if (!['http:', 'https:'].includes(originUrl.protocol)) {
-				return false;
-			}
+      // Validate protocol (must be http or https)
+      if (!["http:", "https:"].includes(originUrl.protocol)) {
+        return false;
+      }
 
-			const isLocalhost = originUrl.hostname === 'localhost' ||
-			                   originUrl.hostname === '127.0.0.1';
-			const hostMatches = host && originUrl.host === host;
+      const isLocalhost =
+        originUrl.hostname === "localhost" ||
+        originUrl.hostname === "127.0.0.1";
 
-			if (!isLocalhost && !hostMatches) {
-				return false;
-			}
-		} catch {
-			return false;
-		}
-	}
+      // Require HTTPS for non-localhost
+      if (!isLocalhost && originUrl.protocol !== "https:") {
+        return false;
+      }
 
-	return true;
+      const hostMatches = host && originUrl.host === host;
+
+      if (!isLocalhost && !hostMatches) {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  return true;
 }
