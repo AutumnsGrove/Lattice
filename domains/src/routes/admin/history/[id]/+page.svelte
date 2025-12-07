@@ -194,12 +194,14 @@
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+		// Use toLocaleString for proper local timezone conversion
+		return new Date(dateStr).toLocaleString('en-US', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
 			hour: '2-digit',
-			minute: '2-digit'
+			minute: '2-digit',
+			timeZoneName: 'short'
 		});
 	}
 

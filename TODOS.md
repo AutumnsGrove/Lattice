@@ -189,20 +189,27 @@
     - DO status response now includes token counts
     - Sync endpoints call refresh before listing
     - History table now shows Tokens column
-- [ ] **TLD Diversity Feature** (2025-12-06)
-  - Add "Diverse TLDs" toggle to search UI
-  - Modify prompts to encourage varied TLDs when enabled
-  - Expand TLD options in UI beyond current 6 (add .club, .garden, .place, .life, .earth, .green, etc.)
-  - Improve base prompts to be slightly more TLD-diverse by default
+- [x] **TLD Diversity Feature** → **DONE (2025-12-06)**
+  - Added grouped TLD selector with 6 categories (Classic, Tech, Creative, Nature, Business, Personal) - 27 TLDs total
+  - Added "Diverse TLDs" toggle to encourage variety in AI-generated suggestions
+  - Updated prompts to be more TLD-diverse by default
+  - Expanded TLD scoring in swarm.ts for all new TLDs
 - [x] **Change default AI to DeepSeek** → **DONE (2025-12-06)**
   - UI default changed from 'claude' to 'deepseek'
   - Worker fallback changed from 'claude' to 'deepseek'
   - DeepSeek now shows as "(Recommended)" in provider dropdown
-- [ ] **History/Results Page UX Issues** (2025-12-06)
-  - Stats not live (domains checked/found/tokens/batch don't update without refresh)
-  - No live streaming of results from DO to history detail page
-  - Search parameters not fully shown (domain_idea, keywords, custom preferences missing)
-  - If user provided a domain idea, show checkmark/X for availability status
+- [x] **History/Results Page UX Issues** → **PARTIALLY DONE (2025-12-06)**
+  - ✅ Live SSE streaming for running jobs
+  - ✅ Domains appear with slide-in animation as found
+  - ✅ Live elapsed time and batch progress
+  - ✅ Domain idea availability status (checkmark/X)
+  - ✅ Stats update in real-time
+  - ⚠️ Timezone issue: dates display in UTC (SSR limitation)
+- [ ] **Follow-up Quiz on History Detail Page** (2025-12-06)
+  - When job status is `needs_followup`, show the follow-up quiz questions
+  - Fetch from `/api/search/followup?job_id=...`
+  - Allow user to submit answers to resume search
+  - Currently follow-up only works on searcher page, not history
 - [ ] **Searcher Page Running Job Issue** (2025-12-06)
   - Right panel shows last COMPLETED job, not currently running job
   - Should show running job status or link to it
