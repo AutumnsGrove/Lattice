@@ -54,6 +54,9 @@ export const POST: RequestHandler = async ({
   }
 
   try {
+    console.log(`[Resume API] Resuming search for job_id: ${jobId}`);
+    console.log(`[Resume API] Followup responses:`, body.followup_responses);
+
     const workerResponse = await fetch(
       `${workerUrl}/api/resume?job_id=${jobId}`,
       {
@@ -65,6 +68,10 @@ export const POST: RequestHandler = async ({
       },
     );
 
+    console.log(
+      `[Resume API] Worker response status: ${workerResponse.status}`,
+    );
+
     if (!workerResponse.ok) {
       const errorText = await workerResponse.text();
       console.error("[Worker Resume Error]", errorText);
@@ -72,6 +79,9 @@ export const POST: RequestHandler = async ({
     }
 
     const result = (await workerResponse.json()) as WorkerResumeResponse;
+    console.log(
+      `[Resume API] Successfully resumed search, new status: ${result.status}`,
+    );
 
     // Update local job status to running
     await updateSearchJobStatus(platform.env.DB, jobId, {

@@ -357,12 +357,16 @@
 	}
 
 	async function handleJobComplete(status: string) {
+		console.log(`[Frontend] Job completed with status: ${status}`);
+		
 		// Fetch full results for complete or needs_followup
 		if (status === 'complete' || status === 'needs_followup') {
+			console.log(`[Frontend] Fetching results for status: ${status}`);
 			await fetchResults();
 		}
 		// Fetch followup quiz if needed
 		if (status === 'needs_followup') {
+			console.log(`[Frontend] Job needs followup, fetching quiz...`);
 			await fetchFollowup();
 		}
 	}
@@ -433,28 +437,58 @@
 	}
 
 	async function fetchFollowup() {
-		if (!currentJob) return;
+		if (!currentJob) {
+			console.log(`[Frontend] No current job, skipping followup fetch`);
+			return;
+		}
 
+		console.log(`[Frontend] Fetching followup quiz for job_id: ${currentJob.id}`);
+		console.log(`[Frontend] Current job status: ${currentJob.status}`);
+		
 		try {
 			const response = await fetch(`/api/search/followup?job_id=${currentJob.id}`);
+			console.log(`[Frontend] Followup response status: ${response.status}`);
+			
 			if (response.ok) {
-				followupQuiz = (await response.json()) as FollowupResponse;
+				const data = await response.json();
+				console.log(`[Frontend] Followup quiz data received:`, data);
+				
+				// Validate the response data
+				if (!data || !data.questions || !Array.isArray(data.questions)) {
+					console.error(`[Frontend] Invalid followup quiz data structure:`, data);
+					errorMessage = 'Invalid followup quiz data received from server';
+					return;
+				}
+				
+				followupQuiz = data as FollowupResponse;
+				
 				// Initialize answers with defaults
 				followupQuiz.questions.forEach(q => {
 					if (q.default) {
 						followupAnswers[q.id] = q.default;
 					}
 				});
+				console.log(`[Frontend] Followup quiz loaded with ${followupQuiz.questions?.length || 0} questions`);
+			} else {
+				const errorText = await response.text();
+				console.error(`[Frontend] Followup API error: ${response.status} - ${errorText}`);
+				errorMessage = `Failed to load followup quiz: ${errorText}`;
 			}
 		} catch (err) {
-			console.error('Failed to fetch followup:', err);
+			console.error('[Frontend] Failed to fetch followup:', err);
+			errorMessage = err instanceof Error ? err.message : 'Failed to load followup quiz';
 		}
 	}
 
 	async function submitFollowup() {
 		if (!currentJob || !followupQuiz) return;
 
+		console.log(`[Frontend] Submitting followup answers for job_id: ${currentJob.id}`);
+		console.log(`[Frontend] Followup answers:`, followupAnswers);
+		
 		isSubmittingFollowup = true;
+		errorMessage = ''; // Clear any previous errors
+		
 		try {
 			const response = await fetch(`/api/search/resume?job_id=${currentJob.id}`, {
 				method: 'POST',
@@ -462,15 +496,29 @@
 				body: JSON.stringify({ followup_responses: followupAnswers })
 			});
 
+			console.log(`[Frontend] Resume search response status: ${response.status}`);
+			
 			if (response.ok) {
-				currentJob = { ...currentJob, status: 'running' };
+				console.log(`[Frontend] Successfully resumed search`);
+				const result = await response.json();
+				console.log(`[Frontend] Resume result:`, result);
+				
+				// Reset followup state
 				followupQuiz = null;
 				followupAnswers = {};
+				
+				// Update job status and restart monitoring
+				currentJob = { ...currentJob, status: 'running' };
 				startMonitoring();
 				startTimer();
+			} else {
+				const errorText = await response.text();
+				console.error(`[Frontend] Resume search API error: ${response.status} - ${errorText}`);
+				errorMessage = `Failed to resume search: ${errorText}`;
 			}
 		} catch (err) {
 			console.error('Failed to resume search:', err);
+			errorMessage = err instanceof Error ? err.message : 'Failed to resume search';
 		} finally {
 			isSubmittingFollowup = false;
 		}

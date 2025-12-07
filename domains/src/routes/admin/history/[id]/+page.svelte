@@ -275,7 +275,12 @@
 
 	// Fetch follow-up quiz when job status is needs_followup
 	async function fetchFollowupQuiz() {
-		if (!job || job.status !== 'needs_followup') return;
+		console.log(`[History Page] fetchFollowupQuiz called for job_id: ${job?.id}, status: ${job?.status}`);
+		
+		if (!job || job.status !== 'needs_followup') {
+			console.log(`[History Page] Skipping fetch - job missing or status not needs_followup`);
+			return;
+		}
 
 		isFetchingFollowup = true;
 		followupError = null;
@@ -285,11 +290,24 @@
 		const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
 		try {
+			console.log(`[History Page] Making followup request for job_id: ${job.id}`);
 			const response = await fetch(`/api/search/followup?job_id=${job.id}`, {
 				signal: controller.signal
 			});
+			
+			console.log(`[History Page] Followup response status: ${response.status}`);
+			
 			if (response.ok) {
 				const data = await response.json();
+				console.log(`[History Page] Followup data received:`, data);
+				
+				// Check if the worker returned a valid quiz
+				if (!data || !data.questions || !Array.isArray(data.questions)) {
+					console.error(`[History Page] Invalid followup quiz data structure:`, data);
+					followupError = 'No follow-up questions available for this search. The search may continue without additional input.';
+					return;
+				}
+				
 				followupQuiz = data;
 				// Initialize answers with defaults
 				if (data.questions) {
@@ -303,12 +321,20 @@
 						}
 					});
 				}
+				console.log(`[History Page] Followup quiz loaded successfully with ${data.questions?.length || 0} questions`);
 			} else {
 				const errorText = await response.text();
-				throw new Error(`Failed to fetch follow-up quiz: ${response.status} ${errorText}`);
+				console.error(`[History Page] Followup API error: ${response.status} - ${errorText}`);
+				
+				// Handle specific worker errors more gracefully
+				if (errorText.includes('No follow-up quiz available')) {
+					followupError = 'No additional questions are needed for this search. You can continue the search as-is or try different search parameters.';
+				} else {
+					throw new Error(`Failed to fetch follow-up quiz: ${response.status} ${errorText}`);
+				}
 			}
 		} catch (err) {
-			console.error('Failed to fetch follow-up quiz:', err);
+			console.error('[History Page] Failed to fetch follow-up quiz:', err);
 			if (err instanceof Error && err.name === 'AbortError') {
 				followupError = 'Request timed out. Please check your connection and try again.';
 			} else {
@@ -317,6 +343,7 @@
 		} finally {
 			clearTimeout(timeoutId);
 			isFetchingFollowup = false;
+			console.log(`[History Page] fetchFollowupQuiz completed, isFetchingFollowup: ${isFetchingFollowup}`);
 		}
 	}
 
@@ -338,11 +365,19 @@
 
 	// Submit follow-up answers and resume search
 	async function submitFollowupAnswers() {
-		if (!job || !followupQuiz) return;
-
-		if (!validateFollowupAnswers()) {
+		console.log(`[History Page] submitFollowupAnswers called for job_id: ${job?.id}`);
+		
+		if (!job || !followupQuiz) {
+			console.log(`[History Page] Cannot submit - missing job or followupQuiz`);
 			return;
 		}
+
+		if (!validateFollowupAnswers()) {
+			console.log(`[History Page] Validation failed, not submitting`);
+			return;
+		}
+
+		console.log(`[History Page] Submitting followup answers:`, followupAnswers);
 
 		isSubmittingFollowup = true;
 		followupError = null;
@@ -359,7 +394,10 @@
 				signal: controller.signal
 			});
 
+			console.log(`[History Page] Resume response status: ${response.status}`);
+
 			if (response.ok) {
+				console.log(`[History Page] Successfully resumed search`);
 				// Update job status to running
 				job = { ...job, status: 'running' };
 				followupQuiz = null;
@@ -369,6 +407,7 @@
 				startTimer();
 			} else {
 				const errorText = await response.text();
+				console.error(`[History Page] Resume API error: ${response.status} - ${errorText}`);
 				let errorMessage = `Failed to resume search (${response.status})`;
 				try {
 					const errorJson = JSON.parse(errorText);
@@ -379,7 +418,7 @@
 				throw new Error(errorMessage);
 			}
 		} catch (err) {
-			console.error('Failed to submit follow-up answers:', err);
+			console.error('[History Page] Failed to submit follow-up answers:', err);
 			if (err instanceof Error && err.name === 'AbortError') {
 				followupError = 'Request timed out. The search may still resume - please check the job status in a moment.';
 			} else {
@@ -388,6 +427,7 @@
 		} finally {
 			clearTimeout(timeoutId);
 			isSubmittingFollowup = false;
+			console.log(`[History Page] submitFollowupAnswers completed, isSubmittingFollowup: ${isSubmittingFollowup}`);
 		}
 	}
 
