@@ -16,6 +16,8 @@ interface WorkerJob {
   batch_num: number;
   domains_checked: number;
   good_results: number;
+  input_tokens: number;
+  output_tokens: number;
   created_at: string;
   updated_at: string;
 }
@@ -43,7 +45,17 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
   }
 
   try {
-    // Fetch all jobs from worker's D1 index
+    // First, call refresh to get fresh status from DOs
+    console.log(
+      "[Sync] Refreshing jobs from:",
+      `${workerUrl}/api/jobs/refresh`,
+    );
+    const refreshResponse = await fetch(`${workerUrl}/api/jobs/refresh`);
+    if (!refreshResponse.ok) {
+      console.warn("[Sync] Refresh failed, falling back to list");
+    }
+
+    // Fetch all jobs from worker's D1 index (now with fresh data)
     console.log(
       "[Sync] Fetching from:",
       `${workerUrl}/api/jobs/list?limit=100`,
@@ -72,8 +84,8 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
         const timestamp = now();
         await platform.env.DB.prepare(
           `INSERT INTO domain_search_jobs
-           (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, good_results, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (id, client_id, client_email, business_name, tld_preferences, vibe, status, batch_num, domains_checked, good_results, input_tokens, output_tokens, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
           .bind(
             workerJob.job_id,
@@ -86,32 +98,63 @@ export const POST: RequestHandler = async ({ locals, platform }) => {
             workerJob.batch_num,
             workerJob.domains_checked,
             workerJob.good_results,
+            workerJob.input_tokens ?? 0,
+            workerJob.output_tokens ?? 0,
             workerJob.created_at,
             timestamp,
           )
           .run();
         synced++;
       } else {
-        // Update existing job if worker has newer status
-        if (
+        // Update existing job if worker has newer status or tokens
+        const isComplete =
+          workerJob.status === "complete" || workerJob.status === "failed";
+        const needsUpdate =
           localJob.status !== workerJob.status ||
           localJob.batch_num !== workerJob.batch_num ||
-          localJob.good_results !== workerJob.good_results
-        ) {
-          await platform.env.DB.prepare(
-            `UPDATE domain_search_jobs
-             SET status = ?, batch_num = ?, domains_checked = ?, good_results = ?, updated_at = ?
-             WHERE id = ?`,
-          )
-            .bind(
-              workerJob.status,
-              workerJob.batch_num,
-              workerJob.domains_checked,
-              workerJob.good_results,
-              now(),
-              workerJob.job_id,
+          localJob.good_results !== workerJob.good_results ||
+          (workerJob.input_tokens ?? 0) > 0;
+
+        if (needsUpdate) {
+          if (isComplete && !localJob.completed_at) {
+            // Set completed_at and calculate duration
+            await platform.env.DB.prepare(
+              `UPDATE domain_search_jobs
+               SET status = ?, batch_num = ?, domains_checked = ?, good_results = ?, input_tokens = ?, output_tokens = ?,
+                   completed_at = ?, duration_seconds = CAST((julianday(?) - julianday(created_at)) * 86400 AS INTEGER), updated_at = ?
+               WHERE id = ?`,
             )
-            .run();
+              .bind(
+                workerJob.status,
+                workerJob.batch_num,
+                workerJob.domains_checked,
+                workerJob.good_results,
+                workerJob.input_tokens ?? 0,
+                workerJob.output_tokens ?? 0,
+                workerJob.updated_at,
+                workerJob.updated_at,
+                now(),
+                workerJob.job_id,
+              )
+              .run();
+          } else {
+            await platform.env.DB.prepare(
+              `UPDATE domain_search_jobs
+               SET status = ?, batch_num = ?, domains_checked = ?, good_results = ?, input_tokens = ?, output_tokens = ?, updated_at = ?
+               WHERE id = ?`,
+            )
+              .bind(
+                workerJob.status,
+                workerJob.batch_num,
+                workerJob.domains_checked,
+                workerJob.good_results,
+                workerJob.input_tokens ?? 0,
+                workerJob.output_tokens ?? 0,
+                now(),
+                workerJob.job_id,
+              )
+              .run();
+          }
           updated++;
         } else {
           skipped++;

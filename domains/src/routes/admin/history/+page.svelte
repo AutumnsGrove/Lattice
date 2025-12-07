@@ -160,7 +160,7 @@
 						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden sm:table-cell">Status</th>
 						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden md:table-cell">Checked</th>
 						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70">Found</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden lg:table-cell">Duration</th>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden lg:table-cell">Tokens</th>
 						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-bark/70 hidden md:table-cell">Date</th>
 						<th class="px-4 py-3"></th>
 					</tr>
@@ -187,7 +187,11 @@
 								</span>
 							</td>
 							<td class="px-4 py-4 text-right text-sm font-sans text-bark/70 hidden lg:table-cell">
-								{formatDuration(job.duration_seconds)}
+								{#if job.input_tokens || job.output_tokens}
+									{((job.input_tokens ?? 0) + (job.output_tokens ?? 0)).toLocaleString()}
+								{:else}
+									-
+								{/if}
 							</td>
 							<td class="px-4 py-4 text-right text-sm font-sans text-bark/50 hidden md:table-cell">
 								{formatDate(job.created_at)}

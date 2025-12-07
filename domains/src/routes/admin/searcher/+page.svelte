@@ -89,7 +89,7 @@
 	let vibe = $state('professional');
 	let keywords = $state('');
 	let tldPreferences = $state<string[]>(['com', 'co']);
-	let aiProvider = $state('claude');
+	let aiProvider = $state('deepseek');
 
 	// UI state
 	let isSubmitting = $state(false);
@@ -136,8 +136,8 @@
 	];
 
 	const aiProviderOptions = [
-		{ value: 'claude', label: 'Claude (Recommended)', description: 'Best quality, highest cost' },
-		{ value: 'deepseek', label: 'DeepSeek (Budget)', description: 'Great quality, very low cost' },
+		{ value: 'deepseek', label: 'DeepSeek (Recommended)', description: 'Great quality, very low cost' },
+		{ value: 'claude', label: 'Claude (Premium)', description: 'Best quality, highest cost' },
 		{ value: 'kimi', label: 'Kimi', description: 'Good quality, low cost' },
 		{ value: 'cloudflare', label: 'Llama 4 (Cloudflare)', description: 'Good quality, lowest cost' }
 	];
@@ -518,13 +518,21 @@
 		expandedDomains = newSet;
 	}
 
-	// Estimate cost based on token usage (Claude pricing)
-	function estimateCost(usage: TokenUsage): string {
-		// Claude 3.5 Sonnet pricing: $3/M input, $15/M output
-		const inputCost = (usage.input_tokens / 1_000_000) * 3;
-		const outputCost = (usage.output_tokens / 1_000_000) * 15;
+	// Provider pricing per million tokens [input, output]
+	const PROVIDER_PRICING: Record<string, [number, number]> = {
+		claude: [3.0, 15.0],
+		deepseek: [0.28, 0.42],
+		kimi: [0.6, 2.5],
+		cloudflare: [0.27, 0.85],
+	};
+
+	// Estimate cost based on token usage and provider
+	function estimateCost(usage: TokenUsage, provider: string = aiProvider): string {
+		const [inputRate, outputRate] = PROVIDER_PRICING[provider] || PROVIDER_PRICING.deepseek;
+		const inputCost = (usage.input_tokens / 1_000_000) * inputRate;
+		const outputCost = (usage.output_tokens / 1_000_000) * outputRate;
 		const total = inputCost + outputCost;
-		return `$${total.toFixed(2)}`;
+		return `$${total.toFixed(3)}`;
 	}
 
 	// Format expiration date

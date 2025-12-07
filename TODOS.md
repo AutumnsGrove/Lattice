@@ -181,18 +181,31 @@
     - New endpoints: `/api/jobs/list`, `/api/jobs/recent`, `/api/backfill`
     - History page auto-syncs from worker on load + manual "Sync" button
     - All new jobs are indexed immediately when created
-- [ ] **Job index shows stale data** (2025-12-06)
+- [x] **Job index shows stale data** → **DONE (2025-12-06)**
   - Status/counts don't update after job completes unless /api/status is polled
-  - **Fix needed**: Sync should also fetch fresh status from each DO
-  - Add tokens (input/output) to job_index schema for history display
+  - **Fix: Added `/api/jobs/refresh` endpoint**
+    - Queries DOs in parallel for fresh status
+    - Added `input_tokens` and `output_tokens` to job_index schema (migration 0002)
+    - DO status response now includes token counts
+    - Sync endpoints call refresh before listing
+    - History table now shows Tokens column
 - [ ] **TLD Diversity Feature** (2025-12-06)
   - Add "Diverse TLDs" toggle to search UI
   - Modify prompts to encourage varied TLDs when enabled
   - Expand TLD options in UI beyond current 6 (add .club, .garden, .place, .life, .earth, .green, etc.)
   - Improve base prompts to be slightly more TLD-diverse by default
-- [ ] **Change default AI to DeepSeek** (2025-12-06)
-  - Update search UI default from 'claude' to 'deepseek'
-  - Update config page defaults
+- [x] **Change default AI to DeepSeek** → **DONE (2025-12-06)**
+  - UI default changed from 'claude' to 'deepseek'
+  - Worker fallback changed from 'claude' to 'deepseek'
+  - DeepSeek now shows as "(Recommended)" in provider dropdown
+- [ ] **History/Results Page UX Issues** (2025-12-06)
+  - Stats not live (domains checked/found/tokens/batch don't update without refresh)
+  - No live streaming of results from DO to history detail page
+  - Search parameters not fully shown (domain_idea, keywords, custom preferences missing)
+  - If user provided a domain idea, show checkmark/X for availability status
+- [ ] **Searcher Page Running Job Issue** (2025-12-06)
+  - Right panel shows last COMPLETED job, not currently running job
+  - Should show running job status or link to it
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state

@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS domain_search_jobs (
     domains_checked INTEGER NOT NULL DEFAULT 0,
     domains_available INTEGER NOT NULL DEFAULT 0, -- Count of available domains found
     good_results INTEGER NOT NULL DEFAULT 0,
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
     error TEXT,
     started_at TEXT,
     completed_at TEXT,
