@@ -39,6 +39,7 @@
   let showPreview = $state(true);
   let cursorLine = $state(1);
   let cursorCol = $state(1);
+  let isUpdating = $state(false);
 
   // Image upload state
   let isDragging = $state(false);
@@ -326,7 +327,8 @@
 
   // Text manipulation helpers
   function wrapSelection(before, after) {
-    if (!textareaRef) return;
+    if (!textareaRef || isUpdating) return;
+    isUpdating = true;
     const start = textareaRef.selectionStart;
     const end = textareaRef.selectionEnd;
     const selectedText = content.substring(start, end);
@@ -335,16 +337,19 @@
       textareaRef.selectionStart = start + before.length;
       textareaRef.selectionEnd = end + before.length;
       textareaRef.focus();
+      isUpdating = false;
     }, 0);
   }
 
   function insertAtCursor(text) {
-    if (!textareaRef) return;
+    if (!textareaRef || isUpdating) return;
+    isUpdating = true;
     const start = textareaRef.selectionStart;
     content = content.substring(0, start) + text + content.substring(start);
     setTimeout(() => {
       textareaRef.selectionStart = textareaRef.selectionEnd = start + text.length;
       textareaRef.focus();
+      isUpdating = false;
     }, 0);
   }
 
@@ -362,10 +367,18 @@
   }
 
   function insertCodeBlock() {
+    if (!textareaRef || isUpdating) return;
+    isUpdating = true;
     const start = textareaRef.selectionStart;
-    const selectedText = content.substring(start, textareaRef.selectionEnd);
+    const end = textareaRef.selectionEnd;
+    const selectedText = content.substring(start, end);
     const codeBlock = "```\n" + (selectedText || "code here") + "\n```";
-    content = content.substring(0, start) + codeBlock + content.substring(textareaRef.selectionEnd);
+    content = content.substring(0, start) + codeBlock + content.substring(end);
+    setTimeout(() => {
+      textareaRef.selectionStart = textareaRef.selectionEnd = start + codeBlock.length;
+      textareaRef.focus();
+      isUpdating = false;
+    }, 0);
   }
 
   function insertList() {
@@ -691,7 +704,9 @@
         </div>
         <div class="preview-content" bind:this={previewRef}>
           {#if previewHtml}
-            {@html previewHtml}
+            {#key previewHtml}
+              <div>{@html previewHtml}</div>
+            {/key}
           {:else}
             <p class="preview-placeholder">
               Your rendered markdown will appear here...
@@ -1006,7 +1021,9 @@
 
           <div class="content-body">
             {#if previewHtml}
-              {@html previewHtml}
+              {#key previewHtml}
+                <div>{@html previewHtml}</div>
+              {/key}
             {:else}
               <p class="preview-placeholder">Start writing to see your content here...</p>
             {/if}
@@ -1845,8 +1862,9 @@
     border: 1px solid var(--light-border-primary);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
+    z-index: 1003; /* above modals and gutters */
     animation: slide-up 0.2s ease;
+    overflow: hidden;
   }
   @keyframes slide-up {
     from { opacity: 0; transform: translateY(10px); }

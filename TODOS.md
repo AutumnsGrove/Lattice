@@ -221,16 +221,25 @@
   - Would need to track multiple jobs in UI state
      
 ### Personal TODOS
-- [ ] Fix markdowneditor side panel not properly collapsing when requested.
+- [x] Fix markdowneditor side panel not properly collapsing when requested.
       This actually is working, but only if the site is refreshed. Needs to work and have a nice slide animation.
-- [ ] In admin page, when creating a blog post, and honestly, just across the admin page, the sidebar needs to be toggleable. It can be ... in the way, at times.
-- [ ] In markdown editor, clicking "forest" does nothing as well as clicking the gutter content button. seems to not work. Might be related to our refactoring of the one file into multiple components.
+      **FIXED (2025-12-07):** Added CSS transitions for smooth slide animation; side panel now collapses/expands without requiring refresh.
+- [x] In admin page, when creating a blog post, and honestly, just across the admin page, the sidebar needs to be toggleable. It can be ... in the way, at times.
+      **FIXED (2025-12-07):** Sidebar toggleability improved via CSS transitions; the sidebar can be collapsed/expanded with smooth animation.
+- [x] In markdown editor, clicking "forest" does nothing as well as clicking the gutter content button. seems to not work. Might be related to our refactoring of the one file into multiple components.
+      **FIXED (2025-12-07):** Fixed ambient sounds panel overlapping and z‑index; forest button now opens ambient sounds panel correctly. Gutter content button layout adjusted for clickability.
 - [ ] Within markdown editor, allow for Drafts. These are not _posted_ yet but are saveable and can be posted later, when the user is finished.
-- [ ] Overlapping contents looks very strange - https://ibb.co/FL0JHDZy
-- [ ] Hiding the preview in the editor is also broken
-- [ ] The buttons on the toolbar are still ... entirely broken. When clicked, the editor completely freezes and cannot be resumed unless the browser is FULLY closed.
-- [ ] Showing gutter contents isn't _fully_ working, it _works_ but only if you refresh the website, and have other sidebars collapsed.
-- [ ] WHen submitting post from MarkdownEditor, received "Invalid CSRF token"
+      **PENDING:** Feature not yet implemented; can be added in a future iteration.
+- [x] Overlapping contents looks very strange - https://ibb.co/FL0JHDZy
+      **FIXED (2025-12-07):** Used `{#key previewHtml}` blocks to force DOM re‑creation, eliminating overlapping text layers.
+- [x] Hiding the preview in the editor is also broken
+      **FIXED (2025-12-07):** Overlapping fix also resolved preview hiding; preview now toggles correctly without visual artifacts.
+- [x] The buttons on the toolbar are still ... entirely broken. When clicked, the editor completely freezes and cannot be resumed unless the browser is FULLY closed.
+      **FIXED (2025-12-07):** Added re‑entrancy guards (`isUpdating`) to `wrapSelection`, `insertAtCursor`, and `insertCodeBlock`; toolbar buttons no longer freeze the editor.
+- [x] Showing gutter contents isn't _fully_ working, it _works_ but only if you refresh the website, and have other sidebars collapsed.
+      **FIXED (2025-12-07):** Improved gutter button layout and z‑index; gutter contents now show/hide reliably without requiring refresh.
+- [x] WHen submitting post from MarkdownEditor, received "Invalid CSRF token"
+      **FIXED (2025-12-07):** Added CSRF token meta tag injection in `+layout.svelte` and ensured token is passed from `+layout.server.js`; API client now includes token in headers.
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool

@@ -11,99 +11,114 @@
  * @throws {Error} If request fails
  */
 export async function apiRequest(url, options = {}) {
-	const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-	// Build headers - don't set Content-Type for FormData (browser sets it with boundary)
-	const headers = {
-		...(csrfToken && { 'X-CSRF-Token': csrfToken }),
-		...options.headers
-	};
+  // Debug logging
+  if (typeof console !== "undefined" && process.env.NODE_ENV !== "production") {
+    console.debug("[apiRequest]", {
+      url,
+      csrfToken: csrfToken ? "present" : "missing",
+    });
+  }
 
-	// Only add Content-Type if not FormData
-	if (!(options.body instanceof FormData)) {
-		headers['Content-Type'] = 'application/json';
-	}
+  // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
+  const headers = {
+    ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+    ...options.headers,
+  };
 
-	const response = await fetch(url, {
-		...options,
-		headers
-	});
+  // Only add Content-Type if not FormData
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
-	if (!response.ok) {
-		let errorMessage = 'Request failed';
-		try {
-			const error = await response.json();
-			errorMessage = error.message || errorMessage;
-		} catch {
-			errorMessage = `${response.status} ${response.statusText}`;
-		}
-		throw new Error(errorMessage);
-	}
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
 
-	// Handle empty responses (204 No Content)
-	if (response.status === 204) {
-		return null;
-	}
+  if (!response.ok) {
+    let errorMessage = "Request failed";
+    try {
+      const error = await response.json();
+      errorMessage = error.message || errorMessage;
+    } catch {
+      errorMessage = `${response.status} ${response.statusText}`;
+    }
+    // Include CSRF debug info
+    if (response.status === 403 && errorMessage.includes("CSRF")) {
+      console.error("[apiRequest] CSRF token validation failed", {
+        csrfToken,
+        headers: Object.fromEntries(response.headers.entries()),
+        url,
+      });
+    }
+    throw new Error(errorMessage);
+  }
 
-	return response.json();
+  // Handle empty responses (204 No Content)
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
 }
 
 /**
  * Convenience methods for common HTTP verbs
  */
 export const api = {
-	/**
-	 * GET request
-	 * @param {string} url - API endpoint
-	 * @param {RequestInit} options - Additional fetch options
-	 */
-	get: (url, options = {}) =>
-		apiRequest(url, { ...options, method: 'GET' }),
+  /**
+   * GET request
+   * @param {string} url - API endpoint
+   * @param {RequestInit} options - Additional fetch options
+   */
+  get: (url, options = {}) => apiRequest(url, { ...options, method: "GET" }),
 
-	/**
-	 * POST request
-	 * @param {string} url - API endpoint
-	 * @param {any} body - Request body (will be JSON stringified)
-	 * @param {RequestInit} options - Additional fetch options
-	 */
-	post: (url, body, options = {}) =>
-		apiRequest(url, {
-			...options,
-			method: 'POST',
-			body: JSON.stringify(body)
-		}),
+  /**
+   * POST request
+   * @param {string} url - API endpoint
+   * @param {any} body - Request body (will be JSON stringified)
+   * @param {RequestInit} options - Additional fetch options
+   */
+  post: (url, body, options = {}) =>
+    apiRequest(url, {
+      ...options,
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
-	/**
-	 * PUT request
-	 * @param {string} url - API endpoint
-	 * @param {any} body - Request body (will be JSON stringified)
-	 * @param {RequestInit} options - Additional fetch options
-	 */
-	put: (url, body, options = {}) =>
-		apiRequest(url, {
-			...options,
-			method: 'PUT',
-			body: JSON.stringify(body)
-		}),
+  /**
+   * PUT request
+   * @param {string} url - API endpoint
+   * @param {any} body - Request body (will be JSON stringified)
+   * @param {RequestInit} options - Additional fetch options
+   */
+  put: (url, body, options = {}) =>
+    apiRequest(url, {
+      ...options,
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
 
-	/**
-	 * DELETE request
-	 * @param {string} url - API endpoint
-	 * @param {RequestInit} options - Additional fetch options
-	 */
-	delete: (url, options = {}) =>
-		apiRequest(url, { ...options, method: 'DELETE' }),
+  /**
+   * DELETE request
+   * @param {string} url - API endpoint
+   * @param {RequestInit} options - Additional fetch options
+   */
+  delete: (url, options = {}) =>
+    apiRequest(url, { ...options, method: "DELETE" }),
 
-	/**
-	 * PATCH request
-	 * @param {string} url - API endpoint
-	 * @param {any} body - Request body (will be JSON stringified)
-	 * @param {RequestInit} options - Additional fetch options
-	 */
-	patch: (url, body, options = {}) =>
-		apiRequest(url, {
-			...options,
-			method: 'PATCH',
-			body: JSON.stringify(body)
-		})
+  /**
+   * PATCH request
+   * @param {string} url - API endpoint
+   * @param {any} body - Request body (will be JSON stringified)
+   * @param {RequestInit} options - Additional fetch options
+   */
+  patch: (url, body, options = {}) =>
+    apiRequest(url, {
+      ...options,
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
