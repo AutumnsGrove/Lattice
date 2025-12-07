@@ -219,6 +219,10 @@
 - [ ] Add search queue support (allow multiple concurrent searches)
   - Currently only one search can run at a time
   - Would need to track multiple jobs in UI state
+     
+### Personal TODOS
+- [ ] Fix markdowneditor side panel not properly collapsing when requested.
+- [ ] In admin page, when creating a blog post, and honestly, just across the admin page, the sidebar needs to be toggleable. It can be ... in the way, at times.
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
