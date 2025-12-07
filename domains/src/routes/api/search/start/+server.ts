@@ -14,6 +14,7 @@ interface StartSearchBody {
   vibe?: string;
   keywords?: string;
   tld_preferences?: string[];
+  diverse_tlds?: boolean;
   ai_provider?: string; // claude | deepseek | kimi | cloudflare
 }
 
@@ -45,6 +46,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
     vibe,
     keywords,
     tld_preferences,
+    diverse_tlds,
     ai_provider,
   } = body;
 
@@ -82,6 +84,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
           tld_preferences: tld_preferences || ["com", "co"],
           vibe: vibe || "professional",
           keywords: keywords?.trim() || undefined,
+          diverse_tlds: diverse_tlds || false,
         },
         // Include provider if specified (both driver and swarm use the same)
         ...(ai_provider && {

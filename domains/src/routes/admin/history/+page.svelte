@@ -6,6 +6,12 @@
 	let syncing = $state(false);
 	let syncMessage = $state<string | null>(null);
 
+	// Reactive jobs state for live updates
+	let jobs = $state(data.jobs);
+	let pollingInterval: ReturnType<typeof setInterval> | null = null;
+	let elapsedTimers: Record<string, number> = {};
+	let timerInterval: ReturnType<typeof setInterval> | null = null;
+
 	// Show auto-sync result notification
 	$effect(() => {
 		if (data.syncResult) {
@@ -17,6 +23,87 @@
 			setTimeout(() => (syncMessage = null), 5000);
 		}
 	});
+
+	// Get running job IDs
+	const runningJobIds = $derived(jobs.filter(j => j.status === 'running' || j.status === 'pending').map(j => j.id));
+
+	// Start/stop polling based on running jobs
+	$effect(() => {
+		if (runningJobIds.length > 0) {
+			startPolling();
+			startElapsedTimers();
+		} else {
+			stopPolling();
+			stopElapsedTimers();
+		}
+		return () => {
+			stopPolling();
+			stopElapsedTimers();
+		};
+	});
+
+	function startPolling() {
+		if (pollingInterval) return;
+		pollingInterval = setInterval(pollRunningJobs, 3000);
+	}
+
+	function stopPolling() {
+		if (pollingInterval) {
+			clearInterval(pollingInterval);
+			pollingInterval = null;
+		}
+	}
+
+	function startElapsedTimers() {
+		if (timerInterval) return;
+		// Initialize elapsed times for running jobs
+		for (const job of jobs.filter(j => j.status === 'running' || j.status === 'pending')) {
+			if (job.started_at) {
+				elapsedTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
+			}
+		}
+		timerInterval = setInterval(() => {
+			for (const jobId of runningJobIds) {
+				elapsedTimers[jobId] = (elapsedTimers[jobId] || 0) + 1;
+			}
+			elapsedTimers = { ...elapsedTimers }; // Trigger reactivity
+		}, 1000);
+	}
+
+	function stopElapsedTimers() {
+		if (timerInterval) {
+			clearInterval(timerInterval);
+			timerInterval = null;
+		}
+	}
+
+	async function pollRunningJobs() {
+		for (const jobId of runningJobIds) {
+			try {
+				const response = await fetch(`/api/search/status?job_id=${jobId}`);
+				if (response.ok) {
+					const result = await response.json() as { job?: typeof jobs[0] };
+					if (result.job) {
+						// Update job in list
+						const idx = jobs.findIndex(j => j.id === jobId);
+						if (idx >= 0) {
+							jobs[idx] = { ...jobs[idx], ...result.job };
+							jobs = [...jobs]; // Trigger reactivity
+						}
+					}
+				}
+			} catch (err) {
+				console.error(`Failed to poll job ${jobId}:`, err);
+			}
+		}
+	}
+
+	function formatElapsed(seconds: number): string {
+		if (seconds < 60) return `${seconds}s`;
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}m ${secs}s`;
+	}
 
 	interface SyncResult {
 		success: boolean;
@@ -91,6 +178,10 @@
 				return 'bg-bark/10 text-bark/60';
 		}
 	}
+
+	function isRunning(status: string): boolean {
+		return status === 'running' || status === 'pending';
+	}
 </script>
 
 <svelte:head>
@@ -141,7 +232,7 @@
 	</div>
 
 	<!-- Jobs List -->
-	{#if data.jobs.length === 0}
+	{#if jobs.length === 0}
 		<div class="card p-12 text-center">
 			<svg class="w-16 h-16 mx-auto text-bark/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -166,20 +257,32 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-grove-100">
-					{#each data.jobs as job}
-						<tr class="hover:bg-grove-50 transition-colors">
+					{#each jobs as job (job.id)}
+						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-domain-50/30' : ''}">
 							<td class="px-4 py-4">
 								<div class="font-sans font-medium text-bark">{job.business_name}</div>
 								<div class="text-sm text-bark/50 font-sans">{job.client_email}</div>
 								<div class="sm:hidden mt-1">
-									<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
+									<span class="badge {getStatusBadge(job.status)} {isRunning(job.status) ? 'animate-pulse' : ''}">{job.status}</span>
 								</div>
 							</td>
 							<td class="px-4 py-4 hidden sm:table-cell">
-								<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
+								<div class="flex items-center gap-2">
+									{#if isRunning(job.status)}
+										<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
+									{/if}
+									<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
+								</div>
+								{#if isRunning(job.status) && elapsedTimers[job.id]}
+									<div class="text-xs text-domain-600 font-mono mt-1">
+										{formatElapsed(elapsedTimers[job.id])}
+									</div>
+								{/if}
 							</td>
 							<td class="px-4 py-4 text-right text-sm font-sans text-bark/70 hidden md:table-cell">
-								{job.domains_checked}
+								<span class="{isRunning(job.status) ? 'font-medium text-domain-600' : ''}">
+									{job.domains_checked}
+								</span>
 							</td>
 							<td class="px-4 py-4 text-right">
 								<span class="font-sans font-medium {job.good_results > 0 ? 'text-grove-600' : 'text-bark/60'}">
@@ -211,9 +314,9 @@
 		</div>
 
 		<!-- Pagination could go here -->
-		{#if data.total > data.jobs.length}
+		{#if data.total > jobs.length}
 			<div class="text-center text-sm text-bark/50 font-sans">
-				Showing {data.jobs.length} of {data.total} searches
+				Showing {jobs.length} of {data.total} searches
 			</div>
 		{/if}
 	{/if}

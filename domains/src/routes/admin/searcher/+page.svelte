@@ -124,16 +124,123 @@
 		{ value: 'tech', label: 'Tech-focused' }
 	];
 
-	const tldOptions = [
-		{ value: 'com', label: '.com' },
-		{ value: 'co', label: '.co' },
-		{ value: 'io', label: '.io' },
-		{ value: 'dev', label: '.dev' },
-		{ value: 'app', label: '.app' },
-		{ value: 'me', label: '.me' },
-		{ value: 'net', label: '.net' },
-		{ value: 'org', label: '.org' }
+	// TLD Groups for categorized selection
+	interface TldGroup {
+		id: string;
+		label: string;
+		description: string;
+		tlds: { value: string; label: string }[];
+	}
+
+	const tldGroups: TldGroup[] = [
+		{
+			id: 'classic',
+			label: 'Classic',
+			description: 'Traditional and widely recognized',
+			tlds: [
+				{ value: 'com', label: '.com' },
+				{ value: 'net', label: '.net' },
+				{ value: 'org', label: '.org' }
+			]
+		},
+		{
+			id: 'tech',
+			label: 'Tech',
+			description: 'Perfect for startups and developers',
+			tlds: [
+				{ value: 'io', label: '.io' },
+				{ value: 'dev', label: '.dev' },
+				{ value: 'app', label: '.app' },
+				{ value: 'tech', label: '.tech' },
+				{ value: 'ai', label: '.ai' },
+				{ value: 'software', label: '.software' }
+			]
+		},
+		{
+			id: 'creative',
+			label: 'Creative',
+			description: 'For designers, artists, and makers',
+			tlds: [
+				{ value: 'design', label: '.design' },
+				{ value: 'studio', label: '.studio' },
+				{ value: 'space', label: '.space' },
+				{ value: 'art', label: '.art' },
+				{ value: 'gallery', label: '.gallery' }
+			]
+		},
+		{
+			id: 'nature',
+			label: 'Nature',
+			description: 'Earthy and organic vibes',
+			tlds: [
+				{ value: 'garden', label: '.garden' },
+				{ value: 'earth', label: '.earth' },
+				{ value: 'green', label: '.green' },
+				{ value: 'place', label: '.place' },
+				{ value: 'life', label: '.life' },
+				{ value: 'land', label: '.land' }
+			]
+		},
+		{
+			id: 'business',
+			label: 'Business',
+			description: 'Professional and corporate',
+			tlds: [
+				{ value: 'co', label: '.co' },
+				{ value: 'biz', label: '.biz' },
+				{ value: 'company', label: '.company' },
+				{ value: 'agency', label: '.agency' },
+				{ value: 'consulting', label: '.consulting' }
+			]
+		},
+		{
+			id: 'personal',
+			label: 'Personal',
+			description: 'Great for personal brands',
+			tlds: [
+				{ value: 'me', label: '.me' },
+				{ value: 'name', label: '.name' },
+				{ value: 'blog', label: '.blog' },
+				{ value: 'page', label: '.page' }
+			]
+		}
 	];
+
+	// State for expanded groups (Classic and Tech expanded by default)
+	let expandedGroups = $state<Set<string>>(new Set(['classic', 'tech']));
+
+	// Diverse TLDs toggle
+	let diverseTlds = $state(false);
+
+	function toggleGroup(groupId: string) {
+		const newSet = new Set(expandedGroups);
+		if (newSet.has(groupId)) {
+			newSet.delete(groupId);
+		} else {
+			newSet.add(groupId);
+		}
+		expandedGroups = newSet;
+	}
+
+	function selectAllInGroup(groupId: string) {
+		const group = tldGroups.find(g => g.id === groupId);
+		if (!group) return;
+		const groupTlds = group.tlds.map(t => t.value);
+		tldPreferences = [...new Set([...tldPreferences, ...groupTlds])];
+	}
+
+	function deselectAllInGroup(groupId: string) {
+		const group = tldGroups.find(g => g.id === groupId);
+		if (!group) return;
+		const groupTldSet = new Set(group.tlds.map(t => t.value));
+		tldPreferences = tldPreferences.filter(t => !groupTldSet.has(t));
+	}
+
+	function getSelectedCountInGroup(groupId: string): number {
+		const group = tldGroups.find(g => g.id === groupId);
+		if (!group) return 0;
+		return group.tlds.filter(t => tldPreferences.includes(t.value)).length;
+	}
 
 	const aiProviderOptions = [
 		{ value: 'deepseek', label: 'DeepSeek (Recommended)', description: 'Great quality, very low cost' },
@@ -173,6 +280,7 @@
 					vibe,
 					keywords: keywords.trim() || null,
 					tld_preferences: tldPreferences,
+					diverse_tlds: diverseTlds,
 					// Only include provider if not the default (claude)
 					...(aiProvider !== 'claude' && { ai_provider: aiProvider })
 				})
@@ -629,22 +737,99 @@
 					</select>
 				</div>
 
-				<!-- TLD Preferences -->
+				<!-- TLD Preferences - Grouped -->
 				<div>
 					<label class="block text-sm font-sans font-medium text-bark mb-2">
 						Preferred TLDs
 					</label>
-					<div class="flex flex-wrap gap-2">
-						{#each tldOptions as option}
-							<button
-								type="button"
-								onclick={() => toggleTld(option.value)}
-								class="px-3 py-1.5 rounded-full text-sm font-sans transition-colors {tldPreferences.includes(option.value) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
-								disabled={isFormDisabled}
-							>
-								{option.label}
-							</button>
+					<div class="space-y-2 border border-grove-200 rounded-lg overflow-hidden">
+						{#each tldGroups as group}
+							{@const isExpanded = expandedGroups.has(group.id)}
+							{@const selectedCount = getSelectedCountInGroup(group.id)}
+							<div class="border-b border-grove-100 last:border-b-0">
+								<!-- Group Header -->
+								<button
+									type="button"
+									onclick={() => toggleGroup(group.id)}
+									disabled={isFormDisabled}
+									class="w-full px-3 py-2 flex items-center justify-between bg-grove-50 hover:bg-grove-100 transition-colors disabled:opacity-50"
+								>
+									<div class="flex items-center gap-2">
+										<svg
+											class="w-4 h-4 text-bark/50 transition-transform {isExpanded ? 'rotate-90' : ''}"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+										</svg>
+										<span class="font-sans font-medium text-bark text-sm">{group.label}</span>
+										<span class="text-xs text-bark/50 font-sans">{group.description}</span>
+									</div>
+									{#if selectedCount > 0}
+										<span class="px-2 py-0.5 text-xs font-sans bg-domain-100 text-domain-700 rounded-full">
+											{selectedCount} selected
+										</span>
+									{/if}
+								</button>
+
+								<!-- Group Content -->
+								{#if isExpanded}
+									<div class="px-3 py-2 bg-white">
+										<div class="flex items-center justify-between mb-2">
+											<div class="flex gap-2">
+												<button
+													type="button"
+													onclick={() => selectAllInGroup(group.id)}
+													disabled={isFormDisabled}
+													class="text-xs text-domain-600 hover:text-domain-700 font-sans disabled:opacity-50"
+												>
+													Select all
+												</button>
+												<span class="text-bark/30">|</span>
+												<button
+													type="button"
+													onclick={() => deselectAllInGroup(group.id)}
+													disabled={isFormDisabled}
+													class="text-xs text-bark/50 hover:text-bark/70 font-sans disabled:opacity-50"
+												>
+													Clear
+												</button>
+											</div>
+										</div>
+										<div class="flex flex-wrap gap-1.5">
+											{#each group.tlds as tld}
+												<button
+													type="button"
+													onclick={() => toggleTld(tld.value)}
+													class="px-2.5 py-1 rounded-full text-xs font-sans transition-colors {tldPreferences.includes(tld.value) ? 'bg-domain-100 text-domain-700 border border-domain-300' : 'bg-bark/5 text-bark/60 border border-transparent hover:bg-bark/10'}"
+													disabled={isFormDisabled}
+												>
+													{tld.label}
+												</button>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</div>
 						{/each}
+					</div>
+
+					<!-- Diverse TLDs Toggle -->
+					<div class="flex items-center justify-between mt-3 pt-3 border-t border-grove-100">
+						<div>
+							<span class="text-sm font-sans font-medium text-bark">Diverse TLDs</span>
+							<p class="text-xs text-bark/50 font-sans">Encourage variety in TLD suggestions</p>
+						</div>
+						<button
+							type="button"
+							role="switch"
+							aria-checked={diverseTlds}
+							onclick={() => diverseTlds = !diverseTlds}
+							disabled={isFormDisabled}
+							class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 {diverseTlds ? 'bg-domain-600' : 'bg-bark/20'}"
+						>
+							<span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {diverseTlds ? 'translate-x-6' : 'translate-x-1'}" />
+						</button>
 					</div>
 				</div>
 
