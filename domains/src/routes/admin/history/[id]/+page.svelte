@@ -138,9 +138,10 @@
 
 	function startTimer() {
 		if (timerInterval) return;
-		// Initialize elapsed time
-		if (job?.started_at) {
-			elapsedSeconds = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
+		// Initialize elapsed time - use started_at or fall back to created_at
+		const startTime = job?.started_at || job?.created_at;
+		if (startTime) {
+			elapsedSeconds = Math.floor((Date.now() - new Date(startTime).getTime()) / 1000);
 		}
 		timerInterval = setInterval(() => {
 			elapsedSeconds++;
@@ -221,6 +222,19 @@
 			case 'recommended': return 'text-domain-600';
 			case 'premium': return 'text-amber-600';
 			default: return 'text-bark/60';
+		}
+	}
+
+	function formatTldPreferences(tldPrefs: string | string[] | null | undefined): string {
+		if (!tldPrefs) return 'None specified';
+		try {
+			const prefs = typeof tldPrefs === 'string' ? JSON.parse(tldPrefs) : tldPrefs;
+			if (Array.isArray(prefs) && prefs.length > 0) {
+				return prefs.map((t: string) => `.${t}`).join(', ');
+			}
+			return 'None specified';
+		} catch {
+			return 'None specified';
 		}
 	}
 </script>
@@ -347,7 +361,7 @@
 				{/if}
 				<div>
 					<span class="text-bark/60">TLD Preferences:</span>
-					<span class="text-bark ml-2">{JSON.parse(job.tld_preferences).map((t: string) => `.${t}`).join(', ')}</span>
+					<span class="text-bark ml-2">{formatTldPreferences(job.tld_preferences)}</span>
 				</div>
 				{#if job.keywords}
 					<div>
