@@ -141,7 +141,9 @@
 		// Initialize elapsed time - use started_at or fall back to created_at
 		const startTime = job?.started_at || job?.created_at;
 		if (startTime) {
-			elapsedSeconds = Math.floor((Date.now() - new Date(startTime).getTime()) / 1000);
+			const elapsed = Math.floor((Date.now() - new Date(startTime).getTime()) / 1000);
+			// Prevent negative elapsed times (can happen with timezone differences)
+			elapsedSeconds = Math.max(0, elapsed);
 		}
 		timerInterval = setInterval(() => {
 			elapsedSeconds++;
