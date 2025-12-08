@@ -12,6 +12,9 @@ export { default as CollapsibleSection } from './components/custom/CollapsibleSe
 export { default as MarkdownEditor } from './components/admin/MarkdownEditor.svelte';
 export { default as GutterManager } from './components/admin/GutterManager.svelte';
 
+// Quota components
+export { QuotaWidget, QuotaWarning, UpgradePrompt } from './components/quota/index';
+
 // Gallery components (from UI module)
 export { default as ImageGallery } from './ui/components/gallery/ImageGallery.svelte';
 export { default as Lightbox } from './ui/components/gallery/Lightbox.svelte';
@@ -23,3 +26,6 @@ export * from './ui/index';
 
 // Utilities
 export { cn } from './utils/cn';
+
+// GroveAuth client (re-export for convenience)
+export * from './groveauth/index';

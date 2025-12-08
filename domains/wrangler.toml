@@ -7,6 +7,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [vars]
 SITE_NAME = "Grove Domain Finder"
 SITE_URL = "http://localhost:5174"
+GROVEAUTH_URL = "https://auth.grove.place"
 
 # D1 Database binding (shared with main platform)
 [[d1_databases]]
@@ -14,9 +15,11 @@ binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
-# Secrets (configured in Cloudflare Dashboard or via wrangler secret):
+# Secrets (configured in Cloudflare Dashboard or via wrangler pages secret):
 # - RESEND_API_KEY
 # - ADMIN_EMAILS
 # - ANTHROPIC_API_KEY (for domain search)
 # - DOMAIN_WORKER_URL (URL to the domain search worker)
+# - GROVEAUTH_CLIENT_ID (OAuth client ID)
+# - GROVEAUTH_CLIENT_SECRET (OAuth client secret)
 # Production SITE_URL is set via --var flag in deployment

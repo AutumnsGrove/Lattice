@@ -2,6 +2,26 @@
 import { MODELS, SEARCH_DEFAULTS } from "$lib/config";
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Session duration: 30 days in milliseconds */
+const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Magic code expiration: 15 minutes in milliseconds */
+const MAGIC_CODE_EXPIRY_MS = 15 * 60 * 1000;
+
+/**
+ * Magic code security parameters.
+ *
+ * SECURITY NOTE: The 6-character code from a 32-char alphabet provides ~10^9 combinations.
+ * To prevent brute force attacks, implement rate limiting on the verification endpoint:
+ * - Recommended: 3 attempts per email per 15 minutes
+ * - Lock account for 1 hour after 10 failed attempts
+ */
+const MAGIC_CODE_LENGTH = 6;
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -109,33 +129,116 @@ export async function getUserById(
 export interface Session {
   id: string;
   user_id: string;
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expires_at: string | null;
   expires_at: string;
   created_at: string;
 }
 
+/**
+ * Create a new session with optional OAuth tokens stored in D1.
+ * Tokens are stored in the database rather than cookies for better security.
+ */
 export async function createSession(
   db: D1Database,
   userId: string,
+  tokens?: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresIn?: number;
+  },
 ): Promise<Session> {
   const id = generateId();
   const timestamp = now();
-  const expiresAt = new Date(
-    Date.now() + 30 * 24 * 60 * 60 * 1000,
-  ).toISOString(); // 30 days
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString();
+
+  const tokenExpiresAt = tokens?.expiresIn
+    ? new Date(Date.now() + tokens.expiresIn * 1000).toISOString()
+    : null;
 
   await db
     .prepare(
-      "INSERT INTO sessions (id, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)",
+      `INSERT INTO sessions (id, user_id, access_token, refresh_token, token_expires_at, expires_at, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     )
-    .bind(id, userId, expiresAt, timestamp)
+    .bind(
+      id,
+      userId,
+      tokens?.accessToken ?? null,
+      tokens?.refreshToken ?? null,
+      tokenExpiresAt,
+      expiresAt,
+      timestamp,
+    )
     .run();
 
   return {
     id,
     user_id: userId,
+    access_token: tokens?.accessToken ?? null,
+    refresh_token: tokens?.refreshToken ?? null,
+    token_expires_at: tokenExpiresAt,
     expires_at: expiresAt,
     created_at: timestamp,
   };
+}
+
+/**
+ * Get a session by ID with token information
+ */
+export async function getSession(
+  db: D1Database,
+  sessionId: string,
+): Promise<Session | null> {
+  const result = await db
+    .prepare(
+      'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")',
+    )
+    .bind(sessionId)
+    .first<Session>();
+  return result ?? null;
+}
+
+/**
+ * Update session tokens (used after token refresh)
+ */
+export async function updateSessionTokens(
+  db: D1Database,
+  sessionId: string,
+  tokens: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresIn?: number;
+  },
+): Promise<void> {
+  const tokenExpiresAt = tokens.expiresIn
+    ? new Date(Date.now() + tokens.expiresIn * 1000).toISOString()
+    : null;
+
+  await db
+    .prepare(
+      `UPDATE sessions
+       SET access_token = ?, refresh_token = COALESCE(?, refresh_token), token_expires_at = ?
+       WHERE id = ?`,
+    )
+    .bind(
+      tokens.accessToken,
+      tokens.refreshToken ?? null,
+      tokenExpiresAt,
+      sessionId,
+    )
+    .run();
+}
+
+/**
+ * Clean up expired sessions (can be called periodically)
+ */
+export async function cleanupExpiredSessions(db: D1Database): Promise<number> {
+  const result = await db
+    .prepare('DELETE FROM sessions WHERE expires_at < datetime("now")')
+    .run();
+  return result.meta.changes ?? 0;
 }
 
 export async function deleteSession(
@@ -176,9 +279,9 @@ export async function createMagicCode(
   email: string,
 ): Promise<MagicCode> {
   const id = generateId();
-  const code = generateSecureCode(6);
+  const code = generateSecureCode(MAGIC_CODE_LENGTH);
   const timestamp = now();
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+  const expiresAt = new Date(Date.now() + MAGIC_CODE_EXPIRY_MS).toISOString();
 
   await db
     .prepare(
