@@ -9,7 +9,7 @@
 - [x] Set up SvelteKit project with TypeScript → **DONE: SvelteKit 2.5+ with Svelte 5**
 - [x] Configure Cloudflare Workers and D1 database → **DONE: 7 migrations in place**
 - [x] Implement magic link auth (6-digit email codes via Resend) → **DONE**
-- [ ] Implement Google Sign-In (OAuth 2.0 with PKCE) → **PENDING** (based on @docs/Google-signin.md)
+- [x] Implement Google Sign-In (OAuth 2.0 with PKCE) → **DONE (2025-12-08)** via GroveAuth integration
 - [x] Configure Stripe for payments → **DONE: Stripe payments system with provider abstraction**
 - [x] Set up Resend for email → **DONE: Used for magic code auth**
 - [x] Check domain availability → **DONE: grove.place secured!**
@@ -77,7 +77,7 @@
 - [x] Extract blog functionality from autumnsgrove.com → **DONE: Complete migration in PR #14**
 - [x] Implement core blog engine with post creation/editing → **DONE: Full CRUD with MarkdownEditor**
 - [x] Add basic theming system (1 theme) → **DONE: Theme system foundation with switcher**
-- [ ] Implement post limits (250 for Starter plan)
+- [x] Implement post limits (250 for Starter plan) → **DONE (2025-12-08)** via GroveAuth subscription tiers
 - [x] Set up R2 storage for media uploads → **DONE: CDN admin upload system (PR #17, #20)**
 - [x] Build admin dashboard for Mom's publishing house → **DONE: Full admin panel with CDN uploader**
 - [ ] Test with Mom's publishing house as first client
