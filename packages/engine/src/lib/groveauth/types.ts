@@ -25,7 +25,7 @@ export interface GroveAuthConfig {
 
 export interface TokenResponse {
   access_token: string;
-  token_type: 'Bearer';
+  token_type: "Bearer";
   expires_in: number;
   refresh_token: string;
   scope: string;
@@ -46,7 +46,7 @@ export interface UserInfo {
   email: string;
   name: string | null;
   picture: string | null;
-  provider: 'google' | 'github' | 'magic_code';
+  provider: "google" | "github" | "magic_code";
 }
 
 export interface LoginUrlResult {
@@ -59,7 +59,7 @@ export interface LoginUrlResult {
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = 'starter' | 'professional' | 'business';
+export type SubscriptionTier = "starter" | "professional" | "business";
 
 export interface UserSubscription {
   id: string;
@@ -124,38 +124,65 @@ export interface CanPostResponse {
  * @see docs/implementing-post-limits.md for full specification
  */
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
-  starter: 250,       // For hobbyists and personal blogs
+  starter: 250, // For hobbyists and personal blogs
   professional: 2000, // For active bloggers and small businesses
-  business: null,     // Unlimited for enterprises and power users
+  business: null, // Unlimited for enterprises and power users
 };
 
 /**
  * Human-readable tier names for UI display.
  */
 export const TIER_NAMES: Record<SubscriptionTier, string> = {
-  starter: 'Starter',
-  professional: 'Professional',
-  business: 'Business',
+  starter: "Starter",
+  professional: "Professional",
+  business: "Business",
 };
 
 // =============================================================================
 // ERROR TYPES
 // =============================================================================
 
+/**
+ * OAuth/API error response structure from GroveAuth.
+ * Used to parse error responses from the authentication API.
+ *
+ * @example
+ * ```typescript
+ * const response = await fetch('/token');
+ * if (!response.ok) {
+ *   const error: AuthError = await response.json();
+ *   console.error(error.error, error.error_description);
+ * }
+ * ```
+ */
 export interface AuthError {
+  /** OAuth error code (e.g., 'invalid_grant', 'access_denied') */
   error: string;
+  /** Human-readable error description (OAuth standard) */
   error_description?: string;
+  /** Alternative message field used by some endpoints */
   message?: string;
 }
 
+/**
+ * Client-side error class for GroveAuth operations.
+ * Thrown when authentication or subscription operations fail.
+ */
 export class GroveAuthError extends Error {
-  public code: string;
-  public statusCode: number;
+  /** Error code (e.g., 'invalid_user_id', 'subscription_error') */
+  public readonly code: string;
+  /** HTTP status code from the response */
+  public readonly statusCode: number;
 
   constructor(code: string, message: string, statusCode: number = 400) {
     super(message);
-    this.name = 'GroveAuthError';
+    this.name = "GroveAuthError";
     this.code = code;
     this.statusCode = statusCode;
+  }
+
+  /** Alias for statusCode for compatibility */
+  get status(): number {
+    return this.statusCode;
   }
 }

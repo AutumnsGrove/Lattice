@@ -14,10 +14,10 @@ import type {
   SubscriptionResponse,
   CanPostResponse,
   SubscriptionTier,
-} from './types.js';
-import { GroveAuthError } from './types.js';
+} from "./types.js";
+import { GroveAuthError } from "./types.js";
 
-const DEFAULT_AUTH_URL = 'https://auth.grove.place';
+const DEFAULT_AUTH_URL = "https://auth.grove.place";
 
 // =============================================================================
 // PKCE HELPERS
@@ -27,10 +27,14 @@ const DEFAULT_AUTH_URL = 'https://auth.grove.place';
  * Generate a cryptographically secure random string
  */
 function generateRandomString(length: number): string {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const randomValues = new Uint8Array(length);
   crypto.getRandomValues(randomValues);
-  return Array.from(randomValues, (byte) => charset[byte % charset.length]).join('');
+  return Array.from(
+    randomValues,
+    (byte) => charset[byte % charset.length],
+  ).join("");
 }
 
 /**
@@ -46,10 +50,10 @@ export function generateCodeVerifier(): string {
 export async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
-  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hash = await crypto.subtle.digest("SHA-256", data);
   const base64 = btoa(String.fromCharCode(...new Uint8Array(hash)));
   // URL-safe base64
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**
@@ -73,11 +77,15 @@ export function generateState(): string {
 const USER_ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
 
 function validateUserId(userId: string): void {
-  if (!userId || typeof userId !== 'string') {
-    throw new GroveAuthError('invalid_user_id', 'User ID is required', 400);
+  if (!userId || typeof userId !== "string") {
+    throw new GroveAuthError("invalid_user_id", "User ID is required", 400);
   }
   if (!USER_ID_PATTERN.test(userId)) {
-    throw new GroveAuthError('invalid_user_id', 'User ID contains invalid characters', 400);
+    throw new GroveAuthError(
+      "invalid_user_id",
+      "User ID contains invalid characters",
+      400,
+    );
   }
 }
 
@@ -93,7 +101,10 @@ export class GroveAuthClient {
    * Reduces API calls for frequently accessed subscription info.
    * Cache entries expire after 5 minutes (configurable via cacheTTL).
    */
-  private subscriptionCache = new Map<string, { data: SubscriptionResponse; expires: number }>();
+  private subscriptionCache = new Map<
+    string,
+    { data: SubscriptionResponse; expires: number }
+  >();
   private cacheTTL: number;
 
   /**
@@ -101,7 +112,10 @@ export class GroveAuthClient {
    * When multiple concurrent requests come in for the same user,
    * they all wait on the same promise instead of making redundant API calls.
    */
-  private subscriptionPromises = new Map<string, Promise<SubscriptionResponse>>();
+  private subscriptionPromises = new Map<
+    string,
+    Promise<SubscriptionResponse>
+  >();
 
   constructor(config: GroveAuthConfig & { cacheTTL?: number }) {
     this.config = {
@@ -129,6 +143,26 @@ export class GroveAuthClient {
   }
 
   /**
+   * Clean up expired cache entries to prevent memory leaks.
+   * Call periodically in long-running processes.
+   *
+   * @returns Number of entries removed
+   */
+  cleanupExpiredCache(): number {
+    const now = Date.now();
+    let removed = 0;
+
+    for (const [key, entry] of this.subscriptionCache.entries()) {
+      if (now >= entry.expires) {
+        this.subscriptionCache.delete(key);
+        removed++;
+      }
+    }
+
+    return removed;
+  }
+
+  /**
    * Helper for exponential backoff retry logic
    */
   private async withRetry<T>(
@@ -145,7 +179,11 @@ export class GroveAuthClient {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Don't retry on 4xx errors (client errors)
-        if (error instanceof GroveAuthError && error.status >= 400 && error.status < 500) {
+        if (
+          error instanceof GroveAuthError &&
+          error.statusCode >= 400 &&
+          error.statusCode < 500
+        ) {
           throw error;
         }
 
@@ -160,7 +198,7 @@ export class GroveAuthClient {
       }
     }
 
-    throw lastError ?? new Error('Operation failed after retries');
+    throw lastError ?? new Error("Operation failed after retries");
   }
 
   // ===========================================================================
@@ -181,7 +219,7 @@ export class GroveAuthClient {
       redirect_uri: this.config.redirectUri,
       state,
       code_challenge: codeChallenge,
-      code_challenge_method: 'S256',
+      code_challenge_method: "S256",
     });
 
     return {
@@ -194,14 +232,17 @@ export class GroveAuthClient {
   /**
    * Exchange an authorization code for tokens
    */
-  async exchangeCode(code: string, codeVerifier: string): Promise<TokenResponse> {
+  async exchangeCode(
+    code: string,
+    codeVerifier: string,
+  ): Promise<TokenResponse> {
     const response = await fetch(`${this.config.authBaseUrl}/token`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         code,
         redirect_uri: this.config.redirectUri,
         client_id: this.config.clientId,
@@ -214,9 +255,9 @@ export class GroveAuthClient {
 
     if (!response.ok) {
       throw new GroveAuthError(
-        data.error || 'token_error',
-        data.error_description || data.message || 'Failed to exchange code',
-        response.status
+        data.error || "token_error",
+        data.error_description || data.message || "Failed to exchange code",
+        response.status,
       );
     }
 
@@ -238,26 +279,29 @@ export class GroveAuthClient {
   ): Promise<TokenResponse> {
     return this.withRetry(
       async () => {
-        const response = await fetch(`${this.config.authBaseUrl}/token/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+        const response = await fetch(
+          `${this.config.authBaseUrl}/token/refresh`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: refreshToken,
+              client_id: this.config.clientId,
+              client_secret: this.config.clientSecret,
+            }),
           },
-          body: new URLSearchParams({
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken,
-            client_id: this.config.clientId,
-            client_secret: this.config.clientSecret,
-          }),
-        });
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
           throw new GroveAuthError(
-            data.error || 'refresh_error',
-            data.error_description || data.message || 'Failed to refresh token',
-            response.status
+            data.error || "refresh_error",
+            data.error_description || data.message || "Failed to refresh token",
+            response.status,
           );
         }
 
@@ -285,13 +329,13 @@ export class GroveAuthClient {
    */
   async revokeToken(refreshToken: string): Promise<void> {
     const response = await fetch(`${this.config.authBaseUrl}/token/revoke`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         token: refreshToken,
-        token_type_hint: 'refresh_token',
+        token_type_hint: "refresh_token",
         client_id: this.config.clientId,
         client_secret: this.config.clientSecret,
       }),
@@ -300,9 +344,9 @@ export class GroveAuthClient {
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'revoke_error',
-        data.error_description || data.message || 'Failed to revoke token',
-        response.status
+        data.error || "revoke_error",
+        data.error_description || data.message || "Failed to revoke token",
+        response.status,
       );
     }
   }
@@ -321,7 +365,7 @@ export class GroveAuthClient {
       },
     });
 
-    const data = await response.json() as TokenInfo;
+    const data = (await response.json()) as TokenInfo;
 
     if (!data.active) {
       return null;
@@ -343,9 +387,9 @@ export class GroveAuthClient {
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'userinfo_error',
-        data.error_description || data.message || 'Failed to get user info',
-        response.status
+        data.error || "userinfo_error",
+        data.error_description || data.message || "Failed to get user info",
+        response.status,
       );
     }
 
@@ -369,9 +413,9 @@ export class GroveAuthClient {
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'subscription_error',
-        data.message || 'Failed to get subscription',
-        response.status
+        data.error || "subscription_error",
+        data.message || "Failed to get subscription",
+        response.status,
       );
     }
 
@@ -390,7 +434,11 @@ export class GroveAuthClient {
    * @param userId - User ID to get subscription for
    * @param skipCache - If true, bypasses cache and fetches fresh data
    */
-  async getUserSubscription(accessToken: string, userId: string, skipCache = false): Promise<SubscriptionResponse> {
+  async getUserSubscription(
+    accessToken: string,
+    userId: string,
+    skipCache = false,
+  ): Promise<SubscriptionResponse> {
     validateUserId(userId);
 
     const cacheKey = `sub:${userId}`;
@@ -410,7 +458,11 @@ export class GroveAuthClient {
     }
 
     // Create the fetch promise
-    const fetchPromise = this._fetchUserSubscription(accessToken, userId, cacheKey);
+    const fetchPromise = this._fetchUserSubscription(
+      accessToken,
+      userId,
+      cacheKey,
+    );
 
     // Store the promise so concurrent requests can share it
     this.subscriptionPromises.set(cacheKey, fetchPromise);
@@ -431,22 +483,25 @@ export class GroveAuthClient {
     userId: string,
     cacheKey: string,
   ): Promise<SubscriptionResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'subscription_error',
-        data.message || 'Failed to get subscription',
-        response.status
+        data.error || "subscription_error",
+        data.message || "Failed to get subscription",
+        response.status,
       );
     }
 
-    const data = await response.json() as SubscriptionResponse;
+    const data = (await response.json()) as SubscriptionResponse;
 
     // Cache the result
     this.subscriptionCache.set(cacheKey, {
@@ -460,20 +515,26 @@ export class GroveAuthClient {
   /**
    * Check if a user can create a new post
    */
-  async canUserCreatePost(accessToken: string, userId: string): Promise<CanPostResponse> {
+  async canUserCreatePost(
+    accessToken: string,
+    userId: string,
+  ): Promise<CanPostResponse> {
     validateUserId(userId);
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/can-post`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/can-post`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'limit_check_error',
-        data.message || 'Failed to check post limit',
-        response.status
+        data.error || "limit_check_error",
+        data.message || "Failed to check post limit",
+        response.status,
       );
     }
 
@@ -484,27 +545,33 @@ export class GroveAuthClient {
    * Increment post count after creating a post
    * Automatically invalidates subscription cache for this user
    */
-  async incrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
+  async incrementPostCount(
+    accessToken: string,
+    userId: string,
+  ): Promise<SubscriptionResponse> {
     validateUserId(userId);
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "increment" }),
       },
-      body: JSON.stringify({ action: 'increment' }),
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'count_error',
-        data.message || 'Failed to update post count',
-        response.status
+        data.error || "count_error",
+        data.message || "Failed to update post count",
+        response.status,
       );
     }
 
-    const data = await response.json() as SubscriptionResponse;
+    const data = (await response.json()) as SubscriptionResponse;
 
     // Update cache with fresh data
     this.subscriptionCache.set(`sub:${userId}`, {
@@ -519,27 +586,33 @@ export class GroveAuthClient {
    * Decrement post count after deleting a post
    * Automatically updates subscription cache for this user
    */
-  async decrementPostCount(accessToken: string, userId: string): Promise<SubscriptionResponse> {
+  async decrementPostCount(
+    accessToken: string,
+    userId: string,
+  ): Promise<SubscriptionResponse> {
     validateUserId(userId);
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "decrement" }),
       },
-      body: JSON.stringify({ action: 'decrement' }),
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'count_error',
-        data.message || 'Failed to update post count',
-        response.status
+        data.error || "count_error",
+        data.message || "Failed to update post count",
+        response.status,
       );
     }
 
-    const data = await response.json() as SubscriptionResponse;
+    const data = (await response.json()) as SubscriptionResponse;
 
     // Update cache with fresh data
     this.subscriptionCache.set(`sub:${userId}`, {
@@ -554,27 +627,34 @@ export class GroveAuthClient {
    * Update post count to a specific value
    * Automatically updates subscription cache for this user
    */
-  async setPostCount(accessToken: string, userId: string, count: number): Promise<SubscriptionResponse> {
+  async setPostCount(
+    accessToken: string,
+    userId: string,
+    count: number,
+  ): Promise<SubscriptionResponse> {
     validateUserId(userId);
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/post-count`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ count }),
       },
-      body: JSON.stringify({ count }),
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'count_error',
-        data.message || 'Failed to update post count',
-        response.status
+        data.error || "count_error",
+        data.message || "Failed to update post count",
+        response.status,
       );
     }
 
-    const data = await response.json() as SubscriptionResponse;
+    const data = (await response.json()) as SubscriptionResponse;
 
     // Update cache with fresh data
     this.subscriptionCache.set(`sub:${userId}`, {
@@ -589,27 +669,34 @@ export class GroveAuthClient {
    * Update a user's subscription tier
    * Automatically updates subscription cache for this user
    */
-  async updateTier(accessToken: string, userId: string, tier: SubscriptionTier): Promise<SubscriptionResponse> {
+  async updateTier(
+    accessToken: string,
+    userId: string,
+    tier: SubscriptionTier,
+  ): Promise<SubscriptionResponse> {
     validateUserId(userId);
-    const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/tier`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}/tier`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tier }),
       },
-      body: JSON.stringify({ tier }),
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
       throw new GroveAuthError(
-        data.error || 'tier_error',
-        data.message || 'Failed to update tier',
-        response.status
+        data.error || "tier_error",
+        data.message || "Failed to update tier",
+        response.status,
       );
     }
 
-    const data = await response.json() as SubscriptionResponse;
+    const data = (await response.json()) as SubscriptionResponse;
 
     // Update cache with fresh data
     this.subscriptionCache.set(`sub:${userId}`, {
@@ -628,6 +715,8 @@ export class GroveAuthClient {
 /**
  * Create a GroveAuth client instance
  */
-export function createGroveAuthClient(config: GroveAuthConfig): GroveAuthClient {
+export function createGroveAuthClient(
+  config: GroveAuthConfig,
+): GroveAuthClient {
   return new GroveAuthClient(config);
 }

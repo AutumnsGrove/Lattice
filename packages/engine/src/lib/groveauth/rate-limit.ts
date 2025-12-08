@@ -1,8 +1,19 @@
 /**
  * Rate Limiting Utilities for GroveAuth API
  *
- * Provides client-side rate limiting and request throttling
- * to prevent API abuse and stay within service limits.
+ * Provides CLIENT-SIDE rate limiting and request throttling as a first line
+ * of defense to prevent accidental API abuse and improve user experience.
+ *
+ * IMPORTANT: This is NOT a security measure. Client-side rate limiting can
+ * be bypassed. Server-side rate limiting should be the PRIMARY enforcement
+ * mechanism. This client-side limiter helps:
+ *
+ * 1. Reduce unnecessary API calls (fail fast before hitting server limits)
+ * 2. Improve UX by showing rate limit errors immediately
+ * 3. Prevent accidental DoS from buggy client code
+ *
+ * Server-side implementation should use Cloudflare Workers rate limiting:
+ * @see https://developers.cloudflare.com/workers/runtime-apis/rate-limit/
  */
 
 interface RateLimitEntry {
@@ -90,7 +101,10 @@ export class RateLimiter {
    *
    * @returns Object with remaining count and reset time, or null if no limit tracked
    */
-  getRemaining(type: string, key: string): { remaining: number; resetAt: number } | null {
+  getRemaining(
+    type: string,
+    key: string,
+  ): { remaining: number; resetAt: number } | null {
     const limitConfig = this.config[type];
     if (!limitConfig) return null;
 
@@ -99,7 +113,10 @@ export class RateLimiter {
     const entry = this.limits.get(limitKey);
 
     if (!entry || now >= entry.resetAt) {
-      return { remaining: limitConfig.maxRequests, resetAt: now + limitConfig.windowMs };
+      return {
+        remaining: limitConfig.maxRequests,
+        resetAt: now + limitConfig.windowMs,
+      };
     }
 
     return {
@@ -151,8 +168,10 @@ export class RateLimitError extends Error {
   readonly retryAfterMs: number;
 
   constructor(type: string, retryAfterMs: number) {
-    super(`Rate limit exceeded for ${type}. Retry after ${Math.ceil(retryAfterMs / 1000)} seconds.`);
-    this.name = 'RateLimitError';
+    super(
+      `Rate limit exceeded for ${type}. Retry after ${Math.ceil(retryAfterMs / 1000)} seconds.`,
+    );
+    this.name = "RateLimitError";
     this.retryAfterMs = retryAfterMs;
   }
 }
@@ -171,7 +190,9 @@ export class RateLimitError extends Error {
  * );
  * ```
  */
-export function withRateLimit<T extends (...args: unknown[]) => Promise<unknown>>(
+export function withRateLimit<
+  T extends (...args: unknown[]) => Promise<unknown>,
+>(
   limiter: RateLimiter,
   type: string,
   getKey: (...args: Parameters<T>) => string,

@@ -43,7 +43,7 @@ Run this migration to add token storage columns to the sessions table:
 
 ```bash
 # Add token columns to sessions table
-wrangler d1 execute grove-domains-db --remote --command="
+wrangler d1 execute grove-engine-db --remote --command="
 -- Add OAuth token columns to sessions table
 -- These store tokens in the database instead of cookies for better security
 ALTER TABLE sessions ADD COLUMN access_token TEXT;
@@ -53,6 +53,23 @@ ALTER TABLE sessions ADD COLUMN token_expires_at TEXT;
 ```
 
 **Note:** SQLite ALTER TABLE only supports adding columns. If you need to modify existing columns, you'll need to create a new table and migrate data.
+
+### Add Database Indexes (Performance Optimization)
+
+Run these to add indexes for better query performance:
+
+```bash
+# Add indexes for sessions and magic_codes tables
+wrangler d1 execute grove-engine-db --remote --command="
+-- Improve session lookup performance
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
+
+-- Improve magic code lookup performance
+CREATE INDEX IF NOT EXISTS idx_magic_codes_email ON magic_codes(email);
+CREATE INDEX IF NOT EXISTS idx_magic_codes_expires_at ON magic_codes(expires_at);
+"
+```
 
 ### Run Post Limit Migration (After GroveAuth Integration)
 

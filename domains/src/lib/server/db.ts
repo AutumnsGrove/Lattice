@@ -2,6 +2,26 @@
 import { MODELS, SEARCH_DEFAULTS } from "$lib/config";
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Session duration: 30 days in milliseconds */
+const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Magic code expiration: 15 minutes in milliseconds */
+const MAGIC_CODE_EXPIRY_MS = 15 * 60 * 1000;
+
+/**
+ * Magic code security parameters.
+ *
+ * SECURITY NOTE: The 6-character code from a 32-char alphabet provides ~10^9 combinations.
+ * To prevent brute force attacks, implement rate limiting on the verification endpoint:
+ * - Recommended: 3 attempts per email per 15 minutes
+ * - Lock account for 1 hour after 10 failed attempts
+ */
+const MAGIC_CODE_LENGTH = 6;
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -131,9 +151,7 @@ export async function createSession(
 ): Promise<Session> {
   const id = generateId();
   const timestamp = now();
-  const expiresAt = new Date(
-    Date.now() + 30 * 24 * 60 * 60 * 1000,
-  ).toISOString(); // 30 days
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString();
 
   const tokenExpiresAt = tokens?.expiresIn
     ? new Date(Date.now() + tokens.expiresIn * 1000).toISOString()
@@ -174,7 +192,9 @@ export async function getSession(
   sessionId: string,
 ): Promise<Session | null> {
   const result = await db
-    .prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")')
+    .prepare(
+      'SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")',
+    )
     .bind(sessionId)
     .first<Session>();
   return result ?? null;
@@ -259,9 +279,9 @@ export async function createMagicCode(
   email: string,
 ): Promise<MagicCode> {
   const id = generateId();
-  const code = generateSecureCode(6);
+  const code = generateSecureCode(MAGIC_CODE_LENGTH);
   const timestamp = now();
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+  const expiresAt = new Date(Date.now() + MAGIC_CODE_EXPIRY_MS).toISOString();
 
   await db
     .prepare(
