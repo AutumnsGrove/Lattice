@@ -1,5 +1,9 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
+	import { page } from '$app/stores';
+
+	// Get error from URL if present
+	$: error = $page.url.searchParams.get('error');
 
 	let currentSlide = $state(0);
 	const slides = [
@@ -39,6 +43,21 @@
 </svelte:head>
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+	<!-- Error Banner -->
+	{#if error}
+		<div class="mb-8 w-full max-w-md p-4 bg-red-50 border border-red-200 rounded-lg">
+			<div class="flex items-start gap-3">
+				<svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+				</svg>
+				<div>
+					<p class="text-red-800 font-sans font-medium">Sign in failed</p>
+					<p class="text-red-600 font-sans text-sm mt-1">{error}</p>
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Logo/Brand -->
 	<div class="mb-8">
 		<svg

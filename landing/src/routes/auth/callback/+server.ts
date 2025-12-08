@@ -97,11 +97,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.json();
-      console.error("[Auth Callback] Token exchange failed:", errorData);
-      throw redirect(
-        302,
-        `/?error=${encodeURIComponent(getFriendlyErrorMessage("token_exchange_failed"))}`,
-      );
+      console.error("[Auth Callback] Token exchange failed:", {
+        status: tokenResponse.status,
+        error: errorData,
+        authBaseUrl,
+        clientId,
+        hasSecret: !!clientSecret,
+        redirectUri,
+      });
+      // Include API error for debugging (temporarily)
+      const debugError =
+        errorData?.error_description ||
+        errorData?.error ||
+        "token_exchange_failed";
+      throw redirect(302, `/?error=${encodeURIComponent(debugError)}`);
     }
 
     const tokens = await tokenResponse.json();
