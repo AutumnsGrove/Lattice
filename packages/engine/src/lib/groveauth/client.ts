@@ -17,7 +17,7 @@ import type {
 } from "./types.js";
 import { GroveAuthError } from "./types.js";
 
-const DEFAULT_AUTH_URL = "https://auth.grove.place";
+const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 
 // =============================================================================
 // PKCE HELPERS

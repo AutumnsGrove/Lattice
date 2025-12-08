@@ -7,7 +7,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [vars]
 SITE_NAME = "Grove Domain Finder"
 SITE_URL = "http://localhost:5174"
-GROVEAUTH_URL = "https://auth.grove.place"
+GROVEAUTH_URL = "https://auth-api.grove.place"
 
 # D1 Database binding (shared with main platform)
 [[d1_databases]]

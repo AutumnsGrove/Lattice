@@ -98,7 +98,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       // Token is expiring soon, try to refresh it
       try {
         const authBaseUrl =
-          event.platform.env.GROVEAUTH_URL || "https://auth.grove.place";
+          event.platform.env.GROVEAUTH_URL || "https://auth-api.grove.place";
         const clientId = event.platform.env.GROVEAUTH_CLIENT_ID;
         const clientSecret = event.platform.env.GROVEAUTH_CLIENT_SECRET;
 
