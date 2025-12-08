@@ -37,6 +37,23 @@ GROVEAUTH_REDIRECT_URI = "https://domains.grove.place/auth/callback"
 
 ## Database Migrations
 
+### Session Table Migration (Required for Token Storage)
+
+Run this migration to add token storage columns to the sessions table:
+
+```bash
+# Add token columns to sessions table
+wrangler d1 execute grove-domains-db --remote --command="
+-- Add OAuth token columns to sessions table
+-- These store tokens in the database instead of cookies for better security
+ALTER TABLE sessions ADD COLUMN access_token TEXT;
+ALTER TABLE sessions ADD COLUMN refresh_token TEXT;
+ALTER TABLE sessions ADD COLUMN token_expires_at TEXT;
+"
+```
+
+**Note:** SQLite ALTER TABLE only supports adding columns. If you need to modify existing columns, you'll need to create a new table and migrate data.
+
 ### Run Post Limit Migration (After GroveAuth Integration)
 
 If you need to sync post counts from GroveEngine to GroveAuth:

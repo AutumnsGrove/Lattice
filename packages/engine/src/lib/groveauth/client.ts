@@ -96,6 +96,13 @@ export class GroveAuthClient {
   private subscriptionCache = new Map<string, { data: SubscriptionResponse; expires: number }>();
   private cacheTTL: number;
 
+  /**
+   * Track in-flight subscription requests to prevent duplicate API calls.
+   * When multiple concurrent requests come in for the same user,
+   * they all wait on the same promise instead of making redundant API calls.
+   */
+  private subscriptionPromises = new Map<string, Promise<SubscriptionResponse>>();
+
   constructor(config: GroveAuthConfig & { cacheTTL?: number }) {
     this.config = {
       ...config,
@@ -119,6 +126,41 @@ export class GroveAuthClient {
     } else {
       this.subscriptionCache.clear();
     }
+  }
+
+  /**
+   * Helper for exponential backoff retry logic
+   */
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    options: { maxRetries?: number; baseDelayMs?: number } = {},
+  ): Promise<T> {
+    const { maxRetries = 3, baseDelayMs = 1000 } = options;
+    let lastError: Error | undefined;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Don't retry on 4xx errors (client errors)
+        if (error instanceof GroveAuthError && error.status >= 400 && error.status < 500) {
+          throw error;
+        }
+
+        // Don't retry if we've exhausted attempts
+        if (attempt === maxRetries) {
+          break;
+        }
+
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+
+    throw lastError ?? new Error('Operation failed after retries');
   }
 
   // ===========================================================================
@@ -182,33 +224,60 @@ export class GroveAuthClient {
   }
 
   /**
-   * Refresh an access token using a refresh token
+   * Refresh an access token using a refresh token.
+   * Includes automatic retry with exponential backoff for transient failures.
+   *
+   * @param refreshToken - The refresh token to use
+   * @param options.maxRetries - Maximum retry attempts (default: 3)
+   * @returns New token response with fresh access token
+   * @throws GroveAuthError if refresh fails after all retries
    */
-  async refreshToken(refreshToken: string): Promise<TokenResponse> {
-    const response = await fetch(`${this.config.authBaseUrl}/token/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+  async refreshToken(
+    refreshToken: string,
+    options: { maxRetries?: number } = {},
+  ): Promise<TokenResponse> {
+    return this.withRetry(
+      async () => {
+        const response = await fetch(`${this.config.authBaseUrl}/token/refresh`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+            client_id: this.config.clientId,
+            client_secret: this.config.clientSecret,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new GroveAuthError(
+            data.error || 'refresh_error',
+            data.error_description || data.message || 'Failed to refresh token',
+            response.status
+          );
+        }
+
+        return data as TokenResponse;
       },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: this.config.clientId,
-        client_secret: this.config.clientSecret,
-      }),
-    });
+      { maxRetries: options.maxRetries ?? 3 },
+    );
+  }
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new GroveAuthError(
-        data.error || 'refresh_error',
-        data.error_description || data.message || 'Failed to refresh token',
-        response.status
-      );
-    }
-
-    return data as TokenResponse;
+  /**
+   * Check if a token is expired or about to expire.
+   * Returns true if token expires within the buffer period.
+   *
+   * @param expiresAt - ISO timestamp of token expiration
+   * @param bufferSeconds - Refresh this many seconds before expiry (default: 60)
+   */
+  isTokenExpiringSoon(expiresAt: string | Date, bufferSeconds = 60): boolean {
+    const expiresTime = new Date(expiresAt).getTime();
+    const bufferTime = bufferSeconds * 1000;
+    return Date.now() >= expiresTime - bufferTime;
   }
 
   /**
@@ -310,7 +379,15 @@ export class GroveAuthClient {
   }
 
   /**
-   * Get a specific user's subscription (with caching)
+   * Get a specific user's subscription (with caching and deduplication)
+   *
+   * Features:
+   * - In-memory caching with configurable TTL
+   * - Request deduplication: concurrent requests share the same API call
+   * - Automatic cache invalidation on mutations
+   *
+   * @param accessToken - Valid access token
+   * @param userId - User ID to get subscription for
    * @param skipCache - If true, bypasses cache and fetches fresh data
    */
   async getUserSubscription(accessToken: string, userId: string, skipCache = false): Promise<SubscriptionResponse> {
@@ -324,8 +401,36 @@ export class GroveAuthClient {
       if (cached && cached.expires > Date.now()) {
         return cached.data;
       }
+
+      // Check for in-flight request to prevent redundant API calls
+      const inFlight = this.subscriptionPromises.get(cacheKey);
+      if (inFlight) {
+        return inFlight;
+      }
     }
 
+    // Create the fetch promise
+    const fetchPromise = this._fetchUserSubscription(accessToken, userId, cacheKey);
+
+    // Store the promise so concurrent requests can share it
+    this.subscriptionPromises.set(cacheKey, fetchPromise);
+
+    try {
+      return await fetchPromise;
+    } finally {
+      // Clean up the in-flight tracking
+      this.subscriptionPromises.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Internal method to fetch user subscription from API
+   */
+  private async _fetchUserSubscription(
+    accessToken: string,
+    userId: string,
+    cacheKey: string,
+  ): Promise<SubscriptionResponse> {
     const response = await fetch(`${this.config.authBaseUrl}/subscription/${encodeURIComponent(userId)}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

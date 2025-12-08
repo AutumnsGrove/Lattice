@@ -66,3 +66,11 @@ export {
 } from './colors.js';
 
 export type { StatusColor, AlertVariant } from './colors.js';
+
+// Rate limiting
+export {
+  RateLimiter,
+  RateLimitError,
+  withRateLimit,
+  DEFAULT_RATE_LIMITS,
+} from './rate-limit.js';

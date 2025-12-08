@@ -82,6 +82,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     const { DB, GROVEAUTH_CLIENT_ID, GROVEAUTH_CLIENT_SECRET, GROVEAUTH_REDIRECT_URI } = platform.env;
     const authBaseUrl = platform.env.GROVEAUTH_URL || 'https://auth.grove.place';
 
+    // Build redirect URI - URLSearchParams handles encoding automatically
+    const redirectUri = GROVEAUTH_REDIRECT_URI || `${url.origin}/auth/callback`;
+
     // Exchange code for tokens
     const tokenResponse = await fetch(`${authBaseUrl}/token`, {
       method: 'POST',
@@ -91,7 +94,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: GROVEAUTH_REDIRECT_URI || `${url.origin}/auth/callback`,
+        redirect_uri: redirectUri,
         client_id: GROVEAUTH_CLIENT_ID || 'domains',
         client_secret: GROVEAUTH_CLIENT_SECRET || '',
         code_verifier: codeVerifier,
@@ -124,10 +127,15 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     // Create or get user in local DB
     const user = await getOrCreateUser(DB, userInfo.email);
 
-    // Create local session
-    const session = await createSession(DB, user.id);
+    // Create local session with tokens stored in D1 (not cookies)
+    // This is more secure for Cloudflare Workers as tokens aren't sent with every request
+    const session = await createSession(DB, user.id, {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiresIn: tokens.expires_in,
+    });
 
-    // Store tokens in session cookie (httpOnly)
+    // Only store session ID in cookie - tokens stay in D1
     cookies.set('session', session.id, {
       path: '/',
       httpOnly: true,
@@ -135,26 +143,6 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
-
-    // Store access token for API calls (consider refresh token flow for production)
-    cookies.set('access_token', tokens.access_token, {
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: tokens.expires_in || 3600,
-    });
-
-    // Store refresh token for token refresh
-    if (tokens.refresh_token) {
-      cookies.set('refresh_token', tokens.refresh_token, {
-        path: '/',
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-      });
-    }
 
     // Redirect to admin
     throw redirect(302, '/admin');
