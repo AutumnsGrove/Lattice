@@ -4,6 +4,26 @@
  */
 
 /**
+ * Get CSRF token from cookie or meta tag
+ * @returns {string|null} CSRF token or null if not found
+ */
+export function getCSRFToken() {
+  if (typeof document === "undefined") return null; // SSR safety
+
+  // Try cookie first
+  const cookieToken = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("csrf_token="))
+    ?.split("=")[1];
+
+  if (cookieToken) return cookieToken;
+
+  // Fallback to meta tag
+  const metaTag = document.querySelector('meta[name="csrf-token"]');
+  return metaTag?.getAttribute("content") || null;
+}
+
+/**
  * Fetch wrapper with automatic CSRF token injection
  * @param {string} url - API endpoint URL
  * @param {RequestInit} options - Fetch options
@@ -11,20 +31,22 @@
  * @throws {Error} If request fails
  */
 export async function apiRequest(url, options = {}) {
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+  const csrfToken = getCSRFToken();
+  const method = options.method?.toUpperCase() || "GET";
+  const isStateMutating = ["POST", "PUT", "DELETE", "PATCH"].includes(method);
 
   // Debug logging
   if (typeof console !== "undefined" && process.env.NODE_ENV !== "production") {
     console.debug("[apiRequest]", {
       url,
+      method,
       csrfToken: csrfToken ? "present" : "missing",
+      isStateMutating,
     });
   }
 
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
   const headers = {
-    ...(csrfToken && { "X-CSRF-Token": csrfToken }),
-    ...(csrfToken && { "csrf-token": csrfToken }), // fallback header
     ...options.headers,
   };
 
@@ -33,9 +55,16 @@ export async function apiRequest(url, options = {}) {
     headers["Content-Type"] = "application/json";
   }
 
+  // Add CSRF token for state-changing requests
+  if (isStateMutating && csrfToken) {
+    headers["X-CSRF-Token"] = csrfToken;
+    headers["csrf-token"] = csrfToken; // fallback header
+  }
+
   const response = await fetch(url, {
     ...options,
     headers,
+    credentials: "include", // Include cookies
   });
 
   if (!response.ok) {
