@@ -1,11 +1,3 @@
----
-project: Grove Platform
-description: Multi-tenant blog platform with social feed
-created: 2025-11-21
-status: Phase 1 - MVP Development
-domain: grove.place ✅
----
-
 # Grove Platform
 
 A modern, multi-tenant blogging platform where users get their own blogs on subdomains (username.grove.place). Built entirely on Cloudflare infrastructure with SvelteKit, featuring unique gutter annotations, a powerful markdown editor, and an optional community feed.
