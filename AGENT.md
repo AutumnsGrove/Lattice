@@ -13,7 +13,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Language:** TypeScript, JavaScript
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
-- **Auth:** Lucia Auth
+- **Auth:** GroveAuth (Google OAuth 2.0 + PKCE)
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
@@ -44,6 +44,10 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Always check `TODOS.md` first** when starting a task or session
 - **Update immediately** when tasks are completed, added, or changed
 - Keep the list current and manageable
+
+### Contributing
+- **See `CONTRIBUTING.md`** for PR guidelines, commit conventions, and the AI agent section
+- Keep Grove's warm, community-focused voice in documentation and user-facing text
 
 ### Git Workflow Essentials
 
