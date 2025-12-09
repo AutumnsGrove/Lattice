@@ -2,46 +2,46 @@
 // This replaces the filesystem-based content.js to avoid Node.js dependencies
 
 export const siteConfig = {
-	owner: {
-		name: 'The Midnight Bloom',
-		email: 'hello@example.grove.place'
-	},
-	site: {
-		title: 'The Midnight Bloom',
-		tagline: 'Open when the stars come out',
-		description:
-			'A late-night tea café where time slows down. Serving rare teas, quiet conversations, and the comfort of a warm cup in the small hours.',
-		copyright: 'The Midnight Bloom Tea Café'
-	},
-	social: {
-		instagram: 'https://instagram.com/midnightbloom',
-		twitter: 'https://twitter.com/midnightbloom'
-	},
-	hours: {
-		open: '6:00 PM',
-		close: '4:00 AM',
-		days: 'Wednesday - Sunday'
-	},
-	location: {
-		address: '742 Twilight Lane',
-		city: 'Moonhaven',
-		state: 'OR',
-		zip: '97401'
-	}
+  owner: {
+    name: "The Midnight Bloom",
+    email: "hello@example.grove.place",
+  },
+  site: {
+    title: "The Midnight Bloom",
+    tagline: "Open when the stars come out",
+    description:
+      "A late-night tea café where time slows down. Serving rare teas, quiet conversations, and the comfort of a warm cup in the small hours.",
+    copyright: "The Midnight Bloom Tea Café",
+  },
+  social: {
+    instagram: "https://instagram.com/midnightbloom",
+    twitter: "https://twitter.com/midnightbloom",
+  },
+  hours: {
+    open: "6:00 PM",
+    close: "4:00 AM",
+    days: "Wednesday - Sunday",
+  },
+  location: {
+    address: "742 Twilight Lane",
+    city: "Moonhaven",
+    state: "OR",
+    zip: "97401",
+  },
 };
 
 export const pages = {
-	Home: {
-		title: 'Home',
-		hero: {
-			title: 'The Midnight Bloom',
-			subtitle: 'Open when the stars come out',
-			cta: {
-				text: 'View Our Menu',
-				link: '/shop'
-			}
-		},
-		content: `<h1>Welcome to The Midnight Bloom</h1>
+  Home: {
+    title: "Home",
+    hero: {
+      title: "The Midnight Bloom",
+      subtitle: "Open when the stars come out",
+      cta: {
+        text: "Read Our Blog",
+        link: "/blog",
+      },
+    },
+    content: `<h1>Welcome to The Midnight Bloom</h1>
 <p>When the rest of the world winds down, we're just getting started. The Midnight Bloom is a sanctuary for night owls, late-shift workers, insomniacs, and anyone who finds peace in the quiet hours after dark.</p>
 <h2>Our Philosophy</h2>
 <p>We believe tea is more than a beverage—it's a ritual, a moment of pause, a small act of self-care in a world that rarely stops moving. Every cup we serve is an invitation to slow down, to breathe, to simply <em>be</em>.</p>
@@ -56,7 +56,7 @@ export const pages = {
 <h2>Visit Us</h2>
 <p>We're tucked away on Twilight Lane, easy to miss if you're not looking. A small wooden sign, a door with a brass moon handle, and the warm glow of candlelight in the window. You'll know it when you find it.</p>
 <p><em>The Midnight Bloom: where every night holds the possibility of something beautiful.</em></p>`,
-		rawContent: `# Welcome to The Midnight Bloom
+    rawContent: `# Welcome to The Midnight Bloom
 
 When the rest of the world winds down, we're just getting started. The Midnight Bloom is a sanctuary for night owls, late-shift workers, insomniacs, and anyone who finds peace in the quiet hours after dark.
 
@@ -77,11 +77,11 @@ Our selection spans the globe: delicate white teas from Fujian, robust pu-erhs f
 
 We're tucked away on Twilight Lane, easy to miss if you're not looking. A small wooden sign, a door with a brass moon handle, and the warm glow of candlelight in the window. You'll know it when you find it.
 
-*The Midnight Bloom: where every night holds the possibility of something beautiful.*`
-	},
-	About: {
-		title: 'About Us',
-		content: `<h1>Our Story</h1>
+*The Midnight Bloom: where every night holds the possibility of something beautiful.*`,
+  },
+  About: {
+    title: "About Us",
+    content: `<h1>Our Story</h1>
 <p>The Midnight Bloom opened its doors on the winter solstice of 2019—the longest night of the year. It felt fitting.</p>
 <h2>How It Began</h2>
 <p>Our founder, Elena Chen, spent a decade working night shifts as a nurse. She understood intimately what it meant to be awake when the world sleeps, to crave connection and comfort in the small hours. The coffee shops were closed. The bars were too loud. There was nowhere to simply sit with a warm drink and quiet thoughts.</p>
@@ -97,7 +97,7 @@ We're tucked away on Twilight Lane, easy to miss if you're not looking. A small 
 <h2>A Note on Reservations</h2>
 <p>We don't take them. The Midnight Bloom operates on serendipity. Some nights you'll find an empty seat immediately; other nights you might wait. We find this adds to the magic—you never quite know what any given night will bring.</p>
 <p><em>Come find us when the stars come out.</em></p>`,
-		rawContent: `# Our Story
+    rawContent: `# Our Story
 
 The Midnight Bloom opened its doors on the winter solstice of 2019—the longest night of the year. It felt fitting.
 
@@ -127,11 +127,11 @@ Our staff are all night people themselves. We understand the particular loneline
 
 We don't take them. The Midnight Bloom operates on serendipity. Some nights you'll find an empty seat immediately; other nights you might wait. We find this adds to the magic—you never quite know what any given night will bring.
 
-*Come find us when the stars come out.*`
-	},
-	Contact: {
-		title: 'Find Us',
-		content: `<h1>Visit The Midnight Bloom</h1>
+*Come find us when the stars come out.*`,
+  },
+  Contact: {
+    title: "Find Us",
+    content: `<h1>Visit The Midnight Bloom</h1>
 <h2>Location</h2>
 <p><strong>742 Twilight Lane</strong><br>
 Moonhaven, OR 97401</p>
@@ -160,7 +160,7 @@ Moonhaven, OR 97401</p>
 <h2>A Word of Welcome</h2>
 <p>Whether you're a night shift worker seeking respite, an artist chasing inspiration, or simply someone who can't sleep—you're welcome here. No judgment, no rush, just tea and the quiet company of fellow night dwellers.</p>
 <p><em>See you after dark.</em></p>`,
-		rawContent: `# Visit The Midnight Bloom
+    rawContent: `# Visit The Midnight Bloom
 
 ## Location
 
@@ -207,18 +207,18 @@ Email us to inquire about availability and pricing.
 
 Whether you're a night shift worker seeking respite, an artist chasing inspiration, or simply someone who can't sleep—you're welcome here. No judgment, no rush, just tea and the quiet company of fellow night dwellers.
 
-*See you after dark.*`
-	}
+*See you after dark.*`,
+  },
 };
 
 export const posts = [
-	{
-		slug: 'why-we-dont-play-music',
-		title: "Why We Don't Play Music",
-		date: '2025-12-01',
-		description: 'The radical act of letting silence speak',
-		tags: ['atmosphere', 'philosophy', 'design'],
-		content: `<p>Every new visitor asks the same question, usually within the first ten minutes: &quot;Is the music broken?&quot;</p>
+  {
+    slug: "why-we-dont-play-music",
+    title: "Why We Don't Play Music",
+    date: "2025-12-01",
+    description: "The radical act of letting silence speak",
+    tags: ["atmosphere", "philosophy", "design"],
+    content: `<p>Every new visitor asks the same question, usually within the first ten minutes: &quot;Is the music broken?&quot;</p>
 <p>No. There is no music. There never has been.</p>
 <h2>The Sound of Most Cafés</h2>
 <!-- anchor:sound-note -->
@@ -259,7 +259,7 @@ export const posts = [
 <p>You might hate it. Some people do.</p>
 <p>But you might find something you didn't know you were looking for: the rare luxury of a public space that doesn't demand anything from your ears.</p>
 <p><em>Sometimes the most radical thing you can offer is nothing at all.</em></p>`,
-		rawContent: `Every new visitor asks the same question, usually within the first ten minutes: "Is the music broken?"
+    rawContent: `Every new visitor asks the same question, usually within the first ten minutes: "Is the music broken?"
 
 No. There is no music. There never has been.
 
@@ -323,38 +323,38 @@ You might hate it. Some people do.
 But you might find something you didn't know you were looking for: the rare luxury of a public space that doesn't demand anything from your ears.
 
 *Sometimes the most radical thing you can offer is nothing at all.*`,
-		gutterContent: {
-			items: [
-				{
-					type: 'comment',
-					anchor: 'anchor:sound-note',
-					content: `<p>Elena spent six months researching &quot;café playlists&quot; before opening. She found over 50,000 &quot;coffee shop vibes&quot; playlists on Spotify alone. It felt less like curation and more like conformity.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:silence',
-					content: `<p>John Cage's 4'33&quot; taught us that there's no such thing as true silence—only sounds we haven't noticed yet. We try to create space for noticing.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:headphones',
-					content: `<p>Our most popular headphone choice among regulars? Apparently it's brown noise. We've been told it sounds like &quot;being inside a warm sweater.&quot;</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:sacred',
-					content: `<p>A regular once described the 3 AM atmosphere as &quot;like being in a library, but the books are people's thoughts.&quot; We've never forgotten that.</p>`
-				}
-			]
-		}
-	},
-	{
-		slug: 'our-favorite-midnight-regulars',
-		title: 'Our Favorite Midnight Regulars',
-		date: '2025-11-28',
-		description: 'The beautiful humans who make our late nights worthwhile',
-		tags: ['community', 'stories', 'regulars'],
-		content: `<p>Every café has its regulars. Ours just happen to appear after midnight.</p>
+    gutterContent: {
+      items: [
+        {
+          type: "comment",
+          anchor: "anchor:sound-note",
+          content: `<p>Elena spent six months researching &quot;café playlists&quot; before opening. She found over 50,000 &quot;coffee shop vibes&quot; playlists on Spotify alone. It felt less like curation and more like conformity.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:silence",
+          content: `<p>John Cage's 4'33&quot; taught us that there's no such thing as true silence—only sounds we haven't noticed yet. We try to create space for noticing.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:headphones",
+          content: `<p>Our most popular headphone choice among regulars? Apparently it's brown noise. We've been told it sounds like &quot;being inside a warm sweater.&quot;</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:sacred",
+          content: `<p>A regular once described the 3 AM atmosphere as &quot;like being in a library, but the books are people's thoughts.&quot; We've never forgotten that.</p>`,
+        },
+      ],
+    },
+  },
+  {
+    slug: "our-favorite-midnight-regulars",
+    title: "Our Favorite Midnight Regulars",
+    date: "2025-11-28",
+    description: "The beautiful humans who make our late nights worthwhile",
+    tags: ["community", "stories", "regulars"],
+    content: `<p>Every café has its regulars. Ours just happen to appear after midnight.</p>
 <h2>The Night Shift Nurses</h2>
 <!-- anchor:nurses -->
 
@@ -385,7 +385,7 @@ But you might find something you didn't know you were looking for: the rare luxu
 <p>If you're reading this and recognizing yourself—if you're someone who's awake when the world sleeps, looking for a place to be—consider this your invitation.</p>
 <p>We don't care why you're up. We don't care what you do for a living or what keeps you from rest. We only care that you might need a warm drink and a seat by the window, watching the night go by.</p>
 <p><em>Come be a regular. We'll learn your order.</em></p>`,
-		rawContent: `Every café has its regulars. Ours just happen to appear after midnight.
+    rawContent: `Every café has its regulars. Ours just happen to appear after midnight.
 
 ## The Night Shift Nurses
 
@@ -438,38 +438,38 @@ If you're reading this and recognizing yourself—if you're someone who's awake 
 We don't care why you're up. We don't care what you do for a living or what keeps you from rest. We only care that you might need a warm drink and a seat by the window, watching the night go by.
 
 *Come be a regular. We'll learn your order.*`,
-		gutterContent: {
-			items: [
-				{
-					type: 'comment',
-					anchor: 'anchor:nurses',
-					content: `<p>We keep a &quot;nurse discount&quot; that isn't on the menu. 50% off for anyone who's spent the night caring for others. Just show us your badge.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:novelist',
-					content: `<p>We did peek at her notebook once, accidentally. The handwriting was beautiful—impossible to read, but beautiful. Like the letters themselves were having feelings.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:stargazer',
-					content: `<p>Professor Okonkwo once set up his telescope in our back alley and showed the entire café Saturn's rings. It was 3 AM. Everyone cried a little.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:community',
-					content: `<p>We keep a small bulletin board by the door where people can leave notes for each other. &quot;Looking for someone to practice French with after midnight&quot; was posted last month. It worked.</p>`
-				}
-			]
-		}
-	},
-	{
-		slug: 'the-art-of-brewing-patience',
-		title: 'The Art of Brewing Patience',
-		date: '2025-11-15',
-		description: 'Why we take our time with every cup, and why you should too',
-		tags: ['tea', 'philosophy', 'brewing'],
-		content: `<p>In a world of instant everything, we've chosen to go slow.</p>
+    gutterContent: {
+      items: [
+        {
+          type: "comment",
+          anchor: "anchor:nurses",
+          content: `<p>We keep a &quot;nurse discount&quot; that isn't on the menu. 50% off for anyone who's spent the night caring for others. Just show us your badge.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:novelist",
+          content: `<p>We did peek at her notebook once, accidentally. The handwriting was beautiful—impossible to read, but beautiful. Like the letters themselves were having feelings.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:stargazer",
+          content: `<p>Professor Okonkwo once set up his telescope in our back alley and showed the entire café Saturn's rings. It was 3 AM. Everyone cried a little.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:community",
+          content: `<p>We keep a small bulletin board by the door where people can leave notes for each other. &quot;Looking for someone to practice French with after midnight&quot; was posted last month. It worked.</p>`,
+        },
+      ],
+    },
+  },
+  {
+    slug: "the-art-of-brewing-patience",
+    title: "The Art of Brewing Patience",
+    date: "2025-11-15",
+    description: "Why we take our time with every cup, and why you should too",
+    tags: ["tea", "philosophy", "brewing"],
+    content: `<p>In a world of instant everything, we've chosen to go slow.</p>
 <h2>The Problem with Speed</h2>
 <!-- anchor:speed-note -->
 
@@ -508,7 +508,7 @@ We don't care why you're up. We don't care what you do for a living or what keep
 <h2>The Reward</h2>
 <p>Tea brewed with patience tastes different. This isn't mysticism; it's chemistry. Proper temperature and timing extract the compounds you want while leaving behind the ones you don't. But beyond the science, there's something else—a satisfaction that comes from having given your full attention to something small and beautiful.</p>
 <p><em>In a world that never stops, we offer you permission to pause.</em></p>`,
-		rawContent: `In a world of instant everything, we've chosen to go slow.
+    rawContent: `In a world of instant everything, we've chosen to go slow.
 
 ## The Problem with Speed
 
@@ -565,36 +565,37 @@ You can bring this mindfulness to your own tea practice:
 Tea brewed with patience tastes different. This isn't mysticism; it's chemistry. Proper temperature and timing extract the compounds you want while leaving behind the ones you don't. But beyond the science, there's something else—a satisfaction that comes from having given your full attention to something small and beautiful.
 
 *In a world that never stops, we offer you permission to pause.*`,
-		gutterContent: {
-			items: [
-				{
-					type: 'comment',
-					anchor: 'anchor:speed-note',
-					content: `<p><strong>A confession</strong>: Elena once worked at a coffee chain that shall remain nameless. The memory of those &quot;tea lattes&quot; still haunts her dreams.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:kettle-note',
-					content: `<p>Our kettles are vintage copper pieces from Japan, each one over 50 years old. They heat water differently than modern electric kettles—more evenly, more gently.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:philosophy',
-					content: `<p>This isn't meant to be gatekeeping. If you need quick caffeine, that's valid. We just can't be the place that provides it. There's a 24-hour diner two blocks over with perfectly serviceable coffee.</p>`
-				}
-			]
-		}
-	}
+    gutterContent: {
+      items: [
+        {
+          type: "comment",
+          anchor: "anchor:speed-note",
+          content: `<p><strong>A confession</strong>: Elena once worked at a coffee chain that shall remain nameless. The memory of those &quot;tea lattes&quot; still haunts her dreams.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:kettle-note",
+          content: `<p>Our kettles are vintage copper pieces from Japan, each one over 50 years old. They heat water differently than modern electric kettles—more evenly, more gently.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:philosophy",
+          content: `<p>This isn't meant to be gatekeeping. If you need quick caffeine, that's valid. We just can't be the place that provides it. There's a 24-hour diner two blocks over with perfectly serviceable coffee.</p>`,
+        },
+      ],
+    },
+  },
 ];
 
 export const recipes = [
-	{
-		slug: 'moonlight-jasmine-blend',
-		title: 'Moonlight Jasmine Blend',
-		date: '2025-10-15',
-		description: 'Our signature house blend - jasmine pearls with a secret midnight twist',
-		tags: ['signature', 'jasmine', 'house-blend', 'recipe'],
-		content: `<p>This is the tea that started it all. The first blend Elena created for The Midnight Bloom, and still our most requested.</p>
+  {
+    slug: "moonlight-jasmine-blend",
+    title: "Moonlight Jasmine Blend",
+    date: "2025-10-15",
+    description:
+      "Our signature house blend - jasmine pearls with a secret midnight twist",
+    tags: ["signature", "jasmine", "house-blend", "recipe"],
+    content: `<p>This is the tea that started it all. The first blend Elena created for The Midnight Bloom, and still our most requested.</p>
 <h2>Overview</h2>
 <p><strong>Brew Time:</strong> 3-4 minutes<br>
 <strong>Temperature:</strong> 175°F (80°C)<br>
@@ -647,7 +648,7 @@ export const recipes = [
 <h2>The Secret Ingredient</h2>
 <p>People always ask about the &quot;secret&quot; in our blend. It's not an ingredient—it's timing. We only blend this tea on clear nights, by moonlight. Call it superstition, call it ritual. We call it the Midnight Bloom way.</p>
 <p><em>Some things can only be made in the dark.</em></p>`,
-		rawContent: `This is the tea that started it all. The first blend Elena created for The Midnight Bloom, and still our most requested.
+    rawContent: `This is the tea that started it all. The first blend Elena created for The Midnight Bloom, and still our most requested.
 
 ## Overview
 
@@ -721,58 +722,58 @@ The first sip should be floral—jasmine forward, with the sweetness of white te
 People always ask about the "secret" in our blend. It's not an ingredient—it's timing. We only blend this tea on clear nights, by moonlight. Call it superstition, call it ritual. We call it the Midnight Bloom way.
 
 *Some things can only be made in the dark.*`,
-		gutterContent: {
-			items: [
-				{
-					type: 'comment',
-					anchor: 'anchor:vessel-note',
-					content: `<p>At the café, we use small clay gaiwans that have absorbed years of tea. They add something to the brew that new vessels can't replicate. At home, any pre-warmed ceramic will do nicely.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:water-note',
-					content: `<p>If your tap water is heavily chlorinated, let it sit uncovered for an hour before boiling, or use spring water. The tea will taste of whatever the water tastes of.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:pearls-note',
-					content: `<p>Traditional jasmine pearls are scented 6-7 times over the course of a month, with fresh jasmine blossoms each night. It takes about 4.4 pounds of blossoms to scent a single pound of tea.</p>`
-				},
-				{
-					type: 'comment',
-					anchor: 'anchor:taste-note',
-					content: `<p>Elena spent three months perfecting the salt ratio. Too much and you taste it directly. The right amount—just a few grains per tablespoon of tea—and you taste <em>everything else</em> more vividly.</p>`
-				}
-			]
-		}
-	}
+    gutterContent: {
+      items: [
+        {
+          type: "comment",
+          anchor: "anchor:vessel-note",
+          content: `<p>At the café, we use small clay gaiwans that have absorbed years of tea. They add something to the brew that new vessels can't replicate. At home, any pre-warmed ceramic will do nicely.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:water-note",
+          content: `<p>If your tap water is heavily chlorinated, let it sit uncovered for an hour before boiling, or use spring water. The tea will taste of whatever the water tastes of.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:pearls-note",
+          content: `<p>Traditional jasmine pearls are scented 6-7 times over the course of a month, with fresh jasmine blossoms each night. It takes about 4.4 pounds of blossoms to scent a single pound of tea.</p>`,
+        },
+        {
+          type: "comment",
+          anchor: "anchor:taste-note",
+          content: `<p>Elena spent three months perfecting the salt ratio. Too much and you taste it directly. The right amount—just a few grains per tablespoon of tea—and you taste <em>everything else</em> more vividly.</p>`,
+        },
+      ],
+    },
+  },
 ];
 
 // Helper functions matching the original API
 export function getSiteConfig() {
-	return siteConfig;
+  return siteConfig;
 }
 
 export function getPage(slug) {
-	return pages[slug] || null;
+  return pages[slug] || null;
 }
 
 export function getAllPosts() {
-	return posts;
+  return posts;
 }
 
 export function getPost(slug) {
-	return posts.find((p) => p.slug === slug) || null;
+  return posts.find((p) => p.slug === slug) || null;
 }
 
 export function getAllRecipes() {
-	return recipes;
+  return recipes;
 }
 
 export function getRecipe(slug) {
-	return recipes.find((r) => r.slug === slug) || null;
+  return recipes.find((r) => r.slug === slug) || null;
 }
 
 export function getLatestPost() {
-	return posts.length > 0 ? posts[0] : null;
+  return posts.length > 0 ? posts[0] : null;
 }
