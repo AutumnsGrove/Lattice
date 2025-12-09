@@ -8,6 +8,11 @@ import {
   getOrCreateCustomer,
 } from "$lib/payments/shop";
 
+// Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
+const SHOP_DISABLED = true;
+const SHOP_DISABLED_MESSAGE =
+  "Shop feature is temporarily disabled. It will be available in a future release.";
+
 /**
  * POST /api/shop/checkout - Create a Stripe Checkout session
  *
@@ -34,6 +39,10 @@ import {
  * }
  */
 export async function POST({ request, url, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   // CSRF check - validate origin for public checkout
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
@@ -259,6 +268,10 @@ export async function POST({ request, url, platform, locals }) {
  * GET /api/shop/checkout?session_id=xxx - Get checkout session status
  */
 export async function GET({ url, platform }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   const sessionId = url.searchParams.get("session_id");
 
   if (!sessionId) {

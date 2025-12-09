@@ -3,6 +3,11 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
+// Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
+const SHOP_DISABLED = true;
+const SHOP_DISABLED_MESSAGE =
+  "Shop feature is temporarily disabled. It will be available in a future release.";
+
 /**
  * GET /api/shop/products - List products
  *
@@ -14,6 +19,10 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * - offset: number
  */
 export async function GET({ url, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -79,6 +88,10 @@ export async function GET({ url, platform, locals }) {
  * }
  */
 export async function POST({ request, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");

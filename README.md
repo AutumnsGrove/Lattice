@@ -71,8 +71,7 @@ GroveEngine/
 - **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
 - **50+ UI Components** - Complete design system with primitives, charts, galleries, and form components
 - **CDN Admin Uploader** - R2-powered media upload with magic byte validation
-- **Stripe Payments** - Payment system with provider abstraction for subscriptions and shop features
-- **E-commerce System** - Full shop infrastructure: products, variants, orders, subscriptions, Connect accounts
+- **Stripe Payments** - Payment system with provider abstraction for subscriptions
 - **AI-Powered Domain Search** - Multi-provider AI (Claude, DeepSeek, Kimi, Llama 4) with live Cloudflare pricing
 - **Accessibility Fonts** - 7 fonts including OpenDyslexic, Atkinson Hyperlegible, and Lexend
 
@@ -109,7 +108,6 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - ✅ GroveAuth integration with Google Sign-In
 - ✅ Landing page deployed with "How It Works" section
 - ✅ Stripe payments system with provider abstraction
-- ✅ E-commerce data model complete (products, orders, subscriptions)
 - ✅ CDN admin upload system with R2 storage and magic byte validation
 - ✅ Example site showcasing all features
 - ✅ AI-powered domain search tool with multi-provider support

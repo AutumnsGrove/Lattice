@@ -122,24 +122,28 @@
 
 ## Future Considerations (Post-Launch)
 
-### Shop Feature (E-commerce)
+### Shop Feature (E-commerce) - DEFERRED
+> **Status:** Temporarily disabled (2025-12-09). Shop API routes return 503, UI shows "Coming Soon" page.
+> **Note:** Platform billing/subscriptions (`/api/billing`) remain fully functional. Only shop e-commerce is disabled.
+> **Resume:** After Phase 4 (Grove Social) is complete. The database schema and payment infrastructure remain in place.
+
 - [x] Design shop data model (products, variants, inventory) → **DONE: migration 007_shop_payments.sql**
-- [ ] Integrate Shopify
-- [ ] Create product management UI in admin panel
-- [ ] Build product listing page with filtering/sorting
-- [ ] Implement product detail pages
-- [ ] Add shopping cart functionality (client-side state)
-- [ ] Integrate Stripe for checkout
-- [ ] Implement order management system
-- [ ] Add order confirmation emails via Resend
-- [ ] Build order history for customers
-- [ ] Implement inventory tracking
-- [ ] Add product categories and tags
-- [ ] Support digital products/downloads
-- [ ] Add product image gallery with R2 storage
-- [ ] Implement product search
-- [ ] Add related products recommendations
-- [ ] Build shop analytics (views, conversions)
+- [ ] ~~Integrate Shopify~~ → Deferred
+- [ ] ~~Create product management UI in admin panel~~ → Deferred
+- [ ] ~~Build product listing page with filtering/sorting~~ → Deferred
+- [ ] ~~Implement product detail pages~~ → Deferred
+- [ ] ~~Add shopping cart functionality (client-side state)~~ → Deferred
+- [ ] ~~Integrate Stripe for checkout~~ → Deferred (infrastructure exists but disabled)
+- [ ] ~~Implement order management system~~ → Deferred
+- [ ] ~~Add order confirmation emails via Resend~~ → Deferred
+- [ ] ~~Build order history for customers~~ → Deferred
+- [ ] ~~Implement inventory tracking~~ → Deferred
+- [ ] ~~Add product categories and tags~~ → Deferred
+- [ ] ~~Support digital products/downloads~~ → Deferred
+- [ ] ~~Add product image gallery with R2 storage~~ → Deferred
+- [ ] ~~Implement product search~~ → Deferred
+- [ ] ~~Add related products recommendations~~ → Deferred
+- [ ] ~~Build shop analytics (views, conversions)~~ → Deferred
 
 ### Theme System Expansion
 > *Note: UI components are managed in [GroveUI](https://github.com/AutumnsGrove/GroveUI)*

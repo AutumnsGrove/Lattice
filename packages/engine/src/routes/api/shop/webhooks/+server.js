@@ -7,18 +7,23 @@ import {
   getOrCreateCustomer,
 } from "$lib/payments/shop";
 
+// Shop e-commerce feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
+// Note: This webhook endpoint remains ENABLED because it handles platform billing subscription events
+// Only shop-specific handlers (orders, refunds, Connect accounts) are disabled
+const SHOP_ECOMMERCE_DISABLED = true;
+
 /**
  * POST /api/shop/webhooks - Handle Stripe webhooks
  *
  * This endpoint receives webhooks from Stripe for:
- * - checkout.session.completed - Payment successful
- * - checkout.session.expired - Checkout expired
- * - payment_intent.succeeded - Payment confirmed
- * - payment_intent.payment_failed - Payment failed
- * - customer.subscription.* - Subscription events
+ * - checkout.session.completed - Payment successful (DISABLED for shop orders, platform billing handled separately)
+ * - checkout.session.expired - Checkout expired (DISABLED for shop)
+ * - payment_intent.succeeded - Payment confirmed (DISABLED for shop)
+ * - payment_intent.payment_failed - Payment failed (DISABLED for shop)
+ * - customer.subscription.* - Subscription events (ENABLED - needed for platform billing)
  * - invoice.* - Invoice events
  *
- * For Stripe Connect, this also handles:
+ * For Stripe Connect (DISABLED):
  * - account.updated - Connected account status changes
  */
 export async function POST({ request, platform }) {
@@ -57,8 +62,9 @@ export async function POST({ request, platform }) {
     });
 
     // Store webhook event for idempotency
-    const existingEvent = await platform.env.POSTS_DB
-      .prepare("SELECT id FROM webhook_events WHERE provider_event_id = ?")
+    const existingEvent = await platform.env.POSTS_DB.prepare(
+      "SELECT id FROM webhook_events WHERE provider_event_id = ?",
+    )
       .bind(event.providerEventId)
       .first();
 
@@ -68,39 +74,58 @@ export async function POST({ request, platform }) {
     }
 
     // Insert webhook event
-    await platform.env.POSTS_DB
-      .prepare(
-        `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
-      )
+    await platform.env.POSTS_DB.prepare(
+      `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+    )
       .bind(
         event.id,
         "stripe",
         event.providerEventId,
         event.type,
         JSON.stringify(eventData),
-        Math.floor(Date.now() / 1000)
+        Math.floor(Date.now() / 1000),
       )
       .run();
 
     // Process based on event type
     switch (event.type) {
+      // Shop e-commerce events - DISABLED
       case "checkout.session.completed":
-        await handleCheckoutCompleted(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log(
+            "Shop disabled, skipping checkout.session.completed for orders",
+          );
+        } else {
+          await handleCheckoutCompleted(platform.env.POSTS_DB, eventData);
+        }
         break;
 
       case "checkout.session.expired":
-        await handleCheckoutExpired(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log("Shop disabled, skipping checkout.session.expired");
+        } else {
+          await handleCheckoutExpired(platform.env.POSTS_DB, eventData);
+        }
         break;
 
       case "payment.succeeded":
-        await handlePaymentSucceeded(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log("Shop disabled, skipping payment.succeeded");
+        } else {
+          await handlePaymentSucceeded(platform.env.POSTS_DB, eventData);
+        }
         break;
 
       case "payment.failed":
-        await handlePaymentFailed(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log("Shop disabled, skipping payment.failed");
+        } else {
+          await handlePaymentFailed(platform.env.POSTS_DB, eventData);
+        }
         break;
 
+      // Platform billing subscription events - ALWAYS ENABLED
       case "subscription.created":
       case "subscription.updated":
         await handleSubscriptionUpdated(platform.env.POSTS_DB, eventData);
@@ -110,12 +135,21 @@ export async function POST({ request, platform }) {
         await handleSubscriptionCanceled(platform.env.POSTS_DB, eventData);
         break;
 
+      // Shop e-commerce events - DISABLED
       case "refund.created":
-        await handleRefundCreated(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log("Shop disabled, skipping refund.created");
+        } else {
+          await handleRefundCreated(platform.env.POSTS_DB, eventData);
+        }
         break;
 
       case "account.updated":
-        await handleConnectAccountUpdated(platform.env.POSTS_DB, eventData);
+        if (SHOP_ECOMMERCE_DISABLED) {
+          console.log("Shop disabled, skipping account.updated (Connect)");
+        } else {
+          await handleConnectAccountUpdated(platform.env.POSTS_DB, eventData);
+        }
         break;
 
       default:
@@ -123,8 +157,9 @@ export async function POST({ request, platform }) {
     }
 
     // Mark as processed
-    await platform.env.POSTS_DB
-      .prepare("UPDATE webhook_events SET processed = 1, processed_at = ? WHERE id = ?")
+    await platform.env.POSTS_DB.prepare(
+      "UPDATE webhook_events SET processed = 1, processed_at = ? WHERE id = ?",
+    )
       .bind(Math.floor(Date.now() / 1000), event.id)
       .run();
 
@@ -184,7 +219,11 @@ async function handleCheckoutCompleted(db, sessionData) {
 
   // Create/update customer with Stripe customer ID
   if (session.customer && session.customer_email && tenantId) {
-    const customer = await getOrCreateCustomer(db, tenantId, session.customer_email);
+    const customer = await getOrCreateCustomer(
+      db,
+      tenantId,
+      session.customer_email,
+    );
     await updateCustomer(db, customer.id, {
       providerCustomerId: session.customer,
       totalOrders: (customer.totalOrders || 0) + 1,
@@ -194,7 +233,11 @@ async function handleCheckoutCompleted(db, sessionData) {
 
   // Update addresses if collected
   if (session.shipping_details && tenantId && session.customer_email) {
-    const customer = await getOrCreateCustomer(db, tenantId, session.customer_email);
+    const customer = await getOrCreateCustomer(
+      db,
+      tenantId,
+      session.customer_email,
+    );
     await updateCustomer(db, customer.id, {
       name: session.shipping_details.name,
       defaultShippingAddress: session.shipping_details.address,
@@ -202,12 +245,14 @@ async function handleCheckoutCompleted(db, sessionData) {
 
     // Also update order with shipping address
     await db
-      .prepare("UPDATE orders SET shipping_address = ?, customer_name = ?, updated_at = ? WHERE id = ?")
+      .prepare(
+        "UPDATE orders SET shipping_address = ?, customer_name = ?, updated_at = ? WHERE id = ?",
+      )
       .bind(
         JSON.stringify(session.shipping_details.address),
         session.shipping_details.name,
         Math.floor(Date.now() / 1000),
-        order.id
+        order.id,
       )
       .run();
   }
@@ -291,7 +336,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
         current_period_end = ?,
         cancel_at_period_end = ?,
         updated_at = ?
-       WHERE provider_subscription_id = ?`
+       WHERE provider_subscription_id = ?`,
     )
     .bind(
       mappedStatus,
@@ -299,7 +344,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
       subscriptionData.current_period_end,
       subscriptionData.cancel_at_period_end ? 1 : 0,
       Math.floor(Date.now() / 1000),
-      stripeSubId
+      stripeSubId,
     )
     .run();
 
@@ -312,7 +357,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
         current_period_end = ?,
         cancel_at_period_end = ?,
         updated_at = ?
-       WHERE provider_subscription_id = ?`
+       WHERE provider_subscription_id = ?`,
     )
     .bind(
       mappedStatus,
@@ -320,7 +365,7 @@ async function handleSubscriptionUpdated(db, subscriptionData) {
       subscriptionData.current_period_end,
       subscriptionData.cancel_at_period_end ? 1 : 0,
       Math.floor(Date.now() / 1000),
-      stripeSubId
+      stripeSubId,
     )
     .run();
 }
@@ -334,12 +379,12 @@ async function handleSubscriptionCanceled(db, subscriptionData) {
         status = 'canceled',
         canceled_at = ?,
         updated_at = ?
-       WHERE provider_subscription_id = ?`
+       WHERE provider_subscription_id = ?`,
     )
     .bind(
       Math.floor(Date.now() / 1000),
       Math.floor(Date.now() / 1000),
-      stripeSubId
+      stripeSubId,
     )
     .run();
 
@@ -348,7 +393,7 @@ async function handleSubscriptionCanceled(db, subscriptionData) {
       `UPDATE platform_billing SET
         status = 'canceled',
         updated_at = ?
-       WHERE provider_subscription_id = ?`
+       WHERE provider_subscription_id = ?`,
     )
     .bind(Math.floor(Date.now() / 1000), stripeSubId)
     .run();
@@ -361,7 +406,9 @@ async function handleRefundCreated(db, refundData) {
 
   // Find the order
   const order = await db
-    .prepare("SELECT id, tenant_id, total FROM orders WHERE provider_payment_id = ?")
+    .prepare(
+      "SELECT id, tenant_id, total FROM orders WHERE provider_payment_id = ?",
+    )
     .bind(paymentIntentId)
     .first();
 
@@ -374,7 +421,7 @@ async function handleRefundCreated(db, refundData) {
   await db
     .prepare(
       `INSERT INTO refunds (id, order_id, tenant_id, amount, currency, status, reason, provider_refund_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       crypto.randomUUID(),
@@ -386,7 +433,7 @@ async function handleRefundCreated(db, refundData) {
       refundData.reason || null,
       refundId,
       Math.floor(Date.now() / 1000),
-      Math.floor(Date.now() / 1000)
+      Math.floor(Date.now() / 1000),
     )
     .run();
 
@@ -422,7 +469,7 @@ async function handleConnectAccountUpdated(db, accountData) {
         country = ?,
         default_currency = ?,
         updated_at = ?
-       WHERE provider_account_id = ?`
+       WHERE provider_account_id = ?`,
     )
     .bind(
       status,
@@ -433,7 +480,7 @@ async function handleConnectAccountUpdated(db, accountData) {
       accountData.country || null,
       accountData.default_currency || null,
       Math.floor(Date.now() / 1000),
-      accountId
+      accountId,
     )
     .run();
 

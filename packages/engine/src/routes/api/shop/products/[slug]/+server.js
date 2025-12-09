@@ -9,10 +9,19 @@ import {
   deleteVariant,
 } from "$lib/payments/shop";
 
+// Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
+const SHOP_DISABLED = true;
+const SHOP_DISABLED_MESSAGE =
+  "Shop feature is temporarily disabled. It will be available in a future release.";
+
 /**
  * GET /api/shop/products/[slug] - Get a single product
  */
 export async function GET({ params, url, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   if (!platform?.env?.POSTS_DB) {
     throw error(500, "Database not configured");
   }
@@ -26,7 +35,7 @@ export async function GET({ params, url, platform, locals }) {
     const product = await getProductBySlug(
       platform.env.POSTS_DB,
       tenantId,
-      params.slug
+      params.slug,
     );
 
     if (!product) {
@@ -47,6 +56,10 @@ export async function GET({ params, url, platform, locals }) {
  * Body: Same as POST, all fields optional
  */
 export async function PATCH({ params, request, url, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -71,7 +84,7 @@ export async function PATCH({ params, request, url, platform, locals }) {
     const product = await getProductBySlug(
       platform.env.POSTS_DB,
       tenantId,
-      params.slug
+      params.slug,
     );
 
     if (!product) {
@@ -84,7 +97,10 @@ export async function PATCH({ params, request, url, platform, locals }) {
     if (data.slug && data.slug !== params.slug) {
       const slugRegex = /^[a-z0-9-]+$/;
       if (!slugRegex.test(data.slug)) {
-        throw error(400, "Slug must contain only lowercase letters, numbers, and hyphens");
+        throw error(
+          400,
+          "Slug must contain only lowercase letters, numbers, and hyphens",
+        );
       }
     }
 
@@ -162,7 +178,7 @@ export async function PATCH({ params, request, url, platform, locals }) {
     const updatedProduct = await getProductBySlug(
       platform.env.POSTS_DB,
       tenantId,
-      data.slug || params.slug
+      data.slug || params.slug,
     );
 
     return json({
@@ -180,6 +196,10 @@ export async function PATCH({ params, request, url, platform, locals }) {
  * DELETE /api/shop/products/[slug] - Delete a product
  */
 export async function DELETE({ params, request, url, platform, locals }) {
+  if (SHOP_DISABLED) {
+    throw error(503, SHOP_DISABLED_MESSAGE);
+  }
+
   // Auth check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -203,7 +223,7 @@ export async function DELETE({ params, request, url, platform, locals }) {
     const product = await getProductBySlug(
       platform.env.POSTS_DB,
       tenantId,
-      params.slug
+      params.slug,
     );
 
     if (!product) {
