@@ -1,20 +1,16 @@
-Grove.place
+# *Pricing & Subscription Tiers*
 
-Subscription Tiers & Pricing
+Grove.place
 
 *Effective December 2025*
 
-Pricing Philosophy
+## Pricing Philosophy
 
-Grove.place is designed to be **accessible**. The goal is to provide a
-home for writers and creators at every level — from hobbyists exploring
-blogging for the first time to professionals who need a polished,
-branded presence.
+Grove.place is designed to be **accessible**. The goal is to provide a home for writers and creators at every level — from hobbyists exploring blogging for the first time to professionals who need a polished, branded presence.
 
-Setup fees for domain services are **credited toward subscription** —
-they're not lost money, they're prepayment for service.
+Setup fees for domain services are **credited toward subscription** — they're not lost money, they're prepayment for service.
 
-Subscription Tiers
+## Subscription Tiers
 
 | **Feature**       |  **Basic**  |  **Professional**  |   **Premium**   |
 |-------------------|:-----------:|:------------------:|:---------------:|
@@ -24,10 +20,9 @@ Subscription Tiers
 | **Grove Social**  |      ✓      |         ✓          |        ✓        |
 | **Target User**   | *Hobbyists* | *Serious Bloggers* | *Professionals* |
 
-Domain Search Service
+## Domain Search Service
 
-Premium tier includes a custom domain. The domain search uses an
-AI-powered tool that reduces 2-week searches to 1-2 hours.
+Premium tier includes a custom domain. The domain search uses an AI-powered tool that reduces 2-week searches to 1-2 hours.
 
 | **Turnaround** | **Setup Fee** | **Credited As**  |
 |:--------------:|:-------------:|:----------------:|
@@ -35,10 +30,9 @@ AI-powered tool that reduces 2-week searches to 1-2 hours.
 |     3 Days     |   **\$100**   | 2 months Premium |
 |     1 Week     |   **\$50**    | 1 month Premium  |
 
-**Note:** Domain registration cost (~\$20/year) is separate and billed
-at cost.
+**Note:** Domain registration cost (~\$20/year) is separate and billed at cost.
 
-Included in Every Tier
+## Included in Every Tier
 
 - Unlimited blog posts (Markdown)
 
@@ -54,7 +48,7 @@ Included in Every Tier
 
 - No ads, no tracking of your readers
 
-Revenue Projections
+## Revenue Projections
 
 Expected distribution: 85% Basic, 10% Professional, 5% Premium
 

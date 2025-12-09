@@ -1,23 +1,18 @@
-Grove.place
+# *Cloudflare R2 Cost Analysis & Infrastructure Planning*
 
-Cloudflare R2 Cost Analysis & Infrastructure Planning
+Grove.place
 
 *December 2024*
 
-Executive Summary
+## Executive Summary
 
-This analysis examines the infrastructure costs for Grove.place, a
-multi-user blogging platform using Cloudflare R2 for storage. The key
-finding:
+This analysis examines the infrastructure costs for Grove.place, a multi-user blogging platform using Cloudflare R2 for storage. The key finding:
 
-**R2 costs will remain under 0.5% of revenue at any scale, from 100
-users to 1 million.**
+**R2 costs will remain under 0.5% of revenue at any scale, from 100 users to 1 million.**
 
-This is possible because of three factors: aggressive CDN caching (95%+
-hit rates), small file sizes (compressed WebP images ~12KB), and R2's
-zero egress fees.
+This is possible because of three factors: aggressive CDN caching (95%+ hit rates), small file sizes (compressed WebP images ~12KB), and R2's zero egress fees.
 
-R2 Pricing Breakdown
+## R2 Pricing Breakdown
 
 Cloudflare R2 charges for three things:
 
@@ -30,10 +25,9 @@ Cloudflare R2 charges for three things:
 
 *The free bandwidth is the killer feature for image hosting.*
 
-Why Caching Changes Everything
+## Why Caching Changes Everything
 
-Without caching, every image view hits R2 (a read operation). With
-thousands of users viewing millions of images, this adds up fast.
+Without caching, every image view hits R2 (a read operation). With thousands of users viewing millions of images, this adds up fast.
 
 With Cloudflare CDN caching enabled:
 
@@ -43,13 +37,11 @@ With Cloudflare CDN caching enabled:
 
 - Expected cache hit rate: 95%+ for static blog images
 
-This means only ~5% of image requests actually hit R2. The rest are
-served free from Cloudflare's global edge network.
+This means only ~5% of image requests actually hit R2. The rest are served free from Cloudflare's global edge network.
 
-Cost Projections at Scale
+## Cost Projections at Scale
 
-Assumptions: 85% Basic (\$12), 10% Pro (\$25), 5% Premium (\$50). Users
-average 35% of allocated storage. 95% cache hit rate.
+Assumptions: 85% Basic (\$12), 10% Pro (\$25), 5% Premium (\$50). Users average 35% of allocated storage. 95% cache hit rate.
 
 | **Users**     | **Storage** | **R2 Cost**      | **Revenue**    |
 |---------------|-------------|------------------|----------------|
@@ -60,24 +52,19 @@ average 35% of allocated storage. 95% cache hit rate.
 
 **R2 costs remain at ~0.39% of revenue regardless of scale.**
 
-Key Takeaways
+## Key Takeaways
 
-1.  **Storage dominates costs (99%+)** — Operations are nearly free with
-    caching
+1.  **Storage dominates costs (99%+)** — Operations are nearly free with caching
 
-2.  **Bandwidth is free** — This is the R2 killer feature for image
-    hosting
+2.  **Bandwidth is free** — This is the R2 killer feature for image hosting
 
-3.  **Caching is essential** — Use custom domains (cdn.grove.place) not
-    r2.dev URLs
+3.  **Caching is essential** — Use custom domains (cdn.grove.place) not r2.dev URLs
 
-4.  **Your margins are excellent** — Charging \$2.40/GB for storage that
-    costs \$0.015/GB
+4.  **Your margins are excellent** — Charging \$2.40/GB for storage that costs \$0.015/GB
 
-5.  **R2 is not your scaling bottleneck** — Payment processing (Stripe
-    ~3%) will cost more
+5.  **R2 is not your scaling bottleneck** — Payment processing (Stripe ~3%) will cost more
 
-What Will Actually Cost Money
+## What Will Actually Cost Money
 
 At scale, your actual cost centers will be:
 

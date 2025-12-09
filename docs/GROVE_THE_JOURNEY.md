@@ -1,15 +1,14 @@
-The Journey
+# *The Journey*
 
 From 'I Want a Blog' to SaaS Platform
 
 *December 2025*
 
-The Timeline
+## The Timeline
 
 **May 2025:** Graduated with IT/Cybersecurity degree
 
-**November 2025:** Still unemployed, working retail, living in parents'
-basement
+**November 2025:** Still unemployed, working retail, living in parents' basement
 
 **Day 1:** "I want a domain"
 
@@ -21,18 +20,15 @@ basement
 
 **Day 7:** Built AI domain-hunting agent, deployed during work shift
 
-***Lunch break:*** Found grove.place for \$17. Instant tagline: "Get
-your place in the Grove"
+***Lunch break:*** Found grove.place for \$17. Instant tagline: "Get your place in the Grove"
 
 **That afternoon:** Full project spec, GitHub repo, 25 commits
 
-**Week 2:** Landing page live, multi-tenant architecture, component
-library
+**Week 2:** Landing page live, multi-tenant architecture, component library
 
-**Week 3:** First NPM package published (@autumnsgrove/groveengine
-v0.5.0)
+**Week 3:** First NPM package published (@autumnsgrove/groveengine v0.5.0)
 
-Current Stats (as of Dec 9, 2025)
+## Current Stats (as of Dec 9, 2025)
 
 - **20+ day coding streak**
 
@@ -50,9 +46,9 @@ Current Stats (as of Dec 9, 2025)
 
 - CDN caching verified and working
 
-The Business Model
+## The Business Model
 
-Pricing Tiers
+### Pricing Tiers
 
 | **Tier**     |   **Price**    | **Storage** |    **Target**     |
 |--------------|:--------------:|:-----------:|:-----------------:|
@@ -60,7 +56,7 @@ Pricing Tiers
 | Professional |   \$25/month   |    20 GB    | Serious bloggers  |
 | **Premium**  | **\$50/month** | **100 GB**  | **Professionals** |
 
-Domain Service (Premium Add-on)
+### Domain Service (Premium Add-on)
 
 AI-powered domain search that turns 2-week searches into 1-2 hours:
 
@@ -72,12 +68,11 @@ AI-powered domain search that turns 2-week searches into 1-2 hours:
 
 *Setup fees aren't lost — they become subscription credit.*
 
-The Economics: Why This Works
+## The Economics: Why This Works
 
-R2 Storage Costs
+### R2 Storage Costs
 
-Cloudflare R2 with CDN caching means infrastructure costs are nearly
-zero:
+Cloudflare R2 with CDN caching means infrastructure costs are nearly zero:
 
 |   **Users**   |  **R2 Cost**  | **Revenue** | **R2 as % Rev** |
 |:-------------:|:-------------:|:-----------:|:---------------:|
@@ -85,10 +80,9 @@ zero:
 |    10,000     |    ~\$590     |  \$152,000  |      0.39%      |
 | **1,000,000** | **~\$59,500** | **\$15.2M** |    **0.39%**    |
 
-**R2 stays at ~0.4% of revenue regardless of scale. Bandwidth is always
-free.**
+**R2 stays at ~0.4% of revenue regardless of scale. Bandwidth is always free.**
 
-Revenue Projections
+### Revenue Projections
 
 Assuming 85% Basic, 10% Pro, 5% Premium:
 
@@ -100,7 +94,7 @@ Assuming 85% Basic, 10% Pro, 5% Premium:
 
 - **1,000 users:** \$15,200/month — life-changing
 
-What Made This Possible
+## What Made This Possible
 
 Built in a framework (SvelteKit) never used before, in under 3 weeks:
 
@@ -114,21 +108,15 @@ Built in a framework (SvelteKit) never used before, in under 3 weeks:
 
 - Building in public (accountability + portfolio)
 
-This isn't "AI replacing developers" — it's ***AI creating
-developers***. The barrier between idea and implementation collapsed.
-The work shifted from fighting syntax to building vision.
+This isn't "AI replacing developers" — it's ***AI creating developers***. The barrier between idea and implementation collapsed. The work shifted from fighting syntax to building vision.
 
-Philosophy: Build With Integrity
+## Philosophy: Build With Integrity
 
-Could easily lock customers in with data traps. Could be predatory with
-pricing. Could hide costs. Could optimize for engagement over wellbeing.
+Could easily lock customers in with data traps. Could be predatory with pricing. Could hide costs. Could optimize for engagement over wellbeing.
 
-**Instead:** Be genuine. Be honest. Be transparent. Build infrastructure
-that *helps* people.
+**Instead:** Be genuine. Be honest. Be transparent. Build infrastructure that *helps* people.
 
-The money comes from providing value, not exploitation. The community
-comes from genuine connection, not gamified engagement. The growth comes
-from people who actually want what you're building.
+The money comes from providing value, not exploitation. The community comes from genuine connection, not gamified engagement. The growth comes from people who actually want what you're building.
 
 *All because I wanted a blog.*
 
