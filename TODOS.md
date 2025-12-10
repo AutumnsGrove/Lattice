@@ -332,7 +332,7 @@
 - [x] Create Acceptable Use Policy / Community Guidelines → **DONE (2025-12-10)**
 - [x] Create DMCA Policy → **DONE (2025-12-10)**
 - [x] Create Refund & Cancellation Policy → **DONE (2025-12-10)**
-- [x] Add AGPL-3.0 license to repo → **DONE (2025-12-10)**
+- [ ] Add AGPL-3.0 license to repo → **REMINDER: License file needs to be added manually**
 - [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
   - Required for DMCA safe harbor protection
   - Register at: https://www.copyright.gov/dmca-directory/
