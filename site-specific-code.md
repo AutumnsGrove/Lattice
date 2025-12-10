@@ -479,6 +479,6 @@ If all are **NO** → Consider contributing to GroveEngine or GroveUI
 
 **Last Updated**: 2025-12-03
 **Related Docs**:
-- `BELONGS_IN_ENGINE.md` (GroveEngine decision guide)
+- `belongs-in-engine.md` (GroveEngine decision guide)
 - `BELONGS_IN_UI.md` (GroveUI decision guide)
-- `CUSTOMER_TEMPLATE.md` (New project template)
+- `customer-template.md` (New project template)

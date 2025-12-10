@@ -123,7 +123,7 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - ✅ Google Sign-In with OAuth 2.0 + PKCE
 
 **Key Links:**
-- [Master Project Summary](docs/README.md)
+- [Master Project Summary](docs/project-plan.md)
 - [Engine Specification](docs/specs/engine-spec.md)
 - [Development Roadmap](docs/roadmap.md)
 

@@ -323,5 +323,5 @@ If all are **NO** → Check if it belongs in GroveUI or Site-Specific code inste
 **Last Updated**: 2025-12-04
 **Related Docs**:
 - `BELONGS_IN_UI.md` (GroveUI decision guide)
-- `SITE_SPECIFIC_CODE.md` (Site deployment guide)
-- `CUSTOMER_TEMPLATE.md` (New project template)
+- `site-specific-code.md` (Site deployment guide)
+- `customer-template.md` (New project template)

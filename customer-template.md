@@ -699,7 +699,7 @@ if (import.meta.env.PROD) {
 
 ## Support & Resources
 
-- **Documentation**: See `BELONGS_IN_ENGINE.md`, `BELONGS_IN_UI.md`, `SITE_SPECIFIC_CODE.md`
+- **Documentation**: See `belongs-in-engine.md`, `BELONGS_IN_UI.md`, `site-specific-code.md`
 - **Examples**: Check `/packages/example-site/` in GroveEngine repo
 - **Issues**: Report bugs to GitHub issues
 

@@ -689,8 +689,8 @@ Blog images return 404.
 
 ### Documentation
 
-- **GroveEngine Docs**: [GroveEngine/docs/README.md](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/README.md)
-- **Migration Strategy**: [GroveEngine/docs/MIGRATION-STRATEGY.md](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/MIGRATION-STRATEGY.md)
+- **GroveEngine Docs**: [GroveEngine/docs/project-plan.md](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/project-plan.md)
+- **Migration Strategy**: [GroveEngine/docs/migration-strategy.md](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/migration-strategy.md)
 - **Engine Spec**: [GroveEngine/docs/specs/engine-spec.md](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/specs/engine-spec.md)
 - **Multi-Tenant Schema**: [GroveEngine/docs/schema/multi-tenant-schema.sql](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/schema/multi-tenant-schema.sql)
 
