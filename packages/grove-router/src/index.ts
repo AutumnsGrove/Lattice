@@ -15,20 +15,29 @@ export interface Env {
 }
 
 /**
- * Subdomains that should NOT be proxied.
- * These have their own Cloudflare Pages custom domains or Workers.
+ * Subdomain routing map.
+ * Maps subdomains to their target Pages/Workers hostnames.
+ * null = use default groveengine.pages.dev
+ * string = proxy to that hostname
  */
-const EXCLUDED_SUBDOMAINS = new Set([
-  "auth", // groveauth-frontend Pages
-  "admin", // groveauth-frontend Pages
-  "login", // groveauth-frontend Pages
-  "domains", // grove-domains Pages
-  "cdn", // grove-landing Pages (R2)
-  "music", // grovemusic Pages
-  "scout", // scout Worker
-  "auth-api", // groveauth Worker
-  "www", // Redirect handled in hooks
-]);
+const SUBDOMAIN_ROUTES: Record<string, string | null> = {
+  // Auth subdomains → groveauth-frontend Pages
+  auth: "groveauth-frontend.pages.dev",
+  admin: "groveauth-frontend.pages.dev",
+  login: "groveauth-frontend.pages.dev",
+
+  // Other Pages projects
+  domains: "grove-domains.pages.dev",
+  cdn: "grove-landing.pages.dev", // R2 assets
+  music: "grovemusic.pages.dev",
+
+  // Workers - these have their own routes but fallback here
+  scout: null, // Should be handled by scout Worker route
+  "auth-api": null, // Should be handled by groveauth Worker route
+
+  // Special handling
+  www: "REDIRECT", // Redirect to root
+};
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -47,17 +56,28 @@ export default {
 
     const subdomain = parts[0];
 
-    // Skip excluded subdomains - they have their own routes
-    // This is a safety net; HTTP Routes should prevent these from reaching this worker
-    if (EXCLUDED_SUBDOMAINS.has(subdomain)) {
-      return new Response("This subdomain is handled by another service", {
-        status: 404,
-      });
+    // Check if this subdomain has special routing
+    const routeTarget = SUBDOMAIN_ROUTES[subdomain];
+
+    // Handle www redirect
+    if (routeTarget === "REDIRECT") {
+      const redirectUrl = new URL(request.url);
+      redirectUrl.hostname = "grove.place";
+      return Response.redirect(redirectUrl.toString(), 301);
     }
 
-    // Proxy to groveengine Pages
+    // Handle Workers that should have their own routes
+    if (routeTarget === null) {
+      return new Response("Service route not configured", { status: 503 });
+    }
+
+    // Determine target hostname
+    // Note: groveengine project uses grove-example-site.pages.dev domain
+    const targetHostname = routeTarget || "grove-example-site.pages.dev";
+
+    // Proxy to target
     const targetUrl = new URL(request.url);
-    targetUrl.hostname = "groveengine.pages.dev";
+    targetUrl.hostname = targetHostname;
 
     // Create new headers, preserving original headers
     const headers = new Headers(request.headers);
