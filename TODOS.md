@@ -119,7 +119,40 @@
 > - Cost scaling - need usage monitoring and smart caching
 > - Performance - static vs dynamic content tradeoffs
 >
-> **See:** `docs/MULTI-TENANT-ARCHITECTURE.md` (to be created)
+> **See:** `docs/MULTI-TENANT-ARCHITECTURE.md`
+
+### Dave Test Tenant - Debugging (2025-12-10)
+> **Status:** Routing works, content loading still showing example-site fallback
+>
+> **What's Working:**
+> - `grove-router` Worker catches `*.grove.place` and proxies correctly
+> - `hooks.server.ts` reads `X-Forwarded-Host` and identifies Dave's tenant
+> - `locals.tenantId` is set correctly in hooks
+> - Dave exists in D1 with home page, about page, and a blog post
+>
+> **What's NOT Working:**
+> - `dave.grove.place` still shows "The Midnight Bloom" (example-site content)
+> - Page loaders updated to filter by `tenant_id` but still falling back to filesystem
+>
+> **Debug Attempts:**
+> 1. Updated `+page.server.js` to use `platform.env.DB` and filter by `tenantId` ✅
+> 2. Added Dave's home page to D1 `pages` table ✅
+> 3. Deployed updated code ✅
+> 4. Still shows example-site content ❌
+>
+> **Likely Issues to Investigate:**
+> - [ ] Is `locals.tenantId` actually being passed to page loaders? (might need to check load function signature)
+> - [ ] Is the `DB` binding configured in Cloudflare Pages dashboard? (might still be using old `POSTS_DB`)
+> - [ ] Add console.log debugging to see what's happening at runtime
+> - [ ] Check if the example-site's own loaders are overriding engine's loaders
+> - [ ] Verify the D1 database ID matches between wrangler.toml and Pages dashboard bindings
+>
+> **Test Tenant Data in D1:**
+> - Tenant ID: `550e8400-e29b-41d4-a716-446655440000`
+> - Subdomain: `dave`
+> - Display name: "Dave's Digital Garden"
+> - Plan: professional
+> - Has: home page, about page, 1 blog post
 
 ## Phase 3: Grove Website (Weeks 10-15)
 - [x] Create marketing website → **DONE: Landing site deployed at grove.place**
