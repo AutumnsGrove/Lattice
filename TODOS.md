@@ -326,6 +326,22 @@
 - [ ] SDK/client libraries (JavaScript, Python)
 
 
+## Legal & Compliance Tasks
+- [x] Create Terms of Service → **DONE (2025-12-10)**
+- [x] Create Privacy Policy → **DONE (2025-12-10)**
+- [x] Create Acceptable Use Policy / Community Guidelines → **DONE (2025-12-10)**
+- [x] Create DMCA Policy → **DONE (2025-12-10)**
+- [x] Create Refund & Cancellation Policy → **DONE (2025-12-10)**
+- [x] Add AGPL-3.0 license to repo → **DONE (2025-12-10)**
+- [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
+  - Required for DMCA safe harbor protection
+  - Register at: https://www.copyright.gov/dmca-directory/
+- [ ] **PRE-LAUNCH: Review all legal policies** - Ensure up to date before public launch
+  - Review ToS for any needed updates
+  - Review Privacy Policy for accuracy with current data practices
+  - Review AUP for clarity and enforceability
+  - Consider professional legal review
+
 ## Documentation Tasks
 - [x] Update README.md with project specifics → **DONE: PR #16**
 - [x] Document API/architecture decisions → **DONE: 7 specs in docs/specs/**
