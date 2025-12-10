@@ -125,9 +125,6 @@ The Service, including its design, features, and underlying technology, is owned
 ### 9.2 Open Source
 The Grove platform code is available under the [GNU Affero General Public License v3.0 (AGPL-3.0)](../../LICENSE). This allows you to view and learn from the code while ensuring that any modifications to the platform remain open source.
 
-### 9.3 Trademarks
-"Grove," "Grove.place," and associated logos are our trademarks. You may not use these marks without our written permission.
-
 ---
 
 ## 10. DMCA and Copyright
