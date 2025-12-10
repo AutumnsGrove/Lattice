@@ -529,6 +529,7 @@ Based on confidence thresholds:
 **Missed Rotation Protocol:**
 - If 90-day deadline passes without rotation, trigger immediate security review
 - Rotate key within 24 hours of missed deadline
+- Pause automated moderation during key rotation to prevent service disruption
 - Document reason for delay in audit log
 - If pattern of missed rotations, implement automated rotation tooling
 
@@ -595,6 +596,18 @@ https://grove.place/legal/acceptable-use
 If you believe this is an error, no action is needed.
 ```
 
+**Content Restored (False Positive):**
+```
+We owe you an apology.
+
+Your post "{title}" was incorrectly removed by our automated moderation system.
+We identified a pattern of errors affecting posts like yours and have fixed the issue.
+
+Your content has been restored and is now live.
+
+We're sorry for the inconvenience. If you have any questions, please reply to this email.
+```
+
 ### 12.2 Appeal Process
 
 1. User replies to notification email
@@ -646,6 +659,14 @@ To identify and address systemic issues with automated moderation:
 - If a content type is consistently misclassified, temporarily reduce confidence threshold for that category
 - Escalate to manual review more aggressively until prompt is refined
 - Notify affected users if their content was incorrectly actioned
+
+**False Positive Notification Protocol:**
+When systemic false positives are identified that resulted in content removal:
+- **Scope:** Only for false positives that led to content removal (not warnings)
+- **Mechanism:** Automated email using the "Content Restored" template (see Section 12.1)
+- **Timeline:** Within 48 hours of identifying the systemic issue
+- **Content:** Apology, explanation of the error, confirmation content has been restored
+- **Record:** Log notification in user's moderation history for transparency
 
 ---
 
