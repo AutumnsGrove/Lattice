@@ -1,5 +1,10 @@
 <svelte:head>
-	<link rel="alternate" type="application/rss+xml" title="AutumnsGrove Blog" href="/api/feed" />
+	{#if context?.type === 'tenant'}
+		<title>{context.tenant.name}</title>
+		<link rel="alternate" type="application/rss+xml" title="{context.tenant.name} RSS Feed" href="/api/feed" />
+	{:else}
+		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
+	{/if}
 </svelte:head>
 
 <script>
@@ -12,6 +17,16 @@
 	import { Button, Input } from '$lib/ui';
 
 	let { children, data } = $props();
+
+	// Get context from layout data (set in hooks.server.ts)
+	const context = $derived(data.context);
+
+	// Derive site name based on context
+	const siteName = $derived(
+		context?.type === 'tenant' ? context.tenant.name :
+		context?.type === 'app' ? `Grove ${context.app.charAt(0).toUpperCase() + context.app.slice(1)}` :
+		'The Grove'
+	);
 
 	// Font family mapping - maps database values to CSS font stacks
 	const fontMap = {
@@ -216,11 +231,21 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
+<!-- Handle not_found context (invalid subdomain) -->
+{#if context?.type === 'not_found'}
+<div class="not-found-layout">
+	<div class="not-found-content">
+		<h1>Blog Not Found</h1>
+		<p>The blog <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
+		<p>Want to create your own blog? <a href="https://grove.place">Get started at grove.place</a></p>
+	</div>
+</div>
+{:else}
 <div class="layout">
 	<header>
 		<nav>
 			<!-- TITLE AREA -->
-			<a href="/" class="logo">The Grove</a>
+			<a href="/" class="logo">{siteName}</a>
 
 			<!-- Desktop Navigation -->
 			<div class="nav-links desktop-nav">
@@ -372,8 +397,46 @@
 		</div>
 	</footer>
 </div>
+{/if}
 
 <style>
+	/* Not found page styles */
+	.not-found-layout {
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fafafa;
+		padding: 2rem;
+	}
+	:global(.dark) .not-found-layout {
+		background: var(--light-bg-primary);
+	}
+	.not-found-content {
+		text-align: center;
+		max-width: 500px;
+	}
+	.not-found-content h1 {
+		color: var(--color-primary, #2c5f2d);
+		margin-bottom: 1rem;
+	}
+	.not-found-content p {
+		color: #666;
+		margin-bottom: 0.5rem;
+	}
+	.not-found-content a {
+		color: var(--color-primary, #2c5f2d);
+		text-decoration: underline;
+	}
+	:global(.dark) .not-found-content h1 {
+		color: var(--accent-success);
+	}
+	:global(.dark) .not-found-content p {
+		color: var(--color-text-muted-dark);
+	}
+	:global(.dark) .not-found-content a {
+		color: var(--accent-success);
+	}
 	/* @font-face declarations for custom fonts */
 	@font-face {
 		font-family: 'Alagard';

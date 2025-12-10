@@ -32,14 +32,14 @@ binding = "IMAGES"
 bucket_name = "your-site-images"
 
 # =============================================================================
-# D1 Database - For posts, pages, settings, and auth
+# D1 Database - Main shared database for multi-tenant platform
 # =============================================================================
-# Create with: npx wrangler d1 create your-site-posts
-# Run migrations: npx wrangler d1 execute your-site-posts --file=migrations/001_magic_codes.sql
+# Uses the shared grove-engine-db for tenants, users, content, and auth
+# Run migrations: npx wrangler d1 execute grove-engine-db --file=migrations/005_multi_tenant.sql --remote
 [[d1_databases]]
-binding = "POSTS_DB"
-database_name = "your-site-posts"
-database_id = "your-database-id"
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 # =============================================================================
 # Environment Variables (non-sensitive)
