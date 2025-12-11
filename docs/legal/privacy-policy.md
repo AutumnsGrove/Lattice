@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Last Updated:** December 11, 2025
 
 ---
 
@@ -101,7 +101,7 @@ We share limited data with trusted service providers who help us operate Grove:
 | **Stripe** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
-| **Fireworks AI / Groq** | Content moderation | Post content (zero data retention) |
+| **Fireworks AI / Cerebras / Groq** | Content moderation | Post content (zero data retention) |
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
 

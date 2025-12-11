@@ -1,8 +1,8 @@
 # Automated Content Moderation System
 
 **Grove Platform**
-**Version:** 1.0 Draft
-**Last Updated:** December 10, 2025
+**Version:** 1.1 Draft
+**Last Updated:** December 11, 2025
 
 ---
 
@@ -63,7 +63,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](.
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              INFERENCE API (Groq or Fireworks AI)                │
+│         INFERENCE API (Fireworks AI / Cerebras / Groq)           │
 │  - Zero Data Retention enabled                                   │
 │  - TLS 1.2+ encryption in transit                               │
 │  - Model: DeepSeek V3.2 (open source, MIT license)              │
@@ -110,10 +110,13 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](.
 
 ### 3.1 Approved Providers
 
-| Provider | Model | ZDR Support | Compliance | Status |
-|----------|-------|-------------|------------|--------|
-| **Fireworks AI** | DeepSeek V3 | Yes (default for open models) | SOC 2 Type II, HIPAA | Preferred |
-| **Groq** | DeepSeek V3 | Yes (explicit toggle) | SOC 2, HIPAA | Alternate |
+| Provider | Models Available | ZDR Support | Compliance | Status |
+|----------|------------------|-------------|------------|--------|
+| **Fireworks AI** | DeepSeek V3.2, Kimi K2, Llama 3.1 70B | Yes (default for open models) | SOC 2 Type II, HIPAA | Primary |
+| **Cerebras** | Llama 3.3 70B, GPT-OSS-120B | Yes (US-based, zero retention) | Trust Center available | Backup |
+| **Groq** | Llama 3.3 70B, Kimi K2 | Yes (explicit toggle) | SOC 2, HIPAA | Tertiary |
+
+**Note:** Groq deprecated Llama 3.1 70B in January 2025 in favor of Llama 3.3 70B. Fireworks AI is the only provider offering all three primary models (DeepSeek V3.2, Kimi K2, and Llama 3.1).
 
 ### 3.2 Provider Requirements Checklist
 
@@ -128,17 +131,25 @@ Before using any provider, verify:
 
 ### 3.3 Why These Providers?
 
-**Fireworks AI:**
+**Fireworks AI (Primary):**
 - ZDR is default for open models (no opt-in required)
 - SOC 2 Type II and HIPAA compliant
 - AES-256 encryption at rest, TLS 1.2+ in transit
 - Explicit policy: "We do not log or store prompt or generation data"
+- **Only provider with all three primary models** (DeepSeek V3.2, Kimi K2, Llama 3.1)
 
-**Groq:**
+**Cerebras (Backup):**
+- 100% US-based AI datacenters with zero data retention
+- Ultra-fast inference (~2100 tokens/sec for Llama 3.3 70B, ~3000 tokens/sec for GPT-OSS-120B)
+- Trust Center available for compliance documentation
+- Offers unique models like GPT-OSS-120B (120B parameters, open source)
+
+**Groq (Tertiary):**
 - Explicit Zero Data Retention toggle in console
 - No logging by default
 - Ultra-fast inference (LPU hardware)
 - Clear data processing documentation
+- Note: Llama 3.1 70B deprecated; use Llama 3.3 70B instead
 
 ### 3.4 Excluded Providers
 
@@ -183,12 +194,14 @@ Low temperature ensures consistent, predictable responses for moderation decisio
 
 If DeepSeek V3.2 is unavailable, use in this order:
 
-| Priority | Model | Provider ID | License |
-|----------|-------|-------------|---------|
-| 1st fallback | [Kimi K2-0905](https://huggingface.co/moonshotai/Kimi-K2-Instruct) | `moonshotai/Kimi-K2-Instruct-0905` (Groq) / `kimi-k2-instruct` (Fireworks) | Modified MIT |
-| 2nd fallback | Llama 3.1 70B | `llama-3.1-70b` | Llama 3.1 License |
+| Priority | Model | HuggingFace | Provider IDs | License |
+|----------|-------|-------------|--------------|---------|
+| 1st fallback | [Kimi K2-0905](https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905) | `moonshotai/Kimi-K2-Instruct-0905` | Fireworks: `accounts/fireworks/models/kimi-k2-instruct` / Groq: `moonshotai/Kimi-K2-Instruct-0905` | Modified MIT |
+| 2nd fallback | [Llama 3.1 70B](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct) | `meta-llama/Llama-3.1-70B-Instruct` | Fireworks: `accounts/fireworks/models/llama-v3p1-70b-instruct` | Llama 3.1 License |
+| 3rd fallback | [Llama 3.3 70B](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct) | `meta-llama/Llama-3.3-70B-Instruct` | Cerebras: `llama-3.3-70b` / Groq: `llama-3.3-70b-versatile` | Llama 3.3 License |
+| 4th fallback | GPT-OSS-120B | — | Cerebras: `gpt-oss-120b` / Groq: `gpt-oss-120b` | Open Source |
 
-Same provider requirements (ZDR, US hosting, SOC 2) apply to all models.
+Same provider requirements (ZDR, US hosting) apply to all models. Provider failover order: Fireworks AI → Cerebras → Groq.
 
 ### 4.3 Cost Estimation
 
@@ -217,31 +230,32 @@ If sampled paragraphs show concerning patterns (e.g., borderline scores), the sy
 
 **Model pricing comparison (per million tokens):**
 
-| Model | Provider | Input | Output |
-|-------|----------|-------|--------|
-| DeepSeek V3.2 | Fireworks | $0.56 | $1.68 |
-| DeepSeek V3.2 | Groq | $0.59 | $0.79 |
-| Kimi K2-0905 | Fireworks | $0.60 | $2.50 |
-| Kimi K2-0905 | Groq | $1.00 | $3.00 |
-| Llama 3.1 70B | Groq | $0.59 | $0.79 |
+| Model | Fireworks | Cerebras | Groq |
+|-------|-----------|----------|------|
+| DeepSeek V3.2 | $0.56 in / $1.68 out | — | — |
+| Kimi K2-0905 | $0.60 in / $2.50 out | — | $1.00 in / $3.00 out |
+| Llama 3.1 70B | Available | — | Deprecated |
+| Llama 3.3 70B | $0.90 in / $0.90 out | ~$0.59 in / $0.79 out | $0.59 in / $0.79 out |
+| GPT-OSS-120B | — | $0.25 in / $0.69 out | $0.15 in / $0.60 out |
 
-**Cost per review by model:**
+**Cost per review by model (~1,700 input tokens, ~150 output tokens):**
 
-| Model | Fireworks | Groq |
-|-------|-----------|------|
-| DeepSeek V3.2 | ~$0.0012 | ~$0.0011 |
-| Kimi K2-0905 | ~$0.0014 | ~$0.0022 |
-| Llama 3.1 70B | — | ~$0.0011 |
+| Model | Fireworks | Cerebras | Groq |
+|-------|-----------|----------|------|
+| DeepSeek V3.2 | ~$0.0012 | — | — |
+| Kimi K2-0905 | ~$0.0014 | — | ~$0.0022 |
+| Llama 3.3 70B | ~$0.0017 | ~$0.0011 | ~$0.0011 |
+| GPT-OSS-120B | — | ~$0.0005 | ~$0.0004 |
 
-**Monthly cost projections (using DeepSeek V3.2 on Groq):**
+**Monthly cost projections (using DeepSeek V3.2 on Fireworks):**
 
 | Posts/Month | Estimated Cost |
 |-------------|----------------|
-| 1,000 | ~$1.10 |
-| 10,000 | ~$11 |
-| 100,000 | ~$110 |
+| 1,000 | ~$1.20 |
+| 10,000 | ~$12 |
+| 100,000 | ~$120 |
 
-*Note: Add ~5% overhead for edge case secondary reviews. Fallback models may have slightly higher costs.*
+*Note: Add ~5% overhead for edge case secondary reviews. Fallback to Cerebras/Groq models may have different costs—see pricing table above.*
 
 ---
 
@@ -553,12 +567,19 @@ For full details on how our inference providers handle data:
 - Zero Data Retention: https://docs.fireworks.ai/guides/security_compliance/data_handling
 - Security & Compliance: https://fireworks.ai/docs/guides/security_compliance/data_security
 
-**Groq (Fallback)**
+**Cerebras (Backup)**
+- Privacy Policy: https://www.cerebras.ai/privacy-policy
+- Trust Center: https://trust.cerebras.ai/
+- Models Overview: https://inference-docs.cerebras.ai/models/overview
+- Pricing: https://www.cerebras.ai/pricing
+
+**Groq (Tertiary)**
 - Privacy Policy: https://groq.com/privacy-policy
 - Your Data in GroqCloud: https://console.groq.com/docs/your-data
 - Data Processing Addendum: https://console.groq.com/docs/legal/customer-data-processing-addendum
+- Model Deprecations: https://console.groq.com/docs/deprecations
 
-*Provider links last verified: December 10, 2025*
+*Provider links last verified: December 11, 2025*
 
 ### 11.2 Internal Audit Log
 
@@ -672,8 +693,9 @@ When systemic false positives are identified that resulted in content removal:
 
 ## 14. Implementation Checklist
 
-- [ ] Set up Fireworks AI account with ZDR verified
-- [ ] Configure Groq as fallback with ZDR enabled
+- [ ] Set up Fireworks AI account with ZDR verified (Primary)
+- [ ] Set up Cerebras account with ZDR verified (Backup)
+- [ ] Configure Groq as tertiary fallback with ZDR enabled
 - [ ] Create isolated Cloudflare Worker for moderation
 - [ ] Implement encrypted queue in KV
 - [ ] Build decision engine with threshold routing
