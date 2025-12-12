@@ -5,8 +5,8 @@
 </script>
 
 <svelte:head>
-	<title>Grove Domain Finder — AI-Powered Domain Search</title>
-	<meta name="description" content="Find the perfect domain name with AI-powered search. Our swarm of intelligent agents scans thousands of possibilities to find available, memorable domains." />
+	<title>Acorn — AI-Powered Domain Discovery</title>
+	<meta name="description" content="Find the perfect domain name with AI-powered search. Every oak was once an acorn—and every online presence starts with a name." />
 </svelte:head>
 
 <main class="min-h-screen flex flex-col">
@@ -33,11 +33,11 @@
 		</div>
 
 		<!-- Title -->
-		<h1 class="text-4xl md:text-5xl font-serif text-bark mb-3 text-center">Domain Finder</h1>
+		<h1 class="text-4xl md:text-5xl font-serif text-bark mb-3 text-center">Acorn</h1>
 
 		<!-- Tagline -->
 		<p class="text-xl md:text-2xl text-bark/70 font-serif italic mb-8 text-center">
-			AI-powered domain discovery
+			every oak was once an acorn
 		</p>
 
 		<!-- Decorative divider -->
@@ -52,12 +52,12 @@
 		<!-- Description -->
 		<div class="max-w-xl text-center mb-12 space-y-4">
 			<p class="text-bark/70 font-sans leading-relaxed">
-				Finding the perfect domain doesn't have to take weeks. Our AI-powered swarm of agents
-				generates creative options, checks availability in real-time, and evaluates each domain
-				for memorability, brandability, and email-friendliness.
+				Finding the perfect domain doesn't have to take weeks. Tell Acorn about your project, your vibe,
+				your budget—and it returns a curated list of available domains that actually fit. The seed you
+				plant here becomes your entire digital presence.
 			</p>
 			<p class="text-bark/60 font-sans text-sm">
-				Powered by Claude Sonnet for creative generation and a fleet of Haiku agents for rapid evaluation.
+				AI-powered domain discovery with real-time availability checks and smart scoring.
 			</p>
 		</div>
 

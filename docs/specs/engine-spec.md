@@ -6,9 +6,11 @@ tags:
 type: tech-spec
 ---
 
-# GroveEngine - Technical Specification
+# Lattice - Technical Specification
 
-**Package:** `@groveengine/core`
+> **Internal codename:** GroveEngine
+
+**Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`
 **Type:** npm Package / SvelteKit Library
 **Purpose:** Powers all individual blog instances with reusable components

@@ -1,6 +1,8 @@
-# Lattice (@grove/engine)
+# Lattice (@autumnsgrove/groveengine)
 
-Multi-tenant blog engine for the Grove Platform. Each Grove site runs as its own Cloudflare Worker, powered by Lattice.
+> **Internal codename:** GroveEngine
+
+Multi-tenant blog engine for the Grove Platform. Each Grove site runs as its own Cloudflare Worker, powered by Lattice. A lattice is the framework that supports growth—vines climb it, gardens are built around it.
 
 ## Features
 

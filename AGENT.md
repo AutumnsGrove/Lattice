@@ -4,6 +4,18 @@
 
 ---
 
+## Project Naming
+
+| | |
+|---|---|
+| **Public name** | Lattice |
+| **Internal codename** | GroveEngine |
+| **npm package** | @autumnsgrove/groveengine |
+
+Lattice is the core framework that powers the Grove ecosystem. The name evokes a framework that supports growth—vines climb it, gardens are built around it. Use "Lattice" in user-facing documentation and marketing; use "GroveEngine" for internal references, database names, and infrastructure.
+
+---
+
 ## Project Purpose
 Multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can share posts, vote, and react with emojis.
 
