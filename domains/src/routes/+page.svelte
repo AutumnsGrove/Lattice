@@ -119,15 +119,15 @@
 				Grove
 			</a>
 			<span class="text-domain-300">·</span>
-			<a href="/vision" class="hover:text-domain-600 transition-colors">
+			<a href="https://grove.place/vision" class="hover:text-domain-600 transition-colors">
 				Vision
 			</a>
 			<span class="text-domain-300">·</span>
-			<a href="/pricing" class="hover:text-domain-600 transition-colors">
+			<a href="https://grove.place/pricing" class="hover:text-domain-600 transition-colors">
 				Pricing
 			</a>
 			<span class="text-domain-300">·</span>
-			<a href="/legal" class="hover:text-domain-600 transition-colors">
+			<a href="https://grove.place/legal" class="hover:text-domain-600 transition-colors">
 				Legal
 			</a>
 		</div>
