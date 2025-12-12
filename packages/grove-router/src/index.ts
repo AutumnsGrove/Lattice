@@ -31,9 +31,13 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   cdn: "grove-landing.pages.dev", // R2 assets
   music: "grovemusic.pages.dev",
 
-  // Workers - these have their own routes but fallback here
-  scout: null, // Should be handled by scout Worker route
-  "auth-api": null, // Should be handled by groveauth Worker route
+  // Workers - proxy to their workers.dev URLs
+  // (Custom domain routes don't take precedence over wildcard routes)
+  scout: "scout.m7jv4v7npb.workers.dev",
+  "auth-api": "groveauth.m7jv4v7npb.workers.dev",
+
+  // Minecraft control API
+  "mc-control": "mc-control.m7jv4v7npb.workers.dev",
 
   // Special handling
   www: "REDIRECT", // Redirect to root
@@ -66,10 +70,8 @@ export default {
       return Response.redirect(redirectUrl.toString(), 301);
     }
 
-    // Handle Workers that should have their own routes
-    if (routeTarget === null) {
-      return new Response("Service route not configured", { status: 503 });
-    }
+    // Handle unknown subdomains - proxy to groveengine for tenant lookup
+    // (null routes were removed - all special subdomains now have explicit targets)
 
     // Determine target hostname
     // Note: groveengine project uses grove-example-site.pages.dev domain
