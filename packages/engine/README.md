@@ -1,6 +1,6 @@
-# @grove/engine
+# Lattice (@grove/engine)
 
-Multi-tenant blog engine for the Grove Platform. Each Grove site runs as its own Cloudflare Worker, powered by this engine.
+Multi-tenant blog engine for the Grove Platform. Each Grove site runs as its own Cloudflare Worker, powered by Lattice.
 
 ## Features
 
@@ -106,7 +106,7 @@ RESEND_API_KEY=re_xxxxx
 
 ## Fonts
 
-GroveEngine includes self-hosted accessibility-focused fonts in `static/fonts/`. After installing the package, copy the fonts to your project's static directory:
+Lattice includes self-hosted accessibility-focused fonts in `static/fonts/`. After installing the package, copy the fonts to your project's static directory:
 
 ```bash
 # Copy fonts from node_modules to your static folder

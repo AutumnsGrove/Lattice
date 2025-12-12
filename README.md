@@ -6,8 +6,8 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | 0.5.0 | Multi-tenant blog engine for Cloudflare Workers |
-| [example-site](packages/example-site) | 0.1.0 | Demo site showcasing all GroveEngine features |
+| [@autumnsgrove/groveengine](packages/engine) | 0.5.0 | Lattice — Multi-tenant blog engine for Cloudflare Workers |
+| [example-site](packages/example-site) | 0.1.0 | Demo site showcasing all Lattice features |
 | [domains](domains) | 0.1.0 | AI-powered domain search tool for client consultations |
 
 ### 🌐 Live Sites
@@ -18,22 +18,22 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 | Example Blog | [example.grove.place](https://example.grove.place) | Demo site (The Midnight Bloom Tea Café) |
 | Domain Search | [domains.grove.place](https://domains.grove.place) | AI-powered domain search tool |
 | CDN | [cdn.grove.place](https://cdn.grove.place) | Content delivery network |
-| Auth | [auth.grove.place](https://auth.grove.place) | GroveAuth authentication service |
-| Admin | [admin.grove.place](https://admin.grove.place) | GroveAuth admin dashboard |
-| Login | [login.grove.place](https://login.grove.place) | GroveAuth login portal |
+| Auth | [auth.grove.place](https://auth.grove.place) | Heartwood authentication service |
+| Admin | [admin.grove.place](https://admin.grove.place) | Heartwood admin dashboard |
+| Login | [login.grove.place](https://login.grove.place) | Heartwood login portal |
 | Scout | [scout.grove.place](https://scout.grove.place) | GroveScout |
-| Music | [music.grove.place](https://music.grove.place) | GroveMusic |
+| Music | [music.grove.place](https://music.grove.place) | Aria (music curation) |
 | Search | [search.grove.place](https://search.grove.place) | GroveSearch |
 
 ### Related Projects
 
 | Project | Repository | Description |
 |---------|------------|-------------|
-| GroveAuth | [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth) | Authentication service with Google OAuth 2.0 + PKCE |
+| Heartwood | [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth) | Authentication service with Google OAuth 2.0 + PKCE |
 | GroveScout | [AutumnsGrove/GroveScout](https://github.com/AutumnsGrove/GroveScout) | Scout tool |
-| GroveMusic | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic) | Music platform |
+| Aria | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic) | Music curation platform |
 | GroveSearch | [AutumnsGrove/GroveSearch](https://github.com/AutumnsGrove/GroveSearch) | Search service |
-| GroveDomainTool | [AutumnsGrove/GroveDomainTool](https://github.com/AutumnsGrove/GroveDomainTool) | AI-powered domain search |
+| Acorn | [AutumnsGrove/GroveDomainTool](https://github.com/AutumnsGrove/GroveDomainTool) | AI-powered domain discovery |
 
 ## 📁 Project Structure
 
@@ -66,7 +66,7 @@ GroveEngine/
 
 - **Gutter Annotations** - Unique sidebar annotation system for contextual notes on blog posts
 - **Markdown Editor** - Full-featured editor with live preview, 7 themes, drag-drop images, slash commands, snippets, and ambient sounds
-- **GroveAuth Integration** - Google Sign-In with OAuth 2.0 + PKCE, plus magic code fallback via [GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
+- **Heartwood Integration** - Google Sign-In with OAuth 2.0 + PKCE, plus magic code fallback via [Heartwood](https://github.com/AutumnsGrove/GroveAuth)
 - **Multi-Tenant Architecture** - Subdomain-based isolation with per-tenant databases
 - **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
 - **50+ UI Components** - Complete design system with primitives, charts, galleries, and form components
@@ -105,7 +105,7 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - ✅ Blog engine migrated from AutumnsGrove (v0.4.5)
 - ✅ NPM packages published (@autumnsgrove/groveengine)
 - ✅ Multi-tenant database schema designed (7 migrations, 25+ tables)
-- ✅ GroveAuth integration with Google Sign-In
+- ✅ Heartwood integration with Google Sign-In
 - ✅ Landing page deployed with "How It Works" section
 - ✅ Stripe payments system with provider abstraction
 - ✅ CDN admin upload system with R2 storage and magic byte validation
@@ -119,7 +119,7 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - 🔄 Basic analytics implementation
 
 **Recently Completed (v0.5.0):**
-- ✅ Post limits enforcement (250 for Starter plan) via GroveAuth
+- ✅ Post limits enforcement (250 for Starter plan) via Heartwood
 - ✅ Google Sign-In with OAuth 2.0 + PKCE
 
 **Key Links:**
@@ -179,7 +179,7 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 
 ## 🚀 Development Roadmap
 
-**Phase 1:** GroveEngine MVP - *In Progress*
+**Phase 1:** Lattice MVP - *In Progress*
 - Post limits, analytics, first client onboarding
 
 **Phase 2:** Multi-tenant Infrastructure
@@ -188,7 +188,7 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 **Phase 3:** Grove Website
 - Marketing site, billing dashboard, customer portal
 
-**Phase 4:** Grove Social
+**Phase 4:** Meadow
 - Community feed, post sharing, voting, emoji reactions
 
 **Phase 5:** Polish & Scale
@@ -204,7 +204,7 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 - **Frontend:** SvelteKit 2.5+, Svelte 5, TypeScript, Tailwind CSS 3.4+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage, Durable Objects
 - **Payments:** Stripe (with provider abstraction for future Paddle/LemonSqueezy)
-- **Auth:** [GroveAuth](https://github.com/AutumnsGrove/GroveAuth) (Google OAuth 2.0 + PKCE, magic code fallback)
+- **Auth:** [Heartwood](https://github.com/AutumnsGrove/GroveAuth) (Google OAuth 2.0 + PKCE, magic code fallback)
 - **Email:** Resend
 - **Markdown:** Marked.js 17+, gray-matter (YAML frontmatter)
 - **Charts:** Chart.js 4.5+

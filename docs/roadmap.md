@@ -1,10 +1,10 @@
-# Grove Platform - Development Roadmap & TODOs
+# Grove Platform — Development Roadmap & TODOs
 
 This file tracks all development tasks, from current MVP work to future features. Items are organized by phase.
 
 ---
 
-## Phase 1: MVP - GroveEngine Core (Current)
+## Phase 1: MVP — Lattice Core (Current)
 
 **Goal:** Extract and refine core blog engine from autumnsgrove.com
 
@@ -39,7 +39,7 @@ This file tracks all development tasks, from current MVP work to future features
 - [ ] Document migration workflow for customers
 
 ### Update Infrastructure
-- [ ] Set up Renovate on GroveEngine repo
+- [ ] Set up Renovate on Lattice repo
 - [ ] Create customer repo template
 - [ ] Configure Renovate for customer repos (auto-merge engine updates)
 - [ ] Document update propagation flow
@@ -169,12 +169,12 @@ This file tracks all development tasks, from current MVP work to future features
 
 ---
 
-## Phase 4: Grove Social (Community Feed)
+## Phase 4: Meadow — Community Feed
 
 **Goal:** Build social features for community discovery
 
 ### User Accounts (Weeks 16-17)
-- [ ] Create `grove-social` repository
+- [ ] Create `meadow` repository (grove-social)
 - [ ] Implement user registration & authentication
 - [ ] Build user profile system
 - [ ] Create session management
@@ -278,7 +278,7 @@ These features are planned for after the core engine is stable and deployed to i
   - Plugin marketplace
 
 ### Community Features
-- [ ] **Grove Social** - Multi-tenant community features
+- [ ] **Meadow** - Multi-tenant community features
   - Central feed aggregating opt-in posts (grove.place/feed)
   - Voting and reactions on community posts
   - User profiles across the Grove network
@@ -431,7 +431,7 @@ These features are planned for after the core engine is stable and deployed to i
 ## Phase 2+ Features (Post-MVP)
 
 ### Social Features
-- [ ] **Grove Feed** (grove.com/feed) - Aggregated posts from opt-in users
+- [ ] **Meadow Feed** (grove.place/feed) - Aggregated posts from opt-in users
 - [ ] **Voting System** - Hacker News style upvote/downvote, no public scores
 - [ ] **Emoji Reactions** - Emoji Kitchen hybrids (~100 custom) + 5 generic emojis
 - [ ] **Emoji Size Scaling** - Popular emojis grow, unpopular shrink (visual effect)
@@ -520,7 +520,7 @@ These features are planned for after the core engine is stable and deployed to i
 
 ### High Priority (Next 3 Months)
 1. Fix auth on autumnsgrove.com
-2. Build GroveEngine (core blog engine)
+2. Build Lattice (core blog engine)
 3. Create first subdomain blog (Mom's publishing house)
 4. Test post limit enforcement with soft limits
 5. Document client onboarding process

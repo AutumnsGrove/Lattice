@@ -13,7 +13,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Language:** TypeScript, JavaScript
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
-- **Auth:** GroveAuth (Google OAuth 2.0 + PKCE)
+- **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
@@ -22,7 +22,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 ## Architecture Notes
 - Multi-tenant architecture with subdomain routing
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)
-- Phase-based development: GroveEngine → Multi-tenant → Website → Social → Polish
+- Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
 - First client: Mom's publishing house
 
 ---
@@ -58,10 +58,6 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 <type>: <brief description>
 
 <optional body>
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: [Model Name] <agent@localhost>
 ```
 
 **Common Types:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
@@ -178,5 +174,5 @@ For all detailed guides, workflows, and examples, see:
 
 ---
 
-*Last updated: 2025-11-22*
-*Model: Kimi K2 Turbo*
+*Last updated: 2025-12-11*
+*Model: Claude Opus 4.5*

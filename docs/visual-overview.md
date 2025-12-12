@@ -28,14 +28,14 @@ This document contains visual diagrams and charts to help understand the Grove p
 ![Platform Architecture](../assets/visuals/grove-architecture.png)
 
 **Key Components:**
-- **GroveEngine:** Core blog engine (SvelteKit + TypeScript)
+- **Lattice:** Core blog engine (SvelteKit + TypeScript)
 - **Grove Website:** Marketing, signup, billing, and client management
-- **Grove Social:** Community feed with voting and reactions
+- **Meadow:** Community feed with voting and reactions
 
 **Data Flow:**
-1. Users interact with Website (signup) and Social (feed)
-2. Website provisions blogs on GroveEngine
-3. GroveEngine optionally shares posts to Social feed
+1. Users interact with Website (signup) and Meadow (feed)
+2. Website provisions blogs on Lattice
+3. Lattice optionally shares posts to Meadow feed
 
 ---
 
@@ -49,10 +49,10 @@ This document contains visual diagrams and charts to help understand the Grove p
 
 | Phase | Duration | Focus | Key Deliverables |
 |-------|----------|-------|------------------|
-| **Phase 1** | Weeks 1-4 | GroveEngine MVP | Post CRUD, media upload, themes, RSS |
+| **Phase 1** | Weeks 1-4 | Lattice MVP | Post CRUD, media upload, themes, RSS |
 | **Phase 2** | Weeks 5-9 | Multi-tenant | Subdomain routing, per-tenant DBs, 3-5 beta clients |
 | **Phase 3** | Weeks 10-15 | Grove Website | Marketing pages, Stripe, automated provisioning |
-| **Phase 4** | Weeks 16-25 | Grove Social | User accounts, feed, voting, reactions |
+| **Phase 4** | Weeks 16-25 | Meadow | User accounts, feed, voting, reactions |
 | **Phase 5** | Weeks 26-36 | Polish & Scale | Comments, analytics, 20 paying clients |
 
 **Milestones:**
@@ -173,8 +173,8 @@ A multi-tenant blog platform where users get their own blogs on subdomains (user
 - **Dream Funding:** Could help fund your tea cafe dream
 
 ### Current Status
-- ✅ **Specifications Complete:** All 3 projects (Engine, Website, Social) fully spec'd
-- 🚧 **Ready to Build:** GroveEngine MVP development starting
+- ✅ **Specifications Complete:** All 3 projects (Lattice, Website, Meadow) fully spec'd
+- 🚧 **Ready to Build:** Lattice MVP development starting
 - 📋 **36-Week Roadmap:** Clear path to $500 MRR
 
 ### Next Steps (Immediate)
@@ -217,4 +217,4 @@ All generated diagrams are stored in `assets/visuals/`:
 
 **Document Version:** 1.0  
 **Last Updated:** November 22, 2025  
-**Next Review:** After GroveEngine MVP completion
+**Next Review:** After Lattice MVP completion

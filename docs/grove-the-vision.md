@@ -32,13 +32,13 @@ Publish. That's it. The technology should disappear into the background.
 
 Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage. No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
 
-# On Community (Grove Social)
+# On Community — Meadow
 
 ## A forest is not a collection of isolated trees.
 
 Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks — the 'wood wide web' that connects an entire forest into a single living organism. The oldest trees nurture the saplings. The dying trees feed the soil for those that come after.
 
-## Grove Social is the roots.
+## Meadow is the roots.
 
 It's optional. Your blog exists independently, complete on its own. But if you choose, you can connect — follow friends, see their posts in a simple chronological feed, leave reactions that only they can see.
 

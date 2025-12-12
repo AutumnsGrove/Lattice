@@ -13,9 +13,9 @@ This document contains all Mermaid diagrams for the Grove Platform. Use your pre
 2. [Post Lifecycle](#2-post-lifecycle)
 3. [Billing & Payment Flow](#3-billing--payment-flow)
 4. [Support Ticket Workflow](#4-support-ticket-workflow)
-5. [Database ERD - GroveEngine](#5-database-erd---groveengine)
+5. [Database ERD - Lattice](#5-database-erd---lattice)
 6. [Database ERD - Grove Website](#6-database-erd---grove-website)
-7. [Database ERD - Grove Social](#7-database-erd---grove-social)
+7. [Database ERD - Meadow](#7-database-erd---meadow)
 
 ### Complex Diagrams
 8. [Complete Data Flow Across All Projects](#8-complete-data-flow-across-all-projects)
@@ -25,7 +25,7 @@ This document contains all Mermaid diagrams for the Grove Platform. Use your pre
 12. [Security Boundaries & Data Isolation](#12-security-boundaries--data-isolation)
 
 ### Visual Breakdowns
-13. [GroveEngine Feature Map](#13-groveengine-feature-map)
+13. [Lattice Feature Map](#13-lattice-feature-map)
 14. [Theme System Architecture](#14-theme-system-architecture)
 15. [Comment System Decision Flow](#15-comment-system-decision-flow)
 16. [Voting & Reaction System](#16-voting--reaction-system)
@@ -43,38 +43,36 @@ flowchart TD
     subgraph signup["Signup Flow"]
         A[User visits grove.place] --> B[Clicks 'Start Your Blog']
         B --> C[Selects Plan]
-        C --> D[Enters Email & Password]
-        D --> E[Verification Email Sent]
-        E --> F[User Clicks Verification Link]
-        F --> G[Email Verified]
-        G --> H[Redirect to Stripe Checkout]
-        H --> I{Payment Successful?}
-        I -->|Yes| J[Account Created]
-        I -->|No| K[Return to Checkout]
-        K --> H
+        C --> D[Sign in with Google]
+        D --> E[OAuth 2.0 + PKCE]
+        E --> F[Account Created]
+        F --> G[Redirect to Stripe Checkout]
+        G --> H{Payment Successful?}
+        H -->|Yes| I[Account Activated]
+        H -->|No| J[Return to Checkout]
+        J --> G
     end
 
     subgraph login["Login Flow"]
-        L[User visits grove.place/login] --> M[Enters Email & Password]
-        M --> N{Credentials Valid?}
-        N -->|Yes| O{Email Verified?}
+        K[User visits grove.place/login] --> L[Sign in with Google]
+        L --> M[OAuth 2.0 + PKCE]
+        M --> N{Valid Token?}
+        N -->|Yes| O[Create Session Cookie]
         N -->|No| P[Show Error Message]
-        P --> M
-        O -->|Yes| Q[Create Session Cookie]
-        O -->|No| R[Prompt to Verify Email]
-        Q --> S[Redirect to Dashboard]
+        P --> K
+        O --> Q[Redirect to Dashboard]
     end
 
     subgraph session["Session Management"]
-        T[User Makes Request] --> U{Session Cookie Valid?}
-        U -->|Yes| V{Session Expired?}
-        U -->|No| W[Redirect to Login]
-        V -->|No| X[Allow Access]
-        V -->|Yes| Y[Refresh Session]
-        Y --> X
+        R[User Makes Request] --> S{Session Cookie Valid?}
+        S -->|Yes| T{Session Expired?}
+        S -->|No| U[Redirect to Login]
+        T -->|No| V[Allow Access]
+        T -->|Yes| W[Refresh Session]
+        W --> V
     end
 
-    J --> L
+    I --> K
 
     style signup fill:#e8f4e8,stroke:#2d5a2d,stroke-width:2px
     style login fill:#f0f7f0,stroke:#2d5a2d,stroke-width:2px
@@ -113,7 +111,7 @@ stateDiagram-v2
     note right of Published
         - Visible on blog
         - In RSS feed
-        - Can share to Grove Social
+        - Can share to Meadow
     end note
 
     note right of Archived
@@ -245,7 +243,7 @@ flowchart TD
 
 ---
 
-### 5. Database ERD - GroveEngine
+### 5. Database ERD - Lattice
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5e9', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#2e7d32', 'lineColor': '#2e7d32', 'background': '#ffffff'}}}%%
@@ -409,7 +407,7 @@ erDiagram
 
 ---
 
-### 7. Database ERD - Grove Social
+### 7. Database ERD - Meadow
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#fff3e0', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#ef6c00', 'lineColor': '#ef6c00', 'background': '#ffffff'}}}%%
@@ -512,7 +510,7 @@ flowchart TB
         W7[Email Service]
     end
 
-    subgraph engine["GroveEngine (username.grove.place)"]
+    subgraph engine["Lattice (username.grove.place)"]
         E1[Blog Frontend]
         E2[Admin Panel]
         E3[Post Editor]
@@ -522,7 +520,7 @@ flowchart TB
         E7[RSS Feed]
     end
 
-    subgraph social["Grove Social (grove.place/feed)"]
+    subgraph social["Meadow (grove.place/feed)"]
         S1[Community Feed]
         S2[Voting System]
         S3[Reaction System]
@@ -590,46 +588,42 @@ sequenceDiagram
 
     Note over C,E: New Client Signup & Blog Provisioning
 
-    C->>W: 1. Select plan & create account
-    W->>W: 2. Validate email format
-    W->>D1: 3. Create client record (unverified)
-    W->>E: 4. Send verification email
-    E-->>C: 5. Verification link
-    C->>W: 6. Click verification link
-    W->>D1: 7. Mark email verified
+    C->>W: 1. Select plan & sign in with Google
+    W->>W: 2. OAuth 2.0 + PKCE authentication
+    W->>D1: 3. Create client record
 
     Note over C,E: Payment & Subscription
 
-    W->>S: 8. Create Stripe customer
-    S-->>W: 9. Return customer ID
-    W->>D1: 10. Store customer ID
-    W->>S: 11. Create checkout session
-    S-->>C: 12. Redirect to checkout
-    C->>S: 13. Complete payment
-    S->>W: 14. Webhook: payment_success
-    W->>D1: 15. Create subscription record
+    W->>S: 4. Create Stripe customer
+    S-->>W: 5. Return customer ID
+    W->>D1: 6. Store customer ID
+    W->>S: 7. Create checkout session
+    S-->>C: 8. Redirect to checkout
+    C->>S: 9. Complete payment
+    S->>W: 10. Webhook: payment_success
+    W->>D1: 11. Create subscription record
 
     Note over C,E: Blog Provisioning
 
-    C->>W: 16. Choose subdomain
-    W->>CF: 17. Check subdomain availability
-    CF-->>W: 18. Subdomain available
-    W->>CF: 19. Create DNS record (CNAME)
-    CF-->>W: 20. DNS record created
-    W->>D1: 21. Create blog record
-    W->>D1: 22. Initialize blog D1 database
-    D1-->>W: 23. Tables created
-    W->>R2: 24. Create media folder path
-    R2-->>W: 25. Path ready
-    W->>D1: 26. Create default config
-    W->>D1: 27. Create sample "Hello World" post
+    C->>W: 12. Choose subdomain
+    W->>CF: 13. Check subdomain availability
+    CF-->>W: 14. Subdomain available
+    W->>CF: 15. Create DNS record (CNAME)
+    CF-->>W: 16. DNS record created
+    W->>D1: 17. Create blog record
+    W->>D1: 18. Initialize blog D1 database
+    D1-->>W: 19. Tables created
+    W->>R2: 20. Create media folder path
+    R2-->>W: 21. Path ready
+    W->>D1: 22. Create default config
+    W->>D1: 23. Create sample "Hello World" post
 
     Note over C,E: Finalization
 
-    W->>E: 28. Send welcome email
-    E-->>C: 29. Welcome + login credentials
-    W-->>C: 30. Redirect to blog admin
-    C->>W: 31. Access admin panel
+    W->>E: 24. Send welcome email
+    E-->>C: 25. Welcome email with setup guide
+    W-->>C: 26. Redirect to blog admin
+    C->>W: 27. Access admin panel
 
     Note over C,E: Blog is now live at username.grove.place
 ```
@@ -718,7 +712,7 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8eaf6', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#3f51b5', 'lineColor': '#3f51b5', 'background': '#ffffff'}}}%%
 flowchart LR
-    subgraph engine_api["GroveEngine API"]
+    subgraph engine_api["Lattice API"]
         direction TB
         EP1["<b>Posts</b><br/>GET /api/posts<br/>GET /api/posts/:slug<br/>POST /api/posts<br/>PUT /api/posts/:id<br/>DELETE /api/posts/:id<br/>POST /api/posts/:id/archive"]
         EP2["<b>Media</b><br/>GET /api/media<br/>POST /api/media/upload<br/>DELETE /api/media/:id"]
@@ -736,7 +730,7 @@ flowchart LR
         WP6["<b>Webhooks</b><br/>POST /api/webhooks/stripe"]
     end
 
-    subgraph social_api["Grove Social API"]
+    subgraph social_api["Meadow API"]
         direction TB
         SP1["<b>Feed</b><br/>GET /api/feed<br/>GET /api/feed/popular<br/>GET /api/feed/hot<br/>GET /api/feed/top"]
         SP2["<b>Votes</b><br/>POST /api/vote<br/>DELETE /api/vote<br/>GET /api/post-stats/:id"]
@@ -844,12 +838,12 @@ flowchart TB
 
 ## Visual Breakdowns
 
-### 13. GroveEngine Feature Map
+### 13. Lattice Feature Map
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5e9', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#2e7d32', 'lineColor': '#2e7d32', 'background': '#ffffff'}}}%%
 mindmap
-    root((GroveEngine))
+    root((Lattice))
         Post Management
             Create & Edit
                 Markdown Editor
@@ -1228,17 +1222,17 @@ timeline
     title Grove Platform Development Phases
 
     section Phase 1 (Weeks 1-4)
-        GroveEngine MVP : Core blog engine
-                       : Post CRUD
-                       : Basic themes
-                       : Media upload
-                       : Admin panel
+        Lattice MVP : Core blog engine
+                   : Post CRUD
+                   : Basic themes
+                   : Media upload
+                   : Admin panel
 
     section Phase 2 (Weeks 5-8)
-        GroveEngine Polish : Mom's blog deployment
-                          : Theme system
-                          : Performance optimization
-                          : Testing & fixes
+        Lattice Polish : Mom's blog deployment
+                      : Theme system
+                      : Performance optimization
+                      : Testing & fixes
 
     section Phase 3 (Weeks 9-16)
         Grove Website : Marketing pages
@@ -1248,11 +1242,11 @@ timeline
                      : Subdomain provisioning
 
     section Phase 4 (Weeks 17-24)
-        Grove Social : Community feed
-                    : Voting system
-                    : Emoji reactions
-                    : Feed algorithms
-                    : Moderation tools
+        Meadow : Community feed
+              : Voting system
+              : Emoji reactions
+              : Feed algorithms
+              : Moderation tools
 
     section Phase 5 (Weeks 25-36+)
         Enhancements : Analytics dashboard
