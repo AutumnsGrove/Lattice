@@ -133,6 +133,54 @@ Revised thinking: The value delta between Professional ($25) and Premium ($50) w
 - Added to monthly subscription as pro-rated amount
 - Example: $180/year domain = +$6.67/month
 
+### Domain Overage Billing Implementation
+
+**Detection Flow:**
+1. When domain is selected via Acorn, fetch registration price from registrar API (Cloudflare Registrar)
+2. If price > $100/year, calculate monthly overage: `(price - 100) / 12`
+
+**User Experience:**
+1. Display overage during domain selection:
+   > "This domain costs $180/year. Your Premium subscription includes $100/year, so your monthly rate will be $35 + $6.67 = $41.67"
+2. User confirms before proceeding
+3. Overage shown as line item on all invoices
+
+**Stripe Implementation:**
+```typescript
+// Create custom price for overage
+const overagePrice = await stripe.prices.create({
+  unit_amount: Math.round((domainCost - 10000) / 12), // cents
+  currency: 'usd',
+  recurring: { interval: 'month' },
+  product: DOMAIN_OVERAGE_PRODUCT_ID,
+  metadata: { domain: domainName, annual_cost: domainCost },
+});
+
+// Add to subscription
+await stripe.subscriptions.update(subscriptionId, {
+  items: [
+    { id: existingItemId },
+    { price: overagePrice.id },
+  ],
+});
+```
+
+**Database Additions:**
+```sql
+ALTER TABLE user_subscriptions ADD COLUMN domain_name TEXT;
+ALTER TABLE user_subscriptions ADD COLUMN domain_annual_cost_cents INTEGER;
+ALTER TABLE user_subscriptions ADD COLUMN domain_overage_monthly_cents INTEGER;
+ALTER TABLE user_subscriptions ADD COLUMN domain_registered_at TIMESTAMP;
+ALTER TABLE user_subscriptions ADD COLUMN domain_expires_at TIMESTAMP;
+ALTER TABLE user_subscriptions ADD COLUMN stripe_overage_price_id TEXT;
+```
+
+**Renewal Handling:**
+- 60 days before expiration: Check if registrar price changed
+- If increased <20%: Renew, notify user of new rate
+- If increased >20%: Require user confirmation before renewal
+- Store price history for transparency
+
 ### Domain Search Service Value
 
 **Why charge for faster turnaround?**
@@ -162,23 +210,57 @@ The domain search tool (Acorn) uses AI to reduce 2-week manual searches to 1-2 h
 
 ## Revenue Projections (Updated)
 
-**Expected tier distribution:** 40% Seedling, 35% Basic, 15% Professional, 10% Premium
+### Conservative Estimate (Early Stage)
+
+Most SaaS products see 60-70% concentration on entry tier initially. Using conservative distribution:
+
+**Expected tier distribution:** 60% Seedling, 25% Basic, 10% Professional, 5% Premium
 
 | Users | Monthly Revenue | Annual Revenue |
 |:-----:|:---------------:|:--------------:|
-| 50 | $680 | $8,160 |
-| 100 | $1,360 | $16,320 |
-| 500 | $6,800 | $81,600 |
-| 1,000 | $13,600 | $163,200 |
+| 50 | $545 | $6,540 |
+| 100 | $1,090 | $13,080 |
+| 500 | $5,450 | $65,400 |
+| 1,000 | $10,900 | $130,800 |
 
-**Calculation basis:**
+**Calculation basis (per 100 users):**
+- 60 Seedling × $8 = $480
+- 25 Basic × $12 = $300
+- 10 Professional × $25 = $250
+- 5 Premium × $35 = $175
+- **Per 100 users = $1,205** (weighted average: $12.05/user)
+
+### Optimistic Estimate (Mature Product)
+
+As product matures and Seedling users upgrade or churn:
+
+**Mature tier distribution:** 40% Seedling, 35% Basic, 15% Professional, 10% Premium
+
+| Users | Monthly Revenue | Annual Revenue |
+|:-----:|:---------------:|:--------------:|
+| 50 | $730 | $8,760 |
+| 100 | $1,465 | $17,580 |
+| 500 | $7,325 | $87,900 |
+| 1,000 | $14,650 | $175,800 |
+
+**Calculation basis (per 100 users):**
 - 40 Seedling × $8 = $320
 - 35 Basic × $12 = $420
 - 15 Professional × $25 = $375
 - 10 Premium × $35 = $350
-- **Per 100 users = $1,465** (using $13.60 weighted average)
+- **Per 100 users = $1,465** (weighted average: $14.65/user)
 
-*Note: Actual revenue likely higher as yearly plans and domain fees are not included.*
+### Key Milestones
+
+| Milestone | Conservative | Optimistic |
+|-----------|:------------:|:----------:|
+| $1,000 MRR | ~92 users | ~68 users |
+| $3,000 MRR | ~275 users | ~205 users |
+| Break-even* | TBD | TBD |
+
+*Break-even depends on infrastructure costs, support time, and Autumn's living expenses.
+
+*Note: Actual revenue likely higher as yearly plans, domain search fees, and support hours are not included.*
 
 ---
 
