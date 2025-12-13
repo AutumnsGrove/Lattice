@@ -54,8 +54,10 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 
 ### TODO Management
 - **Always check `TODOS.md` first** when starting a task or session
+- **Check `COMPLETED.md`** for context on past decisions and implementation details
 - **Update immediately** when tasks are completed, added, or changed
-- Keep the list current and manageable
+- **Move completed tasks** from `TODOS.md` to `COMPLETED.md` to keep the TODO list focused
+- Keep both lists current and accurate
 
 ### Contributing
 - **See `CONTRIBUTING.md`** for PR guidelines, commit conventions, and the AI agent section
