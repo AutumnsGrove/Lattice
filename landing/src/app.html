@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<!-- Blocking script to prevent FOUC (flash of unstyled content) -->
+		<script>
+			try {
+				const stored = localStorage.getItem('grove-theme');
+				// Default to dark if no stored preference (matches theme store default)
+				if (stored === 'dark' || !stored) {
+					document.documentElement.classList.add('dark');
+				}
+			} catch (e) {
+				// localStorage unavailable, default to dark
+				document.documentElement.classList.add('dark');
+			}
+		</script>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />

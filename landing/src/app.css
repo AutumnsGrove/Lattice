@@ -163,6 +163,10 @@
 	}
 
 	body {
+		/* Fallbacks for older browsers without CSS custom property support */
+		background-color: #1a1915;
+		color: #f5f2ea;
+		/* Modern browsers use CSS variables */
 		background-color: var(--color-background);
 		color: var(--color-foreground);
 		-webkit-font-smoothing: antialiased;
@@ -231,7 +235,10 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* Text color utilities using CSS variables */
-.text-foreground { color: var(--color-foreground); }
+.text-foreground {
+	color: #f5f2ea; /* Fallback for older browsers */
+	color: var(--color-foreground);
+}
 .text-foreground-muted { color: var(--color-foreground-muted); }
 .text-foreground-subtle { color: var(--color-foreground-subtle); }
 .text-foreground-faint { color: var(--color-foreground-faint); }

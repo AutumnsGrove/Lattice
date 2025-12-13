@@ -2,6 +2,13 @@
  * Theme Store for Grove Landing
  * Manages light/dark theme preferences
  * Defaults to dark on first visit, remembers user choice thereafter
+ *
+ * Note: This is a global singleton store. The subscription created in
+ * createThemeStore() intentionally persists for the application lifetime.
+ * This is safe because:
+ * 1. The store module is only executed once per page load
+ * 2. SvelteKit's SPA navigation doesn't re-execute module-level code
+ * 3. The subscription is required to sync localStorage with theme changes
  */
 
 import { writable, get } from 'svelte/store';
@@ -38,7 +45,7 @@ function createThemeStore() {
 	if (browser) {
 		applyTheme(get(theme));
 
-		// Subscribe to changes
+		// Global subscription - intentionally never unsubscribed (see module docstring)
 		theme.subscribe((t) => {
 			applyTheme(t);
 			localStorage.setItem(STORAGE_KEY, t);
