@@ -404,7 +404,7 @@ export interface ConnectOnboardingResult {
 // PLATFORM BILLING (TENANT SUBSCRIPTIONS)
 // =============================================================================
 
-export type PlanTier = 'seedling' | 'basic' | 'professional' | 'premium';
+export type PlanTier = 'seedling' | 'sapling' | 'oak' | 'evergreen';
 
 export interface PlatformPlan {
   tier: PlanTier;
