@@ -1,5 +1,6 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 	import { page } from '$app/stores';
 
 	// Get error from URL if present
@@ -45,14 +46,14 @@
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Error Banner -->
 	{#if error}
-		<div class="mb-8 w-full max-w-md p-4 bg-red-50 border border-red-200 rounded-lg">
+		<div class="mb-8 w-full max-w-md p-4 bg-error border border-error rounded-lg">
 			<div class="flex items-start gap-3">
-				<svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+				<svg class="w-5 h-5 text-error flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
 					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
 				</svg>
 				<div>
-					<p class="text-red-800 font-sans font-medium">Sign in failed</p>
-					<p class="text-red-600 font-sans text-sm mt-1">{error}</p>
+					<p class="text-error font-sans font-medium">Sign in failed</p>
+					<p class="text-error text-sm mt-1">{error}</p>
 				</div>
 			</div>
 		</div>
@@ -61,7 +62,7 @@
 	<!-- Logo/Brand -->
 	<div class="mb-8">
 		<svg
-			class="w-20 h-20 text-grove-600"
+			class="w-20 h-20 text-accent-muted"
 			viewBox="0 0 100 100"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -87,27 +88,27 @@
 	</div>
 
 	<!-- Title -->
-	<h1 class="text-4xl md:text-5xl font-serif text-bark mb-3 text-center">Grove</h1>
+	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-3 text-center">Grove</h1>
 
 	<!-- Tagline -->
-	<p class="text-xl md:text-2xl text-bark/70 font-serif italic mb-12 text-center">
+	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-12 text-center">
 		a place to Be
 	</p>
 
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mb-12">
-		<div class="w-12 h-px bg-grove-300"></div>
-		<svg class="w-5 h-5 text-grove-400" viewBox="0 0 20 20" fill="currentColor">
+		<div class="w-12 h-px bg-divider"></div>
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
 			<path
 				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
 				fill-opacity="0.6"
 			/>
 		</svg>
-		<div class="w-12 h-px bg-grove-300"></div>
+		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
 	<!-- Coming soon text -->
-	<p class="text-bark/60 text-center max-w-md mb-8 font-sans">
+	<p class="text-foreground-subtle text-center max-w-md mb-8 font-sans">
 		Something is growing here. Leave your email to be the first to know when we bloom.
 	</p>
 
@@ -116,26 +117,26 @@
 
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mt-16 mb-12">
-		<div class="w-12 h-px bg-grove-300"></div>
-		<svg class="w-5 h-5 text-grove-400" viewBox="0 0 20 20" fill="currentColor">
+		<div class="w-12 h-px bg-divider"></div>
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
 			<path
 				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
 				fill-opacity="0.6"
 			/>
 		</svg>
-		<div class="w-12 h-px bg-grove-300"></div>
+		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
 	<!-- How It Works - Slide Preview -->
 	<section class="w-full max-w-lg">
-		<h2 class="text-lg font-serif text-bark/70 text-center mb-8">How It Works</h2>
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-8">How It Works</h2>
 
 		<!-- Slide Container -->
-		<div class="relative bg-white/50 rounded-2xl border border-grove-200 p-8 min-h-[200px]">
+		<div class="relative bg-surface rounded-2xl border border-default p-8 min-h-[200px]">
 			<!-- Slide Content -->
 			<div class="flex flex-col items-center text-center">
 				<!-- Icon -->
-				<div class="w-16 h-16 mb-4 text-grove-600">
+				<div class="w-16 h-16 mb-4 text-accent-muted">
 					{#if slides[currentSlide].icon === 'signup'}
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
@@ -152,19 +153,19 @@
 				</div>
 
 				<!-- Step number -->
-				<span class="text-sm font-sans text-grove-500 mb-2">Step {currentSlide + 1}</span>
+				<span class="text-sm font-sans text-accent-subtle mb-2">Step {currentSlide + 1}</span>
 
 				<!-- Title -->
-				<h3 class="text-xl font-serif text-bark mb-2">{slides[currentSlide].title}</h3>
+				<h3 class="text-xl font-serif text-foreground mb-2">{slides[currentSlide].title}</h3>
 
 				<!-- Description -->
-				<p class="text-bark/60 font-sans">{slides[currentSlide].description}</p>
+				<p class="text-foreground-subtle font-sans">{slides[currentSlide].description}</p>
 			</div>
 
 			<!-- Navigation Arrows -->
 			<button
 				onclick={prevSlide}
-				class="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-grove-400 hover:text-grove-600 transition-colors"
+				class="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-accent-subtle hover:text-accent-muted transition-colors"
 				aria-label="Previous slide"
 			>
 				<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -173,7 +174,7 @@
 			</button>
 			<button
 				onclick={nextSlide}
-				class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-grove-400 hover:text-grove-600 transition-colors"
+				class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-accent-subtle hover:text-accent-muted transition-colors"
 				aria-label="Next slide"
 			>
 				<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -187,7 +188,7 @@
 			{#each slides as _, i}
 				<button
 					onclick={() => goToSlide(i)}
-					class="w-2 h-2 rounded-full transition-colors {currentSlide === i ? 'bg-grove-600' : 'bg-grove-300 hover:bg-grove-400'}"
+					class="w-2 h-2 rounded-full transition-colors {currentSlide === i ? 'bg-accent-muted' : 'bg-divider hover:bg-accent-subtle'}"
 					aria-label="Go to slide {i + 1}"
 				></button>
 			{/each}
@@ -196,10 +197,10 @@
 
 	<!-- Sign In Section -->
 	<div class="mt-16 text-center">
-		<p class="text-bark/50 text-sm font-sans mb-3">Already have an account?</p>
+		<p class="text-foreground-faint text-sm font-sans mb-3">Already have an account?</p>
 		<a
 			href="/auth/login"
-			class="inline-flex items-center gap-2 px-6 py-2.5 bg-grove-600 hover:bg-grove-700 text-white font-sans rounded-lg transition-colors"
+			class="btn-primary inline-flex items-center gap-2"
 		>
 			<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
 				<path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd" />
@@ -208,70 +209,12 @@
 			Sign In
 		</a>
 	</div>
-
-	<!-- Footer -->
-	<footer class="mt-12 mb-8 flex flex-col items-center gap-6">
-		<!-- Links -->
-		<div class="flex items-center gap-6 text-sm font-sans flex-wrap justify-center">
-			<a
-				href="https://example.grove.place"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="text-bark/50 hover:text-grove-600 transition-colors"
-				title="See a live example site built with Grove"
-			>
-				Example Site
-			</a>
-			<span class="text-grove-300">·</span>
-			<a
-				href="https://autumnsgrove.com/blog"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="text-bark/50 hover:text-grove-600 transition-colors"
-				title="Developer's blog and documentation"
-			>
-				Blog
-			</a>
-			<span class="text-grove-300">·</span>
-			<a
-				href="https://github.com/AutumnsGrove/GroveEngine"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="text-bark/50 hover:text-grove-600 transition-colors flex items-center gap-1"
-				title="View the Grove Engine source code"
-			>
-				<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-					<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-				</svg>
-				Engine
-			</a>
-			<span class="text-grove-300">·</span>
-			<a
-				href="https://github.com/AutumnsGrove/AutumnsGrove"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="text-bark/50 hover:text-grove-600 transition-colors flex items-center gap-1"
-				title="View the main website source code"
-			>
-				<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-					<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-				</svg>
-				Website
-			</a>
-		</div>
-
-		<!-- Footer flourish -->
-		<div class="flex gap-2">
-			{#each [1, 2, 3] as i}
-				<svg
-					class="w-3 h-3 text-grove-300"
-					viewBox="0 0 20 20"
-					fill="currentColor"
-					style="opacity: {0.3 + i * 0.2}"
-				>
-					<circle cx="10" cy="10" r="4" />
-				</svg>
-			{/each}
-		</div>
-	</footer>
 </main>
+
+<!-- Footer with theme toggle -->
+<Footer showExternalLinks={true} />
+
+<style>
+	/* Background color utilities that need to be scoped */
+	.bg-divider { background-color: var(--color-divider); }
+</style>
