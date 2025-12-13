@@ -59,7 +59,7 @@ export interface LoginUrlResult {
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = "seedling" | "basic" | "professional" | "premium";
+export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface UserSubscription {
   id: string;
@@ -113,11 +113,11 @@ export interface CanPostResponse {
  * Business rationale:
  * - Seedling (50 posts): Entry-level tier for curious newcomers testing the
  *   platform. Low commitment, creates upgrade path.
- * - Basic (250 posts): For hobbyists and regular bloggers who know they'll
+ * - Sapling (250 posts): For hobbyists and regular bloggers who know they'll
  *   stick around. ~1 post/day for 8 months.
- * - Professional (unlimited): For serious bloggers whose blog is part of their
+ * - Oak (unlimited): For serious bloggers whose blog is part of their
  *   identity. Includes BYOD (bring your own domain) and full email.
- * - Premium (unlimited): Full-service tier for professionals. Includes domain
+ * - Evergreen (unlimited): Full-service tier for professionals. Includes domain
  *   search, registration, and priority support.
  *
  * Grace period: When users hit their limit, they have 14 days to upgrade or
@@ -127,9 +127,9 @@ export interface CanPostResponse {
  */
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
   seedling: 50,    // For curious newcomers trying blogging
-  basic: 250,      // For hobbyists and regular bloggers
-  professional: null, // Unlimited for serious bloggers
-  premium: null,   // Unlimited for professionals
+  sapling: 250,    // For hobbyists and regular bloggers
+  oak: null,       // Unlimited for serious bloggers
+  evergreen: null, // Unlimited for professionals
 };
 
 /**
@@ -137,9 +137,9 @@ export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
  */
 export const TIER_NAMES: Record<SubscriptionTier, string> = {
   seedling: "Seedling",
-  basic: "Basic",
-  professional: "Professional",
-  premium: "Premium",
+  sapling: "Sapling",
+  oak: "Oak",
+  evergreen: "Evergreen",
 };
 
 // =============================================================================

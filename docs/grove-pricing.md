@@ -16,13 +16,13 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 
 ## Subscription Tiers
 
-| Feature | Seedling | Basic | Professional | Premium |
-|---------|:--------:|:-----:|:------------:|:-------:|
+| Feature | Seedling | Sapling | Oak | Evergreen |
+|---------|:--------:|:-------:|:---:|:---------:|
 | **Monthly** | **$8** | **$12** | **$25** | **$35** |
 | **Yearly** | **$82** | **$122** | **$255** | **$357** |
 | Blog Posts | 50 | 250 | Unlimited | Unlimited |
 | Storage | 1 GB | 5 GB | 20 GB | 100 GB |
-| Grove Social | ✓ | ✓ | ✓ | ✓ |
+| Meadow | ✓ | ✓ | ✓ | ✓ |
 | Custom Domain | — | — | BYOD | ✓ |
 | @grove.place Email | — | Forward | Full | Full |
 | Support | Community | Email | Priority | 8hrs + Priority |
@@ -40,10 +40,10 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - 50 blog posts
 - 1 GB storage for images and media
 - Your blog at `username.grove.place`
-- Access to Grove Social (optional community features)
+- Access to Meadow (optional community features)
 - Community support via documentation
 
-### Basic — $12/month
+### Sapling — $12/month
 *You blog regularly. This is your space.*
 
 - 250 blog posts
@@ -52,7 +52,7 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - **Email forwarding:** Receive emails at `you@grove.place`
 - Email support
 
-### Professional — $25/month
+### Oak — $25/month
 *Your blog is part of your identity.*
 
 - **Unlimited** blog posts
@@ -62,7 +62,7 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 - Full analytics dashboard
 - Priority email support
 
-### Premium — $35/month
+### Evergreen — $35/month
 *Your blog is your business. We handle everything.*
 
 - **Unlimited** blog posts
@@ -78,23 +78,23 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 
 ## Custom Domains
 
-### Bring Your Own Domain (Professional+)
+### Bring Your Own Domain (Oak+)
 
-Already have a domain? Connect it to your Grove blog at no extra cost. Available on Professional and Premium tiers.
+Already have a domain? Connect it to your Grove blog at no extra cost. Available on Oak and Evergreen tiers.
 
-### Domain Search Service (Premium)
+### Domain Search Service (Evergreen)
 
 Don't have a domain yet? Our AI-powered domain search tool finds the perfect domain for your blog—turning what's normally a 2-week search into 1-2 hours.
 
 | Turnaround | Setup Fee | Credited As |
 |:----------:|:---------:|:-----------:|
-| Same Day | $200 | 4 months Premium |
-| 3 Days | $100 | 2 months Premium |
-| 1 Week | $50 | 1 month Premium |
+| Same Day | $200 | 4 months Evergreen |
+| 3 Days | $100 | 2 months Evergreen |
+| 1 Week | $50 | 1 month Evergreen |
 
 **Setup fees are credited toward your subscription**—you're not losing money, you're prepaying for service.
 
-**Domain registration** (~$20/year for standard domains) is included in your Premium subscription for domains up to $100/year. Premium TLDs over $100/year: you cover the difference.
+**Domain registration** (~$20/year for standard domains) is included in your Evergreen subscription for domains up to $100/year. Premium TLDs over $100/year: you cover the difference.
 
 ### Your Domain, Your Ownership
 
@@ -111,9 +111,9 @@ See our [Data Portability & Separation Policy](https://grove.place/legal/data-po
 
 | Tier | Email Feature | What You Get |
 |------|---------------|--------------|
-| Basic | Forwarding | Emails to `you@grove.place` forward to your personal inbox |
-| Professional | Full mailbox | Send AND receive as `you@grove.place` |
-| Premium | Full mailbox | Send AND receive as `you@grove.place` |
+| Sapling | Forwarding | Emails to `you@grove.place` forward to your personal inbox |
+| Oak | Full mailbox | Send AND receive as `you@grove.place` |
+| Evergreen | Full mailbox | Send AND receive as `you@grove.place` |
 
 A professional email address for your blog—no extra cost, no separate service to manage.
 
@@ -124,9 +124,9 @@ A professional email address for your blog—no extra cost, no separate service 
 | Tier | What's Included | Additional Hours |
 |------|-----------------|------------------|
 | Seedling | Documentation & community | $100/hour |
-| Basic | Email support | $100/hour |
-| Professional | Priority email support | $100/hour |
-| Premium | 8 hours free (first month) + priority | $75/hour |
+| Sapling | Email support | $100/hour |
+| Oak | Priority email support | $100/hour |
+| Evergreen | 8 hours free (first month) + priority | $75/hour |
 
 ---
 
@@ -136,7 +136,7 @@ A professional email address for your blog—no extra cost, no separate service 
 - Image hosting with automatic WebP compression
 - Global CDN delivery via Cloudflare
 - SSL/HTTPS included
-- Grove Social access (optional community features)
+- Meadow access (optional community features)
 - Data export anytime (your content is yours)
 - RSS feed for your blog
 - No ads, no tracking of your readers
@@ -145,7 +145,7 @@ A professional email address for your blog—no extra cost, no separate service 
 
 ## Custom Plans
 
-Need something beyond Premium? Multiple domains, white-label options, team collaboration, dedicated support—let's talk.
+Need something beyond Evergreen? Multiple domains, white-label options, team collaboration, dedicated support—let's talk.
 
 **Contact:** autumn@grove.place
 
@@ -157,7 +157,7 @@ Grove is built to be sustainable, not extractive. Infrastructure costs (Cloudfla
 
 - Platform development and improvements
 - Support staff (currently just Autumn)
-- Domain registration costs (Premium tier)
+- Domain registration costs (Evergreen tier)
 - Email infrastructure
 - Keeping the lights on
 

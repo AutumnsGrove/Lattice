@@ -27,8 +27,8 @@ Grove is a multi-tenant blogging platform that provides:
 - Personal blog hosting on subdomains (username.grove.place)
 - Markdown-based content creation and publishing
 - Media storage and delivery
-- Optional community features (Grove Social)
-- Custom domain support (Premium tier only)
+- Optional community features (Meadow)
+- Custom domain support (Oak and Evergreen tiers)
 
 The Service is provided on a subscription basis with different tiers offering varying features and limits.
 
@@ -55,9 +55,12 @@ Grove offers the following subscription plans:
 
 | Plan | Price | Features |
 |------|-------|----------|
-| Basic | $12/month | 5GB storage, 250 posts (archived when limit reached), Grove Social access |
-| Professional | $25/month | 20GB storage, unlimited posts, Grove Social access |
-| Premium | $50/month | 100GB storage, unlimited posts, custom domain support, Grove Social access |
+| Seedling | $8/month ($82/year) | 1GB storage, 50 posts, Meadow access, community support |
+| Sapling | $12/month ($122/year) | 5GB storage, 250 posts, Meadow access, email forwarding, email support |
+| Oak | $25/month ($255/year) | 20GB storage, unlimited posts, Meadow access, BYOD custom domain, full @grove.place email, priority support |
+| Evergreen | $35/month ($357/year) | 100GB storage, unlimited posts, Meadow access, custom domain included, full @grove.place email, 8 hours onboarding + priority support |
+
+Yearly plans save 15% — pay for 10 months, get 12.
 
 ### 5.2 Billing
 - Subscriptions are billed monthly in advance

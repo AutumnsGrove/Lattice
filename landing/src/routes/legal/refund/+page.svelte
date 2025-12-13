@@ -54,7 +54,7 @@
 
 					<h3 class="text-lg font-serif text-bark/90 mb-2 mt-4">1.2 After 14 Days (Pro-Rated Refund)</h3>
 					<p>After the 14-day period, you may still request a refund. We will provide a <strong>pro-rated refund</strong> for the unused portion of your current billing period.</p>
-					<p class="mt-2"><strong>Example:</strong> If you're on the Basic plan ($12/month) and cancel on day 20 of your billing cycle, you would receive approximately $4 back (10 unused days ÷ 30 days × $12).</p>
+					<p class="mt-2"><strong>Example:</strong> If you're on the Sapling plan ($12/month) and cancel on day 20 of your billing cycle, you would receive approximately $4 back (10 unused days ÷ 30 days × $12).</p>
 
 					<h3 class="text-lg font-serif text-bark/90 mb-2 mt-4">1.3 How to Request a Refund</h3>
 					<p>Email us at <a href="mailto:autumn@grove.place" class="text-grove-600 hover:text-grove-700 underline">autumn@grove.place</a> with subject "Refund Request".</p>

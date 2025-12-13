@@ -83,7 +83,7 @@
 					<h2 class="text-xl font-serif text-bark mb-4">2. Domain Ownership & Transfer</h2>
 
 					<h3 class="text-lg font-serif text-bark/90 mb-2">You Own Your Domain</h3>
-					<p>When Grove registers a custom domain on your behalf (Premium tier), <strong>you are the legal owner</strong>. Grove acts as a registrar agent, not the domain owner.</p>
+					<p>When Grove registers a custom domain on your behalf (Evergreen tier), <strong>you are the legal owner</strong>. Grove acts as a registrar agent, not the domain owner.</p>
 					<ul class="list-disc list-inside space-y-1 ml-4 mt-2">
 						<li>The domain is registered with your contact information</li>
 						<li>You receive registrar notifications directly</li>
@@ -92,7 +92,7 @@
 					</ul>
 
 					<h3 class="text-lg font-serif text-bark/90 mb-2 mt-6">Domain Transfer Process</h3>
-					<p><strong>When you cancel your Premium subscription:</strong></p>
+					<p><strong>When you cancel your Evergreen subscription:</strong></p>
 					<ol class="list-decimal list-inside space-y-1 ml-4">
 						<li><strong>Notification:</strong> You'll receive an email explaining your options</li>
 						<li><strong>Transfer window:</strong> 30 days to initiate transfer to another registrar</li>
@@ -154,7 +154,7 @@
 						<li>We'll forward a final notice to your personal email</li>
 						<li>The address may be released for future users after 6 months</li>
 					</ul>
-					<p class="mt-4"><strong>Custom domain email</strong> (Professional tier) is entirely yours and unaffected by Grove cancellation.</p>
+					<p class="mt-4"><strong>Custom domain email</strong> (Oak tier) is entirely yours and unaffected by Grove cancellation.</p>
 				</section>
 
 				<section>

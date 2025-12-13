@@ -58,7 +58,7 @@
 						<li>Markdown-based content creation and publishing</li>
 						<li>Media storage and delivery</li>
 						<li>Optional community features (Meadow)</li>
-						<li>Custom domain support (Professional and Premium tiers)</li>
+						<li>Custom domain support (Oak and Evergreen tiers)</li>
 					</ul>
 					<p>The Service is provided on a subscription basis with different tiers offering varying features and limits.</p>
 				</section>
@@ -98,17 +98,17 @@
 									<td class="py-2 px-3">1GB storage, 50 posts, Meadow access, community support</td>
 								</tr>
 								<tr class="border-b border-grove-100">
-									<td class="py-2 px-3">Basic</td>
+									<td class="py-2 px-3">Sapling</td>
 									<td class="py-2 px-3">$12/month ($122/year)</td>
 									<td class="py-2 px-3">5GB storage, 250 posts, Meadow access, email forwarding, email support</td>
 								</tr>
 								<tr class="border-b border-grove-100">
-									<td class="py-2 px-3">Professional</td>
+									<td class="py-2 px-3">Oak</td>
 									<td class="py-2 px-3">$25/month ($255/year)</td>
 									<td class="py-2 px-3">20GB storage, unlimited posts, Meadow access, BYOD custom domain, full @grove.place email, priority support</td>
 								</tr>
 								<tr class="border-b border-grove-100">
-									<td class="py-2 px-3">Premium</td>
+									<td class="py-2 px-3">Evergreen</td>
 									<td class="py-2 px-3">$35/month ($357/year)</td>
 									<td class="py-2 px-3">100GB storage, unlimited posts, Meadow access, custom domain included, full @grove.place email, 8 hours onboarding + priority support</td>
 								</tr>

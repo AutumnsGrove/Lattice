@@ -47,15 +47,15 @@
 								<div class="text-2xl font-sans font-bold text-grove-600">$8<span class="text-sm font-normal text-bark/50">/mo</span></div>
 							</th>
 							<th class="py-4 px-4 text-center">
-								<div class="font-serif text-bark">Basic</div>
+								<div class="font-serif text-bark">Sapling</div>
 								<div class="text-2xl font-sans font-bold text-grove-600">$12<span class="text-sm font-normal text-bark/50">/mo</span></div>
 							</th>
 							<th class="py-4 px-4 text-center">
-								<div class="font-serif text-bark">Professional</div>
+								<div class="font-serif text-bark">Oak</div>
 								<div class="text-2xl font-sans font-bold text-grove-600">$25<span class="text-sm font-normal text-bark/50">/mo</span></div>
 							</th>
 							<th class="py-4 px-4 text-center">
-								<div class="font-serif text-bark">Premium</div>
+								<div class="font-serif text-bark">Evergreen</div>
 								<div class="text-2xl font-sans font-bold text-grove-600">$35<span class="text-sm font-normal text-bark/50">/mo</span></div>
 							</th>
 						</tr>
@@ -153,8 +153,8 @@
 					<div>
 						<h3 class="font-medium text-bark mb-2">Custom Domains</h3>
 						<p>
-							<strong>Professional (BYOD):</strong> Bring a domain you already own at no extra cost.
-							<strong>Premium:</strong> We find and register the perfect domain for you. Registration included for domains up to $100/year.
+							<strong>Oak (BYOD):</strong> Bring a domain you already own at no extra cost.
+							<strong>Evergreen:</strong> We find and register the perfect domain for you. Registration included for domains up to $100/year.
 						</p>
 					</div>
 
@@ -167,9 +167,9 @@
 					</div>
 
 					<div>
-						<h3 class="font-medium text-bark mb-2">Support Hours (Premium)</h3>
+						<h3 class="font-medium text-bark mb-2">Support Hours (Evergreen)</h3>
 						<p>
-							Premium includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need.
+							Evergreen includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need.
 							After that, priority email support with faster response times.
 						</p>
 					</div>
@@ -200,7 +200,7 @@
 			<!-- Contact -->
 			<div class="mt-12 text-center">
 				<p class="text-bark/60 font-sans text-sm mb-2">
-					Need something beyond Premium? Multiple domains, team collaboration, white-label options?
+					Need something beyond Evergreen? Multiple domains, team collaboration, white-label options?
 				</p>
 				<p class="text-bark font-sans">
 					<a href="mailto:autumn@grove.place" class="text-grove-600 hover:text-grove-700 underline">

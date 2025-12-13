@@ -26,7 +26,7 @@ If you're not satisfied with Grove, you can request a **full refund within 14 da
 
 After the 14-day period, you may still request a refund. We will provide a **pro-rated refund** for the unused portion of your current billing period.
 
-**Example:** If you're on the Basic plan ($12/month) and cancel on day 20 of your billing cycle, you would receive approximately $4 back (10 unused days ÷ 30 days × $12).
+**Example:** If you're on the Sapling plan ($12/month) and cancel on day 20 of your billing cycle, you would receive approximately $4 back (10 unused days ÷ 30 days × $12).
 
 ### 1.3 How to Request a Refund
 
@@ -135,9 +135,9 @@ Refunds are **not available** in the following situations:
 - Fraudulent payment or chargeback abuse
 - Requests made more than 90 days after the original payment
 
-### 5.2 Domain Services (Premium Plan)
+### 5.2 Domain Services (Evergreen Plan)
 
-If you purchased domain search services as part of the Premium plan:
+If you purchased domain search services as part of the Evergreen plan:
 - Setup fees are credited toward your subscription (not separate charges)
 - Domain registration fees (paid to registrars) are non-refundable
 - Domain-related subscription credits are subject to the same refund policy as regular subscriptions

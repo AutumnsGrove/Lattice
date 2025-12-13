@@ -56,7 +56,7 @@ Exports are generated within 24 hours and available for download for 30 days.
 
 ### You Own Your Domain
 
-When Grove registers a custom domain on your behalf (Premium tier), you are the legal owner. Grove acts as a registrar agent, not the domain owner.
+When Grove registers a custom domain on your behalf (Evergreen tier), you are the legal owner. Grove acts as a registrar agent, not the domain owner.
 
 **What this means:**
 - The domain is registered with your contact information
@@ -66,7 +66,7 @@ When Grove registers a custom domain on your behalf (Premium tier), you are the 
 
 ### Domain Transfer Process
 
-**When you cancel your Premium subscription:**
+**When you cancel your Evergreen subscription:**
 
 1. **Notification:** You'll receive an email explaining your options
 2. **Transfer window:** 30 days to initiate transfer to another registrar
@@ -80,7 +80,7 @@ When Grove registers a custom domain on your behalf (Premium tier), you are the 
 
 ### Domain Renewal Responsibility
 
-**While subscribed:** Grove handles all domain renewals automatically (included in Premium subscription for domains up to $100/year).
+**While subscribed:** Grove handles all domain renewals automatically (included in Evergreen subscription for domains up to $100/year).
 
 **After cancellation:** You assume responsibility for domain renewal. If you don't transfer the domain before the next renewal date, you must pay the renewal fee directly to the registrar to maintain ownership.
 
@@ -113,7 +113,7 @@ Email addresses like `username@grove.place` are tied to your Grove subscription.
 
 ### Custom Domain Email
 
-If you use email with your own custom domain (BYOD at Professional tier), that email is entirely yours and unaffected by Grove cancellation. You simply need to update DNS records to point to your new email provider.
+If you use email with your own custom domain (BYOD at Oak tier), that email is entirely yours and unaffected by Grove cancellation. You simply need to update DNS records to point to your new email provider.
 
 ---
 
