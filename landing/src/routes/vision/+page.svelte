@@ -109,7 +109,7 @@
 						<p class="text-bark/70 font-sans leading-relaxed mt-4">
 							Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks —
 							the "wood wide web" that connects an entire forest into a single living organism.
-							The oldest trees nurture the saplings. The dying trees feed the soil for those that come after.
+							The oldest trees nurture the saplings. The seasonal cycles nourish new growth.
 						</p>
 					</div>
 
