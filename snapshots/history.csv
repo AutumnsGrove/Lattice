@@ -1,0 +1,2 @@
+timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits
+2025-12-13_22-42-51,initial-baseline,7f196d5,50405,26210,10555,10575,3065,173924,42725,498,240,711436,142
