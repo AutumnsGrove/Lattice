@@ -76,7 +76,7 @@
 							<td class="py-3 px-4 text-center text-bark">100 GB</td>
 						</tr>
 						<tr class="border-b border-grove-100">
-							<td class="py-3 px-4 text-bark/70">Grove Social</td>
+							<td class="py-3 px-4 text-bark/70">Meadow</td>
 							<td class="py-3 px-4 text-center text-grove-600">
 								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
