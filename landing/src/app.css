@@ -2,6 +2,148 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   GROVE DESIGN SYSTEM - CSS Custom Properties
+   All colors use CSS variables for live theme switching
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+	/* Primary: Grove Green */
+	--grove-50: #f0fdf4;
+	--grove-100: #dcfce7;
+	--grove-200: #bbf7d0;
+	--grove-300: #86efac;
+	--grove-400: #4ade80;
+	--grove-500: #22c55e;
+	--grove-600: #16a34a;
+	--grove-700: #15803d;
+	--grove-800: #166534;
+	--grove-900: #14532d;
+	--grove-950: #052e16;
+
+	/* Neutral: Cream (Light Mode) */
+	--cream: #fefdfb;
+	--cream-50: #fefdfb;
+	--cream-100: #fdfcf8;
+	--cream-200: #faf8f3;
+	--cream-300: #f5f2ea;
+	--cream-400: #ede9de;
+	--cream-500: #e2ddd0;
+
+	/* Neutral: Bark (Light Mode) */
+	--bark: #3d2914;
+	--bark-50: #f9f6f3;
+	--bark-100: #f0e9e1;
+	--bark-200: #e0d2c2;
+	--bark-300: #ccb59c;
+	--bark-400: #b69575;
+	--bark-500: #a57c5a;
+	--bark-600: #8a6347;
+	--bark-700: #6f4d39;
+	--bark-800: #5a3f30;
+	--bark-900: #3d2914;
+	--bark-950: #2a1b0d;
+
+	/* Semantic Colors */
+	--color-background: var(--cream);
+	--color-foreground: var(--bark);
+	--color-foreground-muted: rgba(61, 41, 20, 0.7);
+	--color-foreground-subtle: rgba(61, 41, 20, 0.5);
+	--color-foreground-faint: rgba(61, 41, 20, 0.4);
+
+	--color-primary: var(--grove-600);
+	--color-primary-hover: var(--grove-700);
+	--color-primary-foreground: #ffffff;
+
+	--color-border: var(--grove-200);
+	--color-border-subtle: var(--grove-100);
+	--color-divider: var(--grove-300);
+
+	--color-surface: rgba(255, 255, 255, 0.5);
+	--color-surface-elevated: #ffffff;
+
+	--color-accent-bg: var(--grove-50);
+	--color-accent-border: var(--grove-200);
+	--color-accent-text: var(--grove-800);
+	--color-accent-text-muted: var(--grove-600);
+	--color-accent-text-subtle: var(--grove-500);
+
+	/* Status Colors */
+	--color-error: #dc2626;
+	--color-error-bg: #fee2e2;
+	--color-error-border: #fecaca;
+	--color-error-text: #991b1b;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+	--shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
+	--shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE - Nature at Night
+   ═══════════════════════════════════════════════════════════════ */
+
+.dark {
+	/* Neutral: Cream inverted for dark mode */
+	--cream: #1a1915;
+	--cream-50: #1a1915;
+	--cream-100: #252320;
+	--cream-200: #32302b;
+	--cream-300: #43403a;
+	--cream-400: #5c584f;
+	--cream-500: #777267;
+
+	/* Neutral: Bark inverted for dark mode */
+	--bark: #f5f2ea;
+	--bark-50: #2a1b0d;
+	--bark-100: #3d2914;
+	--bark-200: #5a3f30;
+	--bark-300: #6f4d39;
+	--bark-400: #8a6347;
+	--bark-500: #a57c5a;
+	--bark-600: #b69575;
+	--bark-700: #ccb59c;
+	--bark-800: #e0d2c2;
+	--bark-900: #f0e9e1;
+	--bark-950: #f9f6f3;
+
+	/* Semantic Colors - Dark Mode */
+	--color-background: var(--cream);
+	--color-foreground: var(--bark);
+	--color-foreground-muted: rgba(245, 242, 234, 0.7);
+	--color-foreground-subtle: rgba(245, 242, 234, 0.5);
+	--color-foreground-faint: rgba(245, 242, 234, 0.4);
+
+	--color-border: var(--cream-300);
+	--color-border-subtle: var(--cream-200);
+	--color-divider: var(--cream-400);
+
+	--color-surface: rgba(37, 35, 32, 0.5);
+	--color-surface-elevated: var(--cream-100);
+
+	--color-accent-bg: var(--grove-950);
+	--color-accent-border: var(--grove-900);
+	--color-accent-text: var(--grove-200);
+	--color-accent-text-muted: var(--grove-400);
+	--color-accent-text-subtle: var(--grove-500);
+
+	/* Status Colors - Dark Mode */
+	--color-error: #f87171;
+	--color-error-bg: rgba(220, 38, 38, 0.15);
+	--color-error-border: rgba(220, 38, 38, 0.3);
+	--color-error-text: #fecaca;
+
+	/* Shadows - Dark Mode */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+	--shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FONTS
+   ═══════════════════════════════════════════════════════════════ */
+
 @font-face {
 	font-family: 'Lexend';
 	src: url('/fonts/Lexend-Regular.ttf') format('truetype');
@@ -10,32 +152,209 @@
 	font-display: swap;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
 @layer base {
 	html {
 		font-family: 'Lexend', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		transition: background-color 0.2s ease, color 0.2s ease;
 	}
 
 	body {
-		@apply bg-cream text-bark antialiased;
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENT CLASSES
+   ═══════════════════════════════════════════════════════════════ */
 
 @layer components {
 	.btn-primary {
-		@apply bg-grove-600 hover:bg-grove-700 text-white font-sans font-medium
-			px-6 py-3 rounded-lg transition-colors duration-200
-			focus:outline-none focus:ring-2 focus:ring-grove-500 focus:ring-offset-2;
+		background-color: var(--color-primary);
+		color: var(--color-primary-foreground);
+		font-family: system-ui, -apple-system, sans-serif;
+		font-weight: 500;
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		transition: background-color 0.2s ease;
+	}
+
+	.btn-primary:hover {
+		background-color: var(--color-primary-hover);
+	}
+
+	.btn-primary:focus {
+		outline: none;
+		box-shadow: var(--shadow-focus);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.input-field {
-		@apply w-full px-4 py-3 rounded-lg border border-grove-200
-			focus:border-grove-500 focus:ring-2 focus:ring-grove-500/20
-			focus:outline-none transition-all duration-200
-			bg-white text-bark placeholder:text-bark/40;
+		width: 100%;
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border);
+		background-color: var(--color-surface-elevated);
+		color: var(--color-foreground);
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.input-field::placeholder {
+		color: var(--color-foreground-faint);
+	}
+
+	.input-field:focus {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+	}
+
+	.card {
+		background-color: var(--color-surface-elevated);
+		border: 1px solid var(--color-border);
+		border-radius: 0.75rem;
 	}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Text color utilities using CSS variables */
+.text-foreground { color: var(--color-foreground); }
+.text-foreground-muted { color: var(--color-foreground-muted); }
+.text-foreground-subtle { color: var(--color-foreground-subtle); }
+.text-foreground-faint { color: var(--color-foreground-faint); }
+
+.text-primary { color: var(--color-primary); }
+.text-primary-hover { color: var(--color-primary-hover); }
+
+.text-accent { color: var(--color-accent-text); }
+.text-accent-muted { color: var(--color-accent-text-muted); }
+.text-accent-subtle { color: var(--color-accent-text-subtle); }
+
+.text-error { color: var(--color-error); }
+
+/* Background utilities */
+.bg-page { background-color: var(--color-background); }
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface-elevated { background-color: var(--color-surface-elevated); }
+.bg-accent { background-color: var(--color-accent-bg); }
+.bg-error { background-color: var(--color-error-bg); }
+
+/* Border utilities */
+.border-default { border-color: var(--color-border); }
+.border-subtle { border-color: var(--color-border-subtle); }
+.border-divider { border-color: var(--color-divider); }
+.border-accent { border-color: var(--color-accent-border); }
+.border-error { border-color: var(--color-error-border); }
+
+/* Divider color for text elements like "·" separators */
+.text-divider { color: var(--color-divider); }
 
 /* Subtle leaf pattern background */
 .leaf-pattern {
 	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-25 15 10 5 15 15 15 25 5-10 15-15 25-15-10-5-15-15-15-25z' fill='%2322c55e' fill-opacity='0.03'/%3E%3C/svg%3E");
+}
+
+.dark .leaf-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-25 15 10 5 15 15 15 25 5-10 15-15 25-15-10-5-15-15-15-25z' fill='%2322c55e' fill-opacity='0.06'/%3E%3C/svg%3E");
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROSE STYLES - Legal Documents
+   ═══════════════════════════════════════════════════════════════ */
+
+.prose-legal {
+	font-family: system-ui, -apple-system, sans-serif;
+	color: var(--color-foreground-muted);
+	line-height: 1.75;
+}
+
+.prose-legal section {
+	margin-bottom: 2rem;
+}
+
+.prose-legal h2 {
+	font-family: 'Lexend', Georgia, serif;
+	font-size: 1.25rem;
+	color: var(--color-foreground);
+	margin-bottom: 1rem;
+}
+
+.prose-legal h3 {
+	font-family: 'Lexend', Georgia, serif;
+	font-size: 1.125rem;
+	color: var(--color-foreground-muted);
+	margin-bottom: 0.5rem;
+}
+
+.prose-legal p {
+	margin-bottom: 1rem;
+}
+
+.prose-legal ul {
+	list-style-type: disc;
+	list-style-position: inside;
+	margin-left: 1rem;
+	margin-bottom: 1rem;
+}
+
+.prose-legal ul li {
+	margin-bottom: 0.25rem;
+}
+
+.prose-legal a {
+	color: var(--color-accent-text-muted);
+	text-decoration: underline;
+	transition: color 0.2s ease;
+}
+
+.prose-legal a:hover {
+	color: var(--color-primary);
+}
+
+.prose-legal table {
+	width: 100%;
+	font-size: 0.875rem;
+	border-collapse: collapse;
+	margin: 1rem 0;
+}
+
+.prose-legal th,
+.prose-legal td {
+	padding: 0.5rem 0.75rem;
+	text-align: left;
+}
+
+.prose-legal thead tr {
+	border-bottom: 1px solid var(--color-border);
+}
+
+.prose-legal tbody tr {
+	border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.prose-legal .uppercase {
+	text-transform: uppercase;
+	font-size: 0.875rem;
+}
+
+.prose-legal section.pt-6 {
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--color-border);
+}
+
+.prose-legal strong {
+	color: var(--color-foreground);
 }
