@@ -52,10 +52,10 @@
 
   // Safe status with fallback values
   const safeStatus = $derived(isValidStatus ? status : {
-    tier: 'starter' as const,
+    tier: 'seedling' as const,
     post_count: 0,
-    post_limit: 250,
-    posts_remaining: 250,
+    post_limit: 50,
+    posts_remaining: 50,
     percentage_used: 0,
     is_at_limit: false,
     is_in_grace_period: false,
@@ -73,8 +73,9 @@
 
   // Tier upgrade path
   const nextTier = $derived(
-    safeStatus.tier === 'starter' ? 'professional' :
-    safeStatus.tier === 'professional' ? 'business' :
+    safeStatus.tier === 'seedling' ? 'sapling' :
+    safeStatus.tier === 'sapling' ? 'oak' :
+    safeStatus.tier === 'oak' ? 'evergreen' :
     null
   );
 
@@ -237,8 +238,8 @@
               <div>
                 <p class="font-medium text-blue-900 dark:text-blue-100">{nextTierName} Plan</p>
                 <p class="text-sm text-blue-700 dark:text-blue-300">
-                  {#if nextTier === 'professional'}
-                    Up to 2,000 posts
+                  {#if nextTier === 'sapling'}
+                    Up to 250 posts
                   {:else}
                     Unlimited posts
                   {/if}
