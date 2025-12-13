@@ -1,4 +1,5 @@
 <script lang="ts">
+	import EmailSignup from '$lib/components/EmailSignup.svelte';
 </script>
 
 <svelte:head>
@@ -152,6 +153,17 @@
 					<p class="text-grove-700 font-serif text-lg">
 						A forest of voices. A place to be.
 					</p>
+				</section>
+
+				<!-- Call to Action -->
+				<section class="text-center py-8">
+					<p class="text-bark/70 font-sans leading-relaxed mb-6">
+						We're not open yet, but we're growing.<br />
+						Leave your email to join us when Grove blooms.
+					</p>
+					<div class="flex justify-center">
+						<EmailSignup />
+					</div>
 				</section>
 			</div>
 		</div>

@@ -59,3 +59,10 @@ It's optional. Your blog exists independently, complete on its own. But if you c
 ---
 
 *A forest of voices. A place to be.*
+
+---
+
+We're not open yet, but we're growing.
+Leave your email to join us when Grove blooms.
+
+**[Join the waitlist →](https://grove.place)**
