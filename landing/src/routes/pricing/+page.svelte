@@ -104,7 +104,7 @@
 							<td class="py-3 px-3 text-center text-foreground">3 + accent</td>
 							<td class="py-3 px-3 text-center text-foreground">10 + accent</td>
 							<td class="py-3 px-3 text-center text-foreground">Customizer</td>
-							<td class="py-3 px-3 text-center text-foreground">+ Custom Fonts</td>
+							<td class="py-3 px-3 text-center text-foreground">Customizer + Fonts</td>
 						</tr>
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">Meadow</td>

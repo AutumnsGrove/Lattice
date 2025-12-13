@@ -11,6 +11,11 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * - sapling: $12/month - Hobbyist tier
  * - oak: $25/month - Serious blogger tier
  * - evergreen: $35/month - Full-service tier
+ *
+ * NOTE: The Free tier (Meadow-only access) does NOT use this billing API.
+ * Free users sign up directly without Stripe checkout - they're created
+ * with plan='free' in the tenants table but never hit this endpoint.
+ * This API is only for paid subscriptions.
  */
 
 const PLANS = {

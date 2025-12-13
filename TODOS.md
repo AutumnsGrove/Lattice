@@ -175,7 +175,7 @@
 - [ ] Add documentation/help center → **SPEC READY (2025-12-13)**: `docs/specs/help-center-spec.md`
   - Built into admin panel, not external docs site
   - Contextual help buttons (Cloudflare-style) throughout admin UI
-  - SQLite FTS5 search, 9 categories, "Was this helpful?" feedback
+  - SQLite FTS5 search, 10 categories, "Was this helpful?" feedback
 
 ## Phase 4: Content Moderation System (Weeks 16-20)
 > **Spec:** See `docs/Specs/CONTENT-MODERATION.md` for full technical specification.

@@ -46,6 +46,45 @@ grove-export-username-YYYY-MM-DD.zip
 └── README.md (import instructions)
 ```
 
+**Comments JSON Format:**
+
+`comments.json` (public comments that were approved):
+```json
+{
+  "exported_at": "2025-12-13T12:00:00Z",
+  "total_count": 42,
+  "comments": [
+    {
+      "id": "comment-uuid",
+      "post_slug": "my-first-post",
+      "author_name": "Jane Reader",
+      "author_email": "jane@example.com",
+      "content": "Great post! Really enjoyed reading this.",
+      "created_at": "2025-02-15T14:30:00Z",
+      "status": "approved"
+    }
+  ]
+}
+```
+
+`replies.json` (private replies sent to blog author):
+```json
+{
+  "exported_at": "2025-12-13T12:00:00Z",
+  "total_count": 15,
+  "replies": [
+    {
+      "id": "reply-uuid",
+      "post_slug": "my-first-post",
+      "author_name": "Anonymous Reader",
+      "author_email": "reader@example.com",
+      "content": "Wanted to share privately—this really resonated with me.",
+      "created_at": "2025-02-16T09:15:00Z"
+    }
+  ]
+}
+```
+
 ### How to Request an Export
 
 1. **Self-service:** Admin Panel → Settings → Export Data

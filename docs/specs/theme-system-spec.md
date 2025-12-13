@@ -534,6 +534,166 @@ CREATE INDEX idx_community_themes_status ON community_themes(status);
 CREATE INDEX idx_community_themes_creator ON community_themes(creator_id);
 ```
 
+### 7.4 Theme Submission & Moderation Workflow
+
+#### Submission States
+
+| Status | Description | Who Can See |
+|--------|-------------|-------------|
+| `draft` | User is still editing, not submitted | Creator only |
+| `pending` | Submitted, awaiting review | Creator + Moderators |
+| `in_review` | Currently being reviewed by moderator | Creator + Moderators |
+| `approved` | Approved, visible in community browser | Everyone |
+| `featured` | Approved + promoted in "Featured" section | Everyone |
+| `changes_requested` | Needs changes before approval | Creator + Moderators |
+| `rejected` | Does not meet guidelines | Creator + Moderators |
+| `removed` | Removed after approval (policy violation) | Moderators only |
+
+#### Submission Form Schema
+
+```typescript
+interface ThemeSubmission {
+  // Required
+  name: string;           // 3-50 characters
+  description: string;    // 10-500 characters
+  base_theme: string;     // Which curated theme it builds on
+
+  // Optional
+  tags: string[];         // Max 5 tags, from predefined list
+  include_custom_css: boolean;
+  allow_derivatives: boolean; // Can others fork and re-share?
+
+  // Auto-generated
+  thumbnail: string;      // Generated from live preview
+  preview_url: string;    // Temporary preview link for moderators
+}
+
+// Tag options
+const THEME_TAGS = [
+  'dark', 'light', 'minimal', 'bold', 'playful', 'professional',
+  'writing', 'portfolio', 'photography', 'colorful', 'monochrome',
+  'cozy', 'modern', 'vintage', 'nature', 'tech'
+];
+```
+
+#### Moderation Queue Table
+
+```sql
+CREATE TABLE theme_moderation_queue (
+  id TEXT PRIMARY KEY,
+  theme_id TEXT NOT NULL,
+  moderator_id TEXT,
+
+  -- Review details
+  action TEXT NOT NULL, -- 'approve', 'reject', 'request_changes', 'feature', 'remove'
+  reason TEXT,          -- Required for reject/request_changes/remove
+  internal_notes TEXT,  -- Moderator notes (not visible to creator)
+
+  created_at INTEGER DEFAULT (unixepoch()),
+
+  FOREIGN KEY (theme_id) REFERENCES community_themes(id),
+  FOREIGN KEY (moderator_id) REFERENCES users(id)
+);
+
+CREATE INDEX idx_moderation_theme ON theme_moderation_queue(theme_id);
+CREATE INDEX idx_moderation_action ON theme_moderation_queue(action);
+```
+
+#### Review Workflow
+
+```
+User submits theme
+        │
+        ▼
+   ┌─────────────┐
+   │   pending   │◄───────────────────────────────┐
+   └──────┬──────┘                                │
+          │ Moderator claims                      │
+          ▼                                       │
+   ┌─────────────┐                                │
+   │  in_review  │                                │
+   └──────┬──────┘                                │
+          │                                       │
+    ┌─────┼─────┬──────────┐                      │
+    │     │     │          │                      │
+    ▼     │     ▼          ▼                      │
+┌────────┐│ ┌────────┐ ┌──────────────────┐      │
+│approved││ │rejected│ │changes_requested │      │
+└────┬───┘│ └────────┘ └────────┬─────────┘      │
+     │    │                     │                 │
+     │    │                     │ User fixes      │
+     │    │                     │ and resubmits   │
+     │    │                     └─────────────────┘
+     │    │
+     │    ▼
+     │ ┌────────┐
+     │ │featured│
+     │ └────────┘
+     │
+     └──────────►  Can be changed to 'removed'
+                   if policy violation found later
+```
+
+#### Moderator UI (Admin Panel)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Theme Moderation Queue                              [Moderator]  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Pending Review (3)                                              │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ "Midnight Prose" by @writer_sam                           │   │
+│  │ Submitted: 2 hours ago | Base: Night Garden               │   │
+│  │ Tags: dark, writing, minimal                              │   │
+│  │ [Preview] [Claim for Review]                              │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ "Sunset Warmth" by @creative_jo                           │   │
+│  │ Submitted: 5 hours ago | Base: Cozy Cabin                 │   │
+│  │ Tags: warm, cozy, photography                             │   │
+│  │ [Preview] [Claim for Review]                              │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  In Review (1) - claimed by you                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ "Nordic Calm" by @designr                                 │   │
+│  │ [Full Preview]                                            │   │
+│  │                                                           │   │
+│  │ Checklist:                                                │   │
+│  │ [✓] Meets contrast requirements (WCAG AA)                 │   │
+│  │ [✓] Works on mobile                                       │   │
+│  │ [✓] Custom CSS is safe                                    │   │
+│  │ [ ] No inappropriate content                              │   │
+│  │                                                           │   │
+│  │ [Approve] [Feature] [Request Changes] [Reject]            │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Review Guidelines Checklist
+
+Moderators verify:
+1. **Accessibility:** Contrast ratios meet WCAG 2.1 AA
+2. **Responsiveness:** Works on mobile, tablet, desktop
+3. **Functionality:** Doesn't break Grove features (vines, galleries, etc.)
+4. **Safety:** Custom CSS doesn't include malicious content
+5. **Appropriateness:** No offensive names, descriptions, or visual content
+6. **Originality:** Not a duplicate of existing community theme
+
+#### User Notification Flow
+
+| Event | Notification |
+|-------|--------------|
+| Submitted | "Your theme has been submitted for review. We'll notify you within 48 hours." |
+| Approved | "Great news! Your theme '{name}' has been approved and is now available in the community browser." |
+| Featured | "Congratulations! Your theme '{name}' has been featured! It will appear in the Featured section." |
+| Changes Requested | "We'd love to feature your theme, but we need a few changes first: {reason}" |
+| Rejected | "Unfortunately, your theme doesn't meet our guidelines: {reason}. You can submit a new theme anytime." |
+| Removed | "Your theme '{name}' has been removed: {reason}. If you believe this is an error, contact support." |
+
 ---
 
 ## 8. Implementation
