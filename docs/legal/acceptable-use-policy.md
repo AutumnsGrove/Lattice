@@ -142,7 +142,7 @@ Commercial promotion is allowed with the following restrictions:
 | Rule | Details |
 |------|---------|
 | **Frequency** | Maximum **one promotional post per 7 days** (rolling window) |
-| **Location** | Blog posts only - promotional content is **not allowed** on Grove Social |
+| **Location** | Blog posts only - promotional content is **not allowed** on Meadow |
 | **Definition** | Any content where you make money or sell something |
 
 **Examples of promotional content:**
@@ -265,7 +265,7 @@ We may update this policy as our community grows and evolves. Significant change
 | Original blog posts | ✅ Yes | |
 | Artistic nudity | ✅ Yes | Auto-blur, content warning required |
 | Mature text | ✅ Yes | Author-applied content warning required |
-| Commercial promotion | ✅ Yes | 1x per 7 days, blog only, not on Grove Social |
+| Commercial promotion | ✅ Yes | 1x per 7 days, blog only, not on Meadow |
 | Hate speech | ❌ No | |
 | Harassment/doxxing | ❌ No | |
 | Illegal content | ❌ No | |

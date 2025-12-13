@@ -36,7 +36,7 @@ You said it felt like mothering a child when you published version 0.5.0. That's
 - [ ] 100 users — a real community forming
 - [ ] First user who finds you organically
 - [ ] First Premium user who gets their custom domain
-- [ ] First friend connection made through Grove Social
+- [ ] First friend connection made through Meadow
 - [ ] First reaction left on someone's post — private encouragement working as intended
 
 ---

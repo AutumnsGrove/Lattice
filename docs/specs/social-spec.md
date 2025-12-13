@@ -6,10 +6,10 @@ tags:
 type: tech-spec
 ---
 
-# Grove Social - Technical Specification
+# Meadow (Grove Social) - Technical Specification
 
-**Project:** Grove Social - Community Feed & Social Features  
-**Repository:** `grove-social`  
+**Project:** Meadow - Community Feed & Social Features  
+**Repository:** `Meadow`  
 **Type:** Social Platform  
 **Purpose:** Community feed, voting, reactions, and social discovery
 
@@ -17,7 +17,7 @@ type: tech-spec
 
 ## Overview
 
-Grove Social is the community layer of the Grove platform. It provides a social feed where users can discover posts from across the Grove network, vote on content, react with emojis, and engage with the community. It's entirely optional - blogs can opt-in to share posts to the feed.
+Meadow is the community layer of the Grove platform. It provides a social feed where users can discover posts from across the Grove network, vote on content, react with emojis, and engage with the community. It's entirely optional - blogs can opt-in to share posts to the feed.
 
 ---
 

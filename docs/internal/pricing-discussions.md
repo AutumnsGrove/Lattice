@@ -16,7 +16,7 @@
 | **Yearly (15% off)** | $82 | $122 | $255 | $357 |
 | Posts | 50 | 250 | Unlimited | Unlimited |
 | Storage | 1 GB | 5 GB | 20 GB | 100 GB |
-| Grove Social | ✓ | ✓ | ✓ | ✓ |
+| Meadow | ✓ | ✓ | ✓ | ✓ |
 | Custom Domain | — | — | BYOD only | ✓ (incl. search) |
 | @grove.place Email | — | Forward only | Full (send/receive) | Full (send/receive) |
 | Domain Registration | — | — | — | Included (up to $100/yr) |

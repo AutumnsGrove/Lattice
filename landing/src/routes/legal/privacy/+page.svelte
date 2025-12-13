@@ -56,7 +56,7 @@
 					<ul class="list-disc list-inside space-y-1 ml-4">
 						<li>Blog posts and pages you create</li>
 						<li>Images and media you upload</li>
-						<li>Comments and reactions (if using Grove Social)</li>
+						<li>Comments and reactions (if using Meadow)</li>
 					</ul>
 
 					<p class="mt-4"><strong>Payment Information:</strong></p>

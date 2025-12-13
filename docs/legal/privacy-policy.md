@@ -26,7 +26,7 @@ This Privacy Policy explains what data we collect, how we use it, and your right
 **Content**
 - Blog posts and pages you create
 - Images and media you upload
-- Comments and reactions (if using Grove Social)
+- Comments and reactions (if using Meadow)
 
 **Payment Information**
 - Billing details are processed by Stripe

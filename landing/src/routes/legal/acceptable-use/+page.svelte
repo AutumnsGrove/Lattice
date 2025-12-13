@@ -107,7 +107,7 @@
 					<p>Commercial promotion is allowed with restrictions:</p>
 					<ul class="list-disc list-inside space-y-1 ml-4">
 						<li><strong>Frequency:</strong> Maximum one promotional post per 7 days</li>
-						<li><strong>Location:</strong> Blog posts only — promotional content is not allowed on Grove Social</li>
+						<li><strong>Location:</strong> Blog posts only — promotional content is not allowed on Meadow</li>
 						<li><strong>Disclosure:</strong> Affiliate links and sponsored content must be clearly disclosed</li>
 					</ul>
 				</section>
