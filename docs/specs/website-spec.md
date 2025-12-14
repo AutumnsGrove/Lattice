@@ -113,10 +113,10 @@ grove-website/
 - RSS & ownership benefits
 
 **Pricing Page (`grove.place/pricing`):**
-- Clear tier comparison table
+- Clear tier comparison table (Free, Seedling, Sapling, Oak, Evergreen)
 - FAQ section
 - Money-back guarantee
-- "Most Popular" badge on Professional plan
+- "Most Popular" badge on Sapling plan
 
 **Examples Page (`grove.place/examples`):**
 - Showcase real client blogs (with permission)
@@ -126,13 +126,13 @@ grove-website/
 ### 2. Client Signup & Onboarding
 
 **Signup Flow:**
-1. Choose plan (Starter/Professional/Business)
+1. Choose plan (Free/Seedling/Sapling/Oak/Evergreen)
 2. Enter email address
 3. Receive 6-digit code via email
 4. Enter code to verify & create account
-5. Enter billing info (Stripe)
-6. Choose subdomain (availability check)
-7. Blog created automatically
+5. Enter billing info (Stripe) - except Free tier
+6. Choose subdomain (availability check) - except Free tier
+7. Blog created automatically - except Free tier
 8. Welcome email with next steps
 
 **Onboarding Email Sequence:**
@@ -141,7 +141,7 @@ grove-website/
 - **Day 3:** First post tutorial
 - **Day 7:** Tips for growing your blog
 - **Day 14:** Check-in + support offer
-- **Day 30:** Upgrade prompt (if on Starter)
+- **Day 30:** Upgrade prompt (if on Seedling)
 
 ### 3. Client Dashboard
 
@@ -159,7 +159,7 @@ grove-website/
 - Post management (view all posts, quick edit)
 - Media library access
 - RSS feed URL
-- Custom domain setup (Business plan)
+- Custom domain setup (Oak+)
 
 **Billing Management:**
 - Current plan details
@@ -188,16 +188,23 @@ grove-website/
 
 **Plans & Features:**
 
-| Feature | Starter $12/mo | Professional $25/mo | Business $49/mo |
-|---------|----------------|---------------------|-----------------|
-| Subdomain | ✅ | ✅ | ✅ + Custom domain |
-| Post Limit | 250 (archived) | Unlimited | Unlimited |
-| Storage | 5GB | 20GB | 100GB |
-| Themes | 1 | 3 | 10 |
-| Analytics | Basic | Standard | Advanced |
-| Support Hours | 10 (Month 1) | 15 (Month 1) | 20 (Month 1) |
-| CDN | ❌ | ✅ | ✅ |
-| Priority Support | ❌ | ❌ | ✅ |
+| Feature | Free | Seedling | Sapling | Oak | Evergreen |
+|---------|------|----------|---------|-----|-----------|
+| Monthly Price | $0 | $8 | $12 | $25 | $35 |
+| Yearly Price | — | $82 | $122 | $255 | $357 |
+| Blog | — | ✓ | ✓ | ✓ | ✓ |
+| Blog Posts | — | 50 | 250 | Unlimited | Unlimited |
+| Storage | — | 1 GB | 5 GB | 20 GB | 100 GB |
+| Themes | — | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
+| Community Themes | — | — | — | ✓ | ✓ |
+| Meadow | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
+| Custom Domain | — | — | — | BYOD | ✓ |
+| @grove.place Email | — | — | Forward | Full | Full |
+| Support | Community | Community | Email | Priority | 8hrs + Priority |
+| CDN | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Analytics | Basic | Basic | Standard | Advanced | Advanced |
+| Priority Support | ❌ | ❌ | ❌ | ✅ | ✅ |
 
 **Billing Cycle:**
 - Monthly billing (default)
@@ -231,8 +238,9 @@ grove-website/
 - Must be unique across all clients
 - Reserved subdomains: admin, support, billing, api
 
-**Custom Domains (Business plan):**
-- Client purchases domain (assisted)
+**Custom Domains (Oak+):**
+- **Oak:** Bring Your Own Domain (BYOD) - connect your existing domain
+- **Evergreen:** Domain search service included, registration up to $100/year
 - Add domain to Cloudflare
 - Configure DNS records
 - Set up SSL certificate
@@ -251,14 +259,16 @@ grove-website/
 1. Client submits ticket via dashboard
 2. Auto-reply with ticket number & expected response time
 3. You receive email notification
-4. Respond within SLA (24-48 hours for Starter, 12-24 for Professional, 4-12 for Business)
+4. Respond within SLA (48 hours for Seedling, 24 hours for Sapling, 12 hours for Oak, 4 hours for Evergreen)
 5. Client receives email update
 6. Resolve ticket, client confirms
 
 **SLA by Plan:**
-- Starter: 48-hour first response
-- Professional: 24-hour first response
-- Business: 12-hour first response
+- Free: Help Center only (no SLA)
+- Seedling: 48-hour first response
+- Sapling: 24-hour first response
+- Oak: 12-hour first response
+- Evergreen: 4-hour first response
 
 **Escalation:**
 - Unresolved after 3 days → Escalate to email
@@ -318,7 +328,7 @@ CREATE TABLE clients (
   -- Billing
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
-  plan TEXT DEFAULT 'starter', -- 'starter', 'professional', 'business'
+  plan TEXT DEFAULT 'seedling', -- 'free', 'seedling', 'sapling', 'oak', 'evergreen'
   billing_cycle TEXT DEFAULT 'monthly', -- 'monthly', 'annual'
   status TEXT DEFAULT 'active', -- 'active', 'canceled', 'past_due'
   
@@ -509,7 +519,7 @@ Body: {
   email: string;
   password: string;
   name?: string;
-  plan: 'starter' | 'professional' | 'business';
+  plan: 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
   billing_cycle: 'monthly' | 'annual';
 }
 Response: { success: boolean; client: Client; stripe_url?: string }
@@ -581,7 +591,7 @@ Response: { success: boolean }
 POST /api/subscriptions
 Auth: Required
 Body: {
-  plan: 'starter' | 'professional' | 'business';
+  plan: 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
   billing_cycle: 'monthly' | 'annual';
   payment_method: string; // Stripe payment method ID
 }

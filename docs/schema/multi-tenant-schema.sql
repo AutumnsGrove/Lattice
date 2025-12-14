@@ -13,12 +13,12 @@ CREATE TABLE IF NOT EXISTS tenants (
   subdomain TEXT UNIQUE NOT NULL,         -- e.g., "autumn", "mom-publishing"
   display_name TEXT NOT NULL,             -- Human-readable name
   email TEXT NOT NULL,                    -- Owner email
-  plan TEXT DEFAULT 'starter' CHECK (plan IN ('starter', 'professional', 'business')),
+  plan TEXT DEFAULT 'seedling' CHECK (plan IN ('seedling', 'sapling', 'oak', 'evergreen')),
   storage_used INTEGER DEFAULT 0,         -- Bytes used
-  storage_limit INTEGER DEFAULT 5368709120, -- 5GB default (starter)
+  storage_limit INTEGER DEFAULT 1073741824, -- 1GB default (seedling)
   post_count INTEGER DEFAULT 0,
-  post_limit INTEGER DEFAULT 250,         -- Starter plan limit
-  custom_domain TEXT,                     -- Business plan only
+  post_limit INTEGER DEFAULT 50,          -- Seedling plan limit
+  custom_domain TEXT,                     -- Oak and Evergreen only
   theme TEXT DEFAULT 'default',
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS themes (
   description TEXT,
   preview_image TEXT,
   config TEXT NOT NULL,                   -- JSON theme configuration
-  plan_required TEXT DEFAULT 'starter' CHECK (plan_required IN ('starter', 'professional', 'business')),
+  plan_required TEXT DEFAULT 'seedling' CHECK (plan_required IN ('seedling', 'sapling', 'oak', 'evergreen')),
   is_default INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
@@ -228,22 +228,28 @@ VALUES (
 -- PLAN LIMITS REFERENCE
 -- ============================================
 --
--- Starter ($12/month):
+-- Seedling ($8/month):
+--   - post_limit: 50 (archived, not deleted)
+--   - storage_limit: 1GB (1073741824 bytes)
+--   - themes: 3 + accent
+--   - custom_domain: No
+--
+-- Sapling ($12/month):
 --   - post_limit: 250 (archived, not deleted)
 --   - storage_limit: 5GB (5368709120 bytes)
---   - themes: 1 (default only)
+--   - themes: 10 + accent
 --   - custom_domain: No
 --
--- Professional ($25/month):
+-- Oak ($25/month):
 --   - post_limit: NULL (unlimited)
 --   - storage_limit: 20GB (21474836480 bytes)
---   - themes: 3
---   - custom_domain: No
+--   - themes: Theme customizer + community themes
+--   - custom_domain: Yes (BYOD)
 --
--- Business ($199 + $49/month):
+-- Evergreen ($35/month):
 --   - post_limit: NULL (unlimited)
 --   - storage_limit: 100GB (107374182400 bytes)
---   - themes: 10
---   - custom_domain: Yes
+--   - themes: Theme customizer + custom fonts + community themes
+--   - custom_domain: Yes (included)
 --
 -- ============================================
