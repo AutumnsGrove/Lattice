@@ -371,7 +371,7 @@
 	</main>
 
 	<footer class:admin-page-footer={isAdminPage}>
-		<p>&copy; {new Date().getFullYear()} AutumnsGrove. <a href="https://github.com/AutumnsGrove/AutumnsGrove" target="_blank" rel="noopener noreferrer">Built</a> with SvelteKit.</p>
+		<p>Powered by <a href="https://grove.place" target="_blank" rel="noopener noreferrer">Lattice</a>, from The Grove</p>
 		<div class="footer-actions">
 			{#if data?.user}
 				<span class="logged-in-indicator" title="Logged in">
