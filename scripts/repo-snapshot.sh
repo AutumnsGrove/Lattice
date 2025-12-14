@@ -8,6 +8,22 @@
 # Usage: ./scripts/repo-snapshot.sh [optional-label]
 # Example: ./scripts/repo-snapshot.sh "post-auth-refactor"
 #
+# CSV Schema (14 columns):
+#   1. timestamp         - YYYY-MM-DD_HH-MM-SS format
+#   2. label             - Snapshot label (version tag or custom name)
+#   3. git_hash          - Short git commit hash
+#   4. total_code_lines  - Total lines across all code files
+#   5. svelte_lines      - Lines of Svelte code
+#   6. ts_lines          - Lines of TypeScript code
+#   7. js_lines          - Lines of JavaScript code
+#   8. css_lines         - Lines of CSS code
+#   9. doc_words         - Total words in markdown documentation
+#   10. doc_lines        - Total lines in markdown files
+#   11. total_files      - Total number of tracked files
+#   12. directories      - Total number of directories
+#   13. estimated_tokens - Estimated LLM tokens (~4 chars per token)
+#   14. commits          - Total git commits at this point
+#
 
 set -e
 
@@ -40,27 +56,46 @@ echo -e "Gathering statistics..."
 cd "$PROJECT_ROOT"
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+# Paths to exclude from searches
+EXCLUDE_PATHS="! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*'"
+
+# Count lines of code for a given file pattern
+count_lines() {
+    local pattern="$1"
+    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+}
+
+# Count number of files matching a pattern
+count_files() {
+    local pattern="$1"
+    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f 2>/dev/null | wc -l | tr -d ' '
+}
+
+# ============================================================================
 # GATHER STATISTICS
 # ============================================================================
 
 echo -n "  Counting TypeScript..."
-TS_LINES=$(find . -name "*.ts" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-TS_FILES=$(find . -name "*.ts" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f | wc -l | tr -d ' ')
+TS_LINES=$(count_lines "*.ts")
+TS_FILES=$(count_files "*.ts")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting Svelte..."
-SVELTE_LINES=$(find . -name "*.svelte" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-SVELTE_FILES=$(find . -name "*.svelte" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f | wc -l | tr -d ' ')
+SVELTE_LINES=$(count_lines "*.svelte")
+SVELTE_FILES=$(count_files "*.svelte")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting JavaScript..."
-JS_LINES=$(find . -name "*.js" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-JS_FILES=$(find . -name "*.js" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f | wc -l | tr -d ' ')
+JS_LINES=$(count_lines "*.js")
+JS_FILES=$(count_files "*.js")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting CSS..."
-CSS_LINES=$(find . -name "*.css" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-CSS_FILES=$(find . -name "*.css" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f | wc -l | tr -d ' ')
+CSS_LINES=$(count_lines "*.css")
+CSS_FILES=$(count_files "*.css")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting Documentation..."
@@ -82,7 +117,7 @@ done < <(find . -name "*.md" ! -path "*/node_modules/*" ! -path "*/.git/*" -type
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting JSON files..."
-JSON_FILES=$(find . -name "*.json" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f | wc -l | tr -d ' ')
+JSON_FILES=$(count_files "*.json")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Analyzing code characters..."

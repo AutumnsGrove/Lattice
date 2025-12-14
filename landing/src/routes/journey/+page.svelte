@@ -16,6 +16,7 @@
 
 	// Calculate percentages for the language bar
 	const languageBreakdown = $derived(() => {
+		if (!data.latest) return [];
 		const total = data.latest.totalCodeLines;
 		if (total === 0) return [];
 		return [
@@ -27,7 +28,11 @@
 	});
 
 	// Get max values for chart scaling
-	const maxCodeLines = $derived(Math.max(...data.snapshots.map((s: any) => s.totalCodeLines)));
+	const maxCodeLines = $derived(
+		data.snapshots.length > 0
+			? Math.max(...data.snapshots.map((s: any) => s.totalCodeLines))
+			: 0
+	);
 </script>
 
 <svelte:head>
@@ -56,6 +61,7 @@
 				</div>
 			</header>
 
+			{#if data.latest}
 			<!-- Current Stats Grid -->
 			<section class="mb-16">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Current Growth</h2>
@@ -150,6 +156,18 @@
 					</p>
 				</div>
 			</section>
+			{:else}
+			<!-- Empty state -->
+			<section class="mb-16">
+				<div class="card p-12 text-center">
+					<div class="text-4xl mb-4">🌱</div>
+					<h2 class="text-xl font-serif text-foreground mb-2">No snapshots yet</h2>
+					<p class="text-foreground-muted font-sans">
+						The journey is just beginning. Check back after the first release.
+					</p>
+				</div>
+			</section>
+			{/if}
 
 			<!-- Growth Timeline -->
 			{#if data.snapshots.length > 1}
@@ -182,6 +200,7 @@
 			{/if}
 
 			<!-- Milestones Timeline -->
+			{#if data.snapshots.length > 0}
 			<section class="mb-16">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Milestones</h2>
 
@@ -213,6 +232,7 @@
 					</div>
 				</div>
 			</section>
+			{/if}
 
 			<!-- Footer note -->
 			<section class="text-center py-8 border-t border-default">
