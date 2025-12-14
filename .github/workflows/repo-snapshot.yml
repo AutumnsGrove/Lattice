@@ -1,0 +1,55 @@
+name: Generate Repository Snapshot
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate commit count
+          ref: main       # Checkout main to commit the snapshot there
+
+      - name: Get tag name
+        id: tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Generating snapshot for release: $TAG_NAME"
+
+      - name: Generate snapshot
+        run: |
+          chmod +x ./scripts/repo-snapshot.sh
+          ./scripts/repo-snapshot.sh "${{ steps.tag.outputs.name }}"
+
+      - name: Sync CSV to landing page
+        run: |
+          # Ensure landing data directory exists
+          mkdir -p landing/static/data
+          # Copy the history CSV so the /journey page can display it
+          cp snapshots/history.csv landing/static/data/history.csv
+
+      - name: Commit and push snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add snapshot files and landing data
+          git add snapshots/ landing/static/data/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs: add repository snapshot for ${{ steps.tag.outputs.name }}"
+          git push origin main
