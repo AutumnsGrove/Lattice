@@ -19,7 +19,7 @@ type: tech-spec
 
 > *Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.*
 
-Rings is analytics for writers, not marketers. Traditional analytics breed anxiety: refresh-checking, comparing yourself to others, optimizing for virality instead of authenticity. Grove rejects this.
+Rings is analytics for writers, not marketers. Traditional analytics breed anxiety: refresh-checking, comparing yourself to others, optimizing for virality instead of authenticity. Grove takes a different path.
 
 ### Core Principles
 
@@ -91,6 +91,7 @@ CREATE TABLE resonance_signals (
   triggered_at INTEGER NOT NULL,
   visible_after INTEGER NOT NULL,
   metadata TEXT,                 -- JSON for future signal types
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   FOREIGN KEY (post_id) REFERENCES posts(id),
   FOREIGN KEY (blog_id) REFERENCES tenants(id)
@@ -138,6 +139,7 @@ CREATE INDEX idx_signals_visible ON resonance_signals(visible_after);
 - **Steady Readers** - people who've read 3+ posts total
 - **Posting Calendar** - visual dots for each day you published (different colors per post type)
 - **Quiet Wins** - resurfaces older posts still getting reads
+- **Seasonal Reflection** - after Year 1, choose your frequency (quarterly/bi-annual/annual/never)
 - Referrer breakdown (traffic sources)
 - Device/browser breakdown
 - Country-level geographic data
@@ -153,7 +155,7 @@ CREATE INDEX idx_signals_visible ON resonance_signals(visible_after);
 **Features:**
 - Everything in Oak
 - Custom retention period (1-5 years)
-- **Seasonal Reflection** - annual "wrapped" style reflection
+- **Seasonal Reflection** - continues automatically after Year 1 (all frequency options available)
 - Custom digest frequency (weekly/monthly/quarterly)
 - Priority data export
 - Extended historical analysis
@@ -178,7 +180,7 @@ Percentage of readers who scrolled to the bottom of the post. Contextualized int
 ### Return Readers
 Logged-in readers who came back to read another post on your blog within 30 days. This is the loyalty metric—building real audience vs viral spikes.
 
-*Note: Won't capture RSS readers, but designed for logged-in ecosystem.*
+**Logged-in users only.** Anonymous visitors can't be reliably tracked (IP addresses change, VPNs, etc.). Since Grove has a free tier, there's always an incentive to log in. This keeps the metric honest—you're seeing real returning people, not fuzzy estimates.
 
 ### First Impressions
 Posts that were someone's first encounter with your blog. High numbers here indicate good entry points—posts that are bringing in new readers.
@@ -188,6 +190,8 @@ Readers who explored more of your blog after reading this post. Positive framing
 
 ### Steady Readers
 People who have read 3+ posts on your blog total. Not subscribers (no social pressure), just people who seem to like what you write. Private metric, of course.
+
+**Logged-in users only.** Same as Return Readers—you can only build a reliable picture of loyalty with logged-in users.
 
 ---
 
@@ -266,11 +270,27 @@ Weekly or monthly surfacing of older content that's still performing:
 
 ---
 
-## Seasonal Reflection (Evergreen Only)
+## Seasonal Reflection
 
-Annual "wrapped" style reflection, but **not** competitive or braggy. Reflective, not performative.
+A "wrapped" style reflection, but **not** competitive or braggy. Reflective, not performative.
 
-Example:
+### How It Works
+
+**Year 1 (All Paid Tiers):**
+Every paid user automatically receives their first "Year in the Grove" reflection after 12 months on the platform. This is a celebratory milestone—no opt-in required.
+
+**After Year 1:**
+- **Oak+:** You can choose your reflection frequency in preferences:
+  - Every 3 months (quarterly)
+  - Every 6 months (bi-annual)
+  - Every 12 months (annual)
+  - Never
+- **Evergreen:** Continues automatically (annual by default), with all frequency options available
+
+**Delivery:** Via email, at the end of your chosen period. Private, personal, celebratory.
+
+### Example
+
 ```
 ┌─────────────────────────────────────────────┐
 │           Your Year in the Grove            │
@@ -295,13 +315,11 @@ Example:
 └─────────────────────────────────────────────┘
 ```
 
-Delivered via email in early January. Private, personal, celebratory.
-
 ---
 
 ## Platform Admin Dashboard
 
-The platform owner (you) has access to aggregate data for platform health and business decisions. This is **not** about surveilling individual users.
+As platform owner, you have access to aggregate data for platform health and business decisions. This is **not** about surveilling individual users—it's about understanding how the forest grows.
 
 ### Aggregate Platform Metrics
 
@@ -353,7 +371,7 @@ Since content moderation is automated, monitoring is crucial:
 
 ### Data Retention
 
-Platform admin has **lifetime retention** of aggregate metrics. Individual blog analytics follow tier-based retention rules.
+As platform admin, you have **lifetime retention** of aggregate metrics. Individual blog analytics follow tier-based retention rules.
 
 ---
 
@@ -392,12 +410,13 @@ CREATE TABLE analytics_events (
   event_type TEXT NOT NULL,        -- 'pageview', 'scroll', 'time', 'complete', 'explore'
   timestamp INTEGER NOT NULL,
   process_after INTEGER NOT NULL,  -- 24hrs after timestamp (delayed visibility)
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   -- Visitor (anonymized)
-  visitor_hash TEXT NOT NULL,      -- Daily rotating hash
+  visitor_hash TEXT NOT NULL,      -- Daily rotating hash (for anonymous visitors)
   session_id TEXT,
   is_logged_in INTEGER DEFAULT 0,  -- For return reader tracking
-  user_hash TEXT,                  -- Anonymized user ID if logged in
+  user_hash TEXT,                  -- Stable anonymized hash of user ID (logged-in only)
 
   -- Event data
   data TEXT,                       -- JSON for flexible event properties
@@ -419,6 +438,7 @@ CREATE TABLE analytics_events (
 CREATE INDEX idx_events_post ON analytics_events(post_id);
 CREATE INDEX idx_events_blog ON analytics_events(blog_id);
 CREATE INDEX idx_events_process ON analytics_events(process_after);
+CREATE INDEX idx_events_process_blog ON analytics_events(blog_id, process_after);  -- Composite for daily aggregation
 CREATE INDEX idx_events_type ON analytics_events(event_type);
 CREATE INDEX idx_events_user ON analytics_events(user_hash);
 ```
@@ -502,15 +522,18 @@ CREATE INDEX idx_blog_stats_date ON analytics_blog_stats(date);
 
 #### Reader Tracking Table (for Return/Steady Readers)
 
+**Important:** This table only tracks **logged-in users**. Anonymous visitors cannot be reliably tracked for return/steady reader metrics due to IP rotation, VPNs, etc. The `user_hash` is a stable SHA-256 hash of the user's ID combined with a secret salt—it never changes for a given user, enabling accurate loyalty tracking.
+
 ```sql
 CREATE TABLE reader_history (
   id TEXT PRIMARY KEY,
   blog_id TEXT NOT NULL,
-  user_hash TEXT NOT NULL,         -- Anonymized user identifier
+  user_hash TEXT NOT NULL,         -- SHA-256(user_id + secret_salt) - stable, logged-in users only
   first_read_at INTEGER NOT NULL,
   last_read_at INTEGER NOT NULL,
   total_posts_read INTEGER DEFAULT 1,
   is_steady INTEGER DEFAULT 0,     -- Set to 1 when total_posts_read >= 3
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   UNIQUE(blog_id, user_hash),
   FOREIGN KEY (blog_id) REFERENCES tenants(id)
@@ -535,9 +558,13 @@ CREATE TABLE analytics_preferences (
   focus_schedule TEXT,             -- JSON: {"days": ["monday", "tuesday"]} or null
   focus_until INTEGER,             -- One-time focus end timestamp
 
-  -- Retention
-  custom_retention_years INTEGER,  -- Evergreen only, 1-5
+  -- Seasonal Reflection (Oak+)
+  reflection_frequency TEXT DEFAULT 'annual',  -- 'quarterly', 'biannual', 'annual', 'never'
 
+  -- Retention
+  custom_retention_years INTEGER CHECK(custom_retention_years >= 1 AND custom_retention_years <= 5),  -- Evergreen only
+
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER,
   FOREIGN KEY (blog_id) REFERENCES tenants(id)
 );
@@ -595,6 +622,13 @@ CREATE INDEX idx_platform_date ON platform_metrics(date);
 ## API Endpoints
 
 ### Collection API (Public)
+
+**Rate Limiting:**
+To prevent abuse and inflated metrics, collection endpoints are rate-limited per session:
+- **Pageviews:** 100 per hour per session
+- **Reading progress:** 20 per hour per session
+
+Exceeding limits returns `429 Too Many Requests`.
 
 **Track Page View:**
 ```typescript
@@ -666,6 +700,7 @@ Response: {
   digest_frequency: 'weekly' | 'monthly' | 'quarterly';
   focus_schedule: { days: string[] } | null;
   focus_until: number | null;
+  reflection_frequency: 'quarterly' | 'biannual' | 'annual' | 'never';
   custom_retention_years: number | null;  // Evergreen only
 }
 ```
@@ -679,6 +714,7 @@ Body: {
   digest_frequency?: 'weekly' | 'monthly' | 'quarterly';
   focus_schedule?: { days: string[] } | null;
   focus_until?: number | null;
+  reflection_frequency?: 'quarterly' | 'biannual' | 'annual' | 'never';
   custom_retention_years?: number;  // Evergreen only, 1-5
 }
 Response: { success: boolean }
@@ -690,6 +726,9 @@ GET /api/rings/export
 Query: { start_date: string; end_date: string; format: 'csv' | 'json' }
 Auth: Blog owner (Oak+)
 Response: File download
+
+// Validation: format must be exactly 'csv' or 'json'
+// Invalid format returns 400: { error: 'Invalid format. Use csv or json.' }
 ```
 
 ### Platform Admin API
@@ -883,11 +922,11 @@ Daily cron job removes:
 
 ## Future Enhancements
 
-- **Writing prompts:** AI-powered suggestions based on what resonates
+- **Writing prompts:** AI-powered suggestions based on what resonates with your readers
 - **A/B testing:** Test titles/images (Evergreen only, privacy-respecting)
 - **Collaborative stats:** Aggregate anonymous insights across willing Grove blogs
 - **Goal setting:** Personal goals, not competitive metrics ("I want to write 2x/week")
-- **Reading recommendations:** "Readers who liked this also read..." for blog owners
+- **Reading recommendations:** "Readers who liked this also read..." to help you understand your audience
 
 ---
 
