@@ -8,7 +8,7 @@ interface SiteSettings {
 
 export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Default site settings
-  let siteSettings: SiteSettings = { font_family: "alagard" };
+  let siteSettings: SiteSettings = { font_family: "lexend" };
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;

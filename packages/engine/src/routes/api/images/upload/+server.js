@@ -34,12 +34,7 @@ export async function POST({ request, platform, locals }) {
     }
 
     // Validate file type
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-    ];
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
     if (!allowedTypes.includes(file.type)) {
       throw error(
@@ -61,33 +56,39 @@ export async function POST({ request, platform, locals }) {
     const buffer = new Uint8Array(arrayBuffer);
     const isValidSignature = await (async () => {
       const FILE_SIGNATURES = {
-        'image/jpeg': [
-          [0xFF, 0xD8, 0xFF, 0xE0], // JPEG/JFIF
-          [0xFF, 0xD8, 0xFF, 0xE1], // JPEG/Exif
-          [0xFF, 0xD8, 0xFF, 0xE8]  // JPEG/SPIFF
+        "image/jpeg": [
+          [0xff, 0xd8, 0xff, 0xe0], // JPEG/JFIF
+          [0xff, 0xd8, 0xff, 0xe1], // JPEG/Exif
+          [0xff, 0xd8, 0xff, 0xe8], // JPEG/SPIFF
         ],
-        'image/png': [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]],
-        'image/gif': [
+        "image/png": [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]],
+        "image/gif": [
           [0x47, 0x49, 0x46, 0x38, 0x37, 0x61], // GIF87a
-          [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]  // GIF89a
+          [0x47, 0x49, 0x46, 0x38, 0x39, 0x61], // GIF89a
         ],
-        'image/webp': [[0x52, 0x49, 0x46, 0x46]] // RIFF (WebP container)
+        "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF (WebP container)
       };
       const signatures = FILE_SIGNATURES[file.type];
       if (!signatures) return false;
-      return signatures.some(sig => sig.every((byte, i) => buffer[i] === byte));
+      return signatures.some((sig) =>
+        sig.every((byte, i) => buffer[i] === byte),
+      );
     })();
 
     if (!isValidSignature) {
-      throw error(400, "Invalid file signature - file may be corrupted or spoofed");
+      throw error(
+        400,
+        "Invalid file signature - file may be corrupted or spoofed",
+      );
     }
 
     // Check for duplicates if hash provided
-    if (hash && platform?.env?.POSTS_DB) {
+    if (hash && platform?.env?.DB) {
       try {
-        const existing = await platform.env.POSTS_DB
-          .prepare("SELECT key, url FROM image_hashes WHERE hash = ?")
-          .bind(hash)
+        const existing = await platform.env.DB.prepare(
+          "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
+        )
+          .bind(hash, locals.tenantId)
           .first();
 
         if (existing) {
@@ -108,17 +109,22 @@ export async function POST({ request, platform, locals }) {
     // Generate date-based path: photos/YYYY/MM/DD/
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
     const datePath = `photos/${year}/${month}/${day}`;
 
     // Determine filename
     let filename;
     if (customFilename) {
       // Use AI-generated filename
-      const ext = file.type === 'image/gif' ? 'gif' :
-                  file.type === 'image/webp' ? 'webp' :
-                  file.type === 'image/png' ? 'png' : 'webp';
+      const ext =
+        file.type === "image/gif"
+          ? "gif"
+          : file.type === "image/webp"
+            ? "webp"
+            : file.type === "image/png"
+              ? "png"
+              : "webp";
       filename = `${customFilename}.${ext}`;
     } else {
       // Sanitize original filename
@@ -130,7 +136,7 @@ export async function POST({ request, platform, locals }) {
 
     // Add timestamp to prevent collisions
     const timestamp = Date.now().toString(36);
-    const lastDot = filename.lastIndexOf('.');
+    const lastDot = filename.lastIndexOf(".");
     if (lastDot > 0) {
       filename = `${filename.substring(0, lastDot)}-${timestamp}${filename.substring(lastDot)}`;
     } else {
@@ -149,7 +155,7 @@ export async function POST({ request, platform, locals }) {
     await platform.env.IMAGES.put(key, arrayBuffer, {
       httpMetadata: {
         contentType: file.type,
-        cacheControl: 'public, max-age=31536000, immutable',
+        cacheControl: "public, max-age=31536000, immutable",
       },
       customMetadata: metadata,
     });
@@ -158,15 +164,16 @@ export async function POST({ request, platform, locals }) {
     const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 
     // Store hash for future duplicate detection
-    if (hash && platform?.env?.POSTS_DB) {
+    if (hash && platform?.env?.DB) {
       try {
-        await platform.env.POSTS_DB
-          .prepare(`
-            INSERT INTO image_hashes (hash, key, url, created_at)
-            VALUES (?, ?, ?, datetime('now'))
-            ON CONFLICT(hash) DO NOTHING
-          `)
-          .bind(hash, key, cdnUrl)
+        await platform.env.DB.prepare(
+          `
+            INSERT INTO image_hashes (hash, key, url, tenant_id, created_at)
+            VALUES (?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(hash, tenant_id) DO NOTHING
+          `,
+        )
+          .bind(hash, key, cdnUrl, locals.tenantId)
           .run();
       } catch (dbError) {
         // Non-critical, continue
@@ -175,28 +182,31 @@ export async function POST({ request, platform, locals }) {
     }
 
     // Generate copy formats
-    const safeAlt = altText || 'Image';
+    const safeAlt = altText || "Image";
     const markdown = `![${safeAlt}](${cdnUrl})`;
-    const html = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, '&quot;')}" />`;
-    const svelte = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, '&quot;')}" />`;
+    const html = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
+    const svelte = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
 
-    return json({
-      success: true,
-      url: cdnUrl,
-      key: key,
-      filename: filename,
-      size: file.size,
-      type: file.type,
-      altText: altText || null,
-      description: description || null,
-      markdown,
-      html,
-      svelte,
-    }, {
-      headers: {
-        'Cache-Control': 'no-store',
-      }
-    });
+    return json(
+      {
+        success: true,
+        url: cdnUrl,
+        key: key,
+        filename: filename,
+        size: file.size,
+        type: file.type,
+        altText: altText || null,
+        description: description || null,
+        markdown,
+        html,
+        svelte,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    );
   } catch (err) {
     if (err.status) throw err;
     console.error("Upload error:", err);

@@ -5,20 +5,25 @@ import matter from "gray-matter";
 export async function load({ params, platform, locals }) {
   // Auth check happens in admin layout
   const { slug } = params;
+  const { tenantId } = locals;
 
   if (!slug) {
     throw error(400, "Slug is required");
   }
 
+  if (!tenantId) {
+    throw error(401, "Tenant not authenticated");
+  }
+
   // Try D1 first
-  if (platform?.env?.POSTS_DB) {
+  if (platform?.env?.DB) {
     try {
-      const post = await platform.env.POSTS_DB.prepare(
+      const post = await platform.env.DB.prepare(
         `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, last_synced, updated_at
          FROM posts
-         WHERE slug = ?`
+         WHERE slug = ? AND tenant_id = ?`,
       )
-        .bind(slug)
+        .bind(slug, tenantId)
         .first();
 
       if (post) {

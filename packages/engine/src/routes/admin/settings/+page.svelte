@@ -9,7 +9,7 @@
   let loadingHealth = $state(true);
 
   // Font settings state
-  let currentFont = $state('alagard');
+  let currentFont = $state('lexend');
   let savingFont = $state(false);
   let fontMessage = $state('');
   let loadingFont = $state(true);
@@ -49,11 +49,11 @@
     loadingFont = true;
     try {
       const data = await api.get('/api/settings');
-      currentFont = data.font_family || 'alagard';
+      currentFont = data.font_family || 'lexend';
     } catch (error) {
       toast.error('Failed to load font settings');
       console.error('Failed to fetch font setting:', error);
-      currentFont = 'alagard';
+      currentFont = 'lexend';
     }
     loadingFont = false;
   }

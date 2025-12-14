@@ -268,9 +268,6 @@
 			<div class="nav-links desktop-nav">
 				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
 				<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')}>Blog</a>
-				<a href="/gallery" class:active={$page.url.pathname.startsWith('/gallery')}>Gallery</a>
-				<a href="/recipes" class:active={$page.url.pathname.startsWith('/recipes')}>Recipes</a>
-				<a href="/timeline" class:active={$page.url.pathname.startsWith('/timeline')}>Timeline</a>
 				<a href="/about" class:active={$page.url.pathname.startsWith('/about')}>About</a>
 
 				<!-- Search -->
@@ -361,9 +358,6 @@
 			</form>
 			<a href="/" class:active={$page.url.pathname === '/'} onclick={closeMobileMenu}>Home</a>
 			<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')} onclick={closeMobileMenu}>Blog</a>
-			<a href="/gallery" class:active={$page.url.pathname.startsWith('/gallery')} onclick={closeMobileMenu}>Gallery</a>
-			<a href="/recipes" class:active={$page.url.pathname.startsWith('/recipes')} onclick={closeMobileMenu}>Recipes</a>
-			<a href="/timeline" class:active={$page.url.pathname.startsWith('/timeline')} onclick={closeMobileMenu}>Timeline</a>
 			<a href="/about" class:active={$page.url.pathname.startsWith('/about')} onclick={closeMobileMenu}>About</a>
 		</div>
 	</header>
@@ -598,7 +592,7 @@
 	/* CSS Custom Properties for theming */
 	:global(:root) {
 		/* Font family - dynamically set via JavaScript from database settings */
-		--font-family-main: 'Alagard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		--font-family-main: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		/* Primary colors */
 		--color-primary: #2c5f2d;
 		--color-primary-hover: #4a9d4f;

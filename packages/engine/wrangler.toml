@@ -9,7 +9,7 @@
 # 5. Update the IDs below with actual values from creation output
 # 6. Set secrets: npx wrangler secret put SESSION_SECRET (etc.)
 
-name = "your-site-name"
+name = "groveengine"
 compatibility_date = "2025-01-01"
 
 # Cloudflare Pages Functions output directory
@@ -18,18 +18,16 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 # =============================================================================
 # KV Namespace - For caching and rate limiting
 # =============================================================================
-# Create with: npx wrangler kv:namespace create CACHE
 [[kv_namespaces]]
 binding = "CACHE_KV"
-id = "your-kv-namespace-id"
+id = "514e91e81cc44d128a82ec6f668303e4"
 
 # =============================================================================
 # R2 Bucket - For image and media storage
 # =============================================================================
-# Create with: npx wrangler r2 bucket create your-site-images
 [[r2_buckets]]
 binding = "IMAGES"
-bucket_name = "your-site-images"
+bucket_name = "grove-media"
 
 # =============================================================================
 # D1 Database - Main shared database for multi-tenant platform

@@ -21,15 +21,19 @@ export async function GET({ params, platform, locals }) {
     throw error(400, "Slug is required");
   }
 
+  if (!locals.tenantId) {
+    throw error(401, "Tenant ID not found");
+  }
+
   // Try D1 first
-  if (platform?.env?.POSTS_DB) {
+  if (platform?.env?.DB) {
     try {
-      const post = await platform.env.POSTS_DB.prepare(
+      const post = await platform.env.DB.prepare(
         `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, font, last_synced, updated_at
          FROM posts
-         WHERE slug = ?`
+         WHERE slug = ? AND tenant_id = ?`,
       )
-        .bind(slug)
+        .bind(slug, locals.tenantId)
         .first();
 
       if (post) {
@@ -90,8 +94,12 @@ export async function PUT({ params, request, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
-    throw error(500, "Posts database not configured");
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
+  if (!locals.tenantId) {
+    throw error(401, "Tenant ID not found");
   }
 
   const { slug } = params;
@@ -111,7 +119,7 @@ export async function PUT({ params, request, platform, locals }) {
     // Validation constants
     const MAX_TITLE_LENGTH = 200;
     const MAX_DESCRIPTION_LENGTH = 500;
-    const MAX_MARKDOWN_LENGTH = 1024 * 1024;  // 1MB
+    const MAX_MARKDOWN_LENGTH = 1024 * 1024; // 1MB
 
     // Validate lengths
     if (data.title.length > MAX_TITLE_LENGTH) {
@@ -119,18 +127,21 @@ export async function PUT({ params, request, platform, locals }) {
     }
 
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw error(400, `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`);
+      throw error(
+        400,
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
+      );
     }
 
     if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
-      throw error(400, 'Content too large (max 1MB)');
+      throw error(400, "Content too large (max 1MB)");
     }
 
-    // Check if post exists
-    const existing = await platform.env.POSTS_DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ?"
+    // Check if post exists for this tenant
+    const existing = await platform.env.DB.prepare(
+      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?",
     )
-      .bind(slug)
+      .bind(slug, locals.tenantId)
       .first();
 
     if (!existing) {
@@ -155,7 +166,7 @@ export async function PUT({ params, request, platform, locals }) {
     // Build the update query with all fields
     const updateQuery = `UPDATE posts
        SET title = ?, date = ?, tags = ?, description = ?, markdown_content = ?, html_content = ?, file_hash = ?, gutter_content = ?, font = ?, updated_at = ?
-       WHERE slug = ?`;
+       WHERE slug = ? AND tenant_id = ?`;
 
     const params = [
       data.title,
@@ -169,9 +180,12 @@ export async function PUT({ params, request, platform, locals }) {
       data.font || "default",
       now,
       slug,
+      locals.tenantId,
     ];
 
-    await platform.env.POSTS_DB.prepare(updateQuery).bind(...params).run();
+    await platform.env.DB.prepare(updateQuery)
+      .bind(...params)
+      .run();
 
     return json({
       success: true,
@@ -199,8 +213,12 @@ export async function DELETE({ request, params, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
-    throw error(500, "Posts database not configured");
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
+  if (!locals.tenantId) {
+    throw error(401, "Tenant ID not found");
   }
 
   const { slug } = params;
@@ -210,19 +228,21 @@ export async function DELETE({ request, params, platform, locals }) {
   }
 
   try {
-    // Check if post exists
-    const existing = await platform.env.POSTS_DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ?"
+    // Check if post exists for this tenant
+    const existing = await platform.env.DB.prepare(
+      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?",
     )
-      .bind(slug)
+      .bind(slug, locals.tenantId)
       .first();
 
     if (!existing) {
       throw error(404, "Post not found");
     }
 
-    await platform.env.POSTS_DB.prepare("DELETE FROM posts WHERE slug = ?")
-      .bind(slug)
+    await platform.env.DB.prepare(
+      "DELETE FROM posts WHERE slug = ? AND tenant_id = ?",
+    )
+      .bind(slug, locals.tenantId)
       .run();
 
     return json({

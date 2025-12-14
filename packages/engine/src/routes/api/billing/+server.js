@@ -128,7 +128,7 @@ export async function GET({ url, platform, locals }) {
     throw error(401, "Unauthorized");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -138,13 +138,13 @@ export async function GET({ url, platform, locals }) {
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
 
     // Get billing record
-    const billing = await platform.env.POSTS_DB.prepare(
+    const billing = await platform.env.DB.prepare(
       `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
                 current_period_start, current_period_end, cancel_at_period_end,
                 trial_end, payment_method_last4, payment_method_brand,
@@ -212,7 +212,7 @@ export async function POST({ request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -226,7 +226,7 @@ export async function POST({ request, url, platform, locals }) {
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
@@ -245,7 +245,7 @@ export async function POST({ request, url, platform, locals }) {
     const plan = PLANS[data.plan];
 
     // Check for existing billing
-    const existingBilling = await platform.env.POSTS_DB.prepare(
+    const existingBilling = await platform.env.DB.prepare(
       "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)
@@ -318,13 +318,13 @@ export async function POST({ request, url, platform, locals }) {
 
     // Create or update billing record
     if (existingBilling) {
-      await platform.env.POSTS_DB.prepare(
+      await platform.env.DB.prepare(
         "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
       )
         .bind(data.plan, Math.floor(Date.now() / 1000), existingBilling.id)
         .run();
     } else {
-      await platform.env.POSTS_DB.prepare(
+      await platform.env.DB.prepare(
         `INSERT INTO platform_billing (id, tenant_id, plan, status, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?)`,
       )
@@ -370,7 +370,7 @@ export async function PATCH({ request, url, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -384,7 +384,7 @@ export async function PATCH({ request, url, platform, locals }) {
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
@@ -392,7 +392,7 @@ export async function PATCH({ request, url, platform, locals }) {
     const data = await request.json();
 
     // Get billing record
-    const billing = await platform.env.POSTS_DB.prepare(
+    const billing = await platform.env.DB.prepare(
       "SELECT * FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)
@@ -413,16 +413,17 @@ export async function PATCH({ request, url, platform, locals }) {
           data.cancelImmediately === true,
         );
 
-        await platform.env.POSTS_DB.prepare(
+        await platform.env.DB.prepare(
           `UPDATE platform_billing SET
               cancel_at_period_end = ?,
               updated_at = ?
-             WHERE id = ?`,
+             WHERE id = ? AND tenant_id = ?`,
         )
           .bind(
             data.cancelImmediately ? 0 : 1,
             Math.floor(Date.now() / 1000),
             billing.id,
+            tenantId,
           )
           .run();
 
@@ -436,10 +437,10 @@ export async function PATCH({ request, url, platform, locals }) {
       case "resume":
         await stripe.resumeSubscription(billing.provider_subscription_id);
 
-        await platform.env.POSTS_DB.prepare(
-          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ?",
+        await platform.env.DB.prepare(
+          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
-          .bind(Math.floor(Date.now() / 1000), billing.id)
+          .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
 
         return json({
@@ -491,10 +492,10 @@ export async function PATCH({ request, url, platform, locals }) {
           },
         );
 
-        await platform.env.POSTS_DB.prepare(
-          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
+        await platform.env.DB.prepare(
+          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
         )
-          .bind(data.plan, Math.floor(Date.now() / 1000), billing.id)
+          .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
 
         return json({
@@ -520,7 +521,7 @@ export async function PUT({ url, platform, locals }) {
     throw error(401, "Unauthorized");
   }
 
-  if (!platform?.env?.POSTS_DB) {
+  if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
@@ -539,13 +540,13 @@ export async function PUT({ url, platform, locals }) {
   try {
     // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
-      platform.env.POSTS_DB,
+      platform.env.DB,
       requestedTenantId,
       locals.user,
     );
 
     // Get billing record
-    const billing = await platform.env.POSTS_DB.prepare(
+    const billing = await platform.env.DB.prepare(
       "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
     )
       .bind(tenantId)

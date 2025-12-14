@@ -11,7 +11,7 @@ export async function GET({ platform }) {
 
   if (!db) {
     // Return defaults if database not available
-    return json({ font_family: "alagard" });
+    return json({ font_family: "lexend" });
   }
 
   try {
@@ -31,6 +31,6 @@ export async function GET({ platform }) {
     });
   } catch (error) {
     console.error("Failed to fetch settings:", error);
-    return json({ font_family: "alagard" });
+    return json({ font_family: "lexend" });
   }
 }

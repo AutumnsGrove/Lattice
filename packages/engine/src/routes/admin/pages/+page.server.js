@@ -1,29 +1,33 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from "@sveltejs/kit";
 
 export async function load({ platform, locals }) {
-	// Check if user is authenticated
-	if (!locals.user) {
-		throw redirect(302, '/auth/login');
-	}
+  // Check if user is authenticated
+  if (!locals.user) {
+    throw redirect(302, "/auth/login");
+  }
 
-	let pages = [];
+  const tenantId = locals.tenantId;
+  let pages = [];
 
-	// Try D1 first
-	if (platform?.env?.POSTS_DB) {
-		try {
-			const result = await platform.env.POSTS_DB.prepare(
-				`SELECT slug, title, description, type, updated_at, created_at
+  // Try D1 first
+  if (platform?.env?.DB) {
+    try {
+      const result = await platform.env.DB.prepare(
+        `SELECT slug, title, description, type, updated_at, created_at
          FROM pages
-         ORDER BY slug ASC`
-			).all();
+         WHERE tenant_id = ?
+         ORDER BY slug ASC`,
+      )
+        .bind(tenantId)
+        .all();
 
-			pages = result.results || [];
-		} catch (err) {
-			console.error('D1 fetch error for pages:', err);
-		}
-	}
+      pages = result.results || [];
+    } catch (err) {
+      console.error("D1 fetch error for pages:", err);
+    }
+  }
 
-	return {
-		pages
-	};
+  return {
+    pages,
+  };
 }
