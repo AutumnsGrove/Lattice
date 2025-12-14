@@ -151,6 +151,14 @@
 - `src/lib/db/schema.sql` - Add theme columns (migration)
 - `src/routes/admin/settings/+page.svelte` - Theme picker UI
 
+### Footer Branding
+> **Issue:** Footer currently says "© 2025 AutumnsGrove. Built with SvelteKit."
+> **Should say:** "Powered by Lattice, from The Grove" with link to grove.place
+
+- [ ] Update footer text in `src/routes/+layout.svelte`
+- [ ] Change from "AutumnsGrove" to "Powered by [Lattice](https://grove.place), from The Grove"
+- [ ] Consider making footer configurable per tenant (some may want custom branding)
+
 ### Additional Test Tenants
 > Create more test tenants to validate multi-tenant isolation
 
