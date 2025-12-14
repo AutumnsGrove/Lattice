@@ -28,7 +28,7 @@ Your words are yours. Your data is yours. You can export everything, anytime. If
 No feature bloat. No endless settings. Write in Markdown. Upload images.
 Publish. That's it. The technology should disappear into the background.
 
-## Community Without Toxicity
+## Community With Care
 
 Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage. No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
 

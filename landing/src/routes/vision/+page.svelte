@@ -83,7 +83,7 @@
 						</div>
 
 						<div class="card p-6">
-							<h3 class="text-lg font-serif text-accent-muted mb-2">Community Without Toxicity</h3>
+							<h3 class="text-lg font-serif text-accent-muted mb-2">Community With Care</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage.
 								No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
