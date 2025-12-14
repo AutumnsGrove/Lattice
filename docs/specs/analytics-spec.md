@@ -293,6 +293,8 @@ Every paid user automatically receives their first "Year in the Grove" reflectio
 
 **Important:** Reflections are based on your **signup anniversary**, not the calendar year. If you joined in March, your first reflection arrives the following March.
 
+**Data Retention Note:** Even tiers with 30-day rolling retention (Seedling, Sapling) receive their Year 1 reflection. Key annual metrics (total posts, total engaged readers, resonance signals earned) are stored in a separate `reflection_snapshots` table that persists regardless of tier retention limits. This table only stores aggregate totals—no per-post or per-day granularity.
+
 **After Year 1:**
 - **Oak+:** You can choose your reflection frequency in preferences:
   - Every 3 months (quarterly)
@@ -445,6 +447,20 @@ Platform admin access is designed for GDPR compliance:
 - **Dashboard:** SvelteKit components in admin panel
 - **Consent:** Custom lightweight banner
 - **Scheduling:** Cloudflare Cron Triggers (daily aggregation, signal calculation)
+
+### Timezone Handling
+
+**All timestamps are UTC.** This simplifies aggregation and ensures consistent behavior:
+
+- Event timestamps: UTC Unix timestamps
+- Daily aggregation dates: `YYYY-MM-DD` in UTC
+- Signal evaluation ("7 days after publish"): UTC midnight boundaries
+- Visitor hash rotation: UTC midnight
+- Seasonal Reflection delivery: Based on signup date at UTC midnight
+
+**Dashboard display:** Convert to user's local timezone in the UI layer only. Store everything as UTC, display as local.
+
+**Post publish times:** A post published at "December 1st 10:00 AM EST" is stored as `2025-12-01T15:00:00Z`. The 7-day signal window evaluates at `2025-12-08T00:00:00Z` UTC, which covers the full 7 days regardless of timezone.
 
 ### KV Caching Strategy
 
@@ -656,6 +672,7 @@ CREATE TABLE reader_history (
 CREATE INDEX idx_reader_blog ON reader_history(blog_id);
 CREATE INDEX idx_reader_steady ON reader_history(is_steady);
 CREATE INDEX idx_reader_last_read ON reader_history(last_read_at);
+CREATE INDEX idx_reader_user ON reader_history(user_hash);  -- For cross-blog Return Reader queries
 ```
 
 **Return Reader Calculation:**
@@ -1077,6 +1094,13 @@ function generateUserHash(userId: string): string {
 - `ANALYTICS_PEPPER`: Additional secret stored separately (different secret store or environment)
 - Keys are **never rotated** for user hashes (would break reader history linkage)
 - If key compromise is suspected: generate new keys, invalidate all reader_history data, start fresh
+
+**Platform-Wide vs Per-Blog Keys:**
+Keys are **platform-wide**, not per-blog. Rationale:
+- The `user_hash` is scoped to `(blog_id, user_hash)` in the database—same user on different blogs has different records anyway
+- Per-blog keys would require key management per tenant (complexity, rotation nightmares)
+- Cross-blog tracking is already impossible: we only store which users read which blog, never correlate across blogs
+- If an attacker compromises the key, they still can't reverse the hash without the user_id input
 
 **Why HMAC over plain SHA-256:**
 - Even if the pepper leaks, attacker needs the HMAC key to generate valid hashes
