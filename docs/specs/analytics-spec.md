@@ -301,6 +301,12 @@ Every paid user automatically receives their first "Year in the Grove" reflectio
   - Never
 - **Evergreen:** Continues automatically (annual by default), with all frequency options available
 
+**Frequency is signup-anchored, not rolling.** If you signed up March 15th and choose quarterly:
+- First reflection: March 15th (Year 1 anniversary)
+- Subsequent reflections: June 15th, September 15th, December 15th, March 15th...
+
+This keeps reflections predictable and aligned with your personal Grove timeline, not arbitrary calendar dates.
+
 **Delivery:** Via email, at the end of your chosen period. Private, personal, celebratory.
 
 ### Warm Messaging for Non-Posters
@@ -440,6 +446,31 @@ Platform admin access is designed for GDPR compliance:
 - **Consent:** Custom lightweight banner
 - **Scheduling:** Cloudflare Cron Triggers (daily aggregation, signal calculation)
 
+### KV Caching Strategy
+
+Dashboard data is cached in Cloudflare KV to reduce D1 load:
+
+| Cache Key Pattern | TTL | Invalidation |
+|-------------------|-----|--------------|
+| `rings:blog:{id}:overview` | 1 hour | On new aggregation |
+| `rings:blog:{id}:post:{postId}` | 1 hour | On new aggregation |
+| `rings:blog:{id}:signals` | 24 hours | On signal calculation |
+| `rings:platform:metrics` | 15 minutes | On platform aggregation |
+| `rings:rate:{session}:{endpoint}` | 1 hour | Auto-expire |
+
+**Invalidation Triggers:**
+- Daily aggregation cron invalidates all `overview` and `post` caches for processed blogs
+- Signal calculation cron invalidates `signals` cache for blogs with new signals
+- Tier changes immediately invalidate all caches for that blog
+
+**Cache Warming:**
+- After aggregation, pre-warm the overview cache for active blogs
+- Don't pre-warm individual post caches (on-demand is fine)
+
+**Tier Change Handling:**
+- On upgrade: cache is invalidated, new data available immediately
+- On downgrade: cache is invalidated, dashboard shows tier-appropriate data only
+
 ### Data Flow
 
 ```
@@ -454,6 +485,27 @@ User Visit → Consent Check → Collect → │ → Aggregate → Calculate Sig
 ```
 
 ### Database Schema
+
+#### Deletion Behavior
+
+All analytics tables use `ON DELETE CASCADE` for foreign keys. When a post or blog is deleted:
+
+**Post Deletion:**
+- All `analytics_events` for that post → deleted
+- All `analytics_daily` for that post → deleted
+- All `resonance_signals` for that post → deleted
+
+**This is intentional.** When a writer deletes a post, they expect all traces removed. Analytics data about a deleted post serves no purpose—the writer can't see it, and retaining it feels invasive.
+
+**Blog/Tenant Deletion:**
+- All analytics tables for that blog → cascade deleted
+- Platform aggregate metrics are NOT affected (they're already anonymized counts)
+
+**Alternative Considered (Soft Delete):**
+We considered `post_deleted_at` soft-delete to preserve platform health metrics, but rejected it:
+- Writers expect deletion to mean deletion
+- Platform metrics don't need per-post granularity
+- Simpler data model, clearer privacy story
 
 #### Analytics Events Table
 
@@ -492,8 +544,8 @@ CREATE TABLE analytics_events (
 
 CREATE INDEX idx_events_post ON analytics_events(post_id);
 CREATE INDEX idx_events_blog ON analytics_events(blog_id);
-CREATE INDEX idx_events_process ON analytics_events(process_after);
-CREATE INDEX idx_events_process_blog ON analytics_events(blog_id, process_after);  -- Composite for daily aggregation
+CREATE INDEX idx_events_process ON analytics_events(process_after);  -- Platform-wide aggregation queries
+CREATE INDEX idx_events_process_blog ON analytics_events(blog_id, process_after);  -- Per-blog daily aggregation
 CREATE INDEX idx_events_type ON analytics_events(event_type);
 CREATE INDEX idx_events_user ON analytics_events(user_hash);
 ```
@@ -528,6 +580,8 @@ CREATE TABLE analytics_daily (
   device_breakdown TEXT,
   browser_breakdown TEXT,
   country_breakdown TEXT,
+
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   UNIQUE(post_id, date),
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
@@ -566,6 +620,8 @@ CREATE TABLE analytics_blog_stats (
   -- Content
   posts_published INTEGER DEFAULT 0,
   top_posts TEXT,                  -- JSON array of {post_id, views, engaged}
+
+  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
   UNIQUE(blog_id, date),
   FOREIGN KEY (blog_id) REFERENCES tenants(id) ON DELETE CASCADE
@@ -800,6 +856,51 @@ Response: File download
 // Invalid format returns 400: { error: 'Invalid format. Use csv or json.' }
 ```
 
+**Export Format Schema:**
+
+JSON export structure:
+```json
+{
+  "exported_at": "2025-12-14T00:00:00Z",
+  "blog_id": "blog_123",
+  "date_range": { "start": "2025-01-01", "end": "2025-12-14" },
+  "summary": {
+    "total_views": 12450,
+    "total_engaged_readers": 3200,
+    "total_return_readers": 890,
+    "total_steady_readers": 156
+  },
+  "posts": [
+    {
+      "post_id": "post_abc",
+      "title": "Why I Garden at Midnight",
+      "published_at": "2025-03-15T10:00:00Z",
+      "total_views": 1200,
+      "engaged_readers": 340,
+      "deep_reads": 280,
+      "finish_rate": 0.72,
+      "first_impressions": 450,
+      "signals": ["sparked_interest", "really_resonated"],
+      "daily": [
+        { "date": "2025-03-15", "views": 89, "engaged": 24 },
+        { "date": "2025-03-16", "views": 156, "engaged": 42 }
+      ]
+    }
+  ],
+  "reader_stats": {
+    "return_readers_count": 890,
+    "steady_readers_count": 156
+  }
+}
+```
+
+CSV export columns:
+```
+date,post_id,post_title,views,engaged_readers,deep_reads,finish_rate,first_impressions,referrer_domain,device_type,country_code
+2025-03-15,post_abc,Why I Garden at Midnight,89,24,18,0.68,32,twitter.com,desktop,US
+2025-03-16,post_abc,Why I Garden at Midnight,156,42,35,0.74,67,google.com,mobile,GB
+```
+
 ### Platform Admin API
 
 **Get Platform Overview:**
@@ -815,6 +916,41 @@ Response: {
   moderation: { reviewed, passed, flagged, escalated, categories, appeals },
   health: { errors, response_time, storage }
 }
+```
+
+### API Error Responses
+
+All Rings API endpoints return consistent error responses:
+
+```typescript
+// Error response format
+{
+  error: string;           // Human-readable message
+  code: string;            // Machine-readable error code
+  details?: object;        // Optional additional context
+}
+```
+
+| HTTP Status | Code | Description |
+|-------------|------|-------------|
+| 400 | `invalid_date_range` | Date range invalid or exceeds tier maximum |
+| 400 | `invalid_format` | Export format not 'csv' or 'json' |
+| 400 | `malformed_event` | Event data failed validation |
+| 401 | `unauthorized` | Missing or invalid authentication |
+| 403 | `tier_insufficient` | Feature requires higher tier |
+| 403 | `not_blog_owner` | User doesn't own this blog |
+| 404 | `post_not_found` | Post doesn't exist or was deleted |
+| 404 | `blog_not_found` | Blog doesn't exist |
+| 409 | `outside_retention` | Requested date range outside retention window |
+| 429 | `rate_limited` | Too many requests (includes Retry-After header) |
+| 500 | `aggregation_error` | Internal error during data processing |
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 42
+X-RateLimit-Reset: 1702598400
+Retry-After: 3600  (only on 429)
 ```
 
 ---
@@ -871,6 +1007,27 @@ Daily cron job removes:
 - Raw events older than tier retention
 - Daily aggregates older than tier retention
 - Reader history entries with no activity in 2 years
+
+### Tier Change Behavior
+
+**Upgrades (e.g., Sapling → Oak):**
+- New retention period applies immediately
+- Historical data is preserved if within new retention window
+- No backfill—you can only see data from when you had analytics enabled
+- Dashboard immediately shows expanded metrics
+
+**Downgrades (e.g., Oak → Sapling):**
+- **30-day grace period** before data deletion
+- During grace: data still exists but dashboard shows new tier's metrics only
+- After grace: data outside new retention window is permanently deleted
+- Prevents accidental data loss from billing issues
+- Re-upgrading within grace period restores full access
+
+**Cancellation (any tier → Free):**
+- Same 30-day grace period
+- After grace: all analytics data deleted
+- Reader history cleared (user hashes can't be re-linked anyway)
+- Platform aggregate contributions remain (anonymized, not attributable)
 
 ---
 
@@ -944,7 +1101,9 @@ function getDailySalt(): string {
 }
 ```
 
-**Known Limitation:** Daily rotation means the same visitor across two days appears as two unique visitors. This is intentional—we prioritize privacy over perfect accuracy.
+**Known Limitations:**
+- Daily rotation means the same visitor across two days appears as two unique visitors. This is intentional—we prioritize privacy over perfect accuracy.
+- **Boundary handling:** At exactly midnight UTC, the salt changes. A visitor active at 23:59:59 and 00:00:01 will have different hashes. This is acceptable—edge cases are rare and the privacy benefit outweighs perfect session continuity.
 
 ### Export Security
 
@@ -1023,6 +1182,46 @@ Cloudflare D1 has row limits:
 - Event at 00:01 UTC → processed at 00:00 UTC next day (~24 hour delay)
 
 **Effective delay: 24-48 hours** depending on when the event occurred. This variability is acceptable—the goal is "not real-time," not precise 24-hour delays.
+
+### D1 Batching Strategy
+
+Cloudflare D1 has a **30-second hard timeout** per request. Daily aggregation must batch operations to avoid timeouts:
+
+```typescript
+// Process blogs in batches to avoid D1 timeouts
+async function runDailyAggregation(db: D1Database): Promise<void> {
+  const BATCH_SIZE = 50;  // Process 50 blogs at a time
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const blogs = await db.prepare(
+      `SELECT id FROM tenants WHERE analytics_enabled = 1
+       ORDER BY id LIMIT ? OFFSET ?`
+    ).bind(BATCH_SIZE, offset).all();
+
+    if (blogs.results.length === 0) {
+      hasMore = false;
+      break;
+    }
+
+    for (const blog of blogs.results) {
+      await aggregateBlogEvents(db, blog.id);
+    }
+
+    offset += BATCH_SIZE;
+
+    // Yield to event loop between batches
+    await scheduler.wait(100);  // 100ms pause
+  }
+}
+```
+
+**Batch size tuning:**
+- Start with 50 blogs per batch
+- Monitor execution time and adjust
+- If individual blogs have massive event counts, reduce batch size
+- Log batch completion for observability
 
 ### Reading Time Estimation
 
