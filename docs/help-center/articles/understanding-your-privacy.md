@@ -44,6 +44,16 @@ There are no analytics scripts following your readers around the web. No cookies
 
 We need IP addresses briefly for rate limiting (preventing abuse). After 60 seconds, they're discarded. We don't log them, store them, or use them to identify anyone.
 
+**Here's what our data retention looks like:**
+
+| Data Type | Retention |
+|-----------|-----------|
+| IP addresses | 60 seconds |
+| Error logs | 7 days |
+| Your blog content | Until you delete it |
+| Account data | Until you close your account |
+| Backups | 30 days after deletion |
+
 **No third-party trackers.**
 
 We don't embed Google Analytics, Facebook pixels, or any other tracking scripts. Your readers aren't the product.

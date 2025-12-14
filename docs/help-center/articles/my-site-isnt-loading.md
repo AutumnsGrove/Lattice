@@ -25,6 +25,12 @@ If it works for others but not you, the issue is likely:
 - Your browser cache (try clearing it or using incognito mode)
 - Your DNS (try restarting your router)
 
+**How to clear your browser cache:**
+- **Chrome:** Settings → Privacy and Security → Clear browsing data → Select "Cached images and files"
+- **Firefox:** Settings → Privacy & Security → Cookies and Site Data → Clear Data
+- **Safari:** Safari menu → Clear History → Select timeframe
+- **Edge:** Settings → Privacy, search, and services → Clear browsing data
+
 If it's broken for everyone, keep reading.
 
 ## Check Grove's status

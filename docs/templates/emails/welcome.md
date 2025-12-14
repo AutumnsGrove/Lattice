@@ -28,7 +28,7 @@ Welcome to Grove. Your blog is live and waiting for you.
 **Your blog:** {{blog_url}}
 **Your admin panel:** {{blog_url}}/admin
 
-That's really all you need to get started. Sign in with your email—we'll send you a code, no password to remember.
+That's really all you need to get started. To sign in, just enter your email and we'll send you a 6-digit code—no password to remember. (If you're on mobile and the code is finicky, there's also a magic link in each email.)
 
 ---
 

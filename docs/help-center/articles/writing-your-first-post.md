@@ -45,6 +45,8 @@ Grove uses Markdown for formatting, but you don't need to know it. The editor ha
 
 If you just want to write paragraphs, you can ignore all of that. Plain text works fine.
 
+Want to learn more? See our [Markdown Guide](/help/formatting-your-posts) for all the formatting options available.
+
 ## Don't overthink it
 
 Here's a secret: first posts don't need to be good. They need to exist.

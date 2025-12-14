@@ -40,6 +40,12 @@ Grove isn't trying to be everything. It's not a social network, a newsletter pla
 
 If you need e-commerce, complex membership tiers, or a design tool with infinite customization, Grove probably isn't the right fit. If you want a simple, honest blog that just works—welcome.
 
+## Pricing
+
+Grove has a few plans, starting with **Seedling** (free, with limits) up through paid tiers that unlock more posts, storage, and features. We're transparent about what each plan includes—no hidden fees, no bait-and-switch.
+
+See current pricing at [grove.place/pricing](/pricing).
+
 ## The values behind it
 
 Grove is built on a few principles:

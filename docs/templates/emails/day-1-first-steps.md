@@ -54,7 +54,7 @@ It doesn't need to be polished. First posts rarely are. The point is to start.
 
 ## One thing that might help
 
-When you're writing, you can save a draft anytime. It won't publish until you're ready. No pressure to finish in one sitting.
+When you're writing, Grove **autosaves your work** every few seconds—you'll never lose a draft to a browser crash or accidental tab close. And nothing publishes until you're ready. No pressure to finish in one sitting.
 
 If you get stuck or something's confusing, the help center is at {{help_url}}, or just reply to this email.
 

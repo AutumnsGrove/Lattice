@@ -37,17 +37,18 @@ If you're not familiar: RSS lets people subscribe to your blog in a feed reader.
 
 It's old technology, and it still works beautifully. If you want to share your feed, that URL is all anyone needs.
 
-**Need a feed reader?** Two good options:
+**Need a feed reader?** A few good options:
 - [NetNewsWire](https://netnewswire.com/) — Free, open source, and a classic
 - [Reeder](https://reeder.app/) — Apple only, one-time purchase, genuinely excellent
+- [Feedly](https://feedly.com/) — Web-based, works everywhere, free tier available
 
 ---
 
 ## The Grove community
 
-Grove has a shared feed called **Meadow** where posts from across the network can appear. It's opt-in—your posts stay private unless you choose to share them.
+Grove has a shared feed called **Meadow** where posts from across the network can appear. It's entirely opt-in—your posts stay on your blog only unless you explicitly choose to share them.
 
-If you want to be discovered by other Grove readers (or discover other writers), you can enable this in **Settings → Meadow**. No pressure either way.
+If you want to be discovered by other Grove readers (or discover other writers), you can enable this in **Settings → Meadow**. You control which posts appear there, and you can change your mind anytime. No pressure either way.
 
 ---
 

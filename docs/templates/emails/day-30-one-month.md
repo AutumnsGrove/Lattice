@@ -33,11 +33,11 @@ Whether you've published a dozen posts or just one, whether you've found your rh
 
 I'd genuinely love to know: **How's it going?**
 
-- Is Grove working for you?
-- Is anything confusing or frustrating?
-- Is there something you wish it did differently?
+- What's one thing Grove does well for you?
+- What's one thing that's been confusing or frustrating?
+- Is there a feature you keep wishing existed?
 
-You can reply to this email. I read everything, and it directly shapes what gets built next.
+You can reply to this email with just a sentence or two—doesn't need to be a formal review. I read everything, and your feedback directly shapes what gets built next.
 
 ---
 
