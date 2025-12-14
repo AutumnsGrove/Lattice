@@ -86,6 +86,15 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 ---
 
+## Rings
+**Analytics** · *Integrated into admin dashboard*
+
+Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
+
+Rings is analytics for writers, not marketers. No public view counts breeding anxiety. No leaderboards. No real-time dopamine hits. Just private insights about your own growth—who's reading, what resonates, how your garden is growing over time. Delayed by design, reflective by nature. Your rings are yours alone.
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -98,6 +107,7 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 | **Outpost** | Minecraft server | mc.grove.place |
 | **Aria** | Music curation | aria.grove.place |
 | **Lattice** | Core platform | npm package |
+| **Rings** | Analytics | *(integrated)* |
 
 ---
 
@@ -115,6 +125,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Outpost | GroveMC |
 | Aria | GroveMusic |
 | Lattice | GroveEngine |
+| Rings | GroveAnalytics |
 
 ---
 
