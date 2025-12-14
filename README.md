@@ -175,9 +175,11 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 
 | Plan | Price | Key Features |
 |------|-------|--------------|
-| **Starter** | $12/month | 250 posts (archived), 1 theme, 5GB storage |
-| **Professional** | $25/month | Unlimited posts, 3 themes, 20GB storage, analytics |
-| **Business** | $199 + $49/month | Custom domain, 10 themes, 100GB, priority support |
+| **Free** | $0/month | Meadow access, 20 public comments/week, no blog |
+| **Seedling** | $8/month | 50 posts, 1GB storage, 3 themes + accent, unlimited comments |
+| **Sapling** | $12/month | 250 posts, 5GB storage, 10 themes + accent, email forwarding |
+| **Oak** | $25/month | Unlimited posts, 20GB storage, custom domain (BYOD), theme customizer, full email |
+| **Evergreen** | $35/month | Unlimited posts, 100GB storage, custom domain included, custom font uploads, 8hrs support |
 
 ## 🚀 Development Roadmap
 

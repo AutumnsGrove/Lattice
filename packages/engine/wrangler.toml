@@ -82,9 +82,10 @@ CACHE_TTL_SECONDS = "3600"
 # =============================================================================
 # Create these prices in Stripe Dashboard, then set:
 #
-# STRIPE_PRICE_STARTER      - Price ID for Starter plan ($12/mo)
-# STRIPE_PRICE_PROFESSIONAL - Price ID for Professional plan ($49/mo)
-# STRIPE_PRICE_BUSINESS     - Price ID for Business plan ($199/mo)
+# STRIPE_PRICE_SEEDLING     - Price ID for Seedling plan ($8/mo)
+# STRIPE_PRICE_SAPLING      - Price ID for Sapling plan ($12/mo)
+# STRIPE_PRICE_OAK          - Price ID for Oak plan ($25/mo)
+# STRIPE_PRICE_EVERGREEN    - Price ID for Evergreen plan ($35/mo)
 
 # =============================================================================
 # Cloudflare Pages Notes

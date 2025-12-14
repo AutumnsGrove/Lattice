@@ -64,34 +64,54 @@ This document contains visual diagrams and charts to help understand the Grove p
 
 ## 3. Pricing Structure
 
-**Overview:** Three-tier pricing model with clear upgrade path.
+**Overview:** Five-tier pricing model with clear upgrade path, including a free tier for readers.
 
 ![Pricing Structure](../assets/visuals/grove-pricing.png)
 
 **Pricing Tiers:**
 
-### Starter - $12/month
-- 250 posts (archived when limit reached)
-- 1 blog theme
-- 5GB media storage
-- Basic RSS feed
-- 10 hours support (Month 1 only)
+### Free - $0/month
+- Meadow access (community feed)
+- 20 public comments per week
+- No blog publishing
+- Community support
 
-### Professional - $25/month
-- Unlimited posts
-- 3 blog themes
-- 20GB media storage
-- Basic analytics dashboard
-- 15 hours support (Month 1 only)
+### Seedling - $8/month
+- 50 blog posts
+- 1GB storage for images and media
+- Your blog at `username.grove.place`
+- 3 themes + custom accent color
+- Unlimited comments on other blogs
+- Community support via documentation
 
-### Business - $199 + $49/month
-- Custom domain assistance
-- GitHub repository transfer
-- 10 blog themes
-- 100GB media storage
-- Advanced analytics
-- 20 hours support (Month 1 only)
-- Priority support options
+### Sapling - $12/month
+- 250 blog posts
+- 5GB storage
+- Your blog at `username.grove.place`
+- 10 themes + custom accent color
+- Email forwarding to `you@grove.place`
+- Email support
+
+### Oak - $25/month
+- Unlimited blog posts
+- 20GB storage
+- Bring Your Own Domain (BYOD)
+- Theme customizer (full control over colors, fonts, layout)
+- Community themes (browse and import user-created themes)
+- Full email: send and receive as `you@grove.place`
+- Full analytics dashboard
+- Priority email support
+
+### Evergreen - $35/month
+- Unlimited blog posts
+- 100GB storage
+- Custom domain included (we find and register it for you)
+- Theme customizer + custom font uploads
+- Community themes
+- Full email: send and receive as `you@grove.place`
+- Full analytics dashboard
+- 8 hours of support included (first month)
+- Priority support with faster response times
 
 **Add-on Services:**
 - Additional themes: $49/theme
@@ -138,7 +158,7 @@ This document contains visual diagrams and charts to help understand the Grove p
 ![User Flow](../assets/visuals/grove-userflow.png)
 
 **Signup Flow:**
-1. Visit grove.place → Choose plan ($12-49/mo)
+1. Visit grove.place → Choose plan (Free to $35/month)
 2. Create account → Enter payment (Stripe)
 3. Choose subdomain (username.grove.place)
 4. Blog created automatically → Welcome email
@@ -154,8 +174,8 @@ This document contains visual diagrams and charts to help understand the Grove p
 2. Posts appear on grove.place/feed
 3. Users can vote & react to posts
 
-**Business Plan Extras:**
-1. Purchase custom domain (assisted)
+**Custom Domain Extras (Oak & Evergreen):**
+1. Purchase custom domain (assisted) or domain included (Evergreen)
 2. DNS configuration & SSL setup
 3. Blog accessible on custom domain
 
@@ -167,7 +187,7 @@ This document contains visual diagrams and charts to help understand the Grove p
 A multi-tenant blog platform where users get their own blogs on subdomains (username.grove.place). Built on Cloudflare infrastructure with SvelteKit, featuring an optional community feed where blogs can opt-in to share posts, vote, and react with emojis.
 
 ### Core Value Propositions
-- **Simple & Affordable:** $12-49/month with transparent pricing
+- **Simple & Affordable:** $0-35/month with transparent pricing
 - **Community-Owned:** Decentralized platform away from big tech algorithms
 - **Solarpunk-Aligned:** Community-focused, sustainable business model
 - **Dream Funding:** Could help fund your tea cafe dream
@@ -191,9 +211,12 @@ A multi-tenant blog platform where users get their own blogs on subdomains (user
 | Month 12 | 50+ | $500+ | < 30 hrs/week total |
 
 ### Support Structure
-- **Month 1:** 10-20 hours included (depending on plan)
-- **After Month 1:** $75/hour for support sessions
-- **Business Plan:** Optional monthly support tiers ($99-399/month)
+- **Free:** Help Center only
+- **Seedling:** Help Center & community support
+- **Sapling:** Email support
+- **Oak:** Priority email support
+- **Evergreen:** 8 hours free (first month) + priority support
+- **Additional hours:** $100/hour (Seedling-Sapling-Oak), $75/hour (Evergreen)
 
 ### Risk Mitigation
 - **Start Small:** Prove concept with 3-5 beta clients first

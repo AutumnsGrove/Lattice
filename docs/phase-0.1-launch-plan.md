@@ -259,9 +259,10 @@ grove-engine/
 ### Payment Processing
 - [ ] Complete Stripe onboarding
 - [ ] Set up subscription products in Stripe
-  - Starter Plan: $12/month
-  - Professional Plan: $25/month
-  - Business Plan: $199 setup + $49/month
+  - Seedling Plan: $8/month
+  - Sapling Plan: $12/month
+  - Oak Plan: $25/month
+  - Evergreen Plan: $35/month
 - [ ] Test payment flows
 - [ ] Configure billing email templates
 

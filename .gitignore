@@ -15,3 +15,4 @@ dist/
 *.swp
 *.swo
 *~
+.kilocode/mcp.json

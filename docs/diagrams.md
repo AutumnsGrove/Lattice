@@ -1263,42 +1263,61 @@ timeline
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#f1f8e9', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#558b2f', 'lineColor': '#558b2f', 'background': '#ffffff'}}}%%
 flowchart LR
-    subgraph starter["Starter - $12/mo"]
+    subgraph free["Free - $0/mo"]
+        F1["Meadow Access"]
+        F2["20 Public Comments/week"]
+        F3["No Blog"]
+        F4["Community Support"]
+    end
+
+    subgraph seedling["Seedling - $8/mo"]
         S1["Subdomain<br/>username.grove.place"]
-        S2["250 Post Limit<br/>(soft, archives)"]
-        S3["5GB Storage"]
-        S4["1 Theme"]
-        S5["Basic Analytics"]
-        S6["10 Support Hours<br/>(Month 1)"]
+        S2["50 Blog Posts"]
+        S3["1GB Storage"]
+        S4["3 Themes + Accent"]
+        S5["Unlimited Comments"]
+        S6["Community Support"]
     end
 
-    subgraph pro["Professional - $25/mo"]
-        P1["Subdomain<br/>username.grove.place"]
-        P2["Unlimited Posts"]
-        P3["20GB Storage"]
-        P4["3 Themes"]
-        P5["Standard Analytics"]
-        P6["15 Support Hours<br/>(Month 1)"]
-        P7["CDN Included"]
+    subgraph sapling["Sapling - $12/mo"]
+        SP1["Subdomain<br/>username.grove.place"]
+        SP2["250 Blog Posts"]
+        SP3["5GB Storage"]
+        SP4["10 Themes + Accent"]
+        SP5["Email Forwarding"]
+        SP6["Email Support"]
     end
 
-    subgraph biz["Business - $49/mo"]
-        B1["Custom Domain<br/>+ Subdomain"]
-        B2["Unlimited Posts"]
-        B3["100GB Storage"]
-        B4["10 Themes"]
-        B5["Advanced Analytics"]
-        B6["20 Support Hours<br/>(Month 1)"]
-        B7["CDN Included"]
-        B8["Priority Support"]
+    subgraph oak["Oak - $25/mo"]
+        O1["Bring Your Own Domain"]
+        O2["Unlimited Posts"]
+        O3["20GB Storage"]
+        O4["Theme Customizer"]
+        O5["Community Themes"]
+        O6["Full Email"]
+        O7["Priority Support"]
     end
 
-    starter -.->|"Upgrade"| pro
-    pro -.->|"Upgrade"| biz
+    subgraph evergreen["Evergreen - $35/mo"]
+        E1["Custom Domain Included"]
+        E2["Unlimited Posts"]
+        E3["100GB Storage"]
+        E4["Custom Fonts"]
+        E5["Community Themes"]
+        E6["Full Email"]
+        E7["8hrs Support + Priority"]
+    end
 
-    style starter fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    style pro fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    style biz fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    free -.->|"Upgrade"| seedling
+    seedling -.->|"Upgrade"| sapling
+    sapling -.->|"Upgrade"| oak
+    oak -.->|"Upgrade"| evergreen
+
+    style free fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px
+    style seedling fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style sapling fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style oak fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style evergreen fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
 ```
 
 ---
