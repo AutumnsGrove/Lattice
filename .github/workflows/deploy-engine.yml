@@ -1,10 +1,9 @@
-name: Deploy Example Site to Cloudflare Pages
+name: Deploy GroveEngine to Cloudflare Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/example-site/**'
       - 'packages/engine/**'
   workflow_dispatch:
 
@@ -30,12 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build engine package
+      - name: Build engine
         working-directory: packages/engine
-        run: pnpm run package
-
-      - name: Build site
-        working-directory: packages/example-site
         run: pnpm run build
 
       - name: Deploy to Cloudflare Pages
@@ -43,5 +38,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy packages/example-site/.svelte-kit/cloudflare --project-name=groveengine
+          command: pages deploy packages/engine/.svelte-kit/cloudflare --project-name=groveengine
           packageManager: npm
