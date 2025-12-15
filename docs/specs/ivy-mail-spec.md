@@ -33,6 +33,81 @@ The goal is a mail client that feels like Grove—warm, personal, and respectful
 
 ---
 
+## Configuration Constants
+
+All magic numbers are centralized for easy tuning and consistency:
+
+```typescript
+// Ivy configuration constants
+const IVY_CONFIG = {
+  // Email limits
+  limits: {
+    maxAttachmentBytes: 25 * 1024 * 1024,    // 25 MB per attachment
+    maxEmailSizeBytes: 50 * 1024 * 1024,     // 50 MB total per email
+    maxRecipientsPerEmail: 50,                // BCC limit
+    maxAttachmentsPerEmail: 20,
+  },
+
+  // Rate limits
+  rateLimits: {
+    outgoingPerHour: 100,                     // Oak+ sending limit
+    attachmentUploadMbPerHour: 50,
+    apiRequestsPerHour: 1000,
+    contactFormPerIpPerDay: 5,
+  },
+
+  // Newsletter limits by tier
+  newsletterLimitsPerWeek: {
+    oak: 2,
+    evergreen: 5,
+  },
+
+  // Unsend/delayed send
+  unsend: {
+    defaultDelayMinutes: 2,
+    minDelayMinutes: 1,
+    maxDelayMinutes: 60,
+  },
+
+  // Webhook processing
+  webhook: {
+    maxPayloadBytes: 10 * 1024 * 1024,        // 10 MB
+    perIpPerMinute: 60,
+    perIpPerHour: 500,
+    globalPerMinute: 10000,
+  },
+
+  // Retry policy
+  retry: {
+    maxRetries: 5,
+    backoffMs: [60000, 120000, 240000, 480000, 960000], // 1m, 2m, 4m, 8m, 16m
+    alertAfterFailures: 3,
+  },
+
+  // Contact form spam prevention
+  contactForm: {
+    turnstileSiteKey: 'cf-turnstile-key',     // Cloudflare Turnstile
+    ipRateLimitPerDay: 5,
+    cooldownBetweenFormsMs: 60000,            // 1 minute
+  },
+
+  // Encryption
+  encryption: {
+    algorithm: 'AES-256-GCM',
+    keyDerivation: 'Argon2id',
+    recoveryPhraseWords: 24,                  // BIP39
+  },
+
+  // Trash/cleanup
+  retention: {
+    trashDays: 30,
+    deadLetterDays: 90,
+  },
+};
+```
+
+---
+
 ## Tier Access
 
 | Feature | Free | Seedling ($8) | Sapling ($12) | Oak ($25) | Evergreen ($35) |
@@ -246,9 +321,71 @@ Forward Email handles the actual mail server infrastructure. **Research complete
 
 **Webhook verification:** Forward Email provides signature verification via `X-Webhook-Signature` header (HMAC-SHA256).
 
+#### Webhook Rate Limiting
+
+**IMPORTANT:** Rate limiting happens BEFORE signature verification to prevent DoS attacks from consuming CPU cycles on signature computation.
+
 ```typescript
-// Webhook signature verification (constant-time to prevent timing attacks)
-import { timingSafeEqual } from 'crypto';
+// Webhook rate limiting configuration
+const WEBHOOK_RATE_LIMITS = {
+  perIpPerMinute: 60,        // Max 60 webhook requests per IP per minute
+  perIpPerHour: 500,         // Max 500 per IP per hour
+  globalPerMinute: 10000,    // System-wide safety limit
+};
+
+// Rate limit check (runs BEFORE signature verification)
+async function checkWebhookRateLimit(
+  env: Env,
+  ip: string
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const ipHash = await hashIp(ip);  // Hash for privacy
+  const now = Date.now();
+  const minuteKey = `webhook:${ipHash}:${Math.floor(now / 60000)}`;
+  const hourKey = `webhook:${ipHash}:${Math.floor(now / 3600000)}`;
+
+  // Use KV for rate limit counters (fast, distributed)
+  const [minuteCount, hourCount] = await Promise.all([
+    env.KV.get(minuteKey, 'text').then(v => parseInt(v || '0')),
+    env.KV.get(hourKey, 'text').then(v => parseInt(v || '0')),
+  ]);
+
+  if (minuteCount >= WEBHOOK_RATE_LIMITS.perIpPerMinute) {
+    return { allowed: false, retryAfter: 60 };
+  }
+  if (hourCount >= WEBHOOK_RATE_LIMITS.perIpPerHour) {
+    return { allowed: false, retryAfter: 3600 };
+  }
+
+  // Increment counters atomically
+  await Promise.all([
+    env.KV.put(minuteKey, String(minuteCount + 1), { expirationTtl: 120 }),
+    env.KV.put(hourKey, String(hourCount + 1), { expirationTtl: 7200 }),
+  ]);
+
+  return { allowed: true };
+}
+
+// IP hashing for privacy (don't store raw IPs)
+async function hashIp(ip: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const hash = await crypto.subtle.digest('SHA-256', encoder.encode(ip + 'webhook-salt'));
+  return Array.from(new Uint8Array(hash)).slice(0, 8)
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+```
+
+#### Webhook Signature Verification
+
+```typescript
+// Constant-time comparison for Workers (no Node.js crypto module)
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+  return result === 0;
+}
 
 async function verifyWebhookSignature(
   payload: string,
@@ -269,7 +406,7 @@ async function verifyWebhookSignature(
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
 
-  // Constant-time comparison
+  // Constant-time comparison (Workers-compatible)
   if (signature.length !== expectedHex.length) return false;
   const sigBytes = encoder.encode(signature);
   const expectedBytes = encoder.encode(expectedHex);
@@ -925,9 +1062,26 @@ CREATE TABLE ivy_newsletter_sends (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Audit log for admin overrides and sensitive operations
+-- Required for email address changes, account recovery, etc.
+CREATE TABLE ivy_admin_audit_log (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,                  -- Affected user
+  admin_id TEXT NOT NULL,                 -- Admin who performed action
+  action_type TEXT NOT NULL,              -- email_address_change, key_recovery, account_unlock, etc.
+  old_value TEXT,                         -- Previous value (encrypted if sensitive)
+  new_value TEXT,                         -- New value (encrypted if sensitive)
+  reason TEXT NOT NULL,                   -- Required justification for change
+  ticket_id TEXT,                         -- Support ticket reference (if applicable)
+  ip_address_hash TEXT,                   -- Admin's IP (hashed for privacy)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (admin_id) REFERENCES users(id)
+);
+
 -- Email address immutability enforcement
 -- Note: email_locked_at is set when user first selects address; cannot be changed after
--- Support override requires admin action + audit log entry
+-- Support override requires admin action + audit log entry (see ivy_admin_audit_log)
 ```
 
 ### Indexes
@@ -940,6 +1094,9 @@ CREATE INDEX idx_buffer_pending ON ivy_webhook_buffer(status, received_at);
 CREATE INDEX idx_contact_pending ON ivy_contact_form_buffer(status, created_at);
 CREATE INDEX idx_contact_ip ON ivy_contact_form_buffer(source_ip_hash, created_at);
 CREATE INDEX idx_newsletter_user ON ivy_newsletter_sends(user_id, sent_at DESC);
+CREATE INDEX idx_audit_user ON ivy_admin_audit_log(user_id, created_at DESC);
+CREATE INDEX idx_audit_admin ON ivy_admin_audit_log(admin_id, created_at DESC);
+CREATE INDEX idx_audit_action ON ivy_admin_audit_log(action_type, created_at DESC);
 ```
 
 ### Client-Side Schema (IndexedDB)

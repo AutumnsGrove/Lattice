@@ -618,6 +618,41 @@ Workers have 128MB memory limit. Large exports (50GB+) must stream directly to R
 // Stream zip directly to R2 without buffering entire export
 import { ZipWriter } from '@aspect-build/rules_js'; // or similar streaming zip library
 
+// Configuration constants
+const EXPORT_CONFIG = {
+  batchSize: 10,                  // Fetch 10 files concurrently
+  chunkSizes: {
+    small: 1 * 1024 * 1024 * 1024,   // 1 GB
+    large: 5 * 1024 * 1024 * 1024,   // 5 GB
+  },
+  maxConcurrentExports: 1,        // Per user
+  expiryDays: 7,
+};
+
+// Batch R2 reads to avoid N+1 queries
+async function batchGetFiles(
+  bucket: R2Bucket,
+  keys: string[]
+): Promise<Map<string, R2ObjectBody | null>> {
+  const results = new Map<string, R2ObjectBody | null>();
+
+  // R2 doesn't have native batch get, but we can parallelize
+  const batches: string[][] = [];
+  for (let i = 0; i < keys.length; i += EXPORT_CONFIG.batchSize) {
+    batches.push(keys.slice(i, i + EXPORT_CONFIG.batchSize));
+  }
+
+  for (const batch of batches) {
+    const promises = batch.map(async (key) => {
+      const obj = await bucket.get(key);
+      results.set(key, obj);
+    });
+    await Promise.all(promises);
+  }
+
+  return results;
+}
+
 async function generateExportChunk(
   env: Env,
   userId: string,
@@ -638,15 +673,24 @@ async function generateExportChunk(
   // Create zip writer that streams to the writable side
   const zipWriter = new ZipWriter(writable);
 
+  // Pre-filter files for this chunk
   let currentSize = 0;
+  const chunkFiles: StorageFile[] = [];
   for (const file of files) {
     if (currentSize >= chunkSizeBytes) break;
+    chunkFiles.push(file);
+    currentSize += file.size_bytes;
+  }
 
-    // Stream file from R2 → zip → R2 (never fully in memory)
-    const fileData = await env.R2_BUCKET.get(file.r2_key);
+  // Batch fetch file data (avoids N+1 queries)
+  const fileKeys = chunkFiles.map(f => f.r2_key);
+  const fileDataMap = await batchGetFiles(env.R2_BUCKET, fileKeys);
+
+  // Stream each file into the zip
+  for (const file of chunkFiles) {
+    const fileData = fileDataMap.get(file.r2_key);
     if (fileData) {
       await zipWriter.add(file.filename, fileData.body);
-      currentSize += file.size_bytes;
     }
   }
 
@@ -851,6 +895,47 @@ async function migrateExistingFiles() {
 
 Cellar requires scheduled tasks for automated cleanup:
 
+### Cron Configuration
+
+```typescript
+// Cron job configuration constants
+const CRON_CONFIG = {
+  trashRetentionDays: 30,
+  exportRetentionDays: 7,
+  batchSize: {
+    trash: 100,
+    exports: 50,
+  },
+};
+```
+
+### Structured Logging
+
+All cron jobs use structured JSON logging for monitoring and alerting:
+
+```typescript
+// Structured log entry for cron operations
+interface CronLogEntry {
+  job: string;
+  status: 'started' | 'completed' | 'failed';
+  timestamp: string;
+  duration_ms?: number;
+  items_processed?: number;
+  bytes_freed?: number;
+  errors?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+function logCronEvent(entry: CronLogEntry): void {
+  // Structured JSON for log aggregation (Cloudflare Logpush, Datadog, etc.)
+  console.log(JSON.stringify({
+    ...entry,
+    service: 'cellar',
+    environment: process.env.ENVIRONMENT || 'production',
+  }));
+}
+```
+
 ### Trash Auto-Deletion
 
 **Schedule:** Daily at 3:00 AM UTC
@@ -871,58 +956,130 @@ export default {
 };
 
 async function deleteExpiredTrash(env: Env) {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const startTime = Date.now();
+  const errors: string[] = [];
+  let itemsDeleted = 0;
+  let bytesFreed = 0;
 
-  // Get expired trash items (batch of 100 at a time)
-  const expired = await env.DB.prepare(`
-    SELECT id, user_id, r2_key, size_bytes
-    FROM storage_files
-    WHERE deleted_at IS NOT NULL AND deleted_at < ?
-    LIMIT 100
-  `).bind(thirtyDaysAgo).all();
+  logCronEvent({
+    job: 'trash_cleanup',
+    status: 'started',
+    timestamp: new Date().toISOString(),
+  });
 
-  for (const file of expired.results) {
-    // Delete from R2
-    await env.R2_BUCKET.delete(file.r2_key);
+  try {
+    const cutoffDate = new Date(Date.now() - CRON_CONFIG.trashRetentionDays * 24 * 60 * 60 * 1000).toISOString();
 
-    // Delete from D1
-    await env.DB.prepare('DELETE FROM storage_files WHERE id = ?').bind(file.id).run();
+    // Get expired trash items (batch of 100 at a time)
+    const expired = await env.DB.prepare(`
+      SELECT id, user_id, r2_key, size_bytes
+      FROM storage_files
+      WHERE deleted_at IS NOT NULL AND deleted_at < ?
+      LIMIT ?
+    `).bind(cutoffDate, CRON_CONFIG.batchSize.trash).all();
 
-    // Update user's used_bytes
-    await env.DB.prepare(`
-      UPDATE user_storage
-      SET used_bytes = used_bytes - ?
-      WHERE user_id = ?
-    `).bind(file.size_bytes, file.user_id).run();
-  }
+    for (const file of expired.results) {
+      try {
+        // Delete from R2
+        await env.R2_BUCKET.delete(file.r2_key);
 
-  console.log(`Deleted ${expired.results.length} expired trash items`);
-}
+        // Delete from D1
+        await env.DB.prepare('DELETE FROM storage_files WHERE id = ?').bind(file.id).run();
 
-async function deleteExpiredExports(env: Env) {
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        // Update user's used_bytes
+        await env.DB.prepare(`
+          UPDATE user_storage
+          SET used_bytes = used_bytes - ?
+          WHERE user_id = ?
+        `).bind(file.size_bytes, file.user_id).run();
 
-  const expired = await env.DB.prepare(`
-    SELECT id, r2_key
-    FROM storage_exports
-    WHERE status = 'completed' AND expires_at < ?
-    LIMIT 50
-  `).bind(sevenDaysAgo).all();
-
-  for (const exp of expired.results) {
-    if (exp.r2_key) {
-      // Delete all export files (could be multiple chunks)
-      const prefix = exp.r2_key.replace(/\/[^/]+$/, '/'); // Get directory
-      const list = await env.R2_BUCKET.list({ prefix });
-      for (const obj of list.objects) {
-        await env.R2_BUCKET.delete(obj.key);
+        itemsDeleted++;
+        bytesFreed += file.size_bytes;
+      } catch (err) {
+        errors.push(`Failed to delete file ${file.id}: ${err.message}`);
       }
     }
 
-    await env.DB.prepare('DELETE FROM storage_exports WHERE id = ?').bind(exp.id).run();
+    logCronEvent({
+      job: 'trash_cleanup',
+      status: errors.length > 0 ? 'completed' : 'completed',
+      timestamp: new Date().toISOString(),
+      duration_ms: Date.now() - startTime,
+      items_processed: itemsDeleted,
+      bytes_freed: bytesFreed,
+      errors: errors.length > 0 ? errors : undefined,
+      metadata: { batch_size: expired.results.length },
+    });
+  } catch (err) {
+    logCronEvent({
+      job: 'trash_cleanup',
+      status: 'failed',
+      timestamp: new Date().toISOString(),
+      duration_ms: Date.now() - startTime,
+      errors: [err.message],
+    });
+    throw err;
   }
+}
 
-  console.log(`Deleted ${expired.results.length} expired exports`);
+async function deleteExpiredExports(env: Env) {
+  const startTime = Date.now();
+  const errors: string[] = [];
+  let itemsDeleted = 0;
+
+  logCronEvent({
+    job: 'export_cleanup',
+    status: 'started',
+    timestamp: new Date().toISOString(),
+  });
+
+  try {
+    const cutoffDate = new Date(Date.now() - CRON_CONFIG.exportRetentionDays * 24 * 60 * 60 * 1000).toISOString();
+
+    const expired = await env.DB.prepare(`
+      SELECT id, r2_key
+      FROM storage_exports
+      WHERE status = 'completed' AND expires_at < ?
+      LIMIT ?
+    `).bind(cutoffDate, CRON_CONFIG.batchSize.exports).all();
+
+    for (const exp of expired.results) {
+      try {
+        if (exp.r2_key) {
+          // Delete all export files (could be multiple chunks)
+          const prefix = exp.r2_key.replace(/\/[^/]+$/, '/'); // Get directory
+          const list = await env.R2_BUCKET.list({ prefix });
+          for (const obj of list.objects) {
+            await env.R2_BUCKET.delete(obj.key);
+          }
+        }
+
+        await env.DB.prepare('DELETE FROM storage_exports WHERE id = ?').bind(exp.id).run();
+        itemsDeleted++;
+      } catch (err) {
+        errors.push(`Failed to delete export ${exp.id}: ${err.message}`);
+      }
+    }
+
+    logCronEvent({
+      job: 'export_cleanup',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      duration_ms: Date.now() - startTime,
+      items_processed: itemsDeleted,
+      errors: errors.length > 0 ? errors : undefined,
+      metadata: { batch_size: expired.results.length },
+    });
+  } catch (err) {
+    logCronEvent({
+      job: 'export_cleanup',
+      status: 'failed',
+      timestamp: new Date().toISOString(),
+      duration_ms: Date.now() - startTime,
+      errors: [err.message],
+    });
+    throw err;
+  }
 }
 ```
 
