@@ -34,6 +34,18 @@
 
 ## Phase 2: Multi-tenant Infrastructure
 
+### User Registration to D1
+> **Issue:** Auth callback exchanges tokens but never inserts users into D1.
+> **Impact:** Can't store user preferences, track subscriptions, or associate content with users.
+>
+> **Implementation:**
+> - [ ] Create `users` table migration (id, groveauth_id, email, display_name, created_at, etc.)
+> - [ ] In `/auth/callback/+server.ts`, after token exchange:
+>   - Fetch user info from GroveAuth `/userinfo` endpoint
+>   - UPSERT user into D1 (create if new, update if existing)
+>   - Link user to tenant (for multi-tenant isolation)
+> - [ ] Add `getUserFromSession()` helper for routes needing user data
+
 ### Auth Bug - Login Button Does Nothing
 > **Issue:** On tenant admin pages (e.g., `dave.grove.place/auth/login`), clicking "Sign in with Grove" does nothing.
 > **Root Cause:** Both `+page.svelte` and `+server.ts` exist at `/auth/login`. SvelteKit serves the page component instead of hitting the server route that initiates OAuth.

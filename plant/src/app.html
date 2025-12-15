@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Blocking script to prevent FOUC (flash of unstyled content) -->
+		<script>
+			try {
+				const stored = localStorage.getItem('grove-theme');
+				// Default to dark if no stored preference
+				if (stored === 'dark' || !stored) {
+					document.documentElement.classList.add('dark');
+				}
+			} catch (e) {
+				// localStorage unavailable, default to dark
+				document.documentElement.classList.add('dark');
+			}
+		</script>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="Plant your blog on Grove. Start your writing journey today." />
+		<meta name="theme-color" content="#16a34a" />
+		<meta property="og:title" content="Plant Your Blog - Grove" />
+		<meta property="og:description" content="Start your writing journey on Grove. A warm corner of the internet for your words to grow." />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://plant.grove.place" />
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

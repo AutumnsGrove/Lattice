@@ -1,0 +1,23 @@
+name = "grove-plant"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# D1 Database binding (same as landing/engine - shared database)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# - GROVEAUTH_URL = https://auth-api.grove.place
+# - GROVEAUTH_CLIENT_ID = grove-plant
+# - GROVEAUTH_CLIENT_SECRET = (secret)
+# - STRIPE_SECRET_KEY = sk_xxx
+# - STRIPE_PUBLISHABLE_KEY = pk_xxx
+# - STRIPE_WEBHOOK_SECRET = whsec_xxx
+# - RESEND_API_KEY = re_xxx
+#
+# NOTE: D1 bindings are read from this file by wrangler pages deploy.
+# For secrets/env vars, configure them in Cloudflare Dashboard since
+# wrangler pages deploy doesn't support --var flags.

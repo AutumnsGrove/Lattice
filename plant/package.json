@@ -1,0 +1,33 @@
+{
+  "name": "grove-plant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "wrangler pages dev .svelte-kit/cloudflare",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "deploy": "pnpm run build && wrangler pages deploy .svelte-kit/cloudflare --project-name grove-plant"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "@sveltejs/adapter-cloudflare": "^4.7.4",
+    "@sveltejs/kit": "^2.8.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "svelte": "^5.2.0",
+    "svelte-check": "^4.0.0",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.21",
+    "wrangler": "^3.91.0"
+  },
+  "dependencies": {
+    "@autumnsgrove/groveengine": "workspace:*",
+    "lucide-svelte": "^0.554.0",
+    "resend": "^4.0.0",
+    "stripe": "^17.0.0"
+  }
+}
