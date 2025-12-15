@@ -6,7 +6,9 @@
 
 ## Repository Architecture
 
-Grove follows a **monorepo-per-product** architecture. Each product with a public-facing domain gets its own repository that imports `@autumnsgrove/lattice` as the shared foundation.
+Grove follows a **monorepo-per-product** architecture. Each product with a public-facing domain gets its own repository that imports `groveengine` as the shared foundation.
+
+> **Note:** The npm package is currently published as `groveengine`. It will be renamed to `@autumnsgrove/lattice` in a future release.
 
 ### The Pattern
 
@@ -14,16 +16,16 @@ Grove follows a **monorepo-per-product** architecture. Each product with a publi
 GroveEngine/              ← Lattice: shared npm package
 ├── src/                  ← UI components, utilities, patterns
 ├── docs/specs/           ← Planning docs for all products (pre-implementation)
-└── package.json          ← @autumnsgrove/lattice
+└── package.json          ← groveengine (future: @autumnsgrove/lattice)
 
 grove-ivy/                ← Ivy: standalone product
 ├── src/                  ← SvelteKit app
-├── package.json          ← depends on @autumnsgrove/lattice
+├── package.json          ← depends on groveengine
 └── wrangler.toml         ← Cloudflare Workers config
 
 grove-cellar/             ← Cellar: standalone product
 ├── ...
-└── package.json          ← depends on @autumnsgrove/lattice
+└── package.json          ← depends on groveengine
 ```
 
 ### What Goes Where
@@ -107,7 +109,7 @@ grove-{product}/
 
 ```json
 {
-  "name": "@autumnsgrove/grove-{product}",
+  "name": "grove-{product}",
   "private": true,
   "type": "module",
   "scripts": {
@@ -120,7 +122,7 @@ grove-{product}/
     "check": "svelte-check"
   },
   "dependencies": {
-    "@autumnsgrove/lattice": "workspace:*"
+    "groveengine": "^latest"
   }
 }
 ```
@@ -152,29 +154,29 @@ id = "..."
 
 ## Lattice Integration
 
-Every Grove product imports Lattice for shared functionality:
+Every Grove product imports Lattice (currently `groveengine`) for shared functionality:
 
 ### What Lattice Provides
 
 ```typescript
 // UI Components
-import { Button, Card, Modal, Toast } from '@autumnsgrove/lattice';
-import { GroveLayout, Sidebar, Header } from '@autumnsgrove/lattice/layout';
+import { Button, Card, Modal, Toast } from 'groveengine';
+import { GroveLayout, Sidebar, Header } from 'groveengine/layout';
 
 // Authentication
-import { requireAuth, getUser, withHeartwood } from '@autumnsgrove/lattice/auth';
+import { requireAuth, getUser, withHeartwood } from 'groveengine/auth';
 
 // Database Patterns
-import { createD1Client, withTransaction } from '@autumnsgrove/lattice/db';
+import { createD1Client, withTransaction } from 'groveengine/db';
 
 // Utilities
-import { formatDate, slugify, debounce } from '@autumnsgrove/lattice/utils';
+import { formatDate, slugify, debounce } from 'groveengine/utils';
 
 // Markdown
-import { renderMarkdown, parseMarkdown } from '@autumnsgrove/lattice/markdown';
+import { renderMarkdown, parseMarkdown } from 'groveengine/markdown';
 
 // Theming
-import { theme, applyTheme } from '@autumnsgrove/lattice/theme';
+import { theme, applyTheme } from 'groveengine/theme';
 ```
 
 ### What Products Own
@@ -263,7 +265,7 @@ All authenticated routes use Heartwood:
 
 ```typescript
 // In +page.server.ts or +server.ts
-import { requireAuth } from '@autumnsgrove/lattice/auth';
+import { requireAuth } from 'groveengine/auth';
 
 export const load = async ({ cookies }) => {
   const user = await requireAuth(cookies);
@@ -282,7 +284,7 @@ export const load = async ({ cookies }) => {
 All public endpoints must have rate limiting:
 
 ```typescript
-import { rateLimit } from '@autumnsgrove/lattice/security';
+import { rateLimit } from 'groveengine/security';
 
 // In API route
 const allowed = await rateLimit(env.KV, request, {
