@@ -277,6 +277,43 @@ async function verifyWebhookSignature(
 }
 ```
 
+#### Webhook Payload Validation
+
+Before processing any webhook, validate:
+
+```typescript
+const WEBHOOK_LIMITS = {
+  maxPayloadBytes: 10 * 1024 * 1024, // 10MB max (emails with large attachments)
+  maxAttachmentBytes: 25 * 1024 * 1024, // 25MB per attachment
+  requiredFields: ['raw', 'headers', 'recipients'],
+};
+
+async function validateWebhookPayload(payload: unknown): Promise<{ valid: boolean; error?: string }> {
+  // Size check
+  const payloadSize = JSON.stringify(payload).length;
+  if (payloadSize > WEBHOOK_LIMITS.maxPayloadBytes) {
+    await alertOversizedEmail(payload); // Log for debugging, don't store
+    return { valid: false, error: `Payload exceeds ${WEBHOOK_LIMITS.maxPayloadBytes} bytes` };
+  }
+
+  // Required fields
+  const p = payload as Record<string, unknown>;
+  for (const field of WEBHOOK_LIMITS.requiredFields) {
+    if (!(field in p)) {
+      return { valid: false, error: `Missing required field: ${field}` };
+    }
+  }
+
+  // Recipients must include a @grove.place address
+  const recipients = p.recipients as string[];
+  if (!recipients.some(r => r.endsWith('@grove.place'))) {
+    return { valid: false, error: 'No @grove.place recipient' };
+  }
+
+  return { valid: true };
+}
+```
+
 **Result:** We only pay Forward Email for SMTP sending ($3/mo), all storage lives in R2 at a fraction of the cost.
 
 #### API Capabilities (Confirmed)
@@ -401,6 +438,24 @@ Auth: Server API token (stored securely, not in user space)
 From: username@grove.place (verified domain)
 Stream: broadcast (separate from transactional)
 ```
+
+#### Domain Verification Strategy
+
+Postmark requires domain verification before sending. For Grove:
+
+1. **One-time setup:** Verify `grove.place` domain in Postmark dashboard
+2. **DNS records:** Add DKIM and Return-Path records to grove.place DNS
+3. **Sender signatures:** Grove signs all outbound mail (not individual users)
+4. **From address:** Any `username@grove.place` can send once domain is verified
+
+```
+DNS Records (one-time):
+- DKIM: selector._domainkey.grove.place → Postmark public key
+- Return-Path: pm-bounces.grove.place → Postmark tracking subdomain
+- SPF: Already includes Forward Email; add Postmark's include
+```
+
+**Key point:** Users don't need individual verification—Grove owns the domain and handles all newsletter sends on their behalf via the API.
 
 #### Cost Projection
 
@@ -656,6 +711,52 @@ NEW EMAIL ARRIVES:
 3. Client fetches + decrypts + adds to local index
 ```
 
+#### Thread Grouping (Client-Side)
+
+**Challenge:** Thread IDs are encrypted, so the server can't group emails into conversations.
+
+**Solution:** Client-side thread computation using standard email headers:
+
+```typescript
+// Thread ID generation (client-side, after decryption)
+function computeThreadId(email: DecryptedEmail): string {
+  // Standard email threading: In-Reply-To and References headers
+  const inReplyTo = email.headers['in-reply-to'];
+  const references = email.headers['references'];
+  const messageId = email.headers['message-id'];
+
+  // If replying to something, use the original message's ID as thread root
+  if (inReplyTo) {
+    return hashThreadId(inReplyTo);
+  }
+
+  // Check references chain for thread root
+  if (references) {
+    const refs = references.split(/\s+/);
+    if (refs.length > 0) {
+      return hashThreadId(refs[0]); // First reference is thread root
+    }
+  }
+
+  // New conversation - use this message's ID as thread root
+  return hashThreadId(messageId);
+}
+
+function hashThreadId(messageId: string): string {
+  // Consistent hash for grouping
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(messageId))
+    .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16));
+}
+```
+
+**How it works:**
+1. Server stores `thread_id` inside `encrypted_envelope` (computed at encryption time)
+2. Client decrypts envelope, extracts thread_id
+3. IndexedDB groups emails by thread_id for conversation view
+4. Server never sees thread relationships (zero-knowledge preserved)
+
+**Note:** Thread ID in encrypted_envelope is pre-computed for efficiency—client doesn't need to re-parse headers every time.
+
 #### Key Derivation & Management
 
 **Separation of concerns:** Email encryption key is separate from auth credentials.
@@ -685,11 +786,20 @@ PASSWORD CHANGE:
 - **Key regeneration**: Available in settings, CLEARLY warns this deletes all existing email
 - **Export before reset**: Option to download all decrypted emails before key regeneration
 
+**What happens if user loses BOTH password AND recovery phrase:**
+This results in **permanent, irrecoverable data loss**. Grove cannot help—this is intentional and fundamental to zero-knowledge architecture. The encrypted data still exists but is computationally impossible to decrypt without the key.
+
+This is the trade-off for true privacy: no backdoors, no "forgot password" recovery by support, no government subpoena access. Users must understand this before activating Ivy.
+
 **User-facing warnings:**
 ```
 ⚠️ IMPORTANT: Your recovery phrase is the ONLY way to recover your
 emails if you forget your password. Grove cannot help you—we literally
 cannot read your data. Download and store this safely.
+
+If you lose both your password AND recovery phrase, your emails are
+permanently lost. This is by design—it's why we can promise that
+no one (including us) can ever read your mail.
 ```
 
 #### What's Encrypted vs. Not
@@ -713,10 +823,13 @@ cannot read your data. Download and store this safely.
 
 ## Database Schema (D1)
 
+**Timezone Convention:** All TIMESTAMP fields are stored and queried in **UTC**. Client applications convert to user's local timezone for display. This prevents timezone-related bugs in cron jobs, queries, and cross-timezone collaboration.
+
 ### Core Tables (Zero-Knowledge)
 
 ```sql
 -- User email settings
+-- All TIMESTAMP fields are UTC
 CREATE TABLE ivy_settings (
   user_id TEXT PRIMARY KEY,
   email_address TEXT UNIQUE NOT NULL,

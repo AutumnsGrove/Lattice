@@ -744,6 +744,7 @@ async function migrateExistingFiles() {
 - [ ] Basic dashboard view
 - [ ] Usage breakdown by product
 - [ ] Quota warnings
+- [ ] Trash auto-deletion cron (see Scheduled Tasks)
 
 ### Phase 2: File Management
 
@@ -759,6 +760,7 @@ async function migrateExistingFiles() {
 - [ ] Export by category
 - [ ] Storage add-on purchase flow
 - [ ] Stripe integration for add-ons
+- [ ] Export cleanup cron (see Scheduled Tasks)
 
 ### Phase 4: Polish
 
@@ -767,6 +769,94 @@ async function migrateExistingFiles() {
 - [ ] Usage charts over time
 - [ ] Mobile optimization
 - [ ] Cleanup suggestions
+
+---
+
+## Scheduled Tasks (Worker Cron)
+
+Cellar requires scheduled tasks for automated cleanup:
+
+### Trash Auto-Deletion
+
+**Schedule:** Daily at 3:00 AM UTC
+
+```typescript
+// wrangler.toml
+[triggers]
+crons = ["0 3 * * *"]  # Daily at 3 AM UTC
+
+// Worker cron handler
+export default {
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    if (event.cron === "0 3 * * *") {
+      await deleteExpiredTrash(env);
+      await deleteExpiredExports(env);
+    }
+  }
+};
+
+async function deleteExpiredTrash(env: Env) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Get expired trash items (batch of 100 at a time)
+  const expired = await env.DB.prepare(`
+    SELECT id, user_id, r2_key, size_bytes
+    FROM storage_files
+    WHERE deleted_at IS NOT NULL AND deleted_at < ?
+    LIMIT 100
+  `).bind(thirtyDaysAgo).all();
+
+  for (const file of expired.results) {
+    // Delete from R2
+    await env.R2_BUCKET.delete(file.r2_key);
+
+    // Delete from D1
+    await env.DB.prepare('DELETE FROM storage_files WHERE id = ?').bind(file.id).run();
+
+    // Update user's used_bytes
+    await env.DB.prepare(`
+      UPDATE user_storage
+      SET used_bytes = used_bytes - ?
+      WHERE user_id = ?
+    `).bind(file.size_bytes, file.user_id).run();
+  }
+
+  console.log(`Deleted ${expired.results.length} expired trash items`);
+}
+
+async function deleteExpiredExports(env: Env) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const expired = await env.DB.prepare(`
+    SELECT id, r2_key
+    FROM storage_exports
+    WHERE status = 'completed' AND expires_at < ?
+    LIMIT 50
+  `).bind(sevenDaysAgo).all();
+
+  for (const exp of expired.results) {
+    if (exp.r2_key) {
+      // Delete all export files (could be multiple chunks)
+      const prefix = exp.r2_key.replace(/\/[^/]+$/, '/'); // Get directory
+      const list = await env.R2_BUCKET.list({ prefix });
+      for (const obj of list.objects) {
+        await env.R2_BUCKET.delete(obj.key);
+      }
+    }
+
+    await env.DB.prepare('DELETE FROM storage_exports WHERE id = ?').bind(exp.id).run();
+  }
+
+  console.log(`Deleted ${expired.results.length} expired exports`);
+}
+```
+
+### Cron Schedule Summary
+
+| Task | Schedule | Purpose |
+|------|----------|---------|
+| Trash cleanup | Daily 3 AM UTC | Delete files in trash >30 days |
+| Export cleanup | Daily 3 AM UTC | Delete completed exports >7 days |
 
 ---
 
