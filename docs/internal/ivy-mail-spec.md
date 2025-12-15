@@ -192,18 +192,98 @@ Admin tools should be **extensible**. Build with plugin/module architecture so n
 
 ### Forward Email Integration
 
-Forward Email handles the actual mail server infrastructure:
+Forward Email handles the actual mail server infrastructure. **Research completed December 2025.**
 
+#### Why Forward Email?
+
+| Advantage | Details |
+|-----------|---------|
+| **Zero-knowledge** | Encrypted with user's IMAP password—they can't read emails |
+| **REST API** | 20 endpoints for messages, folders, contacts, calendars (no IMAP complexity) |
+| **Unlimited domains/aliases** | Flat rate pricing regardless of user count |
+| **Open source** | Fully self-hostable if needed as escape hatch |
+| **Privacy-focused** | No SMTP logs, no metadata retention |
+
+#### Pricing (Critical for Multi-Tenant)
+
+| Plan | Price | Domains | Aliases | Storage | Outbound |
+|------|-------|---------|---------|---------|----------|
+| Free | $0 | Unlimited | Unlimited | — | Forwarding only |
+| **Enhanced** | **$3/mo** | Unlimited | Unlimited | 10 GB | ~9,000/mo |
+| Team | $9/mo | Unlimited | Unlimited | 10 GB | Higher + priority support |
+
+**Key insight:** "Unlimited domains and aliases" means we pay ONE flat fee ($3-9/mo total) regardless of how many Grove users we have. This is extremely cost-effective.
+
+Additional storage: +$3/mo per 10 GB if needed.
+
+#### API Capabilities (Confirmed)
+
+Forward Email offers a complete REST API:
+
+```
+Messages:
+- GET /v1/messages — List/search messages (15+ filter params)
+- GET /v1/messages/:id — Get single message
+- POST /v1/messages — Send message
+- PUT /v1/messages/:id — Update (flags, move)
+- DELETE /v1/messages/:id — Delete message
+
+Folders:
+- Full CRUD for IMAP folders via REST
+
+Contacts (CardDAV):
+- Full contact management via REST
+
+Search Parameters:
+- subject, from, to, body, since, before
+- has_attachments, min_size, max_size
+- is_flagged, is_read, folder
+```
+
+#### Webhooks
+
+Forward Email supports webhooks for incoming mail events:
+- HTTP POST to configured endpoint
+- Triggers on new mail arrival
+- Enables real-time inbox updates without polling
+
+**Note:** Exact webhook payload structure needs hands-on testing.
+
+#### Sending Limits & Newsletter Approval
+
+- **Enhanced plan:** ~9,000 outbound emails/month
+- **Newsletter/bulk sending:** Requires manual approval per-domain
+- **Approval process:** Email support@forwardemail.net, typically <24 hours
+
+**Action needed:** Contact Forward Email about Grove's use case for subscriber newsletters.
+
+#### SMTP Configuration
+
+```
+Server: smtp.forwardemail.net
+Port: 465 (SSL/TLS)
+Auth: API token from account dashboard
+```
+
+#### What Forward Email Handles
+
+- MX records & mail routing
 - SMTP for sending
-- IMAP for receiving
-- MX record management
+- IMAP for receiving (also exposed via REST)
+- Spam filtering
 - SPF/DKIM/DMARC configuration
+- Zero-knowledge encryption at rest
 
-Grove's role:
-- Fetch mail via IMAP API
-- Store encrypted copies in R2
-- Index metadata in D1
-- Provide the user interface
+#### What Grove/Ivy Handles
+
+- REST API calls to Forward Email
+- User interface
+- Thread organization & display
+- Labels (our D1, not Forward Email's)
+- Delayed send queue (our D1)
+- Additional encryption layer (our R2)
+- Contact form integration
+- Search indexing (our D1)
 
 ### Data Flow
 
@@ -533,9 +613,9 @@ Platform notifications (new followers, reactions, comments) can optionally route
 
 ### Technical
 
-1. **Forward Email API limits** — What are the rate limits? Do we need to cache aggressively?
+1. ~~**Forward Email API limits**~~ — ✅ ANSWERED: ~9,000 outbound/month on Enhanced, REST API with 15+ search params
 2. **Search implementation** — D1 full-text search vs. external search service?
-3. **Real-time updates** — Polling vs. WebSockets vs. Server-Sent Events?
+3. **Real-time updates** — Webhooks available; need to test payload structure. Polling as fallback.
 4. **Offline sync** — How much data to cache locally for PWA?
 
 ### Product
@@ -543,13 +623,14 @@ Platform notifications (new followers, reactions, comments) can optionally route
 1. **Signature editor** — Simple text or rich HTML signatures?
 2. **Vacation responder** — Auto-reply when away? (Later feature?)
 3. **Blocked senders** — Allow users to block specific addresses?
-4. **Spam handling** — Rely on Forward Email's spam filter, or build our own UI?
+4. **Spam handling** — Forward Email handles spam filtering; we just need UI for spam folder
 
 ### Business
 
-1. **Forward Email costs** — Current plan is $3/month total. Will this scale?
-2. **Storage costs** — R2 pricing at scale for email+attachments?
+1. ~~**Forward Email costs**~~ — ✅ ANSWERED: $3/mo for unlimited domains/aliases. Scales perfectly for multi-tenant.
+2. **Storage costs** — R2 pricing at scale for email+attachments? (R2 is cheap, likely fine)
 3. **Support burden** — Email is complex. What's the support strategy?
+4. **Newsletter approval** — Need to contact Forward Email about bulk sending for Grove's use case
 
 ---
 
@@ -615,11 +696,22 @@ How do we know Ivy is working?
 
 ## References
 
-- [Forward Email Documentation](https://forwardemail.net/en/faq)
+### Forward Email
+- [Forward Email API Documentation](https://forwardemail.net/en/email-api) — Main API docs with OpenAPI 3.0 spec
+- [Complete REST API Guide](https://forwardemail.net/en/blog/docs/complete-email-api-imap-carddav-caldav-rest-endpoints) — Detailed endpoint documentation
+- [Forward Email Pricing](https://forwardemail.net/en/private-business-email) — Plan comparison
+- [Forward Email FAQ](https://forwardemail.net/en/faq) — General documentation
+- [Forward Email Webhooks](https://forwardemail.net/en/webhook-email-notifications-service) — Webhook setup
+- [GitHub Repository](https://github.com/forwardemail/forwardemail.net) — Open source, self-hostable
+
+### Cloudflare
 - [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/pricing/)
 - [Cloudflare D1 Limits](https://developers.cloudflare.com/d1/platform/limits/)
+
+### Grove Internal
 - Grove Pricing: `/docs/grove-pricing.md`
 - Grove Naming: `/docs/grove-naming.md`
+- Pricing Discussions: `/docs/internal/pricing-discussions.md`
 
 ---
 
