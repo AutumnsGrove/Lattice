@@ -55,11 +55,23 @@
 > - [ ] Or use `<a href="/auth/login" data-sveltekit-reload>` to force server request
 > - [ ] Or rename server route to `/auth/oauth/+server.ts`
 
-- [ ] Build tenant onboarding flow → **SPEC READY**: `docs/specs/tenant-onboarding-spec.md`
-  - Signup: name, username (=subdomain), verified email, favorite color, interests
-  - Plan selection → Payment via Stripe → Interactive tour (5-10 min, skippable)
-  - Handoff: D1 initialized, site live immediately
-  - Email sequence: welcome, day 3, 7, 30 follow-ups
+- [x] Build tenant onboarding flow → **DEPLOYED**: `plant.grove.place`
+  - ✅ Signup: name, username (=subdomain), verified email, favorite color, interests
+  - ✅ Plan selection page with 4 tiers
+  - ⏳ Payment via Stripe (placeholder IDs, needs real products)
+  - ✅ Interactive tour (8 steps, skippable)
+  - ✅ Email templates ready (welcome, day 1/3/7/30)
+
+### Stripe Integration (plant.grove.place)
+> **Status:** Code deployed with placeholder price IDs. Needs real Stripe products.
+> **Location:** `plant/src/lib/server/stripe.ts`
+>
+> **Setup Steps:**
+> - [ ] Create 4 products in Stripe Dashboard (Seedling, Sapling, Oak, Evergreen)
+> - [ ] Create 8 prices (4 plans × monthly/yearly with 15% discount)
+> - [ ] Replace placeholder IDs in `plant/src/lib/server/stripe.ts`
+> - [ ] Set STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET secrets
+> - [ ] Configure webhook endpoint: `https://plant.grove.place/api/webhooks/stripe`
 - [ ] Implement plan management (Seedling/Sapling/Oak/Evergreen)
   - **Tiers:** Seedling ($8), Sapling ($12), Oak ($25), Evergreen ($35)
   - **Free tier** for Meadow-only users (no blog, social features only)
