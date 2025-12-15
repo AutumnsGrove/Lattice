@@ -95,6 +95,15 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 
 ---
 
+## Ivy
+**Email** · `ivy.grove.place`
+
+Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
+
+Ivy is email for Grove. Not a Gmail replacement—a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means we can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -108,6 +117,7 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 | **Aria** | Music curation | aria.grove.place |
 | **Lattice** | Core platform | npm package |
 | **Rings** | Analytics | *(integrated)* |
+| **Ivy** | Email | ivy.grove.place |
 
 ---
 
@@ -126,6 +136,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Aria | GroveMusic |
 | Lattice | GroveEngine |
 | Rings | GroveAnalytics |
+| Ivy | GroveMail |
 
 ---
 
