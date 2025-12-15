@@ -22,15 +22,19 @@
 		evergreen: { monthly: 35, yearly: 357 }
 	};
 
-	$: planName = data.onboarding?.planSelected
-		? planNames[data.onboarding.planSelected] || data.onboarding.planSelected
-		: '';
-	$: billingCycle = data.onboarding?.billingCycle || 'monthly';
-	$: price = data.onboarding?.planSelected
-		? billingCycle === 'yearly'
-			? (planPrices[data.onboarding.planSelected]?.yearly / 12).toFixed(2)
-			: planPrices[data.onboarding.planSelected]?.monthly
-		: 0;
+	let planName = $derived(
+		data.onboarding?.planSelected
+			? planNames[data.onboarding.planSelected] || data.onboarding.planSelected
+			: ''
+	);
+	let billingCycle = $derived(data.onboarding?.billingCycle || 'monthly');
+	let price = $derived(
+		data.onboarding?.planSelected
+			? billingCycle === 'yearly'
+				? (planPrices[data.onboarding.planSelected]?.yearly / 12).toFixed(2)
+				: planPrices[data.onboarding.planSelected]?.monthly
+			: 0
+	);
 
 	onMount(async () => {
 		// Create checkout session and redirect to Stripe

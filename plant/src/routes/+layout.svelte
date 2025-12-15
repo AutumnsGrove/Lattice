@@ -1,17 +1,17 @@
 <script lang="ts">
 	import '../app.css';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	// Determine current step based on route
-	$: currentStep = (() => {
-		const path = $page.url.pathname;
+	let currentStep = $derived((() => {
+		const path = page.url.pathname;
 		if (path === '/') return 1;
 		if (path === '/profile') return 2;
 		if (path === '/plans') return 3;
 		if (path === '/checkout') return 4;
 		if (path === '/success' || path === '/tour') return 5;
 		return 1;
-	})();
+	})());
 
 	const steps = [
 		{ num: 1, label: 'Sign In' },
