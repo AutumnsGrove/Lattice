@@ -95,6 +95,24 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 
 ---
 
+## Ivy
+**Email** · `ivy.grove.place`
+
+Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
+
+Ivy is email for Grove. Not a Gmail replacement—a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means we can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+
+---
+
+## Cellar
+**Storage Management** · `cellar.grove.place`
+
+A root cellar is where you store what matters for the long term. Cool, secure, carefully organized. Not a place you visit every day—but when you need something, it's there.
+
+Cellar is Grove's unified storage management. Every file you upload—blog images, email attachments, profile pictures—lives in the same root cellar, organized and accessible from one place. See what's using your space. Download your data. Clean up what you don't need. Your digital cellar, always ready when you need it.
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -108,6 +126,8 @@ Rings is analytics for writers, not marketers. No public view counts breeding an
 | **Aria** | Music curation | aria.grove.place |
 | **Lattice** | Core platform | npm package |
 | **Rings** | Analytics | *(integrated)* |
+| **Ivy** | Email | ivy.grove.place |
+| **Cellar** | Storage management | cellar.grove.place |
 
 ---
 
@@ -126,6 +146,8 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Aria | GroveMusic |
 | Lattice | GroveEngine |
 | Rings | GroveAnalytics |
+| Ivy | GroveMail |
+| Cellar | GroveStorage |
 
 ---
 
