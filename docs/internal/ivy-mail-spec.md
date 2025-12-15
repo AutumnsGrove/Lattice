@@ -308,33 +308,117 @@ Auth: API token from account dashboard
 - Delayed send queue (our D1)
 - Additional encryption layer (our R2)
 - Contact form integration
-- Search indexing (our D1)
+- Search indexing (client-side, IndexedDB)
+
+### Resend Integration (Newsletters)
+
+**Hybrid architecture:** Forward Email for mailbox, Resend for broadcasts.
+
+#### Why Two Providers?
+
+| Use Case | Provider | Why |
+|----------|----------|-----|
+| 1:1 correspondence | Forward Email | Mailbox infrastructure (MX, webhooks, SMTP) |
+| Newsletters/broadcasts | Resend | Purpose-built for bulk, dedicated IPs, deliverability |
+
+Different tools for different jobs. No approval needed from Forward Email for newsletters.
+
+#### Resend Pricing
+
+**Transactional Email (API sends):**
+
+| Plan | Price | Emails/Month | Daily Limit |
+|------|-------|--------------|-------------|
+| Free | $0 | 3,000 | 100/day |
+| Pro | $20/mo | 50,000 | — |
+| Scale | $90/mo | 100,000 | — |
+
+**Marketing Email (Broadcasts):**
+
+| Plan | Price | Contacts | Sends |
+|------|-------|----------|-------|
+| Free | $0 | 1,000 | Unlimited |
+| Starter | $40/mo | 5,000 | Unlimited |
+| Growth | Custom | 10,000+ | Unlimited |
+
+**For Grove:**
+- Start with Free tier (1,000 contacts, unlimited sends)
+- Move to Starter ($40/mo) when subscriber base grows
+- Marketing pricing is per-contact, not per-send (good for 2x/week newsletters)
+
+#### Newsletter Feature (Oak+)
+
+```
+USER FLOW:
+1. User composes newsletter in Ivy
+2. Selects "Send to Subscribers"
+3. Preview shows recipient count
+4. User confirms send
+5. Resend Broadcasts API sends to all subscribers
+6. Copy stored in user's Ivy (encrypted)
+
+LIMITS:
+- Oak/Evergreen only
+- Maximum 2 sends per week (enforced by Grove, not Resend)
+- No tracking pixels, no open tracking (privacy-first)
+- Automatic unsubscribe link in footer
+```
+
+#### Resend Configuration
+
+```
+API: api.resend.com
+Auth: API key (stored securely, not in user space)
+From: username@grove.place (verified domain)
+```
+
+#### Cost Projection
+
+| Users with Oak+ | Avg Subscribers | Monthly Cost |
+|-----------------|-----------------|--------------|
+| 10 | 500 | $0 (free tier) |
+| 50 | 2,500 | $40/mo |
+| 200 | 10,000 | ~$80/mo |
+
+Resend's per-contact pricing scales reasonably for Grove's use case.
 
 ### Data Flow
 
 ```
-INCOMING EMAIL (Webhook-based, no Forward Email storage):
+INCOMING EMAIL (Webhook → Buffer → Process):
 
 [External Sender]
         ↓
 [Forward Email MX receives]
         ↓
-[Webhook POST to Grove Worker]  ← Contains: raw, headers, attachments, auth results
+[Webhook POST to Grove Worker]
         ↓
 [Verify X-Webhook-Signature]
         ↓
-[Parse & Encrypt with user key]
+[IMMEDIATELY write to D1 buffer]  ← Fast, durable, prevents data loss
         ↓
-[Store in R2]  ←  Email body + attachments (encrypted)
+[Return 200 OK to Forward Email]
         ↓
-[Index metadata in D1]  ←  From, to, subject, timestamp (for search)
+[Async: Process buffer entry]
         ↓
-[Ivy UI displays]
+[Fetch user's encrypted email key]
+        ↓
+[Encrypt envelope + body with user key]
+        ↓
+[Store body in R2]  ←  Encrypted email body + attachments
+        ↓
+[Store envelope in D1]  ←  Encrypted metadata blob
+        ↓
+[Delete from buffer]
+        ↓
+[Push notification to client]
 
 
 OUTGOING EMAIL (Delayed queue):
 
 [Ivy Compose]
+        ↓
+[Encrypt with user key]
         ↓
 [Save to D1 Queue]  ←  Status: "pending", scheduled_send_at: now + delay
         ↓
@@ -342,32 +426,137 @@ OUTGOING EMAIL (Delayed queue):
         ↓
 [Cron/Worker triggers at scheduled time]
         ↓
+[Decrypt email content]
+        ↓
 [Send via Forward Email SMTP]
         ↓
-[Store sent copy in R2]  ←  Our own copy, encrypted
+[Re-encrypt and store sent copy in R2]
         ↓
 [Update D1: status = "sent"]
+
+
+NEWSLETTER/BROADCAST (Oak+ via Resend):
+
+[Ivy "Send to Subscribers"]
+        ↓
+[Fetch subscriber list]
+        ↓
+[Resend Broadcasts API]  ←  Dedicated infrastructure for bulk
+        ↓
+[Store copy in user's Ivy (encrypted)]
 ```
 
-**Key point:** Forward Email never stores our users' emails. They only relay.
+**Key points:**
+- Forward Email never stores our users' emails—they only relay
+- D1 buffer ensures no email loss if R2 is temporarily unavailable
+- Resend handles newsletters (separate from 1:1 correspondence)
 
 ### Zero-Knowledge Storage
 
-Emails are encrypted at rest using a key derived from the user's credentials:
+**TRUE zero-knowledge**: Grove cannot read ANY of your email data—not bodies, not subjects, not who you're talking to.
 
-1. User authenticates via Heartwood
-2. Key derivation function generates encryption key from auth token + user secret
-3. All email content encrypted before writing to R2
-4. Metadata (sender, subject line, timestamps) stored in D1 for search/indexing
-5. Grove cannot read email bodies without user's derived key
+#### Architecture: Client-Side Everything
 
-**Trade-off:** Subject lines and metadata are searchable but not encrypted. Full body content is encrypted. This balances privacy with usability (search functionality).
+```
+SERVER STORES (all encrypted):
+├── D1: encrypted_envelope blobs, email IDs, r2 references
+├── R2: encrypted email bodies + attachments
+└── Nothing in plaintext except: user_id, created_at (for pagination)
+
+CLIENT HANDLES:
+├── Decryption of all data
+├── Search indexing (IndexedDB)
+├── Full-text search
+└── Offline caching
+```
+
+#### Why This Works for Ivy
+
+Ivy is focused correspondence, not Gmail. Client-side search is viable:
+
+| Mailbox Size | Encrypted Index | Download Time | Search Speed |
+|--------------|-----------------|---------------|--------------|
+| 100 emails | ~50 KB | <1 sec | Instant |
+| 1,000 emails | ~500 KB | ~2 sec | Instant |
+| 10,000 emails | ~5 MB | ~15 sec | <1 sec |
+
+#### The Flow
+
+```
+LOGIN:
+1. Fetch encrypted email index from D1
+2. Decrypt with user's key (client-side)
+3. Build local search index (IndexedDB)
+4. Cache for offline use
+
+SEARCH:
+1. Query local IndexedDB (instant, private)
+2. Body search: fetch + decrypt individual emails on demand
+
+NEW EMAIL ARRIVES:
+1. Webhook → D1 buffer → encrypt → R2
+2. Push notification to client
+3. Client fetches + decrypts + adds to local index
+```
+
+#### Key Derivation & Management
+
+**Separation of concerns:** Email encryption key is separate from auth credentials.
+
+```
+ACTIVATION (first time):
+1. Generate random 256-bit email encryption key
+2. Derive wrapper key from Heartwood credentials (Argon2id)
+3. Encrypt email key with wrapper key
+4. Store encrypted email key in D1
+5. Offer recovery phrase download (BIP39 mnemonic)
+
+LOGIN:
+1. Authenticate via Heartwood
+2. Derive wrapper key from credentials
+3. Decrypt email key
+4. Use email key for all email encryption/decryption
+
+PASSWORD CHANGE:
+1. Derive new wrapper key from new credentials
+2. Re-encrypt email key with new wrapper key
+3. All emails remain accessible (email key unchanged)
+```
+
+**Recovery options:**
+- **Recovery phrase**: 24-word BIP39 mnemonic, download at activation
+- **Key regeneration**: Available in settings, CLEARLY warns this deletes all existing email
+- **Export before reset**: Option to download all decrypted emails before key regeneration
+
+**User-facing warnings:**
+```
+⚠️ IMPORTANT: Your recovery phrase is the ONLY way to recover your
+emails if you forget your password. Grove cannot help you—we literally
+cannot read your data. Download and store this safely.
+```
+
+#### What's Encrypted vs. Not
+
+| Data | Encrypted | Stored Where |
+|------|-----------|--------------|
+| Email body | ✅ AES-256-GCM | R2 |
+| Attachments | ✅ AES-256-GCM | R2 |
+| Subject line | ✅ AES-256-GCM | D1 (envelope blob) |
+| From/To/CC | ✅ AES-256-GCM | D1 (envelope blob) |
+| Timestamps | ✅ AES-256-GCM | D1 (envelope blob) |
+| Labels | ✅ AES-256-GCM | D1 (envelope blob) |
+| `user_id` | ❌ | D1 |
+| `created_at` | ❌ | D1 (for pagination only) |
+| `r2_key` | ❌ | D1 (reference to R2 object) |
+
+**Marketing claim (honest):**
+> "We literally cannot read your emails. Not the body. Not the subject. Not who you're talking to. Your key, your data."
 
 ---
 
 ## Database Schema (D1)
 
-### Core Tables
+### Core Tables (Zero-Knowledge)
 
 ```sql
 -- User email settings
@@ -375,81 +564,46 @@ CREATE TABLE ivy_settings (
   user_id TEXT PRIMARY KEY,
   email_address TEXT UNIQUE NOT NULL,
   email_selected_at TIMESTAMP NOT NULL,
+  encrypted_email_key TEXT NOT NULL,      -- Email key encrypted with user's wrapper key
   unsend_delay_minutes INTEGER DEFAULT 2,
-  signature TEXT,
+  encrypted_signature TEXT,               -- Encrypted with email key
+  recovery_phrase_downloaded BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Email threads (conversations)
-CREATE TABLE ivy_threads (
+-- Webhook buffer (for reliability)
+CREATE TABLE ivy_webhook_buffer (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  snippet TEXT, -- Preview text
-  participant_emails TEXT, -- JSON array
-  message_count INTEGER DEFAULT 1,
-  is_read BOOLEAN DEFAULT FALSE,
-  is_starred BOOLEAN DEFAULT FALSE,
-  is_archived BOOLEAN DEFAULT FALSE,
-  is_trashed BOOLEAN DEFAULT FALSE,
-  trashed_at TIMESTAMP,
-  last_message_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  raw_payload TEXT NOT NULL,              -- Raw webhook payload, temporarily stored
+  webhook_signature TEXT NOT NULL,        -- For verification
+  status TEXT DEFAULT 'pending',          -- pending, processing, completed, failed
+  retry_count INTEGER DEFAULT 0,
+  error_message TEXT,
+  received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  processed_at TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Individual emails within threads
+-- Encrypted email envelopes
 CREATE TABLE ivy_emails (
   id TEXT PRIMARY KEY,
-  thread_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
-  message_id TEXT UNIQUE, -- Email Message-ID header
-  from_address TEXT NOT NULL,
-  to_addresses TEXT NOT NULL, -- JSON array
-  cc_addresses TEXT, -- JSON array
-  bcc_addresses TEXT, -- JSON array
-  subject TEXT NOT NULL,
-  snippet TEXT,
-  r2_content_key TEXT NOT NULL, -- Reference to encrypted content in R2
-  has_attachments BOOLEAN DEFAULT FALSE,
+  encrypted_envelope TEXT NOT NULL,       -- Contains: from, to, subject, snippet, timestamps, labels, thread_id
+  r2_content_key TEXT NOT NULL,           -- Reference to encrypted body in R2
   is_draft BOOLEAN DEFAULT FALSE,
-  is_sent BOOLEAN DEFAULT FALSE,
-  sent_at TIMESTAMP,
-  received_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (thread_id) REFERENCES ivy_threads(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Only unencrypted field (for pagination)
   FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Labels (user-created tags)
-CREATE TABLE ivy_labels (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  color TEXT, -- Hex color for UI
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  UNIQUE(user_id, name)
-);
-
--- Thread-label associations
-CREATE TABLE ivy_thread_labels (
-  thread_id TEXT NOT NULL,
-  label_id TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (thread_id, label_id),
-  FOREIGN KEY (thread_id) REFERENCES ivy_threads(id),
-  FOREIGN KEY (label_id) REFERENCES ivy_labels(id)
 );
 
 -- Outgoing email queue (for delayed sending)
 CREATE TABLE ivy_email_queue (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
-  email_data TEXT NOT NULL, -- Encrypted JSON with full email content
+  encrypted_email_data TEXT NOT NULL,     -- Full email content, encrypted
   scheduled_send_at TIMESTAMP NOT NULL,
-  status TEXT DEFAULT 'pending', -- pending, cancelled, sent, failed
+  status TEXT DEFAULT 'pending',          -- pending, cancelled, sent, failed
   cancelled_at TIMESTAMP,
   sent_at TIMESTAMP,
   error_message TEXT,
@@ -457,45 +611,54 @@ CREATE TABLE ivy_email_queue (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Attachments metadata
-CREATE TABLE ivy_attachments (
-  id TEXT PRIMARY KEY,
-  email_id TEXT NOT NULL,
-  filename TEXT NOT NULL,
-  content_type TEXT NOT NULL,
-  size_bytes INTEGER NOT NULL,
-  r2_key TEXT NOT NULL, -- Reference to file in R2
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (email_id) REFERENCES ivy_emails(id)
-);
-
--- Contact form submissions (integration)
-CREATE TABLE ivy_contact_form_submissions (
+-- Contact form submissions buffer
+CREATE TABLE ivy_contact_form_buffer (
   id TEXT PRIMARY KEY,
   recipient_user_id TEXT NOT NULL,
-  sender_email TEXT NOT NULL,
-  sender_name TEXT,
-  subject TEXT,
-  message TEXT NOT NULL,
-  source_blog TEXT, -- Which blog the form was on
-  thread_id TEXT, -- Created thread in Ivy
+  encrypted_submission TEXT NOT NULL,     -- Encrypted with recipient's public key
+  source_blog TEXT,
+  status TEXT DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (recipient_user_id) REFERENCES users(id),
-  FOREIGN KEY (thread_id) REFERENCES ivy_threads(id)
+  FOREIGN KEY (recipient_user_id) REFERENCES users(id)
 );
 ```
 
 ### Indexes
 
 ```sql
-CREATE INDEX idx_threads_user_id ON ivy_threads(user_id);
-CREATE INDEX idx_threads_last_message ON ivy_threads(user_id, last_message_at DESC);
-CREATE INDEX idx_threads_archived ON ivy_threads(user_id, is_archived);
-CREATE INDEX idx_threads_trashed ON ivy_threads(user_id, is_trashed);
-CREATE INDEX idx_emails_thread ON ivy_emails(thread_id);
-CREATE INDEX idx_emails_user ON ivy_emails(user_id);
+CREATE INDEX idx_emails_user_created ON ivy_emails(user_id, created_at DESC);
 CREATE INDEX idx_queue_pending ON ivy_email_queue(status, scheduled_send_at);
 CREATE INDEX idx_queue_user ON ivy_email_queue(user_id, status);
+CREATE INDEX idx_buffer_pending ON ivy_webhook_buffer(status, received_at);
+CREATE INDEX idx_contact_pending ON ivy_contact_form_buffer(status, created_at);
+```
+
+### Client-Side Schema (IndexedDB)
+
+```javascript
+// Decrypted and indexed locally for search
+const clientSchema = {
+  emails: {
+    keyPath: 'id',
+    indexes: [
+      { name: 'threadId', keyPath: 'threadId' },
+      { name: 'from', keyPath: 'from' },
+      { name: 'to', keyPath: 'to' },
+      { name: 'subject', keyPath: 'subject' },
+      { name: 'date', keyPath: 'date' },
+      { name: 'isRead', keyPath: 'isRead' },
+      { name: 'isStarred', keyPath: 'isStarred' },
+      { name: 'labels', keyPath: 'labels', multiEntry: true },
+    ]
+  },
+  searchIndex: {
+    // Full-text search index built from decrypted content
+    keyPath: 'emailId',
+    indexes: [
+      { name: 'terms', keyPath: 'terms', multiEntry: true }
+    ]
+  }
+};
 ```
 
 ---
@@ -526,6 +689,18 @@ Email storage counts against the user's total Grove storage quota:
 | Oak | 20 GB | Blog images, markdown, email |
 | Evergreen | 100 GB | Blog images, markdown, email |
 
+### Additional Storage Purchase
+
+Users who need more space can purchase additional storage:
+
+| Add-on | Price | Storage |
+|--------|-------|---------|
+| +10 GB | $1/mo | 10 GB |
+| +50 GB | $4/mo | 50 GB |
+| +100 GB | $7/mo | 100 GB |
+
+**Cost basis:** R2 costs ~$0.015/GB/month. These prices provide healthy margin while being affordable.
+
 ### Storage Calculation
 
 - Email bodies: Typically 10-100 KB each
@@ -535,43 +710,74 @@ Email storage counts against the user's total Grove storage quota:
 
 ### Quota Enforcement
 
+**Never block incoming mail.** Users expect email to work like postal mail.
+
 When approaching quota:
-- 80%: Warning notification
-- 95%: Warning, cannot send attachments >1MB
-- 100%: Cannot send new emails, can still receive (briefly), then hard block
+- **80%**: Warning notification, suggestion to clean up or upgrade
+- **95%**: Warning, cannot send attachments >1MB
+- **100%**: **Cannot send new emails, but CAN still receive**
+
+At 100% quota:
+- Block outgoing only
+- Notify user with options:
+  - Download/export data
+  - Compress attachments (zip)
+  - Delete old emails
+  - Purchase additional storage
+  - Upgrade tier
+
+**Storage Management UI (planned):**
+- Visual breakdown of storage by category (blog, email, attachments)
+- One-click export/download
+- Bulk delete old items
+- Compress large attachments
 
 ---
 
 ## Security Model
 
-### Encryption
+### Encryption (True Zero-Knowledge)
 
-| Data | Encryption | Searchable |
-|------|------------|------------|
-| Email body | AES-256 (user key) | No (client-side only) |
-| Attachments | AES-256 (user key) | No |
-| Subject line | Plaintext | Yes |
-| Sender/recipient | Plaintext | Yes |
-| Timestamps | Plaintext | Yes |
-| Labels | Plaintext | Yes |
+| Data | Encryption | Where | Searchable |
+|------|------------|-------|------------|
+| Email body | AES-256-GCM | R2 | Client-side only |
+| Attachments | AES-256-GCM | R2 | No |
+| Subject line | AES-256-GCM | D1 (envelope blob) | Client-side only |
+| From/To/CC | AES-256-GCM | D1 (envelope blob) | Client-side only |
+| Timestamps | AES-256-GCM | D1 (envelope blob) | Client-side only |
+| Labels | AES-256-GCM | D1 (envelope blob) | Client-side only |
+| `user_id` | None | D1 | Yes (for routing) |
+| `created_at` | None | D1 | Yes (for pagination) |
 
-**Trade-off acknowledged:** Metadata is not encrypted to enable server-side search and indexing. Body content has zero-knowledge protection.
+**No trade-offs:** All email content and metadata is encrypted. Grove cannot read any of it.
+
+### Key Management
+
+- **Email key**: Random 256-bit key generated at Ivy activation
+- **Wrapper key**: Derived from Heartwood credentials via Argon2id
+- **Storage**: Email key encrypted with wrapper key, stored in D1
+- **Recovery**: BIP39 mnemonic phrase, downloadable at activation
+- **Rotation**: Users can regenerate key (requires exporting/deleting all existing email)
 
 ### Authentication
 
 - All Ivy access requires Heartwood authentication
 - Session tokens with reasonable expiry
-- Re-authentication required for sensitive actions (changing settings)
+- Re-authentication required for sensitive actions (changing settings, key regeneration)
+- Constant-time comparison for webhook signature verification (prevent timing attacks)
 
 ### Transport
 
 - All connections over HTTPS/TLS
 - Forward Email handles STARTTLS for SMTP
+- Resend handles TLS for newsletter delivery
 
 ### Privacy Commitments
 
 - **No tracking pixels** — We don't add tracking to outgoing mail
 - **No read receipts** — We don't report when emails are opened
+- **No metadata surveillance** — We can't see who you're emailing or about what
+- **True zero-knowledge** — We literally cannot read your emails
 - **No third-party analytics** — No Google Analytics, no Mixpanel
 - **Data portability** — Users can export all their email data
 
@@ -664,23 +870,24 @@ Platform notifications (new followers, reactions, comments) can optionally route
 ### Technical
 
 1. ~~**Forward Email API limits**~~ — ✅ ANSWERED: ~9,000 outbound/month on Enhanced, REST API with 15+ search params
-2. **Search implementation** — D1 full-text search vs. external search service?
-3. **Real-time updates** — Webhooks available; need to test payload structure. Polling as fallback.
-4. **Offline sync** — How much data to cache locally for PWA?
+2. ~~**Search implementation**~~ — ✅ DECIDED: Client-side search via IndexedDB. True zero-knowledge.
+3. **Real-time updates** — Webhooks available; need to test payload structure. Push notifications for new mail.
+4. **Offline sync** — IndexedDB caches decrypted index. How much email body content to cache?
 
 ### Product
 
-1. **Signature editor** — Simple text or rich HTML signatures?
+1. **Signature editor** — Simple text or rich HTML signatures? (encrypted with email key)
 2. **Vacation responder** — Auto-reply when away? (Later feature?)
 3. **Blocked senders** — Allow users to block specific addresses?
 4. **Spam handling** — Forward Email handles spam filtering; we just need UI for spam folder
+5. **Storage management UI** — Visual breakdown, export tools, compression (planned)
 
 ### Business
 
 1. ~~**Forward Email costs**~~ — ✅ ANSWERED: $3/mo for unlimited domains/aliases. Scales perfectly for multi-tenant.
-2. ~~**Storage costs**~~ — ✅ ANSWERED: Using R2 instead of Forward Email storage. ~$15/mo per TB vs ~$300/mo. Massive savings at scale.
-3. **Support burden** — Email is complex. What's the support strategy?
-4. **Newsletter approval** — Need to contact Forward Email about bulk sending for Grove's use case
+2. ~~**Storage costs**~~ — ✅ ANSWERED: Using R2 instead of Forward Email storage. ~$15/mo per TB vs ~$300/mo.
+3. ~~**Newsletter provider**~~ — ✅ DECIDED: Resend for broadcasts. Hybrid architecture (FE for mailbox, Resend for bulk).
+4. **Support burden** — Email is complex. What's the support strategy?
 
 ---
 
@@ -754,6 +961,11 @@ How do we know Ivy is working?
 - [Forward Email FAQ](https://forwardemail.net/en/faq) — General documentation
 - [Forward Email Webhooks](https://forwardemail.net/en/webhook-email-notifications-service) — Webhook setup
 - [GitHub Repository](https://github.com/forwardemail/forwardemail.net) — Open source, self-hostable
+
+### Resend (Newsletters)
+- [Resend](https://resend.com) — Email for developers
+- [Resend Pricing](https://resend.com/pricing) — Transactional and marketing plans
+- [Resend Broadcasts](https://resend.com/blog/send-marketing-emails-with-resend-broadcasts) — Newsletter feature
 
 ### Cloudflare
 - [Cloudflare R2 Pricing](https://developers.cloudflare.com/r2/pricing/)
