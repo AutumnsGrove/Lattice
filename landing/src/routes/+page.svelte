@@ -62,7 +62,7 @@
 	<!-- Logo/Brand - Sapling -->
 	<div class="mb-8">
 		<svg
-			class="w-20 h-20 text-accent-muted"
+			class="w-24 h-24 text-accent-muted"
 			viewBox="0 0 100 100"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -87,32 +87,74 @@
 			<g class="sapling-sway">
 				<!-- Trunk -->
 				<path
-					d="M50 95 Q48 75 50 55"
+					d="M50 95 Q48 70 50 50"
 					stroke="currentColor"
 					stroke-width="4"
 					stroke-linecap="round"
 					fill="none"
 				/>
 
-				<!-- Left leaf (lower) -->
-				<g transform="translate(28, 62) rotate(-35)">
+				<!-- Lower left leaf (small) -->
+				<g transform="translate(32, 68) rotate(-50)">
+					<path d="M0 0C-4 -6 -4 -12 0 -16C4 -12 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2.5 -5 -2.5 -10 0 -13C2.5 -10 2.5 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -12C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				</g>
+
+				<!-- Lower right leaf (small) -->
+				<g transform="translate(68, 65) rotate(45)">
+					<path d="M0 0C-4 -6 -4 -12 0 -16C4 -12 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2.5 -5 -2.5 -10 0 -13C2.5 -10 2.5 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -12C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				</g>
+
+				<!-- Mid-left leaf (medium) -->
+				<g transform="translate(26, 52) rotate(-40)">
 					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-3.5 -8 -3.5 -14 0 -19C3.5 -14 3.5 -8 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -2C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
 					<path d="M0 -5C-2 -9 -2 -13 0 -16C2 -13 2 -9 0 -5Z" fill="currentColor"/>
 				</g>
 
-				<!-- Right leaf (middle) -->
-				<g transform="translate(72, 52) rotate(40)">
-					<path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-4 -9 -4 -16 0 -21C4 -16 4 -9 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2.5 -10 -2.5 -14 0 -17C2.5 -14 2.5 -10 0 -6Z" fill="currentColor"/>
+				<!-- Mid-right leaf (medium) -->
+				<g transform="translate(74, 48) rotate(35)">
+					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -5C-2 -9 -2 -13 0 -16C2 -13 2 -9 0 -5Z" fill="currentColor"/>
 				</g>
 
-				<!-- Top leaf (crown) - largest -->
-				<g transform="translate(50, 30)">
-					<path d="M0 0C-8 -12 -8 -24 0 -32C8 -24 8 -12 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -4C-5.5 -12 -5.5 -20 0 -27C5.5 -20 5.5 -12 0 -4Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -8C-3.5 -14 -3.5 -20 0 -24C3.5 -20 3.5 -14 0 -8Z" fill="currentColor"/>
+				<!-- Upper left leaf (larger) -->
+				<g transform="translate(30, 38) rotate(-30)">
+					<path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-4 -8 -4 -15 0 -21C4 -15 4 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2.5 -10 -2.5 -15 0 -18C2.5 -15 2.5 -10 0 -6Z" fill="currentColor"/>
+				</g>
+
+				<!-- Upper right leaf (larger) -->
+				<g transform="translate(70, 35) rotate(28)">
+					<path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-4 -8 -4 -15 0 -21C4 -15 4 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2.5 -10 -2.5 -15 0 -18C2.5 -15 2.5 -10 0 -6Z" fill="currentColor"/>
+				</g>
+
+				<!-- Crown leaf left -->
+				<g transform="translate(38, 22) rotate(-15)">
+					<path d="M0 0C-6 -10 -6 -20 0 -28C6 -20 6 -10 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-4 -9 -4 -17 0 -23C4 -17 4 -9 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -7C-2.5 -12 -2.5 -17 0 -21C2.5 -17 2.5 -12 0 -7Z" fill="currentColor"/>
+				</g>
+
+				<!-- Crown leaf right -->
+				<g transform="translate(62, 22) rotate(15)">
+					<path d="M0 0C-6 -10 -6 -20 0 -28C6 -20 6 -10 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-4 -9 -4 -17 0 -23C4 -17 4 -9 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -7C-2.5 -12 -2.5 -17 0 -21C2.5 -17 2.5 -12 0 -7Z" fill="currentColor"/>
+				</g>
+
+				<!-- Top center leaf (crown jewel) -->
+				<g transform="translate(50, 18)">
+					<path d="M0 0C-7 -11 -7 -22 0 -30C7 -22 7 -11 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -4C-5 -10 -5 -18 0 -25C5 -18 5 -10 0 -4Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -8C-3 -13 -3 -18 0 -22C3 -18 3 -13 0 -8Z" fill="currentColor"/>
 				</g>
 			</g>
 		</svg>
