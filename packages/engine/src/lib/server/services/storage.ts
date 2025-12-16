@@ -58,6 +58,8 @@ export interface UploadOptions {
 	altText?: string;
 	/** User ID who uploaded the file */
 	uploadedBy: string;
+	/** Override default file size limit (in bytes) */
+	maxFileSize?: number;
 }
 
 export interface GetFileResult {
@@ -103,7 +105,21 @@ export type StorageErrorCode =
 // Configuration
 // ============================================================================
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+/** Default max file size: 50MB */
+const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+/** Storage configuration - can be customized per-upload */
+export interface StorageConfig {
+	/** Maximum file size in bytes (default: 50MB) */
+	maxFileSize?: number;
+	/** Additional allowed content types beyond the defaults */
+	additionalContentTypes?: string[];
+}
+
+/** Default storage configuration */
+export const STORAGE_DEFAULTS = {
+	MAX_FILE_SIZE: DEFAULT_MAX_FILE_SIZE
+} as const;
 
 const ALLOWED_CONTENT_TYPES = new Set([
 	// Images
@@ -209,21 +225,44 @@ function buildStorageKey(folder: string, filename: string): string {
 // Validation
 // ============================================================================
 
-export function validateFile(data: ArrayBuffer, contentType: string): void {
-	if (data.byteLength > MAX_FILE_SIZE) {
+/**
+ * Validate file size and content type
+ *
+ * @param data - File data as ArrayBuffer
+ * @param contentType - MIME type of the file
+ * @param config - Optional configuration to override defaults
+ */
+export function validateFile(
+	data: ArrayBuffer,
+	contentType: string,
+	config?: StorageConfig
+): void {
+	const maxSize = config?.maxFileSize ?? DEFAULT_MAX_FILE_SIZE;
+
+	if (data.byteLength > maxSize) {
 		throw new StorageError(
-			`File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+			`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`,
 			'FILE_TOO_LARGE'
 		);
 	}
 
-	if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
+	const isAllowed =
+		ALLOWED_CONTENT_TYPES.has(contentType) ||
+		config?.additionalContentTypes?.includes(contentType);
+
+	if (!isAllowed) {
 		throw new StorageError(`Content type not allowed: ${contentType}`, 'INVALID_TYPE');
 	}
 }
 
-export function isAllowedContentType(contentType: string): boolean {
-	return ALLOWED_CONTENT_TYPES.has(contentType);
+/**
+ * Check if a content type is allowed
+ *
+ * @param contentType - MIME type to check
+ * @param additionalTypes - Additional types to allow beyond defaults
+ */
+export function isAllowedContentType(contentType: string, additionalTypes?: string[]): boolean {
+	return ALLOWED_CONTENT_TYPES.has(contentType) || additionalTypes?.includes(contentType) || false;
 }
 
 // ============================================================================
@@ -251,10 +290,10 @@ export async function uploadFile(
 	db: D1DatabaseOrSession,
 	options: UploadOptions
 ): Promise<StorageFile> {
-	const { data, filename, contentType, folder, altText, uploadedBy } = options;
+	const { data, filename, contentType, folder, altText, uploadedBy, maxFileSize } = options;
 
-	// Validate
-	validateFile(data, contentType);
+	// Validate with optional custom size limit
+	validateFile(data, contentType, { maxFileSize });
 
 	// Generate unique key
 	const uniqueFilename = generateUniqueFilename(filename);
@@ -300,8 +339,8 @@ export async function uploadFile(
 		// Attempt to clean up the uploaded file
 		try {
 			await bucket.delete(key);
-		} catch {
-			// Ignore cleanup errors
+		} catch (cleanupErr) {
+			console.error('[Storage] Failed to cleanup R2 object after metadata failure:', cleanupErr);
 		}
 		throw new StorageError('Failed to store file metadata', 'METADATA_FAILED', err);
 	}

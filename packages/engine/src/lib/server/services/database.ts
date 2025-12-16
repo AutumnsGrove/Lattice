@@ -387,9 +387,17 @@ export async function insert(
 		return id;
 	} catch (err) {
 		if (err instanceof Error && err.message.includes('UNIQUE constraint')) {
-			throw new DatabaseError(`Duplicate entry in ${table}`, 'CONSTRAINT_VIOLATION', err);
+			throw new DatabaseError(
+				`Duplicate entry in ${table} (columns: ${columns.join(', ')})`,
+				'CONSTRAINT_VIOLATION',
+				err
+			);
 		}
-		throw new DatabaseError(`Insert into ${table} failed`, 'QUERY_FAILED', err);
+		throw new DatabaseError(
+			`Insert into ${table} failed (columns: ${columns.join(', ')})`,
+			'QUERY_FAILED',
+			err
+		);
 	}
 }
 
@@ -435,7 +443,12 @@ export async function update(
 			.run();
 		return result.meta.changes ?? 0;
 	} catch (err) {
-		throw new DatabaseError(`Update ${table} failed`, 'QUERY_FAILED', err);
+		const fields = Object.keys(dataWithTimestamp).join(', ');
+		throw new DatabaseError(
+			`Update ${table} failed (fields: ${fields}, where: ${where})`,
+			'QUERY_FAILED',
+			err
+		);
 	}
 }
 
@@ -470,7 +483,7 @@ export async function deleteWhere(
 			.run();
 		return result.meta.changes ?? 0;
 	} catch (err) {
-		throw new DatabaseError(`Delete from ${table} failed`, 'QUERY_FAILED', err);
+		throw new DatabaseError(`Delete from ${table} failed (where: ${where})`, 'QUERY_FAILED', err);
 	}
 }
 

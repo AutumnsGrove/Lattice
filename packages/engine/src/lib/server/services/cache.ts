@@ -173,6 +173,11 @@ export async function del(
  * Get a value from cache, or compute and store it if missing
  * This is the most common caching pattern.
  *
+ * NOTE: Cache writes are fire-and-forget for better response time. This means
+ * subsequent requests might miss the cache briefly until the write completes.
+ * Use `getOrSetSync` if you need to ensure the value is cached before returning
+ * (e.g., when cache consistency is critical).
+ *
  * @example
  * ```ts
  * const user = await cache.getOrSet(kv, `user:${id}`, {
