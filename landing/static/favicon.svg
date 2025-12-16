@@ -1,13 +1,12 @@
 <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Linktree-style: 6-point asterisk with longer trunk -->
-  <!-- Trunk (vertical, longer at bottom) -->
-  <rect x="42" y="5" width="16" height="90" rx="2" fill="#22c55e"/>
-  <!-- Upper diagonal branches -->
-  <rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-45 50 38)"/>
-  <rect x="42" y="6" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(45 50 38)"/>
-  <!-- Horizontal branches -->
-  <rect x="5" y="30" width="90" height="16" rx="2" fill="#22c55e"/>
-  <!-- Lower diagonal branches -->
-  <rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(-135 50 38)"/>
-  <rect x="42" y="38" width="16" height="40" rx="2" fill="#22c55e" transform="rotate(135 50 38)"/>
+  <!-- Linktree-style: three stacked chevrons with trunk -->
+  <path fill="#22c55e" fill-rule="nonzero" d="
+    M8 36 L46 8 L46 14 L18 36 Z
+    M92 36 L54 8 L54 14 L82 36 Z
+    M8 54 L46 26 L46 32 L18 54 Z
+    M92 54 L54 26 L54 32 L82 54 Z
+    M8 72 L46 44 L46 50 L18 72 Z
+    M92 72 L54 44 L54 50 L82 72 Z
+    M41 66 h18 v30 h-18 Z
+  "/>
 </svg>
