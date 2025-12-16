@@ -87,74 +87,96 @@
 			<g class="sapling-sway">
 				<!-- Trunk -->
 				<path
-					d="M50 95 Q48 70 50 50"
+					d="M50 95 Q48 70 50 45"
 					stroke="currentColor"
 					stroke-width="4"
 					stroke-linecap="round"
 					fill="none"
 				/>
 
-				<!-- Lower left leaf (small) -->
-				<g transform="translate(32, 68) rotate(-50)">
-					<path d="M0 0C-4 -6 -4 -12 0 -16C4 -12 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2.5 -5 -2.5 -10 0 -13C2.5 -10 2.5 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -12C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				<!-- TIER 1: Bottom leaves (3) -->
+				<g transform="translate(35, 62) rotate(-55)">
+					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(50, 58) rotate(5)">
+					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(65, 60) rotate(50)">
+					<path d="M0 0C-3 -5 -3 -10 0 -14C3 -10 3 -5 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2 -5 -2 -9 0 -11C2 -9 2 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.2 -6 -1.2 -8 0 -10C1.2 -8 1.2 -6 0 -4Z" fill="currentColor"/>
 				</g>
 
-				<!-- Lower right leaf (small) -->
-				<g transform="translate(68, 65) rotate(45)">
-					<path d="M0 0C-4 -6 -4 -12 0 -16C4 -12 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-2.5 -5 -2.5 -10 0 -13C2.5 -10 2.5 -5 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -12C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				<!-- TIER 2: Lower-mid leaves (3) -->
+				<g transform="translate(30, 50) rotate(-45)">
+					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(50, 48) rotate(-8)">
+					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(70, 48) rotate(42)">
+					<path d="M0 0C-4 -6 -4 -13 0 -18C4 -13 4 -6 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -2C-2.5 -6 -2.5 -11 0 -15C2.5 -11 2.5 -6 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -4C-1.5 -7 -1.5 -10 0 -13C1.5 -10 1.5 -7 0 -4Z" fill="currentColor"/>
 				</g>
 
-				<!-- Mid-left leaf (medium) -->
-				<g transform="translate(26, 52) rotate(-40)">
+				<!-- TIER 3: Mid leaves (3) -->
+				<g transform="translate(28, 38) rotate(-38)">
 					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -5C-2 -9 -2 -13 0 -16C2 -13 2 -9 0 -5Z" fill="currentColor"/>
+					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
 				</g>
-
-				<!-- Mid-right leaf (medium) -->
-				<g transform="translate(74, 48) rotate(35)">
+				<g transform="translate(50, 36) rotate(3)">
 					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -2C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -2Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -5C-2 -9 -2 -13 0 -16C2 -13 2 -9 0 -5Z" fill="currentColor"/>
+					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(72, 36) rotate(35)">
+					<path d="M0 0C-5 -8 -5 -16 0 -22C5 -16 5 -8 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -7 -3.5 -13 0 -18C3.5 -13 3.5 -7 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -5C-2 -9 -2 -12 0 -15C2 -12 2 -9 0 -5Z" fill="currentColor"/>
 				</g>
 
-				<!-- Upper left leaf (larger) -->
-				<g transform="translate(30, 38) rotate(-30)">
-					<path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-4 -8 -4 -15 0 -21C4 -15 4 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2.5 -10 -2.5 -15 0 -18C2.5 -15 2.5 -10 0 -6Z" fill="currentColor"/>
+				<!-- TIER 4: Upper leaves (3) -->
+				<g transform="translate(32, 26) rotate(-28)">
+					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(50, 25) rotate(-5)">
+					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
+				</g>
+				<g transform="translate(68, 24) rotate(25)">
+					<path d="M0 0C-5 -9 -5 -18 0 -24C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -8 -3.5 -14 0 -20C3.5 -14 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2 -10 -2 -14 0 -17C2 -14 2 -10 0 -6Z" fill="currentColor"/>
 				</g>
 
-				<!-- Upper right leaf (larger) -->
-				<g transform="translate(70, 35) rotate(28)">
-					<path d="M0 0C-6 -9 -6 -18 0 -25C6 -18 6 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-4 -8 -4 -15 0 -21C4 -15 4 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -6C-2.5 -10 -2.5 -15 0 -18C2.5 -15 2.5 -10 0 -6Z" fill="currentColor"/>
+				<!-- TIER 5: Crown leaves (3) -->
+				<g transform="translate(38, 14) rotate(-18)">
+					<path d="M0 0C-5 -9 -5 -18 0 -26C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -8 -3.5 -15 0 -21C3.5 -15 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2.2 -10 -2.2 -14 0 -18C2.2 -14 2.2 -10 0 -6Z" fill="currentColor"/>
 				</g>
-
-				<!-- Crown leaf left -->
-				<g transform="translate(38, 22) rotate(-15)">
+				<g transform="translate(50, 12)">
 					<path d="M0 0C-6 -10 -6 -20 0 -28C6 -20 6 -10 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-4 -9 -4 -17 0 -23C4 -17 4 -9 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -7C-2.5 -12 -2.5 -17 0 -21C2.5 -17 2.5 -12 0 -7Z" fill="currentColor"/>
+					<path d="M0 -4C-4 -9 -4 -16 0 -23C4 -16 4 -9 0 -4Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -7C-2.5 -11 -2.5 -16 0 -20C2.5 -16 2.5 -11 0 -7Z" fill="currentColor"/>
 				</g>
-
-				<!-- Crown leaf right -->
-				<g transform="translate(62, 22) rotate(15)">
-					<path d="M0 0C-6 -10 -6 -20 0 -28C6 -20 6 -10 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -3C-4 -9 -4 -17 0 -23C4 -17 4 -9 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -7C-2.5 -12 -2.5 -17 0 -21C2.5 -17 2.5 -12 0 -7Z" fill="currentColor"/>
-				</g>
-
-				<!-- Top center leaf (crown jewel) -->
-				<g transform="translate(50, 18)">
-					<path d="M0 0C-7 -11 -7 -22 0 -30C7 -22 7 -11 0 0Z" fill="currentColor" fill-opacity="0.15"/>
-					<path d="M0 -4C-5 -10 -5 -18 0 -25C5 -18 5 -10 0 -4Z" fill="currentColor" fill-opacity="0.3"/>
-					<path d="M0 -8C-3 -13 -3 -18 0 -22C3 -18 3 -13 0 -8Z" fill="currentColor"/>
+				<g transform="translate(62, 14) rotate(18)">
+					<path d="M0 0C-5 -9 -5 -18 0 -26C5 -18 5 -9 0 0Z" fill="currentColor" fill-opacity="0.15"/>
+					<path d="M0 -3C-3.5 -8 -3.5 -15 0 -21C3.5 -15 3.5 -8 0 -3Z" fill="currentColor" fill-opacity="0.3"/>
+					<path d="M0 -6C-2.2 -10 -2.2 -14 0 -18C2.2 -14 2.2 -10 0 -6Z" fill="currentColor"/>
 				</g>
 			</g>
 		</svg>
