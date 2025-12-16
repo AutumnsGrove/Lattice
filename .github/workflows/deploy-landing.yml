@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'landing/**'
+  workflow_run:
+    workflows: ["Generate Repository Snapshot"]
+    types:
+      - completed
   workflow_dispatch:
 
 defaults:
@@ -15,6 +19,8 @@ defaults:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Only run if: push/dispatch triggered, OR workflow_run succeeded
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       deployments: write
@@ -22,6 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Always get latest main to include snapshot commits
+          ref: main
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
