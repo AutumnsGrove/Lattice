@@ -23,8 +23,13 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: ["src/lib/server/services/**/*.ts"],
-      exclude: ["**/*.test.ts", "**/*.spec.ts"],
+      include: [
+        "src/lib/server/services/**/*.ts",
+        "src/lib/groveauth/**/*.ts",
+        "src/lib/payments/**/*.ts",
+        "src/lib/utils/**/*.ts",
+      ],
+      exclude: ["**/*.test.ts", "**/*.spec.ts", "**/types.ts", "**/index.ts"],
     },
   },
 });
