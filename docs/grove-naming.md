@@ -104,12 +104,12 @@ Ivy is email for Grove. Not a Gmail replacement—a focused, privacy-first mail 
 
 ---
 
-## Cellar
-**Storage Management** · `cellar.grove.place`
+## Amber
+**Storage Management** · `amber.grove.place`
 
-A root cellar is where you store what matters for the long term. Cool, secure, carefully organized. Not a place you visit every day—but when you need something, it's there.
+Amber is fossilized tree resin—preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.
 
-Cellar is Grove's unified storage management. Every file you upload—blog images, email attachments, profile pictures—lives in the same root cellar, organized and accessible from one place. See what's using your space. Download your data. Clean up what you don't need. Your digital cellar, always ready when you need it.
+Amber is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place. See what's using your space. Download and export your data. Clean up what you don't need. Buy more when you need it. Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove—made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
 
 ---
 
@@ -127,7 +127,7 @@ Cellar is Grove's unified storage management. Every file you upload—blog image
 | **Lattice** | Core platform | npm package |
 | **Rings** | Analytics | *(integrated)* |
 | **Ivy** | Email | ivy.grove.place |
-| **Cellar** | Storage management | cellar.grove.place |
+| **Amber** | Storage management | amber.grove.place |
 
 ---
 
@@ -147,7 +147,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Lattice | GroveEngine |
 | Rings | GroveAnalytics |
 | Ivy | GroveMail |
-| Cellar | GroveStorage |
+| Amber | GroveStorage |
 
 ---
 

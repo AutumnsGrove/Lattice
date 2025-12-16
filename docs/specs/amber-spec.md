@@ -1,4 +1,4 @@
-# Cellar — Grove Storage Management Specification
+# Amber — Grove Storage Management Specification
 
 *Internal planning document*
 
@@ -8,21 +8,21 @@
 
 ## Overview
 
-**Cellar** is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—lives in the same root cellar, organized and accessible from one place.
+**Amber** is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place.
 
-### Why "Cellar"?
+### Why "Amber"?
 
-A root cellar is where you store what matters for the long term. Cool, secure, carefully organized. Your digital cellar holds your files, keeps them safe, and lets you manage your space as it grows.
+Amber is fossilized tree resin—preserving moments in time, capturing life in suspended animation. Your digital Amber holds your files, keeps them safe, and lets you manage your space as it grows.
 
 | | |
 |---|---|
-| **Public name** | Cellar |
+| **Public name** | Amber |
 | **Internal codename** | GroveStorage |
-| **Domain** | cellar.grove.place (or integrated into dashboard) |
+| **Domain** | amber.grove.place (or integrated into dashboard) |
 
 ### Philosophy
 
-Cellar isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove—made visible and manageable. Every paid user already has storage; Cellar is how they understand and control it.
+Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove—made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
 
 - See what's using your space
 - Download and export your data
@@ -33,7 +33,7 @@ Cellar isn't trying to be Dropbox or Google Drive. It's the storage layer that a
 
 ## Tier Access
 
-Storage is shared across all Grove products. Cellar provides visibility into this unified pool.
+Storage is shared across all Grove products. Amber provides visibility into this unified pool.
 
 | Tier | Base Storage | Email Access | Storage Add-ons |
 |------|:------------:|:------------:|:---------------:|
@@ -523,7 +523,7 @@ DELETE /api/storage/addons/:id
 
 ### 1. Blog (Existing)
 
-Blog already uploads images to R2. Cellar provides:
+Blog already uploads images to R2. Amber provides:
 - Visibility into blog storage usage
 - Ability to delete unused images
 - Bulk download of blog assets
@@ -532,30 +532,30 @@ Blog already uploads images to R2. Cellar provides:
 
 ### 2. Ivy (Email)
 
-Ivy attachments are stored in R2. Cellar provides:
+Ivy attachments are stored in R2. Amber provides:
 - View email attachments separately from emails
 - Download attachments without opening email
 - See which attachments use the most space
 
 ### 3. Profile
 
-Profile images (avatar, banner) are visible in Cellar.
+Profile images (avatar, banner) are visible in Amber.
 
 ### 4. Themes
 
-Custom theme assets appear in Cellar for Oak+ users with custom themes.
+Custom theme assets appear in Amber for Oak+ users with custom themes.
 
 ---
 
 ## Data Portability
 
-Cellar is central to Grove's GDPR compliance. Following the **Google Takeout model**.
+Amber is central to Grove's GDPR compliance. Following the **Google Takeout model**.
 
 ### Full Export
 
 Users can request a complete export of all their data:
 
-1. Click "Download All" in Cellar
+1. Click "Download All" in Amber
 2. **Choose format:**
    - Zip (default, 1GB chunks)
    - Zip (5GB chunks)
@@ -836,7 +836,7 @@ async function migrateExistingFiles() {
 
 1. **Deduplication** — Should we detect and dedupe identical uploads? (Same hash = same R2 object, shared reference)
 2. **Image variants** — Do we store original + resized, or generate on demand?
-3. **Encryption** — Blog files are unencrypted. Should Cellar offer encrypted storage option?
+3. **Encryption** — Blog files are unencrypted. Should Amber offer encrypted storage option?
 4. **Trash retention** — 30 days standard. Make configurable?
 
 ### Product
@@ -893,7 +893,7 @@ async function migrateExistingFiles() {
 
 ## Scheduled Tasks (Worker Cron)
 
-Cellar requires scheduled tasks for automated cleanup:
+Amber requires scheduled tasks for automated cleanup:
 
 ### Cron Configuration
 
@@ -930,7 +930,7 @@ function logCronEvent(entry: CronLogEntry): void {
   // Structured JSON for log aggregation (Cloudflare Logpush, Datadog, etc.)
   console.log(JSON.stringify({
     ...entry,
-    service: 'cellar',
+    service: 'amber',
     environment: process.env.ENVIRONMENT || 'production',
   }));
 }
@@ -1094,7 +1094,7 @@ async function deleteExpiredExports(env: Env) {
 
 ## Success Metrics
 
-1. **Adoption** — % of users who visit Cellar
+1. **Adoption** — % of users who visit Amber
 2. **Exports** — How many users export their data (healthy if occasional)
 3. **Add-on revenue** — Storage add-on purchases
 4. **Support reduction** — Fewer "where is my file" tickets

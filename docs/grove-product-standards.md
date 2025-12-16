@@ -23,7 +23,7 @@ grove-ivy/                ← Ivy: standalone product
 ├── package.json          ← depends on groveengine
 └── wrangler.toml         ← Cloudflare Workers config
 
-grove-cellar/             ← Cellar: standalone product
+grove-amber/             ← Amber: standalone product
 ├── ...
 └── package.json          ← depends on groveengine
 ```
@@ -50,7 +50,7 @@ Products with public domains that users interact with directly:
 | Product | Public Name | Domain | Repo |
 |---------|-------------|--------|------|
 | GroveMail | **Ivy** | ivy.grove.place | `grove-ivy` |
-| GroveStorage | **Cellar** | cellar.grove.place | `grove-cellar` |
+| GroveStorage | **Amber** | amber.grove.place | `grove-amber` |
 | GroveSocial | **Meadow** | meadow.grove.place | `grove-meadow` |
 | GroveDomainTool | **Acorn** | acorn.grove.place | `grove-acorn` |
 | TreasureTrove | **Trove** | trove.grove.place | `grove-trove` |
@@ -194,7 +194,7 @@ Products should NOT put these in Lattice:
 ### Public Names (User-Facing)
 
 Single evocative words from nature/shelter themes:
-- Ivy, Cellar, Meadow, Acorn, Trove, Aria, Outpost
+- Ivy, Amber, Meadow, Acorn, Trove, Aria, Outpost
 - Used in marketing, UI, documentation
 - Domain: `{name}.grove.place`
 
@@ -213,7 +213,7 @@ const MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024;
 
 // Config objects: PRODUCT_CONFIG
 const IVY_CONFIG = { ... };
-const CELLAR_CONFIG = { ... };
+const AMBER_CONFIG = { ... };
 
 // Functions: camelCase
 async function sendNewsletter() { ... }
@@ -315,7 +315,7 @@ When migrating a product out of GroveEngine:
 | Product | Spec | Repo | Frontend | Backend | Status |
 |---------|:----:|:----:|:--------:|:-------:|--------|
 | Ivy | ✓ | — | — | — | Spec complete |
-| Cellar | ✓ | — | — | — | Spec complete |
+| Amber | ✓ | — | — | — | Spec complete |
 | Acorn | — | ✓ | ⚠️ In GroveEngine | ✓ | Needs frontend migration |
 | Heartwood | — | ✓ | ✓ | ✓ | Complete |
 | Cache | — | ✓ | — | — | Repo exists |
