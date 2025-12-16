@@ -320,11 +320,33 @@ export async function withSession<T>(
 }
 
 // ============================================================================
+// Table Name Validation
+// ============================================================================
+
+/**
+ * Valid table name pattern - alphanumeric and underscores only
+ * This prevents SQL injection in functions that accept table names
+ */
+const VALID_TABLE_NAME = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+function validateTableName(table: string): void {
+	if (!VALID_TABLE_NAME.test(table)) {
+		throw new DatabaseError(
+			`Invalid table name: ${table}. Table names must be alphanumeric with underscores only.`,
+			'INVALID_QUERY'
+		);
+	}
+}
+
+// ============================================================================
 // Insert Helpers
 // ============================================================================
 
 /**
  * Insert a row and return the generated ID
+ *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
  *
  * @example
  * ```ts
@@ -340,6 +362,7 @@ export async function insert(
 	data: Record<string, unknown>,
 	options?: { id?: string }
 ): Promise<string> {
+	validateTableName(table);
 	const id = options?.id ?? generateId();
 	const timestamp = now();
 
@@ -377,6 +400,9 @@ export async function insert(
 /**
  * Update rows matching a condition
  *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
+ *
  * @example
  * ```ts
  * const changes = await db.update(db, 'users', { name: 'Jane' }, 'id = ?', [userId]);
@@ -389,6 +415,7 @@ export async function update(
 	where: string,
 	whereParams: unknown[] = []
 ): Promise<number> {
+	validateTableName(table);
 	const dataWithTimestamp = {
 		...data,
 		updated_at: now()
@@ -419,6 +446,9 @@ export async function update(
 /**
  * Delete rows matching a condition
  *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
+ *
  * @example
  * ```ts
  * const deleted = await db.deleteWhere(db, 'sessions', 'expires_at < datetime("now")');
@@ -430,6 +460,7 @@ export async function deleteWhere(
 	where: string,
 	whereParams: unknown[] = []
 ): Promise<number> {
+	validateTableName(table);
 	const sql = `DELETE FROM ${table} WHERE ${where}`;
 
 	try {
@@ -467,6 +498,9 @@ export async function deleteById(
 /**
  * Check if a row exists
  *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
+ *
  * @example
  * ```ts
  * if (await db.exists(db, 'users', 'email = ?', [email])) {
@@ -480,6 +514,7 @@ export async function exists(
 	where: string,
 	whereParams: unknown[] = []
 ): Promise<boolean> {
+	validateTableName(table);
 	const sql = `SELECT 1 FROM ${table} WHERE ${where} LIMIT 1`;
 
 	try {
@@ -496,6 +531,9 @@ export async function exists(
 /**
  * Count rows matching a condition
  *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
+ *
  * @example
  * ```ts
  * const activeUsers = await db.count(db, 'users', 'is_active = ?', [1]);
@@ -507,6 +545,7 @@ export async function count(
 	where?: string,
 	whereParams: unknown[] = []
 ): Promise<number> {
+	validateTableName(table);
 	const sql = where
 		? `SELECT COUNT(*) as count FROM ${table} WHERE ${where}`
 		: `SELECT COUNT(*) as count FROM ${table}`;

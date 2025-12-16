@@ -75,23 +75,6 @@ function buildKey(namespace: string | undefined, key: string): string {
 	return parts.join(':');
 }
 
-/**
- * Parse a cache key into its components
- */
-function parseKey(fullKey: string): { namespace?: string; key: string } {
-	const parts = fullKey.split(':');
-	if (parts[0] !== KEY_PREFIX) {
-		return { key: fullKey };
-	}
-	if (parts.length === 2) {
-		return { key: parts[1] };
-	}
-	return {
-		namespace: parts[1],
-		key: parts.slice(2).join(':')
-	};
-}
-
 // ============================================================================
 // Cache Operations
 // ============================================================================
@@ -379,14 +362,22 @@ export async function touch(
  * Simple rate limiting using KV
  * Returns true if the action is allowed, false if rate limited
  *
+ * LIMITATION: This implementation has a read-modify-write pattern that is not
+ * atomic. Under high concurrency, multiple requests may exceed the limit slightly.
+ * For precise rate limiting in high-traffic scenarios, consider using Cloudflare
+ * Durable Objects or an external rate limiting service.
+ *
+ * For most use cases (login attempts, API throttling), this is sufficient as
+ * slight over-allowance is acceptable.
+ *
  * @example
  * ```ts
  * // Allow 5 login attempts per 15 minutes
- * const allowed = await cache.rateLimit(kv, `login:${email}`, {
+ * const result = await cache.rateLimit(kv, `login:${email}`, {
  *   limit: 5,
  *   windowSeconds: 900
  * });
- * if (!allowed) {
+ * if (!result.allowed) {
  *   throw new Error('Too many attempts');
  * }
  * ```

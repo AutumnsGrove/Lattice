@@ -6,6 +6,26 @@
  * - Integrated metadata storage in D1
  * - Specific error types for debugging
  * - ETag support for conditional requests
+ *
+ * REQUIRED SCHEMA: This service expects a `cdn_files` table in D1:
+ *
+ * ```sql
+ * CREATE TABLE cdn_files (
+ *   id TEXT PRIMARY KEY,
+ *   filename TEXT NOT NULL,
+ *   original_filename TEXT NOT NULL,
+ *   key TEXT NOT NULL UNIQUE,
+ *   content_type TEXT NOT NULL,
+ *   size_bytes INTEGER NOT NULL,
+ *   folder TEXT DEFAULT '/',
+ *   alt_text TEXT,
+ *   uploaded_by TEXT NOT NULL,
+ *   created_at TEXT NOT NULL
+ * );
+ *
+ * CREATE INDEX idx_cdn_files_folder ON cdn_files(folder);
+ * CREATE INDEX idx_cdn_files_key ON cdn_files(key);
+ * ```
  */
 
 // ============================================================================
