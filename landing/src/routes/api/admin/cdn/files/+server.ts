@@ -3,7 +3,7 @@
 
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { listAllCdnFiles, getCdnFolders } from '$lib/server/db';
+import { storage } from '@autumnsgrove/groveengine/services';
 
 export const GET: RequestHandler = async ({ url, locals, platform }) => {
 	if (!locals.user) {
@@ -21,12 +21,21 @@ export const GET: RequestHandler = async ({ url, locals, platform }) => {
 	const offset = parseInt(url.searchParams.get('offset') || '0', 10);
 
 	const [filesData, folders] = await Promise.all([
-		listAllCdnFiles(DB, { limit, offset }),
-		getCdnFolders(DB)
+		storage.listAllFiles(DB, { limit, offset }),
+		storage.listFolders(DB)
 	]);
 
 	const filesWithUrls = filesData.files.map((file) => ({
-		...file,
+		id: file.id,
+		filename: file.filename,
+		original_filename: file.originalFilename,
+		key: file.key,
+		content_type: file.contentType,
+		size_bytes: file.sizeBytes,
+		folder: file.folder,
+		alt_text: file.altText,
+		uploaded_by: file.uploadedBy,
+		created_at: file.createdAt,
 		url: `${CDN_URL}/${file.key}`
 	}));
 

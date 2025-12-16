@@ -4,7 +4,7 @@
 
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { deleteCdnFile, getCdnFile, updateCdnFileAltText } from '$lib/server/db';
+import { storage, StorageError } from '@autumnsgrove/groveengine/services';
 
 export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 	if (!locals.user) {
@@ -18,15 +18,17 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 	}
 
 	const { DB, CDN_BUCKET } = platform.env;
-	const key = await deleteCdnFile(DB, params.id);
 
-	if (!key) {
-		throw error(404, 'File not found');
+	try {
+		await storage.deleteFile(CDN_BUCKET, DB, params.id);
+		return json({ success: true, message: 'File deleted successfully' });
+	} catch (err) {
+		if (err instanceof StorageError && err.code === 'FILE_NOT_FOUND') {
+			throw error(404, 'File not found');
+		}
+		console.error('[CDN Delete Error]', err);
+		throw error(500, 'Failed to delete file');
 	}
-
-	await CDN_BUCKET.delete(key);
-
-	return json({ success: true, message: 'File deleted successfully' });
 };
 
 export const PATCH: RequestHandler = async ({ params, request, locals, platform }) => {
@@ -48,15 +50,34 @@ export const PATCH: RequestHandler = async ({ params, request, locals, platform 
 		throw error(400, 'alt_text must be a string');
 	}
 
-	const file = await getCdnFile(DB, params.id);
+	const file = await storage.getFileRecord(DB, params.id);
 	if (!file) {
 		throw error(404, 'File not found');
 	}
 
-	await updateCdnFileAltText(DB, params.id, alt_text);
+	try {
+		await storage.updateAltText(DB, params.id, alt_text);
+	} catch (err) {
+		if (err instanceof StorageError && err.code === 'FILE_NOT_FOUND') {
+			throw error(404, 'File not found');
+		}
+		throw error(500, 'Failed to update file');
+	}
 
 	return json({
 		success: true,
-		file: { ...file, alt_text, url: `${CDN_URL}/${file.key}` }
+		file: {
+			id: file.id,
+			filename: file.filename,
+			original_filename: file.originalFilename,
+			key: file.key,
+			content_type: file.contentType,
+			size_bytes: file.sizeBytes,
+			folder: file.folder,
+			alt_text,
+			uploaded_by: file.uploadedBy,
+			created_at: file.createdAt,
+			url: `${CDN_URL}/${file.key}`
+		}
 	});
 };

@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { listAllCdnFiles, getCdnFolders } from '$lib/server/db';
+import { storage } from '@autumnsgrove/groveengine/services';
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
 	if (!locals.user) {
@@ -16,12 +16,21 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	const { DB, CDN_URL } = platform.env;
 
 	const [filesData, folders] = await Promise.all([
-		listAllCdnFiles(DB, { limit: 50, offset: 0 }),
-		getCdnFolders(DB)
+		storage.listAllFiles(DB, { limit: 50, offset: 0 }),
+		storage.listFolders(DB)
 	]);
 
 	const files = filesData.files.map((file) => ({
-		...file,
+		id: file.id,
+		filename: file.filename,
+		original_filename: file.originalFilename,
+		key: file.key,
+		content_type: file.contentType,
+		size_bytes: file.sizeBytes,
+		folder: file.folder,
+		alt_text: file.altText,
+		uploaded_by: file.uploadedBy,
+		created_at: file.createdAt,
 		url: `${CDN_URL}/${file.key}`
 	}));
 
