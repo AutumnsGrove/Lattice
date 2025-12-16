@@ -233,7 +233,7 @@
 
 ## Legal & Compliance (Remaining)
 
-- [ ] Add AGPL-3.0 license to repo
+- [x] Add AGPL-3.0 license to repo
 - [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
   - Required for DMCA safe harbor protection
   - Register at: https://www.copyright.gov/dmca-directory/

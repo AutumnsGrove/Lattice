@@ -2,6 +2,8 @@
   "name": "@groveengine/example-site",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "AutumnsGrove",
   "description": "Example site showcasing all GroveEngine features - The Midnight Bloom Tea Café",
   "type": "module",
   "scripts": {

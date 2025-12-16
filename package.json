@@ -2,6 +2,8 @@
   "name": "@autumnsgrove/grove-engine",
   "version": "1.0.0",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "AutumnsGrove",
   "packageManager": "pnpm@9.15.0",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

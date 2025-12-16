@@ -2,6 +2,8 @@
   "name": "grove-router",
   "version": "1.0.0",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "AutumnsGrove",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
