@@ -227,21 +227,26 @@ export interface ConnectOnboardingResult {
     onboardingUrl: string;
     expiresAt?: Date;
 }
-export type PlanTier = 'starter' | 'professional' | 'business';
+export type PlanTier = 'seedling' | 'sapling' | 'oak' | 'evergreen';
 export interface PlatformPlan {
     tier: PlanTier;
     name: string;
     price: Money;
+    yearlyPrice?: Money;
     interval: BillingInterval;
     features: string[];
     limits: {
         posts?: number;
         storage?: number;
         customDomain?: boolean;
-        analytics?: boolean;
+        byod?: boolean;
+        email?: 'none' | 'forward' | 'full';
+        analytics?: 'basic' | 'full';
+        supportHours?: number;
         shop?: boolean;
     };
     providerPriceId?: string;
+    yearlyPriceId?: string;
 }
 export interface TenantBilling {
     tenantId: string;
