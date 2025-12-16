@@ -1,5 +1,6 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
+	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { page } from '$app/stores';
 
@@ -42,6 +43,8 @@
 	<title>Grove — a place to Be</title>
 	<meta name="description" content="A quiet corner of the internet where your words can grow and flourish. Sign up to be notified when Grove launches." />
 </svelte:head>
+
+<Header />
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Error Banner -->
