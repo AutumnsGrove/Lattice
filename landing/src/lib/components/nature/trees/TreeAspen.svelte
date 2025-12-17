@@ -49,54 +49,54 @@
 
 	<!-- Left branch cluster -->
 	<g class={animate ? 'quiver quiver-1' : ''}>
-		<!-- Individual leaf shapes (teardrop/heart) -->
-		<path fill={foliageColor} d="M22 40 Q18 35 22 28 Q26 35 22 40 Z" />
-		<path fill={foliageColor} d="M28 32 Q24 27 28 20 Q32 27 28 32 Z" />
-		<path fill={foliageColor} d="M18 32 Q14 27 18 22 Q22 27 18 32 Z" />
-		<path fill={foliageColor} d="M25 45 Q21 40 25 35 Q29 40 25 45 Z" />
-		<path fill={foliageColor} d="M16 42 Q12 37 16 32 Q20 37 16 42 Z" />
+		<!-- Round leaves with pointed tips - characteristic aspen shape -->
+		<path fill={foliageColor} d="M22 40 Q16 36 16 32 Q16 28 22 28 Q28 28 28 32 Q28 36 22 40 Z" />
+		<path fill={foliageColor} d="M28 32 Q23 29 23 26 Q23 22 28 22 Q33 22 33 26 Q33 29 28 32 Z" />
+		<path fill={foliageColor} d="M18 32 Q13 29 13 26 Q13 22 18 22 Q23 22 23 26 Q23 29 18 32 Z" />
+		<path fill={foliageColor} d="M25 45 Q20 42 20 39 Q20 35 25 35 Q30 35 30 39 Q30 42 25 45 Z" />
+		<path fill={foliageColor} d="M16 42 Q11 39 11 36 Q11 32 16 32 Q21 32 21 36 Q21 39 16 42 Z" />
 	</g>
 
 	<g class={animate ? 'quiver quiver-2' : ''}>
-		<path fill={foliageColor} d="M32 28 Q28 23 32 16 Q36 23 32 28 Z" />
-		<path fill={foliageColor} d="M26 18 Q22 13 26 8 Q30 13 26 18 Z" />
-		<path fill={foliageColor} d="M35 38 Q31 33 35 28 Q39 33 35 38 Z" />
-		<path fill={foliageColor} d="M22 12 Q18 7 22 2 Q26 7 22 12 Z" />
+		<path fill={foliageColor} d="M32 28 Q27 25 27 21 Q27 17 32 17 Q37 17 37 21 Q37 25 32 28 Z" />
+		<path fill={foliageColor} d="M26 18 Q22 16 22 13 Q22 10 26 10 Q30 10 30 13 Q30 16 26 18 Z" />
+		<path fill={foliageColor} d="M35 38 Q30 35 30 32 Q30 28 35 28 Q40 28 40 32 Q40 35 35 38 Z" />
+		<path fill={foliageColor} d="M22 12 Q18 10 18 7 Q18 4 22 4 Q26 4 26 7 Q26 10 22 12 Z" />
 	</g>
 
 	<!-- Center top cluster -->
 	<g class={animate ? 'quiver quiver-3' : ''}>
-		<path fill={foliageColor} d="M50 18 Q46 12 50 5 Q54 12 50 18 Z" />
-		<path fill={foliageColor} d="M44 22 Q40 16 44 10 Q48 16 44 22 Z" />
-		<path fill={foliageColor} d="M56 22 Q52 16 56 10 Q60 16 56 22 Z" />
-		<path fill={foliageColor} d="M50 28 Q46 22 50 16 Q54 22 50 28 Z" />
-		<path fill={foliageColor} d="M42 32 Q38 26 42 20 Q46 26 42 32 Z" />
-		<path fill={foliageColor} d="M58 32 Q54 26 58 20 Q62 26 58 32 Z" />
+		<path fill={foliageColor} d="M50 18 Q45 14 45 10 Q45 6 50 6 Q55 6 55 10 Q55 14 50 18 Z" />
+		<path fill={foliageColor} d="M44 22 Q39 19 39 15 Q39 11 44 11 Q49 11 49 15 Q49 19 44 22 Z" />
+		<path fill={foliageColor} d="M56 22 Q51 19 51 15 Q51 11 56 11 Q61 11 61 15 Q61 19 56 22 Z" />
+		<path fill={foliageColor} d="M50 28 Q45 25 45 21 Q45 17 50 17 Q55 17 55 21 Q55 25 50 28 Z" />
+		<path fill={foliageColor} d="M42 32 Q37 29 37 25 Q37 21 42 21 Q47 21 47 25 Q47 29 42 32 Z" />
+		<path fill={foliageColor} d="M58 32 Q53 29 53 25 Q53 21 58 21 Q63 21 63 25 Q63 29 58 32 Z" />
 	</g>
 
 	<!-- Center middle cluster -->
 	<g class={animate ? 'quiver quiver-1' : ''}>
-		<path fill={foliageColor} d="M50 38 Q46 32 50 26 Q54 32 50 38 Z" />
-		<path fill={foliageColor} d="M44 45 Q40 39 44 33 Q48 39 44 45 Z" />
-		<path fill={foliageColor} d="M56 45 Q52 39 56 33 Q60 39 56 45 Z" />
-		<path fill={foliageColor} d="M48 52 Q44 46 48 40 Q52 46 48 52 Z" />
-		<path fill={foliageColor} d="M52 52 Q48 46 52 40 Q56 46 52 52 Z" />
+		<path fill={foliageColor} d="M50 38 Q45 35 45 31 Q45 27 50 27 Q55 27 55 31 Q55 35 50 38 Z" />
+		<path fill={foliageColor} d="M44 45 Q39 42 39 38 Q39 34 44 34 Q49 34 49 38 Q49 42 44 45 Z" />
+		<path fill={foliageColor} d="M56 45 Q51 42 51 38 Q51 34 56 34 Q61 34 61 38 Q61 42 56 45 Z" />
+		<path fill={foliageColor} d="M48 52 Q43 49 43 45 Q43 41 48 41 Q53 41 53 45 Q53 49 48 52 Z" />
+		<path fill={foliageColor} d="M52 52 Q47 49 47 45 Q47 41 52 41 Q57 41 57 45 Q57 49 52 52 Z" />
 	</g>
 
 	<!-- Right branch cluster -->
 	<g class={animate ? 'quiver quiver-2' : ''}>
-		<path fill={foliageColor} d="M78 40 Q74 35 78 28 Q82 35 78 40 Z" />
-		<path fill={foliageColor} d="M72 32 Q68 27 72 20 Q76 27 72 32 Z" />
-		<path fill={foliageColor} d="M82 32 Q78 27 82 22 Q86 27 82 32 Z" />
-		<path fill={foliageColor} d="M75 45 Q71 40 75 35 Q79 40 75 45 Z" />
-		<path fill={foliageColor} d="M84 42 Q80 37 84 32 Q88 37 84 42 Z" />
+		<path fill={foliageColor} d="M78 40 Q72 36 72 32 Q72 28 78 28 Q84 28 84 32 Q84 36 78 40 Z" />
+		<path fill={foliageColor} d="M72 32 Q67 29 67 26 Q67 22 72 22 Q77 22 77 26 Q77 29 72 32 Z" />
+		<path fill={foliageColor} d="M82 32 Q77 29 77 26 Q77 22 82 22 Q87 22 87 26 Q87 29 82 32 Z" />
+		<path fill={foliageColor} d="M75 45 Q70 42 70 39 Q70 35 75 35 Q80 35 80 39 Q80 42 75 45 Z" />
+		<path fill={foliageColor} d="M84 42 Q79 39 79 36 Q79 32 84 32 Q89 32 89 36 Q89 39 84 42 Z" />
 	</g>
 
 	<g class={animate ? 'quiver quiver-3' : ''}>
-		<path fill={foliageColor} d="M68 28 Q64 23 68 16 Q72 23 68 28 Z" />
-		<path fill={foliageColor} d="M74 18 Q70 13 74 8 Q78 13 74 18 Z" />
-		<path fill={foliageColor} d="M65 38 Q61 33 65 28 Q69 33 65 38 Z" />
-		<path fill={foliageColor} d="M78 12 Q74 7 78 2 Q82 7 78 12 Z" />
+		<path fill={foliageColor} d="M68 28 Q63 25 63 21 Q63 17 68 17 Q73 17 73 21 Q73 25 68 28 Z" />
+		<path fill={foliageColor} d="M74 18 Q70 16 70 13 Q70 10 74 10 Q78 10 78 13 Q78 16 74 18 Z" />
+		<path fill={foliageColor} d="M65 38 Q60 35 60 32 Q60 28 65 28 Q70 28 70 32 Q70 35 65 38 Z" />
+		<path fill={foliageColor} d="M78 12 Q74 10 74 7 Q74 4 78 4 Q82 4 82 7 Q82 10 78 12 Z" />
 	</g>
 </svg>
 

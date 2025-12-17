@@ -52,57 +52,57 @@
 	<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M46 42 Q40 32 35 22" />
 	<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M54 42 Q60 32 65 22" />
 
-	<!-- Birch leaves - small diamond/triangular shapes -->
+	<!-- Birch leaves - small serrated ovate leaves -->
 	<!-- Left side clusters -->
 	<g class={animate ? 'sway sway-1' : ''}>
-		<!-- Diamond-shaped leaves pointing down -->
-		<path fill={foliageColor} d="M25 45 L30 38 L35 45 L30 50 Z" />
-		<path fill={foliageColor} d="M18 38 L22 32 L26 38 L22 43 Z" />
-		<path fill={foliageColor} d="M28 35 L32 28 L36 35 L32 40 Z" />
-		<path fill={foliageColor} d="M15 46 L19 40 L23 46 L19 51 Z" />
-		<path fill={foliageColor} d="M32 48 L36 42 L40 48 L36 53 Z" />
+		<!-- Organic leaf shapes with gentle serration -->
+		<path fill={foliageColor} d="M30 50 Q25 45 27 40 L30 38 L33 40 Q35 45 30 50 Z" />
+		<path fill={foliageColor} d="M22 43 Q18 39 20 35 L22 33 L24 35 Q26 39 22 43 Z" />
+		<path fill={foliageColor} d="M32 40 Q28 36 30 31 L32 29 L34 31 Q36 36 32 40 Z" />
+		<path fill={foliageColor} d="M19 51 Q15 47 17 43 L19 41 L21 43 Q23 47 19 51 Z" />
+		<path fill={foliageColor} d="M36 53 Q32 49 34 44 L36 42 L38 44 Q40 49 36 53 Z" />
 	</g>
 
 	<g class={animate ? 'sway sway-2' : ''}>
-		<path fill={foliageColor} d="M30 28 L34 22 L38 28 L34 33 Z" />
-		<path fill={foliageColor} d="M22 25 L26 19 L30 25 L26 30 Z" />
-		<path fill={foliageColor} d="M26 15 L29 10 L32 15 L29 19 Z" />
-		<path fill={foliageColor} d="M35 20 L38 15 L41 20 L38 24 Z" />
+		<path fill={foliageColor} d="M34 33 Q30 29 32 24 L34 22 L36 24 Q38 29 34 33 Z" />
+		<path fill={foliageColor} d="M26 30 Q22 26 24 21 L26 19 L28 21 Q30 26 26 30 Z" />
+		<path fill={foliageColor} d="M29 19 Q26 16 27 12 L29 10 L31 12 Q32 16 29 19 Z" />
+		<path fill={foliageColor} d="M38 24 Q35 21 36 17 L38 15 L40 17 Q41 21 38 24 Z" />
 	</g>
 
 	<!-- Center top cluster -->
 	<g class={animate ? 'sway sway-3' : ''}>
-		<path fill={foliageColor} d="M47 18 L50 12 L53 18 L50 23 Z" />
-		<path fill={foliageColor} d="M42 22 L45 16 L48 22 L45 27 Z" />
-		<path fill={foliageColor} d="M52 22 L55 16 L58 22 L55 27 Z" />
-		<path fill={foliageColor} d="M50 8 L52 4 L54 8 L52 11 Z" />
-		<path fill={foliageColor} d="M44 12 L47 7 L50 12 L47 16 Z" />
-		<path fill={foliageColor} d="M50 12 L53 7 L56 12 L53 16 Z" />
+		<path fill={foliageColor} d="M50 23 Q46 18 48 13 L50 11 L52 13 Q54 18 50 23 Z" />
+		<path fill={foliageColor} d="M45 27 Q41 23 43 18 L45 16 L47 18 Q49 23 45 27 Z" />
+		<path fill={foliageColor} d="M55 27 Q51 23 53 18 L55 16 L57 18 Q59 23 55 27 Z" />
+		<path fill={foliageColor} d="M52 11 Q49 8 50 5 L52 3 L54 5 Q55 8 52 11 Z" />
+		<path fill={foliageColor} d="M47 16 Q44 13 45 9 L47 7 L49 9 Q50 13 47 16 Z" />
+		<path fill={foliageColor} d="M53 16 Q50 13 51 9 L53 7 L55 9 Q56 13 53 16 Z" />
 	</g>
 
 	<!-- Center middle -->
 	<g class={animate ? 'sway sway-1' : ''}>
-		<path fill={foliageColor} d="M47 32 L50 26 L53 32 L50 37 Z" />
-		<path fill={foliageColor} d="M40 35 L43 29 L46 35 L43 40 Z" />
-		<path fill={foliageColor} d="M54 35 L57 29 L60 35 L57 40 Z" />
-		<path fill={foliageColor} d="M45 45 L48 40 L51 45 L48 49 Z" />
-		<path fill={foliageColor} d="M49 45 L52 40 L55 45 L52 49 Z" />
+		<path fill={foliageColor} d="M50 37 Q46 32 48 27 L50 25 L52 27 Q54 32 50 37 Z" />
+		<path fill={foliageColor} d="M43 40 Q39 36 41 31 L43 29 L45 31 Q47 36 43 40 Z" />
+		<path fill={foliageColor} d="M57 40 Q53 36 55 31 L57 29 L59 31 Q61 36 57 40 Z" />
+		<path fill={foliageColor} d="M48 49 Q45 46 46 42 L48 40 L50 42 Q51 46 48 49 Z" />
+		<path fill={foliageColor} d="M52 49 Q49 46 50 42 L52 40 L54 42 Q55 46 52 49 Z" />
 	</g>
 
 	<!-- Right side clusters -->
 	<g class={animate ? 'sway sway-2' : ''}>
-		<path fill={foliageColor} d="M75 45 L70 38 L65 45 L70 50 Z" />
-		<path fill={foliageColor} d="M82 38 L78 32 L74 38 L78 43 Z" />
-		<path fill={foliageColor} d="M72 35 L68 28 L64 35 L68 40 Z" />
-		<path fill={foliageColor} d="M85 46 L81 40 L77 46 L81 51 Z" />
-		<path fill={foliageColor} d="M68 48 L64 42 L60 48 L64 53 Z" />
+		<path fill={foliageColor} d="M70 50 Q65 45 67 40 L70 38 L73 40 Q75 45 70 50 Z" />
+		<path fill={foliageColor} d="M78 43 Q74 39 76 35 L78 33 L80 35 Q82 39 78 43 Z" />
+		<path fill={foliageColor} d="M68 40 Q64 36 66 31 L68 29 L70 31 Q72 36 68 40 Z" />
+		<path fill={foliageColor} d="M81 51 Q77 47 79 43 L81 41 L83 43 Q85 47 81 51 Z" />
+		<path fill={foliageColor} d="M64 53 Q60 49 62 44 L64 42 L66 44 Q68 49 64 53 Z" />
 	</g>
 
 	<g class={animate ? 'sway sway-3' : ''}>
-		<path fill={foliageColor} d="M70 28 L66 22 L62 28 L66 33 Z" />
-		<path fill={foliageColor} d="M78 25 L74 19 L70 25 L74 30 Z" />
-		<path fill={foliageColor} d="M74 15 L71 10 L68 15 L71 19 Z" />
-		<path fill={foliageColor} d="M65 20 L62 15 L59 20 L62 24 Z" />
+		<path fill={foliageColor} d="M66 33 Q62 29 64 24 L66 22 L68 24 Q70 29 66 33 Z" />
+		<path fill={foliageColor} d="M74 30 Q70 26 72 21 L74 19 L76 21 Q78 26 74 30 Z" />
+		<path fill={foliageColor} d="M71 19 Q68 16 69 12 L71 10 L73 12 Q74 16 71 19 Z" />
+		<path fill={foliageColor} d="M62 24 Q59 21 60 17 L62 15 L64 17 Q65 21 62 24 Z" />
 	</g>
 </svg>
 
