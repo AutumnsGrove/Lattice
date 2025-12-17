@@ -7,6 +7,7 @@
 	import TreePine from '$lib/components/trees/TreePine.svelte';
 	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
 	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
+	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
 
 	// Ground elements
 	import Mushroom from '$lib/components/nature/ground/Mushroom.svelte';
@@ -36,6 +37,7 @@
 		pinks,
 		autumnReds,
 		earth,
+		natural,
 		type Season
 	} from '$lib/components/nature/palette';
 
@@ -43,9 +45,9 @@
 	let season: Season = $state('summer');
 	const isAutumn = $derived(season === 'autumn');
 
-	// Tree component types (removed oak and willow, added aspen)
-	type TreeType = 'logo' | 'pine' | 'aspen' | 'cherry';
-	const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'cherry'];
+	// Tree component types
+	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
+	const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'birch', 'cherry'];
 
 	interface Tree {
 		id: number;
@@ -313,6 +315,8 @@
 						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{:else if tree.treeType === 'aspen'}
 						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" color={tree.color} {season} animate={true} />
 					{:else if tree.treeType === 'cherry'}
 						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{/if}
