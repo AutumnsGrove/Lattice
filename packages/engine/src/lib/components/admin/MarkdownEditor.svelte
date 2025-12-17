@@ -559,6 +559,7 @@
   class:zen-mode={isZenMode}
   class:campfire-mode={writingSession.isCampfireActive}
   aria-label="Markdown editor with live preview"
+  role="application"
   ondragenter={handleDragEnter}
   ondragover={handleDragOver}
   ondragleave={handleDragLeave}
@@ -802,7 +803,9 @@
 
 <!-- Command Palette -->
 {#if commandPalette.isOpen}
-  <div class="command-palette-overlay" onclick={() => commandPalette.close()}>
+  <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+  <div class="command-palette-overlay" onclick={() => commandPalette.close()} role="dialog" aria-modal="true" aria-label="Command palette">
+    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
     <div class="command-palette" onclick={(e) => e.stopPropagation()}>
       <input
         type="text"
@@ -996,7 +999,8 @@
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
-  <div class="full-preview-modal" role="dialog" aria-modal="true">
+  <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview">
+    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
     <div class="full-preview-backdrop" onclick={() => (showFullPreview = false)}></div>
     <div class="full-preview-container">
       <header class="full-preview-header">
