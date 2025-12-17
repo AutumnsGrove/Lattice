@@ -268,28 +268,26 @@
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
-		<!-- Season Toggle - Top Right -->
-		<div class="absolute top-4 right-4 z-20">
+		<!-- Season Toggle - Inline with title -->
+		<div class="absolute top-6 right-6 z-40">
 			<button
 				onclick={toggleSeason}
-				class="flex items-center gap-2 px-3 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-105 transition-transform"
+				class="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-110 transition-transform"
 				aria-label={isAutumn ? 'Switch to spring/summer' : 'Switch to autumn'}
 			>
 				{#if isAutumn}
-					<svg class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="w-6 h-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
 						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
 					</svg>
-					<span class="text-sm font-sans text-amber-700 dark:text-amber-400">Autumn</span>
 				{:else}
-					<svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1" />
 						<circle cx="12" cy="8" r="2" />
 						<path d="M12 10v12" />
 						<path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z" />
 						<path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z" />
 					</svg>
-					<span class="text-sm font-sans text-green-700 dark:text-green-400">Summer</span>
 				{/if}
 			</button>
 		</div>
@@ -321,13 +319,13 @@
 
 		<!-- Forest container with rolling hills (decorative scene) -->
 		<div class="relative w-full h-[70vh] min-h-[500px]" aria-hidden="true" role="presentation">
-			<!-- Falling leaves layer - behind everything -->
+			<!-- Falling leaves layer - above hills, below trees -->
 			<FallingLeavesLayer
 				trees={forestTrees}
 				{season}
 				minLeavesPerTree={2}
 				maxLeavesPerTree={4}
-				zIndex={-1}
+				zIndex={5}
 			/>
 
 			<!-- Rolling hills with trees -->
