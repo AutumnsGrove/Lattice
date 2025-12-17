@@ -22,9 +22,10 @@
 	}: Props = $props();
 
 	// In autumn, default to warm amber/orange tones
-	const defaultColor = season === 'autumn' ? autumn.amber : 'currentColor';
-	const foliageColor = color ?? defaultColor;
-	const actualTrunkColor = trunkColor ?? foliageColor;
+	// Use $derived to react to season/color prop changes
+	const defaultColor = $derived(season === 'autumn' ? autumn.amber : 'currentColor');
+	const foliageColor = $derived(color ?? defaultColor);
+	const actualTrunkColor = $derived(trunkColor ?? foliageColor);
 
 	// Animation state for entrance animation
 	let mounted = $state(false);

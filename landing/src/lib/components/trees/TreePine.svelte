@@ -18,8 +18,9 @@
 	}: Props = $props();
 
 	// Pine trees are evergreen - they stay green in autumn!
-	const foliageColor = color ?? 'currentColor';
-	const actualTrunkColor = trunkColor ?? '#6B4423';
+	// Use $derived to react to color prop changes
+	const foliageColor = $derived(color ?? 'currentColor');
+	const actualTrunkColor = $derived(trunkColor ?? '#6B4423');
 </script>
 
 <!-- Pine/Conifer tree - triangular layered design -->

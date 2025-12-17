@@ -19,9 +19,10 @@
 	}: Props = $props();
 
 	// Cherry trees: pink blossoms in spring, red/crimson foliage in autumn
-	const defaultColor = season === 'autumn' ? autumnReds.scarlet : pinks.blush;
-	const blossomColor = color ?? defaultColor;
-	const actualTrunkColor = trunkColor ?? '#6B4423';
+	// Use $derived to react to season/color prop changes
+	const defaultColor = $derived(season === 'autumn' ? autumnReds.scarlet : pinks.blush);
+	const blossomColor = $derived(color ?? defaultColor);
+	const actualTrunkColor = $derived(trunkColor ?? '#6B4423');
 </script>
 
 <!-- Cherry blossom tree - delicate branching with clustered flowers -->

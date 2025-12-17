@@ -19,15 +19,16 @@
 	}: Props = $props();
 
 	// Aspen turns brilliant gold/yellow in autumn
-	const defaultColor = season === 'autumn' ? autumn.gold : 'currentColor';
-	const foliageColor = color ?? defaultColor;
+	// Use $derived to react to season/color prop changes
+	const defaultColor = $derived(season === 'autumn' ? autumn.gold : 'currentColor');
+	const foliageColor = $derived(color ?? defaultColor);
 
 	// Aspen bark is pale cream/greenish-white with dark marks
-	const actualTrunkColor = trunkColor ?? '#e8e4d9';
+	const actualTrunkColor = $derived(trunkColor ?? '#e8e4d9');
 	const barkMarkColor = '#4a4a4a';
 
 	// Slightly darker shade for leaf depth
-	const leafShadow = season === 'autumn' ? autumn.amber : greens.grove;
+	const leafShadow = $derived(season === 'autumn' ? autumn.amber : greens.grove);
 </script>
 
 <!-- Aspen tree - slender trunk with quivering round/heart-shaped leaves -->

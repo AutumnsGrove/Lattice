@@ -19,11 +19,12 @@
 	}: Props = $props();
 
 	// Birch turns brilliant golden yellow in autumn
-	const defaultColor = season === 'autumn' ? autumn.gold : 'currentColor';
-	const foliageColor = color ?? defaultColor;
+	// Use $derived to react to season/color prop changes
+	const defaultColor = $derived(season === 'autumn' ? autumn.gold : 'currentColor');
+	const foliageColor = $derived(color ?? defaultColor);
 
 	// Birch bark is white/cream with dark horizontal marks
-	const actualTrunkColor = trunkColor ?? natural.birchWhite;
+	const actualTrunkColor = $derived(trunkColor ?? natural.birchWhite);
 	const barkMarkColor = '#2d2d2d';
 </script>
 
