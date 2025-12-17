@@ -268,8 +268,8 @@
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
-		<!-- Season Toggle - Inline with title -->
-		<div class="absolute top-6 right-6 z-40">
+		<!-- Season Toggle - Bottom right corner -->
+		<div class="absolute bottom-6 right-6 z-40">
 			<button
 				onclick={toggleSeason}
 				class="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-110 transition-transform"

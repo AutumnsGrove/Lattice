@@ -8,7 +8,7 @@
 	// Animation constants
 	const LEAF_OPACITY = { min: 0.4, max: 0.75 } as const;
 	const FALL_DURATION = { min: 8, max: 14 } as const;
-	const FALL_DISTANCE = { min: 25, max: 45 } as const;
+	const FALL_DISTANCE = { min: 12, max: 20 } as const;
 	const DRIFT_RANGE = 60; // -30 to +30
 	const SPAWN_DELAY_MAX = 15;
 
