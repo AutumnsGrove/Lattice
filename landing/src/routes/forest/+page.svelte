@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
@@ -15,6 +16,9 @@
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
+	// Path utilities
+	import { samplePathString } from '$lib/utils/pathUtils';
+
 	// Shared palette
 	import {
 		greens,
@@ -29,6 +33,9 @@
 	let season: Season = $state('summer');
 	const isAutumn = $derived(season === 'autumn');
 
+	// ViewBox for hills (wider for smooth curves)
+	const hillViewBox = { width: 1200, height: 500 };
+
 	// Tree component types
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
 	const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'birch', 'cherry'];
@@ -41,10 +48,66 @@
 		color: string;
 		trunkColor: string;
 		treeType: TreeType;
-		rotation?: number;
-		opacity?: number;
-		zIndex?: number;
+		rotation: number;
+		slopeRotation: number;
+		opacity: number;
+		zIndex: number;
 	}
+
+	interface HillLayer {
+		id: number;
+		path: string;
+		treeCount: number;
+		treeSize: { min: number; max: number };
+		brightness: 'dark' | 'mid' | 'light';
+		zIndex: number;
+		opacity: number;
+	}
+
+	// Hill layer definitions - organic rolling curves
+	// Paths define the TOP EDGE of each hill (trees sit on this line)
+	const hillLayers: HillLayer[] = [
+		{
+			id: 1,
+			// Back hill - gentle undulation, higher up
+			path: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160 L1200 500 L0 500 Z',
+			treeCount: 10,
+			treeSize: { min: 35, max: 55 },
+			brightness: 'dark',
+			zIndex: 1,
+			opacity: 0.85
+		},
+		{
+			id: 2,
+			// Middle-back hill
+			path: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210 L1200 500 L0 500 Z',
+			treeCount: 9,
+			treeSize: { min: 50, max: 75 },
+			brightness: 'mid',
+			zIndex: 2,
+			opacity: 0.9
+		},
+		{
+			id: 3,
+			// Middle hill
+			path: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265 L1200 500 L0 500 Z',
+			treeCount: 8,
+			treeSize: { min: 65, max: 95 },
+			brightness: 'mid',
+			zIndex: 3,
+			opacity: 0.92
+		},
+		{
+			id: 4,
+			// Front hill - larger trees
+			path: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310 L1200 500 L0 500 Z',
+			treeCount: 6,
+			treeSize: { min: 90, max: 130 },
+			brightness: 'light',
+			zIndex: 4,
+			opacity: 0.95
+		}
+	];
 
 	// Helper to pick random item from array
 	function pickRandom<T>(arr: T[]): T {
@@ -74,6 +137,18 @@
 		}
 	}
 
+	// Get hill fill color based on layer and season
+	function getHillColor(layerIndex: number): string {
+		const opacity = [0.25, 0.35, 0.45, 0.55][layerIndex] ?? 0.4;
+		if (isAutumn) {
+			const colors = ['#92400e', '#b45309', '#d97706', '#f59e0b'];
+			return colors[layerIndex] ?? colors[0];
+		} else {
+			const colors = ['#166534', '#15803d', '#22c55e', '#4ade80'];
+			return colors[layerIndex] ?? colors[0];
+		}
+	}
+
 	// Get appropriate color for tree type and depth
 	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[]): string {
 		if (treeType === 'cherry') {
@@ -86,84 +161,57 @@
 		return pickRandom(depthColors);
 	}
 
-	// Generate forest trees with layered depth
-	function generateForest(): Tree[] {
-		const trees: Tree[] = [];
-		let id = 0;
+	// Track mount state for path sampling (needs DOM)
+	let mounted = $state(false);
 
-		// Middle-back row (previously back row removed - was above mountains)
-		for (let i = 0; i < 10; i++) {
-			const treeType = pickRandom(treeTypes);
-			trees.push({
-				id: id++,
-				x: 2 + i * 10 + (Math.random() * 6 - 3),
-				y: 18 + Math.random() * 6,
-				size: 40 + Math.random() * 15,
-				color: getTreeColor(treeType, getDepthColors('mid'), getDepthPinks('mid')),
-				trunkColor: pickRandom([bark.bark, bark.warmBark]),
-				treeType,
-				rotation: Math.random() * 8 - 4,
-				opacity: 0.8 + Math.random() * 0.15,
-				zIndex: 2
-			});
+	onMount(() => {
+		mounted = true;
+	});
+
+	// Generate trees along hill curves
+	function generateHillTrees(): Tree[] {
+		if (!mounted) return [];
+
+		const allTrees: Tree[] = [];
+		let treeId = 0;
+
+		for (const hill of hillLayers) {
+			// Sample points along the hill's top edge
+			const points = samplePathString(
+				hill.path,
+				hill.treeCount,
+				hillViewBox,
+				{ jitter: 0.4, startT: 0.08, endT: 0.92 }
+			);
+
+			const depthColors = getDepthColors(hill.brightness);
+			const depthPinks = getDepthPinks(hill.brightness);
+
+			for (const point of points) {
+				const treeType = pickRandom(treeTypes);
+				const size = hill.treeSize.min + Math.random() * (hill.treeSize.max - hill.treeSize.min);
+
+				allTrees.push({
+					id: treeId++,
+					x: point.xPercent,
+					y: point.yPercent,
+					size,
+					color: getTreeColor(treeType, depthColors, depthPinks),
+					trunkColor: pickRandom([bark.bark, bark.warmBark, bark.lightBark]),
+					treeType,
+					rotation: (Math.random() - 0.5) * 10,
+					slopeRotation: point.angle,
+					opacity: hill.opacity,
+					zIndex: hill.zIndex
+				});
+			}
 		}
 
-		// Middle row
-		for (let i = 0; i < 8; i++) {
-			const treeType = pickRandom(treeTypes);
-			trees.push({
-				id: id++,
-				x: 0 + i * 13 + (Math.random() * 8 - 4),
-				y: 32 + Math.random() * 8,
-				size: 55 + Math.random() * 20,
-				color: getTreeColor(treeType, getDepthColors('mid'), getDepthPinks('mid')),
-				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
-				treeType,
-				rotation: Math.random() * 10 - 5,
-				opacity: 0.85 + Math.random() * 0.1,
-				zIndex: 3
-			});
-		}
-
-		// Middle-front row
-		for (let i = 0; i < 6; i++) {
-			const treeType = pickRandom(treeTypes);
-			trees.push({
-				id: id++,
-				x: -3 + i * 18 + (Math.random() * 10 - 5),
-				y: 48 + Math.random() * 10,
-				size: 75 + Math.random() * 25,
-				color: getTreeColor(treeType, getDepthColors('light'), getDepthPinks('light')),
-				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
-				treeType,
-				rotation: Math.random() * 12 - 6,
-				opacity: 0.9 + Math.random() * 0.1,
-				zIndex: 4
-			});
-		}
-
-		// Front row (largest, brightest)
-		for (let i = 0; i < 4; i++) {
-			const treeType = pickRandom(treeTypes);
-			trees.push({
-				id: id++,
-				x: -5 + i * 28 + (Math.random() * 12 - 6),
-				y: 68 + Math.random() * 12,
-				size: 100 + Math.random() * 40,
-				color: getTreeColor(treeType, getDepthColors('light'), getDepthPinks('light')),
-				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
-				treeType,
-				rotation: Math.random() * 15 - 7.5,
-				opacity: 0.95,
-				zIndex: 5
-			});
-		}
-
-		return trees.sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
+		return allTrees;
 	}
 
-	// Reactive forest - regenerates when season changes
-	let forestTrees = $derived(generateForest());
+	// Reactive trees - regenerates when season changes or on mount
+	let forestTrees = $derived(generateHillTrees());
 
 	// Toggle season
 	function toggleSeason() {
@@ -188,14 +236,12 @@
 				aria-label={isAutumn ? 'Switch to spring/summer' : 'Switch to autumn'}
 			>
 				{#if isAutumn}
-					<!-- Leaf icon for autumn (Lucide leaf) -->
 					<svg class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
 						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
 					</svg>
 					<span class="text-sm font-sans text-amber-700 dark:text-amber-400">Autumn</span>
 				{:else}
-					<!-- Flower icon for spring/summer (Lucide flower-2) -->
 					<svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1" />
 						<circle cx="12" cy="8" r="2" />
@@ -219,43 +265,62 @@
 			<Cloud class="w-32 h-16" animate={true} speed="slow" />
 		</div>
 
-		<!-- Distant mountains/hills silhouette -->
-		<div class="absolute inset-x-0 top-20 h-40">
-			<svg class="w-full h-full" viewBox="0 0 1200 160" preserveAspectRatio="none">
+		<!-- Distant mountains silhouette -->
+		<div class="absolute inset-x-0 top-16 h-32">
+			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none">
 				<path
-					d="M0 160 L0 100 Q150 40 300 80 Q450 120 600 70 Q750 20 900 90 Q1050 140 1200 60 L1200 160 Z"
+					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
 					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
 				/>
 				<path
-					d="M0 160 L0 120 Q200 70 400 100 Q600 130 800 80 Q1000 50 1200 100 L1200 160 Z"
+					d="M0 120 L0 100 Q200 60 400 85 Q600 110 800 70 Q1000 40 1200 80 L1200 120 Z"
 					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
 				/>
 			</svg>
 		</div>
 
-		<!-- Forest container -->
+		<!-- Forest container with rolling hills -->
 		<div class="relative w-full h-[70vh] min-h-[500px]">
-			<!-- Falling leaves layer - behind trees -->
+			<!-- Falling leaves layer - behind everything -->
 			<FallingLeavesLayer
 				trees={forestTrees}
 				{season}
 				minLeavesPerTree={2}
-				maxLeavesPerTree={5}
+				maxLeavesPerTree={4}
 				zIndex={-1}
 			/>
 
-			<!-- Trees -->
+			<!-- Rolling hills with trees -->
+			{#each hillLayers as hill, i}
+				<!-- Hill fill -->
+				<svg
+					class="absolute inset-0 w-full h-full pointer-events-none"
+					viewBox="0 0 {hillViewBox.width} {hillViewBox.height}"
+					preserveAspectRatio="none"
+					style="z-index: {hill.zIndex};"
+				>
+					<path
+						d={hill.path}
+						class="transition-colors duration-1000"
+						fill={getHillColor(i)}
+						fill-opacity={isAutumn ? 0.35 : 0.4}
+					/>
+				</svg>
+			{/each}
+
+			<!-- Trees (rendered separately for proper z-ordering) -->
 			{#each forestTrees as tree (tree.id)}
 				<div
-					class="absolute transform -translate-x-1/2 transition-all duration-500 hover:scale-110"
+					class="absolute transition-all duration-300 hover:scale-110 pointer-events-auto"
 					style="
 						left: {tree.x}%;
 						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * 1.23}px;
 						opacity: {tree.opacity};
-						z-index: {tree.zIndex};
-						transform: translateX(-50%) rotate({tree.rotation}deg);
+						z-index: {tree.zIndex + 10};
+						transform: translateX(-50%) translateY(-100%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);
+						transform-origin: bottom center;
 						filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 					"
 				>
@@ -273,9 +338,6 @@
 				</div>
 			{/each}
 		</div>
-
-		<!-- Ground -->
-		<div class="absolute bottom-0 inset-x-0 h-20 transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-t from-amber-800 via-amber-700 to-transparent dark:from-amber-950 dark:via-amber-900' : 'bg-gradient-to-t from-emerald-800 via-emerald-700 to-transparent dark:from-emerald-950 dark:via-emerald-900'}"></div>
 
 		<!-- Content overlay -->
 		<div class="absolute inset-x-0 top-8 text-center z-10 px-6">
@@ -369,7 +431,6 @@
 					href="/tools"
 					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-muted text-white font-sans text-sm hover:bg-accent-subtle transition-colors"
 				>
-					<!-- Lucide paintbrush icon -->
 					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
 						<path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
