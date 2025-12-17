@@ -59,7 +59,8 @@
 
 	interface HillLayer {
 		id: number;
-		path: string;
+		curvePath: string; // Just the top curve for tree placement
+		fillPath: string; // Closed path for hill fill rendering
 		treeCount: number;
 		treeSize: { min: number; max: number };
 		brightness: 'dark' | 'mid' | 'light';
@@ -68,12 +69,14 @@
 	}
 
 	// Hill layer definitions - organic rolling curves
-	// Paths define the TOP EDGE of each hill (trees sit on this line)
+	// curvePath: just the top curve for tree placement (no bottom/sides)
+	// fillPath: closed path for rendering the hill fill
 	const hillLayers: HillLayer[] = [
 		{
 			id: 1,
 			// Back hill - gentle undulation, higher up
-			path: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160 L1200 500 L0 500 Z',
+			curvePath: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160',
+			fillPath: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160 L1200 500 L0 500 Z',
 			treeCount: 10,
 			treeSize: { min: 35, max: 55 },
 			brightness: 'dark',
@@ -83,7 +86,8 @@
 		{
 			id: 2,
 			// Middle-back hill
-			path: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210 L1200 500 L0 500 Z',
+			curvePath: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210',
+			fillPath: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210 L1200 500 L0 500 Z',
 			treeCount: 9,
 			treeSize: { min: 50, max: 75 },
 			brightness: 'mid',
@@ -93,7 +97,8 @@
 		{
 			id: 3,
 			// Middle hill
-			path: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265 L1200 500 L0 500 Z',
+			curvePath: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265',
+			fillPath: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265 L1200 500 L0 500 Z',
 			treeCount: 8,
 			treeSize: { min: 65, max: 95 },
 			brightness: 'mid',
@@ -103,7 +108,8 @@
 		{
 			id: 4,
 			// Front hill - larger trees
-			path: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310 L1200 500 L0 500 Z',
+			curvePath: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310',
+			fillPath: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310 L1200 500 L0 500 Z',
 			treeCount: 6,
 			treeSize: { min: 90, max: 130 },
 			brightness: 'light',
@@ -117,9 +123,9 @@
 		return arr[Math.floor(Math.random() * arr.length)];
 	}
 
-	// Get seasonal colors based on depth
-	function getDepthColors(brightness: 'dark' | 'mid' | 'light'): string[] {
-		if (isAutumn) {
+	// Get seasonal colors based on depth (takes isAutumnSeason explicitly for reactivity)
+	function getDepthColors(brightness: 'dark' | 'mid' | 'light', isAutumnSeason: boolean): string[] {
+		if (isAutumnSeason) {
 			if (brightness === 'dark') return [autumn.rust, autumn.ember];
 			if (brightness === 'mid') return [autumn.pumpkin, autumn.amber];
 			return [autumn.gold, autumn.honey, autumn.straw];
@@ -130,8 +136,8 @@
 		}
 	}
 
-	function getDepthPinks(brightness: 'dark' | 'mid' | 'light'): string[] {
-		if (isAutumn) {
+	function getDepthPinks(brightness: 'dark' | 'mid' | 'light', isAutumnSeason: boolean): string[] {
+		if (isAutumnSeason) {
 			return [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
 		} else {
 			if (brightness === 'dark') return [pinks.deepPink, pinks.pink];
@@ -158,7 +164,7 @@
 	}
 
 	// Get appropriate color for tree type and depth (deterministic based on seed)
-	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number): string {
+	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number, isAutumnSeason: boolean): string {
 		// Use hashed seed to pick deterministically with natural distribution
 		const pickFromArray = <T>(arr: T[]): T => arr[Math.floor(hashSeed(seed)) % arr.length];
 
@@ -166,7 +172,7 @@
 			return pickFromArray(depthPinks);
 		}
 		// Pine stays green even in autumn (evergreen!)
-		if (treeType === 'pine' && isAutumn) {
+		if (treeType === 'pine' && isAutumnSeason) {
 			return pickFromArray([greens.deepGreen, greens.grove, greens.darkForest]);
 		}
 		return pickFromArray(depthColors);
@@ -193,12 +199,12 @@
 		let treeId = 0;
 
 		for (const hill of hillLayers) {
-			// Sample points along the hill's top edge
+			// Sample points along the hill's top curve only (not the fill path)
 			const points = samplePathString(
-				hill.path,
+				hill.curvePath,
 				hill.treeCount,
 				hillViewBox,
-				{ jitter: 0.4, startT: 0.08, endT: 0.92 }
+				{ jitter: 0.3, startT: 0.05, endT: 0.95 }
 			);
 
 			for (const point of points) {
@@ -232,13 +238,14 @@
 	});
 
 	// Final trees with seasonal colors - derived from base trees and season
+	// Explicitly pass isAutumn to establish reactive dependency
 	let forestTrees = $derived(
 		baseTrees.map((tree) => {
-			const depthColors = getDepthColors(tree.brightness);
-			const depthPinks = getDepthPinks(tree.brightness);
+			const depthColors = getDepthColors(tree.brightness, isAutumn);
+			const depthPinks = getDepthPinks(tree.brightness, isAutumn);
 			return {
 				...tree,
-				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id)
+				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id, isAutumn)
 			};
 		})
 	);
@@ -330,7 +337,7 @@
 					style="z-index: {hill.zIndex};"
 				>
 					<path
-						d={hill.path}
+						d={hill.fillPath}
 						class="transition-colors duration-1000"
 						fill={getHillColor(i)}
 						fill-opacity={isAutumn ? 0.35 : 0.4}
