@@ -9,6 +9,9 @@
 	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
 	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
 
+	// Falling leaves
+	import FallingLeavesLayer from '$lib/components/nature/botanical/FallingLeavesLayer.svelte';
+
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
@@ -249,6 +252,15 @@
 
 		<!-- Forest container -->
 		<div class="relative w-full h-[70vh] min-h-[500px]">
+			<!-- Falling leaves layer - behind trees -->
+			<FallingLeavesLayer
+				trees={forestTrees}
+				{season}
+				minLeavesPerTree={2}
+				maxLeavesPerTree={5}
+				zIndex={0}
+			/>
+
 			<!-- Trees -->
 			{#each forestTrees as tree (tree.id)}
 				<div
