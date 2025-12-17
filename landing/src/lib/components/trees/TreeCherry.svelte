@@ -23,8 +23,8 @@
 	<!-- Branches -->
 	<path fill={actualTrunkColor} d="M50 60 Q35 50 20 55 Q25 52 30 45 Q40 48 50 55" stroke={actualTrunkColor} stroke-width="2"/>
 	<path fill={actualTrunkColor} d="M50 60 Q65 50 80 55 Q75 52 70 45 Q60 48 50 55" stroke={actualTrunkColor} stroke-width="2"/>
-	<path fill={actualTrunkColor} d="M50 50 Q45 35 35 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
-	<path fill={actualTrunkColor} d="M50 50 Q55 35 65 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
+	<path d="M50 50 Q45 35 35 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
+	<path d="M50 50 Q55 35 65 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
 
 	<!-- Blossom clusters - left side -->
 	<circle fill={blossomColor} cx="20" cy="52" r="12"/>
