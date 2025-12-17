@@ -41,8 +41,8 @@
 		? foliageColor
 		: (trunkColor ?? BARK_BROWN);
 
-	// Build animation classes
-	const animationClass = breathing ? 'grove-logo-breathe' : (animate ? 'grove-logo-sway' : '');
+	// Build animation classes (using $derived for reactivity)
+	const animationClass = $derived(breathing ? 'grove-logo-breathe' : (animate ? 'grove-logo-sway' : ''));
 </script>
 
 <svg
