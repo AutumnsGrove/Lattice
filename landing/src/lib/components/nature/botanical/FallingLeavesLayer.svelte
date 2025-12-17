@@ -95,16 +95,15 @@
 			const leafSizeVariation = 6 + treeSizeFactor * 4; // Additional random variation
 
 			for (let i = 0; i < leafCount; i++) {
-				// Spawn leaves above the tree canopy area (off-screen above)
+				// Spawn leaves within the tree canopy area (10% below tree anchor point)
 				// Leaves will animate downward from their spawn point
 				const xOffset = (Math.random() - 0.5) * (tree.size / 8); // Horizontal spread based on tree size
-				const yOffset = 15 + Math.random() * 10; // Start 15-25% above the tree position
 
 				const currentLeafId = leafId++;
 				leaves.push({
 					id: currentLeafId,
 					x: tree.x + xOffset,
-					y: tree.y - yOffset, // Well above the tree
+					y: tree.y + 10, // 10% below tree position (within canopy)
 					size: baseLeafSize + Math.random() * leafSizeVariation,
 					variant: getLeafVariant(tree.treeType, currentLeafId),
 					duration: FALL_DURATION.min + Math.random() * (FALL_DURATION.max - FALL_DURATION.min),
