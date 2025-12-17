@@ -3,7 +3,7 @@
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
   import "$lib/styles/content.css";
-  import { Button, Input } from '$lib/ui';
+  import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 
   // Import composables
@@ -717,6 +717,7 @@
       <div class="preview-panel">
         <div class="preview-header">
           <span class="preview-label">:: preview</span>
+          <Logo class="preview-logo" />
         </div>
         <div class="preview-content" bind:this={previewRef}>
           {#if previewHtml}
@@ -1351,6 +1352,9 @@
     min-height: 0;
   }
   .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0.5rem 1rem;
     background: #2d2d2d;
     border-bottom: 1px solid var(--light-border-primary);
@@ -1359,6 +1363,16 @@
     color: #8bc48b;
     font-size: 0.85rem;
     font-family: "JetBrains Mono", "Fira Code", monospace;
+  }
+  :global(.preview-logo) {
+    width: 18px;
+    height: 18px;
+    color: var(--editor-accent, #8bc48b);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+  :global(.preview-logo:hover) {
+    opacity: 1;
   }
   .preview-content {
     flex: 1;
