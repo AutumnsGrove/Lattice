@@ -40,8 +40,34 @@ export const soundLibrary = {
 };
 
 /**
+ * @typedef {Object} AmbientSoundsState
+ * @property {boolean} enabled
+ * @property {string} currentSound
+ * @property {number} volume
+ * @property {boolean} showPanel
+ */
+
+/**
+ * @typedef {Object} AmbientSoundsManager
+ * @property {AmbientSoundsState} state
+ * @property {boolean} enabled
+ * @property {string} currentSound
+ * @property {number} volume
+ * @property {boolean} showPanel
+ * @property {() => void} loadSettings
+ * @property {() => void} toggle
+ * @property {(soundKey: string) => void} play
+ * @property {() => void} stop
+ * @property {(volume: number) => void} setVolume
+ * @property {(soundKey: string) => void} selectSound
+ * @property {() => void} togglePanel
+ * @property {() => void} closePanel
+ * @property {() => void} cleanup
+ */
+
+/**
  * Creates an ambient sounds manager with Svelte 5 runes
- * @returns {object} Ambient sounds state and controls
+ * @returns {AmbientSoundsManager} Ambient sounds state and controls
  */
 export function useAmbientSounds() {
   let state = $state({

@@ -6,8 +6,37 @@
 const SNIPPETS_STORAGE_KEY = "grove-editor-snippets";
 
 /**
+ * @typedef {Object} Snippet
+ * @property {string} id
+ * @property {string} name
+ * @property {string} content
+ * @property {string|null} trigger
+ * @property {string} [createdAt]
+ */
+
+/**
+ * @typedef {Object} SnippetModal
+ * @property {boolean} open
+ * @property {string|null} editingId
+ * @property {string} name
+ * @property {string} content
+ * @property {string} trigger
+ */
+
+/**
+ * @typedef {Object} SnippetsManager
+ * @property {Snippet[]} snippets
+ * @property {SnippetModal} modal
+ * @property {() => void} load
+ * @property {(editId?: string|null) => void} openModal
+ * @property {() => void} closeModal
+ * @property {() => void} saveSnippet
+ * @property {(id: string) => void} deleteSnippet
+ */
+
+/**
  * Creates a snippets manager with Svelte 5 runes
- * @returns {object} Snippets state and controls
+ * @returns {SnippetsManager} Snippets state and controls
  */
 export function useSnippets() {
   let snippets = $state([]);

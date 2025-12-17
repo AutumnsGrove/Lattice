@@ -188,10 +188,10 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@types/dompurify": "^3.0.5",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
+    "esm-env": "^1.2.2",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",

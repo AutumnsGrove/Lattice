@@ -4,10 +4,44 @@
  */
 
 /**
+ * @typedef {Object} CampfireState
+ * @property {boolean} active
+ * @property {number|null} startTime
+ * @property {number} targetMinutes
+ * @property {number} startWordCount
+ */
+
+/**
+ * @typedef {Object} GoalState
+ * @property {boolean} enabled
+ * @property {number} targetWords
+ * @property {number} sessionWords
+ */
+
+/**
+ * @typedef {Object} WritingSessionOptions
+ * @property {() => number} [getWordCount] - Function to get current word count
+ */
+
+/**
+ * @typedef {Object} WritingSessionManager
+ * @property {CampfireState} campfire
+ * @property {GoalState} goal
+ * @property {boolean} isCampfireActive
+ * @property {boolean} isGoalEnabled
+ * @property {() => string} getCampfireElapsed
+ * @property {(currentWordCount: number) => number} getGoalProgress
+ * @property {(currentWordCount: number) => number} getCampfireWords
+ * @property {() => void} startCampfire
+ * @property {() => void} endCampfire
+ * @property {() => void} promptWritingGoal
+ * @property {() => void} disableGoal
+ */
+
+/**
  * Creates a writing session manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {Function} options.getWordCount - Function to get current word count
- * @returns {object} Session state and controls
+ * @param {WritingSessionOptions} options - Configuration options
+ * @returns {WritingSessionManager} Session state and controls
  */
 export function useWritingSession(options = {}) {
   const { getWordCount } = options;

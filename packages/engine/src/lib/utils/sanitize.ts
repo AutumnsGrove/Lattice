@@ -9,11 +9,13 @@
  * which doesn't work in Cloudflare Workers.
  */
 
-import { browser } from "$app/environment";
+import { BROWSER } from "esm-env";
+import type { DOMPurify as DOMPurifyInstance, Config } from "dompurify";
 
-// Dynamically import DOMPurify only in browser
-let DOMPurify = null;
-if (browser) {
+// DOMPurify instance - dynamically imported only in browser
+let DOMPurify: DOMPurifyInstance | null = null;
+
+if (BROWSER) {
   import("dompurify").then((module) => {
     DOMPurify = module.default;
   });
@@ -21,20 +23,20 @@ if (browser) {
 
 /**
  * Sanitize HTML content to prevent XSS attacks
- * @param {string} html - Raw HTML string to sanitize
- * @returns {string} - Sanitized HTML safe for rendering
+ * @param html - Raw HTML string to sanitize
+ * @returns Sanitized HTML safe for rendering
  */
-export function sanitizeHTML(html) {
+export function sanitizeHTML(html: string): string {
   if (!html || typeof html !== "string") {
     return "";
   }
 
   // On server, pass through - will be sanitized on client hydration
-  if (!browser || !DOMPurify) {
+  if (!BROWSER || !DOMPurify) {
     return html;
   }
 
-  const config = {
+  const config: Config = {
     FORBID_TAGS: [
       "script",
       "iframe",
@@ -65,23 +67,24 @@ export function sanitizeHTML(html) {
     ALLOW_DATA_ATTR: false,
     KEEP_CONTENT: true,
     SAFE_FOR_TEMPLATES: true,
+    RETURN_TRUSTED_TYPE: false,
   };
 
-  return DOMPurify.sanitize(html, config);
+  return DOMPurify.sanitize(html, config) as string;
 }
 
 /**
  * Sanitize SVG content specifically (stricter rules for SVG)
- * @param {string} svg - Raw SVG string to sanitize
- * @returns {string} - Sanitized SVG safe for rendering
+ * @param svg - Raw SVG string to sanitize
+ * @returns Sanitized SVG safe for rendering
  */
-export function sanitizeSVG(svg) {
+export function sanitizeSVG(svg: string): string {
   if (!svg || typeof svg !== "string") {
     return "";
   }
 
   // On server, pass through - will be sanitized on client hydration
-  if (!browser || !DOMPurify) {
+  if (!BROWSER || !DOMPurify) {
     return svg;
   }
 
@@ -166,22 +169,23 @@ export function sanitizeSVG(svg) {
     ],
     KEEP_CONTENT: false,
     SAFE_FOR_TEMPLATES: true,
-  });
+    RETURN_TRUSTED_TYPE: false,
+  }) as string;
 }
 
 /**
  * Sanitize markdown-generated HTML with appropriate security rules
  * This is a convenience wrapper for sanitizeHTML with markdown-specific settings
- * @param {string} markdownHTML - HTML generated from markdown parsing
- * @returns {string} - Sanitized HTML safe for rendering
+ * @param markdownHTML - HTML generated from markdown parsing
+ * @returns Sanitized HTML safe for rendering
  */
-export function sanitizeMarkdown(markdownHTML) {
+export function sanitizeMarkdown(markdownHTML: string): string {
   if (!markdownHTML || typeof markdownHTML !== "string") {
     return "";
   }
 
   // On server, pass through - will be sanitized on client hydration
-  if (!browser || !DOMPurify) {
+  if (!BROWSER || !DOMPurify) {
     return markdownHTML;
   }
 
@@ -278,15 +282,16 @@ export function sanitizeMarkdown(markdownHTML) {
     ALLOW_DATA_ATTR: false,
     KEEP_CONTENT: true,
     SAFE_FOR_TEMPLATES: true,
-  });
+    RETURN_TRUSTED_TYPE: false,
+  }) as string;
 }
 
 /**
  * Sanitize URL to prevent dangerous protocols
- * @param {string} url - URL to sanitize
- * @returns {string} - Sanitized URL (returns empty string if dangerous)
+ * @param url - URL to sanitize
+ * @returns Sanitized URL (returns empty string if dangerous)
  */
-export function sanitizeURL(url) {
+export function sanitizeURL(url: string): string {
   if (!url || typeof url !== "string") {
     return "";
   }

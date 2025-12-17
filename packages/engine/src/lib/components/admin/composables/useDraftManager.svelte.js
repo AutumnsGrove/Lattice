@@ -6,14 +6,41 @@
 const AUTO_SAVE_DELAY = 2000; // 2 seconds
 
 /**
+ * @typedef {Object} StoredDraft
+ * @property {string} content
+ * @property {string} savedAt
+ */
+
+/**
+ * @typedef {Object} DraftManagerOptions
+ * @property {string|null} draftKey - Unique key for localStorage
+ * @property {() => string} getContent - Function to get current content
+ * @property {(content: string) => void} setContent - Function to set content
+ * @property {(draft: StoredDraft) => void} [onDraftRestored] - Callback when draft is restored
+ * @property {boolean} [readonly] - Whether editor is readonly
+ */
+
+/**
+ * @typedef {Object} DraftManager
+ * @property {boolean} hasDraft
+ * @property {boolean} draftRestorePrompt
+ * @property {StoredDraft|null} storedDraft
+ * @property {string} lastSavedContent
+ * @property {(initialContent: string) => void} init
+ * @property {(content: string) => void} scheduleSave
+ * @property {() => void} saveDraft
+ * @property {() => void} clearDraft
+ * @property {() => void} restoreDraft
+ * @property {() => void} discardDraft
+ * @property {() => {hasDraft: boolean, storedDraft: StoredDraft|null}} getStatus
+ * @property {(content: string) => boolean} hasUnsavedChanges
+ * @property {() => void} cleanup
+ */
+
+/**
  * Creates a draft manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {string} options.draftKey - Unique key for localStorage
- * @param {Function} options.getContent - Function to get current content
- * @param {Function} options.setContent - Function to set content
- * @param {Function} options.onDraftRestored - Callback when draft is restored
- * @param {boolean} options.readonly - Whether editor is readonly
- * @returns {object} Draft state and controls
+ * @param {DraftManagerOptions} options - Configuration options
+ * @returns {DraftManager} Draft state and controls
  */
 export function useDraftManager(options = {}) {
   const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;

@@ -71,10 +71,11 @@
     getWordCount: () => wordCount,
   });
 
+  // svelte-ignore state_referenced_locally - draftKey, readonly, onDraftRestored don't change during lifecycle
   const draftManager = useDraftManager({
     draftKey,
     getContent: () => content,
-    setContent: (c) => (content = c),
+    setContent: (/** @type {string} */ c) => (content = c),
     onDraftRestored,
     readonly,
   });
@@ -82,7 +83,7 @@
   const slashCommands = useSlashCommands({
     getTextareaRef: () => textareaRef,
     getContent: () => content,
-    setContent: (c) => (content = c),
+    setContent: (/** @type {string} */ c) => (content = c),
     getSnippets: () => snippetsManager.snippets,
     onOpenSnippetsModal: () => snippetsManager.openModal(),
   });
@@ -116,7 +117,7 @@
   let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-  let previewHtml = $derived(content ? sanitizeMarkdown(marked.parse(content)) : "");
+  let previewHtml = $derived(content ? sanitizeMarkdown(/** @type {string} */ (marked.parse(content, { async: false }))) : "");
 
   let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);

@@ -3,7 +3,48 @@
  * Manages the slash command menu and execution
  */
 
+/**
+ * @typedef {Object} SlashCommand
+ * @property {string} id
+ * @property {string} label
+ * @property {string} insert
+ * @property {number} [cursorOffset]
+ * @property {boolean} [isSnippet]
+ */
+
+/**
+ * @typedef {Object} SlashMenuState
+ * @property {boolean} open
+ * @property {string} query
+ * @property {{x: number, y: number}} position
+ * @property {number} selectedIndex
+ */
+
+/**
+ * @typedef {Object} SlashCommandsOptions
+ * @property {() => HTMLTextAreaElement|null} getTextareaRef - Function to get textarea reference
+ * @property {() => string} getContent - Function to get content
+ * @property {(content: string) => void} setContent - Function to set content
+ * @property {() => Array<{id: string, name: string, content: string}>} [getSnippets] - Function to get user snippets
+ * @property {() => void} [onOpenSnippetsModal] - Callback to open snippets modal
+ */
+
+/**
+ * @typedef {Object} SlashCommandsManager
+ * @property {SlashMenuState} menu
+ * @property {boolean} isOpen
+ * @property {() => SlashCommand[]} getAllCommands
+ * @property {() => SlashCommand[]} getFilteredCommands
+ * @property {() => void} open
+ * @property {() => void} close
+ * @property {(direction: 'up' | 'down') => void} navigate
+ * @property {(index: number) => void} execute
+ * @property {(query: string) => void} setQuery
+ * @property {(e: KeyboardEvent, cursorPos: number, lineStart: number) => void} handleKeyDown
+ */
+
 // Base slash commands definition
+/** @type {SlashCommand[]} */
 export const baseSlashCommands = [
   { id: "heading1", label: "Heading 1", insert: "# " },
   { id: "heading2", label: "Heading 2", insert: "## " },
@@ -25,13 +66,8 @@ export const baseSlashCommands = [
 
 /**
  * Creates a slash commands manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {Function} options.getTextareaRef - Function to get textarea reference
- * @param {Function} options.getContent - Function to get content
- * @param {Function} options.setContent - Function to set content
- * @param {Function} options.getSnippets - Function to get user snippets
- * @param {Function} options.onOpenSnippetsModal - Callback to open snippets modal
- * @returns {object} Slash commands state and controls
+ * @param {SlashCommandsOptions} options - Configuration options
+ * @returns {SlashCommandsManager} Slash commands state and controls
  */
 export function useSlashCommands(options = {}) {
   const {

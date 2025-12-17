@@ -4,12 +4,49 @@
  */
 
 /**
+ * @typedef {Object} PaletteAction
+ * @property {string} id
+ * @property {string} label
+ * @property {string} shortcut
+ * @property {() => void} action
+ * @property {string} [themeKey]
+ * @property {boolean} [isTheme]
+ */
+
+/**
+ * @typedef {Object} CommandPaletteState
+ * @property {boolean} open
+ * @property {string} query
+ * @property {number} selectedIndex
+ */
+
+/**
+ * @typedef {Object} CommandPaletteOptions
+ * @property {() => PaletteAction[]} [getActions] - Function to get available actions
+ * @property {() => Record<string, any>} [getThemes] - Function to get available themes
+ * @property {() => string} [getCurrentTheme] - Function to get current theme
+ */
+
+/**
+ * @typedef {Object} CommandPaletteManager
+ * @property {CommandPaletteState} state
+ * @property {boolean} isOpen
+ * @property {string} query
+ * @property {number} selectedIndex
+ * @property {() => PaletteAction[]} getAllCommands
+ * @property {() => PaletteAction[]} getFilteredCommands
+ * @property {() => void} open
+ * @property {() => void} close
+ * @property {() => void} toggle
+ * @property {(direction: 'up' | 'down') => void} navigate
+ * @property {(index: number) => PaletteAction | undefined} execute
+ * @property {(query: string) => void} setQuery
+ */
+
+/**
  * Creates a command palette manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {Function} options.getActions - Function to get available actions
- * @param {Function} options.getThemes - Function to get available themes
- * @param {Function} options.getCurrentTheme - Function to get current theme
- * @returns {object} Command palette state and controls
+ * @param {CommandPaletteOptions} options - Configuration options
+ * @returns {CommandPaletteManager} Command palette state and controls
  */
 export function useCommandPalette(options = {}) {
   const { getActions, getThemes, getCurrentTheme } = options;

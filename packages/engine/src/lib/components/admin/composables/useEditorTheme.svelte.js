@@ -118,8 +118,36 @@ export const themes = {
 };
 
 /**
+ * @typedef {Object} Theme
+ * @property {string} name
+ * @property {string} label
+ * @property {string} desc
+ * @property {string} accent
+ * @property {string} accentDim
+ * @property {string} accentBright
+ * @property {string} accentGlow
+ * @property {string} bg
+ * @property {string} bgSecondary
+ * @property {string} bgTertiary
+ * @property {string} border
+ * @property {string} borderAccent
+ * @property {string} text
+ * @property {string} textDim
+ * @property {string} statusBg
+ * @property {string} statusBorder
+ */
+
+/**
+ * @typedef {Object} EditorThemeManager
+ * @property {string} currentTheme
+ * @property {Record<string, Theme>} themes
+ * @property {() => void} loadTheme
+ * @property {(themeName: string) => void} setTheme
+ */
+
+/**
  * Creates an editor theme manager with Svelte 5 runes
- * @returns {object} Theme state and controls
+ * @returns {EditorThemeManager} Theme state and controls
  */
 export function useEditorTheme() {
   let currentTheme = $state("grove");
