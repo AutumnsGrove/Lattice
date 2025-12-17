@@ -44,7 +44,7 @@ export async function load({ platform, locals }) {
         let htmlContent = pageData.html_content;
         if (!htmlContent && pageData.markdown_content) {
           htmlContent = sanitizeMarkdown(
-            marked.parse(pageData.markdown_content),
+            /** @type {string} */ (marked.parse(pageData.markdown_content, { async: false })),
           );
         }
 
@@ -57,14 +57,14 @@ export async function load({ platform, locals }) {
           try {
             gutterContent = JSON.parse(pageData.gutter_content);
             // Process gutter items: convert markdown to HTML for comment/markdown items
-            gutterContent = gutterContent.map((item) => {
+            gutterContent = gutterContent.map((/** @type {{ type?: string; content?: string; [key: string]: unknown }} */ item) => {
               if (
                 (item.type === "comment" || item.type === "markdown") &&
                 item.content
               ) {
                 return {
                   ...item,
-                  content: sanitizeMarkdown(marked.parse(item.content)),
+                  content: sanitizeMarkdown(/** @type {string} */ (marked.parse(item.content, { async: false }))),
                 };
               }
               return item;
@@ -142,14 +142,14 @@ export async function load({ platform, locals }) {
           try {
             gutterContent = JSON.parse(post.gutter_content);
             // Process gutter items: convert markdown to HTML for comment/markdown items
-            gutterContent = gutterContent.map((item) => {
+            gutterContent = gutterContent.map((/** @type {{ type?: string; content?: string; [key: string]: unknown }} */ item) => {
               if (
                 (item.type === "comment" || item.type === "markdown") &&
                 item.content
               ) {
                 return {
                   ...item,
-                  content: sanitizeMarkdown(marked.parse(item.content)),
+                  content: sanitizeMarkdown(/** @type {string} */ (marked.parse(item.content, { async: false }))),
                 };
               }
               return item;
@@ -195,10 +195,17 @@ export async function load({ platform, locals }) {
 }
 
 /**
+ * @typedef {Object} Header
+ * @property {number} level
+ * @property {string} id
+ * @property {string} text
+ */
+
+/**
  * Extract headers from HTML content for table of contents
  * Used for D1 posts where raw markdown isn't stored
  * @param {string} html - The HTML content
- * @returns {Array} Array of header objects with level, text, and id
+ * @returns {Header[]} Array of header objects with level, text, and id
  */
 function extractHeadersFromHtml(html) {
   const headers = [];

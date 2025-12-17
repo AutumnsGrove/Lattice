@@ -15,6 +15,11 @@
 	} from '$lib/utils/gutter.js';
 	import '$lib/styles/content.css';
 
+	/**
+	 * @typedef {import('$lib/utils/gutter.js').GutterItem} GutterItem
+	 * @typedef {import('$lib/utils/gutter.js').Header} Header
+	 */
+
 	// Constants for positioning calculations
 	const MIN_GAP = 16; // Minimum gap between items in pixels
 	const BOTTOM_PADDING = 32; // Padding from bottom of content
@@ -23,23 +28,29 @@
 
 	let {
 		content = '',
-		gutterContent = [],
-		headers = [],
+		gutterContent = /** @type {GutterItem[]} */ ([]),
+		headers = /** @type {Header[]} */ ([]),
 		showTableOfContents = true,
 		children
 	} = $props();
 
 	// References to mobile gutter containers for each anchor
+	/** @type {Record<string, HTMLElement>} */
 	let mobileGutterRefs = $state({});
 
 	// Track content height for overflow detection
+	/** @type {HTMLElement | undefined} */
 	let contentBodyElement = $state();
 	let contentHeight = $state(0);
+	/** @type {string[]} */
 	let overflowingAnchorKeys = $state([]);
 
 	// Gutter positioning state
+	/** @type {HTMLElement | undefined} */
 	let gutterElement = $state();
+	/** @type {Record<string, number>} */
 	let itemPositions = $state({});
+	/** @type {Record<string, HTMLElement>} */
 	let anchorGroupElements = $state({});
 
 	// Compute unique anchors once as a derived value (performance optimization)
@@ -52,17 +63,27 @@
 	let hasGutters = $derived(hasLeftGutter || hasRightGutter);
 	let hasOverflow = $derived(overflowingAnchorKeys.length > 0);
 
-	// Helper to get anchor key with headers context
+	/**
+	 * Helper to get anchor key with headers context
+	 * @param {string} anchor
+	 */
 	function getKey(anchor) {
 		return getAnchorKey(anchor, headers);
 	}
 
-	// Get items for a specific anchor
+	/**
+	 * Get items for a specific anchor
+	 * @param {string} anchor
+	 */
 	function getItems(anchor) {
 		return getItemsForAnchor(gutterContent, anchor);
 	}
 
-	// Generate unique key for a gutter item
+	/**
+	 * Generate unique key for a gutter item
+	 * @param {GutterItem} item
+	 * @param {number} index
+	 */
 	function getItemKey(item, index) {
 		// Combine item properties to create a unique identifier
 		const parts = [

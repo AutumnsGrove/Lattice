@@ -2,15 +2,31 @@
 	import { tick } from 'svelte';
 	import GutterItem from './GutterItem.svelte';
 
-	let { items = [], headers = [], contentHeight = 0, onOverflowChange = () => {} } = $props();
+	/**
+	 * @typedef {{ type?: string; file?: string; src?: string; url?: string; anchor?: string; content?: string; [key: string]: unknown }} GutterItemType
+	 * @typedef {{ id: string; text: string; level?: number }} HeaderType
+	 */
 
+	let {
+		items = /** @type {GutterItemType[]} */ ([]),
+		headers = /** @type {HeaderType[]} */ ([]),
+		contentHeight = 0,
+		onOverflowChange = /** @type {(anchors: string[]) => void} */ (() => {})
+	} = $props();
+
+	/** @type {HTMLElement | undefined} */
 	let gutterElement = $state();
+	/** @type {Record<string, number>} */
 	let itemPositions = $state({});
+	/** @type {Record<string, HTMLElement>} */
 	let anchorGroupElements = $state({});
+	/** @type {string[]} */
 	let overflowingAnchors = $state([]);
 
 	/**
 	 * Parse anchor string to determine anchor type and value
+	 * @param {string | undefined} anchor
+	 * @returns {{ type: string; value: string | number | null }}
 	 */
 	function parseAnchor(anchor) {
 		if (!anchor) {
@@ -41,6 +57,8 @@
 
 	/**
 	 * Generate a unique key for an anchor (used for grouping and positioning)
+	 * @param {string} anchor
+	 * @returns {string}
 	 */
 	function getAnchorKey(anchor) {
 		const parsed = parseAnchor(anchor);
@@ -61,6 +79,7 @@
 
 	/**
 	 * Get all unique anchors from items (preserving order)
+	 * @returns {string[]}
 	 */
 	function getUniqueAnchors() {
 		const seen = new Set();
@@ -74,12 +93,19 @@
 		return anchors;
 	}
 
-	// Group items by their anchor
+	/**
+	 * Group items by their anchor
+	 * @param {string} anchor
+	 * @returns {GutterItemType[]}
+	 */
 	function getItemsForAnchor(anchor) {
 		return items.filter(item => item.anchor === anchor);
 	}
 
-	// Get items that don't have a valid anchor (show at top)
+	/**
+	 * Get items that don't have a valid anchor (show at top)
+	 * @returns {GutterItemType[]}
+	 */
 	function getOrphanItems() {
 		return items.filter(item => {
 			if (!item.anchor) return true;
@@ -95,6 +121,8 @@
 
 	/**
 	 * Find the DOM element for an anchor
+	 * @param {string} anchor
+	 * @returns {Element | null}
 	 */
 	function findAnchorElement(anchor) {
 		const parsed = parseAnchor(anchor);

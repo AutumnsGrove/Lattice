@@ -5,11 +5,16 @@
    */
 
   /**
-   * @type {{ name: string, commits?: number, additions?: number, deletions?: number }[]}
+   * @typedef {Object} RepoData
+   * @property {string} name
+   * @property {number} [commits]
+   * @property {number} [additions]
+   * @property {number} [deletions]
    */
+
   let {
-    repos = [],
-    mode = 'commits', // 'commits' or 'loc'
+    repos = /** @type {RepoData[]} */ ([]),
+    mode = /** @type {'commits' | 'loc'} */ ('commits'),
     maxWidth = 150,
     showLegend = true
   } = $props();
@@ -33,6 +38,7 @@
     return repos.reduce((sum, r) => sum + (r.additions || 0) + (r.deletions || 0), 0) || 1;
   }
 
+  /** @param {RepoData} repo */
   function getValue(repo) {
     if (mode === 'commits') {
       return repo.commits || 1;

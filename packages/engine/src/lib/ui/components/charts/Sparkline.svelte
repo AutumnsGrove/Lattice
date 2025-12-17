@@ -4,9 +4,20 @@
    * Shows activity trend over time (commits, LOC, etc.)
    */
 
-  /** @type {number[]} */
+  /**
+   * @typedef {Object} SparklineProps
+   * @property {number[]} [data] - Data points for the sparkline
+   * @property {number} [width] - Width of the chart
+   * @property {number} [height] - Height of the chart
+   * @property {string} [strokeColor] - Line color
+   * @property {string} [fillColor] - Fill color for area
+   * @property {number} [strokeWidth] - Line thickness
+   * @property {boolean} [showDots] - Show data point dots
+   * @property {boolean} [showArea] - Show filled area
+   */
+
   let {
-    data = [],
+    data = /** @type {number[]} */ ([]),
     width = 120,
     height = 24,
     strokeColor = '#5cb85f',

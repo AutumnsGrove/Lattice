@@ -19,22 +19,32 @@
     useCommandPalette,
   } from "./composables/index.js";
 
+  /**
+   * @typedef {Object} StoredDraft
+   * @property {string} content
+   * @property {number} savedAt
+   * @property {number} [wordCount]
+   */
+
   // Props
   let {
     content = $bindable(""),
     onSave = () => {},
     saving = false,
     readonly = false,
-    draftKey = null,
-    onDraftRestored = () => {},
+    draftKey = /** @type {string | null} */ (null),
+    onDraftRestored = /** @type {(draft: StoredDraft) => void} */ (() => {}),
     previewTitle = "",
     previewDate = "",
-    previewTags = [],
+    previewTags = /** @type {string[]} */ ([]),
   } = $props();
 
   // Core refs and state
+  /** @type {HTMLTextAreaElement | null} */
   let textareaRef = $state(null);
+  /** @type {HTMLElement | null} */
   let previewRef = $state(null);
+  /** @type {HTMLElement | null} */
   let lineNumbersRef = $state(null);
   let showPreview = $state(true);
   let cursorLine = $state(1);
@@ -46,6 +56,7 @@
   let isDragging = $state(false);
   let isUploading = $state(false);
   let uploadProgress = $state("");
+  /** @type {string | null} */
   let uploadError = $state(null);
 
   // Full preview mode
@@ -173,6 +184,7 @@
     return availableAnchors;
   }
 
+  /** @param {string} name */
   export function insertAnchor(name) {
     insertAtCursor(`<!-- anchor:${name} -->\n`);
   }
@@ -196,6 +208,7 @@
   }
 
   // Keyboard handlers
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     // Escape key handling
     if (e.key === "Escape") {
@@ -214,9 +227,10 @@
     }
 
     // Slash commands trigger
-    if (e.key === "/" && !slashCommands.isOpen) {
+    if (e.key === "/" && !slashCommands.isOpen && textareaRef) {
       const pos = textareaRef.selectionStart;
-      if (slashCommands.shouldTrigger("/", pos, content)) {
+      // Only trigger at start of line or after whitespace
+      if (pos === 0 || /\s$/.test(content.substring(0, pos))) {
         setTimeout(() => slashCommands.open(), 0);
       }
     }
@@ -255,13 +269,15 @@
     }
 
     // Tab for indentation
-    if (e.key === "Tab") {
+    if (e.key === "Tab" && textareaRef) {
       e.preventDefault();
       const start = textareaRef.selectionStart;
       const end = textareaRef.selectionEnd;
       content = content.substring(0, start) + "  " + content.substring(end);
       setTimeout(() => {
-        textareaRef.selectionStart = textareaRef.selectionEnd = start + 2;
+        if (textareaRef) {
+          textareaRef.selectionStart = textareaRef.selectionEnd = start + 2;
+        }
       }, 0);
     }
 
@@ -284,6 +300,7 @@
     }
   }
 
+  /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
       if (ambientSounds.showPanel) {
@@ -328,6 +345,10 @@
   }
 
   // Text manipulation helpers
+  /**
+   * @param {string} before
+   * @param {string} after
+   */
   async function wrapSelection(before, after) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
@@ -348,6 +369,7 @@
     isUpdating = false;
   }
 
+  /** @param {string} text */
   async function insertAtCursor(text) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
@@ -366,6 +388,7 @@
   }
 
   // Toolbar actions
+  /** @param {number} level */
   function insertHeading(level) {
     insertAtCursor("#".repeat(level) + " ");
   }
@@ -430,6 +453,7 @@
   });
 
   // Drag and drop handlers
+  /** @param {DragEvent} e */
   function handleDragEnter(e) {
     e.preventDefault();
     if (readonly) return;
@@ -438,6 +462,7 @@
     }
   }
 
+  /** @param {DragEvent} e */
   function handleDragOver(e) {
     e.preventDefault();
     if (readonly) return;
@@ -447,13 +472,16 @@
     }
   }
 
+  /** @param {DragEvent} e */
   function handleDragLeave(e) {
     e.preventDefault();
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+    const target = /** @type {HTMLElement} */ (e.currentTarget);
+    if (!target.contains(/** @type {Node | null} */ (e.relatedTarget))) {
       isDragging = false;
     }
   }
 
+  /** @param {DragEvent} e */
   async function handleDrop(e) {
     e.preventDefault();
     isDragging = false;
@@ -473,6 +501,7 @@
     }
   }
 
+  /** @param {File} file */
   async function uploadImage(file) {
     isUploading = true;
     uploadProgress = `Uploading ${file.name}...`;
@@ -500,7 +529,7 @@
 
       uploadProgress = "";
     } catch (err) {
-      uploadError = err.message;
+      uploadError = err instanceof Error ? err.message : String(err);
       setTimeout(() => (uploadError = null), 5000);
     } finally {
       isUploading = false;
@@ -508,6 +537,7 @@
     }
   }
 
+  /** @param {ClipboardEvent} e */
   function handlePaste(e) {
     if (readonly) return;
 
@@ -529,6 +559,7 @@
   }
 
   // Command palette execution
+  /** @param {number} index */
   function executePaletteCommand(index) {
     const cmd = filteredPaletteCommands[index];
     if (cmd && cmd.action) {
@@ -763,7 +794,7 @@
         onclick={() => ambientSounds.togglePanel()}
         title="Ambient sounds"
       >
-        [{soundLibrary[ambientSounds.currentSound]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
+        [{soundLibrary[/** @type {keyof typeof soundLibrary} */ (ambientSounds.currentSound)]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
       </button>
       <span class="status-divider">|</span>
       {#if editorSettings.typewriterMode}
@@ -812,7 +843,7 @@
         class="command-palette-input"
         placeholder="> type a command..."
         value={commandPalette.query}
-        oninput={(e) => commandPalette.setQuery(e.target.value)}
+        oninput={(e) => commandPalette.setQuery(/** @type {HTMLInputElement} */ (e.target).value)}
         onkeydown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();

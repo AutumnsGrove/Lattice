@@ -74,7 +74,7 @@ export async function GET({ params, platform, locals }) {
       },
     });
   } catch (err) {
-    if (err.status === 404) throw err;
+    if (/** @type {{ status?: number }} */ (err).status === 404) throw err;
     console.error("Filesystem fetch error:", err);
     throw error(500, "Failed to fetch post");
   }
@@ -149,7 +149,7 @@ export async function PUT({ params, request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(marked.parse(data.markdown_content));
+    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
 
     // Generate a simple hash of the content
     const encoder = new TextEncoder();
@@ -193,7 +193,7 @@ export async function PUT({ params, request, platform, locals }) {
       message: "Post updated successfully",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (/** @type {{ status?: number }} */ (err).status) throw err;
     console.error("Error updating post:", err);
     throw error(500, "Failed to update post");
   }
@@ -250,7 +250,7 @@ export async function DELETE({ request, params, platform, locals }) {
       message: "Post deleted successfully",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (/** @type {{ status?: number }} */ (err).status) throw err;
     console.error("Error deleting post:", err);
     throw error(500, "Failed to delete post");
   }
