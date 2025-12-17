@@ -1,19 +1,32 @@
 <script lang="ts">
+	import type { Season } from '../nature/palette';
+	import { autumnReds, pinks } from '../nature/palette';
+
 	interface Props {
 		class?: string;
 		color?: string;
 		trunkColor?: string;
+		season?: Season;
+		animate?: boolean;
 	}
 
-	let { class: className = 'w-6 h-6', color, trunkColor }: Props = $props();
+	let {
+		class: className = 'w-6 h-6',
+		color,
+		trunkColor,
+		season = 'spring',
+		animate = false
+	}: Props = $props();
 
-	const blossomColor = color ?? '#f9a8d4'; // Default pink blossoms
+	// Cherry trees: pink blossoms in spring, red/crimson foliage in autumn
+	const defaultColor = season === 'autumn' ? autumnReds.scarlet : pinks.blush;
+	const blossomColor = color ?? defaultColor;
 	const actualTrunkColor = trunkColor ?? '#6B4423';
 </script>
 
 <!-- Cherry blossom tree - delicate branching with clustered flowers -->
 <svg
-	class={className}
+	class="{className} {animate ? 'sway' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 100 120"
 >
@@ -48,3 +61,15 @@
 	<circle fill={blossomColor} cx="60" cy="50" r="10"/>
 	<circle fill={blossomColor} cx="50" cy="38" r="12"/>
 </svg>
+
+<style>
+	@keyframes sway {
+		0%, 100% { transform: rotate(0deg); }
+		50% { transform: rotate(1.2deg); }
+	}
+
+	.sway {
+		transform-origin: center bottom;
+		animation: sway 3.5s ease-in-out infinite;
+	}
+</style>
