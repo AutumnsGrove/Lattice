@@ -4,6 +4,10 @@
 
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
 
+	// Animation constants
+	// Starting offset ensures leaves begin above viewport for natural entrance
+	const SPAWN_OFFSET_PX = 50;
+
 	interface Props {
 		class?: string;
 		color?: string;
@@ -42,9 +46,11 @@
 	const cherrySpringColors = [pinks.pink, pinks.rose, pinks.blush, pinks.palePink];
 	const aspenAutumnColors = [autumn.gold, autumn.honey, autumn.straw, autumn.amber];
 
-	// Deterministic color selection based on seed
+	// Deterministic color selection using pseudo-random distribution
+	// Uses sine-based hash to avoid visible patterns from sequential IDs
 	function pickFromArray<T>(arr: T[]): T {
-		return arr[seed % arr.length];
+		const hash = Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+		return arr[Math.floor(hash) % arr.length];
 	}
 
 	// Get default color based on variant and season (deterministic)
@@ -74,7 +80,7 @@
 	class="{className} {animate ? 'fall' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 30 35"
-	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px; --fall-distance: {fallDistance}vh;"
+	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px; --fall-distance: {fallDistance}vh; --spawn-offset: {SPAWN_OFFSET_PX}px;"
 >
 	<g class={animate ? 'spin' : ''}>
 		{#if variant === 'simple'}
@@ -117,7 +123,8 @@
 <style>
 	@keyframes fall {
 		0% {
-			transform: translateY(-50px) translateX(0);
+			/* Start above viewport using spawn offset for natural entrance */
+			transform: translateY(calc(-1 * var(--spawn-offset, 50px))) translateX(0);
 			opacity: 0;
 		}
 		8% {

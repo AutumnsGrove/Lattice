@@ -53,6 +53,11 @@
 		zIndex = -1
 	}: Props = $props();
 
+	// Deterministic hash for pseudo-random distribution (avoids visible patterns)
+	function hashSeed(seed: number): number {
+		return Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+	}
+
 	// Map tree types to appropriate leaf variants (deterministic based on leaf id)
 	function getLeafVariant(treeType: TreeType, leafId: number): LeafVariant {
 		switch (treeType) {
@@ -65,8 +70,8 @@
 				return 'pine';
 			case 'logo':
 			default:
-				// Logo and default get a mix of simple and maple (deterministic)
-				return leafId % 2 === 0 ? 'simple' : 'maple';
+				// Logo and default get a mix of simple and maple (deterministic with natural distribution)
+				return Math.floor(hashSeed(leafId)) % 2 === 0 ? 'simple' : 'maple';
 		}
 	}
 

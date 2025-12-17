@@ -152,10 +152,15 @@
 		}
 	}
 
+	// Deterministic hash for pseudo-random distribution (avoids visible patterns from sequential IDs)
+	function hashSeed(seed: number): number {
+		return Math.abs(Math.sin(seed * 12.9898) * 43758.5453);
+	}
+
 	// Get appropriate color for tree type and depth (deterministic based on seed)
 	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number): string {
-		// Use seed to pick deterministically from array
-		const pickFromArray = <T>(arr: T[]): T => arr[seed % arr.length];
+		// Use hashed seed to pick deterministically with natural distribution
+		const pickFromArray = <T>(arr: T[]): T => arr[Math.floor(hashSeed(seed)) % arr.length];
 
 		if (treeType === 'cherry') {
 			return pickFromArray(depthPinks);
