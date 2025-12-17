@@ -70,11 +70,17 @@ importers:
         specifier: ^2.8.0
         version: 2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))
       '@sveltejs/vite-plugin-svelte':
-        specifier: ^4.0.0
+        specifier: ^4.0.4
         version: 4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))
+      '@testing-library/svelte':
+        specifier: ^5.2.9
+        version: 5.2.9(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))(vitest@4.0.14)
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.22(postcss@8.5.6)
+      jsdom:
+        specifier: ^27.2.0
+        version: 27.2.0
       postcss:
         specifier: ^8.4.49
         version: 8.5.6
@@ -93,6 +99,9 @@ importers:
       vite:
         specifier: ^5.4.21
         version: 5.4.21(@types/node@20.19.25)
+      vitest:
+        specifier: ^4.0.14
+        version: 4.0.14(@types/node@20.19.25)(@vitest/ui@4.0.14)(happy-dom@20.0.11)(jiti@1.21.7)(jsdom@27.2.0)
       wrangler:
         specifier: ^3.91.0
         version: 3.114.15(@cloudflare/workers-types@4.20251202.0)

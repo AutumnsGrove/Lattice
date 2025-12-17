@@ -1,45 +1,54 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+
+	// Trees
 	import Logo from '$lib/components/Logo.svelte';
 	import TreePine from '$lib/components/trees/TreePine.svelte';
-	import TreeOak from '$lib/components/trees/TreeOak.svelte';
-	import TreeWillow from '$lib/components/trees/TreeWillow.svelte';
 	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
+	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
+	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
 
-	// Tree variations with different sizes and green shades
-	const greenShades = {
-		darkForest: '#0d4a1c',
-		deepGreen: '#166534',
-		grove: '#16a34a',
-		meadow: '#22c55e',
-		spring: '#4ade80',
-		mint: '#86efac',
-		pale: '#bbf7d0'
-	};
+	// Ground elements
+	import Mushroom from '$lib/components/nature/ground/Mushroom.svelte';
+	import Fern from '$lib/components/nature/ground/Fern.svelte';
+	import Bush from '$lib/components/nature/ground/Bush.svelte';
+	import GrassTuft from '$lib/components/nature/ground/GrassTuft.svelte';
+	import Rock from '$lib/components/nature/ground/Rock.svelte';
+	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
 
-	// Cherry blossom pink variations
-	const pinkShades = {
-		deepPink: '#db2777',
-		pink: '#ec4899',
-		rose: '#f472b6',
-		blush: '#f9a8d4',
-		palePink: '#fbcfe8'
-	};
+	// Creatures
+	import Firefly from '$lib/components/nature/creatures/Firefly.svelte';
+	import Butterfly from '$lib/components/nature/creatures/Butterfly.svelte';
+	import BirdFlying from '$lib/components/nature/creatures/BirdFlying.svelte';
+	import Bee from '$lib/components/nature/creatures/Bee.svelte';
 
-	// Bark/trunk color variations
-	const trunkShades = {
-		darkBark: '#3d2817',
-		bark: '#5d4037',
-		warmBark: '#6B4423',
-		lightBark: '#8b6914'
-	};
+	// Botanical
+	import LeafFalling from '$lib/components/nature/botanical/LeafFalling.svelte';
+
+	// Sky
+	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
+
+	// Shared palette
+	import {
+		greens,
+		bark,
+		autumn,
+		pinks,
+		autumnReds,
+		earth,
+		natural,
+		type Season
+	} from '$lib/components/nature/palette';
+
+	// Season state
+	let season: Season = $state('summer');
+	const isAutumn = $derived(season === 'autumn');
 
 	// Tree component types
-	type TreeType = 'logo' | 'pine' | 'oak' | 'willow' | 'cherry';
-	const treeTypes: TreeType[] = ['logo', 'pine', 'oak', 'willow', 'cherry'];
+	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
+	const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'birch', 'cherry'];
 
-	// Tree types with different characteristics
 	interface Tree {
 		id: number;
 		x: number;
@@ -58,10 +67,37 @@
 		return arr[Math.floor(Math.random() * arr.length)];
 	}
 
+	// Get seasonal colors based on depth
+	function getDepthColors(brightness: 'dark' | 'mid' | 'light'): string[] {
+		if (isAutumn) {
+			if (brightness === 'dark') return [autumn.rust, autumn.ember];
+			if (brightness === 'mid') return [autumn.pumpkin, autumn.amber];
+			return [autumn.gold, autumn.honey, autumn.straw];
+		} else {
+			if (brightness === 'dark') return [greens.darkForest, greens.deepGreen];
+			if (brightness === 'mid') return [greens.grove, greens.meadow];
+			return [greens.spring, greens.mint];
+		}
+	}
+
+	function getDepthPinks(brightness: 'dark' | 'mid' | 'light'): string[] {
+		if (isAutumn) {
+			return [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
+		} else {
+			if (brightness === 'dark') return [pinks.deepPink, pinks.pink];
+			if (brightness === 'mid') return [pinks.rose, pinks.blush];
+			return [pinks.blush, pinks.palePink];
+		}
+	}
+
 	// Get appropriate color for tree type and depth
 	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[]): string {
 		if (treeType === 'cherry') {
 			return pickRandom(depthPinks);
+		}
+		// Pine stays green even in autumn (evergreen!)
+		if (treeType === 'pine' && isAutumn) {
+			return pickRandom([greens.deepGreen, greens.grove, greens.darkForest]);
 		}
 		return pickRandom(depthColors);
 	}
@@ -71,10 +107,7 @@
 		const trees: Tree[] = [];
 		let id = 0;
 
-		// Back row (smallest, darkest, furthest away)
-		const backColors = [greenShades.darkForest, greenShades.deepGreen];
-		const backPinks = [pinkShades.deepPink, pinkShades.pink];
-		const backTrunks = [trunkShades.darkBark, trunkShades.bark];
+		// Back row (smallest, darkest)
 		for (let i = 0; i < 12; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -82,8 +115,8 @@
 				x: 5 + i * 8 + (Math.random() * 4 - 2),
 				y: 8 + Math.random() * 4,
 				size: 28 + Math.random() * 12,
-				color: getTreeColor(treeType, backColors, backPinks),
-				trunkColor: pickRandom(backTrunks),
+				color: getTreeColor(treeType, getDepthColors('dark'), getDepthPinks('dark')),
+				trunkColor: pickRandom([bark.darkBark, bark.bark]),
 				treeType,
 				rotation: Math.random() * 6 - 3,
 				opacity: 0.7 + Math.random() * 0.2,
@@ -92,9 +125,6 @@
 		}
 
 		// Middle-back row
-		const midBackColors = [greenShades.deepGreen, greenShades.grove];
-		const midBackPinks = [pinkShades.pink, pinkShades.rose];
-		const midBackTrunks = [trunkShades.bark, trunkShades.warmBark];
 		for (let i = 0; i < 10; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -102,8 +132,8 @@
 				x: 2 + i * 10 + (Math.random() * 6 - 3),
 				y: 18 + Math.random() * 6,
 				size: 40 + Math.random() * 15,
-				color: getTreeColor(treeType, midBackColors, midBackPinks),
-				trunkColor: pickRandom(midBackTrunks),
+				color: getTreeColor(treeType, getDepthColors('mid'), getDepthPinks('mid')),
+				trunkColor: pickRandom([bark.bark, bark.warmBark]),
 				treeType,
 				rotation: Math.random() * 8 - 4,
 				opacity: 0.8 + Math.random() * 0.15,
@@ -112,9 +142,6 @@
 		}
 
 		// Middle row
-		const midColors = [greenShades.grove, greenShades.meadow];
-		const midPinks = [pinkShades.rose, pinkShades.blush];
-		const midTrunks = [trunkShades.warmBark, trunkShades.lightBark];
 		for (let i = 0; i < 8; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -122,8 +149,8 @@
 				x: 0 + i * 13 + (Math.random() * 8 - 4),
 				y: 32 + Math.random() * 8,
 				size: 55 + Math.random() * 20,
-				color: getTreeColor(treeType, midColors, midPinks),
-				trunkColor: pickRandom(midTrunks),
+				color: getTreeColor(treeType, getDepthColors('mid'), getDepthPinks('mid')),
+				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
 				treeType,
 				rotation: Math.random() * 10 - 5,
 				opacity: 0.85 + Math.random() * 0.1,
@@ -132,9 +159,6 @@
 		}
 
 		// Middle-front row
-		const midFrontColors = [greenShades.meadow, greenShades.spring];
-		const midFrontPinks = [pinkShades.blush, pinkShades.palePink];
-		const midFrontTrunks = [trunkShades.warmBark, trunkShades.lightBark];
 		for (let i = 0; i < 6; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -142,8 +166,8 @@
 				x: -3 + i * 18 + (Math.random() * 10 - 5),
 				y: 48 + Math.random() * 10,
 				size: 75 + Math.random() * 25,
-				color: getTreeColor(treeType, midFrontColors, midFrontPinks),
-				trunkColor: pickRandom(midFrontTrunks),
+				color: getTreeColor(treeType, getDepthColors('light'), getDepthPinks('light')),
+				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
 				treeType,
 				rotation: Math.random() * 12 - 6,
 				opacity: 0.9 + Math.random() * 0.1,
@@ -152,9 +176,6 @@
 		}
 
 		// Front row (largest, brightest)
-		const frontColors = [greenShades.spring, greenShades.mint];
-		const frontPinks = [pinkShades.blush, pinkShades.palePink];
-		const frontTrunks = [trunkShades.warmBark, trunkShades.lightBark];
 		for (let i = 0; i < 4; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -162,8 +183,8 @@
 				x: -5 + i * 28 + (Math.random() * 12 - 6),
 				y: 68 + Math.random() * 12,
 				size: 100 + Math.random() * 40,
-				color: getTreeColor(treeType, frontColors, frontPinks),
-				trunkColor: pickRandom(frontTrunks),
+				color: getTreeColor(treeType, getDepthColors('light'), getDepthPinks('light')),
+				trunkColor: pickRandom([bark.warmBark, bark.lightBark]),
 				treeType,
 				rotation: Math.random() * 15 - 7.5,
 				opacity: 0.95,
@@ -174,7 +195,13 @@
 		return trees.sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
 	}
 
-	const forestTrees = generateForest();
+	// Reactive forest - regenerates when season changes
+	let forestTrees = $derived(generateForest());
+
+	// Toggle season
+	function toggleSeason() {
+		season = isAutumn ? 'summer' : 'autumn';
+	}
 </script>
 
 <svelte:head>
@@ -182,32 +209,95 @@
 	<meta name="description" content="A forest of Grove trees, growing together." />
 </svelte:head>
 
-<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
+<main class="min-h-screen flex flex-col transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
+		<!-- Season Toggle - Top Right -->
+		<div class="absolute top-4 right-4 z-20">
+			<button
+				onclick={toggleSeason}
+				class="flex items-center gap-2 px-3 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-105 transition-transform"
+				aria-label={isAutumn ? 'Switch to spring/summer' : 'Switch to autumn'}
+			>
+				{#if isAutumn}
+					<!-- Leaf icon for autumn (Lucide leaf) -->
+					<svg class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+					</svg>
+					<span class="text-sm font-sans text-amber-700 dark:text-amber-400">Autumn</span>
+				{:else}
+					<!-- Flower icon for spring/summer (Lucide flower-2) -->
+					<svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1" />
+						<circle cx="12" cy="8" r="2" />
+						<path d="M12 10v12" />
+						<path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z" />
+						<path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z" />
+					</svg>
+					<span class="text-sm font-sans text-green-700 dark:text-green-400">Summer</span>
+				{/if}
+			</button>
+		</div>
+
 		<!-- Sky background gradient -->
-		<div class="absolute inset-0 bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20"></div>
+		<div class="absolute inset-0 transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
+
+		<!-- Clouds -->
+		<div class="absolute top-8 left-[10%] opacity-60">
+			<Cloud class="w-24 h-12" animate={true} speed="slow" />
+		</div>
+		<div class="absolute top-16 right-[15%] opacity-50">
+			<Cloud class="w-32 h-16" animate={true} speed="slow" />
+		</div>
+
+		<!-- Flying creatures (spring/summer) or falling leaves (autumn) -->
+		{#if isAutumn}
+			<div class="absolute top-20 left-1/4" style="--fall-delay: 0s">
+				<LeafFalling class="w-6 h-6" season="autumn" variant="maple" />
+			</div>
+			<div class="absolute top-32 left-1/2" style="--fall-delay: 1s">
+				<LeafFalling class="w-5 h-5" season="autumn" variant="simple" />
+			</div>
+			<div class="absolute top-24 right-1/3" style="--fall-delay: 2s">
+				<LeafFalling class="w-6 h-6" season="autumn" variant="maple" />
+			</div>
+		{:else}
+			<div class="absolute top-24 left-1/4">
+				<BirdFlying class="w-8 h-4" animate={true} />
+			</div>
+			<div class="absolute top-16 right-1/4">
+				<BirdFlying class="w-6 h-3" animate={true} facing="left" />
+			</div>
+			<div class="absolute top-40 left-[15%]">
+				<Butterfly class="w-8 h-8" animate={true} />
+			</div>
+			<div class="absolute top-32 right-[20%]">
+				<Bee class="w-6 h-6" animate={true} />
+			</div>
+		{/if}
 
 		<!-- Distant mountains/hills silhouette -->
 		<div class="absolute inset-x-0 top-20 h-40">
 			<svg class="w-full h-full" viewBox="0 0 1200 160" preserveAspectRatio="none">
 				<path
 					d="M0 160 L0 100 Q150 40 300 80 Q450 120 600 70 Q750 20 900 90 Q1050 140 1200 60 L1200 160 Z"
-					class="fill-emerald-200/40 dark:fill-emerald-900/30"
+					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
 				/>
 				<path
 					d="M0 160 L0 120 Q200 70 400 100 Q600 130 800 80 Q1000 50 1200 100 L1200 160 Z"
-					class="fill-emerald-300/30 dark:fill-emerald-800/20"
+					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
 				/>
 			</svg>
 		</div>
 
 		<!-- Forest container -->
 		<div class="relative w-full h-[70vh] min-h-[500px]">
+			<!-- Trees -->
 			{#each forestTrees as tree (tree.id)}
 				<div
-					class="absolute transform -translate-x-1/2 transition-transform duration-1000 hover:scale-110"
+					class="absolute transform -translate-x-1/2 transition-all duration-500 hover:scale-110"
 					style="
 						left: {tree.x}%;
 						top: {tree.y}%;
@@ -220,22 +310,55 @@
 					"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} />
+						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{:else if tree.treeType === 'pine'}
-						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} />
-					{:else if tree.treeType === 'oak'}
-						<TreeOak class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} />
-					{:else if tree.treeType === 'willow'}
-						<TreeWillow class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} />
+						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+					{:else if tree.treeType === 'aspen'}
+						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+					{:else if tree.treeType === 'birch'}
+						<TreeBirch class="w-full h-full" color={tree.color} {season} animate={true} />
 					{:else if tree.treeType === 'cherry'}
-						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} />
+						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{/if}
 				</div>
 			{/each}
+
+			<!-- Ground decorations -->
+			<div class="absolute bottom-[22%] left-[10%] z-[6]">
+				<Mushroom class="w-8 h-10" />
+			</div>
+			<div class="absolute bottom-[18%] left-[25%] z-[6]">
+				<Fern class="w-6 h-10" {season} />
+			</div>
+			<div class="absolute bottom-[20%] right-[30%] z-[6]">
+				<Rock class="w-10 h-6" variant="round" />
+			</div>
+			<div class="absolute bottom-[15%] right-[15%] z-[6]">
+				<Bush class="w-12 h-10" {season} />
+			</div>
+			<div class="absolute bottom-[25%] left-[45%] z-[6]">
+				<GrassTuft class="w-6 h-8" {season} />
+			</div>
+			{#if !isAutumn}
+				<div class="absolute bottom-[22%] right-[45%] z-[6]">
+					<FlowerWild class="w-5 h-8" />
+				</div>
+			{/if}
+
+			<!-- Fireflies -->
+			<div class="absolute bottom-[35%] left-1/4 z-[7]">
+				<Firefly class="w-4 h-4" animate={true} intensity="subtle" />
+			</div>
+			<div class="absolute bottom-[30%] right-1/3 z-[7]">
+				<Firefly class="w-3 h-3" animate={true} intensity="bright" />
+			</div>
+			<div class="absolute bottom-[40%] left-1/2 z-[7]">
+				<Firefly class="w-4 h-4" animate={true} />
+			</div>
 		</div>
 
 		<!-- Ground -->
-		<div class="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-emerald-800 via-emerald-700 to-transparent dark:from-emerald-950 dark:via-emerald-900"></div>
+		<div class="absolute bottom-0 inset-x-0 h-20 transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-t from-amber-800 via-amber-700 to-transparent dark:from-amber-950 dark:via-amber-900' : 'bg-gradient-to-t from-emerald-800 via-emerald-700 to-transparent dark:from-emerald-950 dark:via-emerald-900'}"></div>
 
 		<!-- Content overlay -->
 		<div class="absolute inset-x-0 top-8 text-center z-10 px-6">
@@ -246,48 +369,100 @@
 				A community of trees, each one unique, all growing together.
 			</p>
 		</div>
+	</article>
 
-		<!-- Color palette legend -->
-		<div class="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10">
-			<div class="card bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-4 rounded-xl">
-				<p class="text-xs text-foreground-faint font-sans uppercase tracking-wide mb-3 text-center">Forest Palette</p>
-				<div class="flex gap-4 items-start">
-					<!-- Green shades -->
-					<div class="flex gap-1 items-end">
-						{#each Object.entries(greenShades) as [name, color]}
+	<!-- Color Palette Showcase - Below the forest -->
+	<section class="py-12 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-divider">
+		<div class="max-w-4xl mx-auto">
+			<h2 class="text-2xl font-serif text-foreground text-center mb-8">Forest Palette</h2>
+
+			<div class="grid md:grid-cols-2 gap-8">
+				<!-- Summer Greens -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(greens) as [name, color]}
 							<div class="flex flex-col items-center gap-1">
 								<div
-									class="w-5 h-5 md:w-6 md:h-6 rounded-full shadow-sm border border-white/20"
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
 									style="background-color: {color};"
 									title={name}
 								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
 							</div>
 						{/each}
 					</div>
-					<!-- Pink shades -->
-					<div class="flex gap-1 items-end">
-						{#each Object.entries(pinkShades) as [name, color]}
+				</div>
+
+				<!-- Autumn Colors -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(autumn) as [name, color]}
 							<div class="flex flex-col items-center gap-1">
 								<div
-									class="w-5 h-5 md:w-6 md:h-6 rounded-full shadow-sm border border-white/20"
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
 									style="background-color: {color};"
 									title={name}
 								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Cherry/Pink -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Cherry Blossoms</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(pinks) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Bark/Earth -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Bark & Earth</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(bark) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
 							</div>
 						{/each}
 					</div>
 				</div>
 			</div>
+
+			<!-- Asset viewer link -->
+			<div class="text-center mt-8">
+				<a
+					href="/tools"
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-muted text-white font-sans text-sm hover:bg-accent-subtle transition-colors"
+				>
+					<!-- Lucide paintbrush icon -->
+					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
+						<path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
+						<path d="M14.5 17.5 4.5 15" />
+					</svg>
+					Explore All Assets
+				</a>
+			</div>
 		</div>
-	</article>
+	</section>
 
-	<Footer class="relative z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm" />
+	<Footer class="relative z-10" />
 </main>
-
-<style>
-	/* Gentle sway animation for trees */
-	@keyframes sway {
-		0%, 100% { transform: translateX(-50%) rotate(var(--rotation, 0deg)); }
-		50% { transform: translateX(-50%) rotate(calc(var(--rotation, 0deg) + 2deg)); }
-	}
-</style>

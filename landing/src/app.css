@@ -517,3 +517,18 @@
 .prose-legal strong {
 	color: var(--color-foreground);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY - Reduced Motion
+   Disable animations for users who prefer reduced motion
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
+}

@@ -1,19 +1,31 @@
 <script lang="ts">
+	import type { Season } from './nature/palette';
+	import { autumn } from './nature/palette';
+
 	interface Props {
 		class?: string;
 		color?: string;
 		trunkColor?: string;
+		season?: Season;
+		animate?: boolean;
 	}
 
-	let { class: className = 'w-6 h-6', color, trunkColor }: Props = $props();
+	let {
+		class: className = 'w-6 h-6',
+		color,
+		trunkColor,
+		season = 'summer',
+		animate = false
+	}: Props = $props();
 
-	// Use trunk color if provided, otherwise fall back to main color
-	const foliageColor = color ?? 'currentColor';
+	// In autumn, default to warm amber/orange tones
+	const defaultColor = season === 'autumn' ? autumn.amber : 'currentColor';
+	const foliageColor = color ?? defaultColor;
 	const actualTrunkColor = trunkColor ?? foliageColor;
 </script>
 
 <svg
-	class={className}
+	class="{className} {animate ? 'sway' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 417 512.238"
 >
@@ -22,3 +34,15 @@
 	<!-- Foliage -->
 	<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
 </svg>
+
+<style>
+	@keyframes sway {
+		0%, 100% { transform: rotate(0deg); }
+		50% { transform: rotate(1deg); }
+	}
+
+	.sway {
+		transform-origin: center bottom;
+		animation: sway 4s ease-in-out infinite;
+	}
+</style>

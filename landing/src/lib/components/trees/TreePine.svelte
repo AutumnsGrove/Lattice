@@ -1,19 +1,30 @@
 <script lang="ts">
+	import type { Season } from '../nature/palette';
+
 	interface Props {
 		class?: string;
 		color?: string;
 		trunkColor?: string;
+		season?: Season;
+		animate?: boolean;
 	}
 
-	let { class: className = 'w-6 h-6', color, trunkColor }: Props = $props();
+	let {
+		class: className = 'w-6 h-6',
+		color,
+		trunkColor,
+		season = 'summer',
+		animate = false
+	}: Props = $props();
 
+	// Pine trees are evergreen - they stay green in autumn!
 	const foliageColor = color ?? 'currentColor';
 	const actualTrunkColor = trunkColor ?? '#6B4423';
 </script>
 
 <!-- Pine/Conifer tree - triangular layered design -->
 <svg
-	class={className}
+	class="{className} {animate ? 'sway' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 100 140"
 >
@@ -29,3 +40,15 @@
 	<!-- Top layer (smallest) -->
 	<polygon fill={foliageColor} points="50,5 28,50 72,50"/>
 </svg>
+
+<style>
+	@keyframes sway {
+		0%, 100% { transform: rotate(0deg); }
+		50% { transform: rotate(0.8deg); }
+	}
+
+	.sway {
+		transform-origin: center bottom;
+		animation: sway 5s ease-in-out infinite;
+	}
+</style>
