@@ -23,6 +23,7 @@ export { default as Spinner } from './Spinner.svelte';
 export { default as Table } from './Table.svelte';
 export { default as CollapsibleSection } from './CollapsibleSection.svelte';
 export { default as Logo } from './Logo.svelte';
+export { default as LogoLoader } from './LogoLoader.svelte';
 
 // Table sub-components (from primitives)
 export {

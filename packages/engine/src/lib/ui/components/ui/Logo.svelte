@@ -19,6 +19,8 @@
 		monochrome?: boolean;
 		/** Add subtle sway animation */
 		animate?: boolean;
+		/** Add breathing animation (for loading states) */
+		breathing?: boolean;
 	}
 
 	let {
@@ -26,7 +28,8 @@
 		color,
 		trunkColor,
 		monochrome = false,
-		animate = false
+		animate = false,
+		breathing = false
 	}: Props = $props();
 
 	// Classic bark brown from the nature palette
@@ -37,10 +40,13 @@
 	const actualTrunkColor = monochrome
 		? foliageColor
 		: (trunkColor ?? BARK_BROWN);
+
+	// Build animation classes
+	const animationClass = breathing ? 'grove-logo-breathe' : (animate ? 'grove-logo-sway' : '');
 </script>
 
 <svg
-	class="{className} {animate ? 'grove-logo-sway' : ''}"
+	class="{className} {animationClass}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 417 512.238"
 	aria-label="Grove logo"
@@ -57,8 +63,24 @@
 		50% { transform: rotate(1deg); }
 	}
 
+	@keyframes grove-logo-breathe {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 0.7;
+		}
+		50% {
+			transform: scale(1.05);
+			opacity: 1;
+		}
+	}
+
 	.grove-logo-sway {
 		transform-origin: center bottom;
 		animation: grove-logo-sway 4s ease-in-out infinite;
+	}
+
+	.grove-logo-breathe {
+		transform-origin: center center;
+		animation: grove-logo-breathe 2s ease-in-out infinite;
 	}
 </style>
