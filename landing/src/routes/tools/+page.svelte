@@ -73,7 +73,7 @@
 	// Asset definitions with their props
 	const assets = {
 		// Trees
-		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate', 'animateEntrance'] },
 		'TreePine': { component: TreePine, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeCherry': { component: TreeCherry, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeAspen': { component: TreeAspen, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
@@ -205,7 +205,7 @@
 
 	// Check if prop is a boolean
 	function isBooleanProp(prop: string): boolean {
-		return ['animate', 'spotted', 'rays', 'hasFlower', 'hasFlowers', 'lit', 'open'].includes(prop);
+		return ['animate', 'animateEntrance', 'spotted', 'rays', 'hasFlower', 'hasFlowers', 'lit', 'open'].includes(prop);
 	}
 
 	// Check if prop has enum options
