@@ -8,6 +8,7 @@
 	import TreePine from '$lib/components/trees/TreePine.svelte';
 	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
 	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
+	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
 
 	// Ground
 	import Mushroom from '$lib/components/nature/ground/Mushroom.svelte';
@@ -76,6 +77,7 @@
 		'TreePine': { component: TreePine, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeCherry': { component: TreeCherry, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeAspen': { component: TreeAspen, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'TreeBirch': { component: TreeBirch, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 
 		// Ground
 		'Mushroom': { component: Mushroom, category: 'Ground', props: ['capColor', 'stemColor', 'spotted'] },
