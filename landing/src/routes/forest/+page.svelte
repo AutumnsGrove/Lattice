@@ -71,12 +71,13 @@
 	// Hill layer definitions - organic rolling curves
 	// curvePath: just the top curve for tree placement (no bottom/sides)
 	// fillPath: closed path for rendering the hill fill
+	// Hills pushed down ~80 units to avoid overlapping title text
 	const hillLayers: HillLayer[] = [
 		{
 			id: 1,
-			// Back hill - gentle undulation, higher up
-			curvePath: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160',
-			fillPath: 'M0 180 Q150 140 300 160 Q450 180 600 150 Q750 120 900 155 Q1050 190 1200 160 L1200 500 L0 500 Z',
+			// Back hill - gentle undulation
+			curvePath: 'M0 260 Q150 220 300 240 Q450 260 600 230 Q750 200 900 235 Q1050 270 1200 240',
+			fillPath: 'M0 260 Q150 220 300 240 Q450 260 600 230 Q750 200 900 235 Q1050 270 1200 240 L1200 500 L0 500 Z',
 			treeCount: 10,
 			treeSize: { min: 35, max: 55 },
 			brightness: 'dark',
@@ -86,8 +87,8 @@
 		{
 			id: 2,
 			// Middle-back hill
-			curvePath: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210',
-			fillPath: 'M0 220 Q200 180 350 210 Q500 240 700 195 Q900 150 1050 200 Q1150 230 1200 210 L1200 500 L0 500 Z',
+			curvePath: 'M0 300 Q200 260 350 290 Q500 320 700 275 Q900 230 1050 280 Q1150 310 1200 290',
+			fillPath: 'M0 300 Q200 260 350 290 Q500 320 700 275 Q900 230 1050 280 Q1150 310 1200 290 L1200 500 L0 500 Z',
 			treeCount: 9,
 			treeSize: { min: 50, max: 75 },
 			brightness: 'mid',
@@ -97,8 +98,8 @@
 		{
 			id: 3,
 			// Middle hill
-			curvePath: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265',
-			fillPath: 'M0 270 Q150 230 300 260 Q500 290 650 250 Q800 210 950 255 Q1100 300 1200 265 L1200 500 L0 500 Z',
+			curvePath: 'M0 340 Q150 300 300 330 Q500 360 650 320 Q800 280 950 325 Q1100 370 1200 335',
+			fillPath: 'M0 340 Q150 300 300 330 Q500 360 650 320 Q800 280 950 325 Q1100 370 1200 335 L1200 500 L0 500 Z',
 			treeCount: 8,
 			treeSize: { min: 65, max: 95 },
 			brightness: 'mid',
@@ -108,8 +109,8 @@
 		{
 			id: 4,
 			// Front hill - larger trees
-			curvePath: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310',
-			fillPath: 'M0 330 Q200 290 400 320 Q600 350 800 300 Q1000 250 1200 310 L1200 500 L0 500 Z',
+			curvePath: 'M0 390 Q200 350 400 380 Q600 410 800 360 Q1000 310 1200 370',
+			fillPath: 'M0 390 Q200 350 400 380 Q600 410 800 360 Q1000 310 1200 370 L1200 500 L0 500 Z',
 			treeCount: 6,
 			treeSize: { min: 90, max: 130 },
 			brightness: 'light',
@@ -238,17 +239,19 @@
 	});
 
 	// Final trees with seasonal colors - derived from base trees and season
-	// Explicitly pass isAutumn to establish reactive dependency
-	let forestTrees = $derived(
-		baseTrees.map((tree) => {
-			const depthColors = getDepthColors(tree.brightness, isAutumn);
-			const depthPinks = getDepthPinks(tree.brightness, isAutumn);
+	// Use $derived.by and read isAutumn at top level to ensure reactivity
+	let forestTrees = $derived.by(() => {
+		// Read isAutumn at top level to establish reactive dependency
+		const currentIsAutumn = isAutumn;
+		return baseTrees.map((tree) => {
+			const depthColors = getDepthColors(tree.brightness, currentIsAutumn);
+			const depthPinks = getDepthPinks(tree.brightness, currentIsAutumn);
 			return {
 				...tree,
-				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id, isAutumn)
+				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id, currentIsAutumn)
 			};
-		})
-	);
+		});
+	});
 
 	// Toggle season
 	function toggleSeason() {
@@ -303,7 +306,7 @@
 		</div>
 
 		<!-- Distant mountains silhouette (decorative) -->
-		<div class="absolute inset-x-0 top-16 h-32" aria-hidden="true">
+		<div class="absolute inset-x-0 top-32 h-32" aria-hidden="true">
 			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" role="presentation">
 				<path
 					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
@@ -376,8 +379,8 @@
 			{/each}
 		</div>
 
-		<!-- Content overlay -->
-		<div class="absolute inset-x-0 top-8 text-center z-10 px-6">
+		<!-- Content overlay - z-30 to stay above trees (which are z-11 to z-14) -->
+		<div class="absolute inset-x-0 top-4 text-center z-30 px-6 pointer-events-none">
 			<h1 class="text-4xl md:text-6xl font-serif text-foreground drop-shadow-lg mb-4">
 				The Grove Forest
 			</h1>
