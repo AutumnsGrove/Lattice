@@ -10,6 +10,8 @@
 		season?: Season;
 		animate?: boolean;
 		animateEntrance?: boolean;
+		/** Add breathing animation (subtle pulse for loading states) */
+		breathing?: boolean;
 	}
 
 	let {
@@ -18,8 +20,12 @@
 		trunkColor,
 		season = 'summer',
 		animate = false,
-		animateEntrance = false
+		animateEntrance = false,
+		breathing = false
 	}: Props = $props();
+
+	// Build animation class - breathing takes precedence over sway
+	const animationClass = $derived(breathing ? 'breathing' : (animate ? 'sway' : ''));
 
 	// In autumn, default to warm amber/orange tones
 	// Use $derived to react to season/color prop changes
@@ -46,7 +52,7 @@
 {#if animateEntrance}
 	<!-- Animated version with 4 separate arrows -->
 	<svg
-		class="{className} {animate ? 'sway' : ''}"
+		class="{className} {animationClass}"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 417 512.238"
 	>
@@ -108,7 +114,7 @@
 {:else}
 	<!-- Static version -->
 	<svg
-		class="{className} {animate ? 'sway' : ''}"
+		class="{className} {animationClass}"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 417 512.238"
 	>
@@ -125,9 +131,25 @@
 		50% { transform: rotate(1deg); }
 	}
 
+	@keyframes breathe {
+		0%, 100% {
+			transform: scale(1);
+			opacity: 0.7;
+		}
+		50% {
+			transform: scale(1.05);
+			opacity: 1;
+		}
+	}
+
 	.sway {
 		transform-origin: center bottom;
 		animation: sway 4s ease-in-out infinite;
+	}
+
+	.breathing {
+		transform-origin: center center;
+		animation: breathe 2s ease-in-out infinite;
 	}
 
 	/* Arrow entrance animations */
