@@ -91,24 +91,7 @@
 		const trees: Tree[] = [];
 		let id = 0;
 
-		// Back row (smallest, darkest)
-		for (let i = 0; i < 12; i++) {
-			const treeType = pickRandom(treeTypes);
-			trees.push({
-				id: id++,
-				x: 5 + i * 8 + (Math.random() * 4 - 2),
-				y: 8 + Math.random() * 4,
-				size: 28 + Math.random() * 12,
-				color: getTreeColor(treeType, getDepthColors('dark'), getDepthPinks('dark')),
-				trunkColor: pickRandom([bark.darkBark, bark.bark]),
-				treeType,
-				rotation: Math.random() * 6 - 3,
-				opacity: 0.7 + Math.random() * 0.2,
-				zIndex: 1
-			});
-		}
-
-		// Middle-back row
+		// Middle-back row (previously back row removed - was above mountains)
 		for (let i = 0; i < 10; i++) {
 			const treeType = pickRandom(treeTypes);
 			trees.push({
@@ -258,7 +241,7 @@
 				{season}
 				minLeavesPerTree={2}
 				maxLeavesPerTree={5}
-				zIndex={0}
+				zIndex={-1}
 			/>
 
 			<!-- Trees -->

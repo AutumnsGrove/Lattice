@@ -16,6 +16,8 @@
 		delay?: number;
 		/** Horizontal drift amount (positive = right, negative = left) */
 		drift?: number;
+		/** Fall distance in vh units (how far the leaf travels) */
+		fallDistance?: number;
 	}
 
 	let {
@@ -26,7 +28,8 @@
 		variant = 'simple',
 		duration = 5,
 		delay = 0,
-		drift = 30
+		drift = 30,
+		fallDistance = 40
 	}: Props = $props();
 
 	// Color palettes for different leaf types
@@ -63,7 +66,7 @@
 	class="{className} {animate ? 'fall' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 30 35"
-	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px;"
+	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px; --fall-distance: {fallDistance}vh;"
 >
 	<g class={animate ? 'spin' : ''}>
 		{#if variant === 'simple'}
@@ -106,17 +109,20 @@
 <style>
 	@keyframes fall {
 		0% {
-			transform: translateY(-10px) translateX(0);
+			transform: translateY(-50px) translateX(0);
 			opacity: 0;
 		}
-		5% {
-			opacity: 0.9;
+		8% {
+			opacity: 0.85;
 		}
-		95% {
-			opacity: 0.6;
+		70% {
+			opacity: 0.7;
+		}
+		90% {
+			opacity: 0.3;
 		}
 		100% {
-			transform: translateY(100vh) translateX(var(--fall-drift, 30px));
+			transform: translateY(var(--fall-distance, 40vh)) translateX(var(--fall-drift, 30px));
 			opacity: 0;
 		}
 	}

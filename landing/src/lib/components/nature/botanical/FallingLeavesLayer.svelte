@@ -24,6 +24,7 @@
 		delay: number;
 		drift: number;
 		opacity: number;
+		fallDistance: number;
 	}
 
 	interface Props {
@@ -42,7 +43,7 @@
 		season = 'summer',
 		minLeavesPerTree = 2,
 		maxLeavesPerTree = 5,
-		zIndex = 0
+		zIndex = -1
 	}: Props = $props();
 
 	// Map tree types to appropriate leaf variants
@@ -82,21 +83,22 @@
 			const leafSizeVariation = 6 + treeSizeFactor * 4; // Additional random variation
 
 			for (let i = 0; i < leafCount; i++) {
-				// Spawn leaves around the tree crown area
-				// Offset from tree center, weighted toward the canopy
-				const xOffset = (Math.random() - 0.5) * (tree.size / 12); // Horizontal spread based on tree size
-				const yOffset = Math.random() * (tree.size / 30); // Start higher up in the canopy
+				// Spawn leaves above the tree canopy area (off-screen above)
+				// Leaves will animate downward from their spawn point
+				const xOffset = (Math.random() - 0.5) * (tree.size / 8); // Horizontal spread based on tree size
+				const yOffset = 15 + Math.random() * 10; // Start 15-25% above the tree position
 
 				leaves.push({
 					id: leafId++,
 					x: tree.x + xOffset,
-					y: tree.y - yOffset, // Above the tree base
+					y: tree.y - yOffset, // Well above the tree
 					size: baseLeafSize + Math.random() * leafSizeVariation,
 					variant: getLeafVariant(tree.treeType),
-					duration: 6 + Math.random() * 8, // 6-14 seconds to fall
-					delay: Math.random() * 12, // Staggered start over 12 seconds
-					drift: (Math.random() - 0.5) * 80, // -40 to +40 horizontal drift
-					opacity: 0.5 + Math.random() * 0.4 // 0.5-0.9 opacity
+					duration: 8 + Math.random() * 6, // 8-14 seconds to fall
+					delay: Math.random() * 15, // Staggered start over 15 seconds
+					drift: (Math.random() - 0.5) * 60, // -30 to +30 horizontal drift
+					opacity: 0.4 + Math.random() * 0.35, // 0.4-0.75 opacity
+					fallDistance: 25 + Math.random() * 20 // 25-45vh fall distance
 				});
 			}
 		}
@@ -131,6 +133,7 @@
 				duration={leaf.duration}
 				delay={leaf.delay}
 				drift={leaf.drift}
+				fallDistance={leaf.fallDistance}
 				animate={true}
 			/>
 		</div>
