@@ -23,17 +23,30 @@
   let { data } = $props();
 
   // Form state - initialized from loaded data
-  let title = $state(data.page.title || "");
-  let slug = $state(data.page.slug || "");
-  let description = $state(data.page.description || "");
-  let content = $state(data.page.markdown_content || "");
+  let title = $state("");
+  let slug = $state("");
+  let description = $state("");
+  let content = $state("");
 
   // Hero section state
-  let heroTitle = $state(data.page.hero?.title || "");
-  let heroSubtitle = $state(data.page.hero?.subtitle || "");
-  let heroCtaText = $state(data.page.hero?.cta?.text || "");
-  let heroCtaLink = $state(data.page.hero?.cta?.link || "");
-  let hasHero = $state(!!data.page.hero);
+  let heroTitle = $state("");
+  let heroSubtitle = $state("");
+  let heroCtaText = $state("");
+  let heroCtaLink = $state("");
+  let hasHero = $state(false);
+
+  // Initialize form state from data
+  $effect(() => {
+    title = data.page.title || "";
+    slug = data.page.slug || "";
+    description = data.page.description || "";
+    content = data.page.markdown_content || "";
+    heroTitle = data.page.hero?.title || "";
+    heroSubtitle = data.page.hero?.subtitle || "";
+    heroCtaText = data.page.hero?.cta?.text || "";
+    heroCtaLink = data.page.hero?.cta?.link || "";
+    hasHero = !!data.page.hero;
+  });
 
   // Editor reference for anchor insertion
   /** @type {import('$lib/components/admin/MarkdownEditor.svelte').default | null} */
@@ -43,6 +56,15 @@
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
   let detailsCollapsed = $state(false);
+
+  // Track original values for unsaved changes detection
+  let originalTitle = $state("");
+  let originalDescription = $state("");
+  let originalContent = $state("");
+  let originalHeroTitle = $state("");
+  let originalHeroSubtitle = $state("");
+  let originalHeroCtaText = $state("");
+  let originalHeroCtaLink = $state("");
 
   // Load collapsed state from localStorage
   onMount(() => {
@@ -61,16 +83,27 @@
     }
   }
 
+  // Update original values when data changes
+  $effect(() => {
+    originalTitle = data.page.title || "";
+    originalDescription = data.page.description || "";
+    originalContent = data.page.markdown_content || "";
+    originalHeroTitle = data.page.hero?.title || "";
+    originalHeroSubtitle = data.page.hero?.subtitle || "";
+    originalHeroCtaText = data.page.hero?.cta?.text || "";
+    originalHeroCtaLink = data.page.hero?.cta?.link || "";
+  });
+
   // Track changes
   $effect(() => {
     const hasChanges =
-      title !== data.page.title ||
-      description !== data.page.description ||
-      content !== data.page.markdown_content ||
-      heroTitle !== (data.page.hero?.title || "") ||
-      heroSubtitle !== (data.page.hero?.subtitle || "") ||
-      heroCtaText !== (data.page.hero?.cta?.text || "") ||
-      heroCtaLink !== (data.page.hero?.cta?.link || "");
+      title !== originalTitle ||
+      description !== originalDescription ||
+      content !== originalContent ||
+      heroTitle !== originalHeroTitle ||
+      heroSubtitle !== originalHeroSubtitle ||
+      heroCtaText !== originalHeroCtaText ||
+      heroCtaLink !== originalHeroCtaLink;
     hasUnsavedChanges = hasChanges;
   });
 

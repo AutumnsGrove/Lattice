@@ -896,9 +896,10 @@
 {/if}
 
 <!-- Snippets Modal -->
-<Dialog bind:open={snippetsManager.modal.open}>
-  <h3 slot="title">:: {snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}</h3>
-
+<Dialog
+  bind:open={snippetsManager.modal.open}
+  title={`:: ${snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}`}
+>
   <div class="snippets-modal-body">
     <div class="snippets-form">
       <div class="snippet-field">
@@ -934,7 +935,10 @@
 
       <div class="snippet-actions">
         {#if snippetsManager.modal.editingId}
-          <Button variant="danger" onclick={() => snippetsManager.deleteSnippet(snippetsManager.modal.editingId)}>
+          <Button variant="danger" onclick={() => {
+            const id = snippetsManager.modal.editingId;
+            if (id) snippetsManager.deleteSnippet(id);
+          }}>
             [<span class="key">d</span>elete]
           </Button>
         {/if}
@@ -1007,7 +1011,10 @@
           max="1"
           step="0.05"
           value={ambientSounds.volume}
-          oninput={(e) => ambientSounds.setVolume(parseFloat(e.target.value))}
+          oninput={(e) => {
+            const target = /** @type {HTMLInputElement} */ (e.target);
+            ambientSounds.setVolume(parseFloat(target.value));
+          }}
           class="volume-slider"
         />
       </label>

@@ -19,9 +19,9 @@
   let tagsInput = $state(
     Array.isArray(data.post.tags) ? data.post.tags.join(", ") : ""
   );
-  let font = $state(data.post.font || "default");
+  let font = $state(/** @type {any} */ (data.post).font || "default");
   let content = $state(data.post.markdown_content || "");
-  let gutterItems = $state(data.post.gutter_content ? JSON.parse(data.post.gutter_content) : []);
+  let gutterItems = $state(data.post.gutter_content ? JSON.parse(/** @type {string} */ (data.post.gutter_content)) : []);
 
   // Editor reference for anchor insertion
   /** @type {any} */
@@ -308,19 +308,19 @@
           </div>
 
           <div class="metadata-info">
-            {#if data.post.last_synced}
+            {#if 'last_synced' in data.post && data.post.last_synced}
               <p class="info-item">
                 <span class="info-label">Last synced:</span>
                 <span class="info-value">
-                  {new Date(data.post.last_synced).toLocaleString()}
+                  {new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
                 </span>
               </p>
             {/if}
-            {#if data.post.updated_at}
+            {#if 'updated_at' in data.post && data.post.updated_at}
               <p class="info-item">
                 <span class="info-label">Last updated:</span>
                 <span class="info-value">
-                  {new Date(data.post.updated_at).toLocaleString()}
+                  {new Date(/** @type {any} */ (data.post).updated_at).toLocaleString()}
                 </span>
               </p>
             {/if}
@@ -529,9 +529,6 @@
     background: var(--color-bg-secondary);
     color: var(--color-primary);
   }
-  .panel-content {
-    /* Animation for content visibility */
-  }
   .form-group {
     margin-bottom: 1.25rem;
   }
@@ -736,11 +733,10 @@
 </style>
 
 <!-- Delete Confirmation Dialog -->
-<Dialog bind:open={showDeleteDialog}>
-  <h3 slot="title">Delete Post</h3>
+<Dialog bind:open={showDeleteDialog} title="Delete Post">
   <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
-  <div slot="footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+  {#snippet footer()}
     <Button variant="outline" onclick={() => showDeleteDialog = false}>Cancel</Button>
     <Button variant="danger" onclick={handleDelete}>Delete</Button>
-  </div>
+  {/snippet}
 </Dialog>

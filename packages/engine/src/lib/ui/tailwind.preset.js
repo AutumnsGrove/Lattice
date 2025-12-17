@@ -333,27 +333,27 @@ export default {
         // Base prose styling
         '.grove-prose': {
           color: theme('colors.bark.DEFAULT'),
-          fontSize: theme('fontSize.body')[0],
-          lineHeight: theme('fontSize.body')[1].lineHeight,
+          fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.body'))[0],
+          lineHeight: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.body'))[1].lineHeight,
           '& h1, & h2, & h3, & h4, & h5, & h6': {
             fontFamily: 'Georgia, Cambria, "Times New Roman", Times, serif',
             fontWeight: '400',
             color: theme('colors.bark.DEFAULT'),
           },
           '& h1': {
-            fontSize: theme('fontSize.display')[0],
-            lineHeight: theme('fontSize.display')[1].lineHeight,
+            fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.display'))[0],
+            lineHeight: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.display'))[1].lineHeight,
             marginBottom: '1.5rem',
           },
           '& h2': {
-            fontSize: theme('fontSize.display-sm')[0],
-            lineHeight: theme('fontSize.display-sm')[1].lineHeight,
+            fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.display-sm'))[0],
+            lineHeight: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.display-sm'))[1].lineHeight,
             marginTop: '2.5rem',
             marginBottom: '1rem',
           },
           '& h3': {
-            fontSize: theme('fontSize.heading-lg')[0],
-            lineHeight: theme('fontSize.heading-lg')[1].lineHeight,
+            fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.heading-lg'))[0],
+            lineHeight: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.heading-lg'))[1].lineHeight,
             marginTop: '2rem',
             marginBottom: '0.75rem',
           },
