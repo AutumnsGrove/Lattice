@@ -1,9 +1,9 @@
 <script>
   import { marked } from "marked";
   import { onMount, tick } from "svelte";
-  import { sanitizeMarkdown } from "../../utils/sanitize.js";
+  import { sanitizeMarkdown } from "../../utils/sanitize";
   import "../../styles/content.css";
-  import { Button, Input } from '../../ui';
+  import { Button, Input, Logo } from '../../ui';
   import Dialog from "../../ui/components/ui/Dialog.svelte";
 
   // Import composables
@@ -19,22 +19,32 @@
     useCommandPalette,
   } from "./composables/index.js";
 
+  /**
+   * @typedef {Object} StoredDraft
+   * @property {string} content
+   * @property {number} savedAt
+   * @property {number} [wordCount]
+   */
+
   // Props
   let {
     content = $bindable(""),
     onSave = () => {},
     saving = false,
     readonly = false,
-    draftKey = null,
-    onDraftRestored = () => {},
+    draftKey = /** @type {string | null} */ (null),
+    onDraftRestored = /** @type {(draft: StoredDraft) => void} */ (() => {}),
     previewTitle = "",
     previewDate = "",
-    previewTags = [],
+    previewTags = /** @type {string[]} */ ([]),
   } = $props();
 
   // Core refs and state
+  /** @type {HTMLTextAreaElement | null} */
   let textareaRef = $state(null);
+  /** @type {HTMLElement | null} */
   let previewRef = $state(null);
+  /** @type {HTMLElement | null} */
   let lineNumbersRef = $state(null);
   let showPreview = $state(true);
   let cursorLine = $state(1);
@@ -46,6 +56,7 @@
   let isDragging = $state(false);
   let isUploading = $state(false);
   let uploadProgress = $state("");
+  /** @type {string | null} */
   let uploadError = $state(null);
 
   // Full preview mode
@@ -71,10 +82,11 @@
     getWordCount: () => wordCount,
   });
 
+  // svelte-ignore state_referenced_locally - draftKey, readonly, onDraftRestored don't change during lifecycle
   const draftManager = useDraftManager({
     draftKey,
     getContent: () => content,
-    setContent: (c) => (content = c),
+    setContent: (/** @type {string} */ c) => (content = c),
     onDraftRestored,
     readonly,
   });
@@ -82,7 +94,7 @@
   const slashCommands = useSlashCommands({
     getTextareaRef: () => textareaRef,
     getContent: () => content,
-    setContent: (c) => (content = c),
+    setContent: (/** @type {string} */ c) => (content = c),
     getSnippets: () => snippetsManager.snippets,
     onOpenSnippetsModal: () => snippetsManager.openModal(),
   });
@@ -116,7 +128,7 @@
   let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-  let previewHtml = $derived(content ? sanitizeMarkdown(marked.parse(content)) : "");
+  let previewHtml = $derived(content ? sanitizeMarkdown(/** @type {string} */ (marked.parse(content, { async: false }))) : "");
 
   let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);
@@ -172,6 +184,7 @@
     return availableAnchors;
   }
 
+  /** @param {string} name */
   export function insertAnchor(name) {
     insertAtCursor(`<!-- anchor:${name} -->\n`);
   }
@@ -195,6 +208,7 @@
   }
 
   // Keyboard handlers
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     // Escape key handling
     if (e.key === "Escape") {
@@ -213,9 +227,10 @@
     }
 
     // Slash commands trigger
-    if (e.key === "/" && !slashCommands.isOpen) {
+    if (e.key === "/" && !slashCommands.isOpen && textareaRef) {
       const pos = textareaRef.selectionStart;
-      if (slashCommands.shouldTrigger("/", pos, content)) {
+      // Only trigger at start of line or after whitespace
+      if (pos === 0 || /\s$/.test(content.substring(0, pos))) {
         setTimeout(() => slashCommands.open(), 0);
       }
     }
@@ -254,13 +269,15 @@
     }
 
     // Tab for indentation
-    if (e.key === "Tab") {
+    if (e.key === "Tab" && textareaRef) {
       e.preventDefault();
       const start = textareaRef.selectionStart;
       const end = textareaRef.selectionEnd;
       content = content.substring(0, start) + "  " + content.substring(end);
       setTimeout(() => {
-        textareaRef.selectionStart = textareaRef.selectionEnd = start + 2;
+        if (textareaRef) {
+          textareaRef.selectionStart = textareaRef.selectionEnd = start + 2;
+        }
       }, 0);
     }
 
@@ -283,6 +300,7 @@
     }
   }
 
+  /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
       if (ambientSounds.showPanel) {
@@ -327,6 +345,10 @@
   }
 
   // Text manipulation helpers
+  /**
+   * @param {string} before
+   * @param {string} after
+   */
   async function wrapSelection(before, after) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
@@ -347,6 +369,7 @@
     isUpdating = false;
   }
 
+  /** @param {string} text */
   async function insertAtCursor(text) {
     if (!textareaRef || isUpdating) return;
     isUpdating = true;
@@ -365,6 +388,7 @@
   }
 
   // Toolbar actions
+  /** @param {number} level */
   function insertHeading(level) {
     insertAtCursor("#".repeat(level) + " ");
   }
@@ -429,6 +453,7 @@
   });
 
   // Drag and drop handlers
+  /** @param {DragEvent} e */
   function handleDragEnter(e) {
     e.preventDefault();
     if (readonly) return;
@@ -437,6 +462,7 @@
     }
   }
 
+  /** @param {DragEvent} e */
   function handleDragOver(e) {
     e.preventDefault();
     if (readonly) return;
@@ -446,13 +472,16 @@
     }
   }
 
+  /** @param {DragEvent} e */
   function handleDragLeave(e) {
     e.preventDefault();
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+    const target = /** @type {HTMLElement} */ (e.currentTarget);
+    if (!target.contains(/** @type {Node | null} */ (e.relatedTarget))) {
       isDragging = false;
     }
   }
 
+  /** @param {DragEvent} e */
   async function handleDrop(e) {
     e.preventDefault();
     isDragging = false;
@@ -472,6 +501,7 @@
     }
   }
 
+  /** @param {File} file */
   async function uploadImage(file) {
     isUploading = true;
     uploadProgress = `Uploading ${file.name}...`;
@@ -499,7 +529,7 @@
 
       uploadProgress = "";
     } catch (err) {
-      uploadError = err.message;
+      uploadError = err instanceof Error ? err.message : String(err);
       setTimeout(() => (uploadError = null), 5000);
     } finally {
       isUploading = false;
@@ -507,6 +537,7 @@
     }
   }
 
+  /** @param {ClipboardEvent} e */
   function handlePaste(e) {
     if (readonly) return;
 
@@ -528,6 +559,7 @@
   }
 
   // Command palette execution
+  /** @param {number} index */
   function executePaletteCommand(index) {
     const cmd = filteredPaletteCommands[index];
     if (cmd && cmd.action) {
@@ -558,6 +590,7 @@
   class:zen-mode={isZenMode}
   class:campfire-mode={writingSession.isCampfireActive}
   aria-label="Markdown editor with live preview"
+  role="application"
   ondragenter={handleDragEnter}
   ondragover={handleDragOver}
   ondragleave={handleDragLeave}
@@ -717,6 +750,7 @@
       <div class="preview-panel">
         <div class="preview-header">
           <span class="preview-label">:: preview</span>
+          <Logo class="preview-logo" />
         </div>
         <div class="preview-content" bind:this={previewRef}>
           {#if previewHtml}
@@ -760,7 +794,7 @@
         onclick={() => ambientSounds.togglePanel()}
         title="Ambient sounds"
       >
-        [{soundLibrary[ambientSounds.currentSound]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
+        [{soundLibrary[/** @type {keyof typeof soundLibrary} */ (ambientSounds.currentSound)]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
       </button>
       <span class="status-divider">|</span>
       {#if editorSettings.typewriterMode}
@@ -800,14 +834,16 @@
 
 <!-- Command Palette -->
 {#if commandPalette.isOpen}
-  <div class="command-palette-overlay" onclick={() => commandPalette.close()}>
+  <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+  <div class="command-palette-overlay" onclick={() => commandPalette.close()} role="dialog" aria-modal="true" aria-label="Command palette">
+    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
     <div class="command-palette" onclick={(e) => e.stopPropagation()}>
       <input
         type="text"
         class="command-palette-input"
         placeholder="> type a command..."
         value={commandPalette.query}
-        oninput={(e) => commandPalette.setQuery(e.target.value)}
+        oninput={(e) => commandPalette.setQuery(/** @type {HTMLInputElement} */ (e.target).value)}
         onkeydown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();
@@ -860,9 +896,10 @@
 {/if}
 
 <!-- Snippets Modal -->
-<Dialog bind:open={snippetsManager.modal.open}>
-  <h3 slot="title">:: {snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}</h3>
-
+<Dialog
+  bind:open={snippetsManager.modal.open}
+  title={`:: ${snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}`}
+>
   <div class="snippets-modal-body">
     <div class="snippets-form">
       <div class="snippet-field">
@@ -898,7 +935,10 @@
 
       <div class="snippet-actions">
         {#if snippetsManager.modal.editingId}
-          <Button variant="danger" onclick={() => snippetsManager.deleteSnippet(snippetsManager.modal.editingId)}>
+          <Button variant="danger" onclick={() => {
+            const id = snippetsManager.modal.editingId;
+            if (id) snippetsManager.deleteSnippet(id);
+          }}>
             [<span class="key">d</span>elete]
           </Button>
         {/if}
@@ -971,7 +1011,10 @@
           max="1"
           step="0.05"
           value={ambientSounds.volume}
-          oninput={(e) => ambientSounds.setVolume(parseFloat(e.target.value))}
+          oninput={(e) => {
+            const target = /** @type {HTMLInputElement} */ (e.target);
+            ambientSounds.setVolume(parseFloat(target.value));
+          }}
           class="volume-slider"
         />
       </label>
@@ -994,7 +1037,8 @@
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
-  <div class="full-preview-modal" role="dialog" aria-modal="true">
+  <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview">
+    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
     <div class="full-preview-backdrop" onclick={() => (showFullPreview = false)}></div>
     <div class="full-preview-container">
       <header class="full-preview-header">
@@ -1357,6 +1401,9 @@
     min-height: 0;
   }
   .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0.5rem 1rem;
     background: #2d2d2d;
     border-bottom: 1px solid var(--light-border-primary);
@@ -1365,6 +1412,16 @@
     color: #8bc48b;
     font-size: 0.85rem;
     font-family: "JetBrains Mono", "Fira Code", monospace;
+  }
+  :global(.preview-logo) {
+    width: 18px;
+    height: 18px;
+    color: var(--editor-accent, #8bc48b);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+  :global(.preview-logo:hover) {
+    opacity: 1;
   }
   .preview-content {
     flex: 1;

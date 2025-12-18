@@ -1,20 +1,17 @@
 /**
  * Create a session token for a user
- * @param {Object} user - User data
- * @param {string} user.email - User email address
+ * @param {User} user - User data
  * @param {string} secret - Session secret
  * @returns {Promise<string>} - Signed JWT token
  */
-export function createSession(user: {
-    email: string;
-}, secret: string): Promise<string>;
+export function createSession(user: User, secret: string): Promise<string>;
 /**
  * Verify a session token and return user data
  * @param {string} token - Session token
  * @param {string} secret - Session secret
- * @returns {Promise<Object|null>} - User data or null if invalid
+ * @returns {Promise<User|null>} - User data or null if invalid
  */
-export function verifySession(token: string, secret: string): Promise<Object | null>;
+export function verifySession(token: string, secret: string): Promise<User | null>;
 /**
  * Create Set-Cookie header value for session
  * @param {string} token - Session token
@@ -42,19 +39,29 @@ export function parseSessionCookie(cookieHeader: string): string | null;
 export function isAllowedAdmin(email: string, allowedList: string): boolean;
 /**
  * Verify that a user owns/has access to a tenant
- * @param {Object} db - D1 database instance
- * @param {string} tenantId - Tenant ID to check
+ * @param {import('@cloudflare/workers-types').D1Database} db - D1 database instance
+ * @param {string | undefined | null} tenantId - Tenant ID to check
  * @param {string} userEmail - User's email address
  * @returns {Promise<boolean>} - Whether the user owns the tenant
  */
-export function verifyTenantOwnership(db: Object, tenantId: string, userEmail: string): Promise<boolean>;
+export function verifyTenantOwnership(db: import("@cloudflare/workers-types").D1Database, tenantId: string | undefined | null, userEmail: string): Promise<boolean>;
 /**
  * Get tenant ID with ownership verification
  * Throws 403 if user doesn't own the tenant
- * @param {Object} db - D1 database instance
- * @param {string} tenantId - Tenant ID from request
- * @param {Object} user - User object with email
+ * @param {import('@cloudflare/workers-types').D1Database} db - D1 database instance
+ * @param {string | undefined | null} tenantId - Tenant ID from request
+ * @param {User | null | undefined} user - User object with email
  * @returns {Promise<string>} - Verified tenant ID
- * @throws {Error} - If unauthorized
+ * @throws {SessionError} - If unauthorized
  */
-export function getVerifiedTenantId(db: Object, tenantId: string, user: Object): Promise<string>;
+export function getVerifiedTenantId(db: import("@cloudflare/workers-types").D1Database, tenantId: string | undefined | null, user: User | null | undefined): Promise<string>;
+export type User = {
+    email: string;
+};
+export type SessionError = {
+    message: string;
+    status: number;
+};
+export type TenantRow = {
+    email: string;
+};

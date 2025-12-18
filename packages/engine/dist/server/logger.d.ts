@@ -1,53 +1,101 @@
 /**
+ * Server-side logging utility with in-memory circular buffers
+ * Supports real-time log streaming to admin console
+ */
+/** Log severity levels */
+export type LogLevel = "info" | "warn" | "error" | "success";
+/** Log categories */
+export type LogCategory = "api" | "github" | "errors" | "cache";
+/** Metadata for API logs */
+export interface APIMetadata {
+    endpoint?: string;
+    method?: string;
+    status?: number;
+    duration?: number;
+    [key: string]: unknown;
+}
+/** Metadata for GitHub logs */
+export interface GitHubMetadata {
+    error?: boolean;
+    warning?: boolean;
+    rateLimit?: {
+        remaining: number;
+        limit: number;
+    };
+    [key: string]: unknown;
+}
+/** Metadata for error logs */
+export interface ErrorMetadata {
+    error?: {
+        message: string;
+        stack?: string;
+        name: string;
+    } | null;
+    [key: string]: unknown;
+}
+/** Metadata for cache logs */
+export interface CacheMetadata {
+    operation?: string;
+    key?: string;
+    error?: boolean;
+    [key: string]: unknown;
+}
+/** Log entry structure */
+export interface LogEntry {
+    id: string;
+    timestamp: string;
+    level: LogLevel;
+    category: LogCategory;
+    message: string;
+    metadata: Record<string, unknown>;
+}
+/** Log statistics for a category */
+export interface CategoryStats {
+    total: number;
+    recent: number;
+}
+/** Overall log statistics */
+export interface LogStats {
+    api: CategoryStats;
+    github: CategoryStats;
+    errors: CategoryStats;
+    cache: CategoryStats;
+}
+/** Subscriber callback type */
+export type LogSubscriber = (log: LogEntry) => void;
+/**
  * Log API activity (requests, responses, timing)
  */
-export function logAPI(endpoint: any, method: any, status: any, metadata?: {}): void;
+export declare function logAPI(endpoint: string, method: string, status: number, metadata?: APIMetadata): void;
 /**
  * Log GitHub API operations (rate limits, queries, errors)
  */
-export function logGitHub(operation: any, metadata?: {}): void;
+export declare function logGitHub(operation: string, metadata?: GitHubMetadata): void;
 /**
  * Log errors (exceptions, failed operations, validation errors)
  */
-export function logError(message: any, error?: null, metadata?: {}): void;
+export declare function logError(message: string, error?: Error | null, metadata?: Record<string, unknown>): void;
 /**
  * Log cache operations (KV get/set, hits/misses)
  */
-export function logCache(operation: any, key: any, metadata?: {}): void;
+export declare function logCache(operation: string, key: string, metadata?: CacheMetadata): void;
 /**
  * Get logs from a specific category
  */
-export function getLogs(category: any, since?: null): any;
+export declare function getLogs(category: LogCategory, since?: string | null): LogEntry[];
 /**
  * Get all logs across all categories
  */
-export function getAllLogs(since?: null): any[];
+export declare function getAllLogs(since?: string | null): LogEntry[];
 /**
  * Get log statistics
  */
-export function getLogStats(): {
-    api: {
-        total: number;
-        recent: number;
-    };
-    github: {
-        total: number;
-        recent: number;
-    };
-    errors: {
-        total: number;
-        recent: number;
-    };
-    cache: {
-        total: number;
-        recent: number;
-    };
-};
+export declare function getLogStats(): LogStats;
 /**
  * Subscribe to log events (for SSE streaming)
  */
-export function subscribe(callback: any): () => boolean;
+export declare function subscribe(callback: LogSubscriber): () => boolean;
 /**
  * Clear logs for a specific category or all categories
  */
-export function clearLogs(category?: null): void;
+export declare function clearLogs(category?: LogCategory | null): void;

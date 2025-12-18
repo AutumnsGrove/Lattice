@@ -5,17 +5,43 @@
   import Select from "../../ui/components/ui/Select.svelte";
   import { toast } from "../../ui/components/ui/toast";
 
+  /**
+   * @typedef {Object} GutterItem
+   * @property {string} type
+   * @property {string} [anchor]
+   * @property {string} [content]
+   * @property {string} [url]
+   * @property {string} [file]
+   * @property {string} [caption]
+   * @property {GalleryImage[]} [images]
+   */
+
+  /**
+   * @typedef {Object} GalleryImage
+   * @property {string} url
+   * @property {string} [alt]
+   * @property {string} [caption]
+   */
+
+  /**
+   * @typedef {Object} CdnImage
+   * @property {string} key
+   * @property {string} url
+   */
+
   // Props
   let {
-    gutterItems = $bindable([]),
-    onInsertAnchor = (anchorName) => {},
-    availableAnchors = [],
+    gutterItems = $bindable(/** @type {GutterItem[]} */ ([])),
+    onInsertAnchor = /** @type {(anchorName: string) => void} */ ((anchorName) => {}),
+    availableAnchors = /** @type {string[]} */ ([]),
   } = $props();
 
   // State
   let showAddModal = $state(false);
+  /** @type {number | null} */
   let editingIndex = $state(null);
   let showImagePicker = $state(false);
+  /** @type {((url: string) => void) | null} */
   let imagePickerCallback = $state(null);
 
   // Form state for add/edit
@@ -24,9 +50,11 @@
   let itemContent = $state("");
   let itemCaption = $state("");
   let itemUrl = $state("");
+  /** @type {GalleryImage[]} */
   let galleryImages = $state([]);
 
   // Image picker state
+  /** @type {CdnImage[]} */
   let cdnImages = $state([]);
   let cdnLoading = $state(false);
   let cdnFilter = $state("");
@@ -46,6 +74,7 @@
     showAddModal = true;
   }
 
+  /** @param {number} index */
   function openEditModal(index) {
     const item = gutterItems[index];
     itemType = item.type;
@@ -65,6 +94,7 @@
   }
 
   function saveItem() {
+    /** @type {GutterItem} */
     const newItem = {
       type: itemType,
       anchor: itemAnchor,
@@ -89,11 +119,16 @@
     closeModal();
   }
 
+  /** @param {number} index */
   function deleteItem(index) {
-    gutterItems = gutterItems.filter((_, i) => i !== index);
+    gutterItems = gutterItems.filter((/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index);
     toast.success("Gutter item deleted");
   }
 
+  /**
+   * @param {number} index
+   * @param {number} direction
+   */
   function moveItem(index, direction) {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= gutterItems.length) return;
@@ -106,6 +141,7 @@
   }
 
   // Generate anchor name from text
+  /** @param {string} text */
   function generateAnchorName(text) {
     return text
       .toLowerCase()
@@ -138,7 +174,7 @@
 
       if (response.ok) {
         const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-        cdnImages = data.images.filter((img) => {
+        cdnImages = data.images.filter((/** @type {CdnImage} */ img) => {
           const key = img.key.toLowerCase();
           return imageExtensions.some((ext) => key.endsWith(ext));
         });
@@ -152,12 +188,14 @@
     }
   }
 
+  /** @param {(url: string) => void} callback */
   function openImagePicker(callback) {
     imagePickerCallback = callback;
     showImagePicker = true;
     loadCdnImages();
   }
 
+  /** @param {CdnImage} image */
   function selectImage(image) {
     if (imagePickerCallback) {
       imagePickerCallback(image.url);
@@ -181,16 +219,23 @@
     });
   }
 
+  /** @param {number} index */
   function removeGalleryImage(index) {
-    galleryImages = galleryImages.filter((_, i) => i !== index);
+    galleryImages = galleryImages.filter((/** @type {GalleryImage} */ _, /** @type {number} */ i) => i !== index);
   }
 
+  /**
+   * @param {number} index
+   * @param {keyof GalleryImage} field
+   * @param {string} value
+   */
   function updateGalleryImage(index, field, value) {
     galleryImages[index][field] = value;
     galleryImages = [...galleryImages];
   }
 
   // Get preview of item content
+  /** @param {GutterItem} item */
   function getItemPreview(item) {
     if (item.type === "comment" && item.content) {
       return item.content.substring(0, 50) + (item.content.length > 50 ? "..." : "");
@@ -204,6 +249,7 @@
     return "";
   }
 
+  /** @param {string} type */
   function getTypeIcon(type) {
     switch (type) {
       case "comment":
@@ -269,17 +315,19 @@
 </div>
 
 <!-- Add/Edit Modal -->
-<Dialog bind:open={showAddModal}>
-  <h3 slot="title">{editingIndex !== null ? "Edit" : "Add"} Gutter Item</h3>
-
-  <div class="form-group">
-    <label for="item-type">Type</label>
-    <Select id="item-type" bind:value={itemType}>
-      <option value="comment">Comment (Markdown)</option>
-      <option value="photo">Photo</option>
-      <option value="gallery">Image Gallery</option>
-    </Select>
-  </div>
+<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Gutter Item" : "Add Gutter Item"}>
+  {#snippet children()}
+    <div class="form-group">
+      <label for="item-type">Type</label>
+      <Select
+        bind:value={itemType}
+        options={[
+          { value: "comment", label: "Comment (Markdown)" },
+          { value: "photo", label: "Photo" },
+          { value: "gallery", label: "Image Gallery" }
+        ]}
+      />
+    </div>
 
   <div class="form-group">
     <label for="item-anchor">Anchor</label>
@@ -369,7 +417,7 @@
 
   {#if itemType === "gallery"}
     <div class="form-group">
-      <label>Gallery Images</label>
+      <div class="gallery-label">Gallery Images</div>
       <div class="gallery-list">
         {#each galleryImages as image, i (i)}
           <div class="gallery-image-item">
@@ -378,14 +426,14 @@
               <Input
                 type="text"
                 value={image.alt}
-                oninput={(e) => updateGalleryImage(i, "alt", e.target.value)}
+                oninput={(/** @type {Event} */ e) => updateGalleryImage(i, "alt", /** @type {HTMLInputElement} */ (e.target).value)}
                 placeholder="Alt text"
                 class="small"
               />
               <Input
                 type="text"
                 value={image.caption}
-                oninput={(e) => updateGalleryImage(i, "caption", e.target.value)}
+                oninput={(/** @type {Event} */ e) => updateGalleryImage(i, "caption", /** @type {HTMLInputElement} */ (e.target).value)}
                 placeholder="Caption"
                 class="small"
               />
@@ -403,20 +451,20 @@
       </button>
     </div>
   {/if}
+  {/snippet}
 
-  <div slot="footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+  {#snippet footer()}
     <Button variant="outline" onclick={closeModal}>Cancel</Button>
     <Button onclick={saveItem}>
       {editingIndex !== null ? "Update" : "Add"} Item
     </Button>
-  </div>
+  {/snippet}
 </Dialog>
 
 <!-- Image Picker Modal -->
-<Dialog bind:open={showImagePicker}>
-  <h3 slot="title">Select Image from CDN</h3>
-
-  <div class="picker-controls">
+<Dialog bind:open={showImagePicker} title="Select Image from CDN">
+  {#snippet children()}
+    <div class="picker-controls">
     <Input
       type="text"
       bind:value={cdnFilter}
@@ -444,10 +492,11 @@
           {/each}
         {/if}
       </div>
+  {/snippet}
 
-  <div slot="footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+  {#snippet footer()}
     <Button variant="outline" onclick={closeImagePicker}>Cancel</Button>
-  </div>
+  {/snippet}
 </Dialog>
 
 <style>
@@ -577,43 +626,13 @@
     text-overflow: ellipsis;
   }
 
-  /* Modal Styles */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-  }
-
-  .modal-content {
-    background: #1e1e1e;
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
-    padding: 1.5rem;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  .modal-content h3 {
-    margin: 0 0 1.25rem 0;
-    color: #d4d4d4;
-    font-size: 1.1rem;
-  }
-
+  /* Form Styles */
   .form-group {
     margin-bottom: 1rem;
   }
 
-  .form-group label {
+  .form-group label,
+  .gallery-label {
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
@@ -634,11 +653,6 @@
   .form-input:focus {
     outline: none;
     border-color: #4a7c4a;
-  }
-
-  .form-input.small {
-    padding: 0.35rem 0.5rem;
-    font-size: 0.8rem;
   }
 
   .form-textarea {
@@ -670,23 +684,6 @@
   .anchor-input-row .form-input,
   .url-input-row .form-input {
     flex: 1;
-  }
-
-  .insert-anchor-btn,
-  .browse-btn {
-    padding: 0.5rem 0.75rem;
-    background: #2d4a2d;
-    color: #a8dca8;
-    border: 1px solid #3d5a3d;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  .insert-anchor-btn:hover,
-  .browse-btn:hover {
-    background: #3d5a3d;
   }
 
   .available-anchors {
@@ -790,49 +787,7 @@
     color: #8bc48b;
   }
 
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #3a3a3a;
-  }
-
-  .cancel-btn,
-  .save-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .cancel-btn {
-    background: transparent;
-    border: 1px solid #3a3a3a;
-    color: #9d9d9d;
-  }
-
-  .cancel-btn:hover {
-    background: #3a3a3a;
-  }
-
-  .save-btn {
-    background: #4a7c4a;
-    border: none;
-    color: #c8f0c8;
-  }
-
-  .save-btn:hover {
-    background: #5a9c5a;
-  }
-
-  /* Image Picker Modal */
-  .image-picker-modal {
-    max-width: 700px;
-  }
-
+  /* Image Picker */
   .picker-controls {
     display: flex;
     gap: 0.5rem;
@@ -841,19 +796,6 @@
 
   .picker-controls .form-input {
     flex: 1;
-  }
-
-  .filter-btn {
-    padding: 0.5rem 1rem;
-    background: #3a3a3a;
-    border: none;
-    border-radius: 4px;
-    color: #d4d4d4;
-    cursor: pointer;
-  }
-
-  .filter-btn:hover {
-    background: #4a4a4a;
   }
 
   .image-grid {

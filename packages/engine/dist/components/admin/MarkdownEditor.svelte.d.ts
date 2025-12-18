@@ -4,9 +4,12 @@ type MarkdownEditor = {
     $set?(props: Partial<$$ComponentProps>): void;
 } & {
     getAvailableAnchors: () => string[];
-    insertAnchor: (name: any) => void;
+    insertAnchor: (name: string) => void;
     clearDraft: () => void;
-    getDraftStatus: () => any;
+    getDraftStatus: () => {
+        hasDraft: boolean;
+        storedDraft: StoredDraft | null;
+    };
 };
 declare const MarkdownEditor: import("svelte").Component<{
     content?: string;
@@ -14,15 +17,18 @@ declare const MarkdownEditor: import("svelte").Component<{
     saving?: boolean;
     readonly?: boolean;
     draftKey?: any;
-    onDraftRestored?: Function;
+    onDraftRestored?: any;
     previewTitle?: string;
     previewDate?: string;
-    previewTags?: any[];
+    previewTags?: any;
 }, {
     getAvailableAnchors: () => string[];
-    insertAnchor: (name: any) => void;
+    insertAnchor: (name: string) => void;
     clearDraft: () => void;
-    getDraftStatus: () => any;
+    getDraftStatus: () => {
+        hasDraft: boolean;
+        storedDraft: import("./composables/useDraftManager.svelte.js").StoredDraft | null;
+    };
 }, "content">;
 type $$ComponentProps = {
     content?: string;
@@ -30,8 +36,8 @@ type $$ComponentProps = {
     saving?: boolean;
     readonly?: boolean;
     draftKey?: any;
-    onDraftRestored?: Function;
+    onDraftRestored?: any;
     previewTitle?: string;
     previewDate?: string;
-    previewTags?: any[];
+    previewTags?: any;
 };

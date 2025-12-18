@@ -1,19 +1,11 @@
-export default ContentWithGutter;
-type ContentWithGutter = {
-    $on?(type: string, callback: (e: any) => void): () => void;
-    $set?(props: Partial<$$ComponentProps>): void;
-};
+import { type GutterItem as GutterItemType, type Header } from '../../utils/gutter';
+import '../../styles/content.css';
 declare const ContentWithGutter: import("svelte").Component<{
     content?: string;
-    gutterContent?: any[];
-    headers?: any[];
+    gutterContent?: GutterItemType[];
+    headers?: Header[];
     showTableOfContents?: boolean;
     children: any;
 }, {}, "">;
-type $$ComponentProps = {
-    content?: string;
-    gutterContent?: any[];
-    headers?: any[];
-    showTableOfContents?: boolean;
-    children: any;
-};
+type ContentWithGutter = ReturnType<typeof ContentWithGutter>;
+export default ContentWithGutter;

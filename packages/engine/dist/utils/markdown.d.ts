@@ -1,165 +1,245 @@
+/** Header extracted from markdown for table of contents */
+export interface Header {
+    level: number;
+    text: string;
+    id: string;
+}
+/** Frontmatter data from markdown files */
+export interface Frontmatter {
+    title?: string;
+    date?: string;
+    tags?: string[];
+    description?: string;
+    hero?: {
+        title?: string;
+        subtitle?: string;
+        cta?: {
+            text: string;
+            link: string;
+        };
+    };
+    galleries?: unknown[];
+    [key: string]: unknown;
+}
+/** Parsed markdown content result */
+export interface ParsedContent {
+    data: Frontmatter;
+    content: string;
+    headers: Header[];
+    rawMarkdown?: string;
+}
+/** Image in a gallery */
+export interface GalleryImage {
+    url: string;
+    alt: string;
+    caption: string;
+}
+/** Base gutter item */
+export interface GutterItemBase {
+    type: string;
+    anchor?: string;
+    file?: string;
+    url?: string;
+    alt?: string;
+    caption?: string;
+    images?: Array<{
+        url?: string;
+        file?: string;
+        alt?: string;
+        caption?: string;
+    }>;
+}
+/** Processed gutter item with resolved content */
+export interface GutterItem extends GutterItemBase {
+    content?: string;
+    src?: string;
+    images?: GalleryImage[];
+}
+/** Gutter manifest structure */
+export interface GutterManifest {
+    items: GutterItemBase[];
+}
+/** Post/Recipe metadata */
+export interface PostMeta {
+    slug: string;
+    title: string;
+    date: string;
+    tags: string[];
+    description: string;
+}
+/** Full post/recipe with content */
+export interface Post extends PostMeta {
+    content: string;
+    headers: Header[];
+    gutterContent?: GutterItem[];
+    sidecar?: unknown;
+}
+/** Page content (home, about, contact) */
+export interface Page {
+    slug: string;
+    title: string;
+    description: string;
+    content: string;
+    headers: Header[];
+    date?: string;
+    hero?: Frontmatter["hero"];
+    galleries?: unknown[];
+    gutterContent?: GutterItem[];
+}
+/** Site configuration */
+export interface SiteConfig {
+    owner: {
+        name: string;
+        email: string;
+    };
+    site: {
+        title: string;
+        description: string;
+        copyright: string;
+    };
+    social: Record<string, string>;
+}
+/** Module map from import.meta.glob */
+export type ModuleMap = Record<string, string>;
+/** Gutter modules configuration */
+export interface GutterModules {
+    manifest: Record<string, GutterManifest | {
+        default: GutterManifest;
+    }>;
+    markdown?: Record<string, string>;
+    images?: Record<string, string>;
+}
+/** Options for getItemBySlug */
+export interface GetItemOptions {
+    gutterModules?: GutterModules;
+    sidecarModules?: Record<string, unknown>;
+}
+/** Options for getPageByFilename */
+export interface GetPageOptions {
+    gutterModules?: GutterModules;
+    slug?: string;
+}
+/** Content loader interface */
+export interface ContentLoader {
+    getAllPosts(): PostMeta[];
+    getAllRecipes(): PostMeta[];
+    getLatestPost(): Post | null;
+    getPostBySlug(slug: string): Post | null;
+    getRecipeBySlug(slug: string): Post | null;
+    getHomePage(): Page | null;
+    getAboutPage(): Page | null;
+    getContactPage(): Page | null;
+    getSiteConfig(): SiteConfig;
+    getGutterContent(slug: string): GutterItem[];
+    getRecipeGutterContent(slug: string): GutterItem[];
+    getHomeGutterContent(slug: string): GutterItem[];
+    getAboutGutterContent(slug: string): GutterItem[];
+    getContactGutterContent(slug: string): GutterItem[];
+    getRecipeSidecar(slug: string): unknown;
+}
+/** Content loader configuration */
+export interface ContentLoaderConfig {
+    posts?: ModuleMap;
+    recipes?: ModuleMap;
+    about?: ModuleMap;
+    home?: ModuleMap;
+    contact?: ModuleMap;
+    siteConfig?: Record<string, SiteConfig | {
+        default: SiteConfig;
+    }>;
+    postGutter?: Partial<GutterModules>;
+    recipeGutter?: Partial<GutterModules>;
+    recipeMetadata?: Record<string, unknown>;
+    aboutGutter?: Partial<GutterModules>;
+    homeGutter?: Partial<GutterModules>;
+    contactGutter?: Partial<GutterModules>;
+}
 /**
  * Extract headers from markdown content for table of contents
- * @param {string} markdown - The raw markdown content
- * @returns {Array} Array of header objects with level, text, and id
  */
-export function extractHeaders(markdown: string): any[];
+export declare function extractHeaders(markdown: string): Header[];
 /**
  * Process anchor tags in HTML content
  * Converts <!-- anchor:tagname --> comments to identifiable span elements
- * @param {string} html - The HTML content
- * @returns {string} HTML with anchor markers converted to spans
  */
-export function processAnchorTags(html: string): string;
+export declare function processAnchorTags(html: string): string;
 /**
  * Parse markdown content and convert to HTML
- * @param {string} markdownContent - The raw markdown content (may include frontmatter)
- * @returns {Object} Object with data (frontmatter), content (HTML), headers, and raw markdown
  */
-export function parseMarkdownContent(markdownContent: string): Object;
+export declare function parseMarkdownContent(markdownContent: string): ParsedContent;
 /**
  * Parse markdown content with sanitization (for user-facing pages like home, about, contact)
- * @param {string} markdownContent - The raw markdown content (may include frontmatter)
- * @returns {Object} Object with data (frontmatter), content (sanitized HTML), headers
  */
-export function parseMarkdownContentSanitized(markdownContent: string): Object;
+export declare function parseMarkdownContentSanitized(markdownContent: string): ParsedContent;
 /**
  * Get gutter content from provided modules
  * This is a utility function that processes gutter manifests, markdown, and images
- *
- * @param {string} slug - The page/post slug
- * @param {Object} manifestModules - The manifest modules (from import.meta.glob)
- * @param {Object} markdownModules - The markdown modules (from import.meta.glob)
- * @param {Object} imageModules - The image modules (from import.meta.glob)
- * @returns {Array} Array of gutter items with content and position info
  */
-export function processGutterContent(slug: string, manifestModules: Object, markdownModules: Object, imageModules: Object): any[];
+export declare function processGutterContent(slug: string, manifestModules: Record<string, GutterManifest | {
+    default: GutterManifest;
+}>, markdownModules: Record<string, string>, imageModules: Record<string, string>): GutterItem[];
 /**
  * Process a list of markdown files into post/recipe objects
- *
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @returns {Array} Array of post/content objects with metadata and slug
  */
-export function processMarkdownModules(modules: Object): any[];
+export declare function processMarkdownModules(modules: ModuleMap): PostMeta[];
 /**
  * Get a single item by slug from modules
- *
- * @param {string} slug - The item slug
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @param {Object} options - Optional configuration
- * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
- * @param {Object} options.sidecarModules - Sidecar/metadata modules (for recipes)
- * @returns {Object|null} Item object with content and metadata
  */
-export function getItemBySlug(slug: string, modules: Object, options?: {
-    gutterModules: Object;
-    sidecarModules: Object;
-}): Object | null;
+export declare function getItemBySlug(slug: string, modules: ModuleMap, options?: GetItemOptions): Post | null;
 /**
  * Get a page (home, about, contact) by filename from modules
  * Uses sanitization for security
- *
- * @param {string} filename - The filename to look for (e.g., "home.md", "about.md")
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @param {Object} options - Optional configuration
- * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
- * @param {string} options.slug - Override slug (defaults to filename without .md)
- * @returns {Object|null} Page object with content and metadata
  */
-export function getPageByFilename(filename: string, modules: Object, options?: {
-    gutterModules: Object;
-    slug: string;
-}): Object | null;
+export declare function getPageByFilename(filename: string, modules: ModuleMap, options?: GetPageOptions): Page | null;
 /**
  * Get site configuration from a config module
- *
- * @param {Object} configModule - The config module from import.meta.glob
- * @returns {Object} Site configuration object
  */
-export function getSiteConfigFromModule(configModule: Object): Object;
+export declare function getSiteConfigFromModule(configModule: Record<string, SiteConfig | {
+    default: SiteConfig;
+}>): SiteConfig;
 /**
  * Create a configured content loader with all functions bound to the provided modules
  * This is the main factory function for creating a content loader in the consuming app
- *
- * @param {Object} config - Configuration object with all required modules
- * @param {Object} config.posts - Post modules from import.meta.glob
- * @param {Object} config.recipes - Recipe modules from import.meta.glob
- * @param {Object} config.about - About page modules from import.meta.glob
- * @param {Object} config.home - Home page modules from import.meta.glob
- * @param {Object} config.contact - Contact page modules from import.meta.glob
- * @param {Object} config.siteConfig - Site config module from import.meta.glob
- * @param {Object} config.postGutter - Post gutter modules { manifest, markdown, images }
- * @param {Object} config.recipeGutter - Recipe gutter modules { manifest, markdown, images }
- * @param {Object} config.recipeMetadata - Recipe metadata modules from import.meta.glob
- * @param {Object} config.aboutGutter - About gutter modules { manifest, markdown, images }
- * @param {Object} config.homeGutter - Home gutter modules { manifest, markdown, images }
- * @param {Object} config.contactGutter - Contact gutter modules { manifest, markdown, images }
- * @returns {Object} Object with all content loader functions
  */
-export function createContentLoader(config: {
-    posts: Object;
-    recipes: Object;
-    about: Object;
-    home: Object;
-    contact: Object;
-    siteConfig: Object;
-    postGutter: Object;
-    recipeGutter: Object;
-    recipeMetadata: Object;
-    aboutGutter: Object;
-    homeGutter: Object;
-    contactGutter: Object;
-}): Object;
+export declare function createContentLoader(config: ContentLoaderConfig): ContentLoader;
 /**
  * Register a content loader for the site
  * This should be called by the consuming site to provide access to content
- * @param {Object} loader - Object with getAllPosts, getSiteConfig, getLatestPost functions
  */
-export function registerContentLoader(loader: Object): void;
+export declare function registerContentLoader(loader: ContentLoader): void;
 /**
  * Get all blog posts
- * @returns {Array} Array of post objects
  */
-export function getAllPosts(): any[];
+export declare function getAllPosts(): PostMeta[];
 /**
  * Get site configuration
- * @returns {Object} Site config object
  */
-export function getSiteConfig(): Object;
+export declare function getSiteConfig(): SiteConfig;
 /**
  * Get the latest post
- * @returns {Object|null} Latest post or null
  */
-export function getLatestPost(): Object | null;
+export declare function getLatestPost(): Post | null;
 /**
  * Get home page content
- * @returns {Object|null} Home page data or null
  */
-export function getHomePage(): Object | null;
+export declare function getHomePage(): Page | null;
 /**
  * Get a post by its slug
- * @param {string} slug - The post slug
- * @returns {Object|null} Post object or null
  */
-export function getPostBySlug(slug: string): Object | null;
+export declare function getPostBySlug(slug: string): Post | null;
 /**
  * Get about page content
- * @returns {Object|null} About page data or null
  */
-export function getAboutPage(): Object | null;
+export declare function getAboutPage(): Page | null;
 /**
  * Get contact page content
- * @returns {Object|null} Contact page data or null
  */
-export function getContactPage(): Object | null;
+export declare function getContactPage(): Page | null;
 /**
  * Get all recipes
- * @returns {Array} Array of recipe objects
  */
-export function getAllRecipes(): any[];
+export declare function getAllRecipes(): PostMeta[];
 /**
  * Get a recipe by its slug
- * @param {string} slug - The recipe slug
- * @returns {Object|null} Recipe object or null
  */
-export function getRecipeBySlug(slug: string): Object | null;
+export declare function getRecipeBySlug(slug: string): Post | null;

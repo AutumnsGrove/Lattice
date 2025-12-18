@@ -5,62 +5,88 @@
  * - minecraft/build_2024-12-01.png → category: minecraft, date: 2024-12-01
  * - selfies/2024-summer.jpg → category: selfies, slug: 2024-summer
  */
+/** Parsed metadata from an image filename */
+export interface ParsedImageMetadata {
+    category: string | null;
+    date: string | null;
+    slug: string;
+    filename: string;
+    extension: string | null;
+    r2Key: string;
+}
+/** Tag object associated with an image */
+export interface ImageTag {
+    slug: string;
+    name?: string;
+}
+/** Gallery image object */
+export interface GalleryImage {
+    r2_key?: string;
+    key?: string;
+    custom_title?: string;
+    custom_date?: string;
+    custom_description?: string;
+    parsed_slug?: string;
+    parsed_date?: string;
+    parsed_category?: string;
+    tags?: ImageTag[];
+}
 /**
  * Parse a filename to extract metadata
- * @param {string} r2Key - R2 object key (e.g., 'minecraft/build.png' or '2025-01-15_photo.jpg')
- * @returns {Object} Parsed metadata: { category, date, slug, filename, extension }
+ * @param r2Key - R2 object key (e.g., 'minecraft/build.png' or '2025-01-15_photo.jpg')
+ * @returns Parsed metadata: { category, date, slug, filename, extension }
  */
-export function parseImageFilename(r2Key: string): Object;
+export declare function parseImageFilename(r2Key: string): ParsedImageMetadata;
 /**
  * Get display title for an image (uses custom title or parsed slug)
- * @param {Object} image - Gallery image object
- * @returns {string} Human-readable title
+ * @param image - Gallery image object
+ * @returns Human-readable title
  */
-export function getImageTitle(image: Object): string;
+export declare function getImageTitle(image: GalleryImage): string;
 /**
  * Get display date for an image (uses custom date or parsed date)
- * @param {Object} image - Gallery image object
- * @returns {string|null} YYYY-MM-DD date string or null
+ * @param image - Gallery image object
+ * @returns YYYY-MM-DD date string or null
  */
-export function getImageDate(image: Object): string | null;
+export declare function getImageDate(image: GalleryImage): string | null;
 /**
  * Filter images by search query (searches title, slug, filename)
- * @param {Array} images - Array of gallery images
- * @param {string} query - Search query
- * @returns {Array} Filtered images
+ * @param images - Array of gallery images
+ * @param query - Search query
+ * @returns Filtered images
  */
-export function searchImages(images: any[], query: string): any[];
+export declare function searchImages(images: GalleryImage[], query: string): GalleryImage[];
 /**
  * Filter images by date range
- * @param {Array} images - Array of gallery images
- * @param {string|null} startDate - YYYY-MM-DD start date (inclusive)
- * @param {string|null} endDate - YYYY-MM-DD end date (inclusive)
- * @returns {Array} Filtered images
+ * @param images - Array of gallery images
+ * @param startDate - YYYY-MM-DD start date (inclusive)
+ * @param endDate - YYYY-MM-DD end date (inclusive)
+ * @returns Filtered images
  */
-export function filterImagesByDateRange(images: any[], startDate: string | null, endDate: string | null): any[];
+export declare function filterImagesByDateRange(images: GalleryImage[], startDate: string | null, endDate: string | null): GalleryImage[];
 /**
  * Filter images by tags
- * @param {Array} images - Array of gallery images (must include 'tags' array)
- * @param {Array} tagSlugs - Array of tag slugs to filter by
- * @returns {Array} Filtered images
+ * @param images - Array of gallery images (must include 'tags' array)
+ * @param tagSlugs - Array of tag slugs to filter by
+ * @returns Filtered images
  */
-export function filterImagesByTags(images: any[], tagSlugs: any[]): any[];
+export declare function filterImagesByTags(images: GalleryImage[], tagSlugs: string[]): GalleryImage[];
 /**
  * Filter images by category (parsed from path)
- * @param {Array} images - Array of gallery images
- * @param {string|null} category - Category to filter by
- * @returns {Array} Filtered images
+ * @param images - Array of gallery images
+ * @param category - Category to filter by
+ * @returns Filtered images
  */
-export function filterImagesByCategory(images: any[], category: string | null): any[];
+export declare function filterImagesByCategory(images: GalleryImage[], category: string | null): GalleryImage[];
 /**
  * Extract unique years from image dates
- * @param {Array} images - Array of gallery images
- * @returns {Array} Sorted array of years (descending)
+ * @param images - Array of gallery images
+ * @returns Sorted array of years (descending)
  */
-export function getAvailableYears(images: any[]): any[];
+export declare function getAvailableYears(images: GalleryImage[]): string[];
 /**
  * Extract unique categories from images
- * @param {Array} images - Array of gallery images
- * @returns {Array} Sorted array of categories
+ * @param images - Array of gallery images
+ * @returns Sorted array of categories
  */
-export function getAvailableCategories(images: any[]): any[];
+export declare function getAvailableCategories(images: GalleryImage[]): string[];

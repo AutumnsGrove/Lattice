@@ -4,14 +4,14 @@ type LeftGutter = {
     $set?(props: Partial<$$ComponentProps>): void;
 };
 declare const LeftGutter: import("svelte").Component<{
-    items?: any[];
-    headers?: any[];
+    items?: any;
+    headers?: any;
     contentHeight?: number;
-    onOverflowChange?: Function;
+    onOverflowChange?: any;
 }, {}, "">;
 type $$ComponentProps = {
-    items?: any[];
-    headers?: any[];
+    items?: any;
+    headers?: any;
     contentHeight?: number;
-    onOverflowChange?: Function;
+    onOverflowChange?: any;
 };

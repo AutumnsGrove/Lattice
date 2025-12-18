@@ -20,7 +20,7 @@ export function safeJsonParse(str, fallback = []) {
   try {
     return JSON.parse(str);
   } catch (e) {
-    console.warn('Failed to parse JSON:', e.message);
+    console.warn('Failed to parse JSON:', e instanceof Error ? e.message : String(e));
     return fallback;
   }
 }

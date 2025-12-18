@@ -13,4 +13,6 @@ export { default as LightboxCaption } from './ui/components/gallery/LightboxCapt
 export { default as ZoomableImage } from './ui/components/gallery/ZoomableImage.svelte';
 export * from './ui/index';
 export { cn } from './utils/cn';
-export * from './groveauth/index';
+export { GroveAuthClient, createGroveAuthClient, generateCodeVerifier, generateCodeChallenge, generateState, GroveAuthError, TIER_POST_LIMITS, TIER_NAMES, getQuotaDescription, getQuotaUrgency, getSuggestedActions, getUpgradeRecommendation, getQuotaWidgetData, getPreSubmitCheck, STATUS_COLORS, ALERT_VARIANTS, getStatusColorFromPercentage, getAlertVariantFromColor, RateLimiter, RateLimitError, withRateLimit, DEFAULT_RATE_LIMITS, } from './groveauth/index';
+export type { GroveAuthConfig, TokenResponse, TokenInfo, UserInfo, LoginUrlResult, UserSubscription, SubscriptionStatus, SubscriptionResponse, CanPostResponse, SubscriptionTier, AuthError, QuotaWidgetData, PreSubmitCheckResult, AlertVariant, } from './groveauth/index';
+export type { StatusColor as GroveAuthStatusColor } from './groveauth/index';

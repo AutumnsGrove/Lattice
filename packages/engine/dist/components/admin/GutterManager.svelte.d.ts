@@ -4,12 +4,12 @@ type GutterManager = {
     $set?(props: Partial<$$ComponentProps>): void;
 };
 declare const GutterManager: import("svelte").Component<{
-    gutterItems?: any[];
-    onInsertAnchor?: Function;
-    availableAnchors?: any[];
+    gutterItems?: any;
+    onInsertAnchor?: any;
+    availableAnchors?: any;
 }, {}, "gutterItems">;
 type $$ComponentProps = {
-    gutterItems?: any[];
-    onInsertAnchor?: Function;
-    availableAnchors?: any[];
+    gutterItems?: any;
+    onInsertAnchor?: any;
+    availableAnchors?: any;
 };

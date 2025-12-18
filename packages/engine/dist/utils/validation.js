@@ -26,12 +26,12 @@ const FILE_SIGNATURES = {
  */
 export async function validateFileSignature(file, expectedType) {
   const buffer = new Uint8Array(await file.arrayBuffer());
-  const signatures = FILE_SIGNATURES[expectedType];
+  const signatures = /** @type {number[][] | undefined} */ (FILE_SIGNATURES[/** @type {keyof typeof FILE_SIGNATURES} */ (expectedType)]);
 
   if (!signatures) return false;
 
-  return signatures.some(sig =>
-    sig.every((byte, i) => buffer[i] === byte)
+  return signatures.some((/** @type {number[]} */ sig) =>
+    sig.every((/** @type {number} */ byte, /** @type {number} */ i) => buffer[i] === byte)
   );
 }
 
@@ -54,6 +54,7 @@ export function sanitizeObject(obj) {
     ));
   }
 
+  /** @type {Record<string, any>} */
   const sanitized = {};
 
   for (const [key, value] of Object.entries(obj)) {
