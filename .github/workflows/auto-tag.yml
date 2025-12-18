@@ -6,18 +6,25 @@ on:
       - main
     paths:
       - 'packages/engine/package.json'
+  workflow_dispatch:
+    inputs:
+      force_snapshot:
+        description: 'Force snapshot generation even without version change'
+        required: false
+        default: 'false'
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
-  tag:
+  tag-and-snapshot:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Need previous commit to compare
+          fetch-depth: 0  # Full history for accurate commit count
 
       - name: Check for version change
         id: version
@@ -54,6 +61,7 @@ jobs:
           fi
 
       - name: Create and push tag
+        id: create_tag
         if: steps.version.outputs.changed == 'true' && steps.tag_exists.outputs.exists == 'false'
         run: |
           TAG="v${{ steps.version.outputs.current }}"
@@ -61,4 +69,43 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
           echo "Created and pushed tag: $TAG"
+
+      - name: Generate repository snapshot
+        id: snapshot
+        if: (steps.version.outputs.changed == 'true' && steps.tag_exists.outputs.exists == 'false') || github.event.inputs.force_snapshot == 'true'
+        run: |
+          TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
+          echo "Generating snapshot for: $TAG"
+
+          chmod +x ./scripts/repo-snapshot.sh
+          ./scripts/repo-snapshot.sh "$TAG"
+
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Sync CSV to landing page
+        if: steps.snapshot.outcome == 'success'
+        run: |
+          # Ensure landing data directory exists
+          mkdir -p landing/static/data
+          # Copy the history CSV so the /journey page can display it
+          cp snapshots/history.csv landing/static/data/history.csv
+
+      - name: Commit and push snapshot
+        if: steps.snapshot.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add snapshot files and landing data
+          git add snapshots/ landing/static/data/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs: add repository snapshot for ${{ steps.snapshot.outputs.tag_name }}"
+          git push origin main
