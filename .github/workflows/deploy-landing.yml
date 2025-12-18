@@ -7,7 +7,7 @@ on:
     paths:
       - 'landing/**'
   workflow_run:
-    workflows: ["Generate Repository Snapshot"]
+    workflows: ["Auto-tag on Version Bump"]
     types:
       - completed
   workflow_dispatch:
