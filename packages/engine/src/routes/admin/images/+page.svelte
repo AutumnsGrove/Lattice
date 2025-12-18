@@ -21,6 +21,7 @@
 
   // Upload state
   let isDragging = $state(false);
+  /** @type {any[]} */
   let uploads = $state([]);
   let uploading = $state(false);
 
@@ -28,17 +29,22 @@
   let copyFormat = $state('markdown');
 
   // Gallery state
+  /** @type {any[]} */
   let galleryImages = $state([]);
   let galleryLoading = $state(false);
+  /** @type {string | null} */
   let galleryError = $state(null);
+  /** @type {string | null} */
   let galleryCursor = $state(null);
   let galleryHasMore = $state(false);
   let galleryFilter = $state('');
   let gallerySortBy = $state('date-desc');
 
   // UI state
+  /** @type {string | number | null} */
   let copiedItem = $state(null);
   let deleteModalOpen = $state(false);
+  /** @type {any} */
   let imageToDelete = $state(null);
   let deleting = $state(false);
 
@@ -60,7 +66,7 @@
       const data = await api.get(`/api/images/list?${params}`);
 
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico', '.avif'];
-      const filteredImages = data.images.filter(img => {
+      const filteredImages = data.images.filter(/** @param {any} img */ img => {
         const key = img.key.toLowerCase();
         return imageExtensions.some(ext => key.endsWith(ext));
       });
@@ -73,7 +79,7 @@
       galleryCursor = data.cursor;
       galleryHasMore = data.truncated;
     } catch (err) {
-      galleryError = err.message;
+      galleryError = err instanceof Error ? err.message : 'Failed to load gallery';
     } finally {
       galleryLoading = false;
     }
@@ -89,10 +95,12 @@
     loadGallery();
   }
 
+  /** @param {string} key */
   function getFileName(key) {
     return key.split('/').pop();
   }
 
+  /** @param {string} key */
   function getDateFromPath(key) {
     // Extract date from photos/YYYY/MM/DD/filename format
     const match = key.match(/photos\/(\d{4})\/(\d{2})\/(\d{2})/);
@@ -102,31 +110,37 @@
     return null;
   }
 
+  /** @param {DragEvent} e */
   function handleDragOver(e) {
     e.preventDefault();
     isDragging = true;
   }
 
+  /** @param {DragEvent} e */
   function handleDragLeave(e) {
     e.preventDefault();
     isDragging = false;
   }
 
+  /** @param {DragEvent} e */
   function handleDrop(e) {
     e.preventDefault();
     isDragging = false;
-    const files = Array.from(e.dataTransfer.files);
+    const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : [];
     uploadFiles(files);
   }
 
+  /** @param {Event} e */
   function handleFileSelect(e) {
-    const files = Array.from(e.target.files);
+    const target = /** @type {HTMLInputElement} */ (e.target);
+    const files = target.files ? Array.from(target.files) : [];
     uploadFiles(files);
-    e.target.value = '';
+    target.value = '';
   }
 
+  /** @param {File[]} files */
   async function uploadFiles(files) {
-    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+    const imageFiles = files.filter(/** @param {File} f */ f => f.type.startsWith('image/'));
 
     if (imageFiles.length === 0) {
       toast.error('Please select image files only');
@@ -143,6 +157,7 @@
     loadGallery();
   }
 
+  /** @param {File} file */
   async function uploadSingleFile(file) {
     const uploadItem = {
       id: Date.now() + Math.random(),
@@ -163,6 +178,7 @@
 
     uploads = [uploadItem, ...uploads];
 
+    /** @param {any} updates */
     const updateUpload = (updates) => {
       uploads = uploads.map(u =>
         u.id === uploadItem.id ? { ...u, ...updates } : u
@@ -176,6 +192,7 @@
 
       // Step 2: Process image (WebP conversion, quality, EXIF strip)
       let processedBlob = file;
+      /** @type {any} */
       let processResult = { originalSize: file.size, processedSize: file.size, skipped: true };
 
       if (!file.type.includes('gif')) { // Don't process GIFs
@@ -258,11 +275,12 @@
       updateUpload({
         status: 'error',
         stage: 'Failed',
-        error: err.message || 'Upload failed'
+        error: err instanceof Error ? err.message : 'Upload failed'
       });
     }
   }
 
+  /** @param {any} upload */
   function getCopyText(upload) {
     if (copyFormat === 'url') return upload.url;
     if (copyFormat === 'markdown') return upload.markdown;
@@ -270,6 +288,7 @@
     return upload.url;
   }
 
+  /** @param {any} image */
   function getCopyTextForGallery(image) {
     const url = image.url;
     const alt = image.customMetadata?.altText || 'Image';
@@ -279,6 +298,10 @@
     return url;
   }
 
+  /**
+   * @param {string} text
+   * @param {string | number | null} [itemId]
+   */
   async function copyToClipboard(text, itemId = null) {
     try {
       await navigator.clipboard.writeText(text);
@@ -295,6 +318,7 @@
     uploads = uploads.filter(u => u.status === 'processing');
   }
 
+  /** @param {any} image */
   function confirmDelete(image) {
     imageToDelete = image;
     deleteModalOpen = true;
@@ -316,7 +340,7 @@
       galleryImages = galleryImages.filter(img => img.key !== imageToDelete.key);
       toast.success('Image deleted');
     } catch (err) {
-      toast.error('Failed to delete: ' + err.message);
+      toast.error('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       deleting = false;
       deleteModalOpen = false;
@@ -351,11 +375,11 @@
       ondragover={handleDragOver}
       ondragleave={handleDragLeave}
       ondrop={handleDrop}
-      onclick={() => document.getElementById('file-input').click()}
+      onclick={() => document.getElementById('file-input')?.click()}
       onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          document.getElementById('file-input').click();
+          document.getElementById('file-input')?.click();
         }
       }}
     >

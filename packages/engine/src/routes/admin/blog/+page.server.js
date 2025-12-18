@@ -14,7 +14,7 @@ export async function load() {
     const postsArray = await response.json();
 
     // Transform posts - tags are already parsed by the worker
-    const posts = postsArray.map(post => ({
+    const posts = postsArray.map(/** @param {any} post */ (post) => ({
       slug: post.slug,
       title: post.title,
       date: post.date,

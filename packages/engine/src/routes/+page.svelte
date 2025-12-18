@@ -7,7 +7,7 @@
 
 <svelte:head>
 	<title>{data.title} - AutumnsGrove</title>
-	<meta name="description" content={data.description} />
+	<meta name="description" content={data.description || ''} />
 </svelte:head>
 
 {#if data.hero}

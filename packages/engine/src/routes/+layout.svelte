@@ -16,6 +16,7 @@
 	import { goto } from '$app/navigation';
 	import { Button, Input } from '$lib/ui';
 
+	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
 
 	// Get context from layout data (set in hooks.server.ts)
@@ -28,6 +29,7 @@
 		'The Grove'
 	);
 
+	/** @type {Record<string, string>} */
 	// Font family mapping - maps database values to CSS font stacks
 	const fontMap = {
 		// Default
@@ -68,10 +70,13 @@
 
 	let darkMode = $state(false); // Default to light mode
 	let mobileMenuOpen = $state(false);
+	/** @type {HTMLDivElement | null} */
 	let mobileMenuRef = $state(null);
+	/** @type {HTMLButtonElement | null} */
 	let hamburgerBtnRef = $state(null);
 	let searchExpanded = $state(false);
 	let searchQuery = $state('');
+	/** @type {HTMLInputElement | null} */
 	let searchInputRef = $state(null);
 
 	// Check if we're on an admin page
@@ -106,6 +111,7 @@
 	});
 
 	// Handle keyboard shortcuts
+	/** @param {KeyboardEvent} event */
 	function handleKeydown(event) {
 		// Escape to close mobile menu
 		if (event.key === 'Escape' && mobileMenuOpen) {
@@ -123,9 +129,10 @@
 		}
 
 		// Keyboard shortcut to focus search (/ or Cmd+K)
-		const isTyping = document.activeElement.tagName === 'INPUT' ||
-		                 document.activeElement.tagName === 'TEXTAREA' ||
-		                 document.activeElement.isContentEditable;
+		const activeEl = /** @type {HTMLElement} */ (document.activeElement);
+		const isTyping = activeEl?.tagName === 'INPUT' ||
+		                 activeEl?.tagName === 'TEXTAREA' ||
+		                 activeEl?.isContentEditable;
 
 		if (!isTyping) {
 			// Forward slash to open search
@@ -216,6 +223,7 @@
 		}
 	}
 
+	/** @param {SubmitEvent} event */
 	function handleSearchSubmit(event) {
 		event.preventDefault();
 		if (searchQuery.trim()) {
@@ -226,6 +234,7 @@
 		}
 	}
 
+	/** @param {KeyboardEvent} event */
 	function handleSearchKeydown(event) {
 		if (event.key === 'Escape') {
 			searchExpanded = false;
@@ -233,9 +242,10 @@
 		}
 	}
 
+	/** @param {FocusEvent} event */
 	function handleSearchBlur(event) {
 		// Close search if focus moves outside the search area (but not to the search button)
-		const relatedTarget = event.relatedTarget;
+		const relatedTarget = /** @type {HTMLElement | null} */ (event.relatedTarget);
 		// Check if focus moved to search button or stays within search form
 		if (relatedTarget && (relatedTarget.classList.contains('search-btn') || relatedTarget.closest('.search-form'))) {
 			return;
@@ -895,7 +905,7 @@
 			border-bottom: 1px solid var(--mobile-menu-border);
 			margin-bottom: 0.5rem;
 		}
-		.mobile-search-input {
+		.mobile-search-form :global(.mobile-search-input) {
 			flex: 1;
 			padding: 0.6rem 0.75rem;
 			font-size: 0.9rem;
@@ -905,25 +915,25 @@
 			color: var(--light-border-secondary);
 			transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 		}
-		:global(.dark) .mobile-search-input {
+		:global(.dark) .mobile-search-form :global(.mobile-search-input) {
 			background: var(--light-bg-primary);
 			border-color: var(--light-border-light);
 			color: var(--color-text-dark);
 		}
-		.mobile-search-input:focus {
+		.mobile-search-form :global(.mobile-search-input:focus) {
 			outline: none;
 			border-color: #2c5f2d;
 		}
-		:global(.dark) .mobile-search-input:focus {
+		:global(.dark) .mobile-search-form :global(.mobile-search-input:focus) {
 			border-color: var(--accent-success);
 		}
-		.mobile-search-input::placeholder {
+		.mobile-search-form :global(.mobile-search-input::placeholder) {
 			color: var(--light-text-muted);
 		}
-		:global(.dark) .mobile-search-input::placeholder {
+		:global(.dark) .mobile-search-form :global(.mobile-search-input::placeholder) {
 			color: #777;
 		}
-		.mobile-search-btn {
+		.mobile-search-form :global(.mobile-search-btn) {
 			background: #2c5f2d;
 			border: none;
 			cursor: pointer;
@@ -935,13 +945,13 @@
 			border-radius: 6px;
 			transition: background-color 0.2s;
 		}
-		:global(.dark) .mobile-search-btn {
+		:global(.dark) .mobile-search-form :global(.mobile-search-btn) {
 			background: var(--accent-success);
 		}
-		.mobile-search-btn:hover {
+		.mobile-search-form :global(.mobile-search-btn:hover) {
 			background: #4a9d4f;
 		}
-		:global(.dark) .mobile-search-btn:hover {
+		:global(.dark) .mobile-search-form :global(.mobile-search-btn:hover) {
 			background: var(--accent-success-light);
 		}
 		.mobile-menu a {

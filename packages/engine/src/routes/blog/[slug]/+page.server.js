@@ -23,7 +23,7 @@ export async function load({ params, locals, platform }) {
 
         if (post) {
           // Process anchor tags in HTML content (same as filesystem posts)
-          const processedHtml = processAnchorTags(post.html_content || "");
+          const processedHtml = processAnchorTags(/** @type {string} */ (post.html_content) || "");
 
           // Extract headers from HTML for table of contents
           // Note: For D1 posts, we extract from HTML since we don't store raw markdown
@@ -33,7 +33,7 @@ export async function load({ params, locals, platform }) {
           let tags = [];
           if (post.tags) {
             try {
-              tags = JSON.parse(post.tags);
+              tags = JSON.parse(/** @type {string} */ (post.tags));
             } catch (e) {
               console.warn("Failed to parse tags:", e);
               tags = [];
@@ -44,16 +44,16 @@ export async function load({ params, locals, platform }) {
           let gutterContent = [];
           if (post.gutter_content) {
             try {
-              gutterContent = JSON.parse(post.gutter_content);
+              gutterContent = JSON.parse(/** @type {string} */ (post.gutter_content));
               // Process gutter items: convert markdown to HTML for comment/markdown items
-              gutterContent = gutterContent.map((item) => {
+              gutterContent = gutterContent.map((/** @type {{ type?: string; content?: string; [key: string]: unknown }} */ item) => {
                 if (
                   (item.type === "comment" || item.type === "markdown") &&
                   item.content
                 ) {
                   return {
                     ...item,
-                    content: sanitizeMarkdown(marked.parse(item.content)),
+                    content: sanitizeMarkdown(/** @type {string} */ (marked.parse(item.content, { async: false }))),
                   };
                 }
                 return item;
@@ -66,11 +66,11 @@ export async function load({ params, locals, platform }) {
 
           return {
             post: {
-              slug: post.slug,
-              title: post.title,
-              date: post.published_at,
+              slug: /** @type {string} */ (post.slug),
+              title: /** @type {string} */ (post.title),
+              date: /** @type {string} */ (post.published_at),
               tags,
-              description: post.description || "",
+              description: /** @type {string} */ (post.description) || "",
               content: processedHtml,
               headers,
               gutterContent,
@@ -112,20 +112,27 @@ export async function load({ params, locals, platform }) {
     throw error(404, "Post not found");
   } catch (err) {
     // If it's already a SvelteKit error, rethrow it
-    if (err?.status) {
+    if (/** @type {{ status?: number }} */ (err)?.status) {
       throw err;
     }
     // Log and rethrow as 500 with message for debugging
     console.error("Blog post load error:", err);
-    throw error(500, `Failed to load post: ${err.message}`);
+    throw error(500, `Failed to load post: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
+
+/**
+ * @typedef {Object} Header
+ * @property {number} level
+ * @property {string} id
+ * @property {string} text
+ */
 
 /**
  * Extract headers from HTML content for table of contents
  * Used for D1 posts where raw markdown isn't stored
  * @param {string} html - The HTML content
- * @returns {Array} Array of header objects with level, text, and id
+ * @returns {Header[]} Array of header objects with level, text, and id
  */
 function extractHeadersFromHtml(html) {
   const headers = [];

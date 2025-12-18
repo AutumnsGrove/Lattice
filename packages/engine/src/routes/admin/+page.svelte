@@ -2,8 +2,20 @@
   import { Card, Spinner } from '$lib/ui';
   import { api } from "$lib/utils/api.js";
 
+  /**
+   * @typedef {Object} HealthStatus
+   * @property {string} [status]
+   * @property {string} [error]
+   * @property {boolean} [r2_configured]
+   * @property {boolean} [d1_configured]
+   * @property {boolean} [kv_configured]
+   * @property {boolean} [github_token_configured]
+   * @property {string} [timestamp]
+   */
+
   let { data } = $props();
 
+  /** @type {HealthStatus | null} */
   let healthStatus = $state(null);
   let loading = $state(true);
 
@@ -13,7 +25,7 @@
       healthStatus = await api.get('/api/git/health');
     } catch (error) {
       console.error('Failed to fetch health:', error);
-      healthStatus = { status: 'error', error: error.message };
+      healthStatus = { status: 'error', error: error instanceof Error ? error.message : String(error) };
     }
     loading = false;
   }

@@ -27,5 +27,48 @@ export * from './ui/index';
 // Utilities
 export { cn } from './utils/cn';
 
-// GroveAuth client (re-export for convenience)
-export * from './groveauth/index';
+// GroveAuth client (re-export explicitly to avoid StatusColor conflict with UI)
+export {
+  GroveAuthClient,
+  createGroveAuthClient,
+  generateCodeVerifier,
+  generateCodeChallenge,
+  generateState,
+  GroveAuthError,
+  TIER_POST_LIMITS,
+  TIER_NAMES,
+  getQuotaDescription,
+  getQuotaUrgency,
+  getSuggestedActions,
+  getUpgradeRecommendation,
+  getQuotaWidgetData,
+  getPreSubmitCheck,
+  STATUS_COLORS,
+  ALERT_VARIANTS,
+  getStatusColorFromPercentage,
+  getAlertVariantFromColor,
+  RateLimiter,
+  RateLimitError,
+  withRateLimit,
+  DEFAULT_RATE_LIMITS,
+} from './groveauth/index';
+
+// Re-export GroveAuth types with renamed StatusColor to avoid conflict
+export type {
+  GroveAuthConfig,
+  TokenResponse,
+  TokenInfo,
+  UserInfo,
+  LoginUrlResult,
+  UserSubscription,
+  SubscriptionStatus,
+  SubscriptionResponse,
+  CanPostResponse,
+  SubscriptionTier,
+  AuthError,
+  QuotaWidgetData,
+  PreSubmitCheckResult,
+  AlertVariant,
+} from './groveauth/index';
+
+export type { StatusColor as GroveAuthStatusColor } from './groveauth/index';

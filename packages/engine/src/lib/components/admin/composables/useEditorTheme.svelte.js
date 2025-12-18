@@ -118,14 +118,45 @@ export const themes = {
 };
 
 /**
- * Creates an editor theme manager with Svelte 5 runes
- * @returns {object} Theme state and controls
+ * @typedef {Object} Theme
+ * @property {string} name
+ * @property {string} label
+ * @property {string} desc
+ * @property {string} accent
+ * @property {string} accentDim
+ * @property {string} accentBright
+ * @property {string} accentGlow
+ * @property {string} bg
+ * @property {string} bgSecondary
+ * @property {string} bgTertiary
+ * @property {string} border
+ * @property {string} borderAccent
+ * @property {string} text
+ * @property {string} textDim
+ * @property {string} statusBg
+ * @property {string} statusBorder
  */
-export function useEditorTheme() {
-  let currentTheme = $state("grove");
 
+/**
+ * @typedef {Object} EditorThemeManager
+ * @property {string} currentTheme
+ * @property {Record<string, Theme>} themes
+ * @property {() => void} loadTheme
+ * @property {(themeName: string) => void} setTheme
+ */
+
+/**
+ * Creates an editor theme manager with Svelte 5 runes
+ * @returns {EditorThemeManager} Theme state and controls
+ */
+/** @typedef {keyof typeof themes} ThemeName */
+
+export function useEditorTheme() {
+  let currentTheme = $state(/** @type {ThemeName} */ ("grove"));
+
+  /** @param {string} themeName */
   function applyTheme(themeName) {
-    const theme = themes[themeName];
+    const theme = themes[/** @type {ThemeName} */ (themeName)];
     if (!theme) return;
 
     const root = document.documentElement;
@@ -147,8 +178,8 @@ export function useEditorTheme() {
   function loadTheme() {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY);
-      if (stored && themes[stored]) {
-        currentTheme = stored;
+      if (stored && themes[/** @type {ThemeName} */ (stored)]) {
+        currentTheme = /** @type {ThemeName} */ (stored);
         applyTheme(stored);
       }
     } catch (e) {
@@ -156,6 +187,7 @@ export function useEditorTheme() {
     }
   }
 
+  /** @param {string} themeName */
   function saveTheme(themeName) {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, themeName);
@@ -164,9 +196,10 @@ export function useEditorTheme() {
     }
   }
 
+  /** @param {string} themeName */
   function setTheme(themeName) {
-    if (!themes[themeName]) return;
-    currentTheme = themeName;
+    if (!themes[/** @type {ThemeName} */ (themeName)]) return;
+    currentTheme = /** @type {ThemeName} */ (themeName);
     applyTheme(themeName);
     saveTheme(themeName);
   }

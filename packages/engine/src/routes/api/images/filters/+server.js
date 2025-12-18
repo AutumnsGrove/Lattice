@@ -49,6 +49,7 @@ export async function GET({ platform, locals }) {
     } while (cursor);
 
     // Fetch tags from D1
+    /** @type {any[]} */
     let tags = [];
     if (platform?.env?.DB) {
       const tagResults = await platform.env.DB.prepare(
@@ -58,6 +59,7 @@ export async function GET({ platform, locals }) {
     }
 
     // Fetch collections from D1
+    /** @type {any[]} */
     let collections = [];
     if (platform?.env?.DB) {
       const collectionResults = await platform.env.DB.prepare(

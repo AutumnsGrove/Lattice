@@ -1,7 +1,41 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { parseImageFilename } from "$lib/utils/gallery.js";
 
-export async function GET({ url, platform, locals }) {
+/** Tag associated with an image */
+interface ImageTag {
+  slug: string;
+  name: string;
+  color: string;
+}
+
+/** Image object with metadata */
+interface ImageWithMetadata {
+  key: string;
+  url: string;
+  size: number;
+  uploaded: Date;
+  parsed_date: string | null;
+  parsed_category: string | null;
+  parsed_slug: string;
+  custom_title: string | null;
+  custom_description: string | null;
+  custom_date: string | null;
+  tags: ImageTag[];
+}
+
+/** Database metadata row */
+interface MetadataRow {
+  r2_key: string;
+  custom_title: string | null;
+  custom_description: string | null;
+  custom_date: string | null;
+  tag_slugs: string | null;
+  tag_names: string | null;
+  tag_colors: string | null;
+}
+
+export const GET: RequestHandler = async ({ url, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -18,7 +52,7 @@ export async function GET({ url, platform, locals }) {
     const limit = parseInt(url.searchParams.get("limit") || "50", 10);
     const sortBy = url.searchParams.get("sortBy") || "date-desc";
 
-    // NEW: Filter parameters
+    // Filter parameters
     const searchQuery = url.searchParams.get("search") || "";
     const tagSlug = url.searchParams.get("tag") || null;
     const category = url.searchParams.get("category") || null;
@@ -32,7 +66,7 @@ export async function GET({ url, platform, locals }) {
     });
 
     // Transform and parse filenames
-    let images = listResult.objects.map((obj) => {
+    let images: ImageWithMetadata[] = listResult.objects.map((obj) => {
       const parsed = parseImageFilename(obj.key);
 
       return {
@@ -62,27 +96,29 @@ export async function GET({ url, platform, locals }) {
       if (r2Keys.length <= 100) {
         const placeholders = r2Keys.map(() => "?").join(",");
         const metadataQuery = `
-					SELECT
-						gi.r2_key,
-						gi.custom_title,
-						gi.custom_description,
-						gi.custom_date,
-						GROUP_CONCAT(gt.slug, ',') as tag_slugs,
-						GROUP_CONCAT(gt.name, ',') as tag_names,
-						GROUP_CONCAT(gt.color, ',') as tag_colors
-					FROM gallery_images gi
-					LEFT JOIN gallery_image_tags git ON gi.id = git.image_id
-					LEFT JOIN gallery_tags gt ON git.tag_id = gt.id
-					WHERE gi.r2_key IN (${placeholders})
-					GROUP BY gi.r2_key
-				`;
+          SELECT
+            gi.r2_key,
+            gi.custom_title,
+            gi.custom_description,
+            gi.custom_date,
+            GROUP_CONCAT(gt.slug, ',') as tag_slugs,
+            GROUP_CONCAT(gt.name, ',') as tag_names,
+            GROUP_CONCAT(gt.color, ',') as tag_colors
+          FROM gallery_images gi
+          LEFT JOIN gallery_image_tags git ON gi.id = git.image_id
+          LEFT JOIN gallery_tags gt ON git.tag_id = gt.id
+          WHERE gi.r2_key IN (${placeholders})
+          GROUP BY gi.r2_key
+        `;
 
         const metadata = await platform.env.DB.prepare(metadataQuery)
           .bind(...r2Keys)
           .all();
 
         // Merge metadata into images
-        const metadataMap = new Map(metadata.results.map((m) => [m.r2_key, m]));
+        const metadataMap = new Map(
+          (metadata.results as MetadataRow[]).map((m) => [m.r2_key, m])
+        );
 
         images = images.map((img) => {
           const meta = metadataMap.get(img.key);
@@ -94,13 +130,13 @@ export async function GET({ url, platform, locals }) {
             // Parse tags
             if (meta.tag_slugs) {
               const slugs = meta.tag_slugs.split(",");
-              const names = meta.tag_names.split(",");
-              const colors = meta.tag_colors.split(",");
+              const names = (meta.tag_names || "").split(",");
+              const colors = (meta.tag_colors || "").split(",");
 
               img.tags = slugs.map((slug, i) => ({
                 slug,
-                name: names[i],
-                color: colors[i],
+                name: names[i] || "",
+                color: colors[i] || "",
               }));
             }
           }
@@ -143,15 +179,15 @@ export async function GET({ url, platform, locals }) {
     switch (sortBy) {
       case "date-desc":
         images.sort((a, b) => {
-          const dateA = a.custom_date || a.parsed_date || a.uploaded;
-          const dateB = b.custom_date || b.parsed_date || b.uploaded;
+          const dateA = a.custom_date || a.parsed_date || a.uploaded.toISOString();
+          const dateB = b.custom_date || b.parsed_date || b.uploaded.toISOString();
           return new Date(dateB).getTime() - new Date(dateA).getTime();
         });
         break;
       case "date-asc":
         images.sort((a, b) => {
-          const dateA = a.custom_date || a.parsed_date || a.uploaded;
-          const dateB = b.custom_date || b.parsed_date || b.uploaded;
+          const dateA = a.custom_date || a.parsed_date || a.uploaded.toISOString();
+          const dateB = b.custom_date || b.parsed_date || b.uploaded.toISOString();
           return new Date(dateA).getTime() - new Date(dateB).getTime();
         });
         break;
@@ -179,4 +215,4 @@ export async function GET({ url, platform, locals }) {
     console.error("List error:", err);
     throw error(500, "Failed to list images");
   }
-}
+};

@@ -9,16 +9,26 @@
   import Sparkline from './Sparkline.svelte';
 
   /**
-   * @type {{ activity_date: string, commit_count: number }[]}
+   * @typedef {Object} ActivityData
+   * @property {string} activity_date
+   * @property {number} commit_count
    */
+
+  /**
+   * @typedef {Object} LocData
+   * @property {number} additions
+   * @property {number} deletions
+   */
+
   let {
-    data = [],
-    locData = { additions: 0, deletions: 0 },  // LOC from separate DB fetch
+    data = /** @type {ActivityData[]} */ ([]),
+    locData = /** @type {LocData} */ ({ additions: 0, deletions: 0 }),
     days = 14
   } = $props();
 
   // Format date as YYYY-MM-DD in local timezone (not UTC!)
   // This matches how GitHub attributes contributions to user's timezone
+  /** @param {Date} date */
   function formatDateKey(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -61,6 +71,7 @@
   const peakCommits = $derived(Math.max(...filledData().map(d => d.commits), 0));
 
   // Get intensity level for heatmap (0-4)
+  /** @param {number} commits */
   function getIntensity(commits) {
     if (commits === 0) return 0;
     if (commits <= 2) return 1;

@@ -6,26 +6,55 @@
 const AUTO_SAVE_DELAY = 2000; // 2 seconds
 
 /**
- * Creates a draft manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {string} options.draftKey - Unique key for localStorage
- * @param {Function} options.getContent - Function to get current content
- * @param {Function} options.setContent - Function to set content
- * @param {Function} options.onDraftRestored - Callback when draft is restored
- * @param {boolean} options.readonly - Whether editor is readonly
- * @returns {object} Draft state and controls
+ * @typedef {Object} StoredDraft
+ * @property {string} content
+ * @property {string} savedAt
  */
-export function useDraftManager(options = {}) {
+
+/**
+ * @typedef {Object} DraftManagerOptions
+ * @property {string|null} [draftKey] - Unique key for localStorage
+ * @property {() => string} [getContent] - Function to get current content
+ * @property {(content: string) => void} [setContent] - Function to set content
+ * @property {(draft: StoredDraft) => void} [onDraftRestored] - Callback when draft is restored
+ * @property {boolean} [readonly] - Whether editor is readonly
+ */
+
+/**
+ * @typedef {Object} DraftManager
+ * @property {boolean} hasDraft
+ * @property {boolean} draftRestorePrompt
+ * @property {StoredDraft|null} storedDraft
+ * @property {string} lastSavedContent
+ * @property {(initialContent: string) => void} init
+ * @property {(content: string) => void} scheduleSave
+ * @property {() => void} saveDraft
+ * @property {() => void} clearDraft
+ * @property {() => void} restoreDraft
+ * @property {() => void} discardDraft
+ * @property {() => {hasDraft: boolean, storedDraft: StoredDraft|null}} getStatus
+ * @property {(content: string) => boolean} hasUnsavedChanges
+ * @property {() => void} cleanup
+ */
+
+/**
+ * Creates a draft manager with Svelte 5 runes
+ * @param {DraftManagerOptions} options - Configuration options
+ * @returns {DraftManager} Draft state and controls
+ */
+export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({})) {
   const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;
 
   let lastSavedContent = $state("");
+  /** @type {ReturnType<typeof setTimeout> | null} */
   let draftSaveTimer = $state(null);
   let hasDraft = $state(false);
   let draftRestorePrompt = $state(false);
+  /** @type {StoredDraft | null} */
   let storedDraft = $state(null);
 
   function saveDraft() {
-    if (!draftKey || readonly) return;
+    if (!draftKey || readonly || !getContent) return;
 
     const content = getContent();
     try {
@@ -81,9 +110,12 @@ export function useDraftManager(options = {}) {
 
   function discardDraft() {
     clearDraft();
-    lastSavedContent = getContent();
+    if (getContent) {
+      lastSavedContent = getContent();
+    }
   }
 
+  /** @param {string} content */
   function scheduleSave(content) {
     if (!draftKey || readonly) return;
 
@@ -101,6 +133,7 @@ export function useDraftManager(options = {}) {
     }, AUTO_SAVE_DELAY);
   }
 
+  /** @param {string} initialContent */
   function init(initialContent) {
     // Check for existing draft on mount
     if (draftKey) {
@@ -124,6 +157,7 @@ export function useDraftManager(options = {}) {
     return { hasDraft, storedDraft };
   }
 
+  /** @param {string} content */
   function hasUnsavedChanges(content) {
     return content !== lastSavedContent;
   }

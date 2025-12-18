@@ -40,17 +40,48 @@ export const soundLibrary = {
 };
 
 /**
+ * @typedef {Object} AmbientSoundsState
+ * @property {boolean} enabled
+ * @property {string} currentSound
+ * @property {number} volume
+ * @property {boolean} showPanel
+ */
+
+/**
+ * @typedef {Object} AmbientSoundsManager
+ * @property {AmbientSoundsState} state
+ * @property {boolean} enabled
+ * @property {string} currentSound
+ * @property {number} volume
+ * @property {boolean} showPanel
+ * @property {() => void} loadSettings
+ * @property {() => void} toggle
+ * @property {(soundKey: string) => void} play
+ * @property {() => void} stop
+ * @property {(volume: number) => void} setVolume
+ * @property {(soundKey: string) => void} selectSound
+ * @property {() => void} togglePanel
+ * @property {() => void} closePanel
+ * @property {() => void} cleanup
+ */
+
+/**
+ * @typedef {keyof typeof soundLibrary} SoundKey
+ */
+
+/**
  * Creates an ambient sounds manager with Svelte 5 runes
- * @returns {object} Ambient sounds state and controls
+ * @returns {AmbientSoundsManager} Ambient sounds state and controls
  */
 export function useAmbientSounds() {
   let state = $state({
     enabled: false,
-    currentSound: "forest",
+    currentSound: /** @type {string} */ ("forest"),
     volume: 0.3,
     showPanel: false,
   });
 
+  /** @type {HTMLAudioElement | null} */
   let audioElement = $state(null);
 
   function loadSettings() {
@@ -89,8 +120,9 @@ export function useAmbientSounds() {
     }
   }
 
+  /** @param {string} soundKey */
   function play(soundKey) {
-    const sound = soundLibrary[soundKey];
+    const sound = soundLibrary[/** @type {keyof typeof soundLibrary} */ (soundKey)];
     if (!sound) return;
 
     // Stop current sound if playing
@@ -117,7 +149,7 @@ export function useAmbientSounds() {
         state.currentSound = soundKey;
         saveSettings();
       })
-      .catch((e) => {
+      .catch((/** @type {Error} */ e) => {
         console.warn("Failed to play sound:", e);
         state.enabled = false;
       });
@@ -131,6 +163,7 @@ export function useAmbientSounds() {
     state.enabled = false;
   }
 
+  /** @param {number} newVolume */
   function setVolume(newVolume) {
     state.volume = newVolume;
     if (audioElement) {
@@ -139,6 +172,7 @@ export function useAmbientSounds() {
     saveSettings();
   }
 
+  /** @param {string} soundKey */
   function selectSound(soundKey) {
     if (state.enabled) {
       play(soundKey);

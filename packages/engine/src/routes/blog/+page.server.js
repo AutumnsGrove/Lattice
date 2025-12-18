@@ -5,6 +5,7 @@ import { getAllPosts } from "$lib/utils/markdown.js";
 export const prerender = false;
 
 export async function load({ locals, platform }) {
+  /** @type {Array<{ slug: string; title: string; date: string; tags: string[]; description: string }>} */
   let posts = [];
   const tenantId = locals.tenantId;
   const db = platform?.env?.DB;
@@ -23,11 +24,11 @@ export async function load({ locals, platform }) {
         .all();
 
       posts = result.results.map((post) => ({
-        slug: post.slug,
-        title: post.title,
-        date: post.published_at,
-        tags: post.tags ? JSON.parse(post.tags) : [],
-        description: post.description || "",
+        slug: /** @type {string} */ (post.slug),
+        title: /** @type {string} */ (post.title),
+        date: /** @type {string} */ (post.published_at),
+        tags: post.tags ? JSON.parse(/** @type {string} */ (post.tags)) : [],
+        description: /** @type {string} */ (post.description) || "",
       }));
     } catch (err) {
       console.error("D1 fetch error for posts list:", err);

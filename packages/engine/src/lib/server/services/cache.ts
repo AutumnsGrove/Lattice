@@ -1,3 +1,5 @@
+/// <reference types="@cloudflare/workers-types" />
+
 /**
  * Cache Service - KV Key-Value Store Abstraction
  *
@@ -302,10 +304,10 @@ export async function delByPrefix(
 
 	do {
 		const list = await kv.list({ prefix: fullPrefix, cursor });
-		const keys = list.keys.map((k) => k.name);
+		const keys = list.keys.map((k: { name: string }) => k.name);
 
 		if (keys.length > 0) {
-			await Promise.all(keys.map((key) => kv.delete(key)));
+			await Promise.all(keys.map((key: string) => kv.delete(key)));
 			deleted += keys.length;
 		}
 

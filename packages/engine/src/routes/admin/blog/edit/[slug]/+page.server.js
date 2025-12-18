@@ -31,7 +31,7 @@ export async function load({ params, platform, locals }) {
           source: "d1",
           post: {
             ...post,
-            tags: post.tags ? JSON.parse(post.tags) : [],
+            tags: post.tags ? JSON.parse(/** @type {string} */ (post.tags)) : [],
             gutter_content: post.gutter_content || "[]",
           },
         };
@@ -53,7 +53,9 @@ export async function load({ params, platform, locals }) {
 
     // Find the matching file
     const entry = Object.entries(modules).find(([filepath]) => {
-      const fileSlug = filepath.split("/").pop().replace(".md", "");
+      const filename = filepath.split("/").pop();
+      if (!filename) return false;
+      const fileSlug = filename.replace(".md", "");
       return fileSlug === slug;
     });
 
@@ -61,7 +63,7 @@ export async function load({ params, platform, locals }) {
       throw error(404, "Post not found");
     }
 
-    const rawContent = entry[1];
+    const rawContent = /** @type {string} */ (entry[1]);
     const { data, content: markdownContent } = matter(rawContent);
 
     // TODO: Load gutter content from UserContent/Posts/{slug}/gutter/manifest.json
@@ -79,7 +81,7 @@ export async function load({ params, platform, locals }) {
       },
     };
   } catch (err) {
-    if (err.status === 404) throw err;
+    if (err && typeof err === "object" && "status" in err && err.status === 404) throw err;
     console.error("Filesystem fetch error:", err);
     throw error(500, "Failed to fetch post");
   }

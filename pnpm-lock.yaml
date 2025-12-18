@@ -108,9 +108,6 @@ importers:
 
   packages/engine:
     dependencies:
-      '@types/dompurify':
-        specifier: ^3.0.5
-        version: 3.2.0
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -120,6 +117,9 @@ importers:
       dompurify:
         specifier: ^3.3.0
         version: 3.3.0
+      esm-env:
+        specifier: ^1.2.2
+        version: 1.2.2
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -136,12 +136,15 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20251217.0
+        version: 4.20251217.0
       '@lucide/svelte':
         specifier: ^0.482.0
         version: 0.482.0(svelte@5.45.3)
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.4
-        version: 7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251202.0))
+        version: 7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251217.0))
       '@sveltejs/kit':
         specifier: ^2.5.28
         version: 2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))
@@ -232,7 +235,7 @@ importers:
         version: 0.482.0(svelte@5.45.3)
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.4
-        version: 7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251202.0))
+        version: 7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251217.0))
       '@sveltejs/kit':
         specifier: ^2.5.28
         version: 2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))
@@ -429,6 +432,9 @@ packages:
 
   '@cloudflare/workers-types@4.20251202.0':
     resolution: {integrity: sha512-Q7m1Ivu2fbKalOPm00KLpu6GfRaq4TlrPknqugvZgp/gDH96OYKINO4x7jvCIBvCz/aK9vVoOj8tlbSQBervVA==}
+
+  '@cloudflare/workers-types@4.20251217.0':
+    resolution: {integrity: sha512-qdVSqCza5Bv23E0DFET+8SEl9fM1F16WHC0HGoYLlDAyWF7rK2HhkPCdUEOp8DsJXwANWvNOkFdJfE1kLYGHYg==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -1433,10 +1439,6 @@ packages:
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
-
-  '@types/dompurify@3.2.0':
-    resolution: {integrity: sha512-Fgg31wv9QbLDA0SpTOXO3MaxySc4DKGLi8sna4/Utjo4r3ZRPdCt4UQee8BWr+Q5z21yifghREPJGYaEOEIACg==}
-    deprecated: This is a stub types definition. dompurify provides its own type definitions, so you do not need this installed.
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -2885,6 +2887,8 @@ snapshots:
 
   '@cloudflare/workers-types@4.20251202.0': {}
 
+  '@cloudflare/workers-types@4.20251217.0': {}
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -3443,12 +3447,12 @@ snapshots:
       worktop: 0.8.0-next.18
       wrangler: 3.114.15(@cloudflare/workers-types@4.20251202.0)
 
-  '@sveltejs/adapter-cloudflare@7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251202.0))':
+  '@sveltejs/adapter-cloudflare@7.2.4(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(wrangler@3.114.15(@cloudflare/workers-types@4.20251217.0))':
     dependencies:
-      '@cloudflare/workers-types': 4.20251202.0
+      '@cloudflare/workers-types': 4.20251217.0
       '@sveltejs/kit': 2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))
       worktop: 0.8.0-next.18
-      wrangler: 3.114.15(@cloudflare/workers-types@4.20251202.0)
+      wrangler: 3.114.15(@cloudflare/workers-types@4.20251217.0)
 
   '@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25)))(svelte@5.45.3)(vite@5.4.21(@types/node@20.19.25))':
     dependencies:
@@ -3549,10 +3553,6 @@ snapshots:
   '@types/cookie@0.6.0': {}
 
   '@types/deep-eql@4.0.2': {}
-
-  '@types/dompurify@3.2.0':
-    dependencies:
-      dompurify: 3.3.0
 
   '@types/estree@1.0.8': {}
 
@@ -4969,6 +4969,26 @@ snapshots:
       workerd: 1.20250718.0
     optionalDependencies:
       '@cloudflare/workers-types': 4.20251202.0
+      fsevents: 2.3.3
+      sharp: 0.33.5
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  wrangler@3.114.15(@cloudflare/workers-types@4.20251217.0):
+    dependencies:
+      '@cloudflare/kv-asset-handler': 0.3.4
+      '@cloudflare/unenv-preset': 2.0.2(unenv@2.0.0-rc.14)(workerd@1.20250718.0)
+      '@esbuild-plugins/node-globals-polyfill': 0.2.3(esbuild@0.17.19)
+      '@esbuild-plugins/node-modules-polyfill': 0.2.2(esbuild@0.17.19)
+      blake3-wasm: 2.1.5
+      esbuild: 0.17.19
+      miniflare: 3.20250718.2
+      path-to-regexp: 6.3.0
+      unenv: 2.0.0-rc.14
+      workerd: 1.20250718.0
+    optionalDependencies:
+      '@cloudflare/workers-types': 4.20251217.0
       fsevents: 2.3.3
       sharp: 0.33.5
     transitivePeerDependencies:

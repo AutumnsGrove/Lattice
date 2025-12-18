@@ -4,9 +4,20 @@
    * Shows activity trend over time (commits, LOC, etc.)
    */
 
-  /** @type {number[]} */
+  /**
+   * @typedef {Object} SparklineProps
+   * @property {number[]} [data] - Data points for the sparkline
+   * @property {number} [width] - Width of the chart
+   * @property {number} [height] - Height of the chart
+   * @property {string} [strokeColor] - Line color
+   * @property {string} [fillColor] - Fill color for area
+   * @property {number} [strokeWidth] - Line thickness
+   * @property {boolean} [showDots] - Show data point dots
+   * @property {boolean} [showArea] - Show filled area
+   */
+
   let {
-    data = [],
+    data = /** @type {number[]} */ ([]),
     width = 120,
     height = 24,
     strokeColor = '#5cb85f',
@@ -24,14 +35,14 @@
     const min = Math.min(...data, 0);
     const range = max - min || 1;
 
-    const points = data.map((value, i) => {
+    const points = data.map((/** @type {number} */ value, /** @type {number} */ i) => {
       const x = (i / (data.length - 1)) * width;
       const y = height - ((value - min) / range) * (height - 4) - 2; // 2px padding
       return { x, y };
     });
 
     // Create line path
-    const linePath = points.map((p, i) =>
+    const linePath = points.map((/** @type {{ x: number, y: number }} */ p, /** @type {number} */ i) =>
       `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
     ).join(' ');
 
@@ -45,14 +56,14 @@
     const min = Math.min(...data, 0);
     const range = max - min || 1;
 
-    const points = data.map((value, i) => {
+    const points = data.map((/** @type {number} */ value, /** @type {number} */ i) => {
       const x = (i / (data.length - 1)) * width;
       const y = height - ((value - min) / range) * (height - 4) - 2;
       return { x, y };
     });
 
     // Create closed area path
-    const linePath = points.map((p, i) =>
+    const linePath = points.map((/** @type {{ x: number, y: number }} */ p, /** @type {number} */ i) =>
       `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
     ).join(' ');
 
@@ -66,7 +77,7 @@
     const min = Math.min(...data, 0);
     const range = max - min || 1;
 
-    return data.map((value, i) => ({
+    return data.map((/** @type {number} */ value, /** @type {number} */ i) => ({
       x: (i / (data.length - 1)) * width,
       y: height - ((value - min) / range) * (height - 4) - 2,
       value

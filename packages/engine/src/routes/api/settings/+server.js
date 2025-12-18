@@ -7,7 +7,7 @@ export const prerender = false;
  * @type {import('./$types').RequestHandler}
  */
 export async function GET({ platform }) {
-  const db = platform?.env?.GIT_STATS_DB;
+  const db = /** @type {any} */ (platform?.env)?.GIT_STATS_DB;
 
   if (!db) {
     // Return defaults if database not available
@@ -19,8 +19,9 @@ export async function GET({ platform }) {
       .prepare("SELECT setting_key, setting_value FROM site_settings")
       .all();
 
+    /** @type {Record<string, any>} */
     const settings = {};
-    for (const row of result.results) {
+    for (const row of /** @type {any[]} */ (result.results)) {
       settings[row.setting_key] = row.setting_value;
     }
 

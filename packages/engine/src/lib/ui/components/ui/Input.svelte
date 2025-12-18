@@ -14,6 +14,7 @@
 	 * @prop {boolean} [required=false] - Whether input is required (shows asterisk)
 	 * @prop {boolean} [disabled=false] - Whether input is disabled
 	 * @prop {string} [class] - Additional CSS classes to apply
+	 * @prop {HTMLInputElement} [ref] - Reference to the underlying input element (bindable)
 	 *
 	 * @example
 	 * <Input label="Email" type="email" bind:value={email} required />
@@ -33,6 +34,7 @@
 		required?: boolean;
 		disabled?: boolean;
 		class?: string;
+		ref?: HTMLInputElement | null;
 	}
 
 	let {
@@ -44,6 +46,7 @@
 		required = false,
 		disabled = false,
 		class: className,
+		ref = $bindable(null),
 		...restProps
 	}: Props = $props();
 
@@ -66,6 +69,7 @@
 	{/if}
 
 	<ShadcnInput
+		bind:ref={ref}
 		bind:value
 		{type}
 		{placeholder}

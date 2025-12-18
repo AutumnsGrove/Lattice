@@ -14,10 +14,13 @@
 
 	// Debounced search query for performance - initialized to same value as searchQuery
 	let debouncedQuery = $state(initialQuery);
+	/** @type {ReturnType<typeof setTimeout> | null} */
 	let debounceTimer = $state(null);
 
+	/** @param {Event} event */
 	function debouncedSearchInput(event) {
-		searchQuery = event.target.value;
+		const target = /** @type {HTMLInputElement} */ (event.target);
+		searchQuery = target.value;
 
 		// Clear existing timer
 		if (debounceTimer) {
@@ -74,6 +77,7 @@
 	}
 
 
+	/** @param {string} tag */
 	function selectTag(tag) {
 		if (selectedTag === tag) {
 			selectedTag = '';

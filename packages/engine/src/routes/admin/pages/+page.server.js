@@ -7,6 +7,7 @@ export async function load({ platform, locals }) {
   }
 
   const tenantId = locals.tenantId;
+  /** @type {any[]} */
   let pages = [];
 
   // Try D1 first

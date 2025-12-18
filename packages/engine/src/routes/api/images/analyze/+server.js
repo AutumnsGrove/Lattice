@@ -96,7 +96,7 @@ Respond in this exact JSON format only, no other text:
     const result = await response.json();
 
     // Extract the text content from Claude's response
-    const textContent = result.content?.find((c) => c.type === "text")?.text;
+    const textContent = result.content?.find((/** @type {{ type: string; text?: string }} */ c) => c.type === "text")?.text;
     if (!textContent) {
       throw error(500, "Invalid AI response format");
     }
@@ -136,7 +136,7 @@ Respond in this exact JSON format only, no other text:
       altText: analysis.altText || "Image",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err instanceof Error && 'status' in err) throw err;
     console.error("Analysis error:", err);
     throw error(500, "Failed to analyze image");
   }

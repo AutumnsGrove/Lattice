@@ -1,20 +1,183 @@
-import { marked } from "marked";
+import { marked, type Tokens } from "marked";
 import matter from "gray-matter";
-import { sanitizeMarkdown } from './sanitize.js';
+import { sanitizeMarkdown } from "./sanitize.js";
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/** Header extracted from markdown for table of contents */
+export interface Header {
+  level: number;
+  text: string;
+  id: string;
+}
+
+/** Frontmatter data from markdown files */
+export interface Frontmatter {
+  title?: string;
+  date?: string;
+  tags?: string[];
+  description?: string;
+  hero?: {
+    title?: string;
+    subtitle?: string;
+    cta?: { text: string; link: string };
+  };
+  galleries?: unknown[];
+  [key: string]: unknown;
+}
+
+/** Parsed markdown content result */
+export interface ParsedContent {
+  data: Frontmatter;
+  content: string;
+  headers: Header[];
+  rawMarkdown?: string;
+}
+
+/** Image in a gallery */
+export interface GalleryImage {
+  url: string;
+  alt: string;
+  caption: string;
+}
+
+/** Base gutter item */
+export interface GutterItemBase {
+  type: string;
+  anchor?: string;
+  file?: string;
+  url?: string;
+  alt?: string;
+  caption?: string;
+  images?: Array<{ url?: string; file?: string; alt?: string; caption?: string }>;
+}
+
+/** Processed gutter item with resolved content */
+export interface GutterItem extends GutterItemBase {
+  content?: string;
+  src?: string;
+  images?: GalleryImage[];
+}
+
+/** Gutter manifest structure */
+export interface GutterManifest {
+  items: GutterItemBase[];
+}
+
+/** Post/Recipe metadata */
+export interface PostMeta {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  description: string;
+}
+
+/** Full post/recipe with content */
+export interface Post extends PostMeta {
+  content: string;
+  headers: Header[];
+  gutterContent?: GutterItem[];
+  sidecar?: unknown;
+}
+
+/** Page content (home, about, contact) */
+export interface Page {
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  headers: Header[];
+  date?: string;
+  hero?: Frontmatter["hero"];
+  galleries?: unknown[];
+  gutterContent?: GutterItem[];
+}
+
+/** Site configuration */
+export interface SiteConfig {
+  owner: { name: string; email: string };
+  site: { title: string; description: string; copyright: string };
+  social: Record<string, string>;
+}
+
+/** Module map from import.meta.glob */
+export type ModuleMap = Record<string, string>;
+
+/** Gutter modules configuration */
+export interface GutterModules {
+  manifest: Record<string, GutterManifest | { default: GutterManifest }>;
+  markdown?: Record<string, string>;
+  images?: Record<string, string>;
+}
+
+/** Options for getItemBySlug */
+export interface GetItemOptions {
+  gutterModules?: GutterModules;
+  sidecarModules?: Record<string, unknown>;
+}
+
+/** Options for getPageByFilename */
+export interface GetPageOptions {
+  gutterModules?: GutterModules;
+  slug?: string;
+}
+
+/** Content loader interface */
+export interface ContentLoader {
+  getAllPosts(): PostMeta[];
+  getAllRecipes(): PostMeta[];
+  getLatestPost(): Post | null;
+  getPostBySlug(slug: string): Post | null;
+  getRecipeBySlug(slug: string): Post | null;
+  getHomePage(): Page | null;
+  getAboutPage(): Page | null;
+  getContactPage(): Page | null;
+  getSiteConfig(): SiteConfig;
+  getGutterContent(slug: string): GutterItem[];
+  getRecipeGutterContent(slug: string): GutterItem[];
+  getHomeGutterContent(slug: string): GutterItem[];
+  getAboutGutterContent(slug: string): GutterItem[];
+  getContactGutterContent(slug: string): GutterItem[];
+  getRecipeSidecar(slug: string): unknown;
+}
+
+/** Content loader configuration */
+export interface ContentLoaderConfig {
+  posts?: ModuleMap;
+  recipes?: ModuleMap;
+  about?: ModuleMap;
+  home?: ModuleMap;
+  contact?: ModuleMap;
+  siteConfig?: Record<string, SiteConfig | { default: SiteConfig }>;
+  postGutter?: Partial<GutterModules>;
+  recipeGutter?: Partial<GutterModules>;
+  recipeMetadata?: Record<string, unknown>;
+  aboutGutter?: Partial<GutterModules>;
+  homeGutter?: Partial<GutterModules>;
+  contactGutter?: Partial<GutterModules>;
+}
+
+// ============================================================================
+// Marked Configuration
+// ============================================================================
 
 // Configure marked renderer for GitHub-style code blocks
 const renderer = new marked.Renderer();
-renderer.code = function (token) {
+
+renderer.code = function (token: Tokens.Code | string): string {
   // Handle both old (code, language) and new (token) API signatures
   const code = typeof token === "string" ? token : token.text;
-  const language = typeof token === "string" ? arguments[1] : token.lang;
+  const language = typeof token === "string" ? (arguments as unknown as [string, string])[1] : token.lang;
 
   const lang = language || "text";
 
   // Render markdown/md code blocks as formatted HTML (like GitHub)
   if (lang === "markdown" || lang === "md") {
     // Parse the markdown content and render it
-    const renderedContent = marked.parse(code);
+    const renderedContent = marked.parse(code, { async: false }) as string;
     // Escape the raw markdown for the copy button
     const escapedCode = code
       .replace(/&/g, "&amp;")
@@ -68,12 +231,14 @@ marked.setOptions({
   breaks: false,
 });
 
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
 /**
  * Validates if a string is a valid URL
- * @param {string} urlString - The string to validate as a URL
- * @returns {boolean} True if the string is a valid URL, false otherwise
  */
-function isValidUrl(urlString) {
+function isValidUrl(urlString: string): boolean {
   try {
     const url = new URL(urlString);
     return url.protocol === "http:" || url.protocol === "https:";
@@ -84,11 +249,9 @@ function isValidUrl(urlString) {
 
 /**
  * Extract headers from markdown content for table of contents
- * @param {string} markdown - The raw markdown content
- * @returns {Array} Array of header objects with level, text, and id
  */
-export function extractHeaders(markdown) {
-  const headers = [];
+export function extractHeaders(markdown: string): Header[] {
+  const headers: Header[] = [];
 
   // Remove fenced code blocks before extracting headers
   // This prevents # comments inside code blocks from being treated as headers
@@ -121,28 +284,24 @@ export function extractHeaders(markdown) {
 /**
  * Process anchor tags in HTML content
  * Converts <!-- anchor:tagname --> comments to identifiable span elements
- * @param {string} html - The HTML content
- * @returns {string} HTML with anchor markers converted to spans
  */
-export function processAnchorTags(html) {
+export function processAnchorTags(html: string): string {
   // Convert <!-- anchor:tagname --> to <span class="anchor-marker" data-anchor="tagname"></span>
   // Supports alphanumeric characters, underscores, and hyphens in tag names
   return html.replace(
     /<!--\s*anchor:([\w-]+)\s*-->/g,
-    (match, tagname) =>
+    (_match, tagname) =>
       `<span class="anchor-marker" data-anchor="${tagname}"></span>`,
   );
 }
 
 /**
  * Parse markdown content and convert to HTML
- * @param {string} markdownContent - The raw markdown content (may include frontmatter)
- * @returns {Object} Object with data (frontmatter), content (HTML), headers, and raw markdown
  */
-export function parseMarkdownContent(markdownContent) {
+export function parseMarkdownContent(markdownContent: string): ParsedContent {
   const { data, content: markdown } = matter(markdownContent);
 
-  let htmlContent = marked.parse(markdown);
+  let htmlContent = marked.parse(markdown, { async: false }) as string;
 
   // Process anchor tags in the HTML content
   htmlContent = processAnchorTags(htmlContent);
@@ -151,7 +310,7 @@ export function parseMarkdownContent(markdownContent) {
   const headers = extractHeaders(markdown);
 
   return {
-    data,
+    data: data as Frontmatter,
     content: htmlContent,
     headers,
     rawMarkdown: markdown,
@@ -160,16 +319,14 @@ export function parseMarkdownContent(markdownContent) {
 
 /**
  * Parse markdown content with sanitization (for user-facing pages like home, about, contact)
- * @param {string} markdownContent - The raw markdown content (may include frontmatter)
- * @returns {Object} Object with data (frontmatter), content (sanitized HTML), headers
  */
-export function parseMarkdownContentSanitized(markdownContent) {
+export function parseMarkdownContentSanitized(markdownContent: string): ParsedContent {
   const { data, content: markdown } = matter(markdownContent);
-  const htmlContent = sanitizeMarkdown(marked.parse(markdown));
+  const htmlContent = sanitizeMarkdown(marked.parse(markdown, { async: false }) as string);
   const headers = extractHeaders(markdown);
 
   return {
-    data,
+    data: data as Frontmatter,
     content: htmlContent,
     headers,
   };
@@ -178,19 +335,13 @@ export function parseMarkdownContentSanitized(markdownContent) {
 /**
  * Get gutter content from provided modules
  * This is a utility function that processes gutter manifests, markdown, and images
- *
- * @param {string} slug - The page/post slug
- * @param {Object} manifestModules - The manifest modules (from import.meta.glob)
- * @param {Object} markdownModules - The markdown modules (from import.meta.glob)
- * @param {Object} imageModules - The image modules (from import.meta.glob)
- * @returns {Array} Array of gutter items with content and position info
  */
 export function processGutterContent(
-  slug,
-  manifestModules,
-  markdownModules,
-  imageModules,
-) {
+  slug: string,
+  manifestModules: Record<string, GutterManifest | { default: GutterManifest }>,
+  markdownModules: Record<string, string>,
+  imageModules: Record<string, string>,
+): GutterItem[] {
   // Find the manifest file for this page/post
   const manifestEntry = Object.entries(manifestModules).find(([filepath]) => {
     const parts = filepath.split("/");
@@ -202,7 +353,8 @@ export function processGutterContent(
     return [];
   }
 
-  const manifest = manifestEntry[1].default || manifestEntry[1];
+  const manifestData = manifestEntry[1];
+  const manifest: GutterManifest = "default" in manifestData ? manifestData.default : manifestData;
 
   if (!manifest.items || !Array.isArray(manifest.items)) {
     return [];
@@ -210,7 +362,11 @@ export function processGutterContent(
 
   // Process each gutter item
   return manifest.items
-    .map((item) => {
+    .map((item): GutterItem | null => {
+      // Destructure to separate images from other properties
+      // This ensures proper type handling when spreading
+      const { images: rawImages, ...baseItem } = item;
+
       if (item.type === "comment" || item.type === "markdown") {
         // Find the markdown content file
         const mdEntry = Object.entries(markdownModules).find(([filepath]) => {
@@ -219,10 +375,10 @@ export function processGutterContent(
 
         if (mdEntry) {
           const markdownContent = mdEntry[1];
-          const htmlContent = marked.parse(markdownContent);
+          const htmlContent = marked.parse(markdownContent, { async: false }) as string;
 
           return {
-            ...item,
+            ...baseItem,
             content: htmlContent,
           };
         }
@@ -230,7 +386,7 @@ export function processGutterContent(
         // Check if file is an external URL
         if (item.file && isValidUrl(item.file)) {
           return {
-            ...item,
+            ...baseItem,
             src: item.file,
           };
         }
@@ -242,7 +398,7 @@ export function processGutterContent(
 
         if (imgEntry) {
           return {
-            ...item,
+            ...baseItem,
             src: imgEntry[1],
           };
         }
@@ -251,7 +407,7 @@ export function processGutterContent(
         if (item.url) {
           // Direct URL (local path like /icons/instruction/mix.webp or CDN URL)
           return {
-            ...item,
+            ...baseItem,
             src: item.url,
           };
         } else if (item.file) {
@@ -262,12 +418,12 @@ export function processGutterContent(
 
           if (imgEntry) {
             return {
-              ...item,
+              ...baseItem,
               src: imgEntry[1],
             };
           }
         }
-        return item;
+        return baseItem;
       } else if (item.type === "gallery") {
         /**
          * Process gallery items containing multiple images
@@ -279,9 +435,9 @@ export function processGutterContent(
          * Images that fail to resolve (invalid URLs or missing files) are filtered out.
          * If all images fail to resolve, the entire gallery item is excluded.
          */
-        const originalImageCount = (item.images || []).length;
-        const images = (item.images || [])
-          .map((img) => {
+        const originalImageCount = (rawImages || []).length;
+        const images: GalleryImage[] = (rawImages || [])
+          .map((img): GalleryImage | null => {
             // Check if it's an external URL
             if (img.url) {
               // Validate URL format to prevent malformed URLs from failing silently
@@ -321,11 +477,11 @@ export function processGutterContent(
 
             return null;
           })
-          .filter(Boolean);
+          .filter((img): img is GalleryImage => img !== null);
 
         if (images.length > 0) {
           return {
-            ...item,
+            ...baseItem,
             images,
           };
         } else if (originalImageCount > 0) {
@@ -336,43 +492,41 @@ export function processGutterContent(
         }
       }
 
-      return item;
+      return baseItem;
     })
-    .filter(
-      (item) =>
-        item.content || item.src || item.images || item.type === "emoji",
-    ); // Filter out items that weren't found
+    .filter((item): item is GutterItem =>
+      item !== null && (!!item.content || !!item.src || !!item.images || item.type === "emoji")
+    );
 }
 
 /**
  * Process a list of markdown files into post/recipe objects
- *
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @returns {Array} Array of post/content objects with metadata and slug
  */
-export function processMarkdownModules(modules) {
+export function processMarkdownModules(modules: ModuleMap): PostMeta[] {
   try {
     const items = Object.entries(modules)
-      .map(([filepath, content]) => {
+      .map(([filepath, content]): PostMeta | null => {
         try {
           // Extract slug from filepath: /path/to/Posts/example.md -> example
-          const slug = filepath.split("/").pop().replace(".md", "");
+          const filename = filepath.split("/").pop();
+          if (!filename) return null;
+          const slug = filename.replace(".md", "");
           const { data } = matter(content);
 
           return {
             slug,
-            title: data.title || "Untitled",
-            date: data.date || new Date().toISOString(),
-            tags: data.tags || [],
-            description: data.description || "",
+            title: (data.title as string) || "Untitled",
+            date: (data.date as string) || new Date().toISOString(),
+            tags: (data.tags as string[]) || [],
+            description: (data.description as string) || "",
           };
         } catch (err) {
           console.error(`Error processing file ${filepath}:`, err);
           return null;
         }
       })
-      .filter(Boolean)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+      .filter((item): item is PostMeta => item !== null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return items;
   } catch (err) {
@@ -383,18 +537,17 @@ export function processMarkdownModules(modules) {
 
 /**
  * Get a single item by slug from modules
- *
- * @param {string} slug - The item slug
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @param {Object} options - Optional configuration
- * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
- * @param {Object} options.sidecarModules - Sidecar/metadata modules (for recipes)
- * @returns {Object|null} Item object with content and metadata
  */
-export function getItemBySlug(slug, modules, options = {}) {
+export function getItemBySlug(
+  slug: string,
+  modules: ModuleMap,
+  options: GetItemOptions = {}
+): Post | null {
   // Find the matching module by slug
   const entry = Object.entries(modules).find(([filepath]) => {
-    const fileSlug = filepath.split("/").pop().replace(".md", "");
+    const filename = filepath.split("/").pop();
+    if (!filename) return false;
+    const fileSlug = filename.replace(".md", "");
     return fileSlug === slug;
   });
 
@@ -406,7 +559,7 @@ export function getItemBySlug(slug, modules, options = {}) {
   const { data, content, headers } = parseMarkdownContent(rawContent);
 
   // Build the result object
-  const result = {
+  const result: Post = {
     slug,
     title: data.title || "Untitled",
     date: data.date || new Date().toISOString(),
@@ -417,8 +570,8 @@ export function getItemBySlug(slug, modules, options = {}) {
   };
 
   // Process gutter content if provided
-  if (options.gutterModules) {
-    const { manifest, markdown, images } = options.gutterModules;
+  if (options.gutterModules?.manifest) {
+    const { manifest, markdown = {}, images = {} } = options.gutterModules;
     result.gutterContent = processGutterContent(slug, manifest, markdown, images);
   }
 
@@ -431,7 +584,10 @@ export function getItemBySlug(slug, modules, options = {}) {
     });
 
     if (sidecarEntry) {
-      result.sidecar = sidecarEntry[1].default || sidecarEntry[1];
+      const sidecarData = sidecarEntry[1] as { default?: unknown } | unknown;
+      result.sidecar = typeof sidecarData === "object" && sidecarData !== null && "default" in sidecarData
+        ? sidecarData.default
+        : sidecarData;
     }
   }
 
@@ -441,15 +597,12 @@ export function getItemBySlug(slug, modules, options = {}) {
 /**
  * Get a page (home, about, contact) by filename from modules
  * Uses sanitization for security
- *
- * @param {string} filename - The filename to look for (e.g., "home.md", "about.md")
- * @param {Object} modules - The modules from import.meta.glob (filepath -> content)
- * @param {Object} options - Optional configuration
- * @param {Object} options.gutterModules - Gutter modules { manifest, markdown, images }
- * @param {string} options.slug - Override slug (defaults to filename without .md)
- * @returns {Object|null} Page object with content and metadata
  */
-export function getPageByFilename(filename, modules, options = {}) {
+export function getPageByFilename(
+  filename: string,
+  modules: ModuleMap,
+  options: GetPageOptions = {}
+): Page | null {
   try {
     // Find the matching file
     const entry = Object.entries(modules).find(([filepath]) => {
@@ -465,7 +618,7 @@ export function getPageByFilename(filename, modules, options = {}) {
     const slug = options.slug || filename.replace(".md", "");
 
     // Build the result object
-    const result = {
+    const result: Page = {
       slug,
       title: data.title || slug.charAt(0).toUpperCase() + slug.slice(1),
       description: data.description || "",
@@ -479,8 +632,8 @@ export function getPageByFilename(filename, modules, options = {}) {
     if (data.galleries) result.galleries = data.galleries;
 
     // Process gutter content if provided
-    if (options.gutterModules) {
-      const { manifest, markdown, images } = options.gutterModules;
+    if (options.gutterModules?.manifest) {
+      const { manifest, markdown = {}, images = {} } = options.gutterModules;
       result.gutterContent = processGutterContent(slug, manifest, markdown, images);
     }
 
@@ -493,14 +646,14 @@ export function getPageByFilename(filename, modules, options = {}) {
 
 /**
  * Get site configuration from a config module
- *
- * @param {Object} configModule - The config module from import.meta.glob
- * @returns {Object} Site configuration object
  */
-export function getSiteConfigFromModule(configModule) {
+export function getSiteConfigFromModule(
+  configModule: Record<string, SiteConfig | { default: SiteConfig }>
+): SiteConfig {
   const entry = Object.entries(configModule)[0];
   if (entry) {
-    return entry[1].default || entry[1];
+    const config = entry[1];
+    return "default" in config ? config.default : config;
   }
   return {
     owner: { name: "Admin", email: "" },
@@ -512,23 +665,8 @@ export function getSiteConfigFromModule(configModule) {
 /**
  * Create a configured content loader with all functions bound to the provided modules
  * This is the main factory function for creating a content loader in the consuming app
- *
- * @param {Object} config - Configuration object with all required modules
- * @param {Object} config.posts - Post modules from import.meta.glob
- * @param {Object} config.recipes - Recipe modules from import.meta.glob
- * @param {Object} config.about - About page modules from import.meta.glob
- * @param {Object} config.home - Home page modules from import.meta.glob
- * @param {Object} config.contact - Contact page modules from import.meta.glob
- * @param {Object} config.siteConfig - Site config module from import.meta.glob
- * @param {Object} config.postGutter - Post gutter modules { manifest, markdown, images }
- * @param {Object} config.recipeGutter - Recipe gutter modules { manifest, markdown, images }
- * @param {Object} config.recipeMetadata - Recipe metadata modules from import.meta.glob
- * @param {Object} config.aboutGutter - About gutter modules { manifest, markdown, images }
- * @param {Object} config.homeGutter - Home gutter modules { manifest, markdown, images }
- * @param {Object} config.contactGutter - Contact gutter modules { manifest, markdown, images }
- * @returns {Object} Object with all content loader functions
  */
-export function createContentLoader(config) {
+export function createContentLoader(config: ContentLoaderConfig): ContentLoader {
   const {
     posts = {},
     recipes = {},
@@ -544,7 +682,7 @@ export function createContentLoader(config) {
     contactGutter = {},
   } = config;
 
-  return {
+  const loader: ContentLoader = {
     /**
      * Get all posts with metadata
      */
@@ -567,24 +705,24 @@ export function createContentLoader(config) {
       if (allPosts.length === 0) {
         return null;
       }
-      return this.getPostBySlug(allPosts[0].slug);
+      return loader.getPostBySlug(allPosts[0].slug);
     },
 
     /**
      * Get a single post by slug
      */
-    getPostBySlug(slug) {
+    getPostBySlug(slug: string) {
       return getItemBySlug(slug, posts, {
-        gutterModules: postGutter.manifest ? postGutter : undefined,
+        gutterModules: postGutter.manifest ? postGutter as GutterModules : undefined,
       });
     },
 
     /**
      * Get a single recipe by slug
      */
-    getRecipeBySlug(slug) {
+    getRecipeBySlug(slug: string) {
       return getItemBySlug(slug, recipes, {
-        gutterModules: recipeGutter.manifest ? recipeGutter : undefined,
+        gutterModules: recipeGutter.manifest ? recipeGutter as GutterModules : undefined,
         sidecarModules: recipeMetadata,
       });
     },
@@ -594,7 +732,7 @@ export function createContentLoader(config) {
      */
     getHomePage() {
       return getPageByFilename("home.md", home, {
-        gutterModules: homeGutter.manifest ? homeGutter : undefined,
+        gutterModules: homeGutter.manifest ? homeGutter as GutterModules : undefined,
         slug: "home",
       });
     },
@@ -604,7 +742,7 @@ export function createContentLoader(config) {
      */
     getAboutPage() {
       return getPageByFilename("about.md", about, {
-        gutterModules: aboutGutter.manifest ? aboutGutter : undefined,
+        gutterModules: aboutGutter.manifest ? aboutGutter as GutterModules : undefined,
         slug: "about",
       });
     },
@@ -614,7 +752,7 @@ export function createContentLoader(config) {
      */
     getContactPage() {
       return getPageByFilename("contact.md", contact, {
-        gutterModules: contactGutter.manifest ? contactGutter : undefined,
+        gutterModules: contactGutter.manifest ? contactGutter as GutterModules : undefined,
         slug: "contact",
       });
     },
@@ -629,7 +767,7 @@ export function createContentLoader(config) {
     /**
      * Get gutter content for a post
      */
-    getGutterContent(slug) {
+    getGutterContent(slug: string) {
       if (!postGutter.manifest) return [];
       return processGutterContent(
         slug,
@@ -642,7 +780,7 @@ export function createContentLoader(config) {
     /**
      * Get gutter content for a recipe
      */
-    getRecipeGutterContent(slug) {
+    getRecipeGutterContent(slug: string) {
       if (!recipeGutter.manifest) return [];
       return processGutterContent(
         slug,
@@ -655,7 +793,7 @@ export function createContentLoader(config) {
     /**
      * Get gutter content for the home page
      */
-    getHomeGutterContent(slug) {
+    getHomeGutterContent(slug: string) {
       if (!homeGutter.manifest) return [];
       return processGutterContent(
         slug,
@@ -668,7 +806,7 @@ export function createContentLoader(config) {
     /**
      * Get gutter content for the about page
      */
-    getAboutGutterContent(slug) {
+    getAboutGutterContent(slug: string) {
       if (!aboutGutter.manifest) return [];
       return processGutterContent(
         slug,
@@ -681,7 +819,7 @@ export function createContentLoader(config) {
     /**
      * Get gutter content for the contact page
      */
-    getContactGutterContent(slug) {
+    getContactGutterContent(slug: string) {
       if (!contactGutter.manifest) return [];
       return processGutterContent(
         slug,
@@ -694,7 +832,7 @@ export function createContentLoader(config) {
     /**
      * Get recipe sidecar/metadata by slug
      */
-    getRecipeSidecar(slug) {
+    getRecipeSidecar(slug: string) {
       const entry = Object.entries(recipeMetadata).find(([filepath]) => {
         const parts = filepath.split("/");
         const folder = parts[parts.length - 3];
@@ -705,33 +843,40 @@ export function createContentLoader(config) {
         return null;
       }
 
-      return entry[1].default || entry[1];
+      const data = entry[1] as { default?: unknown } | unknown;
+      return typeof data === "object" && data !== null && "default" in data
+        ? data.default
+        : data;
     },
   };
+
+  return loader;
 }
+
+// ============================================================================
+// Global Content Loader Registry
+// ============================================================================
 
 /**
  * Registry for site-specific content loaders
  * Sites must register their content loaders using registerContentLoader()
  */
-let contentLoader = null;
+let contentLoader: ContentLoader | null = null;
 
 /**
  * Register a content loader for the site
  * This should be called by the consuming site to provide access to content
- * @param {Object} loader - Object with getAllPosts, getSiteConfig, getLatestPost functions
  */
-export function registerContentLoader(loader) {
+export function registerContentLoader(loader: ContentLoader): void {
   contentLoader = loader;
 }
 
 /**
  * Get all blog posts
- * @returns {Array} Array of post objects
  */
-export function getAllPosts() {
+export function getAllPosts(): PostMeta[] {
   if (!contentLoader || !contentLoader.getAllPosts) {
-    console.warn('getAllPosts: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getAllPosts: No content loader registered. Call registerContentLoader() in your site.");
     return [];
   }
   return contentLoader.getAllPosts();
@@ -739,11 +884,10 @@ export function getAllPosts() {
 
 /**
  * Get site configuration
- * @returns {Object} Site config object
  */
-export function getSiteConfig() {
+export function getSiteConfig(): SiteConfig {
   if (!contentLoader || !contentLoader.getSiteConfig) {
-    console.warn('getSiteConfig: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getSiteConfig: No content loader registered. Call registerContentLoader() in your site.");
     return {
       owner: { name: "Admin", email: "" },
       site: { title: "GroveEngine Site", description: "", copyright: "" },
@@ -755,11 +899,10 @@ export function getSiteConfig() {
 
 /**
  * Get the latest post
- * @returns {Object|null} Latest post or null
  */
-export function getLatestPost() {
+export function getLatestPost(): Post | null {
   if (!contentLoader || !contentLoader.getLatestPost) {
-    console.warn('getLatestPost: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getLatestPost: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getLatestPost();
@@ -767,11 +910,10 @@ export function getLatestPost() {
 
 /**
  * Get home page content
- * @returns {Object|null} Home page data or null
  */
-export function getHomePage() {
+export function getHomePage(): Page | null {
   if (!contentLoader || !contentLoader.getHomePage) {
-    console.warn('getHomePage: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getHomePage: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getHomePage();
@@ -779,12 +921,10 @@ export function getHomePage() {
 
 /**
  * Get a post by its slug
- * @param {string} slug - The post slug
- * @returns {Object|null} Post object or null
  */
-export function getPostBySlug(slug) {
+export function getPostBySlug(slug: string): Post | null {
   if (!contentLoader || !contentLoader.getPostBySlug) {
-    console.warn('getPostBySlug: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getPostBySlug: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getPostBySlug(slug);
@@ -792,11 +932,10 @@ export function getPostBySlug(slug) {
 
 /**
  * Get about page content
- * @returns {Object|null} About page data or null
  */
-export function getAboutPage() {
+export function getAboutPage(): Page | null {
   if (!contentLoader || !contentLoader.getAboutPage) {
-    console.warn('getAboutPage: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getAboutPage: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getAboutPage();
@@ -804,11 +943,10 @@ export function getAboutPage() {
 
 /**
  * Get contact page content
- * @returns {Object|null} Contact page data or null
  */
-export function getContactPage() {
+export function getContactPage(): Page | null {
   if (!contentLoader || !contentLoader.getContactPage) {
-    console.warn('getContactPage: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getContactPage: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getContactPage();
@@ -816,11 +954,10 @@ export function getContactPage() {
 
 /**
  * Get all recipes
- * @returns {Array} Array of recipe objects
  */
-export function getAllRecipes() {
+export function getAllRecipes(): PostMeta[] {
   if (!contentLoader || !contentLoader.getAllRecipes) {
-    console.warn('getAllRecipes: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getAllRecipes: No content loader registered. Call registerContentLoader() in your site.");
     return [];
   }
   return contentLoader.getAllRecipes();
@@ -828,12 +965,10 @@ export function getAllRecipes() {
 
 /**
  * Get a recipe by its slug
- * @param {string} slug - The recipe slug
- * @returns {Object|null} Recipe object or null
  */
-export function getRecipeBySlug(slug) {
+export function getRecipeBySlug(slug: string): Post | null {
   if (!contentLoader || !contentLoader.getRecipeBySlug) {
-    console.warn('getRecipeBySlug: No content loader registered. Call registerContentLoader() in your site.');
+    console.warn("getRecipeBySlug: No content loader registered. Call registerContentLoader() in your site.");
     return null;
   }
   return contentLoader.getRecipeBySlug(slug);

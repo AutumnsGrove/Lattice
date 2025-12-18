@@ -8,13 +8,13 @@
 	 */
 	let { src = '', alt = '', caption = '', isOpen = false, onClose = () => {} } = $props();
 
-	function handleKeydown(event) {
+	function handleKeydown(/** @type {KeyboardEvent} */ event) {
 		if (event.key === 'Escape') {
 			onClose();
 		}
 	}
 
-	function handleBackdropClick(event) {
+	function handleBackdropClick(/** @type {MouseEvent} */ event) {
 		if (event.target === event.currentTarget) {
 			onClose();
 		}
@@ -24,12 +24,14 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 	<div
 		class="lightbox-backdrop"
 		onclick={handleBackdropClick}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Image viewer"
+		tabindex="-1"
 	>
 		<button class="close-button" onclick={onClose} aria-label="Close">
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,6 +39,7 @@
 				<line x1="6" y1="6" x2="18" y2="18"></line>
 			</svg>
 		</button>
+		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
 		<div class="lightbox-content" onclick={handleBackdropClick}>
 			<ZoomableImage {src} {alt} isActive={isOpen} class="lightbox-image" />
 		</div>

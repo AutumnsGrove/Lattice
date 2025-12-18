@@ -3,7 +3,49 @@
  * Manages the slash command menu and execution
  */
 
+/**
+ * @typedef {Object} SlashCommand
+ * @property {string} id
+ * @property {string} label
+ * @property {string} insert
+ * @property {number} [cursorOffset]
+ * @property {boolean} [isSnippet]
+ * @property {boolean} [isAction]
+ * @property {(() => void)} [action]
+ */
+
+/**
+ * @typedef {Object} SlashMenuState
+ * @property {boolean} open
+ * @property {string} query
+ * @property {{x: number, y: number}} position
+ * @property {number} selectedIndex
+ */
+
+/**
+ * @typedef {Object} SlashCommandsOptions
+ * @property {() => HTMLTextAreaElement|null} [getTextareaRef] - Function to get textarea reference
+ * @property {() => string} [getContent] - Function to get content
+ * @property {(content: string) => void} [setContent] - Function to set content
+ * @property {() => Array<{id: string, name: string, content: string}>} [getSnippets] - Function to get user snippets
+ * @property {() => void} [onOpenSnippetsModal] - Callback to open snippets modal
+ */
+
+/**
+ * @typedef {Object} SlashCommandsManager
+ * @property {SlashMenuState} menu
+ * @property {boolean} isOpen
+ * @property {() => SlashCommand[]} getAllCommands
+ * @property {() => SlashCommand[]} getFilteredCommands
+ * @property {() => void} open
+ * @property {() => void} close
+ * @property {(direction: 'up' | 'down') => void} navigate
+ * @property {(index: number) => void} execute
+ * @property {(key: string, cursorPos: number, content: string) => boolean} shouldTrigger
+ */
+
 // Base slash commands definition
+/** @type {SlashCommand[]} */
 export const baseSlashCommands = [
   { id: "heading1", label: "Heading 1", insert: "# " },
   { id: "heading2", label: "Heading 2", insert: "## " },
@@ -25,13 +67,8 @@ export const baseSlashCommands = [
 
 /**
  * Creates a slash commands manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {Function} options.getTextareaRef - Function to get textarea reference
- * @param {Function} options.getContent - Function to get content
- * @param {Function} options.setContent - Function to set content
- * @param {Function} options.getSnippets - Function to get user snippets
- * @param {Function} options.onOpenSnippetsModal - Callback to open snippets modal
- * @returns {object} Slash commands state and controls
+ * @param {SlashCommandsOptions} options - Configuration options
+ * @returns {SlashCommandsManager} Slash commands state and controls
  */
 export function useSlashCommands(options = {}) {
   const {
@@ -50,8 +87,10 @@ export function useSlashCommands(options = {}) {
   });
 
   // Build full command list including snippets
+  /** @returns {SlashCommand[]} */
   function getAllCommands() {
     const snippets = getSnippets ? getSnippets() : [];
+    /** @type {SlashCommand[]} */
     const snippetCommands = snippets.map((s) => ({
       id: s.id,
       label: `> ${s.name}`,
@@ -59,6 +98,7 @@ export function useSlashCommands(options = {}) {
       isSnippet: true,
     }));
 
+    /** @type {SlashCommand} */
     const newSnippetCommand = {
       id: "newSnippet",
       label: "Create New Snippet...",
@@ -88,6 +128,7 @@ export function useSlashCommands(options = {}) {
     menu.open = false;
   }
 
+  /** @param {'up' | 'down'} direction */
   function navigate(direction) {
     const filtered = getFilteredCommands();
     const count = filtered.length;
@@ -100,13 +141,16 @@ export function useSlashCommands(options = {}) {
     }
   }
 
+  /** @param {number} index */
   function execute(index) {
     const filtered = getFilteredCommands();
     const cmd = filtered[index];
     if (!cmd) return;
 
-    const textareaRef = getTextareaRef();
-    const content = getContent();
+    const textareaRef = getTextareaRef ? getTextareaRef() : null;
+    const content = getContent ? getContent() : '';
+
+    if (!textareaRef || !setContent) return;
 
     // Handle action commands (like "Create New Snippet...")
     if (cmd.isAction && cmd.action) {
@@ -142,6 +186,11 @@ export function useSlashCommands(options = {}) {
     menu.open = false;
   }
 
+  /**
+   * @param {string} key
+   * @param {number} cursorPos
+   * @param {string} content
+   */
   function shouldTrigger(key, cursorPos, content) {
     if (key !== "/" || menu.open) return false;
     // Only trigger at start of line or after whitespace

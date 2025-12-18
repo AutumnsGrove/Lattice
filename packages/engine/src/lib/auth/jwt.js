@@ -2,11 +2,21 @@
  * JWT utilities using Web Crypto API (Cloudflare Workers compatible)
  */
 
+/**
+ * @typedef {Object} JwtPayload
+ * @property {string} [sub]
+ * @property {string} [email]
+ * @property {number} [exp]
+ * @property {number} [iat]
+ */
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 /**
  * Base64URL encode
+ * @param {ArrayBuffer} data
+ * @returns {string}
  */
 function base64UrlEncode(data) {
   const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
@@ -15,6 +25,8 @@ function base64UrlEncode(data) {
 
 /**
  * Base64URL decode
+ * @param {string} str
+ * @returns {Uint8Array}
  */
 function base64UrlDecode(str) {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -25,6 +37,8 @@ function base64UrlDecode(str) {
 
 /**
  * Create HMAC key from secret
+ * @param {string} secret
+ * @returns {Promise<CryptoKey>}
  */
 async function createKey(secret) {
   return await crypto.subtle.importKey(
@@ -38,16 +52,16 @@ async function createKey(secret) {
 
 /**
  * Sign a JWT payload
- * @param {Object} payload - The payload to sign
+ * @param {JwtPayload} payload - The payload to sign
  * @param {string} secret - The secret key
  * @returns {Promise<string>} - The signed JWT token
  */
 export async function signJwt(payload, secret) {
   const header = { alg: "HS256", typ: "JWT" };
 
-  const headerEncoded = base64UrlEncode(encoder.encode(JSON.stringify(header)));
+  const headerEncoded = base64UrlEncode(encoder.encode(JSON.stringify(header)).buffer);
   const payloadEncoded = base64UrlEncode(
-    encoder.encode(JSON.stringify(payload)),
+    encoder.encode(JSON.stringify(payload)).buffer,
   );
 
   const message = `${headerEncoded}.${payloadEncoded}`;
@@ -68,7 +82,7 @@ export async function signJwt(payload, secret) {
  * Verify and decode a JWT token
  * @param {string} token - The JWT token to verify
  * @param {string} secret - The secret key
- * @returns {Promise<Object|null>} - The decoded payload or null if invalid
+ * @returns {Promise<JwtPayload|null>} - The decoded payload or null if invalid
  */
 export async function verifyJwt(token, secret) {
   try {

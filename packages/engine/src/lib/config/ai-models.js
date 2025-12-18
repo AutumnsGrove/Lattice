@@ -23,7 +23,7 @@ const CHARS_PER_TOKEN = 4;
  * @returns {{ inputTokens: number, outputTokens: number, cost: number }}
  */
 export function calculateCost(content, model = 'haiku') {
-  const pricing = MODEL_PRICING[model] || MODEL_PRICING.haiku;
+  const pricing = MODEL_PRICING[/** @type {keyof typeof MODEL_PRICING} */ (model)] || MODEL_PRICING.haiku;
   const inputTokens = Math.ceil(content.length / CHARS_PER_TOKEN);
   // Estimate output tokens as ~10% of input for analysis tasks
   const outputTokens = Math.ceil(inputTokens * 0.1);

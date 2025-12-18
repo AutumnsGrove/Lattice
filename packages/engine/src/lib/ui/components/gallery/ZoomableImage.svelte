@@ -56,7 +56,7 @@
 	}
 
 	// Mouse event handlers for drag/pan
-	function handleMouseDown(event) {
+	function handleMouseDown(/** @type {MouseEvent} */ event) {
 		if (zoomLevel === 0) return;
 
 		isDragging = true;
@@ -68,7 +68,7 @@
 		event.preventDefault();
 	}
 
-	function handleMouseMove(event) {
+	function handleMouseMove(/** @type {MouseEvent} */ event) {
 		if (!isDragging) return;
 
 		const deltaX = event.clientX - dragStartX;
@@ -84,7 +84,7 @@
 	}
 
 	// Touch event handlers for drag/pan on mobile
-	function handleTouchStart(event) {
+	function handleTouchStart(/** @type {TouchEvent} */ event) {
 		if (zoomLevel === 0) return;
 
 		// Only handle single touch for panning
@@ -99,7 +99,7 @@
 		}
 	}
 
-	function handleTouchMove(event) {
+	function handleTouchMove(/** @type {TouchEvent} */ event) {
 		if (!isDragging || event.touches.length !== 1) return;
 
 		const deltaX = event.touches[0].clientX - dragStartX;
@@ -116,7 +116,7 @@
 	}
 
 	// Click handler that distinguishes between click and drag
-	function handleClick(event) {
+	function handleClick(/** @type {MouseEvent} */ event) {
 		// If we dragged more than 5px, don't treat as click
 		if (totalDragDistance > 5) {
 			totalDragDistance = 0;
@@ -128,6 +128,7 @@
 
 <svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} />
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_to_interactive_role -->
 <img
 	{src}
 	{alt}
@@ -140,6 +141,8 @@
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
 	onclick={handleClick}
+	role="button"
+	tabindex="0"
 />
 
 <style>

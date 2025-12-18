@@ -29,7 +29,7 @@ export async function load({ params, platform, locals }) {
           source: "d1",
           page: {
             ...page,
-            hero: page.hero ? JSON.parse(page.hero) : null,
+            hero: page.hero ? JSON.parse(/** @type {string} */ (page.hero)) : null,
             gutter_content: page.gutter_content || "[]",
           },
         };

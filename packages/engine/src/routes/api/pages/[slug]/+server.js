@@ -75,7 +75,7 @@ export async function PUT({ params, request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(marked.parse(data.markdown_content));
+    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
 
     const now = new Date().toISOString();
 
@@ -105,8 +105,8 @@ export async function PUT({ params, request, platform, locals }) {
       message: "Page updated successfully",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (/** @type {{ status?: number }} */ (err).status) throw err;
     console.error("Error updating page:", err);
-    throw error(500, err.message || "Failed to update page");
+    throw error(500, err instanceof Error ? err.message : "Failed to update page");
   }
 }

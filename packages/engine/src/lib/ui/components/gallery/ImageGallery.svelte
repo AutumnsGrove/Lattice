@@ -12,12 +12,12 @@
 	 *   { url: 'https://...', alt: 'Description', caption: 'Photo caption' }
 	 * ]} />
 	 */
-	let { images = [] } = $props();
+	let { images = /** @type {Array<{url: string, alt: string, caption?: string}>} */ ([]) } = $props();
 
 	let currentIndex = $state(0);
 	let touchStartX = $state(0);
 	let touchEndX = $state(0);
-	let galleryElement = $state();
+	let galleryElement = $state(/** @type {HTMLDivElement | undefined} */ (undefined));
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
@@ -77,7 +77,7 @@
 		}, NAVIGATION_COOLDOWN_MS);
 	}
 
-	function goToIndex(index) {
+	function goToIndex(/** @type {number} */ index) {
 		if (isNavigating || index < 0 || index >= images.length || index === currentIndex) return;
 
 		isNavigating = true;
@@ -102,7 +102,7 @@
 	}
 
 	// Keyboard navigation
-	function handleKeydown(event) {
+	function handleKeydown(/** @type {KeyboardEvent} */ event) {
 		// Handle Escape to close lightbox
 		if (event.key === 'Escape' && lightboxOpen) {
 			closeLightbox();
@@ -117,11 +117,11 @@
 	}
 
 	// Touch/swipe support
-	function handleTouchStart(event) {
+	function handleTouchStart(/** @type {TouchEvent} */ event) {
 		touchStartX = event.touches[0].clientX;
 	}
 
-	function handleTouchMove(event) {
+	function handleTouchMove(/** @type {TouchEvent} */ event) {
 		touchEndX = event.touches[0].clientX;
 	}
 
@@ -160,6 +160,7 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if images && images.length > 0}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
 		class="gallery-container"
 		bind:this={galleryElement}
@@ -262,12 +263,14 @@
 
 	<!-- Lightbox modal -->
 	{#if lightboxOpen}
+		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
 		<div
 			class="lightbox-backdrop"
-			onclick={(e) => e.target === e.currentTarget && closeLightbox()}
+			onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}
 			role="dialog"
 			aria-modal="true"
 			aria-label="Image viewer"
+			tabindex="-1"
 		>
 			<button class="lightbox-close" onclick={closeLightbox} aria-label="Close">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -276,7 +279,8 @@
 				</svg>
 			</button>
 
-			<div class="lightbox-content" onclick={(e) => e.target === e.currentTarget && closeLightbox()}>
+			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+			<div class="lightbox-content" onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}>
 				<ZoomableImage
 					src={currentImage.url}
 					alt={currentImage.alt || `Image ${currentIndex + 1}`}

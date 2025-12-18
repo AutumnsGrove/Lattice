@@ -31,7 +31,7 @@ export async function GET({ platform, locals }) {
       .bind(locals.tenantId)
       .all();
 
-    const posts = result.results.map((post) => ({
+    const posts = result.results.map((/** @type {{ slug: string; title: string; date: string; tags?: string; description?: string }} */ post) => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
@@ -121,7 +121,7 @@ export async function POST({ request, platform, locals }) {
     }
 
     // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(marked.parse(data.markdown_content));
+    const html_content = sanitizeMarkdown(/** @type {string} */ (marked.parse(data.markdown_content, { async: false })));
 
     // Generate a simple hash of the content
     const encoder = new TextEncoder();
@@ -166,7 +166,7 @@ export async function POST({ request, platform, locals }) {
       message: "Post created successfully",
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (/** @type {{ status?: number }} */ (err).status) throw err;
     console.error("Error creating post:", err);
     throw error(500, "Failed to create post");
   }

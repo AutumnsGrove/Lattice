@@ -4,14 +4,23 @@
 
 	let { data } = $props();
 
+	/**
+	 * @param {MouseEvent} event
+	 * @param {string} slug
+	 */
 	function handleCardClick(event, slug) {
 		// Don't navigate if clicking on a tag link or badge
-		if (event.target.closest('a')) {
+		const target = /** @type {HTMLElement} */ (event.target);
+		if (target.closest('a')) {
 			return;
 		}
 		goto(`/blog/${slug}`);
 	}
 
+	/**
+	 * @param {KeyboardEvent} event
+	 * @param {string} slug
+	 */
 	function handleCardKeydown(event, slug) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
@@ -54,8 +63,8 @@
 		{#each data.posts as post (post.slug)}
 			<Card
 				hoverable
-				onclick={(e) => handleCardClick(e, post.slug)}
-				onkeydown={(e) => handleCardKeydown(e, post.slug)}
+				onclick={(/** @type {MouseEvent} */ e) => handleCardClick(e, post.slug)}
+				onkeydown={(/** @type {KeyboardEvent} */ e) => handleCardKeydown(e, post.slug)}
 				role="button"
 				tabindex="0"
 			>

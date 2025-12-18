@@ -4,6 +4,7 @@
 
 	let { data } = $props();
 
+	/** @type {Record<string, string>} */
 	// Font family mapping - same as in +layout.svelte
 	const fontMap = {
 		// Default
@@ -81,9 +82,9 @@
 </div>
 
 <style>
-	/* Post wrapper for custom font application */
+	/* Post wrapper for custom font application - placeholder for future styles */
 	.post-wrapper {
-		/* No special styling needed unless custom font */
+		display: contents;
 	}
 
 	/* Apply custom font to body content and headings (not meta like date/tags) */

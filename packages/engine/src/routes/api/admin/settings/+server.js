@@ -19,7 +19,7 @@ export async function PUT({ request, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  const db = platform?.env?.GIT_STATS_DB;
+  const db = /** @type {any} */ (platform?.env)?.GIT_STATS_DB;
   if (!db) {
     throw error(500, "Database not configured");
   }
@@ -101,7 +101,7 @@ export async function PUT({ request, platform, locals }) {
       updated_at: now,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err instanceof Error && 'status' in err) throw err;
     console.error("Settings update error:", err);
     throw error(500, "Failed to update setting");
   }

@@ -9,6 +9,23 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 /**
+ * OAuth token response from GroveAuth
+ */
+interface TokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+}
+
+/**
+ * OAuth error response from GroveAuth
+ */
+interface ErrorResponse {
+  error?: string;
+  error_description?: string;
+}
+
+/**
  * Map error codes to user-friendly messages
  */
 const ERROR_MESSAGES: Record<string, string> = {
@@ -96,7 +113,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     });
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json();
+      const errorData = await tokenResponse.json() as ErrorResponse;
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
         error: errorData,
@@ -112,7 +129,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       redirect(302, `/auth/login?error=${encodeURIComponent(debugError)}`);
     }
 
-    const tokens = await tokenResponse.json();
+    const tokens = await tokenResponse.json() as TokenResponse;
 
     // Determine if we're in production
     const isProduction =

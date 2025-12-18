@@ -4,18 +4,53 @@
  */
 
 /**
- * Creates a writing session manager with Svelte 5 runes
- * @param {object} options - Configuration options
- * @param {Function} options.getWordCount - Function to get current word count
- * @returns {object} Session state and controls
+ * @typedef {Object} CampfireState
+ * @property {boolean} active
+ * @property {number|null} startTime
+ * @property {number} targetMinutes
+ * @property {number} startWordCount
  */
-export function useWritingSession(options = {}) {
+
+/**
+ * @typedef {Object} GoalState
+ * @property {boolean} enabled
+ * @property {number} targetWords
+ * @property {number} sessionWords
+ */
+
+/**
+ * @typedef {Object} WritingSessionOptions
+ * @property {() => number} [getWordCount] - Function to get current word count
+ */
+
+/**
+ * @typedef {Object} WritingSessionManager
+ * @property {CampfireState} campfire
+ * @property {GoalState} goal
+ * @property {boolean} isCampfireActive
+ * @property {boolean} isGoalEnabled
+ * @property {() => string} getCampfireElapsed
+ * @property {(currentWordCount: number) => number} getGoalProgress
+ * @property {(currentWordCount: number) => number} getCampfireWords
+ * @property {() => void} startCampfire
+ * @property {() => void} endCampfire
+ * @property {() => void} promptWritingGoal
+ * @property {() => void} disableGoal
+ */
+
+/**
+ * Creates a writing session manager with Svelte 5 runes
+ * @param {WritingSessionOptions} options - Configuration options
+ * @returns {WritingSessionManager} Session state and controls
+ */
+export function useWritingSession(options = /** @type {WritingSessionOptions} */ ({})) {
   const { getWordCount } = options;
 
   // Campfire session state
   let campfire = $state({
     active: false,
-    startTime: null,
+    /** @type {number | null} */
+    startTime: /** @type {number | null} */ (null),
     targetMinutes: 25,
     startWordCount: 0,
   });
@@ -38,6 +73,7 @@ export function useWritingSession(options = {}) {
   }
 
   // Writing goal progress
+  /** @param {number} currentWordCount */
   function getGoalProgress(currentWordCount) {
     if (!goal.enabled) return 0;
     const wordsWritten = currentWordCount - goal.sessionWords;
@@ -45,6 +81,7 @@ export function useWritingSession(options = {}) {
   }
 
   // Words written in campfire session
+  /** @param {number} currentWordCount */
   function getCampfireWords(currentWordCount) {
     return currentWordCount - campfire.startWordCount;
   }

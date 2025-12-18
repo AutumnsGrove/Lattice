@@ -15,6 +15,11 @@
 	} from '$lib/utils/gutter.js';
 	import '$lib/styles/content.css';
 
+	/**
+	 * @typedef {import('$lib/utils/gutter.js').GutterItem} GutterItem
+	 * @typedef {import('$lib/utils/gutter.js').Header} Header
+	 */
+
 	// Constants for positioning calculations
 	const MIN_GAP = 16; // Minimum gap between items in pixels
 	const BOTTOM_PADDING = 32; // Padding from bottom of content
@@ -23,23 +28,29 @@
 
 	let {
 		content = '',
-		gutterContent = [],
-		headers = [],
+		gutterContent = /** @type {GutterItem[]} */ ([]),
+		headers = /** @type {Header[]} */ ([]),
 		showTableOfContents = true,
 		children
 	} = $props();
 
 	// References to mobile gutter containers for each anchor
+	/** @type {Record<string, HTMLElement>} */
 	let mobileGutterRefs = $state({});
 
 	// Track content height for overflow detection
+	/** @type {HTMLElement | undefined} */
 	let contentBodyElement = $state();
 	let contentHeight = $state(0);
+	/** @type {string[]} */
 	let overflowingAnchorKeys = $state([]);
 
 	// Gutter positioning state
+	/** @type {HTMLElement | undefined} */
 	let gutterElement = $state();
+	/** @type {Record<string, number>} */
 	let itemPositions = $state({});
+	/** @type {Record<string, HTMLElement>} */
 	let anchorGroupElements = $state({});
 
 	// Compute unique anchors once as a derived value (performance optimization)
@@ -52,17 +63,27 @@
 	let hasGutters = $derived(hasLeftGutter || hasRightGutter);
 	let hasOverflow = $derived(overflowingAnchorKeys.length > 0);
 
-	// Helper to get anchor key with headers context
+	/**
+	 * Helper to get anchor key with headers context
+	 * @param {string} anchor
+	 */
 	function getKey(anchor) {
 		return getAnchorKey(anchor, headers);
 	}
 
-	// Get items for a specific anchor
+	/**
+	 * Get items for a specific anchor
+	 * @param {string} anchor
+	 */
 	function getItems(anchor) {
 		return getItemsForAnchor(gutterContent, anchor);
 	}
 
-	// Generate unique key for a gutter item
+	/**
+	 * Generate unique key for a gutter item
+	 * @param {GutterItem} item
+	 * @param {number} index
+	 */
 	function getItemKey(item, index) {
 		// Combine item properties to create a unique identifier
 		const parts = [
@@ -88,12 +109,13 @@
 		const gutterRect = gutterElement.getBoundingClientRect();
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
+		/** @type {string[]} */
 		const newOverflowingAnchors = [];
 		const newPositions = { ...itemPositions };
 
 		// Sort anchors by their position in the document
 		const anchorPositions = uniqueAnchors.map(anchor => {
-			const el = findAnchorElement(anchor, contentBodyElement, headers);
+			const el = findAnchorElement(anchor, contentBodyElement ?? null, headers);
 			if (!el && import.meta.env.DEV) {
 				console.warn(`Anchor element not found for: ${anchor}`);
 			}
@@ -149,6 +171,7 @@
 
 	// Setup resize listener on mount with proper cleanup
 	onMount(() => {
+		/** @type {ReturnType<typeof setTimeout> | undefined} */
 		let resizeTimeoutId;
 		const handleResize = () => {
 			clearTimeout(resizeTimeoutId);
@@ -166,8 +189,9 @@
 
 	// Setup copy button functionality for code blocks
 	onMount(() => {
+		/** @param {Event} event */
 		const handleCopyClick = async (event) => {
-			const button = event.currentTarget;
+			const button = /** @type {HTMLElement} */ (event.currentTarget);
 			const codeText = button.getAttribute('data-code');
 
 			if (!codeText) return;
@@ -182,21 +206,21 @@
 
 				// Update button text and style to show success
 				const copyText = button.querySelector('.copy-text');
-				const originalText = copyText.textContent;
-				copyText.textContent = 'Copied!';
+				const originalText = copyText?.textContent || 'Copy';
+				if (copyText) copyText.textContent = 'Copied!';
 				button.classList.add('copied');
 
 				// Reset after 2 seconds
 				setTimeout(() => {
-					copyText.textContent = originalText;
+					if (copyText) copyText.textContent = originalText;
 					button.classList.remove('copied');
 				}, 2000);
 			} catch (err) {
 				console.error('Failed to copy code:', err);
 				const copyText = button.querySelector('.copy-text');
-				copyText.textContent = 'Failed';
+				if (copyText) copyText.textContent = 'Failed';
 				setTimeout(() => {
-					copyText.textContent = 'Copy';
+					if (copyText) copyText.textContent = 'Copy';
 				}, 2000);
 			}
 		};
@@ -230,6 +254,7 @@
 	// Add IDs to headers and position mobile gutter items
 	$effect(() => {
 		// Track moved elements for cleanup
+		/** @type {Array<{ element: HTMLElement, originalParent: HTMLElement | null, originalNextSibling: Node | null }>} */
 		const movedElements = [];
 
 		untrack(() => {
@@ -239,8 +264,8 @@
 			if (headers && headers.length > 0) {
 				const headerElements = contentBodyElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
 				headerElements.forEach((el) => {
-					const text = el.textContent.trim();
-					const matchingHeader = headers.find(h => h.text === text);
+					const text = el.textContent?.trim() || '';
+					const matchingHeader = headers.find(/** @param {Header} h */ (h) => h.text === text);
 					if (matchingHeader) {
 						el.id = matchingHeader.id;
 					}
@@ -284,6 +309,7 @@
 	$effect(() => {
 		if (contentBodyElement) {
 			const updateHeight = () => {
+				if (!contentBodyElement) return;
 				// Get the bottom of content-body relative to the article
 				const rect = contentBodyElement.getBoundingClientRect();
 				const articleRect = contentBodyElement.closest('.content-article')?.getBoundingClientRect();
@@ -321,6 +347,10 @@
 	}
 
 	// Inject reference markers into content HTML for overflowing items
+	/**
+	 * @param {string} html
+	 * @param {string[]} overflowKeys
+	 */
 	function injectReferenceMarkers(html, overflowKeys) {
 		if (!overflowKeys || overflowKeys.length === 0 || typeof window === 'undefined') {
 			return html;
@@ -343,7 +373,7 @@
 					// Find header by text content
 					const allHeaders = doc.body.querySelectorAll('h1, h2, h3, h4, h5, h6');
 					for (const h of allHeaders) {
-						if (h.textContent.trim() === headerText) {
+						if (h.textContent?.trim() === headerText) {
 							targetEl = h;
 							break;
 						}
@@ -352,9 +382,11 @@
 				}
 				case 'paragraph': {
 					const paragraphs = doc.body.querySelectorAll(':scope > p');
-					const index = parsed.value - 1;
-					if (index >= 0 && index < paragraphs.length) {
-						targetEl = paragraphs[index];
+					if (parsed.value != null && typeof parsed.value === 'number') {
+						const index = parsed.value - 1;
+						if (index >= 0 && index < paragraphs.length) {
+							targetEl = paragraphs[index];
+						}
 					}
 					break;
 				}
@@ -372,7 +404,7 @@
 
 				const link = doc.createElement('a');
 				link.href = `#overflow-${refNum}`;
-				link.textContent = refNum;
+				link.textContent = String(refNum);
 				link.title = `See gutter content for: ${getAnchorLabel(anchor)}`;
 
 				marker.appendChild(link);
@@ -399,6 +431,7 @@
 	let processedContent = $derived(injectReferenceMarkers(content, overflowingAnchorKeys));
 
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
+	/** @type {any} */
 	let DOMPurify = $state(null);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
@@ -410,7 +443,7 @@
 	});
 
 	let sanitizedContent = $derived(
-		DOMPurify
+		DOMPurify && typeof DOMPurify.sanitize === 'function'
 			? DOMPurify.sanitize(processedContent, {
 					ALLOWED_TAGS: [
 						// Headings

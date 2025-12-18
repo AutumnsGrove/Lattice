@@ -183,7 +183,13 @@ export const handle: Handle = async ({ event, resolve }) => {
       });
 
       if (userInfoResponse.ok) {
-        const userInfo = await userInfoResponse.json();
+        const userInfo = await userInfoResponse.json() as {
+          sub: string;
+          email: string;
+          name: string;
+          picture: string;
+          provider: string;
+        };
         event.locals.user = {
           id: userInfo.sub,
           email: userInfo.email,

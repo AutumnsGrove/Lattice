@@ -164,6 +164,7 @@
     "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251217.0",
     "@lucide/svelte": "^0.482.0",
     "@sveltejs/adapter-cloudflare": "^7.2.4",
     "@sveltejs/kit": "^2.5.28",
@@ -188,10 +189,10 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-    "@types/dompurify": "^3.0.5",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
+    "esm-env": "^1.2.2",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",

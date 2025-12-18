@@ -27,7 +27,7 @@ export async function DELETE({ request, platform, locals }) {
         throw error(403, "Invalid origin");
       }
     } catch (err) {
-      if (err.status) throw err;
+      if (err instanceof Error && 'status' in err) throw err;
       throw error(403, "Invalid origin header");
     }
   }
@@ -73,7 +73,7 @@ export async function DELETE({ request, platform, locals }) {
       key: sanitizedKey,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if (err instanceof Error && 'status' in err) throw err;
     console.error("Delete error:", err);
     throw error(500, "Failed to delete image");
   }

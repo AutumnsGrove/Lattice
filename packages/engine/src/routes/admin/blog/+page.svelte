@@ -3,6 +3,7 @@
 
   let { data } = $props();
 
+  /** @param {string} dateString */
   function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',

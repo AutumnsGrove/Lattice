@@ -4,13 +4,28 @@
 
 import { signJwt, verifyJwt } from "./jwt.js";
 
+/**
+ * @typedef {Object} User
+ * @property {string} email
+ */
+
+/**
+ * @typedef {Object} SessionError
+ * @property {string} message
+ * @property {number} status
+ */
+
+/**
+ * @typedef {Object} TenantRow
+ * @property {string} email
+ */
+
 const SESSION_COOKIE_NAME = "session";
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 /**
  * Create a session token for a user
- * @param {Object} user - User data
- * @param {string} user.email - User email address
+ * @param {User} user - User data
  * @param {string} secret - Session secret
  * @returns {Promise<string>} - Signed JWT token
  */
@@ -28,12 +43,12 @@ export async function createSession(user, secret) {
  * Verify a session token and return user data
  * @param {string} token - Session token
  * @param {string} secret - Session secret
- * @returns {Promise<Object|null>} - User data or null if invalid
+ * @returns {Promise<User|null>} - User data or null if invalid
  */
 export async function verifySession(token, secret) {
   const payload = await verifyJwt(token, secret);
 
-  if (!payload) {
+  if (!payload || !payload.email) {
     return null;
   }
 
@@ -82,7 +97,8 @@ export function parseSessionCookie(cookieHeader) {
     return null;
   }
 
-  const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+  /** @type {Record<string, string>} */
+  const cookies = cookieHeader.split(";").reduce((/** @type {Record<string, string>} */ acc, /** @type {string} */ cookie) => {
     const [key, value] = cookie.trim().split("=");
     if (key && value) {
       acc[key] = value;
@@ -106,8 +122,8 @@ export function isAllowedAdmin(email, allowedList) {
 
 /**
  * Verify that a user owns/has access to a tenant
- * @param {Object} db - D1 database instance
- * @param {string} tenantId - Tenant ID to check
+ * @param {import('@cloudflare/workers-types').D1Database} db - D1 database instance
+ * @param {string | undefined | null} tenantId - Tenant ID to check
  * @param {string} userEmail - User's email address
  * @returns {Promise<boolean>} - Whether the user owns the tenant
  */
@@ -117,10 +133,10 @@ export async function verifyTenantOwnership(db, tenantId, userEmail) {
   }
 
   try {
-    const tenant = await db
+    const tenant = /** @type {TenantRow | null} */ (await db
       .prepare("SELECT email FROM tenants WHERE id = ?")
       .bind(tenantId)
-      .first();
+      .first());
 
     if (!tenant) {
       return false;
@@ -137,28 +153,31 @@ export async function verifyTenantOwnership(db, tenantId, userEmail) {
 /**
  * Get tenant ID with ownership verification
  * Throws 403 if user doesn't own the tenant
- * @param {Object} db - D1 database instance
- * @param {string} tenantId - Tenant ID from request
- * @param {Object} user - User object with email
+ * @param {import('@cloudflare/workers-types').D1Database} db - D1 database instance
+ * @param {string | undefined | null} tenantId - Tenant ID from request
+ * @param {User | null | undefined} user - User object with email
  * @returns {Promise<string>} - Verified tenant ID
- * @throws {Error} - If unauthorized
+ * @throws {SessionError} - If unauthorized
  */
 export async function getVerifiedTenantId(db, tenantId, user) {
   if (!tenantId) {
-    const err = new Error("Tenant ID required");
+    /** @type {SessionError & Error} */
+    const err = /** @type {SessionError & Error} */ (new Error("Tenant ID required"));
     err.status = 400;
     throw err;
   }
 
   if (!user?.email) {
-    const err = new Error("Unauthorized");
+    /** @type {SessionError & Error} */
+    const err = /** @type {SessionError & Error} */ (new Error("Unauthorized"));
     err.status = 401;
     throw err;
   }
 
   const isOwner = await verifyTenantOwnership(db, tenantId, user.email);
   if (!isOwner) {
-    const err = new Error("Access denied - you do not own this tenant");
+    /** @type {SessionError & Error} */
+    const err = /** @type {SessionError & Error} */ (new Error("Access denied - you do not own this tenant"));
     err.status = 403;
     throw err;
   }

@@ -1,4 +1,5 @@
 import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -11,57 +12,52 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
  * - sapling: $12/month - Hobbyist tier
  * - oak: $25/month - Serious blogger tier
  * - evergreen: $35/month - Full-service tier
- *
- * NOTE: The Free tier (Meadow-only access) does NOT use this billing API.
- * Free users sign up directly without Stripe checkout - they're created
- * with plan='free' in the tenants table but never hit this endpoint.
- * This API is only for paid subscriptions.
- *
- * ============================================================================
- * ENVIRONMENT VARIABLES (Required in Cloudflare Pages / wrangler.toml)
- * ============================================================================
- *
- * STRIPE_SECRET_KEY          - Stripe secret key (sk_live_... or sk_test_...)
- * STRIPE_WEBHOOK_SECRET      - Webhook signing secret (whsec_...)
- * STRIPE_PRICE_SEEDLING      - Stripe Price ID for Seedling plan
- * STRIPE_PRICE_SAPLING       - Stripe Price ID for Sapling plan
- * STRIPE_PRICE_OAK           - Stripe Price ID for Oak plan
- * STRIPE_PRICE_EVERGREEN     - Stripe Price ID for Evergreen plan
- *
- * ============================================================================
- * UPGRADE PATHS
- * ============================================================================
- *
- * Free → Paid:
- *   1. User clicks "Upgrade" from free account
- *   2. POST /api/billing with selected plan
- *   3. Creates new Stripe checkout session (no existing customer)
- *   4. On success, update tenants.plan from 'free' to new plan
- *
- * Paid → Higher Tier:
- *   1. User clicks "Upgrade" from paid account
- *   2. PATCH /api/billing with action='change_plan', plan=newPlan
- *   3. Updates existing Stripe subscription (prorated)
- *   4. Update tenants.plan to new plan
- *
- * Paid → Lower Tier:
- *   1. Same as upgrade (PATCH with change_plan action)
- *   2. Change takes effect at end of billing period OR immediately (user choice)
- *
- * Paid → Cancel:
- *   1. PATCH /api/billing with action='cancel'
- *   2. Access continues until current_period_end
- *   3. After period ends, plan reverts to 'free' (keeps Meadow access)
- *
- * Cancel → Resume:
- *   1. PATCH /api/billing with action='resume' (before period ends)
- *   2. Subscription continues, cancel_at_period_end set to false
  */
 
-const PLANS = {
+/** Plan configuration */
+interface PlanConfig {
+  name: string;
+  price: number;
+  interval: string;
+  features: string[];
+}
+
+/** Billing record from database */
+interface BillingRecord {
+  id: string;
+  plan: string;
+  status: string;
+  provider_customer_id: string | null;
+  provider_subscription_id: string | null;
+  current_period_start: number | null;
+  current_period_end: number | null;
+  cancel_at_period_end: number;
+  trial_end: number | null;
+  payment_method_last4: string | null;
+  payment_method_brand: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+/** Checkout request body */
+interface CheckoutRequest {
+  plan: string;
+  successUrl: string;
+  cancelUrl: string;
+  trialDays?: number;
+}
+
+/** Update subscription request body */
+interface UpdateRequest {
+  action: "change_plan" | "cancel" | "resume";
+  plan?: string;
+  cancelImmediately?: boolean;
+}
+
+const PLANS: Record<string, PlanConfig> = {
   seedling: {
     name: "Seedling",
-    price: 800, // $8.00 in cents
+    price: 800,
     interval: "month",
     features: [
       "50 posts",
@@ -75,7 +71,7 @@ const PLANS = {
   },
   sapling: {
     name: "Sapling",
-    price: 1200, // $12.00 in cents
+    price: 1200,
     interval: "month",
     features: [
       "250 posts",
@@ -90,7 +86,7 @@ const PLANS = {
   },
   oak: {
     name: "Oak",
-    price: 2500, // $25.00 in cents
+    price: 2500,
     interval: "month",
     features: [
       "Unlimited posts",
@@ -105,7 +101,7 @@ const PLANS = {
   },
   evergreen: {
     name: "Evergreen",
-    price: 3500, // $35.00 in cents
+    price: 3500,
     interval: "month",
     features: [
       "Unlimited posts",
@@ -123,7 +119,7 @@ const PLANS = {
 /**
  * GET /api/billing - Get current billing status
  */
-export async function GET({ url, platform, locals }) {
+export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -136,23 +132,21 @@ export async function GET({ url, platform, locals }) {
     url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
-    // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user,
+      locals.user
     );
 
-    // Get billing record
-    const billing = await platform.env.DB.prepare(
+    const billing = (await platform.env.DB.prepare(
       `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
-                current_period_start, current_period_end, cancel_at_period_end,
-                trial_end, payment_method_last4, payment_method_brand,
-                created_at, updated_at
-         FROM platform_billing WHERE tenant_id = ?`,
+              current_period_start, current_period_end, cancel_at_period_end,
+              trial_end, payment_method_last4, payment_method_brand,
+              created_at, updated_at
+       FROM platform_billing WHERE tenant_id = ?`
     )
       .bind(tenantId)
-      .first();
+      .first()) as BillingRecord | null;
 
     if (!billing) {
       return json({
@@ -187,23 +181,16 @@ export async function GET({ url, platform, locals }) {
       plans: PLANS,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error fetching billing:", err);
     throw error(500, "Failed to fetch billing information");
   }
-}
+};
 
 /**
  * POST /api/billing - Start subscription checkout
- *
- * Body:
- * {
- *   plan: 'seedling' | 'sapling' | 'oak' | 'evergreen'
- *   successUrl: string
- *   cancelUrl: string
- * }
  */
-export async function POST({ request, url, platform, locals }) {
+export const POST: RequestHandler = async ({ request, url, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -224,16 +211,14 @@ export async function POST({ request, url, platform, locals }) {
     url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
-    // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user,
+      locals.user
     );
 
-    const data = await request.json();
+    const data = (await request.json()) as CheckoutRequest;
 
-    // Validate plan
     if (!data.plan || !PLANS[data.plan]) {
       throw error(400, "Invalid plan");
     }
@@ -244,23 +229,18 @@ export async function POST({ request, url, platform, locals }) {
 
     const plan = PLANS[data.plan];
 
-    // Check for existing billing
-    const existingBilling = await platform.env.DB.prepare(
-      "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?",
+    const existingBilling = (await platform.env.DB.prepare(
+      "SELECT id, provider_customer_id FROM platform_billing WHERE tenant_id = ?"
     )
       .bind(tenantId)
-      .first();
+      .first()) as { id: string; provider_customer_id: string | null } | null;
 
     const stripe = createPaymentProvider("stripe", {
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    // Get or create price ID for this plan
-    // In production, you'd have these pre-created in Stripe
-    // For now, we'll use inline price data
     const priceId = platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
 
-    // Create checkout session for subscription
     const checkoutParams = {
       mode: "subscription",
       success_url: `${data.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
@@ -271,7 +251,7 @@ export async function POST({ request, url, platform, locals }) {
       billing_address_collection: "required",
       allow_promotion_codes: true,
       subscription_data: {
-        trial_period_days: data.trialDays || (existingBilling ? 0 : 14), // 14-day trial for new customers
+        trial_period_days: data.trialDays || (existingBilling ? 0 : 14),
         metadata: {
           grove_tenant_id: tenantId,
           grove_plan: data.plan,
@@ -284,12 +264,10 @@ export async function POST({ request, url, platform, locals }) {
       },
     };
 
-    // Build line items
-    const lineItems = [];
+    const lineItems: Array<{ price?: string; quantity: number; price_data?: object }> = [];
     if (priceId) {
       lineItems.push({ price: priceId, quantity: 1 });
     } else {
-      // Inline price data
       lineItems.push({
         price_data: {
           currency: "usd",
@@ -306,9 +284,8 @@ export async function POST({ request, url, platform, locals }) {
       });
     }
 
-    // Create session directly via Stripe client
-    const stripeClient = stripe.client || stripe;
-    const session = await stripeClient.request("checkout/sessions", {
+    const stripeClient = (stripe as { client?: unknown }).client || stripe;
+    const session = await (stripeClient as { request: (path: string, opts: object) => Promise<{ url: string; id: string }> }).request("checkout/sessions", {
       method: "POST",
       params: {
         ...checkoutParams,
@@ -316,17 +293,16 @@ export async function POST({ request, url, platform, locals }) {
       },
     });
 
-    // Create or update billing record
     if (existingBilling) {
       await platform.env.DB.prepare(
-        "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?",
+        "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ?"
       )
         .bind(data.plan, Math.floor(Date.now() / 1000), existingBilling.id)
         .run();
     } else {
       await platform.env.DB.prepare(
         `INSERT INTO platform_billing (id, tenant_id, plan, status, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?)`
       )
         .bind(
           crypto.randomUUID(),
@@ -334,7 +310,7 @@ export async function POST({ request, url, platform, locals }) {
           data.plan,
           "pending",
           Math.floor(Date.now() / 1000),
-          Math.floor(Date.now() / 1000),
+          Math.floor(Date.now() / 1000)
         )
         .run();
     }
@@ -345,23 +321,16 @@ export async function POST({ request, url, platform, locals }) {
       sessionId: session.id,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error creating billing checkout:", err);
     throw error(500, "Failed to create checkout session");
   }
-}
+};
 
 /**
  * PATCH /api/billing - Update subscription (change plan, cancel, resume)
- *
- * Body:
- * {
- *   action: 'change_plan' | 'cancel' | 'resume'
- *   plan?: string (for change_plan)
- *   cancelImmediately?: boolean (for cancel)
- * }
  */
-export async function PATCH({ request, url, platform, locals }) {
+export const PATCH: RequestHandler = async ({ request, url, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -382,21 +351,19 @@ export async function PATCH({ request, url, platform, locals }) {
     url.searchParams.get("tenant_id") || locals.tenant?.id;
 
   try {
-    // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user,
+      locals.user
     );
 
-    const data = await request.json();
+    const data = (await request.json()) as UpdateRequest;
 
-    // Get billing record
-    const billing = await platform.env.DB.prepare(
-      "SELECT * FROM platform_billing WHERE tenant_id = ?",
+    const billing = (await platform.env.DB.prepare(
+      "SELECT * FROM platform_billing WHERE tenant_id = ?"
     )
       .bind(tenantId)
-      .first();
+      .first()) as BillingRecord | null;
 
     if (!billing || !billing.provider_subscription_id) {
       throw error(404, "No active subscription found");
@@ -408,22 +375,22 @@ export async function PATCH({ request, url, platform, locals }) {
 
     switch (data.action) {
       case "cancel":
-        await stripe.cancelSubscription(
+        await (stripe as { cancelSubscription: (id: string, immediate: boolean) => Promise<void> }).cancelSubscription(
           billing.provider_subscription_id,
-          data.cancelImmediately === true,
+          data.cancelImmediately === true
         );
 
         await platform.env.DB.prepare(
           `UPDATE platform_billing SET
-              cancel_at_period_end = ?,
-              updated_at = ?
-             WHERE id = ? AND tenant_id = ?`,
+            cancel_at_period_end = ?,
+            updated_at = ?
+           WHERE id = ? AND tenant_id = ?`
         )
           .bind(
             data.cancelImmediately ? 0 : 1,
             Math.floor(Date.now() / 1000),
             billing.id,
-            tenantId,
+            tenantId
           )
           .run();
 
@@ -435,10 +402,10 @@ export async function PATCH({ request, url, platform, locals }) {
         });
 
       case "resume":
-        await stripe.resumeSubscription(billing.provider_subscription_id);
+        await (stripe as { resumeSubscription: (id: string) => Promise<void> }).resumeSubscription(billing.provider_subscription_id);
 
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?",
+          "UPDATE platform_billing SET cancel_at_period_end = 0, updated_at = ? WHERE id = ? AND tenant_id = ?"
         )
           .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
@@ -453,8 +420,6 @@ export async function PATCH({ request, url, platform, locals }) {
           throw error(400, "Invalid plan");
         }
 
-        // For plan changes, we need to update the subscription in Stripe
-        // This requires the price ID for the new plan
         const newPriceId =
           platform.env[`STRIPE_PRICE_${data.plan.toUpperCase()}`];
 
@@ -462,18 +427,15 @@ export async function PATCH({ request, url, platform, locals }) {
           throw error(500, "Price ID not configured for plan");
         }
 
-        // Get current subscription to find the item ID
-        const sub = await stripe.getSubscription(
-          billing.provider_subscription_id,
+        const sub = await (stripe as { getSubscription: (id: string) => Promise<{ items?: { data?: Array<{ id: string }> } } | null> }).getSubscription(
+          billing.provider_subscription_id
         );
         if (!sub) {
           throw error(404, "Subscription not found in Stripe");
         }
 
-        // Update subscription with new price
-        // This is simplified - in production you'd handle prorations
-        const stripeClient = stripe.client || stripe;
-        await stripeClient.request(
+        const stripeClient = (stripe as { client?: unknown }).client || stripe;
+        await (stripeClient as { request: (path: string, opts: object) => Promise<unknown> }).request(
           `subscriptions/${billing.provider_subscription_id}`,
           {
             method: "POST",
@@ -489,11 +451,11 @@ export async function PATCH({ request, url, platform, locals }) {
                 grove_plan: data.plan,
               },
             },
-          },
+          }
         );
 
         await platform.env.DB.prepare(
-          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
+          "UPDATE platform_billing SET plan = ?, updated_at = ? WHERE id = ? AND tenant_id = ?"
         )
           .bind(data.plan, Math.floor(Date.now() / 1000), billing.id, tenantId)
           .run();
@@ -507,16 +469,16 @@ export async function PATCH({ request, url, platform, locals }) {
         throw error(400, "Invalid action");
     }
   } catch (err) {
-    if (err.status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error updating billing:", err);
     throw error(500, "Failed to update subscription");
   }
-}
+};
 
 /**
- * GET /api/billing/portal - Get billing portal URL
+ * PUT /api/billing - Get billing portal URL
  */
-export async function PUT({ url, platform, locals }) {
+export const PUT: RequestHandler = async ({ url, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -538,19 +500,17 @@ export async function PUT({ url, platform, locals }) {
   }
 
   try {
-    // Verify user owns this tenant
     const tenantId = await getVerifiedTenantId(
       platform.env.DB,
       requestedTenantId,
-      locals.user,
+      locals.user
     );
 
-    // Get billing record
-    const billing = await platform.env.DB.prepare(
-      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
+    const billing = (await platform.env.DB.prepare(
+      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?"
     )
       .bind(tenantId)
-      .first();
+      .first()) as { provider_customer_id: string | null } | null;
 
     if (!billing?.provider_customer_id) {
       throw error(404, "No billing customer found");
@@ -560,9 +520,9 @@ export async function PUT({ url, platform, locals }) {
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    const { url: portalUrl } = await stripe.createBillingPortalSession(
+    const { url: portalUrl } = await (stripe as { createBillingPortalSession: (customerId: string, returnUrl: string) => Promise<{ url: string }> }).createBillingPortalSession(
       billing.provider_customer_id,
-      returnUrl,
+      returnUrl
     );
 
     return json({
@@ -570,8 +530,8 @@ export async function PUT({ url, platform, locals }) {
       portalUrl,
     });
   } catch (err) {
-    if (err.status) throw err;
+    if ((err as { status?: number }).status) throw err;
     console.error("Error creating billing portal:", err);
     throw error(500, "Failed to create billing portal session");
   }
-}
+};

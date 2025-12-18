@@ -5,6 +5,7 @@
 	 * This layout wraps all tenant-specific blog routes.
 	 * The tenant context is available via the parent layout's data.
 	 */
+	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
 
 	// Access tenant info from context (set in hooks.server.ts)

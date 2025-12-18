@@ -3,8 +3,20 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
+  /**
+   * @typedef {Object} HealthStatus
+   * @property {string} [status]
+   * @property {string} [error]
+   * @property {boolean} [r2_configured]
+   * @property {boolean} [d1_configured]
+   * @property {boolean} [kv_configured]
+   * @property {boolean} [github_token_configured]
+   * @property {string} [timestamp]
+   */
+
   let clearingCache = $state(false);
   let cacheMessage = $state('');
+  /** @type {HealthStatus | null} */
   let healthStatus = $state(null);
   let loadingHealth = $state(true);
 
@@ -21,7 +33,7 @@
     } catch (error) {
       toast.error('Failed to check system health');
       console.error('Failed to fetch health:', error);
-      healthStatus = { status: 'error', error: error.message };
+      healthStatus = { status: 'error', error: error instanceof Error ? error.message : String(error) };
     }
     loadingHealth = false;
   }
@@ -38,7 +50,7 @@
       await api.post('/api/admin/cache/clear', {});
       cacheMessage = 'Cache cleared successfully!';
     } catch (error) {
-      cacheMessage = 'Error: ' + error.message;
+      cacheMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
     }
 
     clearingCache = false;
@@ -71,6 +83,7 @@
 
       fontMessage = 'Font setting saved! Refresh to see changes site-wide.';
       // Apply immediately for preview
+      /** @type {Record<string, string>} */
       const fontMap = {
         lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -95,7 +108,7 @@
       };
       document.documentElement.style.setProperty('--font-family-main', fontMap[currentFont] || fontMap.lexend);
     } catch (error) {
-      fontMessage = 'Error: ' + error.message;
+      fontMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
     }
 
     savingFont = false;

@@ -14,13 +14,16 @@
   let tagsInput = $state("");
   let font = $state("default");
   let content = $state("");
+  /** @type {any[]} */
   let gutterItems = $state([]);
 
   // Editor reference for anchor insertion
+  /** @type {any} */
   let editorRef = $state(null);
 
   // UI state
   let saving = $state(false);
+  /** @type {string | null} */
   let error = $state(null);
   let slugManuallyEdited = $state(false);
   let showGutter = $state(false);
@@ -59,12 +62,15 @@
     slugManuallyEdited = true;
   }
 
-  // Parse tags from comma-separated input
+  /**
+   * Parse tags from comma-separated input
+   * @param {string} input
+   */
   function parseTags(input) {
     return input
       .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0);
+      .map((/** @type {string} */ tag) => tag.trim())
+      .filter((/** @type {string} */ tag) => tag.length > 0);
   }
 
   async function handleSave() {
@@ -103,7 +109,7 @@
       // Redirect to the edit page or blog admin
       goto(`/admin/blog/edit/${result.slug}`);
     } catch (err) {
-      error = err.message;
+      error = err instanceof Error ? err.message : String(err);
     } finally {
       saving = false;
     }
@@ -289,7 +295,7 @@
             <GutterManager
               bind:gutterItems
               availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-              onInsertAnchor={(name) => editorRef?.insertAnchor(name)}
+              onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
             />
           </aside>
         {/if}
@@ -470,9 +476,6 @@
   .collapse-details-btn:hover {
     background: var(--color-bg-secondary);
     color: var(--color-primary);
-  }
-  .panel-content {
-    /* Animation for content visibility */
   }
   .form-group {
     margin-bottom: 1.25rem;

@@ -251,7 +251,7 @@ export class GroveAuthClient {
       }),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
 
     if (!response.ok) {
       throw new GroveAuthError(
@@ -295,7 +295,7 @@ export class GroveAuthClient {
           },
         );
 
-        const data = await response.json();
+        const data = (await response.json()) as any;
 
         if (!response.ok) {
           throw new GroveAuthError(
@@ -342,7 +342,7 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "revoke_error",
         data.error_description || data.message || "Failed to revoke token",
@@ -385,7 +385,7 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "userinfo_error",
         data.error_description || data.message || "Failed to get user info",
@@ -411,7 +411,7 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "subscription_error",
         data.message || "Failed to get subscription",
@@ -493,7 +493,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "subscription_error",
         data.message || "Failed to get subscription",
@@ -530,7 +530,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "limit_check_error",
         data.message || "Failed to check post limit",
@@ -563,7 +563,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -604,7 +604,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -646,7 +646,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -688,7 +688,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = await response.json();
+      const data = (await response.json()) as any;
       throw new GroveAuthError(
         data.error || "tier_error",
         data.message || "Failed to update tier",
