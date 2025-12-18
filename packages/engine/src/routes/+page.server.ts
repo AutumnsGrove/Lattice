@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         .prepare(
           `SELECT slug, title, description, markdown_content, html_content, hero, gutter_content, font
          FROM pages
-         WHERE tenant_id = ? AND slug = ?`
+         WHERE tenant_id = ? AND slug = ?`,
         )
         .bind(tenantId, "home")
         .first()) as PageData | null;
@@ -93,7 +93,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           typeof pageData.markdown_content === "string"
         ) {
           htmlContent = sanitizeMarkdown(
-            marked.parse(pageData.markdown_content, { async: false }) as string
+            marked.parse(pageData.markdown_content, { async: false }) as string,
           );
         }
 
@@ -117,7 +117,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
                 return {
                   ...item,
                   content: sanitizeMarkdown(
-                    marked.parse(item.content, { async: false }) as string
+                    marked.parse(item.content, { async: false }) as string,
                   ),
                 };
               }
@@ -162,7 +162,19 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     }
   }
 
+  // If no page content exists, check if this is a valid tenant that needs setup
   if (!page) {
+    const context = locals.context;
+    if (context?.type === "tenant" && context.tenant) {
+      // Valid tenant but no content - show setup page
+      return {
+        needsSetup: true,
+        tenantName: context.tenant.display_name,
+        tenantSubdomain: context.tenant.subdomain,
+        title: "Welcome",
+        description: "Set up your new blog",
+      };
+    }
     throw error(404, "Home page not found");
   }
 
@@ -188,14 +200,16 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
          FROM posts
          WHERE tenant_id = ? AND status = 'published'
          ORDER BY published_at DESC
-         LIMIT 1`
+         LIMIT 1`,
         )
         .bind(tenantId)
         .first()) as PostData | null;
 
       if (post) {
         // Process anchor tags in HTML content (same as individual post pages)
-        const processedHtml = processAnchorTags(String(post.html_content || ""));
+        const processedHtml = processAnchorTags(
+          String(post.html_content || ""),
+        );
 
         // Extract headers from HTML for table of contents
         const headers = extractHeadersFromHtml(processedHtml);
@@ -225,7 +239,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
                 return {
                   ...item,
                   content: sanitizeMarkdown(
-                    marked.parse(item.content, { async: false }) as string
+                    marked.parse(item.content, { async: false }) as string,
                   ),
                 };
               }

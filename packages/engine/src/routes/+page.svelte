@@ -10,7 +10,31 @@
 	<meta name="description" content={data.description || ''} />
 </svelte:head>
 
-{#if data.hero}
+{#if data.needsSetup}
+	<div class="setup-page">
+		<div class="setup-content">
+			<div class="setup-icon">
+				<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+				</svg>
+			</div>
+			<h1>Welcome to {data.tenantName}</h1>
+			<p class="setup-subtitle">Your new blog is ready to be set up!</p>
+			<p class="setup-description">
+				Sign in to the admin panel to create your first post, customize your theme,
+				and make this space your own.
+			</p>
+			<div class="setup-actions">
+				<Button href="/admin" variant="default" size="lg">
+					Set Up Your Blog
+				</Button>
+			</div>
+			<p class="setup-hint">
+				You'll be asked to sign in with your Grove account to continue.
+			</p>
+		</div>
+	</div>
+{:else if data.hero}
 	<div class="hero">
 		<h1>{data.hero.title}</h1>
 		<p class="subtitle">{data.hero.subtitle}</p>
@@ -41,6 +65,52 @@
 </footer>
 
 <style>
+	.setup-page {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 60vh;
+		padding: 2rem;
+	}
+	.setup-content {
+		text-align: center;
+		max-width: 500px;
+	}
+	.setup-icon {
+		color: var(--color-primary);
+		margin-bottom: 1.5rem;
+		transition: color 0.3s ease;
+	}
+	.setup-page h1 {
+		font-size: 2rem;
+		color: var(--color-text);
+		margin: 0 0 0.5rem 0;
+		transition: color 0.3s ease;
+	}
+	.setup-subtitle {
+		font-size: 1.25rem;
+		color: var(--color-primary);
+		margin: 0 0 1.5rem 0;
+		font-weight: 500;
+		transition: color 0.3s ease;
+	}
+	.setup-description {
+		font-size: 1rem;
+		color: var(--color-text-muted);
+		line-height: 1.6;
+		margin: 0 0 2rem 0;
+		transition: color 0.3s ease;
+	}
+	.setup-actions {
+		margin-bottom: 1.5rem;
+	}
+	.setup-hint {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0;
+		opacity: 0.8;
+		transition: color 0.3s ease;
+	}
 	.home-footer {
 		text-align: center;
 		padding: 2rem 0;
