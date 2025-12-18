@@ -60,18 +60,18 @@ cd "$PROJECT_ROOT"
 # ============================================================================
 
 # Paths to exclude from searches
-EXCLUDE_PATHS="! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*'"
+EXCLUDE_PATHS="! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*' ! -path '*/.svelte-kit/*'"
 
 # Count lines of code for a given file pattern
 count_lines() {
     local pattern="$1"
-    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
 }
 
 # Count number of files matching a pattern
 count_files() {
     local pattern="$1"
-    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f 2>/dev/null | wc -l | tr -d ' '
+    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f 2>/dev/null | wc -l | tr -d ' '
 }
 
 # ============================================================================
@@ -121,11 +121,11 @@ JSON_FILES=$(count_files "*.json")
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Analyzing code characters..."
-CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
+CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting directories..."
-TOTAL_DIRS=$(find . -type d ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" | wc -l | tr -d ' ')
+TOTAL_DIRS=$(find . -type d ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" | wc -l | tr -d ' ')
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Reading git history..."
