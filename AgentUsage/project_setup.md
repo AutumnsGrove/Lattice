@@ -97,13 +97,7 @@ git commit -m "Initial commit: Setup YourProjectName from BaseProject
 
 - Copied BaseProject structure with AgentUsage guides
 - Configured AGENT.md for this specific project
-- Initialized git repository
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-via [Happy](https://happy.engineering)
-
-Co-Authored-By: [Model Name] <agent@localhost>
-Co-Authored-By: Happy <yesreply@happy.engineering>"
+- Initialized git repository"
 ```
 
 ### Step 5: Set Up TODOS.md

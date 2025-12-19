@@ -79,28 +79,6 @@ if [ -n "$PREFIX" ]; then
 fi
 
 # ============================================================================
-# ADD CLAUDE CO-AUTHORSHIP (if not already present)
-# ============================================================================
-# Only add if this looks like an AI-assisted commit
-# (Skip for manual commits)
-
-# Check if agent attribution already exists
-if ! grep -q "Co-Authored-By: \[Model Name\]" "$COMMIT_MSG_FILE"; then
-    # Check if message is substantive (not just a default message)
-    if [ -s "$COMMIT_MSG_FILE" ] && ! grep -q "^#" "$COMMIT_MSG_FILE"; then
-        # Add co-authorship footer
-        echo "" >> "$COMMIT_MSG_FILE"
-        echo "🤖 Generated with [Claude Code](https://claude.ai/code)" >> "$COMMIT_MSG_FILE"
-        echo "via [Happy](https://happy.engineering)" >> "$COMMIT_MSG_FILE"
-        echo "" >> "$COMMIT_MSG_FILE"
-        echo "Co-Authored-By: [Model Name] <agent@localhost>" >> "$COMMIT_MSG_FILE"
-        echo "Co-Authored-By: Happy <yesreply@happy.engineering>" >> "$COMMIT_MSG_FILE"
-
-        echo -e "${GREEN}✓ Added AI agent co-authorship${NC}" >&2
-    fi
-fi
-
-# ============================================================================
 # ADD HELPFUL COMMENTS (only for terminal, not in commit)
 # ============================================================================
 # Add template/reminder if commit message is empty or default

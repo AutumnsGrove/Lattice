@@ -16,3 +16,5 @@ dist/
 *.swo
 *~
 .kilocode/mcp.json
+.baseproject-backup-*/
+baseproject-update-summary.md

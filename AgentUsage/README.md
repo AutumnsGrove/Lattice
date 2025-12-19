@@ -1,6 +1,6 @@
 # Agent Usage Guide Index
 
-This directory contains guides for working with AI agents on this SvelteKit/Cloudflare project.
+This directory contains comprehensive guides for working with AI agents on development projects. Each guide is self-contained and focused on specific workflows or technologies.
 
 ## Quick Reference
 
@@ -13,18 +13,24 @@ This directory contains guides for working with AI agents on this SvelteKit/Clou
 | [secrets_advanced.md](secrets_advanced.md) | Advanced secrets patterns, rotation, auditing | Enterprise-grade security implementations |
 | [api_usage.md](api_usage.md) | Respectful public API usage, rate limiting, auth | Integrating external APIs |
 | [house_agents.md](house_agents.md) | Specialized agent usage (research, coding) | Complex searches or multi-file refactoring |
+| [subagent_usage.md](subagent_usage.md) | Creating focused task agents | Breaking down large tasks into subtasks |
 | [research_workflow.md](research_workflow.md) | Codebase analysis patterns | Understanding unfamiliar codebases |
 
 ### Development
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
-| [db_usage.md](db_usage.md) | SQLite/D1 database patterns | Working with databases (MANDATORY) |
+| [db_usage.md](db_usage.md) | SQLite database with database.py interface | Working with databases (MANDATORY) |
+| [uv_usage.md](uv_usage.md) | UV package manager workflows | Python dependency management |
+| [testing_python.md](testing_python.md) | Python testing with pytest | Writing Python tests |
 | [testing_javascript.md](testing_javascript.md) | JS/TS testing with Vitest/Jest | Writing JavaScript/TypeScript tests |
-| [testing_strategies.md](testing_strategies.md) | General testing strategies | Planning test coverage |
+| [testing_go.md](testing_go.md) | Go testing with built-in framework | Writing Go tests |
+| [testing_rust.md](testing_rust.md) | Rust testing with cargo test | Writing Rust tests |
+| [code_quality.md](code_quality.md) | Linting, formatting, standards | Setting up quality checks |
 | [code_style_guide.md](code_style_guide.md) | General code style principles | Writing clean, maintainable code |
 | [project_structure.md](project_structure.md) | Directory layouts, file organization | Starting new projects |
 | [project_setup.md](project_setup.md) | Project initialization patterns | Setting up new projects from template |
+| [rich_formatting.md](rich_formatting.md) | Terminal output with Rich library | Building CLI tools, enhancing print output |
 | [svelte5_guide.md](svelte5_guide.md) | Svelte 5 with runes and SvelteKit | Building Svelte web applications |
 
 ### Documentation
@@ -37,8 +43,16 @@ This directory contains guides for working with AI agents on this SvelteKit/Clou
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
-| [cloudflare_guide.md](cloudflare_guide.md) | Cloudflare Workers, KV, R2, D1 | Deploying to Cloudflare, serverless apps |
+| [cloudflare_guide.md](cloudflare_guide.md) | Cloudflare Workers, KV, R2, D1, MCP server | Deploying to Cloudflare, serverless apps |
+| [docker_guide.md](docker_guide.md) | Container setup and workflows | Dockerizing applications |
 | [ci_cd_patterns.md](ci_cd_patterns.md) | GitHub Actions, automation | Setting up CI/CD pipelines |
+| [database_setup.md](database_setup.md) | Database configuration patterns | Working with databases |
+
+### Multi-Language Support
+
+| Guide | Description | When to Use |
+|-------|-------------|-------------|
+| [multi_language_guide.md](multi_language_guide.md) | Patterns for Python, JavaScript, Go, Rust | Multi-language projects or new languages |
 
 ### Pre-commit Hooks
 
@@ -65,21 +79,29 @@ All guides follow a consistent format:
 - **Common Pitfalls**: What to avoid
 - **Related Guides**: Cross-references to other relevant guides
 
+## Contributing to Guides
+
+When updating guides:
+- Keep examples current and tested
+- Maintain the scannable format
+- Update cross-references when adding new guides
+- Follow documentation standards from documentation_standards.md
+
 ## Quick Start Checklist
 
-For new Grove sites, reference these guides in order:
+For new projects, reference these guides in order:
 
 1. **project_setup.md** - Initialize project from template
 2. **project_structure.md** - Set up directory layout
-3. **git_guide.md** - Initialize version control and commit standards
-4. **db_usage.md** - Set up D1 database interface
+3. **git_guide.md** - Initialize version control and learn commit standards
+4. **db_usage.md** - Set up database interface (if using databases)
 5. **secrets_management.md** - Configure API keys
-6. **svelte5_guide.md** - SvelteKit patterns
-7. **cloudflare_guide.md** - Deploy to Cloudflare
-8. **testing_javascript.md** - Write tests
-9. **pre_commit_hooks/setup_guide.md** - Set up quality checks
+6. **uv_usage.md** (Python) or relevant language guide
+7. **pre_commit_hooks/setup_guide.md** - Set up quality checks
+8. **testing_python.md** (Python) or relevant language testing guide
+9. **docker_guide.md** (if needed) - Containerize application
 
 ---
 
-*Last updated: 2025-12-10*
-*Total guides: 15*
+*Last updated: 2025-11-28*
+*Total guides: 25*

@@ -22,11 +22,6 @@ error_msg=""
 # Check for custom format: "Action Brief description"
 if echo "$first_line" | grep -qE "^($valid_actions) "; then
     is_valid=true
-
-    # Optional: Check for Co-Authored-By line (recommended but not required)
-    if ! echo "$commit_msg" | grep -q "Co-Authored-By: [Model Name]"; then
-        echo "Note: Consider adding 'Co-Authored-By: [Model Name] <agent@localhost>' to your commit message"
-    fi
 fi
 
 # Check for conventional commit format: "type: description" or "type(scope): description"

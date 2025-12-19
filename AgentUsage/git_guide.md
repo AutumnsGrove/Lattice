@@ -150,7 +150,7 @@ git add .
 git commit -m "chore: initialize repository
 
 - Add initial project structure
-- Configure .gitignore for common patterns
+- Configure .gitignore for common patterns"
 ```
 
 #### Step 3: Clean Up Backup
@@ -182,7 +182,7 @@ git add .
 git commit -m "feat: add new feature
 
 - Specific implementation detail 1
-- Specific implementation detail 2
+- Specific implementation detail 2"
 
 # Verify
 git status
@@ -226,7 +226,6 @@ in error messages when processing multi-line code blocks.
 - Update error message formatting
 
 Closes #123
-
 ```
 
 **Triggers**: Patch version bump (1.0.0 → 1.0.1)
@@ -241,7 +240,6 @@ docs: Add API documentation for file_handler module
 - Add docstrings for all public functions
 - Include usage examples
 - Update README with new module information
-
 ```
 
 **No version bump**
@@ -259,7 +257,6 @@ makes the validator reusable across modules.
 - Create validate_input() function
 - Update all callers to use new function
 - Add type hints for better IDE support
-
 ```
 
 **No version bump**
@@ -277,7 +274,6 @@ traversal on large projects.
 Benchmarks:
 - Before: 2.3s for 1000 files
 - After: 0.7s for 1000 files
-
 ```
 
 **Triggers**: Patch version bump (1.0.0 → 1.0.1)
@@ -940,13 +936,12 @@ git push --tags
 5. ✅ **Don't end subject with period**
 6. ✅ **Add body for complex changes**
 7. ✅ **Be specific, not vague**
-8. ✅ **Include Claude Code attribution**
-9. ✅ **Mark breaking changes explicitly**
-10. ✅ **Reference issues in footer**
+8. ✅ **Mark breaking changes explicitly**
+9. ✅ **Reference issues in footer**
 
 **Following these guidelines creates a clean, professional git history that enables automated tooling, clear communication, and effective collaboration.**
 
 ---
 
-*Last updated: 2025-12-11*
+*Last updated: 2025-11-02*
 *Unified from: git_commit_guide.md, git_workflow.md, git_conventional_commits.md*
