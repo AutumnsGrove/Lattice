@@ -37,7 +37,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
 
   // Domain management
   domains: "grove-domains.pages.dev",
-  acorn: "grove-domains.pages.dev",
+  forage: "grove-domains.pages.dev",
 
   // Music
   music: "grovemusic.pages.dev",

@@ -35,7 +35,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 | GroveScout | [AutumnsGrove/GroveScout](https://github.com/AutumnsGrove/GroveScout) | Scout tool |
 | Aria | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic) | Music curation platform |
 | GroveSearch | [AutumnsGrove/GroveSearch](https://github.com/AutumnsGrove/GroveSearch) | Search service |
-| Forage | [AutumnsGrove/GroveDomainTool](https://github.com/AutumnsGrove/GroveDomainTool) | AI-powered domain discovery tool |
+| Forage | [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage) | AI-powered domain discovery tool |
 
 ## 📁 Project Structure
 

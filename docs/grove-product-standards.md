@@ -52,7 +52,7 @@ Products with public domains that users interact with directly:
 | GroveMail | **Ivy** | ivy.grove.place | `grove-ivy` |
 | GroveStorage | **Amber** | amber.grove.place | `grove-amber` |
 | GroveSocial | **Meadow** | meadow.grove.place | `grove-meadow` |
-| GroveDomainTool | **Acorn** | acorn.grove.place | `grove-acorn` |
+| GroveDomainTool | **Forage** | forage.grove.place | `grove-forage` |
 | TreasureTrove | **Trove** | trove.grove.place | `grove-trove` |
 | GroveMusic | **Aria** | aria.grove.place | `grove-aria` |
 | GroveMC | **Outpost** | mc.grove.place | `grove-outpost` |

@@ -1,7 +1,7 @@
 // Start Domain Search
 // POST /api/search/start
 //
-// This endpoint proxies to the GroveDomainTool worker and stores
+// This endpoint proxies to the Forage worker and stores
 // a local reference to the job for admin tracking.
 
 import { json, error } from "@sveltejs/kit";

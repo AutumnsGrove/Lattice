@@ -24,7 +24,7 @@ const RESERVED_SUBDOMAINS: Record<string, string | null> = {
   auth: "/auth", // Auth routes
   admin: "/admin", // Platform admin
   api: "/api", // API routes
-  domains: "/(apps)/domains", // Domain search tool
+  domains: "/(apps)/domains", // Forage - Domain discovery tool
   monitor: "/(apps)/monitor", // GroveMonitor
   cdn: null, // Handled by R2 directly
   staging: null, // Staging environment flag
@@ -183,7 +183,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       });
 
       if (userInfoResponse.ok) {
-        const userInfo = await userInfoResponse.json() as {
+        const userInfo = (await userInfoResponse.json()) as {
           sub: string;
           email: string;
           name: string;
