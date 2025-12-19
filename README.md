@@ -18,7 +18,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 |------|-----|-------------|
 | Grove Landing | [grove.place](https://grove.place) | Landing page with email signup |
 | Example Blog | [example.grove.place](https://example.grove.place) | Demo site (The Midnight Bloom Tea Café) |
-| Acorn | [acorn.grove.place](https://acorn.grove.place) | AI-powered domain discovery |
+| Forage | [forage.grove.place](https://forage.grove.place) | AI-powered domain discovery |
 | CDN | [cdn.grove.place](https://cdn.grove.place) | Content delivery network |
 | Auth | [auth.grove.place](https://auth.grove.place) | Heartwood authentication service |
 | Admin | [admin.grove.place](https://admin.grove.place) | Heartwood admin dashboard |
@@ -35,7 +35,7 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 | GroveScout | [AutumnsGrove/GroveScout](https://github.com/AutumnsGrove/GroveScout) | Scout tool |
 | Aria | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic) | Music curation platform |
 | GroveSearch | [AutumnsGrove/GroveSearch](https://github.com/AutumnsGrove/GroveSearch) | Search service |
-| Acorn | [AutumnsGrove/GroveDomainTool](https://github.com/AutumnsGrove/GroveDomainTool) | AI-powered domain discovery tool |
+| Forage | [AutumnsGrove/GroveDomainTool](https://github.com/AutumnsGrove/GroveDomainTool) | AI-powered domain discovery tool |
 
 ## 📁 Project Structure
 
@@ -53,7 +53,7 @@ GroveEngine/
 │   │   │   └── routes/       # SvelteKit routes (blog, admin, API, auth)
 │   │   └── migrations/       # D1 database migrations (7 migrations)
 │   └── example-site/         # Demo site: The Midnight Bloom Tea Café
-├── domains/                  # Acorn: AI-powered domain discovery (acorn.grove.place)
+├── domains/                  # Forage: AI-powered domain discovery (forage.grove.place)
 ├── landing/                  # Marketing site for grove.place
 ├── docs/                     # Project documentation
 │   ├── README.md             # Master project summary
@@ -131,8 +131,8 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 
 ## 🔍 Internal Tools
 
-### Acorn (acorn.grove.place)
-An AI-powered domain discovery tool that speeds up client consultations from 2-3 weeks to 1-2 days. Every oak was once an acorn—and every online presence starts with a name.
+### Forage (forage.grove.place)
+An AI-powered domain discovery tool that speeds up client consultations from 2-3 weeks to 1-2 days. Before you can plant, you have to search—and Forage does the searching so you can focus on choosing.
 
 **Features:**
 - Multi-provider AI swarm (Claude, DeepSeek, Kimi, Llama 4)

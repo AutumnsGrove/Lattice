@@ -124,7 +124,7 @@ From `@autumnsgrove/groveengine`:
 | **Scope** | Blog-focused | Portfolio/catalog-focused |
 | **Pages** | Posts + standard pages | Custom pages (books, gallery) |
 | **Billing** | Grove subscription tier | No billing (family) |
-| **Customization** | Theme system (Patina) | Fully custom design |
+| **Customization** | Theme system (Foliage) | Fully custom design |
 
 ---
 

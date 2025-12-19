@@ -91,7 +91,9 @@ Give Aria a song you love, and it builds a playlist of tracks that share the sam
 
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see—it's the thing that holds everything else up.
 
-Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns, vines (the widgets and content that fill your blog's gutters)—all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
+Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns—all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
+
+**Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts—related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
 
 ---
 
