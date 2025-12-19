@@ -246,11 +246,11 @@ export interface SocialLink {
 │                                                                 │
 │   Featured Books                                                │
 │                                                                 │
-│   ┌─────────┐  ┌─────────┐  ┌─────────┐                        │
-│   │ [cover] │  │ [cover] │  │ [cover] │                        │
-│   │ Title   │  │ Title   │  │ Title   │                        │
-│   │ Author  │  │ Author  │  │ Author  │                        │
-│   └─────────┘  └─────────┘  └─────────┘                        │
+│   ┌─────────┐  ┌─────────┐  ┌─────────┐                         │
+│   │ [cover] │  │ [cover] │  │ [cover] │                         │
+│   │ Title   │  │ Title   │  │ Title   │                         │
+│   │ Author  │  │ Author  │  │ Author  │                         │
+│   └─────────┘  └─────────┘  └─────────┘                         │
 │                                                                 │
 │              [View All Books →]                                 │
 │                                                                 │
@@ -258,16 +258,16 @@ export interface SocialLink {
 │                                                                 │
 │   From the Blog                                                 │
 │                                                                 │
-│   • Latest Post Title                          Dec 15, 2025    │
-│   • Another Blog Post                          Dec 10, 2025    │
-│   • Third Post Title                           Dec 5, 2025     │
+│   • Latest Post Title                          Dec 15, 2025     │
+│   • Another Blog Post                          Dec 10, 2025     │
+│   • Third Post Title                           Dec 5, 2025      │
 │                                                                 │
 │              [Read More →]                                      │
 │                                                                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   © 2025 Fiction House Publishing                              │
-│   [Contact] | [Privacy] | [Dark Mode Toggle]                   │
+│   © 2025 Fiction House Publishing                               │
+│   [Contact] | [Privacy] | [Dark Mode Toggle]                    │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -285,19 +285,19 @@ Grid layout showing all published books.
 ┌─────────────────────────────────────────────────────────────────┐
 │   Our Books                                                     │
 │                                                                 │
-│   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐           │
-│   │ [cover] │  │ [cover] │  │ [cover] │  │ [cover] │           │
-│   │ Title   │  │ Title   │  │ Title   │  │ Title   │           │
-│   │ Author  │  │ Author  │  │ Author  │  │ Author  │           │
-│   │ Genre   │  │ Genre   │  │ Genre   │  │ Genre   │           │
-│   └─────────┘  └─────────┘  └─────────┘  └─────────┘           │
+│   ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐            │
+│   │ [cover] │  │ [cover] │  │ [cover] │  │ [cover] │            │
+│   │ Title   │  │ Title   │  │ Title   │  │ Title   │            │
+│   │ Author  │  │ Author  │  │ Author  │  │ Author  │            │
+│   │ Genre   │  │ Genre   │  │ Genre   │  │ Genre   │            │
+│   └─────────┘  └─────────┘  └─────────┘  └─────────┘            │
 │                                                                 │
-│   ┌─────────┐  ┌─────────┐                                     │
-│   │ [cover] │  │ [cover] │                                     │
-│   │ Title   │  │ Title   │                                     │
-│   │ Author  │  │ Author  │                                     │
-│   │ Genre   │  │ Genre   │                                     │
-│   └─────────┘  └─────────┘                                     │
+│   ┌─────────┐  ┌─────────┐                                      │
+│   │ [cover] │  │ [cover] │                                      │
+│   │ Title   │  │ Title   │                                      │
+│   │ Author  │  │ Author  │                                      │
+│   │ Genre   │  │ Genre   │                                      │
+│   └─────────┘  └─────────┘                                      │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -317,9 +317,9 @@ Grid layout showing all published books.
 │                                                                 │
 │   ─────────────────────────────────────────────────────────     │
 │                                                                 │
-│   Long description of the book goes here. This is the full     │
-│   marketing copy that tells readers what to expect from the    │
-│   book, the story premise, and why they should read it.        │
+│   Long description of the book goes here. This is the full      │
+│   marketing copy that tells readers what to expect from the     │
+│   book, the story premise, and why they should read it.         │
 │                                                                 │
 │   Multiple paragraphs are supported via markdown rendering.     │
 │                                                                 │
@@ -327,11 +327,11 @@ Grid layout showing all published books.
 │                                                                 │
 │   Get Your Copy                                                 │
 │                                                                 │
-│   [Amazon]  [Barnes & Noble]  [IndieBound]                     │
+│   [Amazon]  [Barnes & Noble]  [IndieBound]                      │
 │                                                                 │
 │   ─────────────────────────────────────────────────────────     │
 │                                                                 │
-│   ← Back to All Books                                          │
+│   ← Back to All Books                                           │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -370,26 +370,26 @@ Plus static contact information:
 ┌─────────────────────────────────────────────────────────────────┐
 │   Get in Touch                                                  │
 │                                                                 │
-│   We'd love to hear from you. Whether you have a question      │
-│   about our books or a story to share, drop us a line.         │
+│   We'd love to hear from you. Whether you have a question       │
+│   about our books or a story to share, drop us a line.          │
 │                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │ Your Name                                                │  │
-│   └─────────────────────────────────────────────────────────┘  │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │ Your Name                                               │   │
+│   └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │ Email Address                                            │  │
-│   └─────────────────────────────────────────────────────────┘  │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │ Email Address                                           │   │
+│   └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │ Your Message                                             │  │
-│   │                                                          │  │
-│   │                                                          │  │
-│   └─────────────────────────────────────────────────────────┘  │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │ Your Message                                            │   │
+│   │                                                         │   │
+│   │                                                         │   │
+│   └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │   [Send Message]                                                │
 │                                                                 │
-│   ─────────────────────────────────────────────────────────    │
+│   ─────────────────────────────────────────────────────────     │
 │                                                                 │
 │   Or email us directly:                                         │
 │   contact@fictionhouse.com                                      │

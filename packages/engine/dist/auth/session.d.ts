@@ -44,7 +44,7 @@ export function isAllowedAdmin(email: string, allowedList: string): boolean;
  * @param {string} userEmail - User's email address
  * @returns {Promise<boolean>} - Whether the user owns the tenant
  */
-export function verifyTenantOwnership(db: import("@cloudflare/workers-types").D1Database, tenantId: string | undefined | null, userEmail: string): Promise<boolean>;
+export function verifyTenantOwnership(db: any, tenantId: string | undefined | null, userEmail: string): Promise<boolean>;
 /**
  * Get tenant ID with ownership verification
  * Throws 403 if user doesn't own the tenant
@@ -54,7 +54,7 @@ export function verifyTenantOwnership(db: import("@cloudflare/workers-types").D1
  * @returns {Promise<string>} - Verified tenant ID
  * @throws {SessionError} - If unauthorized
  */
-export function getVerifiedTenantId(db: import("@cloudflare/workers-types").D1Database, tenantId: string | undefined | null, user: User | null | undefined): Promise<string>;
+export function getVerifiedTenantId(db: any, tenantId: string | undefined | null, user: User | null | undefined): Promise<string>;
 export type User = {
     email: string;
 };
