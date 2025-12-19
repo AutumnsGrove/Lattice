@@ -122,15 +122,6 @@ Amber is Grove's unified storage management system. Every file you upload—blog
 
 ---
 
-## Vines
-**Gutter Content** · *Integrated into blog layout*
-
-Vines grow along the edges. They climb walls, wrap around structures, fill the margins with life. They're not the main event—but they make the whole space feel alive and tended.
-
-Vines are the content that lives in your blog's gutters and margins—widgets, links, small bits of personality that frame your posts. A "now reading" shelf. Social links. A tiny bio. The little things that make a blog feel like someone's home, not just a feed of posts.
-
----
-
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -147,7 +138,6 @@ Vines are the content that lives in your blog's gutters and margins—widgets, l
 | **Rings** | Analytics | *(integrated)* |
 | **Ivy** | Email | ivy.grove.place |
 | **Amber** | Storage management | amber.grove.place |
-| **Vines** | Gutter content | *(integrated)* |
 
 ---
 
@@ -169,7 +159,6 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Rings | GroveAnalytics |
 | Ivy | GroveMail |
 | Amber | GroveStorage |
-| Vines | GroveGutters |
 
 ---
 
