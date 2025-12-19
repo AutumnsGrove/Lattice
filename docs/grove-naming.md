@@ -23,12 +23,21 @@ Meadow is social media that remembers what "social" means. No public metrics bre
 
 ---
 
-## Acorn
-**Domain Discovery** · `acorn.grove.place`
+## Forage
+**Domain Discovery** · `forage.grove.place`
 
-Every oak was once an acorn. Every online presence starts with a name.
+Before you can plant, you have to search. You walk the forest floor, looking for what you need—something that fits, something that's *available*, something worth bringing home.
 
-Acorn is an AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget—and it returns a curated list of available domains that actually fit. The seed you plant here becomes your entire digital presence. Choose it well; Acorn will help you find the right one.
+Forage is an AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget—and it returns a curated list of available domains that actually fit. Finding the right name takes effort. Forage does the searching so you can focus on choosing.
+
+---
+
+## Foliage
+**Theming System** · `foliage.grove.place`
+
+Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
+
+Foliage is visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it *yours*. Your foliage is how the world sees your corner of the grove.
 
 ---
 
@@ -82,7 +91,7 @@ Give Aria a song you love, and it builds a playlist of tracks that share the sam
 
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see—it's the thing that holds everything else up.
 
-Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns—all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
+Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns, vines (the widgets and content that fill your blog's gutters)—all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
 
 ---
 
@@ -118,7 +127,8 @@ Amber is Grove's unified storage management system. Every file you upload—blog
 | Name | Purpose | Domain |
 |------|---------|--------|
 | **Meadow** | Social connection | meadow.grove.place |
-| **Acorn** | Domain discovery | acorn.grove.place |
+| **Forage** | Domain discovery | forage.grove.place |
+| **Foliage** | Theming system | foliage.grove.place |
 | **Heartwood** | Authentication | heartwood.grove.place |
 | **Cache** | Backup system | *(internal)* |
 | **Trove** | Library book finder | trove.grove.place |
@@ -138,7 +148,8 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Public Name | Internal Name |
 |-------------|---------------|
 | Meadow | GroveSocial |
-| Acorn | GroveDomainTool |
+| Forage | GroveDomainTool |
+| Foliage | GroveThemes |
 | Heartwood | GroveAuth |
 | Cache | GroveBackups |
 | Trove | TreasureTrove |
@@ -153,7 +164,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 
 ## A Note on Naming
 
-These names share common ground: nature, shelter, things that grow. But none of them are *about* trees directly. They're about what happens in and around the forest. Where people gather (Meadow). What becomes something greater (Acorn). Where you find treasure (Trove). What holds everything together (Lattice).
+These names share common ground: nature, shelter, things that grow. But none of them are *about* trees directly. They're about what happens in and around the forest. Where people gather (Meadow). What you search for and find (Forage). Where you find treasure (Trove). What holds everything together (Lattice).
 
 The Grove is the place. These are the things you find there.
 

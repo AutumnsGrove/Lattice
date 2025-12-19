@@ -1,17 +1,17 @@
-# Patina — Theme System Project Specification
+# Foliage — Theme System Project Specification
 
-> *Patina: The weathered surface, unique to each. Personal character that develops.*
+> *Foliage: The leaves, the color, the personality. No two canopies are quite the same.*
 
 **Internal Name:** GroveThemes
-**Public Name:** Patina
-**Repository:** `AutumnsGrove/Patina`
-**Package:** `@autumnsgrove/patina`
+**Public Name:** Foliage
+**Repository:** `AutumnsGrove/Foliage`
+**Package:** `@autumnsgrove/foliage`
 
 ---
 
 ## Overview
 
-Patina is Grove's theme system — providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities: make your blog feel like *yours*.
+Foliage is Grove's theme system — providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities: make your blog feel like *yours*.
 
 This project is extracted from GroveEngine to be:
 1. **Independently testable** — theme logic separate from engine
@@ -121,7 +121,7 @@ Users share customizations with the community:
 ## Project Structure
 
 ```
-patina/
+foliage/
 ├── src/
 │   ├── lib/
 │   │   ├── themes/
@@ -316,16 +316,16 @@ CREATE INDEX idx_community_themes_creator ON community_themes(creator_tenant_id)
 
 ## Integration with GroveEngine
 
-Patina integrates with GroveEngine via:
+Foliage integrates with GroveEngine via:
 
 ### 1. Package Export
 
 ```typescript
 // In GroveEngine's package.json exports
-"./patina": "./src/lib/patina/index.js"
+"./foliage": "./src/lib/foliage/index.js"
 
 // Usage in tenant sites
-import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/patina';
+import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/foliage';
 ```
 
 ### 2. Layout Integration
@@ -333,7 +333,7 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/patina';
 ```svelte
 <!-- +layout.svelte -->
 <script>
-  import { loadTheme, applyThemeVariables } from '@autumnsgrove/groveengine/patina';
+  import { loadTheme, applyThemeVariables } from '@autumnsgrove/groveengine/foliage';
 
   const { data } = $props();
 
@@ -347,7 +347,7 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/patina';
 
 ```typescript
 // +layout.server.ts
-import { loadThemeSettings } from '@autumnsgrove/groveengine/patina';
+import { loadThemeSettings } from '@autumnsgrove/groveengine/foliage';
 import { db } from '@autumnsgrove/groveengine/services';
 
 export const load = async ({ locals }) => {
@@ -457,9 +457,9 @@ export function validateCustomCSS(css: string): ValidationResult {
 
 ```json
 {
-  "name": "@autumnsgrove/patina",
+  "name": "@autumnsgrove/foliage",
   "version": "0.1.0",
-  "description": "Theme system for Grove — personal expression with modern guardrails",
+  "description": "Theming system for Grove — make your blog feel like yours",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -509,7 +509,7 @@ export function validateCustomCSS(css: string): ValidationResult {
   "license": "AGPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AutumnsGrove/Patina.git"
+    "url": "https://github.com/AutumnsGrove/Foliage.git"
   }
 }
 ```
@@ -518,9 +518,9 @@ export function validateCustomCSS(css: string): ValidationResult {
 
 ## Repository Initialization Checklist
 
-When creating the Patina repository:
+When creating the Foliage repository:
 
-- [ ] Create `AutumnsGrove/Patina` on GitHub
+- [ ] Create `AutumnsGrove/Foliage` on GitHub
 - [ ] Initialize with `pnpm create svelte@latest` (library mode)
 - [ ] Copy this spec to `docs/PROJECT-SPEC.md`
 - [ ] Create `AGENT.md` with project-specific instructions
@@ -544,4 +544,4 @@ When creating the Patina repository:
 
 ---
 
-*Patina enables personal expression while maintaining the quality and accessibility that Grove promises. From simple accent colors to full custom themes, every user can make their space feel like home.*
+*Foliage enables personal expression while maintaining the quality and accessibility that Grove promises. From simple accent colors to full custom themes, every user can make their space feel like home.*
