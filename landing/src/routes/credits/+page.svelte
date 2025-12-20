@@ -104,6 +104,16 @@
 					</div>
 
 					<div class="card p-5">
+						<h3 class="text-lg font-serif text-foreground mb-1">SST</h3>
+						<p class="text-foreground-muted font-sans text-sm">
+							Infrastructure-as-code framework. Manages Cloudflare Workers, Stripe products, and all Grove infrastructure in a single TypeScript config.
+						</p>
+						<a href="https://sst.dev" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
+							sst.dev →
+						</a>
+					</div>
+
+					<div class="card p-5">
 						<h3 class="text-lg font-serif text-foreground mb-1">Tailwind CSS</h3>
 						<p class="text-foreground-muted font-sans text-sm">
 							Utility-first CSS framework. Enables rapid, consistent styling across the entire platform.

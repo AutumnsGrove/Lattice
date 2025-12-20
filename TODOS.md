@@ -6,6 +6,37 @@
 
 ---
 
+## 🚀 Up Next: SST Migration
+
+> **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
+
+SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangler.toml` files with a single TypeScript config. Key benefits:
+
+- **Stripe in Code** - Define products, prices, and webhooks as code (greenfield setup)
+- **Staging Environment** - Finally stop deploying straight to production
+- **PR Previews** - Auto-deploy each PR to `pr-123.grove.place` with Stripe test mode
+- **Simplified Routing** - Workers handle `*.grove.place` natively, Cloudflare for SaaS for custom domains only (Oak+ tier)
+
+### Implementation Phases
+
+- [ ] **Phase 1: Foundation** - `sst init`, basic config, first Worker migration
+- [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
+- [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
+- [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
+- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, simplify grove-router
+
+### Hybrid Routing Strategy
+
+| User Type | Domain | Routing | Cost |
+|-----------|--------|---------|------|
+| Seedling/Sapling | `*.grove.place` | Worker wildcards | Free |
+| Oak (BYOD) | `custom.com` | Cloudflare for SaaS | $0.10/hostname |
+| Evergreen | `custom.com` | Cloudflare for SaaS | $0.10/hostname |
+
+**Pricing:** 100 custom domains free, then $0.10 each, max 5,000 before Enterprise.
+
+---
+
 ## Security Audit - Remaining Items
 
 ### Medium Priority
@@ -55,10 +86,18 @@
   - ✅ Email templates ready (welcome, day 1/3/7/30)
 
 ### Stripe Integration (plant.grove.place)
-> **Status:** Code deployed with placeholder price IDs. Needs real Stripe products.
+> **Status:** Code deployed with placeholder price IDs. **Will be migrated to SST.**
 > **Location:** `plant/src/lib/server/stripe.ts`
+> **New Plan:** See `specs/sst-migration-plan.md` - products/prices defined in code via SST
 >
-> **Setup Steps:**
+> **SST Approach (Preferred):**
+> - [ ] Define products in `sst.config.ts` using `sst.stripe.Product`
+> - [ ] Define prices (8 total: 4 plans × monthly/yearly)
+> - [ ] SST auto-creates products/prices in Stripe on deploy
+> - [ ] SST manages webhook endpoints automatically
+> - [ ] Different Stripe keys per stage (test for dev/PR, live for production)
+>
+> **Manual Fallback (if SST not ready):**
 > - [ ] Create 4 products in Stripe Dashboard (Seedling, Sapling, Oak, Evergreen)
 > - [ ] Create 8 prices (4 plans × monthly/yearly with 15% discount)
 > - [ ] Replace placeholder IDs in `plant/src/lib/server/stripe.ts`
