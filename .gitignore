@@ -3,6 +3,7 @@ secrets.json
 __pycache__/
 .DS_Store
 .claude/
+.sst/
 node_modules/
 build/
 dist/

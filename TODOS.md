@@ -8,7 +8,7 @@
 
 ## 🚀 Up Next: SST Migration
 
-> **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
+> **Full Plan:** See `docs/specs/sst-migration-plan.md` for complete migration strategy.
 
 SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangler.toml` files with a single TypeScript config. Key benefits:
 
@@ -19,11 +19,30 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 
 ### Implementation Phases
 
-- [ ] **Phase 1: Foundation** - `sst init`, basic config, first Worker migration
-- [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
+- [x] **Phase 1: Foundation** - `sst init`, basic config, import existing resources
+- [ ] **Phase 2: Stripe Integration** - Products/prices in code (4 products, 8 prices)
 - [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
 - [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
 - [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, simplify grove-router
+
+### Required Secrets/Tokens
+
+Set these environment variables before running `sst dev` or `sst deploy`:
+
+| Secret | When Needed | How to Get |
+|--------|-------------|------------|
+| `CLOUDFLARE_API_TOKEN` | Phase 1+ | Cloudflare Dashboard → My Profile → API Tokens → Create Token → "Edit Cloudflare Workers" template |
+| `STRIPE_TEST_SECRET_KEY` | Phase 2 (dev) | Stripe Dashboard → Developers → API Keys → Secret key (test mode) |
+| `STRIPE_SECRET_KEY` | Phase 2 (prod) | Stripe Dashboard → Developers → API Keys → Secret key (live mode) |
+
+**Local development:**
+```bash
+export CLOUDFLARE_API_TOKEN="your-token-here"
+export STRIPE_TEST_SECRET_KEY="sk_test_xxx"
+```
+
+**GitHub Actions (later):**
+Add these as repository secrets: `Settings → Secrets → Actions → New repository secret`
 
 ### Hybrid Routing Strategy
 
