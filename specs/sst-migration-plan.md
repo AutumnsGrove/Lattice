@@ -20,30 +20,31 @@ Migrate GroveEngine from manual wrangler.toml configuration to SST (sst.dev) for
 
 Based on your current stack and project vision, here are the SST integrations worth using:
 
-### Definitely Use
+### Phase 1: Immediate Value (This Migration)
 
 | Integration | Current Setup | SST Benefit |
 |-------------|---------------|-------------|
 | **Cloudflare D1** | Manual wrangler.toml | Type-safe linking, automatic migrations |
 | **Cloudflare KV** | Manual wrangler.toml | Unified config, resource linking |
 | **Cloudflare R2** | Manual wrangler.toml | Simplified bucket management |
-| **Cloudflare Workers** | grove-router | Easier routing config |
+| **Cloudflare Workers** | grove-router proxy | Easier routing config |
 | **SvelteKit** | adapter-cloudflare | Native SST component |
 | **Stripe** | Manual API calls | Native webhooks, type-safe products/prices |
+| **Cloudflare for SaaS** | grove-router proxy | Eliminate proxy worker for tenant subdomains |
 
-### Consider for Future Growth
+### Phase 2: Future Scaling
 
-| Integration | Use Case | Notes |
-|-------------|----------|-------|
-| **OpenAuth** | Replace Heartwood? | SST's auth solution, self-hosted OAuth 2.0 |
-| **Resend** | Already using | SST has email components, could simplify |
-| **Upstash** | Rate limiting | Redis-compatible, if KV limits become an issue |
+| Integration | Use Case | When to Consider |
+|-------------|----------|------------------|
+| **OpenAuth** | Replace Heartwood | When scaling auth, adding providers, or consolidating login UIs |
+| **Resend** | Email components | When email complexity grows |
+| **Upstash** | Rate limiting | If KV limits become an issue |
 
-### Skip for Now
+### Skip
 
 | Integration | Reason |
 |-------------|--------|
-| **Auth0/Okta** | You have Heartwood, OpenAuth is closer fit |
+| **Auth0/Okta** | OpenAuth is closer fit when ready |
 | **AWS services** | Cloudflare-first architecture |
 | **PostgreSQL/MySQL** | D1 works well for your scale |
 
@@ -262,17 +263,87 @@ const plant = new sst.cloudflare.SvelteKit("Plant", {
 });
 ```
 
-### 3.4 Grove Router
+### 3.4 Multi-Tenant Routing Overhaul
+
+**Current Problem:** The grove-router Worker proxies all `*.grove.place` traffic, with a hardcoded routing table for internal services. This adds latency and complexity.
+
+**Solution:** Hybrid approach using Cloudflare for SaaS + explicit Worker routes.
+
+#### 3.4.1 Cloudflare for SaaS Setup
+
+For tenant subdomains (alice.grove.place, bob.grove.place, etc.):
 
 ```typescript
-const router = new sst.cloudflare.Worker("GroveRouter", {
-  handler: "packages/grove-router/src/index.ts",
-  domain: {
-    name: "*.grove.place",
-    zone: "grove.place",
-  },
+// sst.config.ts - conceptual, actual API calls may vary
+
+// Engine becomes the fallback origin for CF for SaaS
+const engine = new sst.cloudflare.SvelteKit("Engine", {
+  path: "packages/engine",
+  link: [db, cache, media],
+  // This is the fallback origin for all tenant subdomains
+});
+
+// When a tenant signs up, call Cloudflare API to add custom hostname
+// This moves from the app code, not SST config
+```
+
+**Tenant Hostname Creation (in app code):**
+```typescript
+// Called when new tenant signs up
+async function createTenantHostname(username: string) {
+  await fetch(`https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/custom_hostnames`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${CF_API_TOKEN}` },
+    body: JSON.stringify({
+      hostname: `${username}.grove.place`,
+      ssl: { method: 'http', type: 'dv' },
+    }),
+  });
+}
+```
+
+#### 3.4.2 Internal Services (Explicit Routes)
+
+For internal services, use explicit Worker routes (no proxy needed):
+
+```typescript
+// Auth service
+const auth = new sst.cloudflare.SvelteKit("Auth", {
+  path: "apps/groveauth",
+  domain: "auth.grove.place",
+});
+
+// Plant/billing
+const plant = new sst.cloudflare.SvelteKit("Plant", {
+  path: "plant",
+  domain: "plant.grove.place",
+});
+
+// Domains/Forage
+const domains = new sst.cloudflare.SvelteKit("Domains", {
+  path: "domains",
+  domain: "domains.grove.place",
+});
+
+// Auth API Worker
+const authApi = new sst.cloudflare.Worker("AuthAPI", {
+  handler: "apps/groveauth-api/src/index.ts",
+  domain: "auth-api.grove.place",
 });
 ```
+
+#### 3.4.3 Retire grove-router
+
+After migration:
+- Tenant subdomains: handled by Cloudflare for SaaS (no proxy)
+- Internal services: direct Worker routes (no proxy)
+- `packages/grove-router/` can be deleted
+
+**Benefits:**
+- No proxy latency on tenant requests
+- No hardcoded routing table to maintain
+- Automatic SSL for all tenant subdomains
+- Supports customer custom domains in future (alice.com → their grove blog)
 
 ---
 
@@ -453,19 +524,137 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 
 ---
 
+## Resolved Questions
+
+1. ~~**OpenAuth vs Heartwood**~~: Keep Heartwood for now. Revisit OpenAuth when scaling (see Future Scaling section).
+2. ~~**Domain Configuration**~~: Cloudflare manages all DNS. Migration will use Cloudflare for SaaS for tenant routing.
+
 ## Open Questions
 
-1. **OpenAuth vs Heartwood**: Should we migrate auth to SST's OpenAuth, or keep Heartwood?
-2. **Existing Stripe Products**: Do you have products already in Stripe Dashboard, or starting fresh?
-3. **Domain Configuration**: How is DNS currently managed? SST can handle this too.
-4. **Preview Environments**: Do you want PR preview deployments? SST Console offers this.
+1. **Existing Stripe Products**: Do you have products already in Stripe Dashboard, or starting fresh?
+2. **Preview Environments**: Do you want PR preview deployments? SST Console offers this.
+3. **Cloudflare for SaaS Tier**: Free tier has 100 custom hostnames. Do you expect more tenants soon?
+
+---
+
+## Future Scaling: Auth Migration to OpenAuth
+
+> **When to do this:** After SST migration is stable, when you want to:
+> - Add more OAuth providers (Apple, Discord, Twitter, etc.)
+> - Consolidate the three login page UIs into one
+> - Simplify auth maintenance
+
+### Why OpenAuth Makes Sense Later
+
+| Current (Heartwood) | Future (OpenAuth) |
+|---------------------|-------------------|
+| Custom OAuth implementation | SST-managed, standards-based |
+| Google + GitHub + Magic Code | Same + Apple, Discord, Twitter, etc. |
+| Subscription tracking built-in | Subscription logic moves to GroveEngine DB |
+| Three different login UIs | One themeable, prebuilt UI |
+| Moderate complexity | Similar complexity, less to maintain |
+
+### Architecture After OpenAuth Migration
+
+```
+OpenAuth (SST-managed)
+├── Handles: Identity (Google, GitHub, etc.)
+├── Returns: { sub, email, name, picture }
+└── Deploys to: Cloudflare Workers
+
+GroveEngine Database
+├── users table (linked by groveauth_id / openauth sub)
+├── subscriptions table (tier, post_limit, billing)
+└── Handles: All business logic
+
+App Flow:
+1. User clicks "Sign in with Grove"
+2. OpenAuth handles OAuth dance → returns identity
+3. App looks up user in DB → gets subscription tier
+4. App enforces post limits, features, etc.
+```
+
+### Migration Path (When Ready)
+
+1. **Deploy OpenAuth alongside Heartwood**
+   - New users go through OpenAuth
+   - Existing users still work via Heartwood
+
+2. **Migrate subscription logic to GroveEngine**
+   - Move `getSubscription()`, `canUserCreatePost()` to engine
+   - Query D1 directly instead of Heartwood API
+
+3. **Migrate existing users**
+   - Map Heartwood `groveauth_id` to OpenAuth `sub`
+   - One-time token refresh for active sessions
+
+4. **Retire Heartwood**
+   - Sunset groveauth-frontend and groveauth-api
+   - One login UI to maintain
+
+### OpenAuth SST Config (Future Reference)
+
+```typescript
+// When ready to migrate
+const auth = new sst.cloudflare.Auth("GroveAuth", {
+  authenticator: {
+    handler: "packages/auth/src/authenticator.ts",
+    link: [db],
+  },
+});
+
+// All apps use the same auth
+const engine = new sst.cloudflare.SvelteKit("Engine", {
+  link: [auth, db, cache, media],
+});
+
+const plant = new sst.cloudflare.SvelteKit("Plant", {
+  link: [auth, db, stripeWebhook],
+});
+```
+
+### Subscription Tier Logic (Post-Migration)
+
+```typescript
+// packages/engine/src/lib/subscriptions/index.ts
+import { Resource } from "sst";
+
+export async function getUserSubscription(userId: string) {
+  const db = Resource.GroveDB;
+  const result = await db.prepare(
+    `SELECT tier, post_limit, posts_used FROM subscriptions WHERE user_id = ?`
+  ).bind(userId).first();
+
+  return result ?? { tier: 'free', post_limit: 10, posts_used: 0 };
+}
+
+export async function canCreatePost(userId: string): Promise<boolean> {
+  const sub = await getUserSubscription(userId);
+  if (sub.tier === 'evergreen') return true; // unlimited
+  return sub.posts_used < sub.post_limit;
+}
+```
 
 ---
 
 ## Resources
 
+### SST Core
 - [SST Documentation](https://sst.dev/docs/)
 - [SST Cloudflare Components](https://sst.dev/docs/component/cloudflare/)
 - [SST + SvelteKit Guide](https://sst.dev/docs/start/cloudflare/sveltekit/)
-- [Stripe Provider](https://sst.dev/docs/component/stripe/)
+- [SST Custom Domains](https://sst.dev/docs/custom-domains/)
 - [All SST Providers](https://sst.dev/docs/all-providers/)
+
+### Stripe
+- [SST Stripe Provider](https://sst.dev/docs/component/stripe/)
+
+### Auth (Future Reference)
+- [OpenAuth Documentation](https://openauth.js.org/)
+- [OpenAuth GitHub](https://github.com/sst/openauth)
+- [OpenAuth + SST Guide](https://openauth.js.org/docs/start/sst/)
+
+### Cloudflare
+- [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/)
+- [Custom Hostnames API](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/create-custom-hostnames/)
+- [Wildcard Domains Article](https://hossamelshahawi.com/2025/01/26/handling-wildcard-domains-for-multi-tenant-apps-with-cloudflare-workers/)
