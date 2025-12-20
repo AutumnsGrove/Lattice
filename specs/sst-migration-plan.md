@@ -2,6 +2,7 @@
 
 > **Status:** Draft - Pending Review
 > **Created:** 2025-12-20
+> **Updated:** 2025-12-20
 > **Scope:** Migrate GroveEngine to SST for unified infrastructure management
 
 ---
@@ -10,9 +11,56 @@
 
 Migrate GroveEngine from manual wrangler.toml configuration to SST (sst.dev) for:
 - Unified infrastructure-as-code in TypeScript
-- Native Stripe integration with type-safe resource linking
+- Native Stripe integration with type-safe resource linking (greenfield!)
 - Simplified local development with `sst dev`
 - Multi-stage deployments (dev/staging/production)
+- **Hybrid routing:** Worker wildcards for subdomains + Cloudflare for SaaS for custom domains
+
+---
+
+## Key Decision: Hybrid Routing Architecture
+
+### The Insight
+
+Keep what works (Worker wildcard routing for `*.grove.place`) and add Cloudflare for SaaS **only** for custom domain customers (Oak+ tier).
+
+```
+*.grove.place (tenant subdomains)
+    ↓
+Grove Router Worker (SST-managed)
+    ↓
+GroveEngine Worker → D1 tenant lookup
+    ↓
+Serves tenant blog
+
+customdomain.com (Oak+ customers)
+    ↓
+Cloudflare for SaaS → Falls back to GroveEngine
+    ↓
+GroveEngine Worker → D1 custom_domain lookup
+    ↓
+Serves tenant blog
+```
+
+### Why This Approach
+
+| Approach | Cost | Tenants | Complexity |
+|----------|------|---------|------------|
+| **Worker wildcard only** | FREE | Unlimited | Low |
+| **CF for SaaS only** | $0.10/tenant after 100 | 5,000 max | Medium |
+| **Hybrid (recommended)** | $0.10/custom domain | Unlimited subdomains, 5k custom | Low |
+
+**Math for 1,000 tenants (conservative):**
+- 95% use `*.grove.place` → FREE
+- 5% use custom domains (50 Oak+ users) → FREE (under 100)
+- Total cost: $0
+
+**Math for 5,000 tenants (optimistic):**
+- 90% use `*.grove.place` → FREE
+- 10% use custom domains (500 Oak+ users) → 100 free + 400 × $0.10 = $40/month
+- Total cost: $40/month
+
+This is negligible compared to subscription revenue from 500 Oak+ users ($12,500/month)
 
 ---
 
@@ -127,11 +175,13 @@ export default $config({
 
 ---
 
-## Phase 2: Stripe Integration
+## Phase 2: Stripe Integration (Greenfield)
+
+Since there are no existing Stripe products, SST can manage everything from scratch. This is ideal—no migration, no sync issues.
 
 ### 2.1 Define Products in Code
 
-Replace placeholder price IDs with SST-managed Stripe resources:
+SST creates and manages Stripe products/prices automatically:
 
 ```typescript
 // In sst.config.ts run()
@@ -263,87 +313,200 @@ const plant = new sst.cloudflare.SvelteKit("Plant", {
 });
 ```
 
-### 3.4 Multi-Tenant Routing Overhaul
+### 3.4 Hybrid Routing Architecture
 
-**Current Problem:** The grove-router Worker proxies all `*.grove.place` traffic, with a hardcoded routing table for internal services. This adds latency and complexity.
+**Current Setup:** grove-router Worker proxies `*.grove.place` with a hardcoded routing table. Works but fragile.
 
-**Solution:** Hybrid approach using Cloudflare for SaaS + explicit Worker routes.
+**New Setup:** SST manages the grove-router Worker + adds Cloudflare for SaaS for custom domains only.
 
-#### 3.4.1 Cloudflare for SaaS Setup
+#### 3.4.1 Grove Router (SST-Managed, Simplified)
 
-For tenant subdomains (alice.grove.place, bob.grove.place, etc.):
-
-```typescript
-// sst.config.ts - conceptual, actual API calls may vary
-
-// Engine becomes the fallback origin for CF for SaaS
-const engine = new sst.cloudflare.SvelteKit("Engine", {
-  path: "packages/engine",
-  link: [db, cache, media],
-  // This is the fallback origin for all tenant subdomains
-});
-
-// When a tenant signs up, call Cloudflare API to add custom hostname
-// This moves from the app code, not SST config
-```
-
-**Tenant Hostname Creation (in app code):**
-```typescript
-// Called when new tenant signs up
-async function createTenantHostname(username: string) {
-  await fetch(`https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/custom_hostnames`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${CF_API_TOKEN}` },
-    body: JSON.stringify({
-      hostname: `${username}.grove.place`,
-      ssl: { method: 'http', type: 'dv' },
-    }),
-  });
-}
-```
-
-#### 3.4.2 Internal Services (Explicit Routes)
-
-For internal services, use explicit Worker routes (no proxy needed):
+The grove-router stays, but SST makes it cleaner:
 
 ```typescript
-// Auth service
-const auth = new sst.cloudflare.SvelteKit("Auth", {
-  path: "apps/groveauth",
+// sst.config.ts
+
+// Internal services get their own domains (no proxy needed)
+const auth = new sst.cloudflare.Worker("Auth", {
+  handler: "apps/groveauth/src/worker.ts",
+  assets: "apps/groveauth/.svelte-kit/cloudflare",
   domain: "auth.grove.place",
 });
 
-// Plant/billing
-const plant = new sst.cloudflare.SvelteKit("Plant", {
-  path: "plant",
+const plant = new sst.cloudflare.Worker("Plant", {
+  handler: "plant/src/worker.ts",
+  assets: "plant/.svelte-kit/cloudflare",
+  link: [db, stripeResources],
   domain: "plant.grove.place",
 });
 
-// Domains/Forage
-const domains = new sst.cloudflare.SvelteKit("Domains", {
-  path: "domains",
+const domains = new sst.cloudflare.Worker("Domains", {
+  handler: "domains/src/worker.ts",
+  assets: "domains/.svelte-kit/cloudflare",
+  link: [db],
   domain: "domains.grove.place",
 });
 
-// Auth API Worker
-const authApi = new sst.cloudflare.Worker("AuthAPI", {
-  handler: "apps/groveauth-api/src/index.ts",
-  domain: "auth-api.grove.place",
+// Main engine handles *.grove.place (wildcard)
+const engine = new sst.cloudflare.Worker("Engine", {
+  handler: "packages/engine/src/worker.ts",
+  assets: "packages/engine/.svelte-kit/cloudflare",
+  link: [db, cache, media],
+  domain: {
+    name: "*.grove.place",
+    zone: "grove.place",
+  },
+});
+
+// Landing page (root domain)
+const landing = new sst.cloudflare.Worker("Landing", {
+  handler: "landing/src/worker.ts",
+  assets: "landing/.svelte-kit/cloudflare",
+  link: [db],
+  domain: "grove.place",
 });
 ```
 
-#### 3.4.3 Retire grove-router
+**What changes:**
+- Internal services (auth, plant, domains) get **explicit domains** → no proxy
+- Engine handles `*.grove.place` wildcard **directly** → no proxy for tenants
+- grove-router routing table shrinks to near-zero
 
-After migration:
-- Tenant subdomains: handled by Cloudflare for SaaS (no proxy)
-- Internal services: direct Worker routes (no proxy)
-- `packages/grove-router/` can be deleted
+**What stays:**
+- Engine's subdomain extraction logic in hooks.server.ts
+- D1 tenant lookup
+- X-Forwarded-Host handling (for any edge cases)
 
-**Benefits:**
-- No proxy latency on tenant requests
-- No hardcoded routing table to maintain
-- Automatic SSL for all tenant subdomains
-- Supports customer custom domains in future (alice.com → their grove blog)
+#### 3.4.2 Cloudflare for SaaS (Custom Domains Only)
+
+Custom domains are an Oak+ feature. When enabled, use CF for SaaS:
+
+```typescript
+// packages/engine/src/lib/cloudflare/custom-domains.ts
+
+const CF_API = "https://api.cloudflare.com/client/v4";
+
+export async function createCustomHostname(
+  domain: string,
+  tenantId: string,
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+) {
+  const response = await fetch(
+    `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.CF_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        hostname: domain,
+        ssl: {
+          method: "http",
+          type: "dv",
+          settings: {
+            min_tls_version: "1.2",
+          },
+        },
+        custom_metadata: {
+          tenant_id: tenantId,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to create custom hostname: ${error.errors?.[0]?.message}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteCustomHostname(
+  hostnameId: string,
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+) {
+  await fetch(
+    `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames/${hostnameId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
+    }
+  );
+}
+
+export async function verifyCustomHostname(
+  hostnameId: string,
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+) {
+  const response = await fetch(
+    `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames/${hostnameId}`,
+    {
+      headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
+    }
+  );
+
+  const data = await response.json();
+  return {
+    status: data.result?.ssl?.status,
+    verificationErrors: data.result?.ssl?.validation_errors,
+  };
+}
+```
+
+#### 3.4.3 Update hooks.server.ts for Custom Domains
+
+Add custom domain lookup alongside subdomain lookup:
+
+```typescript
+// In hooks.server.ts - after subdomain extraction
+
+// If no subdomain match, check for custom domain
+if (!tenant && !isReservedSubdomain) {
+  const hostname = getHostname(request);
+
+  // Skip if it's a grove.place domain
+  if (!hostname.endsWith('.grove.place') && !hostname.endsWith('pages.dev')) {
+    // Custom domain lookup
+    tenant = await db
+      .prepare(
+        "SELECT id, subdomain, display_name, email, theme, custom_domain " +
+        "FROM tenants WHERE custom_domain = ? AND active = 1"
+      )
+      .bind(hostname)
+      .first();
+
+    if (tenant) {
+      event.locals.context = { type: "tenant", tenant, isCustomDomain: true };
+      event.locals.tenantId = tenant.id;
+    }
+  }
+}
+```
+
+#### 3.4.4 User Flow for Custom Domains
+
+1. **Oak+ user enables BYOD in settings**
+2. **User enters their domain** (e.g., `blog.example.com`)
+3. **System calls `createCustomHostname()`** → CF provisions SSL
+4. **User adds CNAME** (`blog.example.com` → `grove.place`)
+5. **System verifies DNS** via `verifyCustomHostname()`
+6. **Domain goes live** → stored in `tenants.custom_domain`
+
+#### 3.4.5 What Happens to grove-router?
+
+**Option A: Simplify it** (recommended initially)
+- Remove internal service routing (they have explicit domains now)
+- Keep only for edge cases or legacy routes
+- Significantly smaller routing table
+
+**Option B: Delete it** (after SST is stable)
+- Workers with explicit domains handle everything
+- Wildcard routes work natively
+- No proxy layer at all
+
+**Recommendation:** Start with Option A, move to Option B once confident.
 
 ---
 
@@ -527,13 +690,15 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 ## Resolved Questions
 
 1. ~~**OpenAuth vs Heartwood**~~: Keep Heartwood for now. Revisit OpenAuth when scaling (see Future Scaling section).
-2. ~~**Domain Configuration**~~: Cloudflare manages all DNS. Migration will use Cloudflare for SaaS for tenant routing.
+2. ~~**Domain Configuration**~~: Cloudflare manages all DNS. SST handles Worker domains.
+3. ~~**Existing Stripe Products**~~: **Greenfield!** No existing products. SST will define everything in code.
+4. ~~**Routing Architecture**~~: Hybrid approach—Worker wildcards for subdomains, CF for SaaS for custom domains only.
+5. ~~**grove-router fate**~~: Simplify first (SST manages domains), potentially delete later.
 
 ## Open Questions
 
-1. **Existing Stripe Products**: Do you have products already in Stripe Dashboard, or starting fresh?
-2. **Preview Environments**: Do you want PR preview deployments? SST Console offers this.
-3. **Cloudflare for SaaS Tier**: Free tier has 100 custom hostnames. Do you expect more tenants soon?
+1. **Preview Environments**: Do you want PR preview deployments? SST Console offers this.
+2. **Staging Environment**: Do you want a `dev.grove.place` staging subdomain?
 
 ---
 
