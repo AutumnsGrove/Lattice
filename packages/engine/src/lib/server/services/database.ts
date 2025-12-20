@@ -609,3 +609,316 @@ export async function count(
 		throw new DatabaseError(`Count on ${table} failed`, 'QUERY_FAILED', err);
 	}
 }
+
+// ============================================================================
+// Multi-Tenant Database Wrapper
+// ============================================================================
+
+/**
+ * Error thrown when tenant context is missing or invalid
+ */
+export class TenantContextError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'TenantContextError';
+	}
+}
+
+/**
+ * Tenant-scoped database context
+ * Ensures all queries are automatically scoped to a specific tenant
+ */
+export interface TenantContext {
+	/** The tenant ID for this context */
+	tenantId: string;
+	/** Optional user ID for audit logging */
+	userId?: string;
+}
+
+/**
+ * Tenant-aware database wrapper
+ *
+ * This wrapper enforces tenant isolation by:
+ * 1. Automatically adding tenant_id to all INSERT operations
+ * 2. Requiring tenant_id in all SELECT/UPDATE/DELETE WHERE clauses
+ * 3. Validating tenant_id in query results
+ *
+ * SECURITY: This is a critical security boundary. All multi-tenant data access
+ * MUST go through this wrapper to prevent cross-tenant data leaks.
+ *
+ * @example
+ * ```ts
+ * // In your API route or server load function:
+ * const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenant.id });
+ *
+ * // All queries are now automatically scoped to this tenant
+ * const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published']);
+ * // Equivalent to: SELECT * FROM posts WHERE tenant_id = ? AND status = ?
+ * ```
+ */
+export class TenantDb {
+	private db: D1DatabaseOrSession;
+	private context: TenantContext;
+
+	constructor(db: D1DatabaseOrSession, context: TenantContext) {
+		if (!context.tenantId) {
+			throw new TenantContextError('Tenant ID is required for database operations');
+		}
+		this.db = db;
+		this.context = context;
+	}
+
+	/**
+	 * Get the tenant ID for this context
+	 */
+	get tenantId(): string {
+		return this.context.tenantId;
+	}
+
+	/**
+	 * Query a single row with automatic tenant scoping
+	 */
+	async queryOne<T>(
+		table: string,
+		where?: string,
+		whereParams: unknown[] = []
+	): Promise<T | null> {
+		validateTableName(table);
+		const tenantWhere = where
+			? `tenant_id = ? AND (${where})`
+			: 'tenant_id = ?';
+		const params = [this.context.tenantId, ...whereParams];
+		const sql = `SELECT * FROM ${table} WHERE ${tenantWhere} LIMIT 1`;
+		return queryOne<T>(this.db, sql, params);
+	}
+
+	/**
+	 * Query a single row, throw if not found
+	 */
+	async queryOneOrThrow<T>(
+		table: string,
+		where?: string,
+		whereParams: unknown[] = [],
+		errorMessage = 'Record not found'
+	): Promise<T> {
+		const result = await this.queryOne<T>(table, where, whereParams);
+		if (result === null) {
+			throw new DatabaseError(errorMessage, 'NOT_FOUND');
+		}
+		return result;
+	}
+
+	/**
+	 * Query multiple rows with automatic tenant scoping
+	 */
+	async queryMany<T>(
+		table: string,
+		where?: string,
+		whereParams: unknown[] = [],
+		options?: { orderBy?: string; limit?: number; offset?: number }
+	): Promise<T[]> {
+		validateTableName(table);
+		const tenantWhere = where
+			? `tenant_id = ? AND (${where})`
+			: 'tenant_id = ?';
+		const params = [this.context.tenantId, ...whereParams];
+
+		let sql = `SELECT * FROM ${table} WHERE ${tenantWhere}`;
+
+		if (options?.orderBy) {
+			// Strict validation for ORDER BY - only allow column names and ASC/DESC
+			const orderParts = options.orderBy.split(/\s+/);
+			if (orderParts.length > 2) {
+				throw new DatabaseError(`Invalid ORDER BY clause: too many parts`, 'VALIDATION_ERROR');
+			}
+			validateColumnName(orderParts[0]);
+			const direction = orderParts[1]?.toUpperCase();
+			if (direction && direction !== 'ASC' && direction !== 'DESC') {
+				throw new DatabaseError(`Invalid ORDER BY direction: ${direction}`, 'VALIDATION_ERROR');
+			}
+			sql += ` ORDER BY ${orderParts[0]}${direction ? ` ${direction}` : ''}`;
+		}
+
+		if (options?.limit !== undefined) {
+			// Clamp to reasonable bounds to prevent Infinity or excessive values
+			const limit = Math.max(0, Math.min(Math.floor(options.limit), 1000));
+			sql += ` LIMIT ${limit}`;
+		}
+
+		if (options?.offset !== undefined) {
+			// Clamp to reasonable bounds to prevent Infinity or excessive values
+			const offset = Math.max(0, Math.min(Math.floor(options.offset), 100000));
+			sql += ` OFFSET ${offset}`;
+		}
+
+		return queryMany<T>(this.db, sql, params);
+	}
+
+	/**
+	 * Insert a row with automatic tenant_id injection
+	 */
+	async insert(
+		table: string,
+		data: Record<string, unknown>,
+		options?: { id?: string }
+	): Promise<string> {
+		const dataWithTenant = {
+			...data,
+			tenant_id: this.context.tenantId
+		};
+		return insert(this.db, table, dataWithTenant, options);
+	}
+
+	/**
+	 * Update rows with automatic tenant scoping
+	 * The WHERE clause is automatically combined with tenant_id check
+	 */
+	async update(
+		table: string,
+		data: Record<string, unknown>,
+		where: string,
+		whereParams: unknown[] = []
+	): Promise<number> {
+		validateTableName(table);
+		const tenantWhere = `tenant_id = ? AND (${where})`;
+		const params = [this.context.tenantId, ...whereParams];
+		return update(this.db, table, data, tenantWhere, params);
+	}
+
+	/**
+	 * Update a row by ID with tenant scoping
+	 */
+	async updateById(
+		table: string,
+		id: string,
+		data: Record<string, unknown>
+	): Promise<boolean> {
+		const changes = await this.update(table, data, 'id = ?', [id]);
+		return changes > 0;
+	}
+
+	/**
+	 * Delete rows with automatic tenant scoping
+	 */
+	async delete(
+		table: string,
+		where: string,
+		whereParams: unknown[] = []
+	): Promise<number> {
+		validateTableName(table);
+		const tenantWhere = `tenant_id = ? AND (${where})`;
+		const params = [this.context.tenantId, ...whereParams];
+		return deleteWhere(this.db, table, tenantWhere, params);
+	}
+
+	/**
+	 * Delete a row by ID with tenant scoping
+	 */
+	async deleteById(table: string, id: string): Promise<boolean> {
+		const changes = await this.delete(table, 'id = ?', [id]);
+		return changes > 0;
+	}
+
+	/**
+	 * Check if a row exists with tenant scoping
+	 */
+	async exists(
+		table: string,
+		where: string,
+		whereParams: unknown[] = []
+	): Promise<boolean> {
+		validateTableName(table);
+		const tenantWhere = `tenant_id = ? AND (${where})`;
+		const params = [this.context.tenantId, ...whereParams];
+		return exists(this.db, table, tenantWhere, params);
+	}
+
+	/**
+	 * Count rows with tenant scoping
+	 */
+	async count(
+		table: string,
+		where?: string,
+		whereParams: unknown[] = []
+	): Promise<number> {
+		validateTableName(table);
+		const tenantWhere = where
+			? `tenant_id = ? AND (${where})`
+			: 'tenant_id = ?';
+		const params = [this.context.tenantId, ...whereParams];
+		return count(this.db, table, tenantWhere, params);
+	}
+
+	/**
+	 * Execute a raw query with tenant scoping
+	 *
+	 * WARNING: You must ensure the query includes tenant_id filtering.
+	 * This method validates that 'tenant_id' appears in the SQL.
+	 */
+	async rawQuery<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+		if (!sql.toLowerCase().includes('tenant_id')) {
+			throw new TenantContextError(
+				'Raw queries must include tenant_id filtering. Use the scoped methods or add tenant_id to your WHERE clause.'
+			);
+		}
+		return queryMany<T>(this.db, sql, params);
+	}
+
+	/**
+	 * Execute a raw statement with tenant scoping validation
+	 *
+	 * WARNING: You must ensure the statement includes tenant_id filtering.
+	 */
+	async rawExecute(sql: string, params: unknown[] = []): Promise<ExecuteResult> {
+		const sqlLower = sql.toLowerCase();
+		// INSERT statements should have tenant_id in the columns
+		// UPDATE/DELETE statements should have tenant_id in WHERE
+		if (sqlLower.startsWith('insert') && !sqlLower.includes('tenant_id')) {
+			throw new TenantContextError(
+				'INSERT statements must include tenant_id. Use the insert() method instead.'
+			);
+		}
+		if ((sqlLower.startsWith('update') || sqlLower.startsWith('delete')) &&
+			!sqlLower.includes('tenant_id')) {
+			throw new TenantContextError(
+				'UPDATE/DELETE statements must include tenant_id in WHERE clause. Use the scoped methods instead.'
+			);
+		}
+		return execute(this.db, sql, params);
+	}
+}
+
+/**
+ * Create a tenant-scoped database wrapper
+ *
+ * This is the primary entry point for multi-tenant database access.
+ * All data operations for tenant-specific tables MUST use this wrapper.
+ *
+ * @example
+ * ```ts
+ * // In a SvelteKit load function:
+ * export async function load({ platform, locals }) {
+ *   const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenant.id });
+ *
+ *   const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published']);
+ *   return { posts };
+ * }
+ *
+ * // In an API route:
+ * export async function POST({ request, platform, locals }) {
+ *   const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenant.id });
+ *
+ *   const data = await request.json();
+ *   const postId = await tenantDb.insert('posts', {
+ *     title: data.title,
+ *     content: data.content,
+ *     status: 'draft'
+ *   });
+ *
+ *   return json({ id: postId });
+ * }
+ * ```
+ */
+export function getTenantDb(db: D1DatabaseOrSession, context: TenantContext): TenantDb {
+	return new TenantDb(db, context);
+}

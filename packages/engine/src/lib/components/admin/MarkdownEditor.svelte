@@ -5,8 +5,9 @@
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
+  import FloatingToolbar from "./FloatingToolbar.svelte";
 
-  // Import composables
+  // Import composables (simplified - removed command palette and slash commands)
   import {
     useAmbientSounds,
     soundLibrary,
@@ -15,8 +16,6 @@
     useSnippets,
     useDraftManager,
     useWritingSession,
-    useSlashCommands,
-    useCommandPalette,
   } from "./composables/index.js";
 
   /**
@@ -46,7 +45,7 @@
   let previewRef = $state(null);
   /** @type {HTMLElement | null} */
   let lineNumbersRef = $state(null);
-  let showPreview = $state(true);
+  let showPreview = $state(false);  // Default to false for Medium-style focused writing
   let cursorLine = $state(1);
   let cursorCol = $state(1);
   let isUpdating = $state(false);
@@ -91,38 +90,7 @@
     readonly,
   });
 
-  const slashCommands = useSlashCommands({
-    getTextareaRef: () => textareaRef,
-    getContent: () => content,
-    setContent: (/** @type {string} */ c) => (content = c),
-    getSnippets: () => snippetsManager.snippets,
-    onOpenSnippetsModal: () => snippetsManager.openModal(),
-  });
-
-  // Command palette actions
-  const basePaletteActions = [
-    { id: "save", label: "Save", shortcut: "⌘S", action: () => onSave() },
-    { id: "preview", label: "Toggle Preview", shortcut: "", action: () => (showPreview = !showPreview) },
-    { id: "fullPreview", label: "Full Preview", shortcut: "", action: () => (showFullPreview = true) },
-    { id: "zen", label: "Toggle Zen Mode", shortcut: "⌘⇧↵", action: () => toggleZenMode() },
-    { id: "campfire", label: "Start Campfire Session", shortcut: "", action: () => writingSession.startCampfire() },
-    { id: "bold", label: "Bold", shortcut: "⌘B", action: () => wrapSelection("**", "**") },
-    { id: "italic", label: "Italic", shortcut: "⌘I", action: () => wrapSelection("_", "_") },
-    { id: "code", label: "Insert Code Block", shortcut: "", action: () => insertCodeBlock() },
-    { id: "link", label: "Insert Link", shortcut: "", action: () => insertLink() },
-    { id: "image", label: "Insert Image", shortcut: "", action: () => insertImage() },
-    { id: "goal", label: "Set Writing Goal", shortcut: "", action: () => writingSession.promptWritingGoal() },
-    { id: "snippets", label: "Manage Snippets", shortcut: "", action: () => snippetsManager.openModal() },
-    { id: "newSnippet", label: "Create New Snippet", shortcut: "", action: () => snippetsManager.openModal() },
-    { id: "sounds", label: "Toggle Ambient Sounds", shortcut: "", action: () => ambientSounds.toggle() },
-    { id: "soundPanel", label: "Sound Settings", shortcut: "", action: () => ambientSounds.togglePanel() },
-  ];
-
-  const commandPalette = useCommandPalette({
-    getActions: () => basePaletteActions,
-    getThemes: () => themes,
-    getCurrentTheme: () => editorTheme.currentTheme,
-  });
+  // Note: Slash commands and command palette removed for simplified Medium-style UX
 
   // Computed values
   let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
@@ -159,25 +127,6 @@
     return anchors;
   });
 
-  // Filtered commands for UI
-  let filteredSlashCommands = $derived.by(() => slashCommands.getFilteredCommands());
-  let filteredPaletteCommands = $derived.by(() => {
-    // Include theme actions that actually set the theme
-    const actions = basePaletteActions.filter((cmd) =>
-      cmd.label.toLowerCase().includes(commandPalette.query.toLowerCase())
-    );
-    const themeCommands = Object.entries(themes)
-      .filter(([key, theme]) =>
-        `Theme: ${theme.label} (${theme.desc})`.toLowerCase().includes(commandPalette.query.toLowerCase())
-      )
-      .map(([key, theme]) => ({
-        id: `theme-${key}`,
-        label: `Theme: ${theme.label} (${theme.desc})`,
-        shortcut: editorTheme.currentTheme === key ? "●" : "",
-        action: () => editorTheme.setTheme(key),
-      }));
-    return [...actions, ...themeCommands];
-  });
 
   // Public exports
   export function getAvailableAnchors() {
@@ -207,59 +156,15 @@
     cursorCol = lines[lines.length - 1].length + 1;
   }
 
-  // Keyboard handlers
+  // Keyboard handlers (simplified - removed slash commands and command palette)
   /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
-    // Escape key handling
+    // Escape key handling - exit zen mode
     if (e.key === "Escape") {
-      if (slashCommands.isOpen) {
-        slashCommands.close();
-        return;
-      }
-      if (commandPalette.isOpen) {
-        commandPalette.close();
-        return;
-      }
       if (isZenMode) {
         isZenMode = false;
         return;
       }
-    }
-
-    // Slash commands trigger
-    if (e.key === "/" && !slashCommands.isOpen && textareaRef) {
-      const pos = textareaRef.selectionStart;
-      // Only trigger at start of line or after whitespace
-      if (pos === 0 || /\s$/.test(content.substring(0, pos))) {
-        setTimeout(() => slashCommands.open(), 0);
-      }
-    }
-
-    // Close slash menu on space or enter
-    if (slashCommands.isOpen && (e.key === " " || e.key === "Enter")) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        slashCommands.execute(slashCommands.menu.selectedIndex);
-      }
-      slashCommands.close();
-    }
-
-    // Navigate slash menu
-    if (slashCommands.isOpen) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        slashCommands.navigate("down");
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        slashCommands.navigate("up");
-      }
-    }
-
-    // Command palette: Cmd+K
-    if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      commandPalette.toggle();
     }
 
     // Zen mode: Cmd+Shift+Enter
@@ -558,16 +463,6 @@
     }
   }
 
-  // Command palette execution
-  /** @param {number} index */
-  function executePaletteCommand(index) {
-    const cmd = filteredPaletteCommands[index];
-    if (cmd && cmd.action) {
-      cmd.action();
-      commandPalette.close();
-    }
-  }
-
   onMount(() => {
     updateCursorPosition();
     snippetsManager.load();
@@ -642,57 +537,10 @@
     </div>
   {/if}
 
-  <!-- Toolbar -->
+  <!-- Minimal Toolbar (Medium-style - formatting via floating toolbar on selection) -->
   <div class="toolbar">
-    <div class="toolbar-group">
-      <button type="button" class="toolbar-btn" onclick={() => insertHeading(1)} title="Heading 1" disabled={readonly}>
-        [h<span class="key">1</span>]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={() => insertHeading(2)} title="Heading 2" disabled={readonly}>
-        [h<span class="key">2</span>]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={() => insertHeading(3)} title="Heading 3" disabled={readonly}>
-        [h<span class="key">3</span>]
-      </button>
-    </div>
-
-    <div class="toolbar-divider">|</div>
-
-    <div class="toolbar-group">
-      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("**", "**")} title="Bold (Cmd+B)" disabled={readonly}>
-        [<span class="key">b</span>old]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("_", "_")} title="Italic (Cmd+I)" disabled={readonly}>
-        [<span class="key">i</span>talic]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={() => wrapSelection("`", "`")} title="Inline Code" disabled={readonly}>
-        [<span class="key">c</span>ode]
-      </button>
-    </div>
-
-    <div class="toolbar-divider">|</div>
-
-    <div class="toolbar-group">
-      <button type="button" class="toolbar-btn" onclick={insertLink} title="Link" disabled={readonly}>
-        [<span class="key">l</span>ink]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={insertImage} title="Image" disabled={readonly}>
-        [i<span class="key">m</span>g]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={insertCodeBlock} title="Code Block" disabled={readonly}>
-        [bloc<span class="key">k</span>]
-      </button>
-    </div>
-
-    <div class="toolbar-divider">|</div>
-
-    <div class="toolbar-group">
-      <button type="button" class="toolbar-btn" onclick={insertList} title="List" disabled={readonly}>
-        [lis<span class="key">t</span>]
-      </button>
-      <button type="button" class="toolbar-btn" onclick={insertQuote} title="Quote" disabled={readonly}>
-        [<span class="key">q</span>uote]
-      </button>
+    <div class="toolbar-left">
+      <span class="toolbar-hint">Select text to format</span>
     </div>
 
     <div class="toolbar-spacer"></div>
@@ -812,74 +660,13 @@
   </div>
 </div>
 
-<!-- Slash Commands Menu -->
-{#if slashCommands.isOpen}
-  <div class="slash-menu">
-    <div class="slash-menu-header">:: commands</div>
-    {#each filteredSlashCommands as cmd, i}
-      <button
-        type="button"
-        class="slash-menu-item"
-        class:selected={i === slashCommands.menu.selectedIndex}
-        onclick={() => slashCommands.execute(i)}
-      >
-        <span class="slash-cmd-label">{cmd.label}</span>
-      </button>
-    {/each}
-    {#if filteredSlashCommands.length === 0}
-      <div class="slash-menu-empty">; no commands found</div>
-    {/if}
-  </div>
-{/if}
-
-<!-- Command Palette -->
-{#if commandPalette.isOpen}
-  <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-  <div class="command-palette-overlay" onclick={() => commandPalette.close()} role="dialog" aria-modal="true" aria-label="Command palette">
-    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-    <div class="command-palette" onclick={(e) => e.stopPropagation()}>
-      <input
-        type="text"
-        class="command-palette-input"
-        placeholder="> type a command..."
-        value={commandPalette.query}
-        oninput={(e) => commandPalette.setQuery(/** @type {HTMLInputElement} */ (e.target).value)}
-        onkeydown={(e) => {
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            commandPalette.navigate("down");
-          }
-          if (e.key === "ArrowUp") {
-            e.preventDefault();
-            commandPalette.navigate("up");
-          }
-          if (e.key === "Enter") {
-            e.preventDefault();
-            executePaletteCommand(commandPalette.selectedIndex);
-          }
-          if (e.key === "Escape") {
-            commandPalette.close();
-          }
-        }}
-      />
-      <div class="command-palette-list">
-        {#each filteredPaletteCommands as cmd, i}
-          <button
-            type="button"
-            class="command-palette-item"
-            class:selected={i === commandPalette.selectedIndex}
-            onclick={() => executePaletteCommand(i)}
-          >
-            <span class="palette-cmd-label">{cmd.label}</span>
-            {#if cmd.shortcut}
-              <span class="palette-cmd-shortcut">{cmd.shortcut}</span>
-            {/if}
-          </button>
-        {/each}
-      </div>
-    </div>
-  </div>
-{/if}
+<!-- Floating Toolbar for text formatting (Medium-style) -->
+<FloatingToolbar
+  {textareaRef}
+  bind:content={content}
+  {readonly}
+  onContentChange={(c) => content = c}
+/>
 
 <!-- Campfire Session Controls -->
 {#if writingSession.isCampfireActive}
@@ -1321,6 +1108,15 @@
   .toolbar-spacer {
     flex: 1;
   }
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+  }
+  .toolbar-hint {
+    color: var(--editor-text-dim, #5a5a5a);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
   .editor-area {
     display: flex;
     flex: 1;
@@ -1651,121 +1447,7 @@
   .campfire-end:hover {
     color: #f0d0a0;
   }
-  .slash-menu {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: 220px;
-    max-height: 300px;
-    overflow-y: auto;
-    background: #252526;
-    border: 1px solid var(--light-border-primary);
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
-    animation: scale-in 0.15s ease;
-  }
-  .slash-menu-header {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    color: #8bc48b;
-    border-bottom: 1px solid var(--light-border-primary);
-  }
-  .slash-menu-item {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    background: transparent;
-    border: none;
-    color: #d4d4d4;
-    font-size: 0.85rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.1s ease;
-  }
-  .slash-menu-item:hover,
-  .slash-menu-item.selected {
-    background: var(--light-border-primary);
-  }
-  .slash-menu-item.selected {
-    color: #8bc48b;
-  }
-  .slash-menu-empty {
-    padding: 0.75rem;
-    color: #7a9a7a;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    font-size: 0.8rem;
-    text-align: center;
-  }
-  .command-palette-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 15vh;
-    z-index: 1002;
-  }
-  .command-palette {
-    width: 100%;
-    max-width: 500px;
-    background: var(--light-bg-primary);
-    border: 1px solid var(--light-border-primary);
-    border-radius: 8px;
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
-    overflow: hidden;
-    animation: slide-down 0.2s ease;
-  }
-  .command-palette-input {
-    width: 100%;
-    padding: 1rem;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--light-border-primary);
-    color: #d4d4d4;
-    font-size: 1rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    outline: none;
-  }
-  .command-palette-input::placeholder {
-    color: #7a9a7a;
-  }
-  .command-palette-list {
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  .command-palette-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: transparent;
-    border: none;
-    color: #d4d4d4;
-    font-size: 0.9rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.1s ease;
-  }
-  .command-palette-item:hover,
-  .command-palette-item.selected {
-    background: var(--light-bg-tertiary);
-  }
-  .command-palette-item.selected {
-    color: #8bc48b;
-  }
-  .palette-cmd-shortcut {
-    font-size: 0.75rem;
-    color: #6a6a6a;
-    font-family: "JetBrains Mono", monospace;
-  }
+  /* Slash menu and command palette styles removed - using FloatingToolbar instead */
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }

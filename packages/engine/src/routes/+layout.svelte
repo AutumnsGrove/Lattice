@@ -458,7 +458,9 @@
 	:global(.dark) .not-found-content a {
 		color: var(--accent-success);
 	}
-	/* @font-face declarations for custom fonts */
+	/* @font-face declarations for custom fonts
+	   TODO: Migrate to CDN (https://cdn.grove.place/fonts/) after R2 upload
+	   See FONT_CDN_MIGRATION.md for migration instructions */
 	@font-face {
 		font-family: 'Alagard';
 		src: url('/fonts/alagard.ttf') format('truetype');
