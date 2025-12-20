@@ -458,143 +458,145 @@
 	:global(.dark) .not-found-content a {
 		color: var(--accent-success);
 	}
-	/* @font-face declarations - loaded from CDN for bundle optimization */
+	/* @font-face declarations for custom fonts
+	   TODO: Migrate to CDN (https://cdn.grove.place/fonts/) after R2 upload
+	   See FONT_CDN_MIGRATION.md for migration instructions */
 	@font-face {
 		font-family: 'Alagard';
-		src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
+		src: url('/fonts/alagard.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Cozette';
-		src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
+		src: url('/fonts/CozetteVector.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Atkinson Hyperlegible';
-		src: url('https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
+		src: url('/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'OpenDyslexic';
-		src: url('https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf') format('opentype');
+		src: url('/fonts/OpenDyslexic-Regular.otf') format('opentype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Lexend';
-		src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
+		src: url('/fonts/Lexend-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Cormorant';
-		src: url('https://cdn.grove.place/fonts/Cormorant-Regular.ttf') format('truetype');
+		src: url('/fonts/Cormorant-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Quicksand';
-		src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype');
+		src: url('/fonts/Quicksand-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'IBM Plex Mono';
-		src: url('https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf') format('truetype');
+		src: url('/fonts/IBMPlexMono-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Bodoni Moda';
-		src: url('https://cdn.grove.place/fonts/BodoniModa-Regular.ttf') format('truetype');
+		src: url('/fonts/BodoniModa-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Calistoga';
-		src: url('https://cdn.grove.place/fonts/Calistoga-Regular.ttf') format('truetype');
+		src: url('/fonts/Calistoga-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Caveat';
-		src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype');
+		src: url('/fonts/Caveat-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Fraunces';
-		src: url('https://cdn.grove.place/fonts/Fraunces-Regular.ttf') format('truetype');
+		src: url('/fonts/Fraunces-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Nunito';
-		src: url('https://cdn.grove.place/fonts/Nunito-Regular.ttf') format('truetype');
+		src: url('/fonts/Nunito-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Luciole';
-		src: url('https://cdn.grove.place/fonts/Luciole-Regular.ttf') format('truetype');
+		src: url('/fonts/Luciole-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Merriweather';
-		src: url('https://cdn.grove.place/fonts/Merriweather-Regular.ttf') format('truetype');
+		src: url('/fonts/Merriweather-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'EB Garamond';
-		src: url('https://cdn.grove.place/fonts/EBGaramond-Regular.ttf') format('truetype');
+		src: url('/fonts/EBGaramond-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Lora';
-		src: url('https://cdn.grove.place/fonts/Lora-Regular.ttf') format('truetype');
+		src: url('/fonts/Lora-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Plus Jakarta Sans';
-		src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
+		src: url('/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Manrope';
-		src: url('https://cdn.grove.place/fonts/Manrope-Regular.ttf') format('truetype');
+		src: url('/fonts/Manrope-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
 	}
 	@font-face {
 		font-family: 'Instrument Sans';
-		src: url('https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf') format('truetype');
+		src: url('/fonts/InstrumentSans-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
