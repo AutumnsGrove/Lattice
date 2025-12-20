@@ -27,6 +27,8 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 
 ### Required Secrets/Tokens
 
+> ⚠️ **NEVER commit secrets to the repository!** If you accidentally commit a secret, immediately rotate it in the respective dashboard (Stripe/Cloudflare).
+
 Set these environment variables before running `sst dev` or `sst deploy`:
 
 | Secret | When Needed | How to Get |
@@ -39,6 +41,7 @@ Set these environment variables before running `sst dev` or `sst deploy`:
 ```bash
 export CLOUDFLARE_API_TOKEN="your-token-here"
 export STRIPE_TEST_SECRET_KEY="sk_test_xxx"
+# NEVER set STRIPE_SECRET_KEY locally - use test keys only
 ```
 
 **GitHub Actions (later):**

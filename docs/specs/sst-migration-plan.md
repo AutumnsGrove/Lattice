@@ -651,6 +651,23 @@ Delete from engine:
 
 > **Approach:** Migrate slowly, test at each step, keep wrangler.toml files as fallback.
 
+### ⚠️ Security: Secrets Management
+
+**NEVER commit these to the repository:**
+- `STRIPE_SECRET_KEY` (live mode)
+- `STRIPE_TEST_SECRET_KEY` (test mode)
+- `CLOUDFLARE_API_TOKEN`
+
+**Safe ways to provide secrets:**
+1. **Environment variables** (local dev): `export STRIPE_TEST_SECRET_KEY="sk_test_xxx"`
+2. **GitHub Actions secrets** (CI/CD): Repository Settings → Secrets → Actions
+3. **SST Console** (future): Encrypted secrets management
+
+**If you accidentally commit a secret:**
+1. Immediately rotate the key in Stripe/Cloudflare dashboard
+2. Use `git filter-branch` or BFG Repo-Cleaner to remove from history
+3. Force push (coordinate with team)
+
 ### Step 1: Initialize SST (Foundation)
 
 ```bash
@@ -674,6 +691,8 @@ npx sst add stripe
 
 ### Step 3: Create Base sst.config.ts
 
+> **Note:** Do NOT import provider packages directly. SST manages these internally via the `$config` global. The `stripe.*` and `sst.cloudflare.*` namespaces are automatically available.
+
 ```typescript
 /// <reference path="./.sst/platform/config.d.ts" />
 
@@ -687,6 +706,7 @@ export default $config({
         cloudflare: true,
         stripe: {
           // Test keys for dev/PR, live keys for production
+          // Can also use STRIPE_API_KEY env var as fallback
           apiKey: input?.stage === "production"
             ? process.env.STRIPE_SECRET_KEY
             : process.env.STRIPE_TEST_SECRET_KEY,
@@ -701,17 +721,19 @@ export default $config({
     // =========================================================================
     // PHASE 1: Import existing Cloudflare resources (NO data loss!)
     // =========================================================================
+    // Note: Resource IDs are not secrets, but can be provided via env vars
+    // if you prefer not to hardcode them in the config.
 
     // Import existing D1 database
     const db = sst.cloudflare.D1.get(
       "GroveDB",
-      "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+      process.env.CLOUDFLARE_D1_ID || "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
     );
 
     // Import existing KV namespace
     const cache = sst.cloudflare.Kv.get(
       "GroveCache",
-      "514e91e81cc44d128a82ec6f668303e4"
+      process.env.CLOUDFLARE_KV_ID || "514e91e81cc44d128a82ec6f668303e4"
     );
 
     // Import existing R2 bucket
