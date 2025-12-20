@@ -3,9 +3,11 @@ import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { getTenantDb, generateId, now } from "$lib/server/services/database.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
+  id?: string;
   slug: string;
   title: string;
   date: string;
@@ -28,6 +30,7 @@ interface PostInput {
 
 /**
  * GET /api/posts - List all posts from D1
+ * Uses TenantDb for automatic tenant isolation
  */
 export const GET: RequestHandler = async ({ platform, locals }) => {
   // Auth check for admin access
@@ -44,21 +47,23 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 
   try {
-    const result = await platform.env.DB.prepare(
-      `SELECT slug, title, date, tags, description, last_synced, updated_at
-       FROM posts
-       WHERE tenant_id = ?
-       ORDER BY date DESC`
-    )
-      .bind(locals.tenantId)
-      .all();
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
 
-    const posts = (result.results as PostRecord[]).map((post) => ({
+    const posts = await tenantDb.queryMany<PostRecord>(
+      'posts',
+      undefined,
+      [],
+      { orderBy: 'date DESC' }
+    );
+
+    // Parse JSON tags field
+    const formattedPosts = posts.map((post) => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
 
-    return json({ posts });
+    return json({ posts: formattedPosts });
   } catch (err) {
     console.error("Error fetching posts:", err);
     throw error(500, "Failed to fetch posts");
@@ -67,6 +72,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 /**
  * POST /api/posts - Create a new post in D1
+ * Uses TenantDb for automatic tenant isolation
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Auth check
@@ -131,12 +137,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
 
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+
     // Check if slug already exists for this tenant
-    const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
-    )
-      .bind(slug, locals.tenantId)
-      .first();
+    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
 
     if (existing) {
       throw error(409, "A post with this slug already exists");
@@ -156,31 +161,23 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    const now = new Date().toISOString();
+    const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
 
-    // Build the insert query with all optional fields
-    const insertQuery = `INSERT INTO posts (slug, title, date, tags, description, markdown_content, html_content, gutter_content, font, file_hash, tenant_id, last_synced, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    const queryParams = [
+    // Insert using TenantDb (automatically adds tenant_id)
+    await tenantDb.insert('posts', {
       slug,
-      data.title,
-      data.date || now.split("T")[0],
+      title: data.title,
+      date: data.date || timestamp.split("T")[0],
       tags,
-      data.description || "",
-      data.markdown_content,
+      description: data.description || "",
+      markdown_content: data.markdown_content,
       html_content,
-      data.gutter_content || "[]",
-      data.font || "default",
+      gutter_content: data.gutter_content || "[]",
+      font: data.font || "default",
       file_hash,
-      locals.tenantId,
-      now,
-      now,
-      now,
-    ];
-
-    await platform.env.DB.prepare(insertQuery).bind(...queryParams).run();
+      last_synced: timestamp,
+    }, { id: generateId() });
 
     return json({
       success: true,

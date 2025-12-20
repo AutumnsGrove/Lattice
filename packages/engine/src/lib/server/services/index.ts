@@ -73,9 +73,11 @@ export {
 	type D1DatabaseOrSession,
 	type QueryMeta,
 	type ExecuteResult,
+	type TenantContext,
 	// Errors
 	DatabaseError,
 	type DatabaseErrorCode,
+	TenantContextError,
 	// Utilities
 	generateId,
 	now,
@@ -97,7 +99,10 @@ export {
 	deleteById,
 	// Existence Checks
 	exists,
-	count
+	count,
+	// Multi-Tenant
+	TenantDb,
+	getTenantDb
 } from './database.js';
 
 // ============================================================================

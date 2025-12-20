@@ -4,6 +4,7 @@ import { getPostBySlug } from "$lib/utils/markdown.js";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { getTenantDb, now } from "$lib/server/services/database.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -32,7 +33,8 @@ interface PostInput {
 
 /**
  * GET /api/posts/[slug] - Get a single post
- * Tries D1 first, falls back to filesystem (UserContent)
+ * Uses TenantDb for automatic tenant isolation
+ * Falls back to filesystem (UserContent) if not in D1
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   // Auth check
@@ -50,16 +52,12 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     throw error(401, "Tenant ID not found");
   }
 
-  // Try D1 first
+  // Try D1 first with TenantDb
   if (platform?.env?.DB) {
     try {
-      const post = (await platform.env.DB.prepare(
-        `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, font, last_synced, updated_at
-         FROM posts
-         WHERE slug = ? AND tenant_id = ?`
-      )
-        .bind(slug, locals.tenantId)
-        .first()) as PostRecord | null;
+      const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+
+      const post = await tenantDb.queryOne<PostRecord>('posts', 'slug = ?', [slug]);
 
       if (post) {
         return json({
@@ -110,6 +108,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
 /**
  * PUT /api/posts/[slug] - Update an existing post in D1
+ * Uses TenantDb for automatic tenant isolation
  */
 export const PUT: RequestHandler = async ({
   params,
@@ -170,12 +169,11 @@ export const PUT: RequestHandler = async ({
       throw error(400, "Content too large (max 1MB)");
     }
 
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+
     // Check if post exists for this tenant
-    const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
-    )
-      .bind(slug, locals.tenantId)
-      .first();
+    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
 
     if (!existing) {
       throw error(404, "Post not found");
@@ -195,30 +193,26 @@ export const PUT: RequestHandler = async ({
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    const now = new Date().toISOString();
+    const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
 
-    // Build the update query with all fields
-    const updateQuery = `UPDATE posts
-       SET title = ?, date = ?, tags = ?, description = ?, markdown_content = ?, html_content = ?, file_hash = ?, gutter_content = ?, font = ?, updated_at = ?
-       WHERE slug = ? AND tenant_id = ?`;
-
-    const queryParams = [
-      data.title,
-      data.date || now.split("T")[0],
-      tags,
-      data.description || "",
-      data.markdown_content,
-      html_content,
-      file_hash,
-      data.gutter_content || "[]",
-      data.font || "default",
-      now,
-      slug,
-      locals.tenantId,
-    ];
-
-    await platform.env.DB.prepare(updateQuery).bind(...queryParams).run();
+    // Update using TenantDb (automatically adds tenant_id to WHERE clause)
+    await tenantDb.update(
+      'posts',
+      {
+        title: data.title,
+        date: data.date || timestamp.split("T")[0],
+        tags,
+        description: data.description || "",
+        markdown_content: data.markdown_content,
+        html_content,
+        file_hash,
+        gutter_content: data.gutter_content || "[]",
+        font: data.font || "default",
+      },
+      'slug = ?',
+      [slug]
+    );
 
     return json({
       success: true,
@@ -234,6 +228,7 @@ export const PUT: RequestHandler = async ({
 
 /**
  * DELETE /api/posts/[slug] - Delete a post from D1
+ * Uses TenantDb for automatic tenant isolation
  */
 export const DELETE: RequestHandler = async ({
   request,
@@ -266,22 +261,18 @@ export const DELETE: RequestHandler = async ({
   }
 
   try {
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+
     // Check if post exists for this tenant
-    const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM posts WHERE slug = ? AND tenant_id = ?"
-    )
-      .bind(slug, locals.tenantId)
-      .first();
+    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
 
     if (!existing) {
       throw error(404, "Post not found");
     }
 
-    await platform.env.DB.prepare(
-      "DELETE FROM posts WHERE slug = ? AND tenant_id = ?"
-    )
-      .bind(slug, locals.tenantId)
-      .run();
+    // Delete using TenantDb (automatically adds tenant_id to WHERE clause)
+    await tenantDb.delete('posts', 'slug = ?', [slug]);
 
     return json({
       success: true,

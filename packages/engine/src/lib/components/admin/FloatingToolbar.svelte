@@ -5,6 +5,11 @@
   /**
    * FloatingToolbar - Medium-style floating toolbar for text formatting
    * Appears above selected text with formatting options
+   *
+   * @security This component modifies raw markdown content but does NOT sanitize input.
+   * The parent component MUST sanitize all content before persisting to the database
+   * to prevent XSS attacks. Use sanitizeMarkdown() when converting to HTML for display.
+   * See: $lib/utils/sanitize.js
    */
 
   // Props
