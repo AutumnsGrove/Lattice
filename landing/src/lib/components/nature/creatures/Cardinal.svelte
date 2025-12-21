@@ -3,6 +3,7 @@
 
 	interface Props {
 		class?: string;
+		style?: string;
 		bodyColor?: string;
 		maskColor?: string;
 		beakColor?: string;
@@ -12,6 +13,7 @@
 
 	let {
 		class: className = 'w-6 h-6',
+		style,
 		bodyColor,
 		maskColor,
 		beakColor,
@@ -33,7 +35,7 @@
 	class="{className} {animate ? 'bob' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 60"
-	style="transform: scaleX({scaleX})"
+	style="transform: scaleX({scaleX}); {style ?? ''}"
 >
 	<!-- Tail feathers - long and red -->
 	<path fill={body} d="M5 35 Q0 40 2 50 Q8 48 12 42 Q14 38 10 34 Q7 33 5 35" />

@@ -38,7 +38,7 @@
 	} from '$lib/components/nature/palette';
 
 	// Season state
-	let season: Season = $state('summer');
+	let season = $state<Season>('summer');
 	const isAutumn = $derived(season === 'autumn');
 	const isWinter = $derived(season === 'winter');
 
@@ -293,42 +293,56 @@
 	const winterBirds = $derived.by((): WinterBird[] => {
 		if (baseTrees.length === 0) return [];
 
-		// Select a few trees to place birds near (deterministic selection)
-		const birdTrees = baseTrees
-			.filter((t) => t.treeType !== 'logo') // Don't perch on logo
-			.sort((a, b) => a.id - b.id)
-			.filter((_, i) => [2, 5, 8, 12, 15].includes(i)); // Pick specific indices
+		// Filter to valid perching trees (no logos, visible x positions)
+		const perchableTrees = baseTrees
+			.filter((t) => t.treeType !== 'logo')
+			.filter((t) => t.x > 15 && t.x < 85) // Keep away from edges
+			.sort((a, b) => a.id - b.id);
+
+		// Pick trees for cardinals - spread across left and right halves
+		const leftTrees = perchableTrees.filter((t) => t.x < 50);
+		const rightTrees = perchableTrees.filter((t) => t.x >= 50);
+
+		// Select one cardinal tree from each side for good visual spread
+		const cardinalTrees = [
+			leftTrees[Math.min(2, leftTrees.length - 1)],
+			rightTrees[Math.min(3, rightTrees.length - 1)]
+		].filter(Boolean);
+
+		// Pick additional trees for chickadees (from middle areas)
+		const chickadeeTrees = perchableTrees
+			.filter((t) => !cardinalTrees.includes(t))
+			.filter((_, i) => [1, 4, 7].includes(i));
 
 		const birds: WinterBird[] = [];
 		let birdId = 0;
 
-		birdTrees.forEach((tree, i) => {
-			// Cardinal on first two selected trees
-			if (i < 2) {
-				birds.push({
-					id: birdId++,
-					type: 'cardinal',
-					// Position slightly to the side of tree crown
-					x: tree.x + (i % 2 === 0 ? -3 : 3),
-					y: tree.y - 8, // Above the base, in the canopy area
-					size: Math.max(8, tree.size * 0.15),
-					zIndex: tree.zIndex + 1,
-					opacity: tree.opacity,
-					facing: i % 2 === 0 ? 'right' : 'left'
-				});
-			} else {
-				// Chickadees on remaining trees
-				birds.push({
-					id: birdId++,
-					type: 'chickadee',
-					x: tree.x + (i % 2 === 0 ? -2 : 2),
-					y: tree.y - 6,
-					size: Math.max(6, tree.size * 0.12),
-					zIndex: tree.zIndex + 1,
-					opacity: tree.opacity,
-					facing: i % 2 === 0 ? 'left' : 'right'
-				});
-			}
+		// Place cardinals - one facing each direction
+		cardinalTrees.forEach((tree, i) => {
+			birds.push({
+				id: birdId++,
+				type: 'cardinal',
+				x: tree.x + (i === 0 ? 2 : -2),
+				y: tree.y - 8,
+				size: Math.max(10, tree.size * 0.18),
+				zIndex: tree.zIndex + 1,
+				opacity: tree.opacity,
+				facing: i === 0 ? 'right' : 'left' // Left cardinal faces right, right faces left
+			});
+		});
+
+		// Place chickadees
+		chickadeeTrees.forEach((tree, i) => {
+			birds.push({
+				id: birdId++,
+				type: 'chickadee',
+				x: tree.x + (i % 2 === 0 ? -2 : 2),
+				y: tree.y - 6,
+				size: Math.max(6, tree.size * 0.12),
+				zIndex: tree.zIndex + 1,
+				opacity: tree.opacity,
+				facing: i % 2 === 0 ? 'left' : 'right'
+			});
 		});
 
 		return birds;
@@ -436,7 +450,13 @@
 
 			<!-- Snowfall layer - only in winter -->
 			{#if isWinter}
-				<SnowfallLayer count={80} zIndex={100} enabled={true} />
+				<SnowfallLayer
+					count={100}
+					zIndex={100}
+					enabled={true}
+					opacity={{ min: 0.6, max: 1 }}
+					spawnDelay={6}
+				/>
 			{/if}
 
 			<!-- Winter birds - positioned relative to trees -->
