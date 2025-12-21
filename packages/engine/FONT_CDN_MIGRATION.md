@@ -1,6 +1,6 @@
 # Font CDN Migration Instructions
 
-> **Status:** PENDING - Fonts are currently served locally. Follow these steps to migrate to CDN.
+> **Status:** COMPLETED (2025-12-21) - All fonts now served from cdn.grove.place
 
 ## Overview
 

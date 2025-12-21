@@ -287,7 +287,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
-    "font-src 'self'",
+    "font-src 'self' https://cdn.grove.place",
     "connect-src 'self' https://api.github.com https://*.grove.place",
     "frame-ancestors 'none'",
   ].join("; ");

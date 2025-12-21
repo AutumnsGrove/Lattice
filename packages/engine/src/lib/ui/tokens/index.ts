@@ -13,10 +13,11 @@
 // - Cream: Background and light surfaces (#fefdfb)
 
 // Design token exports
-export * from './colors.js';
-export * from './typography.js';
-export * from './spacing.js';
-export * from './effects.js';
-export * from './animation.js';
+export * from "./colors.js";
+export * from "./typography.js";
+export * from "./spacing.js";
+export * from "./effects.js";
+export * from "./animation.js";
+export * from "./fonts.js";
 
-export const TOKENS_VERSION = '0.2.0';
+export const TOKENS_VERSION = "0.2.0";
