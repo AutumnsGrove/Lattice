@@ -13,6 +13,13 @@
 	// Falling leaves
 	import FallingLeavesLayer from '$lib/components/nature/botanical/FallingLeavesLayer.svelte';
 
+	// Snowfall
+	import SnowfallLayer from '$lib/components/nature/weather/SnowfallLayer.svelte';
+
+	// Winter birds
+	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
+	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
+
 	// Sky
 	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
 
@@ -26,12 +33,14 @@
 		autumn,
 		pinks,
 		autumnReds,
+		winter,
 		type Season
 	} from '$lib/components/nature/palette';
 
 	// Season state
 	let season: Season = $state('summer');
 	const isAutumn = $derived(season === 'autumn');
+	const isWinter = $derived(season === 'winter');
 
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
@@ -124,12 +133,17 @@
 		return arr[Math.floor(Math.random() * arr.length)];
 	}
 
-	// Get seasonal colors based on depth (takes isAutumnSeason explicitly for reactivity)
-	function getDepthColors(brightness: 'dark' | 'mid' | 'light', isAutumnSeason: boolean): string[] {
-		if (isAutumnSeason) {
+	// Get seasonal colors based on depth (takes season explicitly for reactivity)
+	function getDepthColors(brightness: 'dark' | 'mid' | 'light', currentSeason: Season): string[] {
+		if (currentSeason === 'autumn') {
 			if (brightness === 'dark') return [autumn.rust, autumn.ember];
 			if (brightness === 'mid') return [autumn.pumpkin, autumn.amber];
 			return [autumn.gold, autumn.honey, autumn.straw];
+		} else if (currentSeason === 'winter') {
+			// Frosted evergreen colors for pines (deciduous trees handled separately)
+			if (brightness === 'dark') return [winter.frostedPine, winter.frostedPine];
+			if (brightness === 'mid') return [winter.winterGreen, winter.winterGreen];
+			return [winter.coldSpruce, winter.coldSpruce];
 		} else {
 			if (brightness === 'dark') return [greens.darkForest, greens.deepGreen];
 			if (brightness === 'mid') return [greens.grove, greens.meadow];
@@ -137,9 +151,12 @@
 		}
 	}
 
-	function getDepthPinks(brightness: 'dark' | 'mid' | 'light', isAutumnSeason: boolean): string[] {
-		if (isAutumnSeason) {
+	function getDepthPinks(brightness: 'dark' | 'mid' | 'light', currentSeason: Season): string[] {
+		if (currentSeason === 'autumn') {
 			return [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
+		} else if (currentSeason === 'winter') {
+			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
+			return [winter.bareBranch, winter.frostedBark, winter.coldWood];
 		} else {
 			if (brightness === 'dark') return [pinks.deepPink, pinks.pink];
 			if (brightness === 'mid') return [pinks.rose, pinks.blush];
@@ -149,8 +166,11 @@
 
 	// Get hill fill color based on layer and season
 	function getHillColor(layerIndex: number): string {
-		const opacity = [0.25, 0.35, 0.45, 0.55][layerIndex] ?? 0.4;
-		if (isAutumn) {
+		if (isWinter) {
+			// Snowy hills - back hills cooler/darker, front hills warmer/brighter
+			const colors = [winter.hillDeep, winter.hillMid, winter.hillNear, winter.hillFront];
+			return colors[layerIndex] ?? colors[0];
+		} else if (isAutumn) {
 			const colors = ['#92400e', '#b45309', '#d97706', '#f59e0b'];
 			return colors[layerIndex] ?? colors[0];
 		} else {
@@ -165,7 +185,7 @@
 	}
 
 	// Get appropriate color for tree type and depth (deterministic based on seed)
-	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number, isAutumnSeason: boolean): string {
+	function getTreeColor(treeType: TreeType, depthColors: string[], depthPinks: string[], seed: number, currentSeason: Season): string {
 		// Use hashed seed to pick deterministically with natural distribution
 		const pickFromArray = <T>(arr: T[]): T => arr[Math.floor(hashSeed(seed)) % arr.length];
 
@@ -173,8 +193,12 @@
 			return pickFromArray(depthPinks);
 		}
 		// Pine stays green even in autumn (evergreen!)
-		if (treeType === 'pine' && isAutumnSeason) {
+		if (treeType === 'pine' && currentSeason === 'autumn') {
 			return pickFromArray([greens.deepGreen, greens.grove, greens.darkForest]);
+		}
+		// Pine gets frosted colors in winter
+		if (treeType === 'pine' && currentSeason === 'winter') {
+			return pickFromArray([winter.frostedPine, winter.winterGreen, winter.coldSpruce]);
 		}
 		return pickFromArray(depthColors);
 	}
@@ -239,23 +263,86 @@
 	});
 
 	// Final trees with seasonal colors - derived from base trees and season
-	// Use $derived.by and read isAutumn at top level to ensure reactivity
+	// Use $derived.by and read season at top level to ensure reactivity
 	let forestTrees = $derived.by(() => {
-		// Read isAutumn at top level to establish reactive dependency
-		const currentIsAutumn = isAutumn;
+		// Read season at top level to establish reactive dependency
+		const currentSeason = season;
 		return baseTrees.map((tree) => {
-			const depthColors = getDepthColors(tree.brightness, currentIsAutumn);
-			const depthPinks = getDepthPinks(tree.brightness, currentIsAutumn);
+			const depthColors = getDepthColors(tree.brightness, currentSeason);
+			const depthPinks = getDepthPinks(tree.brightness, currentSeason);
 			return {
 				...tree,
-				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id, currentIsAutumn)
+				color: getTreeColor(tree.treeType, depthColors, depthPinks, tree.id, currentSeason)
 			};
 		});
 	});
 
-	// Toggle season
+	// Winter birds - positioned relative to trees for organic placement
+	interface WinterBird {
+		id: number;
+		type: 'cardinal' | 'chickadee';
+		x: number;
+		y: number;
+		size: number;
+		zIndex: number;
+		opacity: number;
+		facing: 'left' | 'right';
+	}
+
+	// Generate bird positions based on tree locations
+	const winterBirds = $derived.by((): WinterBird[] => {
+		if (baseTrees.length === 0) return [];
+
+		// Select a few trees to place birds near (deterministic selection)
+		const birdTrees = baseTrees
+			.filter((t) => t.treeType !== 'logo') // Don't perch on logo
+			.sort((a, b) => a.id - b.id)
+			.filter((_, i) => [2, 5, 8, 12, 15].includes(i)); // Pick specific indices
+
+		const birds: WinterBird[] = [];
+		let birdId = 0;
+
+		birdTrees.forEach((tree, i) => {
+			// Cardinal on first two selected trees
+			if (i < 2) {
+				birds.push({
+					id: birdId++,
+					type: 'cardinal',
+					// Position slightly to the side of tree crown
+					x: tree.x + (i % 2 === 0 ? -3 : 3),
+					y: tree.y - 8, // Above the base, in the canopy area
+					size: Math.max(8, tree.size * 0.15),
+					zIndex: tree.zIndex + 1,
+					opacity: tree.opacity,
+					facing: i % 2 === 0 ? 'right' : 'left'
+				});
+			} else {
+				// Chickadees on remaining trees
+				birds.push({
+					id: birdId++,
+					type: 'chickadee',
+					x: tree.x + (i % 2 === 0 ? -2 : 2),
+					y: tree.y - 6,
+					size: Math.max(6, tree.size * 0.12),
+					zIndex: tree.zIndex + 1,
+					opacity: tree.opacity,
+					facing: i % 2 === 0 ? 'left' : 'right'
+				});
+			}
+		});
+
+		return birds;
+	});
+
+	// Toggle season (cycles: summer → autumn → winter → summer)
 	function toggleSeason() {
-		season = isAutumn ? 'summer' : 'autumn';
+		if (season === 'summer') {
+			season = 'autumn';
+		} else if (season === 'autumn') {
+			season = 'winter';
+		} else {
+			season = 'summer';
+		}
 	}
 </script>
 
@@ -264,7 +351,7 @@
 	<meta name="description" content="A forest of Grove trees, growing together." />
 </svelte:head>
 
-<main class="min-h-screen flex flex-col transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
+<main class="min-h-screen flex flex-col transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
@@ -273,14 +360,31 @@
 			<button
 				onclick={toggleSeason}
 				class="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg border border-white/20 hover:scale-110 transition-transform"
-				aria-label={isAutumn ? 'Switch to spring/summer' : 'Switch to autumn'}
+				aria-label={isWinter ? 'Switch to spring/summer' : isAutumn ? 'Switch to winter' : 'Switch to autumn'}
 			>
-				{#if isAutumn}
+				{#if isWinter}
+					<!-- Snowflake icon - click to go back to summer -->
+					<svg class="w-6 h-6 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" y1="2" x2="12" y2="22" />
+						<line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+						<line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+						<line x1="12" y1="6" x2="9" y2="3" />
+						<line x1="12" y1="6" x2="15" y2="3" />
+						<line x1="12" y1="18" x2="9" y2="21" />
+						<line x1="12" y1="18" x2="15" y2="21" />
+						<line x1="6" y1="12" x2="3" y2="9" />
+						<line x1="6" y1="12" x2="3" y2="15" />
+						<line x1="18" y1="12" x2="21" y2="9" />
+						<line x1="18" y1="12" x2="21" y2="15" />
+					</svg>
+				{:else if isAutumn}
+					<!-- Leaf icon - click to go to winter -->
 					<svg class="w-6 h-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
 						<path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
 					</svg>
 				{:else}
+					<!-- Flower icon - click to go to autumn -->
 					<svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1" />
 						<circle cx="12" cy="8" r="2" />
@@ -293,7 +397,7 @@
 		</div>
 
 		<!-- Sky background gradient -->
-		<div class="absolute inset-0 transition-colors duration-1000 {isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
+		<div class="absolute inset-0 transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
 		<!-- Clouds (decorative) -->
 		<div class="absolute top-8 left-[10%] opacity-60" aria-hidden="true">
@@ -308,25 +412,61 @@
 			<svg class="w-full h-full" viewBox="0 0 1200 120" preserveAspectRatio="none" role="presentation">
 				<path
 					d="M0 120 L0 80 Q150 30 300 60 Q450 90 600 50 Q750 10 900 70 Q1050 110 1200 40 L1200 120 Z"
-					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
+					class="transition-colors duration-1000 {isWinter ? 'fill-slate-300/50 dark:fill-slate-600/40' : isAutumn ? 'fill-amber-200/40 dark:fill-amber-900/30' : 'fill-emerald-200/40 dark:fill-emerald-900/30'}"
 				/>
 				<path
 					d="M0 120 L0 100 Q200 60 400 85 Q600 110 800 70 Q1000 40 1200 80 L1200 120 Z"
-					class="transition-colors duration-1000 {isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
+					class="transition-colors duration-1000 {isWinter ? 'fill-slate-400/40 dark:fill-slate-500/30' : isAutumn ? 'fill-amber-300/30 dark:fill-amber-800/20' : 'fill-emerald-300/30 dark:fill-emerald-800/20'}"
 				/>
 			</svg>
 		</div>
 
 		<!-- Forest container with rolling hills (decorative scene) -->
 		<div class="relative w-full h-[70vh] min-h-[500px]" aria-hidden="true" role="presentation">
-			<!-- Falling leaves layer - above hills, below trees -->
-			<FallingLeavesLayer
-				trees={forestTrees}
-				{season}
-				minLeavesPerTree={2}
-				maxLeavesPerTree={4}
-				zIndex={5}
-			/>
+			<!-- Falling leaves layer - above hills, below trees (not in winter) -->
+			{#if !isWinter}
+				<FallingLeavesLayer
+					trees={forestTrees}
+					{season}
+					minLeavesPerTree={2}
+					maxLeavesPerTree={4}
+					zIndex={5}
+				/>
+			{/if}
+
+			<!-- Snowfall layer - only in winter -->
+			{#if isWinter}
+				<SnowfallLayer count={80} zIndex={100} enabled={true} />
+			{/if}
+
+			<!-- Winter birds - positioned relative to trees -->
+			{#if isWinter}
+				{#each winterBirds as bird (bird.id)}
+					<div
+						class="absolute"
+						style="
+							left: {bird.x}%;
+							top: {bird.y}%;
+							z-index: {bird.zIndex};
+							opacity: {bird.opacity};
+						"
+					>
+						{#if bird.type === 'cardinal'}
+							<Cardinal
+								class="w-{bird.size} h-{bird.size * 1.2}"
+								style="width: {bird.size}px; height: {bird.size * 1.2}px;"
+								facing={bird.facing}
+							/>
+						{:else}
+							<Chickadee
+								class="w-{bird.size} h-{bird.size}"
+								style="width: {bird.size}px; height: {bird.size}px;"
+								facing={bird.facing}
+							/>
+						{/if}
+					</div>
+				{/each}
+			{/if}
 
 			<!-- Rolling hills with trees -->
 			{#each hillLayers as hill, i}
@@ -341,7 +481,7 @@
 						d={hill.fillPath}
 						class="transition-colors duration-1000"
 						fill={getHillColor(i)}
-						fill-opacity={isAutumn ? 0.35 : 0.4}
+						fill-opacity={isWinter ? 0.5 : isAutumn ? 0.35 : 0.4}
 					/>
 				</svg>
 			{/each}
@@ -371,6 +511,7 @@
 					{:else if tree.treeType === 'birch'}
 						<TreeBirch class="w-full h-full" color={tree.color} {season} animate={true} />
 					{:else if tree.treeType === 'cherry'}
+						<!-- TreeCherry handles winter internally: hides blossoms, shows bare branches with snow -->
 						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
 					{/if}
 				</div>
@@ -416,6 +557,23 @@
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(autumn) as [name, color]}
+							<div class="flex flex-col items-center gap-1">
+								<div
+									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
+									style="background-color: {color};"
+									title={name}
+								></div>
+								<span class="text-xs text-foreground-faint">{name}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Winter Colors -->
+				<div>
+					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Winter Frost</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each Object.entries(winter) as [name, color]}
 							<div class="flex flex-col items-center gap-1">
 								<div
 									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"

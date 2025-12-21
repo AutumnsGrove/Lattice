@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { autumn, greens, natural } from '../palette';
+	import { autumn, greens, natural, winter } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -18,12 +18,16 @@
 		animate = true
 	}: Props = $props();
 
+	// Check if tree should be bare (winter)
+	const isBare = $derived(season === 'winter');
+
 	// Birch turns brilliant golden yellow in autumn
 	// Use $derived to react to season/color prop changes
 	const defaultColor = $derived(season === 'autumn' ? autumn.gold : 'currentColor');
 	const foliageColor = $derived(color ?? defaultColor);
 
 	// Birch bark is white/cream with dark horizontal marks
+	// In winter, the white bark stands out even more against snow
 	const actualTrunkColor = $derived(trunkColor ?? natural.birchWhite);
 	const barkMarkColor = '#2d2d2d';
 </script>
@@ -45,7 +49,7 @@
 	<path fill="none" stroke={barkMarkColor} stroke-width="0.5" d="M45 83 Q43 87 45 91" opacity="0.25" />
 	<path fill="none" stroke={barkMarkColor} stroke-width="0.5" d="M55 108 Q57 112 55 116" opacity="0.25" />
 
-	<!-- Delicate branch structure -->
+	<!-- Delicate branch structure - always visible -->
 	<path fill="none" stroke={actualTrunkColor} stroke-width="3" d="M50 55 Q42 48 32 42" />
 	<path fill="none" stroke={actualTrunkColor} stroke-width="3" d="M50 55 Q58 48 68 42" />
 	<path fill="none" stroke={actualTrunkColor} stroke-width="2" d="M50 50 Q44 38 38 28" />
@@ -53,7 +57,27 @@
 	<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M46 42 Q40 32 35 22" />
 	<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M54 42 Q60 32 65 22" />
 
+	<!-- Extended bare branches and snow accents in winter -->
+	{#if isBare}
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M32 42 Q26 35 22 28" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M32 42 Q35 35 38 30" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M68 42 Q74 35 78 28" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M68 42 Q65 35 62 30" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M35 22 Q32 15 30 8" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M65 22 Q68 15 70 8" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M38 28 Q36 22 34 16" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="0.8" d="M62 28 Q64 22 66 16" />
+		<!-- Snow accents on branches -->
+		<ellipse fill={winter.snow} cx="32" cy="41" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="68" cy="41" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="38" cy="27" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="62" cy="27" rx="3" ry="1" opacity="0.7" />
+		<ellipse fill={winter.snow} cx="50" cy="49" rx="3" ry="1" opacity="0.6" />
+	{/if}
+
 	<!-- Birch leaves - small serrated ovate leaves (doubled for fullness) -->
+	<!-- Hidden in winter when tree is bare -->
+	{#if !isBare}
 	<!-- Left side clusters -->
 	<g class={animate ? 'sway sway-1' : ''}>
 		<!-- Organic leaf shapes with gentle serration -->
@@ -137,6 +161,7 @@
 		<path fill={foliageColor} d="M65 28 Q62 25 63 21 L65 19 L67 21 Q68 25 65 28 Z" />
 		<path fill={foliageColor} d="M76 24 Q73 21 74 17 L76 15 L78 17 Q79 21 76 24 Z" />
 	</g>
+	{/if}
 </svg>
 
 <style>

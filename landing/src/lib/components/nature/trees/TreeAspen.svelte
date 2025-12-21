@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { autumn, greens } from '../palette';
+	import { autumn, greens, winter } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -18,14 +18,20 @@
 		animate = true
 	}: Props = $props();
 
+	// Check if tree should be bare (winter)
+	const isBare = $derived(season === 'winter');
+
 	// Aspen turns brilliant gold/yellow in autumn
 	// Use $derived to react to season/color prop changes
 	const defaultColor = $derived(season === 'autumn' ? autumn.gold : 'currentColor');
 	const foliageColor = $derived(color ?? defaultColor);
 
 	// Aspen bark is pale cream/greenish-white with dark marks
-	const actualTrunkColor = $derived(trunkColor ?? '#e8e4d9');
-	const barkMarkColor = '#4a4a4a';
+	// In winter, bark takes on a slightly frosted appearance
+	const actualTrunkColor = $derived(
+		trunkColor ?? (season === 'winter' ? winter.frost : '#e8e4d9')
+	);
+	const barkMarkColor = $derived(season === 'winter' ? '#5a5a5a' : '#4a4a4a');
 
 	// Slightly darker shade for leaf depth
 	const leafShadow = $derived(season === 'autumn' ? autumn.amber : greens.grove);
@@ -41,13 +47,32 @@
 	<ellipse fill={barkMarkColor} cx="51" cy="98" rx="2.5" ry="1" opacity="0.5" />
 	<ellipse fill={barkMarkColor} cx="48" cy="118" rx="2" ry="1" opacity="0.6" />
 
-	<!-- Upper branches hint -->
+	<!-- Upper branches hint - visible year-round -->
 	<path fill={actualTrunkColor} d="M50 60 Q44 55 38 58 L42 52 Q47 54 50 55 Z" />
 	<path fill={actualTrunkColor} d="M50 60 Q56 55 62 58 L58 52 Q53 54 50 55 Z" />
 
+	<!-- Extended bare branches visible in winter -->
+	{#if isBare}
+		<path fill="none" stroke={actualTrunkColor} stroke-width="2" d="M42 52 Q32 42 22 38" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="2" d="M58 52 Q68 42 78 38" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M22 38 Q18 32 20 25" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M22 38 Q28 30 32 22" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M78 38 Q82 32 80 25" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1.5" d="M78 38 Q72 30 68 22" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M50 55 Q50 35 50 18" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M50 28 Q44 20 38 15" />
+		<path fill="none" stroke={actualTrunkColor} stroke-width="1" d="M50 28 Q56 20 62 15" />
+		<!-- Snow accents on branches -->
+		<ellipse fill={winter.snow} cx="22" cy="37" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="78" cy="37" rx="4" ry="1.5" opacity="0.8" />
+		<ellipse fill={winter.snow} cx="50" cy="17" rx="3" ry="1" opacity="0.7" />
+	{/if}
+
 	<!-- Individual aspen leaves - round/heart shaped with pointed tips -->
 	<!-- Each group quivers independently like real aspen leaves -->
+	<!-- Hidden in winter when tree is bare -->
 
+	{#if !isBare}
 	<!-- Left branch cluster -->
 	<g class={animate ? 'quiver quiver-1' : ''}>
 		<!-- Round leaves with pointed tips - characteristic aspen shape -->
@@ -99,6 +124,7 @@
 		<path fill={foliageColor} d="M65 38 Q60 35 60 32 Q60 28 65 28 Q70 28 70 32 Q70 35 65 38 Z" />
 		<path fill={foliageColor} d="M78 12 Q74 10 74 7 Q74 4 78 4 Q82 4 82 7 Q82 10 78 12 Z" />
 	</g>
+	{/if}
 </svg>
 
 <style>

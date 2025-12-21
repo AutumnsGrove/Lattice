@@ -26,6 +26,8 @@
 	import Butterfly from '$lib/components/nature/creatures/Butterfly.svelte';
 	import Bird from '$lib/components/nature/creatures/Bird.svelte';
 	import BirdFlying from '$lib/components/nature/creatures/BirdFlying.svelte';
+	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
+	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
 	import Bee from '$lib/components/nature/creatures/Bee.svelte';
 	import Rabbit from '$lib/components/nature/creatures/Rabbit.svelte';
 	import Deer from '$lib/components/nature/creatures/Deer.svelte';
@@ -95,6 +97,8 @@
 		'Butterfly': { component: Butterfly, category: 'Creatures', props: ['wingColor', 'accentColor', 'animate'] },
 		'Bird': { component: Bird, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
 		'BirdFlying': { component: BirdFlying, category: 'Creatures', props: ['color', 'animate', 'facing'] },
+		'Cardinal': { component: Cardinal, category: 'Creatures', props: ['bodyColor', 'maskColor', 'beakColor', 'animate', 'facing'] },
+		'Chickadee': { component: Chickadee, category: 'Creatures', props: ['capColor', 'cheekColor', 'bodyColor', 'animate', 'facing'] },
 		'Bee': { component: Bee, category: 'Creatures', props: ['bodyColor', 'stripeColor', 'animate'] },
 		'Rabbit': { component: Rabbit, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
 		'Deer': { component: Deer, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },

@@ -19,10 +19,10 @@
 		facing = 'right'
 	}: Props = $props();
 
-	// American Robin colors
-	const body = bodyColor ?? '#4a4a4a'; // Dark gray-brown upper body
-	const breast = breastColor ?? '#c2410c'; // Bright orange-red breast (amber-600)
-	const beak = beakColor ?? '#f59e0b'; // Yellow-orange beak
+	// American Robin colors - from palette
+	const body = bodyColor ?? accents.bird.robinBody;
+	const breast = breastColor ?? accents.bird.robinBreast;
+	const beak = beakColor ?? accents.bird.robinBeak;
 	const legColor = bark.darkBark;
 
 	const scaleX = facing === 'left' ? -1 : 1;

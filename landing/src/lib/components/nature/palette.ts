@@ -119,6 +119,44 @@ export const autumnReds = {
 } as const;
 
 // =============================================================================
+// WINTER PALETTE
+// =============================================================================
+
+/**
+ * Winter colors - frost, snow, and ice
+ * Used for winter mode: snow-dusted evergreens, frozen landscape.
+ * Deciduous trees go bare, showing only branches.
+ */
+export const winter = {
+	// Snow and ice
+	snow: '#f8fafc',       // Pure fresh snow
+	frost: '#e2e8f0',      // Frosted surfaces
+	ice: '#cbd5e1',        // Ice blue-gray
+	glacier: '#94a3b8',    // Deep ice shadows
+
+	// Frosted evergreen greens (muted, cool tones)
+	frostedPine: '#2d4a3e',    // Snow-dusted dark pine
+	winterGreen: '#3d5a4a',    // Muted forest green
+	coldSpruce: '#4a6355',     // Cool spruce color
+
+	// Winter sky
+	winterSky: '#e0f2fe',      // Pale winter sky
+	twilight: '#bfdbfe',       // Evening winter sky
+	overcast: '#cbd5e1',       // Gray overcast
+
+	// Bare branch colors
+	bareBranch: '#78716c',     // Gray-brown bare wood
+	frostedBark: '#a8a29e',    // Frost-touched bark
+	coldWood: '#57534e',       // Dark winter wood
+
+	// Winter hills (snowy ground, back to front)
+	hillDeep: '#475569',       // Far hills - cool slate
+	hillMid: '#7c8ca3',        // Mid hills - gray-blue
+	hillNear: '#c7d2e0',       // Near hills - pale snow
+	hillFront: '#f1f5f9'       // Front hills - fresh snow
+} as const;
+
+// =============================================================================
 // COMPONENT-SPECIFIC ACCENTS
 // =============================================================================
 
@@ -170,6 +208,19 @@ export const accents = {
 		sunset: '#fed7aa',    // Golden hour
 		night: '#1e293b',     // Night sky
 		star: '#fefce8'       // Star/twinkle color
+	},
+	/** Bird colors - winter and year-round species */
+	bird: {
+		cardinalRed: '#dc2626',    // Northern Cardinal vivid red
+		cardinalMask: '#1a1a1a',   // Cardinal black mask
+		cardinalBeak: '#f97316',   // Orange-red cone beak
+		chickadeeCap: '#1a1a1a',   // Black-capped Chickadee cap/bib
+		chickadeeCheek: '#fafafa', // White cheek patch
+		chickadeeBody: '#6b7280',  // Gray back feathers
+		chickadeeBelly: '#fef3c7', // Buff/cream underside
+		robinBody: '#4a4a4a',      // American Robin dark gray-brown
+		robinBreast: '#c2410c',    // American Robin orange-red
+		robinBeak: '#f59e0b'       // Yellow-orange beak
 	}
 } as const;
 
@@ -183,26 +234,54 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 /**
  * Get appropriate foliage colors based on season
  * Used by deciduous trees to switch from greens to autumn palette.
+ * In winter, returns frosted evergreen colors (for pines that keep needles).
  * @example getSeasonalGreens('autumn') // returns autumn palette
  */
 export function getSeasonalGreens(season: Season = 'summer') {
 	if (season === 'autumn') {
 		return autumn;
 	}
-	// Winter could return muted/frosted versions in the future
+	if (season === 'winter') {
+		// Frosted evergreen colors for pines/conifers
+		return {
+			darkForest: winter.frostedPine,
+			deepGreen: winter.frostedPine,
+			grove: winter.winterGreen,
+			meadow: winter.winterGreen,
+			spring: winter.coldSpruce,
+			mint: winter.coldSpruce,
+			pale: winter.coldSpruce
+		};
+	}
 	return greens;
 }
 
 /**
  * Get cherry tree colors based on season
  * Cherry blossoms are pink in spring/summer, turn red in autumn.
+ * In winter, cherry trees are bare (no blossoms).
  * @example getCherryColors('autumn') // returns autumnReds palette
  */
-export function getCherryColors(season: Season = 'spring') {
+export function getCherryColors(season: Season = 'spring'): typeof pinks | typeof autumnReds | null {
 	if (season === 'autumn') {
 		return autumnReds;
 	}
+	if (season === 'winter') {
+		// Return null to indicate bare tree (no foliage to render)
+		return null;
+	}
 	return pinks;
+}
+
+/**
+ * Check if a tree should be bare (no foliage) based on season
+ * Deciduous trees lose leaves in winter.
+ */
+export function isTreeBare(treeType: string, season: Season): boolean {
+	if (season !== 'winter') return false;
+	// Evergreen types keep their needles
+	const evergreens = ['pine', 'spruce', 'fir', 'cedar'];
+	return !evergreens.includes(treeType.toLowerCase());
 }
 
 /**
@@ -240,6 +319,7 @@ export const naturePalette = {
 	autumn,
 	pinks,
 	autumnReds,
+	winter,
 	accents
 } as const;
 
