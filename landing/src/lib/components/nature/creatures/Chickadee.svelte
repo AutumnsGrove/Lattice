@@ -3,6 +3,7 @@
 
 	interface Props {
 		class?: string;
+		style?: string;
 		capColor?: string;
 		cheekColor?: string;
 		bodyColor?: string;
@@ -12,6 +13,7 @@
 
 	let {
 		class: className = 'w-6 h-6',
+		style,
 		capColor,
 		cheekColor,
 		bodyColor,
@@ -35,7 +37,7 @@
 	class="{className} {animate ? 'bob' : ''}"
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 45 50"
-	style="transform: scaleX({scaleX})"
+	style="transform: scaleX({scaleX}); {style ?? ''}"
 >
 	<!-- Tail - short gray -->
 	<path fill={body} d="M5 28 Q2 32 4 38 Q10 36 12 30 Q9 27 5 28" />

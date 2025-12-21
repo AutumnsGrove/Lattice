@@ -38,7 +38,7 @@
 	} from '$lib/components/nature/palette';
 
 	// Season state
-	let season: Season = $state('summer');
+	let season = $state<Season>('summer');
 	const isAutumn = $derived(season === 'autumn');
 	const isWinter = $derived(season === 'winter');
 
