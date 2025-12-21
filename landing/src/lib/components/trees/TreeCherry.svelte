@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from '../nature/palette';
-	import { autumnReds, pinks } from '../nature/palette';
+	import { autumnReds, pinks, winter } from '../nature/palette';
 
 	interface Props {
 		class?: string;
@@ -18,11 +18,16 @@
 		animate = false
 	}: Props = $props();
 
+	// Check if tree should be bare (winter)
+	const isBare = $derived(season === 'winter');
+
 	// Cherry trees: pink blossoms in spring, red/crimson foliage in autumn
 	// Use $derived to react to season/color prop changes
 	const defaultColor = $derived(season === 'autumn' ? autumnReds.scarlet : pinks.blush);
 	const blossomColor = $derived(color ?? defaultColor);
-	const actualTrunkColor = $derived(trunkColor ?? '#6B4423');
+	const actualTrunkColor = $derived(
+		trunkColor ?? (season === 'winter' ? winter.bareBranch : '#6B4423')
+	);
 </script>
 
 <!-- Cherry blossom tree - delicate branching with clustered flowers -->
@@ -34,12 +39,33 @@
 	<!-- Main trunk -->
 	<path fill={actualTrunkColor} d="M45 65 Q43 85 42 120 L58 120 Q57 85 55 65 Q50 60 45 65"/>
 
-	<!-- Branches -->
+	<!-- Branches - always visible -->
 	<path fill={actualTrunkColor} d="M50 60 Q35 50 20 55 Q25 52 30 45 Q40 48 50 55" stroke={actualTrunkColor} stroke-width="2"/>
 	<path fill={actualTrunkColor} d="M50 60 Q65 50 80 55 Q75 52 70 45 Q60 48 50 55" stroke={actualTrunkColor} stroke-width="2"/>
 	<path d="M50 50 Q45 35 35 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
 	<path d="M50 50 Q55 35 65 30" stroke={actualTrunkColor} stroke-width="2" fill="none"/>
 
+	<!-- Extended bare branches in winter -->
+	{#if isBare}
+		<path d="M20 55 Q12 50 8 42" stroke={actualTrunkColor} stroke-width="1.5" fill="none"/>
+		<path d="M20 55 Q18 48 15 38" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M80 55 Q88 50 92 42" stroke={actualTrunkColor} stroke-width="1.5" fill="none"/>
+		<path d="M80 55 Q82 48 85 38" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M35 30 Q28 22 22 15" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M35 30 Q38 22 42 12" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M65 30 Q72 22 78 15" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M65 30 Q62 22 58 12" stroke={actualTrunkColor} stroke-width="1" fill="none"/>
+		<path d="M50 50 Q50 35 50 18" stroke={actualTrunkColor} stroke-width="1.5" fill="none"/>
+		<!-- Snow accents on branches -->
+		<ellipse fill="#f8fafc" cx="20" cy="54" rx="5" ry="1.5" opacity="0.8" />
+		<ellipse fill="#f8fafc" cx="80" cy="54" rx="5" ry="1.5" opacity="0.8" />
+		<ellipse fill="#f8fafc" cx="35" cy="29" rx="4" ry="1" opacity="0.7" />
+		<ellipse fill="#f8fafc" cx="65" cy="29" rx="4" ry="1" opacity="0.7" />
+		<ellipse fill="#f8fafc" cx="50" cy="18" rx="3" ry="1" opacity="0.7" />
+	{/if}
+
+	<!-- Blossom clusters - hidden in winter -->
+	{#if !isBare}
 	<!-- Blossom clusters - left side -->
 	<circle fill={blossomColor} cx="20" cy="52" r="12"/>
 	<circle fill={blossomColor} cx="28" cy="42" r="10"/>
@@ -61,6 +87,7 @@
 	<circle fill={blossomColor} cx="40" cy="50" r="10"/>
 	<circle fill={blossomColor} cx="60" cy="50" r="10"/>
 	<circle fill={blossomColor} cx="50" cy="38" r="12"/>
+	{/if}
 </svg>
 
 <style>
