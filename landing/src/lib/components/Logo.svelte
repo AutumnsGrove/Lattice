@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Season } from './nature/palette';
-	import { autumn, winter, greens } from './nature/palette';
+	import { autumn, winter, greens, bark } from './nature/palette';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -31,18 +31,19 @@
 	const animationClass = $derived(breathing ? 'breathing' : (animate ? 'sway' : ''));
 
 	// Seasonal color mapping for the logo
-	// - Spring: TODO - will use spring palette when implemented (for now, falls through to summer)
+	// - Spring: Light spring green (temporary - will refine when spring mode is fully implemented)
 	// - Summer: Grove brand green
-	// - Autumn: Warm amber/orange tones
+	// - Autumn: Warm orange tones matching the forest palette
 	// - Winter: Frosted muted green (Logo stays green year-round like an evergreen)
 	const defaultColor = $derived(
-		season === 'autumn' ? autumn.amber :
+		season === 'spring' ? greens.mint :       // Temporary light spring green
+		season === 'autumn' ? autumn.pumpkin :    // Orange matching autumn forest palette
 		season === 'winter' ? winter.winterGreen :
-		// Spring falls through to summer colors until spring palette is implemented
-		greens.grove  // Summer (and spring for now) use Grove brand green
+		greens.grove  // Summer uses Grove brand green
 	);
 	const foliageColor = $derived(color ?? defaultColor);
-	const actualTrunkColor = $derived(trunkColor ?? foliageColor);
+	// Trunk should always be brown (like real tree bark), not match the foliage
+	const actualTrunkColor = $derived(trunkColor ?? bark.bark);
 
 	// Animation state for entrance animation
 	let mounted = $state(false);

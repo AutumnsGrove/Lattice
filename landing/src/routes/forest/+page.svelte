@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { season as seasonStore } from '$lib/stores/season';
 
 	// Trees
 	import Logo from '$lib/components/Logo.svelte';
@@ -37,10 +38,9 @@
 		type Season
 	} from '$lib/components/nature/palette';
 
-	// Season state
-	let season = $state<Season>('summer');
-	const isAutumn = $derived(season === 'autumn');
-	const isWinter = $derived(season === 'winter');
+	// Season state - using shared store so logo respects forest season
+	const isAutumn = $derived($seasonStore === 'autumn');
+	const isWinter = $derived($seasonStore === 'winter');
 
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
@@ -266,7 +266,7 @@
 	// Use $derived.by and read season at top level to ensure reactivity
 	let forestTrees = $derived.by(() => {
 		// Read season at top level to establish reactive dependency
-		const currentSeason = season;
+		const currentSeason = $seasonStore;
 		return baseTrees.map((tree) => {
 			const depthColors = getDepthColors(tree.brightness, currentSeason);
 			const depthPinks = getDepthPinks(tree.brightness, currentSeason);
@@ -348,15 +348,9 @@
 		return birds;
 	});
 
-	// Toggle season (cycles: summer → autumn → winter → summer)
+	// Toggle season (cycles through: spring → summer → autumn → winter)
 	function toggleSeason() {
-		if (season === 'summer') {
-			season = 'autumn';
-		} else if (season === 'autumn') {
-			season = 'winter';
-		} else {
-			season = 'summer';
-		}
+		seasonStore.cycle();
 	}
 </script>
 
@@ -441,7 +435,7 @@
 			{#if !isWinter}
 				<FallingLeavesLayer
 					trees={forestTrees}
-					{season}
+					season={$seasonStore}
 					minLeavesPerTree={2}
 					maxLeavesPerTree={4}
 					zIndex={5}
@@ -523,16 +517,16 @@
 					"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'pine'}
-						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'aspen'}
-						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" color={tree.color} {season} animate={true} />
+						<TreeBirch class="w-full h-full" color={tree.color} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'cherry'}
 						<!-- TreeCherry handles winter internally: hides blossoms, shows bare branches with snow -->
-						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} {season} animate={true} />
+						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{/if}
 				</div>
 			{/each}
