@@ -19,7 +19,7 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # - RESEND_API_KEY
 # - ADMIN_EMAILS
 # - ANTHROPIC_API_KEY (for domain search)
-# - DOMAIN_WORKER_URL (URL to the Forage worker at forage.grove.place)
+# - DOMAIN_WORKER_URL (URL to the Forage worker: https://forage.m7jv4v7npb.workers.dev)
 # - GROVEAUTH_CLIENT_ID (OAuth client ID)
 # - GROVEAUTH_CLIENT_SECRET (OAuth client secret)
 # Production SITE_URL is set via --var flag in deployment
