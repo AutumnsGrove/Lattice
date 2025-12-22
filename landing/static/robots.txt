@@ -1,0 +1,489 @@
+# Grove robots.txt
+# Last updated: December 22, 2025
+#
+# Grove blocks AI crawlers and training bots to protect user content.
+# We allow traditional search engines for discoverability.
+#
+# This list is maintained using https://github.com/ai-robots-txt/ai.robots.txt
+# as a reference, plus additional known crawlers.
+#
+# Note: robots.txt is voluntary. Some bad actors ignore it entirely.
+# We also use Cloudflare's AI bot blocking for enforcement.
+# See: https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/
+
+# =============================================================================
+# TRADITIONAL SEARCH ENGINES (ALLOWED)
+# =============================================================================
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# =============================================================================
+# OPENAI CRAWLERS
+# =============================================================================
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ChatGPT Agent
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: OpenAI
+Disallow: /
+
+User-agent: Operator
+Disallow: /
+
+# =============================================================================
+# ANTHROPIC CRAWLERS
+# =============================================================================
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Claude-User
+Disallow: /
+
+User-agent: Claude-SearchBot
+Disallow: /
+
+# =============================================================================
+# GOOGLE AI CRAWLERS (distinct from search)
+# =============================================================================
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Google-CloudVertexBot
+Disallow: /
+
+User-agent: CloudVertexBot
+Disallow: /
+
+User-agent: Google-Firebase
+Disallow: /
+
+User-agent: Google-NotebookLM
+Disallow: /
+
+User-agent: NotebookLM
+Disallow: /
+
+User-agent: GoogleOther
+Disallow: /
+
+User-agent: GoogleOther-Image
+Disallow: /
+
+User-agent: GoogleOther-Video
+Disallow: /
+
+User-agent: GoogleAgent-Mariner
+Disallow: /
+
+User-agent: Gemini-Deep-Research
+Disallow: /
+
+# =============================================================================
+# META CRAWLERS
+# =============================================================================
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+User-agent: meta-externalfetcher
+Disallow: /
+
+User-agent: meta-webindexer
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+# =============================================================================
+# APPLE CRAWLERS
+# =============================================================================
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# Note: Regular Applebot for Siri/Spotlight is allowed
+
+# =============================================================================
+# AMAZON CRAWLERS
+# =============================================================================
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: AmazonBuyForMe
+Disallow: /
+
+User-agent: amazon-kendra
+Disallow: /
+
+User-agent: bedrockbot
+Disallow: /
+
+# =============================================================================
+# BYTEDANCE / TIKTOK
+# =============================================================================
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: TikTokSpider
+Disallow: /
+
+# =============================================================================
+# PERPLEXITY
+# =============================================================================
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+# =============================================================================
+# COMMON CRAWL (used for ML training datasets)
+# =============================================================================
+
+User-agent: CCBot
+Disallow: /
+
+# =============================================================================
+# MISTRAL
+# =============================================================================
+
+User-agent: MistralAI-User
+Disallow: /
+
+User-agent: MistralAI-User/1.0
+Disallow: /
+
+# =============================================================================
+# DEEPSEEK
+# =============================================================================
+
+User-agent: DeepSeekBot
+Disallow: /
+
+# =============================================================================
+# COHERE
+# =============================================================================
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+# =============================================================================
+# OTHER AI CRAWLERS (alphabetical)
+# =============================================================================
+
+User-agent: AddSearchBot
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: AI2Bot-DeepResearchEval
+Disallow: /
+
+User-agent: Ai2Bot-Dolma
+Disallow: /
+
+User-agent: aiHitBot
+Disallow: /
+
+User-agent: Andibot
+Disallow: /
+
+User-agent: Anomura
+Disallow: /
+
+User-agent: atlassian-bot
+Disallow: /
+
+User-agent: Awario
+Disallow: /
+
+User-agent: bigsur.ai
+Disallow: /
+
+User-agent: Bravebot
+Disallow: /
+
+User-agent: Brightbot 1.0
+Disallow: /
+
+User-agent: BuddyBot
+Disallow: /
+
+User-agent: Channel3Bot
+Disallow: /
+
+User-agent: ChatGLM-Spider
+Disallow: /
+
+User-agent: Cloudflare-AutoRAG
+Disallow: /
+
+User-agent: Cotoyogi
+Disallow: /
+
+User-agent: Crawl4AI
+Disallow: /
+
+User-agent: Crawlspace
+Disallow: /
+
+User-agent: Datenbank Crawler
+Disallow: /
+
+User-agent: Devin
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: DuckAssistBot
+Disallow: /
+
+User-agent: Echobot Bot
+Disallow: /
+
+User-agent: EchoboxBot
+Disallow: /
+
+User-agent: Factset_spyderbot
+Disallow: /
+
+User-agent: FirecrawlAgent
+Disallow: /
+
+User-agent: FriendlyCrawler
+Disallow: /
+
+User-agent: iAskBot
+Disallow: /
+
+User-agent: iaskspider
+Disallow: /
+
+User-agent: iaskspider/2.0
+Disallow: /
+
+User-agent: IbouBot
+Disallow: /
+
+User-agent: ICC-Crawler
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: imageSpider
+Disallow: /
+
+User-agent: img2dataset
+Disallow: /
+
+User-agent: ISSCyberRiskCrawler
+Disallow: /
+
+User-agent: Kangaroo Bot
+Disallow: /
+
+User-agent: KlaviyoAIBot
+Disallow: /
+
+User-agent: KunatoCrawler
+Disallow: /
+
+User-agent: laion-huggingface-processor
+Disallow: /
+
+User-agent: LAIONDownloader
+Disallow: /
+
+User-agent: LCC
+Disallow: /
+
+User-agent: LinerBot
+Disallow: /
+
+User-agent: Linguee Bot
+Disallow: /
+
+User-agent: LinkupBot
+Disallow: /
+
+User-agent: Manus-User
+Disallow: /
+
+User-agent: MyCentralAIScraperBot
+Disallow: /
+
+User-agent: netEstate Imprint Crawler
+Disallow: /
+
+User-agent: NovaAct
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+User-agent: omgilibot
+Disallow: /
+
+User-agent: PanguBot
+Disallow: /
+
+User-agent: Panscient
+Disallow: /
+
+User-agent: panscient.com
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: PhindBot
+Disallow: /
+
+User-agent: Poggio-Citations
+Disallow: /
+
+User-agent: Poseidon Research Crawler
+Disallow: /
+
+User-agent: QualifiedBot
+Disallow: /
+
+User-agent: QuillBot
+Disallow: /
+
+User-agent: quillbot.com
+Disallow: /
+
+User-agent: SBIntuitionsBot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: SemrushBot-OCOB
+Disallow: /
+
+User-agent: SemrushBot-SWA
+Disallow: /
+
+User-agent: ShapBot
+Disallow: /
+
+User-agent: Sidetrade indexer bot
+Disallow: /
+
+User-agent: Spider
+Disallow: /
+
+User-agent: TavilyBot
+Disallow: /
+
+User-agent: TerraCotta
+Disallow: /
+
+User-agent: Thinkbot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: TwinAgent
+Disallow: /
+
+User-agent: VelenPublicWebCrawler
+Disallow: /
+
+User-agent: WARDBot
+Disallow: /
+
+User-agent: Webzio-Extended
+Disallow: /
+
+User-agent: webzio-extended
+Disallow: /
+
+User-agent: wpbot
+Disallow: /
+
+User-agent: WRTNBot
+Disallow: /
+
+User-agent: YaK
+Disallow: /
+
+User-agent: YandexAdditional
+Disallow: /
+
+User-agent: YandexAdditionalBot
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: ZanistaBot
+Disallow: /
+
+# =============================================================================
+# DEFAULT RULE
+# =============================================================================
+
+# Allow all other well-behaved crawlers
+User-agent: *
+Allow: /
+
+# =============================================================================
+# SITEMAP
+# =============================================================================
+
+Sitemap: https://grove.place/sitemap.xml
