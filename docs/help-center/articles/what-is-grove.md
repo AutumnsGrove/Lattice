@@ -21,7 +21,7 @@ You get a blog. It's yours. You write, we host it, your readers can find you via
 
 **Privacy by default.** We don't track your readers. No analytics scripts following people around the web. Your visitors' attention is between them and your words.
 
-**Invisible to AI crawlers.** We block every AI training bot, every scraper, every "AI search agent" that wants to harvest content for machine learning. Your writing stays between you and your readers—not vacuumed into datasets. Grove is a black hole to external AI.
+**Invisible to AI crawlers.** We block every AI training bot, every scraper, every "AI search agent" that wants to harvest content for machine learning. Your writing stays between you and your readers, not vacuumed into datasets. Grove is a black hole to external AI.
 
 **Simple on purpose.** Grove has what you need to write and publish. It doesn't have a hundred features you'll never use. The admin panel is clean, the writing experience is focused, and you can be up and running in minutes.
 

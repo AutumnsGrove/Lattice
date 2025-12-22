@@ -68,7 +68,7 @@ Grove actively blocks all external AI crawlers, machine learning scrapers, and A
 - Block automated scraping tools designed to harvest content for datasets
 - Maintain an updated blocklist as new AI crawlers emerge
 
-**Why this matters:** Your writing is for human readers, not training data. As AI companies aggressively scrape the public web to build their models, we believe your personal expression deserves protection. Grove is designed to be invisible to these systems—a sanctuary where your words remain yours.
+**Why this matters:** Your writing is for human readers, not training data. As AI companies aggressively scrape the public web to build their models, we believe your personal expression deserves protection. Grove is designed to be invisible to these systems, a sanctuary where your words remain yours.
 
 **A note on limitations:** Some companies (such as Perplexity) have been documented circumventing crawler blocks and ignoring robots.txt directives entirely. While we implement every technical protection available through Cloudflare, we cannot guarantee 100% protection against bad actors who deliberately bypass industry-standard blocking mechanisms. We commit to staying current with emerging threats and updating our protections as new circumvention methods are identified.
 
