@@ -79,6 +79,26 @@ When we review content for safety (like checking for harmful material), we use A
 
 We chose providers specifically because they offer these guarantees.
 
+## Your writing is invisible to AI crawlers
+
+This is something we're genuinely proud of.
+
+Every major AI company sends crawlers across the web, vacuuming up text to train their models. Your blog posts, your personal reflections, your late-night thoughts—they become training data, statistical weights, fuel for machines that simulate human expression.
+
+**Grove says no.**
+
+We use Cloudflare to block every AI crawler, every scraper, every "AI search agent" that wants to harvest content. GPTBot, CCBot, Google-Extended, anthropic-ai—they all hit a wall. Your corner of the web becomes a black hole to these systems.
+
+**What this means for you:**
+- Your writing stays between you and your readers
+- AI companies can't train on your content
+- Your personal expression isn't reduced to training data
+- Grove is a sanctuary from the data extraction economy
+
+This matters more than most people realize. As the web gets scraped into datasets, authentic human spaces become rarer. Grove is building one of those spaces.
+
+*We use AI carefully and transparently for content moderation. We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
+
 ## What we'll never do
 
 Some things Grove will never do, full stop:

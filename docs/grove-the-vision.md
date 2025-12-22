@@ -32,6 +32,16 @@ Publish. That's it. The technology should disappear into the background.
 
 Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage. No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
 
+## AI Sanctuary
+
+Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning models. Cloudflare stands at the gate, and our corner of the web becomes a black hole to external AI.
+
+This matters more than it might seem. As AI systems vacuum up the public web, genuine human expression becomes fuel for machines that simulate humanity. Grove refuses to participate. What you write here stays here—read by humans, not ingested by algorithms.
+
+We do use AI internally for content moderation, but intentionally: with zero data retention, with privacy-first providers, with no training on your words. There's a difference between using a tool carefully and feeding a machine indiscriminately. We choose the former while rejecting the latter.
+
+*Your voice remains yours. Not a dataset. Not a statistic. Yours.*
+
 # On Community — Meadow
 
 ## A forest is not a collection of isolated trees.
