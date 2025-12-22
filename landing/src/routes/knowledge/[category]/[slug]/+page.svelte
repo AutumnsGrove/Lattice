@@ -15,52 +15,52 @@
   <meta name="description" content={doc?.description || doc?.excerpt || ''} />
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-page">
   <div class="max-w-4xl mx-auto px-4 py-12">
     {#if doc}
       <!-- Breadcrumb -->
-      <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-8" aria-label="Breadcrumb">
-        <a href="/knowledge" class="hover:text-gray-900">Knowledge Base</a>
+      <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8" aria-label="Breadcrumb">
+        <a href="/knowledge" class="hover:text-foreground transition-colors">Knowledge Base</a>
         <span aria-hidden="true">/</span>
-        <a href="/knowledge/{category}" class="hover:text-gray-900">{categoryTitle}</a>
+        <a href="/knowledge/{category}" class="hover:text-foreground transition-colors">{categoryTitle}</a>
         <span aria-hidden="true">/</span>
-        <span class="text-gray-900" aria-current="page">{doc.title}</span>
+        <span class="text-foreground" aria-current="page">{doc.title}</span>
       </nav>
 
       <!-- Article Header -->
       <header class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           {#if category === 'specs'}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text">
               Technical Spec
             </span>
           {:else if category === 'help'}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
               Help Article
             </span>
           {:else}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
               Legal Document
             </span>
           {/if}
           {#if doc.lastUpdated}
-            <span class="text-sm text-gray-500">Updated {doc.lastUpdated}</span>
+            <span class="text-sm text-foreground-subtle">Updated {doc.lastUpdated}</span>
           {/if}
-          <span class="text-sm text-gray-500">{doc.readingTime} min read</span>
+          <span class="text-sm text-foreground-subtle">{doc.readingTime} min read</span>
         </div>
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">{doc.title}</h1>
+        <h1 class="text-4xl font-bold text-foreground mb-4">{doc.title}</h1>
         {#if doc.description}
-          <p class="text-xl text-gray-600">{doc.description}</p>
+          <p class="text-xl text-foreground-muted">{doc.description}</p>
         {/if}
       </header>
 
       <!-- Article Content -->
-      <article class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-        <div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700">
+      <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-8 mb-8">
+        <div class="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground-muted prose-a:text-accent-muted hover:prose-a:text-accent prose-strong:text-foreground prose-ul:text-foreground-muted prose-ol:text-foreground-muted prose-li:text-foreground-muted">
           {#if doc.html}
             {@html doc.html}
           {:else}
-            <p class="text-gray-700 leading-relaxed">{doc.excerpt}</p>
+            <p class="text-foreground-muted leading-relaxed">{doc.excerpt}</p>
           {/if}
         </div>
       </article>
@@ -69,7 +69,7 @@
       <footer class="flex items-center justify-between">
         <a
           href="/knowledge/{category}"
-          class="inline-flex items-center text-gray-600 hover:text-gray-900"
+          class="inline-flex items-center text-foreground-muted hover:text-foreground transition-colors"
           aria-label="Return to {categoryTitle}"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -81,7 +81,7 @@
         <div class="flex gap-4">
           <a
             href="mailto:autumn@grove.place"
-            class="text-gray-600 hover:text-gray-900"
+            class="text-foreground-muted hover:text-foreground transition-colors"
             aria-label="Contact support via email"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -93,18 +93,18 @@
     {:else}
       <!-- 404 -->
       <div class="text-center py-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Document Not Found</h1>
-        <p class="text-xl text-gray-600 mb-8">
+        <h1 class="text-4xl font-bold text-foreground mb-4">Document Not Found</h1>
+        <p class="text-xl text-foreground-muted mb-8">
           The document you're looking for doesn't exist or has been moved.
         </p>
         <div class="flex gap-4 justify-center">
-          <a href="/knowledge" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+          <a href="/knowledge" class="px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground-muted transition-colors">
             Knowledge Base Home
           </a>
-          <a href="/knowledge/specs" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+          <a href="/knowledge/specs" class="px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
             Browse Specs
           </a>
-          <a href="/knowledge/help" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+          <a href="/knowledge/help" class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors">
             Browse Help
           </a>
         </div>
