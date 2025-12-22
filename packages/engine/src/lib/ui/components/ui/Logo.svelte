@@ -42,11 +42,11 @@
 	}: Props = $props();
 
 	// Breathing speed presets (duration per half-cycle in ms)
-	const BREATHING_SPEEDS: Record<BreathingSpeed, number> = {
+	const BREATHING_SPEEDS = {
 		slow: 1500,    // 3s full cycle - calm, meditative
 		normal: 800,   // 1.6s full cycle - balanced
 		fast: 400      // 0.8s full cycle - urgent
-	};
+	} as const;
 
 	// Respect user's reduced motion preference
 	const prefersReducedMotion = browser
@@ -62,22 +62,22 @@
 		? foliageColor
 		: (trunkColor ?? BARK_BROWN);
 
-	// Breathing animation using tweened store
-	const breathValue = tweened(0, {
-		duration: BREATHING_SPEEDS[breathingSpeed],
-		easing: cubicInOut
-	});
+	// Breathing animation using tweened store (duration set dynamically in $effect)
+	const breathValue = tweened(0, { easing: cubicInOut });
 
 	// Animation loop for breathing effect
+	// Re-runs when breathing or breathingSpeed changes, ensuring reactive duration updates
 	$effect(() => {
+		const duration = BREATHING_SPEEDS[breathingSpeed];
+
 		// Disable animation if breathing is off or user prefers reduced motion
 		if (!breathing || prefersReducedMotion) {
-			breathValue.set(0, { duration: 200 });
+			// Use half the breathing duration for smoother exit transition
+			breathValue.set(0, { duration: Math.min(duration / 2, 300) });
 			return;
 		}
 
 		let cancelled = false;
-		const duration = BREATHING_SPEEDS[breathingSpeed];
 
 		async function pulse() {
 			while (!cancelled) {
@@ -115,6 +115,12 @@
 
 	// Decomposed foliage paths (8 pieces)
 	// Original path decomposed into: center anchor + 7 branches
+	//
+	// These paths were derived by tracing the original foliage path command-by-command:
+	// Original: "M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872..."
+	// Each branch was isolated by identifying the geometric boundaries where arms meet the center.
+	// The center anchor covers the intersection hub; branches extend outward from there.
+	// If modifying, ensure the pieces align at rest (breathValue=0) to match the original silhouette.
 
 	// Center anchor - the hub where all branches connect (stays stationary)
 	const centerPath = "M126 173.468 L171.476 124.872 L171.476 173.468 L126 173.468 M245.562 124.872 L290.972 173.268 L245.562 173.268 L245.562 124.872 M126.664 243.97 L171.476 243.97 L171.476 173.468 L126 173.468 L126.664 243.97 M290.252 243.77 L245.562 243.77 L245.562 173.268 L290.972 173.268 L290.252 243.77 M171.476 243.97 L208.519 258.11 L245.562 243.77 L245.562 173.268 L171.476 173.468 L171.476 243.97";
