@@ -20,10 +20,19 @@ export interface Doc {
   readingTime: number;
 }
 
+/** Header extracted from markdown for table of contents */
+export interface DocHeader {
+  level: number;
+  text: string;
+  id: string;
+}
+
 /** Document with full content loaded (used for individual article pages) */
 export interface DocWithContent extends Doc {
   /** Raw markdown content */
   content: string;
   /** Rendered HTML content (safe to use with {@html} - see note above) */
   html: string;
+  /** Headers for table of contents */
+  headers: DocHeader[];
 }
