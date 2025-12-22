@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { springBlossoms } from '../palette';
+	import { browser } from '$app/environment';
 
 	type PetalVariant = 'round' | 'pointed' | 'heart' | 'curled' | 'tiny';
 
@@ -55,6 +56,49 @@
 
 	// Unique animation name to prevent conflicts
 	const animId = `petal-${seed}`;
+
+	// Inject dynamic keyframes at runtime to avoid PostCSS parsing issues
+	$effect(() => {
+		if (!browser || !animate) return;
+
+		const styleId = `petal-style-${seed}`;
+		// Check if already injected
+		if (document.getElementById(styleId)) return;
+
+		const style = document.createElement('style');
+		style.id = styleId;
+		style.textContent = `
+			@keyframes ${animId}-fall {
+				0% {
+					transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
+				}
+				100% {
+					transform: translateY(${fallDistance}vh) translateX(${drift}px) rotate(${initialRotation + rotationAmount * rotationDirection}deg);
+				}
+			}
+			@keyframes ${animId}-flutter {
+				0%, 100% {
+					transform: rotateX(0deg) rotateY(0deg) scale(1);
+				}
+				25% {
+					transform: rotateX(20deg) rotateY(30deg) scale(0.95);
+				}
+				50% {
+					transform: rotateX(-15deg) rotateY(-25deg) scale(1.02);
+				}
+				75% {
+					transform: rotateX(25deg) rotateY(15deg) scale(0.98);
+				}
+			}
+		`;
+		document.head.appendChild(style);
+
+		return () => {
+			// Cleanup on component destroy
+			const el = document.getElementById(styleId);
+			if (el) el.remove();
+		};
+	});
 </script>
 
 <!-- Cherry blossom petal - delicate and flutter-y -->
@@ -169,32 +213,3 @@
 	}
 </style>
 
-<!-- Inject dynamic keyframes for this specific petal -->
-<svelte:head>
-	{#if animate}
-		{@html `<style>
-			@keyframes ${animId}-fall {
-				0% {
-					transform: translateY(0) translateX(0) rotate(${initialRotation}deg);
-				}
-				100% {
-					transform: translateY(${fallDistance}vh) translateX(${drift}px) rotate(${initialRotation + rotationAmount * rotationDirection}deg);
-				}
-			}
-			@keyframes ${animId}-flutter {
-				0%, 100% {
-					transform: rotateX(0deg) rotateY(0deg) scale(1);
-				}
-				25% {
-					transform: rotateX(20deg) rotateY(30deg) scale(0.95);
-				}
-				50% {
-					transform: rotateX(-15deg) rotateY(-25deg) scale(1.02);
-				}
-				75% {
-					transform: rotateX(25deg) rotateY(15deg) scale(0.98);
-				}
-			}
-		</style>`}
-	{/if}
-</svelte:head>
