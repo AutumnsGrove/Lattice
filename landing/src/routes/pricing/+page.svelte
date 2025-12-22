@@ -277,7 +277,7 @@
 					Need something beyond Evergreen? Multiple domains, team collaboration, white-label options?
 				</p>
 				<p class="font-sans">
-					<a href="mailto:autumn@grove.place" class="text-accent-muted hover:text-primary underline">
+					<a href="mailto:autumnbrown23@pm.me" class="text-accent-muted hover:text-primary underline">
 						Let's talk.
 					</a>
 				</p>

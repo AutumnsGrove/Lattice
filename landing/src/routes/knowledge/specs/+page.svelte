@@ -75,7 +75,7 @@
       <p class="text-foreground-muted mb-4">
         If you need clarification on any technical specification or want to suggest improvements, we'd love to hear from you.
       </p>
-      <a href="mailto:autumn@grove.place" class="inline-flex items-center px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-muted transition-colors">
+      <a href="mailto:autumnbrown23@pm.me" class="inline-flex items-center px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-muted transition-colors">
         Contact Us
         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

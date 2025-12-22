@@ -310,7 +310,7 @@ As product matures and Seedling users upgrade or churn:
 
 For users with special needs beyond Evergreen:
 
-> **Custom Plans** — Need something specific? Let's talk. Custom storage, multiple domains, white-label options, team collaboration, dedicated support. Contact autumn@grove.place.
+> **Custom Plans** — Need something specific? Let's talk. Custom storage, multiple domains, white-label options, team collaboration, dedicated support. Contact autumnbrown23@pm.me.
 
 No public pricing. Handle case-by-case based on actual requirements.
 

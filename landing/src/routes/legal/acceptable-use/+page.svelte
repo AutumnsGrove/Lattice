@@ -148,7 +148,7 @@
 
 	<section>
 		<h2>7. Reporting Violations</h2>
-		<p>If you see content that violates this policy, please report it by emailing <a href="mailto:autumn@grove.place">autumn@grove.place</a> with:</p>
+		<p>If you see content that violates this policy, please report it by emailing <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a> with:</p>
 		<ul class="space-y-1 ml-4">
 			<li>A link to the content</li>
 			<li>The specific rule you believe was violated</li>

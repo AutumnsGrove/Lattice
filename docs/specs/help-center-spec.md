@@ -418,7 +418,7 @@ When users can't find what they need:
 │                                                                 │
 │  Can't find what you're looking for?                            │
 │                                                                 │
-│  Email: autumn@grove.place                                      │
+│  Email: autumnbrown23@pm.me                                      │
 │  Response time: Within 48 hours                                 │
 │                                                                 │
 │  Or describe your issue below and we'll get back to you:        │
