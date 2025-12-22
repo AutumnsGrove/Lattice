@@ -117,6 +117,16 @@ export function loadDocBySlug(
   slug: string,
   category: "specs" | "help" | "legal",
 ): Doc | null {
+  // Sanitize slug to prevent path traversal attacks
+  if (
+    !slug ||
+    slug.includes("..") ||
+    slug.includes("/") ||
+    slug.includes("\\")
+  ) {
+    return null;
+  }
+
   const docsPath =
     category === "specs"
       ? join(DOCS_ROOT, "specs")
@@ -145,8 +155,8 @@ export function loadDocBySlug(
       html: marked(markdownContent) as string,
     };
   } catch (error) {
+    // Return null on failure - don't serve incomplete content
     console.error(`Error loading full content for ${slug}:`, error);
-    const { _filePath, ...docWithoutPath } = doc;
-    return docWithoutPath;
+    return null;
   }
 }
