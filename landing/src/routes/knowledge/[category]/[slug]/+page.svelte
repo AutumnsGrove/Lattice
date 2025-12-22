@@ -56,7 +56,7 @@
 
       <!-- Article Content -->
       <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-8 mb-8">
-        <div class="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground-muted prose-a:text-accent-muted hover:prose-a:text-accent prose-strong:text-foreground prose-ul:text-foreground-muted prose-ol:text-foreground-muted prose-li:text-foreground-muted">
+        <div class="prose prose-lg max-w-none">
           {#if doc.html}
             {@html doc.html}
           {:else}
