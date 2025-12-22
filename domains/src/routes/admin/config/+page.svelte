@@ -1,12 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { MODELS, SEARCH_DEFAULTS, DRIVER_MODEL_OPTIONS, SWARM_MODEL_OPTIONS } from '$lib/config';
+	import { SEARCH_DEFAULTS } from '$lib/config';
 
 	let { data }: { data: PageData } = $props();
 
 	// Form state initialized from config
-	let driverModel = $state(data.config?.driver_model || MODELS.DRIVER);
-	let swarmModel = $state(data.config?.swarm_model || MODELS.SWARM);
 	let maxBatches = $state(data.config?.max_batches || SEARCH_DEFAULTS.MAX_BATCHES);
 	let candidatesPerBatch = $state(data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH);
 	let targetGoodResults = $state(data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS);
@@ -18,9 +16,6 @@
 	let successMessage = $state('');
 	let errorMessage = $state('');
 
-	const driverModelOptions = DRIVER_MODEL_OPTIONS;
-	const swarmModelOptions = SWARM_MODEL_OPTIONS;
-
 	async function saveConfig() {
 		isSaving = true;
 		successMessage = '';
@@ -31,8 +26,6 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					driver_model: driverModel,
-					swarm_model: swarmModel,
 					max_batches: maxBatches,
 					candidates_per_batch: candidatesPerBatch,
 					target_good_results: targetGoodResults,
@@ -56,8 +49,6 @@
 	}
 
 	function resetToDefaults() {
-		driverModel = MODELS.DRIVER;
-		swarmModel = MODELS.SWARM;
 		maxBatches = SEARCH_DEFAULTS.MAX_BATCHES;
 		candidatesPerBatch = SEARCH_DEFAULTS.CANDIDATES_PER_BATCH;
 		targetGoodResults = SEARCH_DEFAULTS.TARGET_GOOD_RESULTS;
@@ -91,53 +82,6 @@
 	{/if}
 
 	<form onsubmit={(e) => { e.preventDefault(); saveConfig(); }} class="space-y-8">
-		<!-- AI Models Section -->
-		<div class="card p-6">
-			<h2 class="font-serif text-lg text-bark mb-6">AI Models</h2>
-
-			<div class="grid md:grid-cols-2 gap-6">
-				<!-- Driver Model -->
-				<div>
-					<label for="driver_model" class="block text-sm font-sans font-medium text-bark mb-2">
-						Driver Model (Generation)
-					</label>
-					<select
-						id="driver_model"
-						bind:value={driverModel}
-						class="input-field"
-						disabled={isSaving}
-					>
-						{#each driverModelOptions as option}
-							<option value={option.value}>{option.label}</option>
-						{/each}
-					</select>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
-						The main model that generates creative domain suggestions
-					</p>
-				</div>
-
-				<!-- Swarm Model -->
-				<div>
-					<label for="swarm_model" class="block text-sm font-sans font-medium text-bark mb-2">
-						Swarm Model (Evaluation)
-					</label>
-					<select
-						id="swarm_model"
-						bind:value={swarmModel}
-						class="input-field"
-						disabled={isSaving}
-					>
-						{#each swarmModelOptions as option}
-							<option value={option.value}>{option.label}</option>
-						{/each}
-					</select>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
-						The model used by swarm agents to evaluate domains (12 parallel instances)
-					</p>
-				</div>
-			</div>
-		</div>
-
 		<!-- Search Parameters Section -->
 		<div class="card p-6">
 			<h2 class="font-serif text-lg text-bark mb-6">Search Parameters</h2>
