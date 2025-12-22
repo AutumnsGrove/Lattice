@@ -297,7 +297,7 @@ As product matures and Seedling users upgrade or churn:
 **When login-required is enabled:**
 - Blog homepage shows "Login Required" message
 - Individual post URLs redirect to login
-- RSS feed is disabled (or requires authentication)
+- RSS feed is **disabled entirely** (authenticated RSS breaks most feed readers)
 - Public sharing is disabled
 - Search engines are blocked via robots.txt
 
@@ -307,6 +307,33 @@ As product matures and Seedling users upgrade or churn:
 - RSS feeds work
 - Search engines can index (with AI crawler blocking per privacy policy)
 - Public sharing enabled
+
+### Downgrade Behavior
+
+**What happens when an Evergreen user with privacy enabled downgrades:**
+
+1. **7-day warning email** sent when downgrade is initiated
+   - Subject: "Your blog will become public in 7 days"
+   - Explains privacy controls will be disabled
+   - Provides option to cancel downgrade
+   - Lists alternatives (export data, delete blog, stay on Evergreen)
+
+2. **On downgrade effective date:**
+   - Privacy mode automatically set to `public`
+   - Blog becomes publicly accessible
+   - RSS feed re-enabled
+   - Search engine indexing re-enabled
+   - Confirmation email sent: "Your blog is now public"
+
+3. **Grace period considerations:**
+   - No grace period for privacy feature (auto-disable on downgrade)
+   - User can upgrade back to Evergreen anytime to re-enable
+   - Privacy setting preserved in database (can be re-enabled if user upgrades again within 30 days)
+
+4. **Edge cases:**
+   - Payment failure during Evergreen subscription: 7-day grace, then auto-disable privacy
+   - Trial period end: Same 7-day warning applies
+   - Admin-initiated downgrade: Immediate email notification, privacy disabled on effective date
 
 ### Security Considerations
 
@@ -342,15 +369,44 @@ As product matures and Seedling users upgrade or churn:
    - Media files (images, videos) must respect blog privacy settings
    - R2 bucket access must check blog privacy before serving assets
 
+6. **Session Security**
+   - Session fixation prevention (regenerate session ID after login)
+   - Secure session cookies (`HttpOnly`, `Secure`, `SameSite=Strict`)
+   - Session timeout for inactive users (30 minutes)
+   - Referrer-Policy header set to `no-referrer` or `same-origin` for private blogs
+
+7. **Enumeration Prevention**
+   - Timing attack mitigation (constant-time responses for private blog checks)
+   - Generic error messages (don't reveal if blog exists when unauthenticated)
+   - Rate limiting on blog access attempts
+   - No metadata leakage through 404 vs 403 differences
+
+8. **Image Hotlinking**
+   - R2 image URLs must validate blog privacy before serving
+   - Signed URLs for private blog images (time-limited)
+   - Referer checking for hotlink prevention
+   - Direct R2 URL access blocked for private blogs
+
+9. **API Versioning**
+   - Privacy controls must be built into API from day one
+   - All API endpoints must check blog privacy before returning data
+   - Future API versions maintain privacy checks
+   - No backwards compatibility issues that bypass privacy
+
 ### Implementation Checklist
 
 **Phase 1: Backend (Privacy Controls)**
 - [ ] Add `privacy_mode` field to `blogs` table (`public` | `login_required`)
 - [ ] Create middleware for blog authentication checks
 - [ ] Implement API access control for private blogs
-- [ ] Update RSS feed endpoint to respect privacy settings
+- [ ] Update RSS feed endpoint to disable for private blogs (no authenticated RSS)
 - [ ] Block private blog content from Meadow feed for unauthenticated users
 - [ ] Add privacy checks to media serving (R2 bucket access)
+- [ ] Implement audit logging for privacy setting changes (who, when, old/new value)
+- [ ] Add rate limiting for blog access attempts (prevent enumeration)
+- [ ] Create tier validation checks (Evergreen-only for privacy controls)
+- [ ] Implement downgrade handler (auto-disable privacy, send emails)
+- [ ] Add billing integration (verify active Evergreen before allowing privacy toggle)
 
 **Phase 2: Frontend (User Experience)**
 - [ ] Build privacy settings UI (Evergreen tier only)
@@ -370,10 +426,17 @@ As product matures and Seedling users upgrade or churn:
 **Phase 4: Testing & Security Audit**
 - [ ] Test unauthenticated access to all private blog routes
 - [ ] Verify OG tags don't leak private content
-- [ ] Test RSS feed access controls
-- [ ] Verify media files respect privacy settings
+- [ ] Test RSS feed disabled for private blogs
+- [ ] Verify media files respect privacy settings (R2 hotlinking)
 - [ ] Test API endpoints for metadata leakage
-- [ ] Perform security audit before launch
+- [ ] Test timing attack resistance (constant-time responses)
+- [ ] Verify session fixation prevention
+- [ ] Test Referrer-Policy headers for private blogs
+- [ ] Test downgrade flow (email warnings, auto-disable)
+- [ ] Verify tier validation (non-Evergreen can't enable privacy)
+- [ ] Test audit logging for all privacy changes
+- [ ] Perform penetration testing (OWASP top 10)
+- [ ] Security audit by external reviewer before launch
 
 ---
 
