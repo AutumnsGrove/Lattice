@@ -1,12 +1,14 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+
   export let data;
   const { specs, helpArticles, legalDocs } = data;
-  
+
   let searchQuery = '';
-  
+
   function handleSearch() {
     if (searchQuery.trim()) {
       goto(`/knowledge/search?q=${encodeURIComponent(searchQuery)}`);
@@ -19,8 +21,11 @@
   <meta name="description" content="Learn about Grove's features, specifications, and how to use our platform" />
 </svelte:head>
 
-<div class="min-h-screen bg-page">
-  <div class="max-w-6xl mx-auto px-4 py-12">
+<main class="min-h-screen flex flex-col">
+  <Header />
+
+  <article class="flex-1 px-6 py-12">
+    <div class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-foreground mb-4">Knowledge Base</h1>
@@ -173,4 +178,7 @@
       </div>
     </div>
   </div>
-</div>
+  </article>
+
+  <Footer />
+</main>

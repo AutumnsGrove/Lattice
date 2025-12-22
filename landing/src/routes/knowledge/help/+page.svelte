@@ -1,6 +1,8 @@
 <script lang="ts">
   import { helpArticles } from '$lib/data/knowledge-base';
-  
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+
   export let data;
   const { helpArticles: articles } = data;
 </script>
@@ -10,8 +12,11 @@
   <meta name="description" content="Help articles and guides for using Grove platform" />
 </svelte:head>
 
-<div class="min-h-screen bg-page">
-  <div class="max-w-6xl mx-auto px-4 py-12">
+<main class="min-h-screen flex flex-col">
+  <Header />
+
+  <article class="flex-1 px-6 py-12">
+    <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8">
       <a href="/knowledge" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Knowledge Base</a>
@@ -168,5 +173,7 @@
         </svg>
       </a>
     </div>
-  </div>
-</div>
+  </article>
+
+  <Footer />
+</main>

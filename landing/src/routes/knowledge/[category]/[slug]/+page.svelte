@@ -1,5 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
 
   export let data;
 
@@ -15,8 +17,11 @@
   <meta name="description" content={doc?.description || doc?.excerpt || ''} />
 </svelte:head>
 
-<div class="min-h-screen bg-page">
-  <div class="max-w-4xl mx-auto px-4 py-12">
+<main class="min-h-screen flex flex-col">
+  <Header />
+
+  <article class="flex-1 px-6 py-12">
+    <div class="max-w-4xl mx-auto">
     {#if doc}
       <!-- Breadcrumb -->
       <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8" aria-label="Breadcrumb">
@@ -110,5 +115,8 @@
         </div>
       </div>
     {/if}
-  </div>
-</div>
+    </div>
+  </article>
+
+  <Footer />
+</main>
