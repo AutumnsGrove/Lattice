@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** December 10, 2025
-**Last Updated:** December 11, 2025
+**Last Updated:** December 22, 2025
 
 ---
 
@@ -58,6 +58,25 @@ This Privacy Policy explains what data we collect, how we use it, and your right
 - We do not collect data from your device beyond what's necessary for the Service
 - We do not purchase data about you from third parties
 - We do not monitor your activity outside of Grove
+
+### 1.4 Protection from AI Crawlers and Scrapers
+
+Grove actively blocks all external AI crawlers, machine learning scrapers, and AI training bots from accessing content on our platform. Using Cloudflare's security features, we:
+
+- Block AI training crawlers (GPTBot, CCBot, Google-Extended, anthropic-ai, and similar)
+- Block AI search agents and "AI-powered" indexing systems
+- Block automated scraping tools designed to harvest content for datasets
+- Maintain an updated blocklist as new AI crawlers emerge
+
+**Why this matters:** Your writing is for human readers, not training data. As AI companies aggressively scrape the public web to build their models, we believe your personal expression deserves protection. Grove is designed to be invisible to these systems, a sanctuary where your words remain yours.
+
+**A note on limitations:** Some companies (such as Perplexity) have been documented circumventing crawler blocks and ignoring robots.txt directives entirely. This is a known limitation of all web-based crawler protection, not specific to Grove's implementation. No website can prevent a determined bad actor from scraping content if they choose to ignore industry standards. We implement every technical protection available through Cloudflare and commit to staying current with emerging threats as new circumvention methods are identified.
+
+**Our internal AI use is different:** We do use AI for content moderation (see Section 3.2), but this is fundamentally different from allowing external AI to harvest your content. Our moderation AI:
+- Uses providers with Zero Data Retention
+- Never stores your content
+- Never trains on your writing
+- Processes content only to ensure community safety
 
 ---
 
@@ -284,6 +303,8 @@ We will respond to privacy-related inquiries within 30 days.
 | How long do you keep my data? | **Only while needed, deleted 30 days after account closure.** |
 | Do you use tracking cookies? | **Only essential cookies for authentication.** |
 | Is my data encrypted? | **Yes, in transit and at rest.** |
+| Can AI crawlers access my content? | **No. We block all AI training bots and scrapers.** |
+| Is my writing used to train AI? | **Never. Not by us, not by external AI companies.** |
 
 ---
 

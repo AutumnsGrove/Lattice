@@ -89,6 +89,21 @@
 								No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
 							</p>
 						</div>
+
+						<div class="card p-6">
+							<h3 class="text-lg font-serif text-accent-muted mb-2">AI Sanctuary</h3>
+							<p class="text-foreground-muted font-sans leading-relaxed">
+								Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning.
+								<a href="https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Cloudflare stands at the gate</a>, and our corner of the web becomes a black hole to external AI.
+							</p>
+							<p class="text-foreground-muted font-sans leading-relaxed mt-3">
+								We do use AI internally for content moderation, but intentionally: with zero data retention, with privacy-first providers, with no training on your words.
+								There's a difference between using a tool carefully and feeding a machine indiscriminately.
+							</p>
+							<p class="text-foreground-subtle font-sans italic mt-3">
+								Your voice remains yours. Not a dataset. Not a statistic. Yours.
+							</p>
+						</div>
 					</div>
 				</section>
 
