@@ -8,8 +8,6 @@
 
   $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
                      category === 'help' ? 'Help Center' : 'Legal & Policies';
-  $: categoryColor = category === 'specs' ? 'green' :
-                    category === 'help' ? 'blue' : 'purple';
 </script>
 
 <svelte:head>
@@ -21,20 +19,30 @@
   <div class="max-w-4xl mx-auto px-4 py-12">
     {#if doc}
       <!-- Breadcrumb -->
-      <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-8" aria-label="Breadcrumb">
         <a href="/knowledge" class="hover:text-gray-900">Knowledge Base</a>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <a href="/knowledge/{category}" class="hover:text-gray-900">{categoryTitle}</a>
-        <span>/</span>
-        <span class="text-gray-900">{doc.title}</span>
+        <span aria-hidden="true">/</span>
+        <span class="text-gray-900" aria-current="page">{doc.title}</span>
       </nav>
 
       <!-- Article Header -->
       <header class="mb-8">
         <div class="flex items-center gap-3 mb-4">
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-{categoryColor}-100 text-{categoryColor}-800">
-            {category === 'specs' ? 'Technical Spec' : category === 'help' ? 'Help Article' : 'Legal Document'}
-          </span>
+          {#if category === 'specs'}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              Technical Spec
+            </span>
+          {:else if category === 'help'}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              Help Article
+            </span>
+          {:else}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+              Legal Document
+            </span>
+          {/if}
           {#if doc.lastUpdated}
             <span class="text-sm text-gray-500">Updated {doc.lastUpdated}</span>
           {/if}
@@ -59,16 +67,24 @@
 
       <!-- Article Footer -->
       <footer class="flex items-center justify-between">
-        <a href="/knowledge/{category}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a
+          href="/knowledge/{category}"
+          class="inline-flex items-center text-gray-600 hover:text-gray-900"
+          aria-label="Return to {categoryTitle}"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           Back to {categoryTitle}
         </a>
 
         <div class="flex gap-4">
-          <a href="mailto:autumn@grove.place" class="text-gray-600 hover:text-gray-900" title="Contact Support">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a
+            href="mailto:autumn@grove.place"
+            class="text-gray-600 hover:text-gray-900"
+            aria-label="Contact support via email"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </a>

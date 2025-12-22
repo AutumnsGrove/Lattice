@@ -16,6 +16,13 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Initialize user as null
   event.locals.user = null;
 
+  // Skip DB access for prerendered knowledge base routes
+  // (adapter-cloudflare throws when accessing platform.env during prerendering)
+  const isPrerenderedRoute = event.route.id?.startsWith("/knowledge/");
+  if (isPrerenderedRoute) {
+    return resolve(event);
+  }
+
   // Create a D1 session for consistent reads within this request
   // This enables read replication while maintaining "read your own writes" consistency
   if (event.platform?.env?.DB) {

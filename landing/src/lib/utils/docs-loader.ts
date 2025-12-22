@@ -16,6 +16,8 @@ export interface Doc {
   readingTime: number;
   content?: string;
   html?: string;
+  /** Internal: full path to the markdown file for content loading */
+  _filePath?: string;
 }
 
 function calculateReadingTime(content: string): number {
@@ -57,6 +59,7 @@ function parseDoc(filePath: string, category: "specs" | "help" | "legal"): Doc {
     category,
     lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
     readingTime: calculateReadingTime(markdownContent),
+    _filePath: filePath,
   };
 }
 
@@ -73,6 +76,7 @@ function loadDocsFromDir(
       const fullPath = join(currentPath, item);
       const stat = statSync(fullPath);
 
+      // Skip "completed" subdirectory (archived specs)
       if (stat.isDirectory() && item !== "completed") {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
@@ -100,7 +104,10 @@ export function loadAllDocs(): {
   legalDocs: Doc[];
 } {
   const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
-  const helpArticles = loadDocsFromDir(join(DOCS_ROOT, "help-center/articles"), "help");
+  const helpArticles = loadDocsFromDir(
+    join(DOCS_ROOT, "help-center/articles"),
+    "help",
+  );
   const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
 
   return { specs, helpArticles, legalDocs };
@@ -122,20 +129,24 @@ export function loadDocBySlug(
   const doc = docs.find((d) => d.slug === slug);
   if (!doc) return null;
 
-  // Load full content for individual pages
-  const filePath = join(docsPath, `${slug}.md`);
+  // Use stored file path to support nested directories
+  const filePath = doc._filePath || join(docsPath, `${slug}.md`);
 
   try {
     const content = readFileSync(filePath, "utf-8");
     const { content: markdownContent } = matter(content);
 
+    // Remove internal _filePath from returned doc
+    const { _filePath, ...docWithoutPath } = doc;
+
     return {
-      ...doc,
+      ...docWithoutPath,
       content: markdownContent,
       html: marked(markdownContent) as string,
     };
   } catch (error) {
     console.error(`Error loading full content for ${slug}:`, error);
-    return doc;
+    const { _filePath, ...docWithoutPath } = doc;
+    return docWithoutPath;
   }
 }
