@@ -1,7 +1,10 @@
 import { readFileSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
 import matter from "gray-matter";
 import { marked } from "marked";
+
+// Docs are at project root, not in landing folder
+const DOCS_ROOT = resolve(process.cwd(), "..", "docs");
 
 export interface Doc {
   slug: string;
@@ -96,9 +99,9 @@ export function loadAllDocs(): {
   helpArticles: Doc[];
   legalDocs: Doc[];
 } {
-  const specs = loadDocsFromDir("docs/specs", "specs");
-  const helpArticles = loadDocsFromDir("docs/help-center/articles", "help");
-  const legalDocs = loadDocsFromDir("docs/legal", "legal");
+  const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
+  const helpArticles = loadDocsFromDir(join(DOCS_ROOT, "help-center/articles"), "help");
+  const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
 
   return { specs, helpArticles, legalDocs };
 }
@@ -107,25 +110,20 @@ export function loadDocBySlug(
   slug: string,
   category: "specs" | "help" | "legal",
 ): Doc | null {
-  const docs = loadDocsFromDir(
+  const docsPath =
     category === "specs"
-      ? "docs/specs"
+      ? join(DOCS_ROOT, "specs")
       : category === "help"
-        ? "docs/help-center/articles"
-        : "docs/legal",
-    category,
-  );
+        ? join(DOCS_ROOT, "help-center/articles")
+        : join(DOCS_ROOT, "legal");
+
+  const docs = loadDocsFromDir(docsPath, category);
 
   const doc = docs.find((d) => d.slug === slug);
   if (!doc) return null;
 
   // Load full content for individual pages
-  const filePath =
-    category === "specs"
-      ? `docs/specs/${slug}.md`
-      : category === "help"
-        ? `docs/help-center/articles/${slug}.md`
-        : `docs/legal/${slug}.md`;
+  const filePath = join(docsPath, `${slug}.md`);
 
   try {
     const content = readFileSync(filePath, "utf-8");
@@ -134,7 +132,7 @@ export function loadDocBySlug(
     return {
       ...doc,
       content: markdownContent,
-      html: marked(markdownContent),
+      html: marked(markdownContent) as string,
     };
   } catch (error) {
     console.error(`Error loading full content for ${slug}:`, error);

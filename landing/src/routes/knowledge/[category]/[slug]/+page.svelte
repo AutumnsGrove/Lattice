@@ -1,16 +1,14 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { allDocs } from '$lib/data/knowledge-base';
-  
+
   export let data;
-  
+
+  $: doc = data.doc;
   $: category = $page.params.category;
-  $: slug = $page.params.slug;
-  $: doc = allDocs.find(d => d.slug === slug && d.category === category);
-  
-  $: categoryTitle = category === 'specs' ? 'Technical Specifications' : 
+
+  $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
                      category === 'help' ? 'Help Center' : 'Legal & Policies';
-  $: categoryColor = category === 'specs' ? 'green' : 
+  $: categoryColor = category === 'specs' ? 'green' :
                     category === 'help' ? 'blue' : 'purple';
 </script>
 
@@ -50,27 +48,12 @@
 
       <!-- Article Content -->
       <article class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-        <div class="prose prose-lg max-w-none">
-          <p class="text-gray-700 leading-relaxed">{doc.excerpt}</p>
-          
-          <!-- Placeholder for full content -->
-          <div class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <p class="text-gray-600 mb-4">
-              <strong>Note:</strong> This is a preview of the {doc.category === 'specs' ? 'specification' : doc.category === 'help' ? 'help article' : 'legal document'}. 
-              The full content is available in our GitHub repository.
-            </p>
-            <a 
-              href="https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/{category}/{doc.slug}.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              View on GitHub
-              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
+        <div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700">
+          {#if doc.html}
+            {@html doc.html}
+          {:else}
+            <p class="text-gray-700 leading-relaxed">{doc.excerpt}</p>
+          {/if}
         </div>
       </article>
 
@@ -82,9 +65,9 @@
           </svg>
           Back to {categoryTitle}
         </a>
-        
+
         <div class="flex gap-4">
-          <a href="mailto:autumn@grove.place" class="text-gray-600 hover:text-gray-900">
+          <a href="mailto:autumn@grove.place" class="text-gray-600 hover:text-gray-900" title="Contact Support">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
