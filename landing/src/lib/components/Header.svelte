@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Logo from './Logo.svelte';
+	import ThemeToggle from './ThemeToggle.svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived($page.url.pathname);
@@ -49,6 +50,7 @@
 			>
 				Credits
 			</a>
+			<ThemeToggle />
 		</nav>
 	</div>
 </header>
