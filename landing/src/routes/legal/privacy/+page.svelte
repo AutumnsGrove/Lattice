@@ -148,7 +148,7 @@
 			<li><strong>Access Your Data:</strong> View all your personal information in your account settings</li>
 			<li><strong>Export Your Data:</strong> Export your data at any time in standard formats</li>
 			<li><strong>Correct Your Data:</strong> Update your account information through your settings</li>
-			<li><strong>Delete Your Data:</strong> Request deletion by contacting autumn@grove.place</li>
+			<li><strong>Delete Your Data:</strong> Request deletion by contacting autumnbrown23@pm.me</li>
 			<li><strong>Opt Out:</strong> Unsubscribe from marketing emails at any time</li>
 		</ul>
 	</section>
@@ -183,7 +183,7 @@
 	<section>
 		<h2>9. Contact Us</h2>
 		<p>If you have questions about this Privacy Policy, please contact us:</p>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 	</section>
 
 	<!-- Summary -->

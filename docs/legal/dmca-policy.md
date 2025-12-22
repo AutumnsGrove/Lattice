@@ -42,7 +42,7 @@ Your notice must include **all** of the following:
 
 Send your DMCA takedown notice to:
 
-**Email:** autumn@grove.place
+**Email:** autumnbrown23@pm.me
 **Subject Line:** DMCA Takedown Notice
 
 **Note:** We are in the process of registering a designated DMCA agent with the U.S. Copyright Office. This page will be updated with agent information once registration is complete.
@@ -79,7 +79,7 @@ Your counter-notification must include **all** of the following:
 
 Send your counter-notification to:
 
-**Email:** autumn@grove.place
+**Email:** autumnbrown23@pm.me
 **Subject Line:** DMCA Counter-Notification
 
 ### 2.3 What Happens Next
@@ -131,7 +131,7 @@ Grove does not interfere with standard technical measures used by copyright owne
 
 For all DMCA-related inquiries:
 
-**Email:** autumn@grove.place
+**Email:** autumnbrown23@pm.me
 
 **Designated Agent:** *Registration pending with U.S. Copyright Office*
 

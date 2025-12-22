@@ -32,7 +32,7 @@
 		<p class="mt-2"><strong>Example:</strong> If you're on the Sapling plan ($12/month) and cancel on day 20 of your billing cycle, you would receive approximately $4 back (10 unused days ÷ 30 days × $12).</p>
 
 		<h3>1.3 How to Request a Refund</h3>
-		<p>Email us at <a href="mailto:autumn@grove.place">autumn@grove.place</a> with subject "Refund Request".</p>
+		<p>Email us at <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a> with subject "Refund Request".</p>
 		<p>We will process your request within <strong>3 business days</strong>.</p>
 	</section>
 
@@ -43,7 +43,7 @@
 		<p>You can cancel your subscription at any time:</p>
 		<ul class="space-y-1 ml-4">
 			<li><strong>Through your account settings</strong> — Go to Settings → Billing → Cancel Subscription</li>
-			<li><strong>By contacting us</strong> — Email autumn@grove.place</li>
+			<li><strong>By contacting us</strong> — Email autumnbrown23@pm.me</li>
 		</ul>
 
 		<h3>2.2 What Happens When You Cancel</h3>
@@ -146,7 +146,7 @@
 	<section>
 		<h2>6. Contact Us</h2>
 		<p>If you have questions about refunds, cancellations, or billing:</p>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 		<p>We respond to all billing inquiries within <strong>24 hours</strong>.</p>
 	</section>
 

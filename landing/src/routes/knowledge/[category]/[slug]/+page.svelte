@@ -80,7 +80,7 @@
 
         <div class="flex gap-4">
           <a
-            href="mailto:autumn@grove.place"
+            href="mailto:autumnbrown23@pm.me"
             class="text-foreground-muted hover:text-foreground transition-colors"
             aria-label="Contact support via email"
           >

@@ -31,7 +31,7 @@
 		</ol>
 
 		<h3>1.2 Where to Send Your Notice</h3>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 		<p><strong>Subject Line:</strong> DMCA Takedown Notice</p>
 
 		<h3>1.3 What Happens Next</h3>
@@ -57,7 +57,7 @@
 		</ol>
 
 		<h3>2.2 Where to Send Your Counter-Notification</h3>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 		<p><strong>Subject Line:</strong> DMCA Counter-Notification</p>
 
 		<h3>2.3 What Happens Next</h3>
@@ -90,7 +90,7 @@
 	<section>
 		<h2>5. Contact Information</h2>
 		<p>For all DMCA-related inquiries:</p>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 		<p class="mt-4"><em>Designated Agent registration with U.S. Copyright Office is pending. This policy will be updated once registration is complete.</em></p>
 	</section>
 

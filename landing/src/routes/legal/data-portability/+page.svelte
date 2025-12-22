@@ -48,7 +48,7 @@
 		<h3>How to Request an Export</h3>
 		<ol class="space-y-1 ml-4">
 			<li><strong>Self-service:</strong> Admin Panel → Settings → Export Data</li>
-			<li><strong>Email:</strong> autumn@grove.place</li>
+			<li><strong>Email:</strong> autumnbrown23@pm.me</li>
 			<li><strong>Automatic on cancellation:</strong> Export link sent within 24 hours</li>
 		</ol>
 		<p class="mt-2">Exports are generated within 24 hours and available for download for 30 days.</p>
@@ -77,7 +77,7 @@
 
 		<p class="mt-4"><strong>To request a domain transfer:</strong></p>
 		<ul class="space-y-1 ml-4">
-			<li>Email: autumn@grove.place</li>
+			<li>Email: autumnbrown23@pm.me</li>
 			<li>Subject: "Domain Transfer Request - yourdomain.com"</li>
 			<li>We'll respond with your EPP/authorization code within 48 hours</li>
 		</ul>
@@ -176,12 +176,12 @@
 			<li><strong>No content held for ransom</strong> under any circumstances</li>
 			<li><strong>Standard formats</strong> for all exports (Markdown, JSON, common image formats)</li>
 		</ol>
-		<p class="mt-4">If you ever feel Grove is not honoring this commitment, contact <a href="mailto:autumn@grove.place">autumn@grove.place</a> directly.</p>
+		<p class="mt-4">If you ever feel Grove is not honoring this commitment, contact <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a> directly.</p>
 	</section>
 
 	<section>
 		<h2>7. Contact</h2>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 		<p><strong>Response time:</strong> Within 48 hours</p>
 	</section>
 

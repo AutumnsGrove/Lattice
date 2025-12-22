@@ -190,7 +190,7 @@
 
 	<section>
 		<h2>15. Dispute Resolution</h2>
-		<p>These Terms are governed by the laws of the State of Georgia, United States. Before filing any legal claim, you agree to contact us at autumn@grove.place to attempt to resolve the dispute informally.</p>
+		<p>These Terms are governed by the laws of the State of Georgia, United States. Before filing any legal claim, you agree to contact us at autumnbrown23@pm.me to attempt to resolve the dispute informally.</p>
 	</section>
 
 	<section>
@@ -201,7 +201,7 @@
 	<section>
 		<h2>17. Contact Us</h2>
 		<p>If you have questions about these Terms, please contact us at:</p>
-		<p><strong>Email:</strong> <a href="mailto:autumn@grove.place">autumn@grove.place</a></p>
+		<p><strong>Email:</strong> <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a></p>
 	</section>
 
 	<section class="pt-6">

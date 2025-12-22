@@ -88,7 +88,7 @@ grove-export-username-YYYY-MM-DD.zip
 ### How to Request an Export
 
 1. **Self-service:** Admin Panel → Settings → Export Data
-2. **Email:** autumn@grove.place
+2. **Email:** autumnbrown23@pm.me
 3. **Automatic on cancellation:** Export link sent within 24 hours
 
 Exports are generated within 24 hours and available for download for 30 days.
@@ -117,7 +117,7 @@ When Grove registers a custom domain on your behalf (Evergreen tier), you are th
 4. **No fees:** Grove charges no transfer fees
 
 **To request a domain transfer:**
-- Email: autumn@grove.place
+- Email: autumnbrown23@pm.me
 - Subject: "Domain Transfer Request - yourdomain.com"
 - We'll respond with your EPP/authorization code within 48 hours
 
@@ -186,13 +186,13 @@ Grove commits to the following:
 4. **No content held for ransom** under any circumstances
 5. **Standard formats** for all exports (Markdown, JSON, common image formats)
 
-If you ever feel Grove is not honoring this commitment, contact autumn@grove.place directly.
+If you ever feel Grove is not honoring this commitment, contact autumnbrown23@pm.me directly.
 
 ---
 
 ## Questions?
 
-**Email:** autumn@grove.place
+**Email:** autumnbrown23@pm.me
 **Response time:** Within 48 hours
 
 ---
