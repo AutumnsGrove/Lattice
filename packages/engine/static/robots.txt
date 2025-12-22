@@ -1,4 +1,4 @@
-# Grove robots.txt
+# Grove User Blog robots.txt
 # Last updated: December 22, 2025
 #
 # Grove blocks AI crawlers and training bots to protect user content.
@@ -485,10 +485,3 @@ Disallow: /
 # Allow all other well-behaved crawlers
 User-agent: *
 Allow: /
-
-# =============================================================================
-# SITEMAP
-# =============================================================================
-
-# TODO: Uncomment when sitemap is generated
-# Sitemap: https://grove.place/sitemap.xml
