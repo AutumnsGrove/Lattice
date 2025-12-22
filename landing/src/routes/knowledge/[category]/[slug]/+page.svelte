@@ -1,15 +1,35 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
 
   export let data;
 
   $: doc = data.doc;
   $: category = $page.params.category;
+  $: headers = doc?.headers || [];
+  $: hasHeaders = headers.length > 0;
 
   $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
                      category === 'help' ? 'Help Center' : 'Legal & Policies';
+
+  // Add IDs to headers in the rendered content
+  let contentElement: HTMLElement;
+
+  onMount(() => {
+    if (contentElement && headers.length > 0) {
+      const headerElements = contentElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headerElements.forEach((el) => {
+        const text = el.textContent?.trim() || '';
+        const matchingHeader = headers.find((h: { text: string }) => h.text === text);
+        if (matchingHeader) {
+          el.id = matchingHeader.id;
+        }
+      });
+    }
+  });
 </script>
 
 <svelte:head>
@@ -21,7 +41,7 @@
   <Header />
 
   <article class="flex-1 px-6 py-12">
-    <div class="max-w-4xl mx-auto">
+    <div class="mx-auto" class:max-w-4xl={!hasHeaders} class:max-w-6xl={hasHeaders}>
     {#if doc}
       <!-- Breadcrumb -->
       <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8" aria-label="Breadcrumb">
@@ -59,16 +79,26 @@
         {/if}
       </header>
 
-      <!-- Article Content -->
-      <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-8 mb-8">
-        <div class="prose prose-lg max-w-none">
-          {#if doc.html}
-            {@html doc.html}
-          {:else}
-            <p class="text-foreground-muted leading-relaxed">{doc.excerpt}</p>
-          {/if}
-        </div>
-      </article>
+      <!-- Article Content with TOC -->
+      <div class="content-layout" class:has-toc={hasHeaders}>
+        <!-- Main Content -->
+        <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-8 mb-8">
+          <div class="prose prose-lg max-w-none" bind:this={contentElement}>
+            {#if doc.html}
+              {@html doc.html}
+            {:else}
+              <p class="text-foreground-muted leading-relaxed">{doc.excerpt}</p>
+            {/if}
+          </div>
+        </article>
+
+        <!-- Desktop TOC Sidebar -->
+        {#if hasHeaders}
+          <aside class="toc-sidebar">
+            <TableOfContents {headers} />
+          </aside>
+        {/if}
+      </div>
 
       <!-- Article Footer -->
       <footer class="flex items-center justify-between">
@@ -120,3 +150,47 @@
 
   <Footer />
 </main>
+
+<!-- Mobile TOC Button -->
+{#if doc && hasHeaders}
+  <MobileTOC {headers} />
+{/if}
+
+<style>
+  /* Content layout with TOC sidebar */
+  .content-layout {
+    display: block;
+  }
+
+  .content-layout.has-toc {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* Desktop: Show TOC sidebar */
+  @media (min-width: 1024px) {
+    .content-layout.has-toc {
+      grid-template-columns: 1fr 250px;
+    }
+  }
+
+  /* Large desktop: Wider TOC */
+  @media (min-width: 1280px) {
+    .content-layout.has-toc {
+      grid-template-columns: 1fr 280px;
+    }
+  }
+
+  /* TOC sidebar - hidden on mobile, shown on desktop */
+  .toc-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .toc-sidebar {
+      display: block;
+      position: relative;
+    }
+  }
+</style>
