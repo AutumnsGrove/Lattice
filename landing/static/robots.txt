@@ -24,6 +24,10 @@ Allow: /
 User-agent: DuckDuckBot
 Allow: /
 
+User-agent: KagiBot
+Allow: /
+
+# Slurp is Yahoo's crawler (yes, really)
 User-agent: Slurp
 Allow: /
 
