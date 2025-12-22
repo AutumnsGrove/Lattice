@@ -224,7 +224,7 @@
 
 	<!-- Skip confirmation modal -->
 	{#if showSkipConfirm}
-		<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+		<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 			<div class="card max-w-sm w-full animate-slide-up">
 				<div class="flex justify-between items-start mb-4">
 					<h2 class="text-lg font-medium text-foreground">Skip the tour?</h2>
