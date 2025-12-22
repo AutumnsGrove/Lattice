@@ -15,7 +15,7 @@ interface StartSearchBody {
   keywords?: string;
   tld_preferences?: string[];
   diverse_tlds?: boolean;
-  ai_provider?: string; // claude | deepseek | kimi | cloudflare
+  ai_provider?: string; // deepseek | openrouter
 }
 
 interface WorkerStartResponse {
@@ -55,7 +55,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   }
 
   // Validate ai_provider if provided
-  const validProviders = ["claude", "deepseek", "kimi", "cloudflare"];
+  const validProviders = ["deepseek", "openrouter"];
   if (ai_provider && !validProviders.includes(ai_provider)) {
     throw error(
       400,

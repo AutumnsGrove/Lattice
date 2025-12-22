@@ -2,23 +2,23 @@
 // Update model versions here when new ones are released
 
 export const MODELS = {
-  // Primary model for driving the search strategy
-  DRIVER: "claude-sonnet-4-5-20250929",
-  // Fast model for parallel domain evaluation
-  SWARM: "claude-haiku-4-5-20251001",
+  // Primary model for driving the search strategy (OpenRouter)
+  DRIVER: "deepseek/deepseek-chat",
+  // Fast model for parallel domain evaluation (OpenRouter)
+  SWARM: "cerebras/btlm-3b-8k-base",
 } as const;
 
-// Available model options for the config UI
+// Available model options for the config UI (OpenRouter models)
 export const DRIVER_MODEL_OPTIONS = [
-  { value: "claude-sonnet-4-5-20250929", label: "Claude Sonnet 4.5 (Latest)" },
-  { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
-  { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
+  { value: "deepseek/deepseek-chat", label: "DeepSeek Chat (V3.2)" },
+  { value: "deepseek/deepseek-coder", label: "DeepSeek Coder" },
+  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
 ] as const;
 
 export const SWARM_MODEL_OPTIONS = [
-  { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 (Latest)" },
-  { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
-  { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku (Legacy)" },
+  { value: "cerebras/btlm-3b-8k-base", label: "Cerebras BTLM-3B (Fast)" },
+  { value: "cerebras/cerebras-llama-3.1-70b", label: "Cerebras Llama 3.1 70B" },
+  { value: "deepseek/deepseek-chat", label: "DeepSeek Chat (Fallback)" },
 ] as const;
 
 // Default search configuration

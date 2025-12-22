@@ -93,7 +93,7 @@
 	let vibe = $state('professional');
 	let keywords = $state('');
 	let tldPreferences = $state<string[]>(['com', 'co']);
-	let aiProvider = $state('deepseek');
+	let aiProvider = $state('openrouter');
 
 	// Vibe mode state
 	let vibeText = $state('');
@@ -270,10 +270,8 @@
 	}
 
 	const aiProviderOptions = [
-		{ value: 'deepseek', label: 'DeepSeek (Recommended)', description: 'Great quality, very low cost' },
-		{ value: 'claude', label: 'Claude (Premium)', description: 'Best quality, highest cost' },
-		{ value: 'kimi', label: 'Kimi', description: 'Good quality, low cost' },
-		{ value: 'cloudflare', label: 'Llama 4 (Cloudflare)', description: 'Good quality, lowest cost' }
+		{ value: 'openrouter', label: 'OpenRouter (Recommended)', description: 'Zero data retention, great quality, low cost' },
+		{ value: 'deepseek', label: 'DeepSeek', description: 'Great quality, very low cost' }
 	];
 
 	function toggleTld(tld: string) {
@@ -308,8 +306,8 @@
 					keywords: keywords.trim() || null,
 					tld_preferences: tldPreferences,
 					diverse_tlds: diverseTlds,
-					// Only include provider if not the default (claude)
-					...(aiProvider !== 'claude' && { ai_provider: aiProvider })
+					// Only include provider if not the default (openrouter)
+					...(aiProvider !== 'openrouter' && { ai_provider: aiProvider })
 				})
 			});
 
@@ -678,7 +676,7 @@
 					keywords: parsedVibe.keywords || null,
 					tld_preferences: parsedVibe.tld_preferences,
 					diverse_tlds: false,
-					...(aiProvider !== 'claude' && { ai_provider: aiProvider })
+					...(aiProvider !== 'openrouter' && { ai_provider: aiProvider })
 				})
 			});
 
@@ -834,10 +832,8 @@
 
 	// Provider pricing per million tokens [input, output]
 	const PROVIDER_PRICING: Record<string, [number, number]> = {
-		claude: [3.0, 15.0],
+		openrouter: [0.28, 0.42],
 		deepseek: [0.28, 0.42],
-		kimi: [0.6, 2.5],
-		cloudflare: [0.27, 0.85],
 	};
 
 	// Estimate cost based on token usage and provider
@@ -1533,7 +1529,7 @@
 									</div>
 								</div>
 								<div class="flex justify-between text-[10px] sm:text-xs font-sans pt-1 border-t border-grove-100">
-									<span class="text-bark/50">Est. Cost (Claude)</span>
+									<span class="text-bark/50">Est. Cost ({aiProvider === 'openrouter' ? 'OpenRouter' : 'DeepSeek'})</span>
 									<span class="font-mono text-domain-600 font-medium">{estimateCost(tokenUsage)}</span>
 								</div>
 							</div>
