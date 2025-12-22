@@ -243,30 +243,11 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 ### Personal TODOs
 - [ ] Within markdown editor, allow for Drafts (saveable, postable later)
 
-### Spring Mode for Landing Site
-> **Context:** The landing site logo cycles through seasons (spring → summer → autumn → winter).
-> Autumn, summer, and winter are implemented. Spring needs its own palette and vibe.
-
-**Spring Palette Ideas:**
-- Fresh, bright greens - new growth energy (`#84cc16`, `#a3e635`, `#d9f99d`)
-- Soft cherry blossom pinks (`#fbcfe8`, `#f9a8d4`, `#f472b6`)
-- Pale sky blues - clear spring mornings (`#bae6fd`, `#7dd3fc`)
-- Buttercup yellows - wildflowers returning (`#fde047`, `#facc15`)
-- Lavender accents - lilacs blooming (`#c4b5fd`, `#a78bfa`)
-
-**Spring Vibes:**
-- Renewal, fresh starts, gentle warmth after winter
-- Morning dew, birdsong, first blooms
-- Lighter than summer - pastels over saturated colors
-- Cherry blossoms and apple blossoms (pinks)
-- New leaf unfurling - that bright yellow-green of fresh growth
-- Rain showers and rainbows
-
-**Implementation Tasks:**
-- [ ] Add `spring` palette to `landing/src/lib/components/nature/palette.ts`
-- [ ] Update `getSeasonalGreens()` to return spring-specific colors
-- [ ] Update Logo.svelte spring default color (soft green or blossom pink?)
-- [ ] Consider spring-specific forest elements (blossoms, new buds, rain)
+### Spring Mode for Landing Site ✅
+> **Status:** COMPLETED (2025-12-22)
+> Full spring mode implemented with blossom pink logo, spring birds (Robin, Bluebird),
+> spring flowers (Tulip, Crocus, Daffodil), fresh yellow-green foliage, and spring sky gradients.
+> All components registered in asset viewer.
 
 ### Migration Tools Expansion
 - [ ] WordPress import tool
