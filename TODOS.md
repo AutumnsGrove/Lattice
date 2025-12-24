@@ -36,6 +36,26 @@ pnpm sst deploy --stage dev
 pnpm sst deploy --stage production
 ```
 
+### Rollback Plan (if SST deployment fails)
+
+```bash
+# 1. Revert to previous commit (before SST changes)
+git revert HEAD --no-commit
+git commit -m "revert: roll back SST migration"
+
+# 2. Redeploy each app via wrangler (old configs still work)
+cd landing && pnpm wrangler pages deploy
+cd ../plant && pnpm wrangler pages deploy
+cd ../domains && pnpm wrangler pages deploy
+cd ../packages/engine && pnpm wrangler pages deploy
+cd ../packages/example-site && pnpm wrangler pages deploy
+
+# 3. Verify all apps are back online
+# Resource IDs (D1, KV, R2) remain unchanged - SST imports existing ones
+```
+
+**Why this works:** SST imports existing Cloudflare resources by ID rather than creating new ones. Rolling back to wrangler deployment doesn't affect the underlying data.
+
 ### Post-Merge Cleanup
 - [ ] Delete branch `claude/plan-next-steps-0rjeY`
 - [ ] Verify all apps still work after SST migration
