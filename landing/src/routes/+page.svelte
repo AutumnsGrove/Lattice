@@ -4,9 +4,15 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import { page } from '$app/stores';
+	import { season } from '$lib/stores/season';
 
 	// Get error from URL if present
 	let error = $derived($page.url.searchParams.get('error'));
+
+	// Toggle season on logo click
+	function handleLogoClick() {
+		season.cycle();
+	}
 
 	let currentSlide = $state(0);
 	const slides = [
@@ -65,7 +71,14 @@
 
 	<!-- Logo/Brand -->
 	<div class="mb-8">
-		<Logo class="w-24 h-24" color="#16a34a" trunkColor="#6B4423" />
+		<button
+			onclick={handleLogoClick}
+			class="transition-transform hover:scale-110 active:scale-95"
+			aria-label="Toggle season theme"
+			title="Click to change season"
+		>
+			<Logo class="w-24 h-24" season={$season} />
+		</button>
 	</div>
 
 	<!-- Title -->
