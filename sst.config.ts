@@ -15,6 +15,21 @@
  * Run: npx sst deploy --stage production (deploy to prod)
  */
 
+// =============================================================================
+// PRODUCTION RESOURCE IDS
+// =============================================================================
+// These are the IDs of existing Cloudflare resources created before SST.
+// We import them in production to preserve data; in dev/PR stages, SST creates new ones.
+//
+// To update: Change the ID here, then run `npx sst deploy --stage production`
+// To find IDs: Cloudflare Dashboard → Workers & Pages → D1/KV/R2 → Copy ID
+const PROD_RESOURCES = {
+  D1_DATABASE_ID: "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68",
+  KV_NAMESPACE_ID: "514e91e81cc44d128a82ec6f668303e4",
+  R2_MEDIA_BUCKET: "grove-media",
+  R2_CDN_BUCKET: "grove-cdn",
+} as const;
+
 export default $config({
   app(input) {
     return {
@@ -40,34 +55,54 @@ export default $config({
     // =========================================================================
     // SHARED RESOURCES
     // =========================================================================
+    // Note: Both .get() and new D1/Kv/R2() return the same $Resource type in SST.
+    // The difference is .get() imports existing resources, new creates fresh ones.
 
     // D1 Database - shared by all apps
     // In production, import existing database to avoid data loss
     const db = isProd
-      ? sst.cloudflare.D1.get("GroveDB", "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68")
+      ? sst.cloudflare.D1.get("GroveDB", PROD_RESOURCES.D1_DATABASE_ID)
       : new sst.cloudflare.D1("GroveDB");
 
     // KV Namespace - for caching and rate limiting
     // Used by: engine, example-site
     const cache = isProd
-      ? sst.cloudflare.Kv.get("GroveCache", "514e91e81cc44d128a82ec6f668303e4")
+      ? sst.cloudflare.Kv.get("GroveCache", PROD_RESOURCES.KV_NAMESPACE_ID)
       : new sst.cloudflare.Kv("GroveCache");
 
     // R2 Buckets
     // grove-media: blog images, user uploads (engine, example-site)
     const media = isProd
-      ? sst.cloudflare.R2.get("GroveMedia", "grove-media")
+      ? sst.cloudflare.R2.get("GroveMedia", PROD_RESOURCES.R2_MEDIA_BUCKET)
       : new sst.cloudflare.R2("GroveMedia");
 
     // grove-cdn: landing site assets, static files (landing, grove-router)
     const cdn = isProd
-      ? sst.cloudflare.R2.get("GroveCDN", "grove-cdn")
+      ? sst.cloudflare.R2.get("GroveCDN", PROD_RESOURCES.R2_CDN_BUCKET)
       : new sst.cloudflare.R2("GroveCDN");
 
     // =========================================================================
     // STRIPE PRODUCTS (Phase 2 - uncomment when ready)
     // =========================================================================
-    // Since we have no existing Stripe products, SST will create them fresh
+    // Since we have no existing Stripe products, SST will create them fresh.
+    //
+    // WEBHOOK SETUP (after uncommenting):
+    // 1. SST auto-registers webhook endpoint at: https://plant.grove.place/api/webhooks/stripe
+    // 2. Webhook secret is auto-generated and linked to Plant app
+    // 3. Events to subscribe: checkout.session.completed, customer.subscription.*
+    //
+    // SECRETS MANAGEMENT:
+    // - Production: Set STRIPE_SECRET_KEY via `npx sst secret set STRIPE_SECRET_KEY sk_live_...`
+    // - Dev/PR stages: Set STRIPE_TEST_SECRET_KEY for Stripe test mode
+    // - Webhook secrets are managed by SST (no manual setup needed)
+    //
+    // PASSING PRICE IDS TO APPS:
+    // After uncommenting, add to Plant's environment:
+    //   environment: {
+    //     STRIPE_PRICE_SEEDLING_MONTHLY: prices.seedling.monthly.id,
+    //     STRIPE_PRICE_SEEDLING_YEARLY: prices.seedling.yearly.id,
+    //     // ... etc for all 8 prices
+    //   }
     //
     // const seedling = new stripe.Product("Seedling", {
     //   name: isProd ? "Seedling Plan" : `[${stage}] Seedling Plan`,
@@ -153,11 +188,33 @@ export default $config({
     // SVELTEKIT APPS
     // =========================================================================
 
-    // Helper for stage-based domain names
-    const getDomain = (subdomain: string) => {
+    /**
+     * Helper for stage-based domain names
+     * @param subdomain - lowercase alphanumeric with hyphens only (e.g., "plant", "pr-123")
+     * @returns Full domain like "plant.grove.place" or "plant.dev.grove.place"
+     */
+    const getDomain = (subdomain: string): string => {
+      // Validate subdomain format (DNS-safe: lowercase alphanumeric and hyphens)
+      if (subdomain && !/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/.test(subdomain)) {
+        throw new Error(
+          `Invalid subdomain "${subdomain}": must be lowercase alphanumeric with hyphens, ` +
+          `cannot start/end with hyphen`
+        );
+      }
+
+      // Production: subdomain.grove.place or grove.place (root)
       if (isProd) return subdomain ? `${subdomain}.grove.place` : "grove.place";
+
+      // Dev/PR stages need a subdomain - can't serve grove.place root
+      if (!subdomain) {
+        throw new Error(`Subdomain required for non-production stage "${stage}"`);
+      }
+
+      // Dev stage: subdomain.dev.grove.place
       if (stage === "dev") return `${subdomain}.dev.grove.place`;
-      return `${subdomain}.${stage}.grove.place`; // PR previews: pr-123.grove.place
+
+      // PR previews: subdomain.pr-123.grove.place
+      return `${subdomain}.${stage}.grove.place`;
     };
 
     // -------------------------------------------------------------------------
@@ -239,17 +296,30 @@ export default $config({
     // =========================================================================
 
     // -------------------------------------------------------------------------
-    // Grove Router (*.grove.place wildcard handler)
-    // Catches all subdomain requests and routes to appropriate service
+    // Grove Router - DECISION: Keeping for now, may remove in Phase 5
     // -------------------------------------------------------------------------
-    // Note: With SST managing explicit domains for each app, the router's
-    // role is reduced. It may only be needed for edge cases or CDN proxying.
+    // The grove-router (packages/grove-router) handles *.grove.place routing.
+    //
+    // WITH SST (this config):
+    // - Each app gets explicit domains (plant.grove.place, domains.grove.place, etc.)
+    // - Engine gets wildcard (*.grove.place) for tenant blogs
+    // - Router role is reduced since SST handles domain → app mapping
+    //
+    // ROUTER STILL NEEDED FOR:
+    // 1. CDN proxying (cdn.grove.place → R2 bucket) - R2 custom domains may replace this
+    // 2. Special subdomain routing (auth, admin, login → groveauth-frontend)
+    // 3. www → root redirect
+    // 4. Fallback for any gaps in SST wildcard coverage
+    //
+    // PHASE 5 DECISION:
+    // After SST is fully deployed, test if all routing works without the router.
+    // If yes, delete packages/grove-router entirely.
+    // If no, uncomment below and document which edge cases it handles.
     //
     // const router = new sst.cloudflare.Worker("Router", {
     //   handler: "packages/grove-router/src/index.ts",
     //   link: [cdn],
     //   url: true,
-    //   // Routes will be configured after other apps have their domains
     // });
 
     // =========================================================================
