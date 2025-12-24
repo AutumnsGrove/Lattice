@@ -84,6 +84,7 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
   - ⏳ Payment via Stripe (placeholder IDs, needs real products)
   - ✅ Interactive tour (8 steps, skippable)
   - ✅ Email templates ready (welcome, day 1/3/7/30)
+  - ⚠️ **Auth issue:** Login hangs after OAuth redirect (route misconfiguration)
 
 ### Stripe Integration (plant.grove.place)
 > **Status:** Code deployed with placeholder price IDs. **Will be migrated to SST.**
@@ -117,38 +118,28 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 - [ ] Build tenant admin panel
 - [ ] Implement storage limits per plan (1GB/5GB/20GB/100GB)
 
-### Per-Tenant Theming
+### Per-Tenant Theming → Foliage Integration
 > **Issue:** All tenants currently share the same green theme. Midnight Bloom should have its purple theme back.
-> **Reference:** Old example-site had purple theme defined in `tailwind.config.js` and `+layout.svelte`
+> **Solution:** Integrate `@autumnsgrove/foliage` - our dedicated theming package.
+> **Repository:** https://github.com/AutumnsGrove/Foliage
 
-**Implementation Options:**
+**Foliage provides:**
+- 10 curated themes (Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower)
+- Tier-gated access (Seedling=3, Sapling=10, Oak+=customizer, Evergreen+=custom fonts)
+- CSS variable generation with WCAG AA contrast validation
+- Community themes (Oak+ can browse/submit, moderation queue)
+- Custom font uploads to R2 (Evergreen tier)
 
-**Option A: CSS Variables per Tenant (Recommended)**
-- [ ] Add `theme_primary_color`, `theme_accent_color` columns to `tenants` table
-- [ ] Load tenant theme colors in `+layout.server.ts`
-- [ ] Apply as CSS variables in `+layout.svelte` (override `:root` vars)
-- [ ] Add theme color picker to tenant admin settings
+**Integration Tasks:**
+- [ ] Add `@autumnsgrove/foliage` as dependency to engine
+- [ ] Run Foliage migrations (theme_settings, community_themes, theme_ratings tables)
+- [ ] Add R2 bucket for custom fonts (`foliage-fonts`)
+- [ ] Import `loadThemeSettings` in engine's `+layout.server.ts`
+- [ ] Apply theme CSS vars via `applyThemeVariables()` in `+layout.svelte`
+- [ ] Add theme admin routes (`/admin/themes/`) using Foliage components
+- [ ] Wire up tier access using `canAccessTheme()`, `canUseCustomizer()`, etc.
 
-**Option B: Preset Themes**
-- [ ] Create theme presets (Grove Green, Midnight Purple, Ocean Blue, etc.)
-- [ ] Add `theme_preset` column to `tenants` table
-- [ ] Load preset CSS based on tenant selection
-
-**Midnight Bloom Original Theme** (from `example-site/src/app.css`):
-```css
-/* Light Mode - Late Night Tea Café */
---primary: 340 45% 35%;           /* Deep Plum/Burgundy - like steeped black tea */
---primary-foreground: 40 30% 95%;
---accent: 38 70% 50%;             /* Golden Amber - like honey */
---background: 40 25% 97%;         /* Warm off-white */
---foreground: 340 30% 15%;
-
-/* Dark Mode - Late night ambiance */
---primary: 340 50% 55%;           /* Lighter Plum */
---accent: 38 75% 55%;             /* Brighter golden */
---background: 260 20% 8%;         /* Deep night purple */
---foreground: 40 15% 90%;
-```
+**Midnight Bloom Theme** - Can be implemented as custom colors via customizer (Oak+) or as a community theme.
 
 ---
 
@@ -204,10 +195,9 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 ## Phase 6: Polish & Scale (Weeks 31-41)
 
 - [ ] Performance optimization
-- [ ] Implement theme system → **SPEC READY**: `docs/specs/theme-system-spec.md`
-  - 10 hand-curated themes: Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower
-  - Tiered access: Seedling=3, Sapling=10, Oak+=customizer+community themes, Evergreen+=custom fonts
-  - CSS variable system, custom font uploads to R2
+- [ ] Implement theme system → **NOW: Foliage Integration** (see Phase 2 "Per-Tenant Theming")
+  - Spec at `docs/specs/theme-system-spec.md`, implementation at `@autumnsgrove/foliage`
+  - 10 curated themes, tier-gated access, community themes, custom fonts
 - [ ] Implement advanced analytics (see docs/specs/analytics-spec.md)
 - [ ] Build priority support system
 - [ ] Implement comment system → **SPEC READY**: `docs/specs/comments-spec.md`
@@ -230,12 +220,12 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 > **Resume:** After Phase 4 (Grove Social) is complete.
 
 ### Theme System Expansion
-> *See: `docs/specs/theme-system-spec.md` for full implementation plan*
-- [ ] Custom CSS override option for advanced users (Oak+ via customizer)
+> **Status:** Core features implemented in `@autumnsgrove/foliage`. Below are post-launch expansions.
+- [x] Custom CSS override option (Oak+ via customizer) - **IN FOLIAGE**
+- [x] Community theme submission portal - **IN FOLIAGE**
+- [x] Theme builder/customizer UI (Oak+) - **IN FOLIAGE**
+- [x] Custom font uploads (Evergreen) - **IN FOLIAGE**
 - [ ] Theme marketplace (users buy/sell themes) - **DEFERRED** to post-launch
-- [ ] Community theme submission portal (Oak+ can download, authors can submit)
-- [ ] Theme builder/customizer UI (Oak+)
-- [ ] Custom font uploads (Evergreen only, stored in R2)
 
 ### Internal Tools
 - [ ] Add search queue support (allow multiple concurrent domain searches)
