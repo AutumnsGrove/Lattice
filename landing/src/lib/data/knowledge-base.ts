@@ -87,6 +87,26 @@ export const specs: Doc[] = [
     lastUpdated: "2025-12-01",
     readingTime: 8,
   },
+  {
+    slug: "status-page-spec",
+    title: "Status Page Specification",
+    description: "Public-facing status page for platform health and incident communication",
+    excerpt:
+      "The Grove Status page provides transparent, real-time communication about platform health. When something goes wrong—or when maintenance is planned—users can check status.grove.place.",
+    category: "specs",
+    lastUpdated: "2025-12-24",
+    readingTime: 12,
+  },
+  {
+    slug: "admin-panel-spec",
+    title: "Admin Panel Specification",
+    description: "Content management and site administration interface",
+    excerpt:
+      "The Grove Admin Panel is where bloggers manage their content, customize their site, and configure settings. Designed to be simple, focused, and get out of the way.",
+    category: "specs",
+    lastUpdated: "2025-12-24",
+    readingTime: 10,
+  },
 ];
 
 // Help Center Articles
@@ -210,6 +230,126 @@ export const helpArticles: Doc[] = [
     category: "help",
     lastUpdated: "2025-12-01",
     readingTime: 2,
+  },
+  {
+    slug: "creating-your-account",
+    title: "Creating Your Account",
+    description: "How to sign up for Grove using Google authentication",
+    excerpt:
+      "Getting started with Grove takes about a minute. Grove uses Google for authentication—no new password to create or remember.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 3,
+  },
+  {
+    slug: "understanding-the-admin-panel",
+    title: "Understanding the Admin Panel",
+    description: "A tour of your Grove admin dashboard",
+    excerpt:
+      "Once you're signed in, the admin panel is your home base. Here's a quick tour of what you'll find and where to find it.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
+  },
+  {
+    slug: "formatting-your-posts",
+    title: "Formatting Your Posts",
+    description: "Markdown syntax and formatting options for your writing",
+    excerpt:
+      "Grove uses Markdown for formatting—a simple way to style text that's been around since 2004. Here's everything you need.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 5,
+  },
+  {
+    slug: "adding-images-and-media",
+    title: "Adding Images and Media",
+    description: "How to upload and use images in your posts",
+    excerpt:
+      "Images make posts more engaging. Here's how to add them to your Grove blog, including supported formats and size limits.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 3,
+  },
+  {
+    slug: "choosing-a-theme",
+    title: "Choosing a Theme",
+    description: "Customize your blog's appearance with themes and colors",
+    excerpt:
+      "Your blog should feel like yours. Grove's theme system gives you meaningful customization without requiring design expertise.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
+  },
+  {
+    slug: "what-is-meadow",
+    title: "What is Meadow?",
+    description: "Grove's community feed for discovering and sharing posts",
+    excerpt:
+      "Meadow is Grove's community feed—a shared space where bloggers can discover each other's work, react to posts, and have conversations.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
+  },
+  {
+    slug: "known-limitations",
+    title: "Known Limitations",
+    description: "What Grove intentionally doesn't do",
+    excerpt:
+      "Grove is intentionally focused. Some things we don't do—not because we couldn't, but because they'd compromise what Grove is trying to be.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 5,
+  },
+  {
+    slug: "contact-support",
+    title: "Contacting Support",
+    description: "How to reach a real person when you need help",
+    excerpt:
+      "When you need help with something the documentation doesn't cover, here's how to reach a real person. No ticket system, no chatbot maze.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 3,
+  },
+  {
+    slug: "checking-grove-status",
+    title: "Checking Grove Status",
+    description: "How to check if Grove is experiencing issues",
+    excerpt:
+      "If something seems off with Grove, here's how to find out what's happening. Check status.grove.place for real-time updates.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 3,
+  },
+  {
+    slug: "upgrading-or-downgrading",
+    title: "Upgrading or Downgrading Your Plan",
+    description: "How to change your Grove subscription plan",
+    excerpt:
+      "You can change your Grove plan anytime. Upgrades take effect immediately; downgrades apply at the end of your billing period.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
+  },
+  {
+    slug: "account-deletion",
+    title: "Deleting Your Account",
+    description: "How to close your Grove account and delete your data",
+    excerpt:
+      "If you decide to leave Grove, you can delete your account and all associated data. Export your content first—deletion is permanent.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
+  },
+  {
+    slug: "browser-compatibility",
+    title: "Browser Compatibility",
+    description: "Supported browsers and troubleshooting tips",
+    excerpt:
+      "Grove works in all modern browsers. Here's what's supported and what to do if something isn't working right.",
+    category: "help",
+    lastUpdated: "2025-12-24",
+    readingTime: 4,
   },
 ];
 
