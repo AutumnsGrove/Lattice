@@ -55,8 +55,9 @@
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
 
-	// Tree aspect ratio (height = width * ratio) based on tree SVG viewBoxes
-	const TREE_ASPECT_RATIO = 1.23;
+	// Tree aspect ratio range (height = width * ratio)
+	// Randomized per tree for more natural variation
+	const TREE_ASPECT_RATIO_RANGE = { min: 0.95, max: 1.45 };
 
 	// Tree component types
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
@@ -87,19 +88,79 @@
 		opacity: number;
 	}
 
+	// Responsive tree density - larger screens get more trees for a denser forest
+	// Base counts are for mobile, multiplied by density factor for larger viewports
+	let densityMultiplier = $state(1);
+	let treeSizeMultiplier = $state(1);
+
+	// Calculate density based on viewport width
+	function calculateDensity(): { density: number; treeSize: number } {
+		if (typeof window === 'undefined') return { density: 1, treeSize: 1 };
+
+		const width = window.innerWidth;
+
+		// Scale tree count based on viewport width
+		// Mobile (<768px): 1x - current behavior, looks great
+		// Tablet (768-1024px): 1.3x
+		// Desktop (1024-1440px): 1.8x
+		// Large desktop (1440-2560px): 2.5x
+		// Ultrawide (2560px+): 3.5x
+		let density: number;
+		let treeSize: number;
+
+		if (width < 768) {
+			density = 1;
+			treeSize = 1;
+		} else if (width < 1024) {
+			density = 1.3;
+			treeSize = 1.1;
+		} else if (width < 1440) {
+			density = 1.8;
+			treeSize = 1.15;
+		} else if (width < 2560) {
+			density = 2.5;
+			treeSize = 1.25;
+		} else {
+			// Ultrawide monitors (3440px+)
+			density = 3.5;
+			treeSize = 1.4;
+		}
+
+		return { density, treeSize };
+	}
+
+	// Base tree count ranges per hill layer (tuned for mobile)
+	// Each layer gets a random count within this range, scaled by density
+	const baseTreeCountRanges = [
+		{ min: 8, max: 14 },   // Back hill - more trees, smaller
+		{ min: 7, max: 12 },   // Middle-back
+		{ min: 6, max: 10 },   // Middle
+		{ min: 4, max: 8 }     // Front - fewer trees, larger
+	];
+	const baseTreeSizes = [
+		{ min: 35, max: 55 },   // Back hill - smallest
+		{ min: 50, max: 75 },   // Middle-back
+		{ min: 65, max: 95 },   // Middle
+		{ min: 90, max: 130 }   // Front - largest
+	];
+
+	// Randomize tree count within range, scaled by density
+	function getRandomTreeCount(range: { min: number; max: number }, density: number): number {
+		const baseCount = range.min + Math.random() * (range.max - range.min);
+		return Math.round(baseCount * density);
+	}
+
 	// Hill layer definitions - organic rolling curves
 	// curvePath: just the top curve for tree placement (no bottom/sides)
 	// fillPath: closed path for rendering the hill fill
 	// Hills pushed down ~80 units to avoid overlapping title text
-	const hillLayers: HillLayer[] = [
+	const hillLayerDefs = [
 		{
 			id: 1,
 			// Back hill - gentle undulation
 			curvePath: 'M0 260 Q150 220 300 240 Q450 260 600 230 Q750 200 900 235 Q1050 270 1200 240',
 			fillPath: 'M0 260 Q150 220 300 240 Q450 260 600 230 Q750 200 900 235 Q1050 270 1200 240 L1200 500 L0 500 Z',
-			treeCount: 10,
-			treeSize: { min: 35, max: 55 },
-			brightness: 'dark',
+			brightness: 'dark' as const,
 			zIndex: 1,
 			opacity: 0.85
 		},
@@ -108,9 +169,7 @@
 			// Middle-back hill
 			curvePath: 'M0 300 Q200 260 350 290 Q500 320 700 275 Q900 230 1050 280 Q1150 310 1200 290',
 			fillPath: 'M0 300 Q200 260 350 290 Q500 320 700 275 Q900 230 1050 280 Q1150 310 1200 290 L1200 500 L0 500 Z',
-			treeCount: 9,
-			treeSize: { min: 50, max: 75 },
-			brightness: 'mid',
+			brightness: 'mid' as const,
 			zIndex: 2,
 			opacity: 0.9
 		},
@@ -119,9 +178,7 @@
 			// Middle hill
 			curvePath: 'M0 340 Q150 300 300 330 Q500 360 650 320 Q800 280 950 325 Q1100 370 1200 335',
 			fillPath: 'M0 340 Q150 300 300 330 Q500 360 650 320 Q800 280 950 325 Q1100 370 1200 335 L1200 500 L0 500 Z',
-			treeCount: 8,
-			treeSize: { min: 65, max: 95 },
-			brightness: 'mid',
+			brightness: 'mid' as const,
 			zIndex: 3,
 			opacity: 0.92
 		},
@@ -130,13 +187,24 @@
 			// Front hill - larger trees
 			curvePath: 'M0 390 Q200 350 400 380 Q600 410 800 360 Q1000 310 1200 370',
 			fillPath: 'M0 390 Q200 350 400 380 Q600 410 800 360 Q1000 310 1200 370 L1200 500 L0 500 Z',
-			treeCount: 6,
-			treeSize: { min: 90, max: 130 },
-			brightness: 'light',
+			brightness: 'light' as const,
 			zIndex: 4,
 			opacity: 0.95
 		}
 	];
+
+	// Store randomized tree counts (regenerated with trees)
+	let randomizedTreeCounts: number[] = $state([]);
+
+	// Hill layers with randomized tree counts and scaled sizes
+	let hillLayers = $derived(hillLayerDefs.map((def, i) => ({
+		...def,
+		treeCount: randomizedTreeCounts[i] ?? getRandomTreeCount(baseTreeCountRanges[i], densityMultiplier),
+		treeSize: {
+			min: Math.round(baseTreeSizes[i].min * treeSizeMultiplier),
+			max: Math.round(baseTreeSizes[i].max * treeSizeMultiplier)
+		}
+	})));
 
 	// Helper to pick random item from array
 	function pickRandom<T>(arr: T[]): T {
@@ -234,6 +302,7 @@
 		x: number;
 		y: number;
 		size: number;
+		aspectRatio: number; // Height = width * aspectRatio (randomized for natural variation)
 		treeType: TreeType;
 		trunkColor: string;
 		rotation: number;
@@ -260,12 +329,16 @@
 			for (const point of points) {
 				const treeType = pickRandom(treeTypes);
 				const size = hill.treeSize.min + Math.random() * (hill.treeSize.max - hill.treeSize.min);
+				// Randomize aspect ratio for natural height variation
+				const aspectRatio = TREE_ASPECT_RATIO_RANGE.min +
+					Math.random() * (TREE_ASPECT_RATIO_RANGE.max - TREE_ASPECT_RATIO_RANGE.min);
 
 				allTrees.push({
 					id: treeId++,
 					x: point.xPercent,
 					y: point.yPercent,
 					size,
+					aspectRatio,
 					treeType,
 					trunkColor: pickRandom([bark.bark, bark.warmBark, bark.lightBark]),
 					rotation: (Math.random() - 0.5) * 10,
@@ -280,11 +353,50 @@
 		return allTrees;
 	}
 
-	// Base trees - stable positions generated once on mount
+	// Base trees - stable positions generated once on mount (regenerated if density changes)
 	let baseTrees: BaseTree[] = $state([]);
+	let lastDensity = 0;
+
+	// Generate trees with current density settings
+	function regenerateTrees() {
+		const { density, treeSize } = calculateDensity();
+		densityMultiplier = density;
+		treeSizeMultiplier = treeSize;
+
+		// Randomize tree counts for each layer
+		randomizedTreeCounts = baseTreeCountRanges.map(range =>
+			getRandomTreeCount(range, density)
+		);
+
+		baseTrees = generateBaseTreePositions();
+		lastDensity = density;
+	}
 
 	onMount(() => {
-		baseTrees = generateBaseTreePositions();
+		regenerateTrees();
+
+		// Regenerate on resize if density bracket changes significantly
+		const handleResize = () => {
+			const { density } = calculateDensity();
+			// Only regenerate if density multiplier changed by at least 0.3
+			// This prevents constant regeneration during resize
+			if (Math.abs(density - lastDensity) >= 0.3) {
+				regenerateTrees();
+			}
+		};
+
+		// Debounce resize handler
+		let resizeTimeout: ReturnType<typeof setTimeout>;
+		const debouncedResize = () => {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(handleResize, 250);
+		};
+
+		window.addEventListener('resize', debouncedResize);
+		return () => {
+			window.removeEventListener('resize', debouncedResize);
+			clearTimeout(resizeTimeout);
+		};
 	});
 
 	// Final trees with seasonal colors - derived from base trees and season
@@ -647,7 +759,7 @@
 						left: {tree.x}%;
 						top: {tree.y}%;
 						width: {tree.size}px;
-						height: {tree.size * TREE_ASPECT_RATIO}px;
+						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex + 10};
 						transform: translateX(-50%) translateY(-100%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);
