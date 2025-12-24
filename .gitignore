@@ -4,6 +4,10 @@ __pycache__/
 .DS_Store
 .claude/
 node_modules/
+
+# SST
+.sst/
+sst-env.d.ts
 build/
 dist/
 .svelte-kit/

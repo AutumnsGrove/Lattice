@@ -6,6 +6,7 @@
 **Public Name:** Foliage
 **Repository:** `AutumnsGrove/Foliage`
 **Package:** `@autumnsgrove/foliage`
+**Status:** Package implemented, pending GroveEngine integration
 
 ---
 
@@ -403,6 +404,136 @@ export const load = async ({ locals }) => {
 - [ ] Implement theme import
 - [ ] Build moderation queue
 - [ ] Add rating and download tracking
+
+---
+
+## GroveEngine Integration Implementation
+
+> **Status:** Ready to implement
+> **Prerequisite:** Foliage package published to npm
+
+This section covers integrating `@autumnsgrove/foliage` into GroveEngine for per-tenant theming.
+
+### Infrastructure Requirements
+
+**Database Migrations:**
+Copy Foliage migrations to GroveEngine (renumber as needed):
+- `migrations/014_theme_settings.sql`
+- `migrations/015_custom_fonts.sql`
+- `migrations/016_community_themes.sql`
+
+**R2 Bucket for Custom Fonts:**
+```toml
+# In wrangler.toml (or sst.config.ts when migrated)
+[[r2_buckets]]
+binding = "FONTS_BUCKET"
+bucket_name = "foliage-fonts"
+```
+
+### Layout Integration
+
+**Server-side theme loading:**
+```typescript
+// packages/engine/src/routes/+layout.server.ts
+import { loadThemeSettings } from '@autumnsgrove/foliage/server';
+
+export const load = async ({ platform, locals }) => {
+  const themeSettings = locals.tenantId
+    ? await loadThemeSettings(platform.env.DB, locals.tenantId)
+    : null;
+
+  return {
+    tenant: locals.tenant,
+    themeSettings,
+  };
+};
+```
+
+**Client-side theme application:**
+```svelte
+<!-- packages/engine/src/routes/+layout.svelte -->
+<script lang="ts">
+  import { generateThemeVariables, getTheme } from '@autumnsgrove/foliage';
+
+  let { data, children } = $props();
+
+  const themeCSS = $derived(() => {
+    if (!data.themeSettings) return '';
+    const baseTheme = getTheme(data.themeSettings.themeId);
+    return generateThemeVariables({
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        ...data.themeSettings.customColors,
+        accent: data.themeSettings.accentColor,
+      },
+    });
+  });
+</script>
+
+<svelte:head>
+  {#if themeCSS}
+    {@html `<style>:root { ${themeCSS} }</style>`}
+  {/if}
+</svelte:head>
+
+{@render children()}
+```
+
+### Admin Routes
+
+Create theme management pages in engine admin:
+
+| Route | Component | Tier |
+|-------|-----------|------|
+| `/admin/themes` | `ThemeSelector` | All paid |
+| `/admin/themes/customize` | `ThemeCustomizer` | Oak+ |
+| `/admin/themes/community` | `CommunityThemeBrowser` | Oak+ |
+| `/admin/themes/fonts` | `FontUploader` | Evergreen |
+
+### API Routes
+
+```typescript
+// packages/engine/src/routes/api/themes/+server.ts
+import { loadThemeSettings, saveThemeSettings } from '@autumnsgrove/foliage/server';
+import { canUseCustomizer } from '@autumnsgrove/foliage';
+import { json } from '@sveltejs/kit';
+
+export const GET = async ({ platform, locals }) => {
+  const settings = await loadThemeSettings(platform.env.DB, locals.tenantId);
+  return json(settings);
+};
+
+export const PATCH = async ({ platform, locals, request }) => {
+  const body = await request.json();
+
+  // Tier-gate customizer features
+  if (body.customColors && !canUseCustomizer(locals.tenant.tier)) {
+    return json({ error: 'Oak+ required' }, { status: 403 });
+  }
+
+  await saveThemeSettings(platform.env.DB, {
+    tenantId: locals.tenantId,
+    ...body,
+  });
+
+  return json({ success: true });
+};
+```
+
+### Integration Checklist
+
+- [ ] Install: `pnpm add @autumnsgrove/foliage --filter @autumnsgrove/groveengine`
+- [ ] Copy migrations (014, 015, 016) to engine
+- [ ] Run migrations against D1
+- [ ] Create R2 bucket for fonts
+- [ ] Update `+layout.server.ts` to load theme settings
+- [ ] Update `+layout.svelte` to apply theme CSS vars
+- [ ] Create `/admin/themes/` routes with Foliage components
+- [ ] Create `/api/themes/` CRUD endpoints
+- [ ] Wire up tier checks (`canAccessTheme`, `canUseCustomizer`, etc.)
+- [ ] Test light/dark mode toggle with themes
+- [ ] Test Midnight Bloom theme (purple accent for example tenant)
 
 ---
 

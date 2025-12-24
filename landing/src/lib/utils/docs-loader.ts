@@ -97,6 +97,7 @@ function loadDocsFromDir(
   category: DocCategory,
 ): DocInternal[] {
   const docs: DocInternal[] = [];
+  const seenSlugs = new Set<string>();
 
   function readDirRecursive(currentPath: string) {
     const items = readdirSync(currentPath);
@@ -105,12 +106,21 @@ function loadDocsFromDir(
       const fullPath = join(currentPath, item);
       const stat = statSync(fullPath);
 
-      // Skip "completed" subdirectory (archived specs)
-      if (stat.isDirectory() && item !== "completed") {
+      // Include all subdirectories including "completed" specs
+      if (stat.isDirectory()) {
         readDirRecursive(fullPath);
       } else if (stat.isFile() && item.endsWith(".md")) {
         try {
-          docs.push(parseDoc(fullPath, category));
+          const doc = parseDoc(fullPath, category);
+
+          // Detect duplicate slugs (e.g., same file in both specs/ and specs/completed/)
+          if (seenSlugs.has(doc.slug)) {
+            console.warn(`Duplicate slug "${doc.slug}" found at ${fullPath}, skipping`);
+            continue;
+          }
+
+          seenSlugs.add(doc.slug);
+          docs.push(doc);
         } catch (error) {
           console.error(`Error parsing ${fullPath}:`, error);
         }

@@ -107,6 +107,97 @@ export const specs: Doc[] = [
     lastUpdated: "2025-12-24",
     readingTime: 10,
   },
+  {
+    slug: "customer-repo-spec",
+    title: "Customer Repository Specification",
+    description: "Template structure for customer blog repositories",
+    excerpt:
+      "Each customer has their own repository that imports @groveengine/core as a dependency. This single-tenant model provides isolation, customization, and independence.",
+    category: "specs",
+    lastUpdated: "2025-11-26",
+    readingTime: 6,
+  },
+  {
+    slug: "renovate-spec",
+    title: "Renovate Configuration Specification",
+    description: "Automated dependency updates for Grove repositories",
+    excerpt:
+      "Renovate Bot automatically monitors dependencies and opens pull requests when updates are available, ensuring security patches are applied quickly.",
+    category: "specs",
+    lastUpdated: "2025-11-26",
+    readingTime: 5,
+  },
+  {
+    slug: "versioning-spec",
+    title: "Versioning Specification",
+    description: "Semantic versioning strategy and release workflow",
+    excerpt:
+      "GroveEngine follows Semantic Versioning 2.0.0 for all releases. This document defines how versions are managed and how updates propagate to customer repositories.",
+    category: "specs",
+    lastUpdated: "2025-11-26",
+    readingTime: 7,
+  },
+  {
+    slug: "website-spec",
+    title: "Grove Website Specification",
+    description: "Marketing site and client management platform",
+    excerpt:
+      "Grove Website is the main marketing site and client management platform. It handles marketing, client acquisition, onboarding, billing, and provides a dashboard for clients to manage their blogs.",
+    category: "specs",
+    lastUpdated: "2025-11-21",
+    readingTime: 10,
+  },
+  {
+    slug: "tenant-onboarding-implementation-plan",
+    title: "Tenant Onboarding Implementation Plan",
+    description: "Detailed implementation guide for the onboarding flow",
+    excerpt:
+      "Ready-to-implement plan covering architecture decisions, flow diagrams, and step-by-step implementation details for the tenant signup experience.",
+    category: "specs",
+    lastUpdated: "2025-12-01",
+    readingTime: 12,
+  },
+  // Completed Specs (implemented or superseded)
+  {
+    slug: "amber-spec",
+    title: "Amber — Storage Management",
+    description: "Unified storage management system for Grove",
+    excerpt:
+      "Amber is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place.",
+    category: "specs",
+    lastUpdated: "2025-12-01",
+    readingTime: 10,
+  },
+  {
+    slug: "fiction-house-publishing-spec",
+    title: "Fiction House Publishing",
+    description: "Project specification for the first Grove customer site",
+    excerpt:
+      "Fiction House Publishing is a publishing house portfolio site—the first customer deployment of GroveEngine with custom book catalog features.",
+    category: "specs",
+    lastUpdated: "2025-12-01",
+    readingTime: 8,
+  },
+  {
+    slug: "foliage-project-spec",
+    title: "Foliage — Theme System Project",
+    description: "Extracted theme system package specification",
+    excerpt:
+      "Foliage is Grove's theme system—providing visual customization from simple accent colors to full theme customizers. It enables MySpace-level personalization with modern design sensibilities.",
+    category: "specs",
+    lastUpdated: "2025-12-01",
+    readingTime: 12,
+  },
+  {
+    slug: "ivy-mail-spec",
+    title: "Ivy — Mail Client",
+    description: "First-party mail client for @grove.place email addresses",
+    excerpt:
+      "Ivy is Grove's first-party mail client for @grove.place email addresses. Rather than forcing users to configure IMAP in third-party clients, Ivy provides a focused, privacy-first web interface.",
+    category: "specs",
+    lastUpdated: "2025-12-01",
+    readingTime: 15,
+  },
 ];
 
 // Help Center Articles

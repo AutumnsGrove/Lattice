@@ -13,6 +13,9 @@
     "url": "https://github.com/AutumnsGrove/GroveEngine.git"
   },
   "type": "module",
+  "devDependencies": {
+    "sst": "^3.0.0"
+  },
   "main": "./packages/engine/dist/index.js",
   "types": "./packages/engine/dist/index.d.ts",
   "svelte": "./packages/engine/dist/index.js",

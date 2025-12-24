@@ -1,9 +1,9 @@
 # SST Migration Plan for GroveEngine
 
-> **Status:** Draft - Pending Review
+> **Status:** Active - Ready for Implementation
 > **Created:** 2025-12-20
-> **Updated:** 2025-12-20
-> **Scope:** Migrate GroveEngine to SST for unified infrastructure management
+> **Updated:** 2025-12-24
+> **Scope:** Migrate GroveEngine to SST + Integrate Foliage theming system
 
 ---
 
@@ -15,6 +15,7 @@ Migrate GroveEngine from manual wrangler.toml configuration to SST (sst.dev) for
 - Simplified local development with `sst dev`
 - Multi-stage deployments (dev/staging/production)
 - **Hybrid routing:** Worker wildcards for subdomains + Cloudflare for SaaS for custom domains
+- **Foliage theming:** Integrated per-tenant theme customization with tier-gated features
 
 ---
 
@@ -684,6 +685,8 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 | Phase 3 | Medium | App configs, test thoroughly |
 | Phase 4 | Low | CI/CD updates |
 | Phase 5 | Low | Cleanup |
+
+> **Note:** Foliage integration is tracked separately in `docs/specs/completed/foliage-project-spec.md`
 
 ---
 

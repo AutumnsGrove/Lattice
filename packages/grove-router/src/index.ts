@@ -137,9 +137,8 @@ export default {
     // Handle unknown subdomains - proxy to groveengine for tenant lookup
     // (null routes were removed - all special subdomains now have explicit targets)
 
-    // Determine target hostname
-    // Note: groveengine project uses grove-example-site.pages.dev domain
-    const targetHostname = routeTarget || "grove-example-site.pages.dev";
+    // Determine target hostname - default to main groveengine for tenant blogs
+    const targetHostname = routeTarget || "groveengine.pages.dev";
 
     // Proxy to target
     const targetUrl = new URL(request.url);

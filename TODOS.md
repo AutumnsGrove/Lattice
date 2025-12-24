@@ -6,6 +6,63 @@
 
 ---
 
+## 🔥 Immediate: Merge PR & Deploy SST
+
+**Current State (2025-12-24):**
+- ✅ `sst.config.ts` written - unified config for all Cloudflare resources
+- ✅ Router default target bug fixed (was routing to example-site instead of groveengine)
+- ✅ Knowledge base updated with ALL specs (including completed folder)
+- ⚠️ PR #104 has merge conflicts - needs to be resolved before merge
+
+### Commands to Run
+
+```bash
+# 1. Merge this PR (after resolving conflicts in GitHub)
+#    Or locally:
+git checkout main
+git pull origin main
+git merge claude/plan-next-steps-0rjeY
+# Resolve any conflicts, then:
+git push origin main
+
+# 2. Install SST and initialize
+pnpm add -D sst@latest
+pnpm sst install
+
+# 3. Deploy to dev stage first
+pnpm sst deploy --stage dev
+
+# 4. Once verified, deploy to production
+pnpm sst deploy --stage production
+```
+
+### Rollback Plan (if SST deployment fails)
+
+```bash
+# 1. Revert to previous commit (before SST changes)
+git revert HEAD --no-commit
+git commit -m "revert: roll back SST migration"
+
+# 2. Redeploy each app via wrangler (old configs still work)
+cd landing && pnpm wrangler pages deploy
+cd ../plant && pnpm wrangler pages deploy
+cd ../domains && pnpm wrangler pages deploy
+cd ../packages/engine && pnpm wrangler pages deploy
+cd ../packages/example-site && pnpm wrangler pages deploy
+
+# 3. Verify all apps are back online
+# Resource IDs (D1, KV, R2) remain unchanged - SST imports existing ones
+```
+
+**Why this works:** SST imports existing Cloudflare resources by ID rather than creating new ones. Rolling back to wrangler deployment doesn't affect the underlying data.
+
+### Post-Merge Cleanup
+- [ ] Delete branch `claude/plan-next-steps-0rjeY`
+- [ ] Verify all apps still work after SST migration
+- [ ] Remove old `wrangler.toml` files (Phase 5)
+
+---
+
 ## 🚀 Up Next: SST Migration
 
 > **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
@@ -19,11 +76,15 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 
 ### Implementation Phases
 
-- [ ] **Phase 1: Foundation** - `sst init`, basic config, first Worker migration
+- [x] **Phase 1: Foundation** - `sst.config.ts` created with unified config ✅
 - [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
 - [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
 - [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
-- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, simplify grove-router
+- [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, evaluate grove-router
+  - [ ] Test all routing without grove-router active
+  - [ ] Verify: cdn.grove.place, auth/admin/login subdomains, www redirect
+  - [ ] If all works: delete `packages/grove-router` entirely
+  - [ ] If gaps exist: document which edge cases still need the router
 
 ### Hybrid Routing Strategy
 
@@ -84,6 +145,7 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
   - ⏳ Payment via Stripe (placeholder IDs, needs real products)
   - ✅ Interactive tour (8 steps, skippable)
   - ✅ Email templates ready (welcome, day 1/3/7/30)
+  - ⚠️ **Auth issue:** Login hangs after OAuth redirect (route misconfiguration)
 
 ### Stripe Integration (plant.grove.place)
 > **Status:** Code deployed with placeholder price IDs. **Will be migrated to SST.**
@@ -117,38 +179,28 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 - [ ] Build tenant admin panel
 - [ ] Implement storage limits per plan (1GB/5GB/20GB/100GB)
 
-### Per-Tenant Theming
+### Per-Tenant Theming → Foliage Integration
 > **Issue:** All tenants currently share the same green theme. Midnight Bloom should have its purple theme back.
-> **Reference:** Old example-site had purple theme defined in `tailwind.config.js` and `+layout.svelte`
+> **Solution:** Integrate `@autumnsgrove/foliage` - our dedicated theming package.
+> **Repository:** https://github.com/AutumnsGrove/Foliage
 
-**Implementation Options:**
+**Foliage provides:**
+- 10 curated themes (Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower)
+- Tier-gated access (Seedling=3, Sapling=10, Oak+=customizer, Evergreen+=custom fonts)
+- CSS variable generation with WCAG AA contrast validation
+- Community themes (Oak+ can browse/submit, moderation queue)
+- Custom font uploads to R2 (Evergreen tier)
 
-**Option A: CSS Variables per Tenant (Recommended)**
-- [ ] Add `theme_primary_color`, `theme_accent_color` columns to `tenants` table
-- [ ] Load tenant theme colors in `+layout.server.ts`
-- [ ] Apply as CSS variables in `+layout.svelte` (override `:root` vars)
-- [ ] Add theme color picker to tenant admin settings
+**Integration Tasks:**
+- [ ] Add `@autumnsgrove/foliage` as dependency to engine
+- [ ] Run Foliage migrations (theme_settings, community_themes, theme_ratings tables)
+- [ ] Add R2 bucket for custom fonts (`foliage-fonts`)
+- [ ] Import `loadThemeSettings` in engine's `+layout.server.ts`
+- [ ] Apply theme CSS vars via `applyThemeVariables()` in `+layout.svelte`
+- [ ] Add theme admin routes (`/admin/themes/`) using Foliage components
+- [ ] Wire up tier access using `canAccessTheme()`, `canUseCustomizer()`, etc.
 
-**Option B: Preset Themes**
-- [ ] Create theme presets (Grove Green, Midnight Purple, Ocean Blue, etc.)
-- [ ] Add `theme_preset` column to `tenants` table
-- [ ] Load preset CSS based on tenant selection
-
-**Midnight Bloom Original Theme** (from `example-site/src/app.css`):
-```css
-/* Light Mode - Late Night Tea Café */
---primary: 340 45% 35%;           /* Deep Plum/Burgundy - like steeped black tea */
---primary-foreground: 40 30% 95%;
---accent: 38 70% 50%;             /* Golden Amber - like honey */
---background: 40 25% 97%;         /* Warm off-white */
---foreground: 340 30% 15%;
-
-/* Dark Mode - Late night ambiance */
---primary: 340 50% 55%;           /* Lighter Plum */
---accent: 38 75% 55%;             /* Brighter golden */
---background: 260 20% 8%;         /* Deep night purple */
---foreground: 40 15% 90%;
-```
+**Midnight Bloom Theme** - Can be implemented as custom colors via customizer (Oak+) or as a community theme.
 
 ---
 
@@ -204,10 +256,9 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 ## Phase 6: Polish & Scale (Weeks 31-41)
 
 - [ ] Performance optimization
-- [ ] Implement theme system → **SPEC READY**: `docs/specs/theme-system-spec.md`
-  - 10 hand-curated themes: Grove, Minimal, Night Garden, Zine, Moodboard, Typewriter, Solarpunk, Cozy Cabin, Ocean, Wildflower
-  - Tiered access: Seedling=3, Sapling=10, Oak+=customizer+community themes, Evergreen+=custom fonts
-  - CSS variable system, custom font uploads to R2
+- [ ] Implement theme system → **NOW: Foliage Integration** (see Phase 2 "Per-Tenant Theming")
+  - Spec at `docs/specs/theme-system-spec.md`, implementation at `@autumnsgrove/foliage`
+  - 10 curated themes, tier-gated access, community themes, custom fonts
 - [ ] Implement advanced analytics (see docs/specs/analytics-spec.md)
 - [ ] Build priority support system
 - [ ] Implement comment system → **SPEC READY**: `docs/specs/comments-spec.md`
@@ -230,12 +281,13 @@ SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangle
 > **Resume:** After Phase 4 (Grove Social) is complete.
 
 ### Theme System Expansion
-> *See: `docs/specs/theme-system-spec.md` for full implementation plan*
-- [ ] Custom CSS override option for advanced users (Oak+ via customizer)
+> **Status:** Core features implemented in `@autumnsgrove/foliage`. Below are post-launch expansions.
+- [x] Custom CSS override option (Oak+ via customizer) - **IN FOLIAGE**
+- [x] Community theme submission portal - **IN FOLIAGE**
+- [x] Theme builder/customizer UI (Oak+) - **IN FOLIAGE**
+- [x] Custom font uploads (Evergreen) - **IN FOLIAGE**
+- [ ] **Midnight Bloom theme** - Add to Foliage as 11th curated theme (purple/plum/amber, late-night tea café vibe)
 - [ ] Theme marketplace (users buy/sell themes) - **DEFERRED** to post-launch
-- [ ] Community theme submission portal (Oak+ can download, authors can submit)
-- [ ] Theme builder/customizer UI (Oak+)
-- [ ] Custom font uploads (Evergreen only, stored in R2)
 
 ### Internal Tools
 - [ ] Add search queue support (allow multiple concurrent domain searches)
