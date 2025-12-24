@@ -1,0 +1,8 @@
+/help/*               /knowledge/help/:splat          301
+/legal/refund-policy  /knowledge/legal/refund-policy  301
+/legal/refund         /knowledge/legal/refund-policy  301
+/legal/privacy        /knowledge/legal/privacy-policy 301
+/legal/terms          /knowledge/legal/terms-of-service 301
+/legal/acceptable-use /knowledge/legal/acceptable-use-policy 301
+/legal/dmca           /knowledge/legal/dmca-policy 301
+/legal/data-portability /knowledge/legal/data-portability-separation 301

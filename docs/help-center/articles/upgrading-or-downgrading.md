@@ -81,7 +81,7 @@ Plan changes use your existing payment method on file. If your card has expired 
 
 ## Refunds on downgrades
 
-Downgrades don't trigger refunds for the current period. You keep access to your current plan until the period ends, then move to the lower tier. If you need a refund for other reasons, see our [refund policy](/legal/refund-policy).
+Downgrades don't trigger refunds for the current period. You keep access to your current plan until the period ends, then move to the lower tier. If you need a refund for other reasons, see our [refund policy](/knowledge/legal/refund-policy).
 
 ---
 

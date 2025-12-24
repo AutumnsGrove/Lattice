@@ -10,7 +10,10 @@ const config = {
 				include: ['/*'],
 				exclude: ['<all>']
 			}
-		})
+		}),
+		prerender: {
+			handleMissingId: 'warn'
+		}
 	}
 };
 
