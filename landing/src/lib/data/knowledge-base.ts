@@ -496,6 +496,16 @@ export const legalDocs: Doc[] = [
     lastUpdated: "2025-12-01",
     readingTime: 3,
   },
+  {
+    slug: "data-portability-separation",
+    title: "Data Portability & Account Separation Policy",
+    description: "Your data export rights, domain ownership, and account cancellation terms",
+    excerpt:
+      "Your content is yours. Your domain is yours. Grove will never hold your data or domain hostage. This document outlines what happens when you cancel your subscription.",
+    category: "legal",
+    lastUpdated: "2025-12-01",
+    readingTime: 7,
+  },
 ];
 
 // Combined export for convenience
