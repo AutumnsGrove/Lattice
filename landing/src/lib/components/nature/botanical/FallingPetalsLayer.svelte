@@ -37,7 +37,8 @@
 	}: Props = $props();
 
 	// Petals fall gently and drift more than snow
-	const FALL_DISTANCE = { min: 100, max: 130 } as const;
+	// Increased distance to ensure they traverse the full viewport
+	const FALL_DISTANCE = { min: 120, max: 150 } as const;
 
 	// Reduce petal count for reduced motion
 	const actualCount = prefersReducedMotion ? Math.floor(count / 4) : count;
@@ -83,10 +84,9 @@
 			// Distribute across full width
 			const x = (i / actualCount) * 100 + (xRand - 0.5) * 15;
 
-			// Start positions: mix above and within viewport
-			const y = yRand < 0.4
-				? yRand * 60  // 40% start within viewport
-				: -5 - yRand * 20; // 60% start above
+			// Start positions: ALL petals start above viewport for proper falling motion
+			// Stagger start heights to create continuous rain effect
+			const y = -10 - yRand * 30; // Start 10-40% above viewport
 
 			// Depth-based sizing:
 			// Far petals are smaller and simpler
@@ -103,9 +103,9 @@
 				variant = petalVariants[variantIndex];
 			}
 
-			// Petals in viewport get minimal delay
-			const isInViewport = y >= 0;
-			const actualDelay = isInViewport ? delayRand * 3 : delayRand * spawnDelay;
+			// Since all petals now start above viewport, stagger delays for continuous rain
+			// Shorter delays create more immediate visual interest
+			const actualDelay = delayRand * spawnDelay * 0.6; // Reduce overall delay spread
 
 			// Petals drift more erratically than snow - flutter in the breeze
 			// Use sine wave for more organic drift pattern

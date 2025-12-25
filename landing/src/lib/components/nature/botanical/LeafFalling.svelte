@@ -56,8 +56,15 @@
 	// Get default color based on variant and season (deterministic)
 	function getDefaultColor(): string {
 		if (variant === 'cherry') {
-			const colors = season === 'autumn' ? cherryAutumnColors : cherrySpringColors;
-			return pickFromArray(colors);
+			// Cherry trees: pink blossoms in spring, green in summer, red/orange in autumn
+			if (season === 'spring') {
+				return pickFromArray(cherrySpringColors);
+			} else if (season === 'autumn') {
+				return pickFromArray(cherryAutumnColors);
+			} else {
+				// Summer - cherry trees have regular green leaves
+				return pickFromArray(summerColors);
+			}
 		}
 		if (variant === 'aspen') {
 			const colors = season === 'autumn' ? aspenAutumnColors : summerColors;
@@ -123,8 +130,15 @@
 <style>
 	@keyframes fall {
 		0% {
-			/* Start at initial position, fully visible for immediate natural falling */
+			/* Start transparent to avoid "stuck in place" look for leaves with no delay */
 			transform: translateY(0) translateX(0);
+			opacity: 0;
+		}
+		5% {
+			/* Fade in quickly as falling begins */
+			opacity: 0.5;
+		}
+		10% {
 			opacity: 0.85;
 		}
 		70% {
