@@ -1,35 +1,18 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
+  import { ContentWithGutter } from '@autumnsgrove/groveengine';
+  import '$lib/styles/content.css';
 
   export let data;
 
   $: doc = data.doc;
   $: category = $page.params.category;
   $: headers = doc?.headers || [];
-  $: hasHeaders = headers.length > 0;
 
   $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
                      category === 'help' ? 'Help Center' : 'Legal & Policies';
-
-  // Add IDs to headers in the rendered content
-  let contentElement: HTMLElement;
-
-  onMount(() => {
-    if (contentElement && headers.length > 0) {
-      const headerElements = contentElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      headerElements.forEach((el) => {
-        const text = el.textContent?.trim() || '';
-        const matchingHeader = headers.find((h: { text: string }) => h.text === text);
-        if (matchingHeader) {
-          el.id = matchingHeader.id;
-        }
-      });
-    }
-  });
 </script>
 
 <svelte:head>
@@ -40,68 +23,55 @@
 <main class="min-h-screen flex flex-col">
   <Header />
 
-  <article class="flex-1 px-6 py-12">
-    <div class="mx-auto" class:max-w-4xl={!hasHeaders} class:max-w-6xl={hasHeaders}>
+  <div class="flex-1 px-6 py-12">
     {#if doc}
-      <!-- Breadcrumb -->
-      <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8" aria-label="Breadcrumb">
-        <a href="/knowledge" class="hover:text-foreground transition-colors">Knowledge Base</a>
-        <span aria-hidden="true">/</span>
-        <a href="/knowledge/{category}" class="hover:text-foreground transition-colors">{categoryTitle}</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-foreground" aria-current="page">{doc.title}</span>
-      </nav>
+      <ContentWithGutter
+        content={doc.html || `<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}
+        gutterContent={[]}
+        {headers}
+        showTableOfContents={true}
+      >
+        {#snippet children()}
+          <!-- Breadcrumb -->
+          <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8" aria-label="Breadcrumb">
+            <a href="/knowledge" class="hover:text-foreground transition-colors">Knowledge Base</a>
+            <span aria-hidden="true">/</span>
+            <a href="/knowledge/{category}" class="hover:text-foreground transition-colors">{categoryTitle}</a>
+            <span aria-hidden="true">/</span>
+            <span class="text-foreground" aria-current="page">{doc.title}</span>
+          </nav>
 
-      <!-- Article Header -->
-      <header class="mb-8">
-        <div class="flex items-center gap-3 mb-4">
-          {#if category === 'specs'}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text">
-              Technical Spec
-            </span>
-          {:else if category === 'help'}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-              Help Article
-            </span>
-          {:else}
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-              Legal Document
-            </span>
-          {/if}
-          {#if doc.lastUpdated}
-            <span class="text-sm text-foreground-subtle">Updated {doc.lastUpdated}</span>
-          {/if}
-          <span class="text-sm text-foreground-subtle">{doc.readingTime} min read</span>
-        </div>
-        <h1 class="text-4xl font-bold text-foreground mb-4">{doc.title}</h1>
-        {#if doc.description}
-          <p class="text-xl text-foreground-muted">{doc.description}</p>
-        {/if}
-      </header>
-
-      <!-- Article Content with TOC -->
-      <div class="content-layout" class:has-toc={hasHeaders}>
-        <!-- Main Content -->
-        <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-8 mb-8">
-          <div class="prose prose-lg max-w-none" bind:this={contentElement}>
-            {#if doc.html}
-              {@html doc.html}
-            {:else}
-              <p class="text-foreground-muted leading-relaxed">{doc.excerpt}</p>
+          <!-- Article Header -->
+          <header class="content-header">
+            <div class="flex items-center gap-3 mb-4">
+              {#if category === 'specs'}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text">
+                  Technical Spec
+                </span>
+              {:else if category === 'help'}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                  Help Article
+                </span>
+              {:else}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                  Legal Document
+                </span>
+              {/if}
+              {#if doc.lastUpdated}
+                <span class="text-sm text-foreground-subtle">Updated {doc.lastUpdated}</span>
+              {/if}
+              <span class="text-sm text-foreground-subtle">{doc.readingTime} min read</span>
+            </div>
+            <h1>{doc.title}</h1>
+            {#if doc.description}
+              <p class="text-xl text-foreground-muted mt-4">{doc.description}</p>
             {/if}
-          </div>
-        </article>
-
-        <!-- Desktop TOC Sidebar -->
-        {#if hasHeaders}
-          <aside class="toc-sidebar">
-            <TableOfContents {headers} />
-          </aside>
-        {/if}
-      </div>
+          </header>
+        {/snippet}
+      </ContentWithGutter>
 
       <!-- Article Footer -->
-      <footer class="flex items-center justify-between">
+      <footer class="flex items-center justify-between max-w-[800px] mx-auto mt-12">
         <a
           href="/knowledge/{category}"
           class="inline-flex items-center text-foreground-muted hover:text-foreground transition-colors"
@@ -127,7 +97,7 @@
       </footer>
     {:else}
       <!-- 404 -->
-      <div class="text-center py-12">
+      <div class="text-center py-12 max-w-4xl mx-auto">
         <h1 class="text-4xl font-bold text-foreground mb-4">Document Not Found</h1>
         <p class="text-xl text-foreground-muted mb-8">
           The document you're looking for doesn't exist or has been moved.
@@ -145,52 +115,7 @@
         </div>
       </div>
     {/if}
-    </div>
-  </article>
+  </div>
 
   <Footer />
 </main>
-
-<!-- Mobile TOC Button -->
-{#if doc && hasHeaders}
-  <MobileTOC {headers} />
-{/if}
-
-<style>
-  /* Content layout with TOC sidebar */
-  .content-layout {
-    display: block;
-  }
-
-  .content-layout.has-toc {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  /* Desktop: Show TOC sidebar */
-  @media (min-width: 1024px) {
-    .content-layout.has-toc {
-      grid-template-columns: 1fr 250px;
-    }
-  }
-
-  /* Large desktop: Wider TOC */
-  @media (min-width: 1280px) {
-    .content-layout.has-toc {
-      grid-template-columns: 1fr 280px;
-    }
-  }
-
-  /* TOC sidebar - hidden on mobile, shown on desktop */
-  .toc-sidebar {
-    display: none;
-  }
-
-  @media (min-width: 1024px) {
-    .toc-sidebar {
-      display: block;
-      position: relative;
-    }
-  }
-</style>

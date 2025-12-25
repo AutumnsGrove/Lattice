@@ -1,0 +1,514 @@
+/**
+ * Shared Content Styles
+ *
+ * Used by:
+ * - src/routes/about/+page.svelte
+ * - src/routes/blog/[slug]/+page.svelte
+ *
+ * Import this file to get consistent layout and typography styles
+ * for content pages with optional gutter sidebars.
+ */
+
+/* ==========================================================================
+   Layout Grid System
+   ========================================================================== */
+
+.content-layout {
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.content-layout.has-gutters {
+	display: grid;
+	grid-template-columns: 1fr;
+	max-width: 1400px;
+	gap: 2rem;
+}
+
+/* Desktop: Both gutters */
+@media (min-width: 1200px) {
+	.content-layout.has-both-gutters {
+		grid-template-columns: 240px 1fr 200px;
+	}
+
+	.content-layout.has-left-gutter:not(.has-both-gutters) {
+		grid-template-columns: 240px 1fr;
+		max-width: 1100px;
+	}
+
+	.content-layout.has-right-gutter:not(.has-both-gutters) {
+		grid-template-columns: 1fr 200px;
+		max-width: 1000px;
+	}
+}
+
+/* Tablet: Both gutters */
+@media (min-width: 769px) and (max-width: 1199px) {
+	.content-layout.has-both-gutters {
+		grid-template-columns: 200px 1fr 200px;
+		max-width: 1200px;
+	}
+
+	.content-layout.has-left-gutter:not(.has-both-gutters) {
+		grid-template-columns: 200px 1fr;
+		max-width: 900px;
+	}
+
+	.content-layout.has-right-gutter:not(.has-both-gutters) {
+		grid-template-columns: 1fr 200px;
+		max-width: 900px;
+	}
+
+	/* Hide mobile gutter content since left gutter container is visible */
+	.mobile-gutter-content,
+	.mobile-gutter-inline {
+		display: none !important;
+		float: none;
+	}
+}
+
+/* ==========================================================================
+   Visibility Utilities
+   ========================================================================== */
+
+.desktop-only {
+	display: none;
+}
+
+@media (min-width: 769px) {
+	.desktop-only {
+		display: block;
+	}
+}
+
+/* ==========================================================================
+   Mobile Gutter Content
+   ========================================================================== */
+
+.mobile-gutter-content {
+	display: block;
+	margin: 0 auto 2rem auto;
+	padding: 1rem;
+	background: #f5f5f5;
+	border-radius: 8px;
+	transition: background-color 0.3s ease;
+	text-align: center;
+}
+
+.mobile-gutter-inline {
+	float: right;
+	clear: right;
+	width: 35%;
+	max-width: 250px;
+	min-width: 120px;
+	margin: 0.25rem 0 1rem 1.5rem;
+	padding: 0;
+	background: none;
+	border-radius: 0;
+}
+
+/* On very small mobile, don't float - just display inline and centered */
+@media (max-width: 400px) {
+	.mobile-gutter-inline {
+		float: none;
+		clear: none;
+		max-width: none;
+		margin: 1rem auto 1.5rem auto;
+		padding: 0.75rem;
+		background: #f8f8f8;
+		border-radius: 6px;
+		text-align: center;
+	}
+
+	.dark .mobile-gutter-inline {
+		background: #1a1a1a;
+	}
+}
+
+.dark .mobile-gutter-content {
+	background: #1a1a1a;
+}
+
+@media (min-width: 1200px) {
+	.mobile-gutter-content {
+		display: none;
+	}
+}
+
+/* ==========================================================================
+   Gutter Containers
+   ========================================================================== */
+
+.left-gutter-container,
+.right-gutter-container {
+	min-width: 0;
+}
+
+/* Explicit grid positioning to handle missing gutters */
+@media (min-width: 1200px) {
+	/* Both gutters - 3 column layout */
+	.content-layout.has-both-gutters .left-gutter-container {
+		grid-column: 1;
+	}
+
+	.content-layout.has-both-gutters .content-article {
+		grid-column: 2;
+	}
+
+	.content-layout.has-both-gutters .right-gutter-container {
+		grid-column: 3;
+	}
+
+	/* Left gutter only - 2 column layout */
+	.content-layout.has-left-gutter:not(.has-right-gutter) .left-gutter-container {
+		grid-column: 1;
+	}
+
+	.content-layout.has-left-gutter:not(.has-right-gutter) .content-article {
+		grid-column: 2;
+	}
+
+	/* Right gutter only - 2 column layout */
+	.content-layout.has-right-gutter:not(.has-left-gutter) .content-article {
+		grid-column: 1;
+	}
+
+	.content-layout.has-right-gutter:not(.has-left-gutter) .right-gutter-container {
+		grid-column: 2;
+	}
+}
+
+/* Tablet grid positioning */
+@media (min-width: 769px) and (max-width: 1199px) {
+	/* Both gutters - 3 column layout */
+	.content-layout.has-both-gutters .left-gutter-container {
+		grid-column: 1;
+	}
+
+	.content-layout.has-both-gutters .content-article {
+		grid-column: 2;
+	}
+
+	.content-layout.has-both-gutters .right-gutter-container {
+		grid-column: 3;
+	}
+
+	/* Left gutter only - 2 column layout */
+	.content-layout.has-left-gutter:not(.has-right-gutter) .left-gutter-container {
+		grid-column: 1;
+	}
+
+	.content-layout.has-left-gutter:not(.has-right-gutter) .content-article {
+		grid-column: 2;
+	}
+
+	/* Right gutter only - 2 column layout */
+	.content-layout.has-right-gutter:not(.has-left-gutter) .content-article {
+		grid-column: 1;
+	}
+
+	.content-layout.has-right-gutter:not(.has-left-gutter) .right-gutter-container {
+		grid-column: 2;
+	}
+}
+
+/* ==========================================================================
+   Content Article
+   ========================================================================== */
+
+.content-article {
+	max-width: 800px;
+	min-width: 0;
+}
+
+/* ==========================================================================
+   Content Header
+   ========================================================================== */
+
+.content-header {
+	margin-bottom: 3rem;
+	padding-bottom: 2rem;
+	border-bottom: 2px solid #e0e0e0;
+	transition: border-color 0.3s ease;
+}
+
+.dark .content-header {
+	border-bottom: 2px solid #333;
+}
+
+.content-header h1 {
+	font-size: 2.5rem;
+	color: #2c5f2d;
+	margin: 0;
+	line-height: 1.2;
+	transition: color 0.3s ease;
+}
+
+.dark .content-header h1 {
+	color: #5cb85f;
+}
+
+/* ==========================================================================
+   Content Body - Scroll Offset for Headers
+   ========================================================================== */
+
+/* Scroll offset to account for sticky header */
+.content-body h2,
+.content-body h3,
+.content-body h4,
+.content-body h5,
+.content-body h6 {
+	scroll-margin-top: 5rem;
+}
+
+/* ==========================================================================
+   Code Block Extensions (beyond what prose provides)
+   ========================================================================== */
+
+/* GitHub-style code block wrapper */
+.content-body .code-block-wrapper {
+	margin: 1.5rem 0;
+	border-radius: 8px;
+	border: 1px solid #d0d7de;
+	overflow: hidden;
+	transition: border-color 0.3s ease;
+}
+
+.dark .content-body .code-block-wrapper {
+	border-color: #3a3a3a;
+}
+
+/* Rendered markdown block (for ```markdown code blocks) */
+.content-body .rendered-markdown-block {
+	margin: 1.5rem 0;
+	border-radius: 8px;
+	border: 1px solid #d0d7de;
+	overflow: hidden;
+	transition: border-color 0.3s ease;
+}
+
+.dark .content-body .rendered-markdown-block {
+	border-color: #3a3a3a;
+}
+
+.content-body .rendered-markdown-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 1rem;
+	background: #f6f8fa;
+	border-bottom: 1px solid #d0d7de;
+	font-size: 0.875rem;
+	transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .content-body .rendered-markdown-header {
+	background: #1c1c1c;
+	border-bottom-color: #3a3a3a;
+}
+
+.content-body .rendered-markdown-label {
+	color: #57606a;
+	font-weight: 500;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	transition: color 0.3s ease;
+}
+
+.dark .content-body .rendered-markdown-label {
+	color: #8b949e;
+}
+
+.content-body .rendered-markdown-content {
+	padding: 1rem 1.5rem;
+	background: #ffffff;
+	transition: background-color 0.3s ease;
+}
+
+.dark .content-body .rendered-markdown-content {
+	background: #0d1117;
+}
+
+/* Reset some styles inside rendered markdown */
+.content-body .rendered-markdown-content > :first-child {
+	margin-top: 0;
+}
+
+.content-body .rendered-markdown-content > :last-child {
+	margin-bottom: 0;
+}
+
+/* Code block header with language and copy button */
+.content-body .code-block-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 1rem;
+	background: #f6f8fa;
+	border-bottom: 1px solid #d0d7de;
+	font-size: 0.875rem;
+	transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .content-body .code-block-header {
+	background: #1c1c1c;
+	border-bottom-color: #3a3a3a;
+}
+
+/* Language label */
+.content-body .code-block-language {
+	color: #57606a;
+	font-weight: 500;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	transition: color 0.3s ease;
+}
+
+.dark .content-body .code-block-language {
+	color: #8b949e;
+}
+
+/* Copy button */
+.content-body .code-block-copy {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	background: transparent;
+	border: 1px solid #d0d7de;
+	color: #57606a;
+	padding: 0.35rem 0.65rem;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 0.75rem;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.dark .content-body .code-block-copy {
+	border-color: #3a3a3a;
+	color: #8b949e;
+}
+
+.content-body .code-block-copy:hover {
+	background: #f3f4f6;
+	border-color: #b8bfc6;
+	color: #24292f;
+}
+
+.dark .content-body .code-block-copy:hover {
+	background: #2a2a2a;
+	border-color: #4a4a4a;
+	color: #e0e0e0;
+}
+
+.content-body .code-block-copy:active {
+	background: #e1e4e8;
+	transform: scale(0.98);
+}
+
+.dark .content-body .code-block-copy:active {
+	background: #333;
+}
+
+/* Success state for copy button */
+.content-body .code-block-copy.copied {
+	background: #dafbe1;
+	border-color: #2ea44f;
+	color: #1a7f37;
+}
+
+.dark .content-body .code-block-copy.copied {
+	background: #1a3a24;
+	border-color: #5cb85f;
+	color: #5cb85f;
+}
+
+.content-body .code-block-copy svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Code block pre */
+.content-body .code-block-wrapper pre {
+	background: #ffffff;
+	padding: 1rem;
+	margin: 0;
+	overflow-x: auto;
+	transition: background-color 0.3s ease;
+	/* Word wrap enabled by default */
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+/* Disable word wrap with .no-wrap class on the wrapper */
+.content-body .code-block-wrapper.no-wrap pre {
+	white-space: pre;
+	word-wrap: normal;
+	overflow-wrap: normal;
+}
+
+.dark .content-body .code-block-wrapper pre {
+	background: #0d1117;
+}
+
+.content-body .code-block-wrapper pre code {
+	background: none;
+	padding: 0;
+	color: #24292f;
+	font-family: 'Courier New', Consolas, Monaco, monospace;
+	font-size: 0.875rem;
+	line-height: 1.6;
+	transition: color 0.3s ease;
+	/* Inherit wrapping from pre */
+	white-space: inherit;
+}
+
+.dark .content-body .code-block-wrapper pre code {
+	color: #c9d1d9;
+}
+
+/* Scrollbar for code blocks */
+.content-body .code-block-wrapper pre::-webkit-scrollbar {
+	height: 8px;
+}
+
+.content-body .code-block-wrapper pre::-webkit-scrollbar-track {
+	background: #f6f8fa;
+	border-radius: 0 0 8px 8px;
+}
+
+.dark .content-body .code-block-wrapper pre::-webkit-scrollbar-track {
+	background: #1c1c1c;
+}
+
+.content-body .code-block-wrapper pre::-webkit-scrollbar-thumb {
+	background: #d0d7de;
+	border-radius: 4px;
+}
+
+.dark .content-body .code-block-wrapper pre::-webkit-scrollbar-thumb {
+	background: #3a3a3a;
+}
+
+.content-body .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+	background: #b8bfc6;
+}
+
+.dark .content-body .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+	background: #4a4a4a;
+}
+
+/* ==========================================================================
+   Responsive Typography Adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+	.content-header h1 {
+		font-size: 2rem;
+	}
+}
