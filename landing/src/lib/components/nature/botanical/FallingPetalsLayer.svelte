@@ -84,9 +84,11 @@
 			// Distribute across full width
 			const x = (i / actualCount) * 100 + (xRand - 0.5) * 15;
 
-			// Start positions: ALL petals start above viewport for proper falling motion
-			// Stagger start heights to create continuous rain effect
-			const y = -10 - yRand * 30; // Start 10-40% above viewport
+			// Start positions: Mix above viewport and within for continuous rain effect
+			// 50% start above for "raining from sky", 50% within for immediate visibility
+			const y = yRand < 0.5
+				? -5 - yRand * 15  // Above viewport: -5% to -20%
+				: yRand * 40;       // Within viewport: 0% to 40%
 
 			// Depth-based sizing:
 			// Far petals are smaller and simpler
@@ -136,7 +138,7 @@
 {#if enabled}
 	<!-- Falling petals layer - cherry blossoms drifting on spring breeze -->
 	<div
-		class="absolute inset-0 pointer-events-none overflow-hidden"
+		class="absolute inset-0 pointer-events-none"
 		style="z-index: {zIndex};"
 		aria-hidden="true"
 	>

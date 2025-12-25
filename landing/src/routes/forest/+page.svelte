@@ -246,9 +246,11 @@
 			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
 			return [winter.bareBranch, winter.frostedBark, winter.coldWood];
 		} else {
-			if (brightness === 'dark') return [pinks.deepPink, pinks.pink];
-			if (brightness === 'mid') return [pinks.rose, pinks.blush];
-			return [pinks.blush, pinks.palePink];
+			// Summer - cherry trees have green foliage, not pink!
+			// Return greens based on depth (will be used by getTreeColor)
+			if (brightness === 'dark') return [greens.darkForest, greens.deepGreen];
+			if (brightness === 'mid') return [greens.grove, greens.meadow];
+			return [greens.spring, greens.mint];
 		}
 	}
 
