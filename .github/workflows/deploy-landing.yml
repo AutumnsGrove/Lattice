@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'landing/**'
+      - 'docs/help-center/**'
+      - 'docs/legal/**'
+      - 'docs/specs/**'
   workflow_run:
     workflows: ["Auto-tag on Version Bump"]
     types:
