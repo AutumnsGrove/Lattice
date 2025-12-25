@@ -55,8 +55,9 @@
 	const rotationAmount = 360 + (seed % 360); // 360-720 degrees total rotation - more twirling!
 
 	// Dancing sway parameters - create organic horizontal movement
-	const swayAmplitude = 30 + (seed % 40); // 30-70px horizontal sway
-	const swayFrequency = 2 + (seed % 3); // 2-4 complete waves during fall
+	// Dramatically increased for true gliding, dancing motion!
+	const swayAmplitude = 80 + (seed % 100); // 80-180px horizontal sway - GLIDE!
+	const swayFrequency = 2 + (seed % 4); // 2-5 complete waves during fall
 
 	// Unique animation name to prevent conflicts
 	const animId = `petal-${seed}`;
