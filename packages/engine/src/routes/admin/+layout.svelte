@@ -67,6 +67,10 @@
         <span class="nav-icon">&#x1F4F7;</span>
         CDN Uploader
       </a>
+      <a href="/admin/subscribers" class="nav-item" onclick={closeSidebar}>
+        <span class="nav-icon">&#x1F4E7;</span>
+        Subscribers
+      </a>
       <a href="/admin/analytics" class="nav-item" onclick={closeSidebar}>
         <span class="nav-icon">&#x1F4CA;</span>
         Analytics
