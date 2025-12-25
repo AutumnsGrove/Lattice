@@ -41,15 +41,21 @@ cd landing && pnpm dev      # or wrangler dev
 cd packages/engine && pnpm dev
 ```
 
-### SST (Resource Management)
-SST manages shared Cloudflare resources (D1, KV, R2). Apps deploy via wrangler.
+### SST (Stripe + Resources)
+SST is used for **Stripe integration** (Phase 2) and resource documentation. Apps deploy via wrangler.
+
+**SST Scope:**
+- ✅ Stripe products/prices as code (creates real Stripe products)
+- ✅ D1/KV/R2 resource definitions (IaC documentation)
+- ✅ Isolated staging resources (`pnpm sst:dev`)
+- ❌ App deployment (no cloudflare.SvelteKit - use wrangler)
 
 ```bash
-pnpm sst:dev   # Creates isolated dev resources (for staging)
+pnpm sst:dev   # Creates isolated dev resources
 pnpm sst:prod  # Imports existing production resources
 ```
 
-- **Config:** `sst.config.ts` - all resource definitions
+- **Config:** `sst.config.ts` - Stripe + resource definitions
 - **Secrets:** `secrets.json` (gitignored) - Cloudflare API token
 - **Outputs:** `.sst/outputs.json` - deployed resource IDs
 

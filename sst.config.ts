@@ -3,16 +3,15 @@
 /**
  * SST Configuration for GroveEngine
  *
- * Unifies all Cloudflare resources previously spread across 6 wrangler.toml files:
- * - packages/engine/wrangler.toml
- * - landing/wrangler.toml
- * - plant/wrangler.toml
- * - domains/wrangler.toml
- * - packages/grove-router/wrangler.toml
- * - packages/example-site/wrangler.toml
+ * PURPOSE: Stripe integration + shared resource management
+ * - Stripe products/prices as code (Phase 2)
+ * - D1/KV/R2 resource definitions (documentation + staging isolation)
  *
- * Run: npx sst dev (local development)
- * Run: npx sst deploy --stage production (deploy to prod)
+ * NOT FOR: App deployment (SST lacks cloudflare.SvelteKit)
+ * Apps deploy via wrangler.toml + GitHub Actions
+ *
+ * Run: pnpm sst:dev   (creates isolated dev resources)
+ * Run: pnpm sst:prod  (imports existing production resources)
  */
 
 // =============================================================================
