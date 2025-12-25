@@ -57,7 +57,7 @@ Update the existing billing API to:
 1. Use pre-configured Stripe product/price IDs instead of inline prices
 2. Implement proper error handling for Stripe API calls
 3. Add validation for plan changes and cancellations
-4. Implement trial period handling (14 days for new subscriptions)
+4. Implement trial period handling (7 days for new subscriptions)
 
 #### Webhook Handler Improvements
 Enhance the webhook handler to:
