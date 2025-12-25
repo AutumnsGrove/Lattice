@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "sst": "^3.0.0",
-    "wrangler": "^3.90.0"
+    "wrangler": "^4.0.0"
   },
   "main": "./packages/engine/dist/index.js",
   "types": "./packages/engine/dist/index.d.ts",
