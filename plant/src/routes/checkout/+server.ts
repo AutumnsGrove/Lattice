@@ -11,8 +11,14 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
 	const db = platform?.env?.DB;
 	const stripeSecretKey = platform?.env?.STRIPE_SECRET_KEY;
 
-	if (!db || !stripeSecretKey) {
-		return json({ error: 'Service temporarily unavailable' }, { status: 503 });
+	if (!db) {
+		console.error('[Checkout] Database not available');
+		return json({ error: 'Database not configured' }, { status: 503 });
+	}
+
+	if (!stripeSecretKey) {
+		console.error('[Checkout] STRIPE_SECRET_KEY not configured');
+		return json({ error: 'Stripe not configured. Please set STRIPE_SECRET_KEY in Cloudflare Dashboard.' }, { status: 503 });
 	}
 
 	try {
@@ -57,8 +63,9 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
 			.run();
 
 		return json({ url: session.url });
-	} catch (error) {
-		console.error('[Checkout] Error creating session:', error);
-		return json({ error: 'Unable to create checkout session' }, { status: 500 });
+	} catch (err) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.error('[Checkout] Error creating session:', errorMessage, err);
+		return json({ error: `Checkout failed: ${errorMessage}` }, { status: 500 });
 	}
 };

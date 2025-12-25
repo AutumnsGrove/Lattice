@@ -251,7 +251,7 @@ export const POST: RequestHandler = async ({ request, url, platform, locals }) =
       billing_address_collection: "required",
       allow_promotion_codes: true,
       subscription_data: {
-        trial_period_days: data.trialDays || (existingBilling ? 0 : 14),
+        trial_period_days: data.trialDays || (existingBilling ? 0 : 7),
         metadata: {
           grove_tenant_id: tenantId,
           grove_plan: data.plan,

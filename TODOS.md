@@ -6,6 +6,38 @@
 
 ---
 
+## 🎉 Plant Signup Flow Working! (2025-12-24 Evening)
+
+**MASSIVE DEBUGGING SESSION!** The plant.grove.place signup flow is now working through to checkout!
+
+**What we fixed:**
+- ✅ OAuth flow - Multiple issues resolved:
+  - Registered `grove-plant` client in GroveAuth database
+  - Fixed base64 vs base64url encoding mismatch in client secret hash
+  - Fixed cookie domain mismatch (hardcoded canonical URL to avoid pages.dev issues)
+  - Changed auth endpoint from `/authorize` to `/login` (GroveAuth-specific)
+- ✅ CSRF 403 errors - SvelteKit's origin check was failing on Cloudflare Pages
+  - Created `hooks.server.ts` with custom CSRF handling for allowed origins
+  - Disabled built-in check, implemented explicit origin whitelist
+- ✅ Created GitHub Actions workflow for plant deployment (`.github/workflows/deploy-plant.yml`)
+- ✅ Added Stripe webhook events: `invoice.paid`, `customer.subscription.trial_will_end`
+- ✅ Created billing email templates in `docs/templates/emails/`
+- ✅ Profile form now submits successfully → redirects to `/plans`
+
+**Current Status:**
+- 🔄 Stripe checkout returning 500 - needs debugging (STRIPE_SECRET_KEY is set but may be wrong key or Stripe API issue)
+- Form submission works, plans page displays correctly
+- Need to verify Stripe API key is correct test mode key
+
+**Files created/modified:**
+- `plant/src/hooks.server.ts` - Custom CSRF handling
+- `plant/svelte.config.js` - Disabled built-in CSRF check
+- `.github/workflows/deploy-plant.yml` - CI/CD for plant
+- `GroveAuth/src/db/seed.sql` - Added grove-plant client
+- `plant/src/routes/profile/+page.svelte` - Fixed variable shadowing bug
+
+---
+
 ## 🎉 LAUNCH MILESTONE - First Emails Sent! (2025-12-24)
 
 **HUGE PROGRESS!** Grove has officially launched to the community!

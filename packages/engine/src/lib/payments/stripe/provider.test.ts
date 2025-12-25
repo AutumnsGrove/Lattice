@@ -298,7 +298,7 @@ describe('StripeProvider', () => {
 				mode: 'subscription',
 				successUrl: 'https://example.com/success',
 				cancelUrl: 'https://example.com/cancel',
-				trialPeriodDays: 14
+				trialPeriodDays: 7
 			};
 
 			await provider.createCheckoutSession(items, options, mockResolveVariant);

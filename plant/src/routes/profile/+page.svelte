@@ -58,15 +58,15 @@
 
 		try {
 			const res = await fetch(`/api/check-username?username=${encodeURIComponent(trimmed)}`);
-			const data = await res.json();
+			const result = await res.json();
 
-			if (data.available) {
+			if (result.available) {
 				usernameStatus = 'available';
 				usernameError = null;
 			} else {
 				usernameStatus = 'taken';
-				usernameError = data.error || 'Username not available';
-				usernameSuggestions = data.suggestions || [];
+				usernameError = result.error || 'Username not available';
+				usernameSuggestions = result.suggestions || [];
 			}
 		} catch {
 			usernameStatus = 'error';
@@ -75,12 +75,9 @@
 	}
 
 	// Debounced username check
-	function onUsernameInput(e: Event) {
-		const value = (e.target as HTMLInputElement).value;
-		username = value;
-
+	function onUsernameInput() {
 		clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(() => checkUsername(value), 300);
+		debounceTimer = setTimeout(() => checkUsername(username), 300);
 	}
 
 	// Select a suggested username
@@ -135,7 +132,7 @@
 					type="text"
 					id="username"
 					name="username"
-					value={username}
+					bind:value={username}
 					oninput={onUsernameInput}
 					placeholder="yourname"
 					required
