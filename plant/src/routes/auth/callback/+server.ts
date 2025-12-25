@@ -64,7 +64,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	const authBaseUrl = platform?.env?.GROVEAUTH_URL || 'https://auth-api.grove.place';
 	const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || 'grove-plant';
 	const clientSecret = platform?.env?.GROVEAUTH_CLIENT_SECRET || '';
-	const redirectUri = `${url.origin}/auth/callback`;
+	// Use canonical URL to match what was sent in auth initiation
+	const appBaseUrl = platform?.env?.PUBLIC_APP_URL || 'https://plant.grove.place';
+	const redirectUri = `${appBaseUrl}/auth/callback`;
 	const db = platform?.env?.DB;
 
 	if (!db) {
