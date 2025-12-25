@@ -13,6 +13,12 @@
     "url": "https://github.com/AutumnsGrove/GroveEngine.git"
   },
   "type": "module",
+  "scripts": {
+    "sst": "node scripts/with-secrets.js pnpm exec sst",
+    "sst:dev": "node scripts/with-secrets.js pnpm exec sst deploy --stage dev",
+    "sst:prod": "node scripts/with-secrets.js pnpm exec sst deploy --stage production",
+    "sst:remove": "node scripts/with-secrets.js pnpm exec sst remove"
+  },
   "devDependencies": {
     "sst": "^3.0.0"
   },

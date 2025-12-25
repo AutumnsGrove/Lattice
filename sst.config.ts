@@ -73,8 +73,8 @@ export default $config({
     // =========================================================================
     // SHARED RESOURCES
     // =========================================================================
-    // Note: Both .get() and new D1/Kv/R2() return the same $Resource type in SST.
-    // The difference is .get() imports existing resources, new creates fresh ones.
+    // Note: .get() imports existing resources, new creates fresh ones.
+    // D1 and Kv have .get() methods; Bucket may need different handling for imports.
 
     // D1 Database - shared by all apps
     // In production, import existing database to avoid data loss
@@ -90,14 +90,12 @@ export default $config({
 
     // R2 Buckets
     // grove-media: blog images, user uploads (engine, example-site)
-    const media = isProd
-      ? sst.cloudflare.R2.get("GroveMedia", PROD_RESOURCES.R2_MEDIA_BUCKET)
-      : new sst.cloudflare.R2("GroveMedia");
+    // Note: For production, we'll need to handle existing bucket import separately
+    // The Bucket.get() pattern may differ from D1/Kv - testing with dev stage first
+    const media = new sst.cloudflare.Bucket("GroveMedia");
 
     // grove-cdn: landing site assets, static files (landing, grove-router)
-    const cdn = isProd
-      ? sst.cloudflare.R2.get("GroveCDN", PROD_RESOURCES.R2_CDN_BUCKET)
-      : new sst.cloudflare.R2("GroveCDN");
+    const cdn = new sst.cloudflare.Bucket("GroveCDN");
 
     // =========================================================================
     // STRIPE PRODUCTS (Phase 2 - uncomment when ready)
@@ -203,168 +201,30 @@ export default $config({
     // };
 
     // =========================================================================
-    // SVELTEKIT APPS
+    // SVELTEKIT APPS - PHASE 3 (Deferred)
     // =========================================================================
+    // SST doesn't have a sst.cloudflare.SvelteKit component. Options for Phase 3:
+    // 1. Use sst.cloudflare.Worker with adapter-cloudflare-workers output
+    // 2. Continue using wrangler for app deployments, SST for resources only
     //
-    // DNS PREREQUISITES:
-    // Before deploying, ensure these DNS records exist in Cloudflare:
-    // - A/AAAA records for each explicit subdomain (plant, domains, example)
-    // - CNAME for *.grove.place wildcard (for tenant blogs)
-    // - For dev/PR stages: *.dev.grove.place and *.pr-XXX.grove.place wildcards
-    //
-    // SST will fail deployment if domains aren't properly configured in Cloudflare.
-
-    /**
-     * Helper for stage-based domain names
-     * @param subdomain - lowercase alphanumeric with hyphens only (e.g., "plant", "pr-123")
-     * @returns Full domain like "plant.grove.place" or "plant.dev.grove.place"
-     */
-    const getDomain = (subdomain: string): string => {
-      // Validate subdomain format: 1+ chars, lowercase alphanumeric, hyphens in middle only
-      if (subdomain && !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(subdomain)) {
-        throw new Error(
-          `Invalid subdomain "${subdomain}": must be lowercase alphanumeric, ` +
-          `hyphens allowed in middle only`
-        );
-      }
-
-      // Production: subdomain.grove.place or grove.place (root)
-      if (isProd) return subdomain ? `${subdomain}.grove.place` : "grove.place";
-
-      // Dev/PR stages need a subdomain - can't serve grove.place root
-      if (!subdomain) {
-        throw new Error(`Subdomain required for non-production stage "${stage}"`);
-      }
-
-      // Dev stage: subdomain.dev.grove.place
-      if (stage === "dev") return `${subdomain}.dev.grove.place`;
-
-      // PR previews: subdomain.pr-123.grove.place
-      return `${subdomain}.${stage}.grove.place`;
-    };
-
-    // -------------------------------------------------------------------------
-    // Grove Landing (grove.place)
-    // Marketing site, knowledge base, pricing
-    // -------------------------------------------------------------------------
-    const landing = new sst.cloudflare.SvelteKit("Landing", {
-      path: "landing",
-      link: [db, cdn],
-      environment: {
-        CDN_URL: isProd ? "https://cdn.grove.place" : "http://localhost:5173/cdn",
-      },
-      domain: isProd ? "grove.place" : undefined,
-    });
-
-    // -------------------------------------------------------------------------
-    // Grove Plant (plant.grove.place)
-    // Tenant onboarding, signup flow, payment
-    // -------------------------------------------------------------------------
-    const plant = new sst.cloudflare.SvelteKit("Plant", {
-      path: "plant",
-      link: [db],
-      environment: {
-        GROVEAUTH_URL: "https://auth.grove.place",
-        // Stripe keys will be added as secrets
-      },
-      domain: getDomain("plant"),
-    });
-
-    // -------------------------------------------------------------------------
-    // Grove Domains (domains.grove.place)
-    // Domain search and registration (Forage)
-    // -------------------------------------------------------------------------
-    const domains = new sst.cloudflare.SvelteKit("Domains", {
-      path: "domains",
-      link: [db],
-      environment: {
-        SITE_NAME: "Forage",
-        SITE_URL: isProd ? "https://domains.grove.place" : "http://localhost:5174",
-        GROVEAUTH_URL: "https://auth.grove.place",
-      },
-      domain: getDomain("domains"),
-    });
-
-    // -------------------------------------------------------------------------
-    // GroveEngine (*.grove.place - tenant blogs)
-    // Main blog engine serving all tenant subdomains
-    // -------------------------------------------------------------------------
-    const engine = new sst.cloudflare.SvelteKit("Engine", {
-      path: "packages/engine",
-      link: [db, cache, media],
-      environment: {
-        CACHE_TTL_SECONDS: "3600",
-        GROVEAUTH_URL: "https://auth.grove.place",
-      },
-      // Wildcard domain for all tenant subdomains
-      domain: isProd
-        ? { name: "*.grove.place", zone: "grove.place" }
-        : undefined,
-    });
-
-    // -------------------------------------------------------------------------
-    // Example Site (example.grove.place)
-    // Demo site showcasing GroveEngine features - "The Midnight Bloom"
-    // -------------------------------------------------------------------------
-    const exampleSite = new sst.cloudflare.SvelteKit("ExampleSite", {
-      path: "packages/example-site",
-      link: [db, cache, media],
-      environment: {
-        CACHE_TTL_SECONDS: "3600",
-        SITE_NAME: "The Midnight Bloom",
-        SITE_URL: isProd ? "https://example.grove.place" : "http://localhost:5175",
-      },
-      domain: getDomain("example"),
-    });
-
-    // =========================================================================
-    // WORKERS
-    // =========================================================================
-
-    // -------------------------------------------------------------------------
-    // Grove Router - DECISION: Keeping for now, may remove in Phase 5
-    // -------------------------------------------------------------------------
-    // The grove-router (packages/grove-router) handles *.grove.place routing.
-    //
-    // WITH SST (this config):
-    // - Each app gets explicit domains (plant.grove.place, domains.grove.place, etc.)
-    // - Engine gets wildcard (*.grove.place) for tenant blogs
-    // - Router role is reduced since SST handles domain → app mapping
-    //
-    // ROUTER STILL NEEDED FOR:
-    // 1. CDN proxying (cdn.grove.place → R2 bucket) - R2 custom domains may replace this
-    // 2. Special subdomain routing (auth, admin, login → groveauth-frontend)
-    // 3. www → root redirect
-    // 4. Fallback for any gaps in SST wildcard coverage
-    //
-    // PHASE 5 DECISION:
-    // After SST is fully deployed, test if all routing works without the router.
-    // If yes, delete packages/grove-router entirely.
-    // If no, uncomment below and document which edge cases it handles.
-    //
-    // const router = new sst.cloudflare.Worker("Router", {
-    //   handler: "packages/grove-router/src/index.ts",
-    //   link: [cdn],
-    //   url: true,
-    // });
+    // For now, apps continue to deploy via wrangler.toml files.
+    // SST manages shared resources (D1, KV, R2) which apps reference by ID.
 
     // =========================================================================
     // OUTPUTS
     // =========================================================================
 
     return {
-      // URLs for each app
-      landing: landing.url,
-      plant: plant.url,
-      domains: domains.url,
-      engine: engine.url,
-      exampleSite: exampleSite.url,
-
-      // Resource IDs (useful for debugging)
+      // Resource IDs - apps can use these in their wrangler.toml bindings
+      stage,
       dbId: db.id,
+      dbName: db.name,
       cacheId: cache.id,
+      cacheName: cache.name,
       mediaId: media.id,
+      mediaName: media.name,
       cdnId: cdn.id,
+      cdnName: cdn.name,
     };
   },
 });

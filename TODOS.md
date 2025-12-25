@@ -6,79 +6,54 @@
 
 ---
 
-## 🔥 Immediate: Merge PR & Deploy SST
+## ✅ SST Resources Deployed (2025-12-24)
 
-**Current State (2025-12-24):**
-- ✅ `sst.config.ts` written - unified config for all Cloudflare resources
-- ✅ Router default target bug fixed (was routing to example-site instead of groveengine)
-- ✅ Knowledge base updated with ALL specs (including completed folder)
-- ⚠️ PR #104 has merge conflicts - needs to be resolved before merge
+**Current State:**
+- ✅ `sst.config.ts` manages D1, KV, R2 resources
+- ✅ Dev stage deployed with isolated resources
+- ✅ Secrets management via `secrets.json` (gitignored)
+- ✅ NPM scripts: `pnpm sst:dev`, `pnpm sst:prod`
 
-### Commands to Run
-
-```bash
-# 1. Merge this PR (after resolving conflicts in GitHub)
-#    Or locally:
-git checkout main
-git pull origin main
-git merge claude/plan-next-steps-0rjeY
-# Resolve any conflicts, then:
-git push origin main
-
-# 2. Install SST and initialize
-pnpm add -D sst@latest
-pnpm sst install
-
-# 3. Deploy to dev stage first
-pnpm sst deploy --stage dev
-
-# 4. Once verified, deploy to production
-pnpm sst deploy --stage production
+### Dev Stage Resources Created
+```
+cacheId: 4b650904a144458abd9bdd67318ef05c
+cdnName: grove-dev-grovecdnbucket-bbdbvtaf
+mediaName: grove-dev-grovemediabucket-rcxtoscn
 ```
 
-### Rollback Plan (if SST deployment fails)
-
+### Quick Commands
 ```bash
-# 1. Revert to previous commit (before SST changes)
-git revert HEAD --no-commit
-git commit -m "revert: roll back SST migration"
+# Deploy to dev (creates new isolated resources)
+pnpm sst:dev
 
-# 2. Redeploy each app via wrangler (old configs still work)
-cd landing && pnpm wrangler pages deploy
-cd ../plant && pnpm wrangler pages deploy
-cd ../domains && pnpm wrangler pages deploy
-cd ../packages/engine && pnpm wrangler pages deploy
-cd ../packages/example-site && pnpm wrangler pages deploy
+# Deploy to production (imports existing resources by ID)
+pnpm sst:prod
 
-# 3. Verify all apps are back online
-# Resource IDs (D1, KV, R2) remain unchanged - SST imports existing ones
+# Remove dev stage resources
+pnpm sst:remove --stage dev
 ```
 
-**Why this works:** SST imports existing Cloudflare resources by ID rather than creating new ones. Rolling back to wrangler deployment doesn't affect the underlying data.
-
-### Post-Merge Cleanup
-- [ ] Delete branch `claude/plan-next-steps-0rjeY`
-- [ ] Verify all apps still work after SST migration
-- [ ] Remove old `wrangler.toml` files (Phase 5)
+### Rollback Plan (if issues)
+Apps still deploy via wrangler.toml - SST only manages resources.
+Production resource IDs are hardcoded in sst.config.ts.
 
 ---
 
-## 🚀 Up Next: SST Migration
+## 🚀 SST Migration Progress
 
 > **Full Plan:** See `specs/sst-migration-plan.md` for complete migration strategy.
 
-SST (sst.dev) will unify our infrastructure-as-code, replacing multiple `wrangler.toml` files with a single TypeScript config. Key benefits:
-
-- **Stripe in Code** - Define products, prices, and webhooks as code (greenfield setup)
-- **Staging Environment** - Finally stop deploying straight to production
-- **PR Previews** - Auto-deploy each PR to `pr-123.grove.place` with Stripe test mode
-- **Simplified Routing** - Workers handle `*.grove.place` natively, Cloudflare for SaaS for custom domains only (Oak+ tier)
+SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 resources.
 
 ### Implementation Phases
 
-- [x] **Phase 1: Foundation** - `sst.config.ts` created with unified config ✅
+- [x] **Phase 1: Foundation** - `sst.config.ts` with D1/KV/R2 resources ✅
+  - Dev stage deployed with isolated resources
+  - Secrets via `secrets.json`, npm scripts added
 - [ ] **Phase 2: Stripe Integration** - Products/prices in code, webhooks, billing portal
-- [ ] **Phase 3: SvelteKit Apps** - Migrate engine, plant, landing to SST
+- [ ] **Phase 3: SvelteKit Apps** - Investigate `sst.cloudflare.Worker` for SvelteKit
+  - Note: `sst.cloudflare.SvelteKit` doesn't exist - need Worker + adapter approach
+  - Alternative: Continue wrangler for apps, SST for resources only
 - [ ] **Phase 4: Dev Workflow** - Staging environment, PR previews, GitHub Actions
 - [ ] **Phase 5: Cleanup** - Remove old wrangler.toml files, evaluate grove-router
   - [ ] Test all routing without grove-router active
