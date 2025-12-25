@@ -157,3 +157,22 @@ export {
 	deactivateUser,
 	reactivateUser
 } from './users.js';
+
+// ============================================================================
+// Turnstile Service (Shade - Human Verification)
+// ============================================================================
+
+export * as turnstile from './turnstile.js';
+export {
+	// Types
+	type TurnstileVerifyResult,
+	type TurnstileVerifyOptions,
+	// Verification
+	verifyTurnstileToken,
+	// Cookie Management
+	TURNSTILE_COOKIE_NAME,
+	TURNSTILE_COOKIE_MAX_AGE,
+	createVerificationCookie,
+	validateVerificationCookie,
+	getVerificationCookieOptions
+} from './turnstile.js';

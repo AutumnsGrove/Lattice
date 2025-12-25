@@ -3,6 +3,11 @@ compatibility_date = "2024-11-24"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
+# Environment variables
+[vars]
+# Turnstile (Shade) - human verification
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
+
 # D1 Database binding (same as landing/engine - shared database)
 [[d1_databases]]
 binding = "DB"
@@ -17,6 +22,7 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # - STRIPE_PUBLISHABLE_KEY = pk_xxx
 # - STRIPE_WEBHOOK_SECRET = whsec_xxx
 # - RESEND_API_KEY = re_xxx
+# - TURNSTILE_SECRET_KEY = Cloudflare Turnstile secret (Shade)
 #
 # NOTE: D1 bindings are read from this file by wrangler pages deploy.
 # For secrets/env vars, configure them in Cloudflare Dashboard since

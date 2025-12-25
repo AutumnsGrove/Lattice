@@ -94,6 +94,18 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
   - Rule 3: High threat score filtering
 - [ ] Set up rate limiting rules (60/min general, 200/5min crawling)
 
+### Phase 2.5: Turnstile Human Verification
+- [x] Create Turnstile widget in Cloudflare Dashboard ✅
+- [x] Add site key to wrangler.toml files ✅
+- [x] Add secret key to Cloudflare Pages (engine, landing, plant, ivy, amber) ✅
+- [x] Implement TurnstileWidget.svelte component ✅
+- [x] Add server-side verification utility (turnstile.ts) ✅
+- [x] Create /api/verify/turnstile endpoint ✅
+- [x] Update CSP to allow challenges.cloudflare.com ✅
+- [x] Add verification page (/verify) for first-time visitors ✅
+- [x] Set grove_verified cookie (7-day expiry) ✅
+- [x] Write help center article (how-grove-protects-your-content.md) ✅
+
 ### Phase 3: Legal & Public Pages
 - [ ] Create and publish `/shade` policy page
 - [ ] Update Terms of Service with AI prohibition language
@@ -249,8 +261,23 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 
 ---
 
-## Phase 5: Grove Social (Weeks 21-30)
+## Phase 5: Grove Social / Meadow (Weeks 21-30)
 
+> **Spec:** See `docs/specs/social-spec.md` for full technical specification.
+> **Naming:** Meadow is the public name, GroveSocial internally.
+
+### 5.1 Meadow Landing Page (Pre-Launch)
+- [ ] Create `meadow/` project directory with basic SvelteKit setup
+- [ ] Create wrangler.toml with Turnstile site key
+- [ ] Build landing page explaining Meadow features:
+  - No public metrics, no viral mechanics
+  - Chronological feed of people you follow
+  - Reactions only visible to author
+  - Connection without competition
+- [ ] Add Shade protections (robots.txt, meta tags, Turnstile)
+- [ ] Deploy to meadow.grove.place
+
+### 5.2 Core Social Features
 - [ ] Build community feed system
 - [ ] Implement post sharing between blogs
 - [ ] Add voting system (upvotes/downvotes)

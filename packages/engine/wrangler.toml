@@ -45,6 +45,9 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 [vars]
 CACHE_TTL_SECONDS = "3600"
 GROVEAUTH_URL = "https://auth.grove.place"
+# Turnstile (Shade) - human verification
+# Get from: Cloudflare Dashboard → Turnstile → Your Widget
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
 # Secrets (set via CLI, not in this file!)
@@ -59,6 +62,9 @@ GROVEAUTH_URL = "https://auth.grove.place"
 #
 # RESEND_API_KEY     - API key for Resend email service
 #                      Get from: https://resend.com
+#
+# TURNSTILE_SECRET_KEY - Cloudflare Turnstile secret key (Shade)
+#                        Get from: Cloudflare Dashboard → Turnstile
 #
 # =============================================================================
 # GroveAuth Secrets (Heartwood OAuth)

@@ -6,6 +6,8 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 # Environment variables for local development
 [vars]
 CDN_URL = "http://localhost:5173/cdn"
+# Turnstile (Shade) - human verification
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # D1 Database binding
 [[d1_databases]]
@@ -22,6 +24,7 @@ bucket_name = "grove-cdn"
 # - RESEND_API_KEY (environment variable, not secret for Pages)
 # - ADMIN_EMAILS (environment variable)
 # - CDN_URL = https://cdn.grove.place (production only)
+# - TURNSTILE_SECRET_KEY = Cloudflare Turnstile secret (Shade)
 #
 # NOTE: D1 and R2 bindings are read from this file by wrangler pages deploy.
 # For secrets/env vars, configure them in Cloudflare Dashboard since

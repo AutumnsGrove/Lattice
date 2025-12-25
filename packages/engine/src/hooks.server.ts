@@ -282,13 +282,15 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Content-Security-Policy
   // Note: 'unsafe-eval' is required for Mermaid diagram rendering
   // Note: 'unsafe-inline' is used for the theme script in app.html
+  // Note: challenges.cloudflare.com is required for Turnstile (Shade)
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
     "font-src 'self' https://cdn.grove.place",
-    "connect-src 'self' https://api.github.com https://*.grove.place",
+    "connect-src 'self' https://api.github.com https://*.grove.place https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
   ].join("; ");
 
