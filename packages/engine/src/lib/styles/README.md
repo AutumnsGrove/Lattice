@@ -22,7 +22,7 @@ The `.leaf-pattern` class provides the signature Grove vine background pattern u
 Import in your site's `app.css`:
 
 ```css
-@import '@autumnsgrove/groveengine/styles/vine-pattern.css';
+@import '@autumnsgrove/groveengine/lib/styles/vine-pattern.css';
 ```
 
 Or copy the `.leaf-pattern` class definition directly into your app's CSS.
