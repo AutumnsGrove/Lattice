@@ -135,15 +135,20 @@
 </script>
 
 <!-- Cherry blossom petal - delicate and flutter-y -->
-<svg
-	class="{className}"
-	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 20 20"
+<!-- Wrapper div for fall animation (translateY/X), SVG for flutter (3D rotations) -->
+<div
+	class="petal-wrapper"
 	style="
 		opacity: {opacity};
-		{animate ? `animation: ${animId}-fall ${duration}s ease-in-out ${delay}s infinite, ${animId}-flutter ${duration / 4}s ease-in-out ${delay}s infinite;` : ''}
+		{animate ? `animation: ${animId}-fall ${duration}s ease-in-out ${delay}s infinite;` : ''}
 	"
 >
+	<svg
+		class="{className}"
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 20 20"
+		style="{animate ? `animation: ${animId}-flutter ${duration / 4}s ease-in-out ${delay}s infinite;` : ''}"
+	>
 	<defs>
 		<!-- Gradient for depth -->
 		<radialGradient id="petal-grad-{seed}" cx="30%" cy="30%" r="70%">
@@ -211,7 +216,8 @@
 			transform="rotate({initialRotation} 10 10)"
 		/>
 	{/if}
-</svg>
+	</svg>
+</div>
 
 <style>
 	/* Dynamic keyframes are injected via style attribute */
@@ -240,9 +246,15 @@
 		}
 	}
 
-	svg {
-		transform-style: preserve-3d;
+	.petal-wrapper {
+		display: inline-block;
 		will-change: transform, opacity;
+	}
+
+	svg {
+		display: block;
+		transform-style: preserve-3d;
+		will-change: transform;
 	}
 </style>
 
