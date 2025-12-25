@@ -92,7 +92,7 @@
 		<!-- Error state -->
 		<div class="text-center">
 			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error-bg mb-6">
-				<span class="text-4xl">😕</span>
+				<X size={40} class="text-error" />
 			</div>
 
 			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">

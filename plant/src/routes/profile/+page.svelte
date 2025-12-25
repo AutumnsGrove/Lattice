@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Check, X, Loader2 } from 'lucide-svelte';
+	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from 'lucide-svelte';
 
 	let { data, form } = $props();
 
@@ -18,15 +18,15 @@
 
 	// Available interests
 	const interests = [
-		{ id: 'writing', label: 'Writing / Blogging', emoji: '✍️' },
-		{ id: 'photography', label: 'Photography', emoji: '📷' },
-		{ id: 'art', label: 'Art / Design', emoji: '🎨' },
-		{ id: 'cooking', label: 'Cooking / Food', emoji: '🍳' },
-		{ id: 'tech', label: 'Technology', emoji: '💻' },
-		{ id: 'travel', label: 'Travel', emoji: '✈️' },
-		{ id: 'personal', label: 'Personal / Journal', emoji: '📔' },
-		{ id: 'business', label: 'Business / Professional', emoji: '💼' },
-		{ id: 'other', label: 'Other', emoji: '🌟' }
+		{ id: 'writing', label: 'Writing / Blogging', icon: PenTool },
+		{ id: 'photography', label: 'Photography', icon: Camera },
+		{ id: 'art', label: 'Art / Design', icon: Palette },
+		{ id: 'cooking', label: 'Cooking / Food', icon: ChefHat },
+		{ id: 'tech', label: 'Technology', icon: Laptop },
+		{ id: 'travel', label: 'Travel', icon: Plane },
+		{ id: 'personal', label: 'Personal / Journal', icon: BookOpen },
+		{ id: 'business', label: 'Business / Professional', icon: Briefcase },
+		{ id: 'other', label: 'Other', icon: Star }
 	];
 
 	// Color presets
@@ -227,7 +227,7 @@
 						class:border-primary={selectedInterests.includes(interest.id)}
 						class:border-default={!selectedInterests.includes(interest.id)}
 					>
-						<span>{interest.emoji}</span>
+						<svelte:component this={interest.icon} class="w-4 h-4" />
 						<span class="text-foreground">{interest.label}</span>
 					</button>
 				{/each}

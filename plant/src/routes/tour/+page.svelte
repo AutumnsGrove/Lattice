@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ArrowRight, X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-svelte';
+	import { ArrowRight, X, ChevronLeft, ChevronRight, Sparkles, Sprout, PartyPopper } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -166,7 +166,7 @@
 			<!-- Welcome illustration -->
 			<div class="aspect-video bg-accent rounded-lg mb-6 flex items-center justify-center">
 				<div class="text-center">
-					<div class="text-6xl mb-4">🌱</div>
+					<Sprout class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-foreground-muted">Let's explore Grove together</p>
 				</div>
 			</div>
@@ -174,7 +174,7 @@
 			<!-- Completion illustration -->
 			<div class="aspect-video bg-accent rounded-lg mb-6 flex items-center justify-center">
 				<div class="text-center">
-					<div class="text-6xl mb-4">🎉</div>
+					<PartyPopper class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-lg font-medium text-foreground mb-2">
 						{data.user?.username || 'your-blog'}.grove.place
 					</p>

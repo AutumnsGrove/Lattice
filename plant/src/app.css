@@ -316,9 +316,15 @@
 .border-default { border-color: var(--color-border); }
 .border-subtle { border-color: var(--color-border-subtle); }
 
-/* Subtle vine pattern background */
+/* Subtle leaf pattern background - organic, consistent with Grove design system */
 .leaf-pattern {
-	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 Q35 15 30 25 Q25 15 30 5' fill='%2322c55e' opacity='0.05'/%3E%3Cpath d='M10 35 Q15 25 20 35 Q15 45 10 35' fill='%2322c55e' opacity='0.04'/%3E%3Cpath d='M45 40 Q50 30 55 40 Q50 50 45 40' fill='%2322c55e' opacity='0.04'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 8-15 12-15 20s10 15 15 25c5-10 15-17 15-25S35 13 30 5z' fill='%2316a34a' fill-opacity='0.03'/%3E%3C/svg%3E");
+	background-repeat: repeat;
+}
+
+.dark .leaf-pattern {
+	background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 8-15 12-15 20s10 15 15 25c5-10 15-17 15-25S35 13 30 5z' fill='%2316a34a' fill-opacity='0.05'/%3E%3C/svg%3E");
+	background-repeat: repeat;
 }
 
 /* Loading spinner */

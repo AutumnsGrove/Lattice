@@ -24,21 +24,21 @@ function wrapEmail(content: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grove</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #171a1e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #fefdfb; font-family: 'Lexend', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
       <td align="center" style="padding-bottom: 30px;">
         <!-- Grove Logo -->
-        <svg width="48" height="59" viewBox="0 0 417 512" xmlns="http://www.w3.org/2000/svg">
+        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
           <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
+          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
         </svg>
       </td>
     </tr>
     ${content}
     <tr>
       <td align="center" style="padding-top: 40px;">
-        <p style="margin: 0; font-size: 12px; color: rgba(245, 242, 234, 0.4);">
+        <p style="margin: 0; font-size: 12px; color: rgba(61, 41, 20, 0.4);">
           grove.place
         </p>
       </td>
@@ -53,7 +53,7 @@ function wrapEmail(content: string): string {
  * Welcome email - sent immediately after signup
  */
 export function getWelcomeEmail(params: EmailParams): { subject: string; html: string; text: string } {
-	const subject = `Welcome to Grove, ${params.name}! 🌱`;
+	const subject = `Welcome to Grove, ${params.name}!`;
 
 	const html = wrapEmail(`
     <tr>
@@ -178,14 +178,14 @@ export function getDay3Email(params: EmailParams): { subject: string; html: stri
           You've been on Grove for a few days now. How's it feeling?
         </p>
         ${
-					hasPublished
-						? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-            I saw you published ${params.postCount} post${params.postCount === 1 ? '' : 's'}! That's awesome. 🌱
-          </p>`
-						: `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-            If you haven't written your first post yet, no pressure—sometimes it takes a while to find the right words.
-          </p>`
-				}
+        			hasPublished
+        				? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+                  I saw you published ${params.postCount} post${params.postCount === 1 ? '' : 's'}! That's awesome.
+                </p>`
+        				: `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+                  If you haven't written your first post yet, no pressure—sometimes it takes a while to find the right words.
+                </p>`
+        		}
         <p style="margin: 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           I'm here if you need anything. Just hit reply.
         </p>
@@ -225,7 +225,7 @@ export function getDay7Email(params: EmailParams): { subject: string; html: stri
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
-          One week with Grove 🌿
+          One week with Grove
         </h1>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           Hey ${params.name}! It's been a week since you joined Grove. I hope you're finding your rhythm.
@@ -253,7 +253,7 @@ export function getDay7Email(params: EmailParams): { subject: string; html: stri
   `);
 
 	const text = `
-One week with Grove 🌿
+	One week with Grove
 
 Hey ${params.name}! It's been a week since you joined Grove. I hope you're finding your rhythm.
 
@@ -274,7 +274,7 @@ Questions? I'm here.
  * Day 30 milestone check-in
  */
 export function getDay30Email(params: EmailParams): { subject: string; html: string; text: string } {
-	const subject = `One month! 🎉`;
+	const subject = `One month!`;
 
 	const hasPublished = (params.postCount || 0) > 0;
 
@@ -282,7 +282,7 @@ export function getDay30Email(params: EmailParams): { subject: string; html: str
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
-          One month! 🎉
+          One month!
         </h1>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           Hey ${params.name}! You've been growing with Grove for a whole month now.
@@ -309,7 +309,7 @@ export function getDay30Email(params: EmailParams): { subject: string; html: str
   `);
 
 	const text = `
-One month! 🎉
+	One month!
 
 Hey ${params.name}! You've been growing with Grove for a whole month now.
 

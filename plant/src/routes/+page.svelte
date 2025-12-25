@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Mail } from 'lucide-svelte';
+	import { Mail, Sprout, Sparkles, Heart } from 'lucide-svelte';
+	import { Logo } from '@autumnsgrove/groveengine/ui';
 
 	// Google icon component
 	const GoogleIcon = `<svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -19,12 +20,7 @@
 	<!-- Welcome header -->
 	<div class="text-center mb-10">
 		<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent mb-6">
-			<svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-primary">
-				<path d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z" fill="currentColor" fill-opacity="0.15"/>
-				<path d="M50 20C40 32 30 40 30 55C30 70 38 80 50 80C62 80 70 70 70 55C70 40 60 32 50 20Z" fill="currentColor" fill-opacity="0.3"/>
-				<path d="M50 32C44 40 38 46 38 55C38 64 43 70 50 70C57 70 62 64 62 55C62 46 56 40 50 32Z" fill="currentColor"/>
-				<path d="M50 70V95" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-			</svg>
+			<Logo class="w-10 h-10" />
 		</div>
 
 		<h1 class="text-3xl md:text-4xl font-medium text-foreground mb-3">
@@ -86,15 +82,15 @@
 		</h3>
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-xl mx-auto">
 			<div class="text-center">
-				<div class="text-2xl mb-2">🌱</div>
+				<Sprout class="w-6 h-6 mx-auto mb-2 text-primary" />
 				<p class="text-sm text-foreground-muted">Your own space, away from algorithms</p>
 			</div>
 			<div class="text-center">
-				<div class="text-2xl mb-2">✨</div>
+				<Sparkles class="w-6 h-6 mx-auto mb-2 text-primary" />
 				<p class="text-sm text-foreground-muted">Beautiful by default, customizable if you want</p>
 			</div>
 			<div class="text-center">
-				<div class="text-2xl mb-2">💚</div>
+				<Heart class="w-6 h-6 mx-auto mb-2 text-primary" />
 				<p class="text-sm text-foreground-muted">Built with care, not surveillance</p>
 			</div>
 		</div>

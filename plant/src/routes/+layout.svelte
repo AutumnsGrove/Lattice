@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
+	import { Logo } from '@autumnsgrove/groveengine/ui';
 
 	// Determine current step based on route
 	let currentStep = $derived((() => {
@@ -35,12 +36,7 @@
 			<div class="flex items-center justify-between">
 				<!-- Logo -->
 				<a href="https://grove.place" class="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-					<svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z" fill="currentColor" fill-opacity="0.15"/>
-						<path d="M50 20C40 32 30 40 30 55C30 70 38 80 50 80C62 80 70 70 70 55C70 40 60 32 50 20Z" fill="currentColor" fill-opacity="0.3"/>
-						<path d="M50 32C44 40 38 46 38 55C38 64 43 70 50 70C57 70 62 64 62 55C62 46 56 40 50 32Z" fill="currentColor"/>
-						<path d="M50 70V95" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-					</svg>
+					<Logo class="w-8 h-8" />
 					<span class="font-medium">Grove</span>
 				</a>
 
