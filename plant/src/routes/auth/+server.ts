@@ -70,8 +70,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	cookies.set('auth_state', state, cookieOptions);
 	cookies.set('auth_code_verifier', verifier, cookieOptions);
 
-	// Build authorization URL
-	const authUrl = new URL(`${authBaseUrl}/authorize`);
+	// Build authorization URL (GroveAuth uses /login as the authorization endpoint)
+	const authUrl = new URL(`${authBaseUrl}/login`);
 	authUrl.searchParams.set('client_id', clientId);
 	authUrl.searchParams.set('redirect_uri', redirectUri);
 	authUrl.searchParams.set('response_type', 'code');
