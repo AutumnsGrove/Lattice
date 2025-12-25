@@ -38,7 +38,7 @@ Grove works well for:
 
 ## What Grove isn't
 
-Grove isn't trying to be everything. It's not a social network, a newsletter platform, or a business website builder. It's a place to write and share your writing with people who want to read it.
+Grove isn't trying to be everything. While we offer optional community features (through Meadow) for those who want them, Grove's core is about writing and sharing your writing with people who want to read it. It's not a traditional social network, a newsletter platform, or a business website builder.
 
 If you need e-commerce, complex membership tiers, or a design tool with infinite customization, Grove probably isn't the right fit. If you want a simple, honest blog that just works—welcome.
 
