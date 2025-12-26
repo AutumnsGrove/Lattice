@@ -193,6 +193,26 @@
 						</div>
 					</a>
 
+					<a href="https://github.com/vercel/satori" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Satori</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— Dynamic OG image generation</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">MPL-2.0</span>
+						</div>
+					</a>
+
+					<a href="https://github.com/natemoo-re/satori-html" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">satori-html</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— HTML to Satori converter</span>
+							</div>
+							<span class="text-foreground-faint text-xs font-sans">MIT</span>
+						</div>
+					</a>
+
 					<a href="https://github.com/huntabyte/bits-ui" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
