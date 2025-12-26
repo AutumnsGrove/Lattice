@@ -96,7 +96,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     });
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json();
+      const errorData = (await tokenResponse.json()) as
+        | Record<string, unknown>
+        | unknown;
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
         error: errorData,
@@ -107,13 +109,19 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       });
       // Include API error for debugging (temporarily)
       const debugError =
-        errorData?.error_description ||
-        errorData?.error ||
-        "token_exchange_failed";
+        typeof errorData === "object" && errorData !== null
+          ? ((errorData as Record<string, unknown>)?.error_description as
+              | string
+              | undefined) ||
+            ((errorData as Record<string, unknown>)?.error as
+              | string
+              | undefined) ||
+            "token_exchange_failed"
+          : "token_exchange_failed";
       throw redirect(302, `/?error=${encodeURIComponent(debugError)}`);
     }
 
-    const tokens = await tokenResponse.json();
+    const tokens = (await tokenResponse.json()) as Record<string, unknown>;
 
     // Set cookies with domain=.grove.place for cross-subdomain access
     // This allows admin.grove.place to read these cookies
@@ -126,14 +134,20 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     };
 
     // Set access token (used for API calls)
-    cookies.set("access_token", tokens.access_token, {
-      ...cookieOptions,
-      maxAge: tokens.expires_in || 3600,
-    });
+    const accessToken = tokens.access_token as string | undefined;
+    const expiresIn = tokens.expires_in as number | undefined;
+    const refreshToken = tokens.refresh_token as string | undefined;
+
+    if (accessToken) {
+      cookies.set("access_token", accessToken, {
+        ...cookieOptions,
+        maxAge: expiresIn || 3600,
+      });
+    }
 
     // Set refresh token if provided
-    if (tokens.refresh_token) {
-      cookies.set("refresh_token", tokens.refresh_token, {
+    if (refreshToken) {
+      cookies.set("refresh_token", refreshToken, {
         ...cookieOptions,
         maxAge: 60 * 60 * 24 * 30, // 30 days
       });

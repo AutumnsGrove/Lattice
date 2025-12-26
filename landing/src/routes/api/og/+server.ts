@@ -168,7 +168,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 
   // Return PNG with appropriate cache headers
   // 24 hours browser cache, 1 week CDN cache
-  return new Response(pngBuffer, {
+  return new Response(pngBuffer as unknown as BodyInit, {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "public, max-age=86400, s-maxage=604800",

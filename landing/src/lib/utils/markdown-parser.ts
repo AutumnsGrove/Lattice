@@ -24,7 +24,9 @@ export function parseMarkdownFile(filePath: string): ParsedDoc {
   const content = readFileSync(filePath, "utf-8");
   const { data, content: markdownContent } = matter(content);
 
-  const html = marked(markdownContent);
+  const htmlPromise = marked(markdownContent);
+  const htmlResult =
+    typeof htmlPromise === "string" ? htmlPromise : htmlPromise.toString();
   const slug = filePath.split("/").pop()?.replace(".md", "") || "";
 
   // Generate excerpt (first paragraph or first 200 chars)
@@ -46,7 +48,7 @@ export function parseMarkdownFile(filePath: string): ParsedDoc {
       slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
     description: data.description || excerpt,
     content: markdownContent,
-    html,
+    html: htmlResult,
     category: data.category || "general",
     lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
     filePath,
@@ -104,7 +106,7 @@ export function searchDocs(docs: ParsedDoc[], query: string): ParsedDoc[] {
   return docs.filter(
     (doc) =>
       doc.title.toLowerCase().includes(lowercaseQuery) ||
-      doc.description.toLowerCase().includes(lowercaseQuery) ||
+      (doc.description?.toLowerCase().includes(lowercaseQuery) ?? false) ||
       doc.content.toLowerCase().includes(lowercaseQuery),
   );
 }

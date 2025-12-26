@@ -277,7 +277,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 
   // Return PNG with stale-while-revalidate for random generation
   // Serves stale content while regenerating in background
-  return new Response(pngBuffer, {
+  return new Response(pngBuffer as unknown as BodyInit, {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
