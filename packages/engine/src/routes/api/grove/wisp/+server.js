@@ -104,6 +104,19 @@ export async function POST({ request, platform, locals }) {
 		return json({ error: 'Invalid mode. Use: quick or thorough' }, { status: 400 });
 	}
 
+	// Validate context object (if provided)
+	if (context !== undefined) {
+		if (context !== null && typeof context !== 'object') {
+			return json({ error: 'Invalid context format' }, { status: 400 });
+		}
+		if (context?.slug !== undefined && typeof context.slug !== 'string') {
+			return json({ error: 'Invalid slug in context' }, { status: 400 });
+		}
+		if (context?.title !== undefined && typeof context.title !== 'string') {
+			return json({ error: 'Invalid title in context' }, { status: 400 });
+		}
+	}
+
 	// Rate limiting
 	if (kv) {
 		const rateResult = await cache.rateLimit(kv, `wisp:${locals.user.id}`, {

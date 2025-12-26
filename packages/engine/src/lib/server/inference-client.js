@@ -124,9 +124,10 @@ export async function callInference(request, secrets) {
 		}
 	}
 
-	// All providers failed
+	// All providers failed - build detailed error message
+	const attemptedProviders = errors.map(e => `${e.provider}/${e.model}: ${e.error}`).join('; ');
 	throw new InferenceClientError(
-		'All inference providers failed',
+		`All inference providers failed. Attempted: ${attemptedProviders}`,
 		'ALL_PROVIDERS_FAILED',
 		undefined,
 		errors
@@ -145,45 +146,67 @@ export async function callInference(request, secrets) {
  * @param {Object} options - Call options
  * @returns {Promise<{content: string, usage: {input: number, output: number}}>}
  */
+/** Inference request timeout in milliseconds */
+const INFERENCE_TIMEOUT_MS = 30000; // 30 seconds
+
 async function callProvider(provider, modelId, options) {
 	const { prompt, maxTokens, temperature, apiKey } = options;
 
-	const response = await fetch(`${provider.baseUrl}/chat/completions`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${apiKey}`,
-			// ZDR headers for providers that support them
-			...(provider.zdr && { 'X-Data-Retention': 'none' })
-		},
-		body: JSON.stringify({
-			model: modelId,
-			messages: [{ role: 'user', content: prompt }],
-			max_tokens: maxTokens,
-			temperature
-		})
-	});
+	// Create abort controller for timeout
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), INFERENCE_TIMEOUT_MS);
 
-	if (!response.ok) {
-		const errorText = await response.text().catch(() => 'Unknown error');
-		throw new InferenceClientError(
-			`Provider API error: ${response.status}`,
-			'PROVIDER_ERROR',
-			provider.name,
-			errorText.substring(0, 200)
-		);
+	try {
+		const response = await fetch(`${provider.baseUrl}/chat/completions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${apiKey}`,
+				// ZDR headers for providers that support them
+				...(provider.zdr && { 'X-Data-Retention': 'none' })
+			},
+			body: JSON.stringify({
+				model: modelId,
+				messages: [{ role: 'user', content: prompt }],
+				max_tokens: maxTokens,
+				temperature
+			}),
+			signal: controller.signal
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text().catch(() => 'Unknown error');
+			throw new InferenceClientError(
+				`Provider API error: ${response.status}`,
+				'PROVIDER_ERROR',
+				provider.name,
+				errorText.substring(0, 200)
+			);
+		}
+
+		const data = await response.json();
+
+		// Extract content and usage (OpenAI-compatible format)
+		const content = data.choices?.[0]?.message?.content || '';
+		const usage = {
+			input: data.usage?.prompt_tokens || 0,
+			output: data.usage?.completion_tokens || 0
+		};
+
+		return { content, usage };
+	} catch (err) {
+		// Handle timeout specifically
+		if (err.name === 'AbortError') {
+			throw new InferenceClientError(
+				`Provider timed out after ${INFERENCE_TIMEOUT_MS / 1000}s`,
+				'TIMEOUT',
+				provider.name
+			);
+		}
+		throw err;
+	} finally {
+		clearTimeout(timeoutId);
 	}
-
-	const data = await response.json();
-
-	// Extract content and usage (OpenAI-compatible format)
-	const content = data.choices?.[0]?.message?.content || '';
-	const usage = {
-		input: data.usage?.prompt_tokens || 0,
-		output: data.usage?.completion_tokens || 0
-	};
-
-	return { content, usage };
 }
 
 /**

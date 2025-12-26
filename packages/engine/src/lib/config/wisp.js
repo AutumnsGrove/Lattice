@@ -130,11 +130,13 @@ export const PROMPT_MODES = {
  * @param {string} model - Model key
  * @param {number} inputTokens - Number of input tokens
  * @param {number} outputTokens - Number of output tokens
- * @returns {number} Cost in USD
+ * @returns {number} Cost in USD (rounded to 6 decimal places to avoid floating point errors)
  */
 export function calculateCost(model, inputTokens, outputTokens) {
 	const pricing = MODEL_PRICING[model] || MODEL_PRICING['deepseek-v3.2'];
-	return (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
+	const cost = (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
+	// Round to 6 decimal places to avoid floating point precision issues
+	return Math.round(cost * 1_000_000) / 1_000_000;
 }
 
 /**

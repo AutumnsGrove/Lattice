@@ -64,7 +64,7 @@ fi
 echo ""
 echo "Step 3: Adding default settings..."
 echo "--------------------------------------"
-wrangler d1 execute "$DB_NAME" --command="INSERT OR IGNORE INTO settings (setting_key, setting_value) VALUES ('wisp_enabled', 'false'), ('wisp_mode', 'quick');"
+wrangler d1 execute "$DB_NAME" --file=packages/engine/migrations/014_wisp_settings.sql
 echo "Settings added!"
 
 echo ""
