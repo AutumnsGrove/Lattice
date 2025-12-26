@@ -2,6 +2,24 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
+	// Lucide Icons (replacing emojis)
+	import {
+		MapPin,
+		Check,
+		CheckCircle,
+		Circle,
+		CircleDot,
+		Leaf,
+		Gem,
+		Flower2,
+		Sun,
+		Sparkles,
+		Mail,
+		HardDrive,
+		Palette,
+		Brush
+	} from 'lucide-svelte';
+
 	// Trees
 	import Logo from '$lib/components/Logo.svelte';
 	import TreePine from '$lib/components/trees/TreePine.svelte';
@@ -27,8 +45,10 @@
 	import Lantern from '$lib/components/nature/structural/Lantern.svelte';
 
 	// Ground
-	import Crocus from '$lib/components/nature/ground/Crocus.svelte';
+	import Tulip from '$lib/components/nature/ground/Tulip.svelte';
 	import Daffodil from '$lib/components/nature/ground/Daffodil.svelte';
+	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
+	import GrassTuft from '$lib/components/nature/ground/GrassTuft.svelte';
 
 	// Palette
 	import {
@@ -214,15 +234,15 @@
 				{@const status = getPhaseStatus(key as PhaseKey)}
 				<a
 					href="#{key}"
-					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all
+					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all inline-flex items-center gap-1.5
 						{status === 'current' ? 'bg-accent text-white shadow-md' : ''}
 						{status === 'past' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : ''}
 						{status === 'future' ? 'bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:bg-slate-200 dark:hover:bg-slate-700' : ''}"
 				>
 					{#if status === 'current'}
-						<span class="mr-1">📍</span>
+						<MapPin class="w-3.5 h-3.5" />
 					{:else if status === 'past'}
-						<span class="mr-1">✓</span>
+						<Check class="w-3.5 h-3.5" />
 					{/if}
 					{phase.title}
 				</a>
@@ -252,22 +272,23 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['first-frost'] === 'past'}
-						<span class="inline-block px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
-							✓ Complete
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+							<CheckCircle class="w-4 h-4" />
+							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases['first-frost'].title}</h2>
-					<p class="text-foreground-muted italic">{phases['first-frost'].subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['first-frost'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['first-frost'].title}</h2>
+					<p class="text-slate-600 dark:text-slate-300 italic">{phases['first-frost'].subtitle}</p>
+					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm">
-							<span class="text-green-500 mt-0.5">✓</span>
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm shadow-sm">
+							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div>
-								<span class="font-medium text-foreground">{feature.name}</span>
-								<p class="text-sm text-foreground-muted">{feature.description}</p>
+								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -279,25 +300,31 @@
 		<section
 			id="thaw"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-slate-100 via-sky-50 to-emerald-50
-				dark:from-slate-850 dark:via-slate-800 dark:to-emerald-950"
+				bg-gradient-to-b from-slate-200 via-sky-100 to-emerald-100
+				dark:from-slate-800 dark:via-slate-850 dark:to-emerald-950"
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
 				<SnowfallLayer count={20} zIndex={5} enabled opacity={{ min: 0.3, max: 0.6 }} spawnDelay={12} />
 			</div>
 
-			<!-- Two trees now - growth beginning -->
-			<div class="absolute bottom-0 left-[30%] w-28 h-36 opacity-70" aria-hidden="true">
+			<!-- Three trees now - growth beginning -->
+			<div class="absolute bottom-0 left-[25%] w-28 h-36 opacity-70" aria-hidden="true">
 				<Logo class="w-full h-full" season="winter" animate />
 			</div>
-			<div class="absolute bottom-0 left-[60%] w-24 h-32 opacity-50" aria-hidden="true">
+			<div class="absolute bottom-0 left-[50%] -translate-x-1/2 w-24 h-32 opacity-55" aria-hidden="true">
 				<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
 			</div>
+			<div class="absolute bottom-0 left-[70%] w-20 h-28 opacity-45" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="winter" animate />
+			</div>
 
-			<!-- Crocus emerging -->
-			<div class="absolute bottom-4 left-[45%] w-8 h-10 opacity-60" aria-hidden="true">
-				<Crocus class="w-full h-full" />
+			<!-- Early tulips emerging through snow -->
+			<div class="absolute bottom-4 left-[35%] w-6 h-10 opacity-70" aria-hidden="true">
+				<Tulip class="w-full h-full" variant="purple" />
+			</div>
+			<div class="absolute bottom-4 left-[60%] w-5 h-8 opacity-60" aria-hidden="true">
+				<Tulip class="w-full h-full" variant="yellow" />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
@@ -308,18 +335,18 @@
 							You are here
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases.thaw.title}</h2>
-					<p class="text-foreground-muted italic">{phases.thaw.subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases.thaw.description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases.thaw.title}</h2>
+					<p class="text-slate-600 dark:text-slate-300 italic">{phases.thaw.subtitle}</p>
+					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases.thaw.description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-l-4 border-accent">
-							<span class="text-accent mt-0.5">●</span>
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm border-l-4 border-accent shadow-sm">
+							<CircleDot class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							<div>
-								<span class="font-medium text-foreground">{feature.name}</span>
-								<p class="text-sm text-foreground-muted">{feature.description}</p>
+								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -331,36 +358,42 @@
 		<section
 			id="first-buds"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50
-				dark:from-pink-950/30 dark:via-slate-900 dark:to-lime-950/30"
+				bg-gradient-to-b from-emerald-100 via-pink-50 to-lime-100
+				dark:from-emerald-950/40 dark:via-slate-900 dark:to-lime-950/30"
 		>
 			<!-- Spring petals -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
 				<FallingPetalsLayer count={50} zIndex={5} enabled opacity={{ min: 0.4, max: 0.8 }} fallDuration={{ min: 18, max: 26 }} driftRange={120} spawnDelay={10} />
 			</div>
 
-			<!-- Growing grove - more trees -->
-			<div class="absolute bottom-0 left-[20%] w-28 h-36 opacity-70" aria-hidden="true">
+			<!-- Growing grove - 4 trees -->
+			<div class="absolute bottom-0 left-[15%] w-24 h-32 opacity-50" aria-hidden="true">
+				<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
+			</div>
+			<div class="absolute bottom-0 left-[30%] w-28 h-36 opacity-70" aria-hidden="true">
 				<Logo class="w-full h-full" season="spring" animate />
 			</div>
-			<div class="absolute bottom-0 left-[40%] w-24 h-32 opacity-60" aria-hidden="true">
+			<div class="absolute bottom-0 left-[50%] w-24 h-32 opacity-60" aria-hidden="true">
 				<TreeCherry class="w-full h-full" season="spring" animate />
 			</div>
-			<div class="absolute bottom-0 left-[60%] w-20 h-28 opacity-50" aria-hidden="true">
+			<div class="absolute bottom-0 left-[70%] w-20 h-28 opacity-50" aria-hidden="true">
 				<TreeBirch class="w-full h-full" season="spring" animate />
 			</div>
 
 			<!-- Ivy climbing! -->
-			<div class="absolute bottom-0 left-[35%] w-10 h-20 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-0 left-[40%] w-10 h-20 opacity-70" aria-hidden="true">
 				<Vine class="w-full h-full" variant="ivy" season="spring" animate />
 			</div>
 
-			<!-- Spring flowers -->
-			<div class="absolute bottom-4 left-[25%] w-8 h-12 opacity-60" aria-hidden="true">
+			<!-- Spring flowers - daffodils, tulips, wildflowers -->
+			<div class="absolute bottom-4 left-[22%] w-8 h-12 opacity-65" aria-hidden="true">
 				<Daffodil class="w-full h-full" />
 			</div>
-			<div class="absolute bottom-4 left-[70%] w-6 h-8 opacity-50" aria-hidden="true">
-				<Crocus class="w-full h-full" />
+			<div class="absolute bottom-4 left-[55%] w-6 h-10 opacity-60" aria-hidden="true">
+				<Tulip class="w-full h-full" variant="pink" />
+			</div>
+			<div class="absolute bottom-4 left-[75%] w-5 h-8 opacity-55" aria-hidden="true">
+				<FlowerWild class="w-full h-full" />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
@@ -371,31 +404,32 @@
 							You are here
 						</span>
 					{:else if phaseStatus['first-buds'] === 'future'}
-						<span class="inline-block px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
+							<Sparkles class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases['first-buds'].title}</h2>
-					<p class="text-foreground-muted italic">{phases['first-buds'].subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['first-buds'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['first-buds'].title}</h2>
+					<p class="text-slate-600 dark:text-slate-300 italic">{phases['first-buds'].subtitle}</p>
+					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-buds'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm
 							{feature.icon === 'ivy' ? 'border-l-4 border-green-500' : ''}
 							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
-								<span class="text-green-500 mt-0.5">🌿</span>
+								<Mail class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'amber'}
-								<span class="text-amber-500 mt-0.5">✦</span>
+								<HardDrive class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{:else}
-								<span class="text-foreground-muted mt-0.5">○</span>
+								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
 							<div>
-								<span class="font-medium text-foreground">{feature.name}</span>
-								<p class="text-sm text-foreground-muted">{feature.description}</p>
+								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -407,8 +441,8 @@
 		<section
 			id="full-bloom"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-sky-100 via-emerald-50 to-green-50
-				dark:from-sky-950/30 dark:via-slate-900 dark:to-emerald-950/30"
+				bg-gradient-to-b from-lime-100 via-emerald-50 to-sky-100
+				dark:from-lime-950/30 dark:via-slate-900 dark:to-sky-950/30"
 		>
 			<!-- Fireflies in the summer evening -->
 			<div class="absolute top-1/4 left-[15%] opacity-80" aria-hidden="true">
@@ -420,18 +454,24 @@
 			<div class="absolute top-1/2 left-[25%] opacity-70" aria-hidden="true">
 				<Firefly class="w-3 h-3" />
 			</div>
+			<div class="absolute top-2/3 right-[30%] opacity-50" aria-hidden="true">
+				<Firefly class="w-2 h-2" />
+			</div>
 
-			<!-- Full grove - many trees -->
-			<div class="absolute bottom-0 left-[10%] w-24 h-32 opacity-50" aria-hidden="true">
+			<!-- Full grove - 7 trees (peak growth!) -->
+			<div class="absolute bottom-0 left-[5%] w-20 h-28 opacity-40" aria-hidden="true">
+				<TreeAspen class="w-full h-full" season="summer" animate />
+			</div>
+			<div class="absolute bottom-0 left-[15%] w-24 h-32 opacity-50" aria-hidden="true">
 				<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
 			</div>
-			<div class="absolute bottom-0 left-[25%] w-28 h-36 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-0 left-[28%] w-28 h-36 opacity-70" aria-hidden="true">
 				<Logo class="w-full h-full" season="summer" animate />
 			</div>
-			<div class="absolute bottom-0 left-[40%] w-22 h-30 opacity-60" aria-hidden="true">
+			<div class="absolute bottom-0 left-[42%] w-22 h-30 opacity-60" aria-hidden="true">
 				<TreeCherry class="w-full h-full" season="summer" animate />
 			</div>
-			<div class="absolute bottom-0 left-[55%] w-20 h-28 opacity-55" aria-hidden="true">
+			<div class="absolute bottom-0 left-[56%] w-20 h-28 opacity-55" aria-hidden="true">
 				<TreeBirch class="w-full h-full" season="summer" animate />
 			</div>
 			<div class="absolute bottom-0 left-[70%] w-24 h-32 opacity-50" aria-hidden="true">
@@ -441,39 +481,43 @@
 				<TreePine class="w-full h-full" season="summer" animate color={greens.grove} />
 			</div>
 
-			<!-- Ivy everywhere -->
-			<div class="absolute bottom-0 left-[30%] w-8 h-16 opacity-60" aria-hidden="true">
+			<!-- Ivy and flowering vines everywhere -->
+			<div class="absolute bottom-0 left-[22%] w-8 h-16 opacity-60" aria-hidden="true">
 				<Vine class="w-full h-full" variant="ivy" season="summer" />
 			</div>
-			<div class="absolute bottom-0 left-[60%] w-6 h-12 opacity-50" aria-hidden="true">
+			<div class="absolute bottom-0 left-[48%] w-6 h-12 opacity-55" aria-hidden="true">
 				<Vine class="w-full h-full" variant="flowering" season="summer" />
+			</div>
+			<div class="absolute bottom-0 left-[75%] w-7 h-14 opacity-50" aria-hidden="true">
+				<Vine class="w-full h-full" variant="ivy" season="summer" />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['full-bloom'] === 'future'}
-						<span class="inline-block px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+							<Sun class="w-3.5 h-3.5" />
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases['full-bloom'].title}</h2>
-					<p class="text-foreground-muted italic">{phases['full-bloom'].subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['full-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['full-bloom'].title}</h2>
+					<p class="text-slate-600 dark:text-slate-300 italic">{phases['full-bloom'].subtitle}</p>
+					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['full-bloom'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
 							{#if feature.major}
-								<span class="text-green-500 mt-0.5">🌸</span>
+								<Flower2 class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							{:else}
-								<span class="text-foreground-muted mt-0.5">○</span>
+								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
 							<div>
-								<span class="font-medium text-foreground">{feature.name}</span>
-								<p class="text-sm text-foreground-muted">{feature.description}</p>
+								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -485,8 +529,8 @@
 		<section
 			id="golden-hour"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50
-				dark:from-orange-950/30 dark:via-slate-900 dark:to-amber-950/30"
+				bg-gradient-to-b from-sky-100 via-amber-100 to-orange-100
+				dark:from-sky-950/30 dark:via-slate-900 dark:to-amber-950/40"
 		>
 			<!-- Falling autumn leaves -->
 			<FallingLeavesLayer
@@ -498,49 +542,59 @@
 			/>
 
 			<!-- Lanterns lighting the path -->
-			<div class="absolute bottom-8 left-[20%] w-6 h-10 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-8 left-[12%] w-6 h-10 opacity-70" aria-hidden="true">
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
-			<div class="absolute bottom-8 right-[20%] w-6 h-10 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-8 right-[12%] w-6 h-10 opacity-70" aria-hidden="true">
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
 
-			<!-- Mature grove in autumn colors -->
+			<!-- Mature grove in autumn colors - 8 trees -->
+			<div class="absolute bottom-0 left-[5%] w-20 h-28 opacity-45" aria-hidden="true">
+				<TreePine class="w-full h-full" season="autumn" animate color={autumn.goldenOak} />
+			</div>
 			<div class="absolute bottom-0 left-[15%] w-26 h-34 opacity-60" aria-hidden="true">
 				<TreeAspen class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[30%] w-30 h-38 opacity-70" aria-hidden="true">
+			<div class="absolute bottom-0 left-[28%] w-30 h-38 opacity-70" aria-hidden="true">
 				<Logo class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[45%] w-24 h-32 opacity-65" aria-hidden="true">
+			<div class="absolute bottom-0 left-[42%] w-24 h-32 opacity-65" aria-hidden="true">
 				<TreeCherry class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[60%] w-22 h-30 opacity-55" aria-hidden="true">
+			<div class="absolute bottom-0 left-[55%] w-22 h-30 opacity-55" aria-hidden="true">
 				<TreeBirch class="w-full h-full" season="autumn" animate />
 			</div>
-			<div class="absolute bottom-0 left-[75%] w-20 h-28 opacity-50" aria-hidden="true">
+			<div class="absolute bottom-0 left-[68%] w-24 h-32 opacity-50" aria-hidden="true">
+				<TreeAspen class="w-full h-full" season="autumn" animate />
+			</div>
+			<div class="absolute bottom-0 left-[80%] w-20 h-28 opacity-45" aria-hidden="true">
 				<TreePine class="w-full h-full" season="autumn" animate color={greens.deepGreen} />
+			</div>
+			<div class="absolute bottom-0 left-[92%] w-18 h-26 opacity-35" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="autumn" animate />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['golden-hour'] === 'future'}
-						<span class="inline-block px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium mb-4">
+							<Sun class="w-3.5 h-3.5" />
 							Gathering Light
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases['golden-hour'].title}</h2>
-					<p class="text-foreground-muted italic">{phases['golden-hour'].subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['golden-hour'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-slate-800 dark:text-slate-100 mb-2">{phases['golden-hour'].title}</h2>
+					<p class="text-slate-600 dark:text-slate-300 italic">{phases['golden-hour'].subtitle}</p>
+					<p class="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">{phases['golden-hour'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm">
-							<span class="text-amber-500 mt-0.5">◐</span>
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
+							<Sun class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							<div>
-								<span class="font-medium text-foreground">{feature.name}</span>
-								<p class="text-sm text-foreground-muted">{feature.description}</p>
+								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
+								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -552,7 +606,7 @@
 		<section
 			id="midnight-bloom"
 			class="relative py-24 px-6 overflow-hidden
-				bg-gradient-to-b from-slate-900 via-purple-950 to-slate-950"
+				bg-gradient-to-b from-orange-950/40 via-purple-950 to-slate-950"
 		>
 			<!-- Stars -->
 			<div class="absolute top-12 left-[10%]" aria-hidden="true">
@@ -563,6 +617,9 @@
 			</div>
 			<div class="absolute top-20 left-[40%]" aria-hidden="true">
 				<StarCluster class="w-10 h-10 opacity-40" />
+			</div>
+			<div class="absolute top-32 right-[35%]" aria-hidden="true">
+				<StarCluster class="w-8 h-8 opacity-35" />
 			</div>
 
 			<!-- Moon -->
@@ -575,21 +632,41 @@
 				<Lantern class="w-full h-full" variant="hanging" lit animate />
 			</div>
 
-			<!-- Silhouetted trees -->
-			<div class="absolute bottom-0 left-[20%] w-20 h-28 opacity-30" aria-hidden="true">
+			<!-- Silhouetted trees - many trees in the night (9 total) -->
+			<div class="absolute bottom-0 left-[5%] w-16 h-24 opacity-20" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="winter" color="#1e1b4b" />
+			</div>
+			<div class="absolute bottom-0 left-[15%] w-20 h-28 opacity-30" aria-hidden="true">
 				<TreePine class="w-full h-full" season="winter" color="#1e1b4b" />
 			</div>
-			<div class="absolute bottom-0 left-[50%] -translate-x-1/2 w-24 h-32 opacity-40" aria-hidden="true">
+			<div class="absolute bottom-0 left-[25%] w-18 h-26 opacity-25" aria-hidden="true">
+				<TreeAspen class="w-full h-full" season="winter" color="#2e1065" />
+			</div>
+			<div class="absolute bottom-0 left-[38%] w-22 h-30 opacity-35" aria-hidden="true">
+				<TreeCherry class="w-full h-full" season="winter" color="#3b0764" />
+			</div>
+			<div class="absolute bottom-0 left-[50%] -translate-x-1/2 w-26 h-34 opacity-45" aria-hidden="true">
 				<Logo class="w-full h-full" season="winter" color="#4c1d95" />
 			</div>
-			<div class="absolute bottom-0 right-[20%] w-18 h-26 opacity-25" aria-hidden="true">
+			<div class="absolute bottom-0 left-[62%] w-20 h-28 opacity-30" aria-hidden="true">
+				<TreeBirch class="w-full h-full" season="winter" color="#2e1065" />
+			</div>
+			<div class="absolute bottom-0 left-[75%] w-18 h-26 opacity-25" aria-hidden="true">
 				<TreeAspen class="w-full h-full" season="winter" color="#1e1b4b" />
+			</div>
+			<div class="absolute bottom-0 left-[85%] w-16 h-24 opacity-20" aria-hidden="true">
+				<TreePine class="w-full h-full" season="winter" color="#1e1b4b" />
+			</div>
+			<div class="absolute bottom-0 left-[95%] w-14 h-22 opacity-15" aria-hidden="true">
+				<TreeCherry class="w-full h-full" season="winter" color="#2e1065" />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					<span class="inline-block px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
-						✧ The Dream ✧
+					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
+						<Sparkles class="w-3.5 h-3.5" />
+						The Dream
+						<Sparkles class="w-3.5 h-3.5" />
 					</span>
 					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">{phases['midnight-bloom'].title}</h2>
 					<p class="text-purple-300 italic">{phases['midnight-bloom'].subtitle}</p>
@@ -606,7 +683,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							<span class="text-amber-400 mt-0.5">✦</span>
+							<Sparkles class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>

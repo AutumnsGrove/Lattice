@@ -2,6 +2,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
+	// Lucide Icons
+	import { Music, BookOpen, Newspaper, Telescope } from 'lucide-svelte';
+
 	// Components
 	import StarCluster from '$lib/components/nature/sky/StarCluster.svelte';
 	import Moon from '$lib/components/nature/sky/Moon.svelte';
@@ -13,7 +16,7 @@
 			tagline: 'Music Curation',
 			description: 'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
 			status: 'building',
-			icon: '🎵',
+			icon: 'music',
 			domain: 'aria.grove.place',
 			stack: 'Python + SvelteKit'
 		},
@@ -22,7 +25,7 @@
 			tagline: 'Library Book Discovery',
 			description: 'Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.',
 			status: 'planned',
-			icon: '📚',
+			icon: 'book',
 			domain: 'trove.grove.place',
 			stack: 'Python + SvelteKit'
 		},
@@ -31,7 +34,7 @@
 			tagline: 'Curated News',
 			description: 'Extremely curated newspapers delivered to your inbox. AI-powered research with skeptical analysis, cutting through the noise to surface what actually matters. Thorough, thoughtful, and refreshingly free of clickbait.',
 			status: 'building',
-			icon: '📰',
+			icon: 'newspaper',
 			domain: 'digest.grove.place',
 			stack: 'Python + Cloudflare Workers'
 		},
@@ -40,7 +43,7 @@
 			tagline: 'Swarming Search',
 			description: 'A search engine that uses a swarming AI approach—multiple agents working together to find and synthesize information. Still early, but the foundation is being laid.',
 			status: 'early',
-			icon: '🔭',
+			icon: 'telescope',
 			domain: 'scout.grove.place',
 			stack: 'Python + TypeScript'
 		}
@@ -111,7 +114,17 @@
 					<article class="p-6 rounded-xl bg-slate-800/50 border border-slate-700 backdrop-blur-sm">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
-								<span class="text-3xl">{tool.icon}</span>
+								<div class="w-10 h-10 rounded-lg bg-indigo-900/50 flex items-center justify-center text-indigo-400">
+									{#if tool.icon === 'music'}
+										<Music class="w-5 h-5" />
+									{:else if tool.icon === 'book'}
+										<BookOpen class="w-5 h-5" />
+									{:else if tool.icon === 'newspaper'}
+										<Newspaper class="w-5 h-5" />
+									{:else if tool.icon === 'telescope'}
+										<Telescope class="w-5 h-5" />
+									{/if}
+								</div>
 								<div>
 									<h2 class="text-xl font-serif text-white">{tool.name}</h2>
 									<p class="text-sm text-slate-400">{tool.tagline}</p>
