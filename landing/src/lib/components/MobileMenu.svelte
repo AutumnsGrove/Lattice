@@ -104,7 +104,7 @@
 {#if open}
 	<button
 		type="button"
-		class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
+		class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity"
 		onclick={onClose}
 		aria-label="Close menu"
 	></button>
@@ -113,7 +113,7 @@
 <!-- Slide-out panel -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-50 h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
+	class="fixed top-0 right-0 z-[70] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
 		? 'translate-x-0'
 		: 'translate-x-full'}"
 	role="dialog"

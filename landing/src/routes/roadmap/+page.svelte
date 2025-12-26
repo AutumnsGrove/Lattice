@@ -355,7 +355,7 @@
 
 	<!-- Navigation Pills -->
 	<nav
-		class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
+		class="sticky top-[73px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
 		aria-label="Development phases"
 	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">

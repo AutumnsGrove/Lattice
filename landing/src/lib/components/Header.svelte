@@ -54,7 +54,7 @@
 	}
 </script>
 
-<header class="relative z-30 py-6 px-6 border-b border-default">
+<header class="sticky top-0 z-40 py-6 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
