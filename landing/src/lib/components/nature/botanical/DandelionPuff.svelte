@@ -13,8 +13,8 @@
 		animate = true
 	}: Props = $props();
 
-	const seed = seedColor ?? natural.cream;
-	const stem = greens.deepGreen;
+	const seed = $derived(seedColor ?? natural.cream);
+	const stem = $derived(greens.deepGreen);
 </script>
 
 <!-- Dandelion seed head (puff) -->

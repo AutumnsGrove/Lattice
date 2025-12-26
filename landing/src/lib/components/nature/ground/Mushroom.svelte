@@ -15,8 +15,8 @@
 		spotted = true
 	}: Props = $props();
 
-	const cap = capColor ?? accents.mushroom.redCap;
-	const stem = stemColor ?? earth.sand;
+	const cap = $derived(capColor ?? accents.mushroom.redCap);
+	const stem = $derived(stemColor ?? earth.sand);
 	const spots = accents.mushroom.spots;
 </script>
 

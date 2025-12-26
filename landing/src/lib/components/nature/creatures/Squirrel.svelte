@@ -15,9 +15,9 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const fur = furColor ?? bark.warmBark;
-	const lightFur = earth.sand;
-	const scaleX = facing === 'left' ? -1 : 1;
+	const fur = $derived(furColor ?? bark.warmBark);
+	const lightFur = $derived(earth.sand);
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Sitting squirrel -->

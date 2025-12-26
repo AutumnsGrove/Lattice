@@ -15,10 +15,10 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const feathers = featherColor ?? bark.bark;
-	const lightFeathers = earth.clay;
-	const eyeColor = accents.flower.yellow;
-	const scaleX = facing === 'left' ? -1 : 1;
+	const feathers = $derived(featherColor ?? bark.bark);
+	const lightFeathers = $derived(earth.clay);
+	const eyeColor = $derived(accents.flower.yellow);
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Perched owl -->

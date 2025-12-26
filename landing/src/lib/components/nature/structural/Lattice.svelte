@@ -13,8 +13,8 @@
 		variant = 'trellis'
 	}: Props = $props();
 
-	const woodColor = color ?? bark.warmBark;
-	const shadowColor = bark.darkBark;
+	const woodColor = $derived(color ?? bark.warmBark);
+	const shadowColor = $derived(bark.darkBark);
 </script>
 
 <!-- Lattice/Trellis structure - ties into "Lattice" brand name -->

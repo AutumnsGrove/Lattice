@@ -13,8 +13,8 @@
 		animate = true
 	}: Props = $props();
 
-	const waterColor = color ?? accents.water.surface;
-	const deepColor = accents.water.deep;
+	const waterColor = $derived(color ?? accents.water.surface);
+	const deepColor = $derived(accents.water.deep);
 </script>
 
 <!-- Flowing stream -->

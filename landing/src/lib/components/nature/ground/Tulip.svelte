@@ -27,14 +27,14 @@
 		purple: spring.crocus
 	};
 
-	const petals = petalColor ?? variantColors[variant];
-	const stem = stemColor ?? greens.deepGreen;
+	const petals = $derived(petalColor ?? variantColors[variant]);
+	const stem = $derived(stemColor ?? greens.deepGreen);
 
 	// Slightly darker shade for inner petals
-	const innerPetal = variant === 'red' ? '#e11d48' :
+	const innerPetal = $derived(variant === 'red' ? '#e11d48' :
 		variant === 'pink' ? '#f472b6' :
 		variant === 'yellow' ? '#facc15' :
-		'#8b5cf6';
+		'#8b5cf6');
 </script>
 
 <!-- Classic tulip - spring icon -->

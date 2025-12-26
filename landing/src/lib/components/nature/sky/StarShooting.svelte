@@ -15,8 +15,8 @@
 		direction = 'right'
 	}: Props = $props();
 
-	const starColor = color ?? accents.sky.star;
-	const scaleX = direction === 'left' ? -1 : 1;
+	const starColor = $derived(color ?? accents.sky.star);
+	const scaleX = $derived(direction === 'left' ? -1 : 1);
 </script>
 
 <!-- Shooting star with trail -->

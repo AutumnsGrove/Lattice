@@ -13,8 +13,8 @@
 		roofColor
 	}: Props = $props();
 
-	const body = bodyColor ?? earth.sand;
-	const roof = roofColor ?? bark.warmBark;
+	const body = $derived(bodyColor ?? earth.sand);
+	const roof = $derived(roofColor ?? bark.warmBark);
 	const pole = bark.bark;
 	const hole = bark.darkBark;
 	const perch = bark.lightBark;

@@ -15,7 +15,7 @@
 		animate = true
 	}: Props = $props();
 
-	const sunColor = color ?? accents.flower.yellow;
+	const sunColor = $derived(color ?? accents.flower.yellow);
 </script>
 
 <!-- Sun with optional rays -->

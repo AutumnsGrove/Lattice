@@ -17,8 +17,8 @@
 	}: Props = $props();
 
 	// Grass turns golden/straw in autumn
-	const defaultColor = season === 'autumn' ? autumn.straw : greens.meadow;
-	const grassColor = color ?? defaultColor;
+	const defaultColor = $derived(season === 'autumn' ? autumn.straw : greens.meadow);
+	const grassColor = $derived(color ?? defaultColor);
 </script>
 
 <!-- Cluster of grass blades -->

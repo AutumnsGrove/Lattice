@@ -17,9 +17,9 @@
 		animate = true
 	}: Props = $props();
 
-	const pad = padColor ?? greens.grove;
-	const flower = flowerColor ?? accents.flower.white;
-	const padDark = greens.deepGreen;
+	const pad = $derived(padColor ?? greens.grove);
+	const flower = $derived(flowerColor ?? accents.flower.white);
+	const padDark = $derived(greens.deepGreen);
 </script>
 
 <!-- Lily pad with optional flower -->

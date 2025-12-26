@@ -199,6 +199,7 @@
 	// State
 	let selectedAsset = $state('Logo');
 	let propValues = $state<Record<string, any>>({});
+	let CurrentComponent = $derived(getCurrentAsset()?.component);
 
 	// Get categories for grouped dropdown
 	const categories = [...new Set(Object.values(assets).map(a => a.category))];
@@ -266,12 +267,8 @@
 				<!-- Preview Panel -->
 				<div class="order-1">
 					<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-slate-800 dark:to-emerald-950 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-divider">
-						{#if getCurrentAsset()}
-							<svelte:component
-								this={getCurrentAsset().component}
-								class="w-32 h-32"
-								{...propValues}
-							/>
+						{#if CurrentComponent}
+							<CurrentComponent class="w-32 h-32" {...propValues} />
 						{/if}
 					</div>
 
@@ -310,13 +307,14 @@
 
 							{#each getCurrentAsset().props as prop}
 								<div class="space-y-2">
-									<label class="block text-sm font-sans text-foreground">{prop}</label>
+									<label for="prop-{prop}" class="block text-sm font-sans text-foreground">{prop}</label>
 
 									{#if isColorProp(prop)}
 										<!-- Color picker with presets -->
 										<div class="space-y-2">
 											<div class="flex gap-2 items-center">
 												<input
+													id="prop-{prop}"
 													type="color"
 													bind:value={propValues[prop]}
 													class="w-10 h-10 rounded cursor-pointer border border-divider"
@@ -361,6 +359,7 @@
 									{:else if hasOptions(prop)}
 										<!-- Dropdown for enums -->
 										<select
+											id="prop-{prop}"
 											bind:value={propValues[prop]}
 											class="w-full px-3 py-2 rounded-lg border border-divider bg-surface-elevated text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-accent-subtle"
 											aria-label="Select {prop} option"
@@ -373,6 +372,7 @@
 									{:else if isNumericProp(prop)}
 										<!-- Number/range input -->
 										<input
+											id="prop-{prop}"
 											type="range"
 											min="0"
 											max="1"
@@ -385,6 +385,7 @@
 									{:else}
 										<!-- Text input fallback -->
 										<input
+											id="prop-{prop}"
 											type="text"
 											bind:value={propValues[prop]}
 											placeholder="Default"

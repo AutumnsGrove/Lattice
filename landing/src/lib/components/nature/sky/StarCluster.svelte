@@ -15,14 +15,14 @@
 		density = 'normal'
 	}: Props = $props();
 
-	const starColor = color ?? accents.sky.star;
+	const starColor = $derived(color ?? accents.sky.star);
 
 	// Generate stars based on density
 	const starCounts = { sparse: 5, normal: 9, dense: 15 };
-	const count = starCounts[density];
+	const count = $derived(starCounts[density]);
 
 	// Deterministic star positions for consistent rendering
-	const stars = [
+	const starPositions = [
 		{ x: 25, y: 20, size: 3, delay: 0 },
 		{ x: 60, y: 15, size: 2, delay: 0.5 },
 		{ x: 80, y: 35, size: 4, delay: 0.2 },
@@ -38,7 +38,8 @@
 		{ x: 50, y: 60, size: 2, delay: 1.2 },
 		{ x: 20, y: 85, size: 2, delay: 0.1 },
 		{ x: 75, y: 90, size: 2, delay: 1.4 }
-	].slice(0, count);
+	];
+	const stars = $derived(starPositions.slice(0, count));
 </script>
 
 <!-- Cluster of twinkling stars -->

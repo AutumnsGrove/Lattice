@@ -13,9 +13,9 @@
 		open = false
 	}: Props = $props();
 
-	const gateColor = color ?? bark.warmBark;
-	const postColor = bark.bark;
-	const hingeColor = earth.stone;
+	const gateColor = $derived(color ?? bark.warmBark);
+	const postColor = $derived(bark.bark);
+	const hingeColor = $derived(earth.stone);
 </script>
 
 <!-- Garden gate with posts -->

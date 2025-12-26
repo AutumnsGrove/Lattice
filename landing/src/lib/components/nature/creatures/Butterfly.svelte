@@ -15,9 +15,9 @@
 		animate = true
 	}: Props = $props();
 
-	const wing = wingColor ?? accents.flower.purple;
-	const accent = accentColor ?? accents.flower.yellow;
-	const bodyColor = bark.darkBark;
+	const wing = $derived(wingColor ?? accents.flower.purple);
+	const accent = $derived(accentColor ?? accents.flower.yellow);
+	const bodyColor = $derived(bark.darkBark);
 </script>
 
 <!-- Butterfly with flapping wings -->

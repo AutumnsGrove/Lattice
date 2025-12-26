@@ -11,7 +11,7 @@
 		barkColor
 	}: Props = $props();
 
-	const barkFill = barkColor ?? bark.warmBark;
+	const barkFill = $derived(barkColor ?? bark.warmBark);
 	const innerColor = earth.sand;
 	const ringColor = bark.bark;
 </script>

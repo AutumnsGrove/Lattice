@@ -15,8 +15,8 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const birdColor = color ?? bark.bark;
-	const scaleX = facing === 'left' ? -1 : 1;
+	const birdColor = $derived(color ?? bark.bark);
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Bird in flight - simple silhouette -->

@@ -19,9 +19,11 @@
 	}: Props = $props();
 
 	// Reeds turn golden-brown in autumn
-	const defaultColor = season === 'autumn' ? autumn.straw : greens.deepGreen;
-	const reedColor = color ?? defaultColor;
-	const cattailColor = bark.bark;
+	const defaultColor = $derived(
+		season === 'autumn' ? autumn.straw : greens.deepGreen
+	);
+	const reedColor = $derived(color ?? defaultColor);
+	const cattailColor = $derived(bark.bark);
 </script>
 
 <!-- Reeds/Cattails -->

@@ -15,9 +15,9 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const fur = furColor ?? earth.clay;
-	const innerEar = natural.cream;
-	const scaleX = facing === 'left' ? -1 : 1;
+	const fur = $derived(furColor ?? earth.clay);
+	const innerEar = $derived(natural.cream);
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Sitting rabbit -->

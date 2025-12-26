@@ -13,7 +13,7 @@
 		variant = 'round'
 	}: Props = $props();
 
-	const rockColor = color ?? earth.stone;
+	const rockColor = $derived(color ?? earth.stone);
 	const highlightColor = earth.pebble;
 	const shadowColor = earth.slate;
 </script>

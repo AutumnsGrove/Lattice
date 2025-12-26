@@ -13,8 +13,8 @@
 		ringColor
 	}: Props = $props();
 
-	const barkFill = barkColor ?? bark.warmBark;
-	const ringFill = ringColor ?? earth.sand;
+	const barkFill = $derived(barkColor ?? bark.warmBark);
+	const ringFill = $derived(ringColor ?? earth.sand);
 	const centerColor = bark.lightBark;
 </script>
 

@@ -18,9 +18,9 @@
 		variant = 'tendril'
 	}: Props = $props();
 
-	const defaultColor = season === 'autumn' ? autumn.rust : greens.grove;
-	const vineColor = color ?? defaultColor;
-	const leafColor = season === 'autumn' ? autumn.amber : greens.meadow;
+	const defaultColor = $derived(season === 'autumn' ? autumn.rust : greens.grove);
+	const vineColor = $derived(color ?? defaultColor);
+	const leafColor = $derived(season === 'autumn' ? autumn.amber : greens.meadow);
 </script>
 
 <!-- Vine/tendril -->

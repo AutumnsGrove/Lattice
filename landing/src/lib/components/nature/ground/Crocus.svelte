@@ -28,14 +28,14 @@
 		white: '#fafafa'
 	};
 
-	const petals = petalColor ?? variantColors[variant];
-	const center = centerColor ?? '#f97316';  // Orange stamen
-	const stem = stemColor ?? greens.deepGreen;
+	const petals = $derived(petalColor ?? variantColors[variant]);
+	const center = $derived(centerColor ?? '#f97316');  // Orange stamen
+	const stem = $derived(stemColor ?? greens.deepGreen);
 
 	// Slightly different shade for depth
-	const petalDark = variant === 'purple' ? '#7c3aed' :
+	const petalDark = $derived(variant === 'purple' ? '#7c3aed' :
 		variant === 'yellow' ? '#eab308' :
-		'#e5e5e5';
+		'#e5e5e5');
 </script>
 
 <!-- Crocus - first flowers of spring, often peeking through snow -->

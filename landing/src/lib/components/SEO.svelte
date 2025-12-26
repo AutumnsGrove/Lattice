@@ -51,14 +51,16 @@
 	);
 
 	// Ensure URL is absolute
-	const absoluteUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+	const absoluteUrl = $derived(url.startsWith('http') ? url : `${baseUrl}${url}`);
 
 	// Generate dynamic OG image URL if enabled and no custom image provided
-	const ogImageUrl = image
-		? (image.startsWith('http') ? image : `${baseUrl}${image}`)
-		: dynamicImage
-			? `${baseUrl}/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
-			: `${baseUrl}/og-image.png`;
+	const ogImageUrl = $derived(
+		image
+			? (image.startsWith('http') ? image : `${baseUrl}${image}`)
+			: dynamicImage
+				? `${baseUrl}/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
+				: `${baseUrl}/og-image.png`
+	);
 </script>
 
 <svelte:head>

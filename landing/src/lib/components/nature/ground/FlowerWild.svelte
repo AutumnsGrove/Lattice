@@ -17,9 +17,9 @@
 		animate = true
 	}: Props = $props();
 
-	const petals = petalColor ?? accents.flower.purple;
-	const center = centerColor ?? accents.flower.yellow;
-	const stem = stemColor ?? greens.deepGreen;
+	const petals = $derived(petalColor ?? accents.flower.purple);
+	const center = $derived(centerColor ?? accents.flower.yellow);
+	const stem = $derived(stemColor ?? greens.deepGreen);
 </script>
 
 <!-- Simple 5-petal wildflower -->

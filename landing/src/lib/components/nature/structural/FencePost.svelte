@@ -13,8 +13,8 @@
 		variant = 'pointed'
 	}: Props = $props();
 
-	const postColor = color ?? bark.warmBark;
-	const shadowColor = bark.darkBark;
+	const postColor = $derived(color ?? bark.warmBark);
+	const shadowColor = $derived(bark.darkBark);
 </script>
 
 <!-- Fence post -->

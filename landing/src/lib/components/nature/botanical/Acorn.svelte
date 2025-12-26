@@ -13,8 +13,8 @@
 		nutColor
 	}: Props = $props();
 
-	const cap = capColor ?? bark.bark;
-	const nut = nutColor ?? earth.clay;
+	const cap = $derived(capColor ?? bark.bark);
+	const nut = $derived(nutColor ?? earth.clay);
 	const capDetail = bark.darkBark;
 </script>
 

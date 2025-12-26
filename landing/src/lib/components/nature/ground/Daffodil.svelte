@@ -19,9 +19,9 @@
 		animate = true
 	}: Props = $props();
 
-	const petals = petalColor ?? spring.daffodil;       // Pale yellow petals
-	const trumpet = trumpetColor ?? spring.buttercup;   // Deeper yellow/orange trumpet
-	const stem = stemColor ?? greens.deepGreen;
+	const petals = $derived(petalColor ?? spring.daffodil);       // Pale yellow petals
+	const trumpet = $derived(trumpetColor ?? spring.buttercup);   // Deeper yellow/orange trumpet
+	const stem = $derived(stemColor ?? greens.deepGreen);
 </script>
 
 <!-- Daffodil - classic spring herald -->

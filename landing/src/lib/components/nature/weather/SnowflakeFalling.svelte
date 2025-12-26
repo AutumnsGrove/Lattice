@@ -39,16 +39,16 @@
 	}: Props = $props();
 
 	// Deterministic rotation based on seed - gentle swaying for snow
-	const initialRotation = (seed * 37) % 360;
-	const rotationDirection = seed % 2 === 0 ? 1 : -1;
-	const rotationAmount = 180 + (seed % 180); // 180-360 degrees total rotation - gentler than petals
+	const initialRotation = $derived((seed * 37) % 360);
+	const rotationDirection = $derived(seed % 2 === 0 ? 1 : -1);
+	const rotationAmount = $derived(180 + (seed % 180)); // 180-360 degrees total rotation - gentler than petals
 
 	// Gentle horizontal sway - snow drifts more subtly than petals
-	const swayAmplitude = 40 + (seed % 60); // 40-100px horizontal sway - lighter than petals
-	const swayFrequency = 1 + (seed % 3); // 1-3 complete waves during fall - fewer than petals
+	const swayAmplitude = $derived(40 + (seed % 60)); // 40-100px horizontal sway - lighter than petals
+	const swayFrequency = $derived(1 + (seed % 3)); // 1-3 complete waves during fall - fewer than petals
 
 	// Unique animation name to prevent conflicts
-	const animId = `snow-${seed}`;
+	const animId = $derived(`snow-${seed}`);
 
 	// Inject dynamic keyframes at runtime
 	$effect(() => {

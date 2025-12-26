@@ -20,12 +20,12 @@
 	}: Props = $props();
 
 	// American Robin colors - from palette
-	const body = bodyColor ?? accents.bird.robinBody;
-	const breast = breastColor ?? accents.bird.robinBreast;
-	const beak = beakColor ?? accents.bird.robinBeak;
-	const legColor = bark.darkBark;
+	const body = $derived(bodyColor ?? accents.bird.robinBody);
+	const breast = $derived(breastColor ?? accents.bird.robinBreast);
+	const beak = $derived(beakColor ?? accents.bird.robinBeak);
+	const legColor = $derived(bark.darkBark);
 
-	const scaleX = facing === 'left' ? -1 : 1;
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- American Robin - perched -->

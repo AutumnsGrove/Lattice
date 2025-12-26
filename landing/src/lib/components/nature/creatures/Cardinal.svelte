@@ -22,12 +22,12 @@
 	}: Props = $props();
 
 	// Northern Cardinal colors (male) - from palette
-	const body = bodyColor ?? accents.bird.cardinalRed;
-	const mask = maskColor ?? accents.bird.cardinalMask;
-	const beak = beakColor ?? accents.bird.cardinalBeak;
-	const legColor = bark.darkBark;
+	const body = $derived(bodyColor ?? accents.bird.cardinalRed);
+	const mask = $derived(maskColor ?? accents.bird.cardinalMask);
+	const beak = $derived(beakColor ?? accents.bird.cardinalBeak);
+	const legColor = $derived(bark.darkBark);
 
-	const scaleX = facing === 'left' ? -1 : 1;
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Northern Cardinal - perched, with distinctive crest -->

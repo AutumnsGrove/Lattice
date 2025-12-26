@@ -17,13 +17,15 @@
 		direction = 'right'
 	}: Props = $props();
 
-	const duration = {
-		slow: '120s',
-		normal: '80s',
-		fast: '50s'
-	}[speed];
+	const duration = $derived(
+		{
+			slow: '120s',
+			normal: '80s',
+			fast: '50s'
+		}[speed]
+	);
 
-	const animClass = animate ? `drift-${direction}` : '';
+	const animClass = $derived(animate ? `drift-${direction}` : '');
 </script>
 
 {#if variant === 'fluffy'}

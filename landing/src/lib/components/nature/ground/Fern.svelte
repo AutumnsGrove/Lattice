@@ -17,8 +17,8 @@
 	}: Props = $props();
 
 	// Ferns turn golden/brown in autumn
-	const defaultColor = season === 'autumn' ? autumn.gold : greens.deepGreen;
-	const frondColor = color ?? defaultColor;
+	const defaultColor = $derived(season === 'autumn' ? autumn.gold : greens.deepGreen);
+	const frondColor = $derived(color ?? defaultColor);
 </script>
 
 <!-- Curled fern frond -->

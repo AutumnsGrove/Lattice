@@ -41,7 +41,7 @@
 	const FALL_DISTANCE = { min: 100, max: 120 } as const;
 
 	// Reduce snowflake count for reduced motion or use fewer for performance
-	const actualCount = prefersReducedMotion ? Math.floor(count / 4) : count;
+	const actualCount = $derived(prefersReducedMotion ? Math.floor(count / 4) : count);
 
 	const snowflakeVariants: SnowflakeVariant[] = ['crystal', 'simple', 'star', 'delicate', 'dot'];
 
@@ -133,7 +133,7 @@
 	}
 
 	// Generate snowflakes once
-	const snowflakes = generateSnowflakes();
+	const snowflakes = $derived(generateSnowflakes());
 </script>
 
 {#if enabled}

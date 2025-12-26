@@ -13,8 +13,8 @@
 		stemColor
 	}: Props = $props();
 
-	const cap = capColor ?? accents.mushroom.brownCap;
-	const stem = stemColor ?? earth.sand;
+	const cap = $derived(capColor ?? accents.mushroom.brownCap);
+	const stem = $derived(stemColor ?? earth.sand);
 </script>
 
 <!-- Cluster of small mushrooms -->

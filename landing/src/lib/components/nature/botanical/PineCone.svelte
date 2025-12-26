@@ -11,7 +11,7 @@
 		color
 	}: Props = $props();
 
-	const coneColor = color ?? bark.warmBark;
+	const coneColor = $derived(color ?? bark.warmBark);
 	const scaleLight = bark.lightBark;
 	const scaleDark = bark.darkBark;
 </script>

@@ -17,13 +17,15 @@
 		speed = 'normal'
 	}: Props = $props();
 
-	const starColor = color ?? accents.sky.star;
+	const starColor = $derived(color ?? accents.sky.star);
 
-	const duration = {
-		slow: '4s',
-		normal: '2s',
-		fast: '1s'
-	}[speed];
+	const duration = $derived(
+		{
+			slow: '4s',
+			normal: '2s',
+			fast: '1s'
+		}[speed]
+	);
 </script>
 
 <!-- Star -->

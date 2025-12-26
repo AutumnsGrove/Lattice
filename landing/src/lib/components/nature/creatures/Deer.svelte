@@ -15,10 +15,10 @@
 		facing = 'right'
 	}: Props = $props();
 
-	const fur = furColor ?? earth.clay;
-	const darkFur = bark.bark;
-	const lightFur = natural.cream;
-	const scaleX = facing === 'left' ? -1 : 1;
+	const fur = $derived(furColor ?? earth.clay);
+	const darkFur = $derived(bark.bark);
+	const lightFur = $derived(natural.cream);
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Standing deer -->

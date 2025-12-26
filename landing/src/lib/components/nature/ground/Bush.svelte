@@ -17,9 +17,9 @@
 	}: Props = $props();
 
 	// Bushes turn warm colors in autumn
-	const defaultColor = season === 'autumn' ? autumn.amber : greens.grove;
-	const foliageColor = color ?? defaultColor;
-	const shadowColor = season === 'autumn' ? autumn.rust : greens.deepGreen;
+	const defaultColor = $derived(season === 'autumn' ? autumn.amber : greens.grove);
+	const foliageColor = $derived(color ?? defaultColor);
+	const shadowColor = $derived(season === 'autumn' ? autumn.rust : greens.deepGreen);
 </script>
 
 <!-- Round bush/shrub -->

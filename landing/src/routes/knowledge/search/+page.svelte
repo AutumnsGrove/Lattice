@@ -5,8 +5,6 @@
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
 
-  export let data;
-
   $: query = $page.url.searchParams.get('q') || '';
   $: results = query ? allDocs.filter(doc =>
     doc.title.toLowerCase().includes(query.toLowerCase()) ||

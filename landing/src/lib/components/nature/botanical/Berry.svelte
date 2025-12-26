@@ -13,7 +13,7 @@
 		variant = 'cluster'
 	}: Props = $props();
 
-	const berry = berryColor ?? accents.berry.ripe;
+	const berry = $derived(berryColor ?? accents.berry.ripe);
 	const stem = greens.deepGreen;
 	const highlight = 'white';
 </script>

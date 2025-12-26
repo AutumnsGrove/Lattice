@@ -79,7 +79,7 @@
 		return pickFromArray(colors);
 	}
 
-	const leafColor = color ?? getDefaultColor();
+	const leafColor = $derived(color ?? getDefaultColor());
 </script>
 
 <!-- Falling leaf with spin/flutter animation -->

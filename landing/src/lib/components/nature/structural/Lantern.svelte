@@ -17,8 +17,8 @@
 		variant = 'hanging'
 	}: Props = $props();
 
-	const frame = frameColor ?? bark.darkBark;
-	const glowColor = accents.firefly.glow;
+	const frame = $derived(frameColor ?? bark.darkBark);
+	const glowColor = $derived(accents.firefly.glow);
 </script>
 
 <!-- Lantern -->

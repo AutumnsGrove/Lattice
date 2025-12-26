@@ -17,9 +17,9 @@
 	}: Props = $props();
 
 	// Leaves change color in autumn
-	const defaultColor = season === 'autumn' ? autumn.amber : greens.grove;
-	const leafColor = color ?? defaultColor;
-	const veinColor = season === 'autumn' ? autumn.rust : greens.deepGreen;
+	const defaultColor = $derived(season === 'autumn' ? autumn.amber : greens.grove);
+	const leafColor = $derived(color ?? defaultColor);
+	const veinColor = $derived(season === 'autumn' ? autumn.rust : greens.deepGreen);
 </script>
 
 <!-- Leaf - various shapes -->

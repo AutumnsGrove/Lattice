@@ -15,9 +15,9 @@
 		animate = true
 	}: Props = $props();
 
-	const body = bodyColor ?? accents.flower.yellow;
-	const stripes = stripeColor ?? bark.darkBark;
-	const wingColor = '#e0f2fe'; // Light blue-ish transparent
+	const body = $derived(bodyColor ?? accents.flower.yellow);
+	const stripes = $derived(stripeColor ?? bark.darkBark);
+	const wingColor = $derived('#e0f2fe'); // Light blue-ish transparent
 </script>
 
 <!-- Bumble bee -->

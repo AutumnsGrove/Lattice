@@ -11,9 +11,9 @@
 		woodColor
 	}: Props = $props();
 
-	const wood = woodColor ?? bark.warmBark;
-	const railColor = bark.bark;
-	const shadow = bark.darkBark;
+	const wood = $derived(woodColor ?? bark.warmBark);
+	const railColor = $derived(bark.bark);
+	const shadow = $derived(bark.darkBark);
 </script>
 
 <!-- Small wooden bridge -->

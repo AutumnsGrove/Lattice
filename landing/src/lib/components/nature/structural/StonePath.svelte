@@ -11,9 +11,9 @@
 		stoneColor
 	}: Props = $props();
 
-	const stone = stoneColor ?? earth.stone;
-	const highlight = earth.pebble;
-	const shadow = earth.slate;
+	const stone = $derived(stoneColor ?? earth.stone);
+	const highlight = $derived(earth.pebble);
+	const shadow = $derived(earth.slate);
 </script>
 
 <!-- Stepping stones path -->

@@ -17,14 +17,14 @@
 		intensity = 'normal'
 	}: Props = $props();
 
-	const glow = glowColor ?? accents.firefly.glow;
-	const body = bodyColor ?? accents.firefly.body;
+	const glow = $derived(glowColor ?? accents.firefly.glow);
+	const body = $derived(bodyColor ?? accents.firefly.body);
 
-	const glowOpacity = {
+	const glowOpacity = $derived({
 		subtle: 0.4,
 		normal: 0.6,
 		bright: 0.8
-	}[intensity];
+	}[intensity]);
 </script>
 
 <!-- Firefly with glowing abdomen -->

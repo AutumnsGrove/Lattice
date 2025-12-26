@@ -22,14 +22,14 @@
 	}: Props = $props();
 
 	// Black-capped Chickadee colors - from palette
-	const cap = capColor ?? accents.bird.chickadeeCap;
-	const cheek = cheekColor ?? accents.bird.chickadeeCheek;
-	const body = bodyColor ?? accents.bird.chickadeeBody;
-	const belly = accents.bird.chickadeeBelly;
-	const beak = accents.bird.chickadeeCap; // Same black as cap
-	const legColor = bark.darkBark;
+	const cap = $derived(capColor ?? accents.bird.chickadeeCap);
+	const cheek = $derived(cheekColor ?? accents.bird.chickadeeCheek);
+	const body = $derived(bodyColor ?? accents.bird.chickadeeBody);
+	const belly = $derived(accents.bird.chickadeeBelly);
+	const beak = $derived(accents.bird.chickadeeCap); // Same black as cap
+	const legColor = $derived(bark.darkBark);
 
-	const scaleX = facing === 'left' ? -1 : 1;
+	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 
 <!-- Black-capped Chickadee - small, round, perched -->

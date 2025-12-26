@@ -13,11 +13,13 @@
 		speed = 'slow'
 	}: Props = $props();
 
-	const duration = {
-		slow: '80s',
-		normal: '50s',
-		fast: '30s'
-	}[speed];
+	const duration = $derived(
+		{
+			slow: '80s',
+			normal: '50s',
+			fast: '30s'
+		}[speed]
+	);
 </script>
 
 <!-- Thin wispy cirrus cloud -->

@@ -18,11 +18,11 @@
 		hasFlowers = true
 	}: Props = $props();
 
-	const wood = woodColor ?? bark.warmBark;
-	const defaultVineColor = season === 'autumn' ? autumn.rust : greens.grove;
-	const vine = vineColor ?? defaultVineColor;
-	const leafColor = season === 'autumn' ? autumn.amber : greens.meadow;
-	const flowerColor = accents.flower.purple;
+	const wood = $derived(woodColor ?? bark.warmBark);
+	const defaultVineColor = $derived(season === 'autumn' ? autumn.rust : greens.grove);
+	const vine = $derived(vineColor ?? defaultVineColor);
+	const leafColor = $derived(season === 'autumn' ? autumn.amber : greens.meadow);
+	const flowerColor = $derived(accents.flower.purple);
 </script>
 
 <!-- Lattice with climbing vine -->

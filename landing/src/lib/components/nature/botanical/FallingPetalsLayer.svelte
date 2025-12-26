@@ -41,7 +41,7 @@
 	const FALL_DISTANCE = { min: 120, max: 150 } as const;
 
 	// Reduce petal count for reduced motion
-	const actualCount = prefersReducedMotion ? Math.floor(count / 4) : count;
+	const actualCount = $derived(prefersReducedMotion ? Math.floor(count / 4) : count);
 
 	// Variant distribution - more round and heart shapes for cherry blossoms
 	const petalVariants: PetalVariant[] = ['round', 'round', 'pointed', 'heart', 'curled', 'tiny'];
@@ -132,7 +132,7 @@
 	}
 
 	// Generate petals once
-	const petals = generatePetals();
+	const petals = $derived(generatePetals());
 </script>
 
 {#if enabled}

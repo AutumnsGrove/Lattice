@@ -40,27 +40,27 @@
 	}: Props = $props();
 
 	// Use spring blossom colors with slight variation based on variant
-	const petalColor = color ?? (
+	const petalColor = $derived(color ?? (
 		variant === 'tiny' ? springBlossoms.palePink :
 		variant === 'curled' ? springBlossoms.rose :
 		springBlossoms.blush
-	);
+	));
 
 	// Secondary color for gradient effect
-	const highlightColor = springBlossoms.palePink;
+	const highlightColor = $derived(springBlossoms.palePink);
 
 	// Deterministic rotation based on seed - more dramatic for dancing effect
-	const initialRotation = (seed * 37) % 360;
-	const rotationDirection = seed % 2 === 0 ? 1 : -1;
-	const rotationAmount = 360 + (seed % 360); // 360-720 degrees total rotation - more twirling!
+	const initialRotation = $derived((seed * 37) % 360);
+	const rotationDirection = $derived(seed % 2 === 0 ? 1 : -1);
+	const rotationAmount = $derived(360 + (seed % 360)); // 360-720 degrees total rotation - more twirling!
 
 	// Dancing sway parameters - create organic horizontal movement
 	// Dramatically increased for true gliding, dancing motion!
-	const swayAmplitude = 80 + (seed % 100); // 80-180px horizontal sway - GLIDE!
-	const swayFrequency = 2 + (seed % 4); // 2-5 complete waves during fall
+	const swayAmplitude = $derived(80 + (seed % 100)); // 80-180px horizontal sway - GLIDE!
+	const swayFrequency = $derived(2 + (seed % 4)); // 2-5 complete waves during fall
 
 	// Unique animation name to prevent conflicts
-	const animId = `petal-${seed}`;
+	const animId = $derived(`petal-${seed}`);
 
 	// Inject dynamic keyframes at runtime to avoid PostCSS parsing issues
 	$effect(() => {
