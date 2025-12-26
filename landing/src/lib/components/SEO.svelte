@@ -47,10 +47,8 @@
 	const ogImageUrl = image
 		? (image.startsWith('http') ? image : `https://grove.place${image}`)
 		: dynamicImage
-			? `https://grove.place/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${accentColor}`
+			? `https://grove.place/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
 			: 'https://grove.place/og-image.png';
-
-	const absoluteImage = ogImageUrl;
 </script>
 
 <svelte:head>
@@ -62,7 +60,7 @@
 	<meta property="og:url" content={absoluteUrl} />
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
-	<meta property="og:image" content={absoluteImage} />
+	<meta property="og:image" content={ogImageUrl} />
 	<meta property="og:image:type" content="image/png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -72,5 +70,5 @@
 	<meta name="twitter:url" content={absoluteUrl} />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
-	<meta name="twitter:image" content={absoluteImage} />
+	<meta name="twitter:image" content={ogImageUrl} />
 </svelte:head>

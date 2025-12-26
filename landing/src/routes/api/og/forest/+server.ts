@@ -1,5 +1,6 @@
 import satori from 'satori';
 import { html } from 'satori-html';
+import { Resvg } from '@resvg/resvg-js';
 import type { RequestHandler } from './$types';
 
 /**
@@ -12,9 +13,15 @@ import type { RequestHandler } from './$types';
  * - Randomly generated each time for uniqueness
  */
 export const GET: RequestHandler = async ({ url, fetch }) => {
-	// Load Lexend font from static assets
+	// IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
+	// Load Lexend font from static assets (Cloudflare Workers compatible)
 	const fontUrl = new URL('/fonts/Lexend-Regular.ttf', url.origin);
 	const fontResponse = await fetch(fontUrl.toString());
+
+	if (!fontResponse.ok) {
+		return new Response('Failed to load font', { status: 500 });
+	}
+
 	const fontData = await fontResponse.arrayBuffer();
 
 	// Autumn color palette
@@ -197,11 +204,23 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		],
 	});
 
-	// Return SVG with cache headers (short cache since it's random)
-	return new Response(svg, {
+	// Convert SVG to PNG for better social media compatibility
+	const resvg = new Resvg(svg, {
+		fitTo: {
+			mode: 'width',
+			value: 1200,
+		},
+	});
+	const pngData = resvg.render();
+	const pngBuffer = pngData.asPng();
+
+	// Return PNG with stale-while-revalidate for random generation
+	// Serves stale content while regenerating in background
+	return new Response(pngBuffer, {
 		headers: {
-			'Content-Type': 'image/svg+xml',
-			'Cache-Control': 'public, max-age=3600', // 1 hour cache (allows for some variation)
+			'Content-Type': 'image/png',
+			'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+			'X-Generated-At': new Date().toISOString(),
 		},
 	});
 };

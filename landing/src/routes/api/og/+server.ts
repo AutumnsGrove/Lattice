@@ -1,5 +1,6 @@
 import satori from 'satori';
 import { html } from 'satori-html';
+import { Resvg } from '@resvg/resvg-js';
 import type { RequestHandler } from './$types';
 
 /**
@@ -10,18 +11,30 @@ import type { RequestHandler } from './$types';
  * - Page content preview on the right 3/4
  *
  * Query params:
- * - title: Page title
- * - subtitle: Optional subtitle/description
- * - accent: Optional accent color (hex without #)
+ * - title: Page title (max 100 chars)
+ * - subtitle: Optional subtitle/description (max 200 chars)
+ * - accent: Optional accent color (hex without #, 3 or 6 chars)
  */
 export const GET: RequestHandler = async ({ url, fetch }) => {
-	const title = url.searchParams.get('title') || 'Grove';
-	const subtitle = url.searchParams.get('subtitle') || 'A place to Be.';
-	const accent = url.searchParams.get('accent') || '16a34a'; // Default grove green
+	// Limit string lengths to prevent DoS
+	const title = (url.searchParams.get('title') || 'Grove').slice(0, 100);
+	const subtitle = (url.searchParams.get('subtitle') || 'A place to Be.').slice(0, 200);
 
+	// Validate accent color (hex format: 3 or 6 chars, no #)
+	const rawAccent = url.searchParams.get('accent') || '16a34a';
+	const accent = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(rawAccent)
+		? rawAccent
+		: '16a34a'; // Default grove green
+
+	// IMPORTANT: Requires Lexend-Regular.ttf in /static/fonts/
 	// Load Lexend font from static assets (Cloudflare Workers compatible)
 	const fontUrl = new URL('/fonts/Lexend-Regular.ttf', url.origin);
 	const fontResponse = await fetch(fontUrl.toString());
+
+	if (!fontResponse.ok) {
+		return new Response('Failed to load font', { status: 500 });
+	}
+
 	const fontData = await fontResponse.arrayBuffer();
 
 	// Grove logo SVG (simplified asterisk/star shape)
@@ -111,11 +124,23 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		],
 	});
 
-	// Return SVG as response
-	return new Response(svg, {
+	// Convert SVG to PNG for better social media compatibility
+	const resvg = new Resvg(svg, {
+		fitTo: {
+			mode: 'width',
+			value: 1200,
+		},
+	});
+	const pngData = resvg.render();
+	const pngBuffer = pngData.asPng();
+
+	// Return PNG with appropriate cache headers
+	// 24 hours browser cache, 1 week CDN cache
+	return new Response(pngBuffer, {
 		headers: {
-			'Content-Type': 'image/svg+xml',
-			'Cache-Control': 'public, max-age=31536000, immutable',
+			'Content-Type': 'image/png',
+			'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+			'X-Generated-At': new Date().toISOString(),
 		},
 	});
 };
