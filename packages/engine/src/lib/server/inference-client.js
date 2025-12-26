@@ -14,6 +14,7 @@ import {
 	getModelId,
 	getProvider
 } from '$lib/config/wisp.js';
+import { stripMarkdownForAnalysis } from '$lib/utils/readability.js';
 
 // ============================================================================
 // Types (JSDoc)
@@ -258,20 +259,12 @@ ${content}
 
 /**
  * Strip markdown formatting for cleaner analysis
+ * Re-exported from readability.js for consistency
  *
  * @param {string} content - Markdown content
  * @returns {string} Plain text content
  */
-export function stripMarkdown(content) {
-	return content
-		.replace(/```[\s\S]*?```/g, '') // Remove code blocks
-		.replace(/`[^`]+`/g, '') // Remove inline code
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with text
-		.replace(/[#*_~>]/g, '') // Remove markdown chars
-		.replace(/^\s*[-+*]\s+/gm, '') // Remove list markers
-		.replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
-		.trim();
-}
+export const stripMarkdown = stripMarkdownForAnalysis;
 
 /**
  * Smart truncation for long content

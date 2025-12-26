@@ -355,7 +355,8 @@ Return ONLY valid JSON. No explanation or markdown.`;
 			model: response.model,
 			provider: response.provider
 		};
-	} catch {
+	} catch (err) {
+		console.warn('[Wisp] Failed to parse grammar result:', err.message, '| Response preview:', response.content?.substring(0, 100));
 		return {
 			result: { suggestions: [], overallScore: null, parseError: true },
 			usage: response.usage,
@@ -422,7 +423,8 @@ Return ONLY valid JSON. No explanation or markdown.`;
 			model: response.model,
 			provider: response.provider
 		};
-	} catch {
+	} catch (err) {
+		console.warn('[Wisp] Failed to parse tone result:', err.message, '| Response preview:', response.content?.substring(0, 100));
 		return {
 			result: { analysis: null, traits: [], suggestions: [], parseError: true },
 			usage: response.usage,

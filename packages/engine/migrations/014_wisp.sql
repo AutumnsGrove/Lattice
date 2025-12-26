@@ -20,3 +20,6 @@ CREATE INDEX IF NOT EXISTS idx_wisp_user_time
     ON wisp_requests(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_wisp_created
     ON wisp_requests(created_at DESC);
+-- Compound index for monthly cost cap query (SELECT SUM(cost) WHERE user_id AND created_at)
+CREATE INDEX IF NOT EXISTS idx_wisp_user_cost
+    ON wisp_requests(user_id, created_at DESC, cost);

@@ -74,7 +74,7 @@ export function calculateReadability(content) {
  * @param {string} content - Markdown content
  * @returns {string} Plain text
  */
-function stripMarkdownForAnalysis(content) {
+export function stripMarkdownForAnalysis(content) {
 	return content
 		.replace(/```[\s\S]*?```/g, '') // Remove code blocks
 		.replace(/`[^`]+`/g, '') // Remove inline code
