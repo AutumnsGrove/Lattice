@@ -3,6 +3,24 @@ import { html } from 'satori-html';
 import { Resvg } from '@resvg/resvg-js';
 import type { RequestHandler } from './$types';
 
+// Constants for forest generation
+const FOREST_TREE_COUNT = 24;
+const FOREST_LEAF_COUNT = 30;
+
+/**
+ * Escape HTML entities to prevent XSS
+ */
+function escapeHtml(text: string): string {
+	const map: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 /**
  * Custom Forest OG Image Generator
  *
@@ -19,7 +37,19 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	const fontResponse = await fetch(fontUrl.toString());
 
 	if (!fontResponse.ok) {
-		return new Response('Failed to load font', { status: 500 });
+		// Return helpful error instead of breaking all OG previews
+		console.error(`Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`);
+		return new Response(
+			`OG Image Error: Font not found at ${fontUrl.toString()}. ` +
+			`Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
+			{
+				status: 500,
+				headers: {
+					'Content-Type': 'text/plain',
+					'X-Error': 'font-load-failed'
+				}
+			}
+		);
 	}
 
 	const fontData = await fontResponse.arrayBuffer();
@@ -31,8 +61,8 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		trunks: ['#78350f', '#451a03', '#57534e']
 	};
 
-	// Generate random trees (24 trees)
-	const treeCount = 24;
+	// Generate random trees
+	const treeCount = FOREST_TREE_COUNT;
 	const trees: Array<{ x: number; y: number; size: number; color: string; trunkColor: string }> = [];
 
 	for (let i = 0; i < treeCount; i++) {
@@ -48,8 +78,8 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	// Sort by y position for depth effect (back to front)
 	trees.sort((a, b) => a.y - b.y);
 
-	// Generate random falling leaves (30 leaves)
-	const leafCount = 30;
+	// Generate random falling leaves
+	const leafCount = FOREST_LEAF_COUNT;
 	const leaves: Array<{ x: number; y: number; size: number; color: string; rotation: number }> = [];
 
 	for (let i = 0; i < leafCount; i++) {

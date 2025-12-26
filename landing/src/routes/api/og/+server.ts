@@ -4,6 +4,20 @@ import { Resvg } from '@resvg/resvg-js';
 import type { RequestHandler } from './$types';
 
 /**
+ * Escape HTML entities to prevent XSS
+ */
+function escapeHtml(text: string): string {
+	const map: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	};
+	return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
  * Dynamic Open Graph Image Generator
  *
  * Generates custom OG images with:
@@ -16,9 +30,9 @@ import type { RequestHandler } from './$types';
  * - accent: Optional accent color (hex without #, 3 or 6 chars)
  */
 export const GET: RequestHandler = async ({ url, fetch }) => {
-	// Limit string lengths to prevent DoS
-	const title = (url.searchParams.get('title') || 'Grove').slice(0, 100);
-	const subtitle = (url.searchParams.get('subtitle') || 'A place to Be.').slice(0, 200);
+	// Limit string lengths to prevent DoS and escape HTML to prevent XSS
+	const title = escapeHtml((url.searchParams.get('title') || 'Grove').slice(0, 100));
+	const subtitle = escapeHtml((url.searchParams.get('subtitle') || 'A place to Be.').slice(0, 200));
 
 	// Validate accent color (hex format: 3 or 6 chars, no #)
 	const rawAccent = url.searchParams.get('accent') || '16a34a';
@@ -32,7 +46,19 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	const fontResponse = await fetch(fontUrl.toString());
 
 	if (!fontResponse.ok) {
-		return new Response('Failed to load font', { status: 500 });
+		// Return helpful error instead of breaking all OG previews
+		console.error(`Failed to load font from ${fontUrl.toString()}: ${fontResponse.status}`);
+		return new Response(
+			`OG Image Error: Font not found at ${fontUrl.toString()}. ` +
+			`Please ensure Lexend-Regular.ttf exists in /static/fonts/.`,
+			{
+				status: 500,
+				headers: {
+					'Content-Type': 'text/plain',
+					'X-Error': 'font-load-failed'
+				}
+			}
+		);
 	}
 
 	const fontData = await fontResponse.arrayBuffer();

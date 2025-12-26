@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+
 	/**
 	 * SEO Component - Generates Open Graph and Twitter Card metadata for link previews
 	 *
@@ -40,15 +42,23 @@
 		accentColor = '16a34a'
 	}: Props = $props();
 
+	// Get base URL from current origin (works in dev/staging/prod)
+	// Falls back to production URL for SSR or if page store unavailable
+	const baseUrl = $derived(
+		typeof window !== 'undefined' && $page?.url?.origin
+			? $page.url.origin
+			: 'https://grove.place'
+	);
+
 	// Ensure URL is absolute
-	const absoluteUrl = url.startsWith('http') ? url : `https://grove.place${url}`;
+	const absoluteUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
 	// Generate dynamic OG image URL if enabled and no custom image provided
 	const ogImageUrl = image
-		? (image.startsWith('http') ? image : `https://grove.place${image}`)
+		? (image.startsWith('http') ? image : `${baseUrl}${image}`)
 		: dynamicImage
-			? `https://grove.place/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
-			: 'https://grove.place/og-image.png';
+			? `${baseUrl}/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
+			: `${baseUrl}/og-image.png`;
 </script>
 
 <svelte:head>
