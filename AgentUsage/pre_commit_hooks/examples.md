@@ -177,8 +177,8 @@ Automatically updates dependencies when switching branches.
   ✓ Python dependencies updated (uv)
 
 📦 Node dependencies changed
-  Running 'npm install'...
-  ✓ Node dependencies updated (npm)
+  Running 'pnpm install'...
+  ✓ Node dependencies updated (pnpm)
 
 ✅ Dependency updates complete
 ```

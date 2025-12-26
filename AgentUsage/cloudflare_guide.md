@@ -88,7 +88,7 @@ The MCP server handles authentication via OAuth and translates requests into app
 
 ```bash
 # Install wrangler globally
-npm install -g wrangler
+pnpm add -g wrangler
 
 # Or use npx (no install needed)
 npx wrangler --version
@@ -291,10 +291,10 @@ wrangler pages deploy ./build --project-name=my-site --branch=production
 
 ```bash
 # Install adapter
-npm install -D @sveltejs/adapter-cloudflare
+pnpm add -D @sveltejs/adapter-cloudflare
 
 # Build
-npm run build
+pnpm build
 
 # Deploy
 wrangler pages deploy .svelte-kit/cloudflare
@@ -431,7 +431,7 @@ wrangler d1 list
 
 1. Verify OAuth authentication in Claude
 2. Check MCP config syntax
-3. Ensure `mcp-remote` is installed: `npm install -g mcp-remote`
+3. Ensure `mcp-remote` is installed: `pnpm add -g mcp-remote`
 4. Review Cloudflare API token scopes
 
 ### Deployment Failures

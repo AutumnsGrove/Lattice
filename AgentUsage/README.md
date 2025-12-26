@@ -1,6 +1,32 @@
 # Agent Usage Guide Index
 
-This directory contains comprehensive guides for working with AI agents on development projects. Each guide is self-contained and focused on specific workflows or technologies.
+> **Note**: This project uses **Claude Code Skills** as the primary mechanism for specialized workflows. Skills provide concise, actionable guidance and are invoked using the Skill tool.
+>
+> **Skills are located in:** `.claude/skills/`
+>
+> **These AgentUsage guides serve as extended reference documentation** for when you need more detail than the skill provides.
+
+---
+
+## Skills vs. AgentUsage Guides
+
+| Skills (Primary) | AgentUsage Guides (Reference) |
+|-----------------|------------------------------|
+| Concise, actionable instructions | Comprehensive documentation |
+| Invoked via Skill tool | Read directly when needed |
+| Located in `.claude/skills/` | Located in `AgentUsage/` |
+| Use for most tasks | Use for deep dives |
+
+### How to Use Skills
+
+```
+# Invoke a skill when you encounter a relevant situation
+skill: "secrets-management"
+skill: "database-management"
+skill: "git-workflows"
+```
+
+---
 
 ## Quick Reference
 
@@ -63,10 +89,17 @@ This directory contains comprehensive guides for working with AI agents on devel
 
 ## How to Use These Guides
 
-1. **On-Demand Reference**: Read guides when you need specific knowledge
-2. **Self-Contained**: Each guide stands alone with complete information
-3. **Cross-Referenced**: Related topics link to each other
-4. **Start with AGENT.md**: Check parent directory for trigger patterns
+### Recommended Workflow
+
+1. **Use Skills First**: Invoke the relevant skill via the Skill tool for most tasks
+2. **Reference Guides for Details**: Read these guides when you need deeper information
+3. **Skills point here**: Each skill includes a "Related Resources" section linking to these guides
+
+### Guide Access Pattern
+
+1. **Primary**: Use skill (e.g., `skill: "database-management"`)
+2. **If more detail needed**: Read the corresponding guide (e.g., `AgentUsage/db_usage.md`)
+3. **Self-Contained**: Each guide stands alone with complete information
 
 ## Guide Structure
 
@@ -89,19 +122,43 @@ When updating guides:
 
 ## Quick Start Checklist
 
-For new projects, reference these guides in order:
+For new projects, use these skills in order:
 
-1. **project_setup.md** - Initialize project from template
-2. **project_structure.md** - Set up directory layout
-3. **git_guide.md** - Initialize version control and learn commit standards
-4. **db_usage.md** - Set up database interface (if using databases)
-5. **secrets_management.md** - Configure API keys
-6. **uv_usage.md** (Python) or relevant language guide
-7. **pre_commit_hooks/setup_guide.md** - Set up quality checks
-8. **testing_python.md** (Python) or relevant language testing guide
-9. **docker_guide.md** (if needed) - Containerize application
+1. **`project-scaffolding`** - Initialize project from template
+2. **`git-workflows`** - Initialize version control and learn commit standards
+3. **`database-management`** - Set up database interface (if using databases)
+4. **`secrets-management`** - Configure API keys
+5. **`uv-package-manager`** (Python) or relevant language setup
+6. **`git-hooks`** - Set up quality checks
+7. **`python-testing`** (Python) or relevant testing skill
+8. **`docker-workflows`** (if needed) - Containerize application
 
 ---
 
-*Last updated: 2025-11-28*
+## Skills to Guide Mapping
+
+| Skill | Corresponding Guide |
+|-------|---------------------|
+| `secrets-management` | secrets_management.md |
+| `api-integration` | api_usage.md |
+| `database-management` | db_usage.md |
+| `git-workflows` | git_guide.md |
+| `git-hooks` | pre_commit_hooks/setup_guide.md |
+| `uv-package-manager` | uv_usage.md |
+| `python-testing` | testing_python.md |
+| `javascript-testing` | testing_javascript.md |
+| `go-testing` | testing_go.md |
+| `rust-testing` | testing_rust.md |
+| `code-quality` | code_quality.md |
+| `project-scaffolding` | project_setup.md |
+| `cicd-automation` | ci_cd_patterns.md |
+| `docker-workflows` | docker_guide.md |
+| `cloudflare-deployment` | cloudflare_guide.md |
+| `svelte5-development` | svelte5_guide.md |
+| `rich-terminal-output` | rich_formatting.md |
+| `research-strategy` | research_workflow.md |
+
+---
+
+*Last updated: 2025-12-22*
 *Total guides: 25*

@@ -125,54 +125,74 @@ docs: Update README
 
 ---
 
-## When to Read Specific Guides
+## When to Use Skills
 
-**Read the full guide in `AgentUsage/` when you encounter these situations:**
+**This project uses Claude Code Skills for specialized workflows. Invoke skills using the Skill tool when you encounter these situations:**
 
 ### Secrets & API Keys
-- **When managing API keys or secrets** → Read `AgentUsage/secrets_management.md`
-- **Before implementing secrets loading** → Read `AgentUsage/secrets_management.md`
+- **When managing API keys or secrets** → Use skill: `secrets-management`
+- **Before implementing secrets loading** → Use skill: `secrets-management`
+- **When integrating external APIs** → Use skill: `api-integration`
+
+### Cloudflare Development
+- **When deploying to Cloudflare** → Use skill: `cloudflare-deployment`
+- **Before using Cloudflare Workers, KV, R2, or D1** → Use skill: `cloudflare-deployment`
+- **When setting up Cloudflare MCP server** → Use skill: `cloudflare-deployment`
 
 ### Package Management
-- **When using UV package manager** → Read `AgentUsage/uv_usage.md`
-- **Before creating pyproject.toml** → Read `AgentUsage/uv_usage.md`
-- **When managing Python dependencies** → Read `AgentUsage/uv_usage.md`
+- **When using UV package manager** → Use skill: `uv-package-manager`
+- **Before creating pyproject.toml** → Use skill: `uv-package-manager`
+- **When managing Python dependencies** → Use skill: `uv-package-manager`
 
 ### Version Control
-- **Before making a git commit** → Read `AgentUsage/git_guide.md`
-- **When initializing a new repo** → Read `AgentUsage/git_guide.md`
-- **For git workflow and branching** → Read `AgentUsage/git_guide.md`
-- **For conventional commits reference** → Read `AgentUsage/git_guide.md`
+- **Before making a git commit** → Use skill: `git-workflows`
+- **When initializing a new repo** → Use skill: `git-workflows`
+- **For git workflow and branching** → Use skill: `git-workflows`
+- **When setting up git hooks** → Use skill: `git-hooks`
 
 ### Database Management
-- **When working with databases** → Read `AgentUsage/db_usage.md`
-- **Before implementing data persistence** → Read `AgentUsage/db_usage.md`
-- **For database.py template** → Read `AgentUsage/db_usage.md`
+- **When working with databases** → Use skill: `database-management`
+- **Before implementing data persistence** → Use skill: `database-management`
+- **For database.py template** → Use skill: `database-management`
 
-### Search & Research
-- **When searching across 20+ files** → Read `AgentUsage/house_agents.md`
-- **When finding patterns in codebase** → Read `AgentUsage/house_agents.md`
-- **When locating TODOs/FIXMEs** → Read `AgentUsage/house_agents.md`
+### Research & Analysis
+- **When researching technology decisions** → Use skill: `research-strategy`
+- **When analyzing unfamiliar codebases** → Use skill: `research-strategy`
+- **For systematic investigation** → Use skill: `research-strategy`
 
 ### Testing
-- **Before writing tests** → Read `AgentUsage/testing_strategies.md`
-- **When implementing test coverage** → Read `AgentUsage/testing_strategies.md`
-- **For test organization** → Read `AgentUsage/testing_strategies.md`
-
+- **Before writing JavaScript/TypeScript tests** → Use skill: `javascript-testing`
+- **Before writing Python tests** → Use skill: `python-testing`
+- **Before writing Go tests** → Use skill: `go-testing`
+- **Before writing Rust tests** → Use skill: `rust-testing`
 
 ### Code Quality
-- **When refactoring code** → Read `AgentUsage/code_style_guide.md`
-- **Before major code changes** → Read `AgentUsage/code_style_guide.md`
-- **For style guidelines** → Read `AgentUsage/code_style_guide.md`
+- **When formatting or linting code** → Use skill: `code-quality`
+- **Before major code changes** → Use skill: `code-quality`
+- **For Black, Ruff, mypy usage** → Use skill: `code-quality`
 
-### Project Setup
-- **When starting a new project** → Read `AgentUsage/project_setup.md`
-- **For directory structure** → Read `AgentUsage/project_setup.md`
-- **Setting up CI/CD** → Read `AgentUsage/project_setup.md`
+### Project Setup & Infrastructure
+- **When starting a new project** → Use skill: `project-scaffolding`
+- **Setting up CI/CD pipelines** → Use skill: `cicd-automation`
+- **When containerizing applications** → Use skill: `docker-workflows`
+
+### Web Development
+- **When building Svelte 5 applications** → Use skill: `svelte5-development`
+- **For SvelteKit routing and forms** → Use skill: `svelte5-development`
+
+### CLI Development
+- **When building terminal interfaces** → Use skill: `rich-terminal-output`
+- **For Rich library patterns** → Use skill: `rich-terminal-output`
 
 ---
 
 ## Quick Reference
+
+### How to Use Skills
+Skills are invoked using the Skill tool. When a situation matches a skill trigger:
+1. Invoke the skill by name (e.g., `skill: "secrets-management"`)
+2. The skill will expand with detailed instructions
+3. Follow the skill's guidance for the specific task
 
 ### Security Basics
 - Store API keys in `secrets.json` (NEVER commit)
@@ -180,13 +200,27 @@ docs: Update README
 - Provide `secrets_template.json` for setup
 - Use environment variables as fallbacks
 
-
-### House Agents Quick Trigger
-**When searching 20+ files**, use house-research for:
-- Finding patterns across codebase
-- Searching TODO/FIXME comments
-- Locating API endpoints or functions
-- Documentation searches
+### Available Skills Reference
+| Skill | Purpose |
+|-------|---------|
+| `secrets-management` | API keys, credentials, secrets.json |
+| `api-integration` | External REST API integration |
+| `database-management` | SQLite, database.py patterns |
+| `git-workflows` | Commits, branching, conventional commits |
+| `git-hooks` | Pre-commit hooks setup |
+| `uv-package-manager` | Python dependencies with UV |
+| `python-testing` | pytest, fixtures, mocking |
+| `javascript-testing` | Vitest/Jest testing |
+| `go-testing` | Go testing patterns |
+| `rust-testing` | Cargo test patterns |
+| `code-quality` | Black, Ruff, mypy |
+| `project-scaffolding` | New project setup |
+| `cicd-automation` | GitHub Actions workflows |
+| `docker-workflows` | Containerization |
+| `cloudflare-deployment` | Workers, KV, R2, D1 |
+| `svelte5-development` | Svelte 5 with runes |
+| `rich-terminal-output` | Terminal UI with Rich |
+| `research-strategy` | Systematic research |
 
 ---
 
@@ -220,11 +254,17 @@ docs: Update README
 
 ---
 
-## Complete Guide Index
-For all detailed guides, workflows, and examples, see:
-**`AgentUsage/README.md`** - Master index of all documentation
+## Additional Resources
+
+### Skills Documentation
+Skills are the primary way to access specialized knowledge. Use the Skill tool to invoke them.
+Skills are located in `.claude/skills/` and provide concise, actionable guidance.
+
+### Extended Documentation
+For in-depth reference beyond what skills provide, see:
+**`AgentUsage/README.md`** - Master index of detailed documentation
 
 ---
 
-*Last updated: 2025-12-11*
+*Last updated: 2025-12-25*
 *Model: Claude Opus 4.5*

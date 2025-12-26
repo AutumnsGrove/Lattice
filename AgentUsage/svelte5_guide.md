@@ -20,10 +20,10 @@ Using Svelte 5 with SvelteKit provides:
 ```bash
 # Project Setup
 npx sv create my-app      # Create new SvelteKit project
-cd my-app && npm install  # Install dependencies
-npm run dev               # Start dev server (localhost:5173)
-npm run build             # Build for production
-npm run preview           # Preview production build
+cd my-app && pnpm install # Install dependencies
+pnpm dev                  # Start dev server (localhost:5173)
+pnpm build                # Build for production
+pnpm preview              # Preview production build
 ```
 
 ### Runes Cheatsheet

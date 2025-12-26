@@ -140,7 +140,7 @@ A paragraph explaining the purpose and context of this project.
 ```bash
 pip install -r requirements.txt
 # or
-npm install
+pnpm install
 ```
 
 ## Quick Start

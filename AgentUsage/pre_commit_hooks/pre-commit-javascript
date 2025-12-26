@@ -57,8 +57,8 @@ elif [ -f "node_modules/.bin/prettier" ]; then
     fi
 else
     echo -e "${RED}✗ Prettier is not installed${NC}"
-    echo -e "${YELLOW}Install with: npm install -D prettier${NC}"
-    echo -e "${YELLOW}Or globally: npm install -g prettier${NC}"
+    echo -e "${YELLOW}Install with: pnpm add -D prettier${NC}"
+    echo -e "${YELLOW}Or globally: pnpm add -g prettier${NC}"
     exit 1
 fi
 
@@ -95,7 +95,7 @@ elif [ -f "node_modules/.bin/eslint" ]; then
     fi
 else
     echo -e "${YELLOW}⚠ ESLint is not installed (optional but recommended)${NC}"
-    echo -e "${YELLOW}Install with: npm install -D eslint${NC}"
+    echo -e "${YELLOW}Install with: pnpm add -D eslint${NC}"
 fi
 
 echo ""

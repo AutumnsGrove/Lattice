@@ -16,7 +16,7 @@ This guide covers testing for JavaScript and TypeScript projects using **Vitest*
 
 ```bash
 # Run all tests
-npm run test
+pnpm test
 # or directly
 npx vitest
 
@@ -43,22 +43,22 @@ npx vitest --ui
 
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run in watch mode
-npm test -- --watch
+pnpm test --watch
 
 # Run specific file
-npm test -- src/utils.test.ts
+pnpm test src/utils.test.ts
 
 # Run tests matching pattern
-npm test -- -t "user authentication"
+pnpm test -t "user authentication"
 
 # Run with coverage
-npm test -- --coverage
+pnpm test --coverage
 
 # Run only changed files
-npm test -- --onlyChanged
+pnpm test --onlyChanged
 ```
 
 ---
@@ -69,13 +69,13 @@ npm test -- --onlyChanged
 
 ```bash
 # For SvelteKit projects
-npm install -D vitest @testing-library/svelte @testing-library/jest-dom jsdom
+pnpm add -D vitest @testing-library/svelte @testing-library/jest-dom jsdom
 
 # For general Vite projects
-npm install -D vitest jsdom
+pnpm add -D vitest jsdom
 
 # For coverage
-npm install -D @vitest/coverage-v8
+pnpm add -D @vitest/coverage-v8
 ```
 
 ### Configuration (vite.config.ts)
@@ -153,16 +153,16 @@ vi.mock('$env/dynamic/private', () => ({
 
 ```bash
 # Basic setup
-npm install -D jest @types/jest
+pnpm add -D jest @types/jest
 
 # For TypeScript
-npm install -D ts-jest @types/jest
+pnpm add -D ts-jest @types/jest
 
 # For Svelte (non-SvelteKit)
-npm install -D jest @testing-library/svelte svelte-jester
+pnpm add -D jest @testing-library/svelte svelte-jester
 
 # For React
-npm install -D jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom
+pnpm add -D jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom
 ```
 
 ### Configuration (jest.config.js)
@@ -703,7 +703,7 @@ src/
 
 ```bash
 # Install coverage provider
-npm install -D @vitest/coverage-v8
+pnpm add -D @vitest/coverage-v8
 
 # Run with coverage
 npx vitest run --coverage
@@ -736,7 +736,7 @@ export default defineConfig({
 ### Jest Coverage
 
 ```bash
-npm test -- --coverage --coverageReporters=text-summary
+pnpm test --coverage --coverageReporters=text-summary
 ```
 
 **Target Coverage**: Unit tests 80-90%, Critical paths 100%, Overall 75-85%
@@ -797,10 +797,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - run: npm ci
-      - run: npm run test:run -- --coverage
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:run --coverage
 
       - uses: codecov/codecov-action@v3
         with:

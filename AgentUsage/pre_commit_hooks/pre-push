@@ -80,16 +80,30 @@ if [ -f "package.json" ]; then
     # Check if test script exists in package.json
     if grep -q '"test"' package.json && ! grep -q '"test": "echo \\"Error: no test specified\\"' package.json; then
         tests_run=1
-        echo "Running npm test..."
-        echo ""
 
-        if npm test 2>&1; then
+        # Prefer pnpm, fallback to npm
+        if [ -f "pnpm-lock.yaml" ] && command -v pnpm &> /dev/null; then
+            echo "Running pnpm test..."
             echo ""
-            echo -e "${GREEN}✓ JavaScript tests passed${NC}"
-        else
+            if pnpm test 2>&1; then
+                echo ""
+                echo -e "${GREEN}✓ JavaScript tests passed${NC}"
+            else
+                echo ""
+                echo -e "${RED}✗ JavaScript tests failed${NC}"
+                tests_failed=1
+            fi
+        elif command -v npm &> /dev/null; then
+            echo "Running npm test..."
             echo ""
-            echo -e "${RED}✗ JavaScript tests failed${NC}"
-            tests_failed=1
+            if npm test 2>&1; then
+                echo ""
+                echo -e "${GREEN}✓ JavaScript tests passed${NC}"
+            else
+                echo ""
+                echo -e "${RED}✗ JavaScript tests failed${NC}"
+                tests_failed=1
+            fi
         fi
     else
         echo -e "${YELLOW}⚠ No test script defined in package.json${NC}"

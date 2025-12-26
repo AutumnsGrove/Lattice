@@ -165,15 +165,15 @@ touch src/YourProject/config/__init__.py
 ### JavaScript/TypeScript Projects
 
 ```bash
-# 1. Initialize npm project
-npm init -y
+# 1. Initialize pnpm project
+pnpm init
 
 # 2. Install dependencies
-npm install express dotenv
+pnpm add express dotenv
 
 # 3. Install dev dependencies
-npm install --save-dev typescript @types/node @types/express
-npm install --save-dev jest eslint prettier
+pnpm add -D typescript @types/node @types/express
+pnpm add -D jest eslint prettier
 
 # 4. Initialize TypeScript (if using)
 npx tsc --init
@@ -408,7 +408,7 @@ grep "secrets.json" .gitignore
 
 # ✅ Dependencies installed
 # Python: uv sync
-# JavaScript: npm install
+# JavaScript: pnpm install
 # Go: go mod download
 # Rust: cargo build
 
@@ -417,7 +417,7 @@ tree -L 2 src/  # or appropriate directory
 
 # ✅ Tests run successfully (if any exist)
 # Python: uv run pytest
-# JavaScript: npm test
+# JavaScript: pnpm test
 # Go: go test ./...
 # Rust: cargo test
 ```
@@ -490,8 +490,8 @@ git config user.email "your.email@example.com"
 uv cache clean
 
 # JavaScript: Clear cache
-rm -rf node_modules package-lock.json
-npm install
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 
 # Go: Clear module cache
 go clean -modcache

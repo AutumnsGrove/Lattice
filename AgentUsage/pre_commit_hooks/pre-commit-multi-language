@@ -97,7 +97,7 @@ if [ -n "$js_ts_files" ]; then
             checks_failed=1
         fi
     else
-        echo -e "  ${YELLOW}⚠ Prettier not installed (npm install -D prettier)${NC}"
+        echo -e "  ${YELLOW}⚠ Prettier not installed (pnpm add -D prettier)${NC}"
     fi
 
     # ESLint check
@@ -120,7 +120,7 @@ if [ -n "$js_ts_files" ]; then
             checks_failed=1
         fi
     else
-        echo -e "  ${YELLOW}⚠ ESLint not installed (npm install -D eslint)${NC}"
+        echo -e "  ${YELLOW}⚠ ESLint not installed (pnpm add -D eslint)${NC}"
     fi
 
     echo ""

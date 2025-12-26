@@ -869,7 +869,7 @@ Enforce conventional commits:
 
 ```bash
 # Install
-npm install --save-dev @commitlint/cli @commitlint/config-conventional
+pnpm add -D @commitlint/cli @commitlint/config-conventional
 
 # Configure (.commitlintrc.json)
 {
@@ -892,10 +892,10 @@ Automated changelog and versioning:
 
 ```bash
 # Install
-npm install --save-dev standard-version
+pnpm add -D standard-version
 
 # Use
-npm run release
+pnpm release
 
 # Generates:
 # - Updates version in package.json

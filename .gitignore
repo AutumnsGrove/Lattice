@@ -2,7 +2,6 @@ secrets.json
 *.log
 __pycache__/
 .DS_Store
-.claude/
 node_modules/
 
 # SST
