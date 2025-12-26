@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import SEO from '$lib/components/SEO.svelte';
   import { ContentWithGutter } from '@autumnsgrove/groveengine';
   import '$lib/styles/content.css';
 
@@ -9,16 +10,18 @@
 
   $: doc = data.doc;
   $: category = $page.params.category;
+  $: slug = $page.params.slug;
   $: headers = doc?.headers || [];
 
   $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
                      category === 'help' ? 'Help Center' : 'Legal & Policies';
 </script>
 
-<svelte:head>
-  <title>{doc?.title || 'Not Found'} - Grove Knowledge Base</title>
-  <meta name="description" content={doc?.description || doc?.excerpt || ''} />
-</svelte:head>
+<SEO
+  title={`${doc?.title || 'Not Found'} — Grove`}
+  description={doc?.description || doc?.excerpt || "Grove knowledge base article"}
+  url={`/knowledge/${category}/${slug}`}
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

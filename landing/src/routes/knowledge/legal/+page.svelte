@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
@@ -6,10 +7,11 @@
   const { legalDocs } = data;
 </script>
 
-<svelte:head>
-  <title>Legal & Policies - Grove Knowledge Base</title>
-  <meta name="description" content="Legal documents, terms of service, privacy policy, and other policies for Grove platform" />
-</svelte:head>
+<SEO
+  title="Legal & Policies - Grove Knowledge Base"
+  description="Legal documents, terms of service, privacy policy, and other policies for Grove platform"
+  url="/knowledge/legal"
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { season as seasonStore } from '$lib/stores/season';
 
 	// Trees
@@ -556,10 +557,12 @@
 	}
 </script>
 
-<svelte:head>
-	<title>The Forest — Grove</title>
-	<meta name="description" content="A forest of Grove trees, growing together." />
-</svelte:head>
+<SEO
+	title="The Forest — Grove"
+	description="A forest of Grove trees, growing together. Watch the seasons change and the grove flourish."
+	url="/forest"
+	image="https://grove.place/api/og/forest"
+/>
 
 <main class="min-h-screen flex flex-col transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-slate-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
 	<Header />

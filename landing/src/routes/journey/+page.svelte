@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();
 
@@ -86,10 +87,11 @@
 	});
 </script>
 
-<svelte:head>
-	<title>The Journey — Grove</title>
-	<meta name="description" content="Watch Grove grow. A visual timeline of our codebase evolution, one commit at a time." />
-</svelte:head>
+<SEO
+	title="The Journey — Grove"
+	description="Watch Grove grow. A visual timeline of our codebase evolution, one commit at a time."
+	url="/journey"
+/>
 
 <main class="min-h-screen flex flex-col">
 	<Header />

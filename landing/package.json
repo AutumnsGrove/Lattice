@@ -35,9 +35,12 @@
   },
   "dependencies": {
     "@autumnsgrove/groveengine": "workspace:*",
+    "@resvg/resvg-js": "^2.6.2",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
-    "resend": "^4.0.0"
+    "resend": "^4.0.0",
+    "satori": "^0.18.3",
+    "satori-html": "^0.3.2"
   }
 }

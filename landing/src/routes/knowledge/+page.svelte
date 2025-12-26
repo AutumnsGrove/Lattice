@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
@@ -16,10 +17,11 @@
   }
 </script>
 
-<svelte:head>
-  <title>Knowledge Base - Grove</title>
-  <meta name="description" content="Learn about Grove's features, specifications, and how to use our platform" />
-</svelte:head>
+<SEO
+  title="Knowledge Base - Grove"
+  description="Learn about Grove's features, specifications, and how to use our platform"
+  url="/knowledge"
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

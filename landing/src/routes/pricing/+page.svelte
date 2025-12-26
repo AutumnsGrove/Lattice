@@ -1,12 +1,14 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 </script>
 
-<svelte:head>
-	<title>Pricing — Grove</title>
-	<meta name="description" content="Simple, accessible pricing for writers at every level. From curious newcomers to professionals who need a polished presence." />
-</svelte:head>
+<SEO
+	title="Pricing — Grove"
+	description="Simple, accessible pricing for writers at every level. From curious newcomers to professionals who need a polished presence."
+	url="/pricing"
+/>
 
 <main class="min-h-screen flex flex-col">
 	<Header maxWidth="wide" />

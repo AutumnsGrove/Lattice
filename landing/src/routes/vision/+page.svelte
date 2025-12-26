@@ -2,12 +2,14 @@
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 </script>
 
-<svelte:head>
-	<title>Vision — Grove</title>
-	<meta name="description" content="A return to something simpler. A place where people can plant their thoughts and watch them grow." />
-</svelte:head>
+<SEO
+	title="Vision — Grove"
+	description="A return to something simpler. A place where people can plant their thoughts and watch them grow."
+	url="/vision"
+/>
 
 <main class="min-h-screen flex flex-col">
 	<Header />

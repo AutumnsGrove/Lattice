@@ -3,6 +3,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { page } from '$app/stores';
 	import { season } from '$lib/stores/season';
 
@@ -46,10 +47,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Grove — a place to Be</title>
-	<meta name="description" content="A quiet corner of the internet where your words can grow and flourish. Sign up to be notified when Grove launches." />
-</svelte:head>
+<SEO
+	title="Grove — a place to Be"
+	description="A quiet corner of the internet where your words can grow and flourish. Your own space to write, share, and bloom."
+	url="/"
+/>
 
 <Header />
 

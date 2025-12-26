@@ -1,5 +1,6 @@
 <script lang="ts">
   import { helpArticles } from '$lib/data/knowledge-base';
+  import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
@@ -7,10 +8,11 @@
   const { helpArticles: articles } = data;
 </script>
 
-<svelte:head>
-  <title>Help Center - Grove Knowledge Base</title>
-  <meta name="description" content="Help articles and guides for using Grove platform" />
-</svelte:head>
+<SEO
+  title="Help Center - Grove Knowledge Base"
+  description="Help articles and guides for using Grove platform"
+  url="/knowledge/help"
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

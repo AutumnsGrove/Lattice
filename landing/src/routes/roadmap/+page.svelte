@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons (replacing emojis)
 	import {
@@ -323,10 +324,11 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Roadmap — Grove</title>
-	<meta name="description" content="The journey ahead. Watch the grove grow from first frost to full bloom." />
-</svelte:head>
+<SEO
+	title="Roadmap — Grove"
+	description="The journey ahead. Watch the grove grow from first frost to full bloom — a seasonal roadmap through Grove's development."
+	url="/roadmap"
+/>
 
 <main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
 	<Header />

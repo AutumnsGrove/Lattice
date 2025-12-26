@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
 	import { Music, BookOpen, Newspaper, Telescope, Github } from 'lucide-svelte';
@@ -64,10 +65,12 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Beyond the Grove — Roadmap</title>
-	<meta name="description" content="Standalone tools built alongside Grove. Music curation, book discovery, curated news, and more." />
-</svelte:head>
+<SEO
+	title="Beyond the Grove — Roadmap"
+	description="Standalone tools built alongside Grove. Music curation, book discovery, curated news, and more."
+	url="/roadmap/beyond"
+	accentColor="8b5cf6"
+/>
 
 <main class="min-h-screen flex flex-col bg-slate-900">
 	<Header />

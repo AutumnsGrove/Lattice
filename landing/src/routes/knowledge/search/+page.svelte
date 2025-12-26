@@ -3,6 +3,7 @@
   import { allDocs } from '$lib/data/knowledge-base';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import SEO from '$lib/components/SEO.svelte';
 
   export let data;
 
@@ -20,10 +21,11 @@
   };
 </script>
 
-<svelte:head>
-  <title>Search Results - Grove Knowledge Base</title>
-  <meta name="description" content="Search Grove's knowledge base for documentation and help articles" />
-</svelte:head>
+<SEO
+  title="Search Knowledge Base — Grove"
+  description="Search Grove documentation and help articles"
+  url="/knowledge/search"
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

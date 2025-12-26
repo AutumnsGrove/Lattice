@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SEO from '$lib/components/SEO.svelte';
   import { specs } from '$lib/data/knowledge-base';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -7,10 +8,11 @@
   const { specs: specsList } = data;
 </script>
 
-<svelte:head>
-  <title>Technical Specifications - Grove Knowledge Base</title>
-  <meta name="description" content="Technical specifications and implementation details for Grove platform" />
-</svelte:head>
+<SEO
+  title="Technical Specifications - Grove Knowledge Base"
+  description="Technical specifications and implementation details for Grove platform"
+  url="/knowledge/specs"
+/>
 
 <main class="min-h-screen flex flex-col">
   <Header />

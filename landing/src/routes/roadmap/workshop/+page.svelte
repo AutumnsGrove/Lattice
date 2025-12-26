@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
 	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video } from 'lucide-svelte';
@@ -121,10 +122,12 @@
 	}
 </script>
 
-<svelte:head>
-	<title>The Workshop — Grove Roadmap</title>
-	<meta name="description" content="Tools being built in the Grove workshop. Domain discovery, Minecraft servers, and more." />
-</svelte:head>
+<SEO
+	title="The Workshop — Grove Roadmap"
+	description="Tools being built in the Grove workshop. Domain discovery, Minecraft servers, and more."
+	url="/roadmap/workshop"
+	accentColor="f59e0b"
+/>
 
 <main class="min-h-screen flex flex-col bg-amber-50 dark:bg-slate-900">
 	<Header />

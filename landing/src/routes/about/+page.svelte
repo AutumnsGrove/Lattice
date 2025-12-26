@@ -2,12 +2,14 @@
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 </script>
 
-<svelte:head>
-	<title>What is Grove? — Grove</title>
-	<meta name="description" content="A non-technical guide to Grove: the platform where anyone can have their own personal website and blog." />
-</svelte:head>
+<SEO
+	title="What is Grove? — Grove"
+	description="A non-technical guide to Grove: the platform where anyone can have their own personal website and blog."
+	url="/about"
+/>
 
 <main class="min-h-screen flex flex-col">
 	<Header />
