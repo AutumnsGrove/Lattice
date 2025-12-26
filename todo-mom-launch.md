@@ -1,10 +1,12 @@
 # Mom's Publishing House - Launch TODO
 
-> Site-specific deployment using GroveEngine. A custom site for a publishing house, not a standard Grove blog tenant.
+> **STATUS: PAUSED** - Mom needs to pause on this project. Development completed in separate private repository.
 
-**Repository:** `AutumnsGrove/[repo-name-tbd]` (private)
+**Repository:** `AutumnsGrove/[repo-name-tbd]` (private) - ✅ Complete
 **Type:** Custom site using `@autumnsgrove/groveengine` as dependency
 **Target:** Publishing house portfolio site with book catalog
+
+**Note:** Project is feature-complete and ready to resume when Mom is ready. All development was done in dedicated repo, not in this monorepo.
 
 ---
 
