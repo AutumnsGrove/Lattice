@@ -1,5 +1,9 @@
-// Auth barrel export
-// Re-exports all authentication functions
+/**
+ * Auth barrel export
+ *
+ * Note: Legacy JWT utilities have been removed.
+ * Session management is now handled by Heartwood SessionDO.
+ * Only tenant verification functions remain.
+ */
 
-export * from './jwt.js';
-export * from './session.js';
+export { verifyTenantOwnership, getVerifiedTenantId } from './session.js';
