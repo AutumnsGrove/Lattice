@@ -12,6 +12,10 @@ export { default as CollapsibleSection } from './components/custom/CollapsibleSe
 export { default as MarkdownEditor } from './components/admin/MarkdownEditor.svelte';
 export { default as GutterManager } from './components/admin/GutterManager.svelte';
 
+// Wisp - Writing Assistant
+export { default as WispPanel } from './components/WispPanel.svelte';
+export { default as WispButton } from './components/WispButton.svelte';
+
 // Quota components
 export { QuotaWidget, QuotaWarning, UpgradePrompt } from './components/quota/index';
 
