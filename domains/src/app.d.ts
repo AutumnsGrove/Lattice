@@ -15,6 +15,8 @@ declare global {
     interface Platform {
       env: {
         DB: D1Database;
+        /** GroveAuth Service Binding (Heartwood - fast session validation) */
+        AUTH: Fetcher;
         SITE_NAME: string;
         SITE_URL: string;
         RESEND_API_KEY: string;

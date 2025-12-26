@@ -1,25 +1,47 @@
 /**
- * Logout - Clear all Heartwood session cookies
+ * Logout - Revoke SessionDO session and clear all auth cookies
+ *
+ * This endpoint:
+ * 1. Calls GroveAuth /session/revoke to invalidate the SessionDO session
+ * 2. Clears all auth-related cookies (grove_session, access_token, etc.)
  */
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-export const GET: RequestHandler = async ({ url, cookies }) => {
+export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
   // Determine if we're in production
   const isProduction =
     url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
 
-  // Cookie deletion options
+  // Cookie deletion options - must match domain where cookies were set
   const cookieOptions = {
     path: "/",
     ...(isProduction ? { domain: ".grove.place" } : {}),
   };
 
+  // Revoke SessionDO session via service binding (if available)
+  const groveSession = cookies.get("grove_session");
+  if (groveSession && platform?.env?.AUTH) {
+    try {
+      await platform.env.AUTH.fetch(
+        "https://auth-api.grove.place/session/revoke",
+        {
+          method: "POST",
+          headers: { Cookie: `grove_session=${groveSession}` },
+        }
+      );
+    } catch (err) {
+      // Log but don't fail - we still want to clear cookies
+      console.error("[Logout] Failed to revoke SessionDO session:", err);
+    }
+  }
+
   // Clear all auth cookies
-  cookies.delete("access_token", cookieOptions);
-  cookies.delete("refresh_token", cookieOptions);
-  cookies.delete("session", cookieOptions);
+  cookies.delete("grove_session", cookieOptions);  // SessionDO session
+  cookies.delete("access_token", cookieOptions);   // Legacy JWT
+  cookies.delete("refresh_token", cookieOptions);  // Legacy refresh
+  cookies.delete("session", cookieOptions);        // Legacy session ID
 
   // Also clear the old session cookie if it exists (from magic code auth)
   cookies.delete("session_token", { path: "/" });

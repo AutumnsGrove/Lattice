@@ -20,6 +20,8 @@ declare global {
         picture?: string;
         /** Auth provider (google, github, magic_code) */
         provider?: string;
+        /** Whether user has admin privileges */
+        isAdmin?: boolean;
       } | null;
 
       /** Routing context based on subdomain */
@@ -45,6 +47,9 @@ declare global {
 
         /** R2 Bucket for images and media */
         IMAGES: R2Bucket;
+
+        /** GroveAuth Service Binding (Heartwood - fast session validation) */
+        AUTH: Fetcher;
 
         // Secrets
         GITHUB_TOKEN?: string;

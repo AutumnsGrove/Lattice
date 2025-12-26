@@ -1,5 +1,20 @@
+/**
+ * Domains App (Forage) Server Hooks
+ *
+ * Authentication via Heartwood SessionDO with D1 session fallback for legacy users.
+ */
+
 import type { Handle } from "@sveltejs/kit";
 import { getUserById, getSession, updateSessionTokens } from "$lib/server/db";
+
+/**
+ * Parse a specific cookie by name from the cookie header
+ */
+function getCookie(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`${name}=([^;]+)`));
+  return match ? match[1] : null;
+}
 
 /**
  * Environment variables required for core functionality.
@@ -63,8 +78,6 @@ export const handle: Handle = async ({ event, resolve }) => {
       validateEnvironment(event.platform.env as Record<string, unknown>);
     } catch (error) {
       console.error("[Env Validation Error]", error);
-      // In production, we might want to return a 500 error page
-      // For now, continue with degraded functionality
     }
   }
 
@@ -72,12 +85,56 @@ export const handle: Handle = async ({ event, resolve }) => {
   event.locals.user = null;
 
   // Create a D1 session for consistent reads within this request
-  // This enables read replication while maintaining "read your own writes" consistency
   if (event.platform?.env?.DB) {
     event.locals.dbSession = event.platform.env.DB.withSession();
   }
 
-  // Check for session cookie
+  const cookieHeader = event.request.headers.get("cookie");
+
+  // =========================================================================
+  // AUTHENTICATION (Heartwood SessionDO)
+  // =========================================================================
+  // Try grove_session cookie first (SessionDO - fast path via service binding)
+  const groveSession = getCookie(cookieHeader, "grove_session");
+  if (groveSession && event.platform?.env?.AUTH) {
+    try {
+      const response = await event.platform.env.AUTH.fetch(
+        "https://auth-api.grove.place/session/validate",
+        {
+          method: "POST",
+          headers: { Cookie: `grove_session=${groveSession}` },
+        }
+      );
+
+      if (response.ok) {
+        const data = (await response.json()) as {
+          valid: boolean;
+          user?: {
+            id: string;
+            email: string;
+            name: string;
+            avatarUrl: string;
+            isAdmin: boolean;
+          };
+        };
+
+        if (data.valid && data.user) {
+          event.locals.user = {
+            id: data.user.id,
+            email: data.user.email,
+            is_admin: data.user.isAdmin,
+          };
+          return resolve(event);
+        }
+      }
+    } catch (err) {
+      console.error("[Auth] SessionDO validation error:", err);
+    }
+  }
+
+  // =========================================================================
+  // FALLBACK: Legacy D1 Session (for backwards compatibility)
+  // =========================================================================
   const sessionId = event.cookies.get("session");
   if (!sessionId || !event.locals.dbSession) {
     return resolve(event);
@@ -141,7 +198,6 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
       } catch (refreshError) {
         console.error("[Auth Hook] Token refresh error:", refreshError);
-        // Continue with possibly stale token - next request will retry
       }
     }
 

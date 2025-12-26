@@ -294,7 +294,7 @@
 			trees.push({
 				id: i + 1,
 				x,
-				y: 92, // Position near bottom (percentage)
+				y: 0, // Will use bottom positioning
 				size,
 				aspectRatio,
 				treeType,
@@ -438,15 +438,14 @@
 			<!-- Randomized trees - growth beginning -->
 			{#each thawTrees as tree (tree.id)}
 				<div
-					class="absolute"
+					class="absolute bottom-0"
 					style="
 						left: {tree.x}%;
-						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex};
-						transform: translateX(-50%) translateY(-95%);
+						transform: translateX(-50%);
 					"
 					aria-hidden="true"
 				>
@@ -510,15 +509,14 @@
 			<!-- Randomized spring grove -->
 			{#each firstBudsTrees as tree (tree.id)}
 				<div
-					class="absolute"
+					class="absolute bottom-0"
 					style="
 						left: {tree.x}%;
-						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex};
-						transform: translateX(-50%) translateY(-95%);
+						transform: translateX(-50%);
 					"
 					aria-hidden="true"
 				>
@@ -615,15 +613,14 @@
 			<!-- Randomized full grove (peak growth!) -->
 			{#each fullBloomTrees as tree (tree.id)}
 				<div
-					class="absolute"
+					class="absolute bottom-0"
 					style="
 						left: {tree.x}%;
-						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex};
-						transform: translateX(-50%) translateY(-95%);
+						transform: translateX(-50%);
 					"
 					aria-hidden="true"
 				>
@@ -724,15 +721,14 @@
 			<!-- THE MAGICAL FOREST - Randomized autumn trees! -->
 			{#each goldenHourRandomTrees as tree (tree.id)}
 				<div
-					class="absolute"
+					class="absolute bottom-0"
 					style="
 						left: {tree.x}%;
-						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex};
-						transform: translateX(-50%) translateY(-95%);
+						transform: translateX(-50%);
 					"
 					aria-hidden="true"
 				>
@@ -817,15 +813,14 @@
 			{#each midnightBloomTrees as tree (tree.id)}
 				{@const nightColor = ['#1e1b4b', '#2e1065', '#3b0764', '#4c1d95'][tree.id % 4]}
 				<div
-					class="absolute"
+					class="absolute bottom-0"
 					style="
 						left: {tree.x}%;
-						top: {tree.y}%;
 						width: {tree.size}px;
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity * 0.6};
 						z-index: {tree.zIndex};
-						transform: translateX(-50%) translateY(-95%);
+						transform: translateX(-50%);
 					"
 					aria-hidden="true"
 				>

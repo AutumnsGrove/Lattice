@@ -40,6 +40,13 @@ database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 # =============================================================================
+# GroveAuth Service Binding (Heartwood - fast session validation)
+# =============================================================================
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+# =============================================================================
 # Environment Variables (non-sensitive)
 # =============================================================================
 [vars]

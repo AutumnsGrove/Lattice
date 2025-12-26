@@ -18,6 +18,8 @@ declare global {
         CDN_URL: string;
         RESEND_API_KEY: string;
         ADMIN_EMAILS: string;
+        /** GroveAuth Service Binding (Heartwood - fast session validation) */
+        AUTH: Fetcher;
         GROVEAUTH_URL?: string;
         GROVEAUTH_CLIENT_ID?: string;
         GROVEAUTH_CLIENT_SECRET?: string;

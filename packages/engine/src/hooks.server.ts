@@ -211,49 +211,80 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // =========================================================================
-  // AUTHENTICATION (Heartwood OAuth)
+  // AUTHENTICATION (Heartwood SessionDO)
   // =========================================================================
   const cookieHeader = event.request.headers.get("cookie");
-  const accessToken = getCookie(cookieHeader, "access_token");
 
-  if (accessToken) {
+  // Try grove_session cookie first (SessionDO - fast path via service binding)
+  const groveSession = getCookie(cookieHeader, "grove_session");
+  if (groveSession && event.platform?.env?.AUTH) {
     try {
-      const authBaseUrl =
-        event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+      const response = await event.platform.env.AUTH.fetch(
+        "https://auth-api.grove.place/session/validate",
+        {
+          method: "POST",
+          headers: { Cookie: `grove_session=${groveSession}` },
+        }
+      );
 
-      // Get user info from Heartwood
-      const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      if (response.ok) {
+        const data = (await response.json()) as {
+          valid: boolean;
+          user?: {
+            id: string;
+            email: string;
+            name: string;
+            avatarUrl: string;
+            isAdmin: boolean;
+          };
+        };
 
-      if (userInfoResponse.ok) {
-        const userInfo = (await userInfoResponse.json()) as {
-          sub: string;
-          email: string;
-          name: string;
-          picture: string;
-          provider: string;
-        };
-        event.locals.user = {
-          id: userInfo.sub,
-          email: userInfo.email,
-          name: userInfo.name,
-          picture: userInfo.picture,
-          provider: userInfo.provider,
-        };
-      } else if (userInfoResponse.status === 401) {
-        // Token expired or invalid - try to refresh
-        const refreshToken = getCookie(cookieHeader, "refresh_token");
-        if (refreshToken) {
-          // Token refresh would happen here if needed
-          // For now, user will need to re-login
-          console.log("[Auth] Access token expired, refresh available");
+        if (data.valid && data.user) {
+          event.locals.user = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            picture: data.user.avatarUrl,
+            isAdmin: data.user.isAdmin,
+          };
         }
       }
     } catch (err) {
-      console.error("[Auth] Error verifying token:", err);
+      console.error("[Auth] SessionDO validation error:", err);
+    }
+  }
+
+  // Fallback to access_token cookie (legacy JWT - for backwards compatibility)
+  if (!event.locals.user) {
+    const accessToken = getCookie(cookieHeader, "access_token");
+    if (accessToken) {
+      try {
+        const authBaseUrl =
+          event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+
+        const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (userInfoResponse.ok) {
+          const userInfo = (await userInfoResponse.json()) as {
+            sub: string;
+            email: string;
+            name: string;
+            picture: string;
+            provider: string;
+          };
+          event.locals.user = {
+            id: userInfo.sub,
+            email: userInfo.email,
+            name: userInfo.name,
+            picture: userInfo.picture,
+            provider: userInfo.provider,
+          };
+        }
+      } catch (err) {
+        console.error("[Auth] JWT fallback error:", err);
+      }
     }
   }
 
