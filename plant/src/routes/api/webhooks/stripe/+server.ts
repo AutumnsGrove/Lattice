@@ -9,13 +9,20 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { verifyWebhookSignature, getCheckoutSession } from "$lib/server/stripe";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { sendEmail } from "$lib/server/send-email";
+import {
+  getPaymentFailedEmail,
+  getPaymentReceivedEmail,
+  getTrialEndingSoonEmail,
+} from "$lib/server/email-templates";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
   const stripeSecretKey = platform?.env?.STRIPE_SECRET_KEY;
   const webhookSecret = platform?.env?.STRIPE_WEBHOOK_SECRET;
+  const resendApiKey = platform?.env?.RESEND_API_KEY;
 
-  if (!db || !stripeSecretKey || !webhookSecret) {
+  if (!db || !stripeSecretKey || !webhookSecret || !resendApiKey) {
     console.error("[Webhook] Missing configuration");
     return json({ error: "Configuration error" }, { status: 500 });
   }
@@ -105,6 +112,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
         await handlePaymentFailed(
           db,
           event.data.object as Record<string, unknown>,
+          resendApiKey,
         );
         break;
       }
@@ -113,6 +121,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
         await handleInvoicePaid(
           db,
           event.data.object as Record<string, unknown>,
+          resendApiKey,
         );
         break;
       }
@@ -121,6 +130,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
         await handleTrialWillEnd(
           db,
           event.data.object as Record<string, unknown>,
+          resendApiKey,
         );
         break;
       }
@@ -283,6 +293,7 @@ async function handleSubscriptionDeleted(
 async function handlePaymentFailed(
   db: D1Database,
   invoice: Record<string, unknown>,
+  resendApiKey: string,
 ) {
   const subscriptionId = invoice.subscription as string;
 
@@ -297,58 +308,6 @@ async function handlePaymentFailed(
     )
     .bind(subscriptionId)
     .run();
-
-  // TODO: Send notification email to user via Resend
-  console.log(`[Webhook] Payment failed for subscription ${subscriptionId}`);
-}
-
-/**
- * Handle successful invoice payment (recurring billing)
- */
-async function handleInvoicePaid(
-  db: D1Database,
-  invoice: Record<string, unknown>,
-) {
-  const subscriptionId = invoice.subscription as string;
-  const amountPaid = invoice.amount_paid as number;
-  const invoiceId = invoice.id as string;
-  const lines = invoice.lines as
-    | { data?: Array<{ period?: { end?: number } }> }
-    | undefined;
-  const periodEnd = lines?.data?.[0]?.period?.end;
-
-  if (!subscriptionId) return;
-
-  // Update billing record with latest payment info
-  await db
-    .prepare(
-      `UPDATE platform_billing
-			 SET status = 'active',
-			     current_period_end = ?,
-			     updated_at = unixepoch()
-			 WHERE provider_subscription_id = ?`,
-    )
-    .bind(periodEnd || null, subscriptionId)
-    .run();
-
-  // Log payment for audit trail
-  console.log(
-    `[Webhook] Invoice ${invoiceId} paid: $${(amountPaid / 100).toFixed(2)} for subscription ${subscriptionId}`,
-  );
-
-  // TODO: Send payment confirmation email via Resend
-}
-
-/**
- * Handle trial ending soon (3 days before trial ends)
- */
-async function handleTrialWillEnd(
-  db: D1Database,
-  subscription: Record<string, unknown>,
-) {
-  const subscriptionId = subscription.id as string;
-  const trialEnd = subscription.trial_end as number;
-  const customerId = subscription.customer as string;
 
   // Get tenant info for the email
   const billing = await db
@@ -369,21 +328,210 @@ async function handleTrialWillEnd(
     return;
   }
 
-  const trialEndDate = new Date(trialEnd * 1000).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  // Send payment failed email
+  const email = getPaymentFailedEmail({
+    name: billing.display_name as string,
+    subdomain: billing.subdomain as string,
   });
 
-  console.log(
-    `[Webhook] Trial ending soon for ${billing.subdomain}.grove.place on ${trialEndDate}`,
+  const result = await sendEmail({
+    to: billing.email as string,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    resendApiKey,
+  });
+
+  if (result.success) {
+    console.log(
+      `[Webhook] Payment failed email sent to ${billing.email} for subscription ${subscriptionId}`,
+    );
+  } else {
+    console.error(
+      `[Webhook] Failed to send payment failed email: ${result.error}`,
+    );
+  }
+}
+
+/**
+ * Handle successful invoice payment (recurring billing)
+ */
+async function handleInvoicePaid(
+  db: D1Database,
+  invoice: Record<string, unknown>,
+  resendApiKey: string,
+) {
+  const subscriptionId = invoice.subscription as string;
+  const amountPaid = invoice.amount_paid as number;
+  const invoiceId = invoice.id as string;
+  const lines = invoice.lines as
+    | {
+        data?: Array<{
+          period?: { end?: number };
+          plan?: { interval?: string; nickname?: string };
+        }>;
+      }
+    | undefined;
+  const periodEnd = lines?.data?.[0]?.period?.end;
+  const planInterval = lines?.data?.[0]?.plan?.interval || "month";
+  const planNickname = lines?.data?.[0]?.plan?.nickname || "Unknown Plan";
+
+  if (!subscriptionId) return;
+
+  // Update billing record with latest payment info
+  await db
+    .prepare(
+      `UPDATE platform_billing
+			 SET status = 'active',
+			     current_period_end = ?,
+			     updated_at = unixepoch()
+			 WHERE provider_subscription_id = ?`,
+    )
+    .bind(periodEnd || null, subscriptionId)
+    .run();
+
+  // Get tenant info for the email
+  const billing = await db
+    .prepare(
+      `SELECT t.id, t.subdomain, u.email, u.display_name, pb.plan
+			 FROM platform_billing pb
+			 JOIN tenants t ON t.id = pb.tenant_id
+			 JOIN user_onboarding u ON u.id = t.onboarding_id
+			 WHERE pb.provider_subscription_id = ?`,
+    )
+    .bind(subscriptionId)
+    .first();
+
+  if (!billing) {
+    console.error(
+      `[Webhook] No tenant found for subscription ${subscriptionId}`,
+    );
+    return;
+  }
+
+  // Send payment received email
+  const email = getPaymentReceivedEmail({
+    name: billing.display_name as string,
+    subdomain: billing.subdomain as string,
+    amount: (amountPaid / 100).toFixed(2),
+    paymentDate: new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    planName: planNickname,
+    interval: planInterval,
+    nextPaymentDate: periodEnd
+      ? new Date(periodEnd * 1000).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "Unknown",
+    invoiceId,
+  });
+
+  const result = await sendEmail({
+    to: billing.email as string,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    resendApiKey,
+  });
+
+  if (result.success) {
+    console.log(
+      `[Webhook] Payment receipt sent to ${billing.email} for invoice ${invoiceId}`,
+    );
+  } else {
+    console.error(`[Webhook] Failed to send payment receipt: ${result.error}`);
+  }
+}
+
+/**
+ * Handle trial ending soon (3 days before trial ends)
+ */
+async function handleTrialWillEnd(
+  db: D1Database,
+  subscription: Record<string, unknown>,
+  resendApiKey: string,
+) {
+  const subscriptionId = subscription.id as string;
+  const trialEnd = subscription.trial_end as number;
+  const items = subscription.items as
+    | {
+        data?: Array<{
+          price?: {
+            unit_amount?: number;
+            recurring?: { interval?: string };
+            nickname?: string;
+          };
+        }>;
+      }
+    | undefined;
+  const priceAmount = items?.data?.[0]?.price?.unit_amount || 0;
+  const priceInterval = items?.data?.[0]?.price?.recurring?.interval || "month";
+  const priceNickname = items?.data?.[0]?.price?.nickname || "Unknown Plan";
+
+  // Get tenant info for the email
+  const billing = await db
+    .prepare(
+      `SELECT t.id, t.subdomain, u.email, u.display_name, pb.plan
+			 FROM platform_billing pb
+			 JOIN tenants t ON t.id = pb.tenant_id
+			 JOIN user_onboarding u ON u.id = t.onboarding_id
+			 WHERE pb.provider_subscription_id = ?`,
+    )
+    .bind(subscriptionId)
+    .first();
+
+  if (!billing) {
+    console.error(
+      `[Webhook] No tenant found for subscription ${subscriptionId}`,
+    );
+    return;
+  }
+
+  const trialEndDateFull = new Date(trialEnd * 1000).toLocaleDateString(
+    "en-US",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
   );
 
-  // TODO: Send "trial ending soon" email via Resend
-  // Email should include:
-  // - Their trial end date
-  // - What happens next (card will be charged)
-  // - Link to manage subscription / cancel if needed
-  // - Reassurance about what they get to keep
+  const trialEndDay = new Date(trialEnd * 1000).toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+
+  // Send trial ending soon email
+  const email = getTrialEndingSoonEmail({
+    name: billing.display_name as string,
+    subdomain: billing.subdomain as string,
+    trialEndDay,
+    trialEndDate: trialEndDateFull,
+    planName: priceNickname,
+    amount: (priceAmount / 100).toFixed(2).replace(".00", ""),
+    interval: priceInterval,
+  });
+
+  const result = await sendEmail({
+    to: billing.email as string,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    resendApiKey,
+  });
+
+  if (result.success) {
+    console.log(
+      `[Webhook] Trial ending email sent to ${billing.email} for ${billing.subdomain}.grove.place`,
+    );
+  } else {
+    console.error(
+      `[Webhook] Failed to send trial ending email: ${result.error}`,
+    );
+  }
 }
