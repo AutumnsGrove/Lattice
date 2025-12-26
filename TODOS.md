@@ -372,17 +372,20 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 > **Priority:** High - Solves auth coordination, D1 write scaling, and enables real-time features.
 > **Philosophy:** DOs are a coordination and caching layer, not a replacement for D1. D1 remains source of truth.
 
-### DO Phase 1: Auth (Heartwood) — HIGHEST PRIORITY
-- [ ] Implement `SessionDO` class with SQLite storage
-- [ ] Update Heartwood OAuth flow to use SessionDO
-- [ ] Update auth middleware in all workers to validate via SessionDO
-- [ ] Add "manage sessions" UI showing active devices
-- [ ] Test cross-subdomain auth
+### DO Phase 1: Auth (Heartwood) ✅ COMPLETE
+> **Status:** Fully implemented in GroveAuth (2025-12-26)
+> **Repo:** https://github.com/AutumnsGrove/GroveAuth
 
-**Expected improvements:**
-- Login time: 15 seconds → 2-3 seconds
-- Session validation: D1 query → DO call (sub-millisecond if cached)
-- "Log out all devices" becomes trivial
+- [x] Implement `SessionDO` class with SQLite storage (`src/durables/SessionDO.ts`)
+- [x] Update Heartwood OAuth flow to use SessionDO (`src/routes/oauth/google.ts`)
+- [x] Update auth middleware in all workers to validate via SessionDO (`hooks.server.ts`)
+- [x] Add "manage sessions" UI showing active devices (`frontend/src/routes/dashboard/devices/`)
+- [x] Cross-subdomain auth via `grove_session` cookie (Domain=.grove.place)
+
+**Delivered improvements:**
+- Session validation: D1 query → SessionDO call (sub-millisecond if cached)
+- "Log out all devices" via `/session/revoke-all`
+- Device management UI at `heartwood.grove.place/dashboard/devices`
 
 ### DO Phase 2: Tenant Coordination
 - [ ] Implement `TenantDO` class with SQLite storage
