@@ -95,7 +95,7 @@
 			<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
 				<!-- Copyright & Legal Links -->
 				<div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs font-sans text-foreground-subtle">
-					<span>&copy; {new Date().getFullYear()} Autumn's Grove</span>
+					<span>Made with care by Autumn</span>
 					<span class="text-divider hidden sm:inline">·</span>
 					<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
 					<span class="text-divider">·</span>
