@@ -1,3 +1,8 @@
+<!--
+  Grove — A place to Be
+  Copyright (c) 2025 Autumn Brown
+  Licensed under AGPL-3.0
+-->
 <script lang="ts">
 	import type { Season } from '../palette';
 	import { greens, autumn } from '../palette';
