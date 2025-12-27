@@ -32,7 +32,7 @@
 	</div>
 
 	<!-- Auth options -->
-	<div class="card max-w-md mx-auto">
+	<div class="card max-w-md mx-auto bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30">
 		<h2 class="text-lg font-medium text-foreground mb-6 text-center">
 			Choose how to sign in
 		</h2>

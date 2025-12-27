@@ -1,6 +1,7 @@
 <script>
   import { Card, Spinner } from '$lib/ui';
   import { api } from "$lib/utils/api.js";
+  import { FileText, ChefHat, Image, BarChart3, Calendar, Monitor, Settings, Globe } from 'lucide-svelte';
 
   /**
    * @typedef {Object} HealthStatus
@@ -87,35 +88,35 @@
     <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Quick Actions</h2>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
       <a href="/admin/blog" class="action-card">
-        <span class="text-3xl">&#x1F4DD;</span>
+        <FileText class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">Manage Blog Posts</span>
       </a>
       <a href="/admin/recipes" class="action-card">
-        <span class="text-3xl">&#x1F373;</span>
+        <ChefHat class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">Manage Recipes</span>
       </a>
       <a href="/admin/images" class="action-card">
-        <span class="text-3xl">&#x1F4F7;</span>
+        <Image class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">Upload Images</span>
       </a>
       <a href="/admin/analytics" class="action-card">
-        <span class="text-3xl">&#x1F4CA;</span>
+        <BarChart3 class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">View Analytics</span>
       </a>
       <a href="/admin/timeline" class="action-card">
-        <span class="text-3xl">&#x1F4C5;</span>
+        <Calendar class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">Timeline</span>
       </a>
       <a href="/admin/logs" class="action-card">
-        <span class="text-3xl">&#x1F5A5;</span>
+        <Monitor class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">System Console</span>
       </a>
       <a href="/admin/settings" class="action-card">
-        <span class="text-3xl">&#x2699;</span>
+        <Settings class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">Settings</span>
       </a>
       <a href="/" class="action-card" target="_blank">
-        <span class="text-3xl">&#x1F310;</span>
+        <Globe class="w-8 h-8 text-accent-muted" />
         <span class="font-medium text-center">View Site</span>
       </a>
     </div>

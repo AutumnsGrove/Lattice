@@ -104,7 +104,7 @@
 
 	<!-- Billing toggle -->
 	<div class="flex justify-center mb-8">
-		<div class="inline-flex items-center gap-3 p-1 rounded-lg bg-surface border border-default">
+		<div class="inline-flex items-center gap-3 p-1 rounded-lg bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30">
 			<button
 				onclick={() => (billingCycle = 'monthly')}
 				class="px-4 py-2 rounded-md text-sm font-medium transition-all"
