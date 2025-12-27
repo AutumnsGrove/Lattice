@@ -712,4 +712,126 @@
     outline: none;
     box-shadow: inset 0 0 0 2px var(--grove-500);
   }
+
+  /* ─────────────────────────────────────────────────────────────
+     GLASSMORPHISM UTILITIES
+
+     Apply these classes to any element for glass effects.
+     Combine with Tailwind backdrop-blur-* for blur intensity.
+
+     Usage:
+       <div class="glass">...</div>
+       <div class="glass-accent backdrop-blur-md">...</div>
+     ───────────────────────────────────────────────────────────── */
+
+  /* Base glass - light translucent background */
+  .glass {
+    background-color: rgb(255 255 255 / 0.7);
+    border: 1px solid rgb(255 255 255 / 0.3);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass) {
+    background-color: rgb(30 41 59 / 0.6);
+    border-color: rgb(71 85 105 / 0.3);
+  }
+
+  /* Glass surface - higher opacity for headers/navbars */
+  .glass-surface {
+    background-color: rgb(255 255 255 / 0.95);
+    border: 1px solid rgb(255 255 255 / 0.3);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass-surface) {
+    background-color: rgb(30 41 59 / 0.95);
+    border-color: rgb(71 85 105 / 0.3);
+  }
+
+  /* Glass overlay - dark backdrop for modals */
+  .glass-overlay {
+    background-color: rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass-overlay) {
+    background-color: rgb(0 0 0 / 0.6);
+  }
+
+  /* Glass accent - tinted with accent color */
+  .glass-accent {
+    background-color: rgb(22 163 74 / 0.2);
+    border: 1px solid rgb(22 163 74 / 0.3);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass-accent) {
+    background-color: rgb(22 163 74 / 0.15);
+    border-color: rgb(22 163 74 / 0.2);
+  }
+
+  /* Glass muted - subtle, barely visible */
+  .glass-muted {
+    background-color: rgb(255 255 255 / 0.4);
+    border: 1px solid rgb(255 255 255 / 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass-muted) {
+    background-color: rgb(15 23 42 / 0.3);
+    border-color: rgb(51 65 85 / 0.2);
+  }
+
+  /* Glass tint - light background for text readability */
+  .glass-tint {
+    background-color: rgb(255 255 255 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  :is(.dark .glass-tint) {
+    background-color: rgb(15 23 42 / 0.5);
+    border-color: rgb(51 65 85 / 0.3);
+  }
+
+  /* Glass dark - dark translucent background */
+  .glass-dark {
+    background-color: rgb(15 23 42 / 0.7);
+    border: 1px solid rgb(51 65 85 / 0.3);
+    backdrop-filter: blur(4px);
+    color: white;
+  }
+
+  :is(.dark .glass-dark) {
+    background-color: rgb(2 6 23 / 0.8);
+    border-color: rgb(51 65 85 / 0.3);
+  }
+
+  /* Glass frosted - stronger effect, more opaque */
+  .glass-frosted {
+    background-color: rgb(255 255 255 / 0.85);
+    border: 1px solid rgb(255 255 255 / 0.4);
+    backdrop-filter: blur(12px);
+  }
+
+  :is(.dark .glass-frosted) {
+    background-color: rgb(30 41 59 / 0.8);
+    border-color: rgb(71 85 105 / 0.4);
+  }
+
+  /* No border variants */
+  .glass-borderless {
+    border: none;
+  }
+
+  /* Hover states for interactive glass elements */
+  .glass-hover:hover {
+    background-color: rgb(255 255 255 / 0.85);
+    border-color: rgb(255 255 255 / 0.5);
+  }
+
+  :is(.dark .glass-hover:hover) {
+    background-color: rgb(30 41 59 / 0.75);
+    border-color: rgb(71 85 105 / 0.4);
+  }
 }
