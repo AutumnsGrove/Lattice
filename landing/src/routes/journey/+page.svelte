@@ -94,7 +94,7 @@
 	url="/journey"
 />
 
-<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
+<main class="min-h-screen flex flex-col">
 	<Header />
 
 	<article class="flex-1 px-6 py-12">
