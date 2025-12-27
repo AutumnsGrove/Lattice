@@ -25,6 +25,12 @@ export { default as CollapsibleSection } from './CollapsibleSection.svelte';
 export { default as Logo } from './Logo.svelte';
 export { default as LogoLoader } from './LogoLoader.svelte';
 
+// Glass suite - glassmorphism components
+export { default as Glass } from './Glass.svelte';
+export { default as GlassButton } from './GlassButton.svelte';
+export { default as GlassCard } from './GlassCard.svelte';
+export { default as GlassOverlay } from './GlassOverlay.svelte';
+
 // Table sub-components (from primitives)
 export {
 	TableHeader,

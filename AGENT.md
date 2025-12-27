@@ -187,6 +187,13 @@ docs: Update README
 - **When building Svelte 5 applications** → Use skill: `svelte5-development`
 - **For SvelteKit routing and forms** → Use skill: `svelte5-development`
 
+### Grove UI Design
+- **When creating or enhancing Grove pages** → Use skill: `grove-ui-design`
+- **When adding decorative nature elements** → Use skill: `grove-ui-design`
+- **When implementing glassmorphism effects** → Use skill: `grove-ui-design`
+- **When working with seasonal themes** → Use skill: `grove-ui-design`
+- **When building navigation patterns** → Use skill: `grove-ui-design`
+
 ### CLI Development
 - **When building terminal interfaces** → Use skill: `rich-terminal-output`
 - **For Rich library patterns** → Use skill: `rich-terminal-output`
@@ -227,6 +234,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `cloudflare-deployment` | Workers, KV, R2, D1 |
 | `svelte5-development` | Svelte 5 with runes |
 | `rich-terminal-output` | Terminal UI with Rich |
+| `grove-ui-design` | Glassmorphism, seasons, forests, warm UI |
 | `research-strategy` | Systematic research |
 
 ---
