@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { Check } from 'lucide-svelte';
 </script>
 
 <SEO
@@ -10,7 +11,7 @@
 	url="/pricing"
 />
 
-<main class="min-h-screen flex flex-col">
+<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
 	<Header maxWidth="wide" />
 
 	<!-- Content -->
@@ -32,7 +33,7 @@
 			</header>
 
 			<!-- Pricing Table -->
-			<div class="overflow-x-auto mb-8">
+			<div class="overflow-x-auto mb-8 bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/30 dark:border-slate-700/30 shadow-sm">
 				<table class="w-full text-left border-collapse">
 					<thead>
 						<tr class="border-b-2 border-default">
@@ -63,26 +64,10 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">Blog</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">Blog Posts</td>
@@ -110,31 +95,11 @@
 						</tr>
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">Meadow</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">Public Comments</td>
@@ -150,11 +115,7 @@
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">BYOD</td>
-							<td class="py-3 px-3 text-center text-accent-muted">
-								<svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
-							</td>
+							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">@grove.place Email</td>
@@ -197,7 +158,7 @@
 			</p>
 
 			<!-- Details Box -->
-			<div class="card p-8">
+			<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-white/30 dark:border-slate-700/30 shadow-sm">
 				<h2 class="text-xl font-serif text-foreground mb-6">The Fine Print</h2>
 
 				<div class="space-y-6 text-sm font-sans text-foreground-muted">

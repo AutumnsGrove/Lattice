@@ -11,7 +11,7 @@
 	url="/about"
 />
 
-<main class="min-h-screen flex flex-col">
+<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
 	<Header />
 
 	<!-- Content -->
@@ -55,21 +55,21 @@
 					</p>
 
 					<div class="grid gap-6">
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">The Login Problem</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								When you log in to one Grove site, that login should work everywhere in Grove. Getting this handoff smooth and fast was really hard. The solution: a special system that coordinates all the login stuff in one place, like a really smart bouncer who remembers every face.
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">The Speed Problem</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Every time someone visits a page, Grove used to have to look up a bunch of information from a database. That's slow when thousands of people are visiting at once. The solution: keep the most-used information ready to go, and only check the database occasionally.
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">The Scale Problem</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								What works for 10 users might break with 1,000 users, and definitely breaks with 100,000. We're building systems that automatically handle more load without anyone having to do anything manually.

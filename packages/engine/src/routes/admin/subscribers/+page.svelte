@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from 'lucide-svelte';
+
 	interface Subscriber {
 		email: string;
 		created_at: string;
@@ -76,7 +78,7 @@
 
 <div class="page-header">
 	<div>
-		<h1>📧 Email Subscribers</h1>
+		<h1 class="flex items-center gap-3"><Mail class="w-7 h-7" /> Email Subscribers</h1>
 		<p class="subtitle">
 			{data.totalActive} active subscriber{data.totalActive === 1 ? '' : 's'}
 			{#if data.totalUnsubscribed > 0}
@@ -90,7 +92,7 @@
 <div class="danger-zone">
 	<div class="danger-header">
 		<div>
-			<h2>⚠️ Mass Email Zone</h2>
+			<h2 class="flex items-center gap-2"><AlertTriangle class="w-5 h-5" /> Mass Email Zone</h2>
 			<p>
 				Use with extreme care. This copies all {data.totalActive} subscriber email{data.totalActive ===
 				1
@@ -100,15 +102,15 @@
 		</div>
 	</div>
 	<div class="danger-actions">
-		<button class="btn-danger" onclick={copyAllEmails}>
+		<button class="btn-danger inline-flex items-center gap-2" onclick={copyAllEmails}>
 			{#if copiedAll}
-				✓ Copied!
+				<Check class="w-4 h-4" /> Copied!
 			{:else}
-				📋 Copy All Emails (comma-separated)
+				<Copy class="w-4 h-4" /> Copy All Emails (comma-separated)
 			{/if}
 		</button>
-		<button class="btn-secondary" onclick={exportAsList}> 📥 Export as List (.txt) </button>
-		<button class="btn-secondary" onclick={exportAsCSV}> 📥 Export as CSV </button>
+		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsList}><Download class="w-4 h-4" /> Export as List (.txt)</button>
+		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsCSV}><Download class="w-4 h-4" /> Export as CSV</button>
 	</div>
 </div>
 
@@ -118,7 +120,7 @@
 
 	{#if subscribers.length === 0}
 		<div class="empty-state">
-			<div class="empty-icon">📭</div>
+			<div class="empty-icon"><MailOpen class="w-12 h-12 text-foreground-muted" /></div>
 			<p>No subscribers yet</p>
 		</div>
 	{:else}
@@ -145,11 +147,11 @@
 								<span class="badge">{subscriber.source}</span>
 							</td>
 							<td class="text-right">
-								<button class="btn-copy" onclick={() => copyEmail(subscriber.email)}>
+								<button class="btn-copy inline-flex items-center gap-1" onclick={() => copyEmail(subscriber.email)}>
 									{#if copiedEmail === subscriber.email}
-										✓ Copied
+										<Check class="w-4 h-4" /> Copied
 									{:else}
-										📋 Copy
+										<Copy class="w-4 h-4" /> Copy
 									{/if}
 								</button>
 							</td>

@@ -2,6 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { Tag, Sprout } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -93,7 +94,7 @@
 	url="/journey"
 />
 
-<main class="min-h-screen flex flex-col">
+<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
 	<Header />
 
 	<article class="flex-1 px-6 py-12">
@@ -253,8 +254,8 @@
 								<div class="ml-12 md:ml-0 md:w-1/2 {isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}">
 									<div class="card p-4">
 										<div class="text-xs font-mono text-foreground-faint mb-1">{snapshot.date}</div>
-										<div class="font-serif text-accent-muted mb-2">
-											🏷️ {snapshot.label}
+										<div class="font-serif text-accent-muted mb-2 flex items-center gap-2">
+											<Tag class="w-4 h-4" /> {snapshot.label}
 										</div>
 										<div class="text-sm text-foreground-muted font-sans">
 											{formatNumber(snapshot.totalCodeLines)} lines · {formatNumber(snapshot.commits)} commits
@@ -411,7 +412,7 @@
 			<!-- Empty state -->
 			<section class="mb-16">
 				<div class="card p-12 text-center">
-					<div class="text-4xl mb-4">🌱</div>
+					<div class="mb-4 flex justify-center"><Sprout class="w-10 h-10 text-accent-muted" /></div>
 					<h2 class="text-xl font-serif text-foreground mb-2">No snapshots yet</h2>
 					<p class="text-foreground-muted font-sans">
 						The journey is just beginning. Check back after the first release.
@@ -425,8 +426,8 @@
 				<p class="text-foreground-faint font-sans text-sm mb-2">
 					Snapshots are automatically generated with each release.
 				</p>
-				<p class="text-foreground-subtle font-sans italic">
-					Building something meaningful, one commit at a time. 🌱
+				<p class="text-foreground-subtle font-sans italic inline-flex items-center gap-2 justify-center">
+					Building something meaningful, one commit at a time. <Sprout class="w-4 h-4 text-accent-muted" />
 				</p>
 			</section>
 		</div>

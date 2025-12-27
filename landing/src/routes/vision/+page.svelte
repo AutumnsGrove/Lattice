@@ -11,7 +11,7 @@
 	url="/vision"
 />
 
-<main class="min-h-screen flex flex-col">
+<main class="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950">
 	<Header />
 
 	<!-- Content -->
@@ -60,7 +60,7 @@
 					<h2 class="text-2xl font-serif text-foreground mb-6">Core Values</h2>
 
 					<div class="grid gap-6">
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">Accessibility</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Everyone deserves a voice online. Pricing should never be the barrier that stops someone from sharing their story.
@@ -68,7 +68,7 @@
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">Ownership</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Your words are yours. Your data is yours. You can export everything, anytime.
@@ -76,7 +76,7 @@
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">Simplicity</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								No feature bloat. No endless settings. Write in Markdown. Upload images. Publish. That's it.
@@ -84,7 +84,7 @@
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">Community With Care</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage.
@@ -92,7 +92,7 @@
 							</p>
 						</div>
 
-						<div class="card p-6">
+						<div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/30 dark:border-slate-700/30 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">AI Sanctuary</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning.
