@@ -185,13 +185,14 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 				background: rgba(120, 53, 15, 0.1);
 				border-right: 2px solid rgba(120, 53, 15, 0.2);
 			">
-				<div style="width: 180px; height: 180px;">
+				<div style="display: flex; width: 180px; height: 180px;">
 					${logoSvg}
 				</div>
 			</div>
 
 			<!-- Right 3/4: Autumn Forest -->
 			<div style="
+				display: flex;
 				position: relative;
 				width: 900px;
 				height: 100%;
