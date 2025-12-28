@@ -99,7 +99,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 				background: rgba(255, 255, 255, 0.05);
 				border-right: 2px solid rgba(255, 255, 255, 0.1);
 			">
-				<div style="width: 180px; height: 180px; opacity: 0.9;">
+				<div style="display: flex; width: 180px; height: 180px; opacity: 0.9;">
 					${logoSvg}
 				</div>
 			</div>
