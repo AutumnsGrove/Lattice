@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
 
 	const headers = [
@@ -16,10 +17,11 @@
 	];
 </script>
 
-<svelte:head>
-	<title>Credits — Grove</title>
-	<meta name="description" content="The people, projects, and tools that make Grove possible." />
-</svelte:head>
+<SEO
+	title="Credits — Grove"
+	description="The people, projects, and tools that make Grove possible."
+	url="/credits"
+/>
 
 <main class="min-h-screen flex flex-col">
 	<Header />
