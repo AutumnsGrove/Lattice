@@ -24,10 +24,13 @@
 		MessageCircle,
 		// Journey
 		ArrowRight,
-		Sparkles,
-		Clock
+		Clock,
+		// Pricing tier icons
+		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown
 	} from 'lucide-svelte';
-
 	// Auth section state
 	let authExpanded = $state(false);
 
@@ -42,32 +45,74 @@
 		<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
 	</svg>`;
 
+	// Feature list for "What you'll get" section
+	const features = [
+		{
+			icon: Leaf,
+			title: 'Your own subdomain',
+			description: 'yourname.grove.place — a corner of the web that\'s truly yours.'
+		},
+		{
+			icon: Shield,
+			title: 'Shade protection',
+			description: 'Your words are not training data. AI crawlers blocked at the gate.'
+		},
+		{
+			icon: Palette,
+			title: 'Beautiful themes',
+			description: 'Start beautiful by default. Customize when you\'re ready.'
+		},
+		{
+			icon: Rss,
+			title: 'RSS built in',
+			description: 'The open web, the way it should be. Readers can follow you anywhere.'
+		},
+		{
+			icon: HardDrive,
+			title: 'Image hosting',
+			description: 'Upload your images. We\'ll optimize them for you.'
+		},
+		{
+			icon: Download,
+			title: 'Data export',
+			description: 'Your words are yours. Export everything, anytime.'
+		}
+	];
+
+	// Icon mapping for pricing tiers
+	const planIcons = {
+		sprout: Sprout,
+		sapling: TreeDeciduous,
+		oak: Trees,
+		evergreen: Crown
+	};
+
 	// Plan tier summaries for preview cards
 	const planPreviews = [
 		{
 			name: 'Seedling',
 			price: 8,
 			highlights: ['50 posts', '1 GB storage', '3 themes'],
-			color: 'grove'
+			icon: 'sprout' as keyof typeof planIcons
 		},
 		{
 			name: 'Sapling',
 			price: 12,
 			highlights: ['250 posts', '5 GB storage', 'Email forwarding'],
-			color: 'grove',
+			icon: 'sapling' as keyof typeof planIcons,
 			popular: true
 		},
 		{
 			name: 'Oak',
 			price: 25,
 			highlights: ['Unlimited posts', 'Custom domain', 'Theme customizer'],
-			color: 'grove'
+			icon: 'oak' as keyof typeof planIcons
 		},
 		{
 			name: 'Evergreen',
 			price: 35,
 			highlights: ['Everything', '100 GB storage', 'Domain included'],
-			color: 'grove'
+			icon: 'evergreen' as keyof typeof planIcons
 		}
 	];
 </script>
@@ -101,7 +146,7 @@
 
 	<!-- Section 1: Welcome -->
 	<section class="text-center space-y-6">
-		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent mb-2">
+		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md border border-white/40 dark:border-emerald-800/25 mb-2">
 			<Logo class="w-12 h-12" />
 		</div>
 
@@ -138,65 +183,17 @@
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">What you'll get</h2>
 
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<Leaf class="w-5 h-5 text-primary" />
+			{#each features as feature}
+				<div class="glass-grove rounded-xl p-5 hover-lift">
+					<div class="flex items-center gap-3 mb-2">
+						<div class="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30">
+							<feature.icon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						</div>
+						<h3 class="font-medium text-foreground">{feature.title}</h3>
+					</div>
+					<p class="text-sm text-foreground-muted">{feature.description}</p>
 				</div>
-				<div>
-					<h3 class="font-medium text-foreground">Your own subdomain</h3>
-					<p class="text-sm text-foreground-muted">yourname.grove.place — a corner of the web that's truly yours.</p>
-				</div>
-			</GlassCard>
-
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<Shield class="w-5 h-5 text-primary" />
-				</div>
-				<div>
-					<h3 class="font-medium text-foreground">Shade protection</h3>
-					<p class="text-sm text-foreground-muted">Your words are not training data. AI crawlers blocked at the gate.</p>
-				</div>
-			</GlassCard>
-
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<Palette class="w-5 h-5 text-primary" />
-				</div>
-				<div>
-					<h3 class="font-medium text-foreground">Beautiful themes</h3>
-					<p class="text-sm text-foreground-muted">Start beautiful by default. Customize when you're ready.</p>
-				</div>
-			</GlassCard>
-
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<Rss class="w-5 h-5 text-primary" />
-				</div>
-				<div>
-					<h3 class="font-medium text-foreground">RSS built in</h3>
-					<p class="text-sm text-foreground-muted">The open web, the way it should be. Readers can follow you anywhere.</p>
-				</div>
-			</GlassCard>
-
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<HardDrive class="w-5 h-5 text-primary" />
-				</div>
-				<div>
-					<h3 class="font-medium text-foreground">Image hosting</h3>
-					<p class="text-sm text-foreground-muted">Upload your images. We'll optimize them for you.</p>
-				</div>
-			</GlassCard>
-
-			<GlassCard variant="default" class="flex items-start gap-4 hover-lift">
-				<div class="p-2 rounded-lg bg-accent shrink-0">
-					<Download class="w-5 h-5 text-primary" />
-				</div>
-				<div>
-					<h3 class="font-medium text-foreground">Data export</h3>
-					<p class="text-sm text-foreground-muted">Your words are yours. Export everything, anytime.</p>
-				</div>
-			</GlassCard>
+			{/each}
 		</div>
 	</section>
 
@@ -212,26 +209,26 @@
 
 			<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
 				<div class="space-y-2">
-					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent">
-						<Users class="w-5 h-5 text-primary" />
+					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+						<Users class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<p class="text-sm text-foreground-muted">Queer-friendly</p>
 				</div>
 				<div class="space-y-2">
-					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent">
-						<Eye class="w-5 h-5 text-primary" />
+					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+						<Eye class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<p class="text-sm text-foreground-muted">No public metrics</p>
 				</div>
 				<div class="space-y-2">
-					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent">
-						<Heart class="w-5 h-5 text-primary" />
+					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+						<Heart class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<p class="text-sm text-foreground-muted">Built with care</p>
 				</div>
 				<div class="space-y-2">
-					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent">
-						<MessageCircle class="w-5 h-5 text-primary" />
+					<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+						<MessageCircle class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<p class="text-sm text-foreground-muted">Private reactions</p>
 				</div>
@@ -247,7 +244,7 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-3 stagger-children">
+		<div class="grid grid-cols-2 gap-3 pt-3 stagger-children">
 			{#each planPreviews as plan}
 				<a
 					href="https://grove.place/pricing"
@@ -258,10 +255,15 @@
 						class="relative text-center hover-lift {plan.popular ? 'ring-2 ring-primary/30' : ''}"
 					>
 						{#if plan.popular}
-							<span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white">
+							<span class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-medium px-3 py-1 rounded-full bg-primary text-white shadow-sm">
 								Popular
 							</span>
 						{/if}
+						<!-- Tier Icon -->
+						{@const PlanIcon = planIcons[plan.icon]}
+						<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-3">
+							<PlanIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						</div>
 						<h3 class="font-medium text-foreground mb-1">{plan.name}</h3>
 						<p class="text-2xl font-semibold text-foreground mb-2">
 							${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
@@ -305,7 +307,7 @@
 						onclick={() => authExpanded = true}
 						class="btn-primary w-full flex items-center justify-center gap-2"
 					>
-						<Sparkles class="w-5 h-5" />
+						<Sprout class="w-5 h-5" />
 						Get Started
 						<ChevronDown class="w-4 h-4" />
 					</button>
@@ -373,9 +375,9 @@
 	<!-- Opening Soon Message -->
 	<section class="text-center space-y-4 pb-4">
 		<div class="flex items-center justify-center gap-2 animate-pulse-subtle">
-			<Sparkles class="w-5 h-5 text-primary" />
+			<Leaf class="w-5 h-5 text-primary" />
 			<span class="text-foreground-muted">Opening soon</span>
-			<Sparkles class="w-5 h-5 text-primary" />
+			<Leaf class="w-5 h-5 text-primary" />
 		</div>
 		<p class="text-sm text-foreground-subtle max-w-sm mx-auto">
 			We're putting the finishing touches on a few things. When we're ready, you'll be the first to know.

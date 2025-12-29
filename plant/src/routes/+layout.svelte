@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
-	import { Logo } from '@autumnsgrove/groveengine/ui';
+	import { GlassNavbar } from '@autumnsgrove/groveengine/ui';
 
 	// Determine current step based on route
 	let currentStep = $derived((() => {
@@ -30,32 +30,22 @@
 </svelte:head>
 
 <div class="min-h-screen bg-page leaf-pattern">
-	<!-- Header with logo and progress -->
-	<header class="border-b border-default bg-surface-elevated/80 backdrop-blur-sm">
-		<div class="max-w-2xl mx-auto px-4 py-4">
-			<div class="flex items-center justify-between">
-				<!-- Logo -->
-				<a href="https://grove.place" class="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-					<Logo class="w-8 h-8" />
-					<span class="font-medium">Grove</span>
-				</a>
-
-				<!-- Progress steps (hidden on step 1) -->
-				{#if currentStep > 1}
-					<div class="step-indicator">
-						{#each steps as step}
-							<div
-								class="step-dot"
-								class:active={step.num === currentStep}
-								class:completed={step.num < currentStep}
-								title={step.label}
-							></div>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		</div>
-	</header>
+	<!-- Glass navbar with progress steps -->
+	<GlassNavbar logoHref="https://grove.place" title="Grove" maxWidth="narrow">
+		{#snippet actions()}
+			<!-- Progress steps (hidden on step 1) -->
+			{#if currentStep > 1}
+				<div class="step-indicator">
+					{#each steps as step}
+						<div
+							class="step-dot {step.num === currentStep ? 'active' : ''} {step.num < currentStep ? 'completed' : ''}"
+							title={step.label}
+						></div>
+					{/each}
+				</div>
+			{/if}
+		{/snippet}
+	</GlassNavbar>
 
 	<!-- Main content -->
 	<main class="max-w-2xl mx-auto px-4 py-8 md:py-12">

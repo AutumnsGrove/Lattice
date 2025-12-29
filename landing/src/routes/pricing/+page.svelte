@@ -4,6 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import {
 		Check,
+		// Row icons
 		PenLine,
 		FileText,
 		HardDrive,
@@ -13,7 +14,12 @@
 		Globe,
 		Mail,
 		LifeBuoy,
-		CalendarDays
+		CalendarDays,
+		// Tier header icons
+		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown
 	} from 'lucide-svelte';
 </script>
 
@@ -55,18 +61,30 @@
 								<div class="text-2xl font-sans font-bold text-accent-muted">$0</div>
 							</th>
 							<th class="py-4 px-3 text-center">
+								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
+									<Sprout class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
 								<div class="font-serif text-foreground">Seedling</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$8<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
+								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
+									<TreeDeciduous class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
 								<div class="font-serif text-foreground">Sapling</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$12<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
+								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
+									<Trees class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
 								<div class="font-serif text-foreground">Oak</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$25<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
+								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
+									<Crown class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+								</div>
 								<div class="font-serif text-foreground">Evergreen</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$35<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
