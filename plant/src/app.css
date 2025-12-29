@@ -45,6 +45,9 @@
 	--color-accent-bg: var(--grove-50);
 	--color-accent-border: var(--grove-200);
 	--color-accent-text: var(--grove-800);
+	--color-accent-subtle: var(--grove-100);
+	--color-accent-muted: var(--grove-600);
+	--color-divider: var(--grove-200);
 
 	--color-error: #dc2626;
 	--color-error-bg: #fee2e2;
@@ -80,6 +83,9 @@
 	--color-accent-bg: var(--grove-950);
 	--color-accent-border: var(--grove-900);
 	--color-accent-text: var(--grove-200);
+	--color-accent-subtle: var(--grove-900);
+	--color-accent-muted: var(--grove-400);
+	--color-divider: #363c44;
 
 	--color-error: #f87171;
 	--color-error-bg: rgba(220, 38, 38, 0.15);
@@ -315,6 +321,21 @@
 
 .border-default { border-color: var(--color-border); }
 .border-subtle { border-color: var(--color-border-subtle); }
+
+.text-accent-muted { color: var(--color-accent-muted); }
+.bg-accent-subtle\/20 { background-color: rgba(var(--color-accent-subtle), 0.2); }
+
+/* Glass effect for Grove cards - matches landing page */
+.glass-grove {
+	background: rgba(255, 255, 255, 0.6);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border: 1px solid var(--color-divider);
+}
+
+.dark .glass-grove {
+	background: rgba(30, 41, 59, 0.5);
+}
 
 /* Subtle vine pattern background - organic, forest-like */
 .leaf-pattern {
