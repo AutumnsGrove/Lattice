@@ -1,7 +1,14 @@
 <script>
-  import { Button, Badge } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, toast } from '$lib/ui';
+  import { api } from '$lib/utils/api.js';
+  import { Trash2 } from 'lucide-svelte';
 
   let { data } = $props();
+
+  /** @type {{ slug: string, title: string } | null} */
+  let postToDelete = $state(null);
+  let showDeleteDialog = $state(false);
+  let deleting = $state(false);
 
   /** @param {string} dateString */
   function formatDate(dateString) {
@@ -10,6 +17,35 @@
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  /** @param {{ slug: string, title: string }} post */
+  function confirmDelete(post) {
+    postToDelete = post;
+    showDeleteDialog = true;
+  }
+
+  async function handleDelete() {
+    if (!postToDelete) return;
+
+    deleting = true;
+    try {
+      await api.delete(`/api/posts/${postToDelete.slug}`);
+      // Remove from local list
+      data.posts = data.posts.filter((/** @type {{ slug: string }} */ p) => p.slug !== postToDelete?.slug);
+      showDeleteDialog = false;
+      postToDelete = null;
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast.error('Failed to delete post', { description: 'Please try again.' });
+    } finally {
+      deleting = false;
+    }
+  }
+
+  function handleCancelDelete() {
+    showDeleteDialog = false;
+    postToDelete = null;
   }
 </script>
 
@@ -38,7 +74,7 @@
         {#each data.posts as post (post.slug)}
           <tr>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
                 {post.title}
               </a>
               {#if post.description}
@@ -58,8 +94,17 @@
               {/if}
             </td>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
               <a href="/admin/blog/edit/{post.slug}" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
+              <button
+                onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
+                disabled={deleting}
+                class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                aria-label="Delete {post.title}"
+              >
+                <Trash2 class="w-3.5 h-3.5" />
+                <span class="max-md:hidden">Delete</span>
+              </button>
             </td>
           </tr>
         {:else}
@@ -86,6 +131,19 @@
     </ul>
   </div>
 </div>
+
+<!-- Delete Confirmation Dialog -->
+<GlassConfirmDialog
+  bind:open={showDeleteDialog}
+  title="Delete Post"
+  message={`Are you sure you want to delete "${postToDelete?.title}"? This action cannot be undone.`}
+  confirmLabel="Delete Post"
+  cancelLabel="Cancel"
+  variant="danger"
+  loading={deleting}
+  onconfirm={handleDelete}
+  oncancel={handleCancelDelete}
+/>
 
 <style>
   .info-box {

@@ -135,6 +135,21 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 
 ---
 
+## Trails
+**Personal Roadmaps** · `username.grove.place/trail`
+
+A trail is the path you're walking—the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
+
+Trails lets Grove users share their own roadmaps with the world. Whether you're building a project, planning a content series, or just charting where your creative work is headed, Trails gives you a place to show the journey. Create waypoints marking milestones, group them into phases with custom names, and let visitors follow along as you make progress.
+
+For those who want to dream bigger: Oak and Evergreen users can bring the full Grove aesthetic to their trails—seasonal themes, nature decorations, custom assets. Or keep it simple with a clean timeline. Your trail, your way.
+
+**Templates available for:** Writers planning content series, developers building in public, musicians tracking album progress, restaurants showing seasonal menus, and more.
+
+*The path becomes clear by walking it.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -152,6 +167,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Ivy** | Email | ivy.grove.place |
 | **Amber** | Storage management | amber.grove.place |
 | **Shade** | AI content protection | grove.place/shade |
+| **Trails** | Personal roadmaps | username.grove.place/trail |
 
 ---
 
@@ -174,6 +190,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Ivy | GroveMail |
 | Amber | GroveStorage |
 | Shade | GroveShade |
+| Trails | GroveTrails |
 
 ---
 

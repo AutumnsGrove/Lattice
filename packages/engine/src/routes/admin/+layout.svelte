@@ -1,8 +1,20 @@
 <script>
   import { Toast } from "$lib/ui/components/ui";
+  import {
+    LayoutDashboard,
+    FileText,
+    FileStack,
+    Image,
+    Mail,
+    BarChart3,
+    Calendar,
+    Settings,
+    ChevronLeft
+  } from "lucide-svelte";
 
   let { data, children } = $props();
   let sidebarOpen = $state(false);
+  let sidebarCollapsed = $state(false);
 
   function toggleSidebar() {
     sidebarOpen = !sidebarOpen;
@@ -11,15 +23,19 @@
   function closeSidebar() {
     sidebarOpen = false;
   }
+
+  function toggleCollapse() {
+    sidebarCollapsed = !sidebarCollapsed;
+  }
 </script>
 
 <svelte:head>
   <title>Admin - Autumns Grove</title>
 </svelte:head>
 
-<div class="admin-layout">
+<div class="admin-layout leaf-pattern">
   <!-- Mobile header -->
-  <header class="mobile-header">
+  <header class="mobile-header glass-surface">
     <button class="hamburger" onclick={toggleSidebar} aria-label="Toggle menu">
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
@@ -38,9 +54,16 @@
     ></button>
   {/if}
 
-  <aside class="sidebar" class:open={sidebarOpen}>
+  <aside class="sidebar glass-sidebar" class:open={sidebarOpen} class:collapsed={sidebarCollapsed}>
     <div class="sidebar-header">
-      <h2>Admin Panel</h2>
+      <h2 class:hidden={sidebarCollapsed}>Admin Panel</h2>
+      <button
+        class="collapse-btn"
+        onclick={toggleCollapse}
+        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        <ChevronLeft class="collapse-icon" class:rotated={sidebarCollapsed} />
+      </button>
       <button class="close-sidebar" onclick={closeSidebar} aria-label="Close menu">
         &times;
       </button>
@@ -48,48 +71,36 @@
 
     <nav class="sidebar-nav">
       <a href="/admin" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F3E0;</span>
-        Dashboard
+        <LayoutDashboard class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Dashboard</span>
       </a>
       <a href="/admin/blog" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4DD;</span>
-        Blog Posts
+        <FileText class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Blog Posts</span>
       </a>
       <a href="/admin/pages" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4C4;</span>
-        Pages
-      </a>
-      <a href="/admin/recipes" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F373;</span>
-        Recipes
+        <FileStack class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Pages</span>
       </a>
       <a href="/admin/images" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4F7;</span>
-        CDN Uploader
-      </a>
-      <a href="/admin/subscribers" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4E7;</span>
-        Subscribers
+        <Image class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Images</span>
       </a>
       <a href="/admin/analytics" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4CA;</span>
-        Analytics
+        <BarChart3 class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Analytics</span>
       </a>
       <a href="/admin/timeline" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F4C5;</span>
-        Timeline
-      </a>
-      <a href="/admin/logs" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x1F5A5;</span>
-        Console
+        <Calendar class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Timeline</span>
       </a>
       <a href="/admin/settings" class="nav-item" onclick={closeSidebar}>
-        <span class="nav-icon">&#x2699;</span>
-        Settings
+        <Settings class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Settings</span>
       </a>
     </nav>
 
-    <div class="sidebar-footer">
+    <div class="sidebar-footer" class:hidden={sidebarCollapsed}>
       <div class="user-info">
         <span class="email">{data.user.email}</span>
       </div>
@@ -97,7 +108,7 @@
     </div>
   </aside>
 
-  <main class="content">
+  <main class="content" class:expanded={sidebarCollapsed}>
     {@render children()}
   </main>
 </div>
@@ -108,9 +119,37 @@
   .admin-layout {
     display: flex;
     min-height: 100vh;
-    background: var(--color-bg-secondary);
+    /* Transparent background to show leaf pattern */
+    background: transparent;
     transition: background-color 0.3s ease;
   }
+
+  /* Glass sidebar styling */
+  .glass-sidebar {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  :global(.dark) .glass-sidebar {
+    background: rgba(30, 41, 59, 0.75);
+    border-color: rgba(71, 85, 105, 0.3);
+  }
+
+  /* Glass surface for mobile header */
+  .glass-surface {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  :global(.dark) .glass-surface {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(71, 85, 105, 0.3);
+  }
+
   /* Mobile header - hidden on desktop */
   .mobile-header {
     display: none;
@@ -119,15 +158,14 @@
     left: 0;
     right: 0;
     height: 56px;
-    background: var(--mobile-menu-bg);
     color: var(--color-text);
     align-items: center;
     justify-content: space-between;
     padding: 0 1rem;
     z-index: 1000;
-    border-bottom: 1px solid var(--color-border);
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
+
   .mobile-home-link {
     font-size: 1.25rem;
     font-weight: bold;
@@ -135,12 +173,15 @@
     text-decoration: none;
     transition: color 0.2s;
   }
+
   .mobile-home-link:hover {
     color: var(--color-primary-hover);
   }
+
   .mobile-header-spacer {
-    width: 36px; /* Match hamburger button width for centering */
+    width: 36px;
   }
+
   .hamburger {
     display: flex;
     flex-direction: column;
@@ -150,6 +191,7 @@
     border: none;
     cursor: pointer;
   }
+
   .hamburger-line {
     width: 20px;
     height: 2px;
@@ -157,16 +199,20 @@
     border-radius: 1px;
     transition: background-color 0.3s ease;
   }
+
   /* Sidebar overlay for mobile */
   .sidebar-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 1001;
     border: none;
     cursor: pointer;
   }
+
   /* Close button in sidebar - hidden on desktop */
   .close-sidebar {
     display: none;
@@ -179,43 +225,94 @@
     line-height: 1;
     transition: color 0.3s ease;
   }
+
   .sidebar {
     width: 250px;
-    background: var(--mobile-menu-bg);
     color: var(--color-text);
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: calc(4rem + 0.75rem); /* Header height + margin */
+    top: calc(4rem + 0.75rem);
     left: 0.75rem;
     bottom: 0.75rem;
     height: auto;
-    max-height: calc(100vh - 5.5rem); /* Account for header + margins */
-    z-index: 99; /* Below header (100) but above content */
-    border: 1px solid var(--color-border);
+    max-height: calc(100vh - 5.5rem);
+    z-index: 99;
     border-radius: var(--border-radius-standard);
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
     overflow-y: auto;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   }
+
+  :global(.dark) .sidebar {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .sidebar.collapsed {
+    width: 72px;
+  }
+
   .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
     transition: border-color 0.3s ease;
   }
+
+  :global(.dark) .sidebar-header {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   .sidebar-header h2 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
   }
+
+  .collapse-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-small);
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .collapse-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text);
+  }
+
+  :global(.dark) .collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .collapse-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: transform 0.3s ease;
+  }
+
+  .collapse-icon.rotated {
+    transform: rotate(180deg);
+  }
+
   .sidebar-nav {
     flex: 1;
     padding: 1rem 0;
     overflow-y: auto;
-    min-height: 0; /* Allow flex item to shrink */
+    min-height: 0;
   }
+
   .nav-item {
     display: flex;
     align-items: center;
@@ -225,73 +322,142 @@
     text-decoration: none;
     border-radius: var(--border-radius-button);
     transition: background 0.2s, color 0.2s;
+    margin: 0 0.5rem;
   }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.75rem;
+    margin: 0.25rem 0.5rem;
+  }
+
   .nav-item:hover {
-    background: var(--color-bg-secondary);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--color-primary);
   }
-  .nav-icon {
-    font-size: 1.1rem;
+
+  :global(.dark) .nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
+
+  .nav-item :global(.nav-icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .hidden {
+    display: none;
+  }
+
   .sidebar-footer {
     padding: 1rem 1.5rem;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     transition: border-color 0.3s ease;
-    flex-shrink: 0; /* Prevent footer from being squeezed */
+    flex-shrink: 0;
   }
+
+  :global(.dark) .sidebar-footer {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   .user-info {
     margin-bottom: 0.75rem;
   }
+
   .email {
     font-size: 0.85rem;
     color: var(--color-text-muted);
     word-break: break-all;
     transition: color 0.3s ease;
   }
+
   .logout-btn {
     display: block;
     text-align: center;
     padding: 0.5rem;
-    background: var(--color-bg-secondary);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
     font-size: 0.85rem;
     transition: background 0.2s, color 0.2s;
   }
+
+  :global(.dark) .logout-btn {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
   .logout-btn:hover {
-    background: var(--color-border);
+    background: rgba(0, 0, 0, 0.1);
     color: var(--color-text);
   }
+
+  :global(.dark) .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
   .content {
     flex: 1;
-    margin-left: calc(250px + 0.75rem); /* Sidebar width + left margin */
+    margin-left: calc(250px + 0.75rem);
     padding: 2rem;
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
   }
+
+  .content.expanded {
+    margin-left: calc(72px + 0.75rem);
+  }
+
   /* Mobile styles */
   @media (max-width: 768px) {
     .mobile-header {
       display: flex;
     }
+
     .sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease;
-      z-index: 1002; /* Above sidebar-overlay (1001) on mobile */
+      z-index: 1002;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      border-radius: 0;
     }
+
     .sidebar.open {
       transform: translateX(0);
     }
+
+    .sidebar.collapsed {
+      width: 250px; /* Don't collapse on mobile */
+    }
+
     .sidebar-overlay {
       display: block;
     }
+
     .close-sidebar {
       display: block;
     }
+
+    .collapse-btn {
+      display: none;
+    }
+
     .content {
       margin-left: 0;
       padding: 1rem;
-      padding-top: calc(56px + 1rem); /* Account for mobile header */
+      padding-top: calc(56px + 1rem);
+    }
+
+    .content.expanded {
+      margin-left: 0;
     }
   }
 </style>
