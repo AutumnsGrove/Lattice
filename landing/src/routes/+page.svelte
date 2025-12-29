@@ -4,6 +4,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { RoadmapPreview } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/stores';
 	import { season } from '$lib/stores/season';
 
@@ -18,7 +19,6 @@
 		Users,
 		Download,
 		ArrowRight,
-		MapPin,
 		Sprout
 	} from 'lucide-svelte';
 
@@ -181,33 +181,13 @@
 
 	<!-- Roadmap Preview Card -->
 	<section class="w-full max-w-lg mb-16">
-		<a
+		<RoadmapPreview
+			phase="Thaw"
+			subtitle="The ice begins to crack"
+			description="Grove opens its doors. The first trees take root."
+			progress={33}
 			href="/roadmap"
-			class="block glass-grove rounded-2xl p-6 hover:scale-[1.02] transition-transform group"
-		>
-			<div class="flex items-start justify-between mb-4">
-				<div>
-					<div class="flex items-center gap-2 mb-1">
-						<MapPin class="w-4 h-4 text-accent-muted" />
-						<span class="text-xs font-sans text-foreground-subtle uppercase tracking-wide">Currently</span>
-					</div>
-					<h3 class="text-xl font-serif text-foreground">Thaw</h3>
-					<p class="text-sm font-sans text-foreground-muted italic">The ice begins to crack</p>
-				</div>
-				<ArrowRight class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted group-hover:translate-x-1 transition-all" />
-			</div>
-
-			<!-- Progress bar -->
-			<div class="mb-3">
-				<div class="h-2 bg-divider rounded-full overflow-hidden">
-					<div class="h-full bg-accent-muted rounded-full" style="width: 33%"></div>
-				</div>
-			</div>
-
-			<p class="text-sm font-sans text-foreground-subtle">
-				Grove opens its doors. The first trees take root.
-			</p>
-		</a>
+		/>
 	</section>
 
 	<!-- Feature Highlights -->

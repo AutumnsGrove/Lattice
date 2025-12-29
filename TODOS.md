@@ -6,6 +6,23 @@
 
 ---
 
+## Nature Assets Migration (Future)
+
+> **Note:** The nature components (trees, weather, sky, botanical, creatures, structural) currently live in `landing/src/lib/components/nature/`. These should eventually be moved to the engine package (`packages/engine/src/lib/ui/components/nature/`) so they can be shared across all Grove properties (landing, plant, meadow, engine admin).
+>
+> **Components to migrate:**
+> - Trees: Logo, TreePine, TreeCherry, TreeAspen, TreeBirch
+> - Weather: SnowfallLayer, FallingPetalsLayer, FallingLeavesLayer
+> - Sky: Cloud, Moon, StarCluster, Sun, Rainbow
+> - Ground: Tulip, Daffodil, FlowerWild, GrassTuft, Mushrooms, etc.
+> - Creatures: Cardinal, Robin, Firefly, Butterfly, Deer, etc.
+> - Structural: Lattice, Lantern, StonePath, GardenGate, Bridge
+> - Palette: Season colors, midnightBloom palette
+>
+> **When:** After initial launch, when we want seasonal theming on plant.grove.place
+
+---
+
 ## ✅ Admin Panel Overhaul COMPLETE! (2025-12-29)
 
 **Status: DONE - Major UX improvements and Trails feature spec complete!**
