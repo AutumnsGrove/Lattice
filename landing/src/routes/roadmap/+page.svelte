@@ -49,7 +49,7 @@
 		Puzzle,
 		// Phase badge icons
 		Flower,
-		Moon,
+		Moon as MoonIcon,
 		Star
 	} from 'lucide-svelte';
 
@@ -931,7 +931,7 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
-						<Moon class="w-3.5 h-3.5" />
+						<MoonIcon class="w-3.5 h-3.5" />
 						The Dream
 						<Star class="w-3.5 h-3.5" />
 					</span>
