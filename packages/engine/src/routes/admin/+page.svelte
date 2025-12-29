@@ -13,7 +13,7 @@
     Clock,
     MapPin,
     ArrowRight,
-    Sparkles
+    Megaphone
   } from 'lucide-svelte';
 
   /**
@@ -193,7 +193,7 @@
     >
       <div class="roadmap-header">
         <div class="roadmap-badge">
-          <Sparkles class="w-4 h-4" />
+          <Megaphone class="w-4 h-4" />
           <span>What's New in the Grove</span>
         </div>
         <ArrowRight class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted transition-colors" />

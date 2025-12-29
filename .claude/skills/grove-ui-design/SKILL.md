@@ -372,7 +372,7 @@ midnightBloom.softGold   // #fcd34d - Fairy lights
 **NEVER** use emojis. **ALWAYS** use Lucide icons.
 
 ```svelte
-import { MapPin, Check, Leaf, Sparkles, Mail } from 'lucide-svelte';
+import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
 
 <!-- Good -->
 <MapPin class="w-4 h-4" />
@@ -381,6 +381,59 @@ import { MapPin, Check, Leaf, Sparkles, Mail } from 'lucide-svelte';
 <!-- Bad - NEVER do this -->
 <!-- ❌ 🌱 📧 ✅ -->
 ```
+
+### Standardized Icon Mapping
+
+Use these icons consistently across the project:
+
+| Concept | Icon | Notes |
+|---------|------|-------|
+| **Navigation** | | |
+| Home | `Home` | |
+| About | `Info` | |
+| Vision | `Telescope` | Looking forward |
+| Roadmap | `Map` | Journey/direction |
+| Pricing | `CircleDollarSign` | Money/currency |
+| Knowledge | `BookOpen` | Learning/docs |
+| Forest | `Trees` | Community blogs |
+| Blog | `PenLine` | Writing |
+| **Features** | | |
+| Email | `Mail` | |
+| Storage | `HardDrive` | |
+| Theming | `Palette` | Customization |
+| Authentication | `ShieldCheck` | Security |
+| Cloud | `Cloud` | Remote/serverless |
+| Search | `Search` | |
+| Archives | `Archive` | Backups |
+| Upload | `Upload` | |
+| Video | `Video` | |
+| GitHub | `Github` | External links to GitHub |
+| **States** | | |
+| Success | `Check` | Completed/valid |
+| Error | `X` | Failed/close |
+| Loading | `Loader2` | With animate-spin |
+| **Content** | | |
+| Posts | `FileText` | Blog posts |
+| Tags | `Tag` | Categorization |
+| Growth | `Sprout` | Grove brand, new beginnings |
+| Heart | `Heart` | Love, care |
+| External | `ExternalLink` | Opens new tab |
+| Location | `MapPin` | Current position |
+| **Phases** | | |
+| Coming Soon | `Seedling` | Something growing |
+| Refinement | `Gem` | Polish, quality |
+| The Dream | `Sparkles` | Mystical (use sparingly!) |
+| Night | `Star` | Midnight themes |
+| **Actions** | | |
+| Getting Started | `Compass` | Guidance |
+| What's New | `Megaphone` | Announcements |
+| Next Steps | `Lightbulb` | Ideas |
+
+### Icon Usage Guidelines
+
+1. **Avoid overusing Sparkles** - Reserve for truly mystical/magical contexts
+2. **Be consistent** - Use the same icon for the same concept everywhere
+3. **Semantic meaning** - Choose icons that convey meaning, not just decoration
 
 ### Icon Sizing
 
@@ -396,7 +449,7 @@ import { MapPin, Check, Leaf, Sparkles, Mail } from 'lucide-svelte';
 </button>
 
 <!-- Large decorative -->
-<Sparkles class="w-8 h-8 text-amber-400" />
+<Gem class="w-8 h-8 text-amber-400" />
 ```
 
 ---

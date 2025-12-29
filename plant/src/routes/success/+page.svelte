@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Check, Loader2, Sparkles, ArrowRight, X } from 'lucide-svelte';
+	import { Check, Loader2, Lightbulb, ArrowRight, X } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -140,7 +140,7 @@
 			<!-- What's next -->
 			<div class="card max-w-md mx-auto mb-8 text-left">
 				<h2 class="font-medium text-foreground mb-4 flex items-center gap-2">
-					<Sparkles size={18} class="text-primary" />
+					<Lightbulb size={18} class="text-primary" />
 					What's next?
 				</h2>
 

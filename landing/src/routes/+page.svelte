@@ -12,8 +12,8 @@
 	import {
 		Map,
 		BookOpen,
-		Sparkles,
-		Tag,
+		Trees,
+		CircleDollarSign,
 		Leaf,
 		Shield,
 		Users,
@@ -146,7 +146,7 @@
 			href="/forest"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<Sparkles class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<Trees class="w-4 h-4 group-hover:scale-110 transition-transform" />
 			<span>Forest</span>
 		</a>
 		<span class="text-divider hidden sm:inline">·</span>
@@ -154,7 +154,7 @@
 			href="/pricing"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<Tag class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<CircleDollarSign class="w-4 h-4 group-hover:scale-110 transition-transform" />
 			<span>Pricing</span>
 		</a>
 	</div>

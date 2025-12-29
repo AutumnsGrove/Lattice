@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ArrowRight, X, ChevronLeft, ChevronRight, Sparkles, Sprout, PartyPopper } from 'lucide-svelte';
+	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -137,7 +137,7 @@
 		<!-- Header -->
 		<div class="flex items-start justify-between mb-4">
 			<div class="flex items-center gap-2">
-				<Sparkles size={20} class="text-primary" />
+				<MapPin size={20} class="text-primary" />
 				<span class="text-sm text-foreground-muted">{currentTourStop.location}</span>
 			</div>
 		</div>

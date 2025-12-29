@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Circle, X, Sparkles } from 'lucide-svelte';
+	import { Check, Circle, X, Compass } from 'lucide-svelte';
 
 	interface ChecklistItem {
 		id: string;
@@ -25,7 +25,7 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-2">
-			<Sparkles size={18} class="text-primary" />
+			<Compass size={18} class="text-primary" />
 			<h3 class="font-medium text-foreground text-sm">Getting Started</h3>
 		</div>
 		{#if onDismiss}

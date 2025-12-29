@@ -12,6 +12,9 @@
 		Circle,
 		Flower2,
 		Sun,
+		Sparkles,
+		Seedling,
+		Star,
 		Mail,
 		HardDrive,
 		Palette,
@@ -590,7 +593,7 @@
 						</span>
 					{:else if phaseStatus['first-buds'] === 'future'}
 						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
-							<Flower class="w-3.5 h-3.5" />
+							<Seedling class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
 					{/if}
@@ -825,16 +828,8 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
-							{#if feature.icon === 'gem'}
+							{#if feature.major}
 								<Gem class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'zap'}
-								<Zap class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'accessibility'}
-								<Accessibility class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'smartphone'}
-								<Smartphone class="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'puzzle'}
-								<Puzzle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{/if}
@@ -929,17 +924,7 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							{#if feature.icon === 'coffee'}
-								<Coffee class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'qrcode'}
-								<QrCode class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'bookopen'}
-								<BookOpen class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else if feature.icon === 'home'}
-								<Home class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{:else}
-								<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-							{/if}
+							<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>
