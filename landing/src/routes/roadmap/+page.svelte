@@ -20,7 +20,11 @@
 		HardDrive,
 		Palette,
 		Brush,
-		Compass
+		Compass,
+		Coffee,
+		QrCode,
+		BookOpen,
+		Home
 	} from 'lucide-svelte';
 
 	// Trees
@@ -165,10 +169,10 @@
 			season: 'winter' as Season, // Night scene
 			description: 'Where digital roots meet physical ground.',
 			features: [
-				{ name: 'The Café', description: 'A late-night tea shop for the sleepless and searching', done: false, dream: true },
-				{ name: 'Community Boards', description: 'QR codes linking physical to digital', done: false, dream: true },
-				{ name: 'Local Zines', description: 'Grove blogs printed and shared', done: false, dream: true },
-				{ name: 'A Third Place', description: 'That becomes a first home', done: false, dream: true }
+				{ name: 'The Café', description: 'A late-night tea shop for the sleepless and searching', done: false, dream: true, icon: 'coffee' },
+				{ name: 'Community Boards', description: 'QR codes linking physical to digital', done: false, dream: true, icon: 'qrcode' },
+				{ name: 'Local Zines', description: 'Grove blogs printed and shared', done: false, dream: true, icon: 'bookopen' },
+				{ name: 'A Third Place', description: 'That becomes a first home', done: false, dream: true, icon: 'home' }
 			]
 		}
 	};
@@ -870,7 +874,17 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							<Sparkles class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{#if feature.icon === 'coffee'}
+								<Coffee class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'qrcode'}
+								<QrCode class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'bookopen'}
+								<BookOpen class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'home'}
+								<Home class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else}
+								<Sparkles class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{/if}
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>
