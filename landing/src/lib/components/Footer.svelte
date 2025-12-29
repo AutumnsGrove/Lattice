@@ -1,7 +1,16 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
 	import Logo from './Logo.svelte';
-	import { Github, ExternalLink } from 'lucide-svelte';
+	import {
+		Github,
+		ExternalLink,
+		BookOpen,
+		Map,
+		Tag,
+		TreeDeciduous,
+		Eye,
+		Mail
+	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
 	interface Props {
@@ -40,19 +49,34 @@
 				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Resources</h3>
 				<ul class="space-y-2.5 text-sm font-sans">
 					<li>
-						<a href="/knowledge" class="text-foreground-subtle hover:text-accent-muted transition-colors">Knowledge Base</a>
+						<a href="/knowledge" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<BookOpen class="w-4 h-4" />
+							Knowledge Base
+						</a>
 					</li>
 					<li>
-						<a href="/roadmap" class="text-foreground-subtle hover:text-accent-muted transition-colors">Roadmap</a>
+						<a href="/roadmap" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Map class="w-4 h-4" />
+							Roadmap
+						</a>
 					</li>
 					<li>
-						<a href="/pricing" class="text-foreground-subtle hover:text-accent-muted transition-colors">Pricing</a>
+						<a href="/pricing" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Tag class="w-4 h-4" />
+							Pricing
+						</a>
 					</li>
 					<li>
-						<a href="/about" class="text-foreground-subtle hover:text-accent-muted transition-colors">About Grove</a>
+						<a href="/about" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<TreeDeciduous class="w-4 h-4" />
+							About Grove
+						</a>
 					</li>
 					<li>
-						<a href="/vision" class="text-foreground-subtle hover:text-accent-muted transition-colors">Our Vision</a>
+						<a href="/vision" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Eye class="w-4 h-4" />
+							Our Vision
+						</a>
 					</li>
 				</ul>
 			</div>
@@ -62,7 +86,10 @@
 				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Connect</h3>
 				<ul class="space-y-2.5 text-sm font-sans">
 					<li>
-						<a href="/contact" class="text-foreground-subtle hover:text-accent-muted transition-colors">Contact</a>
+						<a href="/contact" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Mail class="w-4 h-4" />
+							Contact
+						</a>
 					</li>
 					<li>
 						<a
@@ -71,6 +98,7 @@
 							rel="noopener noreferrer"
 							class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
 						>
+							<BookOpen class="w-4 h-4" />
 							Blog
 							<ExternalLink class="w-3 h-3" />
 						</a>
