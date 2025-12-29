@@ -19,7 +19,8 @@
 		Mail,
 		HardDrive,
 		Palette,
-		Brush
+		Brush,
+		Compass
 	} from 'lucide-svelte';
 
 	// Trees
@@ -123,6 +124,7 @@
 			features: [
 				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
 				{ name: 'Amber', description: 'See and manage your storage', done: false, icon: 'amber' },
+				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false },
 				{ name: 'More Themes', description: 'Foliage brings color to your corner', done: false }
 			]
@@ -572,12 +574,15 @@
 					{#each phases['first-buds'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.icon === 'ivy' ? 'border-l-4 border-green-500' : ''}
-							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}"
+							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}
+							{feature.icon === 'trails' ? 'border-l-4 border-teal-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
 								<Mail class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'amber'}
 								<HardDrive class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'trails'}
+								<Compass class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}

@@ -836,6 +836,210 @@ async function validateAuth(request: Request, env: Env) {
 
 ---
 
+## Admin Panel Integration
+
+The admin panel can leverage DOs to reduce D1 costs and enable real-time features.
+
+### TenantDO Extensions for Admin
+
+The TenantDO already handles per-tenant config caching. Extend it for admin panel:
+
+```typescript
+interface TenantDOAdminState {
+  // Existing config
+  config: TenantConfig;
+
+  // Admin extensions
+  adminConfig: AdminConfig;
+  draftBuffer: Map<string, Draft>;
+  customSections: AdminSection[];
+  recentPosts: PostSummary[];      // Cached for dashboard
+  stats: DashboardStats;           // Word count, post count, etc.
+}
+
+interface AdminConfig {
+  font: string;                    // User's preferred font
+  theme: ThemeConfig;              // Custom theme settings
+  customSections: AdminSection[];  // Extensible admin pages
+  editorPreferences: EditorPrefs;  // Auto-save interval, zen mode defaults
+}
+
+interface AdminSection {
+  id: string;
+  label: string;
+  icon: string;                    // Lucide icon name
+  href: string;
+  enabled: boolean;
+  tier: 'seedling' | 'sapling' | 'oak' | 'evergreen';  // Minimum tier
+  sortOrder: number;
+}
+
+interface Draft {
+  slug: string;                    // Post slug or 'new'
+  content: string;
+  metadata: PostMetadata;
+  lastSaved: number;
+  deviceId: string;
+}
+```
+
+**New TenantDO Methods for Admin:**
+
+```typescript
+class TenantDO extends DurableObject {
+  // ... existing methods ...
+
+  // Draft Management (cross-device sync)
+  async saveDraft(draft: Draft): Promise<void>;
+  async getDraft(slug: string): Promise<Draft | null>;
+  async listDrafts(): Promise<Draft[]>;
+  async deleteDraft(slug: string): Promise<void>;
+
+  // Admin Config
+  async getAdminConfig(): Promise<AdminConfig>;
+  async updateAdminConfig(updates: Partial<AdminConfig>): Promise<void>;
+
+  // Custom Sections (tier-gated extensibility)
+  async getCustomSections(): Promise<AdminSection[]>;
+  async addSection(section: AdminSection): Promise<void>;
+  async updateSection(id: string, updates: Partial<AdminSection>): Promise<void>;
+  async removeSection(id: string): Promise<void>;
+  async reorderSections(ids: string[]): Promise<void>;
+
+  // Dashboard Stats (cached, updated hourly)
+  async getDashboardStats(): Promise<DashboardStats>;
+  async refreshDashboardStats(): Promise<void>;
+}
+
+interface DashboardStats {
+  postCount: number;
+  totalWords: number;
+  draftCount: number;
+  publishedThisMonth: number;
+  topTags: Array<{ tag: string; count: number }>;
+  accountAge: number;               // Days since creation
+  storageUsed: number;              // Bytes
+  lastActivity: number;             // Timestamp
+}
+```
+
+### Draft Auto-Save Flow
+
+Current: localStorage (single-device only)
+
+With DO:
+1. Editor saves to localStorage immediately (fast, offline-capable)
+2. Every 30 seconds, if draft changed, save to TenantDO
+3. On page load, check TenantDO for newer draft than localStorage
+4. Conflict resolution: Show dialog if versions differ
+
+```typescript
+// In MarkdownEditor
+async function syncDraft() {
+  const localDraft = localStorage.getItem(`draft-${slug}`);
+  const remoteDraft = await fetch(`/api/drafts/${slug}`).then(r => r.json());
+
+  if (!remoteDraft) {
+    // No remote draft, save local
+    await saveDraftToServer(localDraft);
+  } else if (!localDraft) {
+    // No local draft, use remote
+    loadDraft(remoteDraft);
+  } else if (remoteDraft.lastSaved > localDraft.lastSaved) {
+    // Remote is newer
+    showConflictDialog(localDraft, remoteDraft);
+  } else {
+    // Local is newer, save to remote
+    await saveDraftToServer(localDraft);
+  }
+}
+```
+
+### Custom Admin Sections (Tier-Gated)
+
+Extensibility for users to add their own admin pages:
+
+| Tier | Custom Sections | Icon Selection |
+|------|-----------------|----------------|
+| Seedling | 0 | N/A |
+| Sapling | 2 | Limited set (10 icons) |
+| Oak | 10 | Full Lucide library |
+| Evergreen | Unlimited | Full + custom upload |
+
+**Default Sections (always present):**
+- Dashboard
+- Blog Posts
+- Pages
+- Images
+- Settings
+
+**Optional Built-in Sections (can be hidden):**
+- Analytics (when Rings is ready)
+- Timeline (for sites with timeline content)
+- Trails (when enabled)
+
+**Custom Sections (user-created):**
+- Recipes
+- Portfolio
+- Events
+- Products (future)
+
+### API Endpoints for Admin Config
+
+```
+GET  /api/admin/config              # Get full admin config
+PUT  /api/admin/config              # Update admin config
+
+GET  /api/admin/drafts              # List all drafts
+GET  /api/admin/drafts/:slug        # Get specific draft
+PUT  /api/admin/drafts/:slug        # Save draft
+DELETE /api/admin/drafts/:slug      # Delete draft
+
+GET  /api/admin/sections            # List custom sections
+POST /api/admin/sections            # Add section
+PUT  /api/admin/sections/:id        # Update section
+DELETE /api/admin/sections/:id      # Delete section
+POST /api/admin/sections/reorder    # Reorder sections
+
+GET  /api/admin/stats               # Get dashboard stats (cached)
+POST /api/admin/stats/refresh       # Force refresh stats
+```
+
+### Batching Strategy
+
+TenantDO batches writes to D1:
+- Admin config changes: Immediate flush (rare, user expects save)
+- Draft saves: Batch every 5 minutes
+- Stats refresh: Hourly alarm
+- Section changes: Immediate flush
+
+---
+
+## Trails Integration with DOs
+
+Trails can leverage TenantDO for caching:
+
+```typescript
+interface TenantDOTrailsState {
+  trails: Trail[];                  // Cached trail metadata
+  trailCache: Map<string, TrailWithWaypoints>;  // Full trail data
+  trailCacheExpiry: Map<string, number>;
+}
+
+// TenantDO methods for Trails
+class TenantDO {
+  async getTrail(slug: string): Promise<TrailWithWaypoints | null>;
+  async setTrail(slug: string, trail: TrailWithWaypoints): Promise<void>;
+  async invalidateTrail(slug: string): Promise<void>;
+
+  // Batch waypoint status updates (reduces D1 writes)
+  async queueWaypointUpdate(waypointId: string, status: WaypointStatus): Promise<void>;
+  async flushWaypointUpdates(): Promise<void>;  // Called by alarm every 5 min
+}
+```
+
+---
+
 ## Next Steps
 
 1. Create a new `durables/` directory in Lattice
@@ -843,5 +1047,6 @@ async function validateAuth(request: Request, env: Env) {
 3. Update Heartwood to use SessionDO
 4. Test auth flow end-to-end
 5. Gradually add other DO classes
+6. **Add admin panel extensions to TenantDO** (Phase 2.5)
 
 The key insight: Start with auth because it's the most painful and will give you immediate, tangible improvements. Everything else builds on having reliable auth.
