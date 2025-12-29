@@ -4,27 +4,53 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
-	// Lucide Icons (replacing emojis)
+	// Lucide Icons
 	import {
 		MapPin,
 		Check,
 		CheckCircle,
 		Circle,
-		CircleDot,
-		Leaf,
-		Gem,
 		Flower2,
 		Sun,
-		Sparkles,
 		Mail,
 		HardDrive,
 		Palette,
-		Brush,
 		Compass,
 		Coffee,
 		QrCode,
 		BookOpen,
-		Home
+		Home,
+		// Thaw icons
+		UserPlus,
+		Sprout,
+		Globe,
+		PenLine,
+		ImagePlus,
+		Rss,
+		ShieldCheck,
+		Download,
+		LifeBuoy,
+		// First Buds icons
+		TreeDeciduous,
+		// Full Bloom icons
+		Clock,
+		MessageCircle,
+		Heart,
+		TrendingUp,
+		Crown,
+		Paintbrush,
+		Users,
+		Shield,
+		// Golden Hour icons
+		Gem,
+		Zap,
+		Accessibility,
+		Smartphone,
+		Puzzle,
+		// Phase badge icons
+		Flower,
+		Moon,
+		Star
 	} from 'lucide-svelte';
 
 	// Trees
@@ -109,15 +135,15 @@
 			season: 'winter' as Season,
 			description: 'Grove opens its doors. The first trees take root.',
 			features: [
-				{ name: 'Sign Up', description: 'Google, email, or Hub account', done: true },
-				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true },
-				{ name: 'Your Blog', description: 'username.grove.place', done: true },
-				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true },
-				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true },
-				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true },
-				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true },
-				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true },
-				{ name: 'Help Center', description: 'Guidance when you need it', done: true }
+				{ name: 'Sign Up', description: 'Google, email, or Hub account', done: true, icon: 'userplus' },
+				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true, icon: 'sprout' },
+				{ name: 'Your Blog', description: 'username.grove.place', done: true, icon: 'globe' },
+				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true, icon: 'penline' },
+				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
+				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
+				{ name: 'Shade Protection', description: 'AI crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
+				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
+				{ name: 'Help Center', description: 'Guidance when you need it', done: true, icon: 'lifebuoy' }
 			]
 		},
 		'first-buds': {
@@ -129,8 +155,8 @@
 				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
 				{ name: 'Amber', description: 'See and manage your storage', done: false, icon: 'amber' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
-				{ name: 'Sapling Tier', description: 'More space, more themes', done: false },
-				{ name: 'More Themes', description: 'Foliage brings color to your corner', done: false }
+				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
+				{ name: 'More Themes', description: 'Foliage brings color to your corner', done: false, icon: 'palette' }
 			]
 		},
 		'full-bloom': {
@@ -139,15 +165,15 @@
 			season: 'summer' as Season,
 			description: 'The grove becomes a community. Roots intertwine.',
 			features: [
-				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true },
-				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false },
-				{ name: 'Comments', description: 'Replies and thoughtful discussions', done: false },
-				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false },
-				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false },
-				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false },
-				{ name: 'Theme Customizer', description: 'Make it truly yours', done: false },
-				{ name: 'Community Themes', description: 'Share what you create', done: false },
-				{ name: 'Content Moderation', description: 'Keeping the grove safe', done: false }
+				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true, icon: 'meadow' },
+				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
+				{ name: 'Comments', description: 'Replies and thoughtful discussions', done: false, icon: 'message' },
+				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
+				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending' },
+				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown' },
+				{ name: 'Theme Customizer', description: 'Make it truly yours', done: false, icon: 'paintbrush' },
+				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
+				{ name: 'Content Moderation', description: 'Keeping the grove safe', done: false, icon: 'shield' }
 			]
 		},
 		'golden-hour': {
@@ -156,11 +182,11 @@
 			season: 'autumn' as Season,
 			description: 'The grove settles into itself. A time for refinement.',
 			features: [
-				{ name: 'Polish', description: 'Attention to every detail', done: false, major: true },
-				{ name: 'Performance', description: 'Fast everywhere, always', done: false },
-				{ name: 'Accessibility', description: 'Grove for everyone', done: false },
-				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false },
-				{ name: 'Edge Cases', description: 'The small things that matter', done: false }
+				{ name: 'Polish', description: 'Attention to every detail', done: false, major: true, icon: 'gem' },
+				{ name: 'Performance', description: 'Fast everywhere, always', done: false, icon: 'zap' },
+				{ name: 'Accessibility', description: 'Grove for everyone', done: false, icon: 'accessibility' },
+				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false, icon: 'smartphone' },
+				{ name: 'Edge Cases', description: 'The small things that matter', done: false, icon: 'puzzle' }
 			]
 		},
 		'midnight-bloom': {
@@ -491,7 +517,27 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-accent shadow-sm">
-							<CircleDot class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{#if feature.icon === 'userplus'}
+								<UserPlus class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'sprout'}
+								<Sprout class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'globe'}
+								<Globe class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'penline'}
+								<PenLine class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'imageplus'}
+								<ImagePlus class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'rss'}
+								<Rss class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'shieldcheck'}
+								<ShieldCheck class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'download'}
+								<Download class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'lifebuoy'}
+								<LifeBuoy class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else}
+								<Circle class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{/if}
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
 								<p class="text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
@@ -565,7 +611,7 @@
 						</span>
 					{:else if phaseStatus['first-buds'] === 'future'}
 						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
-							<Sparkles class="w-3.5 h-3.5" />
+							<Flower class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
 					{/if}
@@ -579,7 +625,9 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.icon === 'ivy' ? 'border-l-4 border-green-500' : ''}
 							{feature.icon === 'amber' ? 'border-l-4 border-amber-500' : ''}
-							{feature.icon === 'trails' ? 'border-l-4 border-teal-500' : ''}"
+							{feature.icon === 'trails' ? 'border-l-4 border-teal-500' : ''}
+							{feature.icon === 'tree' ? 'border-l-4 border-emerald-500' : ''}
+							{feature.icon === 'palette' ? 'border-l-4 border-violet-500' : ''}"
 						>
 							{#if feature.icon === 'ivy'}
 								<Mail class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -587,6 +635,10 @@
 								<HardDrive class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'trails'}
 								<Compass class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'tree'}
+								<TreeDeciduous class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'palette'}
+								<Palette class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
@@ -678,8 +730,24 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
 						>
-							{#if feature.major}
+							{#if feature.icon === 'meadow'}
 								<Flower2 class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'clock'}
+								<Clock class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'message'}
+								<MessageCircle class="w-5 h-5 text-sky-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'heart'}
+								<Heart class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'trending'}
+								<TrendingUp class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'crown'}
+								<Crown class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'paintbrush'}
+								<Paintbrush class="w-5 h-5 text-violet-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'users'}
+								<Users class="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'shield'}
+								<Shield class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}
@@ -764,7 +832,7 @@
 				<div class="text-center mb-12">
 					{#if phaseStatus['golden-hour'] === 'future'}
 						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200/80 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-sm font-medium mb-4 shadow-sm">
-							<Sparkles class="w-3.5 h-3.5" />
+							<Gem class="w-3.5 h-3.5" />
 							Refinement
 						</span>
 					{/if}
@@ -778,10 +846,18 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
-							{#if feature.major}
-								<Sparkles class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+							{#if feature.icon === 'gem'}
+								<Gem class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'zap'}
+								<Zap class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'accessibility'}
+								<Accessibility class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'smartphone'}
+								<Smartphone class="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'puzzle'}
+								<Puzzle class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
 							{:else}
-								<Leaf class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+								<Circle class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{/if}
 							<div>
 								<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
@@ -855,9 +931,9 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
-						<Sparkles class="w-3.5 h-3.5" />
+						<Moon class="w-3.5 h-3.5" />
 						The Dream
-						<Sparkles class="w-3.5 h-3.5" />
+						<Star class="w-3.5 h-3.5" />
 					</span>
 					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">{phases['midnight-bloom'].title}</h2>
 					<p class="text-purple-300 italic">{phases['midnight-bloom'].subtitle}</p>
@@ -883,7 +959,7 @@
 							{:else if feature.icon === 'home'}
 								<Home class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
 							{:else}
-								<Sparkles class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+								<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
 							{/if}
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
