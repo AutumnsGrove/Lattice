@@ -11,14 +11,16 @@
 	 * <GlassLogo class="w-16 h-20" />
 	 * ```
 	 *
+	 * @example Seasonal glass logo
+	 * ```svelte
+	 * <GlassLogo season="winter" class="w-16 h-20" />
+	 * <GlassLogo season="spring" breathing />
+	 * <GlassLogo season="autumn" variant="frosted" />
+	 * ```
+	 *
 	 * @example Accent variant with breathing
 	 * ```svelte
 	 * <GlassLogo variant="accent" breathing />
-	 * ```
-	 *
-	 * @example Frosted variant for dark backgrounds
-	 * ```svelte
-	 * <GlassLogo variant="frosted" class="w-24 h-30" />
 	 * ```
 	 */
 
@@ -27,11 +29,13 @@
 	import { browser } from '$app/environment';
 
 	type GlassVariant =
-		| "default"   // Light translucent - white/emerald tones
+		| "default"   // Light translucent - uses seasonal color or white/emerald
 		| "accent"    // Accent-colored glass
 		| "frosted"   // Strong frosted effect, more opaque
 		| "dark"      // Dark translucent for light backgrounds
 		| "ethereal"; // Dreamy, highly transparent with glow
+
+	type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
 	type BreathingSpeed = 'slow' | 'normal' | 'fast';
 
@@ -39,6 +43,8 @@
 		class?: string;
 		/** Glass style variant */
 		variant?: GlassVariant;
+		/** Seasonal color theme - overrides default colors */
+		season?: Season;
 		/** Add subtle sway animation */
 		animate?: boolean;
 		/** Add breathing animation (for loading states) */
@@ -47,7 +53,7 @@
 		breathingSpeed?: BreathingSpeed;
 		/** Whether trunk should match foliage color */
 		monochrome?: boolean;
-		/** Custom accent color (CSS color value) */
+		/** Custom accent color (CSS color value) - overrides season */
 		accentColor?: string;
 		/** Unique ID for SVG filters (auto-generated if not provided) */
 		filterId?: string;
@@ -56,6 +62,7 @@
 	let {
 		class: className = 'w-6 h-6',
 		variant = "default",
+		season,
 		animate = false,
 		breathing = false,
 		breathingSpeed = 'normal',
@@ -63,6 +70,9 @@
 		accentColor,
 		filterId
 	}: Props = $props();
+
+	// Check if winter for snow accents
+	const isWinter = $derived(season === 'winter');
 
 	// Generate unique ID for SVG filters to avoid conflicts when multiple logos exist
 	const uniqueId = filterId ?? `glass-logo-${Math.random().toString(36).slice(2, 9)}`;
@@ -85,56 +95,127 @@
 		return () => reducedMotionQuery.removeEventListener('change', handler);
 	});
 
-	// Glass color schemes per variant
-	const variantColors = $derived({
-		default: {
-			// Light translucent white/emerald
-			gradientStart: 'rgba(255, 255, 255, 0.7)',
-			gradientEnd: 'rgba(236, 253, 245, 0.5)',   // emerald-50
-			highlight: 'rgba(255, 255, 255, 0.9)',
-			shadow: 'rgba(16, 185, 129, 0.2)',         // emerald-500
-			trunk: monochrome ? 'rgba(255, 255, 255, 0.5)' : 'rgba(93, 64, 55, 0.7)',
-			glowColor: 'rgba(16, 185, 129, 0.3)'
+	// Seasonal color palettes (glass-tinted versions)
+	// These define the base hues for each season
+	const seasonalPalettes = {
+		spring: {
+			// Cherry blossom pink - soft, hopeful
+			primary: 'rgba(244, 114, 182, 0.75)',      // pink-400
+			secondary: 'rgba(251, 207, 232, 0.5)',     // pink-200
+			glow: 'rgba(236, 72, 153, 0.35)',          // pink-500
+			shadow: 'rgba(219, 39, 119, 0.2)'          // pink-600
 		},
-		accent: {
-			// Accent-colored (uses CSS variable or custom color)
-			gradientStart: accentColor ? `${accentColor}cc` : 'rgba(var(--accent-rgb, 16, 185, 129), 0.8)',
-			gradientEnd: accentColor ? `${accentColor}99` : 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)',
-			highlight: 'rgba(255, 255, 255, 0.6)',
-			shadow: accentColor ? `${accentColor}40` : 'rgba(var(--accent-rgb, 16, 185, 129), 0.25)',
-			trunk: monochrome
-				? (accentColor ? `${accentColor}99` : 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)')
-				: 'rgba(93, 64, 55, 0.8)',
-			glowColor: accentColor ? `${accentColor}50` : 'rgba(var(--accent-rgb, 16, 185, 129), 0.3)'
+		summer: {
+			// Grove brand green - growth, warmth
+			primary: 'rgba(16, 185, 129, 0.75)',       // emerald-500
+			secondary: 'rgba(167, 243, 208, 0.5)',     // emerald-200
+			glow: 'rgba(5, 150, 105, 0.35)',           // emerald-600
+			shadow: 'rgba(4, 120, 87, 0.2)'            // emerald-700
 		},
-		frosted: {
-			// Strong frosted, more opaque
-			gradientStart: 'rgba(255, 255, 255, 0.85)',
-			gradientEnd: 'rgba(248, 250, 252, 0.75)',  // slate-50
-			highlight: 'rgba(255, 255, 255, 0.95)',
-			shadow: 'rgba(100, 116, 139, 0.15)',       // slate-500
-			trunk: monochrome ? 'rgba(255, 255, 255, 0.7)' : 'rgba(93, 64, 55, 0.85)',
-			glowColor: 'rgba(148, 163, 184, 0.2)'     // slate-400
+		autumn: {
+			// Warm amber/orange - harvest, reflection
+			primary: 'rgba(251, 146, 60, 0.75)',       // orange-400
+			secondary: 'rgba(254, 215, 170, 0.5)',     // orange-200
+			glow: 'rgba(234, 88, 12, 0.35)',           // orange-600
+			shadow: 'rgba(194, 65, 12, 0.2)'           // orange-700
 		},
-		dark: {
-			// Dark translucent for light backgrounds
-			gradientStart: 'rgba(30, 41, 59, 0.7)',   // slate-800
-			gradientEnd: 'rgba(15, 23, 42, 0.6)',     // slate-900
-			highlight: 'rgba(148, 163, 184, 0.4)',    // slate-400
-			shadow: 'rgba(0, 0, 0, 0.3)',
-			trunk: monochrome ? 'rgba(30, 41, 59, 0.6)' : 'rgba(60, 45, 38, 0.8)',
-			glowColor: 'rgba(100, 116, 139, 0.2)'
-		},
-		ethereal: {
-			// Dreamy, highly transparent with strong glow
-			gradientStart: 'rgba(255, 255, 255, 0.4)',
-			gradientEnd: 'rgba(236, 254, 255, 0.25)', // cyan-50
-			highlight: 'rgba(255, 255, 255, 0.7)',
-			shadow: 'rgba(34, 211, 238, 0.2)',        // cyan-400
-			trunk: monochrome ? 'rgba(255, 255, 255, 0.3)' : 'rgba(93, 64, 55, 0.5)',
-			glowColor: 'rgba(34, 211, 238, 0.4)'
+		winter: {
+			// Frosted evergreen - stillness, rest
+			primary: 'rgba(134, 239, 172, 0.6)',       // green-300 (muted)
+			secondary: 'rgba(220, 252, 231, 0.4)',     // green-100
+			glow: 'rgba(74, 222, 128, 0.3)',           // green-400
+			shadow: 'rgba(34, 197, 94, 0.15)'          // green-500
 		}
-	}[variant]);
+	} as const;
+
+	// Snow color for winter accents
+	const snowColor = 'rgba(248, 250, 252, 0.9)'; // slate-50
+
+	// Get seasonal colors or null if no season specified
+	const seasonColors = $derived(season ? seasonalPalettes[season] : null);
+
+	// Glass color schemes per variant, with seasonal override support
+	const variantColors = $derived(() => {
+		// If accentColor is provided, it takes precedence over season
+		if (accentColor) {
+			return {
+				gradientStart: `${accentColor}cc`,
+				gradientEnd: `${accentColor}99`,
+				highlight: 'rgba(255, 255, 255, 0.6)',
+				shadow: `${accentColor}40`,
+				trunk: monochrome ? `${accentColor}99` : 'rgba(93, 64, 55, 0.8)',
+				glowColor: `${accentColor}50`
+			};
+		}
+
+		// Base colors from variant
+		const baseColors = {
+			default: {
+				gradientStart: seasonColors?.primary ?? 'rgba(255, 255, 255, 0.7)',
+				gradientEnd: seasonColors?.secondary ?? 'rgba(236, 253, 245, 0.5)',
+				highlight: 'rgba(255, 255, 255, 0.9)',
+				shadow: seasonColors?.shadow ?? 'rgba(16, 185, 129, 0.2)',
+				trunk: monochrome
+					? (seasonColors?.primary ?? 'rgba(255, 255, 255, 0.5)')
+					: 'rgba(93, 64, 55, 0.7)',
+				glowColor: seasonColors?.glow ?? 'rgba(16, 185, 129, 0.3)'
+			},
+			accent: {
+				// Accent uses seasonal colors if available, otherwise CSS variable
+				gradientStart: seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.8)',
+				gradientEnd: seasonColors?.secondary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)',
+				highlight: 'rgba(255, 255, 255, 0.6)',
+				shadow: seasonColors?.shadow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.25)',
+				trunk: monochrome
+					? (seasonColors?.primary ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.6)')
+					: 'rgba(93, 64, 55, 0.8)',
+				glowColor: seasonColors?.glow ?? 'rgba(var(--accent-rgb, 16, 185, 129), 0.3)'
+			},
+			frosted: {
+				// Frosted: more opaque, tinted with season
+				gradientStart: seasonColors
+					? seasonColors.primary.replace('0.75)', '0.85)').replace('0.6)', '0.8)')
+					: 'rgba(255, 255, 255, 0.85)',
+				gradientEnd: seasonColors
+					? seasonColors.secondary.replace('0.5)', '0.7)').replace('0.4)', '0.6)')
+					: 'rgba(248, 250, 252, 0.75)',
+				highlight: 'rgba(255, 255, 255, 0.95)',
+				shadow: seasonColors?.shadow ?? 'rgba(100, 116, 139, 0.15)',
+				trunk: monochrome
+					? (seasonColors?.primary ?? 'rgba(255, 255, 255, 0.7)')
+					: 'rgba(93, 64, 55, 0.85)',
+				glowColor: seasonColors?.glow ?? 'rgba(148, 163, 184, 0.2)'
+			},
+			dark: {
+				// Dark: subtle seasonal tint in shadow/glow only
+				gradientStart: 'rgba(30, 41, 59, 0.7)',
+				gradientEnd: 'rgba(15, 23, 42, 0.6)',
+				highlight: 'rgba(148, 163, 184, 0.4)',
+				shadow: 'rgba(0, 0, 0, 0.3)',
+				trunk: monochrome ? 'rgba(30, 41, 59, 0.6)' : 'rgba(60, 45, 38, 0.8)',
+				glowColor: seasonColors?.glow ?? 'rgba(100, 116, 139, 0.2)'
+			},
+			ethereal: {
+				// Ethereal: dreamy seasonal colors with strong glow
+				gradientStart: seasonColors
+					? seasonColors.primary.replace(/0\.\d+\)$/, '0.4)')
+					: 'rgba(255, 255, 255, 0.4)',
+				gradientEnd: seasonColors
+					? seasonColors.secondary.replace(/0\.\d+\)$/, '0.25)')
+					: 'rgba(236, 254, 255, 0.25)',
+				highlight: 'rgba(255, 255, 255, 0.7)',
+				shadow: seasonColors?.shadow ?? 'rgba(34, 211, 238, 0.2)',
+				trunk: monochrome
+					? (seasonColors?.primary?.replace(/0\.\d+\)$/, '0.3)') ?? 'rgba(255, 255, 255, 0.3)')
+					: 'rgba(93, 64, 55, 0.5)',
+				glowColor: seasonColors
+					? seasonColors.glow.replace(/0\.\d+\)$/, '0.4)')
+					: 'rgba(34, 211, 238, 0.4)'
+			}
+		};
+
+		return baseColors[variant];
+	})();
 
 	// Breathing animation
 	const breathValue = tweened(0, { easing: cubicInOut });
@@ -327,6 +408,27 @@
 			stroke-width="2"
 			stroke-opacity="0.3"
 		/>
+	{/if}
+
+	<!-- Winter snow accents -->
+	{#if isWinter}
+		<!-- Top point snow cap -->
+		<ellipse fill={snowColor} cx="208" cy="8" rx="32" ry="10" opacity="0.85" />
+
+		<!-- Upper diagonal arm tips (the angled parts pointing up-left and up-right) -->
+		<ellipse fill={snowColor} cx="52" cy="60" rx="18" ry="6" opacity="0.7" transform="rotate(-25 52 60)" />
+		<ellipse fill={snowColor} cx="365" cy="60" rx="18" ry="6" opacity="0.7" transform="rotate(25 365 60)" />
+
+		<!-- Horizontal arm snow (left and right extending arms) -->
+		<ellipse fill={snowColor} cx="45" cy="175" rx="28" ry="7" opacity="0.75" />
+		<ellipse fill={snowColor} cx="372" cy="175" rx="28" ry="7" opacity="0.75" />
+
+		<!-- Center intersection snow pile -->
+		<ellipse fill={snowColor} cx="208" cy="175" rx="25" ry="8" opacity="0.6" />
+
+		<!-- Lower diagonal arm tips -->
+		<ellipse fill={snowColor} cx="95" cy="320" rx="16" ry="5" opacity="0.55" transform="rotate(25 95 320)" />
+		<ellipse fill={snowColor} cx="322" cy="320" rx="16" ry="5" opacity="0.55" transform="rotate(-25 322 320)" />
 	{/if}
 </svg>
 
