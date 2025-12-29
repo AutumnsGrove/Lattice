@@ -2,7 +2,19 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Check } from 'lucide-svelte';
+	import {
+		Check,
+		PenLine,
+		FileText,
+		HardDrive,
+		Palette,
+		Flower2,
+		MessageCircle,
+		Globe,
+		Mail,
+		LifeBuoy,
+		CalendarDays
+	} from 'lucide-svelte';
 </script>
 
 <SEO
@@ -62,7 +74,12 @@
 					</thead>
 					<tbody class="text-sm font-sans">
 						<tr class="border-b border-subtle">
-							<td class="py-3 px-3 text-foreground-muted">Blog</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<PenLine class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Blog
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
@@ -70,7 +87,12 @@
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
-							<td class="py-3 px-3 text-foreground-muted">Blog Posts</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<FileText class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Blog Posts
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">50</td>
 							<td class="py-3 px-3 text-center text-foreground">250</td>
@@ -78,7 +100,12 @@
 							<td class="py-3 px-3 text-center text-foreground">Unlimited</td>
 						</tr>
 						<tr class="border-b border-subtle">
-							<td class="py-3 px-3 text-foreground-muted">Storage</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<HardDrive class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Storage
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">1 GB</td>
 							<td class="py-3 px-3 text-center text-foreground">5 GB</td>
@@ -86,7 +113,12 @@
 							<td class="py-3 px-3 text-center text-foreground">100 GB</td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
-							<td class="py-3 px-3 text-foreground-muted">Themes</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<Palette class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Themes
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">3 + accent</td>
 							<td class="py-3 px-3 text-center text-foreground">10 + accent</td>
@@ -94,7 +126,12 @@
 							<td class="py-3 px-3 text-center text-foreground">Customizer + Community + Fonts</td>
 						</tr>
 						<tr class="border-b border-subtle">
-							<td class="py-3 px-3 text-foreground-muted">Meadow</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<Flower2 class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Meadow
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
@@ -102,7 +139,12 @@
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
-							<td class="py-3 px-3 text-foreground-muted">Public Comments</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<MessageCircle class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Public Comments
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground">20/week</td>
 							<td class="py-3 px-3 text-center text-foreground">Unlimited</td>
 							<td class="py-3 px-3 text-center text-foreground">Unlimited</td>
@@ -110,7 +152,12 @@
 							<td class="py-3 px-3 text-center text-foreground">Unlimited</td>
 						</tr>
 						<tr class="border-b border-subtle">
-							<td class="py-3 px-3 text-foreground-muted">Custom Domain</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<Globe class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Custom Domain
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
@@ -118,7 +165,12 @@
 							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
-							<td class="py-3 px-3 text-foreground-muted">@grove.place Email</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<Mail class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									@grove.place Email
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">Forward</td>
@@ -126,7 +178,12 @@
 							<td class="py-3 px-3 text-center text-foreground">Full</td>
 						</tr>
 						<tr class="border-b border-subtle">
-							<td class="py-3 px-3 text-foreground-muted">Support</td>
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<LifeBuoy class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Support
+								</span>
+							</td>
 							<td class="py-3 px-3 text-center text-foreground">Help Center</td>
 							<td class="py-3 px-3 text-center text-foreground">Community</td>
 							<td class="py-3 px-3 text-center text-foreground">Email</td>
@@ -142,7 +199,12 @@
 							<td class="py-3 px-3 text-center text-foreground-subtle italic">Professionals</td>
 						</tr>
 						<tr>
-							<td class="py-4 px-3 text-foreground-muted">Yearly</td>
+							<td class="py-4 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
+									<CalendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Yearly
+								</span>
+							</td>
 							<td class="py-4 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-4 px-3 text-center font-medium text-accent-muted">$82</td>
 							<td class="py-4 px-3 text-center font-medium text-accent-muted">$122</td>
