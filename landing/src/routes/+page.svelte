@@ -18,7 +18,8 @@
 		Users,
 		Download,
 		ArrowRight,
-		MapPin
+		MapPin,
+		Sprout
 	} from 'lucide-svelte';
 
 	// Get error from URL if present
@@ -99,7 +100,7 @@
 			class="btn-primary inline-flex items-center gap-2 text-base mb-4"
 		>
 			Plant Your Blog
-			<Sparkles class="w-4 h-4" />
+			<Sprout class="w-4 h-4" />
 		</a>
 		<p class="text-foreground-subtle text-sm font-sans mb-6">
 			Signups aren't open yet, but feel free to look around.
