@@ -591,5 +591,74 @@ export const legalDocs: Doc[] = [
   },
 ];
 
+// Marketing Documents
+export const marketingDocs: Doc[] = [
+  {
+    slug: "grove-at-a-glance",
+    title: "Grove at a Glance",
+    description: "A 30-second overview of what Grove is and why it matters",
+    excerpt:
+      "A blogging platform that gives you your own corner of the internet. Your words stay yours, no algorithms, no ads.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 1,
+  },
+  {
+    slug: "launch-email-personal",
+    title: "Launch Email Template",
+    description: "Direct email to waitlist members",
+    excerpt:
+      "Personal email template for early supporters and waitlist members announcing Grove's launch.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 2,
+  },
+  {
+    slug: "landing-page-hero-text",
+    title: "Landing Page Hero Copy",
+    description: "Main headline and body copy for grove.place",
+    excerpt:
+      "The internet used to be a garden. Grove is a quiet corner of the web where your words can grow.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 2,
+  },
+  {
+    slug: "hacker-news-post",
+    title: "Hacker News Post",
+    description: "Show HN submission draft",
+    excerpt:
+      "Show HN: I quit my job and built a blogging platform in a month that blocks AI crawlers.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 3,
+  },
+  {
+    slug: "twitter-thread",
+    title: "Social Media Thread",
+    description: "Bluesky/Twitter/Mastodon thread template",
+    excerpt:
+      "Punchy, values-first social media thread for sharing Grove's launch on social platforms.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 2,
+  },
+  {
+    slug: "video-concept-shade-demo",
+    title: "Shade Demo Video Script",
+    description: "Video script for demonstrating AI crawler protection",
+    excerpt:
+      "Most platforms are desperate for AI traffic. I built one that blocks AI crawlers/agents completely. Let me show you.",
+    category: "marketing",
+    lastUpdated: "2025-12-30",
+    readingTime: 3,
+  },
+];
+
 // Combined export for convenience
-export const allDocs = [...specs, ...helpArticles, ...legalDocs];
+export const allDocs = [
+  ...specs,
+  ...helpArticles,
+  ...legalDocs,
+  ...marketingDocs,
+];
