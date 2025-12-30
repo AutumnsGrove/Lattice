@@ -14,7 +14,8 @@
   $: headers = doc?.headers || [];
 
   $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
-                     category === 'help' ? 'Help Center' : 'Legal & Policies';
+                     category === 'help' ? 'Help Center' :
+                     category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies';
 </script>
 
 <SEO
@@ -54,6 +55,10 @@
               {:else if category === 'help'}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                   Help Article
+                </span>
+              {:else if category === 'marketing'}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  Marketing
                 </span>
               {:else}
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">

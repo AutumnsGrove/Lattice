@@ -264,6 +264,96 @@
 		</div>
 	</section>
 
+	<!-- Decorative divider -->
+	<div class="flex items-center gap-4 mt-8 mb-12">
+		<div class="w-12 h-px bg-divider"></div>
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
+			<path
+				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
+				fill-opacity="0.6"
+			/>
+		</svg>
+		<div class="w-12 h-px bg-divider"></div>
+	</div>
+
+	<!-- Who is Grove for? -->
+	<section class="w-full max-w-2xl mb-12">
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Who is Grove for?</h2>
+
+		<div class="glass-grove rounded-xl p-6 space-y-4">
+			<p class="text-foreground-subtle font-sans leading-relaxed">
+				Writers who want a home on the internet without the surveillance, manipulation, and noise of social media. People who remember when the web felt personal.
+			</p>
+			<p class="text-foreground-subtle font-sans leading-relaxed">
+				<span class="text-foreground font-medium">Neurodivergent folks</span> who hate the endless customization rabbit holes. <span class="text-foreground font-medium">Queer people</span> who want safe digital spaces. Anyone who's tired of being the product.
+			</p>
+			<p class="text-foreground font-sans leading-relaxed font-medium">
+				Your words are yours. Not a dataset. Not a statistic. Yours.
+			</p>
+		</div>
+	</section>
+
+	<!-- Why I Built This -->
+	<section class="w-full max-w-2xl mb-12">
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Why I built this</h2>
+
+		<div class="glass-grove rounded-xl p-6 space-y-4">
+			<p class="text-foreground-subtle font-sans leading-relaxed">
+				Remember when the internet felt personal? When you had your little corner of it. When you weren't performing for an algorithm. When your words belonged to you.
+			</p>
+			<p class="text-foreground-subtle font-sans leading-relaxed">
+				I built Grove because I think we can have that again.
+			</p>
+			<p class="text-foreground-subtle font-sans leading-relaxed">
+				I'm tired of my friends being trapped in dopamine slot machines designed to exploit neurodivergent minds. So I built something different — a platform that doesn't spy on you, doesn't train AI on your words, doesn't make you compete for attention. A place where you can just... write.
+			</p>
+			<p class="text-foreground-subtle font-sans leading-relaxed italic">
+				— Autumn, founder
+			</p>
+		</div>
+	</section>
+
+	<!-- What You Get -->
+	<section class="w-full max-w-2xl mb-8">
+		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">What you get</h2>
+
+		<div class="glass-grove rounded-xl p-6">
+			<ul class="space-y-3 text-foreground-subtle font-sans">
+				<li class="flex items-start gap-3">
+					<Leaf class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<span><span class="text-foreground font-medium">yourname.grove.place</span> — a website that's yours</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<Shield class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<span><span class="text-foreground font-medium">Shade protection</span> — AI companies send bots to scrape websites and train their models on your writing. Grove blocks them.</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<Users class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<span><span class="text-foreground font-medium">No algorithms, no ads</span> — you're the customer, not the product</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<Download class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<span><span class="text-foreground font-medium">Take your stuff and go</span> — export everything anytime, your content lives in standard formats</span>
+				</li>
+			</ul>
+		</div>
+	</section>
+
+	<!-- Pricing teaser -->
+	<section class="w-full max-w-md mb-12 text-center">
+		<p class="text-foreground-muted font-sans mb-4">
+			Plans start at <span class="text-foreground font-medium">$8/month</span>. No free tier with hidden catches — just straightforward pricing for a service that respects you.
+		</p>
+		<a
+			href="/pricing"
+			class="inline-flex items-center gap-2 text-accent-muted hover:text-accent font-sans transition-colors"
+		>
+			<CircleDollarSign class="w-4 h-4" />
+			See all plans
+			<ArrowRight class="w-4 h-4" />
+		</a>
+	</section>
+
 </main>
 
 <!-- Footer -->
