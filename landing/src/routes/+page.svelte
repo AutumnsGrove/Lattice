@@ -95,9 +95,19 @@
 
 	<!-- CTA Links -->
 	<div class="text-center max-w-md mb-12">
-		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-6">
+		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-4">
 			A quiet corner of the internet where your words can grow — and stay yours.
 		</p>
+
+		<!-- Quick explainer link -->
+		<a
+			href="/knowledge/marketing/grove-at-a-glance"
+			class="inline-flex items-center gap-1.5 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors mb-6"
+		>
+			<BookOpen class="w-4 h-4" />
+			<span>30-second overview</span>
+			<ArrowRight class="w-3 h-3" />
+		</a>
 
 		<!-- Primary CTA: Plant your blog -->
 		<a
