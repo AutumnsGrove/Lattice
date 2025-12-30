@@ -33,8 +33,8 @@
 </script>
 
 <SEO
-	title="Grove — a place to Be"
-	description="A quiet corner of the internet where your words can grow and flourish. Your own space to write, share, and bloom."
+	title="Grove — The internet used to be a garden"
+	description="A quiet corner of the web where your words can grow. Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice."
 	url="/"
 />
 
@@ -69,11 +69,16 @@
 	</div>
 
 	<!-- Title -->
-	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-3 text-center">Grove</h1>
+	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center">Grove</h1>
 
 	<!-- Tagline -->
-	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-12 text-center">
-		a place to Be
+	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4 text-center">
+		The internet used to be a garden.
+	</p>
+
+	<!-- Subtagline -->
+	<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-lg text-center mb-12 leading-relaxed">
+		Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice.
 	</p>
 
 	<!-- Decorative divider -->
@@ -91,7 +96,7 @@
 	<!-- CTA Links -->
 	<div class="text-center max-w-md mb-12">
 		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-6">
-			A quiet corner of the internet where your words can grow.
+			A quiet corner of the internet where your words can grow — and stay yours.
 		</p>
 
 		<!-- Primary CTA: Plant your blog -->
