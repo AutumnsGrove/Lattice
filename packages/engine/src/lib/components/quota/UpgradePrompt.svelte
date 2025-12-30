@@ -187,6 +187,7 @@
       aria-modal="true"
       aria-labelledby="upgrade-title"
       aria-describedby="upgrade-description"
+      tabindex="0"
     >
       <!-- Header -->
       <div class="text-center mb-6">

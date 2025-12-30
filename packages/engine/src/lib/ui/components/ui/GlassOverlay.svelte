@@ -83,7 +83,7 @@
 <div
 	class={computedClass}
 	role={interactive ? "button" : "presentation"}
-	tabindex={interactive ? 0 : -1}
+	tabindex={interactive ? 0 : undefined}
 	aria-label={interactive ? "Close overlay" : undefined}
 	{...restProps}
 >

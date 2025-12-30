@@ -129,6 +129,7 @@
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="confirm-dialog-title"
+		tabindex="0"
 		transition:fade={{ duration: 150 }}
 	>
 		<!-- Dark overlay with blur -->
@@ -157,7 +158,7 @@
 					variant === "warning" && "bg-amber-100 dark:bg-amber-900/30",
 					variant === "default" && "bg-accent/10 dark:bg-accent/20"
 				)}>
-					<svelte:component this={config.icon} class={cn("w-6 h-6", config.iconClass)} />
+					<config.icon class={cn("w-6 h-6", config.iconClass)} />
 				</div>
 				<div class="flex-1 min-w-0">
 					<h3

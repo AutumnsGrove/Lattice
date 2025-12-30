@@ -4,8 +4,8 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import type { Season } from '../nature/palette';
-	import { winter } from '../nature/palette';
+	import type { Season } from '../palette';
+	import { winter } from '../palette';
 
 	interface Props {
 		class?: string;
