@@ -7,7 +7,7 @@
  */
 
 /** Document category */
-export type DocCategory = "specs" | "help" | "legal";
+export type DocCategory = "specs" | "help" | "legal" | "marketing";
 
 /** Base document metadata (used for listings and static data) */
 export interface Doc {

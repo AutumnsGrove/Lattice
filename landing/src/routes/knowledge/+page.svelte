@@ -6,7 +6,7 @@
   import Footer from '$lib/components/Footer.svelte';
 
   export let data;
-  const { specs, helpArticles, legalDocs } = data;
+  const { specs, helpArticles, legalDocs, marketingDocs } = data;
 
   let searchQuery = '';
 
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Categories -->
-    <div class="grid md:grid-cols-3 gap-8">
+    <div class="grid md:grid-cols-2 gap-8">
       <!-- Technical Specifications -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
         <div class="flex items-center mb-4">
@@ -159,20 +159,53 @@
           </svg>
         </a>
       </div>
+
+      <!-- Marketing Documents -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Marketing & Launch</h2>
+            <p class="text-sm text-foreground-subtle">{marketingDocs.length} documents</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Launch materials, messaging, and copy that tells the Grove story.
+        </p>
+        <div class="space-y-2 mb-4">
+          {#each marketingDocs.slice(0, 3) as doc}
+            <div class="text-sm">
+              <a href="/knowledge/marketing/{doc.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+                {doc.title}
+              </a>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/marketing" class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+          View all materials
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
     </div>
 
     <!-- Quick Links -->
     <div class="mt-12 text-center">
       <h3 class="text-lg font-semibold text-foreground mb-4">Quick Links</h3>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="/knowledge/specs/CONTENT-MODERATION" class="px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
-          Content Moderation
+        <a href="/knowledge/marketing/grove-at-a-glance" class="px-4 py-2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/40 transition-colors">
+          Grove at a Glance
         </a>
         <a href="/knowledge/help/what-is-grove" class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors">
           What is Grove?
         </a>
-        <a href="/knowledge/help/writing-your-first-post" class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors">
-          Writing Your First Post
+        <a href="/knowledge/specs/shade-spec" class="px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors">
+          Shade Protection
         </a>
         <a href="/vision" class="px-4 py-2 bg-surface-elevated text-foreground-muted border border-default rounded-lg hover:bg-surface transition-colors">
           Our Vision

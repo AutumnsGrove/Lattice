@@ -16,7 +16,7 @@ export const entries: EntryGenerator = () => {
   }));
 };
 
-const validCategories: DocCategory[] = ["specs", "help", "legal"];
+const validCategories: DocCategory[] = ["specs", "help", "legal", "marketing"];
 
 export const load: PageServerLoad = async ({ params }) => {
   const { category, slug } = params;
