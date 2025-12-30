@@ -150,6 +150,19 @@ For those who want to dream bigger: Oak and Evergreen users can bring the full G
 
 ---
 
+## Vineyard
+**Asset & Tool Showcase** · `*.grove.place/vineyard`
+
+A vineyard is where vines are tended before they're ready—rows of growth, organized and visible, trained along the lattice. It's part nursery, part gallery. A place to see what's growing and understand how it all fits together.
+
+Vineyard is the documentation and demo pattern for every Grove tool. Each product gets its own `/vineyard` route: `amber.grove.place/vineyard`, `ivy.grove.place/vineyard`, `foliage.grove.place/vineyard`. Inside, you'll find working demos where possible, visual mockups for what's coming, feature documentation, and the philosophy behind each tool. It's where you go to understand what something does before you use it—or to dream about what it will become.
+
+Some vineyards showcase mature vines ready for harvest. Others tend young shoots still finding their shape. Both belong here. The vineyard doesn't hide what's unfinished—it celebrates the growing.
+
+*Every vine starts somewhere.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -168,6 +181,7 @@ For those who want to dream bigger: Oak and Evergreen users can bring the full G
 | **Amber** | Storage management | amber.grove.place |
 | **Shade** | AI content protection | grove.place/shade |
 | **Trails** | Personal roadmaps | username.grove.place/trail |
+| **Vineyard** | Asset & tool showcase | *.grove.place/vineyard |
 
 ---
 
@@ -191,6 +205,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Amber | GroveStorage |
 | Shade | GroveShade |
 | Trails | GroveTrails |
+| Vineyard | GroveShowcase |
 
 ---
 
