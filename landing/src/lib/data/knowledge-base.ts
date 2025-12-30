@@ -648,7 +648,7 @@ export const marketingDocs: Doc[] = [
     title: "Shade Demo Video Script",
     description: "Video script for demonstrating AI crawler protection",
     excerpt:
-      "Most platforms are desperate for AI traffic. I built one that tells AI to fuck off. Let me show you.",
+      "Most platforms are desperate for AI traffic. I built one that blocks AI crawlers/agents completely. Let me show you.",
     category: "marketing",
     lastUpdated: "2025-12-30",
     readingTime: 3,
@@ -656,4 +656,9 @@ export const marketingDocs: Doc[] = [
 ];
 
 // Combined export for convenience
-export const allDocs = [...specs, ...helpArticles, ...legalDocs, ...marketingDocs];
+export const allDocs = [
+  ...specs,
+  ...helpArticles,
+  ...legalDocs,
+  ...marketingDocs,
+];

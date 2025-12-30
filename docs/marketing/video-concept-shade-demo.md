@@ -16,7 +16,7 @@
 
 ### [0:00-0:15] Opening
 
-"Most platforms are desperate for AI traffic. I built one that tells AI to fuck off. Let me show you."
+"Most platforms are desperate for AI traffic. I built one that blocks AI crawlers/agents completely. Let me show you."
 
 ---
 
