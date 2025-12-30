@@ -5,7 +5,7 @@
 		Github,
 		ExternalLink,
 		BookOpen,
-		Map as MapIcon,
+		MapPin,
 		Tag,
 		Info,
 		Telescope,
@@ -57,7 +57,7 @@
 					</li>
 					<li>
 						<a href="/roadmap" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
-							<MapIcon class="w-4 h-4" />
+							<MapPin class="w-4 h-4" />
 							Roadmap
 						</a>
 					</li>
