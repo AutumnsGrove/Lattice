@@ -54,11 +54,8 @@
 		Puzzle,
 		// Phase badge icons
 		Flower,
-		Moon as MoonIcon,
-		Star
+		Moon as MoonIcon
 	} from 'lucide-svelte';
-tt// Wisp icons
-ttWind
 
 	// Import nature assets from engine package
 	import {
