@@ -52,7 +52,8 @@ The groundwork laid in stillness. Foundations built when no one was watching.
 - [x] **Internal Tools** — Development infrastructure
   - Bloom (GroveBloom) — Remote coding environments on-demand
   - Mycelium (GroveMCP) — MCP server for AI agent integration
-  - See `docs/specs/mycelium-spec.md` and `docs/grove-mcp-guide.md`
+  - Vineyard — Asset & tool showcase pattern for Grove products
+  - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, and `docs/grove-mcp-guide.md`
 
 ---
 
