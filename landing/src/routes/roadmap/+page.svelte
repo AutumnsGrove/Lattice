@@ -53,48 +53,27 @@
 		Star
 	} from 'lucide-svelte';
 
-	// Trees
-	import Logo from '$lib/components/Logo.svelte';
-	import TreePine from '$lib/components/trees/TreePine.svelte';
-	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
-	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
-	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
-
-	// Weather & Sky
-	import SnowfallLayer from '$lib/components/nature/weather/SnowfallLayer.svelte';
-	import FallingPetalsLayer from '$lib/components/nature/botanical/FallingPetalsLayer.svelte';
-	import FallingLeavesLayer from '$lib/components/nature/botanical/FallingLeavesLayer.svelte';
-	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
-	import Moon from '$lib/components/nature/sky/Moon.svelte';
-	import StarCluster from '$lib/components/nature/sky/StarCluster.svelte';
-
-	// Creatures
-	import Firefly from '$lib/components/nature/creatures/Firefly.svelte';
-
-	// Botanical
-	import Vine from '$lib/components/nature/botanical/Vine.svelte';
-
-	// Structural
-	import Lantern from '$lib/components/nature/structural/Lantern.svelte';
-
-	// Ground
-	import Tulip from '$lib/components/nature/ground/Tulip.svelte';
-	import Daffodil from '$lib/components/nature/ground/Daffodil.svelte';
-	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
-	import GrassTuft from '$lib/components/nature/ground/GrassTuft.svelte';
-
-	// Palette
+	// Import nature assets from engine package
 	import {
-		greens,
-		bark,
-		autumn,
-		spring,
-		winter,
-		pinks,
-		accents,
-		midnightBloom,
+		Logo,
+		// Trees
+		TreePine, TreeCherry, TreeAspen, TreeBirch,
+		// Weather
+		SnowfallLayer,
+		// Botanical
+		FallingPetalsLayer, FallingLeavesLayer, Vine,
+		// Sky
+		Cloud, Moon, StarCluster,
+		// Creatures
+		Firefly,
+		// Structural
+		Lantern,
+		// Ground
+		Tulip, Daffodil, FlowerWild, GrassTuft,
+		// Palette
+		greens, bark, autumn, spring, winter, pinks, accents, midnightBloom,
 		type Season
-	} from '$lib/components/nature/palette';
+	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// =============================================================================
 	// PHASE CONFIGURATION

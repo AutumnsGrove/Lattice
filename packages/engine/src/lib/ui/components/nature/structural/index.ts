@@ -1,0 +1,9 @@
+// Structural components - garden structures and paths
+export { default as Birdhouse } from './Birdhouse.svelte';
+export { default as Bridge } from './Bridge.svelte';
+export { default as FencePost } from './FencePost.svelte';
+export { default as GardenGate } from './GardenGate.svelte';
+export { default as Lantern } from './Lantern.svelte';
+export { default as Lattice } from './Lattice.svelte';
+export { default as LatticeWithVine } from './LatticeWithVine.svelte';
+export { default as StonePath } from './StonePath.svelte';

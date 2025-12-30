@@ -5,48 +5,26 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { season as seasonStore } from '$lib/stores/season';
 
-	// Trees
-	import Logo from '$lib/components/Logo.svelte';
-	import TreePine from '$lib/components/trees/TreePine.svelte';
-	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
-	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
-	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
-
-	// Falling leaves
-	import FallingLeavesLayer from '$lib/components/nature/botanical/FallingLeavesLayer.svelte';
-
-	// Falling petals (spring cherry blossoms)
-	import FallingPetalsLayer from '$lib/components/nature/botanical/FallingPetalsLayer.svelte';
-
-	// Snowfall
-	import SnowfallLayer from '$lib/components/nature/weather/SnowfallLayer.svelte';
-
-	// Winter birds
-	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
-	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
-
-	// Spring birds
-	import Robin from '$lib/components/nature/creatures/Robin.svelte';
-	import Bluebird from '$lib/components/nature/creatures/Bluebird.svelte';
-
-	// Sky
-	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
+	// Import nature assets from engine package
+	import {
+		Logo,
+		// Trees
+		TreePine, TreeCherry, TreeAspen, TreeBirch,
+		// Botanical
+		FallingLeavesLayer, FallingPetalsLayer,
+		// Weather
+		SnowfallLayer,
+		// Creatures - birds
+		Cardinal, Chickadee, Robin, Bluebird,
+		// Sky
+		Cloud,
+		// Palette
+		greens, bark, autumn, pinks, autumnReds, winter, spring, springBlossoms,
+		type Season
+	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
-
-	// Shared palette
-	import {
-		greens,
-		bark,
-		autumn,
-		pinks,
-		autumnReds,
-		winter,
-		spring,
-		springBlossoms,
-		type Season
-	} from '$lib/components/nature/palette';
 
 	// Season state - using shared store so logo respects forest season
 	const isSpring = $derived($seasonStore === 'spring');

@@ -8,7 +8,7 @@
 
 import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { Season } from '$lib/components/nature/palette';
+import type { Season } from '@autumnsgrove/groveengine/ui/nature';
 
 const STORAGE_KEY = 'grove-season';
 

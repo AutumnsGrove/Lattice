@@ -2,82 +2,30 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
-	// Import all nature assets
-	// Trees
-	import Logo from '$lib/components/Logo.svelte';
+	// Import nature assets from engine package
+	import {
+		// Logo (also available locally - keep local version while working on it)
+		Logo,
+		// Palette
+		greens, bark, earth, natural, autumn, pinks, autumnReds, accents,
+		// Trees
+		TreePine, TreeCherry, TreeAspen, TreeBirch,
+		// Ground
+		Mushroom, MushroomCluster, Fern, Bush, GrassTuft, Rock, Stump, Log,
+		FlowerWild, Tulip, Crocus, Daffodil,
+		// Creatures
+		Firefly, Butterfly, Bird, BirdFlying, Cardinal, Chickadee, Robin, Bluebird,
+		Bee, Rabbit, Deer, Owl, Squirrel,
+		// Sky
+		Cloud, CloudWispy, Sun, Moon, Star, StarCluster, StarShooting, Rainbow,
+		// Water
+		Pond, LilyPad, Reeds, Stream,
+		// Botanical
+		Leaf, LeafFalling, PetalFalling, Acorn, PineCone, Berry, DandelionPuff, Vine,
+		// Structural
+		Lattice, LatticeWithVine, Birdhouse, GardenGate, FencePost, StonePath, Bridge, Lantern
+	} from '@autumnsgrove/groveengine/ui/nature';
 	import { GlassLogo } from '@autumnsgrove/groveengine/ui';
-	import TreePine from '$lib/components/trees/TreePine.svelte';
-	import TreeCherry from '$lib/components/trees/TreeCherry.svelte';
-	import TreeAspen from '$lib/components/nature/trees/TreeAspen.svelte';
-	import TreeBirch from '$lib/components/nature/trees/TreeBirch.svelte';
-
-	// Ground
-	import Mushroom from '$lib/components/nature/ground/Mushroom.svelte';
-	import MushroomCluster from '$lib/components/nature/ground/MushroomCluster.svelte';
-	import Fern from '$lib/components/nature/ground/Fern.svelte';
-	import Bush from '$lib/components/nature/ground/Bush.svelte';
-	import GrassTuft from '$lib/components/nature/ground/GrassTuft.svelte';
-	import Rock from '$lib/components/nature/ground/Rock.svelte';
-	import Stump from '$lib/components/nature/ground/Stump.svelte';
-	import Log from '$lib/components/nature/ground/Log.svelte';
-	import FlowerWild from '$lib/components/nature/ground/FlowerWild.svelte';
-	import Tulip from '$lib/components/nature/ground/Tulip.svelte';
-	import Crocus from '$lib/components/nature/ground/Crocus.svelte';
-	import Daffodil from '$lib/components/nature/ground/Daffodil.svelte';
-
-	// Creatures
-	import Firefly from '$lib/components/nature/creatures/Firefly.svelte';
-	import Butterfly from '$lib/components/nature/creatures/Butterfly.svelte';
-	import Bird from '$lib/components/nature/creatures/Bird.svelte';
-	import BirdFlying from '$lib/components/nature/creatures/BirdFlying.svelte';
-	import Cardinal from '$lib/components/nature/creatures/Cardinal.svelte';
-	import Chickadee from '$lib/components/nature/creatures/Chickadee.svelte';
-	import Robin from '$lib/components/nature/creatures/Robin.svelte';
-	import Bluebird from '$lib/components/nature/creatures/Bluebird.svelte';
-	import Bee from '$lib/components/nature/creatures/Bee.svelte';
-	import Rabbit from '$lib/components/nature/creatures/Rabbit.svelte';
-	import Deer from '$lib/components/nature/creatures/Deer.svelte';
-	import Owl from '$lib/components/nature/creatures/Owl.svelte';
-	import Squirrel from '$lib/components/nature/creatures/Squirrel.svelte';
-
-	// Sky
-	import Cloud from '$lib/components/nature/sky/Cloud.svelte';
-	import CloudWispy from '$lib/components/nature/sky/CloudWispy.svelte';
-	import Sun from '$lib/components/nature/sky/Sun.svelte';
-	import Moon from '$lib/components/nature/sky/Moon.svelte';
-	import Star from '$lib/components/nature/sky/Star.svelte';
-	import StarCluster from '$lib/components/nature/sky/StarCluster.svelte';
-	import StarShooting from '$lib/components/nature/sky/StarShooting.svelte';
-	import Rainbow from '$lib/components/nature/sky/Rainbow.svelte';
-
-	// Water
-	import Pond from '$lib/components/nature/water/Pond.svelte';
-	import LilyPad from '$lib/components/nature/water/LilyPad.svelte';
-	import Reeds from '$lib/components/nature/water/Reeds.svelte';
-	import Stream from '$lib/components/nature/water/Stream.svelte';
-
-	// Botanical
-	import Leaf from '$lib/components/nature/botanical/Leaf.svelte';
-	import LeafFalling from '$lib/components/nature/botanical/LeafFalling.svelte';
-	import PetalFalling from '$lib/components/nature/botanical/PetalFalling.svelte';
-	import Acorn from '$lib/components/nature/botanical/Acorn.svelte';
-	import PineCone from '$lib/components/nature/botanical/PineCone.svelte';
-	import Berry from '$lib/components/nature/botanical/Berry.svelte';
-	import DandelionPuff from '$lib/components/nature/botanical/DandelionPuff.svelte';
-	import Vine from '$lib/components/nature/botanical/Vine.svelte';
-
-	// Structural
-	import Lattice from '$lib/components/nature/structural/Lattice.svelte';
-	import LatticeWithVine from '$lib/components/nature/structural/LatticeWithVine.svelte';
-	import Birdhouse from '$lib/components/nature/structural/Birdhouse.svelte';
-	import GardenGate from '$lib/components/nature/structural/GardenGate.svelte';
-	import FencePost from '$lib/components/nature/structural/FencePost.svelte';
-	import StonePath from '$lib/components/nature/structural/StonePath.svelte';
-	import Bridge from '$lib/components/nature/structural/Bridge.svelte';
-	import Lantern from '$lib/components/nature/structural/Lantern.svelte';
-
-	// Import palette for presets
-	import { greens, bark, earth, natural, autumn, pinks, autumnReds, accents } from '$lib/components/nature/palette';
 
 	// Asset definitions with their props
 	const assets = {

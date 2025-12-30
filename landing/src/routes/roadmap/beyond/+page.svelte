@@ -6,9 +6,8 @@
 	// Lucide Icons
 	import { Music, BookOpen, Newspaper, Telescope, Github } from 'lucide-svelte';
 
-	// Components
-	import StarCluster from '$lib/components/nature/sky/StarCluster.svelte';
-	import Moon from '$lib/components/nature/sky/Moon.svelte';
+	// Import nature assets from engine package
+	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';
 
 	// Standalone tools - built for personal use, shared with the world
 	const tools = [

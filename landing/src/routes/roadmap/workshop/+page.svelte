@@ -6,9 +6,8 @@
 	// Lucide Icons
 	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video } from 'lucide-svelte';
 
-	// Components
-	import Logo from '$lib/components/Logo.svelte';
-	import Lantern from '$lib/components/nature/structural/Lantern.svelte';
+	// Import nature assets from engine package
+	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
 
 	// Tools that integrate with Grove
 	const tools = [
