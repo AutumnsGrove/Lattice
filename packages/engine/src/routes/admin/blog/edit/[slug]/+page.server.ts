@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
       const post = (await platform.env.DB.prepare(
         `SELECT slug, title, date, tags, description, markdown_content, html_content, gutter_content, last_synced, updated_at
          FROM posts
-         WHERE slug = ? AND tenant_id = ?`
+         WHERE slug = ? AND tenant_id = ?`,
       )
         .bind(slug, effectiveTenantId)
         .first()) as PostRecord | null;
@@ -95,12 +95,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
       },
     };
   } catch (err) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "status" in err &&
-      err.status === 404
-    )
+    if (err && typeof err === "object" && "status" in err && err.status === 404)
       throw err;
     console.error("Filesystem fetch error:", err);
     throw error(500, "Failed to fetch post");
