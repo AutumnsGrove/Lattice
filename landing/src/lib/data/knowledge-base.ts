@@ -90,7 +90,8 @@ export const specs: Doc[] = [
   {
     slug: "status-page-spec",
     title: "Status Page Specification",
-    description: "Public-facing status page for platform health and incident communication",
+    description:
+      "Public-facing status page for platform health and incident communication",
     excerpt:
       "The Grove Status page provides transparent, real-time communication about platform health. When something goes wrong—or when maintenance is planned—users can check status.grove.place.",
     category: "specs",
@@ -156,6 +157,76 @@ export const specs: Doc[] = [
     category: "specs",
     lastUpdated: "2025-12-01",
     readingTime: 12,
+  },
+  {
+    slug: "shade-spec",
+    title: "Shade — AI Content Protection System",
+    description: "Layered defense against AI crawlers and scrapers",
+    excerpt:
+      "Users own their words. Shade is Grove's seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.",
+    category: "specs",
+    lastUpdated: "2025-12-26",
+    readingTime: 18,
+  },
+  {
+    slug: "bloom-spec",
+    title: "Bloom — Remote Coding Infrastructure",
+    description: "Serverless autonomous coding agent on transient VPS",
+    excerpt:
+      "Bloom is a personal, serverless remote coding agent. Text it and forget it—send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs.",
+    category: "specs",
+    lastUpdated: "2025-12-30",
+    readingTime: 23,
+  },
+  {
+    slug: "mycelium-spec",
+    title: "Mycelium — MCP Server",
+    description: "Model Context Protocol server for Grove ecosystem",
+    excerpt:
+      "Mycelium is Grove's Model Context Protocol (MCP) server—the wood wide web that lets AI agents interact with the entire Grove ecosystem. Claude talks to Grove through Mycelium.",
+    category: "specs",
+    lastUpdated: "2025-12-30",
+    readingTime: 15,
+  },
+  {
+    slug: "trails-spec",
+    title: "Trails — Personal Roadmaps",
+    description: "Build in public with beautiful project roadmaps",
+    excerpt:
+      "Trails lets Grove users create and share personal roadmaps. Build in public, plan content, and track progress with a beautiful way to show the journey.",
+    category: "specs",
+    lastUpdated: "2025-12-29",
+    readingTime: 6,
+  },
+  {
+    slug: "vineyard-spec",
+    title: "Vineyard — Tool Showcase Pattern",
+    description: "Consistent documentation and demo pattern for Grove tools",
+    excerpt:
+      "Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed.",
+    category: "specs",
+    lastUpdated: "2025-12-30",
+    readingTime: 5,
+  },
+  {
+    slug: "writing-assistant-unified-spec",
+    title: "Wisp — Writing Assistant",
+    description: "Ethical AI writing tool that polishes without replacing",
+    excerpt:
+      "Wisp is an ethical AI writing assistant that helps users polish their voice without replacing it. It analyzes content for grammar, tone, and readability—never generates or expands content.",
+    category: "specs",
+    lastUpdated: "2025-12-30",
+    readingTime: 6,
+  },
+  {
+    slug: "wisp-migration-prompt",
+    title: "Wisp Migration Guide",
+    description: "Migration guide from old AI assistant to Wisp",
+    excerpt:
+      "Migration documentation for moving from the local AIWritingPanel to the new Wisp system from GroveEngine, using DeepSeek V3 via Fireworks AI.",
+    category: "specs",
+    lastUpdated: "2025-12-30",
+    readingTime: 3,
   },
   // Completed Specs (implemented or superseded)
   {
@@ -315,7 +386,8 @@ export const helpArticles: Doc[] = [
   {
     slug: "how-grove-protects-your-content",
     title: "How Grove Protects Your Content from AI Scraping",
-    description: "Shade: Grove's seven-layer defense against AI crawlers and scrapers",
+    description:
+      "Shade: Grove's seven-layer defense against AI crawlers and scrapers",
     excerpt:
       "Every major AI company sends crawlers across the web to train their models. Grove says no. Here's how our Shade protection system keeps your writing between you and your readers.",
     category: "help",
@@ -509,7 +581,8 @@ export const legalDocs: Doc[] = [
   {
     slug: "data-portability-separation",
     title: "Data Portability & Account Separation Policy",
-    description: "Your data export rights, domain ownership, and account cancellation terms",
+    description:
+      "Your data export rights, domain ownership, and account cancellation terms",
     excerpt:
       "Your content is yours. Your domain is yours. Grove will never hold your data or domain hostage. This document outlines what happens when you cancel your subscription.",
     category: "legal",
