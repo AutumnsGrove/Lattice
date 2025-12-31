@@ -57,6 +57,21 @@ grove.place · step away (unsubscribe)
 
 ---
 
+## Assets
+
+Logo files are available at:
+- `landing/static/logo-summer.svg` (source)
+- `landing/static/logo-summer-16.png`
+- `landing/static/logo-summer-24.png`
+- `landing/static/logo-summer-32.png`
+
+Hosted at:
+- `https://grove.place/logo-summer-16.png`
+- `https://grove.place/logo-summer-24.png`
+- `https://grove.place/logo-summer-32.png`
+
+---
+
 ## Voice Notes
 
 - "A place to be." — calm, inviting, already established on the landing page
