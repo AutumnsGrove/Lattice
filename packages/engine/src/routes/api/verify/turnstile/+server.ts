@@ -7,16 +7,15 @@
  * Cookie lasts 7 days, shared across all *.grove.place subdomains.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   verifyTurnstileToken,
   createVerificationCookie,
-  getVerificationCookieOptions,
   TURNSTILE_COOKIE_NAME,
 } from "$lib/server/services/turnstile";
 
-export const POST: RequestHandler = async ({ request, platform, cookies }) => {
+export const POST: RequestHandler = async ({ request, platform }) => {
   // Get the token from the request body
   let token: string;
 
@@ -58,14 +57,29 @@ export const POST: RequestHandler = async ({ request, platform, cookies }) => {
     throw error(403, "Human verification failed");
   }
 
-  // Create and set the verification cookie
+  // Create the verification cookie
   const cookieValue = createVerificationCookie(secretKey);
-  const cookieOptions = getVerificationCookieOptions(".grove.place");
 
-  cookies.set(TURNSTILE_COOKIE_NAME, cookieValue, cookieOptions);
+  // Build Set-Cookie header manually to ensure it's correct
+  // Format: name=value; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place
+  const cookieHeader = [
+    `${TURNSTILE_COOKIE_NAME}=${cookieValue}`,
+    "Path=/",
+    "Max-Age=604800", // 7 days
+    "HttpOnly",
+    "Secure",
+    "SameSite=Lax",
+    "Domain=grove.place" // No leading dot - modern browsers handle this correctly
+  ].join("; ");
 
-  return json({
+  return new Response(JSON.stringify({
     success: true,
     message: "Verification successful",
+  }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Set-Cookie": cookieHeader
+    }
   });
 };
