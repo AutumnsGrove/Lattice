@@ -53,7 +53,8 @@ The groundwork laid in stillness. Foundations built when no one was watching.
   - Bloom (GroveBloom) — Remote coding environments on-demand
   - Mycelium (GroveMCP) — MCP server for AI agent integration
   - Vineyard — Asset & tool showcase pattern for Grove products
-  - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, and `docs/grove-mcp-guide.md`
+  - Vista (GroveMonitor) — Infrastructure observability dashboard
+  - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, `docs/specs/vista-spec.md`, and `docs/grove-mcp-guide.md`
 
 ---
 

@@ -204,6 +204,20 @@ It's the invisible network beneath everything. You don't see it. You don't think
 
 ---
 
+## Vista
+**Infrastructure Observability** · `vista.grove.place`
+**Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
+
+A vista is a clearing in the forest where the canopy opens up—a place where you can finally see. The whole grove stretches out before you: what's thriving, what's struggling, what needs attention.
+
+Vista is infrastructure observability for the Grove platform. It monitors every worker, database, storage bucket, and KV namespace—tracking health, latency, error rates, and costs. Real-time dashboards show the state of the entire ecosystem at a glance. When something needs attention, Vista sends an alert before users ever notice. Ninety days of history, always available, quietly watching.
+
+Rings tells writers about their readers. Vista tells the grove keeper about the grove itself.
+
+*Where you go to see everything clearly.*
+
+---
+
 ## Wisp
 **Writing Assistant** · *Integrated into editor*
 
@@ -236,6 +250,7 @@ All features off by default. Zero data retention. Your words analyzed, never sto
 | **Vineyard** | Asset & tool showcase | *.grove.place/vineyard |
 | **Bloom** | Remote coding infrastructure | bloom.grove.place |
 | **Mycelium** | MCP server | mycelium.grove.place |
+| **Vista** | Infrastructure observability | vista.grove.place |
 | **Wisp** | Writing assistant | *(integrated)* |
 
 ---
@@ -263,6 +278,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Vineyard | GroveShowcase |
 | Bloom | GroveBloom |
 | Mycelium | GroveMCP |
+| Vista | GroveMonitor |
 | Wisp | GroveWisp |
 
 ---

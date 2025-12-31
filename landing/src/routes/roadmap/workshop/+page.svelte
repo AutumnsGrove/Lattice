@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -127,6 +127,16 @@
 			icon: 'wind',
 			integration: 'Integrated into the Grove editor, off by default'
 		},
+		{
+			name: 'Vista',
+			tagline: 'Infrastructure Observability',
+			description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history. Where the grove keeper goes to see everything clearly.',
+			status: 'building',
+			icon: 'eye',
+			domain: 'vista.grove.place',
+			integration: 'Internal infrastructure monitoring for Grove operators',
+			github: 'https://github.com/AutumnsGrove/GroveMonitor'
+		},
 	];
 
 	function getStatusBadge(status: string) {
@@ -206,6 +216,8 @@
 										<Network class="w-5 h-5" />
 									{:else if tool.icon === 'wind'}
 										<Wind class="w-5 h-5" />
+									{:else if tool.icon === 'eye'}
+										<Eye class="w-5 h-5" />
 									{:else if tool.icon === 'book'}
 										<BookOpen class="w-5 h-5" />
 									{/if}
