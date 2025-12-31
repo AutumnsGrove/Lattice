@@ -77,9 +77,18 @@
 	</p>
 
 	<!-- Subtagline -->
-	<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-lg text-center mb-12 leading-relaxed">
+	<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-lg text-center mb-8 leading-relaxed">
 		Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice.
 	</p>
+
+	<!-- Launch Notice -->
+	<div class="w-full max-w-md mb-8">
+		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
+			<p class="text-foreground font-sans text-sm leading-relaxed">
+				<span class="font-medium">A small delay —</span> I'm finalizing some legal paperwork (DBA registration and tax documents) before we officially open. Should be ready by Monday. Thanks for your patience.
+			</p>
+		</div>
+	</div>
 
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mb-12">
