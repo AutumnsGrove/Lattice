@@ -6,7 +6,7 @@
 		DemoContainer,
 		CodeExample,
 		RoadmapSection
-	} from '@autumnsgrove/groveengine/vineyard';
+	} from '$lib/vineyard';
 	import { Grape, Layout, CreditCard, Code, Lock, Map, Sparkles } from 'lucide-svelte';
 </script>
 
@@ -96,7 +96,7 @@
     VineyardLayout,
     FeatureCard,
     StatusBadge
-  } from '@autumnsgrove/groveengine/vineyard';
+  } from '$lib/vineyard';
 </script>
 
 <VineyardLayout

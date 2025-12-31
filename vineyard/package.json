@@ -27,7 +27,7 @@
     "wrangler": "^4.54.0"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "workspace:*",
+    "@autumnsgrove/vineyard": "link:../../../Vineyard",
     "lucide-svelte": "^0.460.0"
   }
 }
