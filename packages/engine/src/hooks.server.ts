@@ -308,9 +308,11 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Auto-validate CSRF on state-changing methods
   if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
     const isAuthEndpoint = event.url.pathname.includes("/auth/");
+    // Turnstile verification is like auth - new visitors don't have CSRF tokens
+    const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";
 
-    if (isAuthEndpoint) {
-      // Auth endpoints use origin-based validation (users don't have CSRF tokens yet)
+    if (isAuthEndpoint || isTurnstileEndpoint) {
+      // Auth and verification endpoints use origin-based validation (users don't have CSRF tokens yet)
       if (!validateCSRF(event.request)) {
         throw error(403, "Invalid origin");
       }
