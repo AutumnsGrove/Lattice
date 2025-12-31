@@ -122,6 +122,12 @@ Grove opens its doors. The first trees take root.
 
 ### Technical Tasks
 
+- [ ] **🛡️ Patina** — Automated nightly backups
+  - Nightly SQL dumps of all 6 D1 databases to R2
+  - Weekly meta-backups (compress 7 days into archive)
+  - 12-week retention for disaster recovery
+  - See `docs/specs/patina-spec.md`
+
 - [ ] Debug Edit button on blog list (navigation issue)
 - [ ] Set Stripe secrets in Cloudflare Dashboard
 - [ ] Create Stripe webhook endpoint configuration

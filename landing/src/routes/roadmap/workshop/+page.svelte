@@ -92,13 +92,13 @@
 			github: 'https://github.com/AutumnsGrove/GroveMC'
 		},
 		{
-			name: 'Cache',
+			name: 'Patina',
 			tagline: 'Automated Backups',
-			description: 'Squirrels cache acorns for winter. Cache runs weekly automated backups of every Grove database to cold storage—twelve weeks of history, always available, quietly preserved. When disaster strikes, Cache is already there.',
+			description: 'A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
 			status: 'building',
 			icon: 'archive',
 			integration: 'Internal service protecting all Grove data',
-			github: 'https://github.com/AutumnsGrove/GroveBackups'
+			github: 'https://github.com/AutumnsGrove/Patina'
 		},
 		{
 			name: 'CDN Uploader',

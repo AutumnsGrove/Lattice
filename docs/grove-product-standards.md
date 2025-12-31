@@ -64,7 +64,7 @@ Backend services that need isolation for security or operational reasons:
 | Product | Public Name | Repo | Reason |
 |---------|-------------|------|--------|
 | GroveAuth | **Heartwood** | `GroveAuth` | Security isolation |
-| GroveBackups | **Cache** | `GroveBackups` | Operational isolation |
+| GrovePatina | **Patina** | `Patina` | Operational isolation |
 
 ### Internal/Integrated (Stay in Lattice)
 
@@ -318,7 +318,7 @@ When migrating a product out of GroveEngine:
 | Amber | ✓ | — | — | — | Spec complete |
 | Acorn | — | ✓ | ⚠️ In GroveEngine | ✓ | Needs frontend migration |
 | Heartwood | — | ✓ | ✓ | ✓ | Complete |
-| Cache | — | ✓ | — | — | Repo exists |
+| Patina | ✓ | ✓ | — | — | Spec updated, repo exists |
 | Meadow | — | — | — | — | Not started |
 | Trove | — | — | — | — | Not started |
 | Aria | — | — | — | — | Not started |

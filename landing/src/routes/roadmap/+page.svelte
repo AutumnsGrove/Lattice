@@ -34,6 +34,7 @@
 		LifeBuoy,
 		Terminal,
 		Network,
+		Database,
 		// First Buds icons
 		TreeDeciduous,
 		// Full Bloom icons
@@ -127,7 +128,8 @@
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
 				{ name: 'Help Center', description: 'Guidance when you need it', done: true, icon: 'lifebuoy' },
 				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: true, icon: 'terminal', internal: true },
-				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true }
+				{ name: 'Mycelium', description: 'MCP server — the wood wide web', done: true, icon: 'network', internal: true },
+				{ name: 'Patina', description: 'Nightly backups — age as armor', done: false, icon: 'database', internal: true }
 			]
 		},
 		'first-buds': {
@@ -524,6 +526,8 @@
 								<Terminal class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'network'}
 								<Network class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'database'}
+								<Database class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
 							{/if}

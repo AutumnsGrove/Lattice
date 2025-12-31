@@ -55,13 +55,15 @@ Heartwood is centralized authentication for the Grove ecosystem. One identity, v
 
 ---
 
-## Cache
+## Patina
 **Backup System** · *Internal service*
-**Repository:** [AutumnsGrove/GroveBackups](https://github.com/AutumnsGrove/GroveBackups)
+**Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
 
-Squirrels cache acorns for winter. They bury what matters in safe places, trusting they can return when they need it.
+A patina is the thin layer that forms on copper and bronze over time—not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.
 
-Cache runs weekly automated backups of every Grove database to cold storage. Twelve weeks of history, always available, quietly preserved. You'll probably never think about it—and that's the point. When disaster strikes, Cache is already there, holding everything safe.
+Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. You'll probably never think about it—and that's the point. When disaster strikes, Patina is already there, holding everything safe beneath its protective layer.
+
+*Age as armor. Time as protection.*
 
 ---
 
@@ -237,7 +239,7 @@ All features off by default. Zero data retention. Your words analyzed, never sto
 | **Forage** | Domain discovery | forage.grove.place |
 | **Foliage** | Theming system | foliage.grove.place |
 | **Heartwood** | Authentication | heartwood.grove.place |
-| **Cache** | Backup system | *(internal)* |
+| **Patina** | Backup system | *(internal)* |
 | **Trove** | Library book finder | trove.grove.place |
 | **Outpost** | Minecraft server | mc.grove.place |
 | **Aria** | Music curation | aria.grove.place |
@@ -265,7 +267,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Forage | GroveDomainTool |
 | Foliage | GroveThemes |
 | Heartwood | GroveAuth |
-| Cache | GroveBackups |
+| Patina | GrovePatina |
 | Trove | TreasureTrove |
 | Outpost | GroveMC |
 | Aria | GroveMusic |
