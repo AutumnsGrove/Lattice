@@ -33,7 +33,7 @@
 </script>
 
 <SEO
-	title="Grove — The internet used to be a garden"
+	title="Grove — A place to Be"
 	description="A quiet corner of the web where your words can grow. Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice."
 	url="/"
 />
@@ -73,7 +73,7 @@
 
 	<!-- Tagline -->
 	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4 text-center">
-		The internet used to be a garden.
+		A place to Be.
 	</p>
 
 	<!-- Subtagline -->
@@ -174,26 +174,6 @@
 		</a>
 	</div>
 
-	<!-- Coming soon text -->
-	<p class="text-foreground-subtle text-center max-w-md mb-8 font-sans text-sm">
-		Want to be notified when we launch?
-	</p>
-
-	<!-- Email signup -->
-	<EmailSignup />
-
-	<!-- Decorative divider -->
-	<div class="flex items-center gap-4 mt-16 mb-12">
-		<div class="w-12 h-px bg-divider"></div>
-		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
-			<path
-				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
-				fill-opacity="0.6"
-			/>
-		</svg>
-		<div class="w-12 h-px bg-divider"></div>
-	</div>
-
 	<!-- Roadmap Preview Card -->
 	<section class="w-full max-w-lg mb-16">
 		<RoadmapPreview
@@ -204,77 +184,6 @@
 			href="/roadmap"
 		/>
 	</section>
-
-	<!-- Feature Highlights -->
-	<section class="w-full max-w-2xl mb-8">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-8">What makes Grove different</h2>
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-			<!-- Your Space -->
-			<div class="glass-grove rounded-xl p-5">
-				<div class="flex items-center gap-3 mb-2">
-					<div class="p-2 rounded-lg bg-accent-subtle/20">
-						<Leaf class="w-5 h-5 text-accent-muted" />
-					</div>
-					<h3 class="font-serif text-foreground">Your own subdomain</h3>
-				</div>
-				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
-					yourname.grove.place — a corner of the internet that's truly yours.
-				</p>
-			</div>
-
-			<!-- AI Protection -->
-			<div class="glass-grove rounded-xl p-5">
-				<div class="flex items-center gap-3 mb-2">
-					<div class="p-2 rounded-lg bg-accent-subtle/20">
-						<Shield class="w-5 h-5 text-accent-muted" />
-					</div>
-					<h3 class="font-serif text-foreground">Shade protection</h3>
-				</div>
-				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
-					Your words are not training data. AI crawlers blocked at the gate.
-				</p>
-			</div>
-
-			<!-- Community -->
-			<div class="glass-grove rounded-xl p-5">
-				<div class="flex items-center gap-3 mb-2">
-					<div class="p-2 rounded-lg bg-accent-subtle/20">
-						<Users class="w-5 h-5 text-accent-muted" />
-					</div>
-					<h3 class="font-serif text-foreground">Meadow community</h3>
-				</div>
-				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
-					Optional connection without competition. No algorithms, just friends.
-				</p>
-			</div>
-
-			<!-- Data Freedom -->
-			<div class="glass-grove rounded-xl p-5">
-				<div class="flex items-center gap-3 mb-2">
-					<div class="p-2 rounded-lg bg-accent-subtle/20">
-						<Download class="w-5 h-5 text-accent-muted" />
-					</div>
-					<h3 class="font-serif text-foreground">Your words, always</h3>
-				</div>
-				<p class="text-sm font-sans text-foreground-subtle leading-relaxed">
-					Full data export anytime. You own everything you create here.
-				</p>
-			</div>
-		</div>
-	</section>
-
-	<!-- Decorative divider -->
-	<div class="flex items-center gap-4 mt-8 mb-12">
-		<div class="w-12 h-px bg-divider"></div>
-		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
-			<path
-				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
-				fill-opacity="0.6"
-			/>
-		</svg>
-		<div class="w-12 h-px bg-divider"></div>
-	</div>
 
 	<!-- Who is Grove for? -->
 	<section class="w-full max-w-2xl mb-12">
@@ -338,6 +247,26 @@
 			</ul>
 		</div>
 	</section>
+
+	<!-- Decorative divider -->
+	<div class="flex items-center gap-4 mt-8 mb-12">
+		<div class="w-12 h-px bg-divider"></div>
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
+			<path
+				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
+				fill-opacity="0.6"
+			/>
+		</svg>
+		<div class="w-12 h-px bg-divider"></div>
+	</div>
+
+	<!-- Coming soon text -->
+	<p class="text-foreground-subtle text-center max-w-md mb-8 font-sans text-sm">
+		Want to be notified when we launch?
+	</p>
+
+	<!-- Email signup -->
+	<EmailSignup />
 
 	<!-- Pricing teaser -->
 	<section class="w-full max-w-md mb-12 text-center">
