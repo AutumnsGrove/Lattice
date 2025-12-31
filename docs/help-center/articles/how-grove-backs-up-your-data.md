@@ -68,6 +68,8 @@ Backup restores aren't self-service (yet). If you need something recovered:
 
 Most restores complete within 24 hours. Complex situations might take longer.
 
+**Want to understand the restore process?** Our technical documentation includes [restore guides](https://patina.grove.place/restore-guide) that explain exactly how recovery works. You can see the available backup dates and restoration steps—even if you can't trigger them yourself yet.
+
 ## What backups can't fix
 
 Patina is powerful, but not magic:

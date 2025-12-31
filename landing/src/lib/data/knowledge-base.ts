@@ -191,12 +191,13 @@ export const specs: Doc[] = [
   {
     slug: "patina-spec",
     title: "Patina — Automated Backup System",
-    description: "Nightly database backups with weekly archives and 12-week retention",
+    description:
+      "Nightly database backups with weekly archives and 12-week retention",
     excerpt:
       "A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.",
     category: "specs",
     lastUpdated: "2025-12-31",
-    readingTime: 20,
+    readingTime: 25,
   },
   {
     slug: "trails-spec",
@@ -407,8 +408,7 @@ export const helpArticles: Doc[] = [
   {
     slug: "how-grove-backs-up-your-data",
     title: "How Grove Backs Up Your Data",
-    description:
-      "Patina: Automated nightly backups with 12-week retention",
+    description: "Patina: Automated nightly backups with 12-week retention",
     excerpt:
       "Every night while you sleep, Grove quietly preserves everything: your posts, your comments, your settings. We call this system Patina. Age as armor.",
     category: "help",

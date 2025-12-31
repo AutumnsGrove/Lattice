@@ -76,6 +76,14 @@ Meta-Backup Flow (Weekly, Sunday):
 3. Compress into single archive: /weekly/YYYY-Www.tar.gz
 4. Delete daily backups older than 7 days
 5. Delete weekly archives older than 12 weeks
+
+Timing Dependencies:
+• Nightly backup (3 AM): ~15-30 min for 6 DBs (concurrency=3, timeout=30s each)
+• Meta-backup starts 1 hour later (4 AM) - sufficient buffer
+• If nightly runs long, meta-backup checks for running jobs before starting:
+  - Query backup_jobs for status='running' AND started_at > (now - 2 hours)
+  - If found, skip meta-backup this week (alert via webhook)
+  - Nightly will complete, and next week's meta-backup will include 14 days
 ```
 
 ---
@@ -255,6 +263,14 @@ export const DATABASES: DatabaseConfig[] = [
   },
 ];
 
+// NOTE: This list will grow as Grove expands. The backup system supports
+// dynamic database registration via the DATABASES array above. When adding
+// new D1 databases to Grove:
+// 1. Add entry to this array with appropriate priority
+// 2. Add D1 binding to wrangler.toml
+// 3. Run a manual backup to verify export works
+// 4. Update backup count references in documentation
+
 // Backup schedule and retention
 export const BACKUP_CONFIG = {
   // Cron: Every day at 3:00 AM UTC (nightly backups)
@@ -396,6 +412,11 @@ export async function exportDatabase(
     sqlDump += `${table.sql};\n\n`;
 
     // Export rows in batches to avoid memory issues
+    // NOTE: Fixed batch size works for most Grove tables (small rows).
+    // For tables with large JSON/blob columns, consider adaptive sizing:
+    //   - Estimate avg row size from first 100 rows
+    //   - Target ~1MB per batch (adjust BATCH_SIZE = 1MB / avgRowSize)
+    //   - Worker memory limit: 128MB, keep total buffer under 64MB
     const BATCH_SIZE = 1000;
     let offset = 0;
     
@@ -449,6 +470,49 @@ function formatSqlValue(value: unknown): string {
   // Escape single quotes for strings
   return `'${String(value).replace(/'/g, "''")}'`;
 }
+```
+
+### Error Handling Strategy
+
+| Error Type | Behavior | Recovery |
+|------------|----------|----------|
+| **Connection failure** | Retry 3x with exponential backoff | Mark DB as failed, continue others |
+| **Export timeout** (30s) | Abort export for that DB | Log partial progress, don't save to R2 |
+| **Partial batch failure** | Abort entire DB export | Don't save incomplete dumps |
+| **Schema extraction error** | Skip table, log warning | Continue with remaining tables |
+| **R2 upload failure** | Retry 2x | Mark job failed if persists |
+
+```typescript
+// Error handling wrapper for exports
+async function safeExportDatabase(
+  db: D1Database,
+  dbName: string,
+  jobId: string,
+  timeoutMs: number
+): Promise<ExportResult | ExportError> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const result = await exportDatabase(db, dbName, jobId);
+    clearTimeout(timeout);
+    return result;
+  } catch (error) {
+    clearTimeout(timeout);
+
+    // Determine error type for appropriate handling
+    if (error.name === 'AbortError') {
+      return { error: 'timeout', dbName, message: `Export exceeded ${timeoutMs}ms` };
+    }
+    if (error.message?.includes('no such table')) {
+      return { error: 'schema', dbName, message: error.message };
+    }
+    return { error: 'connection', dbName, message: error.message };
+  }
+}
+
+// Partial exports are NEVER saved - all or nothing per database
+// Failed DBs don't block successful ones in the same job
 ```
 
 ---
@@ -601,6 +665,29 @@ async function authenticateDownload(request: Request, env: Env): Promise<boolean
   }
 
   return false;
+}
+```
+
+**Rate Limiting**
+
+To prevent abuse if API keys are compromised, implement rate limiting:
+
+| Limit | Value | Rationale |
+|-------|-------|-----------|
+| Per-client downloads | 10/hour | Normal restore needs 6 DBs max |
+| Per-IP requests | 30/hour | Allow multiple clients behind NAT |
+| Concurrent downloads | 2 | Prevent bandwidth exhaustion |
+
+```typescript
+// Rate limiting with Cloudflare KV
+const RATE_LIMIT = { maxRequests: 10, windowSeconds: 3600 };
+
+async function checkRateLimit(clientId: string, kv: KVNamespace): Promise<boolean> {
+  const key = `ratelimit:download:${clientId}`;
+  const current = parseInt(await kv.get(key) || '0');
+  if (current >= RATE_LIMIT.maxRequests) return false;
+  await kv.put(key, String(current + 1), { expirationTtl: RATE_LIMIT.windowSeconds });
+  return true;
 }
 ```
 
@@ -813,6 +900,62 @@ export async function cleanupOldBackups(
     results,
   };
 }
+```
+
+### Metadata Reconciliation
+
+The `backup_inventory` table tracks R2 contents separately. To handle drift from partial operations or failures, run weekly reconciliation:
+
+```typescript
+// src/lib/reconcile.ts - Run weekly after meta-backup (Sunday 5 AM UTC)
+
+export async function reconcileInventory(
+  bucket: R2Bucket,
+  metadataDb: D1Database
+): Promise<ReconcileResult> {
+  // 1. List actual R2 contents
+  const r2Objects = await bucket.list({ prefix: 'daily/' });
+  const r2Keys = new Set(r2Objects.objects.map(o => o.key));
+
+  // 2. Get inventory records (not marked deleted)
+  const inventoryResult = await metadataDb.prepare(`
+    SELECT id, r2_key FROM backup_inventory WHERE deleted_at IS NULL
+  `).all();
+
+  const orphanedRecords: string[] = [];  // In DB but not in R2
+  const untracked: string[] = [];         // In R2 but not in DB
+
+  // 3. Find orphaned records (DB says exists, R2 says no)
+  for (const record of inventoryResult.results) {
+    if (!r2Keys.has(record.r2_key)) {
+      orphanedRecords.push(record.r2_key);
+      // Mark as deleted since file doesn't exist
+      await metadataDb.prepare(`
+        UPDATE backup_inventory SET deleted_at = ? WHERE id = ?
+      `).bind(Date.now() / 1000, record.id).run();
+    }
+  }
+
+  // 4. Find untracked files (R2 has file, DB doesn't know)
+  const trackedKeys = new Set(inventoryResult.results.map(r => r.r2_key));
+  for (const key of r2Keys) {
+    if (!trackedKeys.has(key)) {
+      untracked.push(key);
+      // Optionally: add to inventory or flag for review
+    }
+  }
+
+  return { orphanedRecords, untracked, reconciled: true };
+}
+```
+
+Add to cron schedule:
+```toml
+crons = [
+  "0 3 * * *",   # Nightly backup
+  "0 4 * * 0",   # Weekly meta-backup (Sunday)
+  "0 5 * * 0"    # Weekly reconciliation (Sunday, after meta-backup)
+]
 ```
 
 ---
@@ -1196,6 +1339,66 @@ function shouldAlert(current: BackupMetrics, history: BackupMetrics[]): AlertTyp
   return null;
 }
 ```
+
+---
+
+## 🔐 Security Checklist
+
+Before deploying Patina to production, verify:
+
+### Infrastructure Security
+
+- [ ] **R2 Bucket Privacy**: Bucket is private (no public access URLs)
+  ```bash
+  # Verify: should show no public access
+  wrangler r2 bucket info grove-patina
+  ```
+- [ ] **D1 Database Isolation**: Metadata DB only accessible via Worker binding
+- [ ] **Worker Authentication**: Download endpoint requires auth (CF Access or API key)
+- [ ] **Secrets Management**: All sensitive values in `wrangler secret`, not vars
+
+### Operational Security
+
+- [ ] **API Key Rotation Schedule**: Document rotation procedure
+  ```bash
+  # Rotate API key (update all clients first)
+  wrangler secret put PATINA_API_KEY
+  ```
+  Recommended: Rotate every 90 days or immediately if compromised
+
+- [ ] **Audit Logging**: Log all download requests
+  ```typescript
+  // Log format for download requests
+  console.log(JSON.stringify({
+    event: 'backup_download',
+    timestamp: Date.now(),
+    clientId: authenticatedClient,
+    database: requestedDb,
+    date: requestedDate,
+    ip: request.headers.get('CF-Connecting-IP'),
+  }));
+  ```
+
+- [ ] **Webhook Security**: Discord webhooks don't expose sensitive DB names/sizes
+  - Use generic descriptions ("backup completed" not "groveauth: 212KB")
+  - Or use internal-only notification channel
+
+### Incident Response
+
+- [ ] **Compromised API Key**: Rotation procedure documented
+  1. Generate new key via `wrangler secret put PATINA_API_KEY`
+  2. Update all authorized clients
+  3. Review download logs for unauthorized access
+  4. Consider re-encrypting backups if data exfiltration suspected
+
+- [ ] **Backup Corruption**: Detection and response
+  1. Size anomaly alerts trigger investigation
+  2. Compare against previous exports
+  3. Use D1 Time Travel for uncorrupted source
+
+- [ ] **Unauthorized Restore Attempt**: Monitoring
+  1. All restore-guide accesses logged
+  2. Unusual patterns alert to security channel
 
 ---
 
