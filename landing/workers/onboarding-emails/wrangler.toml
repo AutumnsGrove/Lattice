@@ -1,0 +1,23 @@
+# Grove Onboarding Emails Worker
+# Sends follow-up emails to waitlist signups on a schedule
+
+name = "grove-onboarding-emails"
+main = "worker.ts"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+
+# Cron trigger - runs daily at 10:00 AM UTC
+[triggers]
+crons = ["0 10 * * *"]
+
+# D1 Database binding (same as landing page)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Secrets (configured in Cloudflare Dashboard):
+# - RESEND_API_KEY = re_xxx
+#
+# To set secrets:
+#   wrangler secret put RESEND_API_KEY --name grove-onboarding-emails

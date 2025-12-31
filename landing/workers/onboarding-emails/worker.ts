@@ -1,20 +1,67 @@
 /**
- * Email Templates for Grove Landing Page
+ * Grove Onboarding Emails Worker
  *
- * Onboarding sequence for waitlist signups:
- * - Day 0: Welcome email (thanks for joining early)
- * - Day 3: What we're building (product preview)
- * - Day 7: Why Grove exists (values + community)
- * - Day 14: Check-in + how to reach us
+ * Scheduled worker that sends follow-up emails to waitlist signups.
+ * Runs daily and checks for users who need Day 3, Day 7, or Day 14 emails.
+ *
+ * Schedule: Daily at 10:00 AM UTC
  */
 
-interface OnboardingEmailResult {
-	subject: string;
-	html: string;
-	text: string;
+import { Resend } from 'resend';
+
+interface Env {
+	DB: D1Database;
+	RESEND_API_KEY: string;
 }
 
-// Shared email wrapper with Grove styling
+interface EmailSignup {
+	id: number;
+	email: string;
+	name: string | null;
+	created_at: string;
+	day3_email_sent: number;
+	day7_email_sent: number;
+	day14_email_sent: number;
+}
+
+// =============================================================================
+// UNSUBSCRIBE TOKEN UTILITIES
+// =============================================================================
+
+const UNSUBSCRIBE_PREFIX = 'grove-unsubscribe-v1';
+
+async function generateUnsubscribeToken(email: string, secret: string): Promise<string> {
+	const encoder = new TextEncoder();
+	const keyData = encoder.encode(secret);
+	const messageData = encoder.encode(`${UNSUBSCRIBE_PREFIX}:${email.toLowerCase()}`);
+
+	const cryptoKey = await crypto.subtle.importKey(
+		'raw',
+		keyData,
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
+
+	const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+	const hashArray = Array.from(new Uint8Array(signature));
+	const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+	return hex.substring(0, 32);
+}
+
+async function generateUnsubscribeUrl(email: string, secret: string): Promise<string> {
+	const token = await generateUnsubscribeToken(email, secret);
+	const params = new URLSearchParams({
+		email: email.toLowerCase(),
+		token
+	});
+	return `https://grove.place/unsubscribe?${params.toString()}`;
+}
+
+// =============================================================================
+// EMAIL TEMPLATES
+// =============================================================================
+
 function wrapEmail(content: string, unsubscribeUrl: string): string {
 	return `
 <!DOCTYPE html>
@@ -28,7 +75,6 @@ function wrapEmail(content: string, unsubscribeUrl: string): string {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
       <td align="center" style="padding-bottom: 30px;">
-        <!-- Grove Logo -->
         <svg width="48" height="59" viewBox="0 0 417 512" xmlns="http://www.w3.org/2000/svg">
           <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
           <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
@@ -52,120 +98,7 @@ function wrapEmail(content: string, unsubscribeUrl: string): string {
 `.trim();
 }
 
-// =============================================================================
-// DAY 0: WELCOME EMAIL
-// =============================================================================
-
-export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
-	return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Grove</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #fefdfb; font-family: Georgia, Cambria, 'Times New Roman', serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-    <tr>
-      <td align="center" style="padding-bottom: 30px;">
-        <!-- Grove Logo -->
-        <svg width="60" height="73" viewBox="0 0 417 512" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-bottom: 20px;">
-        <h1 style="margin: 0; font-size: 28px; color: #3d2914; font-weight: normal;">
-          Welcome to Grove
-        </h1>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-bottom: 30px;">
-        <p style="margin: 0; font-size: 18px; color: #3d2914; opacity: 0.7; font-style: italic;">
-          a place to Be
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 30px; background-color: #f0fdf4; border-radius: 12px;">
-        <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          Thank you for joining us early.
-        </p>
-        <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          We're building something special — a quiet corner of the internet where your words can grow and flourish.
-        </p>
-        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3d2914;">
-          We'll reach out when Grove is ready to bloom. Until then, thank you for believing in what we're growing.
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 40px;">
-        <p style="margin: 0; font-size: 14px; color: #3d2914; opacity: 0.5;">
-          — The Grove Team
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 30px;">
-        <div style="display: inline-block;">
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #bbf7d0; border-radius: 50%; margin: 0 4px;"></span>
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #86efac; border-radius: 50%; margin: 0 4px;"></span>
-          <span style="display: inline-block; width: 6px; height: 6px; background-color: #4ade80; border-radius: 50%; margin: 0 4px;"></span>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 30px;">
-        <p style="margin: 0; font-size: 12px; color: #3d2914; opacity: 0.4;">
-          grove.place
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="padding-top: 20px; border-top: 1px solid #e5e5e5; margin-top: 20px;">
-        <p style="margin: 16px 0 0 0; font-size: 11px; color: #3d2914; opacity: 0.35;">
-          Don't want to receive these emails? <a href="${unsubscribeUrl}" style="color: #3d2914; opacity: 0.5;">Unsubscribe</a>
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`.trim();
-}
-
-export function getWelcomeEmailText(unsubscribeUrl: string): string {
-	return `
-Welcome to Grove
-================
-
-a place to Be
-
-Thank you for joining us early.
-
-We're building something special — a quiet corner of the internet where your words can grow and flourish.
-
-We'll reach out when Grove is ready to bloom. Until then, thank you for believing in what we're growing.
-
-— The Grove Team
-
-grove.place
-
----
-Don't want to receive these emails? Unsubscribe: ${unsubscribeUrl}
-`.trim();
-}
-
-// =============================================================================
-// DAY 3: WHAT WE'RE BUILDING
-// =============================================================================
-
-export function getDay3Email(unsubscribeUrl: string): OnboardingEmailResult {
+function getDay3Email(unsubscribeUrl: string): { subject: string; html: string; text: string } {
 	const subject = "What we're building at Grove";
 
 	const html = wrapEmail(
@@ -245,11 +178,7 @@ Unsubscribe: ${unsubscribeUrl}
 	return { subject, html, text };
 }
 
-// =============================================================================
-// DAY 7: WHY GROVE EXISTS
-// =============================================================================
-
-export function getDay7Email(unsubscribeUrl: string): OnboardingEmailResult {
+function getDay7Email(unsubscribeUrl: string): { subject: string; html: string; text: string } {
 	const subject = "Why we're building Grove";
 
 	const html = wrapEmail(
@@ -326,11 +255,7 @@ Unsubscribe: ${unsubscribeUrl}
 	return { subject, html, text };
 }
 
-// =============================================================================
-// DAY 14: CHECK-IN
-// =============================================================================
-
-export function getDay14Email(unsubscribeUrl: string): OnboardingEmailResult {
+function getDay14Email(unsubscribeUrl: string): { subject: string; html: string; text: string } {
 	const subject = 'Still here, still growing';
 
 	const html = wrapEmail(
@@ -401,3 +326,167 @@ Unsubscribe: ${unsubscribeUrl}
 
 	return { subject, html, text };
 }
+
+// =============================================================================
+// EMAIL SENDING
+// =============================================================================
+
+async function sendEmail(
+	resend: Resend,
+	to: string,
+	subject: string,
+	html: string,
+	text: string
+): Promise<boolean> {
+	try {
+		const { error } = await resend.emails.send({
+			from: 'Grove <hello@grove.place>',
+			to,
+			subject,
+			html,
+			text,
+		});
+
+		if (error) {
+			console.error(`[Resend] Error sending to ${to}:`, error);
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		console.error(`[Resend] Exception sending to ${to}:`, err);
+		return false;
+	}
+}
+
+function daysSinceSignup(createdAt: string): number {
+	const signupDate = new Date(createdAt);
+	const now = new Date();
+	const diffMs = now.getTime() - signupDate.getTime();
+	return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+async function processOnboardingEmails(env: Env): Promise<{ sent: number; errors: number }> {
+	const resend = new Resend(env.RESEND_API_KEY);
+	let sent = 0;
+	let errors = 0;
+
+	// Query users who need onboarding emails
+	const result = await env.DB.prepare(`
+		SELECT id, email, name, created_at, day3_email_sent, day7_email_sent, day14_email_sent
+		FROM email_signups
+		WHERE unsubscribed_at IS NULL
+		  AND onboarding_emails_unsubscribed = 0
+		  AND (
+		    (day3_email_sent = 0 AND datetime(created_at, '+3 days') <= datetime('now'))
+		    OR (day7_email_sent = 0 AND datetime(created_at, '+7 days') <= datetime('now'))
+		    OR (day14_email_sent = 0 AND datetime(created_at, '+14 days') <= datetime('now'))
+		  )
+		LIMIT 100
+	`).all<EmailSignup>();
+
+	if (!result.results || result.results.length === 0) {
+		console.log('[Onboarding] No users need emails today');
+		return { sent: 0, errors: 0 };
+	}
+
+	console.log(`[Onboarding] Processing ${result.results.length} users`);
+
+	for (const user of result.results) {
+		const days = daysSinceSignup(user.created_at);
+
+		// Generate secure unsubscribe URL for this user
+		const unsubscribeUrl = await generateUnsubscribeUrl(user.email, env.RESEND_API_KEY);
+
+		let emailToSend: { subject: string; html: string; text: string } | null = null;
+		let emailType: 'day3' | 'day7' | 'day14' | null = null;
+
+		// Determine which email to send (prioritize earlier emails)
+		if (user.day3_email_sent === 0 && days >= 3) {
+			emailToSend = getDay3Email(unsubscribeUrl);
+			emailType = 'day3';
+		} else if (user.day7_email_sent === 0 && days >= 7) {
+			emailToSend = getDay7Email(unsubscribeUrl);
+			emailType = 'day7';
+		} else if (user.day14_email_sent === 0 && days >= 14) {
+			emailToSend = getDay14Email(unsubscribeUrl);
+			emailType = 'day14';
+		}
+
+		if (!emailToSend || !emailType) {
+			continue;
+		}
+
+		console.log(`[Onboarding] Sending ${emailType} email to ${user.email}`);
+
+		const success = await sendEmail(
+			resend,
+			user.email,
+			emailToSend.subject,
+			emailToSend.html,
+			emailToSend.text
+		);
+
+		if (success) {
+			// Mark email as sent
+			const column = `${emailType}_email_sent`;
+			await env.DB.prepare(`UPDATE email_signups SET ${column} = 1 WHERE id = ?`)
+				.bind(user.id)
+				.run();
+			sent++;
+		} else {
+			errors++;
+		}
+
+		// Small delay to avoid rate limiting
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
+
+	return { sent, errors };
+}
+
+// =============================================================================
+// WORKER HANDLERS
+// =============================================================================
+
+export default {
+	// Scheduled handler - runs on cron trigger
+	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+		console.log(`[Onboarding] Cron triggered at ${new Date().toISOString()}`);
+
+		const { sent, errors } = await processOnboardingEmails(env);
+
+		console.log(`[Onboarding] Completed: ${sent} sent, ${errors} errors`);
+	},
+
+	// HTTP handler - for manual triggering and health checks
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		const url = new URL(request.url);
+
+		// Health check
+		if (url.pathname === '/health') {
+			return new Response('OK', { status: 200 });
+		}
+
+		// Manual trigger (protected by auth in production)
+		if (url.pathname === '/trigger' && request.method === 'POST') {
+			const authHeader = request.headers.get('Authorization');
+			if (!authHeader || !authHeader.startsWith('Bearer ')) {
+				return new Response('Unauthorized', { status: 401 });
+			}
+
+			ctx.waitUntil(
+				processOnboardingEmails(env).then(({ sent, errors }) => {
+					console.log(`[Onboarding] Manual trigger: ${sent} sent, ${errors} errors`);
+				})
+			);
+
+			return new Response(JSON.stringify({ status: 'processing' }), {
+				status: 202,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		return new Response('Not Found', { status: 404 });
+	},
+};
