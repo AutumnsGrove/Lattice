@@ -259,6 +259,29 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 
 ---
 
+## Email Unsubscribe Flow
+
+> **Context:** Email footer uses "step away (unsubscribe)" link. D1 table `email_signups` already has `unsubscribed_at` column. Script at `scripts/get-subscribers.sh` already filters out unsubscribed emails.
+
+### Implementation Tasks
+- [ ] Create unsubscribe endpoint at `landing/src/routes/unsubscribe/+server.ts`
+  - Accept token/hashed email as query param
+  - Set `unsubscribed_at = datetime('now')` in D1
+  - Return redirect to confirmation page
+- [ ] Create unsubscribe confirmation page at `landing/src/routes/unsubscribe/+page.svelte`
+  - Simple, warm message: "You've stepped away. We'll miss you."
+  - No guilt trips, no "are you sure" dark patterns
+- [ ] Generate unsubscribe tokens (hash of email + secret, or UUID stored in table)
+  - Consider adding `unsubscribe_token` column to `email_signups`
+- [ ] Update footer template with actual URL pattern: `grove.place/unsubscribe?token=xxx`
+
+### Related Files
+- `landing/migrations/0002_email_signups.sql` — existing schema
+- `scripts/get-subscribers.sh` — already filters by `unsubscribed_at IS NULL`
+- `docs/internal/grove-email-footer-template.md` — footer template
+
+---
+
 ## Phase 1: GroveEngine MVP (Remaining)
 
 - [ ] Test with Mom's publishing house as first client
