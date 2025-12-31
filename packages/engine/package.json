@@ -141,6 +141,11 @@
     "./services/*": {
       "types": "./dist/server/services/*.d.ts",
       "default": "./dist/server/services/*.js"
+    },
+    "./vineyard": {
+      "types": "./dist/ui/vineyard/index.d.ts",
+      "svelte": "./dist/ui/vineyard/index.js",
+      "default": "./dist/ui/vineyard/index.js"
     }
   },
   "files": [
@@ -199,6 +204,7 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
+    "@autumnsgrove/vineyard": "link:../../../Vineyard",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",

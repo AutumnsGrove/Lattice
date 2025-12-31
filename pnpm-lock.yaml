@@ -145,6 +145,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@autumnsgrove/vineyard':
+        specifier: link:../../../Vineyard
+        version: link:../../../Vineyard
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
