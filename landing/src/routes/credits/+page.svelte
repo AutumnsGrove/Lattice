@@ -168,13 +168,18 @@
 								<span class="supporter-name">Madison & Kyle Hiday</span>
 								<span class="supporter-desc">— sending love and support all the way from Belgium</span>
 							</div>
+							<div class="supporter-card featured">
+								<div class="supporter-header">
+									<span class="supporter-name">Ariana Garcia</span>
+									<span class="supporter-context">first person to sign up</span>
+								</div>
+								<p class="supporter-note">
+									Day zero. The very first person to believe in this vision enough to actually sign up. That kind of trust and support means everything—it's one thing to encourage from the sidelines, another entirely to be the first one through the door. A ray of sunshine on stormy days, excited to learn to code through this open source project. She's been a supporter for months, and her faith in Grove has been a constant light.
+								</p>
+							</div>
 							<div class="supporter-item">
 								<span class="supporter-name">Arturo Martinez</span>
 								<span class="supporter-desc">— best friend who keeps me grounded, doesn't feed my ego but still believes in the vision</span>
-							</div>
-							<div class="supporter-item">
-								<span class="supporter-name">Ariana Garcia</span>
-								<span class="supporter-desc">— ray of sunshine on stormy days, excited to learn to code through this open source project</span>
 							</div>
 							<div class="supporter-item">
 								<span class="supporter-name">Trent Ice & Savanna</span>
