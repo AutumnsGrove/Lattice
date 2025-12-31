@@ -59,16 +59,11 @@ grove.place · step away (unsubscribe)
 
 ## Assets
 
-Logo files are available at:
-- `landing/static/logo-summer.svg` (source)
-- `landing/static/logo-summer-16.png`
-- `landing/static/logo-summer-24.png`
-- `landing/static/logo-summer-32.png`
-
-Hosted at:
-- `https://grove.place/logo-summer-16.png`
-- `https://grove.place/logo-summer-24.png`
-- `https://grove.place/logo-summer-32.png`
+Logo files are in `docs/internal/email-assets/`:
+- `logo-summer.svg` (source)
+- `logo-summer-16.png`
+- `logo-summer-24.png`
+- `logo-summer-32.png`
 
 ---
 
