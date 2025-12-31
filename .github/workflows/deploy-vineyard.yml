@@ -1,0 +1,74 @@
+name: Deploy vineyard.grove.place
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'vineyard/**'
+      - '.github/workflows/deploy-vineyard.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Pages
+    steps:
+      - name: Checkout GroveEngine
+        uses: actions/checkout@v4
+
+      - name: Checkout Vineyard
+        uses: actions/checkout@v4
+        with:
+          repository: AutumnsGrove/Vineyard
+          path: Vineyard
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Build Vineyard package
+        run: |
+          cd Vineyard
+          pnpm install
+          pnpm run package
+
+      - name: Copy Vineyard components to project
+        run: |
+          mkdir -p vineyard/src/lib/vineyard/components
+          cp Vineyard/dist/components/vineyard/*.svelte vineyard/src/lib/vineyard/components/
+
+      - name: Update imports for bundled components
+        run: |
+          cat > vineyard/src/lib/vineyard/index.ts << 'EOF'
+          export { default as VineyardLayout } from "./components/VineyardLayout.svelte";
+          export { default as FeatureCard } from "./components/FeatureCard.svelte";
+          export { default as StatusBadge } from "./components/StatusBadge.svelte";
+          export { default as DemoContainer } from "./components/DemoContainer.svelte";
+          export { default as CodeExample } from "./components/CodeExample.svelte";
+          export { default as TierGate } from "./components/TierGate.svelte";
+          export { default as RoadmapSection } from "./components/RoadmapSection.svelte";
+          EOF
+
+      - name: Install GroveEngine dependencies
+        run: pnpm install --ignore-workspace
+
+      - name: Build vineyard site
+        working-directory: vineyard
+        run: |
+          pnpm install
+          pnpm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy vineyard/.svelte-kit/cloudflare --project-name=vineyard-grove-place
