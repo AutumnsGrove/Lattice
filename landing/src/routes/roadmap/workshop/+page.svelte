@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, BookOpen, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, Layers, MessageCircle, Shield, BarChart3 } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, Layers, MessageCircle, Shield, BarChart3, Grape } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -205,6 +205,14 @@
 			icon: 'barchart',
 			integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)'
 		},
+		{
+			name: 'Vineyard',
+			tagline: 'Tool Showcase Pattern',
+			description: 'Every vine starts somewhere. Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it\'s headed. One pattern, across the entire ecosystem.',
+			status: 'building',
+			icon: 'grape',
+			integration: 'Documentation pattern implemented by all Grove tools'
+		},
 	];
 
 	function getStatusBadge(status: string) {
@@ -286,8 +294,6 @@
 										<Wind class="w-5 h-5" />
 									{:else if tool.icon === 'eye'}
 										<Eye class="w-5 h-5" />
-									{:else if tool.icon === 'book'}
-										<BookOpen class="w-5 h-5" />
 									{:else if tool.icon === 'bird'}
 										<Bird class="w-5 h-5" />
 									{:else if tool.icon === 'dashboard'}
@@ -304,6 +310,8 @@
 										<Shield class="w-5 h-5" />
 									{:else if tool.icon === 'barchart'}
 										<BarChart3 class="w-5 h-5" />
+									{:else if tool.icon === 'grape'}
+										<Grape class="w-5 h-5" />
 									{/if}
 								</div>
 								<div>
