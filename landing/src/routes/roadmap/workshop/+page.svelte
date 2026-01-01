@@ -331,9 +331,9 @@
 					spec: '/knowledge/specs/waystone-spec'
 				},
 				{
-					name: 'Roots',
-					tagline: 'Durable Objects Architecture',
-					description: 'The coordination layer beneath the surface. Roots uses Cloudflare Durable Objects for auth coordination, D1 write scaling, and real-time features. The invisible infrastructure that makes Meadow and Heartwood possible.',
+					name: 'Loom',
+					tagline: 'Real-Time Coordination',
+					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
 					status: 'building',
 					icon: 'network',
 					integration: 'Architectural pattern for coordination and real-time',
