@@ -1,16 +1,25 @@
-# Grove.place Bloom Infrastructure — Project Spec
+# Bloom — Remote Coding Infrastructure
+
+> *Brief, brilliant, gone.*
+
+**Public Name:** Bloom
+**Internal Name:** GroveBloom
+**Domain:** `bloom.grove.place`
+**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
+
+A bloom is the brief, brilliant moment when a flower opens—ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+
+Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Text it and forget it—Bloom works through it, saves the results, and cleans up after itself.
+
+---
 
 ## Overview
-
-**Bloom** is a personal, serverless remote coding agent. It provides a mobile-friendly web interface to an autonomous coding agent (Kilo Code CLI) running on a transient Hetzner VPS.
-
-> *Flowers bloom while you're not watching, then suddenly results appear.*
 
 **Philosophy**: "Text it and forget it." Send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs. Work that happens in the quiet hours, blooming into results by morning.
 
 **Target**: Personal development work across multiple interconnected Grove ecosystem projects.
 
-**Cost Estimate**: &lt;$1.00/month (assuming ~20 hours of coding/month + heavy DeepSeek usage).
+**Cost Estimate**: <$1.00/month (assuming ~20 hours of coding/month + heavy DeepSeek usage).
 
 ---
 

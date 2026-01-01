@@ -1,9 +1,14 @@
-# Status Page Specification
+# Clearing — Status Page
 
-> A public-facing status page for Grove platform health and incident communication
+> *A clearing in the forest where you can see what's happening.*
 
-**Public Domain**: `status.grove.place`
-**Internal Name**: Grove Status
+**Public Name:** Clearing
+**Internal Name:** GroveClear
+**Domain:** `status.grove.place`
+
+A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.
+
+Clearing is Grove's public status page—transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without needing to contact support.
 
 ---
 

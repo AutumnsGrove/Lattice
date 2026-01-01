@@ -1,17 +1,15 @@
----
-aliases:
-date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Friday, November 21st 2025, 3:02:46 pm
-tags:
-type: tech-spec
----
+# Meadow — Social Connection
 
-# Meadow (Grove Social) - Technical Specification
+> *Where the forest opens up and you can see the people around you.*
 
-**Project:** Meadow - Community Feed & Social Features  
-**Repository:** `Meadow`  
-**Type:** Social Platform  
-**Purpose:** Community feed, voting, reactions, and social discovery
+**Public Name:** Meadow
+**Internal Name:** GroveMeadow
+**Domain:** `meadow.grove.place`
+**Repository:** `Meadow`
+
+A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view.
+
+Meadow is social media that remembers what "social" means. No public metrics breeding hierarchy. No viral mechanics rewarding the loudest voice. Just a chronological feed of people you chose to follow, with reactions that only the author can see. Encouragement without performance. Connection without competition.
 
 ---
 

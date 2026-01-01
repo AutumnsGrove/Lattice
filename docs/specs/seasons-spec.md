@@ -1,15 +1,15 @@
----
-date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
-tags:
-type: tech-spec
----
+# Seasons — Versioning System
 
-# GroveEngine - Versioning Specification
+> *Each ring records a season—growth in plenty, resilience through hardship.*
 
-**Package:** `@groveengine/core`
+**Public Name:** Seasons
+**Internal Name:** GroveSeasons
+**Package:** `@autumnsgrove/groveengine`
 **Registry:** npmjs.com (public)
-**Purpose:** Documents versioning strategy, publishing workflow, and update propagation
+
+Seasons mark the passage of time in a forest. Spring brings new growth, summer matures it, autumn harvests, winter rests. Each season builds on the last, each version a new ring in the trunk.
+
+Seasons is Grove's versioning system—how Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.
 
 ---
 

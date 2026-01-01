@@ -1,19 +1,15 @@
----
-aliases:
-date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Tuesday, November 26th 2025
-tags:
-type: tech-spec
----
+# Lattice — Core Platform
 
-# Lattice - Technical Specification
+> *The framework that supports growth.*
 
-> **Internal codename:** GroveEngine
-
+**Public Name:** Lattice
+**Internal Name:** GroveEngine
 **Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`
-**Type:** npm Package / SvelteKit Library
-**Purpose:** Powers all individual blog instances with reusable components
+
+A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see—it's the thing that holds everything else up.
+
+Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns—all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
 
 ---
 

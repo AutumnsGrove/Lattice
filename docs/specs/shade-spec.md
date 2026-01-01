@@ -1,8 +1,15 @@
-# Shade: AI Content Protection System
+# Shade — AI Content Protection
 
-**Grove Platform**
+> *In a forest full of harvesters, this grove stays shaded.*
+
+**Public Name:** Shade
+**Internal Name:** GroveShade
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
+
+Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.
+
+Shade is Grove's layered defense against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade is a quiet refusal.
 
 ---
 

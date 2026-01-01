@@ -1,8 +1,15 @@
-# Theme System Specification
+# Canopy — Theme System
 
-**Grove Platform**
+> *No two canopies are quite the same.*
+
+**Public Name:** Canopy
+**Internal Name:** GroveCanopy
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
+
+The canopy is what you see when you look up at the forest—the leaves, the color, the personality that changes with the seasons. Each tree's canopy is unique, expressing itself through shape and shade.
+
+Canopy is Grove's theme system—visual customization from simple accent colors to full theme control. Make it warm, make it bold, make it yours. Your canopy is how the world sees your corner of the grove.
 
 ---
 
