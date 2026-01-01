@@ -9,7 +9,11 @@
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
 
-	// Icon lookup map
+	// Icon lookup map for tool cards
+	// To add a new icon:
+	// 1. Import it from 'lucide-svelte' in the imports above
+	// 2. Add a key-value pair below (key = icon string used in tool data, value = component)
+	// 3. Use the key in any tool's `icon` field
 	const icons: Record<string, typeof Mail> = {
 		mail: Mail,
 		harddrive: HardDrive,
