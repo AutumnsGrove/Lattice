@@ -62,9 +62,12 @@
 					<div class="grid gap-6">
 						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
 							<h3 class="text-lg font-serif text-accent-muted mb-2">Accessibility</h3>
-							<p class="text-foreground-muted font-sans leading-relaxed">
+							<p class="text-foreground-muted font-sans leading-relaxed mb-3">
 								Everyone deserves a voice online. Pricing should never be the barrier that stops someone from sharing their story.
 								The basic tier exists so that anyone who wants to write can afford to write.
+							</p>
+							<p class="text-foreground-muted font-sans leading-relaxed">
+								<strong class="text-foreground">Reading is always free.</strong> Every Grove blog is publicly accessible — no login, no paywall. You pay to write, not to read.
 							</p>
 						</div>
 

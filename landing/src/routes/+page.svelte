@@ -279,8 +279,11 @@
 
 	<!-- Pricing teaser -->
 	<section class="w-full max-w-md mb-12 text-center">
+		<p class="text-foreground font-sans font-medium mb-2">
+			Reading is free. Always.
+		</p>
 		<p class="text-foreground-muted font-sans mb-4">
-			Plans start at <span class="text-foreground font-medium">$8/month</span>. No free tier with hidden catches — just straightforward pricing for a service that respects you.
+			Every Grove blog is publicly accessible — just visit and read, no account needed. When you're ready to write your own, plans start at <span class="text-foreground font-medium">$8/month</span>.
 		</p>
 		<a
 			href="/pricing"

@@ -15,6 +15,8 @@ Grove is a blogging platform for people who want their own space on the internet
 
 You get a blog. It's yours. You write, we host it, your readers can find you via your own URL. No ads, no algorithms deciding who sees your posts, no tracking your visitors.
 
+**Reading is free. Always.** Every Grove blog is publicly accessible — just visit and read, no account needed. You only pay if you want to write your own blog.
+
 ## What makes Grove different
 
 **You own your content.** Everything you write belongs to you. You can export it anytime, in standard formats that work anywhere. If you ever leave, your words come with you.
@@ -44,7 +46,7 @@ If you need e-commerce, complex membership tiers, or a design tool with infinite
 
 ## Pricing
 
-Grove has a few plans, starting with **Seedling** (free, with limits) up through paid tiers that unlock more posts, storage, and features. We're transparent about what each plan includes—no hidden fees, no bait-and-switch.
+Grove has a **Free** tier for readers and community members, and paid plans starting at **$8/month (Seedling)** for bloggers. Higher tiers unlock more posts, storage, and features. We're transparent about what each plan includes—no hidden fees, no bait-and-switch.
 
 See current pricing at [grove.place/pricing](/pricing).
 

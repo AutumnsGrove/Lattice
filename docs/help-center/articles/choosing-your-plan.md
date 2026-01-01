@@ -9,6 +9,8 @@ related: [what-is-grove, upgrading-or-downgrading]
 
 # Choosing Your Plan
 
+**First, the important bit:** Reading Grove blogs is free. Always. Every blog is publicly accessible — just visit and read, no account needed. You only need a plan if you want to *write* your own blog.
+
 Grove has a few plans, each designed for different needs. Here's what you get at each level.
 
 ## The plans
