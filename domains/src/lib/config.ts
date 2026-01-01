@@ -1,24 +1,20 @@
 // Centralized configuration for Domain Finder
-// Update model versions here when new ones are released
+// Using DeepSeek v3.2 via OpenRouter for zero-data-retention compliance
 
 export const MODELS = {
-  // Primary model for driving the search strategy (OpenRouter)
+  // Primary model for driving the search strategy (DeepSeek v3.2 via OpenRouter)
   DRIVER: "deepseek/deepseek-chat",
-  // Fast model for parallel domain evaluation (OpenRouter)
-  SWARM: "cerebras/btlm-3b-8k-base",
+  // Fast model for parallel domain evaluation (DeepSeek v3.2 via OpenRouter)
+  SWARM: "deepseek/deepseek-chat",
 } as const;
 
-// Available model options for the config UI (OpenRouter models)
+// Model configuration - locked to DeepSeek v3.2 via OpenRouter
 export const DRIVER_MODEL_OPTIONS = [
-  { value: "deepseek/deepseek-chat", label: "DeepSeek Chat (V3.2)" },
-  { value: "deepseek/deepseek-coder", label: "DeepSeek Coder" },
-  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
+  { value: "deepseek/deepseek-chat", label: "DeepSeek v3.2 (via OpenRouter)" },
 ] as const;
 
 export const SWARM_MODEL_OPTIONS = [
-  { value: "cerebras/btlm-3b-8k-base", label: "Cerebras BTLM-3B (Fast)" },
-  { value: "cerebras/cerebras-llama-3.1-70b", label: "Cerebras Llama 3.1 70B" },
-  { value: "deepseek/deepseek-chat", label: "DeepSeek Chat (Fallback)" },
+  { value: "deepseek/deepseek-chat", label: "DeepSeek v3.2 (via OpenRouter)" },
 ] as const;
 
 // Default search configuration

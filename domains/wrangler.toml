@@ -23,8 +23,8 @@ service = "groveauth"
 # Secrets (configured in Cloudflare Dashboard or via wrangler pages secret):
 # - RESEND_API_KEY
 # - ADMIN_EMAILS
-# - ANTHROPIC_API_KEY (for domain search)
-# - DOMAIN_WORKER_URL (URL to the Forage worker: https://forage.m7jv4v7npb.workers.dev)
+# - ANTHROPIC_API_KEY (legacy - no longer used, kept for compatibility)
+# - DOMAIN_WORKER_URL (URL to the Forage worker: uses DeepSeek v3.2 via OpenRouter)
 # - GROVEAUTH_CLIENT_ID (OAuth client ID)
 # - GROVEAUTH_CLIENT_SECRET (OAuth client secret)
 # Production SITE_URL is set via --var flag in deployment

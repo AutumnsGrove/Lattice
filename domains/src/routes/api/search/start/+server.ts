@@ -3,6 +3,7 @@
 //
 // This endpoint proxies to the Forage worker and stores
 // a local reference to the job for admin tracking.
+// Uses DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
@@ -15,7 +16,7 @@ interface StartSearchBody {
   keywords?: string;
   tld_preferences?: string[];
   diverse_tlds?: boolean;
-  ai_provider?: string; // deepseek | openrouter
+  ai_provider?: string; // locked to 'openrouter' for ZDR compliance
 }
 
 interface WorkerStartResponse {
@@ -54,12 +55,12 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
     throw error(400, "Business name is required");
   }
 
-  // Validate ai_provider if provided
-  const validProviders = ["deepseek", "openrouter"];
-  if (ai_provider && !validProviders.includes(ai_provider)) {
+  // Validate ai_provider if provided (locked to openrouter for ZDR)
+  // Only openrouter is supported for zero-data-retention compliance
+  if (ai_provider && ai_provider !== "openrouter") {
     throw error(
       400,
-      `Invalid AI provider. Valid options: ${validProviders.join(", ")}`,
+      "Invalid AI provider. Only 'openrouter' is supported for zero-data-retention compliance.",
     );
   }
 
@@ -86,11 +87,10 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
           keywords: keywords?.trim() || undefined,
           diverse_tlds: diverse_tlds || false,
         },
-        // Include provider if specified (both driver and swarm use the same)
-        ...(ai_provider && {
-          driver_provider: ai_provider,
-          swarm_provider: ai_provider,
-        }),
+        // Provider locked to openrouter for ZDR compliance
+        // Both driver and swarm use DeepSeek v3.2 via OpenRouter
+        driver_provider: "openrouter",
+        swarm_provider: "openrouter",
       }),
     });
 

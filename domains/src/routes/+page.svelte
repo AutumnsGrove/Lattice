@@ -6,7 +6,7 @@
 
 <svelte:head>
 	<title>Forage — AI-Powered Domain Discovery</title>
-	<meta name="description" content="Find the perfect domain name with AI-powered search. Before you can plant, you have to search—walk the forest floor looking for what fits." />
+	<meta name="description" content="Find the perfect domain name with AI-powered search using DeepSeek v3.2 via OpenRouter. Before you can plant, you have to search—walk the forest floor looking for what fits." />
 </svelte:head>
 
 <main class="min-h-screen flex flex-col">
@@ -57,7 +57,7 @@
 				floor, looking for something worth bringing home.
 			</p>
 			<p class="text-bark/60 font-sans text-sm">
-				AI-powered domain discovery with real-time availability checks and smart scoring.
+				Powered by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance. Real-time availability checks and smart scoring.
 			</p>
 		</div>
 
@@ -71,7 +71,7 @@
 				</div>
 				<h3 class="font-serif text-bark mb-2">AI Generation</h3>
 				<p class="text-bark/60 font-sans text-sm">
-					Creative domain suggestions based on your brand, vibe, and preferences
+					Creative domain suggestions powered by DeepSeek v3.2, based on your brand, vibe, and preferences
 				</p>
 			</div>
 

@@ -247,7 +247,7 @@
 				{
 					name: 'Forage',
 					tagline: 'Domain Discovery',
-					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit.',
+					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.',
 					status: 'live',
 					icon: 'search',
 					domain: 'forage.grove.place',

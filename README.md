@@ -74,7 +74,7 @@ GroveEngine/
 - **50+ UI Components** - Complete design system with primitives, charts, galleries, and form components
 - **CDN Admin Uploader** - R2-powered media upload with magic byte validation
 - **Stripe Payments** - Payment system with provider abstraction for subscriptions
-- **AI-Powered Domain Search** - Multi-provider AI (Claude, DeepSeek, Kimi, Llama 4) with live Cloudflare pricing
+- **AI-Powered Domain Search** - DeepSeek v3.2 via OpenRouter (zero-data-retention) with live Cloudflare pricing
 - **Accessibility Fonts** - 7 fonts including OpenDyslexic, Atkinson Hyperlegible, and Lexend
 
 ## 🚀 Quick Start
@@ -135,7 +135,7 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 An AI-powered domain discovery tool that speeds up client consultations from 2-3 weeks to 1-2 days. Before you can plant, you have to search—and Forage does the searching so you can focus on choosing.
 
 **Features:**
-- Multi-provider AI swarm (Claude, DeepSeek, Kimi, Llama 4)
+- DeepSeek v3.2 via OpenRouter (zero-data-retention compliance)
 - Real-time SSE streaming for live progress updates
 - Live pricing from Cloudflare Registrar
 - Pricing tiers: bundled (≤$30), recommended (≤$50), standard, premium
@@ -214,7 +214,7 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 - **Charts:** Chart.js 4.5+
 - **Icons:** Lucide Svelte
 - **UI:** 50+ components with bits-ui primitives
-- **AI Providers:** Claude, DeepSeek, Kimi, Llama 4 (for domain search)
+- **AI Provider:** DeepSeek v3.2 via OpenRouter (for domain search)
 - **Testing:** Vitest 4.0+, Testing Library, happy-dom
 - **Build:** Vite 5.4+, pnpm 9+ workspaces
 

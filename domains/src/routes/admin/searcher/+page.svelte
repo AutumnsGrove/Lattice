@@ -93,7 +93,8 @@
 	let vibe = $state('professional');
 	let keywords = $state('');
 	let tldPreferences = $state<string[]>(['com', 'co']);
-	let aiProvider = $state('openrouter');
+	// Fixed to OpenRouter for zero-data-retention compliance
+	const aiProvider = 'openrouter';
 
 	// Vibe mode state
 	let vibeText = $state('');
@@ -269,10 +270,12 @@
 		return group.tlds.filter(t => tldPreferences.includes(t.value)).length;
 	}
 
-	const aiProviderOptions = [
-		{ value: 'openrouter', label: 'OpenRouter (Recommended)', description: 'Zero data retention, great quality, low cost' },
-		{ value: 'deepseek', label: 'DeepSeek', description: 'Great quality, very low cost' }
-	];
+	// Provider locked to OpenRouter for ZDR compliance with DeepSeek v3.2
+	const aiProviderInfo = {
+		provider: 'OpenRouter',
+		model: 'DeepSeek v3.2',
+		description: 'Zero data retention, great quality, low cost'
+	};
 
 	function toggleTld(tld: string) {
 		if (tldPreferences.includes(tld)) {
@@ -830,15 +833,12 @@
 		expandedDomains = newSet;
 	}
 
-	// Provider pricing per million tokens [input, output]
-	const PROVIDER_PRICING: Record<string, [number, number]> = {
-		openrouter: [0.28, 0.42],
-		deepseek: [0.28, 0.42],
-	};
+	// DeepSeek v3.2 pricing via OpenRouter per million tokens [input, output]
+	const MODEL_PRICING: [number, number] = [0.28, 0.42];
 
-	// Estimate cost based on token usage and provider
-	function estimateCost(usage: TokenUsage, provider: string = aiProvider): string {
-		const [inputRate, outputRate] = PROVIDER_PRICING[provider] || PROVIDER_PRICING.deepseek;
+	// Estimate cost based on token usage
+	function estimateCost(usage: TokenUsage): string {
+		const [inputRate, outputRate] = MODEL_PRICING;
 		const inputCost = (usage.input_tokens / 1_000_000) * inputRate;
 		const outputCost = (usage.output_tokens / 1_000_000) * outputRate;
 		const total = inputCost + outputCost;
@@ -1081,21 +1081,11 @@
 								</div>
 							</div>
 
-							<!-- AI Provider (keep this available) -->
-							<div>
-								<label for="ai_provider_vibe" class="block text-xs font-sans text-bark/60 mb-1">
-									AI Model
-								</label>
-								<select
-									id="ai_provider_vibe"
-									bind:value={aiProvider}
-									class="input-field text-sm"
-									disabled={isSubmitting}
-								>
-									{#each aiProviderOptions as option}
-										<option value={option.value}>{option.label}</option>
-									{/each}
-								</select>
+							<!-- AI Provider Info (locked) -->
+							<div class="bg-grove-50 border border-grove-200 rounded-lg p-3">
+								<div class="text-xs font-sans text-bark/60 mb-1">AI Model</div>
+								<div class="text-sm font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
+								<div class="text-xs font-sans text-bark/50 mt-1">{aiProviderInfo.description}</div>
 							</div>
 
 							<!-- Start Search button -->
@@ -1280,24 +1270,17 @@
 					/>
 				</div>
 
-				<!-- AI Provider -->
+				<!-- AI Provider Info (locked) -->
 				<div>
-					<label for="ai_provider" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label class="block text-sm font-sans font-medium text-bark mb-2">
 						AI Model
 					</label>
-					<select
-						id="ai_provider"
-						bind:value={aiProvider}
-						class="input-field"
-						disabled={isFormDisabled}
-					>
-						{#each aiProviderOptions as option}
-							<option value={option.value}>{option.label}</option>
-						{/each}
-					</select>
-					<p class="mt-1 text-xs text-bark/50 font-sans">
-						{aiProviderOptions.find(p => p.value === aiProvider)?.description ?? ''}
-					</p>
+					<div class="card p-4 bg-grove-50">
+						<div class="text-base font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
+						<p class="mt-1 text-sm text-bark/60 font-sans">
+							{aiProviderInfo.description}
+						</p>
+					</div>
 				</div>
 
 				<!-- Submit -->
@@ -1529,7 +1512,7 @@
 									</div>
 								</div>
 								<div class="flex justify-between text-[10px] sm:text-xs font-sans pt-1 border-t border-grove-100">
-									<span class="text-bark/50">Est. Cost ({aiProvider === 'openrouter' ? 'OpenRouter' : 'DeepSeek'})</span>
+									<span class="text-bark/50">Est. Cost (DeepSeek v3.2)</span>
 									<span class="font-mono text-domain-600 font-medium">{estimateCost(tokenUsage)}</span>
 								</div>
 							</div>
