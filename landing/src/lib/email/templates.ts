@@ -1,4 +1,4 @@
-export function getWelcomeEmailHtml(): string {
+export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
 	return `
 <!DOCTYPE html>
 <html lang="en">
@@ -68,13 +68,20 @@ export function getWelcomeEmailHtml(): string {
         </p>
       </td>
     </tr>
+    <tr>
+      <td align="center" style="padding-top: 20px; border-top: 1px solid #e5e5e5; margin-top: 20px;">
+        <p style="margin: 16px 0 0 0; font-size: 11px; color: #3d2914; opacity: 0.35;">
+          Don't want to receive these emails? <a href="${unsubscribeUrl}" style="color: #3d2914; opacity: 0.5;">Unsubscribe</a>
+        </p>
+      </td>
+    </tr>
   </table>
 </body>
 </html>
 `.trim();
 }
 
-export function getWelcomeEmailText(): string {
+export function getWelcomeEmailText(unsubscribeUrl: string): string {
 	return `
 Welcome to Grove
 ================
@@ -90,5 +97,8 @@ We'll reach out when Grove is ready to bloom. Until then, thank you for believin
 — The Grove Team
 
 grove.place
+
+---
+Don't want to receive these emails? Unsubscribe: ${unsubscribeUrl}
 `.trim();
 }

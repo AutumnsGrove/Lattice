@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { getWelcomeEmailHtml, getWelcomeEmailText } from './templates';
+import { generateUnsubscribeUrl } from './tokens';
 
 export async function sendWelcomeEmail(
 	toEmail: string,
@@ -8,12 +9,19 @@ export async function sendWelcomeEmail(
 	const resend = new Resend(apiKey);
 
 	try {
+		// Generate unsubscribe URL for this recipient
+		const unsubscribeUrl = await generateUnsubscribeUrl(toEmail, apiKey);
+
 		const { error } = await resend.emails.send({
 			from: 'Grove <hello@grove.place>',
 			to: toEmail,
 			subject: 'Welcome to Grove 🌿',
-			html: getWelcomeEmailHtml(),
-			text: getWelcomeEmailText()
+			html: getWelcomeEmailHtml(unsubscribeUrl),
+			text: getWelcomeEmailText(unsubscribeUrl),
+			headers: {
+				'List-Unsubscribe': `<${unsubscribeUrl}>`,
+				'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+			}
 		});
 
 		if (error) {
