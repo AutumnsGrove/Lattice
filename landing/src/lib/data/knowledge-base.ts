@@ -9,12 +9,12 @@ export const specs: Doc[] = [
     slug: "thorn-spec",
     title: "Thorn — Content Moderation",
     description:
-      "Privacy-first automated content moderation using AI models with zero data retention",
+      "Privacy-first automated content moderation using AI models with zero data retention, protected by Songbird pattern",
     excerpt:
-      "Grove uses automated content moderation to enforce our Acceptable Use Policy while maintaining strict privacy protections. This system is designed with a privacy-first architecture: no human eyes on user data, no retention of content, and fully encrypted processing.",
+      "Grove uses automated content moderation to enforce our Acceptable Use Policy while maintaining strict privacy protections. This system is designed with a privacy-first architecture: no human eyes on user data, no retention of content, and fully encrypted processing. Uses the Songbird pattern (Canary → Kestrel → Robin) for prompt injection protection.",
     category: "specs",
-    lastUpdated: "2025-12-11",
-    readingTime: 15,
+    lastUpdated: "2026-01-01",
+    readingTime: 18,
   },
   {
     slug: "rings-spec",
