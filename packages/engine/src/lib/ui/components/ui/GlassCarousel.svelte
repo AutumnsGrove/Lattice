@@ -36,6 +36,9 @@
 		caption?: string;
 	}
 
+	/** Custom content renderer type - receives slide index */
+	type ItemRenderer = Snippet<[number]>;
+
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, "class"> {
 		/** Array of images to display */
 		images?: CarouselImage[];
@@ -54,7 +57,7 @@
 		/** Custom class name */
 		class?: string;
 		/** Custom content renderer - receives index */
-		item?: Snippet<[number]>;
+		item?: ItemRenderer;
 	}
 
 	let {
@@ -226,6 +229,23 @@
 		};
 	});
 
+	// Handle window-level mouseup for edge case: drag starts, mouse leaves window, released outside
+	$effect(() => {
+		if (!isDragging) return;
+
+		const handleWindowMouseUp = () => handleMouseUp();
+		window.addEventListener('mouseup', handleWindowMouseUp);
+
+		return () => window.removeEventListener('mouseup', handleWindowMouseUp);
+	});
+
+	// Reset currentIndex if totalItems changes and current index is out of bounds
+	$effect(() => {
+		if (totalItems > 0 && currentIndex >= totalItems) {
+			currentIndex = totalItems - 1;
+		}
+	});
+
 	// Calculate card transforms for stack effect
 	function getCardStyle(index: number): string {
 		const offset = index - currentIndex;
@@ -274,6 +294,7 @@
 	);
 </script>
 
+{#if totalItems > 0}
 <div
 	class={containerClass}
 	role="region"
@@ -397,3 +418,4 @@
 		</div>
 	{/if}
 </div>
+{/if}
