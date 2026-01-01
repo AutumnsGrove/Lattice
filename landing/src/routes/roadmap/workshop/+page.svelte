@@ -63,7 +63,7 @@
 		},
 		{
 			name: 'Mycelium',
-			tagline: 'The Wood Wide Web',
+			tagline: 'MCP Server',
 			description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service through a single, unified interface.',
 			status: 'building',
 			icon: 'network',

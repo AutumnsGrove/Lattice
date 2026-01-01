@@ -139,10 +139,10 @@
 			description: 'New growth appears. The grove finds its voice.',
 			features: [
 				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
-				{ name: 'Amber', description: 'See and manage your storage', done: false, icon: 'amber' },
+				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
-				{ name: 'Foliage', description: 'More themes — color for your corner', done: false, icon: 'palette' }
+				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'palette' }
 			]
 		},
 		'full-bloom': {
@@ -151,7 +151,7 @@
 			season: 'summer' as Season,
 			description: 'The grove becomes a community. Roots intertwine.',
 			features: [
-				{ name: 'Meadow', description: 'The social layer — connection without competition', done: false, major: true, icon: 'meadow' },
+				{ name: 'Meadow', description: 'Social feed — connection without competition', done: false, major: true, icon: 'meadow' },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
 				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message' },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
