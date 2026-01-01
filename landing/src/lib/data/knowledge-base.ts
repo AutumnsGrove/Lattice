@@ -611,7 +611,7 @@ export const patterns: Doc[] = [
     excerpt:
       "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
     category: "patterns",
-    lastUpdated: "2025-12-30",
+    lastUpdated: "2026-01-01",
     readingTime: 12,
   },
   {
