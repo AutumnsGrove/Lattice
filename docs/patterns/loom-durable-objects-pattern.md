@@ -1,4 +1,15 @@
-# Grove Ecosystem: Durable Objects Architecture
+# Loom — Real-Time Coordination
+
+> *The framework where Grove's threads come together.*
+
+**Public Name:** Loom
+**Internal Name:** GroveLoom
+**Pattern Type:** Architecture
+**Last Updated:** January 2026
+
+Loom is Grove's coordination layer, built on Cloudflare Durable Objects. It's the invisible structure that makes everything feel seamless—auth that works across all properties, state that stays in sync, real-time features that just work.
+
+---
 
 ## Executive Summary
 

@@ -615,13 +615,13 @@ export const patterns: Doc[] = [
     readingTime: 12,
   },
   {
-    slug: "grove-durable-objects-architecture",
-    title: "Durable Objects Architecture",
+    slug: "loom-durable-objects-pattern",
+    title: "Loom — Real-Time Coordination",
     description: "Cloudflare Durable Objects for auth, scaling, and real-time features",
     excerpt:
-      "Durable Objects solve three critical problems: auth coordination (eliminate janky handoffs), D1 write scaling (batch writes as user base grows), and real-time features (live updates for Meadow). They're a coordination layer, not a replacement for D1.",
+      "The framework where Grove's threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.",
     category: "patterns",
-    lastUpdated: "2025-12-28",
+    lastUpdated: "2026-01-01",
     readingTime: 18,
   },
   {
