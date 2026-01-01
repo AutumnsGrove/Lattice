@@ -161,7 +161,7 @@
 					icon: 'activity',
 					domain: 'status.grove.place',
 					integration: 'Public platform status for all Grove users',
-					github: 'https://github.com/AutumnsGrove/GroveClear',
+					github: 'https://github.com/AutumnsGrove/Clearing',
 					spec: '/knowledge/specs/clearing-spec'
 				},
 			]
