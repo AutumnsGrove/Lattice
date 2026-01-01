@@ -190,7 +190,18 @@ async function kestrelCheck(
     temperature: 0.1
   });
 
-  const result = JSON.parse(response);
+  // Handle malformed JSON gracefully — fail closed
+  let result: { valid: boolean; confidence: number; reason: string };
+  try {
+    result = JSON.parse(response);
+  } catch (e) {
+    logSecurityEvent('kestrel_json_parse_error', {
+      contentHash: hashContent(userContent),
+      responsePreview: response.slice(0, 100)
+    });
+    // Fail closed: if we can't parse the response, treat as failed validation
+    return { pass: false, confidence: 0, reason: 'Response parsing failed' };
+  }
 
   // Require high confidence for pass
   const pass = result.valid && result.confidence >= 0.85;

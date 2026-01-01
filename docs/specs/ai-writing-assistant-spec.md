@@ -476,6 +476,23 @@ Conversations are stored **client-side only** during the session:
 
 **Primary approach:** Client-side `sessionStorage` keyed by `fireside_session_{conversationId}`. This survives page refreshes within the same tab but is automatically cleared when the tab closes.
 
+**Conversation ID Generation:**
+
+```typescript
+function generateConversationId(): string {
+  // Collision-resistant: timestamp + random UUID
+  const timestamp = Date.now();
+  const uuid = crypto.randomUUID();
+  return `${timestamp}-${uuid}`;
+}
+// Example: "1704067200000-550e8400-e29b-41d4-a716-446655440000"
+```
+
+This pattern ensures:
+- No collisions across concurrent sessions
+- Sortable by creation time (timestamp prefix)
+- Unpredictable for security (UUID suffix)
+
 **Crash recovery (optional, off by default):**
 
 For users who enable it, conversations can be persisted to Cloudflare KV with:
@@ -597,6 +614,10 @@ interface FiresideErrorResponse {
 
 -- Track Fireside sessions (not individual messages)
 ALTER TABLE wisp_requests ADD COLUMN fireside_session_id TEXT;
+
+-- Index for querying requests by session (e.g., cost aggregation)
+CREATE INDEX IF NOT EXISTS idx_wisp_fireside_session ON wisp_requests(fireside_session_id)
+  WHERE fireside_session_id IS NOT NULL;
 
 -- Track posts created via Fireside
 ALTER TABLE posts ADD COLUMN fireside_assisted INTEGER DEFAULT 0;
