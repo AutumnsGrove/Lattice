@@ -1,23 +1,19 @@
----
-aliases:
-date created: Friday, November 22nd 2025, 12:00:00 pm
-date modified: Saturday, December 14th 2025, 12:00:00 pm
-tags:
-type: tech-spec
----
+# Rings — Private Analytics
 
-# Rings - Grove Analytics Specification
+> *Count the rings and you learn the story.*
 
-**Project:** Rings (GroveAnalytics) - Writer-First Analytics
+**Public Name:** Rings
+**Internal Name:** GroveRings
 **Phase:** Phase 5 Enhancement
-**Type:** Analytics System
-**Purpose:** Private insights for writers, platform health for admin—no anxiety, no performance metrics
+**Last Updated:** December 2025
+
+Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
+
+Rings is analytics for writers, not marketers. Private insights without the anxiety of real-time dashboards. Your growth reflected back to you, not performed for others.
 
 ---
 
 ## Philosophy
-
-> *Count the rings of a tree and you learn its story. Each ring records a season—growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.*
 
 Rings is analytics for writers, not marketers. Traditional analytics breed anxiety: refresh-checking, comparing yourself to others, optimizing for virality instead of authenticity. Grove takes a different path.
 
