@@ -85,7 +85,7 @@
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">A small delay —</span> I'm finishing up some paperwork before we officially open. Should be ready early next week. Thanks for your patience.
+				<span class="font-medium">A small delay —</span> Some government systems I need are closed until January 5th (of course). Signups will open shortly after. Thanks for your patience.
 			</p>
 		</div>
 	</div>
