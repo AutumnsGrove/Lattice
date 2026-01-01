@@ -22,6 +22,17 @@
 
 ---
 
+## Vineyard Component Showcase
+
+### GlassCarousel Completion
+- [ ] **Add GlassCarousel to vineyard showcase** — The carousel component is in a PR but not yet merged
+  - Location: `/packages/engine/src/routes/vineyard/+page.svelte` has a stub placeholder
+  - When merged: Import `GlassCarousel` and replace the "Coming Soon" stub with an interactive demo
+  - Demo should showcase: slide transitions, glassmorphism navigation controls, auto-play toggle
+  - Reference the carousel PR for implementation details
+
+---
+
 ## Nature Assets Migration (Future)
 
 > **Note:** The nature components (trees, weather, sky, botanical, creatures, structural) currently live in `landing/src/lib/components/nature/`. These should eventually be moved to the engine package (`packages/engine/src/lib/ui/components/nature/`) so they can be shared across all Grove properties (landing, plant, meadow, engine admin).
