@@ -109,6 +109,15 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 ---
 
+## Plant
+**Onboarding** · `plant.grove.place`
+
+A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place—carefully prepared soil, the right conditions, gentle care until roots take hold.
+
+Plant is Grove's onboarding system—the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets you publishing within minutes. You arrive as a visitor. You leave with a home.
+
+---
+
 ## Rings
 **Analytics** · *Integrated into admin dashboard*
 
@@ -246,6 +255,7 @@ All features off by default. Zero data retention. Your words analyzed, never sto
 | **Outpost** | Minecraft server | mc.grove.place |
 | **Aria** | Music curation | aria.grove.place |
 | **Lattice** | Core platform | npm package |
+| **Plant** | Onboarding | plant.grove.place |
 | **Rings** | Analytics | *(integrated)* |
 | **Ivy** | Email | ivy.grove.place |
 | **Amber** | Storage management | amber.grove.place |
@@ -274,6 +284,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Outpost | GroveMC |
 | Aria | GroveMusic |
 | Lattice | GroveEngine |
+| Plant | Seedbed |
 | Rings | GroveAnalytics |
 | Ivy | GroveMail |
 | Amber | GroveStorage |

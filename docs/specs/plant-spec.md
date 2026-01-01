@@ -1,16 +1,16 @@
-# Seedbed — Tenant Onboarding
+# Plant — Tenant Onboarding
 
 > *Where new growth begins.*
 
-**Public Name:** Seedbed
-**Internal Name:** GroveSeed
-**Domain:** `create.grove.place`
+**Public Name:** Plant
+**Internal Name:** Seedbed
+**Domain:** `plant.grove.place`
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
 
 A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place—carefully prepared soil, the right conditions, gentle care until roots take hold.
 
-Seedbed is Grove's onboarding system—the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets users publishing within minutes.
+Plant is Grove's onboarding system—the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets users publishing within minutes.
 
 ---
 

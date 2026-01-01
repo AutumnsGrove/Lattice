@@ -165,12 +165,12 @@
 			github: 'https://github.com/AutumnsGrove/GroveClear'
 		},
 		{
-			name: 'Seedbed',
+			name: 'Plant',
 			tagline: 'Tenant Onboarding',
-			description: 'Where new growth begins. Seedbed is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
+			description: 'Where new growth begins. Plant is Grove\'s onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.',
 			status: 'building',
 			icon: 'userplus',
-			domain: 'create.grove.place',
+			domain: 'plant.grove.place',
 			integration: 'Signup and onboarding for new Grove users'
 		},
 		{

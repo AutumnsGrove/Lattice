@@ -68,8 +68,8 @@ export const specs: Doc[] = [
     readingTime: 9,
   },
   {
-    slug: "seedbed-spec",
-    title: "Seedbed — Tenant Onboarding",
+    slug: "plant-spec",
+    title: "Plant — Tenant Onboarding",
     description: "Multi-step onboarding flow for new Grove users",
     excerpt:
       "Comprehensive onboarding system guiding users through account creation, plan selection, payment, and initial setup.",
