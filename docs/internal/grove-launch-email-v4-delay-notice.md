@@ -29,6 +29,10 @@ Signups will open shortly after they're back. Almost there.
 
 ---
 
+[Unsubscribe]({{{RESEND_UNSUBSCRIBE_URL}}})
+
+---
+
 ## Subject Line Options
 
 1. **A small delay** ← selected
