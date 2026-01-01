@@ -65,8 +65,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			return json({ error: 'This email is already on our list!' }, { status: 409 });
 		}
 
-		// Insert new signup
-		await platform.env.DB.prepare('INSERT INTO email_signups (email) VALUES (?)')
+		// Insert new signup with welcome_email_sent flag
+		await platform.env.DB.prepare(
+			'INSERT INTO email_signups (email, welcome_email_sent) VALUES (?, 1)'
+		)
 			.bind(normalizedEmail)
 			.run();
 
