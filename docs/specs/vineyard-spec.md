@@ -1,10 +1,15 @@
-# Vineyard — Asset & Tool Showcase Pattern
+# Vineyard — Tool Showcase Pattern
 
 > *Every vine starts somewhere.*
 
-**Status:** Spec Draft
-**Target Phase:** Ongoing (each tool implements as ready)
+**Public Name:** Vineyard
 **Internal Name:** GroveShowcase
+**Target Phase:** Ongoing (each tool implements as ready)
+**Last Updated:** December 2025
+
+A vineyard is where vines are cultivated, each one tended and displayed. Visitors can walk the rows, sample the offerings, understand what grows here. Vineyard is Grove's tool showcase pattern—a consistent way to explore any tool in the ecosystem.
+
+Every Grove tool implements a `/vineyard` route on its subdomain. Visit `bloom.grove.place/vineyard` to see what Bloom does. Visit `meadow.grove.place/vineyard` to explore the social layer. One pattern, across the entire ecosystem.
 
 ---
 

@@ -1,11 +1,16 @@
-# Trails — Personal Roadmaps for Grove
+# Trails — Personal Roadmaps
 
 > *The path becomes clear by walking it.*
 
-**Status:** Spec Draft
+**Public Name:** Trails
+**Internal Name:** GroveTrails
 **Target Phase:** First Buds (Early Spring)
 **Tiers:** Sapling ($12/mo) and up
-**Internal Name:** GroveTrails
+**Last Updated:** December 2025
+
+Trails wind through the forest, marking where others have walked. They show the journey—not just the destination. Trails is Grove's personal roadmap system, letting you build in public and share the path you're walking.
+
+Whether planning a creative project, outlining upcoming blog content, or tracking progress on a long-term goal, Trails provides a beautiful way to show where you've been, where you are, and where you're headed.
 
 ---
 

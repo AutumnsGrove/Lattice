@@ -1,15 +1,16 @@
-# Vista - Unified Infrastructure Observability
+# Vista — Infrastructure Monitoring
 
 > *A clearing in the forest where the whole grove stretches out before you.*
 
-## Project Overview
-
 **Public Name:** Vista
 **Internal Name:** GroveMonitor
-**URL:** `vista.grove.place`
+**Domain:** `vista.grove.place`
 **Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
-**Purpose:** Unified dashboard for monitoring all Grove Platform services
-**Stack:** SvelteKit + Cloudflare Workers + D1 + KV + R2
+**Last Updated:** December 2025
+
+A vista is a view that opens up—a clearing where you can see the whole forest at once. From here, nothing hides. Vista is Grove's infrastructure monitoring dashboard, providing a single pane of glass for all platform services.
+
+Real-time metrics, historical data, alerting, cost tracking, health checks—all in one beautiful dashboard. Vista watches so you don't have to.
 
 ---
 

@@ -1,8 +1,16 @@
-# Songbird Pattern — Three-Layer Prompt Injection Protection
+# Songbird — Prompt Injection Protection
 
-> **Status:** Approved pattern
-> **Applies to:** All Grove AI input vectors (Wisp, Content Moderation, future features)
-> **Model:** DeepSeek V3.2 via Fireworks AI (all layers)
+> *Three birds, three layers, one defense.*
+
+**Public Name:** Songbird
+**Internal Name:** GroveSongbird
+**Applies to:** All Grove AI input vectors (Wisp, Thorn, future features)
+**Model:** DeepSeek V3.2 via Fireworks AI
+**Last Updated:** December 2025
+
+In the forest, birds warn each other of danger. The canary alerts first. The kestrel watches and validates. The robin sings the safe response. Songbird is Grove's three-layer defense against prompt injection attacks.
+
+Each layer costs fractions of a cent but protects all Grove AI features from compromised responses. Cheap insurance. Essential protection.
 
 ---
 

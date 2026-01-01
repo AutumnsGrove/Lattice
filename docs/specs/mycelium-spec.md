@@ -1,18 +1,15 @@
----
-date created: Monday, December 30th 2024, 12:00:00 pm
-date modified: Monday, December 30th 2024, 12:00:00 pm
-tags: mcp, cloudflare, durable-objects, internal
-type: tech-spec
----
+# Mycelium — MCP Server
 
-# 🍄 Mycelium
+> *The wood wide web of the Grove ecosystem.*
 
-> *The wood wide web of the Grove ecosystem*
-
-**Internal Name:** GroveMCP
 **Public Name:** Mycelium
+**Internal Name:** GroveMCP
 **Domain:** `mycelium.grove.place`
-**Status:** Specification Draft
+**Last Updated:** December 2025
+
+Beneath the forest floor, fungal networks connect every tree—sharing nutrients, sending signals, creating a living internet of roots. Mycelium is Grove's Model Context Protocol server, the invisible network connecting AI agents to the entire ecosystem.
+
+Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service through a single, unified interface. The wood wide web.
 
 ---
 

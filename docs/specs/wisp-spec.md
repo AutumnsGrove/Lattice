@@ -1,17 +1,15 @@
-# Wisp - Grove Writing Assistant
+# Wisp — Writing Assistant
 
-> **Status:** Approved - Ready for implementation
-> **Target:** GroveEngine integration
-> **Internal Name:** GroveWisp
-> **Philosophy:** A helper, not a writer—and sometimes, a good listener
+> *A helper, not a writer—and sometimes, a good listener.*
 
----
+**Public Name:** Wisp
+**Internal Name:** GroveWisp
+**Target:** GroveEngine integration
+**Last Updated:** December 2025
 
-## Naming
+Like a will-o'-the-wisp in the forest—light, airy, ephemeral. Wisp appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice. A wisp of help. Nothing more, nothing less.
 
-**Wisp** — like a will-o'-the-wisp in the forest. Light, airy, ephemeral. It appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice.
-
-*A wisp of help. Nothing more, nothing less.*
+Wisp is Grove's ethical AI writing tool. It helps you polish your voice without replacing it—analyzing grammar, tone, and readability, but never generating or expanding content. Your words, refined. Not replaced.
 
 ---
 

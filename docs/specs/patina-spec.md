@@ -1,21 +1,20 @@
-# Patina - Automated Database Backup System
+# Patina — Automated Backups
 
-> **Internal codename:** GrovePatina
-
-## Project Overview
+> *Age as armor. Time as protection.*
 
 **Public Name:** Patina
-**Internal Codename:** GrovePatina
+**Internal Name:** GrovePatina
+**Domain:** `patina.grove.place`
 **Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
-**URL:** `patina.grove.place` (optional dashboard)
-**Purpose:** Automated nightly backups of all Grove D1 databases to R2
-**Stack:** Cloudflare Workers + D1 + R2
+**Last Updated:** December 2025
 
-*Part of the Grove ecosystem. "Age as armor. Time as protection."*
+A patina forms on copper over time—not decay, but protection. The oxidation becomes armor, beauty emerging from age. Patina is Grove's automated backup system, quietly preserving everything while you sleep.
+
+Every night, Patina runs automated backups of all Grove D1 databases to R2 cold storage. Weekly archives compress the daily layers. Twelve weeks of history remain quietly preserved, ready if you ever need to reach back in time.
 
 ---
 
-## 🎯 Goals
+## Goals
 
 1. **Automated nightly backups** of all 6 D1 databases
 2. **Weekly meta-backups** — compress 7 daily backups into one archive
