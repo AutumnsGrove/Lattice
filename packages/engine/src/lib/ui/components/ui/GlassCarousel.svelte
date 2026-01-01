@@ -9,6 +9,9 @@
 	 * Mobile-first carousel where cards stack on top of each other.
 	 * Supports images out of the box, or custom content via children snippet.
 	 *
+	 * Navigation: touch/swipe, mouse drag, click (arrows/dots).
+	 * Keyboard navigation intentionally omitted for simplicity.
+	 *
 	 * @example Image carousel
 	 * ```svelte
 	 * <GlassCarousel images={[
@@ -83,8 +86,16 @@
 	// Autoplay interval reference
 	let autoplayTimer: ReturnType<typeof setInterval> | null = null;
 
-	// Navigation with animation lock
-	const ANIMATION_DURATION = 400;
+	// Configuration constants
+	const ANIMATION_DURATION_MS = 400;
+	const SWIPE_THRESHOLD_PX = 50;
+	const DRAG_INFLUENCE_FACTOR = 0.3;
+	const MIN_CARD_SCALE = 0.85;
+	const SCALE_STEP = 0.05;
+	const CARD_OFFSET_X = 20;
+	const CARD_OFFSET_Y = 8;
+	const MIN_OPACITY = 0.4;
+	const OPACITY_STEP = 0.3;
 
 	function goTo(index: number) {
 		if (isAnimating || index < 0 || index >= totalItems || index === currentIndex) return;
@@ -94,7 +105,7 @@
 
 		setTimeout(() => {
 			isAnimating = false;
-		}, ANIMATION_DURATION);
+		}, ANIMATION_DURATION_MS);
 	}
 
 	function goNext() {
@@ -133,10 +144,9 @@
 	function handleTouchEnd() {
 		if (!isDragging) return;
 
-		const swipeThreshold = 50;
 		const diff = touchStartX - touchCurrentX;
 
-		if (Math.abs(diff) > swipeThreshold) {
+		if (Math.abs(diff) > SWIPE_THRESHOLD_PX) {
 			if (diff > 0) {
 				goNext();
 			} else {
@@ -191,7 +201,15 @@
 		}
 	}
 
-	// Start/stop autoplay based on prop
+	// Reset drag state helper
+	function resetDragState() {
+		isDragging = false;
+		dragOffset = 0;
+		touchStartX = 0;
+		touchCurrentX = 0;
+	}
+
+	// Start/stop autoplay based on prop, with cleanup for drag state
 	$effect(() => {
 		if (autoplay && totalItems > 1) {
 			startAutoplay();
@@ -199,31 +217,21 @@
 			stopAutoplay();
 		}
 
-		return () => stopAutoplay();
+		return () => {
+			stopAutoplay();
+			// Clean up drag state if component unmounts during drag
+			if (isDragging) {
+				resetDragState();
+			}
+		};
 	});
 
 	// Calculate card transforms for stack effect
 	function getCardStyle(index: number): string {
 		const offset = index - currentIndex;
-		const dragInfluence = isDragging ? dragOffset * 0.3 : 0;
+		const dragInfluence = isDragging ? dragOffset * DRAG_INFLUENCE_FACTOR : 0;
 
-		// Cards behind current
-		if (offset < 0) {
-			const depth = Math.abs(offset);
-			const scale = Math.max(0.85, 1 - depth * 0.05);
-			const translateX = -20 * depth + dragInfluence;
-			const translateY = 8 * depth;
-			const opacity = Math.max(0.4, 1 - depth * 0.3);
-			const zIndex = totalItems - depth;
-
-			return `
-				transform: translateX(${translateX}px) translateY(${translateY}px) scale(${scale});
-				opacity: ${opacity};
-				z-index: ${zIndex};
-			`;
-		}
-
-		// Current card
+		// Current card - special case
 		if (offset === 0) {
 			const translateX = isDragging ? dragOffset : 0;
 			return `
@@ -233,12 +241,14 @@
 			`;
 		}
 
-		// Cards ahead of current
-		const scale = Math.max(0.85, 1 - offset * 0.05);
-		const translateX = 20 * offset + dragInfluence;
-		const translateY = 8 * offset;
-		const opacity = Math.max(0.4, 1 - offset * 0.3);
-		const zIndex = totalItems - offset;
+		// Cards behind or ahead - shared transform logic
+		const depth = Math.abs(offset);
+		const direction = offset < 0 ? -1 : 1;
+		const scale = Math.max(MIN_CARD_SCALE, 1 - depth * SCALE_STEP);
+		const translateX = direction * CARD_OFFSET_X * depth + dragInfluence;
+		const translateY = CARD_OFFSET_Y * depth;
+		const opacity = Math.max(MIN_OPACITY, 1 - depth * OPACITY_STEP);
+		const zIndex = totalItems - depth;
 
 		return `
 			transform: translateX(${translateX}px) translateY(${translateY}px) scale(${scale});
@@ -286,7 +296,7 @@
 		{#each { length: totalItems } as _, index (index)}
 			<div
 				class={cn(
-					"absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-all duration-400 ease-out",
+					"absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-all duration-[400ms] ease-out",
 					"bg-white dark:bg-slate-900",
 					isDragging && "transition-none"
 				)}
@@ -387,9 +397,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	.duration-400 {
-		transition-duration: 400ms;
-	}
-</style>
