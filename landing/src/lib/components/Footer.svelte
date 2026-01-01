@@ -11,7 +11,7 @@
 		Telescope,
 		Mail,
 		PenLine,
-		Pickaxe
+		Hammer
 	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
@@ -64,7 +64,7 @@
 					</li>
 					<li>
 						<a href="/roadmap/workshop" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
-							<Pickaxe class="w-4 h-4" />
+							<Hammer class="w-4 h-4" />
 							Workshop
 						</a>
 					</li>
