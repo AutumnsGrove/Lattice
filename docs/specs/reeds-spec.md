@@ -1,8 +1,13 @@
-# Comments System Specification
+# Reeds — Comments System
 
-**Grove Platform**
+> *Whisper together at the water's edge.*
+
+**Public Name:** Reeds
+**Internal Name:** GroveReeds
 **Version:** 1.0 Draft
 **Last Updated:** December 2025
+
+Reeds sway together at the water's edge, whispering in the breeze—a gentle murmur of community. Reeds is Grove's comment system, supporting both private replies and public conversations, all flowing naturally beneath your posts.
 
 ---
 

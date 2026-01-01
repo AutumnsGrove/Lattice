@@ -1,8 +1,13 @@
-# Automated Content Moderation System
+# Thorn — Content Moderation
 
-**Grove Platform**
+> *Every rose has thorns for protection.*
+
+**Public Name:** Thorn
+**Internal Name:** GroveThorn
 **Version:** 1.1 Draft
-**Last Updated:** December 11, 2025
+**Last Updated:** December 2025
+
+Thorns protect plants from harm without being aggressive. They're natural, protective, and guard the grove from harmful content. Thorn is Grove's automated content moderation system—privacy-first, context-aware, and designed to protect without surveillance.
 
 ---
 

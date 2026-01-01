@@ -1,9 +1,12 @@
-# Admin Panel Specification
+# Arbor — Admin Panel
 
-> The content management and site administration interface for Grove blogs
+> *The structured framework where growth is tended.*
 
-**Internal Name**: Grove Admin
-**Access URL**: `{blog}.grove.place/admin`
+**Public Name:** Arbor
+**Internal Name:** GroveArbor
+**Access URL:** `{blog}.grove.place/admin`
+
+An arbor is a garden structure that supports climbing plants—structured, nurturing, and essential for healthy growth. It's where you manage and cultivate your corner of the grove.
 
 ---
 
