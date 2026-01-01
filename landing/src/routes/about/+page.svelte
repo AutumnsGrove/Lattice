@@ -42,8 +42,11 @@
 					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
 						Imagine you're building a neighborhood of tiny houses. Each person gets their own house (their website at <code>yourname.grove.place</code>), but they all share some common infrastructure — the roads, the power grid, the community center.
 					</p>
-					<p class="text-foreground-muted font-sans leading-relaxed">
+					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
 						Grove is all of that infrastructure: the roads (how you get to any site), the power grid (keeping everything fast and reliable), the locks on the doors (making sure only you can access your stuff), and eventually the community center (where people can interact with each other).
+					</p>
+					<p class="text-foreground-muted font-sans leading-relaxed">
+						<strong class="text-foreground">And reading is free.</strong> Every Grove blog is publicly accessible — no account, no paywall, no hoops to jump through. Just visit and read. The paid plans are for people who want to <em>write</em>, not for people who want to read.
 					</p>
 				</section>
 
