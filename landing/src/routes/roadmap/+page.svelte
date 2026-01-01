@@ -157,7 +157,7 @@
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
 				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending' },
 				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown' },
-				{ name: 'Canopy', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
+				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
 				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' }
 			]
