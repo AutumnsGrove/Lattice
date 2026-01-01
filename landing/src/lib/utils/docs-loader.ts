@@ -142,6 +142,7 @@ export function loadAllDocs(): {
   helpArticles: Doc[];
   legalDocs: Doc[];
   marketingDocs: Doc[];
+  patterns: Doc[];
 } {
   const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
   const helpArticles = loadDocsFromDir(
@@ -150,8 +151,9 @@ export function loadAllDocs(): {
   );
   const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
   const marketingDocs = loadDocsFromDir(join(DOCS_ROOT, "marketing"), "marketing");
+  const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
 
-  return { specs, helpArticles, legalDocs, marketingDocs };
+  return { specs, helpArticles, legalDocs, marketingDocs, patterns };
 }
 
 export function loadDocBySlug(
@@ -175,7 +177,9 @@ export function loadDocBySlug(
         ? join(DOCS_ROOT, "help-center/articles")
         : category === "marketing"
           ? join(DOCS_ROOT, "marketing")
-          : join(DOCS_ROOT, "legal");
+          : category === "patterns"
+            ? join(DOCS_ROOT, "patterns")
+            : join(DOCS_ROOT, "legal");
 
   const docs = loadDocsFromDir(docsPath, category);
 
