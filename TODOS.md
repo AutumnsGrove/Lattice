@@ -22,6 +22,17 @@
 
 ---
 
+## Vineyard Component Showcase
+
+### ✅ GlassCarousel Completion (2026-01-01)
+- [x] **Add GlassCarousel to vineyard showcase** — Interactive demo added with:
+  - Variant switcher (default/frosted/minimal)
+  - Autoplay toggle
+  - Custom seasonal slide content
+  - Swipe, drag, and keyboard navigation hints
+
+---
+
 ## Nature Assets Migration (Future)
 
 > **Note:** The nature components (trees, weather, sky, botanical, creatures, structural) currently live in `landing/src/lib/components/nature/`. These should eventually be moved to the engine package (`packages/engine/src/lib/ui/components/nature/`) so they can be shared across all Grove properties (landing, plant, meadow, engine admin).
