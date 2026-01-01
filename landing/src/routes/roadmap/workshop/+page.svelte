@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, Layers, MessageCircle, Shield, BarChart3, Grape } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -174,14 +174,6 @@
 			integration: 'Signup and onboarding for new Grove users'
 		},
 		{
-			name: 'Canopy',
-			tagline: 'Theme System',
-			description: 'No two canopies are quite the same. Canopy powers Grove\'s visual customization—from simple accent colors for all users to full theme control for premium tiers. Make it warm, make it bold, make it yours.',
-			status: 'building',
-			icon: 'layers',
-			integration: 'Theme engine powering Foliage and all blog customization'
-		},
-		{
 			name: 'Reeds',
 			tagline: 'Comments System',
 			description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
@@ -302,8 +294,6 @@
 										<Activity class="w-5 h-5" />
 									{:else if tool.icon === 'userplus'}
 										<UserPlus class="w-5 h-5" />
-									{:else if tool.icon === 'layers'}
-										<Layers class="w-5 h-5" />
 									{:else if tool.icon === 'message'}
 										<MessageCircle class="w-5 h-5" />
 									{:else if tool.icon === 'shield'}
