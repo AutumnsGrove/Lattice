@@ -627,12 +627,24 @@ export const patterns: Doc[] = [
   {
     slug: "loom-durable-objects-pattern",
     title: "Loom — Real-Time Coordination",
-    description: "Cloudflare Durable Objects for auth, scaling, and real-time features",
+    description:
+      "Cloudflare Durable Objects for auth, scaling, and real-time features",
     excerpt:
       "The framework where Grove's threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.",
     category: "patterns",
     lastUpdated: "2026-01-01",
     readingTime: 18,
+  },
+  {
+    slug: "threshold-pattern",
+    title: "Threshold — Rate Limiting & Abuse Prevention",
+    description:
+      "Layered rate limiting with Durable Objects for precise per-user, per-tenant, and per-endpoint limits",
+    excerpt:
+      "The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Uses Durable Objects for precision and graduated response.",
+    category: "patterns",
+    lastUpdated: "2026-01-01",
+    readingTime: 15,
   },
   {
     slug: "vineyard-spec",
