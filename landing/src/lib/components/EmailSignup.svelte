@@ -48,26 +48,26 @@
 
 {#if status === 'success'}
 	<div
-		class="bg-accent border border-accent rounded-lg px-6 py-4 text-center max-w-md animate-in"
+		class="{variant === 'dark' ? 'bg-purple-900/40 border-purple-600/40' : 'bg-accent border-accent'} border rounded-lg px-6 py-4 text-center max-w-md animate-in"
 	>
-		<svg class="w-8 h-8 text-accent-muted mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<svg class="{variant === 'dark' ? 'text-amber-400' : 'text-accent-muted'} w-8 h-8 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 			<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" />
 			<polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round" />
 		</svg>
-		<p class="text-accent font-sans font-medium">You're on the list!</p>
-		<p class="text-accent-muted text-sm font-sans mt-1">Check your inbox for a welcome note.</p>
-		<p class="text-accent-subtle text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
+		<p class="{variant === 'dark' ? 'text-white' : 'text-accent'} font-sans font-medium">You're on the list!</p>
+		<p class="{variant === 'dark' ? 'text-purple-200' : 'text-accent-muted'} text-sm font-sans mt-1">Check your inbox for a welcome note.</p>
+		<p class="{variant === 'dark' ? 'text-purple-300/80' : 'text-accent-subtle'} text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
 	</div>
 {:else if status === 'already_signed_up'}
 	<div
-		class="bg-accent border border-accent rounded-lg px-6 py-4 text-center max-w-md animate-in"
+		class="{variant === 'dark' ? 'bg-purple-900/40 border-purple-600/40' : 'bg-accent border-accent'} border rounded-lg px-6 py-4 text-center max-w-md animate-in"
 	>
-		<svg class="w-8 h-8 text-accent-muted mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<svg class="{variant === 'dark' ? 'text-pink-400' : 'text-accent-muted'} w-8 h-8 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 			<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" stroke-linecap="round" stroke-linejoin="round" />
 		</svg>
-		<p class="text-accent font-sans font-medium">You're already on the list!</p>
-		<p class="text-accent-muted text-sm font-sans mt-1">Thank you for being so excited.</p>
-		<p class="text-accent-subtle text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
+		<p class="{variant === 'dark' ? 'text-white' : 'text-accent'} font-sans font-medium">You're already on the list!</p>
+		<p class="{variant === 'dark' ? 'text-purple-200' : 'text-accent-muted'} text-sm font-sans mt-1">Thank you for being so excited.</p>
+		<p class="{variant === 'dark' ? 'text-purple-300/80' : 'text-accent-subtle'} text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
 	</div>
 {:else}
 	<form onsubmit={handleSubmit} class="w-full max-w-md">
@@ -101,7 +101,7 @@
 			<p class="{variant === 'dark' ? 'text-red-400' : 'text-error'} text-sm mt-2 font-sans">{errorMessage}</p>
 		{/if}
 
-		<p class="{variant === 'dark' ? 'text-purple-400/60' : 'text-foreground-faint'} text-xs mt-3 text-center font-sans">
+		<p class="{variant === 'dark' ? 'text-purple-300/70' : 'text-foreground-faint'} text-xs mt-3 text-center font-sans">
 			No spam, ever. Unsubscribe anytime.
 		</p>
 	</form>

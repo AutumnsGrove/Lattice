@@ -23,34 +23,39 @@
 	<Header />
 
 	<!-- The Manifesto -->
-	<article class="flex-1 relative overflow-hidden bg-gradient-to-b from-purple-950 via-slate-950 to-black">
-		<!-- Stars scattered throughout -->
+	<article
+		class="flex-1 relative overflow-hidden bg-gradient-to-b from-purple-950 via-slate-950 to-black"
+		aria-label="Grove Manifesto: A declaration of our beliefs, written under the stars"
+	>
+		<!-- Stars scattered throughout - reduced on mobile for performance -->
 		<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+			<!-- Always visible stars -->
 			<div class="absolute top-16 left-[8%]">
 				<StarCluster class="w-20 h-20 opacity-50" />
 			</div>
 			<div class="absolute top-24 right-[12%]">
 				<StarCluster class="w-14 h-14 opacity-40" />
 			</div>
-			<div class="absolute top-48 left-[25%]">
-				<StarCluster class="w-10 h-10 opacity-35" />
-			</div>
-			<div class="absolute top-32 right-[35%]">
-				<StarCluster class="w-8 h-8 opacity-30" />
-			</div>
-			<div class="absolute top-[20%] left-[45%]">
-				<StarCluster class="w-6 h-6 opacity-25" />
-			</div>
 			<div class="absolute top-[35%] right-[8%]">
 				<StarCluster class="w-12 h-12 opacity-35" />
 			</div>
-			<div class="absolute top-[50%] left-[5%]">
+			<!-- Hidden on mobile to reduce visual clutter -->
+			<div class="hidden sm:block absolute top-48 left-[25%]">
+				<StarCluster class="w-10 h-10 opacity-35" />
+			</div>
+			<div class="hidden sm:block absolute top-32 right-[35%]">
+				<StarCluster class="w-8 h-8 opacity-30" />
+			</div>
+			<div class="hidden md:block absolute top-[20%] left-[45%]">
+				<StarCluster class="w-6 h-6 opacity-25" />
+			</div>
+			<div class="hidden sm:block absolute top-[50%] left-[5%]">
 				<StarCluster class="w-10 h-10 opacity-30" />
 			</div>
-			<div class="absolute top-[65%] right-[20%]">
+			<div class="hidden md:block absolute top-[65%] right-[20%]">
 				<StarCluster class="w-8 h-8 opacity-25" />
 			</div>
-			<div class="absolute top-[80%] left-[15%]">
+			<div class="hidden md:block absolute top-[80%] left-[15%]">
 				<StarCluster class="w-6 h-6 opacity-20" />
 			</div>
 		</div>
@@ -155,7 +160,7 @@
 								<br />
 								In encouragement without performance.
 							</p>
-							<p class="text-base md:text-lg text-purple-300 font-serif leading-relaxed mt-6">
+							<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed mt-6">
 								No metrics breeding outrage.
 								<br />
 								No viral mechanics rewarding the loudest voice.
@@ -211,7 +216,7 @@
 						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
 							We believe in the <span class="text-amber-300">open web.</span>
 						</p>
-						<p class="text-base md:text-lg text-purple-300 font-serif leading-relaxed">
+						<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed">
 							In RSS feeds.
 							<br />
 							In markdown files you can take anywhere.
@@ -270,7 +275,7 @@
 					<!-- Closing - Major Glass Callout -->
 					<section class="relative">
 						<div class="bg-gradient-to-b from-purple-900/40 to-slate-900/40 backdrop-blur-md rounded-2xl p-10 md:p-12 border border-purple-600/30 shadow-2xl">
-							<p class="text-base md:text-lg text-purple-300 font-serif leading-relaxed mb-6">
+							<p class="text-base md:text-lg text-purple-200/90 font-serif leading-relaxed mb-6">
 								This is our manifesto.
 								<br />
 								Not a pitch. Not a promise of features.
