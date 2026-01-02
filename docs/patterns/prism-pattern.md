@@ -22,47 +22,47 @@ The Prism pattern defines a layered visual system built on glassmorphism, season
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         THE PRISM LAYER STACK                            │
+│                         THE PRISM LAYER STACK                           │
 └─────────────────────────────────────────────────────────────────────────┘
 
     ┌─────────────────────────────────────────────────────────────────┐
-    │  LAYER 5: CONTENT                                                │
-    │  ─────────────────────────────────────────────────────────────   │
-    │  Text, buttons, forms, interactive elements                      │
-    │  Clean, readable, high contrast                                  │
+    │  LAYER 5: CONTENT                                               │
+    │  ─────────────────────────────────────────────────────────────  │
+    │  Text, buttons, forms, interactive elements                     │
+    │  Clean, readable, high contrast                                 │
     └─────────────────────────────────────────────────────────────────┘
                                     ▲
                                     │
     ┌─────────────────────────────────────────────────────────────────┐
-    │  LAYER 4: GLASS SURFACES                                         │
-    │  ─────────────────────────────────────────────────────────────   │
-    │  Translucent containers with backdrop-blur                       │
-    │  Cards, modals, navigation bars, callouts                        │
-    │  Variants: surface, tint, card, accent, overlay, muted           │
+    │  LAYER 4: GLASS SURFACES                                        │
+    │  ─────────────────────────────────────────────────────────────  │
+    │  Translucent containers with backdrop-blur                      │
+    │  Cards, modals, navigation bars, callouts                       │
+    │  Variants: surface, tint, card, accent, overlay, muted          │
     └─────────────────────────────────────────────────────────────────┘
                                     ▲
                                     │
     ┌─────────────────────────────────────────────────────────────────┐
-    │  LAYER 3: DECORATIVE ELEMENTS                                    │
-    │  ─────────────────────────────────────────────────────────────   │
-    │  Trees (randomized forests), birds, lanterns, vines              │
-    │  Partially visible through glass, adds depth                     │
+    │  LAYER 3: DECORATIVE ELEMENTS                                   │
+    │  ─────────────────────────────────────────────────────────────  │
+    │  Trees (randomized forests), birds, lanterns, vines             │
+    │  Partially visible through glass, adds depth                    │
     └─────────────────────────────────────────────────────────────────┘
                                     ▲
                                     │
     ┌─────────────────────────────────────────────────────────────────┐
-    │  LAYER 2: WEATHER & PARTICLES                                    │
-    │  ─────────────────────────────────────────────────────────────   │
+    │  LAYER 2: WEATHER & PARTICLES                                   │
+    │  ─────────────────────────────────────────────────────────────  │
     │  Snowfall (winter), petals (spring), leaves (autumn)            │
-    │  Clouds, stars, moon, fireflies                                  │
+    │  Clouds, stars, moon, fireflies                                 │
     └─────────────────────────────────────────────────────────────────┘
                                     ▲
                                     │
     ┌─────────────────────────────────────────────────────────────────┐
-    │  LAYER 1: BACKGROUND                                             │
-    │  ─────────────────────────────────────────────────────────────   │
-    │  Seasonal gradient (sky to ground)                               │
-    │  Sets the emotional tone for the entire page                     │
+    │  LAYER 1: BACKGROUND                                            │
+    │  ─────────────────────────────────────────────────────────────  │
+    │  Seasonal gradient (sky to ground)                              │
+    │  Sets the emotional tone for the entire page                    │
     └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -227,7 +227,7 @@ Grove experiences four seasons, each with distinct colors, weather, and emotiona
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                           GROVE SEASONAL CYCLE                            │
+│                           GROVE SEASONAL CYCLE                           │
 └──────────────────────────────────────────────────────────────────────────┘
 
         SPRING                    SUMMER                    AUTUMN

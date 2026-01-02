@@ -54,13 +54,13 @@ This pattern is ideal for workloads that are:
        │           │             │                              │
        │           ▼             │                              │
        │    ┌──────────────────────────────────────────────┐    │
-       │    │                 ILLUMINATE                    │    │
-       │    │                                               │    │
-       │    │  • Execute primary work (coding, gaming, etc) │    │
-       │    │  • Monitor health and activity                │    │
-       │    │  • Periodic state sync to persistent storage  │    │
-       │    │  • Idle detection running in background       │    │
-       │    │                                               │    │
+       │    │                 ILLUMINATE                   │    │
+       │    │                                              │    │
+       │    │  • Execute primary work (coding, gaming, etc)│    │
+       │    │  • Monitor health and activity               │    │
+       │    │  • Periodic state sync to persistent storage │    │
+       │    │  • Idle detection running in background      │    │
+       │    │                                              │    │
        │    └──────────────────────┬───────────────────────┘    │
        │                           │                            │
        │                           ▼                            │

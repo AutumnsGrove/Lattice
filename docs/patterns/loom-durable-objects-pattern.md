@@ -53,16 +53,16 @@ Durable Objects are not replacing D1. They are a **coordination and caching laye
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                              REQUEST FLOW                                │
+│                           REQUEST FLOW                                  │
 └─────────────────────────────────────────────────────────────────────────┘
 
                            User Request
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         Router Worker                                    │
+│                         Router Worker                                   │
 │  - Extract subdomain (tenant)                                           │
-│  - Extract path                                                          │
+│  - Extract path                                                         │
 │  - Validate session via SessionDO                                       │
 └─────────────────────────────────────────────────────────────────────────┘
                                 │
@@ -76,7 +76,7 @@ Durable Objects are not replacing D1. They are a **coordination and caching laye
                 └───────────────┼───────────────┘
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         D1 Database                                      │
+│                         D1 Database                                     │
 │  - Source of truth for all persistent data                              │
 │  - Receives batched writes from DOs                                     │
 │  - Posts, comments, users, settings, analytics                          │
