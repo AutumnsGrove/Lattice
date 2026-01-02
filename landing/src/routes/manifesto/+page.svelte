@@ -27,35 +27,33 @@
 		class="flex-1 relative overflow-hidden bg-gradient-to-b from-purple-950 via-slate-950 to-black"
 		aria-label="Grove Manifesto: A declaration of our beliefs, written under the stars"
 	>
-		<!-- Stars scattered throughout - reduced on mobile for performance -->
+		<!-- Stars scattered throughout -->
 		<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-			<!-- Always visible stars -->
 			<div class="absolute top-16 left-[8%]">
 				<StarCluster class="w-20 h-20 opacity-50" />
 			</div>
 			<div class="absolute top-24 right-[12%]">
 				<StarCluster class="w-14 h-14 opacity-40" />
 			</div>
+			<div class="absolute top-48 left-[25%]">
+				<StarCluster class="w-10 h-10 opacity-35" />
+			</div>
+			<div class="absolute top-32 right-[35%]">
+				<StarCluster class="w-8 h-8 opacity-30" />
+			</div>
+			<div class="absolute top-[20%] left-[45%]">
+				<StarCluster class="w-6 h-6 opacity-25" />
+			</div>
 			<div class="absolute top-[35%] right-[8%]">
 				<StarCluster class="w-12 h-12 opacity-35" />
 			</div>
-			<!-- Hidden on mobile to reduce visual clutter -->
-			<div class="hidden sm:block absolute top-48 left-[25%]">
-				<StarCluster class="w-10 h-10 opacity-35" />
-			</div>
-			<div class="hidden sm:block absolute top-32 right-[35%]">
-				<StarCluster class="w-8 h-8 opacity-30" />
-			</div>
-			<div class="hidden md:block absolute top-[20%] left-[45%]">
-				<StarCluster class="w-6 h-6 opacity-25" />
-			</div>
-			<div class="hidden sm:block absolute top-[50%] left-[5%]">
+			<div class="absolute top-[50%] left-[5%]">
 				<StarCluster class="w-10 h-10 opacity-30" />
 			</div>
-			<div class="hidden md:block absolute top-[65%] right-[20%]">
+			<div class="absolute top-[65%] right-[20%]">
 				<StarCluster class="w-8 h-8 opacity-25" />
 			</div>
-			<div class="hidden md:block absolute top-[80%] left-[15%]">
+			<div class="absolute top-[80%] left-[15%]">
 				<StarCluster class="w-6 h-6 opacity-20" />
 			</div>
 		</div>
