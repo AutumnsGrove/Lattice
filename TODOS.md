@@ -389,8 +389,9 @@ SST (sst.dev) manages infrastructure-as-code. Currently managing D1, KV, R2 reso
 
 ## Phase 1: GroveEngine MVP (Remaining)
 
-- [ ] Test with Mom's publishing house as first client
+- [ ] Complete multi-tenant infrastructure testing
 - [ ] Implement basic analytics
+- [ ] Finalize tenant onboarding flow
 
 ---
 

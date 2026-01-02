@@ -527,7 +527,7 @@ Please provide code examples in JavaScript/Svelte where relevant, and recommend 
 
 #### Development Phases
 
-**Phase 1: MVP for beta clients (Mom's publishing house)**
+**Phase 1: MVP for beta clients**
 - Single subdomain setup
 - Admin panel with post creation
 - Basic template
@@ -1003,7 +1003,7 @@ Alright, all files created! Here's what you have:
 
 1. **Check domain availability** - Is grove.com available/affordable? If not, brainstorm alternatives
 2. **Send research prompts** - You've already been firing these off, perfect! When they come back, update the technical requirements
-3. **Build MVP** - Use the Claude Code prompt to start building Phase 1 (Mom's site, no social features yet)
+3. **Build MVP** - Use the Claude Code prompt to start building Phase 1 (beta client testing, no social features yet)
 
 All your files are in `/home/claude/` and ready to download!
 

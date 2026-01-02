@@ -216,7 +216,7 @@ This AI-first approach enables:
 - [ ] Generate RSS feeds
 - [ ] Build theme system (3 base themes)
 - [ ] Implement post archival system (soft limits)
-- [ ] Test with Mom's publishing house
+- [ ] Test with initial beta clients
 
 **Success Criteria:**
 - One blog running smoothly on custom domain

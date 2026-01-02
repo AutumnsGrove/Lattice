@@ -117,8 +117,9 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 - ✅ SSE streaming for real-time domain search updates
 
 **In Progress:**
-- 🔄 First client onboarding (Mom's publishing house)
+- 🔄 Multi-tenant infrastructure testing
 - 🔄 Basic analytics implementation
+- 🔄 Tenant onboarding flow finalization
 
 **Recently Completed (v0.5.0):**
 - ✅ Post limits enforcement (250 for Starter plan) via Heartwood

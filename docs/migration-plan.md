@@ -270,7 +270,7 @@ src/lib/themes/
 
 ## Data Migration Strategy
 
-### For First Client (Mom's Publishing House)
+### For First Beta Client
 
 1. Export existing content from autumnsgrove.com
 2. Create new tenant in grove-engine
@@ -329,7 +329,7 @@ async function importContent(targetDb, tenantId, exportData) {
 | Risk | Mitigation |
 |------|------------|
 | Migration breaks existing site | Keep autumnsgrove.com running until grove-engine proven |
-| First client unhappy | Extensive testing with Mom before public launch |
+| First beta client unhappy | Extensive testing with beta client before public launch |
 | Feature regression | Maintain comprehensive test suite from AutumnsGrove |
 
 ---
@@ -355,7 +355,7 @@ async function importContent(targetDb, tenantId, exportData) {
 - [ ] Upgrade prompts display correctly
 
 ### MVP Complete When:
-- [ ] Mom's publishing house live on subdomain
+- [ ] First beta client live on subdomain
 - [ ] All existing features work
 - [ ] Admin panel fully functional
 - [ ] Zero data loss verified
@@ -372,7 +372,7 @@ async function importContent(targetDb, tenantId, exportData) {
 | 3-4 | Plan Enforcement | Limits, archival, tracking |
 | 4-5 | Themes | 3-5 themes, selector UI |
 | 5-6 | Testing | Security tests, performance |
-| 7+ | Launch | First client (Mom), iterate |
+| 7+ | Launch | First beta client, iterate |
 
 ---
 

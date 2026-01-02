@@ -201,7 +201,7 @@ A multi-tenant blog platform where users get their own blogs on subdomains (user
 1. **Domain Research:** Check availability for grove.place or alternatives
 2. **Repository Setup:** Create `grove-engine` GitHub repository
 3. **Code Extraction:** Extract blog functionality from autumnsgrove.place
-4. **MVP Build:** Test with Mom's publishing house as first client
+4. **MVP Build:** Test with initial beta clients
 
 ### Key Metrics & Goals
 | Timeline | Clients | MRR | Support Hours |

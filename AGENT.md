@@ -73,7 +73,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 - Multi-tenant architecture with subdomain routing
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)
 - Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
-- First client: Mom's publishing house
+- First client: TBD (Mom's site completed with mock data)
 
 ### Key Architecture Documents
 

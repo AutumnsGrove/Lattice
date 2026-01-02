@@ -21,7 +21,7 @@ Phase 0.1 is the critical pre-launch phase where we prepare all infrastructure, 
 - [ ] Development environment configured
 - [ ] Initial project scaffolding complete
 - [ ] Clear understanding of MVP scope
-- [ ] First client (Mom's publishing house) ready to test
+- [ ] First beta client ready to test
 
 ---
 
