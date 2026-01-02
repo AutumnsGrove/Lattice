@@ -10,6 +10,9 @@ export default defineConfig({
       external: ["dompurify"],
     },
   },
+  optimizeDeps: {
+    exclude: ["workers-og"],
+  },
   server: {
     fs: {
       // Allow serving files from project root directories (dev only)
