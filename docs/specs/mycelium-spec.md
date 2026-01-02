@@ -37,11 +37,11 @@ For Grove, Mycelium does the same thing: it's the invisible connective tissue th
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            MCP CLIENTS                                       │
-│  ┌─────────────┐  ┌─────────────────┐  ┌─────────────┐  ┌─────────────┐    │
-│  │  Claude.ai  │  │ Claude Desktop  │  │ Claude Code │  │   Cursor    │    │
-│  │ (Connectors)│  │  (mcp-remote)   │  │             │  │             │    │
-│  └──────┬──────┘  └────────┬────────┘  └──────┬──────┘  └──────┬──────┘    │
+│                            MCP CLIENTS                                      │
+│  ┌─────────────┐  ┌─────────────────┐  ┌─────────────┐  ┌─────────────┐     │
+│  │  Claude.ai  │  │ Claude Desktop  │  │ Claude Code │  │   Cursor    │     │
+│  │ (Connectors)│  │  (mcp-remote)   │  │             │  │             │     │
+│  └──────┬──────┘  └────────┬────────┘  └──────┬──────┘  └──────┬──────┘     │
 └─────────┼──────────────────┼──────────────────┼──────────────────┼──────────┘
           │                  │                  │                  │
           │         SSE / Streamable HTTP / WebSocket              │
@@ -49,44 +49,44 @@ For Grove, Mycelium does the same thing: it's the invisible connective tissue th
           └──────────────────┴─────────┬────────┴──────────────────┘
                                        │
 ┌──────────────────────────────────────┴──────────────────────────────────────┐
-│                     MYCELIUM (Cloudflare Worker)                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                        Router Layer                                  │   │
-│  │   /mcp  → Streamable HTTP (recommended)                             │   │
-│  │   /sse  → Server-Sent Events (legacy support)                       │   │
-│  └─────────────────────────────────┬───────────────────────────────────┘   │
+│                     MYCELIUM (Cloudflare Worker)                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                        Router Layer                                 │    │
+│  │   /mcp  → Streamable HTTP (recommended)                             │    │
+│  │   /sse  → Server-Sent Events (legacy support)                       │    │
+│  └─────────────────────────────────┬───────────────────────────────────┘    │
 │                                    │                                        │
-│  ┌─────────────────────────────────┴───────────────────────────────────┐   │
-│  │                    OAuth Provider (Heartwood)                        │   │
-│  │   /authorize  → Redirect to heartwood.grove.place                   │   │
-│  │   /callback   → Token exchange                                       │   │
-│  │   /token      → Token refresh                                        │   │
-│  └─────────────────────────────────┬───────────────────────────────────┘   │
+│  ┌─────────────────────────────────┴───────────────────────────────────┐    │
+│  │                    OAuth Provider (Heartwood)                       │    │
+│  │   /authorize  → Redirect to heartwood.grove.place                   │    │
+│  │   /callback   → Token exchange                                      │    │
+│  │   /token      → Token refresh                                       │    │
+│  └─────────────────────────────────┬───────────────────────────────────┘    │
 │                                    │                                        │
-│  ┌─────────────────────────────────┴───────────────────────────────────┐   │
-│  │              MyceliumDO (Durable Object per Session)                 │   │
-│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │   │
-│  │  │  Session State  │  │  SQLite Storage │  │   Hibernation   │      │   │
-│  │  │  - preferences  │  │  - task history │  │   (auto-sleep)  │      │   │
-│  │  │  - active ctx   │  │  - cached data  │  │                 │      │   │
-│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘      │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────┴───────────────────────────────────┐    │
+│  │              MyceliumDO (Durable Object per Session)                │    │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐      │    │
+│  │  │  Session State  │  │  SQLite Storage │  │   Hibernation   │      │    │
+│  │  │  - preferences  │  │  - task history │  │   (auto-sleep)  │      │    │
+│  │  │  - active ctx   │  │  - cached data  │  │                 │      │    │
+│  │  └─────────────────┘  └─────────────────┘  └─────────────────┘      │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        │ Internal API Calls
                                        │
 ┌──────────────────────────────────────┴──────────────────────────────────────┐
-│                          GROVE ECOSYSTEM                                     │
-│                                                                              │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐ │
-│  │  Lattice  │  │ Heartwood │  │   Amber   │  │   Bloom   │  │   Rings   │ │
-│  │  (blogs)  │  │  (auth)   │  │ (storage) │  │ (dev env) │  │(analytics)│ │
-│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  └───────────┘ │
-│                                                                              │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐ │
-│  │  Meadow   │  │   Scout   │  │   Aria    │  │   Acorn   │  │  Outpost  │ │
-│  │ (social)  │  │  (deals)  │  │  (music)  │  │ (domains) │  │(minecraft)│ │
-│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  └───────────┘ │
+│                          GROVE ECOSYSTEM                                    │
+│                                                                             │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │  Lattice  │  │ Heartwood │  │   Amber   │  │   Bloom   │  │   Rings   │  │
+│  │  (blogs)  │  │  (auth)   │  │ (storage) │  │ (dev env) │  │(analytics)│  │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  └───────────┘  │
+│                                                                             │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │  Meadow   │  │   Scout   │  │   Aria    │  │   Acorn   │  │  Outpost  │  │
+│  │ (social)  │  │  (deals)  │  │  (music)  │  │ (domains) │  │(minecraft)│  │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  └───────────┘  │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -375,7 +375,7 @@ Mycelium uses Heartwood as its OAuth provider, leveraging Grove's existing auth 
        │
        │         5. Redirect to /callback with code
        ▼
-┌──────────┐     6. Exchange code for tokens    ┌──────────┐
+┌──────────┐     6. Exchange code for tokens   ┌──────────┐
 │  Claude  │ ───────────────────────────────▶  │ Mycelium │
 │  Client  │                                   │  Worker  │
 └──────────┘                                   └────┬─────┘
