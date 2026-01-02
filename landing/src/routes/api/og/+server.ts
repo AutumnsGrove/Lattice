@@ -1,6 +1,6 @@
 import satori from "satori";
 import { html } from "satori-html";
-import { Resvg } from "@cf-wasm/resvg";
+import { Resvg } from "@cf-wasm/resvg/workerd";
 import type { RequestHandler } from "./$types";
 
 /**
