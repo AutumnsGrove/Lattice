@@ -758,7 +758,7 @@ The base architecture above works well at small scale. For high traffic, Durable
 
 ### Load Testing Integration
 
-Rings analytics can be leveraged for **load testing validation** via the [Sentinel pattern](docs/patterns/sentinel-pattern.md). This provides infrastructure-level validation during stress testing to ensure analytics collection remains reliable under high load.
+Rings analytics can be leveraged for **load testing validation** via the Sentinel pattern. This provides infrastructure-level validation during stress testing to ensure analytics collection remains reliable under high load.
 
 **Load Testing Validation Workflow:**
 1. **Sentinel** executes load tests against Grove infrastructure
