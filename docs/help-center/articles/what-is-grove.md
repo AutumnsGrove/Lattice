@@ -38,6 +38,29 @@ Grove works well for:
 - **People leaving big platforms** who want ownership of their work and respect for their readers' privacy
 - **Anyone who misses the old web**: when having a blog felt personal, not performative
 
+## How it works (the simple version)
+
+Think of Grove like a neighborhood of tiny houses. Each person gets their own house (your blog at `yourname.grove.place`), but you all share common infrastructure—the roads, the power grid, the community center.
+
+Grove is all that shared infrastructure: how you get to any site, keeping everything fast and reliable, making sure only you can access your stuff, and (eventually) the community spaces where people can interact.
+
+**Under the hood**, Grove runs on Cloudflare's global network—servers all over the world that are close to wherever your readers are. This makes everything fast.
+
+We use something called **Durable Objects**—think of them like little robot helpers:
+- Each robot has a specific job (handle logins for Alice, track analytics for Bob's site, etc.)
+- They wake up when needed, do their job, then go back to sleep
+- They remember everything even when sleeping
+- They can coordinate with each other
+
+Before this architecture, every request had to ask a central database "hey, is this person logged in?" Now, each person basically has their own little robot that already knows the answer. This means:
+
+- **Cheap to run** — Only pay for what's actually being used
+- **Fast everywhere** — Servers near every user
+- **Scales infinitely** — 10 users or 10 million, same system
+- **Private by design** — Each person's data is isolated
+
+*For the technical details of this architecture, see [Loom — Real-Time Coordination](/knowledge/patterns/loom-durable-objects-pattern).*
+
 ## What Grove isn't
 
 Grove isn't trying to be everything. While we offer optional community features (through Meadow) for those who want them, Grove's core is about writing and sharing your writing with people who want to read it. It's not a traditional social network, a newsletter platform, or a business website builder.

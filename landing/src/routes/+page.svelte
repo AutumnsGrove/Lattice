@@ -132,7 +132,7 @@
 
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
 			<a
-				href="/about"
+				href="/knowledge/help/what-is-grove"
 				class="btn-secondary inline-flex items-center gap-2 text-base"
 			>
 				What is Grove?

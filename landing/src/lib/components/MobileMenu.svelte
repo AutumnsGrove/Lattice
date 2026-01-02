@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import {
 		Home,
-		Info,
 		Telescope,
 		CircleDollarSign,
 		BookOpen,
@@ -81,7 +80,6 @@
 
 	const navItems: NavItem[] = [
 		{ href: '/', label: 'Home', icon: Home },
-		{ href: '/about', label: 'About', icon: Info },
 		{ href: '/manifesto', label: 'Manifesto', icon: Scroll },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/roadmap', label: 'Roadmap', icon: Map },

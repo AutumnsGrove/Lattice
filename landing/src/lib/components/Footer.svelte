@@ -7,7 +7,6 @@
 		BookOpen,
 		MapPin,
 		Tag,
-		Info,
 		Telescope,
 		Mail,
 		PenLine,
@@ -73,12 +72,6 @@
 						<a href="/pricing" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
 							<Tag class="w-4 h-4" />
 							Pricing
-						</a>
-					</li>
-					<li>
-						<a href="/about" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
-							<Info class="w-4 h-4" />
-							About Grove
 						</a>
 					</li>
 					<li>

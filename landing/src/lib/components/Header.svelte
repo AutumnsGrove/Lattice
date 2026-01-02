@@ -4,7 +4,7 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { season } from '$lib/stores/season';
-	import { Menu, Home, Info, Telescope, Tag, BookOpen, Trees, Waypoints, PenLine, MapPin, Scroll } from 'lucide-svelte';
+	import { Menu, Home, Telescope, Tag, BookOpen, Trees, PenLine, MapPin, Scroll } from 'lucide-svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived($page.url.pathname);
@@ -38,7 +38,6 @@
 	};
 
 	const navItems: NavItem[] = [
-		{ href: '/about', label: 'About', icon: Info },
 		{ href: '/manifesto', label: 'Manifesto', icon: Scroll },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/roadmap', label: 'Roadmap', icon: MapPin },
@@ -80,16 +79,14 @@
 		<!-- Desktop navigation -->
 		<nav class="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-sans">
 			{#each navItems as item}
-				{@const Icon = item.icon}
 				<a
 					href={item.href}
 					target={item.external ? '_blank' : undefined}
 					rel={item.external ? 'noopener noreferrer' : undefined}
-					class="flex items-center gap-2 transition-colors whitespace-nowrap {isActive(item.href)
+					class="transition-colors whitespace-nowrap {isActive(item.href)
 						? 'text-accent-muted'
 						: 'text-foreground-subtle hover:text-accent-muted'}"
 				>
-					<Icon class="w-4 h-4 flex-shrink-0" />
 					<span>{item.label}</span>
 				</a>
 			{/each}
