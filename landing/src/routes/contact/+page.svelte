@@ -30,9 +30,13 @@
 
 		<!-- Personal note -->
 		<div class="glass-contact rounded-2xl p-8 mb-10">
-			<!-- Photo placeholder -->
-			<div class="w-32 h-32 mx-auto mb-6 rounded-full bg-accent-subtle/20 border-2 border-dashed border-accent-subtle flex items-center justify-center">
-				<span class="text-sm text-foreground-subtle font-sans italic">Photo coming soon</span>
+			<!-- Profile photo -->
+			<div class="w-32 h-32 mx-auto mb-6">
+				<img
+					src="https://cdn.grove.place/profile-mjxaqbpu.jpeg"
+					alt="Photo of Autumn, creator of Grove"
+					class="w-full h-full rounded-full object-cover border-2 border-accent-subtle shadow-sm"
+				/>
 			</div>
 
 			<div class="prose prose-grove max-w-none text-center">
