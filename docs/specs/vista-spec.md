@@ -69,6 +69,30 @@ Data Flow:
 5. Stores time-series in D1, real-time snapshots in KV
 6. Dashboard reads from API worker (requires valid session)
 7. Alerts sent via email on threshold breaches
+
+### Load Testing Integration
+
+Vista serves as the **validation layer** for Grove's load testing framework. When load tests are executed via the [Sentinel pattern](docs/patterns/sentinel-load-testing-pattern.md), Vista provides the infrastructure metrics needed to validate system behavior under stress.
+
+**Load Testing Workflow:**
+1. **Sentinel** executes load tests against target services
+2. **Vista Collector** monitors infrastructure during test execution
+3. **Real-time metrics** captured in KV for live test observation
+4. **Historical analysis** stored in D1 for post-test review
+5. **Vista LoadTest Package** provides test orchestration integration
+
+**Load Testing Metrics:**
+- Request rate validation (target vs actual)
+- Error rate under load (baseline vs stressed)
+- Latency distribution changes (p50, p95, p99)
+- Resource utilization (CPU, memory, database queries)
+- Infrastructure cost impact during tests
+
+**Integration Points:**
+- Load test results stored alongside normal metrics
+- Alert thresholds can be temporarily modified for tests
+- Historical data comparison (normal vs test periods)
+- Cost tracking includes load test resource usage
 ```
 
 ---

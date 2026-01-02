@@ -210,6 +210,27 @@
 
 ---
 
+## New Patterns Added (January 2026)
+
+| Pattern | File | Purpose |
+|---------|------|---------|
+| Sentinel | `docs/patterns/sentinel-pattern.md` | Load testing & scale validation framework |
+| Threshold | `docs/patterns/threshold-pattern.md` | Rate limiting & abuse prevention |
+| Vista LoadTest | `docs/specs/vista-loadtest-spec.md` | Implementation spec for Sentinel in Vista |
+
+### Pattern Integration
+- **Sentinel Pattern:** Defines load testing methodology with realistic traffic profiles, ramp-up testing, and DO coordination validation. Integrates with Vista for monitoring dashboard.
+- **Threshold Pattern:** Implements 4-layer rate limiting (Edge → Tenant → User → Endpoint) with graduated response system. Uses TenantDO and SessionDO for precise per-user limits.
+- **Vista LoadTest Spec:** Provides implementation plan for Sentinel within Vista monorepo, including package structure, database schema, and dashboard components.
+
+### Cross-References Added
+- Vista Spec updated with load testing integration
+- Durable Objects Architecture updated with rate limiting extensions
+- Rings Spec updated with Sentinel references
+- TODOS.md updated with implementation tasks
+
+---
+
 ## Future Considerations (Done)
 
 | Task | Status | Notes |

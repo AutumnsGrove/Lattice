@@ -756,6 +756,48 @@ The base architecture above works well at small scale. For high traffic, Durable
 
 **Key Insight:** DOs aren't replacing D1—they're a *coordination and caching layer* that sits between Workers and D1. D1 remains the source of truth.
 
+### Load Testing Integration
+
+Rings analytics can be leveraged for **load testing validation** via the [Sentinel pattern](docs/patterns/sentinel-load-testing-pattern.md). This provides infrastructure-level validation during stress testing to ensure analytics collection remains reliable under high load.
+
+**Load Testing Validation Workflow:**
+1. **Sentinel** executes load tests against Grove infrastructure
+2. **Rings Collection** continues capturing analytics events (with rate limiting)
+3. **Vista** monitors infrastructure health during tests
+4. **Validation Metrics** captured for post-test analysis:
+   - Collection latency during peak load
+   - Event processing delay consistency (24hr delay maintained)
+   - Data accuracy under stress (sampling thresholds)
+   - Dashboard availability during tests
+
+**Integration Points:**
+- Load test events marked with special metadata for filtering
+- Rate limiting temporarily adjusted during planned tests
+- Collection endpoints monitored for timeout behavior
+- Analytics accuracy validated against baseline metrics
+
+**Validation Metrics:**
+- Collection endpoint response times under load
+- Event buffer overflow prevention during tests
+- Dashboard query performance during peak traffic
+- Data retention consistency during stress periods
+
+**Load Test Event Marking:**
+```typescript
+// Events during load tests include metadata
+{
+  "event_type": "pageview",
+  "post_id": "test_post",
+  "metadata": {
+    "load_test": true,
+    "test_id": "sentinel_2025_01_02_001",
+    "phase": "ramp_up"
+  }
+}
+```
+
+This allows post-test analysis to separate load test traffic from real user analytics, ensuring accurate baseline metrics for normal operations.
+
 #### AnalyticsDO Design
 
 **ID Pattern:** `analytics:{tenantId}:{date}` (e.g., `analytics:alice:2025-12-25`)

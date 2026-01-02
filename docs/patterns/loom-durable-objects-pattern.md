@@ -712,6 +712,165 @@ new_sqlite_classes = ["SessionDO", "TenantDO", "PostDO", "FeedDO", "Notification
 
 ---
 
+## Threshold Pattern Integration
+
+The Loom architecture integrates with the [Threshold pattern](docs/patterns/threshold-pattern.md) for rate limiting and abuse prevention. This provides enterprise-grade protection against spam, DDoS, and resource abuse.
+
+### Rate Limiting Strategy
+
+**Multi-Layer Approach:**
+1. **TenantDO Level**: Per-tenant rate limits (configurable by tier)
+2. **SessionDO Level**: Per-user rate limits (prevents account abuse)
+3. **Worker Level**: Global rate limits (prevents infrastructure abuse)
+
+**Threshold Pattern Integration:**
+```typescript
+// Enhanced TenantDO with Threshold pattern
+interface TenantDOState {
+  // ... existing state ...
+  
+  // Threshold pattern integration
+  thresholdConfig: {
+    enabled: boolean;
+    tiers: Map<string, TierLimits>;
+    customRules: ThresholdRule[];
+    globalLimits: GlobalLimits;
+  };
+  
+  // Real-time abuse detection
+  abuseSignals: {
+    rapidRequests: Set<string>;     // IPs making rapid requests
+    suspiciousPatterns: Set<string>; // Users with unusual behavior
+    botIndicators: Set<string>;     // Automated traffic patterns
+  };
+  
+  // Adaptive rate limiting
+  adaptiveLimits: {
+    baseLimit: number;
+    dynamicAdjustment: number;     // +/- based on reputation
+    cooldownPeriod: number;        // Temporary limit increases
+  };
+}
+```
+
+**Enhanced Rate Limiting Methods:**
+```typescript
+class TenantDO extends DurableObject {
+  // ... existing methods ...
+  
+  // Threshold pattern rate limiting
+  async checkThresholdLimit(params: {
+    identifier: string;        // IP, userId, or sessionId
+    resourceType: string;      // "api", "upload", "comment", etc.
+    action: string;            // Specific action being limited
+    context?: object;         // Additional context for decision
+  }): Promise<{
+    allowed: boolean;
+    remaining: number;
+    resetAt: number;
+    reason: string;
+    cooldownUntil?: number;
+  }>;
+  
+  // Adaptive rate limiting based on reputation
+  async adjustLimitsForReputation(identifier: string): Promise<{
+    adjusted: boolean;
+    newLimit: number;
+    reason: string;
+  }>;
+  
+  // Real-time abuse detection
+  async recordAbuseSignal(params: {
+    identifier: string;
+    signalType: "rapid_request" | "suspicious_pattern" | "bot_indicator";
+    severity: "low" | "medium" | "high";
+    metadata?: object;
+  }): Promise<void>;
+  
+  // Get current reputation score
+  async getReputationScore(identifier: string): Promise<{
+    score: number;           // 0-100, higher is better
+    tier: "trusted" | "normal" | "suspicious" | "blocked";
+    factors: string[];        // What affects the score
+  }>;
+}
+```
+
+**SessionDO Rate Limiting:**
+```typescript
+class SessionDO extends DurableObject {
+  // Enhanced with Threshold pattern
+  async recordLoginAttempt(params: {
+    success: boolean;
+    ipAddress: string;
+    userAgent: string;
+    geolocation?: string;
+  }): Promise<{
+    allowed: boolean;
+    lockoutRemaining?: number;
+    reputationImpact: number;
+  }>;
+  
+  // Session-based abuse detection
+  async checkSessionAbuse(sessionId: string): Promise<{
+    suspicious: boolean;
+    riskLevel: "low" | "medium" | "high";
+    actions: string[];        // Recommended actions
+  }>;
+}
+```
+
+**Integration Benefits:**
+- **Abuse Prevention**: Multi-layer protection against various attack vectors
+- **Adaptive Limits**: Dynamic rate limits based on user reputation
+- **Real-time Detection**: Immediate response to suspicious patterns
+- **Tier-aware**: Rate limits automatically adjust based on subscription tier
+- **Global Protection**: Infrastructure-level protection via Worker integration
+
+**Configuration Example:**
+```typescript
+// In tenant configuration
+const thresholdConfig = {
+  enabled: true,
+  tiers: {
+    seedling: {
+      requestsPerMinute: 60,
+      apiCallsPerHour: 1000,
+      uploadsPerDay: 10
+    },
+    sapling: {
+      requestsPerMinute: 200,
+      apiCallsPerHour: 5000,
+      uploadsPerDay: 50
+    },
+    oak: {
+      requestsPerMinute: 1000,
+      apiCallsPerHour: 25000,
+      uploadsPerDay: 500
+    },
+    evergreen: {
+      requestsPerMinute: 5000,
+      apiCallsPerHour: 100000,
+      uploadsPerDay: 5000
+    }
+  },
+  customRules: [
+    {
+      name: "comment_spam_protection",
+      condition: "action == 'comment' && frequency > 10",
+      limit: "per_minute: 5",
+      action: "temporary_block"
+    }
+  ],
+  globalLimits: {
+    requestsPerSecond: 10000,  // Infrastructure protection
+    concurrentConnections: 1000
+  }
+};
+```
+
+---
+
 ## Patterns and Anti-Patterns
 
 ### DO: Use Deterministic IDs
