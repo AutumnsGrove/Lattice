@@ -649,6 +649,26 @@ export const patterns: Doc[] = [
 // Marketing Documents
 export const marketingDocs: Doc[] = [
   {
+    slug: "advertising-strategy",
+    title: "Advertising & Marketing Strategy",
+    description: "How Grove markets itself to the world — channels, messaging, and principles",
+    excerpt:
+      "Word of mouth is the marketing. This document outlines channels, target audiences, messaging framework, and the principles behind how Grove gets the word out.",
+    category: "marketing",
+    lastUpdated: "2026-01-02",
+    readingTime: 8,
+  },
+  {
+    slug: "business-card-spec",
+    title: "Business Card Specification",
+    description: "Print-ready design spec for Grove business cards",
+    excerpt:
+      "Two-sided business card with QR codes. Front links to grove.place, back links to grove.place/hello. Minimal, warm, functional.",
+    category: "marketing",
+    lastUpdated: "2026-01-02",
+    readingTime: 5,
+  },
+  {
     slug: "grove-at-a-glance",
     title: "Grove at a Glance",
     description: "A 30-second overview of what Grove is and why it matters",
