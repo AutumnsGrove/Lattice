@@ -39,11 +39,11 @@
 	// - Spring: Blossom pink - celebrating cherry blossom season!
 	// - Summer: Grove brand green
 	// - Autumn: Warm orange tones matching the forest palette
-	// - Winter: Frosted muted green (Logo stays green year-round like an evergreen)
+	// - Winter: Frosted cool spruce (heavily snow-dusted evergreen)
 	const defaultColor = $derived(
 		season === 'spring' ? springBlossoms.pink :  // Blossom pink for spring!
 		season === 'autumn' ? autumn.pumpkin :       // Orange matching autumn forest palette
-		season === 'winter' ? winter.winterGreen :
+		season === 'winter' ? winter.coldSpruce :    // Cool spruce with heavy snow
 		greens.grove  // Summer uses Grove brand green
 	);
 	const foliageColor = $derived(color ?? defaultColor);
@@ -139,25 +139,37 @@
 		<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
 		<!-- Foliage -->
 		<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		<!-- Snow accents in winter -->
+		<!-- Snow accents in winter - heavy snow coverage -->
 		{#if isWinter}
-			<!-- Top point snow cap -->
-			<ellipse fill={winter.snow} cx="208" cy="8" rx="32" ry="10" opacity="0.85" />
+			<!-- Top point snow cap - prominent rounded cap -->
+			<ellipse fill={winter.snow} cx="208" cy="6" rx="38" ry="12" opacity="0.95" />
+			<ellipse fill={winter.frost} cx="208" cy="14" rx="30" ry="8" opacity="0.6" />
 
-			<!-- Upper diagonal arm tips (the angled parts pointing up-left and up-right) -->
-			<ellipse fill={winter.snow} cx="52" cy="60" rx="18" ry="6" opacity="0.7" transform="rotate(-25 52 60)" />
-			<ellipse fill={winter.snow} cx="365" cy="60" rx="18" ry="6" opacity="0.7" transform="rotate(25 365 60)" />
+			<!-- Upper diagonal arm tips - thick snow coverage -->
+			<ellipse fill={winter.snow} cx="42" cy="52" rx="26" ry="10" opacity="0.92" transform="rotate(-45 42 52)" />
+			<ellipse fill={winter.frost} cx="52" cy="62" rx="20" ry="7" opacity="0.5" transform="rotate(-45 52 62)" />
+			<ellipse fill={winter.snow} cx="375" cy="52" rx="26" ry="10" opacity="0.92" transform="rotate(45 375 52)" />
+			<ellipse fill={winter.frost} cx="365" cy="62" rx="20" ry="7" opacity="0.5" transform="rotate(45 365 62)" />
 
-			<!-- Horizontal arm snow (left and right extending arms) -->
-			<ellipse fill={winter.snow} cx="45" cy="175" rx="28" ry="7" opacity="0.75" />
-			<ellipse fill={winter.snow} cx="372" cy="175" rx="28" ry="7" opacity="0.75" />
+			<!-- Horizontal arm snow caps - left and right -->
+			<ellipse fill={winter.snow} cx="28" cy="173" rx="32" ry="11" opacity="0.93" />
+			<ellipse fill={winter.frost} cx="45" cy="180" rx="24" ry="7" opacity="0.55" />
+			<ellipse fill={winter.snow} cx="389" cy="173" rx="32" ry="11" opacity="0.93" />
+			<ellipse fill={winter.frost} cx="372" cy="180" rx="24" ry="7" opacity="0.55" />
 
 			<!-- Center intersection snow pile -->
-			<ellipse fill={winter.snow} cx="208" cy="175" rx="25" ry="8" opacity="0.6" />
+			<ellipse fill={winter.snow} cx="208" cy="172" rx="30" ry="10" opacity="0.75" />
+			<ellipse fill={winter.frost} cx="208" cy="180" rx="22" ry="6" opacity="0.4" />
 
-			<!-- Lower diagonal arm tips -->
-			<ellipse fill={winter.snow} cx="95" cy="320" rx="16" ry="5" opacity="0.55" transform="rotate(25 95 320)" />
-			<ellipse fill={winter.snow} cx="322" cy="320" rx="16" ry="5" opacity="0.55" transform="rotate(-25 322 320)" />
+			<!-- Lower diagonal arm tips - snow settled on angled surfaces -->
+			<ellipse fill={winter.snow} cx="88" cy="315" rx="22" ry="8" opacity="0.85" transform="rotate(45 88 315)" />
+			<ellipse fill={winter.frost} cx="98" cy="322" rx="16" ry="5" opacity="0.45" transform="rotate(45 98 322)" />
+			<ellipse fill={winter.snow} cx="329" cy="315" rx="22" ry="8" opacity="0.85" transform="rotate(-45 329 315)" />
+			<ellipse fill={winter.frost} cx="319" cy="322" rx="16" ry="5" opacity="0.45" transform="rotate(-45 319 322)" />
+
+			<!-- Extra frost highlights on branch edges -->
+			<ellipse fill={winter.ice} cx="130" cy="125" rx="12" ry="4" opacity="0.4" transform="rotate(-45 130 125)" />
+			<ellipse fill={winter.ice} cx="287" cy="125" rx="12" ry="4" opacity="0.4" transform="rotate(45 287 125)" />
 		{/if}
 	</svg>
 {/if}
