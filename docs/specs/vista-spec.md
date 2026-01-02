@@ -72,7 +72,7 @@ Data Flow:
 
 ### Load Testing Integration
 
-Vista serves as the **validation layer** for Grove's load testing framework. When load tests are executed via the [Sentinel pattern](docs/patterns/sentinel-load-testing-pattern.md), Vista provides the infrastructure metrics needed to validate system behavior under stress.
+Vista serves as the **validation layer** for Grove's load testing framework. When load tests are executed via the [Sentinel pattern](../patterns/sentinel-pattern.md), Vista provides the infrastructure metrics needed to validate system behavior under stress.
 
 **Load Testing Workflow:**
 1. **Sentinel** executes load tests against target services

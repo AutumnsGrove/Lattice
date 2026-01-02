@@ -714,7 +714,7 @@ new_sqlite_classes = ["SessionDO", "TenantDO", "PostDO", "FeedDO", "Notification
 
 ## Threshold Pattern Integration
 
-The Loom architecture integrates with the [Threshold pattern](docs/patterns/threshold-pattern.md) for rate limiting and abuse prevention. This provides enterprise-grade protection against spam, DDoS, and resource abuse.
+The Loom architecture integrates with the [Threshold pattern](threshold-pattern.md) for rate limiting and abuse prevention. This provides enterprise-grade protection against spam, DDoS, and resource abuse.
 
 ### Rate Limiting Strategy
 

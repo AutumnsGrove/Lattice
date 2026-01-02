@@ -432,10 +432,10 @@ Threshold adds these headers to responses:
 
 ## Related Resources
 
-- **Threshold Pattern:** `docs/patterns/threshold-pattern.md` - Full technical specification
-- **Loom Architecture:** `docs/patterns/loom-durable-objects-pattern.md` - Durable Objects foundation
-- **Vista Monitoring:** `docs/specs/vista-spec.md` - Monitoring system integration
-- **Sentinel Pattern:** `docs/patterns/sentinel-pattern.md` - Load testing framework
+- **Threshold Pattern:** `../patterns/threshold-pattern.md` - Full technical specification
+- **Loom Architecture:** `../patterns/loom-durable-objects-pattern.md` - Durable Objects foundation
+- **Vista Monitoring:** `../specs/vista-spec.md` - Monitoring system integration
+- **Sentinel Pattern:** `../patterns/sentinel-pattern.md` - Load testing framework
 
 ---
 
