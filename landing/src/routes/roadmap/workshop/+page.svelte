@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, BookOpen, Boxes, Users, Map, HelpCircle, Calendar, ShieldOff, FileText } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, BookOpen, Boxes, Users, Map, HelpCircle, Calendar, ShieldOff, FileText, Triangle } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -42,6 +42,7 @@
 		helpCircle: HelpCircle,
 		calendar: Calendar,
 		shieldoff: ShieldOff,
+		triangle: Triangle,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -327,6 +328,15 @@
 			name: 'Patterns',
 			description: 'Reusable patterns and architectural foundations',
 			tools: [
+				{
+					name: 'Prism',
+					tagline: 'Grove Design System',
+					description: 'Light enters plain and emerges transformed. Prism defines Grove\'s visual language: glassmorphism surfaces, seasonal theming, randomized forests, and the warm aesthetic that makes every page feel like a place.',
+					status: 'live',
+					icon: 'triangle',
+					integration: 'Visual foundation for all Grove properties',
+					spec: '/knowledge/patterns/prism-pattern'
+				},
 				{
 					name: 'Songbird',
 					tagline: 'Prompt Injection Protection',

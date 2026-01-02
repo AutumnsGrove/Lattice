@@ -605,6 +605,16 @@ export const legalDocs: Doc[] = [
 // Architecture Patterns
 export const patterns: Doc[] = [
   {
+    slug: "prism-pattern",
+    title: "Prism — Grove Design System",
+    description: "Glassmorphism, seasonal theming, and organic UI patterns",
+    excerpt:
+      "Light enters plain and emerges transformed. Prism defines Grove's visual language: glassmorphism surfaces, seasonal theming, randomized forests, and the warm aesthetic that makes every page feel like a place you want to visit.",
+    category: "patterns",
+    lastUpdated: "2026-01-02",
+    readingTime: 20,
+  },
+  {
     slug: "songbird-pattern",
     title: "Songbird — Prompt Injection Protection",
     description: "Three-layer defense system against prompt injection attacks",
