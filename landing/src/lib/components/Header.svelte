@@ -4,7 +4,7 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { season } from '$lib/stores/season';
-	import { Menu, Home, Info, Telescope, Tag, BookOpen, Trees, Waypoints, PenLine, MapPin } from 'lucide-svelte';
+	import { Menu, Home, Info, Telescope, Tag, BookOpen, Trees, Waypoints, PenLine, MapPin, Scroll } from 'lucide-svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived($page.url.pathname);
@@ -39,6 +39,7 @@
 
 	const navItems: NavItem[] = [
 		{ href: '/about', label: 'About', icon: Info },
+		{ href: '/manifesto', label: 'Manifesto', icon: Scroll },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/roadmap', label: 'Roadmap', icon: MapPin },
 		{ href: '/pricing', label: 'Pricing', icon: Tag },

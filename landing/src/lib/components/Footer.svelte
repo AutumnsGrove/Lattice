@@ -11,7 +11,8 @@
 		Telescope,
 		Mail,
 		PenLine,
-		Hammer
+		Hammer,
+		Scroll
 	} from 'lucide-svelte';
 	import { season } from '$lib/stores/season';
 
@@ -78,6 +79,12 @@
 						<a href="/about" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
 							<Info class="w-4 h-4" />
 							About Grove
+						</a>
+					</li>
+					<li>
+						<a href="/manifesto" class="inline-flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors">
+							<Scroll class="w-4 h-4" />
+							Manifesto
 						</a>
 					</li>
 					<li>
