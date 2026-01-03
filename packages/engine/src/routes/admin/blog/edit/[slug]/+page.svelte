@@ -4,7 +4,7 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { Input, Button } from '$lib/ui';
+  import { Input, Button, GlassCard } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
@@ -182,7 +182,7 @@
 
   <div class="editor-layout">
     <!-- Metadata Panel -->
-    <aside class="metadata-panel" class:collapsed={detailsCollapsed}>
+    <GlassCard variant="frosted" class="metadata-panel" class:collapsed={detailsCollapsed}>
       <div class="panel-header">
         <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
         <button
@@ -327,7 +327,7 @@
           </div>
         </div>
       {/if}
-    </aside>
+    </GlassCard>
 
     <!-- Editor Panel -->
     <main class="editor-main">
@@ -469,21 +469,15 @@
     flex: 1;
     min-height: 0;
   }
-  /* Metadata Panel */
-  .metadata-panel {
+  /* Metadata Panel - Now using GlassCard */
+  :global(.metadata-panel) {
     width: 280px;
     flex-shrink: 0;
-    background: var(--mobile-menu-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
-    padding: 1.25rem;
     overflow-y: auto;
-    transition: width 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+    transition: width 0.2s ease;
   }
-  .metadata-panel.collapsed {
+  :global(.metadata-panel.collapsed) {
     width: 50px;
-    padding: 0.75rem 0.5rem;
-    overflow: hidden;
   }
   .panel-header {
     display: flex;
@@ -616,11 +610,13 @@
   }
   .tag-preview {
     padding: 0.2rem 0.6rem;
-    background: var(--tag-bg);
+    background: rgba(34, 197, 94, 0.7);
+    backdrop-filter: blur(4px);
     color: white;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   .metadata-info {
     margin-top: 1.5rem;

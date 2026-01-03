@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Check } from 'lucide-svelte';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
 
@@ -9,7 +10,7 @@
 	// Selected plan
 	let selectedPlan = $state<string | null>(null);
 
-	// Plan definitions
+	// Plan definitions with glass variants
 	const plans = [
 		{
 			id: 'seedling',
@@ -25,7 +26,8 @@
 				'RSS feed',
 				'No ads ever'
 			],
-			highlight: null
+			highlight: null,
+			glassVariant: 'default' as const
 		},
 		{
 			id: 'sapling',
@@ -41,7 +43,8 @@
 				'Priority email support',
 				'Everything in Seedling'
 			],
-			highlight: 'popular'
+			highlight: 'popular',
+			glassVariant: 'default' as const
 		},
 		{
 			id: 'oak',
@@ -57,7 +60,8 @@
 				'Full email suite',
 				'Priority support'
 			],
-			highlight: 'value'
+			highlight: 'value',
+			glassVariant: 'accent' as const
 		},
 		{
 			id: 'evergreen',
@@ -73,7 +77,8 @@
 				'Domain search & registration',
 				'8 hrs/mo dedicated support'
 			],
-			highlight: null
+			highlight: null,
+			glassVariant: 'frosted' as const
 		}
 	];
 
@@ -130,62 +135,64 @@
 	<!-- Plans grid -->
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
 		{#each plans as plan}
-			<button
-				onclick={() => (selectedPlan = plan.id)}
-				class="plan-card text-left relative"
-				class:selected={selectedPlan === plan.id}
-				class:popular={plan.highlight === 'popular'}
+			<GlassCard
+				variant={plan.glassVariant}
+				hoverable
+				class="relative cursor-pointer transition-all {selectedPlan === plan.id ? 'ring-2 ring-primary ring-offset-2' : ''}"
 			>
-				{#if plan.highlight === 'popular'}
-					<span
-						class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-primary text-white"
-					>
-						Most Popular
-					</span>
-				{:else if plan.highlight === 'value'}
-					<span
-						class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-grove-700 text-white"
-					>
-						Best Value
-					</span>
-				{/if}
+				<button
+					onclick={() => (selectedPlan = plan.id)}
+					class="w-full text-left"
+					type="button"
+				>
+					{#if plan.highlight === 'popular'}
+						<span
+							class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-primary text-white z-10"
+						>
+							Most Popular
+						</span>
+					{:else if plan.highlight === 'value'}
+						<span
+							class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-grove-700 text-white z-10"
+						>
+							Best Value
+						</span>
+					{/if}
 
-				<div class="flex justify-between items-start mb-4">
-					<div>
-						<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
-						<p class="text-sm text-foreground-muted">{plan.description}</p>
+					<div class="flex justify-between items-start mb-4">
+						<div>
+							<h3 class="text-lg font-medium text-foreground">{plan.name}</h3>
+							<p class="text-sm text-foreground-muted">{plan.description}</p>
+						</div>
+						<div
+							class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 {selectedPlan === plan.id ? 'border-primary bg-primary' : 'border-white/40 dark:border-slate-700/40'}"
+						>
+							{#if selectedPlan === plan.id}
+								<Check size={12} class="text-white" />
+							{/if}
+						</div>
 					</div>
-					<div
-						class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
-						class:border-primary={selectedPlan === plan.id}
-						class:bg-primary={selectedPlan === plan.id}
-						class:border-default={selectedPlan !== plan.id}
-					>
-						{#if selectedPlan === plan.id}
-							<Check size={12} class="text-white" />
+
+					<div class="mb-4">
+						<span class="text-3xl font-semibold text-foreground">${getPrice(plan)}</span>
+						<span class="text-foreground-muted">/mo</span>
+						{#if billingCycle === 'yearly'}
+							<p class="text-xs text-success mt-1">
+								Save ${getYearlySavings(plan)}/year
+							</p>
 						{/if}
 					</div>
-				</div>
 
-				<div class="mb-4">
-					<span class="text-3xl font-semibold text-foreground">${getPrice(plan)}</span>
-					<span class="text-foreground-muted">/mo</span>
-					{#if billingCycle === 'yearly'}
-						<p class="text-xs text-success mt-1">
-							Save ${getYearlySavings(plan)}/year
-						</p>
-					{/if}
-				</div>
-
-				<ul class="space-y-2">
-					{#each plan.features as feature}
-						<li class="flex items-center gap-2 text-sm text-foreground-muted">
-							<Check size={16} class="text-primary flex-shrink-0" />
-							<span>{feature}</span>
-						</li>
-					{/each}
-				</ul>
-			</button>
+					<ul class="space-y-2">
+						{#each plan.features as feature}
+							<li class="flex items-center gap-2 text-sm text-foreground-muted">
+								<Check size={16} class="text-primary flex-shrink-0" />
+								<span>{feature}</span>
+							</li>
+						{/each}
+					</ul>
+				</button>
+			</GlassCard>
 		{/each}
 	</div>
 

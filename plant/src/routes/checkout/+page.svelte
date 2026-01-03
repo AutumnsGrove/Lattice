@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Loader2, CreditCard, ShieldCheck } from 'lucide-svelte';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
 
@@ -68,10 +69,10 @@
 	</div>
 
 	<!-- Order summary -->
-	<div class="card max-w-md mx-auto mb-8">
+	<GlassCard variant="frosted" class="max-w-md mx-auto mb-8">
 		<h2 class="font-medium text-foreground mb-4">Order Summary</h2>
 
-		<div class="flex justify-between items-center py-3 border-b border-default">
+		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-slate-700/20">
 			<div>
 				<p class="font-medium text-foreground">{planName} Plan</p>
 				<p class="text-sm text-foreground-muted">
@@ -86,7 +87,7 @@
 			</div>
 		</div>
 
-		<div class="flex justify-between items-center py-3 border-b border-default">
+		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-slate-700/20">
 			<p class="text-foreground-muted">14-day free trial</p>
 			<p class="text-success font-medium">Included</p>
 		</div>
@@ -99,15 +100,15 @@
 		<p class="text-xs text-foreground-subtle mt-2">
 			You won't be charged until your trial ends. Cancel anytime.
 		</p>
-	</div>
+	</GlassCard>
 
 	<!-- Loading state / Error -->
 	{#if isLoading}
 		<div class="text-center">
-			<div class="inline-flex items-center gap-3 px-6 py-4 rounded-lg bg-surface border border-default">
+			<GlassCard variant="default" class="inline-flex items-center gap-3">
 				<Loader2 size={24} class="animate-spin text-primary" />
 				<span class="text-foreground">Redirecting to secure checkout...</span>
-			</div>
+			</GlassCard>
 		</div>
 	{:else if error}
 		<div class="max-w-md mx-auto">
@@ -121,12 +122,12 @@
 	{/if}
 
 	<!-- Security badges -->
-	<div class="flex items-center justify-center gap-6 mt-8 text-foreground-subtle">
-		<div class="flex items-center gap-2 text-sm">
+	<div class="flex items-center justify-center gap-6 mt-8">
+		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
 			<ShieldCheck size={18} />
 			<span>Secure checkout</span>
 		</div>
-		<div class="flex items-center gap-2 text-sm">
+		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
 			<CreditCard size={18} />
 			<span>Powered by Stripe</span>
 		</div>

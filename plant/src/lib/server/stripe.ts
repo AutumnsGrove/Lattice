@@ -100,7 +100,7 @@ export async function createCheckoutSession(params: {
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = (await response.json()) as { error?: { message?: string } };
     console.error("[Stripe] Checkout session creation failed:", error);
     console.error("[Stripe] Request params:", {
       priceId: params.priceId,

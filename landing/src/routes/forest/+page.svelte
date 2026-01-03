@@ -23,6 +23,9 @@
 		type Season
 	} from '@autumnsgrove/groveengine/ui/nature';
 
+	// Import glass components
+	import { Glass, GlassCard } from '@autumnsgrove/groveengine/ui';
+
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
 
@@ -550,7 +553,7 @@
 		<div class="absolute bottom-6 right-6 z-40">
 			<button
 				onclick={toggleSeason}
-				class="p-2 rounded-full bg-white/70 dark:bg-emerald-950/35 backdrop-blur-md shadow-lg border border-white/30 dark:border-emerald-800/25 hover:scale-110 transition-transform"
+				class="p-3 rounded-full bg-white/70 dark:bg-emerald-950/35 backdrop-blur-md shadow-lg border border-white/30 dark:border-emerald-800/25 hover:scale-110 hover:bg-white/80 dark:hover:bg-emerald-950/45 transition-all duration-200"
 				aria-label={isSpring ? 'Switch to summer' : isAutumn ? 'Switch to winter' : isWinter ? 'Switch to spring' : 'Switch to autumn'}
 			>
 				{#if isSpring}
@@ -770,23 +773,29 @@
 
 		<!-- Content overlay - z-30 to stay above trees (which are z-11 to z-14) -->
 		<div class="absolute inset-x-0 top-4 text-center z-30 px-6 pointer-events-none">
-			<h1 class="text-4xl md:text-6xl font-serif text-foreground drop-shadow-lg mb-4">
-				The Grove Forest
-			</h1>
-			<p class="text-lg md:text-xl text-foreground-muted font-sans max-w-xl mx-auto drop-shadow">
-				A community of trees, each one unique, all growing together.
-			</p>
+			<Glass variant="tint" intensity="medium" class="inline-block p-6 rounded-2xl max-w-2xl mx-auto pointer-events-auto">
+				<h1 class="text-4xl md:text-6xl font-serif text-foreground mb-4">
+					The Grove Forest
+				</h1>
+				<p class="text-lg md:text-xl text-foreground-muted font-sans">
+					A community of trees, each one unique, all growing together.
+				</p>
+			</Glass>
 		</div>
 	</article>
 
 	<!-- Color Palette Showcase - Below the forest -->
 	<section class="py-12 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-divider">
 		<div class="max-w-4xl mx-auto">
-			<h2 class="text-2xl font-serif text-foreground text-center mb-8">Forest Palette</h2>
+			<div class="text-center mb-8">
+				<Glass variant="tint" intensity="light" class="inline-block px-8 py-3 rounded-xl">
+					<h2 class="text-2xl font-serif text-foreground">Forest Palette</h2>
+				</Glass>
+			</div>
 
-			<div class="grid md:grid-cols-2 gap-8">
+			<div class="grid md:grid-cols-2 gap-6">
 				<!-- Spring Colors -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(spring).slice(0, 9) as [name, color]}
@@ -800,10 +809,10 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 
 				<!-- Summer Greens -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Summer Greens</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(greens) as [name, color]}
@@ -817,10 +826,10 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 
 				<!-- Autumn Colors -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Autumn Colors</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(autumn) as [name, color]}
@@ -834,10 +843,10 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 
 				<!-- Winter Colors -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Winter Frost</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(winter) as [name, color]}
@@ -851,10 +860,10 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 
 				<!-- Cherry/Pink -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Cherry Blossoms</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(pinks) as [name, color]}
@@ -868,10 +877,10 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 
 				<!-- Bark/Earth -->
-				<div>
+				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Bark & Earth</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(bark) as [name, color]}
@@ -885,22 +894,24 @@
 							</div>
 						{/each}
 					</div>
-				</div>
+				</Glass>
 			</div>
 
 			<!-- Asset viewer link -->
 			<div class="text-center mt-8">
-				<a
-					href="/tools"
-					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-muted text-white font-sans text-sm hover:bg-accent-subtle transition-colors"
-				>
-					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
-						<path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
-						<path d="M14.5 17.5 4.5 15" />
-					</svg>
-					Explore All Assets
-				</a>
+				<GlassCard variant="frosted" hoverable class="inline-block max-w-xs">
+					<a
+						href="/tools"
+						class="inline-flex items-center gap-2 text-foreground font-sans text-sm"
+					>
+						<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
+							<path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
+							<path d="M14.5 17.5 4.5 15" />
+						</svg>
+						Explore All Assets
+					</a>
+				</GlassCard>
 			</div>
 		</div>
 	</section>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from 'lucide-svelte';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
 
@@ -133,7 +134,7 @@
 	</div>
 
 	<!-- Tour content -->
-	<div class="card max-w-2xl mx-auto">
+	<GlassCard variant="frosted" class="max-w-2xl mx-auto">
 		<!-- Header -->
 		<div class="flex items-start justify-between mb-4">
 			<div class="flex items-center gap-2">
@@ -152,7 +153,7 @@
 
 		<!-- Image placeholder (would show actual screenshots) -->
 		{#if currentTourStop.image}
-			<div class="aspect-video bg-surface rounded-lg mb-6 flex items-center justify-center border border-default">
+			<div class="aspect-video bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
 				<div class="text-center text-foreground-subtle">
 					<p class="text-sm">Preview of {currentTourStop.location}</p>
 					{#if currentTourStop.url}
@@ -164,7 +165,7 @@
 			</div>
 		{:else if currentStep === 0}
 			<!-- Welcome illustration -->
-			<div class="aspect-video bg-accent rounded-lg mb-6 flex items-center justify-center">
+			<div class="aspect-video bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
 				<div class="text-center">
 					<Sprout class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-foreground-muted">Let's explore Grove together</p>
@@ -172,7 +173,7 @@
 			</div>
 		{:else if isLastStep}
 			<!-- Completion illustration -->
-			<div class="aspect-video bg-accent rounded-lg mb-6 flex items-center justify-center">
+			<div class="aspect-video bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
 				<div class="text-center">
 					<PartyPopper class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-lg font-medium text-foreground mb-2">
@@ -184,7 +185,7 @@
 		{/if}
 
 		<!-- Navigation -->
-		<div class="flex items-center justify-between pt-4 border-t border-default">
+		<div class="flex items-center justify-between pt-4 border-t border-white/20 dark:border-slate-700/20">
 			<button
 				onclick={prevStep}
 				disabled={isFirstStep}
@@ -200,10 +201,9 @@
 				{#each tourStops as _, i}
 					<button
 						onclick={() => (currentStep = i)}
-						class="w-2 h-2 rounded-full transition-all"
+						class="w-2 h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/30 dark:bg-slate-700/30' : ''}"
 						class:bg-primary={i === currentStep}
 						class:w-4={i === currentStep}
-						class:bg-surface={i !== currentStep}
 					></button>
 				{/each}
 			</div>
@@ -220,12 +220,12 @@
 				</button>
 			{/if}
 		</div>
-	</div>
+	</GlassCard>
 
 	<!-- Skip confirmation modal -->
 	{#if showSkipConfirm}
 		<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-			<div class="card max-w-sm w-full animate-slide-up">
+			<GlassCard variant="frosted" class="max-w-sm w-full animate-slide-up">
 				<div class="flex justify-between items-start mb-4">
 					<h2 class="text-lg font-medium text-foreground">Skip the tour?</h2>
 					<button onclick={() => (showSkipConfirm = false)} class="text-foreground-subtle hover:text-foreground">
@@ -243,7 +243,7 @@
 						Skip to Blog
 					</button>
 				</div>
-			</div>
+			</GlassCard>
 		</div>
 	{/if}
 </div>

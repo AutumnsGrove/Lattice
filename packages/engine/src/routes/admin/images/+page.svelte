@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { Button } from '$lib/ui';
+  import { Button, GlassCard, Glass } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api, apiRequest } from "$lib/utils/api.js";
@@ -365,7 +365,7 @@
 
   <!-- Upload Section -->
   <section class="upload-section">
-    <div
+    <Glass variant="tint" intensity="light"
       class="drop-zone"
       class:dragging={isDragging}
       class:uploading={uploading}
@@ -420,10 +420,10 @@
           <p class="drop-hint">or click to browse</p>
         {/if}
       </div>
-    </div>
+    </Glass>
 
     <!-- Options Panel -->
-    <div class="options-panel">
+    <GlassCard variant="default" class="options-panel">
       <div class="options-main">
         <label class="toggle-option primary">
           <input type="checkbox" bind:checked={useAiAnalysis} />
@@ -492,7 +492,7 @@
           </div>
         </div>
       {/if}
-    </div>
+    </GlassCard>
   </section>
 
   <!-- Active Uploads -->
@@ -505,7 +505,7 @@
 
       <div class="uploads-list">
         {#each uploads as upload (upload.id)}
-          <div class="upload-card" class:success={upload.status === 'success'} class:duplicate={upload.status === 'duplicate'} class:error={upload.status === 'error'}>
+          <GlassCard variant="default" class="upload-card" class:success={upload.status === 'success'} class:duplicate={upload.status === 'duplicate'} class:error={upload.status === 'error'}>
             <div class="upload-header">
               <span class="upload-name">{upload.name}</span>
               <span class="upload-badge" class:processing={upload.status === 'processing'} class:success={upload.status === 'success'} class:duplicate={upload.status === 'duplicate'} class:error={upload.status === 'error'}>
@@ -567,14 +567,14 @@
             {#if upload.status === 'error'}
               <p class="upload-error">{upload.error}</p>
             {/if}
-          </div>
+          </GlassCard>
         {/each}
       </div>
     </section>
   {/if}
 
   <!-- Gallery Section -->
-  <section class="gallery-section">
+  <GlassCard variant="default" class="gallery-section">
     <div class="section-header">
       <div class="section-title">
         <h2>CDN Gallery</h2>
@@ -679,7 +679,7 @@
         </div>
       {/if}
     {/if}
-  </section>
+  </GlassCard>
 </div>
 
 <!-- Delete Modal -->
@@ -758,28 +758,31 @@
     margin-bottom: 2rem;
   }
 
-  .drop-zone {
-    border: 2px dashed var(--color-border);
+  :global(.drop-zone) {
+    border: 2px dashed rgba(255, 255, 255, 0.4);
     border-radius: var(--border-radius-standard);
     padding: 3rem 2rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: var(--color-bg-secondary);
   }
 
-  .drop-zone:hover {
+  :global(.dark .drop-zone) {
+    border-color: rgba(148, 163, 184, 0.3);
+  }
+
+  :global(.drop-zone:hover) {
     border-color: var(--color-primary);
-    background: var(--color-bg-tertiary, var(--color-bg-secondary));
   }
 
-  .drop-zone.dragging {
+  :global(.drop-zone.dragging) {
     border-color: var(--accent-success);
-    background: rgba(40, 167, 69, 0.05);
+    background: rgba(40, 167, 69, 0.15);
+    backdrop-filter: blur(12px);
     transform: scale(1.01);
   }
 
-  .drop-zone.uploading {
+  :global(.drop-zone.uploading) {
     pointer-events: none;
     opacity: 0.8;
   }
@@ -819,10 +822,8 @@
   }
 
   /* Options Panel */
-  .options-panel {
+  :global(.options-panel) {
     margin-top: 1rem;
-    background: var(--color-bg-secondary);
-    border-radius: var(--border-radius-standard);
     padding: 1rem;
   }
 
@@ -1051,24 +1052,21 @@
     gap: 0.75rem;
   }
 
-  .upload-card {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
+  :global(.upload-card) {
     padding: 1rem;
     transition: border-color 0.2s;
   }
 
-  .upload-card.success {
-    border-color: var(--accent-success);
+  :global(.upload-card.success) {
+    border-color: var(--accent-success) !important;
   }
 
-  .upload-card.duplicate {
-    border-color: var(--color-primary);
+  :global(.upload-card.duplicate) {
+    border-color: var(--color-primary) !important;
   }
 
-  .upload-card.error {
-    border-color: var(--accent-danger);
+  :global(.upload-card.error) {
+    border-color: var(--accent-danger) !important;
   }
 
   .upload-header {
@@ -1199,9 +1197,7 @@
   }
 
   /* Gallery Section */
-  .gallery-section {
-    background: var(--color-bg-secondary);
-    border-radius: var(--border-radius-standard);
+  :global(.gallery-section) {
     padding: 1.5rem;
   }
 
@@ -1286,16 +1282,28 @@
   }
 
   .gallery-card {
-    background: var(--mobile-menu-bg);
-    border: 1px solid var(--color-border);
+    position: relative;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: var(--border-radius-standard);
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+
+  :global(.dark) .gallery-card {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(71, 85, 105, 0.3);
   }
 
   .gallery-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  :global(.dark) .gallery-card:hover {
+    background: rgba(30, 41, 59, 0.65);
   }
 
   .gallery-image {

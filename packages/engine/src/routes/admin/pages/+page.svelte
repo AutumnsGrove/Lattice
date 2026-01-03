@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge } from '$lib/ui';
+  import { Button, Badge, GlassCard } from '$lib/ui';
 
   let { data } = $props();
 
@@ -22,14 +22,14 @@
     </div>
   </header>
 
-  <div class="bg-[var(--mobile-menu-bg)] dark:bg-[var(--color-bg-tertiary-dark)] rounded-[var(--border-radius-standard)] shadow-md dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] overflow-hidden transition-[background-color,box-shadow]">
+  <GlassCard variant="default" class="overflow-hidden mb-8">
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:px-2 max-md:py-3">Page</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:hidden">Type</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:hidden">Updated</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -61,9 +61,9 @@
         {/each}
       </tbody>
     </table>
-  </div>
+  </GlassCard>
 
-  <div class="info-box">
+  <GlassCard variant="muted">
     <h3>How Pages Work</h3>
     <p>
       Site pages (Home, About, Contact, etc.) can be edited directly from the admin panel or synced from files.
@@ -74,65 +74,39 @@
       <li>Run <code>node scripts/sync-pages.cjs --remote</code> to sync from files to database</li>
       <li>Edit the hero section, description, and content directly in the editor</li>
     </ul>
-  </div>
+  </GlassCard>
 </div>
 
 <style>
-  .info-box {
-    margin-top: 2rem;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
+  :global(.max-w-screen-xl .glass-card) {
     padding: 1.5rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
-  .info-box h3 {
+  :global(.max-w-screen-xl .glass-card h3) {
     margin-top: 0;
     margin-bottom: 0.5rem;
     color: var(--color-text);
     transition: color 0.3s ease;
   }
 
-  :global(.dark) .info-box {
-    background: var(--color-bg-tertiary-dark);
-    border-color: var(--color-border-dark);
-  }
-
-  :global(.dark) .info-box h3 {
-    color: var(--color-text-dark);
-  }
-
-  .info-box p {
+  :global(.max-w-screen-xl .glass-card p) {
     margin: 0.5rem 0;
     color: var(--color-text-muted);
     transition: color 0.3s ease;
   }
 
-  :global(.dark) .info-box p {
-    color: var(--color-text-subtle-dark);
-  }
-
-  .info-box ul {
+  :global(.max-w-screen-xl .glass-card ul) {
     margin: 0.5rem 0;
     padding-left: 1.5rem;
     color: var(--color-text-muted);
     transition: color 0.3s ease;
   }
 
-  :global(.dark) .info-box ul {
-    color: var(--color-text-subtle-dark);
-  }
-
-  .info-box code {
+  :global(.max-w-screen-xl .glass-card code) {
     background: var(--color-bg-tertiary);
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-size: 0.9em;
     transition: background-color 0.3s ease;
-  }
-
-  :global(.dark) .info-box code {
-    background: var(--color-bg-primary-dark);
   }
 </style>

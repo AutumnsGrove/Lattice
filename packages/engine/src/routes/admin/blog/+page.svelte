@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassConfirmDialog, toast } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, GlassCard, toast } from '$lib/ui';
   import { api } from '$lib/utils/api.js';
   import { Trash2 } from 'lucide-svelte';
 
@@ -60,14 +60,14 @@
     </Button>
   </header>
 
-  <div class="bg-[var(--mobile-menu-bg)] dark:bg-[var(--color-bg-tertiary-dark)] rounded-[var(--border-radius-standard)] shadow-md dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] overflow-hidden transition-[background-color,box-shadow]">
+  <GlassCard variant="default" class="overflow-hidden mb-8">
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:px-2 max-md:py-3">Title</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:hidden">Date</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:hidden">Tags</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-secondary)] dark:bg-[var(--color-border-dark)] font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
+          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -116,9 +116,9 @@
         {/each}
       </tbody>
     </table>
-  </div>
+  </GlassCard>
 
-  <div class="info-box">
+  <GlassCard variant="muted">
     <h3>How Blog Posts Work</h3>
     <p>
       Create and edit posts directly in the built-in markdown editor. Posts are saved to the database
@@ -129,7 +129,7 @@
       <li>Use <strong>Edit</strong> links to modify existing posts</li>
       <li>Posts from <code>UserContent/Posts/</code> are also available (synced via GitHub)</li>
     </ul>
-  </div>
+  </GlassCard>
 </div>
 
 <!-- Delete Confirmation Dialog -->
@@ -146,30 +146,25 @@
 />
 
 <style>
-  .info-box {
-    margin-top: 2rem;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
+  :global(.max-w-screen-xl .glass-card) {
     padding: 1.5rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
-  .info-box h3 {
+  :global(.max-w-screen-xl .glass-card h3) {
     margin: 0 0 0.75rem 0;
     font-size: 1rem;
     color: var(--color-text);
     transition: color 0.3s ease;
   }
 
-  .info-box p {
+  :global(.max-w-screen-xl .glass-card p) {
     margin: 0 0 0.75rem 0;
     color: var(--color-text-muted);
     font-size: 0.9rem;
     transition: color 0.3s ease;
   }
 
-  .info-box ul {
+  :global(.max-w-screen-xl .glass-card ul) {
     margin: 0;
     padding-left: 1.25rem;
     color: var(--color-text-muted);
@@ -177,11 +172,11 @@
     transition: color 0.3s ease;
   }
 
-  .info-box li {
+  :global(.max-w-screen-xl .glass-card li) {
     margin-bottom: 0.25rem;
   }
 
-  .info-box code {
+  :global(.max-w-screen-xl .glass-card code) {
     background: var(--color-border);
     padding: 0.125rem 0.25rem;
     border-radius: var(--border-radius-small);

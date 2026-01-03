@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from 'lucide-svelte';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data, form } = $props();
 
@@ -104,53 +105,52 @@
 	</div>
 
 	<!-- Form -->
-	<form method="POST" use:enhance class="space-y-6 max-w-md mx-auto">
-		<!-- Display Name -->
-		<div>
-			<label for="displayName" class="block text-sm font-medium text-foreground mb-1.5">
-				Display Name <span class="text-error">*</span>
-			</label>
-			<input
-				type="text"
-				id="displayName"
-				name="displayName"
-				bind:value={displayName}
-				placeholder="How should we call you?"
-				required
-				class="input-field"
-			/>
-			<p class="text-xs text-foreground-subtle mt-1">This is how your name appears on your blog.</p>
-		</div>
-
-		<!-- Username / Subdomain -->
-		<div>
-			<label for="username" class="block text-sm font-medium text-foreground mb-1.5">
-				Username <span class="text-error">*</span>
-			</label>
-			<div class="relative">
+	<GlassCard variant="frosted" class="max-w-md mx-auto">
+		<form method="POST" use:enhance class="space-y-6">
+			<!-- Display Name -->
+			<div>
+				<label for="displayName" class="block text-sm font-medium text-foreground mb-1.5">
+					Display Name <span class="text-error">*</span>
+				</label>
 				<input
 					type="text"
-					id="username"
-					name="username"
-					bind:value={username}
-					oninput={onUsernameInput}
-					placeholder="yourname"
+					id="displayName"
+					name="displayName"
+					bind:value={displayName}
+					placeholder="How should we call you?"
 					required
-					class="input-field pr-24"
-					class:success={usernameStatus === 'available'}
-					class:error={usernameStatus === 'taken' || usernameStatus === 'error'}
+					class="w-full px-4 py-3 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:border-primary focus:bg-white/70 dark:focus:bg-slate-800/70 focus:ring-2 focus:ring-primary/20"
 				/>
-				<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-					<span class="text-sm text-foreground-subtle">.grove.place</span>
-					{#if usernameStatus === 'checking'}
-						<Loader2 size={16} class="animate-spin text-foreground-subtle" />
-					{:else if usernameStatus === 'available'}
-						<Check size={16} class="text-success" />
-					{:else if usernameStatus === 'taken' || usernameStatus === 'error'}
-						<X size={16} class="text-error" />
-					{/if}
-				</div>
+				<p class="text-xs text-foreground-subtle mt-1">This is how your name appears on your blog.</p>
 			</div>
+
+			<!-- Username / Subdomain -->
+			<div>
+				<label for="username" class="block text-sm font-medium text-foreground mb-1.5">
+					Username <span class="text-error">*</span>
+				</label>
+				<div class="relative">
+					<input
+						type="text"
+						id="username"
+						name="username"
+						bind:value={username}
+						oninput={onUsernameInput}
+						placeholder="yourname"
+						required
+						class="w-full px-4 py-3 pr-32 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:bg-white/70 dark:focus:bg-slate-800/70 focus:ring-2 focus:ring-primary/20 {usernameStatus === 'available' ? 'border-success focus:border-success' : usernameStatus === 'taken' || usernameStatus === 'error' ? 'border-error focus:border-error' : 'border-white/30 focus:border-primary'}"
+					/>
+					<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+						<span class="text-sm text-foreground-subtle">.grove.place</span>
+						{#if usernameStatus === 'checking'}
+							<Loader2 size={16} class="animate-spin text-foreground-subtle" />
+						{:else if usernameStatus === 'available'}
+							<Check size={16} class="text-success" />
+						{:else if usernameStatus === 'taken' || usernameStatus === 'error'}
+							<X size={16} class="text-error" />
+						{/if}
+					</div>
+				</div>
 
 			{#if usernameError}
 				<p class="text-xs text-error mt-1">{usernameError}</p>
@@ -165,90 +165,88 @@
 			{/if}
 
 			<!-- Username suggestions -->
-			{#if usernameSuggestions.length > 0}
-				<div class="mt-2">
-					<p class="text-xs text-foreground-subtle mb-1">Try one of these:</p>
-					<div class="flex flex-wrap gap-2">
-						{#each usernameSuggestions as suggestion}
-							<button
-								type="button"
-								onclick={() => selectSuggestion(suggestion)}
-								class="text-xs px-2 py-1 rounded bg-accent border border-default text-foreground hover:border-primary transition-colors"
-							>
-								{suggestion}
-							</button>
-						{/each}
+				{#if usernameSuggestions.length > 0}
+					<div class="mt-2">
+						<p class="text-xs text-foreground-subtle mb-1">Try one of these:</p>
+						<div class="flex flex-wrap gap-2">
+							{#each usernameSuggestions as suggestion}
+								<button
+									type="button"
+									onclick={() => selectSuggestion(suggestion)}
+									class="text-xs px-3 py-1.5 rounded-md bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-primary transition-all"
+								>
+									{suggestion}
+								</button>
+							{/each}
+						</div>
 					</div>
+				{/if}
+			</div>
+
+			<!-- Favorite Color (Optional) -->
+			<div class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20">
+				<label class="block text-sm font-medium text-foreground mb-1.5">
+					Favorite Color <span class="text-foreground-subtle">(optional)</span>
+				</label>
+				<p class="text-xs text-foreground-subtle mb-3">This will be your blog's accent color. You can change it later.</p>
+
+				<div class="grid grid-cols-4 gap-2">
+					{#each colorPresets as color}
+						<button
+							type="button"
+							onclick={() => (favoriteColor = favoriteColor === color.value ? null : color.value)}
+							class="aspect-square rounded-lg border-2 transition-all hover:scale-105"
+							class:border-primary={favoriteColor === color.value}
+							class:border-transparent={favoriteColor !== color.value}
+							style="background-color: {color.hex}"
+							title={color.name}
+						>
+							{#if favoriteColor === color.value}
+								<Check size={20} class="text-white mx-auto" />
+							{/if}
+						</button>
+					{/each}
+				</div>
+				<input type="hidden" name="favoriteColor" value={favoriteColor || ''} />
+			</div>
+
+			<!-- Interests (Optional) -->
+			<div>
+				<label class="block text-sm font-medium text-foreground mb-1.5">
+					What brings you to Grove? <span class="text-foreground-subtle">(optional)</span>
+				</label>
+				<p class="text-xs text-foreground-subtle mb-3">Select all that apply. This helps us personalize your experience.</p>
+
+				<div class="grid grid-cols-2 gap-2">
+					{#each interests as interest}
+						<button
+							type="button"
+							onclick={() => toggleInterest(interest.id)}
+							class="flex items-center gap-2 p-3 rounded-lg backdrop-blur-sm border text-left text-sm transition-all {selectedInterests.includes(interest.id) ? 'bg-white/50 dark:bg-slate-800/50 border-primary' : 'bg-white/20 dark:bg-slate-800/20 border-white/30 dark:border-slate-700/30 hover:bg-white/40 dark:hover:bg-slate-800/40'}"
+						>
+							<svelte:component this={interest.icon} class="w-4 h-4" />
+							<span class="text-foreground">{interest.label}</span>
+						</button>
+					{/each}
+				</div>
+				<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
+			</div>
+
+			<!-- Form error -->
+			{#if form?.error}
+				<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm">
+					{form.error}
 				</div>
 			{/if}
-		</div>
 
-		<!-- Favorite Color (Optional) -->
-		<div>
-			<label class="block text-sm font-medium text-foreground mb-1.5">
-				Favorite Color <span class="text-foreground-subtle">(optional)</span>
-			</label>
-			<p class="text-xs text-foreground-subtle mb-3">This will be your blog's accent color. You can change it later.</p>
-
-			<div class="grid grid-cols-4 gap-2">
-				{#each colorPresets as color}
-					<button
-						type="button"
-						onclick={() => (favoriteColor = favoriteColor === color.value ? null : color.value)}
-						class="aspect-square rounded-lg border-2 transition-all hover:scale-105"
-						class:border-primary={favoriteColor === color.value}
-						class:border-transparent={favoriteColor !== color.value}
-						style="background-color: {color.hex}"
-						title={color.name}
-					>
-						{#if favoriteColor === color.value}
-							<Check size={20} class="text-white mx-auto" />
-						{/if}
-					</button>
-				{/each}
-			</div>
-			<input type="hidden" name="favoriteColor" value={favoriteColor || ''} />
-		</div>
-
-		<!-- Interests (Optional) -->
-		<div>
-			<label class="block text-sm font-medium text-foreground mb-1.5">
-				What brings you to Grove? <span class="text-foreground-subtle">(optional)</span>
-			</label>
-			<p class="text-xs text-foreground-subtle mb-3">Select all that apply. This helps us personalize your experience.</p>
-
-			<div class="grid grid-cols-2 gap-2">
-				{#each interests as interest}
-					<button
-						type="button"
-						onclick={() => toggleInterest(interest.id)}
-						class="flex items-center gap-2 p-3 rounded-lg border text-left text-sm transition-all"
-						class:bg-accent={selectedInterests.includes(interest.id)}
-						class:border-primary={selectedInterests.includes(interest.id)}
-						class:border-default={!selectedInterests.includes(interest.id)}
-					>
-						<svelte:component this={interest.icon} class="w-4 h-4" />
-						<span class="text-foreground">{interest.label}</span>
-					</button>
-				{/each}
-			</div>
-			<input type="hidden" name="interests" value={JSON.stringify(selectedInterests)} />
-		</div>
-
-		<!-- Form error -->
-		{#if form?.error}
-			<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm">
-				{form.error}
-			</div>
-		{/if}
-
-		<!-- Submit -->
-		<button
-			type="submit"
-			disabled={!displayName || usernameStatus !== 'available'}
-			class="btn-primary w-full"
-		>
-			Continue to Plans
-		</button>
-	</form>
+			<!-- Submit -->
+			<button
+				type="submit"
+				disabled={!displayName || usernameStatus !== 'available'}
+				class="btn-primary w-full"
+			>
+				Continue to Plans
+			</button>
+		</form>
+	</GlassCard>
 </div>

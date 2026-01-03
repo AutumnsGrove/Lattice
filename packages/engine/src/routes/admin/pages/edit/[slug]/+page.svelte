@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
-  import { Input, Textarea, Button } from '$lib/ui';
+  import { Input, Textarea, Button, GlassCard } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
@@ -195,7 +195,7 @@
 
   <div class="editor-container">
     <!-- Page Details Section -->
-    <div class="details-section">
+    <GlassCard variant="default" class="details-section">
       <button class="details-header" onclick={toggleDetailsCollapsed}>
         <h2 class="m-0 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
           Page Details
@@ -281,10 +281,10 @@
           </div>
         </div>
       {/if}
-    </div>
+    </GlassCard>
 
     <!-- Markdown Editor -->
-    <div class="editor-section">
+    <GlassCard variant="default" class="editor-section">
       <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
         Content
       </h2>
@@ -293,7 +293,7 @@
         bind:content
         draftKey="page-{slug}"
       />
-    </div>
+    </GlassCard>
   </div>
 </div>
 
@@ -304,17 +304,8 @@
     gap: 1.5rem;
   }
 
-  .details-section {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
+  :global(.details-section) {
     overflow: hidden;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-
-  :global(.dark) .details-section {
-    background: var(--color-bg-tertiary-dark);
-    border-color: var(--color-border-dark);
   }
 
   .details-header {
@@ -373,14 +364,17 @@
 
   .hero-fields {
     padding: 1rem;
-    background: var(--color-bg-tertiary);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: var(--border-radius-standard);
     margin-top: 0.5rem;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   :global(.dark) .hero-fields {
-    background: var(--color-bg-primary-dark);
+    background: rgba(30, 41, 59, 0.4);
+    border-color: rgba(71, 85, 105, 0.3);
   }
 
   .cta-fields {
@@ -395,17 +389,8 @@
     }
   }
 
-  .editor-section {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
+  :global(.editor-section) {
     padding: 1.5rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-  }
-
-  :global(.dark) .editor-section {
-    background: var(--color-bg-tertiary-dark);
-    border-color: var(--color-border-dark);
   }
 
   .unsaved-indicator {

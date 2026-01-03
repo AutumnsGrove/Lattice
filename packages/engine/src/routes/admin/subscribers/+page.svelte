@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from 'lucide-svelte';
+	import { GlassCard, Glass } from '$lib/ui';
 
 	interface Subscriber {
 		email: string;
@@ -89,7 +90,7 @@
 </div>
 
 <!-- Danger Zone -->
-<div class="danger-zone">
+<Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-6 rounded-lg mb-8">
 	<div class="danger-header">
 		<div>
 			<h2 class="flex items-center gap-2"><AlertTriangle class="w-5 h-5" /> Mass Email Zone</h2>
@@ -112,10 +113,10 @@
 		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsList}><Download class="w-4 h-4" /> Export as List (.txt)</button>
 		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsCSV}><Download class="w-4 h-4" /> Export as CSV</button>
 	</div>
-</div>
+</Glass>
 
 <!-- Subscribers Table -->
-<div class="card">
+<GlassCard variant="default">
 	<h2>All Subscribers</h2>
 
 	{#if subscribers.length === 0}
@@ -161,7 +162,7 @@
 			</table>
 		</div>
 	{/if}
-</div>
+</GlassCard>
 
 <style>
 	.page-header {
@@ -190,20 +191,12 @@
 		margin: 0;
 	}
 
-	.danger-zone {
-		background: #fee;
-		border: 2px solid #fcc;
-		border-radius: var(--border-radius-standard);
-		padding: 1.5rem;
-		margin-bottom: 2rem;
-	}
-
-	.danger-header h2 {
+	:global(.danger-zone .danger-header) h2 {
 		color: #c00;
 		margin-bottom: 0.5rem;
 	}
 
-	.danger-header p {
+	:global(.danger-zone .danger-header) p {
 		color: #800;
 		margin: 0 0 1rem 0;
 	}
@@ -246,10 +239,7 @@
 		background: #fee;
 	}
 
-	.card {
-		background: var(--color-bg-primary);
-		border: 1px solid var(--color-border);
-		border-radius: var(--border-radius-standard);
+	:global(.glass-card) {
 		padding: 1.5rem;
 	}
 

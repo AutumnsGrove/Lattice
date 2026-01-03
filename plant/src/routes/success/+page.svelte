@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Check, Loader2, Lightbulb, ArrowRight, X } from 'lucide-svelte';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
 
@@ -122,23 +123,27 @@
 	{:else if status === 'ready' && tenant}
 		<!-- Success state -->
 		<div class="text-center">
-			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-bg mb-6">
-				<Check size={40} class="text-success" />
-			</div>
+			<GlassCard variant="accent" class="max-w-md mx-auto mb-8">
+				<div class="flex flex-col items-center">
+					<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-bg mb-6">
+						<Check size={40} class="text-success" />
+					</div>
 
-			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
-				Your blog is ready!
-			</h1>
+					<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
+						Your blog is ready!
+					</h1>
 
-			<p class="text-foreground-muted max-w-md mx-auto mb-2">
-				Welcome to Grove, {data.user?.displayName || 'friend'}!
-			</p>
-			<p class="text-lg text-primary font-medium mb-8">
-				{tenant.subdomain}.grove.place
-			</p>
+					<p class="text-foreground-muted mb-2">
+						Welcome to Grove, {data.user?.displayName || 'friend'}!
+					</p>
+					<p class="text-lg text-primary font-medium">
+						{tenant.subdomain}.grove.place
+					</p>
+				</div>
+			</GlassCard>
 
 			<!-- What's next -->
-			<div class="card max-w-md mx-auto mb-8 text-left">
+			<GlassCard variant="frosted" class="max-w-md mx-auto mb-8 text-left">
 				<h2 class="font-medium text-foreground mb-4 flex items-center gap-2">
 					<Lightbulb size={18} class="text-primary" />
 					What's next?
@@ -146,7 +151,7 @@
 
 				<ul class="space-y-3">
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">1</span>
 						</div>
 						<div>
@@ -155,7 +160,7 @@
 						</div>
 					</li>
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">2</span>
 						</div>
 						<div>
@@ -164,7 +169,7 @@
 						</div>
 					</li>
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">3</span>
 						</div>
 						<div>
@@ -173,7 +178,7 @@
 						</div>
 					</li>
 				</ul>
-			</div>
+			</GlassCard>
 
 			<!-- Action buttons -->
 			<div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">

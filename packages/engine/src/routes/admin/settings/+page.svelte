@@ -1,5 +1,5 @@
 <script>
-  import { Button, Spinner } from '$lib/ui';
+  import { Button, Spinner, GlassCard } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api.js";
 
@@ -126,7 +126,7 @@
     <p class="subtitle">Manage site configuration and maintenance</p>
   </header>
 
-  <section class="settings-section">
+  <GlassCard variant="frosted" class="mb-6">
     <h2>System Health</h2>
     {#if loadingHealth}
       <div class="health-grid">
@@ -174,9 +174,9 @@
     <Button onclick={fetchHealth} variant="secondary" disabled={loadingHealth}>
       {loadingHealth ? 'Checking...' : 'Refresh Status'}
     </Button>
-  </section>
+  </GlassCard>
 
-  <section class="settings-section">
+  <GlassCard variant="frosted" class="mb-6">
     <h2>Typography</h2>
     <p class="section-description">
       Choose the font family used across the entire site. Changes take effect immediately.
@@ -294,9 +294,9 @@
         See <a href="/credits">font credits and licenses</a> for attribution.
       </p>
     {/if}
-  </section>
+  </GlassCard>
 
-  <section class="settings-section">
+  <GlassCard variant="frosted" class="mb-6">
     <h2>Cache Management</h2>
     <p class="section-description">
       The site uses KV for caching API responses. Clearing the cache will cause
@@ -316,9 +316,9 @@
     <p class="note">
       Note: The cache clear endpoint needs to be implemented at <code>/api/admin/cache/clear</code>
     </p>
-  </section>
+  </GlassCard>
 
-  <section class="settings-section">
+  <GlassCard variant="frosted" class="mb-6">
     <h2>Environment</h2>
     <div class="env-info">
       <div class="env-item">
@@ -330,9 +330,9 @@
         <span class="env-value">6 hours (21600 seconds)</span>
       </div>
     </div>
-  </section>
+  </GlassCard>
 
-  <section class="settings-section">
+  <GlassCard variant="frosted" class="mb-6">
     <h2>Links</h2>
     <ul class="links-list">
       <li>
@@ -345,7 +345,7 @@
         <a href="https://github.com/AutumnsGrove/AutumnsGrove/actions" target="_blank">GitHub Actions</a>
       </li>
     </ul>
-  </section>
+  </GlassCard>
 </div>
 
 <style>
@@ -366,15 +366,10 @@
     color: var(--color-text-muted);
     transition: color 0.3s ease;
   }
-  .settings-section {
-    background: var(--mobile-menu-bg);
-    border-radius: var(--border-radius-standard);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  :global(.settings .glass-card) {
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    transition: background-color 0.3s ease;
   }
-  .settings-section h2 {
+  :global(.settings h2) {
     margin: 0 0 1rem 0;
     font-size: 1.25rem;
     color: var(--color-text);

@@ -4,6 +4,7 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
+  import { GlassCard, Glass } from '$lib/ui';
   import { api } from "$lib/utils/api.js";
 
   // Form state
@@ -132,16 +133,16 @@
   </header>
 
   {#if error}
-    <div class="error-banner">
-      <span class="error-icon">!</span>
-      <span>{error}</span>
-      <button class="error-dismiss" onclick={() => (error = null)}>&times;</button>
-    </div>
+    <Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg mb-4 flex items-center gap-3">
+      <span class="flex items-center justify-center w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold">!</span>
+      <span class="flex-1 text-red-600 dark:text-red-400">{error}</span>
+      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl leading-none" onclick={() => (error = null)}>&times;</button>
+    </Glass>
   {/if}
 
   <div class="editor-layout">
     <!-- Metadata Panel -->
-    <aside class="metadata-panel" class:collapsed={detailsCollapsed}>
+    <GlassCard variant="frosted" class="metadata-panel" class:collapsed={detailsCollapsed}>
       <div class="panel-header">
         <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
         <button
@@ -273,7 +274,7 @@
           </div>
         </div>
       {/if}
-    </aside>
+    </GlassCard>
 
     <!-- Editor Panel -->
     <main class="editor-main">
@@ -363,53 +364,6 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
-  /* Error Banner */
-  .error-banner {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: #ffeef0;
-    border: 1px solid #f85149;
-    border-radius: var(--border-radius-button);
-    color: #cf222e;
-    margin-bottom: 1rem;
-    flex-shrink: 0;
-  }
-  :global(.dark) .error-banner {
-    background: rgba(248, 81, 73, 0.15);
-    border-color: #f85149;
-    color: #ff7b72;
-  }
-  .error-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: #cf222e;
-    color: white;
-    border-radius: 50%;
-    font-size: 0.75rem;
-    font-weight: bold;
-  }
-  :global(.dark) .error-icon {
-    background: #f85149;
-  }
-  .error-dismiss {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    opacity: 0.7;
-  }
-  .error-dismiss:hover {
-    opacity: 1;
-  }
   /* Editor Layout */
   .editor-layout {
     display: flex;
@@ -417,21 +371,15 @@
     flex: 1;
     min-height: 0;
   }
-  /* Metadata Panel */
-  .metadata-panel {
+  /* Metadata Panel - Now using GlassCard */
+  :global(.metadata-panel) {
     width: 280px;
     flex-shrink: 0;
-    background: var(--mobile-menu-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-standard);
-    padding: 1.25rem;
     overflow-y: auto;
-    transition: width 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+    transition: width 0.2s ease;
   }
-  .metadata-panel.collapsed {
+  :global(.metadata-panel.collapsed) {
     width: 50px;
-    padding: 0.75rem 0.5rem;
-    overflow: hidden;
   }
   .panel-header {
     display: flex;
@@ -571,11 +519,13 @@
   }
   .tag-preview {
     padding: 0.2rem 0.6rem;
-    background: var(--tag-bg);
+    background: rgba(34, 197, 94, 0.7);
+    backdrop-filter: blur(4px);
     color: white;
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   /* Editor Main */
   .editor-main {
