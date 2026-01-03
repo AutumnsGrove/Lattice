@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, BookOpen, Boxes, Users, Map, HelpCircle, Calendar, ShieldOff, FileText, Triangle } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, BookOpen, Boxes, Users, Map, HelpCircle, ShieldOff, FileText, Triangle, Gauge, Radar, Sparkles } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -40,9 +40,11 @@
 		users: Users,
 		map: Map,
 		helpCircle: HelpCircle,
-		calendar: Calendar,
 		shieldoff: ShieldOff,
 		triangle: Triangle,
+		gauge: Gauge,
+		radar: Radar,
+		sparkles: Sparkles,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -164,6 +166,15 @@
 					integration: 'Public platform status for all Grove users',
 					github: 'https://github.com/AutumnsGrove/Clearing',
 					spec: '/knowledge/specs/clearing-spec'
+				},
+				{
+					name: 'Waystone',
+					tagline: 'Help Center',
+					description: 'Integrated help that meets you where you are. Waystone is Grove\'s help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it\'s already there.',
+					status: 'live',
+					icon: 'helpCircle',
+					integration: 'Built into all Grove properties',
+					spec: '/knowledge/specs/waystone-spec'
 				},
 			]
 		},
@@ -322,6 +333,15 @@
 					github: 'https://github.com/AutumnsGrove/GroveMCP',
 					spec: '/knowledge/specs/mycelium-spec'
 				},
+				{
+					name: 'Shade',
+					tagline: 'AI Content Protection',
+					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
+					status: 'live',
+					icon: 'shieldoff',
+					integration: 'Automatic protection for all Grove blogs',
+					spec: '/knowledge/specs/shade-spec'
+				},
 			]
 		},
 		{
@@ -338,6 +358,24 @@
 					spec: '/knowledge/patterns/prism-pattern'
 				},
 				{
+					name: 'Loom',
+					tagline: 'Real-Time Coordination',
+					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
+					status: 'integrated',
+					icon: 'network',
+					integration: 'Architectural pattern for coordination and real-time',
+					spec: '/knowledge/patterns/loom-durable-objects-pattern'
+				},
+				{
+					name: 'Threshold',
+					tagline: 'Rate Limiting & Abuse Prevention',
+					description: 'The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.',
+					status: 'planned',
+					icon: 'gauge',
+					integration: 'Protection layer for all Grove endpoints',
+					spec: '/knowledge/patterns/threshold-pattern'
+				},
+				{
 					name: 'Songbird',
 					tagline: 'Prompt Injection Protection',
 					description: 'A three-layer defense system against prompt injection attacks. Canary detects poison early. Kestrel watches and validates. Robin produces the safe response. Each layer costs fractions of a cent but protects against compromised AI responses.',
@@ -347,6 +385,24 @@
 					spec: '/knowledge/patterns/songbird-pattern'
 				},
 				{
+					name: 'Sentinel',
+					tagline: 'Load Testing & Scale Validation',
+					description: 'The watchful guardian who tests the forest\'s defenses before the storm. Sentinel doesn\'t just ask "can it handle 500 users?"—it asks what happens to p95 latency during ramp-up, and which Durable Object becomes the bottleneck first.',
+					status: 'planned',
+					icon: 'radar',
+					integration: 'Testing pattern for Vista and infrastructure validation',
+					spec: '/knowledge/patterns/sentinel-pattern'
+				},
+				{
+					name: 'Firefly',
+					tagline: 'Ephemeral Server Pattern',
+					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
+					status: 'implemented',
+					icon: 'sparkles',
+					integration: 'Powers Bloom and Outpost infrastructure',
+					spec: '/knowledge/patterns/firefly-pattern'
+				},
+				{
 					name: 'Vineyard',
 					tagline: 'Tool Showcase Pattern',
 					description: 'Every vine starts somewhere. Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it\'s headed.',
@@ -354,42 +410,6 @@
 					icon: 'grape',
 					integration: 'Documentation pattern implemented by all Grove tools',
 					spec: '/knowledge/patterns/vineyard-spec'
-				},
-				{
-					name: 'Seasons',
-					tagline: 'Versioning System',
-					description: 'Each ring records a season: growth in plenty, resilience through hardship. Seasons is Grove\'s versioning system. How Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.',
-					status: 'implemented',
-					icon: 'calendar',
-					integration: 'Version management for Lattice and customer sites',
-					spec: '/knowledge/specs/seasons-spec'
-				},
-				{
-					name: 'Shade',
-					tagline: 'AI Content Protection',
-					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
-					status: 'live',
-					icon: 'shieldoff',
-					integration: 'Automatic protection for all Grove blogs',
-					spec: '/knowledge/specs/shade-spec'
-				},
-				{
-					name: 'Waystone',
-					tagline: 'Help Center',
-					description: 'Integrated help that meets you where you are. Waystone is Grove\'s help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it\'s already there.',
-					status: 'live',
-					icon: 'helpCircle',
-					integration: 'Built into all Grove properties',
-					spec: '/knowledge/specs/waystone-spec'
-				},
-				{
-					name: 'Loom',
-					tagline: 'Real-Time Coordination',
-					description: 'The framework where Grove\'s threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.',
-					status: 'integrated',
-					icon: 'network',
-					integration: 'Architectural pattern for coordination and real-time',
-					spec: '/knowledge/patterns/loom-durable-objects-pattern'
 				},
 			]
 		},
