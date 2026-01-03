@@ -132,7 +132,7 @@
 /* =============================================================================
    GLASS DESIGN SYSTEM
    Domain-specific glassmorphism with slightly higher opacity for professionalism
-   Uses project-defined colors: neutral-*, grove-*, domain-*, forage-*
+   Uses project-defined colors: neutral-*, grove-*, domain-*
    ============================================================================= */
 
 /* Browser fallback for backdrop-blur (Safari < 9, older browsers) */
@@ -182,7 +182,7 @@
 
 .glass-card-hover:hover {
 	@apply bg-white/85 dark:bg-neutral-900/85
-		shadow-lg border-forage-200/50 dark:border-forage-600/30;
+		shadow-lg border-domain-200/50 dark:border-domain-600/30;
 }
 
 /* Glass card variants */
@@ -193,8 +193,8 @@
 }
 
 .glass-card-accent {
-	@apply bg-forage-50/60 dark:bg-forage-950/40 backdrop-blur-md
-		rounded-xl border border-forage-200/50 dark:border-forage-700/40
+	@apply bg-domain-50/60 dark:bg-domain-950/40 backdrop-blur-md
+		rounded-xl border border-domain-200/50 dark:border-domain-700/40
 		shadow-sm;
 }
 
@@ -210,7 +210,7 @@
 	@apply bg-white/60 dark:bg-neutral-800/60 backdrop-blur-sm
 		border border-white/50 dark:border-neutral-600/40
 		focus:bg-white/80 dark:focus:bg-neutral-800/80
-		focus:border-forage-400 dark:focus:border-forage-500
+		focus:border-domain-400 dark:focus:border-domain-500
 		transition-all duration-200;
 }
 

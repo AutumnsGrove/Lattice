@@ -56,11 +56,11 @@
 		</div>
 		<div class="glass-stat p-6">
 			<div class="text-sm font-sans text-bark/60 mb-1">Currently Running</div>
-			<div class="text-3xl font-serif text-forage-600">{runningJobs}</div>
+			<div class="text-3xl font-serif text-domain-600">{runningJobs}</div>
 			{#if runningJobs > 0}
 				<div class="mt-2 flex items-center gap-1.5">
-					<span class="w-2 h-2 bg-forage-500 rounded-full animate-pulse"></span>
-					<span class="text-xs text-forage-600 font-sans">Active</span>
+					<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
+					<span class="text-xs text-domain-600 font-sans">Active</span>
 				</div>
 			{/if}
 		</div>

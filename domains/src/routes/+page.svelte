@@ -15,7 +15,7 @@
 		<!-- Logo/Brand -->
 		<div class="mb-6">
 			<svg
-				class="w-20 h-20 text-forage-600"
+				class="w-20 h-20 text-domain-600"
 				viewBox="0 0 100 100"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
@@ -42,11 +42,11 @@
 
 		<!-- Decorative divider -->
 		<div class="flex items-center gap-4 mb-8">
-			<div class="w-12 h-px bg-forage-300"></div>
-			<svg class="w-4 h-4 text-forage-400" viewBox="0 0 20 20" fill="currentColor">
+			<div class="w-12 h-px bg-domain-300"></div>
+			<svg class="w-4 h-4 text-domain-400" viewBox="0 0 20 20" fill="currentColor">
 				<circle cx="10" cy="10" r="4" />
 			</svg>
-			<div class="w-12 h-px bg-forage-300"></div>
+			<div class="w-12 h-px bg-domain-300"></div>
 		</div>
 
 		<!-- Description -->
@@ -64,7 +64,7 @@
 		<!-- How It Works -->
 		<div class="grid md:grid-cols-3 gap-6 max-w-3xl mb-12">
 			<div class="glass-card glass-card-hover p-6 text-center">
-				<div class="w-12 h-12 mx-auto mb-4 text-forage-600">
+				<div class="w-12 h-12 mx-auto mb-4 text-domain-600">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-full h-full">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
 					</svg>
@@ -115,19 +115,19 @@
 	<!-- Footer -->
 	<footer class="py-8 text-center">
 		<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-sans text-bark/50 mb-4">
-			<a href="https://grove.place" class="hover:text-forage-600 transition-colors">
+			<a href="https://grove.place" class="hover:text-domain-600 transition-colors">
 				Grove
 			</a>
-			<span class="text-forage-300">·</span>
-			<a href="https://grove.place/vision" class="hover:text-forage-600 transition-colors">
+			<span class="text-domain-300">·</span>
+			<a href="https://grove.place/vision" class="hover:text-domain-600 transition-colors">
 				Vision
 			</a>
-			<span class="text-forage-300">·</span>
-			<a href="https://grove.place/pricing" class="hover:text-forage-600 transition-colors">
+			<span class="text-domain-300">·</span>
+			<a href="https://grove.place/pricing" class="hover:text-domain-600 transition-colors">
 				Pricing
 			</a>
-			<span class="text-forage-300">·</span>
-			<a href="https://grove.place/legal" class="hover:text-forage-600 transition-colors">
+			<span class="text-domain-300">·</span>
+			<a href="https://grove.place/legal" class="hover:text-domain-600 transition-colors">
 				Legal
 			</a>
 		</div>

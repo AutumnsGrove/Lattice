@@ -776,7 +776,7 @@
 
 	function getStatusColor(status: string): string {
 		switch (status) {
-			case 'running': return 'text-forage-600';
+			case 'running': return 'text-domain-600';
 			case 'pending': return 'text-bark/60';
 			case 'complete': return 'text-grove-600';
 			case 'needs_followup': return 'text-amber-600';
@@ -1339,7 +1339,7 @@
 						</div>
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-bark/60">Available Found</span>
-							<span class="text-forage-600 font-medium">{currentJob.domains_available ?? 0}</span>
+							<span class="text-domain-600 font-medium">{currentJob.domains_available ?? 0}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-bark/60">Good Results</span>
@@ -1351,7 +1351,7 @@
 								{currentJob.status === 'running' || currentJob.status === 'pending' ? 'Elapsed' : 'Duration'}
 							</span>
 							{#if currentJob.status === 'running' || currentJob.status === 'pending'}
-								<span class="text-forage-600 font-medium font-mono tabular-nums">
+								<span class="text-domain-600 font-medium font-mono tabular-nums">
 									{formatElapsed(elapsedSeconds)}
 								</span>
 							{:else if currentJob.duration_seconds}
@@ -1367,7 +1367,7 @@
 						<div class="mt-4">
 							<div class="h-2 bg-grove-100 rounded-full overflow-hidden">
 								<div
-									class="h-full bg-forage-500 transition-all duration-500"
+									class="h-full bg-domain-500 transition-all duration-500"
 									style="width: {Math.min((currentJob.batch_num / 6) * 100, 100)}%"
 								></div>
 							</div>

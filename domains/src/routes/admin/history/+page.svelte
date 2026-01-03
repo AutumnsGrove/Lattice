@@ -259,7 +259,7 @@
 				</thead>
 				<tbody class="divide-y divide-grove-100">
 					{#each jobs as job (job.id)}
-						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-forage-50/30' : ''}">
+						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-domain-50/30' : ''}">
 							<td class="px-4 py-4">
 								<div class="font-sans font-medium text-bark">{job.business_name}</div>
 								<div class="text-sm text-bark/50 font-sans">{job.client_email}</div>
@@ -270,18 +270,18 @@
 							<td class="px-4 py-4 hidden sm:table-cell">
 								<div class="flex items-center gap-2">
 									{#if isRunning(job.status)}
-										<span class="w-2 h-2 bg-forage-500 rounded-full animate-pulse"></span>
+										<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
 									{/if}
 									<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
 								</div>
 								{#if isRunning(job.status) && elapsedTimers[job.id]}
-									<div class="text-xs text-forage-600 font-mono mt-1">
+									<div class="text-xs text-domain-600 font-mono mt-1">
 										{formatElapsed(elapsedTimers[job.id])}
 									</div>
 								{/if}
 							</td>
 							<td class="px-4 py-4 text-right text-sm font-sans text-bark/70 hidden md:table-cell">
-								<span class="{isRunning(job.status) ? 'font-medium text-forage-600' : ''}">
+								<span class="{isRunning(job.status) ? 'font-medium text-domain-600' : ''}">
 									{job.domains_checked}
 								</span>
 							</td>
@@ -303,7 +303,7 @@
 							<td class="px-4 py-4 text-right">
 								<a
 									href="/admin/history/{job.id}"
-									class="text-forage-600 hover:text-forage-700 font-sans text-sm transition-colors"
+									class="text-domain-600 hover:text-domain-700 font-sans text-sm transition-colors"
 								>
 									View
 								</a>

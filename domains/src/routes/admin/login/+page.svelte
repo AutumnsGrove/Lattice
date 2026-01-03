@@ -71,7 +71,7 @@
 	<div class="glass-card p-8 w-full max-w-sm">
 		<!-- Logo -->
 		<div class="mb-6 text-center">
-			<a href="/" class="inline-block text-forage-600 hover:text-forage-700 transition-colors" aria-label="Back to home">
+			<a href="/" class="inline-block text-domain-600 hover:text-domain-700 transition-colors" aria-label="Back to home">
 				<svg class="w-14 h-14 mx-auto" viewBox="0 0 100 100" fill="none">
 					<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
 					<circle cx="50" cy="50" r="20" fill="currentColor" fill-opacity="0.15" />
@@ -99,7 +99,7 @@
 		{/if}
 
 		{#if successMessage && step === 'code'}
-			<div class="mb-4 bg-forage-50/80 border border-forage-200 text-forage-700 px-4 py-3 rounded-lg">
+			<div class="mb-4 bg-domain-50/80 border border-domain-200 text-domain-700 px-4 py-3 rounded-lg">
 				<p class="text-sm font-sans">{successMessage}</p>
 			</div>
 		{/if}
@@ -144,7 +144,7 @@
 				<button
 					type="button"
 					onclick={() => { step = 'email'; code = ''; errorMessage = ''; successMessage = ''; }}
-					class="w-full text-sm text-bark/60 hover:text-forage-600 font-sans transition-colors"
+					class="w-full text-sm text-bark/60 hover:text-domain-600 font-sans transition-colors"
 				>
 					Use a different email
 				</button>
@@ -155,8 +155,8 @@
 	<!-- Back link -->
 	<a
 		href="/"
-		class="mt-6 text-sm text-bark/50 hover:text-forage-600 font-sans transition-colors"
+		class="mt-6 text-sm text-bark/50 hover:text-domain-600 font-sans transition-colors"
 	>
-		Back to Forage
+		Back to Domain Finder
 	</a>
 </main>

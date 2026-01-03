@@ -481,7 +481,7 @@
 					<h1 class="text-2xl font-serif text-bark">{job.business_name}</h1>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
-							<span class="w-2 h-2 bg-forage-500 rounded-full animate-pulse"></span>
+							<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
 						{/if}
 						<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
 					</div>
@@ -491,7 +491,7 @@
 			{#if isRunning}
 				<div class="text-right">
 					<div class="text-sm text-bark/60 font-sans">Elapsed</div>
-					<div class="text-lg font-mono text-forage-600">{formatElapsed(elapsedSeconds)}</div>
+					<div class="text-lg font-mono text-domain-600">{formatElapsed(elapsedSeconds)}</div>
 				</div>
 			{/if}
 		</div>
@@ -500,7 +500,7 @@
 		<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">Domains Checked</div>
-				<div class="text-2xl font-serif {isRunning ? 'text-forage-600' : 'text-bark'}">{job.domains_checked}</div>
+				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">{job.domains_checked}</div>
 			</div>
 			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">Available Found</div>
@@ -508,7 +508,7 @@
 			</div>
 			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
-				<div class="text-2xl font-serif {isRunning ? 'text-forage-600' : 'text-bark'}">
+				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">
 					{isRunning ? formatElapsed(elapsedSeconds) : formatDuration(job.duration_seconds)}
 				</div>
 			</div>
@@ -517,7 +517,7 @@
 				<div class="text-2xl font-serif text-bark">{job.batch_num} / 6</div>
 				{#if isRunning}
 					<div class="mt-2 h-1.5 bg-grove-100 rounded-full overflow-hidden">
-						<div class="h-full bg-forage-500 transition-all" style="width: {(job.batch_num / 6) * 100}%"></div>
+						<div class="h-full bg-domain-500 transition-all" style="width: {(job.batch_num / 6) * 100}%"></div>
 					</div>
 				{/if}
 			</div>
@@ -600,7 +600,7 @@
 				
 				{#if isFetchingFollowup}
 					<div class="text-center py-8">
-						<svg class="w-10 h-10 mx-auto animate-spin text-forage-600" viewBox="0 0 24 24" fill="none">
+						<svg class="w-10 h-10 mx-auto animate-spin text-domain-600" viewBox="0 0 24 24" fill="none">
 							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
 							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 						</svg>
@@ -738,8 +738,8 @@
 					<h2 class="font-serif text-lg text-bark">Available Domains</h2>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
-							<span class="inline-flex items-center gap-1.5 text-sm text-forage-600 font-sans">
-								<span class="w-2 h-2 bg-forage-500 rounded-full animate-pulse"></span>
+							<span class="inline-flex items-center gap-1.5 text-sm text-domain-600 font-sans">
+								<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
 								Live
 							</span>
 						{/if}
@@ -767,7 +767,7 @@
 										<td class="px-4 py-3 text-center">
 											<div class="w-full bg-grove-100 rounded-full h-2 max-w-[60px] mx-auto">
 												<div
-													class="bg-forage-500 h-2 rounded-full"
+													class="bg-domain-500 h-2 rounded-full"
 													style="width: {result.score * 100}%"
 												></div>
 											</div>
