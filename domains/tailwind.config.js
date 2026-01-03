@@ -19,7 +19,7 @@ export default {
 				},
 				cream: '#fefdfb',
 				bark: '#3d2914',
-				// Domain-specific accent colors
+				// Domain-specific accent colors (purple for admin features)
 				domain: {
 					50: '#f5f3ff',
 					100: '#ede9fe',
@@ -31,6 +31,34 @@ export default {
 					700: '#6d28d9',
 					800: '#5b21b6',
 					900: '#4c1d95'
+				},
+				// Forage brand colors (teal - for the search/discovery aesthetic)
+				forage: {
+					50: '#f0fdfa',
+					100: '#ccfbf1',
+					200: '#99f6e4',
+					300: '#5eead4',
+					400: '#2dd4bf',
+					500: '#14b8a6',
+					600: '#0d9488',
+					700: '#0f766e',
+					800: '#115e59',
+					900: '#134e4a',
+					950: '#042f2e'
+				},
+				// Neutral palette for dark mode and glass effects
+				neutral: {
+					50: '#fafaf9',
+					100: '#f5f5f4',
+					200: '#e7e5e4',
+					300: '#d6d3d1',
+					400: '#a8a29e',
+					500: '#78716c',
+					600: '#57534e',
+					700: '#44403c',
+					800: '#292524',
+					900: '#1c1917',
+					950: '#0c0a09'
 				}
 			},
 			fontFamily: {

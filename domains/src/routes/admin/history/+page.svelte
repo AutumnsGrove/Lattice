@@ -234,7 +234,7 @@
 
 	<!-- Jobs List -->
 	{#if jobs.length === 0}
-		<div class="card p-12 text-center">
+		<div class="glass-card-muted p-12 text-center">
 			<svg class="w-16 h-16 mx-auto text-bark/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
 			</svg>
