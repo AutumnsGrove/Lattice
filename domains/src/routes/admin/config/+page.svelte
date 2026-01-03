@@ -83,7 +83,7 @@
 
 	<form onsubmit={(e) => { e.preventDefault(); saveConfig(); }} class="space-y-8">
 		<!-- Search Parameters Section -->
-		<div class="card p-6">
+		<div class="glass-form-section">
 			<h2 class="font-serif text-lg text-bark mb-6">Search Parameters</h2>
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -147,7 +147,7 @@
 		</div>
 
 		<!-- Creativity & Rate Limiting -->
-		<div class="card p-6">
+		<div class="glass-form-section">
 			<h2 class="font-serif text-lg text-bark mb-6">Creativity & Rate Limiting</h2>
 
 			<div class="grid md:grid-cols-2 gap-6">
@@ -234,7 +234,7 @@
 	</form>
 
 	<!-- Info Box -->
-	<div class="card p-6 bg-domain-50 border-domain-200">
+	<div class="glass-card-accent p-6">
 		<h3 class="font-serif text-bark mb-2">About Configuration</h3>
 		<p class="text-sm text-bark/70 font-sans leading-relaxed">
 			These settings control how the domain search agent operates. Changes take effect on the next search.

@@ -66,44 +66,45 @@
 	<title>Admin Login - Domain Finder</title>
 </svelte:head>
 
-<main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-	<!-- Logo -->
-	<div class="mb-8">
-		<a href="/" class="text-domain-600 hover:text-domain-700 transition-colors" aria-label="Back to home">
-			<svg class="w-16 h-16" viewBox="0 0 100 100" fill="none">
-				<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
-				<circle cx="50" cy="50" r="20" fill="currentColor" fill-opacity="0.15" />
-				<circle cx="50" cy="50" r="10" fill="currentColor" />
-				<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" />
-				<line x1="77" y1="77" x2="88" y2="88" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-			</svg>
-		</a>
-	</div>
+<main class="min-h-screen flex flex-col items-center justify-center px-6 py-12 domain-gradient">
+	<!-- Glass Login Card -->
+	<div class="glass-card p-8 w-full max-w-sm">
+		<!-- Logo -->
+		<div class="mb-6 text-center">
+			<a href="/" class="inline-block text-domain-600 hover:text-domain-700 transition-colors" aria-label="Back to home">
+				<svg class="w-14 h-14 mx-auto" viewBox="0 0 100 100" fill="none">
+					<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
+					<circle cx="50" cy="50" r="20" fill="currentColor" fill-opacity="0.15" />
+					<circle cx="50" cy="50" r="10" fill="currentColor" />
+					<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" />
+					<line x1="77" y1="77" x2="88" y2="88" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+				</svg>
+			</a>
+		</div>
 
-	<h1 class="text-2xl font-serif text-bark mb-2">Admin Login</h1>
-	<p class="text-bark/60 font-sans mb-8 text-center">
-		{#if step === 'email'}
-			Enter your admin email to receive a login code
-		{:else}
-			Enter the code sent to {email}
+		<h1 class="text-2xl font-serif text-bark mb-2 text-center">Admin Login</h1>
+		<p class="text-bark/60 font-sans mb-6 text-center text-sm">
+			{#if step === 'email'}
+				Enter your admin email to receive a login code
+			{:else}
+				Enter the code sent to {email}
+			{/if}
+		</p>
+
+		<!-- Messages -->
+		{#if errorMessage}
+			<div class="mb-4 bg-red-50/80 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+				<p class="text-sm font-sans">{errorMessage}</p>
+			</div>
 		{/if}
-	</p>
 
-	<!-- Messages -->
-	{#if errorMessage}
-		<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg w-full max-w-sm">
-			<p class="text-sm font-sans">{errorMessage}</p>
-		</div>
-	{/if}
+		{#if successMessage && step === 'code'}
+			<div class="mb-4 bg-domain-50/80 border border-domain-200 text-domain-700 px-4 py-3 rounded-lg">
+				<p class="text-sm font-sans">{successMessage}</p>
+			</div>
+		{/if}
 
-	{#if successMessage && step === 'code'}
-		<div class="mb-4 bg-domain-50 border border-domain-200 text-domain-700 px-4 py-3 rounded-lg w-full max-w-sm">
-			<p class="text-sm font-sans">{successMessage}</p>
-		</div>
-	{/if}
-
-	<!-- Forms -->
-	<div class="w-full max-w-sm">
+		<!-- Forms -->
 		{#if step === 'email'}
 			<form onsubmit={(e) => { e.preventDefault(); requestCode(); }}>
 				<input
@@ -154,7 +155,7 @@
 	<!-- Back link -->
 	<a
 		href="/"
-		class="mt-8 text-sm text-bark/50 hover:text-domain-600 font-sans transition-colors"
+		class="mt-6 text-sm text-bark/50 hover:text-domain-600 font-sans transition-colors"
 	>
 		Back to Domain Finder
 	</a>

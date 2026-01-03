@@ -32,18 +32,18 @@
 {:else}
 	<div class="min-h-screen flex flex-col">
 		<!-- Header -->
-		<header class="bg-white border-b border-grove-200 sticky top-0 z-50">
+		<header class="glass-surface sticky top-0 z-50">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex justify-between items-center h-16">
 					<!-- Logo -->
-					<a href="/" class="flex items-center gap-3">
-						<svg class="w-8 h-8 text-domain-600" viewBox="0 0 100 100" fill="none">
+					<a href="/" class="flex items-center gap-3 group">
+						<svg class="w-8 h-8 text-domain-600 group-hover:text-domain-700 transition-colors" viewBox="0 0 100 100" fill="none">
 							<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
 							<circle cx="50" cy="50" r="10" fill="currentColor" />
 							<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" />
 							<line x1="77" y1="77" x2="88" y2="88" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
 						</svg>
-						<span class="font-serif text-lg text-bark">Domain Finder</span>
+						<span class="font-serif text-lg text-bark group-hover:text-domain-700 transition-colors">Domain Finder</span>
 					</a>
 
 					<!-- User menu -->
@@ -53,7 +53,7 @@
 						</span>
 						<button
 							onclick={logout}
-							class="text-sm text-bark/60 hover:text-red-600 font-sans transition-colors"
+							class="text-sm text-bark/60 hover:text-red-600 font-sans transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
 						>
 							Logout
 						</button>
@@ -63,7 +63,7 @@
 		</header>
 
 		<!-- Tab Navigation -->
-		<nav class="bg-white border-b border-grove-200">
+		<nav class="glass-tabs sticky top-16 z-40">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex gap-1 -mb-px overflow-x-auto">
 					{#each tabs as tab}

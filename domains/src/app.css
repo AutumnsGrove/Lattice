@@ -128,3 +128,108 @@
 .status-dot-warning {
 	@apply bg-amber-500 animate-pulse-slow;
 }
+
+/* =============================================================================
+   GLASS DESIGN SYSTEM
+   Domain-specific glassmorphism with slightly higher opacity for professionalism
+   ============================================================================= */
+
+/* Glass utility classes - base glass effects */
+.glass {
+	@apply bg-white/75 dark:bg-slate-900/75 backdrop-blur-md;
+}
+
+.glass-subtle {
+	@apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm;
+}
+
+.glass-frosted {
+	@apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg;
+}
+
+/* Glass surface - for sticky headers, navbars */
+.glass-surface {
+	@apply bg-white/90 dark:bg-slate-900/90 backdrop-blur-md
+		border-b border-white/50 dark:border-slate-700/50;
+}
+
+/* Glass card - content containers with warm styling */
+.glass-card {
+	@apply bg-white/75 dark:bg-slate-900/75 backdrop-blur-md
+		rounded-xl border border-white/50 dark:border-slate-700/40
+		shadow-sm transition-all duration-200;
+}
+
+.glass-card-hover:hover {
+	@apply bg-white/85 dark:bg-slate-900/85
+		shadow-lg border-domain-200/50 dark:border-domain-600/30;
+}
+
+/* Glass card variants */
+.glass-card-muted {
+	@apply bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm
+		rounded-xl border border-white/30 dark:border-slate-700/30
+		shadow-sm;
+}
+
+.glass-card-accent {
+	@apply bg-domain-50/60 dark:bg-domain-950/40 backdrop-blur-md
+		rounded-xl border border-domain-200/50 dark:border-domain-700/40
+		shadow-sm;
+}
+
+/* Glass tint - for text containers over backgrounds */
+.glass-tint {
+	@apply bg-white/65 dark:bg-slate-900/65 backdrop-blur-sm
+		border border-white/40 dark:border-slate-700/30
+		rounded-lg;
+}
+
+/* Glass input styling */
+.glass-input {
+	@apply bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm
+		border border-white/50 dark:border-slate-600/40
+		focus:bg-white/80 dark:focus:bg-slate-800/80
+		focus:border-domain-400 dark:focus:border-domain-500
+		transition-all duration-200;
+}
+
+/* Glass tab navigation */
+.glass-tabs {
+	@apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm
+		border-b border-white/40 dark:border-slate-700/40;
+}
+
+/* Glass stats card - for dashboard metrics */
+.glass-stat {
+	@apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md
+		rounded-xl border border-white/50 dark:border-slate-700/40
+		p-6 transition-all duration-200;
+}
+
+.glass-stat:hover {
+	@apply bg-white/80 dark:bg-slate-900/80 shadow-md;
+}
+
+/* Glass form section */
+.glass-form-section {
+	@apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md
+		rounded-xl border border-white/50 dark:border-slate-700/40
+		p-6 shadow-sm;
+}
+
+/* Animation for glass fade-in */
+@keyframes glass-fade-in {
+	from {
+		opacity: 0;
+		backdrop-filter: blur(0px);
+	}
+	to {
+		opacity: 1;
+		backdrop-filter: blur(12px);
+	}
+}
+
+.animate-glass-in {
+	animation: glass-fade-in 0.3s ease-out forwards;
+}

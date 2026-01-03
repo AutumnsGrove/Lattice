@@ -461,7 +461,7 @@
 </svelte:head>
 
 {#if !job}
-	<div class="card p-12 text-center">
+	<div class="glass-card-muted p-12 text-center">
 		<p class="text-bark/60 font-sans">Job not found</p>
 		<a href="/admin/history" class="btn-primary inline-block mt-4">
 			Back to History
@@ -498,21 +498,21 @@
 
 		<!-- Job Details -->
 		<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-			<div class="card p-4">
+			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">Domains Checked</div>
 				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">{job.domains_checked}</div>
 			</div>
-			<div class="card p-4">
+			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">Available Found</div>
 				<div class="text-2xl font-serif text-grove-600">{job.good_results}</div>
 			</div>
-			<div class="card p-4">
+			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
 				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">
 					{isRunning ? formatElapsed(elapsedSeconds) : formatDuration(job.duration_seconds)}
 				</div>
 			</div>
-			<div class="card p-4">
+			<div class="glass-stat p-4">
 				<div class="text-sm font-sans text-bark/60 mb-1">Batches</div>
 				<div class="text-2xl font-serif text-bark">{job.batch_num} / 6</div>
 				{#if isRunning}
@@ -524,7 +524,7 @@
 		</div>
 
 		<!-- Search Parameters -->
-		<div class="card p-6">
+		<div class="glass-card p-6">
 			<h2 class="font-serif text-lg text-bark mb-4">Search Parameters</h2>
 			<div class="grid sm:grid-cols-2 gap-4 text-sm font-sans">
 				<div>
@@ -585,7 +585,7 @@
 
 		<!-- Follow-up Quiz -->
 		{#if job.status === 'needs_followup'}
-			<div class="card p-6 border-2 border-amber-200 bg-gradient-to-br from-amber-50/30 to-white">
+			<div class="glass-card p-6 border-2 border-amber-200/60 bg-gradient-to-br from-amber-50/40 to-white/60 backdrop-blur-md">
 				<div class="flex items-start gap-3 mb-4">
 					<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
 						<svg class="w-5 h-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">

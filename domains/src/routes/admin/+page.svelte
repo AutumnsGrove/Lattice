@@ -50,19 +50,25 @@
 
 	<!-- Stats Grid -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-		<div class="card p-6">
+		<div class="glass-stat">
 			<div class="text-sm font-sans text-bark/60 mb-1">Total Searches</div>
 			<div class="text-3xl font-serif text-bark">{totalJobs}</div>
 		</div>
-		<div class="card p-6">
+		<div class="glass-stat">
 			<div class="text-sm font-sans text-bark/60 mb-1">Currently Running</div>
 			<div class="text-3xl font-serif text-domain-600">{runningJobs}</div>
+			{#if runningJobs > 0}
+				<div class="mt-2 flex items-center gap-1.5">
+					<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
+					<span class="text-xs text-domain-600 font-sans">Active</span>
+				</div>
+			{/if}
 		</div>
-		<div class="card p-6">
+		<div class="glass-stat">
 			<div class="text-sm font-sans text-bark/60 mb-1">Completed</div>
 			<div class="text-3xl font-serif text-grove-600">{completedJobs}</div>
 		</div>
-		<div class="card p-6">
+		<div class="glass-stat">
 			<div class="text-sm font-sans text-bark/60 mb-1">Domains Found</div>
 			<div class="text-3xl font-serif text-bark">{totalDomainsFound}</div>
 		</div>
@@ -79,8 +85,8 @@
 	</div>
 
 	<!-- Recent Jobs -->
-	<div class="card">
-		<div class="p-4 border-b border-grove-200">
+	<div class="glass-card">
+		<div class="p-4 border-b border-white/30 dark:border-slate-700/30">
 			<h2 class="font-serif text-lg text-bark">Recent Searches</h2>
 		</div>
 		{#if data.jobs.length === 0}
@@ -88,9 +94,9 @@
 				<p class="text-bark/60 font-sans">No searches yet. Start your first domain search!</p>
 			</div>
 		{:else}
-			<div class="divide-y divide-grove-100">
+			<div class="divide-y divide-white/20 dark:divide-slate-700/20">
 				{#each data.jobs.slice(0, 5) as job}
-					<a href="/admin/history/{job.id}" class="block p-4 hover:bg-grove-50 transition-colors">
+					<a href="/admin/history/{job.id}" class="block p-4 hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<div class="status-dot status-dot-{job.status === 'running' ? 'running' : job.status === 'complete' ? 'complete' : job.status === 'failed' ? 'error' : 'pending'}"></div>
