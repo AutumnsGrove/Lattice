@@ -86,7 +86,7 @@
 
 	<!-- Recent Jobs -->
 	<div class="glass-card">
-		<div class="p-4 border-b border-white/30 dark:border-neutral-700/30">
+		<div class="p-4 border-b glass-divider">
 			<h2 class="font-serif text-lg text-bark">Recent Searches</h2>
 		</div>
 		{#if data.jobs.length === 0}
@@ -94,7 +94,7 @@
 				<p class="text-bark/60 font-sans">No searches yet. Start your first domain search!</p>
 			</div>
 		{:else}
-			<div class="divide-y divide-white/20 dark:divide-neutral-700/20">
+			<div class="divide-y glass-divide">
 				{#each data.jobs.slice(0, 5) as job}
 					<a href="/admin/history/{job.id}" class="block p-4 hover:bg-white/40 dark:hover:bg-neutral-800/40 transition-colors">
 						<div class="flex items-center justify-between">

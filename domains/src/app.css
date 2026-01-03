@@ -238,3 +238,12 @@
 		rounded-xl border border-white/50 dark:border-neutral-700/40
 		p-6 shadow-sm;
 }
+
+/* Glass internal dividers - lighter than card borders for subtle separation */
+.glass-divider {
+	@apply border-white/30 dark:border-neutral-700/30;
+}
+
+.glass-divide {
+	@apply divide-white/30 dark:divide-neutral-700/30;
+}
