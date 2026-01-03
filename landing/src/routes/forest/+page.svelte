@@ -7,7 +7,6 @@
 
 	// Import nature assets from engine package
 	import {
-		Logo,
 		// Trees
 		TreePine, TreeCherry, TreeAspen, TreeBirch,
 		// Botanical
@@ -24,7 +23,7 @@
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Import glass components
-	import { Glass, GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { Glass, GlassCard, GlassLogo } from '@autumnsgrove/groveengine/ui';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
@@ -33,6 +32,17 @@
 	const isSpring = $derived($seasonStore === 'spring');
 	const isAutumn = $derived($seasonStore === 'autumn');
 	const isWinter = $derived($seasonStore === 'winter');
+
+	// GlassLogo variant based on season
+	// Winter & Autumn: frosted (more opaque, muted feel)
+	// Summer: default (clean natural glass)
+	// Spring: ethereal (dreamy, glowy)
+	type GlassVariant = 'default' | 'frosted' | 'ethereal';
+	const glassLogoVariant = $derived<GlassVariant>(
+		isWinter || isAutumn ? 'frosted' :
+		isSpring ? 'ethereal' :
+		'default'
+	);
 
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
@@ -756,7 +766,7 @@
 					"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
+						<GlassLogo class="w-full h-full" variant={glassLogoVariant} season={$seasonStore} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'aspen'}
