@@ -656,6 +656,28 @@ export const patterns: Doc[] = [
     lastUpdated: "2025-12-30",
     readingTime: 5,
   },
+  {
+    slug: "sentinel-pattern",
+    title: "Sentinel — Load Testing & Scale Validation",
+    description:
+      "Realistic traffic profiles and ramp-up testing for Durable Objects and D1",
+    excerpt:
+      "The watchful guardian who tests the forest's defenses before the storm. Sentinel doesn't just ask 'can it handle 500 users?'—it asks 'what happens to p95 latency during the ramp-up, and which Durable Object becomes the bottleneck first?'",
+    category: "patterns",
+    lastUpdated: "2026-01-01",
+    readingTime: 20,
+  },
+  {
+    slug: "firefly-pattern",
+    title: "Firefly — Ephemeral Server Pattern",
+    description:
+      "On-demand infrastructure that ignites, illuminates, and fades away",
+    excerpt:
+      "A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability, full VM capabilities.",
+    category: "patterns",
+    lastUpdated: "2026-01-01",
+    readingTime: 18,
+  },
 ];
 
 // Marketing Documents
