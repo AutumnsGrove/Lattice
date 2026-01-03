@@ -247,15 +247,17 @@
 
 	// Add IDs to headers and position mobile gutter items
 	$effect(() => {
+		// Track contentBodyElement outside untrack() so effect re-runs when element becomes available
+		const contentEl = contentBodyElement;
+		if (!contentEl) return;
+
 		// Track moved elements for cleanup
 		const movedElements: Array<{ element: HTMLElement; originalParent: HTMLElement | null; originalNextSibling: Node | null }> = [];
 
 		untrack(() => {
-			if (!contentBodyElement) return;
-
 			// First, add IDs to headers
 			if (headers && headers.length > 0) {
-				const headerElements = (contentBodyElement as HTMLElement).querySelectorAll('h1, h2, h3, h4, h5, h6');
+				const headerElements = (contentEl as HTMLElement).querySelectorAll('h1, h2, h3, h4, h5, h6');
 				headerElements.forEach((el: Element) => {
 					const text = (el as HTMLElement).textContent?.trim() || '';
 					const matchingHeader = headers.find((h: Header) => h.text === text);
@@ -275,7 +277,7 @@
 				const originalParent = mobileGutterEl.parentElement;
 				const originalNextSibling = mobileGutterEl.nextSibling;
 
-				const targetEl = findAnchorElement(anchor, contentBodyElement as HTMLElement, headers);
+				const targetEl = findAnchorElement(anchor, contentEl as HTMLElement, headers);
 
 				if (targetEl) {
 					targetEl.insertAdjacentElement('afterend', mobileGutterEl);
