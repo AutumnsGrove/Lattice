@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -44,6 +44,9 @@
 		gauge: Gauge,
 		radar: Radar,
 		sparkles: Sparkles,
+		terminal: Terminal,
+		database: Database,
+		compass: Compass,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -57,7 +60,7 @@
 		name: string;
 		tagline: string;
 		description: string;
-		status: 'live' | 'building' | 'planned';
+		status: 'live' | 'building' | 'planned' | 'complete' | 'integrated' | 'implemented' | 'being implemented';
 		icon: string;
 		domain?: string;
 		integration: string;
@@ -223,7 +226,7 @@
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
 					status: 'live',
-					icon: 'map',
+					icon: 'compass',
 					integration: 'Available for all Grove blogs',
 					spec: '/knowledge/specs/trails-spec'
 				},
@@ -249,7 +252,7 @@
 					tagline: 'Remote AI Coding',
 					description: 'Text it and forget it. Send development tasks from your phone, and an AI coding agent handles them on a temporary server that self-destructs when done. Your code syncs to cloud storage before shutdown. Autonomous coding from anywhere.',
 					status: 'building',
-					icon: 'cloud',
+					icon: 'terminal',
 					domain: 'bloom.grove.place',
 					integration: 'Personal serverless development infrastructure',
 					github: 'https://github.com/AutumnsGrove/GroveBloom',
@@ -316,7 +319,7 @@
 					tagline: 'Automated Backups',
 					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
 					status: 'live',
-					icon: 'archive',
+					icon: 'database',
 					integration: 'Internal service protecting all Grove data',
 					github: 'https://github.com/AutumnsGrove/Patina',
 					spec: '/knowledge/specs/patina-spec'
@@ -337,7 +340,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'shield',
+					icon: 'shieldcheck',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec'
 				},

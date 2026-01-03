@@ -844,8 +844,16 @@
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
 						>
-							{#if feature.major}
+							{#if feature.icon === 'gem'}
 								<Gem class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'zap'}
+								<Zap class="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'accessibility'}
+								<Accessibility class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'smartphone'}
+								<Smartphone class="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'puzzle'}
+								<Puzzle class="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
 							{/if}
@@ -940,7 +948,17 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['midnight-bloom'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
-							<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{#if feature.icon === 'coffee'}
+								<Coffee class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'qrcode'}
+								<QrCode class="w-5 h-5 text-purple-300 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'bookopen'}
+								<BookOpen class="w-5 h-5 text-pink-300 mt-0.5 flex-shrink-0" />
+							{:else if feature.icon === 'home'}
+								<Home class="w-5 h-5 text-amber-300 mt-0.5 flex-shrink-0" />
+							{:else}
+								<Star class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+							{/if}
 							<div>
 								<span class="font-medium text-white">{feature.name}</span>
 								<p class="text-sm text-purple-300">{feature.description}</p>
