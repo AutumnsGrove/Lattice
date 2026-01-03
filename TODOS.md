@@ -426,6 +426,28 @@ GET https://og.grove.place/?title=X&subtitle=Y&accent=HEX
   - Custom seasonal slide content
   - Swipe, drag, and keyboard navigation hints
 
+### Color Palette Showcase Page — FUTURE
+> **Priority:** Low — Nice-to-have for design consistency documentation
+
+Create a dedicated `/vineyard/palettes` page showcasing ALL project color palettes:
+
+**Palettes to Display:**
+- `grove` — Core green (50-950)
+- `domain` — Admin purple/violet (50-900)
+- `forage` — Teal for Forage branding (50-950)
+- `neutral` — Warm stone tones for glass dark mode (50-950)
+- `cream` / `bark` — Base light/dark colors
+- Tailwind defaults we rely on: `amber`, `red`, etc.
+
+**Page Features:**
+- [ ] Color swatches with hex codes (click to copy)
+- [ ] Light/dark mode toggle to see palette contrast
+- [ ] Usage notes (where each palette is used)
+- [ ] Accessibility contrast checker (WCAG AA/AAA)
+- [ ] Example components using each palette
+
+**Location:** `packages/engine/src/routes/vineyard/palettes/+page.svelte`
+
 ---
 
 ## Nature Assets Migration (Future)
