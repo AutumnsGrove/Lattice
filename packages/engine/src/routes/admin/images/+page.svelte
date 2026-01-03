@@ -366,9 +366,7 @@
   <!-- Upload Section -->
   <section class="upload-section">
     <Glass variant="tint" intensity="light"
-      class="drop-zone"
-      class:dragging={isDragging}
-      class:uploading={uploading}
+      class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''}"
       role="button"
       tabindex="0"
       aria-label="Drop zone for image uploads"
@@ -505,7 +503,7 @@
 
       <div class="uploads-list">
         {#each uploads as upload (upload.id)}
-          <GlassCard variant="default" class="upload-card" class:success={upload.status === 'success'} class:duplicate={upload.status === 'duplicate'} class:error={upload.status === 'error'}>
+          <GlassCard variant="default" class="upload-card {upload.status === 'success' ? 'success' : ''} {upload.status === 'duplicate' ? 'duplicate' : ''} {upload.status === 'error' ? 'error' : ''}">
             <div class="upload-header">
               <span class="upload-name">{upload.name}</span>
               <span class="upload-badge" class:processing={upload.status === 'processing'} class:success={upload.status === 'success'} class:duplicate={upload.status === 'duplicate'} class:error={upload.status === 'error'}>

@@ -182,7 +182,7 @@
 
   <div class="editor-layout">
     <!-- Metadata Panel -->
-    <GlassCard variant="frosted" class="metadata-panel" class:collapsed={detailsCollapsed}>
+    <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
       <div class="panel-header">
         <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
         <button
