@@ -57,9 +57,17 @@
 
 	function startElapsedTimers() {
 		if (timerInterval) return;
+
 		// Initialize elapsed times for running jobs
+		// Note: This is called only when runningJobIds.length > 0 (from $effect above),
+		// which is derived from jobs (server-loaded data), so jobs should always be populated
 		const newTimers: Record<string, number> = { ...elapsedTimers };
-		for (const job of jobs.filter(j => j.status === 'running' || j.status === 'pending')) {
+		const runningJobs = jobs.filter(j => j.status === 'running' || j.status === 'pending');
+
+		// Defensive: Only initialize if we have jobs with valid start times
+		if (runningJobs.length === 0) return;
+
+		for (const job of runningJobs) {
 			if (job.started_at) {
 				newTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
 			}

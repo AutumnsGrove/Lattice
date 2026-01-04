@@ -70,16 +70,20 @@
 		{
 			id: 'complete',
 			title: "You're Ready!",
-			get description() {
-				return `Your blog is waiting at ${data.user?.username || 'your'}.grove.place. Time to write something beautiful.`;
-			},
+			description: 'placeholder', // Will be computed reactively
 			location: 'Your blog',
 			url: null,
 			image: null
 		}
 	] as const;
 
-	const currentTourStop = $derived(tourStops[currentStep]);
+	// Compute current tour stop with reactive description for final step
+	const currentTourStop = $derived({
+		...tourStops[currentStep],
+		description: tourStops[currentStep].id === 'complete'
+			? `Your blog is waiting at ${data.user?.username || 'your'}.grove.place. Time to write something beautiful.`
+			: tourStops[currentStep].description
+	});
 	const isFirstStep = $derived(currentStep === 0);
 	const isLastStep = $derived(currentStep === tourStops.length - 1);
 	const progress = $derived(((currentStep + 1) / tourStops.length) * 100);
