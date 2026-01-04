@@ -11,17 +11,27 @@
 
   let { data } = $props();
 
-  // Form state - initialized from loaded data
-  let title = $state(data.post.title || "");
-  let slug = $state(data.post.slug || "");
-  let date = $state(data.post.date || new Date().toISOString().split("T")[0]);
-  let description = $state(data.post.description || "");
-  let tagsInput = $state(
-    Array.isArray(data.post.tags) ? data.post.tags.join(", ") : ""
-  );
-  let font = $state(/** @type {any} */ (data.post).font || "default");
-  let content = $state(data.post.markdown_content || "");
-  let gutterItems = $state(data.post.gutter_content ? JSON.parse(/** @type {string} */ (data.post.gutter_content)) : []);
+  // Form state - initialized from loaded data (synced via effect)
+  let title = $state("");
+  let slug = $state("");
+  let date = $state("");
+  let description = $state("");
+  let tagsInput = $state("");
+  let font = $state("default");
+  let content = $state("");
+  let gutterItems = $state(/** @type {any[]} */ ([]));
+
+  // Sync form state when data changes (e.g., navigating to different post)
+  $effect(() => {
+    title = data.post.title || "";
+    slug = data.post.slug || "";
+    date = data.post.date || new Date().toISOString().split("T")[0];
+    description = data.post.description || "";
+    tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
+    font = /** @type {any} */ (data.post).font || "default";
+    content = data.post.markdown_content || "";
+    gutterItems = data.post.gutter_content ? JSON.parse(/** @type {string} */ (data.post.gutter_content)) : [];
+  });
 
   // Editor reference for anchor insertion
   /** @type {any} */

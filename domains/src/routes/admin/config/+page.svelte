@@ -1,15 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { SEARCH_DEFAULTS } from '$lib/config';
+	import { untrack } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Form state initialized from config
-	let maxBatches = $state(data.config?.max_batches || SEARCH_DEFAULTS.MAX_BATCHES);
-	let candidatesPerBatch = $state(data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH);
-	let targetGoodResults = $state(data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS);
-	let creativity = $state(data.config?.creativity || SEARCH_DEFAULTS.CREATIVITY);
-	let rdapDelaySeconds = $state(data.config?.rdap_delay_seconds || SEARCH_DEFAULTS.RDAP_DELAY_SECONDS);
+	// Form state initialized from config - using untrack to capture initial values
+	let maxBatches = $state(untrack(() => data.config?.max_batches || SEARCH_DEFAULTS.MAX_BATCHES));
+	let candidatesPerBatch = $state(untrack(() => data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH));
+	let targetGoodResults = $state(untrack(() => data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS));
+	let creativity = $state(untrack(() => data.config?.creativity || SEARCH_DEFAULTS.CREATIVITY));
+	let rdapDelaySeconds = $state(untrack(() => data.config?.rdap_delay_seconds || SEARCH_DEFAULTS.RDAP_DELAY_SECONDS));
 
 	// UI state
 	let isSaving = $state(false);

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { untrack } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -125,7 +126,7 @@
 	let isLoadingResults = $state(false);
 	let isSubmittingFollowup = $state(false);
 	let errorMessage = $state('');
-	let currentJob = $state(data.currentJob);
+	let currentJob = $state(untrack(() => data.currentJob));
 	let jobResults = $state<DomainResult[]>([]);
 	let pricingSummary = $state<PricingSummary | null>(null);
 	let tokenUsage = $state<TokenUsage | null>(null);

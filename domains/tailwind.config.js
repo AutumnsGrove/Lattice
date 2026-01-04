@@ -31,7 +31,8 @@ export default {
 					600: '#7c3aed',
 					700: '#6d28d9',
 					800: '#5b21b6',
-					900: '#4c1d95'
+					900: '#4c1d95',
+					950: '#2e1065'
 				},
 				// Forage brand colors (teal - for the search/discovery aesthetic)
 				forage: {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { untrack } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -7,9 +8,9 @@
 	let syncMessage = $state<string | null>(null);
 
 	// Reactive jobs state for live updates
-	let jobs = $state(data.jobs);
+	let jobs = $state(untrack(() => data.jobs));
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
-	let elapsedTimers: Record<string, number> = {};
+	let elapsedTimers = $state<Record<string, number>>({});
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 	// Show auto-sync result notification

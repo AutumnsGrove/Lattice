@@ -9,8 +9,8 @@
 	let currentStep = $state(0);
 	let showSkipConfirm = $state(false);
 
-	// Tour stops configuration
-	const tourStops = [
+	// Tour stops configuration - use $derived to reference props in closures
+	const tourStops = $derived([
 		{
 			id: 'welcome',
 			title: 'Welcome to the Tour!',
@@ -75,7 +75,7 @@
 			url: null,
 			image: null
 		}
-	];
+	]);
 
 	const currentTourStop = $derived(tourStops[currentStep]);
 	const isFirstStep = $derived(currentStep === 0);

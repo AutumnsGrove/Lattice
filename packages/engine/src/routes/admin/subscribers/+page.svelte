@@ -16,7 +16,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let subscribers: Subscriber[] = $state.snapshot(data.subscribers);
+	let subscribers: Subscriber[] = $derived(data.subscribers);
 	let copiedAll = $state(false);
 	let copiedEmail = $state<string | null>(null);
 

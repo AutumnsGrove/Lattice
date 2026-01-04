@@ -5,11 +5,18 @@
 
 	let { data, form } = $props();
 
-	// Form state
-	let displayName = $state(data.user?.displayName || '');
+	// Form state - use $derived for values initialized from props
+	let displayName = $state('');
 	let username = $state('');
 	let favoriteColor = $state<string | null>(null);
 	let selectedInterests = $state<string[]>([]);
+
+	// Initialize displayName from props
+	$effect(() => {
+		if (data.user?.displayName && !displayName) {
+			displayName = data.user.displayName;
+		}
+	});
 
 	// Username validation state
 	let usernameStatus = $state<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
@@ -219,12 +226,13 @@
 
 				<div class="grid grid-cols-2 gap-2">
 					{#each interests as interest}
+						{@const Icon = interest.icon}
 						<button
 							type="button"
 							onclick={() => toggleInterest(interest.id)}
 							class="flex items-center gap-2 p-3 rounded-lg backdrop-blur-sm border text-left text-sm transition-all {selectedInterests.includes(interest.id) ? 'bg-white/50 dark:bg-slate-800/50 border-primary' : 'bg-white/20 dark:bg-slate-800/20 border-white/30 dark:border-slate-700/30 hover:bg-white/40 dark:hover:bg-slate-800/40'}"
 						>
-							<svelte:component this={interest.icon} class="w-4 h-4" />
+							<Icon class="w-4 h-4" />
 							<span class="text-foreground">{interest.label}</span>
 						</button>
 					{/each}

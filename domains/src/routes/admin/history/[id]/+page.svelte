@@ -1,16 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { untrack } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	// Reactive state for live updates
-	let job = $state(data.job);
-	let results = $state(data.results);
+	let job = $state(untrack(() => data.job));
+	let results = $state(untrack(() => data.results));
 	let eventSource: EventSource | null = null;
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
 	let elapsedSeconds = $state(0);
-	let seenDomainIds = $state<Set<string>>(new Set(data.results.map(r => r.domain)));
+	let seenDomainIds = $state<Set<string>>(untrack(() => new Set(data.results.map(r => r.domain))));
 	let newDomainIds = $state<Set<string>>(new Set());
 	let domainIdeaStatus = $state<{ available: boolean; checked: boolean; price_cents?: number } | null>(null);
 
