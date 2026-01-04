@@ -8,9 +8,162 @@
 
 The internet used to be a place of personal expression. Somewhere along the way, we traded that for algorithms and engagement metrics. Grove is a return to something simpler: a place where people can plant their thoughts and watch them grow.
 
-These names aren't just branding. They're the language of an ecosystem. Each one draws from the same soil: forests, growth, shelter, connection. Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks. The oldest trees nurture the saplings. 
+These names aren't just branding. They're the language of an ecosystem. Each one draws from the same soil: forests, growth, shelter, connection. Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks. The oldest trees nurture the saplings.
 
 This is how we build.
+
+---
+
+# Core Infrastructure
+
+*The foundation everything grows from*
+
+---
+
+## Lattice
+**Core Platform** · `npm: @autumnsgrove/lattice`
+**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+
+A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
+
+Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns: all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
+
+**Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts: related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
+
+---
+
+# Platform Services
+
+*Essential services that power every Grove blog*
+
+---
+
+## Heartwood
+**Authentication** · `heartwood.grove.place`
+**Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
+
+Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
+
+Heartwood is centralized authentication for the Grove ecosystem. One identity, verified and protected, that works across every Grove property. Your heartwood is yours. It proves you are who you say you are.
+
+---
+
+## Arbor
+**Admin Panel** · `{blog}.grove.place/admin`
+
+An arbor is a garden structure that supports climbing plants: structured, nurturing, and essential for healthy growth. It's where you manage and cultivate your corner of the grove.
+
+Arbor is Grove's blogger admin panel where users manage content, customize their site, and configure settings. Designed to be minimal and anxiety-free with quick navigation, instant saves, and a warm aesthetic matching Grove's cozy tea-shop vibe. No real-time analytics dashboards breeding anxiety. Just write, publish, done.
+
+---
+
+## Plant
+**Onboarding** · `plant.grove.place`
+
+A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.
+
+Plant is Grove's onboarding system: the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets you publishing within minutes. You arrive as a visitor. You leave with a home.
+
+---
+
+## Amber
+**Storage Management** · `amber.grove.place`
+**Repository:** [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)
+
+Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.
+
+Amber is Grove's unified storage management system. Every file you upload (blog images, email attachments, profile pictures) is preserved in Amber, organized and accessible from one place. See what's using your space. Download and export your data. Clean up what you don't need. Buy more when you need it. Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove, made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
+
+---
+
+## Foliage
+**Theming System** · `foliage.grove.place`
+**Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
+
+Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
+
+Foliage is visual customization for your blog, from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it *yours*. Your foliage is how the world sees your corner of the grove.
+
+---
+
+## Rings
+**Analytics** · *Integrated into admin dashboard*
+
+Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
+
+Rings is analytics for writers, not marketers. No public view counts breeding anxiety. No leaderboards. No real-time dopamine hits. Just private insights about your own growth: who's reading, what resonates, how your garden is growing over time. Delayed by design, reflective by nature. Your rings are yours alone.
+
+---
+
+## Clearing
+**Status Page** · `status.grove.place`
+
+A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.
+
+Clearing is Grove's public status page: transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without needing to contact support.
+
+---
+
+## Waystone
+**Help Center** · *(integrated)*
+
+Waystones are the markers travelers leave along forest paths, guiding those who follow, showing the way forward.
+
+Waystone is Grove's built-in help center: searchable documentation, contextual help buttons throughout the interface, and a lantern to light your path when you're lost. Not an external docs site, not a separate login. Help is where you need it, not hidden away. Clear about what Grove can and can't do. Text-first for easy updates as the platform evolves.
+
+*Trail markers that guide you through the forest.*
+
+---
+
+## Centennial
+**Domain Preservation** · *(feature)*
+
+A century is the lifetime of an oak. It's the span between a sapling taking root and becoming something people gather beneath for shade.
+
+Centennial is Grove's promise that your words can have that same longevity. When you've been part of Grove long enough to put down real roots (12 cumulative months of Sapling+ membership), your site earns Centennial status. Your `name.grove.place` domain stays online for 100 years from the day you planted it—even if you stop paying, even after you're gone.
+
+*Some trees outlive the people who planted them.*
+
+---
+
+# Content & Community
+
+*Writing, moderation, and social features*
+
+---
+
+## Wisp
+**Writing Assistant** · *Integrated into editor*
+
+A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.
+
+Wisp is Grove's ethical writing assistant. It helps polish your voice without replacing it: grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Just subtle nudges from a tool that disappears into the background when you don't need it.
+
+**Fireside** is a mode of Wisp for writers who freeze at the blank page. Some people can't start writing, but they have no trouble *talking*. Fireside is a conversation that becomes a post. Wisp asks questions, you answer naturally, and your words get organized into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+
+All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer, and sometimes, a good listener.*
+
+---
+
+## Reeds
+**Comments System** · *(integrated)*
+
+Reeds sway together at the water's edge, whispering in the breeze: a gentle murmur of community.
+
+Reeds is Grove's comment system, supporting both private replies (author-only) and public conversations (author-moderated). A dual system that encourages thoughtful engagement while giving blog authors full control over their public-facing content. Private replies remove the performance anxiety of public commenting. No reactions on comments, just threaded replies. HN-style simplicity.
+
+*Whisper together at the water's edge.*
+
+---
+
+## Thorn
+**Content Moderation** · *(internal)*
+
+Thorns protect plants from harm without being aggressive. They're natural, protective, and guard the grove from harmful content.
+
+Thorn is Grove's automated content moderation system: privacy-first, context-aware, and designed to protect without surveillance. Zero human eyes on user data during automated review. Immediate deletion of all content after review completes. No training on user data—ever. Context-aware decisions rather than keyword matching.
+
+*Every rose has thorns for protection.*
 
 ---
 
@@ -25,6 +178,51 @@ Meadow is social media that remembers what "social" means. No public metrics bre
 
 ---
 
+## Trails
+**Personal Roadmaps** · `username.grove.place/trail`
+
+A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
+
+Trails lets Grove users share their own roadmaps with the world. Whether you're building a project, planning a content series, or just charting where your creative work is headed, Trails gives you a place to show the journey. Create waypoints marking milestones, group them into phases with custom names, and let visitors follow along as you make progress.
+
+For those who want to dream bigger: Oak and Evergreen users can bring the full Grove aesthetic to their trails with seasonal themes, nature decorations, custom assets. Or keep it simple with a clean timeline. Your trail, your way.
+
+**Templates available for:** Writers planning content series, developers building in public, musicians tracking album progress, restaurants showing seasonal menus, and more.
+
+*The path becomes clear by walking it.*
+
+---
+
+# Standalone Tools
+
+*Independent tools that integrate with Grove*
+
+---
+
+## Ivy
+**Email** · `ivy.grove.place`
+**Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
+
+Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
+
+Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means we can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+
+---
+
+## Bloom
+**Remote Coding Infrastructure** · `bloom.grove.place`
+**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
+
+A bloom is the brief, brilliant moment when a flower opens: ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+
+Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Send a task from your phone during lunch. Check back later: Bloom worked through it, saved the results, and cleaned up after itself. Infrastructure that exists only when needed, costs almost nothing, and never overstays its welcome.
+
+It blooms, does its work, and fades away. By morning, there's only the code it left behind.
+
+*Brief, brilliant, gone.*
+
+---
+
 ## Forage
 **Domain Discovery** · `forage.grove.place`
 **Repository:** [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)
@@ -35,45 +233,13 @@ Forage is an AI-powered domain hunting tool that turns weeks of frustrating sear
 
 ---
 
-## Foliage
-**Theming System** · `foliage.grove.place`
-**Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
+## Nook
+**Private Video Sharing** · `nook.grove.place`
+**Repository:** [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook)
 
-Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.
+A nook is a tucked-away corner, a quiet space set apart from the main room. Somewhere intimate and private.
 
-Foliage is visual customization for your blog, from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it *yours*. Your foliage is how the world sees your corner of the grove.
-
----
-
-## Heartwood
-**Authentication** · `heartwood.grove.place`
-**Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
-
-Cut a tree open and you'll find the heartwood at the center, the densest, most durable part. It's what remains when everything else falls away. It's the authentic core.
-
-Heartwood is centralized authentication for the Grove ecosystem. One identity, verified and protected, that works across every Grove property. Your heartwood is yours. It proves you are who you say you are.
-
----
-
-## Patina
-**Backup System** · *Internal service*
-**Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
-
-A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.
-
-Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. You'll probably never think about it, and that's the point. When disaster strikes, Patina is already there, holding everything safe beneath its protective layer.
-
-*Age as armor. Time as protection.*
-
----
-
-## Trove
-**Library Book Discovery** · `trove.grove.place`
-**Repository:** [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove)
-
-A trove is a collection of precious things, gathered and waiting to be discovered.
-
-Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time, with visual markers showing exactly where they sit on the shelf. No more decision paralysis. No more walking out empty-handed. Just treasures, found.
+Nook is where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you've been meaning to share for over a year. Intimate video sharing for close connections.
 
 ---
 
@@ -97,106 +263,45 @@ Give Aria a song you love, and it builds a playlist of tracks that share the sam
 
 ---
 
-## Lattice
-**Core Platform** · `npm: @autumnsgrove/lattice`
-**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+## Trove
+**Library Book Discovery** · `trove.grove.place`
+**Repository:** [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove)
 
-A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
+A trove is a collection of precious things, gathered and waiting to be discovered.
 
-Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns: all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
-
-**Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts: related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
+Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time, with visual markers showing exactly where they sit on the shelf. No more decision paralysis. No more walking out empty-handed. Just treasures, found.
 
 ---
 
-## Plant
-**Onboarding** · `plant.grove.place`
+# Operations
 
-A seedbed is where seeds are planted and nurtured until they're ready to grow on their own. It's the starting place: carefully prepared soil, the right conditions, gentle care until roots take hold.
-
-Plant is Grove's onboarding system: the complete flow for new users from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience that gets you publishing within minutes. You arrive as a visitor. You leave with a home.
+*Internal infrastructure keeping Grove running*
 
 ---
 
-## Rings
-**Analytics** · *Integrated into admin dashboard*
+## Vista
+**Infrastructure Observability** · `vista.grove.place`
+**Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
 
-Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
+A vista is a clearing in the forest where the canopy opens up, a place where you can finally see. The whole grove stretches out before you: what's thriving, what's struggling, what needs attention.
 
-Rings is analytics for writers, not marketers. No public view counts breeding anxiety. No leaderboards. No real-time dopamine hits. Just private insights about your own growth: who's reading, what resonates, how your garden is growing over time. Delayed by design, reflective by nature. Your rings are yours alone.
+Vista is infrastructure observability for the Grove platform. It monitors every worker, database, storage bucket, and KV namespace, tracking health, latency, error rates, and costs. Real-time dashboards show the state of the entire ecosystem at a glance. When something needs attention, Vista sends an alert before users ever notice. Ninety days of history, always available, quietly watching.
 
----
+Rings tells writers about their readers. Vista tells the grove keeper about the grove itself.
 
-## Ivy
-**Email** · `ivy.grove.place`
-**Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
-
-Ivy climbs the lattice. It's the living connection that grows along the framework, reaching out, intertwining, linking one point to another.
-
-Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first mail client for your `@grove.place` address. Professional correspondence for your blog. A place where contact form submissions arrive as threads. Zero-knowledge encryption means we can't read your mail; it's yours alone. One address, chosen once, that's authentically you.
+*Where you go to see everything clearly.*
 
 ---
 
-## Amber
-**Storage Management** · `amber.grove.place`
-**Repository:** [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)
+## Patina
+**Backup System** · *Internal service*
+**Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
 
-Amber is fossilized tree resin, preserving moments in time, capturing life in suspended animation. It holds what matters, protecting it for centuries.
+A patina is the thin layer that forms on copper and bronze over time. Not decay, but protection. It's what happens when something weathers the world and comes out stronger. The green of old statues, the warmth of handled wood, the soft wear on a favorite book's spine.
 
-Amber is Grove's unified storage management system. Every file you upload (blog images, email attachments, profile pictures) is preserved in Amber, organized and accessible from one place. See what's using your space. Download and export your data. Clean up what you don't need. Buy more when you need it. Amber isn't trying to be Dropbox or Google Drive. It's the storage layer that already exists in Grove, made visible and manageable. Every paid user already has storage; Amber is how they understand and control it.
+Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. You'll probably never think about it, and that's the point. When disaster strikes, Patina is already there, holding everything safe beneath its protective layer.
 
----
-
-## Shade
-**AI Content Protection** · `grove.place/shade`
-
-Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.
-
-Shade is Grove's layered defense against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade is a quiet refusal. robots.txt directives, meta tags, rate limiting, WAF rules, and legal documentation, all working together so writers can write without worrying about becoming someone else's training data.
-
-*In a forest full of harvesters, this grove stays shaded.*
-
----
-
-## Trails
-**Personal Roadmaps** · `username.grove.place/trail`
-
-A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.
-
-Trails lets Grove users share their own roadmaps with the world. Whether you're building a project, planning a content series, or just charting where your creative work is headed, Trails gives you a place to show the journey. Create waypoints marking milestones, group them into phases with custom names, and let visitors follow along as you make progress.
-
-For those who want to dream bigger: Oak and Evergreen users can bring the full Grove aesthetic to their trails with seasonal themes, nature decorations, custom assets. Or keep it simple with a clean timeline. Your trail, your way.
-
-**Templates available for:** Writers planning content series, developers building in public, musicians tracking album progress, restaurants showing seasonal menus, and more.
-
-*The path becomes clear by walking it.*
-
----
-
-## Vineyard
-**Asset & Tool Showcase** · `*.grove.place/vineyard`
-
-A vineyard is where vines are tended before they're ready: rows of growth, organized and visible, trained along the lattice. It's part nursery, part gallery. A place to see what's growing and understand how it all fits together.
-
-Vineyard is the documentation and demo pattern for every Grove tool. Each product gets its own `/vineyard` route: `amber.grove.place/vineyard`, `ivy.grove.place/vineyard`, `foliage.grove.place/vineyard`. Inside, you'll find working demos where possible, visual mockups for what's coming, feature documentation, and the philosophy behind each tool. It's where you go to understand what something does before you use it, or to dream about what it will become.
-
-Some vineyards showcase mature vines ready for harvest. Others tend young shoots still finding their shape. Both belong here. The vineyard doesn't hide what's unfinished, it celebrates the growing.
-
-*Every vine starts somewhere.*
-
----
-
-## Bloom
-**Remote Coding Infrastructure** · `bloom.grove.place`
-**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
-
-A bloom is the brief, brilliant moment when a flower opens: ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
-
-Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Send a task from your phone during lunch. Check back later: Bloom worked through it, saved the results, and cleaned up after itself. Infrastructure that exists only when needed, costs almost nothing, and never overstays its welcome.
-
-It blooms, does its work, and fades away. By morning, there's only the code it left behind.
-
-*Brief, brilliant, gone.*
+*Age as armor. Time as protection.*
 
 ---
 
@@ -215,57 +320,142 @@ It's the invisible network beneath everything. You don't see it. You don't think
 
 ---
 
-## Vista
-**Infrastructure Observability** · `vista.grove.place`
-**Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
+## Shade
+**AI Content Protection** · `grove.place/shade`
 
-A vista is a clearing in the forest where the canopy opens up, a place where you can finally see. The whole grove stretches out before you: what's thriving, what's struggling, what needs attention.
+Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.
 
-Vista is infrastructure observability for the Grove platform. It monitors every worker, database, storage bucket, and KV namespace, tracking health, latency, error rates, and costs. Real-time dashboards show the state of the entire ecosystem at a glance. When something needs attention, Vista sends an alert before users ever notice. Ninety days of history, always available, quietly watching.
+Shade is Grove's layered defense against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade is a quiet refusal. robots.txt directives, meta tags, rate limiting, WAF rules, and legal documentation, all working together so writers can write without worrying about becoming someone else's training data.
 
-Rings tells writers about their readers. Vista tells the grove keeper about the grove itself.
-
-*Where you go to see everything clearly.*
+*In a forest full of harvesters, this grove stays shaded.*
 
 ---
 
-## Wisp
-**Writing Assistant** · *Integrated into editor*
+## Seasons
+**Versioning System** · *(internal)*
 
-A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.
+Seasons mark the passage of time in a forest. Spring brings new growth, summer matures it, autumn harvests, winter rests. Each season builds on the last, each version a new ring in the trunk.
 
-Wisp is Grove's ethical writing assistant. It helps polish your voice without replacing it: grammar checks, tone analysis, readability scores. Never generation, never expansion, never brainstorming. Just subtle nudges from a tool that disappears into the background when you don't need it.
-
-**Fireside** is a mode of Wisp for writers who freeze at the blank page. Some people can't start writing, but they have no trouble *talking*. Fireside is a conversation that becomes a post. Wisp asks questions, you answer naturally, and your words get organized into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
-
-All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer, and sometimes, a good listener.*
+Seasons is Grove's versioning system: how Lattice evolves, how updates propagate to customer repositories, how the ecosystem grows together through breaking changes and gentle improvements alike. Semantic versioning with meaning—major versions are new seasons, minor versions are weather patterns, patches are daily cycles.
 
 ---
+
+# Patterns
+
+*Reusable patterns and architectural foundations*
+
+These are architectural patterns that power the Grove infrastructure. They follow the same naming philosophy but are internal systems rather than user-facing products. You won't see them in marketing, but they're the foundation everything else grows on.
+
+---
+
+## Prism
+**Design System** · *All Grove properties*
+
+Step into a cathedral in the forest. Your eyes adjust to the dim sanctuary, and then you look up—massive stained glass windows transforming ordinary sunlight into something that takes your breath away. A prism doesn't just transmit light. It *transfigures* it.
+
+Prism is Grove's design system: glassmorphism, seasonal theming, and organic randomization. Every page is a *place* you visit—warm like a midnight tea shop, clear like good documentation. Translucent surfaces that don't merely display—they transform.
+
+*Light enters plain and emerges transformed.*
+
+---
+
+## Loom
+**Real-Time Coordination** · *Durable Objects layer*
+
+Loom is Grove's coordination layer, built on Cloudflare Durable Objects. It's the invisible structure that makes everything feel seamless: auth that works across all properties, state that stays in sync, real-time features that just work.
+
+A loom is the framework where threads come together. Loom weaves together SessionDO, TenantDO, and PostDO into a coherent fabric.
+
+*The framework where Grove's threads come together.*
+
+---
+
+## Firefly
+**Ephemeral Server Pattern** · *Used by Bloom, Outpost*
+
+In the forest at dusk, fireflies blink into existence—brief, purposeful flashes of light. They don't stay lit all night. They appear when conditions call for them, do what they need to do, and vanish.
+
+Firefly is Grove's pattern for ephemeral infrastructure. Servers that spin up on demand, complete their work, and tear down automatically. Infrastructure that exists only when needed—costing almost nothing when idle, scaling instantly when called upon.
+
+*A brief light in the darkness.*
+
+---
+
+## Threshold
+**Rate Limiting & Abuse Prevention** · *Security layer*
+
+The forest has boundaries. Threshold enforces them.
+
+Moving beyond naive IP-based limits, Threshold uses Durable Objects for precise per-user, per-tenant, and per-endpoint rate limiting with graceful degradation. Graduated response: warning → slowdown → block → ban. Protection without punishing legitimate users.
+
+---
+
+## Sentinel
+**Load Testing & Scale Validation** · *Testing framework*
+
+The watchful guardian who tests the forest's defenses before the storm.
+
+Sentinel doesn't just ask "can it handle 500 users?"—it asks "what happens to p95 latency during the ramp-up, and which Durable Object becomes the bottleneck first?" Realistic traffic profiles, ramp-up testing, and multi-vector observation.
+
+---
+
+## Songbird
+**Prompt Injection Protection** · *AI security*
+
+In the forest, birds warn each other of danger. The canary alerts first. The kestrel watches and validates. The robin sings the safe response.
+
+Songbird is Grove's three-layer defense against prompt injection attacks. Each layer costs fractions of a cent but protects all Grove AI features from compromised responses. Cheap insurance. Essential protection.
+
+*Three birds, three layers, one defense.*
+
+---
+
+## Vineyard
+**Asset & Tool Showcase** · `*.grove.place/vineyard`
+
+A vineyard is where vines are tended before they're ready: rows of growth, organized and visible, trained along the lattice. It's part nursery, part gallery. A place to see what's growing and understand how it all fits together.
+
+Vineyard is the documentation and demo pattern for every Grove tool. Each product gets its own `/vineyard` route: `amber.grove.place/vineyard`, `ivy.grove.place/vineyard`, `foliage.grove.place/vineyard`. Inside, you'll find working demos where possible, visual mockups for what's coming, feature documentation, and the philosophy behind each tool. It's where you go to understand what something does before you use it, or to dream about what it will become.
+
+Some vineyards showcase mature vines ready for harvest. Others tend young shoots still finding their shape. Both belong here. The vineyard doesn't hide what's unfinished, it celebrates the growing.
+
+*Every vine starts somewhere.*
+
+---
+
+# Reference Tables
 
 ## The Ecosystem
 
 | Name | Purpose | Domain |
 |------|---------|--------|
-| **Meadow** | Social connection | meadow.grove.place |
-| **Forage** | Domain discovery | forage.grove.place |
-| **Foliage** | Theming system | foliage.grove.place |
+| **Lattice** | Core platform | npm package |
 | **Heartwood** | Authentication | heartwood.grove.place |
-| **Patina** | Backup system | *(internal)* |
-| **Trove** | Library book finder | trove.grove.place |
+| **Arbor** | Admin panel | {blog}.grove.place/admin |
+| **Plant** | Onboarding | plant.grove.place |
+| **Amber** | Storage management | amber.grove.place |
+| **Foliage** | Theming system | foliage.grove.place |
+| **Rings** | Analytics | *(integrated)* |
+| **Clearing** | Status page | status.grove.place |
+| **Waystone** | Help center | *(integrated)* |
+| **Centennial** | Domain preservation | *(feature)* |
+| **Wisp** | Writing assistant (+ Fireside) | *(integrated)* |
+| **Reeds** | Comments system | *(integrated)* |
+| **Thorn** | Content moderation | *(internal)* |
+| **Meadow** | Social connection | meadow.grove.place |
+| **Trails** | Personal roadmaps | username.grove.place/trail |
+| **Ivy** | Email | ivy.grove.place |
+| **Bloom** | Remote coding infrastructure | bloom.grove.place |
+| **Forage** | Domain discovery | forage.grove.place |
+| **Nook** | Private video sharing | nook.grove.place |
 | **Outpost** | Minecraft server | mc.grove.place |
 | **Aria** | Music curation | aria.grove.place |
-| **Lattice** | Core platform | npm package |
-| **Plant** | Onboarding | plant.grove.place |
-| **Rings** | Analytics | *(integrated)* |
-| **Ivy** | Email | ivy.grove.place |
-| **Amber** | Storage management | amber.grove.place |
-| **Shade** | AI content protection | grove.place/shade |
-| **Trails** | Personal roadmaps | username.grove.place/trail |
-| **Vineyard** | Asset & tool showcase | *.grove.place/vineyard |
-| **Bloom** | Remote coding infrastructure | bloom.grove.place |
-| **Mycelium** | MCP server | mycelium.grove.place |
+| **Trove** | Library book finder | trove.grove.place |
 | **Vista** | Infrastructure observability | vista.grove.place |
-| **Wisp** | Writing assistant (+ Fireside) | *(integrated)* |
+| **Patina** | Backup system | *(internal)* |
+| **Mycelium** | MCP server | mycelium.grove.place |
+| **Shade** | AI content protection | grove.place/shade |
+| **Seasons** | Versioning system | *(internal)* |
 
 ---
 
@@ -275,26 +465,47 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 
 | Public Name | Internal Name |
 |-------------|---------------|
-| Meadow | GroveSocial |
-| Forage | GroveDomainTool |
-| Foliage | GroveThemes |
+| Lattice | GroveEngine |
 | Heartwood | GroveAuth |
-| Patina | GrovePatina |
-| Trove | TreasureTrove |
+| Arbor | GroveArbor |
+| Plant | Seedbed |
+| Amber | GroveStorage |
+| Foliage | GroveThemes |
+| Rings | GroveAnalytics |
+| Clearing | GroveClear |
+| Waystone | GroveWaystone |
+| Centennial | GroveCentennial |
+| Wisp | GroveWisp |
+| Reeds | GroveReeds |
+| Thorn | GroveThorn |
+| Meadow | GroveSocial |
+| Trails | GroveTrails |
+| Ivy | GroveMail |
+| Bloom | GroveBloom |
+| Forage | GroveDomainTool |
+| Nook | GroveNook |
 | Outpost | GroveMC |
 | Aria | GroveMusic |
-| Lattice | GroveEngine |
-| Plant | Seedbed |
-| Rings | GroveAnalytics |
-| Ivy | GroveMail |
-| Amber | GroveStorage |
-| Shade | GroveShade |
-| Trails | GroveTrails |
-| Vineyard | GroveShowcase |
-| Bloom | GroveBloom |
-| Mycelium | GroveMCP |
+| Trove | TreasureTrove |
 | Vista | GroveMonitor |
-| Wisp | GroveWisp |
+| Patina | GrovePatina |
+| Mycelium | GroveMCP |
+| Shade | GroveShade |
+| Seasons | GroveSeasons |
+
+---
+
+## Patterns Reference
+
+| Pattern | Purpose | Internal Name |
+|---------|---------|---------------|
+| Prism | Design system | GrovePrism |
+| Loom | Real-time coordination | GroveLoom |
+| Firefly | Ephemeral servers | GroveFirefly |
+| Threshold | Rate limiting | GroveThreshold |
+| Sentinel | Load testing | GroveSentinel |
+| Songbird | AI security | GroveSongbird |
+| Vineyard | Tool showcase | GroveShowcase |
 
 ---
 
@@ -306,5 +517,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: December 2025*
+*Last updated: January 2026*
 *Status: Placeholder names, pending launch*

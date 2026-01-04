@@ -27,9 +27,11 @@ Grove specifications define the architecture, interfaces, and implementation det
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Lattice](lattice-spec.md)** | Core framework & multi-tenant engine | **Active** | All components |
+| **[Heartwood](heartwood-spec.md)** | Centralized authentication service | **Active** | All services |
 | **[Engine](engine-spec.md)** | Blog rendering & content management | Active | Lattice, TenantDO |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
+| **[Seasons](seasons-spec.md)** | Semantic versioning system | Active | npm, Renovate |
 
 ### 📊 Monitoring & Analytics
 
@@ -40,23 +42,44 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Vineyard](vineyard-spec.md)** | Vista LoadTest package | **New** | Sentinel, Vista |
 | **[Vista LoadTest](vista-loadtest-spec.md)** | Load testing integration spec | **New** | Sentinel, Vista |
 
-### 🔧 Tools & Services
+### 🔧 Platform Services
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
-| **[Amber](amber-spec.md)** | Image processing & optimization | Active | R2, Engine |
-| **[Arbor](arbor-spec.md)** | Theme system & customization | Active | Engine, TenantDO |
-| **[Bloom](bloom-spec.md)** | Email newsletter system | Planned | Resend, TenantDO |
-| **[Clearing](clearing-spec.md)** | Data export & migration tools | Active | D1, R2 |
+| **[Arbor](arbor-spec.md)** | Admin panel for blog management | Active | Engine, TenantDO |
+| **[Plant](plant-spec.md)** | Tenant onboarding system | Active | Heartwood, Stripe |
+| **[Amber](amber-spec.md)** | Storage management system | Active | R2, Engine |
+| **[Foliage](foliage-project-spec.md)** | Theming & customization | Active | Engine, TenantDO |
+| **[Clearing](clearing-spec.md)** | Public status page | Planned | All services |
+| **[Waystone](waystone-spec.md)** | Built-in help center | Planned | All properties |
+| **[Centennial](centennial-spec.md)** | 100-year domain preservation | Active | Membership tiers |
 
-### 🛡️ Security & Operations
+### 💬 Content & Community
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
-| **[Mycelium](mycelium-spec.md)** | Secret management & rotation | Active | All services |
-| **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
-| **[Renovate](renovate-spec.md)** | Dependency updates & security | Active | GitHub, pnpm |
-| **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
+| **[Wisp](wisp-spec.md)** | Ethical writing assistant | Planned | Editor integration |
+| **[Reeds](reeds-spec.md)** | Comments system | Planned | PostDO, TenantDO |
+| **[Thorn](thorn-spec.md)** | Content moderation | Planned | AI, Posts |
+| **[Trails](trails-spec.md)** | Personal roadmaps | Active | Blog routes |
+
+### 🛠️ Standalone Tools
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[Ivy](ivy-mail-spec.md)** | Privacy-first email | Building | R2, Resend |
+| **[Bloom](bloom-spec.md)** | Remote AI coding infrastructure | Building | Firefly pattern |
+| **[Forage](forage-spec.md)** | AI domain discovery | Active | OpenRouter |
+
+### 🛡️ Operations & Infrastructure
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[Vista](vista-spec.md)** | Infrastructure observability | Planned | All services |
+| **[Patina](patina-spec.md)** | Automated backups | Active | D1, R2 |
+| **[Mycelium](mycelium-spec.md)** | MCP server for AI agents | Building | All Grove services |
+| **[Shade](shade-spec.md)** | AI content protection | Active | All blogs |
+| **[Renovate](renovate-spec.md)** | Dependency updates | Active | GitHub, pnpm |
 
 ---
 
