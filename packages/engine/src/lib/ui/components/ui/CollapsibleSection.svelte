@@ -16,12 +16,7 @@
 		...restProps
 	}: Props = $props();
 
-	let isOpen = $state(false);
-
-	// Sync with defaultOpen prop when it changes
-	$effect(() => {
-		isOpen = defaultOpen;
-	});
+	let isOpen = $state(defaultOpen);
 
 	function toggle() {
 		isOpen = !isOpen;

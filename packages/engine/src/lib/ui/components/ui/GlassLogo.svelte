@@ -72,7 +72,8 @@
 	const isWinter = $derived(season === 'winter');
 
 	// Generate unique ID for SVG filters to avoid conflicts when multiple logos exist
-	const uniqueId = $derived(filterId ?? `glass-logo-${Math.random().toString(36).slice(2, 9)}`);
+	const randomId = `glass-logo-${Math.random().toString(36).slice(2, 9)}`;
+	const uniqueId = $derived(filterId ?? randomId);
 
 	// Breathing speed presets
 	const BREATHING_SPEEDS = {
