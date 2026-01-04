@@ -1,71 +1,146 @@
 # Asset Playground - Implementation Plan
 
+> **Version**: 1.0 (Planning)
+> **Route**: `/playground`
+> **Inspiration**: Evolution of `/vineyard` pattern - from viewing components to composing scenes
+
 ## Overview
 
-Create an interactive canvas-based playground where users can drag and drop Grove's nature components and assets to design custom multi-asset scenes (like grove compositions with lattices, trees, creatures, etc.).
+Create an interactive canvas-based playground where users drag and drop Grove's nature components to design custom multi-asset scenes. Think of it as the Vineyard's interactive prop controls, but spatially - users can compose grove scenes with lattices, trees, creatures, and more.
+
+---
+
+## Decisions (User Confirmed)
+
+| Decision | Answer |
+|----------|--------|
+| **Route** | `/playground` - standalone creative tool |
+| **Persistence** | localStorage for v1, database stubs for later |
+| **Export** | Required - PNG export (and possibly SVG) |
+| **Custom Images** | Not in v1, add stubs for future CDN integration |
+| **Animation** | Yes, toggleable - animated assets can animate |
+| **Prop Configuration** | Yes, all component props are configurable |
 
 ---
 
 ## Core Features
 
 ### 1. Canvas System
-- **Blank canvas** - Full viewport workspace with pan/zoom support
-- **Infinite canvas** - Allow scrolling/panning beyond viewport
-- **Background options** - Sky gradients, solid colors, or transparent
+- **Blank canvas** - Full viewport workspace
+- **Pan/zoom** - Navigate large scenes (scroll wheel + drag)
+- **Background options** - Sky gradients, solid colors, or transparent for export
+- **Viewport info** - Show current zoom level, canvas dimensions
 
-### 2. Drag-and-Drop Asset Placement
-- **Asset palette** - Sidebar listing all available components by category:
-  - Trees (Aspen, Birch, Cherry, Pine)
-  - Creatures (Bee, Bird, Butterfly, Deer, Firefly, Owl, Rabbit, Squirrel, etc.)
-  - Botanical (Acorn, Berry, Leaf, Vine, Fern, etc.)
-  - Ground (Bush, Mushroom, Rock, Stump, Grass, Flowers)
-  - Sky (Cloud, Moon, Star, Sun, Rainbow)
-  - Structural (Lattice, LatticeWithVine, Birdhouse, Bridge, Lantern, GardenGate)
-  - Water (Pond, Stream, LilyPad, Reeds)
-  - Weather (Snowflake, SnowfallLayer, FallingLeavesLayer)
-- **Drag from palette** to canvas
-- **Click to place** as alternative interaction
+### 2. Asset Palette (Sidebar)
+Categorized list of all draggable components:
+
+| Category | Components |
+|----------|------------|
+| **Trees** | TreeAspen, TreeBirch, TreeCherry, TreePine |
+| **Creatures** | Bee, Bird, BirdFlying, Bluebird, Butterfly, Cardinal, Chickadee, Deer, Firefly, Owl, Rabbit, Robin, Squirrel |
+| **Botanical** | Acorn, Berry, DandelionPuff, Leaf, LeafFalling, PetalFalling, PineCone, Vine, FallingLeavesLayer, FallingPetalsLayer |
+| **Ground** | Bush, Crocus, Daffodil, Fern, FlowerWild, GrassTuft, Log, Mushroom, MushroomCluster, Rock, Stump, Tulip |
+| **Sky** | Cloud, CloudWispy, Moon, Rainbow, Star, StarCluster, StarShooting, Sun |
+| **Structural** | Birdhouse, Bridge, FencePost, GardenGate, Lantern, Lattice, LatticeWithVine, StonePath |
+| **Water** | LilyPad, Pond, Reeds, Stream |
+| **Weather** | Snowflake, SnowflakeFalling, SnowfallLayer |
+
+- **Search/filter** - Quick search within palette
+- **Preview thumbnails** - Visual preview in palette
+- **Drag handle** - Clear affordance for dragging
 
 ### 3. Asset Manipulation
 - **Move** - Drag placed assets to reposition
-- **Scale** - Resize assets with handles or input
-- **Rotate** - Optional rotation for certain assets
+- **Scale** - Resize with corner handles or numeric input
+- **Rotate** - Rotation handle or degree input (optional per asset)
 - **Layer order** - Bring forward/send back (z-index control)
-- **Delete** - Remove assets from canvas
-- **Duplicate** - Quick copy of placed assets
+- **Delete** - Remove via keyboard (Delete/Backspace) or button
+- **Duplicate** - Cmd/Ctrl+D or context action
+- **Multi-select** - Shift+click or marquee selection (stretch goal)
 
 ### 4. Snap-to-Grid Mode
-- **Toggle grid** - Show/hide alignment grid
-- **Grid size** - Configurable (16px, 32px, 64px default options)
-- **Snap behavior** - Assets snap to grid intersections when enabled
-- **Free placement** - Hold modifier key to temporarily disable snap
+- **Toggle button** - Grid on/off in toolbar
+- **Grid sizes** - 16px, 32px, 64px (configurable)
+- **Visual grid** - Subtle dotted lines when enabled
+- **Snap behavior** - Assets snap to nearest grid intersection
+- **Override** - Hold Alt/Option to temporarily disable snap while dragging
 
-### 5. Scene Management
-- **New scene** - Start fresh
-- **Save scene** - Store scene data (positions, assets, settings)
-- **Load scene** - Restore previously saved scenes
-- **Export** - Download as PNG/SVG for use elsewhere
+### 5. Props Panel (Vineyard-Style)
+When an asset is selected, show its configurable props:
+
+```
+┌─────────────────────────────┐
+│ TreePine                    │
+├─────────────────────────────┤
+│ Scale: [====●====] 1.0      │
+│ Rotation: [0°___] ↻         │
+│ ─────────────────           │
+│ Component Props:            │
+│ height: [150___] px         │
+│ color: [#2d5a27] 🎨         │
+│ variant: [○ default ● snow] │
+│ animated: [✓]               │
+│ ─────────────────           │
+│ Layer: [▲] 3 [▼]            │
+│ [Duplicate] [Delete]        │
+└─────────────────────────────┘
+```
+
+- Mirrors Vineyard's interactive prop controls
+- Changes apply live to the selected asset
+- Show only relevant props for each component type
+
+### 6. Animation Toggle
+- **Global toggle** - Master animation on/off in toolbar
+- **Per-asset toggle** - In props panel for animated components
+- **Animated assets include**: Firefly, FallingLeavesLayer, FallingPetalsLayer, SnowfallLayer, StarShooting, etc.
+- **Performance note** - May want to pause animations when many are on canvas
+
+### 7. Scene Management
+
+#### Save (localStorage v1)
+- **Auto-save** - Periodically save to localStorage
+- **Named scenes** - User can name their scene
+- **Scene list** - Dropdown of saved scenes
+
+#### Export (Required for v1)
+- **PNG export** - Download canvas as PNG image
+- **SVG export** - Vector format (if feasible with components)
+- **Transparent background** - Option for export
+- **Export dimensions** - Match canvas or custom
+
+#### Future Stubs
+- **Database save** - For authenticated users (placeholder)
+- **Gallery images** - Drag from user's CDN (placeholder)
+- **Share scene** - Public URL (placeholder)
 
 ---
 
 ## Technical Architecture
 
-### Data Structure
+### Data Structures
 
 ```typescript
+// Scene saved to localStorage
 interface PlaygroundScene {
   id: string;
   name: string;
-  canvas: {
-    width: number;
-    height: number;
-    background: string; // color or gradient
-    gridEnabled: boolean;
-    gridSize: number;
-  };
+  version: 1; // For future migrations
+  canvas: CanvasSettings;
   assets: PlacedAsset[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO date
+  updatedAt: string;
+}
+
+interface CanvasSettings {
+  width: number;
+  height: number;
+  background: string; // CSS value (color, gradient, 'transparent')
+  gridEnabled: boolean;
+  gridSize: 16 | 32 | 64;
+  zoom: number;
+  panX: number;
+  panY: number;
 }
 
 interface PlacedAsset {
@@ -74,9 +149,10 @@ interface PlacedAsset {
   category: AssetCategory;
   position: { x: number; y: number };
   scale: number;
-  rotation: number;
+  rotation: number; // degrees
   zIndex: number;
-  props?: Record<string, any>; // Component-specific props
+  props: Record<string, unknown>; // Component-specific props
+  animationEnabled: boolean;
 }
 
 type AssetCategory =
@@ -89,14 +165,23 @@ type AssetCategory =
 
 ```
 packages/engine/src/lib/ui/components/playground/
-├── Playground.svelte           # Main wrapper with state
-├── Canvas.svelte               # The workspace area
-├── AssetPalette.svelte         # Sidebar with draggable assets
+├── Playground.svelte           # Main wrapper - orchestrates everything
+├── Canvas.svelte               # The workspace area with pan/zoom
+├── AssetPalette.svelte         # Sidebar with draggable asset list
+├── PaletteCategory.svelte      # Collapsible category in palette
+├── PaletteItem.svelte          # Individual draggable asset
 ├── PlacedAsset.svelte          # Wrapper for assets on canvas
+├── SelectionBox.svelte         # Selection handles (resize, rotate)
 ├── GridOverlay.svelte          # Visual grid when enabled
-├── Toolbar.svelte              # Top toolbar (grid toggle, export, etc.)
-├── AssetControls.svelte        # Selection handles (scale, rotate, delete)
-├── LayerPanel.svelte           # Optional: layer management sidebar
+├── Toolbar.svelte              # Top bar (grid, zoom, export, etc.)
+├── PropsPanel.svelte           # Right sidebar - Vineyard-style controls
+├── PropControl.svelte          # Individual prop input (reusable)
+├── ExportDialog.svelte         # Export options modal
+├── SceneManager.svelte         # Save/load UI
+├── assetRegistry.ts            # Maps component names to components + metadata
+├── playgroundState.svelte.ts   # Shared state using Svelte 5 runes
+├── types.ts                    # TypeScript interfaces
+├── utils.ts                    # Helper functions (snap, export, etc.)
 └── index.ts                    # Exports
 ```
 
@@ -105,187 +190,320 @@ packages/engine/src/lib/ui/components/playground/
 ```
 packages/engine/src/routes/playground/
 ├── +page.svelte                # Main playground page
-├── +page.server.ts             # Load saved scenes (optional)
+├── +page.ts                    # Client-side only (no SSR needed)
 └── +layout.svelte              # Minimal layout (full-screen canvas)
 ```
 
----
-
-## Implementation Phases
-
-### Phase 1: Core Canvas & Asset Palette
-1. Create `Playground.svelte` with canvas area
-2. Build `AssetPalette.svelte` with categorized asset list
-3. Implement basic drag-from-palette to canvas
-4. Add `PlacedAsset.svelte` wrapper with position state
-5. Enable moving placed assets by dragging
-
-### Phase 2: Grid System & Snapping
-1. Create `GridOverlay.svelte` with configurable size
-2. Add snap-to-grid logic in drag handler
-3. Build `Toolbar.svelte` with grid toggle and size options
-4. Add modifier key (Shift) to disable snap temporarily
-
-### Phase 3: Asset Controls & Selection
-1. Implement asset selection (click to select)
-2. Add `AssetControls.svelte` with resize handles
-3. Implement scale functionality
-4. Add delete action (keyboard + button)
-5. Add duplicate action
-6. Implement z-index controls (layer ordering)
-
-### Phase 4: Scene Persistence
-1. Define scene data structure
-2. Implement save to localStorage (no backend initially)
-3. Add load scene functionality
-4. Optional: Database storage for authenticated users
-
-### Phase 5: Export & Polish
-1. Add PNG export using html2canvas or similar
-2. Add SVG export for vector output
-3. Refine UX with keyboard shortcuts
-4. Add undo/redo (stretch goal)
-
----
-
-## State Management
+### State Management
 
 Using Svelte 5 runes for reactive state:
 
 ```typescript
-// playground.svelte.ts - Shared state
-export const playgroundState = $state({
-  scene: {
-    assets: [] as PlacedAsset[],
+// playgroundState.svelte.ts
+export function createPlaygroundState() {
+  // Scene state
+  let scene = $state<PlaygroundScene>({
+    id: crypto.randomUUID(),
+    name: 'Untitled Scene',
+    version: 1,
     canvas: {
-      width: 1200,
-      height: 800,
-      background: 'var(--sky-gradient)',
+      width: 1920,
+      height: 1080,
+      background: 'linear-gradient(to bottom, #87CEEB, #E0F6FF)',
       gridEnabled: true,
-      gridSize: 32
-    }
-  },
-  selectedAssetId: null as string | null,
-  isDragging: false,
-  dragOffset: { x: 0, y: 0 }
-});
+      gridSize: 32,
+      zoom: 1,
+      panX: 0,
+      panY: 0,
+    },
+    assets: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+
+  // UI state
+  let selectedAssetId = $state<string | null>(null);
+  let isDragging = $state(false);
+  let draggedPaletteItem = $state<string | null>(null);
+  let animationsEnabled = $state(true);
+
+  // Derived
+  let selectedAsset = $derived(
+    scene.assets.find(a => a.id === selectedAssetId) ?? null
+  );
+
+  // Actions
+  function addAsset(componentName: string, position: { x: number; y: number }) { ... }
+  function updateAsset(id: string, updates: Partial<PlacedAsset>) { ... }
+  function deleteAsset(id: string) { ... }
+  function duplicateAsset(id: string) { ... }
+  function moveLayer(id: string, direction: 'up' | 'down' | 'top' | 'bottom') { ... }
+  function saveToLocalStorage() { ... }
+  function loadFromLocalStorage(sceneId: string) { ... }
+
+  return {
+    get scene() { return scene; },
+    get selectedAsset() { return selectedAsset; },
+    // ... expose state and actions
+  };
+}
 ```
 
----
-
-## Asset Registry
-
-Create a registry mapping component names to actual components:
+### Asset Registry
 
 ```typescript
 // assetRegistry.ts
 import * as Trees from '$lib/ui/components/nature/trees';
 import * as Creatures from '$lib/ui/components/nature/creatures';
-import * as Botanical from '$lib/ui/components/nature/botanical';
-// ... etc
+// ... all categories
 
-export const assetRegistry = {
-  trees: {
-    TreeAspen: { component: Trees.TreeAspen, name: 'Aspen', icon: '🌳' },
-    TreeBirch: { component: Trees.TreeBirch, name: 'Birch', icon: '🌳' },
-    TreeCherry: { component: Trees.TreeCherry, name: 'Cherry', icon: '🌸' },
-    TreePine: { component: Trees.TreePine, name: 'Pine', icon: '🌲' },
+interface AssetDefinition {
+  component: Component;
+  name: string;                    // Display name
+  category: AssetCategory;
+  defaultProps: Record<string, unknown>;
+  propSchema: PropSchema[];        // For PropsPanel
+  isAnimated: boolean;
+  defaultSize: { width: number; height: number };
+}
+
+interface PropSchema {
+  key: string;
+  label: string;
+  type: 'number' | 'string' | 'boolean' | 'color' | 'select';
+  options?: { value: string; label: string }[];  // For select
+  min?: number;  // For number
+  max?: number;
+  step?: number;
+}
+
+export const assetRegistry: Record<string, AssetDefinition> = {
+  TreePine: {
+    component: Trees.TreePine,
+    name: 'Pine Tree',
+    category: 'trees',
+    defaultProps: { height: 150 },
+    propSchema: [
+      { key: 'height', label: 'Height', type: 'number', min: 50, max: 300 },
+    ],
+    isAnimated: false,
+    defaultSize: { width: 100, height: 150 },
   },
-  creatures: {
-    Bee: { component: Creatures.Bee, name: 'Bee', icon: '🐝' },
-    // ...
+  Firefly: {
+    component: Creatures.Firefly,
+    name: 'Firefly',
+    category: 'creatures',
+    defaultProps: { glowColor: '#FFE87C' },
+    propSchema: [
+      { key: 'glowColor', label: 'Glow Color', type: 'color' },
+    ],
+    isAnimated: true,
+    defaultSize: { width: 20, height: 20 },
   },
-  // ... all categories
+  Lattice: {
+    component: Structural.Lattice,
+    name: 'Lattice',
+    category: 'structural',
+    defaultProps: { width: 100, height: 200 },
+    propSchema: [
+      { key: 'width', label: 'Width', type: 'number', min: 50, max: 300 },
+      { key: 'height', label: 'Height', type: 'number', min: 100, max: 400 },
+    ],
+    isAnimated: false,
+    defaultSize: { width: 100, height: 200 },
+  },
+  // ... all 60+ assets
 };
 ```
 
 ---
 
-## UI/UX Considerations
+## UI Layout
 
-### Layout
 ```
-┌─────────────────────────────────────────────────────────┐
-│  [Toolbar: Grid Toggle | Size | Export | Save | Load]   │
-├────────────┬────────────────────────────────────────────┤
-│            │                                            │
-│  Asset     │                                            │
-│  Palette   │              Canvas Area                   │
-│            │                                            │
-│  [Trees]   │         ┌──────┐                          │
-│  [Creat.]  │         │ 🌲   │    🦋                    │
-│  [Plants]  │         └──────┘         ╔════╗           │
-│  [Ground]  │                          ║    ║ Lattice   │
-│  [Sky]     │     🍄      🪨           ╚════╝           │
-│  [Struct.] │                                            │
-│  [Water]   │                                            │
-│            │                                            │
-└────────────┴────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  [🏠] Asset Playground    [Grid: ▣ 32px ▼] [Zoom: 100%] [▶ Animations]     │
+│                           [💾 Save] [📂 Load] [📤 Export]                   │
+├───────────────┬───────────────────────────────────────────┬─────────────────┤
+│               │                                           │                 │
+│  Asset        │                                           │  Props Panel    │
+│  Palette      │              Canvas Area                  │  (when asset    │
+│               │                                           │   selected)     │
+│  🔍 Search    │         ┌──────┐                         │                 │
+│               │         │ 🌲   │    🦋                   │  TreePine       │
+│  ▼ Trees      │         └──────┘         ╔════╗          │  ─────────────  │
+│    🌳 Aspen   │                          ║    ║ Lattice  │  Scale: 1.0     │
+│    🌳 Birch   │     🍄      🪨           ╚════╝          │  Rotation: 0°   │
+│    🌸 Cherry  │                                           │  height: 150px  │
+│    🌲 Pine    │                                           │                 │
+│               │         · · · · · · · · ·                │  [Duplicate]    │
+│  ▼ Creatures  │         · · · · · · · · · (grid)         │  [Delete]       │
+│    🐝 Bee     │         · · · · · · · · ·                │                 │
+│    🦋 Butterfly│                                          │                 │
+│    🦌 Deer    │                                           │                 │
+│    ...        │                                           │                 │
+│               │                                           │                 │
+│  ▼ Structural │                                           │                 │
+│    🏗️ Lattice │                                           │                 │
+│    ...        │                                           │                 │
+│               │                                           │                 │
+└───────────────┴───────────────────────────────────────────┴─────────────────┘
 ```
 
 ### Interactions
-- **Drag from palette**: Ghost preview follows cursor
-- **Drop on canvas**: Asset placed at drop position
-- **Click asset**: Select it (shows controls)
-- **Drag asset**: Move it (respects grid if enabled)
-- **Corner handles**: Scale proportionally
-- **Delete key**: Remove selected asset
-- **Escape**: Deselect
+
+| Action | Trigger |
+|--------|---------|
+| Add asset | Drag from palette to canvas, or double-click in palette |
+| Select asset | Click on asset |
+| Deselect | Click empty canvas or press Escape |
+| Move asset | Drag selected asset |
+| Scale asset | Drag corner handles |
+| Rotate asset | Drag rotation handle (or use props panel) |
+| Delete asset | Delete/Backspace key, or button in props panel |
+| Duplicate | Cmd/Ctrl+D |
+| Toggle grid | Click grid button, or press G |
+| Pan canvas | Middle mouse drag, or Space+drag |
+| Zoom | Scroll wheel, or +/- keys |
 
 ### Visual Feedback
-- **Grid**: Subtle dotted lines when enabled
-- **Selection**: Dashed border around selected asset
-- **Drag preview**: Semi-transparent ghost
-- **Snap indicator**: Highlight grid lines when snapping
+
+- **Grid**: Subtle dotted lines, fade with zoom
+- **Selection**: Dashed border + corner handles + rotation handle
+- **Drag preview**: Semi-transparent ghost follows cursor
+- **Snap indicator**: Grid lines highlight when snapping
+- **Drop zone**: Canvas highlights when dragging from palette
 
 ---
 
-## Questions for User
+## Implementation Phases
 
-1. **Persistence**: Should scenes save to the database (for logged-in users), or is localStorage sufficient initially?
+### Phase 1: Core Canvas & Palette
+**Goal**: Basic drag-and-drop working
 
-2. **Collaboration**: Any plans for sharing/collaborative editing in the future?
+1. Create route `/playground` with full-screen layout
+2. Build `Playground.svelte` wrapper with basic state
+3. Build `Canvas.svelte` with asset rendering
+4. Build `AssetPalette.svelte` with categorized list
+5. Implement drag-from-palette to canvas
+6. Add `PlacedAsset.svelte` with position binding
+7. Enable moving placed assets by dragging
+8. Basic click-to-select
 
-3. **Asset props**: Should users be able to customize component props (colors, sizes, variants)?
+### Phase 2: Grid & Snapping
+**Goal**: Precise positioning
 
-4. **Animation**: Should animated assets (FallingLeavesLayer, Firefly) animate in the playground?
+1. Create `GridOverlay.svelte`
+2. Add grid toggle to toolbar
+3. Implement snap-to-grid in drag logic
+4. Add grid size selector (16/32/64px)
+5. Alt key to override snap
 
-5. **Custom images**: Should users be able to drag in their own images from the gallery alongside nature components?
+### Phase 3: Props Panel & Asset Controls
+**Goal**: Vineyard-style customization
 
-6. **Route location**: Where should this live?
-   - `/playground` - Standalone feature
-   - `/admin/playground` - Admin-only tool
-   - `/create` - User-facing creative tool
+1. Build `PropsPanel.svelte`
+2. Build `PropControl.svelte` for each prop type
+3. Create `assetRegistry.ts` with prop schemas
+4. Connect props to live component updates
+5. Add scale/rotation handles to selection
+6. Implement z-index layer controls
+7. Add duplicate/delete actions
+
+### Phase 4: Animation Support
+**Goal**: Animated assets work properly
+
+1. Add global animation toggle
+2. Add per-asset animation toggle in props
+3. Identify animated components in registry
+4. Handle animation state correctly
+
+### Phase 5: Export & Save
+**Goal**: Users can keep their work
+
+1. Implement localStorage save/load
+2. Build `SceneManager.svelte` for scene list
+3. Build `ExportDialog.svelte`
+4. Implement PNG export (html2canvas or dom-to-image)
+5. Add background options for export
+6. Auto-save on changes
+
+### Phase 6: Polish & Stubs
+**Goal**: Production ready + future hooks
+
+1. Add keyboard shortcuts (G, Delete, Cmd+D, etc.)
+2. Improve drag UX with smooth animations
+3. Add zoom/pan controls
+4. Add stubs for database persistence
+5. Add stubs for gallery image integration
+6. Performance optimization for many assets
+7. Responsive considerations (tablet support?)
 
 ---
 
-## Files to Create/Modify
+## Files to Create
 
 ### New Files
-- `packages/engine/src/lib/ui/components/playground/Playground.svelte`
-- `packages/engine/src/lib/ui/components/playground/Canvas.svelte`
-- `packages/engine/src/lib/ui/components/playground/AssetPalette.svelte`
-- `packages/engine/src/lib/ui/components/playground/PlacedAsset.svelte`
-- `packages/engine/src/lib/ui/components/playground/GridOverlay.svelte`
-- `packages/engine/src/lib/ui/components/playground/Toolbar.svelte`
-- `packages/engine/src/lib/ui/components/playground/AssetControls.svelte`
-- `packages/engine/src/lib/ui/components/playground/assetRegistry.ts`
-- `packages/engine/src/lib/ui/components/playground/index.ts`
-- `packages/engine/src/routes/playground/+page.svelte`
-- `packages/engine/src/routes/playground/+layout.svelte`
+```
+packages/engine/src/lib/ui/components/playground/
+├── Playground.svelte
+├── Canvas.svelte
+├── AssetPalette.svelte
+├── PaletteCategory.svelte
+├── PaletteItem.svelte
+├── PlacedAsset.svelte
+├── SelectionBox.svelte
+├── GridOverlay.svelte
+├── Toolbar.svelte
+├── PropsPanel.svelte
+├── PropControl.svelte
+├── ExportDialog.svelte
+├── SceneManager.svelte
+├── assetRegistry.ts
+├── playgroundState.svelte.ts
+├── types.ts
+├── utils.ts
+└── index.ts
+
+packages/engine/src/routes/playground/
+├── +page.svelte
+├── +page.ts
+└── +layout.svelte
+```
 
 ### Files to Modify
-- `packages/engine/package.json` - Add playground export
-- `packages/engine/src/lib/ui/index.ts` - Export playground components
+```
+packages/engine/package.json          # Add playground export
+packages/engine/src/lib/ui/index.ts   # Export playground components
+```
 
 ---
 
-## Estimated Scope
+## Open Questions / Future Considerations
 
-- **Phase 1** (Core): ~6-8 components
-- **Phase 2** (Grid): ~2-3 components
-- **Phase 3** (Controls): ~2-3 components
-- **Phase 4** (Persistence): State management + storage
-- **Phase 5** (Export): Export utilities
+1. **Undo/redo** - Not in v1, but worth architecting for (command pattern?)
+2. **Templates** - Pre-made scenes users can start from?
+3. **Component search** - Fuzzy search in palette?
+4. **Touch support** - Mobile/tablet drag-and-drop?
+5. **Performance** - How many assets before we need virtualization?
+6. **Collaboration** - Real-time editing with Durable Objects? (far future)
 
-Total: ~15 new files, creating a complete interactive playground experience.
+---
+
+## Summary
+
+The Asset Playground is an evolution of the Vineyard pattern - from viewing components with interactive props to spatially composing them into scenes. Users get:
+
+- **60+ nature components** to drag onto a canvas
+- **Vineyard-style prop controls** for full customization
+- **Snap-to-grid** for precise layouts
+- **Animation toggle** for dynamic scenes
+- **PNG export** to use their creations elsewhere
+- **localStorage persistence** to save and load scenes
+
+This creates a powerful creative tool for designing grove scenes, testing component combinations, and eventually (with stubs in place) integrating with user galleries and persistent storage.
+
+---
+
+*Plan created: 2026-01-04*
+*Ready for implementation in separate agent session*
