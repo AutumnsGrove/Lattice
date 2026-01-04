@@ -438,25 +438,25 @@
 						</div>
 					</section>
 
+					<!-- Bridge to Vision -->
+					<section class="pt-8">
+						<a
+							href="/vision"
+							class="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-purple-800/60 hover:bg-purple-700/70 border border-purple-600/40 rounded-xl text-purple-100 hover:text-white transition-all font-serif text-xl shadow-lg hover:shadow-purple-900/30"
+						>
+							<span class="italic">But loss isn't the whole story</span>
+							<span class="group-hover:translate-x-1 transition-transform">→</span>
+						</a>
+					</section>
+
 					<!-- CTA -->
-					<section class="pt-8 pb-4">
+					<section class="pt-12 pb-4">
 						<p class="text-purple-400 mb-6 font-sans text-sm">
 							We're growing. Join us.
 						</p>
 						<div class="flex justify-center">
 							<EmailSignup variant="dark" />
 						</div>
-					</section>
-
-					<!-- Bridge to Vision -->
-					<section class="pt-12">
-						<a
-							href="/vision"
-							class="group inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-serif text-lg"
-						>
-							<span class="italic">But loss isn't the whole story</span>
-							<span class="group-hover:translate-x-1 transition-transform">→</span>
-						</a>
 					</section>
 
 				</div>
