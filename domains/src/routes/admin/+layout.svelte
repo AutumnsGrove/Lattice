@@ -37,23 +37,26 @@
 				<div class="flex justify-between items-center h-16">
 					<!-- Logo -->
 					<a href="/" class="flex items-center gap-3 group">
-						<svg class="w-8 h-8 text-domain-600 group-hover:text-domain-700 transition-colors" viewBox="0 0 100 100" fill="none">
+						<svg class="w-8 h-8 text-domain-600 dark:text-domain-400 group-hover:text-domain-700 dark:group-hover:text-domain-300 transition-colors" viewBox="0 0 100 100" fill="none">
 							<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="3" fill="none" opacity="0.2" />
 							<circle cx="50" cy="50" r="10" fill="currentColor" />
-							<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" />
+							<circle cx="68" cy="68" r="12" stroke="currentColor" stroke-width="3" fill="white" class="dark:fill-neutral-900" />
 							<line x1="77" y1="77" x2="88" y2="88" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
 						</svg>
-						<span class="font-serif text-lg text-bark group-hover:text-domain-700 transition-colors">Domain Finder</span>
+						<span class="font-serif text-lg text-bark dark:text-neutral-100 group-hover:text-domain-700 dark:group-hover:text-domain-300 transition-colors">Domain Finder</span>
 					</a>
 
 					<!-- User menu -->
 					<div class="flex items-center gap-4">
-						<span class="text-sm text-bark/60 font-sans hidden sm:block">
+						<span class="text-sm text-bark/60 dark:text-neutral-400 font-sans hidden sm:block">
 							{data.user?.email}
 						</span>
 						<button
 							onclick={logout}
-							class="text-sm text-bark/60 hover:text-red-600 font-sans transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+							class="text-sm text-bark/60 dark:text-neutral-400
+								hover:text-red-600 dark:hover:text-red-400
+								font-sans transition-colors px-3 py-1.5 rounded-lg
+								hover:bg-red-50 dark:hover:bg-red-900/20"
 						>
 							Logout
 						</button>
@@ -69,7 +72,10 @@
 					{#each tabs as tab}
 						<a
 							href={tab.href}
-							class="tab flex items-center gap-2 py-4 border-b-2 {isActive(tab.href) ? 'border-domain-600 text-domain-700' : 'border-transparent text-bark/60 hover:text-bark hover:border-bark/20'}"
+							class="tab flex items-center gap-2 py-4 border-b-2 transition-colors
+								{isActive(tab.href)
+									? 'border-domain-600 dark:border-domain-400 text-domain-700 dark:text-domain-300'
+									: 'border-transparent text-bark/60 dark:text-neutral-400 hover:text-bark dark:hover:text-neutral-200 hover:border-bark/20 dark:hover:border-neutral-600'}"
 						>
 							{#if tab.icon === 'dashboard'}
 								<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">

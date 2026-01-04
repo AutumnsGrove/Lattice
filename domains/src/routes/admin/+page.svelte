@@ -44,33 +44,33 @@
 <div class="space-y-8">
 	<!-- Page Header -->
 	<div>
-		<h1 class="text-2xl font-serif text-bark">Dashboard</h1>
-		<p class="text-bark/60 font-sans mt-1">Overview of domain search activity</p>
+		<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Dashboard</h1>
+		<p class="text-bark/60 dark:text-neutral-400 font-sans mt-1">Overview of domain search activity</p>
 	</div>
 
 	<!-- Stats Grid -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 		<div class="glass-stat p-6">
-			<div class="text-sm font-sans text-bark/60 mb-1">Total Searches</div>
-			<div class="text-3xl font-serif text-bark">{totalJobs}</div>
+			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Total Searches</div>
+			<div class="text-3xl font-serif text-bark dark:text-neutral-100">{totalJobs}</div>
 		</div>
 		<div class="glass-stat p-6">
-			<div class="text-sm font-sans text-bark/60 mb-1">Currently Running</div>
-			<div class="text-3xl font-serif text-domain-600">{runningJobs}</div>
+			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Currently Running</div>
+			<div class="text-3xl font-serif text-domain-600 dark:text-domain-400">{runningJobs}</div>
 			{#if runningJobs > 0}
 				<div class="mt-2 flex items-center gap-1.5">
-					<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
-					<span class="text-xs text-domain-600 font-sans">Active</span>
+					<span class="w-2 h-2 bg-domain-500 dark:bg-domain-400 rounded-full animate-pulse"></span>
+					<span class="text-xs text-domain-600 dark:text-domain-400 font-sans">Active</span>
 				</div>
 			{/if}
 		</div>
 		<div class="glass-stat p-6">
-			<div class="text-sm font-sans text-bark/60 mb-1">Completed</div>
-			<div class="text-3xl font-serif text-grove-600">{completedJobs}</div>
+			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Completed</div>
+			<div class="text-3xl font-serif text-grove-600 dark:text-grove-400">{completedJobs}</div>
 		</div>
 		<div class="glass-stat p-6">
-			<div class="text-sm font-sans text-bark/60 mb-1">Domains Found</div>
-			<div class="text-3xl font-serif text-bark">{totalDomainsFound}</div>
+			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Domains Found</div>
+			<div class="text-3xl font-serif text-bark dark:text-neutral-100">{totalDomainsFound}</div>
 		</div>
 	</div>
 
@@ -87,11 +87,11 @@
 	<!-- Recent Jobs -->
 	<div class="glass-card">
 		<div class="p-4 border-b glass-divider">
-			<h2 class="font-serif text-lg text-bark">Recent Searches</h2>
+			<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Recent Searches</h2>
 		</div>
 		{#if data.jobs.length === 0}
 			<div class="p-8 text-center">
-				<p class="text-bark/60 font-sans">No searches yet. Start your first domain search!</p>
+				<p class="text-bark/60 dark:text-neutral-400 font-sans">No searches yet. Start your first domain search!</p>
 			</div>
 		{:else}
 			<div class="divide-y glass-divide">
@@ -101,18 +101,18 @@
 							<div class="flex items-center gap-3">
 								<div class="status-dot status-dot-{job.status === 'running' ? 'running' : job.status === 'complete' ? 'complete' : job.status === 'failed' ? 'error' : 'pending'}"></div>
 								<div>
-									<div class="font-sans font-medium text-bark">{job.business_name}</div>
-									<div class="text-sm text-bark/60 font-sans">{job.client_email}</div>
+									<div class="font-sans font-medium text-bark dark:text-neutral-100">{job.business_name}</div>
+									<div class="text-sm text-bark/60 dark:text-neutral-400 font-sans">{job.client_email}</div>
 								</div>
 							</div>
 							<div class="text-right">
 								<span class="badge {getStatusBadge(job.status)}">{job.status}</span>
-								<div class="text-xs text-bark/50 font-sans mt-1">
+								<div class="text-xs text-bark/50 dark:text-neutral-500 font-sans mt-1">
 									{formatDate(job.created_at)}
 								</div>
 							</div>
 						</div>
-						<div class="mt-2 flex gap-4 text-sm text-bark/60 font-sans">
+						<div class="mt-2 flex gap-4 text-sm text-bark/60 dark:text-neutral-400 font-sans">
 							<span>{job.domains_checked} checked</span>
 							<span>{job.good_results} found</span>
 							{#if job.duration_seconds}

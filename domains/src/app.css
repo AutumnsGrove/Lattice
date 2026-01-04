@@ -16,38 +16,47 @@
 	}
 
 	body {
-		@apply bg-cream text-bark antialiased;
+		@apply bg-cream dark:bg-neutral-950 text-bark dark:text-neutral-100 antialiased;
 	}
 }
 
 @layer components {
 	.btn-primary {
-		@apply bg-domain-600 hover:bg-domain-700 text-white font-sans font-medium
+		@apply bg-domain-600 hover:bg-domain-700 dark:bg-domain-500 dark:hover:bg-domain-600
+			text-white font-sans font-medium
 			px-6 py-3 rounded-lg transition-colors duration-200
-			focus:outline-none focus:ring-2 focus:ring-domain-500 focus:ring-offset-2;
+			focus:outline-none focus:ring-2 focus:ring-domain-500 focus:ring-offset-2
+			dark:focus:ring-offset-neutral-900;
 	}
 
 	.btn-secondary {
-		@apply bg-grove-600 hover:bg-grove-700 text-white font-sans font-medium
+		@apply bg-grove-600 hover:bg-grove-700 dark:bg-grove-500 dark:hover:bg-grove-600
+			text-white font-sans font-medium
 			px-6 py-3 rounded-lg transition-colors duration-200
-			focus:outline-none focus:ring-2 focus:ring-grove-500 focus:ring-offset-2;
+			focus:outline-none focus:ring-2 focus:ring-grove-500 focus:ring-offset-2
+			dark:focus:ring-offset-neutral-900;
 	}
 
 	.btn-ghost {
-		@apply bg-transparent hover:bg-bark/5 text-bark font-sans font-medium
+		@apply bg-transparent hover:bg-bark/5 dark:hover:bg-white/10
+			text-bark dark:text-neutral-100 font-sans font-medium
 			px-4 py-2 rounded-lg transition-colors duration-200
-			focus:outline-none focus:ring-2 focus:ring-bark/20;
+			focus:outline-none focus:ring-2 focus:ring-bark/20 dark:focus:ring-white/20;
 	}
 
 	.input-field {
-		@apply w-full px-4 py-3 rounded-lg border border-grove-200
-			focus:border-domain-500 focus:ring-2 focus:ring-domain-500/20
+		@apply w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-neutral-700
+			focus:border-domain-500 dark:focus:border-domain-400
+			focus:ring-2 focus:ring-domain-500/20 dark:focus:ring-domain-400/20
 			focus:outline-none transition-all duration-200
-			bg-white text-bark placeholder:text-bark/40;
+			bg-white dark:bg-neutral-800/60
+			text-bark dark:text-neutral-100
+			placeholder:text-bark/40 dark:placeholder:text-neutral-500;
 	}
 
 	.card {
-		@apply bg-white rounded-xl border border-grove-200 shadow-sm;
+		@apply bg-white dark:bg-neutral-900/75 rounded-xl
+			border border-grove-200 dark:border-neutral-700/50 shadow-sm;
 	}
 
 	.badge {
@@ -55,19 +64,19 @@
 	}
 
 	.badge-success {
-		@apply bg-grove-100 text-grove-800;
+		@apply bg-grove-100 dark:bg-grove-900/50 text-grove-800 dark:text-grove-200;
 	}
 
 	.badge-warning {
-		@apply bg-amber-100 text-amber-800;
+		@apply bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200;
 	}
 
 	.badge-error {
-		@apply bg-red-100 text-red-800;
+		@apply bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200;
 	}
 
 	.badge-info {
-		@apply bg-domain-100 text-domain-800;
+		@apply bg-domain-100 dark:bg-domain-900/50 text-domain-800 dark:text-domain-200;
 	}
 
 	/* Tab navigation */
@@ -76,17 +85,23 @@
 	}
 
 	.tab-active {
-		@apply bg-domain-100 text-domain-700;
+		@apply bg-domain-100 dark:bg-domain-900/50 text-domain-700 dark:text-domain-300;
 	}
 
 	.tab-inactive {
-		@apply text-bark/60 hover:text-bark hover:bg-bark/5;
+		@apply text-bark/60 dark:text-neutral-400
+			hover:text-bark dark:hover:text-neutral-200
+			hover:bg-bark/5 dark:hover:bg-white/10;
 	}
 }
 
 /* Subtle gradient background for domain pages */
 .domain-gradient {
 	background: linear-gradient(135deg, #f5f3ff 0%, #fefdfb 50%, #f0fdf4 100%);
+}
+
+.dark .domain-gradient {
+	background: linear-gradient(135deg, #1e1b2e 0%, #1c1917 50%, #1a2e1e 100%);
 }
 
 /* Animation for status indicators */
@@ -101,7 +116,8 @@
 
 /* Domain result card hover effect */
 .domain-card {
-	@apply card p-4 transition-all duration-200 hover:shadow-md hover:border-domain-300;
+	@apply card p-4 transition-all duration-200
+		hover:shadow-md hover:border-domain-300 dark:hover:border-domain-600;
 }
 
 /* Status dot indicator */
@@ -110,23 +126,23 @@
 }
 
 .status-dot-running {
-	@apply bg-domain-500 animate-pulse-slow;
+	@apply bg-domain-500 dark:bg-domain-400 animate-pulse-slow;
 }
 
 .status-dot-complete {
-	@apply bg-grove-500;
+	@apply bg-grove-500 dark:bg-grove-400;
 }
 
 .status-dot-error {
-	@apply bg-red-500;
+	@apply bg-red-500 dark:bg-red-400;
 }
 
 .status-dot-pending {
-	@apply bg-bark/30;
+	@apply bg-bark/30 dark:bg-neutral-600;
 }
 
 .status-dot-warning {
-	@apply bg-amber-500 animate-pulse-slow;
+	@apply bg-amber-500 dark:bg-amber-400 animate-pulse-slow;
 }
 
 /* =============================================================================
