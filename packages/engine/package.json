@@ -73,6 +73,11 @@
       "svelte": "./dist/ui/components/states/index.js",
       "default": "./dist/ui/components/states/index.js"
     },
+    "./ui/typography": {
+      "types": "./dist/ui/components/typography/index.d.ts",
+      "svelte": "./dist/ui/components/typography/index.js",
+      "default": "./dist/ui/components/typography/index.js"
+    },
     "./ui/nature": {
       "types": "./dist/ui/components/nature/index.d.ts",
       "svelte": "./dist/ui/components/nature/index.js",

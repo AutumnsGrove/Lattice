@@ -21,6 +21,9 @@ export * from './components/states/index.js';
 // Charts (from AutumnsGrove)
 export * from './components/charts/index.js';
 
+// Typography (font wrapper components)
+export * from './components/typography/index.js';
+
 // Export design tokens
 export * from './tokens/index.js';
 
