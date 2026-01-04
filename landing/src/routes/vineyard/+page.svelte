@@ -5,200 +5,225 @@
 
 	// Lucide Icons
 	import {
-		ExternalLink,
-		Grape,
-		Mail,
-		HardDrive,
-		Palette,
-		Flower2,
-		TrendingUp,
-		Compass,
-		ShieldCheck,
-		Search,
-		Box,
+		Boxes,
+		Layers,
+		TreePine as TreeIcon,
 		Sparkles,
-		ArrowRight,
-		ChevronRight
+		ChevronDown,
+		ChevronRight,
+		Palette,
+		MousePointer,
+		Eye
 	} from 'lucide-svelte';
+
+	// Import Glass components
+	import {
+		Glass,
+		GlassButton,
+		GlassCard,
+		GlassLogo,
+		GlassOverlay,
+		GlassCarousel
+	} from '@autumnsgrove/groveengine/ui';
 
 	// Import nature assets
 	import {
 		Logo,
 		TreePine, TreeCherry, TreeAspen, TreeBirch,
-		Cloud,
-		Vine,
-		Firefly,
-		GrassTuft,
-		greens, bark, autumn
+		Mushroom, MushroomCluster, Fern, Bush, GrassTuft, Rock, Stump, Log,
+		FlowerWild, Tulip, Crocus, Daffodil,
+		Firefly, Butterfly, Bird, BirdFlying, Cardinal, Chickadee, Robin, Bluebird,
+		Bee, Rabbit, Deer, Owl, Squirrel,
+		Cloud, CloudWispy, Sun, Moon, Star, StarCluster, StarShooting, Rainbow,
+		Pond, LilyPad, Reeds, Stream,
+		Leaf, LeafFalling, PetalFalling, Acorn, PineCone, Berry, DandelionPuff, Vine,
+		Lattice as LatticeStructure, LatticeWithVine, Birdhouse, GardenGate, FencePost, StonePath, Bridge, Lantern,
+		greens, bark, earth, natural, autumn, pinks, autumnReds, accents
 	} from '@autumnsgrove/groveengine/ui/nature';
 
-	// Tool definitions
-	type ToolStatus = 'ready' | 'preview' | 'development' | 'coming-soon';
-	type ToolColor = 'grove' | 'green' | 'amber' | 'violet' | 'pink' | 'emerald' | 'teal' | 'sky';
+	// Section expansion state
+	let expandedSection = $state<'glass' | 'nature' | null>('glass');
 
-	interface Tool {
-		name: string;
-		tagline: string;
-		description: string;
-		status: ToolStatus;
-		icon: typeof Mail;
-		color: ToolColor;
-		domain?: string;
-		integrated?: boolean;
-		philosophy?: string;
-	}
+	// Glass component demos state
+	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('card');
+	let glassIntensity = $state<'none' | 'light' | 'medium' | 'strong'>('medium');
+	let buttonVariant = $state<'default' | 'accent' | 'dark' | 'ghost' | 'outline'>('default');
+	let buttonSize = $state<'sm' | 'md' | 'lg' | 'icon'>('md');
+	let cardVariant = $state<'default' | 'accent' | 'dark' | 'muted' | 'frosted'>('default');
+	let cardHoverable = $state(false);
+	let logoVariant = $state<'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'>('default');
+	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
+	let logoBreathing = $state(false);
 
-	const tools: Tool[] = [
-		{
-			name: 'Lattice',
-			tagline: 'The core that powers the grove',
-			description: 'The engine behind every Grove blog. Handles routing, theming, and the foundation of your space.',
-			status: 'ready',
-			icon: Box,
-			color: 'grove',
-			domain: 'engine.grove.place',
-			philosophy: 'A lattice supports growth—vines climb it, gardens are built around it.'
-		},
-		{
-			name: 'Heartwood',
-			tagline: 'Authentication that keeps you safe',
-			description: 'Secure login via Google OAuth. Your identity, protected at the core.',
-			status: 'ready',
-			icon: ShieldCheck,
-			color: 'amber',
-			domain: 'heartwood.grove.place',
-			philosophy: 'The heartwood is the oldest, strongest part of the tree—the core that everything else grows around.'
-		},
-		{
-			name: 'Ivy',
-			tagline: 'Email at @grove.place',
-			description: 'Your own @grove.place email address. Send newsletters, receive replies, keep your inbox close.',
-			status: 'coming-soon',
-			icon: Mail,
-			color: 'green',
-			domain: 'ivy.grove.place',
-			philosophy: 'Ivy climbs, connects, and delivers messages between spaces.'
-		},
-		{
-			name: 'Amber',
-			tagline: 'Your files, preserved',
-			description: 'Storage dashboard for managing images, media, and attachments across your blog.',
-			status: 'coming-soon',
-			icon: HardDrive,
-			color: 'amber',
-			domain: 'amber.grove.place',
-			philosophy: 'Amber is fossilized tree resin—preserving moments in time, protecting what matters.'
-		},
-		{
-			name: 'Foliage',
-			tagline: 'Make it truly yours',
-			description: 'Theme library and customizer. Choose from curated themes or create your own look.',
-			status: 'coming-soon',
-			icon: Palette,
-			color: 'violet',
-			domain: 'foliage.grove.place',
-			philosophy: 'Foliage is the visible expression of a tree—the leaves that catch light and change with seasons.'
-		},
-		{
-			name: 'Meadow',
-			tagline: 'Connection without competition',
-			description: 'Social feed with chronological posts, private reactions, and no public metrics.',
-			status: 'coming-soon',
-			icon: Flower2,
-			color: 'pink',
-			domain: 'meadow.grove.place',
-			philosophy: 'A meadow is where the grove opens up—a shared space between trees where wildflowers bloom.'
-		},
-		{
-			name: 'Rings',
-			tagline: 'Your growth, reflected',
-			description: 'Private analytics showing views, reads, and trends. Only you see the numbers.',
-			status: 'coming-soon',
-			icon: TrendingUp,
-			color: 'emerald',
-			integrated: true,
-			philosophy: 'Tree rings tell the story of growth—each year visible only to those who look closely.'
-		},
-		{
-			name: 'Trails',
-			tagline: 'Share your journey',
-			description: 'Personal roadmaps for goals and projects. Track your path, share your progress.',
-			status: 'coming-soon',
-			icon: Compass,
-			color: 'teal',
-			integrated: true,
-			philosophy: 'Trails are paths worn by repeated walking—stories of journeys taken.'
-		},
-		{
-			name: 'Forage',
-			tagline: 'Find your perfect domain',
-			description: 'Domain discovery tool for finding available custom domains that match your vibe.',
-			status: 'development',
-			icon: Search,
-			color: 'sky',
-			domain: 'forage.grove.place',
-			philosophy: 'Foraging is the art of finding what you need in the wild—patient, intentional discovery.'
-		}
-	];
+	// Overlay demo state
+	let showOverlayDemo = $state(false);
 
-	// Status badge styling
-	function getStatusStyles(status: ToolStatus) {
-		switch (status) {
-			case 'ready':
-				return {
-					bg: 'bg-green-100 dark:bg-green-900/40',
-					text: 'text-green-700 dark:text-green-300',
-					border: 'border-green-300 dark:border-green-700',
-					label: 'Ready'
-				};
-			case 'preview':
-				return {
-					bg: 'bg-amber-100 dark:bg-amber-900/40',
-					text: 'text-amber-700 dark:text-amber-300',
-					border: 'border-amber-300 dark:border-amber-700 border-dashed',
-					label: 'Preview'
-				};
-			case 'development':
-				return {
-					bg: 'bg-orange-100 dark:bg-orange-900/40',
-					text: 'text-orange-700 dark:text-orange-300',
-					border: 'border-orange-300 dark:border-orange-700',
-					label: 'In Development'
-				};
-			case 'coming-soon':
-				return {
-					bg: 'bg-slate-100 dark:bg-slate-800',
-					text: 'text-slate-600 dark:text-slate-400',
-					border: 'border-slate-300 dark:border-slate-600',
-					label: 'Coming Soon'
-				};
-		}
-	}
-
-	// Color mapping for tool accents (exhaustive - ToolColor enforces valid keys)
-	const toolAccents: Record<ToolColor, string> = {
-		grove: 'bg-grove-500',
-		green: 'bg-green-500',
-		amber: 'bg-amber-500',
-		violet: 'bg-violet-500',
-		pink: 'bg-pink-500',
-		emerald: 'bg-emerald-500',
-		teal: 'bg-teal-500',
-		sky: 'bg-sky-500'
+	// Nature asset viewer state
+	type AssetInfo = {
+		component: any;
+		category: string;
+		props: string[];
 	};
 
-	function getToolAccent(color: ToolColor): string {
-		return toolAccents[color];
+	const assets: Record<string, AssetInfo> = {
+		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate', 'animateEntrance', 'breathing'] },
+		'GlassLogo': { component: GlassLogo, category: 'Trees', props: ['variant', 'season', 'animate', 'breathing', 'breathingSpeed', 'monochrome', 'accentColor'] },
+		'TreePine': { component: TreePine, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'TreeCherry': { component: TreeCherry, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'TreeAspen': { component: TreeAspen, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'TreeBirch': { component: TreeBirch, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
+		'Mushroom': { component: Mushroom, category: 'Ground', props: ['capColor', 'stemColor', 'spotted'] },
+		'MushroomCluster': { component: MushroomCluster, category: 'Ground', props: ['capColor', 'stemColor'] },
+		'Fern': { component: Fern, category: 'Ground', props: ['color', 'season', 'animate'] },
+		'Bush': { component: Bush, category: 'Ground', props: ['color', 'season', 'animate'] },
+		'GrassTuft': { component: GrassTuft, category: 'Ground', props: ['color', 'season', 'animate'] },
+		'Rock': { component: Rock, category: 'Ground', props: ['color', 'variant'] },
+		'Stump': { component: Stump, category: 'Ground', props: ['barkColor', 'ringColor'] },
+		'Log': { component: Log, category: 'Ground', props: ['barkColor'] },
+		'FlowerWild': { component: FlowerWild, category: 'Ground', props: ['petalColor', 'centerColor', 'stemColor', 'animate'] },
+		'Tulip': { component: Tulip, category: 'Ground', props: ['petalColor', 'stemColor', 'variant', 'animate'] },
+		'Crocus': { component: Crocus, category: 'Ground', props: ['petalColor', 'centerColor', 'stemColor', 'variant', 'animate'] },
+		'Daffodil': { component: Daffodil, category: 'Ground', props: ['petalColor', 'trumpetColor', 'stemColor', 'animate'] },
+		'Firefly': { component: Firefly, category: 'Creatures', props: ['glowColor', 'bodyColor', 'animate', 'intensity'] },
+		'Butterfly': { component: Butterfly, category: 'Creatures', props: ['wingColor', 'accentColor', 'animate'] },
+		'Bird': { component: Bird, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
+		'BirdFlying': { component: BirdFlying, category: 'Creatures', props: ['color', 'animate', 'facing'] },
+		'Cardinal': { component: Cardinal, category: 'Creatures', props: ['bodyColor', 'maskColor', 'beakColor', 'animate', 'facing'] },
+		'Chickadee': { component: Chickadee, category: 'Creatures', props: ['capColor', 'cheekColor', 'bodyColor', 'animate', 'facing'] },
+		'Robin': { component: Robin, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
+		'Bluebird': { component: Bluebird, category: 'Creatures', props: ['bodyColor', 'breastColor', 'beakColor', 'animate', 'facing'] },
+		'Bee': { component: Bee, category: 'Creatures', props: ['bodyColor', 'stripeColor', 'animate'] },
+		'Rabbit': { component: Rabbit, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
+		'Deer': { component: Deer, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
+		'Owl': { component: Owl, category: 'Creatures', props: ['featherColor', 'animate', 'facing'] },
+		'Squirrel': { component: Squirrel, category: 'Creatures', props: ['furColor', 'animate', 'facing'] },
+		'Cloud': { component: Cloud, category: 'Sky', props: ['color', 'animate', 'speed'] },
+		'CloudWispy': { component: CloudWispy, category: 'Sky', props: ['color', 'animate', 'speed'] },
+		'Sun': { component: Sun, category: 'Sky', props: ['color', 'rays', 'animate'] },
+		'Moon': { component: Moon, category: 'Sky', props: ['color', 'phase', 'animate'] },
+		'Star': { component: Star, category: 'Sky', props: ['color', 'animate', 'variant', 'speed'] },
+		'StarCluster': { component: StarCluster, category: 'Sky', props: ['color', 'animate', 'density'] },
+		'StarShooting': { component: StarShooting, category: 'Sky', props: ['color', 'animate', 'direction'] },
+		'Rainbow': { component: Rainbow, category: 'Sky', props: ['opacity', 'animate'] },
+		'Pond': { component: Pond, category: 'Water', props: ['color', 'animate'] },
+		'LilyPad': { component: LilyPad, category: 'Water', props: ['padColor', 'flowerColor', 'hasFlower', 'animate'] },
+		'Reeds': { component: Reeds, category: 'Water', props: ['color', 'season', 'animate', 'variant'] },
+		'Stream': { component: Stream, category: 'Water', props: ['color', 'animate'] },
+		'Leaf': { component: Leaf, category: 'Botanical', props: ['color', 'season', 'variant'] },
+		'LeafFalling': { component: LeafFalling, category: 'Botanical', props: ['color', 'season', 'animate', 'variant'] },
+		'PetalFalling': { component: PetalFalling, category: 'Botanical', props: ['color', 'variant', 'animate', 'opacity'] },
+		'Acorn': { component: Acorn, category: 'Botanical', props: ['capColor', 'nutColor'] },
+		'PineCone': { component: PineCone, category: 'Botanical', props: ['color'] },
+		'Berry': { component: Berry, category: 'Botanical', props: ['berryColor', 'variant'] },
+		'DandelionPuff': { component: DandelionPuff, category: 'Botanical', props: ['seedColor', 'animate'] },
+		'Vine': { component: Vine, category: 'Botanical', props: ['color', 'season', 'animate', 'variant'] },
+		'Lattice': { component: LatticeStructure, category: 'Structural', props: ['color', 'variant'] },
+		'LatticeWithVine': { component: LatticeWithVine, category: 'Structural', props: ['woodColor', 'vineColor', 'season', 'hasFlowers'] },
+		'Birdhouse': { component: Birdhouse, category: 'Structural', props: ['bodyColor', 'roofColor'] },
+		'GardenGate': { component: GardenGate, category: 'Structural', props: ['color', 'open'] },
+		'FencePost': { component: FencePost, category: 'Structural', props: ['color', 'variant'] },
+		'StonePath': { component: StonePath, category: 'Structural', props: ['stoneColor'] },
+		'Bridge': { component: Bridge, category: 'Structural', props: ['woodColor'] },
+		'Lantern': { component: Lantern, category: 'Structural', props: ['frameColor', 'lit', 'animate', 'variant'] },
+	};
+
+	// Color presets
+	const colorPresets = [
+		{ name: 'Grove Green', value: greens.grove },
+		{ name: 'Deep Green', value: greens.deepGreen },
+		{ name: 'Meadow', value: greens.meadow },
+		{ name: 'Autumn Amber', value: autumn.amber },
+		{ name: 'Autumn Rust', value: autumn.rust },
+		{ name: 'Gold', value: autumn.gold },
+		{ name: 'Cherry Pink', value: pinks.blush },
+		{ name: 'Warm Bark', value: bark.warmBark },
+		{ name: 'Stone', value: earth.stone },
+		{ name: 'Cream', value: natural.cream },
+	];
+
+	// Prop options
+	const propOptions: Record<string, string[]> = {
+		season: ['spring', 'summer', 'autumn', 'winter'],
+		variant: ['default'],
+		facing: ['left', 'right'],
+		phase: ['full', 'waning', 'crescent', 'new'],
+		speed: ['slow', 'normal', 'fast'],
+		breathingSpeed: ['slow', 'normal', 'fast'],
+		intensity: ['subtle', 'normal', 'bright'],
+		density: ['sparse', 'normal', 'dense'],
+		direction: ['left', 'right'],
+	};
+
+	const assetVariants: Record<string, string[]> = {
+		'GlassLogo': ['default', 'accent', 'frosted', 'dark', 'ethereal'],
+		'Rock': ['round', 'flat', 'jagged'],
+		'Leaf': ['oak', 'maple', 'simple', 'aspen'],
+		'LeafFalling': ['simple', 'maple'],
+		'PetalFalling': ['round', 'pointed', 'heart', 'curled', 'tiny'],
+		'Berry': ['cluster', 'single', 'branch'],
+		'Vine': ['tendril', 'ivy', 'flowering'],
+		'Reeds': ['cattail', 'grass'],
+		'Star': ['twinkle', 'point', 'burst', 'classic', 'tiny'],
+		'Lattice': ['trellis', 'fence', 'archway'],
+		'FencePost': ['pointed', 'flat', 'round'],
+		'Lantern': ['hanging', 'standing', 'post'],
+		'Tulip': ['red', 'pink', 'yellow', 'purple'],
+		'Crocus': ['purple', 'yellow', 'white'],
+	};
+
+	let selectedAsset = $state('Logo');
+	let propValues = $state<Record<string, any>>({});
+
+	const categories = [...new Set(Object.values(assets).map(a => a.category))];
+
+	function getAssetsByCategory(category: string) {
+		return Object.entries(assets).filter(([_, a]) => a.category === category);
 	}
 
-	// Separate ready tools from upcoming (using $derived to avoid recalculation)
-	const readyTools = $derived(tools.filter(t => t.status === 'ready'));
-	const upcomingTools = $derived(tools.filter(t => t.status !== 'ready'));
+	function getCurrentAsset() {
+		return assets[selectedAsset as keyof typeof assets];
+	}
+
+	function isColorProp(prop: string): boolean {
+		return prop.toLowerCase().includes('color');
+	}
+
+	function isBooleanProp(prop: string): boolean {
+		return ['animate', 'animateEntrance', 'breathing', 'spotted', 'rays', 'hasFlower', 'hasFlowers', 'lit', 'open'].includes(prop);
+	}
+
+	function hasOptions(prop: string): boolean {
+		return prop in propOptions || (prop === 'variant' && selectedAsset in assetVariants);
+	}
+
+	function getOptions(prop: string): string[] {
+		if (prop === 'variant' && selectedAsset in assetVariants) {
+			return assetVariants[selectedAsset];
+		}
+		return propOptions[prop] || [];
+	}
+
+	function isNumericProp(prop: string): boolean {
+		return ['opacity'].includes(prop);
+	}
+
+	function onAssetChange() {
+		propValues = {};
+	}
+
+	let CurrentComponent = $derived(getCurrentAsset()?.component);
+
+	// Carousel demo images (placeholders)
+	const carouselImages = [
+		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%2310b981"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 1%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 1', caption: 'First slide caption' },
+		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%23059669"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 2%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 2', caption: 'Second slide caption' },
+		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%23047857"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 3%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 3', caption: 'Third slide caption' },
+	];
 </script>
 
 <SEO
-	title="Vineyard — Grove Tools"
-	description="Explore the Grove ecosystem. Every tool, every feature—cultivated with care. Walk the rows and see what's growing."
+	title="Vineyard — Lattice Asset Showcase"
+	description="Explore the components and assets that Lattice provides. Glass UI components, nature SVGs, and everything you need to build beautiful Grove experiences."
 	url="/vineyard"
 />
 
@@ -206,253 +231,443 @@
 	<Header />
 
 	<!-- Hero Section -->
-	<section class="relative py-20 px-6 overflow-hidden">
+	<section class="relative py-16 px-6 overflow-hidden">
 		<!-- Background decorations -->
-		<div class="absolute top-4 left-[8%] opacity-30" aria-hidden="true">
-			<Cloud variant="wispy" class="w-28 h-12" animate speed="slow" direction="right" />
+		<div class="absolute top-8 left-[10%] opacity-30" aria-hidden="true">
+			<Cloud class="w-24 h-10" animate speed="slow" />
 		</div>
-		<div class="absolute top-12 right-[12%] opacity-25" aria-hidden="true">
-			<Cloud variant="fluffy" class="w-36 h-16" animate speed="slow" direction="left" />
-		</div>
-
-		<!-- Vines along edges -->
-		<div class="absolute top-0 left-0 w-16 h-32 opacity-40" aria-hidden="true">
-			<Vine class="w-full h-full" variant="ivy" season="summer" animate />
-		</div>
-		<div class="absolute top-0 right-0 w-16 h-32 opacity-40 -scale-x-100" aria-hidden="true">
-			<Vine class="w-full h-full" variant="ivy" season="summer" animate />
+		<div class="absolute top-16 right-[15%] opacity-20" aria-hidden="true">
+			<Cloud variant="wispy" class="w-32 h-12" animate speed="slow" />
 		</div>
 
 		<div class="max-w-4xl mx-auto text-center relative z-10">
-			<!-- Icon badge -->
+			<!-- Badge -->
 			<div class="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm">
-				<Grape class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-				<span class="text-sm font-medium text-foreground">The Grove Vineyard</span>
+				<Boxes class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+				<span class="text-sm font-medium text-foreground">Lattice Asset Showcase</span>
 			</div>
 
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
-				Every vine starts somewhere
+				Everything Lattice Provides
 			</h1>
 			<p class="text-lg text-foreground-muted max-w-2xl mx-auto mb-8">
-				This is where Grove's tools grow. Walk the rows, see what's ready to harvest,
-				and peek at what's still ripening on the vine.
+				Glass UI components, nature assets, and the building blocks for beautiful Grove experiences.
+				Explore, customize, and see what's possible.
 			</p>
 
-			<!-- Philosophy callout -->
-			<blockquote class="max-w-xl mx-auto p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/60 dark:border-slate-700/60">
-				<p class="text-foreground-muted italic text-sm">
-					"A vineyard is where vines are cultivated, each one tended and displayed.
-					Visitors can walk the rows, sample the offerings, understand what grows here."
-				</p>
-			</blockquote>
+			<!-- Quick stats -->
+			<div class="flex flex-wrap justify-center gap-6 text-sm">
+				<div class="flex items-center gap-2 text-foreground-muted">
+					<Layers class="w-4 h-4 text-grove-600" />
+					<span>8 Glass Components</span>
+				</div>
+				<div class="flex items-center gap-2 text-foreground-muted">
+					<TreeIcon class="w-4 h-4 text-grove-600" />
+					<span>{Object.keys(assets).length} Nature Assets</span>
+				</div>
+				<div class="flex items-center gap-2 text-foreground-muted">
+					<Palette class="w-4 h-4 text-grove-600" />
+					<span>4 Seasonal Themes</span>
+				</div>
+			</div>
 		</div>
 	</section>
 
-	<!-- Ready Tools Section -->
-	<section class="py-12 px-6">
+	<!-- Glass Components Section -->
+	<section class="py-8 px-6">
 		<div class="max-w-5xl mx-auto">
-			<div class="flex items-center gap-3 mb-8">
-				<div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/40">
-					<Sparkles class="w-5 h-5 text-green-600 dark:text-green-400" />
+			<!-- Section Header -->
+			<button
+				type="button"
+				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
+				onclick={() => expandedSection = expandedSection === 'glass' ? null : 'glass'}
+			>
+				<div class="flex items-center gap-3">
+					<div class="p-2 rounded-lg bg-grove-100 dark:bg-grove-900/40">
+						<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+					</div>
+					<div class="text-left">
+						<h2 class="text-xl font-serif text-foreground">Glass Components</h2>
+						<p class="text-sm text-foreground-muted">Glassmorphism UI elements with blur effects</p>
+					</div>
 				</div>
-				<div>
-					<h2 class="text-2xl font-serif text-foreground">Ready to Use</h2>
-					<p class="text-foreground-muted text-sm">These tools are live and growing</p>
-				</div>
-			</div>
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'glass' ? 'rotate-180' : ''}" />
+			</button>
 
-			<div class="grid md:grid-cols-2 gap-6">
-				{#each readyTools as tool}
-					{@const status = getStatusStyles(tool.status)}
-					<a
-						href={tool.domain ? `https://${tool.domain}/vineyard` : '#'}
-						class="group block p-6 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:shadow-md hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all"
-					>
-						<div class="flex items-start gap-4">
-							<!-- Icon -->
-							<div class="p-3 rounded-lg {status.bg}">
-								<tool.icon class="w-6 h-6 {status.text}" />
+			{#if expandedSection === 'glass'}
+				<div class="space-y-8 animate-in slide-in-from-top-2 duration-300">
+					<!-- Glass Base Component -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;Glass&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Base glass container</span>
+						</h3>
+
+						<div class="grid md:grid-cols-2 gap-6">
+							<!-- Preview -->
+							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
+								<Glass variant={glassVariant} intensity={glassIntensity} class="p-6 rounded-xl">
+									<p class="text-foreground font-medium">Glass content here</p>
+									<p class="text-sm text-foreground-muted mt-1">With {glassVariant} variant</p>
+								</Glass>
 							</div>
 
-							<div class="flex-1 min-w-0">
-								<!-- Header -->
-								<div class="flex items-center gap-2 mb-1">
-									<h3 class="font-semibold text-foreground">{tool.name}</h3>
-									<span class="px-2 py-0.5 text-xs font-medium rounded-full {status.bg} {status.text} border {status.border}">
-										{status.label}
-									</span>
+							<!-- Controls -->
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="surface">surface</option>
+										<option value="overlay">overlay</option>
+										<option value="card">card</option>
+										<option value="tint">tint</option>
+										<option value="accent">accent</option>
+										<option value="muted">muted</option>
+									</select>
 								</div>
-
-								<!-- Tagline -->
-								<p class="text-sm text-foreground-muted mb-2">{tool.tagline}</p>
-
-								<!-- Description -->
-								<p class="text-sm text-foreground-faint">{tool.description}</p>
-
-								<!-- Link hint -->
-								{#if tool.domain}
-									<div class="flex items-center gap-1 mt-3 text-xs text-grove-600 dark:text-grove-400 group-hover:text-grove-700 dark:group-hover:text-grove-300">
-										<span>Visit vineyard</span>
-										<ArrowRight class="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-									</div>
-								{/if}
-							</div>
-						</div>
-					</a>
-				{/each}
-			</div>
-		</div>
-	</section>
-
-	<!-- Upcoming Tools Section -->
-	<section class="py-12 px-6 relative overflow-hidden">
-		<!-- Decorative trees at bottom -->
-		<div class="absolute bottom-0 left-[5%] w-24 h-32 opacity-40" aria-hidden="true">
-			<Logo class="w-full h-full" season="summer" animate />
-		</div>
-		<div class="absolute bottom-0 left-[20%] w-20 h-28 opacity-30" aria-hidden="true">
-			<TreePine class="w-full h-full" season="summer" animate color={greens.grove} />
-		</div>
-		<div class="absolute bottom-0 right-[8%] w-22 h-30 opacity-35" aria-hidden="true">
-			<TreeCherry class="w-full h-full" season="summer" animate />
-		</div>
-		<div class="absolute bottom-0 right-[25%] w-18 h-24 opacity-25" aria-hidden="true">
-			<TreeBirch class="w-full h-full" season="summer" animate />
-		</div>
-
-		<!-- Fireflies -->
-		<div class="absolute top-1/4 left-[15%] opacity-60" aria-hidden="true">
-			<Firefly class="w-3 h-3" />
-		</div>
-		<div class="absolute top-1/3 right-[20%] opacity-50" aria-hidden="true">
-			<Firefly class="w-2 h-2" />
-		</div>
-
-		<div class="max-w-5xl mx-auto relative z-10">
-			<div class="flex items-center gap-3 mb-8">
-				<div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/40">
-					<Grape class="w-5 h-5 text-amber-600 dark:text-amber-400" />
-				</div>
-				<div>
-					<h2 class="text-2xl font-serif text-foreground">What's Growing</h2>
-					<p class="text-foreground-muted text-sm">Tools in development or on the horizon</p>
-				</div>
-			</div>
-
-			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-				{#each upcomingTools as tool}
-					{@const status = getStatusStyles(tool.status)}
-					<div class="p-5 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-white/50 dark:border-slate-700/50 shadow-sm">
-						<div class="flex items-start gap-3">
-							<!-- Icon with accent bar -->
-							<div class="relative">
-								<div class="p-2.5 rounded-lg {status.bg}">
-									<tool.icon class="w-5 h-5 {status.text}" />
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Intensity</label>
+									<select bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="none">none</option>
+										<option value="light">light</option>
+										<option value="medium">medium</option>
+										<option value="strong">strong</option>
+									</select>
 								</div>
-								<div class="absolute -left-1 top-1 bottom-1 w-1 rounded-full {getToolAccent(tool.color)}"></div>
-							</div>
-
-							<div class="flex-1 min-w-0">
-								<!-- Header -->
-								<div class="flex items-center gap-2 mb-1 flex-wrap">
-									<h3 class="font-semibold text-foreground text-sm">{tool.name}</h3>
-									<span class="px-1.5 py-0.5 text-xs font-medium rounded {status.bg} {status.text}">
-										{status.label}
-									</span>
-									{#if tool.integrated}
-										<span class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-											Integrated
-										</span>
-									{/if}
-								</div>
-
-								<!-- Tagline -->
-								<p class="text-xs text-foreground-muted mb-1.5">{tool.tagline}</p>
-
-								<!-- Description -->
-								<p class="text-xs text-foreground-faint leading-relaxed">{tool.description}</p>
-
-								<!-- Philosophy -->
-								{#if tool.philosophy}
-									<p class="mt-2 text-xs text-foreground-faint italic opacity-75">
-										"{tool.philosophy.slice(0, 80)}..."
-									</p>
-								{/if}
 							</div>
 						</div>
 					</div>
-				{/each}
-			</div>
+
+					<!-- GlassButton -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassButton&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Translucent buttons</span>
+						</h3>
+
+						<div class="grid md:grid-cols-2 gap-6">
+							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[150px]">
+								<GlassButton variant={buttonVariant} size={buttonSize}>
+									<MousePointer class="w-4 h-4" />
+									Click me
+								</GlassButton>
+							</div>
+
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select bind:value={buttonVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="default">default</option>
+										<option value="accent">accent</option>
+										<option value="dark">dark</option>
+										<option value="ghost">ghost</option>
+										<option value="outline">outline</option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Size</label>
+									<select bind:value={buttonSize} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="sm">sm</option>
+										<option value="md">md</option>
+										<option value="lg">lg</option>
+										<option value="icon">icon</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- GlassCard -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassCard&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Content cards with glass effect</span>
+						</h3>
+
+						<div class="grid md:grid-cols-2 gap-6">
+							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
+								<GlassCard
+									variant={cardVariant}
+									hoverable={cardHoverable}
+									title="Card Title"
+									description="A beautiful glass card"
+									class="w-full max-w-xs"
+								>
+									<p class="text-sm text-foreground-muted">Card content goes here. Try hovering!</p>
+								</GlassCard>
+							</div>
+
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select bind:value={cardVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="default">default</option>
+										<option value="accent">accent</option>
+										<option value="dark">dark</option>
+										<option value="muted">muted</option>
+										<option value="frosted">frosted</option>
+									</select>
+								</div>
+								<label class="flex items-center gap-3 cursor-pointer">
+									<input type="checkbox" bind:checked={cardHoverable} class="w-5 h-5 rounded" />
+									<span class="text-sm text-foreground">Hoverable</span>
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<!-- GlassLogo -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassLogo&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Seasonal glassmorphism logo</span>
+						</h3>
+
+						<div class="grid md:grid-cols-2 gap-6">
+							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
+								<GlassLogo
+									variant={logoVariant}
+									season={logoSeason}
+									breathing={logoBreathing}
+									class="w-24 h-32"
+								/>
+							</div>
+
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Variant</label>
+									<select bind:value={logoVariant} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="default">default</option>
+										<option value="accent">accent</option>
+										<option value="frosted">frosted</option>
+										<option value="dark">dark</option>
+										<option value="ethereal">ethereal</option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-sm font-medium text-foreground mb-2">Season</label>
+									<select bind:value={logoSeason} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground">
+										<option value="spring">spring</option>
+										<option value="summer">summer</option>
+										<option value="autumn">autumn</option>
+										<option value="winter">winter</option>
+									</select>
+								</div>
+								<label class="flex items-center gap-3 cursor-pointer">
+									<input type="checkbox" bind:checked={logoBreathing} class="w-5 h-5 rounded" />
+									<span class="text-sm text-foreground">Breathing animation</span>
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<!-- GlassOverlay -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassOverlay&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Fullscreen backdrop overlay</span>
+						</h3>
+
+						<div class="flex items-center gap-4">
+							<GlassButton variant="accent" onclick={() => showOverlayDemo = true}>
+								<Eye class="w-4 h-4" />
+								Show Overlay Demo
+							</GlassButton>
+							<p class="text-sm text-foreground-muted">Click to see the overlay effect</p>
+						</div>
+					</div>
+
+					<!-- GlassCarousel -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+							<code class="text-sm px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">&lt;GlassCarousel&gt;</code>
+							<span class="text-sm font-normal text-foreground-muted">Stack-style image carousel</span>
+						</h3>
+
+						<div class="max-w-md mx-auto">
+							<GlassCarousel images={carouselImages} variant="frosted" />
+						</div>
+						<p class="text-center text-sm text-foreground-muted mt-4">Swipe, drag, or use arrows to navigate</p>
+					</div>
+
+					<!-- More components note -->
+					<div class="text-center p-6 rounded-xl bg-grove-50/50 dark:bg-grove-950/20 border border-dashed border-grove-300 dark:border-grove-800">
+						<p class="text-foreground-muted">
+							Plus: <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-sm">GlassNavbar</code> and
+							<code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-sm">GlassConfirmDialog</code>
+						</p>
+						<p class="text-sm text-foreground-faint mt-1">See them in action throughout Grove</p>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</section>
 
-	<!-- How Vineyard Works Section -->
-	<section class="py-16 px-6 bg-white/40 dark:bg-slate-800/40">
-		<div class="max-w-3xl mx-auto text-center">
-			<h2 class="text-2xl font-serif text-foreground mb-4">Every tool has a home</h2>
-			<p class="text-foreground-muted mb-8">
-				Each Grove tool implements its own <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-sm">/vineyard</code> route.
-				Visit any tool's vineyard to explore demos, documentation, and roadmaps.
-			</p>
-
-			<div class="grid sm:grid-cols-3 gap-4 text-left">
-				<div class="p-4 rounded-lg bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm">
-					<div class="w-8 h-8 rounded-full bg-grove-100 dark:bg-grove-900/40 flex items-center justify-center mb-3">
-						<span class="text-grove-600 dark:text-grove-400 font-semibold text-sm">1</span>
+	<!-- Nature Assets Section -->
+	<section class="py-8 px-6">
+		<div class="max-w-5xl mx-auto">
+			<!-- Section Header -->
+			<button
+				type="button"
+				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
+				onclick={() => expandedSection = expandedSection === 'nature' ? null : 'nature'}
+			>
+				<div class="flex items-center gap-3">
+					<div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+						<TreeIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
-					<h3 class="font-medium text-foreground mb-1">Demo First</h3>
-					<p class="text-xs text-foreground-muted">Working examples beat documentation walls. Try before you commit.</p>
-				</div>
-
-				<div class="p-4 rounded-lg bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm">
-					<div class="w-8 h-8 rounded-full bg-grove-100 dark:bg-grove-900/40 flex items-center justify-center mb-3">
-						<span class="text-grove-600 dark:text-grove-400 font-semibold text-sm">2</span>
+					<div class="text-left">
+						<h2 class="text-xl font-serif text-foreground">Nature Assets</h2>
+						<p class="text-sm text-foreground-muted">{Object.keys(assets).length} SVG components across {categories.length} categories</p>
 					</div>
-					<h3 class="font-medium text-foreground mb-1">Honest Progress</h3>
-					<p class="text-xs text-foreground-muted">Clear status badges show what's ready, what's coming, and what's just an idea.</p>
 				</div>
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'nature' ? 'rotate-180' : ''}" />
+			</button>
 
-				<div class="p-4 rounded-lg bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm">
-					<div class="w-8 h-8 rounded-full bg-grove-100 dark:bg-grove-900/40 flex items-center justify-center mb-3">
-						<span class="text-grove-600 dark:text-grove-400 font-semibold text-sm">3</span>
+			{#if expandedSection === 'nature'}
+				<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40 animate-in slide-in-from-top-2 duration-300">
+					<div class="grid md:grid-cols-2 gap-8">
+						<!-- Preview Panel -->
+						<div>
+							<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-slate-800 dark:to-emerald-950 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-divider">
+								{#if CurrentComponent}
+									<CurrentComponent class="w-32 h-32" {...propValues} />
+								{/if}
+							</div>
+							<p class="text-center mt-4 text-foreground-muted font-mono text-sm">
+								&lt;{selectedAsset} /&gt;
+							</p>
+						</div>
+
+						<!-- Controls Panel -->
+						<div class="space-y-6">
+							<!-- Asset Selector -->
+							<div>
+								<label for="asset-selector" class="block text-sm font-medium text-foreground mb-2">Select Asset</label>
+								<select
+									id="asset-selector"
+									bind:value={selectedAsset}
+									onchange={onAssetChange}
+									class="w-full px-4 py-2 rounded-lg border border-divider bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+								>
+									{#each categories as category}
+										<optgroup label={category}>
+											{#each getAssetsByCategory(category) as [name, _]}
+												<option value={name}>{name}</option>
+											{/each}
+										</optgroup>
+									{/each}
+								</select>
+							</div>
+
+							<!-- Props Controls -->
+							{#if getCurrentAsset()}
+								<div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+									<h4 class="text-sm font-medium text-foreground-muted uppercase tracking-wide">Properties</h4>
+
+									{#each getCurrentAsset().props as prop}
+										<div class="space-y-2">
+											<label for="prop-{prop}" class="block text-sm font-medium text-foreground">{prop}</label>
+
+											{#if isColorProp(prop)}
+												<div class="space-y-2">
+													<div class="flex gap-2 items-center">
+														<input
+															id="prop-{prop}"
+															type="color"
+															bind:value={propValues[prop]}
+															class="w-10 h-10 rounded cursor-pointer border border-divider"
+														/>
+														<input
+															type="text"
+															bind:value={propValues[prop]}
+															placeholder="#16a34a"
+															class="flex-1 px-3 py-2 rounded-lg border border-divider bg-surface text-foreground font-mono text-sm"
+														/>
+													</div>
+													<div class="flex flex-wrap gap-1">
+														{#each colorPresets as preset}
+															<button
+																type="button"
+																onclick={() => propValues[prop] = preset.value}
+																class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+																style="background-color: {preset.value}"
+																title={preset.name}
+															></button>
+														{/each}
+													</div>
+												</div>
+											{:else if isBooleanProp(prop)}
+												<label class="flex items-center gap-3 cursor-pointer">
+													<input type="checkbox" bind:checked={propValues[prop]} class="w-5 h-5 rounded" />
+													<span class="text-sm text-foreground-muted">{propValues[prop] !== false ? 'Enabled' : 'Disabled'}</span>
+												</label>
+											{:else if hasOptions(prop)}
+												<select
+													id="prop-{prop}"
+													bind:value={propValues[prop]}
+													class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm"
+												>
+													<option value={undefined}>Default</option>
+													{#each getOptions(prop) as option}
+														<option value={option}>{option}</option>
+													{/each}
+												</select>
+											{:else if isNumericProp(prop)}
+												<input
+													id="prop-{prop}"
+													type="range"
+													min="0"
+													max="1"
+													step="0.1"
+													bind:value={propValues[prop]}
+													class="w-full"
+												/>
+											{:else}
+												<input
+													id="prop-{prop}"
+													type="text"
+													bind:value={propValues[prop]}
+													placeholder="Default"
+													class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm"
+												/>
+											{/if}
+										</div>
+									{/each}
+								</div>
+							{/if}
+
+							<!-- Reset button -->
+							<button
+								type="button"
+								onclick={() => propValues = {}}
+								class="w-full px-4 py-2 rounded-lg border border-divider text-foreground-muted hover:bg-surface transition-colors text-sm"
+							>
+								Reset to Defaults
+							</button>
+						</div>
 					</div>
-					<h3 class="font-medium text-foreground mb-1">Beautiful by Default</h3>
-					<p class="text-xs text-foreground-muted">Grove's warm aesthetic throughout. Documentation should feel like home.</p>
 				</div>
-			</div>
-
-			<!-- Links to related pages -->
-			<div class="flex flex-wrap justify-center gap-4 mt-10">
-				<a
-					href="/roadmap"
-					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-grove-600 text-white hover:bg-grove-700 transition-colors"
-				>
-					<Compass class="w-4 h-4" />
-					View Roadmap
-				</a>
-				<a
-					href="/tools"
-					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 text-foreground border border-divider hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-				>
-					<Palette class="w-4 h-4" />
-					Asset Viewer
-				</a>
-			</div>
+			{/if}
 		</div>
 	</section>
 
-	<!-- Bottom decoration -->
-	<div class="h-20 relative overflow-hidden" aria-hidden="true">
-		<div class="absolute bottom-0 left-[30%] w-4 h-6 opacity-50">
-			<GrassTuft class="w-full h-full" season="summer" />
-		</div>
-		<div class="absolute bottom-0 left-[50%] w-5 h-7 opacity-40">
-			<GrassTuft class="w-full h-full" season="summer" />
-		</div>
-		<div class="absolute bottom-0 left-[70%] w-4 h-5 opacity-45">
-			<GrassTuft class="w-full h-full" season="summer" />
-		</div>
-	</div>
+	<!-- Bottom spacer -->
+	<div class="flex-1"></div>
 
 	<Footer />
 </main>
+
+<!-- Overlay Demo -->
+{#if showOverlayDemo}
+	<GlassOverlay onclick={() => showOverlayDemo = false}>
+		<div class="flex items-center justify-center h-full">
+			<GlassCard variant="frosted" class="max-w-sm mx-4" title="Overlay Demo">
+				<p class="text-foreground-muted">Click anywhere on the backdrop to close this overlay.</p>
+				<div class="mt-4">
+					<GlassButton variant="accent" onclick={() => showOverlayDemo = false}>Close</GlassButton>
+				</div>
+			</GlassCard>
+		</div>
+	</GlassOverlay>
+{/if}
