@@ -8,8 +8,7 @@ export const specs: Doc[] = [
   {
     slug: "centennial-spec",
     title: "Centennial — Domain Preservation",
-    description:
-      "100-year domain preservation for long-term Grove members",
+    description: "100-year domain preservation for long-term Grove members",
     excerpt:
       "Some trees outlive the people who planted them. Centennial is Grove's promise that your words can have that same longevity. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years from the day you planted it.",
     category: "specs",
@@ -239,16 +238,6 @@ export const specs: Doc[] = [
     category: "specs",
     lastUpdated: "2025-12-30",
     readingTime: 6,
-  },
-  {
-    slug: "wisp-migration-prompt",
-    title: "Wisp Migration Guide",
-    description: "Migration guide from old AI assistant to Wisp",
-    excerpt:
-      "Migration documentation for moving from the local AIWritingPanel to the new Wisp system from GroveEngine, using DeepSeek V3 via Fireworks AI.",
-    category: "specs",
-    lastUpdated: "2025-12-30",
-    readingTime: 3,
   },
   // Completed Specs (implemented or superseded)
   {
@@ -549,7 +538,8 @@ export const helpArticles: Doc[] = [
   {
     slug: "the-markdown-editor",
     title: "The Markdown Editor",
-    description: "A guide to Grove's writing environment with preview, ambient sounds, and zen mode",
+    description:
+      "A guide to Grove's writing environment with preview, ambient sounds, and zen mode",
     excerpt:
       "Grove's editor is where you'll spend most of your time. Markdown with floating toolbar, live preview, drag-drop images, ambient sounds, zen mode, and autosave.",
     category: "help",
@@ -559,7 +549,8 @@ export const helpArticles: Doc[] = [
   {
     slug: "custom-fonts",
     title: "Custom Fonts",
-    description: "20 curated fonts including accessibility options, with custom upload for Evergreen",
+    description:
+      "20 curated fonts including accessibility options, with custom upload for Evergreen",
     excerpt:
       "Grove includes 20 fonts—accessibility fonts like Lexend and OpenDyslexic, serifs, sans-serifs, and display faces. Evergreen subscribers can upload their own.",
     category: "help",
@@ -579,7 +570,8 @@ export const helpArticles: Doc[] = [
   {
     slug: "data-portability",
     title: "Data Portability",
-    description: "Taking your Grove content to WordPress, Ghost, Hugo, or anywhere else",
+    description:
+      "Taking your Grove content to WordPress, Ghost, Hugo, or anywhere else",
     excerpt:
       "Your content belongs to you. Grove exports in standard formats—Markdown and JSON—that work with WordPress, Ghost, Hugo, and other platforms.",
     category: "help",
@@ -756,7 +748,8 @@ export const marketingDocs: Doc[] = [
   {
     slug: "advertising-strategy",
     title: "Advertising & Marketing Strategy",
-    description: "How Grove markets itself to the world — channels, messaging, and principles",
+    description:
+      "How Grove markets itself to the world — channels, messaging, and principles",
     excerpt:
       "Word of mouth is the marketing. This document outlines channels, target audiences, messaging framework, and the principles behind how Grove gets the word out.",
     category: "marketing",
