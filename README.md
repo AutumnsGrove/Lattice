@@ -4,22 +4,28 @@
 
 A modern, multi-tenant blogging platform where users get their own blogs on subdomains (username.grove.place). Built entirely on Cloudflare infrastructure with SvelteKit, featuring unique gutter annotations, a powerful markdown editor, and an optional community feed. Lattice is the core framework that supports the entire Grove ecosystem—the thing that holds everything else up.
 
+> *A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see—it's the thing that holds everything else up.*
+
 ## 📦 Packages
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | 0.5.0 | Lattice — Multi-tenant blog engine for Cloudflare Workers |
-| [example-site](packages/example-site) | 0.1.0 | Demo site showcasing all Lattice features |
-| [domains](domains) | 0.1.0 | AI-powered domain search tool for client consultations |
+| [@autumnsgrove/groveengine](packages/engine) | 0.8.0 | Lattice — Multi-tenant blog engine with 177 UI components |
+| [landing](landing) | — | Marketing site at grove.place |
+| [domains](domains) | — | Forage — AI-powered domain discovery tool |
+| [og-worker](packages/og-worker) | — | Dynamic OG image generation Worker |
+| [grove-router](packages/grove-router) | — | Subdomain routing Worker |
 
 ### 🌐 Live Sites
 
 | Site | URL | Description |
 |------|-----|-------------|
-| Grove Landing | [grove.place](https://grove.place) | Landing page with email signup |
+| Grove Landing | [grove.place](https://grove.place) | Landing page with forest scenes and seasonal themes |
+| Vineyard | [grove.place/vineyard](https://grove.place/vineyard) | Lattice asset showcase with all 177 UI components |
 | Example Blog | [example.grove.place](https://example.grove.place) | Demo site (The Midnight Bloom Tea Café) |
 | Forage | [forage.grove.place](https://forage.grove.place) | AI-powered domain discovery |
 | CDN | [cdn.grove.place](https://cdn.grove.place) | Content delivery network |
+| OG Images | [og.grove.place](https://og.grove.place) | Dynamic OG image generation |
 | Auth | [auth.grove.place](https://auth.grove.place) | Heartwood authentication service |
 | Admin | [admin.grove.place](https://admin.grove.place) | Heartwood admin dashboard |
 | Login | [login.grove.place](https://login.grove.place) | Heartwood login portal |
@@ -42,40 +48,64 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 ```
 GroveEngine/
 ├── packages/
-│   ├── engine/               # @autumnsgrove/groveengine - Blog engine
-│   │   ├── src/
-│   │   │   ├── lib/          # Core library code
-│   │   │   │   ├── auth/         # JWT and session management
-│   │   │   │   ├── components/   # Svelte components (admin, custom)
-│   │   │   │   ├── payments/     # Stripe payment system
-│   │   │   │   ├── ui/           # 50+ UI components with design system
-│   │   │   │   └── utils/        # 12 utility modules
-│   │   │   └── routes/       # SvelteKit routes (blog, admin, API, auth)
-│   │   └── migrations/       # D1 database migrations (7 migrations)
-│   └── example-site/         # Demo site: The Midnight Bloom Tea Café
-├── domains/                  # Forage: AI-powered domain discovery (forage.grove.place)
+│   ├── engine/               # @autumnsgrove/groveengine - Core engine (0.8.0)
+│   │   ├── src/lib/
+│   │   │   ├── auth/             # JWT and session management
+│   │   │   ├── components/       # Svelte components (admin, custom)
+│   │   │   ├── payments/         # Stripe payment system
+│   │   │   ├── ui/               # 177 UI components with design system
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── ui/           # Glass, buttons, cards, forms (40+)
+│   │   │   │   │   ├── nature/       # Trees, creatures, weather (60+)
+│   │   │   │   │   ├── typography/   # Font components (20+)
+│   │   │   │   │   ├── gallery/      # Image gallery & lightbox
+│   │   │   │   │   ├── charts/       # Analytics visualizations
+│   │   │   │   │   └── content/      # Cards, roadmaps, plans
+│   │   │   │   ├── tokens/       # Design tokens & color palettes
+│   │   │   │   └── styles/       # Global CSS & Tailwind preset
+│   │   │   └── utils/            # 12 utility modules
+│   │   ├── routes/           # SvelteKit routes (blog, admin, API, auth)
+│   │   └── migrations/       # D1 database migrations (13 migrations)
+│   ├── og-worker/            # Dynamic OG image generation (og.grove.place)
+│   └── grove-router/         # Subdomain routing Worker
+├── domains/                  # Forage: AI-powered domain discovery
 ├── landing/                  # Marketing site for grove.place
+│   └── src/routes/
+│       ├── forest/           # Seasonal nature scene showcase
+│       ├── vineyard/         # Asset & component showcase
+│       ├── manifesto/        # Project philosophy
+│       ├── knowledge/        # Help center (10+ categories)
+│       └── legal/            # ToS, Privacy, DMCA, etc.
 ├── docs/                     # Project documentation
-│   ├── README.md             # Master project summary
-│   ├── specs/                # Technical specifications (7 specs)
-│   ├── guides/               # Setup and onboarding guides
-│   └── prompts/              # Research and implementation prompts
-├── AgentUsage/               # 24+ agent workflow guides
-└── assets/                   # Brand assets & visuals
+│   ├── specs/                # Technical specifications (30+ specs)
+│   ├── patterns/             # Design patterns (8 patterns)
+│   └── guides/               # Setup and onboarding guides
+└── AgentUsage/               # 24+ agent workflow guides
 ```
 
 ## ✨ Key Features
 
-- **Gutter Annotations** - Unique sidebar annotation system for contextual notes on blog posts
-- **Markdown Editor** - Full-featured editor with live preview, 7 themes, drag-drop images, slash commands, snippets, and ambient sounds
-- **Heartwood Integration** - Google Sign-In with OAuth 2.0 + PKCE, plus magic code fallback via [Heartwood](https://github.com/AutumnsGrove/GroveAuth)
-- **Multi-Tenant Architecture** - Subdomain-based isolation with per-tenant databases
-- **Cloudflare Native** - D1 database, R2 storage, KV caching, Workers deployment
-- **50+ UI Components** - Complete design system with primitives, charts, galleries, and form components
-- **CDN Admin Uploader** - R2-powered media upload with magic byte validation
-- **Stripe Payments** - Payment system with provider abstraction for subscriptions
-- **AI-Powered Domain Search** - DeepSeek v3.2 via OpenRouter (zero-data-retention) with live Cloudflare pricing
-- **Accessibility Fonts** - 7 fonts including OpenDyslexic, Atkinson Hyperlegible, and Lexend
+### Core Platform
+- **Gutter Annotations** — Unique sidebar annotation system for contextual notes on blog posts
+- **Markdown Editor** — Full-featured editor with live preview, 7 themes, drag-drop images, snippets, and ambient sounds
+- **Heartwood Integration** — Google Sign-In with OAuth 2.0 + PKCE via [Heartwood](https://github.com/AutumnsGrove/GroveAuth)
+- **Multi-Tenant Architecture** — Subdomain-based isolation with per-tenant databases
+- **Cloudflare Native** — D1 database, R2 storage, KV caching, Workers deployment
+- **Stripe Payments** — Payment system with provider abstraction for subscriptions
+
+### Design System (177 Components)
+- **Glass Design System** — 8 glassmorphism components (Glass, GlassCard, GlassButton, GlassCarousel, GlassNavbar, GlassLogo, GlassOverlay, GlassConfirmDialog)
+- **Nature Components** — 60+ SVG components for atmospheric forest scenes (trees, creatures, weather, botanical, structural, water, sky)
+- **Typography Components** — 20+ font components with FontProvider for scoped font application
+- **Seasonal Palettes** — Complete color system for spring, summer, autumn, winter with midnightBloom accent
+- **Dark Mode** — Full dark mode support across all components
+
+### Tools & Infrastructure
+- **Forage** — AI-powered domain discovery with DeepSeek v3.2, SSE streaming, live Cloudflare pricing
+- **Shade** — AI content protection with Turnstile verification, WAF rules, and Dark Visitors integration
+- **OG Worker** — Dynamic Open Graph image generation at og.grove.place
+- **CDN Admin Uploader** — R2-powered media upload with magic byte validation
+- **Accessibility Fonts** — 20 fonts including OpenDyslexic, Atkinson Hyperlegible, Luciole, and Lexend
 
 ## 🚀 Quick Start
 
@@ -98,37 +128,39 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 
 ## 🎯 Project Status
 
-**Current Phase:** Phase 1 - MVP Development
+**Current Phase:** Phase 1 - MVP Development | **Engine Version:** 0.8.0 | **Domain:** grove.place ✅
 
-**Domain Secured:** grove.place ✅
+### Recently Completed (v0.8.0)
+- ✅ **Nature Components Library** — 60+ SVG components (trees, creatures, weather, botanical, structural, water, sky)
+- ✅ **Seasonal Palette System** — Complete color exports for spring, summer, autumn, winter, midnightBloom
+- ✅ **Glass Design System** — 8 glassmorphism components with Prism pattern documentation
+- ✅ **Typography Components** — 20+ font components with FontProvider for scoped application
+- ✅ **Dark Mode Redesign** — Domains app with glassmorphism and dark mode support
+- ✅ **Vineyard Showcase** — Asset and component showcase page at /vineyard
+- ✅ **OG Worker** — Dynamic Open Graph image generation deployed to og.grove.place
+- ✅ **Admin Panel Overhaul** — Glassmorphism sidebar, inline delete, roadmap preview
+- ✅ **Email Unsubscribe** — Token-based unsubscribe system with HMAC verification
+- ✅ **Shade Implementation** — Turnstile verification for AI content protection
+- ✅ **Manifesto Enhancement** — Personal voice and Centennial feature
 
-**Completed:**
-- ✅ Domain secured (grove.place)
-- ✅ Blog engine migrated from AutumnsGrove (v0.4.5)
-- ✅ NPM packages published (@autumnsgrove/groveengine)
-- ✅ Multi-tenant database schema designed (7 migrations, 25+ tables)
-- ✅ Heartwood integration with Google Sign-In
-- ✅ Landing page deployed with "How It Works" section
-- ✅ Stripe payments system with provider abstraction
-- ✅ CDN admin upload system with R2 storage and magic byte validation
-- ✅ Example site showcasing all features
-- ✅ AI-powered domain search tool with multi-provider support
-- ✅ Security audit completed (2025-12-05) - critical issues fixed
-- ✅ SSE streaming for real-time domain search updates
+### Foundation (Completed)
+- ✅ Blog engine with 177 UI components
+- ✅ Multi-tenant database schema (13 migrations, 25+ tables)
+- ✅ Heartwood integration with Google OAuth 2.0 + PKCE
+- ✅ Stripe payments with provider abstraction
+- ✅ Forage AI domain search with SSE streaming
+- ✅ Security audit completed with critical issues fixed
+- ✅ 30+ specification documents, 8 design patterns
 
-**In Progress:**
+### In Progress
+- 🔄 Glass design system expansion to remaining pages
 - 🔄 Multi-tenant infrastructure testing
-- 🔄 Basic analytics implementation
 - 🔄 Tenant onboarding flow finalization
 
-**Recently Completed (v0.5.0):**
-- ✅ Post limits enforcement (250 for Starter plan) via Heartwood
-- ✅ Google Sign-In with OAuth 2.0 + PKCE
-
 **Key Links:**
-- [Master Project Summary](docs/project-plan.md)
+- [Grove Naming System](docs/grove-naming.md) — The philosophy behind Grove's naming
 - [Engine Specification](docs/specs/engine-spec.md)
-- [Development Roadmap](docs/roadmap.md)
+- [Prism Pattern](docs/patterns/prism-pattern.md) — Glassmorphism design system
 
 ## 🔍 Internal Tools
 
@@ -209,15 +241,16 @@ This isn't just a SaaS—it's about helping people have their own space online, 
 - **Frontend:** SvelteKit 2.5+, Svelte 5, TypeScript, Tailwind CSS 3.4+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage, Durable Objects
 - **Payments:** Stripe (with provider abstraction for future Paddle/LemonSqueezy)
-- **Auth:** [Heartwood](https://github.com/AutumnsGrove/GroveAuth) (Google OAuth 2.0 + PKCE, magic code fallback)
+- **Auth:** [Heartwood](https://github.com/AutumnsGrove/GroveAuth) (Google OAuth 2.0 + PKCE)
 - **Email:** Resend
 - **Markdown:** Marked.js 17+, gray-matter (YAML frontmatter)
 - **Charts:** Chart.js 4.5+
 - **Icons:** Lucide Svelte
-- **UI:** 50+ components with bits-ui primitives
+- **UI:** 177 components with bits-ui primitives, glassmorphism design system
 - **AI Provider:** DeepSeek v3.2 via OpenRouter (for domain search)
 - **Testing:** Vitest 4.0+, Testing Library, happy-dom
 - **Build:** Vite 5.4+, pnpm 9+ workspaces
+- **Design Patterns:** 8 documented patterns (Prism, Sentinel, Threshold, Loom, Songbird, Firefly, Vineyard)
 
 ## 📈 Success Metrics
 
@@ -256,11 +289,7 @@ pnpm dev:wrangler
 cd landing
 pnpm dev
 
-# Start example site
-cd packages/example-site
-pnpm dev
-
-# Start domain search tool
+# Start domain search tool (Forage)
 cd domains
 pnpm dev
 ```
@@ -303,11 +332,11 @@ wrangler d1 migrations apply grove-engine-db --remote
 
 ## 📄 License
 
-MIT
+AGPL-3.0
 
 ---
 
 **Project Status:** Phase 1 - MVP Development
 **Domain:** grove.place ✅
-**Engine Version:** 0.5.0
-**Last Updated:** 2025-12-09
+**Engine Version:** 0.8.0
+**Last Updated:** 2026-01-04
