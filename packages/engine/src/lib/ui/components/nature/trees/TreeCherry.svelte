@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { autumnReds, pinks, winter } from '../palette';
+	import { autumnReds, cherryBlossoms, winter } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -28,7 +28,7 @@
 
 	// Cherry trees: pink blossoms in spring, red/crimson foliage in autumn
 	// Use $derived to react to season/color prop changes
-	const defaultColor = $derived(season === 'autumn' ? autumnReds.scarlet : pinks.blush);
+	const defaultColor = $derived(season === 'autumn' ? autumnReds.scarlet : cherryBlossoms.pale);
 	const blossomColor = $derived(color ?? defaultColor);
 	const actualTrunkColor = $derived(
 		trunkColor ?? (season === 'winter' ? winter.bareBranch : '#6B4423')

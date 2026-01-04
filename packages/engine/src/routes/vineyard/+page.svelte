@@ -38,7 +38,9 @@
 	} from '$lib/ui/components/typography';
 	import {
 		greens, bark, earth, natural,
-		spring, springBlossoms, autumn, pinks, autumnReds, winter,
+		springFoliage, springSky, wildflowers,
+		cherryBlossoms, cherryBlossomsPeak,
+		autumn, autumnReds, winter,
 		accents, midnightBloom
 	} from '$lib/ui/components/nature/palette';
 	import { grove, cream, bark as barkTokens, status } from '$lib/ui/tokens/colors';
@@ -804,11 +806,16 @@ $ npm run dev
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Seasonal Palettes</h3>
 			<p class="text-bark-600 mb-6">Each season brings its own color story to the grove.</p>
 			<div class="grid gap-6">
-				<PaletteRow name="Spring" colors={spring} description="Fresh growth, wildflowers, and renewal" />
-				<PaletteRow name="Spring Blossoms" colors={springBlossoms} description="Cherry blossom pinks at peak bloom" />
+				<!-- Spring -->
+				<PaletteRow name="Spring Foliage" colors={springFoliage} description="Fresh yellow-green growth of new leaves" />
+				<PaletteRow name="Spring Sky" colors={springSky} description="Clear, bright spring atmosphere" />
+				<PaletteRow name="Wildflowers" colors={wildflowers} description="Meadow flowers - yellows, purples, pinks" />
+				<PaletteRow name="Cherry Blossoms" colors={cherryBlossoms} description="Standard summer cherry blossoms" />
+				<PaletteRow name="Cherry Blossoms Peak" colors={cherryBlossomsPeak} description="Extra vibrant spring peak bloom" />
+				<!-- Autumn -->
 				<PaletteRow name="Autumn" colors={autumn} description="Warm golds, ambers, and falling leaves" />
-				<PaletteRow name="Pinks" colors={pinks} description="Cherry blossoms and soft florals" />
 				<PaletteRow name="Autumn Reds" colors={autumnReds} description="Maple and cherry fall foliage" />
+				<!-- Winter -->
 				<PaletteRow name="Winter" colors={winter} description="Snow, frost, and peaceful quiet" />
 			</div>
 		</div>
@@ -819,7 +826,6 @@ $ npm run dev
 			<p class="text-bark-600 mb-6">Special pops of color for woodland details.</p>
 			<div class="grid gap-6">
 				<PaletteRow name="Mushroom" colors={accents.mushroom} description="Fairy tale forest pops of color" />
-				<PaletteRow name="Flower" colors={accents.flower} description="Wildflower purples and yellows" />
 				<PaletteRow name="Firefly" colors={accents.firefly} description="Bioluminescent warm glow" />
 				<PaletteRow name="Berry" colors={accents.berry} description="Rich and saturated berry tones" />
 				<PaletteRow name="Water" colors={accents.water} description="Cool pond and stream reflections" />

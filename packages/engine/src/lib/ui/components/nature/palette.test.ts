@@ -8,6 +8,12 @@ import {
 	pinks,
 	autumnReds,
 	accents,
+	wildflowers,
+	springFoliage,
+	springSky,
+	cherryBlossoms,
+	cherryBlossomsPeak,
+	winter,
 	getSeasonalGreens,
 	getCherryColors,
 	pickRandom,
@@ -26,18 +32,38 @@ describe('palette.ts', () => {
 
 		it('should export all seasonal palettes', () => {
 			expect(autumn).toBeDefined();
-			expect(pinks).toBeDefined();
 			expect(autumnReds).toBeDefined();
+			expect(winter).toBeDefined();
+		});
+
+		it('should export spring-specific palettes', () => {
+			expect(springFoliage).toBeDefined();
+			expect(springSky).toBeDefined();
+			expect(wildflowers).toBeDefined();
+			expect(cherryBlossoms).toBeDefined();
+			expect(cherryBlossomsPeak).toBeDefined();
+		});
+
+		it('should export backward-compatible aliases', () => {
+			// These are deprecated but should still work
+			expect(pinks).toBeDefined();
+			expect(pinks.deepPink).toBe(cherryBlossoms.deep);
 		});
 
 		it('should export accent palettes', () => {
 			expect(accents).toBeDefined();
 			expect(accents.mushroom).toBeDefined();
-			expect(accents.flower).toBeDefined();
+			expect(accents.flower).toBeDefined(); // Deprecated but still available
 			expect(accents.firefly).toBeDefined();
 			expect(accents.berry).toBeDefined();
 			expect(accents.water).toBeDefined();
 			expect(accents.sky).toBeDefined();
+		});
+
+		it('accents.flower should alias wildflowers colors', () => {
+			expect(accents.flower.purple).toBe(wildflowers.purple);
+			expect(accents.flower.yellow).toBe(wildflowers.buttercup);
+			expect(accents.flower.white).toBe(wildflowers.white);
 		});
 
 		it('greens should have expected color keys', () => {
@@ -60,6 +86,16 @@ describe('palette.ts', () => {
 			Object.values(autumn).forEach(color => {
 				expect(color).toMatch(hexRegex);
 			});
+
+			Object.values(wildflowers).forEach(color => {
+				expect(color).toMatch(hexRegex);
+			});
+		});
+
+		it('cherryBlossoms and cherryBlossomsPeak should have distinct but related colors', () => {
+			// Peak bloom is brighter (shifted one shade up)
+			expect(cherryBlossomsPeak.deep).toBe(cherryBlossoms.standard);
+			expect(cherryBlossomsPeak.standard).toBe(cherryBlossoms.light);
 		});
 	});
 
@@ -69,35 +105,43 @@ describe('palette.ts', () => {
 			expect(getSeasonalGreens('summer')).toBe(greens);
 		});
 
-		it('should return greens palette for spring', () => {
-			expect(getSeasonalGreens('spring')).toBe(greens);
+		it('should return spring foliage mapped to greens structure for spring', () => {
+			const springGreens = getSeasonalGreens('spring');
+			expect(springGreens.darkForest).toBe(springFoliage.sprout);
+			expect(springGreens.grove).toBe(springFoliage.newLeaf);
+			expect(springGreens.meadow).toBe(springFoliage.freshGreen);
 		});
 
 		it('should return autumn palette for autumn', () => {
 			expect(getSeasonalGreens('autumn')).toBe(autumn);
 		});
 
-		it('should return greens palette for winter (current behavior)', () => {
-			expect(getSeasonalGreens('winter')).toBe(greens);
+		it('should return winter frosted colors for winter', () => {
+			const winterGreens = getSeasonalGreens('winter');
+			expect(winterGreens.darkForest).toBe(winter.frostedPine);
+			expect(winterGreens.grove).toBe(winter.winterGreen);
 		});
 	});
 
 	describe('getCherryColors', () => {
-		it('should return pinks palette for spring (default)', () => {
-			expect(getCherryColors()).toBe(pinks);
-			expect(getCherryColors('spring')).toBe(pinks);
+		it('should return cherryBlossomsPeak for spring (peak bloom)', () => {
+			expect(getCherryColors('spring')).toBe(cherryBlossomsPeak);
 		});
 
-		it('should return pinks palette for summer', () => {
-			expect(getCherryColors('summer')).toBe(pinks);
+		it('should return cherryBlossomsPeak for spring as default', () => {
+			expect(getCherryColors()).toBe(cherryBlossomsPeak);
+		});
+
+		it('should return cherryBlossoms for summer', () => {
+			expect(getCherryColors('summer')).toBe(cherryBlossoms);
 		});
 
 		it('should return autumnReds palette for autumn', () => {
 			expect(getCherryColors('autumn')).toBe(autumnReds);
 		});
 
-		it('should return pinks palette for winter', () => {
-			expect(getCherryColors('winter')).toBe(pinks);
+		it('should return null for winter (bare trees)', () => {
+			expect(getCherryColors('winter')).toBeNull();
 		});
 	});
 

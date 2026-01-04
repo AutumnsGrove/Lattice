@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { greens, spring } from '../palette';
+	import { greens, wildflowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -26,10 +26,10 @@
 
 	// Tulip color variants
 	const variantColors = {
-		red: spring.tulipRed,
-		pink: spring.tulipPink,
-		yellow: spring.daffodil,
-		purple: spring.crocus
+		red: wildflowers.tulipRed,
+		pink: wildflowers.tulipPink,
+		yellow: wildflowers.daffodil,
+		purple: wildflowers.crocus
 	};
 
 	const petals = $derived(petalColor ?? variantColors[variant]);

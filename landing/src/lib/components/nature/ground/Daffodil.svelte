@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { greens, spring } from '../palette';
+	import { greens, wildflowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -24,8 +24,8 @@
 		animate = true
 	}: Props = $props();
 
-	const petals = $derived(petalColor ?? spring.daffodil);       // Pale yellow petals
-	const trumpet = $derived(trumpetColor ?? spring.buttercup);   // Deeper yellow/orange trumpet
+	const petals = $derived(petalColor ?? wildflowers.daffodil);       // Pale yellow petals
+	const trumpet = $derived(trumpetColor ?? wildflowers.buttercup);   // Deeper yellow/orange trumpet
 	const stem = $derived(stemColor ?? greens.deepGreen);
 </script>
 

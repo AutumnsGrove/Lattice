@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Season } from './palette';
-	import { autumn, winter, greens, bark, springBlossoms } from './palette';
+	import { autumn, winter, greens, bark, cherryBlossomsPeak } from './palette';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -41,9 +41,9 @@
 	// - Autumn: Warm orange tones matching the forest palette
 	// - Winter: Frosted cool spruce (heavily snow-dusted evergreen)
 	const defaultColor = $derived(
-		season === 'spring' ? springBlossoms.pink :  // Blossom pink for spring!
-		season === 'autumn' ? autumn.pumpkin :       // Orange matching autumn forest palette
-		season === 'winter' ? winter.coldSpruce :    // Cool spruce with heavy snow
+		season === 'spring' ? cherryBlossomsPeak.standard :  // Blossom pink for spring!
+		season === 'autumn' ? autumn.pumpkin :               // Orange matching autumn forest palette
+		season === 'winter' ? winter.coldSpruce :            // Cool spruce with heavy snow
 		greens.grove  // Summer uses Grove brand green
 	);
 	const foliageColor = $derived(color ?? defaultColor);

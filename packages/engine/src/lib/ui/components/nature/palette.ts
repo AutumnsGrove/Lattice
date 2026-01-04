@@ -51,7 +51,7 @@ export const bark = {
  */
 export const earth = {
 	soil: '#3e2723',       // Rich forest floor
-	mud: '#5d4037',        // Wet earth
+	mud: '#5d4037',        // Wet earth (same as bark.bark - natural connection)
 	clay: '#8d6e63',       // Exposed clay
 	sand: '#d7ccc8',       // Paths, dry ground
 	stone: '#78716c',      // Neutral gray rocks
@@ -74,44 +74,87 @@ export const natural = {
 } as const;
 
 // =============================================================================
-// SEASONAL PALETTES
+// SEASONAL PALETTES - SPRING
 // =============================================================================
 
 /**
- * Spring colors - fresh growth and renewal
- * Bright yellow-greens of new leaves, soft pastels of early blooms.
- * Organized dark-to-light for depth layering (darker = far, brighter = near).
- * Spring feels lighter and more pastel than the saturated summer greens.
+ * Spring foliage - fresh yellow-green growth
+ * The distinctive bright yellow-green of new spring leaves.
+ * Organized dark-to-light for depth layering.
  */
-export const spring = {
-	// Fresh growth greens (yellow-green tint of new leaves)
+export const springFoliage = {
 	sprout: '#65a30d',        // Dark spring green - distant new growth
 	newLeaf: '#84cc16',       // Classic spring lime - mid-ground
 	freshGreen: '#a3e635',    // Bright yellow-green - foreground
 	budding: '#bef264',       // Pale new leaf
-	tender: '#d9f99d',        // Very pale spring green
-
-	// Sky and atmosphere
-	clearSky: '#7dd3fc',      // Clear spring morning sky
-	softSky: '#bae6fd',       // Pale spring sky
-
-	// Wildflower accents
-	buttercup: '#facc15',     // Bright yellow wildflower
-	daffodil: '#fde047',      // Pale yellow daffodil
-	crocus: '#a78bfa',        // Early spring crocus purple
-	lilac: '#c4b5fd',         // Soft lilac blooms
-	tulipPink: '#f9a8d4',     // Soft tulip pink
-	tulipRed: '#fb7185',      // Bright tulip red
-
-	// Hills and ground
-	hillDeep: '#166534',      // Far spring hills - rich green
-	hillMid: '#22c55e',       // Mid hills - meadow green
-	hillNear: '#86efac',      // Near hills - fresh mint
-	hillFront: '#bbf7d0'      // Front hills - pale spring green
+	tender: '#d9f99d'         // Very pale spring green
 } as const;
 
 /**
- * Autumn/Fall colors
+ * Spring sky colors
+ * Clear, bright spring atmosphere.
+ */
+export const springSky = {
+	clear: '#7dd3fc',         // Clear spring morning sky
+	soft: '#bae6fd'           // Pale spring sky
+} as const;
+
+/**
+ * Wildflowers - spring and general meadow flowers
+ * Unified wildflower palette for all seasons.
+ * Used for spring wildflowers and general meadow accents.
+ */
+export const wildflowers = {
+	// Yellows
+	buttercup: '#facc15',     // Bright yellow - buttercups, dandelions
+	daffodil: '#fde047',      // Pale yellow - daffodils
+
+	// Purples and violets
+	crocus: '#a78bfa',        // Early spring crocus
+	violet: '#8b5cf6',        // Wild violets
+	purple: '#a855f7',        // Lupine, thistle
+	lavender: '#c4b5fd',      // Distant flower masses, lilacs
+
+	// Pinks and reds
+	tulipPink: '#f9a8d4',     // Soft tulip pink
+	tulipRed: '#fb7185',      // Bright tulip red
+
+	// Neutrals
+	white: '#fefefe'          // Daisies, trillium
+} as const;
+
+/**
+ * Cherry blossoms - standard summer/default
+ * Used for cherry trees during summer.
+ * Pink blooms from dense to pale.
+ */
+export const cherryBlossoms = {
+	deep: '#db2777',          // Dense bloom centers
+	standard: '#ec4899',      // Standard blossom
+	light: '#f472b6',         // Light petals
+	pale: '#f9a8d4',          // Pale blossoms
+	falling: '#fbcfe8'        // Falling petals, distant blooms
+} as const;
+
+/**
+ * Cherry blossoms peak bloom - vibrant spring version
+ * Extra saturated for spring when cherry blossoms are at their most beautiful.
+ * One shade brighter than standard cherryBlossoms.
+ */
+export const cherryBlossomsPeak = {
+	deep: '#ec4899',          // Vibrant deep pink
+	standard: '#f472b6',      // Bright cherry blossom
+	light: '#f9a8d4',         // Soft rose petals
+	pale: '#fbcfe8',          // Pale blush
+	falling: '#fce7f3'        // Very pale falling petals
+} as const;
+
+// =============================================================================
+// SEASONAL PALETTES - AUTUMN
+// =============================================================================
+
+/**
+ * Autumn/Fall foliage colors
  * Replaces greens for deciduous trees during autumn season.
  * Organized warm-to-bright for depth layering (dark rust = far, bright gold = near).
  * Aspen and birch use gold/honey for their signature golden fall color.
@@ -127,19 +170,6 @@ export const autumn = {
 } as const;
 
 /**
- * Cherry blossom pinks (spring/summer)
- * Used for cherry trees during spring bloom.
- * In autumn, cherry trees switch to autumnReds to mimic real cherry leaf color change.
- */
-export const pinks = {
-	deepPink: '#db2777',   // Dense bloom centers
-	pink: '#ec4899',       // Standard blossom
-	rose: '#f472b6',       // Light petals
-	blush: '#f9a8d4',      // Pale blossoms
-	palePink: '#fbcfe8'    // Falling petals, distant blooms
-} as const;
-
-/**
  * Autumn reds for cherry/maple foliage
  * Cherry trees don't just lose pink - they turn red/crimson in fall.
  * Also used for Japanese maple trees and other red autumn foliage.
@@ -152,7 +182,7 @@ export const autumnReds = {
 } as const;
 
 // =============================================================================
-// WINTER PALETTE
+// SEASONAL PALETTES - WINTER
 // =============================================================================
 
 /**
@@ -195,7 +225,7 @@ export const winter = {
 
 /**
  * Accent colors for specific components
- * Each category gets 1-2 unique colors that don't fit the main palettes.
+ * Each category gets unique colors that don't fit the main palettes.
  * These add visual interest without breaking the natural cohesion.
  */
 export const accents = {
@@ -207,13 +237,22 @@ export const accents = {
 		spots: '#fefefe',     // White spots on caps
 		gill: '#fde8e8'       // Pale pink gills underneath
 	},
-	/** Wildflower accents - purple/violet break from green monotony */
+	/**
+	 * @deprecated Use the top-level `wildflowers` export instead. Will be removed in v1.0.
+	 *
+	 * Historical context: Flower colors were originally split between two places:
+	 * - `spring` palette had wildflower accents (crocus, lilac, tulips, buttercup, daffodil)
+	 * - `accents.flower` had generic flower colors (purple, violet, yellow, white, lavender)
+	 *
+	 * This caused confusion and duplicate values. Now unified in the top-level `wildflowers`
+	 * palette which contains all meadow flower colors in one place.
+	 */
 	flower: {
-		purple: '#a855f7',    // Lupine, thistle
-		violet: '#8b5cf6',    // Wild violets
-		yellow: '#fbbf24',    // Buttercup, dandelion
-		white: '#fefefe',     // Daisies, trillium
-		lavender: '#c4b5fd'   // Distant flower masses
+		purple: wildflowers.purple,
+		violet: wildflowers.violet,
+		yellow: wildflowers.buttercup,
+		white: wildflowers.white,
+		lavender: wildflowers.lavender
 	},
 	/** Firefly bioluminescence - warm yellow-green glow */
 	firefly: {
@@ -268,6 +307,24 @@ export const accents = {
 } as const;
 
 // =============================================================================
+// MIDNIGHT BLOOM PALETTE
+// =============================================================================
+
+/**
+ * Midnight Bloom - the far vision
+ * A late-night tea café palette: deep plums, warm amber, soft golds.
+ * Used for the Midnight Bloom section of the roadmap and future theming.
+ */
+export const midnightBloom = {
+	deepPlum: '#581c87',    // Night sky depth
+	purple: '#7c3aed',      // Soft purple glow
+	violet: '#8b5cf6',      // Lighter accent
+	amber: '#f59e0b',       // Lantern warmth
+	warmCream: '#fef3c7',   // Tea steam, page glow
+	softGold: '#fcd34d'     // Fairy lights
+} as const;
+
+// =============================================================================
 // PALETTE HELPERS
 // =============================================================================
 
@@ -280,20 +337,20 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
  * Spring uses bright yellow-greens of new growth.
  * Autumn uses warm oranges and golds.
  * In winter, returns frosted evergreen colors (for pines that keep needles).
- * @example getSeasonalGreens('spring') // returns spring palette greens
+ * @example getSeasonalGreens('spring') // returns spring foliage mapped to greens structure
  * @example getSeasonalGreens('autumn') // returns autumn palette
  */
 export function getSeasonalGreens(season: Season = 'summer') {
 	if (season === 'spring') {
 		// Fresh yellow-green spring foliage - mapped to match greens structure
 		return {
-			darkForest: spring.sprout,
-			deepGreen: spring.sprout,
-			grove: spring.newLeaf,
-			meadow: spring.freshGreen,
-			spring: spring.budding,
-			mint: spring.budding,
-			pale: spring.tender
+			darkForest: springFoliage.sprout,
+			deepGreen: springFoliage.sprout,
+			grove: springFoliage.newLeaf,
+			meadow: springFoliage.freshGreen,
+			spring: springFoliage.budding,
+			mint: springFoliage.budding,
+			pale: springFoliage.tender
 		};
 	}
 	if (season === 'autumn') {
@@ -315,31 +372,18 @@ export function getSeasonalGreens(season: Season = 'summer') {
 }
 
 /**
- * Spring cherry blossom colors - extra vibrant for peak bloom
- * Spring is when cherry blossoms are at their most beautiful.
- * Slightly brighter and more saturated than the standard pinks.
- */
-export const springBlossoms = {
-	deepPink: '#ec4899',    // Vibrant deep pink
-	pink: '#f472b6',        // Bright cherry blossom
-	rose: '#f9a8d4',        // Soft rose petals
-	blush: '#fbcfe8',       // Pale blush
-	palePink: '#fce7f3'     // Very pale falling petals
-} as const;
-
-/**
  * Get cherry tree colors based on season
  * Spring: Extra vibrant pink blossoms (peak bloom!)
  * Summer: Standard pink blossoms
  * Autumn: Turn red/crimson like real cherry leaves
  * Winter: Bare (no blossoms)
- * @example getCherryColors('spring') // returns springBlossoms (vibrant)
+ * @example getCherryColors('spring') // returns cherryBlossomsPeak (vibrant)
  * @example getCherryColors('autumn') // returns autumnReds palette
  */
-export function getCherryColors(season: Season = 'spring'): typeof pinks | typeof autumnReds | typeof springBlossoms | null {
+export function getCherryColors(season: Season = 'spring'): typeof cherryBlossoms | typeof autumnReds | typeof cherryBlossomsPeak | null {
 	if (season === 'spring') {
 		// Peak bloom - extra vibrant pinks!
-		return springBlossoms;
+		return cherryBlossomsPeak;
 	}
 	if (season === 'autumn') {
 		return autumnReds;
@@ -348,7 +392,7 @@ export function getCherryColors(season: Season = 'spring'): typeof pinks | typeo
 		// Return null to indicate bare tree (no foliage to render)
 		return null;
 	}
-	return pinks;
+	return cherryBlossoms;
 }
 
 /**
@@ -386,40 +430,101 @@ export function pickFrom<T extends Record<string, string>>(
 }
 
 // =============================================================================
-// MIDNIGHT BLOOM PALETTE
+// BACKWARD COMPATIBILITY ALIASES
 // =============================================================================
 
 /**
- * Midnight Bloom - the far vision
- * A late-night tea café palette: deep plums, warm amber, soft golds.
- * Used for the Midnight Bloom section of the roadmap and future theming.
+ * @deprecated Use `cherryBlossoms` instead. Will be removed in v1.0.
+ * Alias for backward compatibility with components using 'pinks'.
  */
-export const midnightBloom = {
-	deepPlum: '#581c87',    // Night sky depth
-	purple: '#7c3aed',      // Soft purple glow
-	violet: '#8b5cf6',      // Lighter accent
-	amber: '#f59e0b',       // Lantern warmth
-	warmCream: '#fef3c7',   // Tea steam, page glow
-	softGold: '#fcd34d'     // Fairy lights
+export const pinks = {
+	deepPink: cherryBlossoms.deep,
+	pink: cherryBlossoms.standard,
+	rose: cherryBlossoms.light,
+	blush: cherryBlossoms.pale,
+	palePink: cherryBlossoms.falling
 } as const;
+
+/**
+ * @deprecated Use `cherryBlossomsPeak` instead. Will be removed in v1.0.
+ * Alias for backward compatibility with components using 'springBlossoms'.
+ */
+export const springBlossoms = {
+	deepPink: cherryBlossomsPeak.deep,
+	pink: cherryBlossomsPeak.standard,
+	rose: cherryBlossomsPeak.light,
+	blush: cherryBlossomsPeak.pale,
+	palePink: cherryBlossomsPeak.falling
+} as const;
+
+/**
+ * @deprecated Use `springFoliage`, `wildflowers`, `springSky` instead. Will be removed in v1.0.
+ * Combined spring palette for backward compatibility.
+ * New code should import the specific palettes directly.
+ */
+export const spring = {
+	// Fresh growth greens (from springFoliage)
+	sprout: springFoliage.sprout,
+	newLeaf: springFoliage.newLeaf,
+	freshGreen: springFoliage.freshGreen,
+	budding: springFoliage.budding,
+	tender: springFoliage.tender,
+
+	// Sky and atmosphere (from springSky)
+	clearSky: springSky.clear,
+	softSky: springSky.soft,
+
+	// Wildflower accents (from wildflowers)
+	buttercup: wildflowers.buttercup,
+	daffodil: wildflowers.daffodil,
+	crocus: wildflowers.crocus,
+	lilac: wildflowers.lavender,
+	tulipPink: wildflowers.tulipPink,
+	tulipRed: wildflowers.tulipRed,
+
+	// Hills and ground (references to greens for depth layering)
+	hillDeep: greens.deepGreen,
+	hillMid: greens.meadow,
+	hillNear: greens.mint,
+	hillFront: greens.pale
+} as const;
+
 
 // =============================================================================
 // FULL PALETTE EXPORT
 // =============================================================================
 
 export const naturePalette = {
+	// Core
 	greens,
 	bark,
 	earth,
 	natural,
-	spring,
-	springBlossoms,
+
+	// Spring
+	springFoliage,
+	springSky,
+	wildflowers,
+	cherryBlossoms,
+	cherryBlossomsPeak,
+
+	// Autumn
 	autumn,
-	pinks,
 	autumnReds,
+
+	// Winter
 	winter,
+
+	// Accents
 	accents,
-	midnightBloom
+
+	// Special
+	midnightBloom,
+
+	// Deprecated aliases (for backward compat)
+	spring,
+	pinks,
+	springBlossoms
 } as const;
 
 export default naturePalette;

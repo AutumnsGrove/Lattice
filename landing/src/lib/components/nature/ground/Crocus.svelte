@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { greens, spring } from '../palette';
+	import { greens, wildflowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -28,8 +28,8 @@
 
 	// Crocus color variants - early spring bloomers
 	const variantColors = {
-		purple: spring.crocus,
-		yellow: spring.buttercup,
+		purple: wildflowers.crocus,
+		yellow: wildflowers.buttercup,
 		white: '#fafafa'
 	};
 

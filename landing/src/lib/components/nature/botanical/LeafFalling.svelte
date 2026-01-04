@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { autumn, greens, pinks, autumnReds } from '../palette';
+	import { autumn, greens, cherryBlossoms, autumnReds } from '../palette';
 
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
 
@@ -48,7 +48,7 @@
 	const autumnColors = [autumn.rust, autumn.amber, autumn.gold, autumn.pumpkin, autumn.ember];
 	const summerColors = [greens.grove, greens.meadow, greens.spring, greens.deepGreen];
 	const cherryAutumnColors = [autumnReds.crimson, autumnReds.scarlet, autumnReds.rose];
-	const cherrySpringColors = [pinks.pink, pinks.rose, pinks.blush, pinks.palePink];
+	const cherrySpringColors = [cherryBlossoms.standard, cherryBlossoms.light, cherryBlossoms.pale, cherryBlossoms.falling];
 	const aspenAutumnColors = [autumn.gold, autumn.honey, autumn.straw, autumn.amber];
 
 	// Deterministic color selection using pseudo-random distribution

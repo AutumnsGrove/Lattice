@@ -117,16 +117,184 @@ const isWinter = $derived($season === 'winter');
 // Summer is the default (no flag needed)
 ```
 
-### Seasonal Colors
+### Color Palette System
 
-Import from: `$lib/components/nature/palette`
+Import from: `@autumnsgrove/groveengine/ui/nature` or `$lib/components/nature/palette`
+
+#### Core Palettes (Year-Round)
+
+```typescript
+import { greens, bark, earth, natural } from '@autumnsgrove/groveengine/ui/nature';
+
+// Greens - organized dark-to-light for atmospheric depth
+greens.darkForest  // #0d4a1c - Background trees
+greens.deepGreen   // #166534 - Mid-distance
+greens.grove       // #16a34a - Grove brand primary
+greens.meadow      // #22c55e - Standard foliage
+greens.spring      // #4ade80 - Bright accent
+greens.mint        // #86efac - Light accent
+greens.pale        // #bbf7d0 - Foreground highlights
+
+// Bark - warm wood tones
+bark.darkBark      // #3d2817 - Oak, older trees
+bark.bark          // #5d4037 - Standard trunk
+bark.warmBark      // #6B4423 - Pine, cedar
+bark.lightBark     // #8b6914 - Young trees
+
+// Earth - ground elements
+earth.soil, earth.mud, earth.clay, earth.sand, earth.stone, earth.pebble, earth.slate
+
+// Natural - cream and off-whites
+natural.cream, natural.aspenBark, natural.bone, natural.mushroom, natural.birchWhite
+```
+
+#### Spring Palettes
+
+```typescript
+import { springFoliage, springSky, wildflowers, cherryBlossoms, cherryBlossomsPeak } from '@autumnsgrove/groveengine/ui/nature';
+
+// Spring Foliage - yellow-green new growth
+springFoliage.sprout      // #65a30d - Distant new growth
+springFoliage.newLeaf     // #84cc16 - Classic spring lime
+springFoliage.freshGreen  // #a3e635 - Bright foreground
+springFoliage.budding     // #bef264 - Pale new leaf
+springFoliage.tender      // #d9f99d - Very pale
+
+// Spring Sky
+springSky.clear    // #7dd3fc - Clear morning
+springSky.soft     // #bae6fd - Pale sky
+
+// Wildflowers - unified meadow flower colors
+wildflowers.buttercup   // #facc15 - Yellow
+wildflowers.daffodil    // #fde047 - Pale yellow
+wildflowers.crocus      // #a78bfa - Purple crocus
+wildflowers.violet      // #8b5cf6 - Wild violets
+wildflowers.purple      // #a855f7 - Lupine, thistle
+wildflowers.lavender    // #c4b5fd - Distant masses
+wildflowers.tulipPink   // #f9a8d4 - Pink tulips
+wildflowers.tulipRed    // #fb7185 - Red tulips
+wildflowers.white       // #fefefe - Daisies, trillium
+
+// Cherry Blossoms - summer standard
+cherryBlossoms.deep      // #db2777 - Dense centers
+cherryBlossoms.standard  // #ec4899 - Standard blossom
+cherryBlossoms.light     // #f472b6 - Light petals
+cherryBlossoms.pale      // #f9a8d4 - Pale blossoms
+cherryBlossoms.falling   // #fbcfe8 - Falling petals
+
+// Cherry Blossoms Peak - vibrant spring (one shade brighter!)
+cherryBlossomsPeak.deep      // #ec4899
+cherryBlossomsPeak.standard  // #f472b6
+cherryBlossomsPeak.light     // #f9a8d4
+cherryBlossomsPeak.pale      // #fbcfe8
+cherryBlossomsPeak.falling   // #fce7f3
+```
+
+#### Autumn & Winter Palettes
+
+```typescript
+import { autumn, autumnReds, winter } from '@autumnsgrove/groveengine/ui/nature';
+
+// Autumn - warm fall foliage (dark-to-light for depth)
+autumn.rust     // #9a3412 - Deep background
+autumn.ember    // #c2410c - Oak-like
+autumn.pumpkin  // #ea580c - Maple mid-tones
+autumn.amber    // #d97706 - Classic fall
+autumn.gold     // #eab308 - Aspen/birch
+autumn.honey    // #facc15 - Bright foreground
+autumn.straw    // #fde047 - Pale dying leaves
+
+// Autumn Reds - cherry/maple fall foliage
+autumnReds.crimson  // #be123c - Deep maple
+autumnReds.scarlet  // #e11d48 - Bright cherry
+autumnReds.rose     // #f43f5e - Light autumn
+autumnReds.coral    // #fb7185 - Pale accent
+
+// Winter - frost, snow, ice + frosted evergreens
+winter.snow, winter.frost, winter.ice, winter.glacier
+winter.frostedPine, winter.winterGreen, winter.coldSpruce
+winter.winterSky, winter.twilight, winter.overcast
+winter.bareBranch, winter.frostedBark, winter.coldWood
+winter.hillDeep, winter.hillMid, winter.hillNear, winter.hillFront
+```
+
+#### Accent Palettes
+
+```typescript
+import { accents, wildflowers } from '@autumnsgrove/groveengine/ui/nature';
+
+// Mushrooms - fairy tale pops of color
+accents.mushroom.redCap, accents.mushroom.orangeCap, accents.mushroom.brownCap
+accents.mushroom.spots, accents.mushroom.gill
+
+// Firefly - bioluminescence
+accents.firefly.glow, accents.firefly.warmGlow, accents.firefly.body
+
+// Berry - rich saturated
+accents.berry.ripe, accents.berry.elderberry, accents.berry.red
+
+// Water - cool blue spectrum
+accents.water.surface, accents.water.deep, accents.water.shallow, accents.water.lily
+
+// Sky - time of day
+accents.sky.dayLight, accents.sky.dayMid, accents.sky.sunset, accents.sky.night, accents.sky.star
+
+// Birds - species-specific colors
+accents.bird.cardinalRed, accents.bird.cardinalMask, accents.bird.cardinalBeak
+accents.bird.chickadeeCap, accents.bird.chickadeeBody, accents.bird.chickadeeBelly
+accents.bird.robinBody, accents.bird.robinBreast, accents.bird.robinBeak
+accents.bird.bluebirdBody, accents.bird.bluebirdWing, accents.bird.bluebirdBreast
+
+// NOTE: accents.flower is deprecated - use wildflowers instead
+```
+
+#### Seasonal Helper Functions
+
+```typescript
+import { getSeasonalGreens, getCherryColors, isTreeBare, pickRandom, pickFrom } from '@autumnsgrove/groveengine/ui/nature';
+
+// Get foliage colors mapped to season
+const foliage = getSeasonalGreens(season);
+// spring → springFoliage colors
+// summer → greens
+// autumn → autumn palette
+// winter → frosted evergreen colors
+
+// Get cherry tree colors by season
+const cherryColors = getCherryColors(season);
+// spring → cherryBlossomsPeak (vibrant!)
+// summer → cherryBlossoms (standard)
+// autumn → autumnReds
+// winter → null (bare tree)
+
+// Check if deciduous tree is bare
+if (isTreeBare('cherry', 'winter')) { /* no foliage */ }
+
+// Random color selection for natural variation
+const randomGreen = pickRandom(greens);
+const specificGreen = pickFrom(greens, ['grove', 'meadow']);
+```
+
+#### Deprecated Aliases (Still Work)
+
+```typescript
+// These work but will be removed in v1.0:
+import { spring, pinks, springBlossoms } from '@autumnsgrove/groveengine/ui/nature';
+
+// spring → use springFoliage, wildflowers, springSky instead
+// pinks → use cherryBlossoms instead
+// springBlossoms → use cherryBlossomsPeak instead
+// accents.flower → use wildflowers instead
+```
+
+#### Season Mood Summary
 
 | Season | Primary Colors | Mood |
 |--------|---------------|------|
-| **Spring** | Fresh greens, cherry pink | Renewal, hope |
-| **Summer** | Deep greens, sky blue | Growth, warmth |
-| **Autumn** | Rust, amber, gold | Harvest, reflection |
-| **Winter** | Slate, frost, evergreen | Rest, stillness |
+| **Spring** | `springFoliage`, `cherryBlossomsPeak`, `wildflowers` | Renewal, hope |
+| **Summer** | `greens`, `cherryBlossoms` | Growth, warmth |
+| **Autumn** | `autumn`, `autumnReds` | Harvest, reflection |
+| **Winter** | `winter` (frost, snow, frosted pines) | Rest, stillness |
 
 ### Seasonal Weather Effects
 

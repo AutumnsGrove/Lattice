@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { springBlossoms } from '../palette';
+	import { cherryBlossomsPeak } from '../palette';
 	import { browser } from '$app/environment';
 
 	type PetalVariant = 'round' | 'pointed' | 'heart' | 'curled' | 'tiny';
@@ -46,13 +46,13 @@
 
 	// Use spring blossom colors with slight variation based on variant
 	const petalColor = $derived(color ?? (
-		variant === 'tiny' ? springBlossoms.palePink :
-		variant === 'curled' ? springBlossoms.rose :
-		springBlossoms.blush
+		variant === 'tiny' ? cherryBlossomsPeak.falling :
+		variant === 'curled' ? cherryBlossomsPeak.light :
+		cherryBlossomsPeak.pale
 	));
 
 	// Secondary color for gradient effect
-	const highlightColor = $derived(springBlossoms.palePink);
+	const highlightColor = $derived(cherryBlossomsPeak.falling);
 
 	// Deterministic rotation based on seed - more dramatic for dancing effect
 	const initialRotation = $derived((seed * 37) % 360);
@@ -178,7 +178,7 @@
 		<path
 			d="M10 3 Q10 10 10 18"
 			fill="none"
-			stroke={springBlossoms.rose}
+			stroke={cherryBlossomsPeak.light}
 			stroke-width="0.5"
 			opacity="0.3"
 			transform="rotate({initialRotation} 10 10)"
@@ -208,7 +208,7 @@
 		<path
 			d="M8 6 Q12 5 14 8"
 			fill="none"
-			stroke={springBlossoms.rose}
+			stroke={cherryBlossomsPeak.light}
 			stroke-width="0.5"
 			opacity="0.4"
 			transform="rotate({initialRotation} 10 10)"
