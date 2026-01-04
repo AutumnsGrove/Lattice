@@ -59,11 +59,50 @@
 	let showOverlayDemo = $state(false);
 
 	// Nature asset viewer state
+	import type { Component } from 'svelte';
+
 	type AssetInfo = {
-		component: any;
+		component: Component<Record<string, unknown>>;
 		category: string;
 		props: string[];
 	};
+
+	// Component render error state
+	let componentError = $state<string | null>(null);
+
+	// Debounced color input state
+	let colorInputTimeout: ReturnType<typeof setTimeout> | null = null;
+	let pendingColorValues = $state<Record<string, string>>({});
+
+	function debouncedColorUpdate(prop: string, value: string) {
+		pendingColorValues[prop] = value;
+		if (colorInputTimeout) clearTimeout(colorInputTimeout);
+		colorInputTimeout = setTimeout(() => {
+			if (isValidHexColor(value) || value === '') {
+				propValues[prop] = value || undefined;
+			}
+		}, 150);
+	}
+
+	function isValidHexColor(value: string): boolean {
+		return /^#[0-9A-Fa-f]{6}$/.test(value);
+	}
+
+	function getColorInputError(prop: string): string | null {
+		const value = pendingColorValues[prop];
+		if (!value || value === '') return null;
+		if (!isValidHexColor(value)) return 'Use format: #RRGGBB';
+		return null;
+	}
+
+	// Numeric prop ranges configuration
+	const numericPropRanges: Record<string, { min: number; max: number; step: number }> = {
+		opacity: { min: 0, max: 1, step: 0.1 },
+	};
+
+	function getNumericRange(prop: string) {
+		return numericPropRanges[prop] ?? { min: 0, max: 100, step: 1 };
+	}
 
 	const assets: Record<string, AssetInfo> = {
 		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate', 'animateEntrance', 'breathing'] },
@@ -224,7 +263,7 @@
 <SEO
 	title="Vineyard — Lattice Asset Showcase"
 	description="Explore the components and assets that Lattice provides. Glass UI components, nature SVGs, and everything you need to build beautiful Grove experiences."
-	url="/vineyard"
+	url="https://grove.place/vineyard"
 />
 
 <main class="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50 via-green-50 to-lime-50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950">
@@ -281,6 +320,8 @@
 				type="button"
 				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
 				onclick={() => expandedSection = expandedSection === 'glass' ? null : 'glass'}
+				aria-expanded={expandedSection === 'glass'}
+				aria-controls="glass-section-content"
 			>
 				<div class="flex items-center gap-3">
 					<div class="p-2 rounded-lg bg-grove-100 dark:bg-grove-900/40">
@@ -291,11 +332,11 @@
 						<p class="text-sm text-foreground-muted">Glassmorphism UI elements with blur effects</p>
 					</div>
 				</div>
-				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'glass' ? 'rotate-180' : ''}" />
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'glass' ? 'rotate-180' : ''}" aria-hidden="true" />
 			</button>
 
 			{#if expandedSection === 'glass'}
-				<div class="space-y-8 animate-in slide-in-from-top-2 duration-300">
+				<div id="glass-section-content" class="space-y-8 animate-in slide-in-from-top-2 duration-300">
 					<!-- Glass Base Component -->
 					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -511,6 +552,8 @@
 				type="button"
 				class="w-full flex items-center justify-between p-4 rounded-xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 shadow-sm hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all mb-4"
 				onclick={() => expandedSection = expandedSection === 'nature' ? null : 'nature'}
+				aria-expanded={expandedSection === 'nature'}
+				aria-controls="nature-section-content"
 			>
 				<div class="flex items-center gap-3">
 					<div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
@@ -521,17 +564,27 @@
 						<p class="text-sm text-foreground-muted">{Object.keys(assets).length} SVG components across {categories.length} categories</p>
 					</div>
 				</div>
-				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'nature' ? 'rotate-180' : ''}" />
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'nature' ? 'rotate-180' : ''}" aria-hidden="true" />
 			</button>
 
 			{#if expandedSection === 'nature'}
-				<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40 animate-in slide-in-from-top-2 duration-300">
+				<div id="nature-section-content" class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40 animate-in slide-in-from-top-2 duration-300">
 					<div class="grid md:grid-cols-2 gap-8">
 						<!-- Preview Panel -->
 						<div>
 							<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-slate-800 dark:to-emerald-950 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-divider">
 								{#if CurrentComponent}
-									<CurrentComponent class="w-32 h-32" {...propValues} />
+									{#key selectedAsset + JSON.stringify(propValues)}
+										<svelte:boundary onerror={(e) => componentError = e.message}>
+											<CurrentComponent class="w-32 h-32" {...propValues} />
+											{#snippet failed()}
+												<div class="text-center text-red-500 dark:text-red-400">
+													<p class="text-sm font-medium">Component error</p>
+													<p class="text-xs mt-1 opacity-75">{componentError ?? 'Failed to render'}</p>
+												</div>
+											{/snippet}
+										</svelte:boundary>
+									{/key}
 								{/if}
 							</div>
 							<p class="text-center mt-4 text-foreground-muted font-mono text-sm">
@@ -570,26 +623,34 @@
 											<label for="prop-{prop}" class="block text-sm font-medium text-foreground">{prop}</label>
 
 											{#if isColorProp(prop)}
+												{@const colorError = getColorInputError(prop)}
 												<div class="space-y-2">
 													<div class="flex gap-2 items-center">
 														<input
 															id="prop-{prop}"
 															type="color"
-															bind:value={propValues[prop]}
+															value={propValues[prop] ?? '#16a34a'}
+															oninput={(e) => propValues[prop] = e.currentTarget.value}
 															class="w-10 h-10 rounded cursor-pointer border border-divider"
 														/>
 														<input
 															type="text"
-															bind:value={propValues[prop]}
+															value={pendingColorValues[prop] ?? propValues[prop] ?? ''}
+															oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
 															placeholder="#16a34a"
-															class="flex-1 px-3 py-2 rounded-lg border border-divider bg-surface text-foreground font-mono text-sm"
+															class="flex-1 px-3 py-2 rounded-lg border bg-surface text-foreground font-mono text-sm {colorError ? 'border-red-400 dark:border-red-600' : 'border-divider'}"
+															aria-invalid={!!colorError}
+															aria-describedby={colorError ? `${prop}-error` : undefined}
 														/>
 													</div>
+													{#if colorError}
+														<p id="{prop}-error" class="text-xs text-red-500 dark:text-red-400">{colorError}</p>
+													{/if}
 													<div class="flex flex-wrap gap-1">
 														{#each colorPresets as preset}
 															<button
 																type="button"
-																onclick={() => propValues[prop] = preset.value}
+																onclick={() => { propValues[prop] = preset.value; pendingColorValues[prop] = preset.value; }}
 																class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
 																style="background-color: {preset.value}"
 																title={preset.name}
@@ -614,15 +675,26 @@
 													{/each}
 												</select>
 											{:else if isNumericProp(prop)}
-												<input
-													id="prop-{prop}"
-													type="range"
-													min="0"
-													max="1"
-													step="0.1"
-													bind:value={propValues[prop]}
-													class="w-full"
-												/>
+												{@const range = getNumericRange(prop)}
+												<div class="space-y-1">
+													<input
+														id="prop-{prop}"
+														type="range"
+														min={range.min}
+														max={range.max}
+														step={range.step}
+														bind:value={propValues[prop]}
+														class="w-full"
+														aria-valuemin={range.min}
+														aria-valuemax={range.max}
+														aria-valuenow={propValues[prop] ?? range.min}
+													/>
+													<div class="flex justify-between text-xs text-foreground-faint">
+														<span>{range.min}</span>
+														<span class="font-medium text-foreground-muted">{propValues[prop]?.toFixed(range.step < 1 ? 1 : 0) ?? 'default'}</span>
+														<span>{range.max}</span>
+													</div>
+												</div>
 											{:else}
 												<input
 													id="prop-{prop}"
