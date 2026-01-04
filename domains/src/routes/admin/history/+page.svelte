@@ -58,16 +58,20 @@
 	function startElapsedTimers() {
 		if (timerInterval) return;
 		// Initialize elapsed times for running jobs
+		const newTimers: Record<string, number> = { ...elapsedTimers };
 		for (const job of jobs.filter(j => j.status === 'running' || j.status === 'pending')) {
 			if (job.started_at) {
-				elapsedTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
+				newTimers[job.id] = Math.floor((Date.now() - new Date(job.started_at).getTime()) / 1000);
 			}
 		}
+		elapsedTimers = newTimers;
+
 		timerInterval = setInterval(() => {
+			const updated: Record<string, number> = {};
 			for (const jobId of runningJobIds) {
-				elapsedTimers[jobId] = (elapsedTimers[jobId] || 0) + 1;
+				updated[jobId] = (elapsedTimers[jobId] || 0) + 1;
 			}
-			elapsedTimers = { ...elapsedTimers }; // Trigger reactivity
+			elapsedTimers = { ...elapsedTimers, ...updated };
 		}, 1000);
 	}
 
