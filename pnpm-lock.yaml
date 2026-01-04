@@ -332,52 +332,6 @@ importers:
         specifier: ^4.54.0
         version: 4.54.0(@cloudflare/workers-types@4.20251225.0)
 
-  vineyard:
-    dependencies:
-      '@autumnsgrove/vineyard':
-        specifier: link:../../../Vineyard
-        version: link:../../../Vineyard
-      lucide-svelte:
-        specifier: ^0.460.0
-        version: 0.460.1(svelte@5.46.1)
-    devDependencies:
-      '@cloudflare/workers-types':
-        specifier: ^4.20251225.0
-        version: 4.20251225.0
-      '@sveltejs/adapter-cloudflare':
-        specifier: ^7.2.4
-        version: 7.2.4(@sveltejs/kit@2.49.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.46.1)(vite@5.4.21(@types/node@22.19.3)))(svelte@5.46.1)(vite@5.4.21(@types/node@22.19.3)))(wrangler@4.54.0(@cloudflare/workers-types@4.20251225.0))
-      '@sveltejs/kit':
-        specifier: ^2.49.0
-        version: 2.49.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.46.1)(vite@5.4.21(@types/node@22.19.3)))(svelte@5.46.1)(vite@5.4.21(@types/node@22.19.3))
-      '@sveltejs/vite-plugin-svelte':
-        specifier: ^4.0.4
-        version: 4.0.4(svelte@5.46.1)(vite@5.4.21(@types/node@22.19.3))
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.4.23(postcss@8.5.6)
-      postcss:
-        specifier: ^8.4.49
-        version: 8.5.6
-      svelte:
-        specifier: ^5.46.0
-        version: 5.46.1
-      svelte-check:
-        specifier: ^4.0.0
-        version: 4.3.5(picomatch@4.0.3)(svelte@5.46.1)(typescript@5.9.3)
-      tailwindcss:
-        specifier: ^3.4.19
-        version: 3.4.19
-      typescript:
-        specifier: ^5.6.0
-        version: 5.9.3
-      vite:
-        specifier: ^5.4.21
-        version: 5.4.21(@types/node@22.19.3)
-      wrangler:
-        specifier: ^4.54.0
-        version: 4.54.0(@cloudflare/workers-types@4.20251225.0)
-
 packages:
 
   '@acemir/cssom@0.9.30':
@@ -2196,11 +2150,6 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
-
-  lucide-svelte@0.460.1:
-    resolution: {integrity: sha512-guJjJSeWlKivsEG51Xg41egunBMJcobhDmkLv/NYTXmXyCEwxMf1A+HX7RvDEKiXbXYgtLImih67tI08MSUOkA==}
-    peerDependencies:
-      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   lucide-svelte@0.554.0:
     resolution: {integrity: sha512-LLcpHi3SuKup0nVD1kKqo8FDZnjXJp48uST26GGh8Jcyrxqk5gmgpnvKmHsHox674UL3cPS1DCul/wFL7ybGqg==}
@@ -4897,10 +4846,6 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
-
-  lucide-svelte@0.460.1(svelte@5.46.1):
-    dependencies:
-      svelte: 5.46.1
 
   lucide-svelte@0.554.0(svelte@5.46.1):
     dependencies:

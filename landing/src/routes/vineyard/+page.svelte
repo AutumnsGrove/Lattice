@@ -39,7 +39,7 @@
 		Pond, LilyPad, Reeds, Stream,
 		Leaf, LeafFalling, PetalFalling, Acorn, PineCone, Berry, DandelionPuff, Vine,
 		Lattice as LatticeStructure, LatticeWithVine, Birdhouse, GardenGate, FencePost, StonePath, Bridge, Lantern,
-		greens, bark, earth, natural, autumn, pinks, autumnReds, accents, spring, springBlossoms, winter, midnightBloom
+		greens, bark, earth, natural, autumn, pinks, autumnReds, spring, springBlossoms, winter, midnightBloom
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Import typography components
@@ -1132,23 +1132,6 @@ $ npm run dev
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Natural</h3>
 					<div class="flex flex-wrap gap-2">
 						{#each Object.entries(natural) as [name, color]}
-							<div class="flex flex-col items-center gap-1">
-								<div
-									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-									style="background-color: {color};"
-									title={name}
-								></div>
-								<span class="text-xs text-foreground-faint">{name}</span>
-							</div>
-						{/each}
-					</div>
-				</Glass>
-
-				<!-- Accents -->
-				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
-					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Accents</h3>
-					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(accents) as [name, color]}
 							<div class="flex flex-col items-center gap-1">
 								<div
 									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
