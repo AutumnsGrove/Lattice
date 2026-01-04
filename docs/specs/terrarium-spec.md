@@ -11,7 +11,7 @@ type: tech-spec
 > *A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow.*
 
 **Public Name:** Terrarium
-**Internal Name:** GroveTerrar
+**Internal Name:** GroveTerrarium
 **Route:** `/terrarium`
 **Repository:** `AutumnsGrove/GroveEngine` (packages/engine)
 
@@ -37,6 +37,9 @@ Terrarium is Grove's creative canvas. Drag nature components onto an open space,
 12. [Accessibility](#accessibility)
 13. [Auto-Save Behavior](#auto-save-behavior)
 14. [Touch Interactions](#touch-interactions)
+15. [Testing Strategy](#testing-strategy)
+16. [Community Decorations Security](#community-decorations-security)
+17. [API Endpoints](#api-endpoints)
 
 ---
 
@@ -357,6 +360,94 @@ export const TERRARIUM_CONFIG = {
 export type TerrariumConfig = typeof TERRARIUM_CONFIG;
 ```
 
+### Complexity Budget Utilities
+
+```typescript
+// packages/engine/src/lib/utils/complexity.ts
+
+import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+import { assetRegistry } from '$lib/ui/components/terrarium/assetRegistry.generated';
+import type { PlacedAsset } from '$lib/types';
+
+const { maxComplexity, weights, warningThreshold } = TERRARIUM_CONFIG.complexity;
+
+/**
+ * Calculate complexity cost for a single asset
+ */
+export function getAssetComplexity(asset: PlacedAsset): number {
+  const meta = assetRegistry[asset.componentName];
+  let cost = weights.normal;
+
+  // Animated assets cost more
+  if (meta?.isAnimated && asset.animationEnabled) {
+    cost = weights.animated;
+  }
+  // Extreme scale adds cost
+  else if (asset.scale > 1.5 || asset.scale < 0.5) {
+    cost = weights.scaled;
+  }
+
+  return cost;
+}
+
+/**
+ * Calculate total complexity of all assets in a scene
+ */
+export function calculateSceneComplexity(assets: PlacedAsset[]): number {
+  return assets.reduce((total, asset) => total + getAssetComplexity(asset), 0);
+}
+
+/**
+ * Get complexity as percentage of budget (0-1)
+ */
+export function getComplexityPercentage(assets: PlacedAsset[]): number {
+  return calculateSceneComplexity(assets) / maxComplexity;
+}
+
+/**
+ * Check if adding an asset would exceed complexity budget
+ */
+export function canAddAsset(
+  currentAssets: PlacedAsset[],
+  newAsset: Partial<PlacedAsset>
+): { allowed: boolean; wouldExceed: boolean; currentUsage: number } {
+  const currentComplexity = calculateSceneComplexity(currentAssets);
+  const assetCost = getAssetComplexity(newAsset as PlacedAsset);
+  const newTotal = currentComplexity + assetCost;
+
+  return {
+    allowed: newTotal <= maxComplexity,
+    wouldExceed: newTotal > maxComplexity,
+    currentUsage: currentComplexity / maxComplexity,
+  };
+}
+
+/**
+ * Check if scene is at warning threshold
+ */
+export function isAtWarningThreshold(assets: PlacedAsset[]): boolean {
+  return getComplexityPercentage(assets) >= warningThreshold;
+}
+
+/**
+ * Get remaining budget
+ */
+export function getRemainingBudget(assets: PlacedAsset[]): {
+  remaining: number;
+  canAddNormal: number;
+  canAddAnimated: number;
+} {
+  const used = calculateSceneComplexity(assets);
+  const remaining = maxComplexity - used;
+
+  return {
+    remaining,
+    canAddNormal: Math.floor(remaining / weights.normal),
+    canAddAnimated: Math.floor(remaining / weights.animated),
+  };
+}
+```
+
 ---
 
 ## Asset Registry
@@ -659,31 +750,55 @@ The renderer must pre-load all components asynchronously before rendering. Compo
   let loadError = $state<string | null>(null);
 
   onMount(async () => {
-    try {
-      // Get unique component names from scene
-      const componentNames = [...new Set(
-        decoration.scene.assets.map(a => a.componentName)
-      )];
+    // Get unique component names from scene
+    const componentNames = [...new Set(
+      decoration.scene.assets.map(a => a.componentName)
+    )];
 
-      // Load all components in parallel
-      const loadPromises = componentNames.map(async (name) => {
-        const definition = assetRegistry[name];
-        if (!definition) {
-          throw new Error(`Unknown component: ${name}`);
-        }
+    // Load all components in parallel with graceful failure handling
+    const loadPromises = componentNames.map(async (name) => {
+      const definition = assetRegistry[name];
+      if (!definition) {
+        return { name, error: `Unknown component: ${name}` };
+      }
+      try {
         const module = await definition.load();
-        return [name, module.default] as const;
-      });
+        return { name, component: module.default };
+      } catch (err) {
+        return { name, error: `Failed to load: ${name}` };
+      }
+    });
 
-      const loaded = await Promise.all(loadPromises);
+    // Use allSettled for partial failure handling
+    const results = await Promise.allSettled(loadPromises);
 
-      // Store in Map
-      loadedComponents = new Map(loaded);
-      isLoading = false;
-    } catch (err) {
-      loadError = err instanceof Error ? err.message : 'Failed to load components';
-      isLoading = false;
+    const componentMap = new Map<string, SvelteComponent>();
+    const errors: string[] = [];
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        const { name, component, error } = result.value;
+        if (component) {
+          componentMap.set(name, component);
+        } else if (error) {
+          errors.push(error);
+        }
+      } else {
+        errors.push(result.reason?.message ?? 'Unknown error');
+      }
     }
+
+    loadedComponents = componentMap;
+
+    // Only show error if ALL components failed
+    if (componentMap.size === 0 && errors.length > 0) {
+      loadError = errors.join(', ');
+    } else if (errors.length > 0) {
+      // Log partial failures but continue rendering
+      console.warn('Some components failed to load:', errors);
+    }
+
+    isLoading = false;
   });
 
   function getComponent(name: string): SvelteComponent | null {
@@ -1322,8 +1437,23 @@ export function createAutoSave(getScene: () => TerrariumScene) {
 
   const { debounceMs, maxIntervalMs } = TERRARIUM_CONFIG.autoSave;
 
+  // Stable hash using sorted keys to avoid property ordering issues
   function hashScene(scene: TerrariumScene): string {
-    return JSON.stringify({
+    const stableStringify = (obj: unknown): string => {
+      if (obj === null || typeof obj !== 'object') {
+        return JSON.stringify(obj);
+      }
+      if (Array.isArray(obj)) {
+        return '[' + obj.map(stableStringify).join(',') + ']';
+      }
+      const sortedKeys = Object.keys(obj).sort();
+      const pairs = sortedKeys.map(
+        key => `${JSON.stringify(key)}:${stableStringify((obj as Record<string, unknown>)[key])}`
+      );
+      return '{' + pairs.join(',') + '}';
+    };
+
+    return stableStringify({
       assets: scene.assets,
       canvas: scene.canvas,
       name: scene.name,
@@ -1515,6 +1645,435 @@ function getTouchCenter(touches: TouchList): { x: number; y: number } {
 - Pencil hover (M2+ iPads) shows asset preview
 - Palm rejection during pencil use
 - Side panel adapts to landscape/portrait
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+```typescript
+// packages/engine/src/lib/utils/__tests__/complexity.test.ts
+
+import { describe, it, expect } from 'vitest';
+import {
+  getAssetComplexity,
+  calculateSceneComplexity,
+  canAddAsset,
+  isAtWarningThreshold,
+  getRemainingBudget,
+} from '../complexity';
+
+describe('Complexity Budget', () => {
+  const normalAsset = { componentName: 'Rock', scale: 1, animationEnabled: false };
+  const animatedAsset = { componentName: 'Firefly', scale: 1, animationEnabled: true };
+  const scaledAsset = { componentName: 'TreePine', scale: 2.0, animationEnabled: false };
+
+  it('calculates normal asset cost', () => {
+    expect(getAssetComplexity(normalAsset)).toBe(1);
+  });
+
+  it('calculates animated asset cost', () => {
+    expect(getAssetComplexity(animatedAsset)).toBe(5);
+  });
+
+  it('calculates scaled asset cost', () => {
+    expect(getAssetComplexity(scaledAsset)).toBe(2);
+  });
+
+  it('calculates scene complexity', () => {
+    const assets = [normalAsset, animatedAsset, scaledAsset];
+    expect(calculateSceneComplexity(assets)).toBe(8);
+  });
+
+  it('prevents exceeding budget', () => {
+    const nearMaxAssets = Array(195).fill(normalAsset);
+    const result = canAddAsset(nearMaxAssets, animatedAsset);
+    expect(result.allowed).toBe(false);
+    expect(result.wouldExceed).toBe(true);
+  });
+
+  it('detects warning threshold', () => {
+    const assets = Array(160).fill(normalAsset); // 80% of 200
+    expect(isAtWarningThreshold(assets)).toBe(true);
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+// packages/engine/src/lib/storage/__tests__/terrarium-db.test.ts
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { saveScene, getScene, getAllScenes, deleteScene } from '../terrarium-db';
+import 'fake-indexeddb/auto';
+
+describe('Terrarium IndexedDB Storage', () => {
+  const mockScene = {
+    id: 'test-123',
+    name: 'Test Scene',
+    version: 1,
+    canvas: { width: 800, height: 600, background: '#fff', gridEnabled: false, gridSize: 32 },
+    assets: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  afterEach(async () => {
+    await deleteScene(mockScene.id);
+  });
+
+  it('saves and retrieves a scene', async () => {
+    await saveScene(mockScene);
+    const retrieved = await getScene(mockScene.id);
+    expect(retrieved).toEqual(mockScene);
+  });
+
+  it('lists all scenes', async () => {
+    await saveScene(mockScene);
+    const all = await getAllScenes();
+    expect(all.length).toBeGreaterThan(0);
+  });
+
+  it('deletes a scene', async () => {
+    await saveScene(mockScene);
+    await deleteScene(mockScene.id);
+    const retrieved = await getScene(mockScene.id);
+    expect(retrieved).toBeUndefined();
+  });
+});
+```
+
+### E2E Tests
+
+```typescript
+// packages/engine/e2e/terrarium.spec.ts
+
+import { test, expect } from '@playwright/test';
+
+test.describe('Terrarium Canvas', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/terrarium');
+  });
+
+  test('loads the terrarium page', async ({ page }) => {
+    await expect(page.getByRole('main')).toBeVisible();
+    await expect(page.getByTestId('asset-palette')).toBeVisible();
+    await expect(page.getByTestId('canvas')).toBeVisible();
+  });
+
+  test('drags asset from palette to canvas', async ({ page }) => {
+    const paletteItem = page.getByTestId('palette-item-TreePine');
+    const canvas = page.getByTestId('canvas');
+
+    await paletteItem.dragTo(canvas);
+
+    await expect(page.getByTestId('placed-asset')).toBeVisible();
+  });
+
+  test('exports scene as PNG', async ({ page }) => {
+    // Add an asset first
+    await page.getByTestId('palette-item-Rock').click();
+    await page.getByTestId('canvas').click();
+
+    // Export
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Export PNG' }).click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/\.png$/);
+  });
+
+  test('keyboard shortcuts work', async ({ page }) => {
+    // Add and select an asset
+    await page.getByTestId('palette-item-Rock').click();
+    await page.getByTestId('canvas').click();
+    await page.getByTestId('placed-asset').click();
+
+    // Duplicate with Cmd+D
+    await page.keyboard.press('Meta+d');
+    const assets = page.getByTestId('placed-asset');
+    await expect(assets).toHaveCount(2);
+
+    // Delete with Backspace
+    await page.keyboard.press('Backspace');
+    await expect(assets).toHaveCount(1);
+  });
+});
+```
+
+### Accessibility Tests
+
+```typescript
+// packages/engine/e2e/terrarium-a11y.spec.ts
+
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('Terrarium Accessibility', () => {
+  test('has no WCAG violations', async ({ page }) => {
+    await page.goto('/terrarium');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  test('supports keyboard navigation', async ({ page }) => {
+    await page.goto('/terrarium');
+
+    // Tab to palette
+    await page.keyboard.press('Tab');
+    await expect(page.getByTestId('asset-palette')).toBeFocused();
+
+    // Arrow to navigate within palette
+    await page.keyboard.press('ArrowDown');
+    const firstItem = page.getByTestId('palette-item').first();
+    await expect(firstItem).toBeFocused();
+  });
+
+  test('screen reader announcements work', async ({ page }) => {
+    await page.goto('/terrarium');
+
+    // Add an asset
+    await page.getByTestId('palette-item-Rock').click();
+    await page.getByTestId('canvas').click();
+
+    // Check live region
+    const liveRegion = page.locator('[aria-live="polite"]');
+    await expect(liveRegion).toContainText('Rock added');
+  });
+});
+```
+
+---
+
+## Community Decorations Security
+
+### Rate Limiting
+
+```typescript
+// packages/engine/src/routes/api/terrarium/decorations/+server.ts
+
+import { rateLimit } from '$lib/middleware/rate-limit';
+
+const decorationRateLimit = rateLimit({
+  windowMs: 60 * 1000,  // 1 minute
+  max: {
+    GET: 100,           // 100 reads/min
+    POST: 10,           // 10 creates/min
+    PUT: 20,            // 20 updates/min
+    DELETE: 5,          // 5 deletes/min
+  },
+  keyGenerator: (event) => event.locals.user?.id ?? event.getClientAddress(),
+});
+
+export async function POST(event) {
+  await decorationRateLimit(event, 'POST');
+  // ... rest of handler
+}
+```
+
+### Content Moderation
+
+```typescript
+// packages/engine/src/lib/moderation/decoration-scanner.ts
+
+interface ModerationResult {
+  approved: boolean;
+  flags: string[];
+  reason?: string;
+}
+
+export async function scanDecoration(decoration: Decoration): Promise<ModerationResult> {
+  const flags: string[] = [];
+
+  // 1. Check name for profanity
+  if (await containsProfanity(decoration.name)) {
+    flags.push('profanity_in_name');
+  }
+
+  // 2. Validate asset counts (prevent resource abuse)
+  const animatedCount = decoration.scene.assets.filter(a => a.animationEnabled).length;
+  if (animatedCount > 30) {
+    flags.push('excessive_animations');
+  }
+
+  // 3. Check for suspicious patterns (e.g., all assets stacked in corner)
+  if (detectSuspiciousLayout(decoration.scene.assets)) {
+    flags.push('suspicious_layout');
+  }
+
+  return {
+    approved: flags.length === 0,
+    flags,
+    reason: flags.length > 0 ? `Flagged: ${flags.join(', ')}` : undefined,
+  };
+}
+```
+
+### Storage Quotas
+
+```typescript
+// packages/engine/src/lib/utils/quota.ts
+
+import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+import type { UserTier } from '$lib/types';
+
+export async function checkStorageQuota(
+  userId: string,
+  tier: UserTier
+): Promise<{ withinQuota: boolean; used: number; max: number }> {
+  const currentCount = await db.decorations.count({ authorId: userId });
+  const maxAllowed = TERRARIUM_CONFIG.storage.maxSavedScenes[tier];
+
+  return {
+    withinQuota: currentCount < maxAllowed,
+    used: currentCount,
+    max: maxAllowed,
+  };
+}
+
+export async function enforceQuota(userId: string, tier: UserTier): Promise<void> {
+  const { withinQuota, used, max } = await checkStorageQuota(userId, tier);
+
+  if (!withinQuota) {
+    throw new QuotaExceededError(
+      `Storage quota exceeded: ${used}/${max} scenes. Upgrade your plan for more.`
+    );
+  }
+}
+```
+
+### XSS Sanitization
+
+```typescript
+// packages/engine/src/lib/utils/sanitize.ts
+
+import DOMPurify from 'isomorphic-dompurify';
+
+/**
+ * Sanitize decoration name to prevent XSS
+ */
+export function sanitizeDecorationName(name: string): string {
+  return DOMPurify.sanitize(name, {
+    ALLOWED_TAGS: [],  // No HTML allowed
+    ALLOWED_ATTR: [],
+  }).trim();
+}
+
+/**
+ * Sanitize props to prevent script injection
+ */
+export function sanitizeAssetProps(props: Record<string, unknown>): Record<string, unknown> {
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(props)) {
+    if (typeof value === 'string') {
+      sanitized[key] = DOMPurify.sanitize(value, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    } else if (typeof value === 'number' || typeof value === 'boolean') {
+      sanitized[key] = value;
+    }
+    // Ignore other types (functions, objects with methods, etc.)
+  }
+
+  return sanitized;
+}
+```
+
+---
+
+## API Endpoints
+
+### Scene Management
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/terrarium/scenes` | List user's scenes | Required |
+| `GET` | `/api/terrarium/scenes/:id` | Get single scene | Required |
+| `POST` | `/api/terrarium/scenes` | Create new scene | Required |
+| `PUT` | `/api/terrarium/scenes/:id` | Update scene | Required |
+| `DELETE` | `/api/terrarium/scenes/:id` | Delete scene | Required |
+
+### Decoration Management
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/terrarium/decorations` | List user's decorations | Required |
+| `GET` | `/api/terrarium/decorations/community` | Browse public decorations | Oak+ |
+| `POST` | `/api/terrarium/decorations` | Create decoration from scene | Required |
+| `POST` | `/api/terrarium/decorations/:id/publish` | Make decoration public | Evergreen |
+| `DELETE` | `/api/terrarium/decorations/:id` | Delete decoration | Required |
+
+### Request/Response Examples
+
+**Create Scene:**
+```typescript
+// POST /api/terrarium/scenes
+// Request
+{
+  "name": "My Forest",
+  "canvas": {
+    "width": 1200,
+    "height": 800,
+    "background": "linear-gradient(to bottom, #87CEEB, #228B22)",
+    "gridEnabled": true,
+    "gridSize": 32
+  },
+  "assets": [
+    {
+      "componentName": "TreePine",
+      "position": { "x": 100, "y": 200 },
+      "scale": 1.5,
+      "rotation": 0,
+      "zIndex": 1,
+      "props": { "height": 200, "snowCovered": false },
+      "animationEnabled": false
+    }
+  ]
+}
+
+// Response (201 Created)
+{
+  "id": "scene_abc123",
+  "name": "My Forest",
+  "version": 1,
+  "canvas": { ... },
+  "assets": [ ... ],
+  "createdAt": "2026-01-04T12:00:00Z",
+  "updatedAt": "2026-01-04T12:00:00Z"
+}
+```
+
+**Export as Decoration:**
+```typescript
+// POST /api/terrarium/decorations
+// Request
+{
+  "name": "Forest Header",
+  "zone": "header",
+  "sceneId": "scene_abc123",
+  "options": {
+    "opacity": 0.9
+  }
+}
+
+// Response (201 Created)
+{
+  "id": "deco_xyz789",
+  "name": "Forest Header",
+  "zone": "header",
+  "scene": { ... },
+  "options": { "opacity": 0.9 },
+  "thumbnail": "https://cdn.grove.example/thumbs/deco_xyz789.png",
+  "authorId": "user_123",
+  "isPublic": false,
+  "createdAt": "2026-01-04T12:00:00Z"
+}
+```
 
 ---
 
