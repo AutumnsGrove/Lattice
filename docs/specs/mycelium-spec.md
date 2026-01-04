@@ -1,7 +1,12 @@
 ---
 aliases: []
+<<<<<<< HEAD
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026
+=======
+date created: Thursday, January 2nd 2026
+date modified: Thursday, January 2nd 2026
+>>>>>>> 0ea3b68 (docs: unify frontmatter metadata with correct creation dates)
 tags: []
 type: tech-spec
 ---
