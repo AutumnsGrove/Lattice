@@ -13,7 +13,7 @@ type: tech-spec
 
 > *Where the forest opens up and you can see the people around you.*
 
-Grove's social layer providing a chronological feed across the network. No public metrics, no viral mechanics—just genuine connection. Reactions only visible to authors, enabling encouragement without performance anxiety.
+Grove's social layer providing a chronological feed across the network. No public metrics, no viral mechanics. Just genuine connection. Reactions only visible to authors, enabling encouragement without performance anxiety.
 
 **Public Name:** Meadow
 **Internal Name:** GroveMeadow

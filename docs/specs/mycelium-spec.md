@@ -13,7 +13,7 @@ type: tech-spec
 
 > *The wood wide web of the Grove ecosystem.*
 
-Grove's Model Context Protocol server connecting AI agents to the entire ecosystem. Through Mycelium, Claude can read blog posts, start Bloom sessions, manage Amber files—accessing every Grove service through a single, unified interface.
+Grove's Model Context Protocol server connecting AI agents to the entire ecosystem. Through Mycelium, Claude can read blog posts, start Bloom sessions, and manage Amber files. Every Grove service through a single, unified interface.
 
 **Public Name:** Mycelium
 **Internal Name:** GroveMCP

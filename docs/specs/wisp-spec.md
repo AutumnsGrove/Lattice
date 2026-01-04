@@ -14,7 +14,7 @@ type: tech-spec
 
 > *A helper, not a writer, and sometimes, a good listener.*
 
-An ethical AI writing tool that helps users polish their voice without replacing it. Wisp analyzes grammar, tone, and readability but never generates or expands content—your words, refined, not replaced.
+An ethical AI writing tool that helps users polish their voice without replacing it. Wisp analyzes grammar, tone, and readability but never generates or expands content. Your words, refined, not replaced.
 
 **Public Name:** Wisp
 **Internal Name:** GroveWisp

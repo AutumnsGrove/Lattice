@@ -11,7 +11,7 @@ type: tech-spec
 
 # Amber: Grove Storage Management Specification
 
-Grove's unified storage management system for all uploaded files across the ecosystem. Every image, attachment, and asset is preserved in Amber—organized, accessible, and manageable from one place.
+Grove's unified storage management system for all uploaded files across the ecosystem. Every image, attachment, and asset is preserved in Amber: organized, accessible, and manageable from one place.
 
 ---
 

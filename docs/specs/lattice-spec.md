@@ -21,7 +21,7 @@ The npm package powering every Grove site. UI components, authentication utiliti
 **Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`
 
-A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
+A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. The lattice stays invisible; what matters is everything it supports.
 
 Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns: all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
 

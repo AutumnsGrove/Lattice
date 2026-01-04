@@ -13,7 +13,7 @@ type: tech-spec
 
 > *Some trees outlive the people who planted them.*
 
-Grove's 100-year domain preservation promise. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for a century—even after you're gone. Digital immortality for those who put down real roots.
+Guarantees 100-year domain preservation after 12 cumulative months of Sapling+ membership. Your grove.place subdomain stays online for a century, even after you're gone. Some trees outlive the people who planted them.
 
 **Public Name:** Centennial
 **Internal Name:** GroveCentennial

@@ -1,6 +1,6 @@
 ---
 aliases: []
-date created: Friday, May 28th 2025, 3:01:54 pm
+date created: Friday, May 28th 2025
 date modified: Saturday, January 4th 2026
 tags:
   - domain-search

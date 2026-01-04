@@ -1,6 +1,6 @@
 ---
 aliases: []
-date created: Friday, November 21st 2025, 3:01:54 pm
+date created: Friday, November 21st 2025
 date modified: Saturday, January 4th 2026
 tags:
   - core

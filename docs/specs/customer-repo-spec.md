@@ -11,7 +11,7 @@ type: tech-spec
 
 # Customer Repository Specification
 
-Documents the template structure for individual customer blog repositories. Each customer installs @groveengine/core with dedicated Cloudflare resources (D1, KV, R2), providing isolation, customization, and independent deployment.
+Template structure for individual customer blog repositories, each with dedicated Cloudflare resources (D1, KV, R2). Complete isolation means independent deployment, full customization, and customer-managed updates.
 
 **Purpose:** Documents the template structure for customer blog repositories
 **Deployment:** Cloudflare Workers/Pages with D1, KV, and R2

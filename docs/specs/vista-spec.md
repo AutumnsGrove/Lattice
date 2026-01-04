@@ -22,9 +22,9 @@ Grove's infrastructure monitoring dashboard providing real-time metrics, histori
 **Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
 **Last Updated:** December 2025
 
-A vista is a view that opens up—a clearing where you can see the whole forest at once. From here, nothing hides. Vista is Grove's infrastructure monitoring dashboard, providing a single pane of glass for all platform services.
+A vista is a view that opens up: a clearing where you can see the whole forest at once. From here, nothing hides. Vista is Grove's infrastructure monitoring dashboard, providing a single pane of glass for all platform services.
 
-Real-time metrics, historical data, alerting, cost tracking, health checks—all in one beautiful dashboard. Vista watches so you don't have to.
+Real-time metrics, historical data, alerting, cost tracking, health checks. All in one beautiful dashboard. Vista watches so you don't have to.
 
 ---
 
