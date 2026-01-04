@@ -33,6 +33,10 @@ Terrarium is Grove's creative canvas. Drag nature components onto an open space,
 8. [Foliage Integration](#foliage-integration)
 9. [Implementation Phases](#implementation-phases)
 10. [File Structure](#file-structure)
+11. [Keyboard Shortcuts](#keyboard-shortcuts)
+12. [Accessibility](#accessibility)
+13. [Auto-Save Behavior](#auto-save-behavior)
+14. [Touch Interactions](#touch-interactions)
 
 ---
 
@@ -92,7 +96,13 @@ Community → Share decorations (Oak+) → Others import
 
 ### 2. Asset Palette
 
-Categorized sidebar with 60+ nature components:
+Categorized sidebar with 60+ nature components.
+
+**Search & Filter:**
+- Search box at top filters assets by name
+- Category tabs filter by category
+- Search + category filters stack (AND logic)
+- Debounced search (150ms) for performance
 
 | Category | Components |
 |----------|------------|
@@ -238,8 +248,19 @@ export const TERRARIUM_CONFIG = {
   // Scene constraints
   scene: {
     maxNameLength: 100,
-    maxAssets: 100,
     maxSizeBytes: 1_000_000, // 1MB JSON
+  },
+
+  // Complexity budget system (replaces hard asset limit)
+  // Total complexity cannot exceed maxComplexity
+  complexity: {
+    maxComplexity: 200,
+    weights: {
+      animated: 5,    // Animated assets cost 5 points
+      scaled: 2,      // Scale > 1.5 or < 0.5 costs 2 points
+      normal: 1,      // Standard assets cost 1 point
+    },
+    warningThreshold: 0.8, // Warn at 80% budget
   },
 
   // Canvas constraints
@@ -263,6 +284,10 @@ export const TERRARIUM_CONFIG = {
 
   // Storage limits (per tier)
   storage: {
+    // Use IndexedDB for larger storage (25MB+) vs localStorage (5-10MB)
+    backend: 'indexeddb' as const,
+    dbName: 'terrarium',
+    dbVersion: 1,
     maxSavedScenes: {
       free: 0,
       seedling: 5,
@@ -285,6 +310,16 @@ export const TERRARIUM_CONFIG = {
     maxHeight: 4096,
     defaultScale: 2, // 2x for retina
     format: 'png' as const,
+    // Realistic: 5-10s for complex scenes, not 3s
+    expectedTimeMs: { min: 1000, typical: 5000, max: 10000 },
+  },
+
+  // Auto-save settings
+  autoSave: {
+    enabled: true,
+    debounceMs: 2000,        // Wait 2s after last change
+    maxIntervalMs: 30000,    // Force save every 30s during activity
+    showIndicator: true,     // Show "Saving..." indicator
   },
 
   // Zone constraints for Foliage integration
@@ -326,9 +361,45 @@ export type TerrariumConfig = typeof TERRARIUM_CONFIG;
 
 ## Asset Registry
 
+### Explicit Metadata Exports
+
+Instead of fragile Svelte parsing, each nature component exports its metadata explicitly.
+
+**Component Pattern:**
+
+```svelte
+<!-- src/lib/ui/components/nature/trees/TreePine.svelte -->
+<script lang="ts" context="module">
+  import type { AssetMeta } from '../../terrarium/types';
+
+  // Explicit metadata export - no parsing needed
+  export const meta: AssetMeta = {
+    displayName: 'Pine Tree',
+    category: 'trees',
+    isAnimated: false,
+    defaultSize: { width: 100, height: 150 },
+    props: [
+      { key: 'height', label: 'Height', type: 'number', min: 50, max: 300, default: 150 },
+      { key: 'snowCovered', label: 'Snow Covered', type: 'boolean', default: false },
+    ],
+  };
+</script>
+
+<script lang="ts">
+  interface Props {
+    height?: number;
+    snowCovered?: boolean;
+  }
+
+  let { height = 150, snowCovered = false }: Props = $props();
+</script>
+
+<!-- component template -->
+```
+
 ### Build-Time Generation
 
-Instead of manually maintaining a 60+ entry registry, use a build script:
+The build script collects metadata from explicit exports (not parsing):
 
 ```bash
 pnpm run generate:asset-registry
@@ -340,76 +411,59 @@ pnpm run generate:asset-registry
 import { glob } from 'glob';
 import * as fs from 'fs';
 import * as path from 'path';
-import ts from 'typescript';
 
 const NATURE_PATH = 'src/lib/ui/components/nature';
 const OUTPUT_PATH = 'src/lib/ui/components/terrarium/assetRegistry.generated.ts';
 
-interface AssetMeta {
-  name: string;
-  displayName: string;
-  category: string;
-  isAnimated: boolean;
-  defaultSize: { width: number; height: number };
-  propSchema: PropSchema[];
-}
-
 async function generateRegistry() {
   const categories = await glob(`${NATURE_PATH}/*/`);
-  const registry: Record<string, AssetMeta> = {};
+  const imports: string[] = [];
+  const registryEntries: string[] = [];
+  const categoryMap: Record<string, string[]> = {};
 
   for (const categoryPath of categories) {
     const category = path.basename(categoryPath);
     const components = await glob(`${categoryPath}/*.svelte`);
+    categoryMap[category] = [];
 
     for (const componentPath of components) {
       const name = path.basename(componentPath, '.svelte');
+      const relativePath = path.relative(
+        'src/lib/ui/components/terrarium',
+        componentPath.replace('.svelte', '')
+      );
 
-      // Parse component to extract props
-      const source = fs.readFileSync(componentPath, 'utf-8');
-      const propSchema = extractPropsFromSvelte(source);
-      const isAnimated = detectAnimation(source);
-      const defaultSize = inferDefaultSize(name, category);
+      // Import meta from component module
+      imports.push(
+        `import { meta as ${name}Meta } from '${relativePath}.svelte';`
+      );
 
-      registry[name] = {
-        name,
-        displayName: formatDisplayName(name),
-        category,
-        isAnimated,
-        defaultSize,
-        propSchema,
-      };
+      registryEntries.push(`
+  ${name}: {
+    name: '${name}',
+    ...${name}Meta,
+    load: () => import('${relativePath}.svelte'),
+  },`);
+
+      categoryMap[category].push(name);
     }
   }
 
-  // Generate output file
-  const output = generateOutputFile(registry);
+  const output = `// AUTO-GENERATED - DO NOT EDIT
+// Run \`pnpm run generate:asset-registry\` to regenerate
+
+import type { AssetDefinition } from './types';
+
+${imports.join('\n')}
+
+export const assetRegistry: Record<string, AssetDefinition> = {${registryEntries.join('')}
+};
+
+export const assetsByCategory = ${JSON.stringify(categoryMap, null, 2)};
+`;
+
   fs.writeFileSync(OUTPUT_PATH, output);
-
-  console.log(`Generated registry with ${Object.keys(registry).length} assets`);
-}
-
-function extractPropsFromSvelte(source: string): PropSchema[] {
-  // Parse Svelte 5 $props() declarations
-  // Extract types and defaults
-  // Return schema array
-}
-
-function detectAnimation(source: string): boolean {
-  // Check for animation-related code
-  return source.includes('animate:') ||
-         source.includes('@keyframes') ||
-         source.includes('transition:');
-}
-
-function formatDisplayName(name: string): string {
-  // TreePine -> Pine Tree
-  // LatticeWithVine -> Lattice with Vine
-  return name
-    .replace(/([A-Z])/g, ' $1')
-    .trim()
-    .replace(/^Tree /, '')
-    .concat(name.startsWith('Tree') ? ' Tree' : '');
+  console.log(\`Generated registry with \${registryEntries.length} assets\`);
 }
 
 generateRegistry();
@@ -423,33 +477,28 @@ generateRegistry();
 
 import type { AssetDefinition } from './types';
 
-// Dynamic imports for code splitting
-const assetImports = {
-  TreePine: () => import('../nature/trees/TreePine.svelte'),
-  TreeBirch: () => import('../nature/trees/TreeBirch.svelte'),
-  Firefly: () => import('../nature/creatures/Firefly.svelte'),
-  // ... all 60+ assets
-};
+import { meta as TreePineMeta } from '../nature/trees/TreePine.svelte';
+import { meta as TreeBirchMeta } from '../nature/trees/TreeBirch.svelte';
+import { meta as FireflyMeta } from '../nature/creatures/Firefly.svelte';
+// ... all 60+ assets
 
 export const assetRegistry: Record<string, AssetDefinition> = {
   TreePine: {
     name: 'TreePine',
-    displayName: 'Pine Tree',
-    category: 'trees',
-    isAnimated: false,
-    defaultSize: { width: 100, height: 150 },
-    propSchema: [
-      { key: 'height', label: 'Height', type: 'number', min: 50, max: 300, default: 150 },
-      { key: 'snowCovered', label: 'Snow Covered', type: 'boolean', default: false },
-    ],
-    load: assetImports.TreePine,
+    ...TreePineMeta,
+    load: () => import('../nature/trees/TreePine.svelte'),
+  },
+  TreeBirch: {
+    name: 'TreeBirch',
+    ...TreeBirchMeta,
+    load: () => import('../nature/trees/TreeBirch.svelte'),
   },
   // ... all assets
 };
 
 export const assetsByCategory = {
   trees: ['TreePine', 'TreeBirch', 'TreeCherry', 'TreeAspen'],
-  creatures: ['Bee', 'Bird', 'Butterfly', 'Deer', 'Firefly', /* ... */],
+  creatures: ['Bee', 'Bird', 'Butterfly', 'Deer', 'Firefly'],
   // ... all categories
 };
 ```
@@ -457,8 +506,9 @@ export const assetsByCategory = {
 ### Adding New Assets
 
 1. Create component in `src/lib/ui/components/nature/{category}/`
-2. Run `pnpm run generate:asset-registry`
-3. New asset automatically appears in Terrarium palette
+2. Add `export const meta: AssetMeta = { ... }` in `context="module"` script
+3. Run `pnpm run generate:asset-registry`
+4. New asset automatically appears in Terrarium palette
 
 ---
 
@@ -585,10 +635,14 @@ async function exportAsDecoration(
 
 ### DecorationRenderer Component
 
+The renderer must pre-load all components asynchronously before rendering. Components from dynamic imports are Promises, not components, so they must be awaited in `onMount` and stored in a Map.
+
 ```svelte
 <!-- DecorationRenderer.svelte -->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { Decoration, DecorationZone } from '$lib/types';
+  import type { Component as SvelteComponent } from 'svelte';
   import { assetRegistry } from './assetRegistry.generated';
 
   interface Props {
@@ -598,25 +652,179 @@ async function exportAsDecoration(
   }
 
   let { decoration, zone, class: className }: Props = $props();
+
+  // Pre-loaded components map
+  let loadedComponents = $state<Map<string, SvelteComponent>>(new Map());
+  let isLoading = $state(true);
+  let loadError = $state<string | null>(null);
+
+  onMount(async () => {
+    try {
+      // Get unique component names from scene
+      const componentNames = [...new Set(
+        decoration.scene.assets.map(a => a.componentName)
+      )];
+
+      // Load all components in parallel
+      const loadPromises = componentNames.map(async (name) => {
+        const definition = assetRegistry[name];
+        if (!definition) {
+          throw new Error(`Unknown component: ${name}`);
+        }
+        const module = await definition.load();
+        return [name, module.default] as const;
+      });
+
+      const loaded = await Promise.all(loadPromises);
+
+      // Store in Map
+      loadedComponents = new Map(loaded);
+      isLoading = false;
+    } catch (err) {
+      loadError = err instanceof Error ? err.message : 'Failed to load components';
+      isLoading = false;
+    }
+  });
+
+  function getComponent(name: string): SvelteComponent | null {
+    return loadedComponents.get(name) ?? null;
+  }
 </script>
 
-<div
-  class="decoration decoration--{zone} {className}"
-  style:--opacity={decoration.options.opacity}
->
-  {#each decoration.scene.assets as asset (asset.id)}
-    {@const Component = assetRegistry[asset.componentName].component}
-    <div
-      class="placed-asset"
-      style:left="{asset.position.x}px"
-      style:top="{asset.position.y}px"
-      style:transform="scale({asset.scale}) rotate({asset.rotation}deg)"
-      style:z-index={asset.zIndex}
-    >
-      <Component {...asset.props} />
-    </div>
-  {/each}
-</div>
+{#if isLoading}
+  <div class="decoration-loading" aria-busy="true">
+    <span class="sr-only">Loading decoration...</span>
+  </div>
+{:else if loadError}
+  <div class="decoration-error" role="alert">
+    Failed to load decoration
+  </div>
+{:else}
+  <div
+    class="decoration decoration--{zone} {className}"
+    style:--opacity={decoration.options.opacity}
+  >
+    {#each decoration.scene.assets as asset (asset.id)}
+      {@const Component = getComponent(asset.componentName)}
+      {#if Component}
+        <div
+          class="placed-asset"
+          style:left="{asset.position.x}px"
+          style:top="{asset.position.y}px"
+          style:transform="scale({asset.scale}) rotate({asset.rotation}deg)"
+          style:z-index={asset.zIndex}
+        >
+          <Component {...asset.props} />
+        </div>
+      {/if}
+    {/each}
+  </div>
+{/if}
+```
+
+### Security: Zod Validation for Decorations
+
+Community decorations (shared by other users) must be validated before rendering to prevent injection attacks.
+
+**Schema: `packages/engine/src/lib/schemas/decoration.ts`**
+
+```typescript
+import { z } from 'zod';
+import { assetsByCategory } from '../ui/components/terrarium/assetRegistry.generated';
+
+// Get all valid component names at runtime
+const validComponentNames = Object.values(assetsByCategory).flat();
+
+const PlacedAssetSchema = z.object({
+  id: z.string().uuid(),
+  componentName: z.enum(validComponentNames as [string, ...string[]]),
+  category: z.enum([
+    'trees', 'creatures', 'botanical', 'ground',
+    'sky', 'structural', 'water', 'weather'
+  ]),
+  position: z.object({
+    x: z.number().min(-1000).max(5000),
+    y: z.number().min(-1000).max(5000),
+  }),
+  scale: z.number().min(0.1).max(5),
+  rotation: z.number().min(-360).max(360),
+  zIndex: z.number().int().min(0).max(1000),
+  props: z.record(z.unknown()),
+  animationEnabled: z.boolean(),
+});
+
+const CanvasSettingsSchema = z.object({
+  width: z.number().min(200).max(4000),
+  height: z.number().min(200).max(4000),
+  background: z.string().max(100),
+  gridEnabled: z.boolean(),
+  gridSize: z.union([z.literal(16), z.literal(32), z.literal(64)]),
+});
+
+export const TerrariumSceneSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  version: z.literal(1),
+  canvas: CanvasSettingsSchema,
+  assets: z.array(PlacedAssetSchema).max(200), // Max complexity budget
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const DecorationSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  zone: z.enum(['header', 'sidebar', 'footer', 'background']),
+  scene: TerrariumSceneSchema,
+  options: z.object({
+    opacity: z.number().min(0).max(1).default(1),
+  }),
+  authorId: z.string().uuid(),
+  isPublic: z.boolean(),
+  createdAt: z.string().datetime(),
+});
+
+export type ValidatedDecoration = z.infer<typeof DecorationSchema>;
+```
+
+**Usage in API:**
+
+```typescript
+// packages/engine/src/routes/api/terrarium/decorations/+server.ts
+import { DecorationSchema } from '$lib/schemas/decoration';
+import { json, error } from '@sveltejs/kit';
+
+export async function POST({ request, locals }) {
+  const body = await request.json();
+
+  // Validate with Zod
+  const result = DecorationSchema.safeParse(body);
+  if (!result.success) {
+    throw error(400, {
+      message: 'Invalid decoration data',
+      errors: result.error.flatten().fieldErrors,
+    });
+  }
+
+  const decoration = result.data;
+  // ... save to database
+}
+```
+
+**Usage in DecorationRenderer (community decorations):**
+
+```typescript
+// Before rendering community decorations, validate
+import { TerrariumSceneSchema } from '$lib/schemas/decoration';
+
+function validateScene(scene: unknown): scene is TerrariumScene {
+  const result = TerrariumSceneSchema.safeParse(scene);
+  if (!result.success) {
+    console.error('Invalid scene data:', result.error);
+    return false;
+  }
+  return true;
+}
 ```
 
 ---
@@ -660,6 +868,7 @@ packages/engine/src/routes/terrarium/
 
 **Deliverables:**
 - Full asset registry (60+ via build script)
+- **Search & filter** in asset palette
 - Grid overlay + snap-to-grid toggle
 - Props panel (Vineyard-style)
 - Scale/rotation handles
@@ -667,6 +876,13 @@ packages/engine/src/routes/terrarium/
 - Animation toggle (global + per-asset)
 - Multiple scenes (save/load/list)
 - Scene naming + management
+- **Complexity budget** display and warnings
+- **Templates** - Pre-made starter scenes:
+  - "Empty Canvas" - Blank slate
+  - "Forest Clearing" - Trees, bushes, ambient creatures
+  - "Night Garden" - Moon, fireflies, flowers
+  - "Stream Scene" - Water, reeds, lily pads
+  - "Winter Grove" - Snow-covered trees, snowfall layer
 
 **Additional Files:**
 ```
@@ -675,7 +891,16 @@ packages/engine/src/routes/terrarium/
 ├── PropControl.svelte
 ├── SelectionBox.svelte
 ├── SceneManager.svelte
+├── SearchFilter.svelte
+├── ComplexityBudget.svelte
+├── TemplatesPicker.svelte
 ├── assetRegistry.generated.ts
+├── templates/
+│   ├── index.ts
+│   ├── forest-clearing.json
+│   ├── night-garden.json
+│   ├── stream-scene.json
+│   └── winter-grove.json
 scripts/
 └── generate-asset-registry.ts
 ```
@@ -773,14 +998,24 @@ packages/engine/
 | First paint | <500ms | Lighthouse |
 | Asset render | <50ms | Per asset |
 | Drag latency | <16ms | One frame |
-| Export time | <3s | For 100 assets |
+| Export time | 5-10s | Complex scenes (realistic target) |
 
 ### Strategy
 
 - **DOM-based rendering** for MVP (simpler, good for ~50 assets)
 - **requestAnimationFrame batching** for animations
 - **Throttle position updates** during drag (16ms)
-- **Warn user** when animated assets > 20
+- **Warn user** when complexity budget exceeds 80%
+- **Progress indicator** during export (can take 5-10s for complex scenes)
+
+### Export Performance Notes
+
+PNG export via `dom-to-image-more` is CPU-intensive:
+- Simple scenes (10-20 assets): 1-3 seconds
+- Medium scenes (30-50 assets): 3-5 seconds
+- Complex scenes (50+ assets, animations): 5-10 seconds
+
+Show progress indicator with "Exporting..." message. Consider Web Worker for non-blocking export in future version.
 
 ---
 
@@ -809,38 +1044,102 @@ packages/engine/
 
 ## Migration Strategy
 
-### localStorage → PlaygroundDO
+### IndexedDB Storage (MVP)
+
+Use IndexedDB for client-side storage instead of localStorage:
+- IndexedDB supports 25MB+ (browser-dependent)
+- localStorage limited to 5-10MB
+- IndexedDB handles complex data structures better
+
+**Storage Implementation: `packages/engine/src/lib/storage/terrarium-db.ts`**
+
+```typescript
+import { openDB, type IDBPDatabase } from 'idb';
+import type { TerrariumScene } from '../types';
+
+const DB_NAME = 'terrarium';
+const DB_VERSION = 1;
+const SCENES_STORE = 'scenes';
+
+let db: IDBPDatabase | null = null;
+
+async function getDB(): Promise<IDBPDatabase> {
+  if (db) return db;
+
+  db = await openDB(DB_NAME, DB_VERSION, {
+    upgrade(database) {
+      if (!database.objectStoreNames.contains(SCENES_STORE)) {
+        const store = database.createObjectStore(SCENES_STORE, {
+          keyPath: 'id',
+        });
+        store.createIndex('updatedAt', 'updatedAt');
+        store.createIndex('name', 'name');
+      }
+    },
+  });
+
+  return db;
+}
+
+export async function saveScene(scene: TerrariumScene): Promise<void> {
+  const database = await getDB();
+  await database.put(SCENES_STORE, scene);
+}
+
+export async function getScene(id: string): Promise<TerrariumScene | undefined> {
+  const database = await getDB();
+  return database.get(SCENES_STORE, id);
+}
+
+export async function getAllScenes(): Promise<TerrariumScene[]> {
+  const database = await getDB();
+  return database.getAllFromIndex(SCENES_STORE, 'updatedAt');
+}
+
+export async function deleteScene(id: string): Promise<void> {
+  const database = await getDB();
+  await database.delete(SCENES_STORE, id);
+}
+```
+
+### IndexedDB → PlaygroundDO Migration
 
 When PlaygroundDO ships (Golden Hour):
 
 ```typescript
+import { getAllScenes } from '$lib/storage/terrarium-db';
+
 async function migrateToPlaygroundDO(userId: string): Promise<void> {
-  const LOCAL_KEY = 'terrarium-scenes';
-  const localData = localStorage.getItem(LOCAL_KEY);
+  const scenes = await getAllScenes();
+  if (scenes.length === 0) return;
 
-  if (!localData) return;
-
-  const scenes: TerrariumScene[] = JSON.parse(localData);
-
+  let migrated = 0;
   for (const scene of scenes) {
-    await fetch('/api/terrarium/scenes', {
-      method: 'POST',
-      body: JSON.stringify(scene),
-    });
+    try {
+      await fetch('/api/terrarium/scenes', {
+        method: 'POST',
+        body: JSON.stringify(scene),
+      });
+      migrated++;
+    } catch (err) {
+      console.error(`Failed to migrate scene ${scene.id}:`, err);
+    }
   }
 
-  // Mark as migrated, keep local as backup
-  localStorage.setItem(`${LOCAL_KEY}-migrated`, 'true');
+  // Mark as migrated in IndexedDB metadata
+  const database = await getDB();
+  await database.put('metadata', { key: 'migrated', value: true, migratedAt: new Date().toISOString() });
 
-  toast.success(`Migrated ${scenes.length} scenes to your account!`);
+  toast.success(`Migrated ${migrated}/${scenes.length} scenes to your account!`);
 }
 ```
 
 ### Fallback Behavior
 
-- If DO unavailable, fall back to localStorage
+- If DO unavailable, fall back to IndexedDB
 - Sync when connection restored
-- localStorage remains offline backup
+- IndexedDB remains offline backup
+- Check for pending local changes on app load
 
 ---
 
@@ -851,10 +1150,374 @@ async function migrateToPlaygroundDO(userId: string): Promise<void> {
 - **Real-time collaboration** - WebSocket via PlaygroundDO
 - **SVG export** - Vector format for scalability
 - **Custom images** - Drag from user's CDN/gallery
-- **Templates** - Pre-made scenes to start from
 - **Community decorations** - Browse/share (Oak+)
 
 ---
 
+## Keyboard Shortcuts
+
+| Action | Shortcut | Notes |
+|--------|----------|-------|
+| **Selection** | | |
+| Select all | `Cmd/Ctrl + A` | Selects all assets |
+| Deselect | `Escape` | Clears selection |
+| Delete selected | `Delete` or `Backspace` | Removes selected asset |
+| **Clipboard** | | |
+| Duplicate | `Cmd/Ctrl + D` | Duplicate selected asset |
+| Copy | `Cmd/Ctrl + C` | Copy to clipboard (future) |
+| Paste | `Cmd/Ctrl + V` | Paste from clipboard (future) |
+| **Navigation** | | |
+| Pan canvas | `Space + Drag` | Hold space, then drag |
+| Pan canvas | `Middle mouse drag` | Middle button pan |
+| **Layers** | | |
+| Bring forward | `]` | Move layer up one |
+| Send backward | `[` | Move layer down one |
+| Bring to front | `Shift + ]` | Move to top layer |
+| Send to back | `Shift + [` | Move to bottom layer |
+| **View** | | |
+| Toggle grid | `G` | Show/hide snap grid |
+| Toggle animations | `A` | Enable/disable animations |
+| **Saving** | | |
+| Save scene | `Cmd/Ctrl + S` | Manual save (also auto-saves) |
+
+### Focus Management
+
+- `Tab` cycles through palette categories
+- `Arrow keys` navigate within palette
+- `Enter` places selected palette asset at canvas center
+- `Escape` returns focus to canvas from panels
+
+---
+
+## Accessibility
+
+### WCAG 2.1 AA Compliance Targets
+
+**Perceivable:**
+- All interactive elements have visible focus indicators
+- Color contrast ≥4.5:1 for text, ≥3:1 for graphics
+- Animation respects `prefers-reduced-motion`
+- Non-text content has text alternatives
+
+**Operable:**
+- All functionality available via keyboard
+- No time limits on interactions
+- Users can pause/stop animations
+- Focus order follows logical reading order
+
+**Understandable:**
+- Consistent navigation patterns
+- Error messages identify and explain issues
+- Labels and instructions provided
+
+**Robust:**
+- Valid HTML semantics
+- ARIA attributes where needed
+- Works with screen readers
+
+### Screen Reader Support
+
+```svelte
+<!-- Asset palette item -->
+<button
+  class="palette-item"
+  role="option"
+  aria-selected={isSelected}
+  aria-label="{asset.displayName}, {asset.category}"
+  onclick={() => selectAsset(asset)}
+>
+  <AssetPreview {asset} aria-hidden="true" />
+  <span class="sr-only">
+    {asset.isAnimated ? 'Animated' : 'Static'} {asset.displayName}
+  </span>
+</button>
+
+<!-- Placed asset on canvas -->
+<div
+  class="placed-asset"
+  role="img"
+  aria-label="{asset.displayName} at position {asset.position.x}, {asset.position.y}"
+  tabindex="0"
+  on:focus={() => selectAsset(asset.id)}
+>
+```
+
+### Reduced Motion Support
+
+```svelte
+<script>
+  import { browser } from '$app/environment';
+
+  let prefersReducedMotion = $state(false);
+
+  if (browser) {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    prefersReducedMotion = mediaQuery.matches;
+    mediaQuery.addEventListener('change', (e) => {
+      prefersReducedMotion = e.matches;
+    });
+  }
+</script>
+
+{#if !prefersReducedMotion && animationsEnabled}
+  <AnimatedFirefly {props} />
+{:else}
+  <StaticFirefly {props} />
+{/if}
+```
+
+### Live Regions
+
+```svelte
+<!-- Announce actions to screen readers -->
+<div aria-live="polite" class="sr-only" bind:this={announcer}>
+  {announcement}
+</div>
+
+<script>
+  let announcement = $state('');
+
+  function announce(message: string) {
+    announcement = '';
+    // Force DOM update
+    requestAnimationFrame(() => {
+      announcement = message;
+    });
+  }
+
+  // Usage
+  function deleteAsset(id: string) {
+    const asset = getAsset(id);
+    removeAsset(id);
+    announce(`${asset.displayName} deleted`);
+  }
+</script>
+```
+
+---
+
+## Auto-Save Behavior
+
+### Save Triggers
+
+1. **Debounced auto-save** - 2 seconds after last change
+2. **Interval save** - Every 30 seconds during activity
+3. **Before unload** - When user navigates away
+4. **Manual save** - `Cmd/Ctrl + S`
+
+### Implementation
+
+```typescript
+// packages/engine/src/lib/ui/components/terrarium/autoSave.svelte.ts
+
+import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+import { saveScene } from '$lib/storage/terrarium-db';
+
+export function createAutoSave(getScene: () => TerrariumScene) {
+  let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+  let intervalId: ReturnType<typeof setInterval> | null = null;
+  let lastSavedHash = '';
+  let isSaving = $state(false);
+  let lastSaved = $state<Date | null>(null);
+
+  const { debounceMs, maxIntervalMs } = TERRARIUM_CONFIG.autoSave;
+
+  function hashScene(scene: TerrariumScene): string {
+    return JSON.stringify({
+      assets: scene.assets,
+      canvas: scene.canvas,
+      name: scene.name,
+    });
+  }
+
+  async function save(): Promise<void> {
+    const scene = getScene();
+    const hash = hashScene(scene);
+
+    // Skip if no changes
+    if (hash === lastSavedHash) return;
+
+    isSaving = true;
+    try {
+      await saveScene({
+        ...scene,
+        updatedAt: new Date().toISOString(),
+      });
+      lastSavedHash = hash;
+      lastSaved = new Date();
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  function scheduleSave(): void {
+    // Debounce
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(save, debounceMs);
+  }
+
+  function startInterval(): void {
+    intervalId = setInterval(save, maxIntervalMs);
+  }
+
+  function stopInterval(): void {
+    if (intervalId) clearInterval(intervalId);
+  }
+
+  // Save before unload
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => {
+      save();
+    });
+  }
+
+  return {
+    get isSaving() { return isSaving; },
+    get lastSaved() { return lastSaved; },
+    scheduleSave,
+    save,
+    startInterval,
+    stopInterval,
+  };
+}
+```
+
+### UI Indicator
+
+```svelte
+<!-- SaveIndicator.svelte -->
+<script lang="ts">
+  interface Props {
+    isSaving: boolean;
+    lastSaved: Date | null;
+  }
+
+  let { isSaving, lastSaved }: Props = $props();
+
+  let timeAgo = $derived(
+    lastSaved
+      ? formatTimeAgo(lastSaved)
+      : 'Not saved'
+  );
+</script>
+
+<div class="save-indicator" aria-live="polite">
+  {#if isSaving}
+    <span class="saving">Saving...</span>
+  {:else}
+    <span class="saved">Saved {timeAgo}</span>
+  {/if}
+</div>
+```
+
+---
+
+## Touch Interactions
+
+### Supported Gestures
+
+| Gesture | Action | Notes |
+|---------|--------|-------|
+| **Single tap** | Select asset | Or deselect if tapping canvas |
+| **Tap + drag** | Move asset | Drag selected asset |
+| **Long press** | Context menu | Shows duplicate/delete options |
+| **Two-finger pan** | Pan canvas | Move viewport |
+| **Pinch** | Zoom canvas | Future: Canvas zoom |
+| **Two-finger rotate** | Rotate asset | Future enhancement |
+
+### Touch Event Handling
+
+```typescript
+// packages/engine/src/lib/ui/components/terrarium/touchHandlers.ts
+
+interface TouchState {
+  isMultiTouch: boolean;
+  startDistance: number;
+  startCenter: { x: number; y: number };
+}
+
+export function setupTouchHandlers(canvas: HTMLElement) {
+  let touchState: TouchState | null = null;
+  let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function handleTouchStart(e: TouchEvent) {
+    if (e.touches.length === 1) {
+      // Single touch - potential tap or drag
+      const touch = e.touches[0];
+      longPressTimer = setTimeout(() => {
+        dispatchContextMenu(touch.clientX, touch.clientY);
+      }, 500);
+    } else if (e.touches.length === 2) {
+      // Multi-touch - pan/zoom
+      e.preventDefault();
+      cancelLongPress();
+      touchState = {
+        isMultiTouch: true,
+        startDistance: getTouchDistance(e.touches),
+        startCenter: getTouchCenter(e.touches),
+      };
+    }
+  }
+
+  function handleTouchMove(e: TouchEvent) {
+    cancelLongPress();
+
+    if (e.touches.length === 2 && touchState?.isMultiTouch) {
+      e.preventDefault();
+      const newCenter = getTouchCenter(e.touches);
+      const deltaX = newCenter.x - touchState.startCenter.x;
+      const deltaY = newCenter.y - touchState.startCenter.y;
+      panCanvas(deltaX, deltaY);
+      touchState.startCenter = newCenter;
+    }
+  }
+
+  function handleTouchEnd(e: TouchEvent) {
+    cancelLongPress();
+    touchState = null;
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  }
+
+  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+  canvas.addEventListener('touchend', handleTouchEnd);
+
+  return () => {
+    canvas.removeEventListener('touchstart', handleTouchStart);
+    canvas.removeEventListener('touchmove', handleTouchMove);
+    canvas.removeEventListener('touchend', handleTouchEnd);
+  };
+}
+
+function getTouchDistance(touches: TouchList): number {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getTouchCenter(touches: TouchList): { x: number; y: number } {
+  return {
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+  };
+}
+```
+
+### iPad-Specific Considerations
+
+- Support Apple Pencil for precise asset placement
+- Pencil hover (M2+ iPads) shows asset preview
+- Palm rejection during pencil use
+- Side panel adapts to landscape/portrait
+
+---
+
 *Spec created: January 2026*
+*Updated: January 2026 (PR feedback integration)*
 *Target: MVP by Full Bloom, Full version by Golden Hour*
