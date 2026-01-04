@@ -731,7 +731,7 @@ The renderer must pre-load all components asynchronously before rendering. Compo
 ```svelte
 <!-- DecorationRenderer.svelte -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { untrack } from 'svelte';
   import type { Decoration, DecorationZone } from '$lib/types';
   import type { Component as SvelteComponent } from 'svelte';
   import { assetRegistry } from './assetRegistry.generated';
@@ -749,56 +749,70 @@ The renderer must pre-load all components asynchronously before rendering. Compo
   let isLoading = $state(true);
   let loadError = $state<string | null>(null);
 
-  onMount(async () => {
-    // Get unique component names from scene
+  // Track which decoration we've loaded to detect changes
+  let loadedDecorationId = $state<string | null>(null);
+
+  // Reload components when decoration changes
+  $effect(() => {
+    const decorationId = decoration.id;
     const componentNames = [...new Set(
       decoration.scene.assets.map(a => a.componentName)
     )];
 
-    // Load all components in parallel with graceful failure handling
-    const loadPromises = componentNames.map(async (name) => {
-      const definition = assetRegistry[name];
-      if (!definition) {
-        return { name, error: `Unknown component: ${name}` };
-      }
-      try {
-        const module = await definition.load();
-        return { name, component: module.default };
-      } catch (err) {
-        return { name, error: `Failed to load: ${name}` };
-      }
-    });
+    // Run the async load in untrack to avoid re-triggering
+    untrack(async () => {
+      // Skip if already loaded for this decoration
+      if (loadedDecorationId === decorationId) return;
 
-    // Use allSettled for partial failure handling
-    const results = await Promise.allSettled(loadPromises);
+      isLoading = true;
+      loadError = null;
 
-    const componentMap = new Map<string, SvelteComponent>();
-    const errors: string[] = [];
-
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        const { name, component, error } = result.value;
-        if (component) {
-          componentMap.set(name, component);
-        } else if (error) {
-          errors.push(error);
+      // Load all components in parallel with graceful failure handling
+      const loadPromises = componentNames.map(async (name) => {
+        const definition = assetRegistry[name];
+        if (!definition) {
+          return { name, error: `Unknown component: ${name}` };
         }
-      } else {
-        errors.push(result.reason?.message ?? 'Unknown error');
+        try {
+          const module = await definition.load();
+          return { name, component: module.default };
+        } catch (err) {
+          return { name, error: `Failed to load: ${name}` };
+        }
+      });
+
+      // Use allSettled for partial failure handling
+      const results = await Promise.allSettled(loadPromises);
+
+      const componentMap = new Map<string, SvelteComponent>();
+      const errors: string[] = [];
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          const { name, component, error } = result.value;
+          if (component) {
+            componentMap.set(name, component);
+          } else if (error) {
+            errors.push(error);
+          }
+        } else {
+          errors.push(result.reason?.message ?? 'Unknown error');
+        }
       }
-    }
 
-    loadedComponents = componentMap;
+      loadedComponents = componentMap;
+      loadedDecorationId = decorationId;
 
-    // Only show error if ALL components failed
-    if (componentMap.size === 0 && errors.length > 0) {
-      loadError = errors.join(', ');
-    } else if (errors.length > 0) {
-      // Log partial failures but continue rendering
-      console.warn('Some components failed to load:', errors);
-    }
+      // Only show error if ALL components failed
+      if (componentMap.size === 0 && errors.length > 0) {
+        loadError = errors.join(', ');
+      } else if (errors.length > 0) {
+        // Log partial failures but continue rendering
+        console.warn('Some components failed to load:', errors);
+      }
 
-    isLoading = false;
+      isLoading = false;
+    });
   });
 
   function getComponent(name: string): SvelteComponent | null {
@@ -845,10 +859,120 @@ Community decorations (shared by other users) must be validated before rendering
 
 ```typescript
 import { z } from 'zod';
-import { assetsByCategory } from '../ui/components/terrarium/assetRegistry.generated';
+import {
+  assetsByCategory,
+  assetRegistry,
+} from '../ui/components/terrarium/assetRegistry.generated';
 
 // Get all valid component names at runtime
 const validComponentNames = Object.values(assetsByCategory).flat();
+
+/**
+ * Component-specific prop schemas
+ * Each component defines expected prop types in the registry
+ */
+const PropSchemas: Record<string, z.ZodSchema> = {
+  // Trees
+  OakTree: z.object({
+    season: z.enum(['spring', 'summer', 'autumn', 'winter']).optional(),
+    size: z.enum(['small', 'medium', 'large']).optional(),
+  }),
+  PineTree: z.object({
+    snowCapped: z.boolean().optional(),
+    size: z.enum(['small', 'medium', 'large']).optional(),
+  }),
+  WillowTree: z.object({
+    windSpeed: z.number().min(0).max(1).optional(),
+  }),
+
+  // Creatures
+  Firefly: z.object({
+    glowColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    flickerSpeed: z.number().min(0.1).max(2).optional(),
+  }),
+  Butterfly: z.object({
+    wingPattern: z.enum(['monarch', 'blue', 'swallowtail']).optional(),
+    flutterSpeed: z.number().min(0.5).max(2).optional(),
+  }),
+  Bird: z.object({
+    species: z.enum(['robin', 'bluebird', 'cardinal', 'sparrow']).optional(),
+  }),
+
+  // Botanical
+  Flower: z.object({
+    color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    bloomStage: z.enum(['bud', 'partial', 'full']).optional(),
+  }),
+  Mushroom: z.object({
+    variant: z.enum(['red', 'brown', 'white', 'glowing']).optional(),
+  }),
+  Fern: z.object({
+    unfurled: z.boolean().optional(),
+  }),
+
+  // Ground
+  Rock: z.object({
+    mossy: z.boolean().optional(),
+    variant: z.number().int().min(1).max(5).optional(),
+  }),
+  Grass: z.object({
+    density: z.enum(['sparse', 'medium', 'dense']).optional(),
+  }),
+
+  // Weather
+  Cloud: z.object({
+    opacity: z.number().min(0.1).max(1).optional(),
+    variant: z.number().int().min(1).max(3).optional(),
+  }),
+  Raindrop: z.object({
+    intensity: z.enum(['light', 'medium', 'heavy']).optional(),
+  }),
+
+  // Structural
+  Lattice: z.object({
+    style: z.enum(['wooden', 'metal', 'vine-covered']).optional(),
+    width: z.number().min(50).max(400).optional(),
+  }),
+  Fence: z.object({
+    style: z.enum(['picket', 'rustic', 'stone']).optional(),
+    segments: z.number().int().min(1).max(10).optional(),
+  }),
+};
+
+// Fallback for components without specific schemas
+const DefaultPropSchema = z.record(
+  z.union([z.string(), z.number(), z.boolean()])
+).refine(
+  (obj) => Object.keys(obj).length <= 10,
+  { message: 'Too many props (max 10)' }
+);
+
+/**
+ * Get prop schema for a component, with fallback
+ */
+function getPropSchema(componentName: string): z.ZodSchema {
+  return PropSchemas[componentName] ?? DefaultPropSchema;
+}
+
+/**
+ * Validate props against component schema
+ */
+export function validateAssetProps(
+  componentName: string,
+  props: Record<string, unknown>
+): { valid: boolean; errors?: string[] } {
+  const schema = getPropSchema(componentName);
+  const result = schema.safeParse(props);
+
+  if (result.success) {
+    return { valid: true };
+  }
+
+  return {
+    valid: false,
+    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+  };
+}
 
 const PlacedAssetSchema = z.object({
   id: z.string().uuid(),
@@ -864,9 +988,17 @@ const PlacedAssetSchema = z.object({
   scale: z.number().min(0.1).max(5),
   rotation: z.number().min(-360).max(360),
   zIndex: z.number().int().min(0).max(1000),
-  props: z.record(z.unknown()),
+  props: z.record(z.union([z.string(), z.number(), z.boolean()])),
   animationEnabled: z.boolean(),
-});
+}).refine(
+  (asset) => validateAssetProps(asset.componentName, asset.props).valid,
+  (asset) => ({
+    message: `Invalid props for ${asset.componentName}: ${
+      validateAssetProps(asset.componentName, asset.props).errors?.join(', ')
+    }`,
+    path: ['props'],
+  })
+);
 
 const CanvasSettingsSchema = z.object({
   width: z.number().min(200).max(4000),
@@ -1130,7 +1262,132 @@ PNG export via `dom-to-image-more` is CPU-intensive:
 - Medium scenes (30-50 assets): 3-5 seconds
 - Complex scenes (50+ assets, animations): 5-10 seconds
 
-Show progress indicator with "Exporting..." message. Consider Web Worker for non-blocking export in future version.
+Show progress indicator with "Exporting..." message.
+
+### Web Worker Export (Recommended)
+
+For non-blocking exports, offload `dom-to-image-more` processing to a Web Worker. This prevents UI freezes during complex scene exports.
+
+**Worker Implementation: `packages/engine/src/lib/workers/export.worker.ts`**
+
+```typescript
+import domtoimage from 'dom-to-image-more';
+
+interface ExportMessage {
+  type: 'export';
+  nodeHtml: string;
+  options: {
+    width: number;
+    height: number;
+    scale: number;
+    backgroundColor?: string;
+  };
+}
+
+interface ExportResult {
+  type: 'success' | 'error';
+  dataUrl?: string;
+  error?: string;
+}
+
+self.onmessage = async (event: MessageEvent<ExportMessage>) => {
+  const { nodeHtml, options } = event.data;
+
+  try {
+    // Create an offscreen document fragment
+    const template = document.createElement('template');
+    template.innerHTML = nodeHtml;
+    const node = template.content.firstElementChild as HTMLElement;
+
+    // Generate PNG
+    const dataUrl = await domtoimage.toPng(node, {
+      width: options.width * options.scale,
+      height: options.height * options.scale,
+      style: {
+        transform: `scale(${options.scale})`,
+        transformOrigin: 'top left',
+        backgroundColor: options.backgroundColor ?? 'transparent',
+      },
+    });
+
+    self.postMessage({ type: 'success', dataUrl } satisfies ExportResult);
+  } catch (error) {
+    self.postMessage({
+      type: 'error',
+      error: error instanceof Error ? error.message : 'Export failed',
+    } satisfies ExportResult);
+  }
+};
+```
+
+**Usage in Terrarium:**
+
+```typescript
+// packages/engine/src/lib/utils/export-scene.ts
+
+let exportWorker: Worker | null = null;
+
+function getExportWorker(): Worker {
+  if (!exportWorker) {
+    exportWorker = new Worker(
+      new URL('../workers/export.worker.ts', import.meta.url),
+      { type: 'module' }
+    );
+  }
+  return exportWorker;
+}
+
+export async function exportSceneWithWorker(
+  canvasNode: HTMLElement,
+  options: ExportOptions
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const worker = getExportWorker();
+
+    // Clone node HTML for worker
+    const nodeHtml = canvasNode.outerHTML;
+
+    worker.onmessage = (event: MessageEvent<ExportResult>) => {
+      if (event.data.type === 'success' && event.data.dataUrl) {
+        resolve(event.data.dataUrl);
+      } else {
+        reject(new Error(event.data.error ?? 'Export failed'));
+      }
+    };
+
+    worker.onerror = (error) => {
+      reject(new Error(`Worker error: ${error.message}`));
+    };
+
+    worker.postMessage({
+      type: 'export',
+      nodeHtml,
+      options: {
+        width: options.width,
+        height: options.height,
+        scale: options.scale ?? 2,
+        backgroundColor: options.backgroundColor,
+      },
+    } satisfies ExportMessage);
+  });
+}
+
+// Cleanup on page unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('unload', () => {
+    exportWorker?.terminate();
+    exportWorker = null;
+  });
+}
+```
+
+**Benefits:**
+- Main thread stays responsive during export
+- User can continue interacting with UI
+- Cancel support via `worker.terminate()`
+- Progress reporting possible via additional messages
+
+**Note:** Worker-based export requires serializing the DOM, which adds overhead for very simple scenes. Use direct export for <20 assets, worker export for larger scenes.
 
 ---
 
@@ -1173,8 +1430,10 @@ import { openDB, type IDBPDatabase } from 'idb';
 import type { TerrariumScene } from '../types';
 
 const DB_NAME = 'terrarium';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Bump when schema changes
 const SCENES_STORE = 'scenes';
+const DECORATIONS_STORE = 'decorations';
+const METADATA_STORE = 'metadata';
 
 let db: IDBPDatabase | null = null;
 
@@ -1182,14 +1441,55 @@ async function getDB(): Promise<IDBPDatabase> {
   if (db) return db;
 
   db = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(database) {
-      if (!database.objectStoreNames.contains(SCENES_STORE)) {
-        const store = database.createObjectStore(SCENES_STORE, {
+    upgrade(database, oldVersion, newVersion, transaction) {
+      // Version-aware migrations
+      if (oldVersion < 1) {
+        // Initial schema
+        const scenesStore = database.createObjectStore(SCENES_STORE, {
           keyPath: 'id',
         });
-        store.createIndex('updatedAt', 'updatedAt');
-        store.createIndex('name', 'name');
+        scenesStore.createIndex('updatedAt', 'updatedAt');
+        scenesStore.createIndex('name', 'name');
       }
+
+      if (oldVersion < 2) {
+        // Add decorations store and metadata
+        if (!database.objectStoreNames.contains(DECORATIONS_STORE)) {
+          const decorationsStore = database.createObjectStore(DECORATIONS_STORE, {
+            keyPath: 'id',
+          });
+          decorationsStore.createIndex('zone', 'zone');
+          decorationsStore.createIndex('createdAt', 'createdAt');
+        }
+
+        if (!database.objectStoreNames.contains(METADATA_STORE)) {
+          database.createObjectStore(METADATA_STORE, { keyPath: 'key' });
+        }
+
+        // Migrate existing scenes to add version field
+        const scenesStore = transaction.objectStore(SCENES_STORE);
+        scenesStore.openCursor().then(function migrateScene(cursor) {
+          if (!cursor) return;
+          const scene = cursor.value;
+          if (!scene.version) {
+            scene.version = 1;
+            cursor.update(scene);
+          }
+          cursor.continue().then(migrateScene);
+        });
+      }
+
+      // Future migrations go here:
+      // if (oldVersion < 3) { ... }
+    },
+    blocked() {
+      // Another tab has an older version open
+      console.warn('Database upgrade blocked by another tab');
+    },
+    blocking() {
+      // This tab is blocking an upgrade in another tab
+      db?.close();
+      db = null;
     },
   });
 
@@ -1981,6 +2281,208 @@ export function sanitizeAssetProps(props: Record<string, unknown>): Record<strin
   }
 
   return sanitized;
+}
+```
+
+### Content Security Policy
+
+The `/terrarium` route requires specific CSP headers to enable canvas export while blocking injection attacks.
+
+**SvelteKit Hook: `packages/engine/src/hooks.server.ts`**
+
+```typescript
+import type { Handle } from '@sveltejs/kit';
+
+const TERRARIUM_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",  // Required for Svelte
+  "style-src 'self' 'unsafe-inline'",   // Required for dynamic styles
+  "img-src 'self' data: blob:",          // Allow data URLs for export
+  "font-src 'self'",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",              // Prevent embedding
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join('; ');
+
+const DEFAULT_CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+export const handle: Handle = async ({ event, resolve }) => {
+  const response = await resolve(event);
+
+  // Apply stricter CSP for Terrarium route
+  const csp = event.url.pathname.startsWith('/terrarium')
+    ? TERRARIUM_CSP
+    : DEFAULT_CSP;
+
+  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  return response;
+};
+```
+
+**Key CSP Decisions:**
+- `img-src blob:` - Required for `dom-to-image-more` canvas export
+- `script-src 'unsafe-inline'` - Required for Svelte's hydration (consider nonces for production)
+- `frame-ancestors 'none'` - Prevent clickjacking attacks on the editor
+
+### Thumbnail Validation
+
+Decoration thumbnails must be validated before storage to prevent malicious uploads.
+
+**Validation: `packages/engine/src/lib/utils/thumbnail-validator.ts`**
+
+```typescript
+import { error } from '@sveltejs/kit';
+
+interface ThumbnailValidation {
+  valid: boolean;
+  error?: string;
+}
+
+// Allowed formats (magic bytes)
+const ALLOWED_SIGNATURES = {
+  png: [0x89, 0x50, 0x4e, 0x47],  // PNG signature
+  jpeg: [0xff, 0xd8, 0xff],       // JPEG signature
+  webp: [0x52, 0x49, 0x46, 0x46], // RIFF (WebP container)
+};
+
+const MAX_THUMBNAIL_SIZE = 512 * 1024; // 512KB
+const MAX_DIMENSIONS = { width: 800, height: 600 };
+const MIN_DIMENSIONS = { width: 100, height: 75 };
+
+/**
+ * Validate thumbnail data URL before storage
+ */
+export async function validateThumbnail(
+  dataUrl: string
+): Promise<ThumbnailValidation> {
+  // 1. Check data URL format
+  if (!dataUrl.startsWith('data:image/')) {
+    return { valid: false, error: 'Invalid data URL format' };
+  }
+
+  // 2. Extract MIME type and base64 data
+  const matches = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) {
+    return { valid: false, error: 'Malformed data URL' };
+  }
+
+  const [, mimeType, base64Data] = matches;
+
+  // 3. Check allowed MIME types
+  if (!['png', 'jpeg', 'webp'].includes(mimeType)) {
+    return { valid: false, error: `Unsupported format: ${mimeType}` };
+  }
+
+  // 4. Decode and check size
+  const binaryData = atob(base64Data);
+  if (binaryData.length > MAX_THUMBNAIL_SIZE) {
+    return {
+      valid: false,
+      error: `Thumbnail too large: ${binaryData.length} bytes (max ${MAX_THUMBNAIL_SIZE})`,
+    };
+  }
+
+  // 5. Verify magic bytes match claimed MIME type
+  const bytes = new Uint8Array(binaryData.length);
+  for (let i = 0; i < binaryData.length; i++) {
+    bytes[i] = binaryData.charCodeAt(i);
+  }
+
+  const signature = ALLOWED_SIGNATURES[mimeType as keyof typeof ALLOWED_SIGNATURES];
+  const headerBytes = Array.from(bytes.slice(0, signature.length));
+
+  if (!signature.every((byte, i) => headerBytes[i] === byte)) {
+    return {
+      valid: false,
+      error: 'File signature does not match claimed type',
+    };
+  }
+
+  // 6. Validate dimensions using ImageBitmap (browser) or sharp (server)
+  try {
+    const dimensions = await getImageDimensions(dataUrl);
+
+    if (dimensions.width > MAX_DIMENSIONS.width ||
+        dimensions.height > MAX_DIMENSIONS.height) {
+      return {
+        valid: false,
+        error: `Dimensions too large: ${dimensions.width}x${dimensions.height} (max ${MAX_DIMENSIONS.width}x${MAX_DIMENSIONS.height})`,
+      };
+    }
+
+    if (dimensions.width < MIN_DIMENSIONS.width ||
+        dimensions.height < MIN_DIMENSIONS.height) {
+      return {
+        valid: false,
+        error: `Dimensions too small: ${dimensions.width}x${dimensions.height} (min ${MIN_DIMENSIONS.width}x${MIN_DIMENSIONS.height})`,
+      };
+    }
+  } catch (err) {
+    return { valid: false, error: 'Failed to read image dimensions' };
+  }
+
+  // 7. Strip EXIF data (privacy concern)
+  // Note: PNG doesn't have EXIF, but JPEG/WebP might
+  // Use a library like 'piexifjs' for production
+
+  return { valid: true };
+}
+
+/**
+ * Get image dimensions from data URL
+ */
+async function getImageDimensions(
+  dataUrl: string
+): Promise<{ width: number; height: number }> {
+  // Browser context
+  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const bitmap = await createImageBitmap(blob);
+    const { width, height } = bitmap;
+    bitmap.close();
+    return { width, height };
+  }
+
+  // Server context - use probe-image-size or similar
+  throw new Error('Server-side dimension checking requires additional setup');
+}
+```
+
+**Usage in API:**
+
+```typescript
+// packages/engine/src/routes/api/terrarium/decorations/+server.ts
+import { validateThumbnail } from '$lib/utils/thumbnail-validator';
+
+export async function POST({ request, locals }) {
+  const { thumbnail, ...decorationData } = await request.json();
+
+  // Validate thumbnail before processing
+  const thumbnailResult = await validateThumbnail(thumbnail);
+  if (!thumbnailResult.valid) {
+    throw error(400, {
+      message: 'Invalid thumbnail',
+      reason: thumbnailResult.error,
+    });
+  }
+
+  // Continue with decoration creation...
 }
 ```
 
