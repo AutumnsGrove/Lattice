@@ -22,51 +22,39 @@ Changes apply immediately. Refresh any page to see your new font across your ent
 
 ## Available fonts
 
-Grove includes 20 fonts, organized by purpose:
+Grove includes 10 carefully selected fonts, organized by purpose:
+
+### Default
+
+- **Lexend** — Optimized for reading fluency, based on research into visual reading speed. Grove's default.
 
 ### Accessibility fonts
 
 These fonts are designed for specific readability needs:
 
-- **Lexend** — Optimized for reading fluency, based on research into visual reading speed. Grove's default.
 - **Atkinson Hyperlegible** — Designed by the Braille Institute for low vision readers. Characters are distinct and unambiguous.
 - **OpenDyslexic** — Weighted bottoms help letters stay grounded for readers with dyslexia.
-- **Luciole** — Created for visually impaired readers, with enhanced letter differentiation.
 
 ### Sans-serif fonts
 
 Clean, modern options:
 
-- **Nunito** — Rounded, friendly geometric shapes
-- **Quicksand** — Light and airy with smooth curves
-- **Manrope** — Contemporary with excellent legibility
-- **Instrument Sans** — Precise and modern
-- **Plus Jakarta Sans** — Professional with warmth
-
-### Serif fonts
-
-Classic typography with character:
-
-- **Cormorant** — Elegant display serif for a literary feel
-- **Bodoni Moda** — High-contrast, dramatic strokes
-- **Lora** — Balanced and readable for long-form content
-- **EB Garamond** — Historical elegance, refined for screens
-- **Merriweather** — Designed specifically for screen reading
-- **Fraunces** — Quirky old-style with personality
+- **Quicksand** — Light and airy with smooth curves, geometric and friendly
+- **Plus Jakarta Sans** — Professional with warmth, balanced and versatile
 
 ### Monospace fonts
 
 For code-heavy or technical blogs:
 
-- **IBM Plex Mono** — Clean, highly readable code font
-- **Cozette** — Bitmap-style programming font
+- **IBM Plex Mono** — Clean, highly readable code font with human warmth
+- **Cozette** — Bitmap-style programming font with retro terminal aesthetic
 
 ### Display and decorative
 
 For personality:
 
 - **Alagard** — Medieval pixel font for fantasy vibes
-- **Calistoga** — Warm, retro display face
+- **Calistoga** — Warm, casual brush serif for friendly headlines
 - **Caveat** — Handwritten, casual feel
 
 ## Font recommendations
@@ -75,11 +63,9 @@ For personality:
 
 **For accessibility:** Atkinson Hyperlegible is excellent for readers with low vision. OpenDyslexic helps readers with dyslexia.
 
-**For long-form writing:** Lora or Merriweather are designed for comfortable extended reading.
-
 **For technical blogs:** IBM Plex Mono gives a clean, code-friendly aesthetic.
 
-**For creative/artistic blogs:** Cormorant, Fraunces, or Caveat add personality.
+**For creative/artistic blogs:** Caveat, Calistoga, or Alagard add personality.
 
 ## Uploading custom fonts (Evergreen)
 

@@ -13,7 +13,6 @@ export type FontCategory =
   | "default"
   | "accessibility"
   | "sans-serif"
-  | "serif"
   | "monospace"
   | "display";
 
@@ -98,41 +97,8 @@ export const fonts: readonly FontDefinition[] = [
       "sans-serif",
     ],
   },
-  {
-    id: "luciole",
-    name: "Luciole",
-    file: "Luciole-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Luciole",
-    category: "accessibility",
-    description:
-      "French accessibility font designed for visually impaired readers.",
-    fallback: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      "Roboto",
-      "sans-serif",
-    ],
-  },
 
   // Modern sans-serif fonts
-  {
-    id: "nunito",
-    name: "Nunito",
-    file: "Nunito-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Nunito",
-    category: "sans-serif",
-    description: "Friendly rounded sans-serif. Warm and approachable.",
-    fallback: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      "Roboto",
-      "sans-serif",
-    ],
-  },
   {
     id: "quicksand",
     name: "Quicksand",
@@ -141,38 +107,6 @@ export const fonts: readonly FontDefinition[] = [
     fontFamily: "Quicksand",
     category: "sans-serif",
     description: "Geometric sans with rounded terminals. Light and modern.",
-    fallback: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      "Roboto",
-      "sans-serif",
-    ],
-  },
-  {
-    id: "manrope",
-    name: "Manrope",
-    file: "Manrope-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Manrope",
-    category: "sans-serif",
-    description: "Professional geometric sans. Clean and contemporary.",
-    fallback: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      "Segoe UI",
-      "Roboto",
-      "sans-serif",
-    ],
-  },
-  {
-    id: "instrument-sans",
-    name: "Instrument Sans",
-    file: "InstrumentSans-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Instrument Sans",
-    category: "sans-serif",
-    description: "Low contrast sans with humanist touches. Elegant simplicity.",
     fallback: [
       "-apple-system",
       "BlinkMacSystemFont",
@@ -196,69 +130,6 @@ export const fonts: readonly FontDefinition[] = [
       "Roboto",
       "sans-serif",
     ],
-  },
-
-  // Serif fonts
-  {
-    id: "cormorant",
-    name: "Cormorant",
-    file: "Cormorant-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Cormorant",
-    category: "serif",
-    description:
-      "Elegant display serif inspired by Garamond. Refined and classic.",
-    fallback: ["Georgia", "Times New Roman", "serif"],
-  },
-  {
-    id: "bodoni-moda",
-    name: "Bodoni Moda",
-    file: "BodoniModa-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Bodoni Moda",
-    category: "serif",
-    description: "High contrast modern serif. Bold and sophisticated.",
-    fallback: ["Georgia", "Times New Roman", "serif"],
-  },
-  {
-    id: "lora",
-    name: "Lora",
-    file: "Lora-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Lora",
-    category: "serif",
-    description: "Well-balanced contemporary serif. Excellent for body text.",
-    fallback: ["Georgia", "Times New Roman", "serif"],
-  },
-  {
-    id: "eb-garamond",
-    name: "EB Garamond",
-    file: "EBGaramond-Regular.ttf",
-    format: "truetype",
-    fontFamily: "EB Garamond",
-    category: "serif",
-    description: "Revival of classic Garamond. Timeless book typography.",
-    fallback: ["Georgia", "Times New Roman", "serif"],
-  },
-  {
-    id: "merriweather",
-    name: "Merriweather",
-    file: "Merriweather-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Merriweather",
-    category: "serif",
-    description: "Designed for screen reading. Excellent legibility.",
-    fallback: ["Georgia", "Times New Roman", "serif"],
-  },
-  {
-    id: "fraunces",
-    name: "Fraunces",
-    file: "Fraunces-Regular.ttf",
-    format: "truetype",
-    fontFamily: "Fraunces",
-    category: "serif",
-    description: 'Soft serif with "wonky" optical axes. Warm personality.',
-    fallback: ["Georgia", "Times New Roman", "serif"],
   },
 
   // Monospace fonts
@@ -396,7 +267,6 @@ export const fontCategoryLabels: Record<FontCategory, string> = {
   default: "Default",
   accessibility: "Accessibility",
   "sans-serif": "Sans-Serif",
-  serif: "Serif",
   monospace: "Monospace",
   display: "Display & Special",
 };

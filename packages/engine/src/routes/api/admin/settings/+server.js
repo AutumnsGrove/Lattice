@@ -51,20 +51,9 @@ export async function PUT({ request, platform, locals }) {
         // Accessibility
         "atkinson",
         "opendyslexic",
-        "luciole",
-        "nunito",
-        // Modern Sans
+        // Sans-serif
         "quicksand",
-        "manrope",
-        "instrument-sans",
         "plus-jakarta-sans",
-        // Serifs
-        "cormorant",
-        "bodoni-moda",
-        "lora",
-        "eb-garamond",
-        "merriweather",
-        "fraunces",
         // Monospace
         "ibm-plex-mono",
         "cozette",

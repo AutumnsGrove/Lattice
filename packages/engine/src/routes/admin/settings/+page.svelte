@@ -88,18 +88,8 @@
         lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        luciole: "'Luciole', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        nunito: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        manrope: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        'instrument-sans': "'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
-        'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif",
-        lora: "'Lora', Georgia, 'Times New Roman', serif",
-        'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
-        merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
-        fraunces: "'Fraunces', Georgia, 'Times New Roman', serif",
         'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
         cozette: "'Cozette', 'Courier New', Consolas, monospace",
         alagard: "'Alagard', fantasy, cursive",
@@ -186,29 +176,16 @@
       <Spinner />
     {:else}
       <div class="font-selector">
-        <label class="font-option" class:selected={currentFont === 'alagard'}>
+        <label class="font-option" class:selected={currentFont === 'lexend'}>
           <input
             type="radio"
             name="font"
-            value="alagard"
+            value="lexend"
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Alagard', sans-serif;">Alagard</span>
-            <span class="font-description">Medieval pixel font for fantasy vibes</span>
-          </div>
-        </label>
-
-        <label class="font-option" class:selected={currentFont === 'cozette'}>
-          <input
-            type="radio"
-            name="font"
-            value="cozette"
-            bind:group={currentFont}
-          />
-          <div class="font-info">
-            <span class="font-name" style="font-family: 'Cozette', sans-serif;">Cozette</span>
-            <span class="font-description">Bitmap programming font</span>
+            <span class="font-name" style="font-family: 'Lexend', sans-serif;">Lexend</span>
+            <span class="font-description">Modern accessibility font for reading fluency (default)</span>
           </div>
         </label>
 
@@ -221,7 +198,7 @@
           />
           <div class="font-info">
             <span class="font-name" style="font-family: 'Atkinson Hyperlegible', sans-serif;">Atkinson Hyperlegible</span>
-            <span class="font-description">Accessibility font for low vision</span>
+            <span class="font-description">Accessibility font for low vision readers</span>
           </div>
         </label>
 
@@ -238,32 +215,6 @@
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'lexend'}>
-          <input
-            type="radio"
-            name="font"
-            value="lexend"
-            bind:group={currentFont}
-          />
-          <div class="font-info">
-            <span class="font-name" style="font-family: 'Lexend', sans-serif;">Lexend</span>
-            <span class="font-description">Modern accessibility font for reading fluency (default)</span>
-          </div>
-        </label>
-
-        <label class="font-option" class:selected={currentFont === 'cormorant'}>
-          <input
-            type="radio"
-            name="font"
-            value="cormorant"
-            bind:group={currentFont}
-          />
-          <div class="font-info">
-            <span class="font-name" style="font-family: 'Cormorant', serif;">Cormorant</span>
-            <span class="font-description">Elegant display serif for fantasy aesthetic</span>
-          </div>
-        </label>
-
         <label class="font-option" class:selected={currentFont === 'quicksand'}>
           <input
             type="radio"
@@ -274,6 +225,84 @@
           <div class="font-info">
             <span class="font-name" style="font-family: 'Quicksand', sans-serif;">Quicksand</span>
             <span class="font-description">Rounded, friendly geometric sans-serif</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'plus-jakarta-sans'}>
+          <input
+            type="radio"
+            name="font"
+            value="plus-jakarta-sans"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'Plus Jakarta Sans', sans-serif;">Plus Jakarta Sans</span>
+            <span class="font-description">Contemporary geometric sans, balanced and versatile</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'ibm-plex-mono'}>
+          <input
+            type="radio"
+            name="font"
+            value="ibm-plex-mono"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'IBM Plex Mono', monospace;">IBM Plex Mono</span>
+            <span class="font-description">Clean, highly readable code font</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'cozette'}>
+          <input
+            type="radio"
+            name="font"
+            value="cozette"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'Cozette', monospace;">Cozette</span>
+            <span class="font-description">Bitmap-style programming font, retro aesthetic</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'alagard'}>
+          <input
+            type="radio"
+            name="font"
+            value="alagard"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'Alagard', fantasy;">Alagard</span>
+            <span class="font-description">Medieval pixel font for fantasy vibes</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'calistoga'}>
+          <input
+            type="radio"
+            name="font"
+            value="calistoga"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'Calistoga', serif;">Calistoga</span>
+            <span class="font-description">Casual brush serif, warm and friendly</span>
+          </div>
+        </label>
+
+        <label class="font-option" class:selected={currentFont === 'caveat'}>
+          <input
+            type="radio"
+            name="font"
+            value="caveat"
+            bind:group={currentFont}
+          />
+          <div class="font-info">
+            <span class="font-name" style="font-family: 'Caveat', cursive;">Caveat</span>
+            <span class="font-description">Handwritten script, personal and informal</span>
           </div>
         </label>
       </div>

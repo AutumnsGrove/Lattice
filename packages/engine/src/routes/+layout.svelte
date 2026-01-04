@@ -37,20 +37,9 @@
 		// Accessibility
 		atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		luciole: "'Luciole', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		nunito: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Modern Sans
+		// Sans-serif
 		quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		manrope: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		'instrument-sans': "'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
 		'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-		// Serifs
-		cormorant: "'Cormorant', Georgia, 'Times New Roman', serif",
-		'bodoni-moda': "'Bodoni Moda', Georgia, 'Times New Roman', serif",
-		lora: "'Lora', Georgia, 'Times New Roman', serif",
-		'eb-garamond': "'EB Garamond', Georgia, 'Times New Roman', serif",
-		merriweather: "'Merriweather', Georgia, 'Times New Roman', serif",
-		fraunces: "'Fraunces', Georgia, 'Times New Roman', serif",
 		// Monospace
 		'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
 		cozette: "'Cozette', 'Courier New', Consolas, monospace",
@@ -460,15 +449,8 @@
 	}
 	/* @font-face declarations for custom fonts - served from CDN */
 	@font-face {
-		font-family: 'Alagard';
-		src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Cozette';
-		src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
+		font-family: 'Lexend';
+		src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
@@ -488,22 +470,15 @@
 		font-display: swap;
 	}
 	@font-face {
-		font-family: 'Lexend';
-		src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Cormorant';
-		src: url('https://cdn.grove.place/fonts/Cormorant-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
 		font-family: 'Quicksand';
 		src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Plus Jakarta Sans';
+		src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
@@ -516,8 +491,15 @@
 		font-display: swap;
 	}
 	@font-face {
-		font-family: 'Bodoni Moda';
-		src: url('https://cdn.grove.place/fonts/BodoniModa-Regular.ttf') format('truetype');
+		font-family: 'Cozette';
+		src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+	@font-face {
+		font-family: 'Alagard';
+		src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
@@ -532,69 +514,6 @@
 	@font-face {
 		font-family: 'Caveat';
 		src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Fraunces';
-		src: url('https://cdn.grove.place/fonts/Fraunces-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Nunito';
-		src: url('https://cdn.grove.place/fonts/Nunito-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Luciole';
-		src: url('https://cdn.grove.place/fonts/Luciole-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Merriweather';
-		src: url('https://cdn.grove.place/fonts/Merriweather-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'EB Garamond';
-		src: url('https://cdn.grove.place/fonts/EBGaramond-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Lora';
-		src: url('https://cdn.grove.place/fonts/Lora-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Plus Jakarta Sans';
-		src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Manrope';
-		src: url('https://cdn.grove.place/fonts/Manrope-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Instrument Sans';
-		src: url('https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;

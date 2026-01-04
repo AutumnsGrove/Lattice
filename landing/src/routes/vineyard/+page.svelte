@@ -45,9 +45,8 @@
 	// Import typography components
 	import {
 		FontProvider,
-		Lexend, Atkinson, OpenDyslexic, Luciole,
-		Nunito, Quicksand, Manrope, InstrumentSans, PlusJakartaSans,
-		Cormorant, BodoniModa, Lora, EBGaramond, Merriweather, Fraunces,
+		Lexend, Atkinson, OpenDyslexic,
+		Quicksand, PlusJakartaSans,
 		IBMPlexMono, Cozette,
 		Alagard, Calistoga, Caveat,
 		fonts,
@@ -322,7 +321,7 @@
 				</div>
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<Type class="w-4 h-4 text-grove-600" />
-					<span>20 Font Families</span>
+					<span>10 Font Families</span>
 				</div>
 				<div class="flex items-center gap-2 text-foreground-muted">
 					<Palette class="w-4 h-4 text-grove-600" />
@@ -761,7 +760,7 @@
 					</div>
 					<div class="text-left">
 						<h2 class="text-xl font-serif text-foreground">Typography</h2>
-						<p class="text-sm text-foreground-muted">20 fonts for every mood - from cozy headers to crisp code</p>
+						<p class="text-sm text-foreground-muted">10 curated fonts for every mood - from cozy headers to crisp code</p>
 					</div>
 				</div>
 				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'typography' ? 'rotate-180' : ''}" aria-hidden="true" />
@@ -829,38 +828,6 @@
 						</div>
 					</div>
 
-					<!-- Serif Fonts -->
-					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
-						<h3 class="text-lg font-semibold text-foreground mb-4">Serif Fonts</h3>
-						<p class="text-sm text-foreground-muted mb-4">Classic elegance for body text and refined headers</p>
-						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Cormorant as="h4" class="text-xl text-foreground mb-1">Cormorant</Cormorant>
-								<Cormorant as="p" class="text-foreground-muted text-sm">Elegant display serif inspired by Garamond.</Cormorant>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<BodoniModa as="h4" class="text-xl text-foreground mb-1">Bodoni Moda</BodoniModa>
-								<BodoniModa as="p" class="text-foreground-muted text-sm">High contrast modern serif. Bold and sophisticated.</BodoniModa>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Lora as="h4" class="text-xl text-foreground mb-1">Lora</Lora>
-								<Lora as="p" class="text-foreground-muted text-sm">Well-balanced contemporary serif for body text.</Lora>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<EBGaramond as="h4" class="text-xl text-foreground mb-1">EB Garamond</EBGaramond>
-								<EBGaramond as="p" class="text-foreground-muted text-sm">Revival of classic Garamond. Timeless.</EBGaramond>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Merriweather as="h4" class="text-xl text-foreground mb-1">Merriweather</Merriweather>
-								<Merriweather as="p" class="text-foreground-muted text-sm">Designed for screen reading. Excellent legibility.</Merriweather>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Fraunces as="h4" class="text-xl text-foreground mb-1">Fraunces</Fraunces>
-								<Fraunces as="p" class="text-foreground-muted text-sm">Soft serif with "wonky" optical axes. Warm personality.</Fraunces>
-							</div>
-						</div>
-					</div>
-
 					<!-- Sans-Serif Fonts -->
 					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Sans-Serif Fonts</h3>
@@ -871,20 +838,8 @@
 								<Lexend as="p" class="text-foreground-muted text-sm">Modern, highly readable. Grove's default font.</Lexend>
 							</div>
 							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Nunito as="h4" class="text-xl text-foreground mb-1">Nunito</Nunito>
-								<Nunito as="p" class="text-foreground-muted text-sm">Friendly rounded sans-serif. Warm and approachable.</Nunito>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
 								<Quicksand as="h4" class="text-xl text-foreground mb-1">Quicksand</Quicksand>
 								<Quicksand as="p" class="text-foreground-muted text-sm">Geometric sans with rounded terminals. Light and modern.</Quicksand>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<Manrope as="h4" class="text-xl text-foreground mb-1">Manrope</Manrope>
-								<Manrope as="p" class="text-foreground-muted text-sm">Professional geometric sans. Clean and contemporary.</Manrope>
-							</div>
-							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
-								<InstrumentSans as="h4" class="text-xl text-foreground mb-1">Instrument Sans</InstrumentSans>
-								<InstrumentSans as="p" class="text-foreground-muted text-sm">Low contrast sans with humanist touches.</InstrumentSans>
 							</div>
 							<div class="p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg border border-divider">
 								<PlusJakartaSans as="h4" class="text-xl text-foreground mb-1">Plus Jakarta Sans</PlusJakartaSans>
@@ -922,7 +877,7 @@ $ npm run dev
 					<div class="p-4 sm:p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
 						<h3 class="text-lg font-semibold text-foreground mb-4">Accessibility Fonts</h3>
 						<p class="text-sm text-foreground-muted mb-4">Designed for maximum readability and inclusion</p>
-						<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+						<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
 							<div class="p-4 bg-grove-50 dark:bg-grove-900/40 rounded-lg border border-grove-200 dark:border-grove-700">
 								<Atkinson as="h4" class="text-lg text-grove-900 dark:text-grove-100 mb-2">Atkinson Hyperlegible</Atkinson>
 								<Atkinson as="p" class="text-grove-700 dark:text-grove-300 text-sm">
@@ -934,12 +889,6 @@ $ npm run dev
 								<OpenDyslexic as="p" class="text-blue-700 dark:text-blue-300 text-sm">
 									Weighted bottoms reduce letter confusion for dyslexic readers.
 								</OpenDyslexic>
-							</div>
-							<div class="p-4 bg-amber-50 dark:bg-amber-900/40 rounded-lg border border-amber-200 dark:border-amber-700">
-								<Luciole as="h4" class="text-lg text-amber-900 dark:text-amber-100 mb-2">Luciole</Luciole>
-								<Luciole as="p" class="text-amber-700 dark:text-amber-300 text-sm">
-									French accessibility font for visually impaired readers.
-								</Luciole>
 							</div>
 						</div>
 					</div>

@@ -19,22 +19,10 @@ export { default as Lexend } from './Lexend.svelte';
 // Accessibility fonts
 export { default as Atkinson } from './Atkinson.svelte';
 export { default as OpenDyslexic } from './OpenDyslexic.svelte';
-export { default as Luciole } from './Luciole.svelte';
 
-// Modern sans-serif fonts
-export { default as Nunito } from './Nunito.svelte';
+// Sans-serif fonts
 export { default as Quicksand } from './Quicksand.svelte';
-export { default as Manrope } from './Manrope.svelte';
-export { default as InstrumentSans } from './InstrumentSans.svelte';
 export { default as PlusJakartaSans } from './PlusJakartaSans.svelte';
-
-// Serif fonts
-export { default as Cormorant } from './Cormorant.svelte';
-export { default as BodoniModa } from './BodoniModa.svelte';
-export { default as Lora } from './Lora.svelte';
-export { default as EBGaramond } from './EBGaramond.svelte';
-export { default as Merriweather } from './Merriweather.svelte';
-export { default as Fraunces } from './Fraunces.svelte';
 
 // Monospace fonts
 export { default as IBMPlexMono } from './IBMPlexMono.svelte';

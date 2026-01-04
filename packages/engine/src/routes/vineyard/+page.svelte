@@ -28,9 +28,8 @@
 	import {
 		// Typography components
 		FontProvider,
-		Lexend, Atkinson, OpenDyslexic, Luciole,
-		Nunito, Quicksand, Manrope, InstrumentSans, PlusJakartaSans,
-		Cormorant, BodoniModa, Lora, EBGaramond, Merriweather, Fraunces,
+		Lexend, Atkinson, OpenDyslexic,
+		Quicksand, PlusJakartaSans,
 		IBMPlexMono, Cozette,
 		Alagard, Calistoga, Caveat,
 		fonts, fontCategoryLabels,
