@@ -34,6 +34,7 @@
 
 	// Tool definitions
 	type ToolStatus = 'ready' | 'preview' | 'development' | 'coming-soon';
+	type ToolColor = 'grove' | 'green' | 'amber' | 'violet' | 'pink' | 'emerald' | 'teal' | 'sky';
 
 	interface Tool {
 		name: string;
@@ -41,7 +42,7 @@
 		description: string;
 		status: ToolStatus;
 		icon: typeof Mail;
-		color: string;
+		color: ToolColor;
 		domain?: string;
 		integrated?: boolean;
 		philosophy?: string;
@@ -174,24 +175,25 @@
 		}
 	}
 
-	// Color mapping for tool accents
-	function getToolAccent(color: string) {
-		const accents: Record<string, string> = {
-			grove: 'bg-grove-500',
-			green: 'bg-green-500',
-			amber: 'bg-amber-500',
-			violet: 'bg-violet-500',
-			pink: 'bg-pink-500',
-			emerald: 'bg-emerald-500',
-			teal: 'bg-teal-500',
-			sky: 'bg-sky-500'
-		};
-		return accents[color] || 'bg-grove-500';
+	// Color mapping for tool accents (exhaustive - ToolColor enforces valid keys)
+	const toolAccents: Record<ToolColor, string> = {
+		grove: 'bg-grove-500',
+		green: 'bg-green-500',
+		amber: 'bg-amber-500',
+		violet: 'bg-violet-500',
+		pink: 'bg-pink-500',
+		emerald: 'bg-emerald-500',
+		teal: 'bg-teal-500',
+		sky: 'bg-sky-500'
+	};
+
+	function getToolAccent(color: ToolColor): string {
+		return toolAccents[color];
 	}
 
-	// Separate ready tools from upcoming
-	const readyTools = tools.filter(t => t.status === 'ready');
-	const upcomingTools = tools.filter(t => t.status !== 'ready');
+	// Separate ready tools from upcoming (using $derived to avoid recalculation)
+	const readyTools = $derived(tools.filter(t => t.status === 'ready'));
+	const upcomingTools = $derived(tools.filter(t => t.status !== 'ready'));
 </script>
 
 <SEO
