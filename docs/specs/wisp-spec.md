@@ -1,6 +1,20 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - writing-assistant
+  - ai
+  - privacy
+  - cloudflare-workers
+type: tech-spec
+---
+
 # Wisp: Writing Assistant
 
 > *A helper, not a writer, and sometimes, a good listener.*
+
+An ethical AI writing tool that helps users polish their voice without replacing it. Wisp analyzes grammar, tone, and readability but never generates or expands content—your words, refined, not replaced.
 
 **Public Name:** Wisp
 **Internal Name:** GroveWisp

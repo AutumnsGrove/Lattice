@@ -1,12 +1,17 @@
 ---
-aliases:
+aliases: []
 date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Friday, November 21st 2025, 3:02:46 pm
+date modified: Saturday, January 4th 2026
 tags:
+  - marketing
+  - billing
+  - client-management
 type: tech-spec
 ---
 
-# Grove Website - Technical Specification
+# Grove Website — Technical Specification
+
+The main marketing site and client management platform for Grove. Handles marketing, client acquisition, onboarding, billing via Stripe, and provides a dashboard for clients to manage their blogs across the platform.
 
 **Project:** Grove Website - Main Site & Client Management  
 **Repository:** `grove-website`  

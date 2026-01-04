@@ -1,14 +1,19 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 1st 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - onboarding
+  - signup
+  - user-experience
 type: tech-spec
 ---
 
 # Plant — Tenant Onboarding
 
 > *Where new growth begins.*
+
+Grove's complete onboarding system from initial signup through payment, interactive tour, and handoff to their own blog. A frictionless, welcoming experience designed to get new users publishing within minutes.
 
 **Public Name:** Plant
 **Internal Name:** Seedbed

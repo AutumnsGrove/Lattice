@@ -2,13 +2,18 @@
 aliases: []
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026
-tags: []
+tags:
+  - domain-preservation
+  - longevity
+  - membership
 type: tech-spec
 ---
 
 # Centennial — Domain Preservation
 
 > *Some trees outlive the people who planted them.*
+
+Grove's 100-year domain preservation promise. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for a century—even after you're gone. Digital immortality for those who put down real roots.
 
 **Public Name:** Centennial
 **Internal Name:** GroveCentennial

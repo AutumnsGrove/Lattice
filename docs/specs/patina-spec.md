@@ -2,13 +2,18 @@
 aliases: []
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026
-tags: []
+tags:
+  - backups
+  - disaster-recovery
+  - cloudflare-r2
 type: tech-spec
 ---
 
 # Patina — Automated Backups
 
 > *Age as armor. Time as protection.*
+
+Grove's automated backup system running nightly SQL dumps of all D1 databases to R2 cold storage. Weekly meta-backups compress daily layers, maintaining 12 weeks of history ready if you ever need to reach back in time.
 
 **Public Name:** Patina
 **Internal Name:** GrovePatina

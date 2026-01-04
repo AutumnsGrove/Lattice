@@ -1,11 +1,17 @@
 ---
+aliases: []
 date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
+date modified: Saturday, January 4th 2026
 tags:
+  - versioning
+  - npm
+  - semver
 type: tech-spec
 ---
 
-# GroveEngine - Versioning Specification
+# GroveEngine — Versioning Specification
+
+Defines the semantic versioning strategy, publishing workflow, and update propagation for GroveEngine. Documents how versions are managed, releases published to npm, and how updates flow to customer repositories via Renovate.
 
 **Package:** `@groveengine/core`
 **Registry:** npmjs.com (public)

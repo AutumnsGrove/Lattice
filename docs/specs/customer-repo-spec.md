@@ -1,11 +1,17 @@
 ---
+aliases: []
 date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
+date modified: Saturday, January 4th 2026
 tags:
+  - templates
+  - deployment
+  - cloudflare-workers
 type: tech-spec
 ---
 
 # Customer Repository Specification
+
+Documents the template structure for individual customer blog repositories. Each customer installs @groveengine/core with dedicated Cloudflare resources (D1, KV, R2), providing isolation, customization, and independent deployment.
 
 **Purpose:** Documents the template structure for customer blog repositories
 **Deployment:** Cloudflare Workers/Pages with D1, KV, and R2

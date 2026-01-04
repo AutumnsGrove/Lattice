@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Thursday, January 2nd 2026
+tags:
+  - documentation
+  - help-center
+  - user-experience
+type: tech-spec
+---
+
 # Waystone — Help Center
 
 > *Trail markers that guide you through the forest.*
+
+Grove's built-in help center providing searchable documentation, contextual help buttons throughout the interface, and self-service support. Integrated directly into the platform so help is always where you need it.
 
 **Public Name:** Waystone
 **Internal Name:** GroveWaystone

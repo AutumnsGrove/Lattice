@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - documentation
+  - showcase
+  - ui-patterns
+type: tech-spec
+---
+
 # Vineyard — Tool Showcase Pattern
 
 > *Every vine starts somewhere.*
+
+Grove's consistent documentation and demo pattern implemented across all tools. Every Grove product implements a `/vineyard` route on its subdomain, creating a discoverable way to explore features, demos, and roadmaps.
 
 **Public Name:** Vineyard
 **Internal Name:** GroveShowcase

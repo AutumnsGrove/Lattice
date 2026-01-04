@@ -1,8 +1,17 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - storage
+  - cloudflare-r2
+  - file-management
+type: tech-spec
+---
+
 # Amber: Grove Storage Management Specification
 
-*Internal planning document*
-
-*Created: December 2025*
+Grove's unified storage management system for all uploaded files across the ecosystem. Every image, attachment, and asset is preserved in Amber—organized, accessible, and manageable from one place.
 
 ---
 

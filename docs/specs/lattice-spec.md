@@ -1,14 +1,20 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 1st 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - core
+  - sveltekit
+  - npm
+  - cloudflare-workers
 type: tech-spec
 ---
 
 # Lattice — Core Platform
 
 > *The framework that supports growth.*
+
+The npm package powering every Grove site. UI components, authentication utilities, markdown rendering, and database patterns—all the infrastructure that makes building on Grove effortless. The invisible framework everything else grows upon.
 
 **Public Name:** Lattice
 **Internal Name:** GroveEngine

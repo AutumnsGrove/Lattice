@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - customer-site
+  - publishing
+  - sveltekit
+type: tech-spec
+---
+
 # Fiction House Publishing — Project Specification
 
 > A warm, welcoming home for Fiction House Publishing. Built on GroveEngine, leveraging the tenant architecture with custom book catalog features.
+
+A single-tenant deployment for Fiction House Publishing featuring a book catalog, blog, and contact form. Uses GroveEngine as a dependency with custom book management extensions for this boutique literary publisher.
 
 **Repository:** `AutumnsGrove/FictionHousePublishing` (private)
 **Business Name:** Fiction House Publishing

@@ -1,6 +1,20 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - versioning
+  - npm
+  - releases
+  - semver
+type: tech-spec
+---
+
 # Seasons — Versioning System
 
 > *Each ring records a season—growth in plenty, resilience through hardship.*
+
+Grove's semantic versioning system defining how Lattice evolves and updates propagate to customer repositories. Covers major/minor/patch conventions, publishing workflows, breaking change protocols, and the Renovate-powered auto-update pipeline.
 
 **Public Name:** Seasons
 **Internal Name:** GroveSeasons

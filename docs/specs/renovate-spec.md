@@ -1,11 +1,17 @@
 ---
+aliases: []
 date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
+date modified: Saturday, January 4th 2026
 tags:
+  - automation
+  - dependencies
+  - renovate
 type: tech-spec
 ---
 
 # Renovate Configuration Specification
+
+Automated dependency update configuration for GroveEngine and customer repositories. Ensures security patches are applied quickly, dependencies stay fresh, and updates are validated through CI before merging.
 
 **Purpose:** Automated dependency updates for GroveEngine and customer repositories
 **Tool:** [Renovate](https://docs.renovatebot.com/)

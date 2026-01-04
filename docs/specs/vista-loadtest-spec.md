@@ -1,8 +1,20 @@
-# Vista LoadTest Package Spec
+---
+aliases: []
+date created: Saturday, January 4th 2026
+date modified: Saturday, January 4th 2026
+tags:
+  - load-testing
+  - monitoring
+  - performance
+  - vista
+type: tech-spec
+---
 
-# Vista LoadTest: Sentinel Integration
+# Vista LoadTest — Sentinel Integration
 
 > *Adding eyes to see what the forest can withstand.*
+
+Load testing capabilities for Vista implementing the Sentinel pattern within the Vista monorepo. Provides scenario-based testing with virtual user simulation, real-time metrics collection, and bottleneck detection for Grove infrastructure validation.
 
 **Package:** `packages/loadtest`  
 **Parent Project:** Vista (GroveMonitor)  

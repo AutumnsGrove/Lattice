@@ -1,6 +1,20 @@
-# Shade: AI Content Protection
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - ai-protection
+  - privacy
+  - security
+  - cloudflare-workers
+type: tech-spec
+---
+
+# Shade — AI Content Protection
 
 > *In a forest full of harvesters, this grove stays shaded.*
+
+Grove's layered defense system against AI crawlers, scrapers, and automated data harvesting. Implements eight complementary protection layers from Cloudflare bot blocking to Turnstile verification, establishing that users own their words.
 
 **Public Name:** Shade
 **Internal Name:** GroveShade

@@ -1,12 +1,17 @@
 ---
-aliases:
+aliases: []
 date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Tuesday, November 26th 2025
+date modified: Saturday, January 4th 2026
 tags:
+  - core
+  - sveltekit
+  - npm
 type: tech-spec
 ---
 
-# GroveEngine - Technical Specification
+# GroveEngine — Technical Specification
+
+The core technical specification for GroveEngine, Grove's Cloudflare-native blog engine published as an npm package. Documents the architecture, deployment model, and single-tenant design where each customer gets dedicated D1/KV/R2 resources.
 
 **Package:** `@autumnsgrove/groveengine`
 **Repository:** `GroveEngine`

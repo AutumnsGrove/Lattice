@@ -1,6 +1,20 @@
+---
+aliases: []
+date created: Wednesday, December 31st 2025
+date modified: Saturday, January 4th 2026
+tags:
+  - monitoring
+  - infrastructure
+  - cloudflare-workers
+  - observability
+type: tech-spec
+---
+
 # Vista — Infrastructure Monitoring
 
 > *A clearing in the forest where the whole grove stretches out before you.*
+
+Grove's infrastructure monitoring dashboard providing real-time metrics, historical data, alerting, and cost tracking. A single pane of glass for all platform services that watches so you don't have to.
 
 **Public Name:** Vista
 **Internal Name:** GroveMonitor

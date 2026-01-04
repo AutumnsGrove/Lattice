@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Thursday, January 2nd 2026
+tags:
+  - comments
+  - social
+  - user-interaction
+type: tech-spec
+---
+
 # Reeds — Comments System
 
 > *Whisper together at the water's edge.*
+
+Grove's comment system supporting both private replies (author-only) and public conversations (author-moderated). A dual system that encourages thoughtful engagement while giving blog authors full control over their public-facing content.
 
 **Public Name:** Reeds
 **Internal Name:** GroveReeds

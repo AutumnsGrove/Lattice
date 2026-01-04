@@ -1,16 +1,19 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 1st 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - email
+  - mail-client
+  - privacy
 type: tech-spec
 ---
 
-# Ivy: Grove Mail Client Specification
+# Ivy — Grove Mail Client
 
-*Internal planning document*
+> *The vine that connects people through Grove's infrastructure.*
 
-*Created: December 2025*
+Grove's first-party mail client for @grove.place email addresses. A focused, privacy-first web interface integrated into the Grove ecosystem for professional blog contact, subscriber communication, and admin messaging.
 
 ---
 

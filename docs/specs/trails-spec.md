@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - roadmaps
+  - content-planning
+  - user-experience
+type: tech-spec
+---
+
 # Trails — Personal Roadmaps
 
 > *The path becomes clear by walking it.*
+
+Grove's personal roadmap system for building in public. Lets users create and share project timelines with waypoints, phases, and beautiful nature-themed presentations that show where they've been and where they're headed.
 
 **Public Name:** Trails
 **Internal Name:** GroveTrails

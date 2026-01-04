@@ -1,6 +1,20 @@
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - content-moderation
+  - privacy
+  - cloudflare-workers
+  - ai
+type: tech-spec
+---
+
 # Thorn — Content Moderation
 
 > *Every rose has thorns for protection.*
+
+Grove's automated content moderation system enforces acceptable use policies while maintaining strict privacy protections. Designed with zero human surveillance, immediate content deletion after review, and context-aware decisions rather than keyword matching.
 
 **Public Name:** Thorn
 **Internal Name:** GroveThorn

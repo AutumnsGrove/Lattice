@@ -2,11 +2,18 @@
 aliases: []
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026
-tags: []
+tags:
+  - themes
+  - customization
+  - svelte
 type: tech-spec
 ---
 
-# Foliage Project Specification
+# Foliage — Theme System
+
+> *Every leaf is different, but all belong to the same tree.*
+
+Grove's theme system enabling visual customization from accent colors to full theme customizers. Extracted from GroveEngine to be independently testable and reusable, with progressive enhancement unlocking more features at higher tiers.
 
 ## Overview Section
 

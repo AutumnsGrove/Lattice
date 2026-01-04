@@ -1,6 +1,19 @@
+---
+aliases: []
+date created: Tuesday, December 24th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - status-page
+  - infrastructure
+  - user-communication
+type: tech-spec
+---
+
 # Clearing — Status Page
 
 > *A clearing in the forest where you can see what's happening.*
+
+Grove's public status page providing transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without contacting support.
 
 **Public Name:** Clearing
 **Internal Name:** GroveClear

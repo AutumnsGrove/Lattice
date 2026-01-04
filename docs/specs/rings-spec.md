@@ -1,6 +1,20 @@
-# Rings: Private Analytics
+---
+aliases: []
+date created: Monday, December 29th 2025
+date modified: Friday, January 3rd 2026
+tags:
+  - analytics
+  - privacy
+  - writer-wellness
+  - cloudflare-workers
+type: tech-spec
+---
+
+# Rings — Private Analytics
 
 > *Count the rings and you learn the story.*
+
+Grove's private analytics system designed for writers, not marketers. Provides meaningful insights without the anxiety of real-time dashboards, featuring 24-hour delayed stats, resonance indicators, and wellness-focused features like Digest Mode and Focus Periods.
 
 **Public Name:** Rings
 **Internal Name:** GroveRings

@@ -1,14 +1,19 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 1st 2026
-tags: []
+date modified: Saturday, January 4th 2026
+tags:
+  - social
+  - community
+  - cloudflare-workers
 type: tech-spec
 ---
 
 # Meadow — Social Connection
 
 > *Where the forest opens up and you can see the people around you.*
+
+Grove's social layer providing a chronological feed across the network. No public metrics, no viral mechanics—just genuine connection. Reactions only visible to authors, enabling encouragement without performance anxiety.
 
 **Public Name:** Meadow
 **Internal Name:** GroveMeadow
