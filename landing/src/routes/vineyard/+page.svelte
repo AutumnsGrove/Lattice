@@ -739,7 +739,7 @@
 				<Glass variant="card" intensity="light" class="p-4 rounded-xl">
 					<h3 class="text-sm font-sans text-foreground-muted uppercase tracking-wide mb-3">Spring Growth</h3>
 					<div class="flex flex-wrap gap-2">
-						{#each Object.entries(spring).slice(0, 9) as [name, color]}
+						{#each Object.entries(spring) as [name, color]}
 							<div class="flex flex-col items-center gap-1">
 								<div
 									class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
