@@ -263,10 +263,14 @@
 
 	<!-- Lightbox modal -->
 	{#if lightboxOpen}
-		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="lightbox-backdrop"
 			onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}
+			onkeydown={(/** @type {KeyboardEvent} */ e) => {
+				if (e.key === 'Escape') closeLightbox();
+				if (e.key === 'Enter' || e.key === ' ') closeLightbox();
+			}}
 			role="dialog"
 			aria-modal="true"
 			aria-label="Image viewer"
@@ -279,8 +283,15 @@
 				</svg>
 			</button>
 
-			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-			<div class="lightbox-content" onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div
+				class="lightbox-content"
+				onclick={(/** @type {MouseEvent} */ e) => e.target === e.currentTarget && closeLightbox()}
+				onkeydown={(/** @type {KeyboardEvent} */ e) => {
+					if (e.key === 'Escape') closeLightbox();
+					if (e.key === 'Enter' || e.key === ' ') closeLightbox();
+				}}
+			>
 				<ZoomableImage
 					src={currentImage.url}
 					alt={currentImage.alt || `Image ${currentIndex + 1}`}

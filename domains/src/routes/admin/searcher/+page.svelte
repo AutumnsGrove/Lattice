@@ -1009,8 +1009,9 @@
 							<div class="bg-grove-50 border border-grove-200 rounded-lg p-4 space-y-3">
 								<!-- Business Name -->
 								<div>
-									<label class="block text-xs font-sans text-bark/60 mb-1">Business Name</label>
+									<label for="business_name_parsed" class="block text-xs font-sans text-bark/60 mb-1">Business Name</label>
 									<input
+										id="business_name_parsed"
 										type="text"
 										bind:value={parsedVibe.business_name}
 										class="input-field text-sm"
@@ -1020,8 +1021,9 @@
 
 								<!-- Vibe -->
 								<div>
-									<label class="block text-xs font-sans text-bark/60 mb-1">Vibe</label>
+									<label for="vibe_parsed" class="block text-xs font-sans text-bark/60 mb-1">Vibe</label>
 									<select
+										id="vibe_parsed"
 										bind:value={parsedVibe.vibe}
 										class="input-field text-sm"
 										disabled={isSubmitting}
@@ -1034,8 +1036,9 @@
 
 								<!-- Keywords -->
 								<div>
-									<label class="block text-xs font-sans text-bark/60 mb-1">Keywords</label>
+									<label for="keywords_parsed" class="block text-xs font-sans text-bark/60 mb-1">Keywords</label>
 									<input
+										id="keywords_parsed"
 										type="text"
 										bind:value={parsedVibe.keywords}
 										placeholder="comma, separated, keywords"
@@ -1046,8 +1049,9 @@
 
 								<!-- Domain Idea -->
 								<div>
-									<label class="block text-xs font-sans text-bark/60 mb-1">Domain Idea (optional)</label>
+									<label for="domain_idea_parsed" class="block text-xs font-sans text-bark/60 mb-1">Domain Idea (optional)</label>
 									<input
+										id="domain_idea_parsed"
 										type="text"
 										value={parsedVibe.domain_idea || ''}
 										oninput={(e) => { if (parsedVibe) parsedVibe.domain_idea = e.currentTarget.value || null; }}

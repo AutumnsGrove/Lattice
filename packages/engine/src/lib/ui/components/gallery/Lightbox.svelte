@@ -24,10 +24,11 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events a11y_interactive_supports_focus -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		class="lightbox-backdrop"
 		onclick={handleBackdropClick}
+		onkeydown={handleKeydown}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Image viewer"
@@ -39,8 +40,12 @@
 				<line x1="6" y1="6" x2="18" y2="18"></line>
 			</svg>
 		</button>
-		<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-		<div class="lightbox-content" onclick={handleBackdropClick}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div
+			class="lightbox-content"
+			onclick={handleBackdropClick}
+			onkeydown={handleKeydown}
+		>
 			<ZoomableImage {src} {alt} isActive={isOpen} class="lightbox-image" />
 		</div>
 		<LightboxCaption {caption} />

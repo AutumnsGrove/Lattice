@@ -50,7 +50,6 @@
 			{placeholder}
 			disabled={disabled || loading}
 			rows="1"
-			{autofocus}
 			onkeydown={handleKeydown}
 			onfocus={() => showExamples = true}
 			onblur={() => setTimeout(() => showExamples = false, 200)}
