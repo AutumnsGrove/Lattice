@@ -45,6 +45,77 @@ Actual usage is closer to 95% for Grove, but maintaining conservative estimate f
 
 ---
 
+## Infrastructure Expenses
+
+### Domain Registration (grove.place)
+
+| Field | Value |
+|-------|-------|
+| **Domain** | grove.place |
+| **Cost** | $17/year |
+| **Renewal Date** | December 2025 |
+| **Business Use** | 100% |
+
+Primary domain for the Grove platform. All user blogs are served from subdomains (username.grove.place).
+
+---
+
+### Email Forwarding Service
+
+| Field | Value |
+|-------|-------|
+| **Service** | Forward Email |
+| **Cost** | $36/year |
+| **Renewal Date** | December 26, 2025 |
+| **Business Use** | 100% |
+
+Enables Grove users to create their own @grove.place email addresses (e.g., username@grove.place). Core platform feature for user identity.
+
+---
+
+### Cloudflare Workers (Paid Tier)
+
+| Field | Value |
+|-------|-------|
+| **Service** | Cloudflare Workers Paid |
+| **Provider** | Cloudflare |
+| **Cost** | $5/month ($60/year) |
+| **Start Date** | January 3, 2026 |
+| **Business Use** | 100% |
+
+Powers the Grove backend infrastructure—API endpoints, authentication, and multi-tenant routing.
+
+---
+
+### Mobile Hotspot (Development Internet)
+
+| Field | Value |
+|-------|-------|
+| **Service** | US Mobile Unlimited Hotspot |
+| **Provider** | US Mobile |
+| **Cost** | $199/year (promotional rate, 50% off) |
+| **Start Date** | January 4, 2026 |
+| **Business Use** | 85% |
+
+Dedicated mobile internet for remote development work. Enables productive coding sessions outside the home environment.
+
+**Write-off:** $199 × 0.85 = $169.15/year deductible
+
+---
+
+## Annual Summary
+
+| Expense | Annual Cost | Business % | Deductible |
+|---------|-------------|------------|------------|
+| Claude Max | $2,400 | 75-80% | $1,800-1,920 |
+| Domain (grove.place) | $17 | 100% | $17 |
+| Forward Email | $36 | 100% | $36 |
+| Cloudflare Workers | $60 | 100% | $60 |
+| Mobile Hotspot | $199 | 85% | $169 |
+| **Total** | **$2,712** | — | **$2,082-2,202** |
+
+---
+
 ## Notes
 
 - This document serves as a paper trail for business expense tracking
