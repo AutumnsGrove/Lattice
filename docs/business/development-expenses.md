@@ -104,6 +104,23 @@ Dedicated mobile internet for remote development work. Enables productive coding
 
 ---
 
+### Mailbox Service (UPS)
+
+| Field | Value |
+|-------|-------|
+| **Service** | Private Mailbox with Full Address |
+| **Provider** | UPS |
+| **Cost** | $81/quarter + $10 setup (one-time) |
+| **Start Date** | January 5, 2026 |
+| **Renewal Date** | April 5, 2026 |
+| **Business Use** | 100% |
+
+Provides a physical mailing address for Grove business correspondence. Enables receipt of vendor communications, business mail, and official documentation.
+
+**Write-off:** $81 × 4 quarters = $324/year deductible (recurring); $10 setup fee deductible in 2026 only
+
+---
+
 ## Annual Summary
 
 | Expense | Annual Cost | Business % | Deductible |
@@ -113,7 +130,10 @@ Dedicated mobile internet for remote development work. Enables productive coding
 | Forward Email | $36 | 100% | $36 |
 | Cloudflare Workers | $60 | 100% | $60 |
 | Mobile Hotspot | $199 | 85% | $169 |
-| **Total** | **$2,712** | — | **$2,082-2,202** |
+| Mailbox (UPS) | $334* | 100% | $334 |
+| **Total** | **$3,046** | — | **$2,416-2,536** |
+
+*2026 includes $10 one-time setup fee; ongoing annual cost $324/year
 
 ---
 
