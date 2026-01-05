@@ -63,7 +63,7 @@
       {:else}
         <div class="sidebar-brand">
           <Logo class="sidebar-logo-small" />
-          <h2>Arbor</h2>
+          <h2>Arbor <span class="admin-label">(admin panel)</span></h2>
         </div>
       {/if}
       <button
@@ -299,6 +299,17 @@
     white-space: nowrap;
     overflow: hidden;
     color: var(--color-primary);
+  }
+
+  .admin-label {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  :global(.dark) .admin-label {
+    color: rgba(167, 199, 183, 0.6);
   }
 
   :global(.sidebar-logo) {

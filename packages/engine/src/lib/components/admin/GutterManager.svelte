@@ -4,7 +4,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X, Trash2 } from "lucide-svelte";
+  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X } from "lucide-svelte";
 
   /**
    * @typedef {Object} GutterItem
@@ -733,7 +733,7 @@
     color: rgba(167, 199, 183, 0.5);
   }
 
-  /* Form Styles */
+  /* Form Styles - These appear in the Dialog component */
   .form-group {
     margin-bottom: 1rem;
   }
@@ -743,23 +743,23 @@
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
   }
 
   .form-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    background: #252526;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    color: #d4d4d4;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    color: var(--color-text);
     font-size: 0.9rem;
     font-family: inherit;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: #4a7c4a;
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -772,14 +772,14 @@
     display: block;
     margin-top: 0.35rem;
     font-size: 0.75rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
   }
 
   .form-hint code {
-    background: #252526;
+    background: var(--color-bg-secondary);
     padding: 0.1rem 0.3rem;
     border-radius: 2px;
-    color: #ce9178;
+    color: var(--color-primary);
   }
 
   .anchor-input-row,
@@ -803,31 +803,43 @@
 
   .anchors-label {
     font-size: 0.75rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
   }
 
   .anchor-chip {
     padding: 0.2rem 0.5rem;
-    background: #252526;
-    border: 1px solid #3a3a3a;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
     border-radius: 12px;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
     font-size: 0.7rem;
     font-family: monospace;
     cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  :global(.dark) .anchor-chip {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.2);
   }
 
   .anchor-chip:hover {
-    background: #3a3a3a;
-    color: #d4d4d4;
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .anchor-chip:hover {
+    background: rgba(74, 222, 128, 0.2);
+    color: #86efac;
   }
 
   .image-preview {
     margin-top: 0.5rem;
     max-height: 150px;
     overflow: hidden;
-    border-radius: 4px;
-    background: #252526;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
   }
 
   .image-preview img {
@@ -847,17 +859,17 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    background: #252526;
+    background: var(--color-bg-secondary);
     padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
   }
 
   .gallery-thumb {
     width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 3px;
+    border-radius: 4px;
   }
 
   .gallery-image-fields {
@@ -871,25 +883,42 @@
     padding: 0.25rem 0.5rem;
     background: transparent;
     border: none;
-    color: #f85149;
+    color: #ef4444;
     font-size: 1.2rem;
     cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .remove-btn:hover {
+    color: #f87171;
   }
 
   .add-image-btn {
     padding: 0.5rem;
     background: transparent;
-    border: 1px dashed #3a3a3a;
-    border-radius: 4px;
-    color: #6a6a6a;
+    border: 1px dashed rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    color: var(--color-text-muted);
     cursor: pointer;
     font-size: 0.85rem;
     width: 100%;
+    transition: all 0.15s ease;
+  }
+
+  :global(.dark) .add-image-btn {
+    border-color: rgba(74, 222, 128, 0.25);
   }
 
   .add-image-btn:hover {
-    border-color: #4a7c4a;
-    color: #8bc48b;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(34, 197, 94, 0.05);
+  }
+
+  :global(.dark) .add-image-btn:hover {
+    border-color: #86efac;
+    color: #86efac;
+    background: rgba(74, 222, 128, 0.08);
   }
 
   /* Image Picker */
@@ -910,8 +939,9 @@
     max-height: 400px;
     overflow-y: auto;
     padding: 0.5rem;
-    background: #252526;
-    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
   }
 
   .loading,
@@ -919,34 +949,38 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 2rem;
-    color: #6a6a6a;
+    color: var(--color-text-muted);
   }
 
   .image-option {
     display: flex;
     flex-direction: column;
-    background: #1e1e1e;
+    background: var(--color-bg);
     border: 2px solid transparent;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 0.25rem;
     cursor: pointer;
     transition: border-color 0.15s ease;
   }
 
   .image-option:hover {
-    border-color: #4a7c4a;
+    border-color: var(--color-primary);
+  }
+
+  :global(.dark) .image-option:hover {
+    border-color: #86efac;
   }
 
   .image-option img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: 2px;
+    border-radius: 4px;
   }
 
   .image-name {
     font-size: 0.65rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
     margin-top: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
