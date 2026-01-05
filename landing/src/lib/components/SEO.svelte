@@ -53,12 +53,23 @@
 	// Ensure URL is absolute
 	const absoluteUrl = $derived(url.startsWith('http') ? url : `${baseUrl}${url}`);
 
+	// Safely encode strings for URL parameters (handles edge cases with special characters)
+	function safeEncode(str: string | undefined | null): string {
+		if (!str) return '';
+		try {
+			return encodeURIComponent(str);
+		} catch {
+			// Fallback: remove problematic characters and try again
+			return encodeURIComponent(str.replace(/[\uD800-\uDFFF]/g, ''));
+		}
+	}
+
 	// Generate dynamic OG image URL if enabled and no custom image provided
 	const ogImageUrl = $derived(
 		image
 			? (image.startsWith('http') ? image : `${baseUrl}${image}`)
 			: dynamicImage
-				? `${baseUrl}/api/og?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(description)}&accent=${encodeURIComponent(accentColor)}`
+				? `${baseUrl}/api/og?title=${safeEncode(title)}&subtitle=${safeEncode(description)}&accent=${safeEncode(accentColor)}`
 				: `${baseUrl}/og-image.png`
 	);
 </script>

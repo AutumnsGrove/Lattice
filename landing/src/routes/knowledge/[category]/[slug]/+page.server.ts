@@ -4,9 +4,10 @@ import type { DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 
-// Disable prerendering for knowledge routes since documents
-// may not be available during build process and content is dynamic
-export const prerender = false;
+// Prerender all knowledge base articles at build time
+// This is required because Cloudflare Workers don't have filesystem access at runtime
+// The docs-loader uses Node.js fs APIs which only work during the build process
+export const prerender = true;
 
 // Generate entries for all known documents
 export const entries: EntryGenerator = () => {
