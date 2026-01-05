@@ -25,6 +25,27 @@ Seasons mark the passage of time in a forest. Spring brings new growth, summer m
 
 Seasons is Grove's versioning system: how Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.
 
+```
+       Count the rings and learn the story:
+
+                    .  *  .    .  *  .
+                 .      ╭───────╮      .
+                *     ╭─┤ 2.0.0 ├─╮     *
+               .    ╭─┤ │       │ ├─╮    .
+                  ╭─┤ │ │ 1.0.0 │ │ ├─╮
+                 ┌┤ │ │ │       │ │ │ ├┐
+                 │├─┤ │ │ 0.x.x │ │ │─┤│    Each ring records a season:
+                 │││ │ │ │      │ │ │ │││
+                 │││ │ │ │  🌱  │ │ │ │││    0.x.x  - seedling growth
+                 └┴┴─┴─┴─┴──────┴─┴─┴─┴┴┘    1.0.0  - first bloom
+                ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱    2.0.0  - new season begins
+             ────────────────────────────
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                 Spring → Summer → Autumn → Winter
+                 Each version a new ring in the trunk.
+```
+
 ---
 
 ## Overview
@@ -36,6 +57,45 @@ GroveEngine follows [Semantic Versioning 2.0.0](https://semver.org/) for all rel
 ## Semantic Versioning Strategy
 
 Version format: `MAJOR.MINOR.PATCH` (e.g., `1.2.3`)
+
+```
+            MAJOR  .  MINOR  .  PATCH
+               │        │        │
+               │        │        │
+        ┌──────┴──────┐ │ ┌──────┴──────┐
+        │             │ │ │             │
+        ▼             │ │ │             ▼
+   ╔═════════════╗    │ │ │    ╔═════════════╗
+   ║  BREAKING   ║    │ │ │    ║  BUG FIXES  ║
+   ║   CHANGES   ║    │ │ │    ║  Security   ║
+   ║             ║    │ │ │    ║  patches    ║
+   ║  🚨 Action  ║    │ │ │    ║             ║
+   ║   required  ║    │ │ │    ║  ✓ Safe to  ║
+   ╚═════════════╝    │ │ │    ║   auto-     ║
+                      │ │ │    ║   update    ║
+                      │ │ │    ╚═════════════╝
+                      │ │ │
+                 ┌────┴─┴─┴────┐
+                 │             │
+                 ▼             │
+            ╔═════════════╗    │
+            ║    NEW      ║    │
+            ║  FEATURES   ║    │
+            ║             ║    │
+            ║  Backwards- ║    │
+            ║  compatible ║    │
+            ║             ║    │
+            ║  ✓ Safe to  ║    │
+            ║   auto-     ║    │
+            ║   update    ║    │
+            ╚═════════════╝────┘
+
+          Example:  2 . 4 . 1
+                    │   │   │
+                    │   │   └── Bug fix #1
+                    │   └────── 4th feature set
+                    └────────── 2nd breaking change era
+```
 
 ### MAJOR Version Changes
 
@@ -105,6 +165,16 @@ During initial development, versions are `0.x.x`:
 
 In `0.x.x` versions, MINOR version bumps may include breaking changes. This is expected during initial development.
 
+```
+Development Phase:
+
+    0.1.0 ──▶ 0.2.0 ──▶ 0.3.0 ──▶ ... ──▶ 0.9.0 ──▶ 1.0.0
+      │         │         │                 │         │
+      🌱        🌱        🌱                🌱        🌳
+   seedling  seedling  seedling          ready     STABLE!
+    growth    growth    growth          to bloom
+```
+
 ### Beta Releases
 
 Use `-beta.x` suffix for testing before stable releases:
@@ -121,6 +191,16 @@ Use `-beta.x` suffix for testing before stable releases:
 - Database migrations that affect existing data
 - Significant UI/UX changes
 - Performance improvements needing validation
+
+```
+Beta Releases:
+
+    1.2.0-beta.1 ──▶ 1.2.0-beta.2 ──▶ 1.2.0-beta.3 ──▶ 1.2.0
+         │                │                │             │
+        🔬              🔬              🔬            ✓
+      testing          fixes          final         stable
+                                     polish
+```
 
 ### Alpha Releases
 
@@ -231,6 +311,38 @@ Recommended version constraints for customer repositories:
 
 **Caret (`^`) recommended:** Allows automatic updates for MINOR and PATCH versions while protecting against MAJOR changes.
 
+```
+    Recommended in package.json:
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │  "dependencies": {                                          │
+    │    "@groveengine/core": "^1.0.0"                           │
+    │  }                     ▲                                    │
+    │                        │                                    │
+    │                        └── The caret (^) is your friend     │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
+
+    What each symbol means:
+
+    ^1.2.3    ───▶    ≥1.2.3  and  <2.0.0     ✓ Recommended
+                      │
+                      └── Gets minor + patch updates safely
+
+    ~1.2.3    ───▶    ≥1.2.3  and  <1.3.0     ⚠️ Conservative
+                      │
+                      └── Patch updates only
+
+    1.2.3     ───▶    Exactly 1.2.3            ⛔ Avoid
+                      │
+                      └── Misses security patches!
+
+    *         ───▶    Any version               🚫 Never use
+                      │
+                      └── Chaos. Breaking changes everywhere.
+```
+
 **Version constraint meanings:**
 - `^1.2.3` - Allows `>=1.2.3 <2.0.0` (recommended)
 - `~1.2.3` - Allows `>=1.2.3 <1.3.0` (conservative)
@@ -291,6 +403,48 @@ Typical update propagation timeline:
 | Customer site running new version | T+2 hours |
 
 **Note:** Emergency security patches can be expedited by manually triggering Renovate or updating dependencies directly.
+
+### Update Propagation Visual
+
+```
+    ┌─────────────┐
+    │ ENGINE      │   T+0 min      pnpm publish
+    │ publishes   │ ─────────────────────────────▶
+    └─────┬───────┘
+          │
+          ▼
+    ┌─────────────┐
+    │ npm         │   T+1 min      Package indexed
+    │ registry    │ ─────────────────────────────▶
+    └─────┬───────┘
+          │
+          ▼
+    ┌─────────────┐
+    │ Renovate    │   T+1 hour     Detects update
+    │ bot         │ ─────────────────────────────▶
+    └─────┬───────┘
+          │
+          ▼
+    ┌─────────────┐
+    │ Customer    │   T+1.5 hours  PR opened, CI runs
+    │ repo        │ ─────────────────────────────▶
+    └─────┬───────┘
+          │
+          ▼
+    ┌─────────────┐
+    │ Auto-merge  │   T+1.5 hours  (if CI passes)
+    │             │ ─────────────────────────────▶
+    └─────┬───────┘
+          │
+          ▼
+    ┌─────────────┐
+    │ Cloudflare  │   T+2 hours    🚀 Live!
+    │ deploy      │ ─────────────────────────────▶
+    └─────────────┘
+
+         ╰───────────────────────────────────────╯
+                    Automated growth
+```
 
 ---
 

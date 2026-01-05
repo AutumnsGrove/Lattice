@@ -11,6 +11,26 @@ type: tech-spec
 
 # Vineyard — Tool Showcase Pattern
 
+```
+                              ·  ☀️  ·
+
+           🍇        🍇        🍇        🍇        🍇
+            ╲        ╲        ╲        ╲        ╲
+       ──────╳────────╳────────╳────────╳────────╳──────
+            ╱        ╱        ╱        ╱        ╱
+
+           🍇        🍇        🍇        🍇        🍇
+            ╲        ╲        ╲        ╲        ╲
+       ──────╳────────╳────────╳────────╳────────╳──────
+            ╱        ╱        ╱        ╱        ╱
+
+           🍇        🍇        🍇        🍇        🍇
+            ·        ·        ·        ·        ·
+      ─ ─ ─ · ─ ─ ─ ─· ─ ─ ─ ─· ─ ─ ─ ─· ─ ─ ─ ─· ─ ─ ─
+
+                   Every vine starts somewhere.
+```
+
 > *Every vine starts somewhere.*
 
 Grove's consistent documentation and demo pattern implemented across all tools. Every Grove product implements a `/vineyard` route on its subdomain, creating a discoverable way to explore features, demos, and roadmaps.

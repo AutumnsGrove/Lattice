@@ -11,6 +11,24 @@ type: tech-spec
 
 # Amber: Grove Storage Management Specification
 
+```
+                              ·
+                             ╱ ╲
+                            ╱   ╲
+                           ╱  ✨  ╲
+                          ╱   🦟   ╲
+                         ╱    ··    ╲
+                        ╱            ╲
+                       ╱      ◇       ╲
+                      ╱________________╲
+                          ╲      ╱
+                           ╲    ╱
+                            ╲  ╱
+                             ··
+
+            Moments preserved. Time suspended.
+```
+
 Grove's unified storage management system for all uploaded files across the ecosystem. Every image, attachment, and asset is preserved in Amber: organized, accessible, and manageable from one place.
 
 ---

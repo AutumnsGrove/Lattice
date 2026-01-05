@@ -11,6 +11,19 @@ type: tech-spec
 
 # Reeds — Comments System
 
+```
+                                                        ·
+           ı    ı         ı              ı    ı        ı
+          ıı   ıı    ı   ıı    ı   ı    ıı   ıı   ı   ıı
+         ıı|  ıı|   ıı  ıı|   ıı  ıı   ıı|  ıı|  ıı  ıı|
+        ı|||ı|||  ı||ı ı|||  ı||ı|||  ı|||ı|||ı ı||ı|||
+    ∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿∿
+    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+              Whisper together at the water's edge.
+```
+
 > *Whisper together at the water's edge.*
 
 Grove's comment system supporting both private replies (author-only) and public conversations (author-moderated). A dual system that encourages thoughtful engagement while giving blog authors full control over their public-facing content.

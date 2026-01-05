@@ -13,6 +13,20 @@ type: tech-spec
 
 # Heartwood (GroveAuth) - Centralized Authentication Service
 
+```
+                          ╭──────────╮
+                       ╭──│ ╭──────╮ │──╮
+                     ╭─│  │ │ ╭──╮ │ │  │─╮
+                    │  │  │ │ │♥ │ │ │  │  │
+                     ╰─│  │ │ ╰──╯ │ │  │─╯
+                       ╰──│ ╰──────╯ │──╯
+                          ╰──────────╯
+
+       every ring: a year, a story, a layer of growth
+
+               The center that holds it all.
+```
+
 > A Cloudflare Worker-based authentication service for all AutumnsGrove properties
 
 **Public Name**: Heartwood

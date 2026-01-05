@@ -11,6 +11,21 @@ type: tech-spec
 
 # Clearing — Status Page
 
+```
+                    .  ·  .    ☀️    .  ·  .
+                 ·                           ·
+               🌲         ┌─────────┐         🌲
+                          │    ○    │
+              🌲          │  clear  │          🌲
+                          │  skies  │
+               🌲         └─────────┘         🌲
+                 ·                           ·
+                    ·  .  ·       ·  .  ·
+                ────────────────────────────
+               ~~~~~~~~~ open ground ~~~~~~~~~
+                   Where you can see clearly.
+```
+
 > *A clearing in the forest where you can see what's happening.*
 
 Grove's public status page providing transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without contacting support.

@@ -11,7 +11,60 @@ type: tech-spec
 
 # Patina — Automated Backups
 
+```
+                         .  ·  .  ·  .
+                      ·   time passes   ·
+                     ╭───────────────────╮
+                    ╭┤  ┌─────────────┐  ├╮
+                   ╭┤│  │  2026-01-05 │  │├╮
+                   │││  │  ▓▓▓▓▓▓▓▓▓▓ │  │││
+                   │││  │  ▒▒▒▒▒▒▒▒▒▒ │  │││
+                   │││  │  ░░░░░░░░░░ │  │││
+                   │││  │  ·········· │  │││
+                   ╰┴┴──└─────────────┘──┴┴╯
+                  ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱
+               ──────────────────────────────
+              ~~~~~~~~ oxidation layer ~~~~~~~~
+              Age as armor. Time as protection.
+```
+
 > *Age as armor. Time as protection.*
+
+```
+              Backup Retention Timeline
+
+  TODAY                                              12 WEEKS AGO
+    │                                                      │
+    ▼                                                      ▼
+   ┌─┬─┬─┬─┬─┬─┬─┐                                        ┌─┐
+   │█│█│█│█│█│█│█│ ◀── Daily backups (7 days)             │░│
+   └─┴─┴─┴─┴─┴─┴─┘                                        └─┘
+   S M T W T F S
+         │                                                 │
+         └────────────┬────────────────────────────────────┘
+                      │
+                      ▼
+   Week  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐     ┌───┐ ┌───┐
+    #    │ 1 │ │ 2 │ │ 3 │ │ 4 │ │ 5 │ │ 6 │ ··· │11 │ │12 │
+         └───┘ └───┘ └───┘ └───┘ └───┘ └───┘     └───┘ └───┘
+           │     │     │     │     │     │         │     │
+           ▼     ▼     ▼     ▼     ▼     ▼         ▼     ▼
+         ┌───────────────────────────────────────────────────┐
+         │              Weekly Archives (12 weeks)           │
+         │  Each archive = compressed 7 daily backups        │
+         │  Sundays: compress week → delete dailies          │
+         └───────────────────────────────────────────────────┘
+
+   ════════════════════════════════════════════════════════════
+
+   Storage strategy:
+   ┌────────────────┐     ┌────────────────┐     ┌────────────┐
+   │  /daily/       │     │  /weekly/      │     │  Expired   │
+   │  2026-01-05/   │ ──▶ │  2026-W01.tar  │ ──▶ │  (deleted) │
+   │  *.sql         │     │  .gz           │     │            │
+   └────────────────┘     └────────────────┘     └────────────┘
+      7 days max           12 weeks max          auto-cleanup
+```
 
 Grove's automated backup system running nightly SQL dumps of all D1 databases to R2 cold storage. Weekly meta-backups compress daily layers, maintaining 12 weeks of history ready if you ever need to reach back in time.
 

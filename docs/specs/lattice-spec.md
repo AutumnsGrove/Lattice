@@ -12,6 +12,24 @@ type: tech-spec
 
 # Lattice — Core Platform
 
+```
+              🌿            🌿            🌿
+                ╲          ╱  ╲          ╱
+                 ╲        ╱    ╲        ╱
+                  ╲      ╱      ╲      ╱
+                   ╲    ╱        ╲    ╱
+                    ╲  ╱          ╲  ╱
+                     ╳            ╳
+                    ╱  ╲          ╱  ╲
+                   ╱    ╲        ╱    ╲
+                  ╱      ╲      ╱      ╲
+                 ╱        ╲    ╱        ╲
+                ╱          ╲  ╱          ╲
+              🌿            🌿            🌿
+
+          The framework that supports growth.
+```
+
 > *The framework that supports growth.*
 
 The npm package powering every Grove site. UI components, authentication utilities, markdown rendering, and database patterns—all the infrastructure that makes building on Grove effortless. The invisible framework everything else grows upon.

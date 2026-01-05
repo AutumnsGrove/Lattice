@@ -11,6 +11,18 @@ type: tech-spec
 
 # Waystone — Help Center
 
+```
+                                              🌲
+      🌲                    ╱╲
+               🌲          ╱  ╲               🌲
+                          ╱ →  ╲
+    ·  ·  ·  ·  ·  ·  ·  ╱──────╲  ·  ·  ·  ·  ·  ·  ·
+    ─────────────────────────────────────────────────────
+                      the path
+
+                Markers for when you're lost.
+```
+
 > *Trail markers that guide you through the forest.*
 
 Grove's built-in help center providing searchable documentation, contextual help buttons throughout the interface, and self-service support. Integrated directly into the platform so help is always where you need it.

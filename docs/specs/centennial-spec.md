@@ -23,6 +23,26 @@ A century is the lifetime of an oak. It's the span between a sapling taking root
 
 When you've been part of Grove long enough to put down real roots, your site earns Centennial status. Your `name.grove.place` domain stays online for 100 years from the day you planted it — even if you stop paying, even after you're gone.
 
+```
+         ~ some trees outlive the people who planted them ~
+
+                              2026                              2126
+                                │                                 │
+                                ▼                                 ▼
+    ┌───────────────────────────────────────────────────────────────────────┐
+    │                                                                       │
+    │   🌱                     ────────────────────────────────▶        🌳  │
+    │   planted                                                        100  │
+    │                                                                 years │
+    │                           your grove persists                         │
+    │                                                                       │
+    └───────────────────────────────────────────────────────────────────────┘
+
+                    ├─────────────────── 100 years ───────────────────┤
+
+             You plant.            You grow.            Your words remain.
+```
+
 ---
 
 ## Goals
@@ -37,6 +57,27 @@ When you've been part of Grove long enough to put down real roots, your site ear
 ## How It Works
 
 ### Earning Centennial Status
+
+```
+    The Path to Centennial:
+
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                                                                     │
+    │   Month   1   2   3   4   5   6   7   8   9  10  11  12            │
+    │           │   │   │   │   │   │   │   │   │   │   │   │            │
+    │           ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼            │
+    │           🌱  🌱  🌱  🌱  🌱  🌱  🌱  🌿  🌿  🌿  🌿  🌳            │
+    │           ░░  ░░  ░░  ░░  ░░  ░░  ░░  ██  ██  ██  ██  ██            │
+    │                                                                     │
+    │           └────────── growing ──────────┴── earned! ──┘            │
+    │                                                                     │
+    │           12 cumulative months at Sapling ($12) or above            │
+    │                                                                     │
+    └─────────────────────────────────────────────────────────────────────┘
+
+    Yearly subscription? Instant upon first renewal.
+    Monthly? After 12 payments. Mixed? Cumulative.
+```
 
 Centennial status unlocks automatically when a user reaches **12 cumulative months** of paid membership on **Sapling tier or above**.
 
@@ -78,6 +119,31 @@ This means:
 - Earning Centennial retroactively protects from day one
 
 ### Active vs. Archived State
+
+```
+    Grove Lifecycle States:
+
+                    ┌─────────────────────────────────────────────┐
+                    │                                             │
+                    ▼                                             │
+    ┌──────────┐         ┌──────────┐         ┌──────────┐       │
+    │  ACTIVE  │────────▶│ ARCHIVED │────────▶│ DELETED  │       │
+    │          │ lapsed  │          │ request │          │       │
+    │  🌳 🌿   │         │   🌳     │         │    ✕     │       │
+    │  writing │         │ read-only│         │  removed │       │
+    └──────────┘         └──────────┘         └──────────┘       │
+         │                    │                                   │
+         │                    │ resubscribe                       │
+         │                    └───────────────────────────────────┘
+         │
+         └──────────────────▶ Can always delete if you choose
+
+    Archived groves:
+    • All published posts remain publicly accessible
+    • RSS feed continues working
+    • No admin access (can't edit, delete, or publish)
+    • Reactivate anytime by resuming subscription
+```
 
 | State | Description |
 |-------|-------------|
@@ -312,9 +378,32 @@ Most platforms treat your content as theirs. When you stop paying, it vanishes. 
 
 Centennial is a different bet: that some things are worth keeping. That your words, accumulated over years, might matter to someone you'll never meet. That a century from now, someone might stumble onto your little corner of the internet and feel less alone.
 
-A hundred years is a long time. It's also roughly how long an oak tree lives.
+```
+    A hundred years is a long time.
+    It's also roughly how long an oak tree lives.
 
-Plant something worth keeping.
+              2026                                        2126
+                │                                           │
+    ────────────┼───────────────────────────────────────────┼────────────
+                │                                           │
+                │     .  *  .    .  *  .    .  *  .         │
+                │  .     ╭───╮     .     ╭───────╮     .    │
+                │ *    ╭─┤   ├─╮  *    ╭─┤       ├─╮   *    │
+                │.   ╭─┤ │   │ ├─╮   ╭─┤ │       │ ├─╮  .   │
+                │   ╭┤ │ │ 🌱│ │ ├╮ ╭┤ │ │  🌳   │ │ ├╮     │
+                │  ┌┤│ │ │   │ │ │├┐││ │ │       │ │ │││    │
+                │  │││ │ │   │ │ │││││ │ │       │ │ │││    │
+                │  └┴┴─┴─┴───┴─┴─┴┴┘└┴─┴─┴───────┴─┴─┴┴┘    │
+                │ ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱   │
+                │────────────────────────────────────────   │
+                │                                           │
+                │                                           │
+              plant                                      still
+              your                                      standing
+              grove
+
+                        ~ plant something worth keeping ~
+```
 
 ---
 

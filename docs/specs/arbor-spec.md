@@ -11,6 +11,18 @@ type: tech-spec
 
 # Arbor — Admin Panel
 
+```
+            🌿              🌿              🌿
+              \    🌸      /  \    🌺      /
+               \    |     /    \    |     /
+        ────────╳───┼────╳──────╳───┼────╳────────
+               /    |     \    /    |     \
+              /    🌷      \  /    🌻      \
+            🌿              🌿              🌿
+
+              Where you tend what you've grown.
+```
+
 > *The structured framework where growth is tended.*
 
 Grove's blogger admin panel where users manage content, customize their site, and configure settings. Designed to be minimal and anxiety-free with quick navigation, instant saves, and a warm aesthetic matching Grove's cozy tea-shop vibe.

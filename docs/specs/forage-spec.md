@@ -12,6 +12,20 @@ type: tech-spec
 
 # Forage — Domain Discovery
 
+```
+                         .  ·  🔍  ·  .
+                      ·                 ·
+                    🍄    🍂    🌰    🍄
+                   ·                     ·
+                  🌿        ~~~        🌿
+                   ·    searching     ·
+                    🍂               🍂
+                      ·  ·  ·  ·  ·
+                ─────────────────────────
+               ~~~~~~~~ forest floor ~~~~~~~~
+               Before you plant, you search.
+```
+
 > *Before you can plant, you have to search.*
 
 AI-powered asynchronous domain availability checker that reduces domain hunting from weeks to hours. Orchestrates AI agents to generate, check, and evaluate domain name candidates, producing curated lists of available, affordable options.

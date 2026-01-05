@@ -25,6 +25,29 @@ Shade is the cool relief beneath the canopy. Protection from the harsh glare of 
 
 Shade is Grove's layered defense against AI crawlers, scrapers, and automated data harvesting. In a world where tech giants treat user content as training data to be extracted without consent, Shade is a quiet refusal.
 
+```
+                         ~ in a forest full of harvesters ~
+                           ~ this grove stays shaded ~
+
+                              .  *  .    .  *  .
+                           .     ╭─────────╮     .
+                          *    ╱             ╲    *
+                         .   ╱                 ╲   .
+                            ╱    🌿  🌿  🌿     ╲
+                           ╱  ┌─────────────────┐ ╲
+                          ╱   │    PROTECTED    │  ╲
+                         ╱    │   Your words    │   ╲
+                        ╱     │   are yours.    │    ╲
+                       ╱      └─────────────────┘     ╲
+                      ╱   🌱                      🌱   ╲
+                ─────╱────────────────────────────────╲─────
+               ~~~~~~╲                                ╱~~~~~~
+                      ╲══════════════════════════════╱
+                       ╲___________________________ ╱
+
+                    cool relief beneath the canopy
+```
+
 ---
 
 ## Implementation Status
@@ -309,6 +332,38 @@ Turnstile is Cloudflare's human verification system that doesn't require solving
 | hooks.server.ts | Root | Site-wide verification check |
 
 **How It Works:**
+
+```
+    Turnstile Verification Flow:
+
+    ┌────────────┐     ┌────────────┐     ┌────────────┐
+    │   First    │     │  /verify   │     │ Cloudflare │
+    │   Visit    │────▶│   page     │────▶│ Turnstile  │
+    └────────────┘     └────────────┘     └─────┬──────┘
+                                                │
+                                          (invisible for
+                                           most users)
+                                                │
+                                                ▼
+    ┌────────────┐     ┌────────────┐     ┌────────────┐
+    │  Original  │     │   Cookie   │     │   Token    │
+    │   Page     │◀────│    Set     │◀────│  Verified  │
+    └────────────┘     └────────────┘     └────────────┘
+         │
+         │ (subsequent visits)
+         ▼
+    ┌────────────┐
+    │  Cookie    │
+    │  Valid?    │───Yes───▶ Access granted
+    └────────────┘
+         │
+        No
+         │
+         ▼
+    ┌────────────┐
+    │  Re-verify │
+    └────────────┘
+```
 
 1. **First Visit:** User hits any protected page without valid cookie
 2. **Redirect:** hooks.server.ts redirects to `/verify?return=<original_url>`
@@ -712,7 +767,51 @@ A dedicated public page that:
 - Provides a reference for the Shade spec
 - Offers guidance for others who want to adopt similar protections
 
-### 6.2 Required Content
+### 6.2 The /shade Page Mockup
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  grove.place/shade                                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│                            🌿                                       │
+│                                                                     │
+│                          Shade                                      │
+│                   In a forest full of harvesters,                   │
+│                     this grove stays shaded.                        │
+│                                                                     │
+│   ─────────────────────────────────────────────────────────────    │
+│                                                                     │
+│   Users own their words.                                            │
+│                                                                     │
+│   Content on Grove.place may not be used for AI training,           │
+│   machine learning, or automated data harvesting. Technical         │
+│   access does not constitute consent.                               │
+│                                                                     │
+│   This applies regardless of robots.txt compliance. The absence     │
+│   of technical barriers does not imply permission.                  │
+│                                                                     │
+│   ─────────────────────────────────────────────────────────────    │
+│                                                                     │
+│   What we block:                                                    │
+│   • AI training crawlers (GPTBot, ClaudeBot, CCBot, etc.)          │
+│   • Automated scrapers and data harvesters                          │
+│   • Web archiving services (except user-initiated)                  │
+│                                                                     │
+│   What we allow:                                                    │
+│   • Search engine indexing (Google, Bing, Kagi)                    │
+│   • Human readers (always welcome)                                  │
+│   • RSS feeds (for your subscribers)                               │
+│                                                                     │
+│   ─────────────────────────────────────────────────────────────    │
+│                                                                     │
+│   Questions? concerns@grove.place                                   │
+│   Full policy: grove.place/legal/terms                              │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.3 Required Content
 
 The `/shade` page must include:
 

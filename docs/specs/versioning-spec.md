@@ -11,6 +11,26 @@ type: tech-spec
 
 # GroveEngine — Versioning Specification
 
+```
+                              v3.0.0
+                             ╱
+                    v2.1.0──●
+                   ╱         ╲
+          v2.0.0──●           v2.1.1
+         ╱
+        ●──v1.2.0──v1.2.1──v1.2.2
+       ╱
+      ●──v1.1.0
+     ╱
+    ●──v1.0.0
+   ╱
+  ●
+  │
+  │    Seeds planted. Branches grown.
+  │    Each release a ring of growth.
+ ═╧═
+```
+
 Defines the semantic versioning strategy, publishing workflow, and update propagation for GroveEngine. Documents how versions are managed, releases published to npm, and how updates flow to customer repositories via Renovate.
 
 **Package:** `@groveengine/core`
