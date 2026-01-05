@@ -165,6 +165,8 @@ Rings tells writers about their readers. Vista tells the grove keeper about the 
     • Own R2 storage prefix (/autumn/images/*)
 ```
 
+See [Loom Pattern](../patterns/loom-durable-objects-pattern.md) for the full Durable Object coordination architecture.
+
 ---
 
 ## Architecture
