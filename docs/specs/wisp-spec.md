@@ -10,6 +10,26 @@ tags:
 type: tech-spec
 ---
 
+```
+         🌲  🌲  🌲
+          \   |   /
+           \  |  /
+             ✨
+            ╱ ╲
+           ╱   ╲
+          ╱  ·  ╲
+         ╱   ·   ╲
+        ╱    ·    ╲
+       ·     ·     ·
+         gentle
+         guiding
+          light
+```
+
+> *A helper, not a writer—and sometimes, a good listener*
+
+---
+
 # Wisp: Writing Assistant
 
 > *A helper, not a writer, and sometimes, a good listener.*

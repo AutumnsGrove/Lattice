@@ -9,6 +9,27 @@ tags:
 type: tech-spec
 ---
 
+```
+       _______________
+      /               \
+     |    .-"""-.     |
+     |   /  ⚙️   \    |
+    /|  |   🌿    |   |\
+   | |   \ ⚙️  /    | |
+   | |    `-.-'     | |
+   | |       |       | |
+    \|    .-""-.    |/
+     |   / 🌿  \   |
+     |  |  ⚙️   |  |
+     |   \ ___ /   |
+      \____________/
+         ~  ~  ~
+```
+
+> *The engine that powers growth*
+
+---
+
 # GroveEngine — Technical Specification
 
 The core technical specification for GroveEngine, Grove's Cloudflare-native blog engine published as an npm package. Documents the architecture, deployment model, and single-tenant design where each customer gets dedicated D1/KV/R2 resources.

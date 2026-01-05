@@ -9,6 +9,26 @@ tags:
 type: tech-spec
 ---
 
+```
+        🌸 WELCOME 🌸
+      _______________
+     /               \
+    |   🌿       🌿   |
+    |                 |
+    |    GROVE.       |
+    |     PLACE       |
+    |                 |
+    |   🌿  ⟿  🌿    |
+     \_______·_______/
+         |     |
+         |     |
+    ~~~~~|~~~~~|~~~~~
+```
+
+> *The entrance to the grove*
+
+---
+
 # Grove Website — Technical Specification
 
 The main marketing site and client management platform for Grove. Handles marketing, client acquisition, onboarding, billing via Stripe, and provides a dashboard for clients to manage their blogs across the platform.

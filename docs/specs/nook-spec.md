@@ -11,6 +11,26 @@ tags:
 type: tech-spec
 ---
 
+```
+      ~~~~~~~~~~~~~
+     |             |
+     |    🌿  🌿    |
+     |             |
+     |   .----.    |
+     |  /      \   |
+     | |  🪵🪵  |  |
+     | |  🪵🪵  |  |
+     |  \______/   |
+     |      💡      |
+     |   cozy &    |
+     |    warm     |
+      ~~~~~~~~~~~~~
+```
+
+> *Gather close. Share quietly.*
+
+---
+
 # Nook — Private Video Sharing
 
 > *A cozy corner of the grove. Videos for close friends.*

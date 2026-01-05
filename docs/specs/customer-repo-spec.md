@@ -9,6 +9,26 @@ tags:
 type: tech-spec
 ---
 
+```
+        🌱
+      / | \
+     /  |  \
+    ·   |   ·
+   ·    |    ·
+        |
+    [========]
+    |        |
+    | ♡ Your |
+    |  Space |
+    [========]
+     \      /
+      \____/
+```
+
+> *Your own plot in the grove*
+
+---
+
 # Customer Repository Specification
 
 Template structure for individual customer blog repositories, each with dedicated Cloudflare resources (D1, KV, R2). Complete isolation means independent deployment, full customization, and customer-managed updates.

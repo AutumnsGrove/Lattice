@@ -10,6 +10,26 @@ tags:
 type: tech-spec
 ---
 
+```
+    ~~~ ~~~ ~~~
+     🌲  🌲  🌲
+      \\  \\  \\
+       \\ || //
+        \\||//
+    ━━━━━━━━━━━━━
+    ├─────┴─────┤
+    │  STRESS   │
+    │   TEST    │
+    ├───────────┤
+    │ 💪 Roots  │
+    │   Hold    │
+    └───────────┘
+```
+
+> *Testing what the forest can withstand*
+
+---
+
 # Vista LoadTest — Sentinel Integration
 
 > *Adding eyes to see what the forest can withstand.*

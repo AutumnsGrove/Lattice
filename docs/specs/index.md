@@ -8,6 +8,24 @@ tags:
 type: index
 ---
 
+```
+         🌲
+         |
+      ___|___
+     |       |
+     | SPECS |
+     |_______|
+         |
+    ╱────┼────╲
+   ╱     │     ╲
+  ⟿     ⟿     ⟿
+Core  Tools  Docs
+```
+
+> *All paths through the grove*
+
+---
+
 # Grove Specifications
 
 Comprehensive collection of technical specifications, component designs, and implementation details for the Grove ecosystem.

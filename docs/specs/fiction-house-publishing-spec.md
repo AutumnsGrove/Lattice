@@ -9,6 +9,29 @@ tags:
 type: tech-spec
 ---
 
+```
+         🕯️
+         |
+       .-'-.
+      /     \
+     |       |
+      \_____/
+         |
+    _____|_____
+   /           \
+  |  ~~~~~ ~~~  |
+  |  ~~~~ ~~~~  |
+  |  ~~~~  ~~~  |
+  |  ~~~~ ~~~~  |
+  |_____________|
+   \___________/
+        |||
+```
+
+> *Stories find their home*
+
+---
+
 # Fiction House Publishing — Project Specification
 
 > A warm, welcoming home for Fiction House Publishing. Built on GroveEngine, leveraging the tenant architecture with custom book catalog features.
