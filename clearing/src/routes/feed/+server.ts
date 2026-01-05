@@ -44,7 +44,17 @@ export const GET: RequestHandler = async ({ platform }) => {
 				}
 			}
 		} catch (error) {
-			console.error('Failed to generate RSS feed:', error);
+			console.error('[status] Failed to generate RSS feed:', error);
+			// Add a system notice when we can't fetch real data
+			const errorDate = new Date();
+			items = `
+    <item>
+      <title><![CDATA[[System Notice] Status feed temporarily unavailable]]></title>
+      <link>${baseUrl}</link>
+      <guid isPermaLink="false">system-notice-${errorDate.getTime()}</guid>
+      <pubDate>${errorDate.toUTCString()}</pubDate>
+      <description><![CDATA[We're experiencing issues retrieving status updates. Please visit the status page directly for current information.]]></description>
+    </item>`;
 		}
 	} else {
 		// Mock data for development

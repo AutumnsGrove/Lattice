@@ -234,6 +234,24 @@ export async function getOverallStatus(db: D1Database): Promise<OverallStatus> {
 }
 
 /**
+ * Maximum number of IDs allowed in a batch query to prevent oversized queries
+ */
+const MAX_BATCH_SIZE = 100;
+
+/**
+ * UUID validation regex - matches standard UUID format
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Validates that all IDs in an array are valid UUIDs
+ * This provides defense-in-depth for batch queries
+ */
+function validateUUIDs(ids: string[]): boolean {
+	return ids.every((id) => UUID_REGEX.test(id));
+}
+
+/**
  * Get recent incidents with all updates in optimized batch queries
  * Reduces N+1 queries by fetching all updates and components in bulk
  */
@@ -250,8 +268,9 @@ export async function getRecentIncidentsWithUpdates(
 			SELECT * FROM status_incidents
 			WHERE started_at >= ?
 			ORDER BY started_at DESC
+			LIMIT ?
 		`)
-		.bind(cutoffDate.toISOString())
+		.bind(cutoffDate.toISOString(), MAX_BATCH_SIZE)
 		.all<StatusIncident>();
 
 	const incidents = incidentsResult.results || [];
@@ -259,9 +278,17 @@ export async function getRecentIncidentsWithUpdates(
 
 	const incidentIds = incidents.map((i) => i.id);
 
-	// SAFETY: This dynamic SQL is safe because incidentIds are UUIDs retrieved from
-	// a trusted database query above (not user input). The parameterized bindings
-	// ensure proper escaping. D1 doesn't support array parameters natively.
+	// Defense-in-depth: validate all IDs are proper UUIDs
+	if (!validateUUIDs(incidentIds)) {
+		console.error('[status] Invalid UUID detected in incident IDs, aborting batch query');
+		return [];
+	}
+
+	// SAFETY: This dynamic SQL is safe because:
+	// 1. incidentIds are UUIDs retrieved from a trusted database query above
+	// 2. All IDs are validated as proper UUIDs before use
+	// 3. The parameterized bindings ensure proper escaping
+	// 4. D1 doesn't support array parameters natively, so this pattern is required
 	// Batch fetch all updates for these incidents
 	const updatesResult = await db
 		.prepare(`
@@ -272,7 +299,7 @@ export async function getRecentIncidentsWithUpdates(
 		.bind(...incidentIds)
 		.all<StatusUpdate>();
 
-	// SAFETY: Same as above - incidentIds are trusted UUIDs from database
+	// SAFETY: Same as above - incidentIds are validated UUIDs from database
 	// Batch fetch all component relationships
 	const componentRelationsResult = await db
 		.prepare(`

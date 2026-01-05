@@ -28,8 +28,20 @@ export const load: PageServerLoad = async ({ platform }) => {
  */
 function getMockData() {
 	const now = new Date();
-	const yesterday = new Date(now);
-	yesterday.setDate(yesterday.getDate() - 1);
+
+	// Create relative dates for demo incident (2 days ago)
+	const incidentStart = new Date(now);
+	incidentStart.setDate(incidentStart.getDate() - 2);
+	incidentStart.setHours(10, 15, 0, 0);
+
+	const incidentResolved = new Date(incidentStart);
+	incidentResolved.setMinutes(incidentResolved.getMinutes() + 45);
+
+	const updateIdentified = new Date(incidentStart);
+	updateIdentified.setMinutes(updateIdentified.getMinutes() + 15);
+
+	const updateMonitoring = new Date(incidentStart);
+	updateMonitoring.setMinutes(updateMonitoring.getMinutes() + 30);
 
 	// Generate 90 days of mock uptime data
 	function generate90Days(componentId: string, componentName: string, issueChance: number = 0.02) {
@@ -83,22 +95,22 @@ function getMockData() {
 			{
 				id: 'inc_demo_1',
 				title: 'CDN Degraded Performance',
-				slug: 'cdn-degraded-performance-jan-03',
+				slug: 'cdn-degraded-performance-demo',
 				status: 'resolved' as const,
 				impact: 'minor' as const,
 				type: 'degraded' as const,
-				started_at: new Date('2026-01-03T10:15:00Z').toISOString(),
-				resolved_at: new Date('2026-01-03T11:00:00Z').toISOString(),
-				created_at: new Date('2026-01-03T10:15:00Z').toISOString(),
-				updated_at: new Date('2026-01-03T11:00:00Z').toISOString(),
+				started_at: incidentStart.toISOString(),
+				resolved_at: incidentResolved.toISOString(),
+				created_at: incidentStart.toISOString(),
+				updated_at: incidentResolved.toISOString(),
 				components: [
 					{ id: 'comp_cdn', name: 'CDN', slug: 'cdn', description: 'Image and media delivery', display_order: 2, current_status: 'operational' as const, created_at: now.toISOString(), updated_at: now.toISOString() }
 				],
 				updates: [
-					{ id: 'upd_4', incident_id: 'inc_demo_1', status: 'resolved' as const, message: 'The issue has been resolved. Image delivery is back to normal speeds.', created_at: new Date('2026-01-03T11:00:00Z').toISOString() },
-					{ id: 'upd_3', incident_id: 'inc_demo_1', status: 'monitoring' as const, message: 'We\'ve deployed a fix and are monitoring. Image loading times are improving.', created_at: new Date('2026-01-03T10:45:00Z').toISOString() },
-					{ id: 'upd_2', incident_id: 'inc_demo_1', status: 'identified' as const, message: 'Root cause identified: cache invalidation issue following deployment. Working on a fix.', created_at: new Date('2026-01-03T10:30:00Z').toISOString() },
-					{ id: 'upd_1', incident_id: 'inc_demo_1', status: 'investigating' as const, message: 'We\'re investigating reports of slow image loading.', created_at: new Date('2026-01-03T10:15:00Z').toISOString() }
+					{ id: 'upd_4', incident_id: 'inc_demo_1', status: 'resolved' as const, message: 'The issue has been resolved. Image delivery is back to normal speeds.', created_at: incidentResolved.toISOString() },
+					{ id: 'upd_3', incident_id: 'inc_demo_1', status: 'monitoring' as const, message: 'We\'ve deployed a fix and are monitoring. Image loading times are improving.', created_at: updateMonitoring.toISOString() },
+					{ id: 'upd_2', incident_id: 'inc_demo_1', status: 'identified' as const, message: 'Root cause identified: cache invalidation issue following deployment. Working on a fix.', created_at: updateIdentified.toISOString() },
+					{ id: 'upd_1', incident_id: 'inc_demo_1', status: 'investigating' as const, message: 'We\'re investigating reports of slow image loading.', created_at: incidentStart.toISOString() }
 				]
 			}
 		],
