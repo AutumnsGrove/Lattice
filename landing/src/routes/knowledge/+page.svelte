@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
@@ -10,7 +9,8 @@
 
   let searchQuery = '';
 
-  function handleSearch() {
+  function handleSearch(e) {
+    e.preventDefault();
     if (searchQuery.trim()) {
       goto(`/knowledge/search?q=${encodeURIComponent(searchQuery)}`);
     }

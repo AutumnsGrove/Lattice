@@ -1,21 +1,34 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import { allDocs } from '$lib/data/knowledge-base';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
+  import { ContentSearch } from '@autumnsgrove/groveengine';
 
-  $: query = $page.url.searchParams.get('q') || '';
-  $: results = query ? allDocs.filter(doc =>
-    doc.title.toLowerCase().includes(query.toLowerCase()) ||
-    doc.excerpt.toLowerCase().includes(query.toLowerCase()) ||
-    (doc.description && doc.description.toLowerCase().includes(query.toLowerCase()))
-  ) : [];
+  let searchQuery = $state('');
+  let filteredResults = $state([]);
+
+  // Filter function for ContentSearch
+  function filterDoc(doc, query) {
+    const q = query.toLowerCase();
+    return (
+      doc.title.toLowerCase().includes(q) ||
+      doc.excerpt.toLowerCase().includes(q) ||
+      (doc.description && doc.description.toLowerCase().includes(q))
+    );
+  }
+
+  // Handle search results
+  function handleSearchChange(query, results) {
+    filteredResults = results;
+  }
 
   $: categoryCounts = {
-    specs: results.filter(d => d.category === 'specs').length,
-    help: results.filter(d => d.category === 'help').length,
-    legal: results.filter(d => d.category === 'legal').length
+    specs: filteredResults.filter(d => d.category === 'specs').length,
+    help: filteredResults.filter(d => d.category === 'help').length,
+    legal: filteredResults.filter(d => d.category === 'legal').length,
+    marketing: filteredResults.filter(d => d.category === 'marketing').length,
+    patterns: filteredResults.filter(d => d.category === 'patterns').length
   };
 </script>
 
@@ -40,37 +53,26 @@
     <!-- Search Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-foreground mb-4">Search Knowledge Base</h1>
-      <form method="GET" action="/knowledge/search" class="max-w-2xl">
-        <div class="relative">
-          <input
-            type="text"
-            name="q"
-            value={query}
-            placeholder="Search documentation..."
-            class="w-full px-4 py-3 pl-12 pr-20 text-foreground bg-surface-elevated border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-          />
-          <div class="absolute inset-y-0 left-0 flex items-center pl-4">
-            <svg class="w-5 h-5 text-foreground-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <button
-            type="submit"
-            class="absolute inset-y-0 right-0 flex items-center pr-4 text-accent hover:text-accent-muted font-medium"
-          >
-            Search
-          </button>
-        </div>
-      </form>
+      <ContentSearch
+        items={allDocs}
+        filterFn={filterDoc}
+        bind:searchQuery
+        placeholder="Search documentation..."
+        syncWithUrl={true}
+        queryParam="q"
+        onSearchChange={handleSearchChange}
+        wrapperClass="max-w-2xl"
+        inputClass="w-full px-4 py-3 pl-12 pr-20 text-foreground bg-surface-elevated border border-default rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+      />
     </div>
 
-    {#if query}
+    {#if searchQuery}
       <!-- Results Summary -->
       <div class="mb-6">
         <p class="text-foreground-muted">
-          Found {results.length} result{results.length !== 1 ? 's' : ''} for "<span class="font-medium">{query}</span>"
+          Found {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''} for "<span class="font-medium">{searchQuery}</span>"
         </p>
-        {#if results.length > 0}
+        {#if filteredResults.length > 0}
           <div class="flex gap-4 mt-2 text-sm text-foreground-subtle">
             {#if categoryCounts.specs > 0}
               <span>{categoryCounts.specs} specs</span>
@@ -81,14 +83,20 @@
             {#if categoryCounts.legal > 0}
               <span>{categoryCounts.legal} legal docs</span>
             {/if}
+            {#if categoryCounts.marketing > 0}
+              <span>{categoryCounts.marketing} marketing</span>
+            {/if}
+            {#if categoryCounts.patterns > 0}
+              <span>{categoryCounts.patterns} patterns</span>
+            {/if}
           </div>
         {/if}
       </div>
 
       <!-- Search Results -->
-      {#if results.length > 0}
+      {#if filteredResults.length > 0}
         <div class="space-y-4">
-          {#each results as doc}
+          {#each filteredResults as doc}
             <article class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
               <div class="flex items-start justify-between mb-2">
                 <div class="flex-1">
@@ -102,8 +110,8 @@
                   {/if}
                   <p class="text-foreground-subtle text-sm">{doc.excerpt}</p>
                 </div>
-                <span class="ml-4 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {doc.category === 'specs' ? 'bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text' : doc.category === 'help' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'}">
-                  {doc.category === 'specs' ? 'Spec' : doc.category === 'help' ? 'Help' : 'Legal'}
+                <span class="ml-4 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {doc.category === 'specs' ? 'bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text' : doc.category === 'help' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : doc.category === 'legal' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : doc.category === 'marketing' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'}">
+                  {doc.category === 'specs' ? 'Spec' : doc.category === 'help' ? 'Help' : doc.category === 'legal' ? 'Legal' : doc.category === 'marketing' ? 'Marketing' : 'Pattern'}
                 </span>
               </div>
               <div class="flex items-center justify-between mt-4">
