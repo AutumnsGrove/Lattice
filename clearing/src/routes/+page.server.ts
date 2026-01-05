@@ -9,6 +9,7 @@ import { getStatusPageData } from '$lib/server/status';
 export const load: PageServerLoad = async ({ platform }) => {
 	// In development without D1, return mock data
 	if (!platform?.env?.DB) {
+		console.warn('[status] D1 database binding not available, using mock data');
 		return { ...getMockData(), isMockData: true };
 	}
 
@@ -16,7 +17,7 @@ export const load: PageServerLoad = async ({ platform }) => {
 		const data = await getStatusPageData(platform.env.DB);
 		return { ...data, isMockData: false };
 	} catch (error) {
-		console.error('Failed to load status data:', error);
+		console.error('[status] Failed to load status data, falling back to mock:', error);
 		// Return mock data on error
 		return { ...getMockData(), isMockData: true };
 	}

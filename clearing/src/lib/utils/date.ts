@@ -3,11 +3,20 @@
  */
 
 /**
+ * Check if a date is valid
+ */
+function isValidDate(date: Date): boolean {
+	return !isNaN(date.getTime());
+}
+
+/**
  * Format a timestamp for incident timelines
  * Example: "Jan 5, 3:45 PM"
  */
 export function formatTime(timestamp: string): string {
 	const date = new Date(timestamp);
+	if (!isValidDate(date)) return 'Unknown time';
+
 	return date.toLocaleString('en-US', {
 		month: 'short',
 		day: 'numeric',
@@ -22,6 +31,8 @@ export function formatTime(timestamp: string): string {
  */
 export function formatDateFull(timestamp: string): string {
 	const date = new Date(timestamp);
+	if (!isValidDate(date)) return 'Unknown date';
+
 	return date.toLocaleDateString('en-US', {
 		month: 'long',
 		day: 'numeric',
@@ -35,6 +46,8 @@ export function formatDateFull(timestamp: string): string {
  */
 export function formatDateShort(dateStr: string): string {
 	const date = new Date(dateStr);
+	if (!isValidDate(date)) return 'Unknown';
+
 	return date.toLocaleDateString('en-US', {
 		weekday: 'short',
 		month: 'short',
@@ -48,6 +61,8 @@ export function formatDateShort(dateStr: string): string {
  */
 export function formatRelativeTime(timestamp: string): string {
 	const date = new Date(timestamp);
+	if (!isValidDate(date)) return 'Unknown';
+
 	const now = new Date();
 	const diffMs = now.getTime() - date.getTime();
 	const diffMins = Math.floor(diffMs / 60000);
@@ -68,7 +83,11 @@ export function formatRelativeTime(timestamp: string): string {
  */
 export function formatDuration(startTimestamp: string, endTimestamp?: string | null): string {
 	const start = new Date(startTimestamp);
+	if (!isValidDate(start)) return 'Unknown';
+
 	const end = endTimestamp ? new Date(endTimestamp) : new Date();
+	if (!isValidDate(end)) return 'Unknown';
+
 	const diffMs = end.getTime() - start.getTime();
 	const diffMins = Math.floor(diffMs / 60000);
 

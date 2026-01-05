@@ -130,7 +130,10 @@ export async function getScheduledMaintenance(db: D1Database): Promise<Scheduled
 
 	return (result.results || []).map((m) => ({
 		...m,
-		components: JSON.parse(m.components as unknown as string || '[]')
+		// D1 returns JSON columns as strings, parse them back to arrays
+		components: typeof m.components === 'string'
+			? JSON.parse(m.components || '[]')
+			: (m.components || [])
 	}));
 }
 
@@ -256,6 +259,9 @@ export async function getRecentIncidentsWithUpdates(
 
 	const incidentIds = incidents.map((i) => i.id);
 
+	// SAFETY: This dynamic SQL is safe because incidentIds are UUIDs retrieved from
+	// a trusted database query above (not user input). The parameterized bindings
+	// ensure proper escaping. D1 doesn't support array parameters natively.
 	// Batch fetch all updates for these incidents
 	const updatesResult = await db
 		.prepare(`
@@ -266,6 +272,7 @@ export async function getRecentIncidentsWithUpdates(
 		.bind(...incidentIds)
 		.all<StatusUpdate>();
 
+	// SAFETY: Same as above - incidentIds are trusted UUIDs from database
 	// Batch fetch all component relationships
 	const componentRelationsResult = await db
 		.prepare(`

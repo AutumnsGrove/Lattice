@@ -10,6 +10,7 @@ export const load: PageServerLoad = async ({ params, platform }) => {
 
 	// In development without D1, return mock data
 	if (!platform?.env?.DB) {
+		console.warn('[status] D1 database binding not available, using mock incident data');
 		return getMockIncident(slug);
 	}
 
@@ -25,7 +26,7 @@ export const load: PageServerLoad = async ({ params, platform }) => {
 		if ((err as any)?.status === 404) {
 			throw err;
 		}
-		console.error('Failed to load incident:', err);
+		console.error('[status] Failed to load incident, falling back to mock:', err);
 		return getMockIncident(slug);
 	}
 };
