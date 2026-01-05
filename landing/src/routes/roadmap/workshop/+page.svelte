@@ -489,7 +489,7 @@
 					</div>
 
 					<!-- Tools Grid -->
-					<div class="grid gap-6 md:grid-cols-2">
+					<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{#each category.tools as tool}
 							{@const badge = getStatusBadge(tool.status)}
 							{@const cardClass = getCardClass(category.name)}
