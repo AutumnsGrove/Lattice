@@ -1,0 +1,21 @@
+# Grove Clearing - Status Page
+# Deployed to: status.grove.place
+
+name = "grove-clearing"
+compatibility_date = "2024-11-24"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Environment variables for local development
+[vars]
+CDN_URL = "http://localhost:5173/cdn"
+
+# D1 Database binding (shared with Grove)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# NOTE: For production deployment, configure:
+# - Custom domain: status.grove.place
+# - See DEPLOY.md for deployment instructions

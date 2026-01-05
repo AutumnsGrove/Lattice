@@ -1,0 +1,6 @@
+# Clearing - Grove Status Page
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://status.grove.place/sitemap.xml
