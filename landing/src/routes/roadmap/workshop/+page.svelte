@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, ShieldUser, MessagesSquare, BrickWallShield } from 'lucide-svelte';
+	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, ShieldUser, MessagesSquare, BrickWallShield, Wind } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -51,6 +51,7 @@
 		pencilruler: PencilRuler,
 		swatchbook: SwatchBook,
 		brickwallshield: BrickWallShield,
+		wind: Wind,
 	};
 
 	function getCardClass(categoryName: string) {
