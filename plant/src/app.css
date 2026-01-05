@@ -325,16 +325,17 @@
 .text-accent-muted { color: var(--color-accent-muted); }
 .bg-accent-subtle\/20 { background-color: rgba(var(--color-accent-subtle), 0.2); }
 
-/* Glass effect for Grove cards - matches landing page */
+/* Frosted glass effect for content cards - universal across all Grove sites */
 .glass-grove {
-	background: rgba(255, 255, 255, 0.6);
+	background: rgba(255, 255, 255, 0.7);
 	backdrop-filter: blur(12px);
 	-webkit-backdrop-filter: blur(12px);
-	border: 1px solid var(--color-divider);
 }
 
 .dark .glass-grove {
-	background: rgba(30, 41, 59, 0.5);
+	background: rgba(30, 34, 39, 0.75);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
 
 /* Subtle vine pattern background - organic, forest-like */

@@ -150,14 +150,5 @@
 <style>
 	.bg-divider { background-color: var(--color-divider); }
 
-	.glass-grove {
-		background: rgba(255, 255, 255, 0.6);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid var(--color-divider);
-	}
-
-	:global(.dark) .glass-grove {
-		background: rgba(30, 41, 59, 0.5);
-	}
+	/* Glass effect now defined globally in app.css */
 </style>
