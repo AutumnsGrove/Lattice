@@ -4,6 +4,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
+  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X } from "lucide-svelte";
 
   /**
    * @typedef {Object} GutterItem
@@ -122,7 +123,7 @@
   /** @param {number} index */
   function deleteItem(index) {
     gutterItems = gutterItems.filter((/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index);
-    toast.success("Gutter item deleted");
+    toast.success("Vine removed");
   }
 
   /**
@@ -249,38 +250,38 @@
     return "";
   }
 
-  /** @param {string} type */
-  function getTypeIcon(type) {
-    switch (type) {
-      case "comment":
-        return "💬";
-      case "photo":
-        return "🖼️";
-      case "gallery":
-        return "🎞️";
-      default:
-        return "📌";
-    }
-  }
 </script>
 
-<div class="gutter-manager">
-  <div class="gutter-header">
-    <h3>Gutter Content</h3>
-    <button class="add-btn" onclick={openAddModal}>+ Add Item</button>
+<div class="vines-manager">
+  <div class="vines-header">
+    <h3>Vines</h3>
+    <button class="add-btn" onclick={openAddModal}>
+      <Plus class="btn-icon" />
+      <span>Add Item</span>
+    </button>
   </div>
 
   {#if gutterItems.length === 0}
     <div class="empty-state">
-      <p>No gutter items yet.</p>
+      <p>No vines yet.</p>
       <p class="hint">Add comments, images, or galleries that appear alongside your content.</p>
     </div>
   {:else}
-    <div class="gutter-list">
+    <div class="vines-list">
       {#each gutterItems as item, index (index)}
-        <div class="gutter-item">
+        <div class="vine-item">
           <div class="item-header">
-            <span class="item-type">{getTypeIcon(item.type)}</span>
+            <span class="item-type">
+              {#if item.type === "comment"}
+                <MessageSquare class="type-icon" />
+              {:else if item.type === "photo"}
+                <ImageIcon class="type-icon" />
+              {:else if item.type === "gallery"}
+                <Images class="type-icon" />
+              {:else}
+                <Pin class="type-icon" />
+              {/if}
+            </span>
             <span class="item-anchor" title={item.anchor}>{item.anchor || "No anchor"}</span>
             <div class="item-actions">
               <button
@@ -288,23 +289,35 @@
                 onclick={() => moveItem(index, -1)}
                 disabled={index === 0}
                 title="Move up"
-              >↑</button>
+                aria-label="Move item up"
+              >
+                <ChevronUp class="action-icon" />
+              </button>
               <button
                 class="action-btn"
                 onclick={() => moveItem(index, 1)}
                 disabled={index === gutterItems.length - 1}
                 title="Move down"
-              >↓</button>
+                aria-label="Move item down"
+              >
+                <ChevronDown class="action-icon" />
+              </button>
               <button
                 class="action-btn"
                 onclick={() => openEditModal(index)}
                 title="Edit"
-              >✎</button>
+                aria-label="Edit item"
+              >
+                <Pencil class="action-icon" />
+              </button>
               <button
                 class="action-btn delete"
                 onclick={() => deleteItem(index)}
                 title="Delete"
-              >×</button>
+                aria-label="Delete item"
+              >
+                <X class="action-icon" />
+              </button>
             </div>
           </div>
           <div class="item-preview">{getItemPreview(item)}</div>
@@ -315,7 +328,7 @@
 </div>
 
 <!-- Add/Edit Modal -->
-<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Gutter Item" : "Add Gutter Item"}>
+<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Vine" : "Add Vine"}>
   {#snippet children()}
     <div class="form-group">
       <label for="item-type">Type</label>
@@ -500,49 +513,71 @@
 </Dialog>
 
 <style>
-  .gutter-manager {
-    background: #1e1e1e;
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
+  .vines-manager {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--grove-overlay-15);
+    border-radius: 12px;
     overflow: hidden;
   }
 
-  .gutter-header {
+  .vines-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: #252526;
-    border-bottom: 1px solid #3a3a3a;
+    padding: 0.875rem 1rem;
+    background: var(--grove-overlay-5);
+    border-bottom: 1px solid var(--grove-border-subtle);
   }
 
-  .gutter-header h3 {
+  .vines-header h3 {
     margin: 0;
-    font-size: 0.9rem;
-    color: #8bc48b;
+    font-size: 0.95rem;
+    color: var(--color-primary);
     font-weight: 600;
   }
 
+  :global(.dark) .vines-header h3 {
+    color: #86efac;
+  }
+
   .add-btn {
-    padding: 0.35rem 0.75rem;
-    background: #2d4a2d;
-    color: #a8dca8;
-    border: 1px solid #3d5a3d;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: var(--grove-overlay-10);
+    color: var(--color-primary);
+    border: 1px solid var(--grove-border);
+    border-radius: var(--border-radius-button);
     font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
+  :global(.dark) .add-btn {
+    color: #86efac;
+  }
+
   .add-btn:hover {
-    background: #3d5a3d;
-    color: #c8f0c8;
+    background: var(--grove-overlay-18);
+    border-color: var(--grove-border-strong);
+  }
+
+  :global(.btn-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   .empty-state {
     padding: 2rem 1rem;
     text-align: center;
-    color: #6a6a6a;
+    color: var(--color-text-muted);
+  }
+
+  :global(.dark) .empty-state {
+    color: var(--grove-text-muted);
   }
 
   .empty-state p {
@@ -551,19 +586,32 @@
 
   .empty-state .hint {
     font-size: 0.85rem;
-    color: #5a5a5a;
+    color: var(--color-text-subtle);
   }
 
-  .gutter-list {
+  :global(.dark) .empty-state .hint {
+    color: var(--grove-text-subtle);
+  }
+
+  .vines-list {
     padding: 0.5rem;
   }
 
-  .gutter-item {
-    background: #252526;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    padding: 0.5rem 0.75rem;
+  .vine-item {
+    background: var(--glass-bg-medium);
+    border: 1px solid var(--grove-border-subtle);
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
     margin-bottom: 0.5rem;
+    transition: border-color 0.15s ease;
+  }
+
+  .vine-item:hover {
+    border-color: var(--grove-overlay-25);
+  }
+
+  :global(.dark) .vine-item:hover {
+    border-color: var(--grove-overlay-30);
   }
 
   .item-header {
@@ -573,38 +621,70 @@
   }
 
   .item-type {
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .item-type {
+    color: #86efac;
+  }
+
+  :global(.type-icon) {
+    width: 1rem;
+    height: 1rem;
   }
 
   .item-anchor {
     flex: 1;
     font-family: monospace;
     font-size: 0.8rem;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  :global(.dark) .item-anchor {
+    color: var(--grove-text-strong);
+  }
+
   .item-actions {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
 
   .action-btn {
-    padding: 0.2rem 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
     background: transparent;
     border: 1px solid transparent;
-    color: #6a6a6a;
-    border-radius: 3px;
+    color: var(--color-text-subtle);
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85rem;
     transition: all 0.15s ease;
   }
 
+  :global(.dark) .action-btn {
+    color: var(--grove-text-subtle);
+  }
+
+  :global(.action-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
   .action-btn:hover:not(:disabled) {
-    background: #3a3a3a;
-    color: #d4d4d4;
+    background: var(--grove-overlay-10);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .action-btn:hover:not(:disabled) {
+    background: var(--grove-overlay-15);
+    color: #86efac;
   }
 
   .action-btn:disabled {
@@ -613,20 +693,29 @@
   }
 
   .action-btn.delete:hover {
-    background: rgba(215, 58, 73, 0.2);
-    color: #f85149;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  :global(.dark) .action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
   }
 
   .item-preview {
     margin-top: 0.35rem;
     font-size: 0.8rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Form Styles */
+  :global(.dark) .item-preview {
+    color: var(--grove-text-subtle);
+  }
+
+  /* Form Styles - These appear in the Dialog component */
   .form-group {
     margin-bottom: 1rem;
   }
@@ -636,23 +725,23 @@
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
   }
 
   .form-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    background: #252526;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    color: #d4d4d4;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    color: var(--color-text);
     font-size: 0.9rem;
     font-family: inherit;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: #4a7c4a;
+    border-color: var(--color-primary);
   }
 
   .form-textarea {
@@ -665,14 +754,14 @@
     display: block;
     margin-top: 0.35rem;
     font-size: 0.75rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
   }
 
   .form-hint code {
-    background: #252526;
+    background: var(--color-bg-secondary);
     padding: 0.1rem 0.3rem;
     border-radius: 2px;
-    color: #ce9178;
+    color: var(--color-primary);
   }
 
   .anchor-input-row,
@@ -696,31 +785,37 @@
 
   .anchors-label {
     font-size: 0.75rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
   }
 
   .anchor-chip {
     padding: 0.2rem 0.5rem;
-    background: #252526;
-    border: 1px solid #3a3a3a;
+    background: var(--grove-overlay-10);
+    border: 1px solid var(--grove-border);
     border-radius: 12px;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
     font-size: 0.7rem;
     font-family: monospace;
     cursor: pointer;
+    transition: all 0.15s ease;
   }
 
   .anchor-chip:hover {
-    background: #3a3a3a;
-    color: #d4d4d4;
+    background: var(--grove-overlay-20);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .anchor-chip:hover {
+    color: #86efac;
   }
 
   .image-preview {
     margin-top: 0.5rem;
     max-height: 150px;
     overflow: hidden;
-    border-radius: 4px;
-    background: #252526;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
   }
 
   .image-preview img {
@@ -740,17 +835,17 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    background: #252526;
+    background: var(--color-bg-secondary);
     padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
   }
 
   .gallery-thumb {
     width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 3px;
+    border-radius: 4px;
   }
 
   .gallery-image-fields {
@@ -764,25 +859,37 @@
     padding: 0.25rem 0.5rem;
     background: transparent;
     border: none;
-    color: #f85149;
+    color: #ef4444;
     font-size: 1.2rem;
     cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .remove-btn:hover {
+    color: #f87171;
   }
 
   .add-image-btn {
     padding: 0.5rem;
     background: transparent;
-    border: 1px dashed #3a3a3a;
-    border-radius: 4px;
-    color: #6a6a6a;
+    border: 1px dashed var(--grove-overlay-30);
+    border-radius: 8px;
+    color: var(--color-text-muted);
     cursor: pointer;
     font-size: 0.85rem;
     width: 100%;
+    transition: all 0.15s ease;
   }
 
   .add-image-btn:hover {
-    border-color: #4a7c4a;
-    color: #8bc48b;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--grove-overlay-5);
+  }
+
+  :global(.dark) .add-image-btn:hover {
+    border-color: #86efac;
+    color: #86efac;
   }
 
   /* Image Picker */
@@ -803,8 +910,9 @@
     max-height: 400px;
     overflow-y: auto;
     padding: 0.5rem;
-    background: #252526;
-    border-radius: 4px;
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
   }
 
   .loading,
@@ -812,34 +920,38 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 2rem;
-    color: #6a6a6a;
+    color: var(--color-text-muted);
   }
 
   .image-option {
     display: flex;
     flex-direction: column;
-    background: #1e1e1e;
+    background: var(--color-bg-secondary);
     border: 2px solid transparent;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 0.25rem;
     cursor: pointer;
     transition: border-color 0.15s ease;
   }
 
   .image-option:hover {
-    border-color: #4a7c4a;
+    border-color: var(--color-primary);
+  }
+
+  :global(.dark) .image-option:hover {
+    border-color: #86efac;
   }
 
   .image-option img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: 2px;
+    border-radius: 4px;
   }
 
   .image-name {
     font-size: 0.65rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
     margin-top: 0.25rem;
     white-space: nowrap;
     overflow: hidden;

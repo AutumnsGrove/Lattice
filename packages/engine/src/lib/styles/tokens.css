@@ -25,6 +25,56 @@
 	--color-bg-secondary: hsl(var(--secondary));
 	--color-border: hsl(var(--border));
 
+	/* Grove overlay tokens - centralized green overlays for glassmorphism */
+	/* Base RGB values for color mixing */
+	--grove-green-rgb: 34, 197, 94;
+	--grove-green-light-rgb: 74, 222, 128;
+	--grove-green-dark-rgb: 74, 124, 89;
+	--grove-sage-rgb: 167, 199, 183;
+
+	/* Grove overlays - light mode (use grove green) */
+	--grove-overlay-5: rgba(34, 197, 94, 0.05);
+	--grove-overlay-8: rgba(34, 197, 94, 0.08);
+	--grove-overlay-10: rgba(34, 197, 94, 0.1);
+	--grove-overlay-12: rgba(34, 197, 94, 0.12);
+	--grove-overlay-15: rgba(34, 197, 94, 0.15);
+	--grove-overlay-18: rgba(34, 197, 94, 0.18);
+	--grove-overlay-20: rgba(34, 197, 94, 0.2);
+	--grove-overlay-25: rgba(34, 197, 94, 0.25);
+	--grove-overlay-30: rgba(34, 197, 94, 0.3);
+	--grove-overlay-35: rgba(34, 197, 94, 0.35);
+	--grove-overlay-70: rgba(34, 197, 94, 0.7);
+
+	/* Grove borders - light mode */
+	--grove-border-subtle: rgba(34, 197, 94, 0.1);
+	--grove-border: rgba(34, 197, 94, 0.2);
+	--grove-border-strong: rgba(34, 197, 94, 0.35);
+
+	/* Glass backgrounds - light mode */
+	--glass-bg: rgba(255, 255, 255, 0.85);
+	--glass-bg-medium: rgba(255, 255, 255, 0.6);
+	--glass-bg-subtle: rgba(255, 255, 255, 0.5);
+	--glass-border: rgba(255, 255, 255, 0.3);
+	--glass-border-strong: rgba(255, 255, 255, 0.4);
+
+	/* Slate glass (for some dark backgrounds in light mode) */
+	--slate-glass-bg: rgba(30, 41, 59, 0.5);
+	--slate-glass-border: rgba(71, 85, 105, 0.3);
+
+	/* Neutral overlays */
+	--overlay-dark-5: rgba(0, 0, 0, 0.05);
+	--overlay-dark-10: rgba(0, 0, 0, 0.1);
+	--overlay-dark-40: rgba(0, 0, 0, 0.4);
+	--overlay-light-5: rgba(255, 255, 255, 0.05);
+	--overlay-light-10: rgba(255, 255, 255, 0.1);
+	--overlay-light-20: rgba(255, 255, 255, 0.2);
+
+	/* Shadow tokens */
+	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+	--shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
+
 	/* Dark mode values */
 	--color-text-dark: hsl(var(--foreground));
 	--color-text-muted-dark: hsl(var(--muted-foreground));
@@ -117,6 +167,46 @@
 	/* Dark mode tag colors */
 	--tag-bg: hsl(270 38% 55%);
 	--tag-bg-hover: hsl(270 38% 49%);
+
+	/* Grove overlays - dark mode (use lighter grove green) */
+	--grove-overlay-5: rgba(74, 222, 128, 0.05);
+	--grove-overlay-8: rgba(74, 222, 128, 0.08);
+	--grove-overlay-10: rgba(74, 222, 128, 0.1);
+	--grove-overlay-12: rgba(74, 222, 128, 0.12);
+	--grove-overlay-15: rgba(74, 222, 128, 0.15);
+	--grove-overlay-18: rgba(74, 222, 128, 0.18);
+	--grove-overlay-20: rgba(74, 222, 128, 0.2);
+	--grove-overlay-25: rgba(74, 222, 128, 0.25);
+	--grove-overlay-30: rgba(74, 222, 128, 0.3);
+	--grove-overlay-35: rgba(74, 222, 128, 0.35);
+	--grove-overlay-70: rgba(74, 222, 128, 0.7);
+
+	/* Grove borders - dark mode */
+	--grove-border-subtle: rgba(74, 124, 89, 0.2);
+	--grove-border: rgba(74, 222, 128, 0.2);
+	--grove-border-strong: rgba(74, 222, 128, 0.35);
+
+	/* Glass backgrounds - dark mode (dark grove tint) */
+	--glass-bg: rgba(20, 30, 25, 0.92);
+	--glass-bg-medium: rgba(30, 45, 35, 0.6);
+	--glass-bg-subtle: rgba(30, 41, 59, 0.4);
+	--glass-border: rgba(74, 124, 89, 0.25);
+	--glass-border-strong: rgba(74, 124, 89, 0.3);
+
+	/* Slate glass - dark mode */
+	--slate-glass-bg: rgba(30, 41, 59, 0.9);
+	--slate-glass-border: rgba(71, 85, 105, 0.3);
+
+	/* Grove sage text - dark mode muted text (WCAG AA compliant) */
+	--grove-text-muted: rgba(167, 199, 183, 0.75);
+	--grove-text-subtle: rgba(167, 199, 183, 0.6);
+	--grove-text-strong: rgba(167, 199, 183, 0.9);
+
+	/* Shadow tokens - dark mode */
+	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+	--shadow-grove: 0 8px 32px rgba(74, 222, 128, 0.15);
 
 	/* Dark mode component-specific overrides */
 	/* Blog header */

@@ -302,11 +302,11 @@
         {/if}
       </div>
       <button
-        class="toggle-gutter-btn"
+        class="toggle-vines-btn"
         onclick={() => (showGutter = !showGutter)}
-        title={showGutter ? "Hide gutter panel" : "Show gutter panel"}
+        title={showGutter ? "Hide Vines panel" : "Show Vines panel"}
       >
-        {showGutter ? "Hide Gutter ◀" : "▶ Gutter Content"}
+        {showGutter ? "Hide Vines" : "Show Vines"}
       </button>
     </main>
   </div>
@@ -332,13 +332,18 @@
     gap: 0.5rem;
   }
   .back-link {
-    color: var(--color-text-muted);
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: color 0.2s;
+    opacity: 0.8;
   }
   .back-link:hover {
     color: var(--color-primary);
+    opacity: 1;
+  }
+  :global(.dark) .back-link {
+    color: #86efac;
   }
   .page-header h1 {
     margin: 0;
@@ -551,21 +556,31 @@
     flex-shrink: 0;
     overflow-y: auto;
   }
-  .toggle-gutter-btn {
-    margin-top: 0.5rem;
-    padding: 0.4rem 0.75rem;
-    background: #252526;
-    border: 1px solid var(--light-border-primary);
-    border-radius: 4px;
-    color: #8bc48b;
-    font-size: 0.8rem;
+  .toggle-vines-btn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--border-radius-button);
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     align-self: flex-end;
   }
-  .toggle-gutter-btn:hover {
-    background: var(--light-border-primary);
-    color: #a8dca8;
+  .toggle-vines-btn:hover {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+  :global(.dark) .toggle-vines-btn {
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.2);
+    color: #86efac;
+  }
+  :global(.dark) .toggle-vines-btn:hover {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.35);
   }
   /* Responsive */
   @media (max-width: 1200px) {

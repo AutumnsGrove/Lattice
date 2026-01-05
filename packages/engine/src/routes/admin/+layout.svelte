@@ -1,15 +1,15 @@
 <script>
-  import { Toast } from "$lib/ui/components/ui";
+  import { Toast, Logo } from "$lib/ui/components/ui";
   import {
     LayoutDashboard,
     FileText,
     FileStack,
     Image,
-    Mail,
     BarChart3,
     Calendar,
     Settings,
-    ChevronLeft
+    ChevronLeft,
+    LogOut
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -56,7 +56,16 @@
 
   <aside class="sidebar glass-sidebar" class:open={sidebarOpen} class:collapsed={sidebarCollapsed}>
     <div class="sidebar-header">
-      <h2 class:hidden={sidebarCollapsed}>Admin Panel</h2>
+      {#if sidebarCollapsed}
+        <a href="/admin" class="sidebar-logo-link" title="Arbor Dashboard">
+          <Logo class="sidebar-logo" />
+        </a>
+      {:else}
+        <div class="sidebar-brand">
+          <Logo class="sidebar-logo-small" />
+          <h2>Arbor <span class="admin-label">(admin panel)</span></h2>
+        </div>
+      {/if}
       <button
         class="collapse-btn"
         onclick={toggleCollapse}
@@ -100,12 +109,23 @@
       </a>
     </nav>
 
-    <div class="sidebar-footer" class:hidden={sidebarCollapsed}>
-      <div class="user-info">
-        <span class="email">{data.user.email}</span>
+    {#if !sidebarCollapsed}
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <span class="email">{data.user.email}</span>
+        </div>
+        <a href="/auth/logout" class="logout-btn">
+          <LogOut class="logout-icon" />
+          <span>Logout</span>
+        </a>
       </div>
-      <a href="/auth/logout" class="logout-btn">Logout</a>
-    </div>
+    {:else}
+      <div class="sidebar-footer-collapsed">
+        <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
+          <LogOut class="logout-icon" />
+        </a>
+      </div>
+    {/if}
   </aside>
 
   <main class="content" class:expanded={sidebarCollapsed}>
@@ -126,28 +146,23 @@
 
   /* Glass sidebar styling */
   .glass-sidebar {
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  :global(.dark) .glass-sidebar {
-    background: rgba(30, 41, 59, 0.75);
-    border-color: rgba(71, 85, 105, 0.3);
+    border: 1px solid var(--grove-overlay-15);
   }
 
   /* Glass surface for mobile header */
   .glass-surface {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   :global(.dark) .glass-surface {
-    background: rgba(30, 41, 59, 0.9);
-    border-color: rgba(71, 85, 105, 0.3);
+    background: var(--slate-glass-bg);
+    border-color: var(--slate-glass-border);
   }
 
   /* Mobile header - hidden on desktop */
@@ -205,7 +220,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--overlay-dark-40);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: 1001;
@@ -241,11 +256,7 @@
     border-radius: var(--border-radius-standard);
     transition: all 0.3s ease;
     overflow-y: auto;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  }
-
-  :global(.dark) .sidebar {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
   }
 
   .sidebar.collapsed {
@@ -253,8 +264,8 @@
   }
 
   .sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--grove-border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -262,8 +273,10 @@
     transition: border-color 0.3s ease;
   }
 
-  :global(.dark) .sidebar-header {
-    border-color: rgba(255, 255, 255, 0.1);
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .sidebar-header h2 {
@@ -272,6 +285,45 @@
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
+    color: var(--color-primary);
+  }
+
+  .admin-label {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  :global(.dark) .admin-label {
+    color: var(--grove-text-subtle);
+  }
+
+  :global(.sidebar-logo) {
+    width: 2rem;
+    height: 2.5rem;
+  }
+
+  :global(.sidebar-logo-small) {
+    width: 1.5rem;
+    height: 1.875rem;
+  }
+
+  .sidebar-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar-logo-link:hover {
+    opacity: 0.8;
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 1rem 0.5rem;
   }
 
   .collapse-btn {
@@ -288,12 +340,12 @@
   }
 
   .collapse-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--overlay-dark-5);
     color: var(--color-text);
   }
 
   :global(.dark) .collapse-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--overlay-light-10);
   }
 
   .collapse-icon {
@@ -317,12 +369,12 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
     transition: background 0.2s, color 0.2s;
-    margin: 0 0.5rem;
+    margin: 0.125rem 0.5rem;
   }
 
   .sidebar.collapsed .nav-item {
@@ -332,12 +384,17 @@
   }
 
   .nav-item:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--grove-overlay-8);
     color: var(--color-primary);
   }
 
   :global(.dark) .nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--grove-overlay-12);
+    color: #86efac;
+  }
+
+  :global(.dark) .nav-item {
+    color: var(--grove-text-strong);
   }
 
   .nav-item :global(.nav-icon) {
@@ -356,14 +413,22 @@
   }
 
   .sidebar-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--grove-border-subtle);
     transition: border-color 0.3s ease;
     flex-shrink: 0;
   }
 
-  :global(.dark) .sidebar-footer {
-    border-color: rgba(255, 255, 255, 0.1);
+  .sidebar-footer-collapsed {
+    padding: 0.75rem;
+    border-top: 1px solid var(--grove-border-subtle);
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  :global(.dark) .sidebar-footer-collapsed {
+    border-color: var(--grove-border-subtle);
   }
 
   .user-info {
@@ -371,17 +436,23 @@
   }
 
   .email {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--color-text-muted);
     word-break: break-all;
     transition: color 0.3s ease;
   }
 
+  :global(.dark) .email {
+    color: var(--grove-text-muted);
+  }
+
   .logout-btn {
-    display: block;
-    text-align: center;
-    padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--grove-overlay-8);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -390,16 +461,50 @@
   }
 
   :global(.dark) .logout-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
   }
 
   .logout-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--color-text);
+    background: var(--grove-overlay-15);
+    color: var(--color-primary);
   }
 
   :global(.dark) .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--grove-overlay-18);
+    color: #86efac;
+  }
+
+  .logout-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: var(--grove-overlay-8);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: var(--border-radius-button);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  :global(.dark) .logout-btn-icon {
+    background: var(--grove-overlay-10);
+    color: var(--grove-text-strong);
+  }
+
+  .logout-btn-icon:hover {
+    background: var(--grove-overlay-15);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .logout-btn-icon:hover {
+    background: var(--grove-overlay-18);
+    color: #86efac;
+  }
+
+  :global(.logout-icon) {
+    width: 1rem;
+    height: 1rem;
   }
 
   .content {
