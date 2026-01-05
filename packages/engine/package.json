@@ -41,6 +41,16 @@
       "svelte": "./dist/ui/index.js",
       "default": "./dist/ui/index.js"
     },
+    "./ui/chrome": {
+      "types": "./dist/ui/components/chrome/index.d.ts",
+      "svelte": "./dist/ui/components/chrome/index.js",
+      "default": "./dist/ui/components/chrome/index.js"
+    },
+    "./ui/stores": {
+      "types": "./dist/ui/stores/index.d.ts",
+      "svelte": "./dist/ui/stores/index.js",
+      "default": "./dist/ui/stores/index.js"
+    },
     "./ui/gallery": {
       "types": "./dist/ui/components/gallery/index.d.ts",
       "svelte": "./dist/ui/components/gallery/index.js",

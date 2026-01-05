@@ -1,12 +1,10 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
 	import { RoadmapPreview } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/stores';
-	import { season } from '$lib/stores/season';
 
 	// Lucide icons
 	import {
@@ -27,7 +25,7 @@
 
 	// Toggle season on logo click
 	function handleLogoClick() {
-		season.cycle();
+		seasonStore.cycle();
 	}
 
 </script>
@@ -64,7 +62,7 @@
 			aria-label="Toggle season theme"
 			title="Click to change season"
 		>
-			<Logo class="w-24 h-24" season={$season} />
+			<Logo class="w-24 h-24" season={$seasonStore} />
 		</button>
 	</div>
 
