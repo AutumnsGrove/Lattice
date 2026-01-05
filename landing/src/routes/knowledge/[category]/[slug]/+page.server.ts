@@ -4,9 +4,9 @@ import type { DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 
-// Prerender all knowledge base articles at build time
-// This is required because Cloudflare Workers don't have filesystem access at runtime
-export const prerender = true;
+// Disable prerendering for knowledge routes since documents
+// may not be available during build process and content is dynamic
+export const prerender = false;
 
 // Generate entries for all known documents
 export const entries: EntryGenerator = () => {
@@ -16,7 +16,13 @@ export const entries: EntryGenerator = () => {
   }));
 };
 
-const validCategories: DocCategory[] = ["specs", "help", "legal", "marketing", "patterns"];
+const validCategories: DocCategory[] = [
+  "specs",
+  "help",
+  "legal",
+  "marketing",
+  "patterns",
+];
 
 export const load: PageServerLoad = async ({ params }) => {
   const { category, slug } = params;
