@@ -9,16 +9,16 @@ import { getStatusPageData } from '$lib/server/status';
 export const load: PageServerLoad = async ({ platform }) => {
 	// In development without D1, return mock data
 	if (!platform?.env?.DB) {
-		return getMockData();
+		return { ...getMockData(), isMockData: true };
 	}
 
 	try {
 		const data = await getStatusPageData(platform.env.DB);
-		return data;
+		return { ...data, isMockData: false };
 	} catch (error) {
 		console.error('Failed to load status data:', error);
 		// Return mock data on error
-		return getMockData();
+		return { ...getMockData(), isMockData: true };
 	}
 };
 
@@ -94,10 +94,10 @@ function getMockData() {
 					{ id: 'comp_cdn', name: 'CDN', slug: 'cdn', description: 'Image and media delivery', display_order: 2, current_status: 'operational' as const, created_at: now.toISOString(), updated_at: now.toISOString() }
 				],
 				updates: [
-					{ id: 'upd_4', incident_id: 'inc_demo_1', status: 'resolved', message: 'The issue has been resolved. Image delivery is back to normal speeds.', created_at: new Date('2026-01-03T11:00:00Z').toISOString() },
-					{ id: 'upd_3', incident_id: 'inc_demo_1', status: 'monitoring', message: 'We\'ve deployed a fix and are monitoring. Image loading times are improving.', created_at: new Date('2026-01-03T10:45:00Z').toISOString() },
-					{ id: 'upd_2', incident_id: 'inc_demo_1', status: 'identified', message: 'Root cause identified: cache invalidation issue following deployment. Working on a fix.', created_at: new Date('2026-01-03T10:30:00Z').toISOString() },
-					{ id: 'upd_1', incident_id: 'inc_demo_1', status: 'investigating', message: 'We\'re investigating reports of slow image loading.', created_at: new Date('2026-01-03T10:15:00Z').toISOString() }
+					{ id: 'upd_4', incident_id: 'inc_demo_1', status: 'resolved' as const, message: 'The issue has been resolved. Image delivery is back to normal speeds.', created_at: new Date('2026-01-03T11:00:00Z').toISOString() },
+					{ id: 'upd_3', incident_id: 'inc_demo_1', status: 'monitoring' as const, message: 'We\'ve deployed a fix and are monitoring. Image loading times are improving.', created_at: new Date('2026-01-03T10:45:00Z').toISOString() },
+					{ id: 'upd_2', incident_id: 'inc_demo_1', status: 'identified' as const, message: 'Root cause identified: cache invalidation issue following deployment. Working on a fix.', created_at: new Date('2026-01-03T10:30:00Z').toISOString() },
+					{ id: 'upd_1', incident_id: 'inc_demo_1', status: 'investigating' as const, message: 'We\'re investigating reports of slow image loading.', created_at: new Date('2026-01-03T10:15:00Z').toISOString() }
 				]
 			}
 		],

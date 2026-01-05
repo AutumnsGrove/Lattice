@@ -6,6 +6,7 @@
 	 * Uses glassmorphism with status-appropriate coloring.
 	 */
 	import { cn } from '$lib/utils/cn';
+	import { formatRelativeTime } from '$lib/utils/date';
 	import type { OverallStatus } from '$lib/types/status';
 	import {
 		CheckCircle,
@@ -74,27 +75,6 @@
 
 	const config = $derived(statusConfig[status]);
 	const StatusIcon = $derived(config.icon);
-
-	// Format last updated time
-	function formatLastUpdated(timestamp: string): string {
-		const date = new Date(timestamp);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffMins = Math.floor(diffMs / 60000);
-
-		if (diffMins < 1) return 'Just now';
-		if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-
-		const diffHours = Math.floor(diffMins / 60);
-		if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-
-		return date.toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: '2-digit'
-		});
-	}
 </script>
 
 <div
@@ -145,7 +125,7 @@
 		</p>
 
 		<p class="text-sm text-foreground-subtle">
-			Last updated: {formatLastUpdated(lastUpdated)}
+			Last updated: {formatRelativeTime(lastUpdated)}
 		</p>
 	</div>
 </div>

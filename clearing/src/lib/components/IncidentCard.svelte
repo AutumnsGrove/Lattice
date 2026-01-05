@@ -5,6 +5,7 @@
 	 * Shows incident title, status, affected components, and timeline of updates.
 	 */
 	import { cn } from '$lib/utils/cn';
+	import { formatTime, formatDuration } from '$lib/utils/date';
 	import type { IncidentStatus, IncidentType, StatusUpdate, StatusComponent } from '$lib/types/status';
 	import { getIncidentStatusLabel } from '$lib/types/status';
 	import {
@@ -63,31 +64,7 @@
 	};
 
 	const TypeIcon = $derived(typeIcons[type]);
-
-	// Format timestamp
-	function formatTime(timestamp: string): string {
-		const date = new Date(timestamp);
-		return date.toLocaleString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: '2-digit'
-		});
-	}
-
-	// Calculate duration
-	function getDuration(): string {
-		const start = new Date(startedAt);
-		const end = resolvedAt ? new Date(resolvedAt) : new Date();
-		const diffMs = end.getTime() - start.getTime();
-		const diffMins = Math.floor(diffMs / 60000);
-
-		if (diffMins < 60) return `${diffMins} min`;
-		const diffHours = Math.floor(diffMins / 60);
-		if (diffHours < 24) return `${diffHours}h ${diffMins % 60}m`;
-		const diffDays = Math.floor(diffHours / 24);
-		return `${diffDays}d ${diffHours % 24}h`;
-	}
+	const duration = $derived(formatDuration(startedAt, resolvedAt));
 </script>
 
 <article class={cn('glass-card overflow-hidden', className)}>
@@ -123,9 +100,9 @@
 			<div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-foreground-muted">
 				<span>{formatTime(startedAt)}</span>
 				{#if resolvedAt}
-					<span class="text-foreground-subtle">Resolved in {getDuration()}</span>
+					<span class="text-foreground-subtle">Resolved in {duration}</span>
 				{:else}
-					<span class="text-orange-500">Ongoing ({getDuration()})</span>
+					<span class="text-orange-500">Ongoing ({duration})</span>
 				{/if}
 			</div>
 

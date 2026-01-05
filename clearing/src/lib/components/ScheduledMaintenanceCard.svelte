@@ -44,7 +44,8 @@
 		};
 	}
 
-	const { date, time } = formatDateRange(maintenance.scheduled_start, maintenance.scheduled_end);
+	// Format date/time range using $derived to react to prop changes
+	const dateTime = $derived(formatDateRange(maintenance.scheduled_start, maintenance.scheduled_end));
 
 	// Check if maintenance is happening soon (within 24 hours)
 	const isSoon = $derived(() => {
@@ -61,7 +62,7 @@
 )}>
 	<div class="flex items-start gap-3">
 		<div class="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
-			<Wrench class="w-5 h-5 text-blue-500" />
+			<Wrench class="w-5 h-5 text-blue-500" aria-hidden="true" />
 		</div>
 
 		<div class="flex-1 min-w-0">
@@ -71,7 +72,7 @@
 					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 whitespace-nowrap">
 						In Progress
 					</span>
-				{:else if isSoon}
+				{:else if isSoon()}
 					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 whitespace-nowrap">
 						Coming Soon
 					</span>
@@ -84,12 +85,12 @@
 
 			<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-foreground-muted">
 				<span class="inline-flex items-center gap-1.5">
-					<Calendar class="w-4 h-4" />
-					{date}
+					<Calendar class="w-4 h-4" aria-hidden="true" />
+					{dateTime.date}
 				</span>
 				<span class="inline-flex items-center gap-1.5">
-					<Clock class="w-4 h-4" />
-					{time}
+					<Clock class="w-4 h-4" aria-hidden="true" />
+					{dateTime.time}
 				</span>
 			</div>
 

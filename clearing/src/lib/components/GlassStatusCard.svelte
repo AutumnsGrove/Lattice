@@ -68,6 +68,8 @@
 		'glass-card p-4 transition-all duration-200 hover:shadow-md',
 		className
 	)}
+	role="listitem"
+	aria-label={`${name}: ${getStatusLabel(status)}`}
 >
 	<div class="flex items-start justify-between gap-3">
 		<div class="flex-1 min-w-0">
@@ -85,7 +87,7 @@
 				'border'
 			)}
 		>
-			<StatusIcon class={cn('w-4 h-4', config.color)} />
+			<StatusIcon class={cn('w-4 h-4', config.color)} aria-hidden="true" />
 			<span class={config.color}>{getStatusLabel(status)}</span>
 		</div>
 	</div>

@@ -5,8 +5,9 @@
  * Users can subscribe to stay informed about platform health.
  */
 import type { RequestHandler } from './$types';
-import { getRecentIncidents, getIncidentUpdates } from '$lib/server/status';
+import { getRecentIncidentsWithUpdates } from '$lib/server/status';
 import { getIncidentStatusLabel } from '$lib/types/status';
+import type { IncidentStatus } from '$lib/types/status';
 
 export const GET: RequestHandler = async ({ platform }) => {
 	const baseUrl = 'https://status.grove.place';
@@ -16,25 +17,29 @@ export const GET: RequestHandler = async ({ platform }) => {
 
 	if (platform?.env?.DB) {
 		try {
-			const incidents = await getRecentIncidents(platform.env.DB, 30);
+			// Use optimized query that fetches incidents with updates in fewer queries
+			const incidents = await getRecentIncidentsWithUpdates(platform.env.DB, 30);
 
 			for (const incident of incidents) {
-				const updates = await getIncidentUpdates(platform.env.DB, incident.id);
-
 				// Create an item for each update
-				for (const update of updates) {
+				for (const update of incident.updates) {
 					const pubDate = new Date(update.created_at).toUTCString();
-					const title = `[${getIncidentStatusLabel(update.status as any)}] ${incident.title}`;
+					// Validate status is a known IncidentStatus before using
+					const statusLabel = isValidIncidentStatus(update.status)
+						? getIncidentStatusLabel(update.status)
+						: update.status;
+					const title = `[${statusLabel}] ${incident.title}`;
 					const link = `${baseUrl}/incidents/${incident.slug}`;
 					const guid = `${incident.id}-${update.id}`;
 
+					// CDATA sections preserve text as-is, no escaping needed inside them
 					items += `
     <item>
-      <title><![CDATA[${escapeXml(title)}]]></title>
+      <title><![CDATA[${title}]]></title>
       <link>${link}</link>
       <guid isPermaLink="false">${guid}</guid>
       <pubDate>${pubDate}</pubDate>
-      <description><![CDATA[${escapeXml(update.message)}]]></description>
+      <description><![CDATA[${update.message}]]></description>
     </item>`;
 				}
 			}
@@ -80,13 +85,8 @@ export const GET: RequestHandler = async ({ platform }) => {
 };
 
 /**
- * Escape special XML characters
+ * Type guard to validate incident status
  */
-function escapeXml(text: string): string {
-	return text
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&apos;');
+function isValidIncidentStatus(status: string): status is IncidentStatus {
+	return ['investigating', 'identified', 'monitoring', 'resolved'].includes(status);
 }

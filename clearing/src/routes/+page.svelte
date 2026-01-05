@@ -12,12 +12,14 @@
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';
 	import IncidentCard from '$lib/components/IncidentCard.svelte';
 	import ScheduledMaintenanceCard from '$lib/components/ScheduledMaintenanceCard.svelte';
+	import { formatDateFull } from '$lib/utils/date';
 	import {
 		Activity,
 		History,
 		Calendar,
 		ChevronDown,
-		BarChart3
+		BarChart3,
+		FlaskConical
 	} from 'lucide-svelte';
 
 	let { data } = $props();
@@ -27,11 +29,7 @@
 		const groups = new Map<string, typeof data.recentIncidents>();
 
 		for (const incident of data.recentIncidents) {
-			const date = new Date(incident.started_at).toLocaleDateString('en-US', {
-				month: 'long',
-				day: 'numeric',
-				year: 'numeric'
-			});
+			const date = formatDateFull(incident.started_at);
 
 			if (!groups.has(date)) {
 				groups.set(date, []);
@@ -55,8 +53,16 @@
 <div class="min-h-screen flex flex-col">
 	<Header />
 
-	<main class="flex-1 py-8 px-4 sm:px-6">
+	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">
+			<!-- Mock data indicator for development -->
+			{#if data.isMockData}
+				<div class="flex items-center justify-center gap-2 py-2 px-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-700 dark:text-amber-300" role="alert">
+					<FlaskConical class="w-4 h-4" aria-hidden="true" />
+					<span>Showing demo data — database not connected</span>
+				</div>
+			{/if}
+
 			<!-- Overall Status Banner -->
 			<GlassStatusBanner
 				status={data.status}
@@ -65,9 +71,9 @@
 
 			<!-- Active Incidents (if any) -->
 			{#if data.activeIncidents.length > 0}
-				<section>
-					<h2 class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-						<Activity class="w-5 h-5 text-orange-500" />
+				<section aria-labelledby="active-incidents-heading">
+					<h2 id="active-incidents-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+						<Activity class="w-5 h-5 text-orange-500" aria-hidden="true" />
 						Active Incidents
 					</h2>
 
@@ -91,9 +97,9 @@
 
 			<!-- Scheduled Maintenance (if any) -->
 			{#if data.scheduledMaintenance.length > 0}
-				<section>
-					<h2 class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-						<Calendar class="w-5 h-5 text-blue-500" />
+				<section aria-labelledby="scheduled-maintenance-heading">
+					<h2 id="scheduled-maintenance-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+						<Calendar class="w-5 h-5 text-blue-500" aria-hidden="true" />
 						Scheduled Maintenance
 					</h2>
 
@@ -112,13 +118,13 @@
 			{/if}
 
 			<!-- Component Status Grid -->
-			<section>
-				<h2 class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-					<Activity class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+			<section aria-labelledby="system-status-heading">
+				<h2 id="system-status-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+					<Activity class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
 					System Status
 				</h2>
 
-				<div class="grid gap-3 sm:grid-cols-2">
+				<div class="grid gap-3 sm:grid-cols-2" role="list" aria-label="Platform component statuses">
 					{#each showAllComponents ? data.components : data.components.slice(0, 4) as component}
 						<GlassStatusCard
 							name={component.name}
@@ -141,9 +147,9 @@
 			</section>
 
 			<!-- Uptime History -->
-			<section>
-				<h2 class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-					<BarChart3 class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+			<section aria-labelledby="uptime-history-heading">
+				<h2 id="uptime-history-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+					<BarChart3 class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
 					90-Day Uptime
 				</h2>
 
@@ -170,9 +176,9 @@
 			</section>
 
 			<!-- Past Incidents -->
-			<section>
-				<h2 class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-					<History class="w-5 h-5 text-foreground-muted" />
+			<section aria-labelledby="past-incidents-heading">
+				<h2 id="past-incidents-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+					<History class="w-5 h-5 text-foreground-muted" aria-hidden="true" />
 					Past Incidents (30 days)
 				</h2>
 

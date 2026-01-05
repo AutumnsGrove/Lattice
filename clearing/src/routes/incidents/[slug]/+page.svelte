@@ -22,7 +22,7 @@
 	} from 'lucide-svelte';
 
 	let { data } = $props();
-	const { incident } = data;
+	const incident = $derived(data.incident);
 
 	// Type icons
 	const typeIcons = {
@@ -40,7 +40,7 @@
 		resolved: CheckCircle
 	};
 
-	const TypeIcon = typeIcons[incident.type as keyof typeof typeIcons] || AlertCircle;
+	const TypeIcon = $derived(typeIcons[incident.type as keyof typeof typeIcons] || AlertCircle);
 
 	// Format timestamp
 	function formatTime(timestamp: string): string {
@@ -55,8 +55,8 @@
 		});
 	}
 
-	// Calculate duration
-	function getDuration(): string {
+	// Calculate duration as a derived value
+	const duration = $derived(() => {
 		const start = new Date(incident.started_at);
 		const end = incident.resolved_at ? new Date(incident.resolved_at) : new Date();
 		const diffMs = end.getTime() - start.getTime();
@@ -70,7 +70,7 @@
 		}
 		const diffDays = Math.floor(diffHours / 24);
 		return `${diffDays} day${diffDays !== 1 ? 's' : ''} ${diffHours % 24}h`;
-	}
+	});
 
 	// Impact label
 	const impactLabels = {
@@ -143,7 +143,7 @@
 							<div>
 								<span class="text-foreground-subtle">Duration</span>
 								<p class="text-foreground">
-									{getDuration()}
+									{duration()}
 									{#if !incident.resolved_at}
 										<span class="text-orange-500">(ongoing)</span>
 									{/if}

@@ -7,6 +7,7 @@
 	 * Hover reveals details about specific days.
 	 */
 	import { cn } from '$lib/utils/cn';
+	import { formatDateShort } from '$lib/utils/date';
 	import type { ComponentStatus, DailyStatus } from '$lib/types/status';
 	import { getStatusLabel } from '$lib/types/status';
 
@@ -33,16 +34,6 @@
 			maintenance: 'bg-blue-500'
 		};
 		return colors[status];
-	}
-
-	// Format date for tooltip
-	function formatDate(dateStr: string): string {
-		const date = new Date(dateStr);
-		return date.toLocaleDateString('en-US', {
-			weekday: 'short',
-			month: 'short',
-			day: 'numeric'
-		});
 	}
 
 	// Handle mouse events for tooltip
@@ -90,7 +81,7 @@
 						day.status === 'operational' ? 'h-full' : 'h-full'
 					)}
 					style="height: 100%"
-					aria-label={`${formatDate(day.date)}: ${getStatusLabel(day.status)}`}
+					aria-label={`${formatDateShort(day.date)}: ${getStatusLabel(day.status)}`}
 					onmouseenter={(e) => handleMouseEnter(day, e)}
 					onmouseleave={handleMouseLeave}
 					onfocus={(e) => handleMouseEnter(day, e as unknown as MouseEvent)}
@@ -113,7 +104,7 @@
 		class="fixed z-50 px-3 py-2 text-sm bg-slate-900 dark:bg-slate-800 text-white rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-full"
 		style="left: {tooltipPosition.x}px; top: {tooltipPosition.y}px;"
 	>
-		<div class="font-medium">{formatDate(hoveredDay.date)}</div>
+		<div class="font-medium">{formatDateShort(hoveredDay.date)}</div>
 		<div class="text-slate-300">{getStatusLabel(hoveredDay.status)}</div>
 		{#if hoveredDay.incidentCount > 0}
 			<div class="text-slate-400 text-xs mt-0.5">
