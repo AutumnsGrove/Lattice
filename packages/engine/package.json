@@ -154,6 +154,15 @@
       "types": "./dist/ui/vineyard/index.d.ts",
       "svelte": "./dist/ui/vineyard/index.js",
       "default": "./dist/ui/vineyard/index.js"
+    },
+    "./ui/terrarium": {
+      "types": "./dist/ui/components/terrarium/index.d.ts",
+      "svelte": "./dist/ui/components/terrarium/index.js",
+      "default": "./dist/ui/components/terrarium/index.js"
+    },
+    "./config/terrarium": {
+      "types": "./dist/config/terrarium.d.ts",
+      "default": "./dist/config/terrarium.js"
     }
   },
   "files": [
@@ -226,6 +235,7 @@
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
     "svelte-sonner": "^1.0.7",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "dom-to-image-more": "^3.5.0"
   }
 }
