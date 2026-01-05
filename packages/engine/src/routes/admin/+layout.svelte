@@ -1,15 +1,15 @@
 <script>
-  import { Toast } from "$lib/ui/components/ui";
+  import { Toast, Logo } from "$lib/ui/components/ui";
   import {
     LayoutDashboard,
     FileText,
     FileStack,
     Image,
-    Mail,
     BarChart3,
     Calendar,
     Settings,
-    ChevronLeft
+    ChevronLeft,
+    LogOut
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -56,7 +56,16 @@
 
   <aside class="sidebar glass-sidebar" class:open={sidebarOpen} class:collapsed={sidebarCollapsed}>
     <div class="sidebar-header">
-      <h2 class:hidden={sidebarCollapsed}>Admin Panel</h2>
+      {#if sidebarCollapsed}
+        <a href="/admin" class="sidebar-logo-link" title="Arbor Dashboard">
+          <Logo class="sidebar-logo" />
+        </a>
+      {:else}
+        <div class="sidebar-brand">
+          <Logo class="sidebar-logo-small" />
+          <h2>Arbor</h2>
+        </div>
+      {/if}
       <button
         class="collapse-btn"
         onclick={toggleCollapse}
@@ -100,12 +109,23 @@
       </a>
     </nav>
 
-    <div class="sidebar-footer" class:hidden={sidebarCollapsed}>
-      <div class="user-info">
-        <span class="email">{data.user.email}</span>
+    {#if !sidebarCollapsed}
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <span class="email">{data.user.email}</span>
+        </div>
+        <a href="/auth/logout" class="logout-btn">
+          <LogOut class="logout-icon" />
+          <span>Logout</span>
+        </a>
       </div>
-      <a href="/auth/logout" class="logout-btn">Logout</a>
-    </div>
+    {:else}
+      <div class="sidebar-footer-collapsed">
+        <a href="/auth/logout" class="logout-btn-icon" title="Logout">
+          <LogOut class="logout-icon" />
+        </a>
+      </div>
+    {/if}
   </aside>
 
   <main class="content" class:expanded={sidebarCollapsed}>
@@ -126,15 +146,15 @@
 
   /* Glass sidebar styling */
   .glass-sidebar {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(34, 197, 94, 0.15);
   }
 
   :global(.dark) .glass-sidebar {
-    background: rgba(30, 41, 59, 0.75);
-    border-color: rgba(71, 85, 105, 0.3);
+    background: rgba(20, 30, 25, 0.92);
+    border-color: rgba(74, 124, 89, 0.25);
   }
 
   /* Glass surface for mobile header */
@@ -253,8 +273,8 @@
   }
 
   .sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -263,7 +283,13 @@
   }
 
   :global(.dark) .sidebar-header {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(74, 124, 89, 0.2);
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .sidebar-header h2 {
@@ -272,6 +298,34 @@
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
+    color: var(--color-primary);
+  }
+
+  :global(.sidebar-logo) {
+    width: 2rem;
+    height: 2.5rem;
+  }
+
+  :global(.sidebar-logo-small) {
+    width: 1.5rem;
+    height: 1.875rem;
+  }
+
+  .sidebar-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar-logo-link:hover {
+    opacity: 0.8;
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 1rem 0.5rem;
   }
 
   .collapse-btn {
@@ -317,12 +371,12 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
     transition: background 0.2s, color 0.2s;
-    margin: 0 0.5rem;
+    margin: 0.125rem 0.5rem;
   }
 
   .sidebar.collapsed .nav-item {
@@ -332,12 +386,17 @@
   }
 
   .nav-item:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(34, 197, 94, 0.08);
     color: var(--color-primary);
   }
 
   :global(.dark) .nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(74, 222, 128, 0.12);
+    color: #86efac;
+  }
+
+  :global(.dark) .nav-item {
+    color: rgba(167, 199, 183, 0.85);
   }
 
   .nav-item :global(.nav-icon) {
@@ -356,14 +415,26 @@
   }
 
   .sidebar-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(34, 197, 94, 0.1);
     transition: border-color 0.3s ease;
     flex-shrink: 0;
   }
 
   :global(.dark) .sidebar-footer {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(74, 124, 89, 0.2);
+  }
+
+  .sidebar-footer-collapsed {
+    padding: 0.75rem;
+    border-top: 1px solid rgba(34, 197, 94, 0.1);
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  :global(.dark) .sidebar-footer-collapsed {
+    border-color: rgba(74, 124, 89, 0.2);
   }
 
   .user-info {
@@ -371,17 +442,23 @@
   }
 
   .email {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--color-text-muted);
     word-break: break-all;
     transition: color 0.3s ease;
   }
 
+  :global(.dark) .email {
+    color: rgba(167, 199, 183, 0.7);
+  }
+
   .logout-btn {
-    display: block;
-    text-align: center;
-    padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(34, 197, 94, 0.08);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -390,16 +467,50 @@
   }
 
   :global(.dark) .logout-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(74, 222, 128, 0.1);
+    color: rgba(167, 199, 183, 0.85);
   }
 
   .logout-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--color-text);
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-primary);
   }
 
   :global(.dark) .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(74, 222, 128, 0.18);
+    color: #86efac;
+  }
+
+  .logout-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: rgba(34, 197, 94, 0.08);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: var(--border-radius-button);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  :global(.dark) .logout-btn-icon {
+    background: rgba(74, 222, 128, 0.1);
+    color: rgba(167, 199, 183, 0.85);
+  }
+
+  .logout-btn-icon:hover {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .logout-btn-icon:hover {
+    background: rgba(74, 222, 128, 0.18);
+    color: #86efac;
+  }
+
+  :global(.logout-icon) {
+    width: 1rem;
+    height: 1rem;
   }
 
   .content {

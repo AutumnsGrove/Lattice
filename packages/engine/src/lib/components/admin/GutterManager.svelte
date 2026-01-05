@@ -4,6 +4,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
+  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X, Trash2 } from "lucide-svelte";
 
   /**
    * @typedef {Object} GutterItem
@@ -122,7 +123,7 @@
   /** @param {number} index */
   function deleteItem(index) {
     gutterItems = gutterItems.filter((/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index);
-    toast.success("Gutter item deleted");
+    toast.success("Vine removed");
   }
 
   /**
@@ -249,38 +250,38 @@
     return "";
   }
 
-  /** @param {string} type */
-  function getTypeIcon(type) {
-    switch (type) {
-      case "comment":
-        return "💬";
-      case "photo":
-        return "🖼️";
-      case "gallery":
-        return "🎞️";
-      default:
-        return "📌";
-    }
-  }
 </script>
 
-<div class="gutter-manager">
-  <div class="gutter-header">
-    <h3>Gutter Content</h3>
-    <button class="add-btn" onclick={openAddModal}>+ Add Item</button>
+<div class="vines-manager">
+  <div class="vines-header">
+    <h3>Vines</h3>
+    <button class="add-btn" onclick={openAddModal}>
+      <Plus class="btn-icon" />
+      <span>Add Item</span>
+    </button>
   </div>
 
   {#if gutterItems.length === 0}
     <div class="empty-state">
-      <p>No gutter items yet.</p>
+      <p>No vines yet.</p>
       <p class="hint">Add comments, images, or galleries that appear alongside your content.</p>
     </div>
   {:else}
-    <div class="gutter-list">
+    <div class="vines-list">
       {#each gutterItems as item, index (index)}
-        <div class="gutter-item">
+        <div class="vine-item">
           <div class="item-header">
-            <span class="item-type">{getTypeIcon(item.type)}</span>
+            <span class="item-type">
+              {#if item.type === "comment"}
+                <MessageSquare class="type-icon" />
+              {:else if item.type === "photo"}
+                <ImageIcon class="type-icon" />
+              {:else if item.type === "gallery"}
+                <Images class="type-icon" />
+              {:else}
+                <Pin class="type-icon" />
+              {/if}
+            </span>
             <span class="item-anchor" title={item.anchor}>{item.anchor || "No anchor"}</span>
             <div class="item-actions">
               <button
@@ -288,23 +289,31 @@
                 onclick={() => moveItem(index, -1)}
                 disabled={index === 0}
                 title="Move up"
-              >↑</button>
+              >
+                <ChevronUp class="action-icon" />
+              </button>
               <button
                 class="action-btn"
                 onclick={() => moveItem(index, 1)}
                 disabled={index === gutterItems.length - 1}
                 title="Move down"
-              >↓</button>
+              >
+                <ChevronDown class="action-icon" />
+              </button>
               <button
                 class="action-btn"
                 onclick={() => openEditModal(index)}
                 title="Edit"
-              >✎</button>
+              >
+                <Pencil class="action-icon" />
+              </button>
               <button
                 class="action-btn delete"
                 onclick={() => deleteItem(index)}
                 title="Delete"
-              >×</button>
+              >
+                <X class="action-icon" />
+              </button>
             </div>
           </div>
           <div class="item-preview">{getItemPreview(item)}</div>
@@ -315,7 +324,7 @@
 </div>
 
 <!-- Add/Edit Modal -->
-<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Gutter Item" : "Add Gutter Item"}>
+<Dialog bind:open={showAddModal} title={editingIndex !== null ? "Edit Vine" : "Add Vine"}>
   {#snippet children()}
     <div class="form-group">
       <label for="item-type">Type</label>
@@ -500,49 +509,88 @@
 </Dialog>
 
 <style>
-  .gutter-manager {
-    background: #1e1e1e;
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
+  .vines-manager {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(34, 197, 94, 0.15);
+    border-radius: 12px;
     overflow: hidden;
   }
 
-  .gutter-header {
+  :global(.dark) .vines-manager {
+    background: rgba(20, 30, 25, 0.92);
+    border-color: rgba(74, 124, 89, 0.25);
+  }
+
+  .vines-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: #252526;
-    border-bottom: 1px solid #3a3a3a;
+    padding: 0.875rem 1rem;
+    background: rgba(34, 197, 94, 0.05);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.1);
   }
 
-  .gutter-header h3 {
+  :global(.dark) .vines-header {
+    background: rgba(74, 222, 128, 0.08);
+    border-color: rgba(74, 124, 89, 0.2);
+  }
+
+  .vines-header h3 {
     margin: 0;
-    font-size: 0.9rem;
-    color: #8bc48b;
+    font-size: 0.95rem;
+    color: var(--color-primary);
     font-weight: 600;
   }
 
+  :global(.dark) .vines-header h3 {
+    color: #86efac;
+  }
+
   .add-btn {
-    padding: 0.35rem 0.75rem;
-    background: #2d4a2d;
-    color: #a8dca8;
-    border: 1px solid #3d5a3d;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--border-radius-button);
     font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
   }
 
+  :global(.dark) .add-btn {
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.2);
+    color: #86efac;
+  }
+
   .add-btn:hover {
-    background: #3d5a3d;
-    color: #c8f0c8;
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+
+  :global(.dark) .add-btn:hover {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: rgba(74, 222, 128, 0.35);
+  }
+
+  :global(.btn-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   .empty-state {
     padding: 2rem 1rem;
     text-align: center;
-    color: #6a6a6a;
+    color: var(--color-text-muted);
+  }
+
+  :global(.dark) .empty-state {
+    color: rgba(167, 199, 183, 0.7);
   }
 
   .empty-state p {
@@ -551,19 +599,37 @@
 
   .empty-state .hint {
     font-size: 0.85rem;
-    color: #5a5a5a;
+    color: var(--color-text-subtle);
   }
 
-  .gutter-list {
+  :global(.dark) .empty-state .hint {
+    color: rgba(167, 199, 183, 0.5);
+  }
+
+  .vines-list {
     padding: 0.5rem;
   }
 
-  .gutter-item {
-    background: #252526;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    padding: 0.5rem 0.75rem;
+  .vine-item {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
     margin-bottom: 0.5rem;
+    transition: border-color 0.15s ease;
+  }
+
+  :global(.dark) .vine-item {
+    background: rgba(30, 45, 35, 0.6);
+    border-color: rgba(74, 124, 89, 0.2);
+  }
+
+  .vine-item:hover {
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+
+  :global(.dark) .vine-item:hover {
+    border-color: rgba(74, 222, 128, 0.3);
   }
 
   .item-header {
@@ -573,38 +639,70 @@
   }
 
   .item-type {
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .item-type {
+    color: #86efac;
+  }
+
+  :global(.type-icon) {
+    width: 1rem;
+    height: 1rem;
   }
 
   .item-anchor {
     flex: 1;
     font-family: monospace;
     font-size: 0.8rem;
-    color: #9d9d9d;
+    color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  :global(.dark) .item-anchor {
+    color: rgba(167, 199, 183, 0.8);
+  }
+
   .item-actions {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
 
   .action-btn {
-    padding: 0.2rem 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
     background: transparent;
     border: 1px solid transparent;
-    color: #6a6a6a;
-    border-radius: 3px;
+    color: var(--color-text-subtle);
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85rem;
     transition: all 0.15s ease;
   }
 
+  :global(.dark) .action-btn {
+    color: rgba(167, 199, 183, 0.5);
+  }
+
+  :global(.action-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
   .action-btn:hover:not(:disabled) {
-    background: #3a3a3a;
-    color: #d4d4d4;
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .action-btn:hover:not(:disabled) {
+    background: rgba(74, 222, 128, 0.15);
+    color: #86efac;
   }
 
   .action-btn:disabled {
@@ -613,17 +711,26 @@
   }
 
   .action-btn.delete:hover {
-    background: rgba(215, 58, 73, 0.2);
-    color: #f85149;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  :global(.dark) .action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
   }
 
   .item-preview {
     margin-top: 0.35rem;
     font-size: 0.8rem;
-    color: #6a6a6a;
+    color: var(--color-text-subtle);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  :global(.dark) .item-preview {
+    color: rgba(167, 199, 183, 0.5);
   }
 
   /* Form Styles */
