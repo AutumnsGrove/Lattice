@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Blocking script to prevent FOUC (flash of unstyled content) -->
+		<script>
+			try {
+				const stored = localStorage.getItem('grove-theme');
+				// Default to dark if no stored preference
+				if (stored === 'dark' || !stored) {
+					document.documentElement.classList.add('dark');
+				}
+			} catch (e) {
+				// localStorage unavailable, default to dark
+				document.documentElement.classList.add('dark');
+			}
+		</script>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="Grove Status - A clearing in the forest where you can see what's happening" />
+		<meta name="theme-color" content="#16a34a" />
+
+		<!-- Preconnect to CDN for faster font loading -->
+		<link rel="preconnect" href="https://cdn.grove.place" crossorigin />
+		<link rel="dns-prefetch" href="https://cdn.grove.place" />
+
+		<!-- Favicons -->
+		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="32x32" href="%sveltekit.assets%/favicon-32x32.png" />
+
+		<!-- Apple Touch Icon -->
+		<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
+
+		<!-- RSS Feed -->
+		<link rel="alternate" type="application/rss+xml" title="Grove Status Updates" href="/feed" />
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

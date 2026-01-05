@@ -1,6 +1,7 @@
 packages:
   - 'packages/*'
   - 'landing'
+  - 'clearing'
   - 'domains'
   - 'plant'
   - 'vineyard'
