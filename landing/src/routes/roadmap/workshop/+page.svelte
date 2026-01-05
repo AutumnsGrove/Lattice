@@ -6,6 +6,9 @@
 	// Centralized icon registry - single source of truth for all icons
 	import { toolIcons } from '$lib/utils/icons';
 
+	// Additional Lucide icons for spec/github links
+	import { FileText, Github } from 'lucide-svelte';
+
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
 

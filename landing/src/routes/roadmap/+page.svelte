@@ -23,7 +23,8 @@
 		Zap,
 		Accessibility,
 		Smartphone,
-		Puzzle
+		Puzzle,
+		Sprout
 	} from 'lucide-svelte';
 
 	// Import nature assets from engine package
