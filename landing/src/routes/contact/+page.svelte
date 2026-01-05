@@ -34,7 +34,7 @@
 			<div class="w-32 h-32 mx-auto mb-6">
 				<img
 					src="https://cdn.grove.place/profile-mjxaqbpu.jpeg"
-					alt="Photo of Autumn, creator of Grove"
+					alt="Autumn, creator of Grove"
 					class="w-full h-full rounded-full object-cover border-2 border-accent-subtle shadow-sm"
 				/>
 			</div>

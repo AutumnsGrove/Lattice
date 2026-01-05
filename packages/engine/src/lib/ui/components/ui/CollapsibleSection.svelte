@@ -11,6 +11,8 @@
 	let {
 		title,
 		defaultOpen = false,
+		open: externalOpen,
+		ontoggle,
 		children,
 		class: className = '',
 		...restProps
@@ -18,8 +20,16 @@
 
 	let isOpen = $state(defaultOpen);
 
+	// Sync with external open prop if provided
+	$effect(() => {
+		if (externalOpen !== undefined) {
+			isOpen = externalOpen;
+		}
+	});
+
 	function toggle() {
 		isOpen = !isOpen;
+		ontoggle?.();
 	}
 </script>
 

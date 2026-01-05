@@ -124,11 +124,19 @@
 		}
 		cycleZoom();
 	}
+
+	// Keyboard handler for accessibility
+	function handleKeydown(/** @type {KeyboardEvent} */ event) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			cycleZoom();
+		}
+	}
 </script>
 
 <svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} />
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events a11y_no_noninteractive_element_to_interactive_role -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <img
 	{src}
 	{alt}
@@ -141,8 +149,10 @@
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
 	onclick={handleClick}
-	role="button"
+	onkeydown={handleKeydown}
 	tabindex="0"
+	role="button"
+	aria-label="Click to zoom image"
 />
 
 <style>

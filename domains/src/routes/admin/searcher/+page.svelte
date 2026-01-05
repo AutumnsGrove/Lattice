@@ -1251,6 +1251,7 @@
 							type="button"
 							role="switch"
 							aria-checked={diverseTlds}
+							aria-label="Toggle diverse TLDs"
 							onclick={() => diverseTlds = !diverseTlds}
 							disabled={isFormDisabled}
 							class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 {diverseTlds ? 'bg-domain-600' : 'bg-bark/20'}"
