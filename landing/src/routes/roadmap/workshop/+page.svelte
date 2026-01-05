@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass } from 'lucide-svelte';
+	import { Search, Pickaxe, Github, Mail, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Video, Network, Wind, Eye, Bird, LayoutDashboard, Activity, UserPlus, MessageCircle, Shield, BarChart3, Grape, Boxes, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Sparkles, Terminal, Database, Compass, Layers } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -47,6 +47,7 @@
 		terminal: Terminal,
 		database: Database,
 		compass: Compass,
+		layers: Layers,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -148,6 +149,15 @@
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
 					spec: '/knowledge/specs/foliage-project-spec'
+				},
+				{
+					name: 'Terrarium',
+					tagline: 'Creative Canvas',
+					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
+					status: 'planned',
+					icon: 'layers',
+					integration: 'Creative tool for building blog decorations',
+					spec: '/knowledge/specs/terrarium-spec'
 				},
 				{
 					name: 'Rings',
