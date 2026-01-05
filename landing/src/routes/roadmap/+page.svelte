@@ -46,7 +46,7 @@
 		Crown,
 		Paintbrush,
 		Users,
-		UserRoundCheck,
+		ShieldUser,
 		// Golden Hour icons
 		Gem,
 		Zap,
@@ -746,7 +746,7 @@
 							{:else if feature.icon === 'users'}
 								<Users class="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
 							{:else if feature.icon === 'shield'}
-								<UserRoundCheck class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
+								<ShieldUser class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
 							{:else}
 								<Circle class="w-5 h-5 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
 							{/if}

@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
-	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, UserRoundCheck, MessagesSquare, BrickWall } from 'lucide-svelte';
+	import { Pickaxe, Github, HardDrive, Palette, ShieldCheck, Cloud, Archive, Upload, Bird, LayoutDashboard, Activity, UserPlus, BarChart3, Grape, Users, Map, HelpCircle, FileText, Triangle, Gauge, Radar, Terminal, Database, Layers, PencilRuler, SwatchBook, Codesandbox, Webhook, Spool, CircuitBoard, Binoculars, LandPlot, Projector, SearchCode, Mailbox, MapPinPlus, ShieldUser, MessagesSquare, BrickWallShield } from 'lucide-svelte';
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
@@ -33,7 +33,7 @@
 		activity: Activity,
 		landplot: LandPlot,
 		messagessquare: MessagesSquare,
-		shielduser: UserRoundCheck,
+		shielduser: ShieldUser,
 		barchart: BarChart3,
 		grape: Grape,
 		codesandbox: Codesandbox,
@@ -50,7 +50,7 @@
 		layers: Layers,
 		pencilruler: PencilRuler,
 		swatchbook: SwatchBook,
-		brickwall: BrickWall,
+		brickwallshield: BrickWallShield,
 	};
 
 	function getCardClass(categoryName: string) {
@@ -353,7 +353,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'brickwall',
+					icon: 'brickwallshield',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec'
 				},
