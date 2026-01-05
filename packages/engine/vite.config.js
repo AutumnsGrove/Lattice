@@ -21,7 +21,8 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.{test,spec}.{js,ts}"],
-    environment: "node",
+    // Use jsdom for component tests, node for server tests
+    environment: "jsdom",
     globals: true,
     coverage: {
       provider: "v8",

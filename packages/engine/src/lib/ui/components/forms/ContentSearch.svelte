@@ -1,3 +1,57 @@
+<!--
+	ContentSearch Component
+
+	A reusable, accessible search component with debouncing, URL synchronization, and custom filtering.
+	Part of the Grove UI design system - "a place to Be"
+
+	@example Basic usage
+	```svelte
+	<ContentSearch
+		items={posts}
+		filterFn={(post, query) => post.title.toLowerCase().includes(query.toLowerCase())}
+		bind:searchQuery
+		placeholder="Search posts..."
+	/>
+	```
+
+	@example With URL sync and custom filters
+	```svelte
+	<ContentSearch
+		items={docs}
+		filterFn={filterDoc}
+		bind:searchQuery
+		syncWithUrl={true}
+		onSearchChange={(query, results) => filteredResults = results}
+	>
+		{#snippet children()}
+			<div class="custom-filters">
+				Add tag filters, date filters, etc. here
+			</div>
+		{/snippet}
+	</ContentSearch>
+	```
+
+	@example With pre-computed lowercase fields (performance optimization)
+	```svelte
+	<script>
+		// Pre-compute lowercase fields for better performance
+		let postsWithLowercase = $derived.by(() => {
+			return posts.map(post => ({
+				...post,
+				titleLower: post.title.toLowerCase(),
+				tagsLower: post.tags.map(t => t.toLowerCase())
+			}));
+		});
+
+		function filterPost(post, query) {
+			const q = query.toLowerCase();
+			return post.titleLower.includes(q) || post.tagsLower.some(tag => tag.includes(q));
+		}
+	</script>
+
+	<ContentSearch items={postsWithLowercase} filterFn={filterPost} />
+	```
+-->
 <script lang="ts" generics="T extends Record<string, any>">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -48,6 +102,11 @@
 		children
 	}: Props = $props();
 
+	// Generate unique ID for accessibility
+	const searchId = `content-search-${Math.random().toString(36).substring(2, 9)}`;
+	const clearButtonId = `${searchId}-clear`;
+	const resultsId = `${searchId}-results`;
+
 	// Initialize from URL if syncing
 	$effect(() => {
 		if (syncWithUrl && typeof window !== 'undefined') {
@@ -63,7 +122,15 @@
 	let debouncedQuery = $state(searchQuery);
 	let debounceTimer: ReturnType<typeof setTimeout> | null = $state(null);
 
-	/** @param {Event} event */
+	// Cleanup timer on component destruction
+	$effect(() => {
+		return () => {
+			if (debounceTimer) {
+				clearTimeout(debounceTimer);
+			}
+		};
+	});
+
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
 		searchQuery = target.value;
@@ -97,13 +164,19 @@
 		}
 	});
 
-	// Update URL when search query changes
+	// Update URL when search query changes (optimized to avoid unnecessary navigation)
 	function updateUrl() {
 		if (!syncWithUrl) return;
 
+		const currentQuery = $page.url.searchParams.get(queryParam) || '';
+		const newQuery = searchQuery.trim();
+
+		// Skip navigation if query hasn't actually changed
+		if (currentQuery === newQuery) return;
+
 		const params = new URLSearchParams($page.url.searchParams);
-		if (searchQuery.trim()) {
-			params.set(queryParam, searchQuery.trim());
+		if (newQuery) {
+			params.set(queryParam, newQuery);
 		} else {
 			params.delete(queryParam);
 		}
@@ -120,15 +193,12 @@
 			debounceTimer = null;
 		}
 		if (syncWithUrl) {
-			const params = new URLSearchParams($page.url.searchParams);
-			params.delete(queryParam);
-			const newUrl = params.toString() ? `?${params.toString()}` : $page.url.pathname;
-			goto(newUrl, { replaceState: true });
+			updateUrl();
 		}
 	}
 </script>
 
-<div class="content-search-wrapper {wrapperClass}">
+<div class="content-search-wrapper {wrapperClass}" role="search">
 	<div class="content-search-input-container">
 		{#if showIcon}
 			<svg
@@ -142,13 +212,18 @@
 				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
+				aria-hidden="true"
 			>
 				<circle cx="11" cy="11" r="8"></circle>
 				<path d="m21 21-4.3-4.3"></path>
 			</svg>
 		{/if}
 		<input
-			type="text"
+			type="search"
+			id={searchId}
+			role="searchbox"
+			aria-label={placeholder}
+			aria-describedby={showClearButton && searchQuery ? clearButtonId : undefined}
 			{placeholder}
 			value={searchQuery}
 			oninput={handleInput}
@@ -157,11 +232,12 @@
 		{#if showClearButton && searchQuery}
 			<button
 				type="button"
+				id={clearButtonId}
 				onclick={clearSearch}
 				class="content-search-clear"
-				aria-label="Clear search"
+				aria-label="Clear search query"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<path d="M18 6 6 18"></path>
 					<path d="m6 6 12 12"></path>
 				</svg>
@@ -174,6 +250,13 @@
 			{@render children()}
 		</div>
 	{/if}
+
+	<!-- Screen reader announcement for search results -->
+	<div id={resultsId} role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+		{#if debouncedQuery}
+			Found {filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''} for "{debouncedQuery}"
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -236,8 +319,26 @@
 		background-color: var(--light-bg-secondary, #f3f4f6);
 	}
 
+	.content-search-clear:focus {
+		outline: 2px solid var(--accent, #2c5f2d);
+		outline-offset: 2px;
+	}
+
 	.content-search-filters {
 		margin-top: 1rem;
+	}
+
+	/* Visually hidden but accessible to screen readers */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
 	}
 
 	/* Dark mode support */
@@ -266,5 +367,9 @@
 	:global(.dark) .content-search-clear:hover {
 		color: var(--dark-text-primary, #f9fafb);
 		background-color: var(--dark-bg-tertiary, #111827);
+	}
+
+	:global(.dark) .content-search-clear:focus {
+		outline-color: var(--accent, #4ade80);
 	}
 </style>
