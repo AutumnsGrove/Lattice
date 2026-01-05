@@ -518,7 +518,16 @@
 									{#if tool.domain}
 										<div class="flex items-center gap-2 text-sm">
 											<span class="text-foreground-faint">Domain:</span>
-											<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted">{tool.domain}</code>
+											{#if tool.domain.includes('{you}')}
+												<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted">{tool.domain}</code>
+											{:else}
+												<a
+													href="https://{tool.domain}"
+													target="_blank"
+													rel="noopener noreferrer"
+													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors font-mono text-sm"
+												>{tool.domain}</a>
+											{/if}
 										</div>
 									{/if}
 									<div class="text-sm text-foreground-faint">

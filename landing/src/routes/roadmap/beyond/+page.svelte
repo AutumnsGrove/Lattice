@@ -148,7 +148,12 @@
 						<div class="pt-4 border-t border-slate-700 space-y-2">
 							<div class="flex items-center gap-2 text-sm">
 								<span class="text-slate-500">Domain:</span>
-								<code class="px-2 py-0.5 rounded bg-slate-700 text-slate-300">{tool.domain}</code>
+								<a
+									href="https://{tool.domain}"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="px-2 py-0.5 rounded bg-slate-700 text-slate-300 hover:text-white hover:bg-slate-600 transition-colors font-mono text-sm"
+								>{tool.domain}</a>
 							</div>
 							<div class="flex items-center gap-2 text-sm">
 								<span class="text-slate-500">Stack:</span>
