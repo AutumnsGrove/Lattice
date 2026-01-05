@@ -52,6 +52,7 @@ Actual usage is closer to 95% for Grove, but maintaining conservative estimate f
 | Field | Value |
 |-------|-------|
 | **Domain** | grove.place |
+| **Registrar** | Cloudflare (at-cost pricing, no markup) |
 | **Cost** | $17/year |
 | **Renewal Date** | December 2025 |
 | **Business Use** | 100% |
