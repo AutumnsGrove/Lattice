@@ -51,12 +51,15 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * Verifies that animations are actually paused on an element.
+ * Verifies that animations are actually paused on an element and all its children.
  * Uses getComputedStyle to check animation-play-state.
  */
 function verifyAnimationsPaused(element: HTMLElement): boolean {
-	const style = getComputedStyle(element);
-	return style.animationPlayState === 'paused' || style.animationPlayState === '';
+	const allElements = [element, ...Array.from(element.querySelectorAll<HTMLElement>('*'))];
+	return allElements.every((el) => {
+		const style = getComputedStyle(el);
+		return style.animationPlayState === 'paused' || style.animationPlayState === '';
+	});
 }
 
 /**

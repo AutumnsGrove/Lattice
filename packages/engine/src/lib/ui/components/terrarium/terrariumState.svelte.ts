@@ -229,6 +229,26 @@ export function createTerrariumState() {
 		}
 
 		scene.updatedAt = new Date().toISOString();
+
+		// Normalize z-indices periodically to prevent drift
+		normalizeZIndices();
+	}
+
+	/**
+	 * Normalizes z-indices to sequential values (0, 1, 2, ...) to prevent
+	 * accumulation of very large or negative values over time.
+	 */
+	function normalizeZIndices(): void {
+		if (scene.assets.length === 0) return;
+
+		// Sort by current z-index, then reassign sequential values
+		const sorted = [...scene.assets].sort((a, b) => a.zIndex - b.zIndex);
+		sorted.forEach((asset, index) => {
+			const original = scene.assets.find((a) => a.id === asset.id);
+			if (original) {
+				original.zIndex = index;
+			}
+		});
 	}
 
 	function setScene(newScene: TerrariumScene): void {
@@ -243,6 +263,9 @@ export function createTerrariumState() {
 		};
 		selectedAssetId = null;
 		panOffset = { x: 0, y: 0 };
+
+		// Normalize z-indices when loading external data
+		normalizeZIndices();
 	}
 
 	function resetScene(): void {
