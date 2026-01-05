@@ -93,6 +93,12 @@ export function createTerrariumState() {
 	);
 
 	function addAsset(componentName: string, category: AssetCategory, position: Point): string {
+		// Guard: enforce complexity budget
+		if (!canAddAsset) {
+			console.warn('Cannot add asset: complexity budget exceeded');
+			return '';
+		}
+
 		const id = crypto.randomUUID();
 		const maxZ = getMaxZIndex(scene.assets);
 

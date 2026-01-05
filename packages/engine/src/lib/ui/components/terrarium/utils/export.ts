@@ -51,15 +51,31 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
+ * Maximum allowed filename length after sanitization.
+ */
+const MAX_FILENAME_LENGTH = 100;
+
+/**
  * Sanitizes a filename by converting to lowercase and replacing
  * non-alphanumeric characters with hyphens.
+ * Also truncates to a maximum length to prevent filesystem issues.
  */
 export function sanitizeFilename(name: string): string {
-	return name
+	const sanitized = name
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/-+/g, '-')
 		.replace(/^-|-$/g, '');
+
+	// Truncate to max length, ensuring we don't cut in the middle of a word
+	if (sanitized.length > MAX_FILENAME_LENGTH) {
+		const truncated = sanitized.slice(0, MAX_FILENAME_LENGTH);
+		// Find last hyphen to avoid cutting words
+		const lastHyphen = truncated.lastIndexOf('-');
+		return lastHyphen > MAX_FILENAME_LENGTH / 2 ? truncated.slice(0, lastHyphen) : truncated;
+	}
+
+	return sanitized;
 }
 
 /**

@@ -80,13 +80,19 @@
 		showExportDialog = true;
 	}
 
-	function handleSave() {
+	function handleSave(): boolean {
 		try {
 			const sceneJson = JSON.stringify(terrarium.scene);
 			localStorage.setItem(STORAGE_KEY, sceneJson);
 			console.log('Scene saved to localStorage');
+			return true;
 		} catch (error) {
-			console.error('Failed to save scene:', error);
+			if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+				console.error('Storage quota exceeded. Try removing some assets or clearing browser storage.');
+			} else {
+				console.error('Failed to save scene:', error);
+			}
+			return false;
 		}
 	}
 
@@ -156,16 +162,38 @@
 		}
 	}
 
+	function isValidScene(scene: unknown): scene is TerrariumScene {
+		if (typeof scene !== 'object' || scene === null) return false;
+		const s = scene as Record<string, unknown>;
+		return (
+			typeof s.id === 'string' &&
+			typeof s.name === 'string' &&
+			typeof s.canvas === 'object' &&
+			Array.isArray(s.assets)
+		);
+	}
+
 	function loadSceneFromStorage() {
 		try {
 			const storedScene = localStorage.getItem(STORAGE_KEY);
 			if (storedScene) {
-				const parsedScene = JSON.parse(storedScene) as TerrariumScene;
-				terrarium.setScene(parsedScene);
-				console.log('Scene loaded from localStorage');
+				const parsedScene = JSON.parse(storedScene);
+				if (isValidScene(parsedScene)) {
+					terrarium.setScene(parsedScene);
+					console.log('Scene loaded from localStorage');
+				} else {
+					console.warn('Invalid scene format in localStorage, using default scene');
+					localStorage.removeItem(STORAGE_KEY);
+				}
 			}
 		} catch (error) {
 			console.error('Failed to load scene from localStorage:', error);
+			// Clear corrupted data
+			try {
+				localStorage.removeItem(STORAGE_KEY);
+			} catch {
+				// Ignore cleanup errors
+			}
 		}
 	}
 
