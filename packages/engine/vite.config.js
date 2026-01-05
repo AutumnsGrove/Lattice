@@ -32,6 +32,7 @@ export default defineConfig({
         "src/lib/groveauth/**/*.ts",
         "src/lib/payments/**/*.ts",
         "src/lib/utils/**/*.ts",
+        "src/lib/ui/components/**/*.{ts,svelte}",
       ],
       exclude: ["**/*.test.ts", "**/*.spec.ts", "**/types.ts", "**/index.ts"],
     },

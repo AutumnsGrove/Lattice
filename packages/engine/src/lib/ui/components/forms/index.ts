@@ -12,6 +12,7 @@ export { default as ContentSearch } from './ContentSearch.svelte';
 // Filter utilities for ContentSearch
 export {
 	normalizeSearchText,
+	includesNormalized,
 	textIncludes,
 	createTextFilter,
 	createMultiFieldFilter,

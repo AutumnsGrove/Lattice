@@ -66,6 +66,8 @@
 		searchQuery?: string;
 		/** Placeholder text for search input */
 		placeholder?: string;
+		/** Type of results for screen reader announcements (e.g., "posts", "documents", "items") */
+		resultsType?: string;
 		/** Whether to sync search query with URL params */
 		syncWithUrl?: boolean;
 		/** URL parameter name for search query */
@@ -91,6 +93,7 @@
 		filterFn,
 		searchQuery = $bindable(''),
 		placeholder = 'Search...',
+		resultsType = 'result',
 		syncWithUrl = false,
 		queryParam = 'q',
 		debounceDelay = 250,
@@ -122,7 +125,10 @@
 	let debouncedQuery = $state(searchQuery);
 	let debounceTimer: ReturnType<typeof setTimeout> | null = $state(null);
 
-	// Cleanup timer on component destruction
+	// Cleanup timer on component destruction to prevent memory leaks
+	// This is separate from the handleInput cleanup because:
+	// - handleInput clears the timer when user types (normal debounce behavior)
+	// - This cleanup runs when component is destroyed (prevents timer firing after unmount)
 	$effect(() => {
 		return () => {
 			if (debounceTimer) {
@@ -135,7 +141,7 @@
 		const target = event.target as HTMLInputElement;
 		searchQuery = target.value;
 
-		// Clear existing timer
+		// Clear existing timer to restart debounce window
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
 		}
@@ -252,9 +258,9 @@
 	{/if}
 
 	<!-- Screen reader announcement for search results -->
-	<div id={resultsId} role="status" aria-live="polite" aria-atomic="true" class="sr-only">
+	<div id={resultsId} role="status" aria-live="polite" aria-atomic="true" aria-label="Search results" class="sr-only">
 		{#if debouncedQuery}
-			Found {filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''} for "{debouncedQuery}"
+			Found {filteredItems.length} {resultsType}{filteredItems.length !== 1 ? 's' : ''} matching "{debouncedQuery}"
 		{/if}
 	</div>
 </div>

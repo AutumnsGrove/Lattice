@@ -19,7 +19,22 @@ export function normalizeSearchText(text: string): string {
 }
 
 /**
+ * Check if normalized text includes a normalized query
+ * Note: Both inputs should already be normalized via normalizeSearchText()
+ *
+ * @param normalizedText - Already normalized text to search in
+ * @param normalizedQuery - Already normalized query to search for
+ */
+export function includesNormalized(normalizedText: string, normalizedQuery: string): boolean {
+	return normalizedText.includes(normalizedQuery);
+}
+
+/**
  * Check if text includes a search query (case-insensitive)
+ * This is a convenience function that normalizes both inputs
+ *
+ * @param text - Text to search in (will be normalized)
+ * @param query - Query to search for (will be normalized)
  */
 export function textIncludes(text: string, query: string): boolean {
 	return normalizeSearchText(text).includes(normalizeSearchText(query));
@@ -45,7 +60,8 @@ export function createTextFilter<T extends Record<string, any>>(
 		return fields.some(field => {
 			const value = item[field];
 			if (typeof value === 'string') {
-				return normalizeSearchText(value).includes(normalizedQuery);
+				// Use includesNormalized to avoid double normalization
+				return includesNormalized(normalizeSearchText(value), normalizedQuery);
 			}
 			return false;
 		});
@@ -76,7 +92,8 @@ export function createMultiFieldFilter<T extends Record<string, any>>(
 		const matchesText = textFields.some(field => {
 			const value = item[field];
 			if (typeof value === 'string') {
-				return normalizeSearchText(value).includes(normalizedQuery);
+				// Use includesNormalized to avoid double normalization
+				return includesNormalized(normalizeSearchText(value), normalizedQuery);
 			}
 			return false;
 		});
@@ -89,7 +106,8 @@ export function createMultiFieldFilter<T extends Record<string, any>>(
 			if (Array.isArray(value)) {
 				return value.some(item => {
 					if (typeof item === 'string') {
-						return normalizeSearchText(item).includes(normalizedQuery);
+						// Use includesNormalized to avoid double normalization
+						return includesNormalized(normalizeSearchText(item), normalizedQuery);
 					}
 					return false;
 				});
@@ -217,7 +235,8 @@ export function createDateFilter<T extends Record<string, any>>(
 	startDate?: Date,
 	endDate?: Date
 ): (item: T, query: string) => boolean {
-	return (item: T) => {
+	// Date filters don't use the query string, but must match the filterFn signature
+	return (item: T, _query: string) => {
 		const dateValue = item[dateField];
 		if (!dateValue) return false;
 
