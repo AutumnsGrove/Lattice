@@ -116,26 +116,43 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const timestamp = now();
 
     // Insert using TenantDb (automatically adds tenant_id and generates id)
-    const result = await tenantDb.insert("pages", {
-      slug,
-      title: data.title,
-      description: data.description || "",
-      type: "page",
-      markdown_content: data.markdown_content,
-      html_content,
-      hero: data.hero || null,
-      gutter_content: "[]",
-      font: data.font || "default",
-      created_at: timestamp,
-      updated_at: timestamp,
-    });
+    // The UNIQUE(tenant_id, slug) constraint will catch any race conditions
+    try {
+      const result = await tenantDb.insert("pages", {
+        slug,
+        title: data.title,
+        description: data.description || "",
+        type: "page",
+        markdown_content: data.markdown_content,
+        html_content,
+        hero: data.hero || null,
+        gutter_content: "[]",
+        font: data.font || "default",
+        created_at: timestamp,
+        updated_at: timestamp,
+      });
 
-    return json({
-      success: true,
-      slug,
-      id: result.id,
-      message: "Page created successfully",
-    });
+      return json({
+        success: true,
+        slug,
+        id: result.id,
+        message: "Page created successfully",
+      });
+    } catch (insertErr) {
+      // Handle unique constraint violation (race condition where another request created the slug)
+      const errMsg = String(insertErr);
+      if (
+        errMsg.includes("UNIQUE constraint failed") ||
+        errMsg.includes("unique")
+      ) {
+        const suggested = `${slug}-${Date.now().toString(36)}`;
+        throw error(409, {
+          message: "A page with this slug already exists",
+          suggested_slug: suggested,
+        } as any);
+      }
+      throw insertErr;
+    }
   } catch (err) {
     // Pass through HTTP errors with status codes
     if ((err as { status?: number }).status) throw err;

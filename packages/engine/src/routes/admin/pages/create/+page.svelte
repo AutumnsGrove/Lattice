@@ -51,6 +51,19 @@
     slugError = "";
   }
 
+  // Validate URL for safe schemes (prevent javascript: XSS)
+  function isValidUrl(url) {
+    if (!url) return true;
+    const trimmed = url.trim();
+    // Allow relative paths starting with /
+    if (trimmed.startsWith('/')) return true;
+    // Allow http:// and https:// URLs
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return true;
+    // Allow anchor links
+    if (trimmed.startsWith('#')) return true;
+    return false;
+  }
+
   async function handleCreate() {
     // Validation
     if (!title.trim()) {
@@ -63,6 +76,10 @@
     }
     if (slugError) {
       toast.error("Please fix slug errors");
+      return;
+    }
+    if (heroCtaLink && !isValidUrl(heroCtaLink)) {
+      toast.error("CTA link must be a relative path (/) or valid URL (http/https)");
       return;
     }
 
@@ -339,10 +356,5 @@
     .cta-fields {
       grid-template-columns: 1fr;
     }
-  }
-
-  .unsaved-indicator {
-    color: var(--color-warning);
-    font-weight: 500;
   }
 </style>

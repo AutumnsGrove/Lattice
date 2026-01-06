@@ -1,6 +1,7 @@
 import { redirect } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
 
-export async function load({ locals }) {
+export const load: PageServerLoad = async ({ locals }) => {
   // Auth check - ensure user is logged in
   if (!locals.user) {
     throw redirect(302, "/auth/login");
@@ -8,4 +9,4 @@ export async function load({ locals }) {
 
   // Return empty data (no page to load for creation)
   return {};
-}
+};
