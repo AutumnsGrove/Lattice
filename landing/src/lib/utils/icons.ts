@@ -104,6 +104,8 @@ import {
   Triangle,
   Terminal,
   Signpost,
+  Database,
+  Zap,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -239,7 +241,7 @@ export const toolIcons = {
   radar: Radar,
   webhook: Webhook,
   terminal: Terminal,
-  database: HardDrive,
+  database: Database,
   mapplus: MapPinPlus,
   layers: Layers,
   pencilruler: PencilRuler,
@@ -258,6 +260,7 @@ export const toolIcons = {
 // ============================================================================
 /** Icons for features in roadmap phases */
 export const roadmapFeatureIcons = {
+  // Thaw Phase
   userplus: Users,
   sprout: Sprout,
   globe: Trees,
@@ -268,15 +271,17 @@ export const roadmapFeatureIcons = {
   download: Download,
   lifebuoy: HelpCircle,
   signpost: Signpost,
-  terminal: FileText,
-  network: Github,
-  database: HardDrive,
-  ivy: Mail,
-  amber: HardDrive,
-  trails: MapPin,
+  terminal: Terminal,          // Bloom - remote coding (was FileText)
+  network: CircuitBoard,       // Mycelium - MCP server (was Github)
+  database: Database,          // Patina - backups (was HardDrive)
+  // First Buds Phase
+  ivy: Mailbox,                // Ivy - email (was Mail, Workshop uses mailbox)
+  amber: HardDrive,            // Amber - storage
+  trails: MapPinPlus,          // Trails - personal roadmaps (was MapPin, Workshop uses mapplus)
   tree: Trees,
-  swatchbook: Palette,
-  meadow: Flower2,
+  swatchbook: SwatchBook,      // Foliage - theming (was Palette)
+  // Full Bloom Phase
+  meadow: Users,               // Meadow - social feed (was Flower2, Workshop uses users)
   clock: Clock,
   message: MessagesSquare,
   heart: Heart,
@@ -284,14 +289,16 @@ export const roadmapFeatureIcons = {
   crown: Star,
   paintbrush: Palette,
   users: Users,
-  shield: ShieldUser,
+  shield: UserRoundCheck,      // Thorn - moderation (was ShieldUser)
+  // Golden Hour Phase
   gem: Gem,
-  zap: TrendingUp,
+  zap: Zap,                    // Performance (was TrendingUp)
   accessibility: Info,
   smartphone: FileText,
   puzzle: Lightbulb,
-  coffee: Heart,
-  qrcode: Lightbulb,
+  // Midnight Bloom Phase
+  coffee: Coffee,              // The Cafe (was Heart)
+  qrcode: QrCode,              // Community Boards (was Lightbulb)
   bookopen: BookOpen,
   home: Home,
 } as const;
