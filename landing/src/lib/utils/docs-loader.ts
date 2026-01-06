@@ -1,8 +1,27 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import matter from "gray-matter";
-import { marked } from "marked";
-import type { Doc, DocCategory, DocWithContent, DocHeader } from "$lib/types/docs";
+import { marked, Renderer } from "marked";
+import type {
+  Doc,
+  DocCategory,
+  DocWithContent,
+  DocHeader,
+} from "$lib/types/docs";
+
+// Custom renderer that adds IDs to headings for TOC navigation
+const renderer = new Renderer();
+renderer.heading = function ({ text, depth }) {
+  const id = text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+  return `<h${depth} id="${id}">${text}</h${depth}>\n`;
+};
+
+marked.use({ renderer });
 
 // Re-export types for convenience
 export type { Doc, DocWithContent } from "$lib/types/docs";
@@ -115,7 +134,9 @@ function loadDocsFromDir(
 
           // Detect duplicate slugs (e.g., same file in both specs/ and specs/completed/)
           if (seenSlugs.has(doc.slug)) {
-            console.warn(`Duplicate slug "${doc.slug}" found at ${fullPath}, skipping`);
+            console.warn(
+              `Duplicate slug "${doc.slug}" found at ${fullPath}, skipping`,
+            );
             continue;
           }
 
@@ -150,7 +171,10 @@ export function loadAllDocs(): {
     "help",
   );
   const legalDocs = loadDocsFromDir(join(DOCS_ROOT, "legal"), "legal");
-  const marketingDocs = loadDocsFromDir(join(DOCS_ROOT, "marketing"), "marketing");
+  const marketingDocs = loadDocsFromDir(
+    join(DOCS_ROOT, "marketing"),
+    "marketing",
+  );
   const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
 
   return { specs, helpArticles, legalDocs, marketingDocs, patterns };

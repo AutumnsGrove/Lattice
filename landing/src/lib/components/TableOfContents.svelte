@@ -55,7 +55,7 @@
 
 {#if headers.length > 0}
   <!-- Desktop TOC -->
-  <nav class="toc hidden xl:block" aria-label="Table of contents">
+  <nav class="toc hidden lg:block" aria-label="Table of contents">
     <h3 class="toc-title">On this page</h3>
     <ul class="toc-list">
       {#each headers as header (header.id)}
@@ -74,7 +74,7 @@
   </nav>
 
   <!-- Mobile TOC Button -->
-  <div class="xl:hidden fixed bottom-6 right-6 z-50">
+  <div class="lg:hidden fixed bottom-6 right-6 z-50">
     <button
       type="button"
       on:click={() => isOpen = !isOpen}

@@ -111,13 +111,13 @@
         </div>
 
         <!-- Table of Contents sidebar -->
-        <aside class="hidden xl:block w-64 flex-shrink-0">
+        <aside class="hidden lg:block w-64 flex-shrink-0">
           <TableOfContents {headers} />
         </aside>
       </div>
 
       <!-- Mobile TOC (floating button) -->
-      <div class="xl:hidden">
+      <div class="lg:hidden">
         <TableOfContents {headers} />
       </div>
     {:else}
