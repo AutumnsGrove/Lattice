@@ -1,6 +1,6 @@
 <script>
 	import { GlassCard } from '$lib/ui';
-	import { Calendar, MapPin, Target, Sparkles, TreePine, Workflow } from 'lucide-svelte';
+	import { Calendar, MapPin, Target, Sparkles, TreePine, Workflow, Map } from 'lucide-svelte';
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -153,7 +153,9 @@
 	<!-- Philosophy -->
 	<GlassCard>
 		<div class="flex items-start gap-4">
-			<div class="text-4xl">🗺️</div>
+			<div class="p-3 bg-accent-subtle/10 rounded-lg shrink-0">
+				<Map class="w-8 h-8 text-accent-muted" />
+			</div>
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">Build in Public. Show the Journey.</h3>
 				<p class="text-sm text-foreground-muted mb-3">

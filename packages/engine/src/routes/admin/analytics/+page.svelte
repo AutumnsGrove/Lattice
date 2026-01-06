@@ -1,6 +1,6 @@
 <script>
 	import { GlassCard } from '$lib/ui';
-	import { BarChart3, TrendingUp, Heart, Eye, Users, Sparkles, Calendar } from 'lucide-svelte';
+	import { BarChart3, TrendingUp, Heart, Eye, Users, Sparkles, Calendar, Sprout, Leaf, TreePine } from 'lucide-svelte';
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -49,7 +49,7 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Resonance Indicators</h3>
-						<p class="text-xs text-foreground-muted">Positive signals like 🌱 Sparked Interest, 🌿 Really Resonated, 🌳 Community Favorite.</p>
+						<p class="text-xs text-foreground-muted">Positive signals like <Sprout class="inline w-3.5 h-3.5 text-accent-muted" /> Sparked Interest, <Leaf class="inline w-3.5 h-3.5 text-accent-muted" /> Really Resonated, <TreePine class="inline w-3.5 h-3.5 text-accent-muted" /> Community Favorite.</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -83,7 +83,9 @@
 	<!-- Philosophy -->
 	<GlassCard>
 		<div class="flex items-start gap-4">
-			<div class="text-4xl">🌳</div>
+			<div class="p-3 bg-accent-subtle/10 rounded-lg shrink-0">
+				<TreePine class="w-8 h-8 text-accent-muted" />
+			</div>
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">Private by Default. Delayed by Design.</h3>
 				<p class="text-sm text-foreground-muted mb-3">
