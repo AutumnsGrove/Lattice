@@ -19,7 +19,7 @@ type: tech-spec
           │                                         │
           │    [Rock]───────[Vine]───────[Vine]    │
           │       │            │            │       │
-          │       │     tendrils connect    │       │
+          │       │     threads connect    │       │
           │    [Vine]      [Vine]       [Vine]     │
           │       │                                 │
           │    [Vine]                               │
@@ -56,7 +56,7 @@ To weave is to interlace threads into fabric, to bring separate strands together
 
 Weave is Grove's visual composition studio. Place elements on a grid, draw connections between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and icons that map your architecture. Whether motion or structure, Weave is where you bring it all together.
 
-The connections themselves are called **tendrils** — the reaching, grasping parts of climbing vines that grab and connect.
+The connections themselves are called **threads** — the reaching, grasping parts of climbing vines that grab and connect.
 
 *Weave your world together.*
 
@@ -73,7 +73,7 @@ The connections themselves are called **tendrils** — the reaching, grasping pa
 |------|---------|
 | **Bower** | More noun-like, less active energy |
 | **Canopy** | Too observational, not creative enough |
-| **Tendril** | Better for the connections themselves |
+| **Thread** | Better for the connections themselves |
 | **Sway/Fern** | Good sub-mode names if needed later |
 
 ---
@@ -83,7 +83,7 @@ The connections themselves are called **tendrils** — the reaching, grasping pa
 | Public Name | Internal Name |
 |-------------|---------------|
 | Weave | GroveWeave |
-| Tendrils (connections) | GroveTendrils |
+| Threads (connections) | GroveThreads |
 
 ---
 
@@ -271,7 +271,7 @@ Weave lives **inside** Terrarium as a mode/tab:
 ```
 
 - **Canvas** — Existing Terrarium (static composition + Live preview)
-- **Weave** — Node-graph editor (tendrils + timing)
+- **Weave** — Node-graph editor (threads + timing)
 - **Export** — Export dialog (now supports animation formats)
 
 ---
@@ -312,7 +312,7 @@ Build diagram rendering into the same node-graph foundation:
 - **Text Nodes** — Simple labeled boxes
 - **Custom Components** — Extend with Svelte components
 
-**Connection Types (Tendrils):**
+**Connection Types (Threads):**
 - Solid arrows (→)
 - Dashed lines (--)
 - Labeled connections
@@ -483,10 +483,10 @@ packages/engine/src/lib/ui/components/
 - [x] **Weave** — unified node-graph engine
 - [x] **Sway** — animation sub-mode (nature assets, timing, propagation)
 - [x] **Fern** — diagram sub-mode (glass cards, Lucide icons, static)
-- [x] **Tendrils** — the connections between nodes
+- [x] **Threads** — the connections between nodes
 
 ### Technical
-- [x] **Tendrils in Live Mode** → Hidden by default, toggle to show
+- [x] **Threads in Live Mode** → Hidden by default, toggle to show
 - [x] **Circular connections** → Detect and warn, but allow (valid for showing circular deps)
 - [x] **Max chain depth** → 10-15 levels, test and tune
 - [x] **Preset jiggle patterns** → Yes! `wave`, `pulse`, `random`, `cascade`
@@ -538,8 +538,8 @@ CREATE TABLE weave_nodes (
   FOREIGN KEY (composition_id) REFERENCES weave_compositions(id)
 );
 
--- Tendrils (connections between nodes)
-CREATE TABLE weave_tendrils (
+-- Threads (connections between nodes)
+CREATE TABLE weave_threads (
   id TEXT PRIMARY KEY,
   composition_id TEXT NOT NULL,
   source_node_id TEXT NOT NULL,
