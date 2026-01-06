@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Logo } from '../nature/Logo.svelte';
+	import { Logo } from '../nature';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season';

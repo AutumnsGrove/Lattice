@@ -1,8 +1,7 @@
 <script lang="ts">
   import { helpArticles } from '$lib/data/knowledge-base';
   import SEO from '$lib/components/SEO.svelte';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
+  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 
   let { data } = $props();
   const { helpArticles: articles } = data;

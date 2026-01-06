@@ -1,3 +1,5 @@
+import type { Component } from 'svelte';
+
 export interface NavItem {
   href: string;
   label: string;

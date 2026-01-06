@@ -4,9 +4,12 @@
 	 *
 	 * Clean, minimal header with Grove branding and theme toggle.
 	 */
-	import { theme } from '$lib/stores/theme';
+	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
 	import { cn } from '$lib/utils/cn';
 	import { Trees, Sun, Moon, Rss } from 'lucide-svelte';
+
+	// Extract the resolvedTheme store and toggle function
+	const { resolvedTheme, toggle } = themeStore;
 
 	interface Props {
 		class?: string;
@@ -50,11 +53,11 @@
 			<!-- Theme toggle -->
 			<button
 				type="button"
-				onclick={() => theme.toggle()}
+				onclick={() => toggle()}
 				class="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
 				aria-label="Toggle theme"
 			>
-				{#if $theme === 'dark'}
+				{#if $resolvedTheme === 'dark'}
 					<Sun class="w-5 h-5" />
 				{:else}
 					<Moon class="w-5 h-5" />

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Header from './Header.svelte';
-	import Footer from './Footer.svelte';
+	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import type { Snippet } from 'svelte';
 
 	interface Props {

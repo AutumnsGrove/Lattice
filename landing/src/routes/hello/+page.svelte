@@ -1,10 +1,8 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { season } from '$lib/stores/season';
 
 	// Lucide icons
 	import {
@@ -30,7 +28,7 @@
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Logo -->
 	<div class="mb-6">
-		<Logo class="w-20 h-20" season={$season} />
+		<Logo class="w-20 h-20" season={$seasonStore} />
 	</div>
 
 	<!-- Welcome -->

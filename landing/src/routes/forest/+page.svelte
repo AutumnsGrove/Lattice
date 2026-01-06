@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import { season as seasonStore } from '$lib/stores/season';
 
 	// Import nature assets from engine package
 	import {

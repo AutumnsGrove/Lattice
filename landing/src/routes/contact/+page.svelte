@@ -1,9 +1,7 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import Logo from '$lib/components/Logo.svelte';
-	import { season } from '$lib/stores/season';
+	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Mail, ExternalLink, Heart } from 'lucide-svelte';
 </script>
 
@@ -20,7 +18,7 @@
 		<!-- Header -->
 		<div class="text-center mb-12">
 			<div class="mb-6">
-				<Logo class="w-16 h-16 mx-auto" season={$season} />
+				<Logo class="w-16 h-16 mx-auto" season={$seasonStore} />
 			</div>
 			<h1 class="text-3xl md:text-4xl font-serif text-foreground mb-3">Hello there</h1>
 			<p class="text-lg text-foreground-muted font-sans">

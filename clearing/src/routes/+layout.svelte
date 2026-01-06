@@ -1,12 +1,12 @@
 <script lang="ts">
 	import '../app.css';
-	import { theme } from '$lib/stores/theme';
+	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
 
 	let { children } = $props();
 
 	// Ensure theme store initializes
 	$effect(() => {
-		const _ = $theme;
+		const _ = $themeStore.resolvedTheme;
 	});
 </script>
 

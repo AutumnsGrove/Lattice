@@ -4,3 +4,4 @@
  */
 
 export { seasonStore } from "./season";
+export { themeStore } from "./theme";

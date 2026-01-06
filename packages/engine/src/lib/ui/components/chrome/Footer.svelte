@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
-	import { Logo } from '../nature/Logo.svelte';
+	import { Logo } from '../nature';
 	import {
 		Github,
 		ExternalLink,

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { allDocs } from '$lib/data/knowledge-base';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
+  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import { ContentSearch } from '@autumnsgrove/groveengine';
 

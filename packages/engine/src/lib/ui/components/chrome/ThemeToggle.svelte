@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { theme } from '$lib/stores/theme';
+	import { themeStore } from '$lib/ui/stores/theme';
 
-	let isDark = $derived($theme === 'dark');
+	// Extract the resolvedTheme store and toggle function
+	const { resolvedTheme, toggle } = themeStore;
+	let isDark = $derived($resolvedTheme === 'dark');
 </script>
 
 <button
-	onclick={() => theme.toggle()}
+	onclick={() => toggle()}
 	class="p-2 rounded-lg text-foreground-subtle hover:text-accent-muted hover:bg-surface transition-colors"
 	aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}

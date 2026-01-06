@@ -1,8 +1,7 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
   import { specs } from '$lib/data/knowledge-base';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
+  import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 
   let { data } = $props();
   const { specs: specsList } = data;

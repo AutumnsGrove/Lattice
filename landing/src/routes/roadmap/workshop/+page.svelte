@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons

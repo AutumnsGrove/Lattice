@@ -12,3 +12,6 @@ export { default as FooterMinimal } from "./FooterMinimal.svelte";
 
 export * from "./types";
 export * from "./defaults";
+
+// Re-export stores for convenient access
+export { seasonStore, themeStore } from "../../stores";
