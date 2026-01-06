@@ -102,6 +102,16 @@
 					spec: '/knowledge/specs/amber-spec'
 				},
 				{
+					name: 'Pantry',
+					tagline: 'Shop & Provisioning',
+					description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
+					status: 'planned',
+					icon: 'store',
+					domain: 'pantry.grove.place',
+					integration: 'Shop and provisioning for Grove users',
+					spec: '/knowledge/specs/pantry-spec'
+				},
+				{
 					name: 'Foliage',
 					tagline: 'Theming Engine',
 					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
