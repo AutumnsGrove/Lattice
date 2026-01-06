@@ -311,6 +311,17 @@ Reeds is Grove's comment system, supporting both private replies (author-only) a
 
 ---
 
+## Echo
+**Support Tickets** · `echo.grove.place`
+
+An echo returns what you send out. You call into the forest, and your voice comes back—transformed, but recognizable. That's what good support feels like: you ask a question, and you get a response that shows someone actually listened.
+
+Echo is Grove's support system. Submit a question, and we'll get back to you. Not a corporate help desk with ticket numbers and SLAs, but a conversation that happens to be tracked. Email notifications keep you updated, and authenticated users can view their history on the web.
+
+*Voices carry across the grove. Questions asked, answers returned.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -341,6 +352,7 @@ Reeds is Grove's comment system, supporting both private replies (author-only) a
 | **Clearing** | Status page | status.grove.place |
 | **Waystone** | Help center | *(integrated)* |
 | **Reeds** | Comments system | *(integrated)* |
+| **Echo** | Support tickets | echo.grove.place |
 
 ---
 
@@ -376,6 +388,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Clearing | GroveClear |
 | Waystone | GroveWaystone |
 | Reeds | GroveReeds |
+| Echo | GroveSupport |
 
 ---
 

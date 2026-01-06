@@ -66,6 +66,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   clearing: "grove-landing.pages.dev", // Clearing alias
   mc: "grove-landing.pages.dev", // Outpost Minecraft (coming soon)
   search: "grove-landing.pages.dev", // Search (coming soon)
+  echo: "grove-landing.pages.dev", // Echo support tickets (coming soon)
 
   // Special handling
   www: "REDIRECT", // Redirect to root

@@ -160,6 +160,16 @@
 					integration: 'Built into all Grove properties',
 					spec: '/knowledge/specs/waystone-spec'
 				},
+				{
+					name: 'Echo',
+					tagline: 'Support Tickets',
+					description: 'Voices carry across the grove. Echo is Grove\'s support system—submit a question, and we\'ll get back to you. Not a corporate help desk, but a conversation that happens to be tracked. Email notifications keep you updated.',
+					status: 'planned',
+					icon: 'lifebuoy',
+					domain: 'echo.grove.place',
+					integration: 'Support channel for all Grove users',
+					spec: '/knowledge/specs/echo-spec'
+				},
 			]
 		},
 		{

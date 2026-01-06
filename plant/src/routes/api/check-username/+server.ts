@@ -66,7 +66,8 @@ const ADDITIONAL_RESERVED = [
 	'waystone',
 	'reeds',
 	'mc',
-	'domains'
+	'domains',
+	'echo'
 ];
 
 interface CheckResult {

@@ -263,6 +263,8 @@ export const toolIcons = {
   telescope: Telescope,
   // Commerce
   store: Store,
+  // Support
+  lifebuoy: LifeBuoy,
 } as const;
 
 // ============================================================================
