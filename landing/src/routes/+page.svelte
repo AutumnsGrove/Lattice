@@ -85,7 +85,7 @@
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">A small delay —</span> Some government systems I need are closed until January 5th (of course). Signups will open shortly after. Thanks for your patience.
+				<span class="font-medium">Making it official —</span> I'm working through the paperwork needed to properly establish Grove. The pieces are coming together, and signups will open soon. Thanks for your patience.
 			</p>
 		</div>
 	</div>
