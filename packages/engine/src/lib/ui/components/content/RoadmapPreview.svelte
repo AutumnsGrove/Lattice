@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
-	import { MapPin, ArrowRight } from "lucide-svelte";
+	// Use centralized icon registry instead of direct lucide-svelte imports
+	import { MapPin, ArrowRight } from "$lib/ui/components/icons";
 
 	/**
 	 * RoadmapPreview - A glass card showing current development phase

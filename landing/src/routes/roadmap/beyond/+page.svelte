@@ -4,10 +4,10 @@
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
-	import { toolIcons } from '$lib/utils/icons';
+	import { toolIcons, featureIcons } from '$lib/utils/icons';
 
-	// Lucide Icons - only for social links
-	import { Github } from 'lucide-svelte';
+	// Use centralized registry for social link icons
+	const Github = featureIcons.github;
 
 	// Import nature assets from engine package
 	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';

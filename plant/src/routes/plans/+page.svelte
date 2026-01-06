@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Check } from 'lucide-svelte';
+	// Use centralized icon registry for consistent icons across Grove
+	import { Check } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
