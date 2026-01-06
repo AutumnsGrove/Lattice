@@ -490,8 +490,9 @@ packages/engine/src/lib/ui/components/
 ### Technical
 - [x] **Threads in Live Mode** → Hidden by default, toggle to show
 - [x] **Circular connections** → Detect and warn, but allow (valid for showing circular deps)
-- [x] **Max chain depth** → 10-15 levels, test and tune
+- [x] **Max chain depth** → 15 levels (tested ceiling)
 - [x] **Preset jiggle patterns** → Yes! `wave`, `pulse`, `random`, `cascade`
+- [x] **Resource limits** → 100 nodes, 200 threads, 4000×4000px canvas max
 
 ### Diagram Editor
 - [x] **Markdown shortcode** → Yes, fenced code block syntax:
@@ -509,6 +510,61 @@ packages/engine/src/lib/ui/components/
 - [ ] Audio sync possibilities for V2+?
 - [ ] Physics simulation parameters for V2?
 - [ ] Community sharing of weave compositions?
+
+---
+
+## Security & Resource Limits
+
+### Input Sanitization
+
+**JSON Fields** (`canvas_settings`, `props`):
+- Parse all JSON through a strict validator before storage
+- Define allowed keys per component type (no arbitrary fields)
+- Reject unknown properties, sanitize values
+
+**Text Fields** (`label`, `name`):
+- Strip HTML tags from all user-provided text
+- Escape special characters before rendering
+- Max lengths: name (100 chars), label (50 chars)
+
+### XSS Prevention
+
+Thread labels and node content render in the canvas and exports:
+
+```typescript
+// All user text goes through sanitization
+import { sanitize } from '$lib/utils/security';
+
+const safeLabel = sanitize(thread.label, { maxLength: 50 });
+const safeName = sanitize(node.name, { maxLength: 100 });
+```
+
+For SVG exports, escape attribute values and text content.
+
+### Resource Limits
+
+| Resource | Limit | Rationale |
+|----------|-------|-----------|
+| **Nodes per composition** | 100 | Prevents canvas performance degradation |
+| **Threads per composition** | 200 | Max 2 connections per node average |
+| **Chain depth** | 15 levels | Tested propagation delay ceiling |
+| **Compositions per user** | 50 (free), 200 (paid) | Storage tier limits |
+| **Canvas dimensions** | 4000×4000px | Export and render ceiling |
+| **JSON field size** | 10KB | Prevents blob storage abuse |
+
+### Cycle Detection
+
+Circular connections are allowed (useful for showing circular dependencies in diagrams) but:
+- Display warning indicator on cyclic threads
+- Disable propagation preview for cyclic chains (infinite loop prevention)
+- Export warnings note cycle presence
+
+### Rate Limiting
+
+Composition operations follow standard Threshold patterns:
+- Create: 10/minute per user
+- Update: 30/minute per user
+- Export: 5/minute per user (CPU-intensive)
 
 ---
 
@@ -576,5 +632,6 @@ CREATE TABLE weave_threads (
 - Added glassmorphism patterns and Lucide icon mapping
 - Added D1 schema draft for Loom integration
 - Decided: markdown shortcode syntax, dark mode default, preset jiggle patterns
+- Added Security & Resource Limits section (JSON sanitization, XSS prevention, resource caps)
 
 *Status: Spec complete — ready for implementation planning*
