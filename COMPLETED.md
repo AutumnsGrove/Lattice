@@ -231,6 +231,28 @@
 
 ---
 
+## Plant Onboarding & Stripe Integration (2026-01-05)
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Fix Stripe Accounts V2 compatibility | ✓ | Create customer before checkout session |
+| Fix webhook idempotency logic | ✓ | Check `processed` flag, not just existence |
+| Fix D1 type error with expanded subscription | ✓ | Handle subscription as object or string |
+| Fix success page redirect for unauthenticated users | ✓ | Direct redirect to admin panel after checkout |
+| Add email to GroveAuth allowlist | ✓ | wrathofthestorm0@gmail.com added |
+| Fix profile page deadname bug | ✓ | Removed reactive `$effect` on displayName |
+| Add padding to profile page | ✓ | max-w-2xl mx-auto px-4 py-8 wrapper |
+| Expand color palette to 12 Grove colors | ✓ | greens, autumn, wildflowers, midnight bloom |
+| Improve color selection visual states | ✓ | White border, shadow, larger checkmark |
+| Improve interest selection visual states | ✓ | Green icon, border-2, checkmark |
+| Add padding to plans page | ✓ | max-w-5xl mx-auto px-4 py-8 wrapper |
+
+### Successful Test Signups
+- **grove2.grove.place** - Princess Peach (wrathofthestorm0@gmail.com)
+- Full signup flow now working: profile → plans → Stripe → tenant creation → admin redirect
+
+---
+
 ## Future Considerations (Done)
 
 | Task | Status | Notes |
@@ -240,4 +262,4 @@
 
 ---
 
-*Last updated: 2026-01-02*
+*Last updated: 2026-01-05*
