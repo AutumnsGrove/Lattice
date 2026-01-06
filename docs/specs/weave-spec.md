@@ -477,26 +477,35 @@ packages/engine/src/lib/ui/components/
 
 ---
 
-## Open Questions
+## Decisions Made
 
 ### Naming
-- [x] ~~Confirm name~~ → **Weave** chosen
-- [ ] Decide if sub-modes need names (Sway for animation, Fern for diagrams)
+- [x] **Weave** — unified node-graph engine
+- [x] **Sway** — animation sub-mode (nature assets, timing, propagation)
+- [x] **Fern** — diagram sub-mode (glass cards, Lucide icons, static)
+- [x] **Tendrils** — the connections between nodes
 
 ### Technical
-- [ ] Should tendrils be visible in Live Mode, or hidden during preview?
-- [ ] How to handle circular connections (A→B→C→A)?
-- [ ] Maximum chain depth before performance degrades?
-- [ ] Should there be preset "jiggle patterns" (wave, pulse, random)?
+- [x] **Tendrils in Live Mode** → Hidden by default, toggle to show
+- [x] **Circular connections** → Detect and warn, but allow (valid for showing circular deps)
+- [x] **Max chain depth** → 10-15 levels, test and tune
+- [x] **Preset jiggle patterns** → Yes! `wave`, `pulse`, `random`, `cascade`
 
 ### Diagram Editor
-- [ ] Markdown shortcode syntax for embedding diagrams in posts?
-- [ ] Should diagrams support dark/light mode variants?
-- [ ] Starter icon palette — which Lucide icons to include by default?
+- [x] **Markdown shortcode** → Yes, fenced code block syntax:
+  ````markdown
+  ```weave
+  [Request] --> [Handler]
+  [Handler] --> [Database]
+  ```
+  ````
+  Rendered via Cloudflare Worker, displayed live in posts.
+- [x] **Dark/light mode** → Auto-adapt to site theme, **dark mode by default**
 
-### Future (V2+)
-- [ ] Audio sync possibilities?
-- [ ] Physics simulation parameters?
+### Open Questions (Remaining)
+- [ ] Starter Lucide icon palette — which icons to include by default?
+- [ ] Audio sync possibilities for V2+?
+- [ ] Physics simulation parameters for V2?
 - [ ] Community sharing of weave compositions?
 
 ---
@@ -559,9 +568,11 @@ CREATE TABLE weave_tendrils (
 
 *Draft created: January 6th, 2026*
 *Updated: January 6th, 2026*
-- Added Diagram Editor concept
-- Completed grove walk, chose **Weave** as name
+- Added Diagram Editor concept (Fern mode)
+- Completed grove walk, chose **Weave** as unified name
+- Sub-modes: **Sway** (animation) + **Fern** (diagrams)
 - Added glassmorphism patterns and Lucide icon mapping
 - Added D1 schema draft for Loom integration
+- Decided: markdown shortcode syntax, dark mode default, preset jiggle patterns
 
-*Status: Idea documentation — name decided, ready for implementation planning*
+*Status: Spec complete — ready for implementation planning*
