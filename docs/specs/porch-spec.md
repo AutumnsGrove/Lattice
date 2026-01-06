@@ -1,24 +1,26 @@
-# Echo Specification
+# Porch Specification
 
-> *Voices carry across the grove. Questions asked, answers returned.*
+> *Have a seat on the porch. We'll figure it out together.*
 
 ---
 
 ## Overview
 
-**Echo** is Grove's support ticket system—a warm, accessible interface where users can ask questions and receive help. Not a corporate help desk with ticket numbers and SLAs, but a conversation that happens to be tracked.
+**Porch** is Grove's front porch—a warm, accessible space where users can sit down and have a conversation. Not a corporate help desk with ticket numbers and SLAs, but a porch where you chat with the grove keeper about what's going on.
 
-**Domain:** `echo.grove.place`
-**Internal Name:** GroveSupport
+**Domain:** `porch.grove.place`
+**Internal Name:** GrovePorch
 **Status:** Planned (Launch Priority)
 
 ---
 
 ## Philosophy
 
-An echo returns what you send out. You call into the forest, and your voice comes back—transformed, but recognizable. That's what good support feels like: you ask a question, and you get a response that shows someone actually listened.
+A porch is where you sit and talk. You come up the steps, have a seat, and the grove keeper comes out to chat. It's not a ticket counter. It's not a help desk queue. It's two people on a porch, figuring things out together.
 
-Echo is built on a simple principle: **meet users where they are**. Some users will have Ivy email addresses and prefer everything in their inbox. Others won't use Ivy at all. Echo accommodates both without forcing anyone into a workflow they didn't choose.
+Porch is built on a simple principle: **meet users where they are**. Some users will have Ivy email addresses and prefer everything in their inbox. Others won't use Ivy at all. Porch accommodates both without forcing anyone into a workflow they didn't choose.
+
+More than just support, Porch is where you reach out when you need help—or when you just want to say hi. Start a conversation, ask a question, or drop by to see what Autumn's up to.
 
 ---
 
@@ -26,7 +28,7 @@ Echo is built on a simple principle: **meet users where they are**. Some users w
 
 ### ⚠️ IMPORTANT: Phased Rollout
 
-Echo is built in two distinct phases. **Phase 1 is the launch requirement.** Phase 2 comes later when Ivy is production-ready.
+Porch is built in two distinct phases. **Phase 1 is the launch requirement.** Phase 2 comes later when Ivy is production-ready.
 
 ---
 
@@ -45,14 +47,14 @@ Phase 1 provides a complete, functional support system using email as the commun
 │     │                                                           │
 │     ▼                                                           │
 │   ┌─────────────────┐                                          │
-│   │ echo.grove.place│  Web interface for submitting tickets    │
+│   │porch.grove.place│  Web interface for starting visits        │
 │   │   (SvelteKit)   │                                          │
 │   └────────┬────────┘                                          │
 │            │                                                    │
 │            ▼                                                    │
 │   ┌─────────────────┐     ┌──────────────────┐                │
-│   │  Echo Worker    │────▶│   D1 Database    │                │
-│   │                 │     │  (tickets, msgs) │                │
+│   │  Porch Worker   │────▶│   D1 Database    │                │
+│   │                 │     │  (visits, msgs)  │                │
 │   └────────┬────────┘     └──────────────────┘                │
 │            │                                                    │
 │            ▼                                                    │
@@ -66,43 +68,43 @@ Phase 1 provides a complete, functional support system using email as the commun
 
 ### User Flow (Phase 1)
 
-1. **User visits** `echo.grove.place`
+1. **User visits** `porch.grove.place`
 2. **If authenticated** (via Heartwood): Pre-filled email, username, tier info
 3. **If guest**: Enter email address manually
-4. **Submit ticket**: Category, subject, description, optional attachments
-5. **Confirmation**: Ticket number displayed, confirmation email sent
+4. **Start a visit**: Category, subject, what's on your mind, optional attachments
+5. **Confirmation**: Visit number displayed, confirmation email sent
 6. **Updates**: All replies delivered via email
-7. **View history**: Authenticated users can see their ticket history on the web
+7. **View history**: Authenticated users can see their visit history on the web
 
 ### Components
 
-#### 1. Web Interface (`echo.grove.place`)
+#### 1. Web Interface (`porch.grove.place`)
 
 SvelteKit Pages application providing:
 
-- **New Ticket Form**
-  - Category selection (billing, technical, account, feedback, other)
+- **Start a Visit Form**
+  - Category selection (billing, technical, account, just saying hi, other)
   - Subject line
-  - Description (markdown supported)
+  - What's on your mind (markdown supported)
   - File attachments (up to 10MB total, stored in R2)
   - Priority indicator (normal/urgent)
 
-- **Ticket History** (authenticated users only)
-  - List of past tickets with status
+- **Your Visits** (authenticated users only)
+  - List of past visits with status
   - Click to view full conversation
   - Filter by status (open, pending, resolved)
 
-- **Ticket Detail View**
+- **Visit Detail View**
   - Full conversation thread
   - Add reply
   - Mark as resolved
-  - Reopen ticket
+  - Reopen visit
 
-#### 2. Echo Worker
+#### 2. Porch Worker
 
 Cloudflare Worker handling:
 
-- Ticket creation and updates
+- Visit creation and updates
 - Email dispatch via Resend
 - Inbound email processing (via Resend webhook)
 - Authentication via Heartwood
@@ -110,22 +112,22 @@ Cloudflare Worker handling:
 
 #### 3. Email Integration (Resend)
 
-- **Outbound**: Ticket confirmations, reply notifications
+- **Outbound**: Visit confirmations, reply notifications
 - **Inbound**: Users can reply directly to emails
-- **From address**: `support@grove.place`
-- **Reply-to**: Unique per-ticket address for threading
+- **From address**: `porch@grove.place`
+- **Reply-to**: Unique per-visit address for threading
 
 ### Database Schema (D1)
 
 ```sql
--- Support tickets
-CREATE TABLE echo_threads (
+-- Porch visits (conversations)
+CREATE TABLE porch_visits (
   id TEXT PRIMARY KEY,                    -- ULID
-  thread_number TEXT UNIQUE NOT NULL,     -- ECHO-2026-00001
+  visit_number TEXT UNIQUE NOT NULL,      -- PORCH-2026-00001
   user_id TEXT,                           -- Heartwood user ID (NULL for guests)
   guest_email TEXT,                       -- Email for non-authenticated users
   guest_name TEXT,                        -- Optional name for guests
-  category TEXT NOT NULL DEFAULT 'other', -- billing, technical, account, feedback, other
+  category TEXT NOT NULL DEFAULT 'other', -- billing, technical, account, hello, other
   subject TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'open',    -- open, pending, resolved, closed
   priority TEXT NOT NULL DEFAULT 'normal',-- normal, urgent
@@ -138,15 +140,15 @@ CREATE TABLE echo_threads (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE INDEX idx_echo_threads_user ON echo_threads(user_id);
-CREATE INDEX idx_echo_threads_status ON echo_threads(status);
-CREATE INDEX idx_echo_threads_created ON echo_threads(created_at DESC);
+CREATE INDEX idx_porch_visits_user ON porch_visits(user_id);
+CREATE INDEX idx_porch_visits_status ON porch_visits(status);
+CREATE INDEX idx_porch_visits_created ON porch_visits(created_at DESC);
 
--- Messages within threads
-CREATE TABLE echo_messages (
+-- Messages within visits
+CREATE TABLE porch_messages (
   id TEXT PRIMARY KEY,                    -- ULID
-  thread_id TEXT NOT NULL,
-  sender_type TEXT NOT NULL,              -- 'user' or 'support'
+  visit_id TEXT NOT NULL,
+  sender_type TEXT NOT NULL,              -- 'user' or 'autumn'
   sender_id TEXT,                         -- User ID or support staff ID
   sender_name TEXT,                       -- Display name
   content TEXT NOT NULL,                  -- Markdown content
@@ -154,64 +156,64 @@ CREATE TABLE echo_messages (
   is_internal BOOLEAN DEFAULT FALSE,      -- Internal notes (not visible to user)
   created_at INTEGER NOT NULL,
 
-  FOREIGN KEY (thread_id) REFERENCES echo_threads(id)
+  FOREIGN KEY (visit_id) REFERENCES porch_visits(id)
 );
 
-CREATE INDEX idx_echo_messages_thread ON echo_messages(thread_id);
+CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 
 -- Email threading for inbound replies
-CREATE TABLE echo_email_threads (
+CREATE TABLE porch_email_threads (
   id TEXT PRIMARY KEY,
-  thread_id TEXT NOT NULL,
+  visit_id TEXT NOT NULL,
   email_thread_id TEXT UNIQUE,            -- Resend thread identifier
-  reply_to_address TEXT UNIQUE,           -- Unique reply address per ticket
+  reply_to_address TEXT UNIQUE,           -- Unique reply address per visit
 
-  FOREIGN KEY (thread_id) REFERENCES echo_threads(id)
+  FOREIGN KEY (visit_id) REFERENCES porch_visits(id)
 );
 ```
 
 ### Email Templates
 
-#### Ticket Confirmation
+#### Visit Confirmation
 
 ```
-Subject: [ECHO-2026-00001] We received your message
+Subject: [PORCH-2026-00001] Thanks for stopping by
 
 Hi {name},
 
-Thanks for reaching out. We've received your message about:
+Thanks for coming to the porch. I got your message about:
 
 "{subject}"
 
-We'll get back to you as soon as we can. You can reply directly to this
-email to add more details, or visit your ticket at:
+I'll get back to you as soon as I can. You can reply directly to this
+email to add more details, or visit your conversation at:
 
-https://echo.grove.place/tickets/{id}
+https://porch.grove.place/visits/{id}
 
----
-Grove Support
+—
+Autumn
 ```
 
-#### Support Reply
+#### Reply from Autumn
 
 ```
-Subject: Re: [ECHO-2026-00001] {subject}
+Subject: Re: [PORCH-2026-00001] {subject}
 
 Hi {name},
 
-{support_reply_content}
+{reply_content}
 
----
-Reply to this email or visit: https://echo.grove.place/tickets/{id}
+—
+Reply to this email or visit: https://porch.grove.place/visits/{id}
 
-Grove Support
+Autumn
 ```
 
 ### API Endpoints
 
 ```typescript
-// Create new ticket
-POST /api/tickets
+// Start a new visit
+POST /api/visits
 Body: {
   category: string;
   subject: string;
@@ -221,38 +223,38 @@ Body: {
 }
 Response: {
   id: string;
-  thread_number: string;
+  visit_number: string;
 }
 
-// List user's tickets
-GET /api/tickets
+// List user's visits
+GET /api/visits
 Query: ?status=open|pending|resolved|all
 Response: {
-  tickets: Ticket[];
+  visits: Visit[];
 }
 
-// Get ticket details
-GET /api/tickets/:id
+// Get visit details
+GET /api/visits/:id
 Response: {
-  ticket: Ticket;
+  visit: Visit;
   messages: Message[];
 }
 
-// Add reply to ticket
-POST /api/tickets/:id/reply
+// Add reply to visit
+POST /api/visits/:id/reply
 Body: {
   content: string;
   attachments?: string[];
 }
 
-// Update ticket status (user can resolve their own)
-PATCH /api/tickets/:id
+// Update visit status (user can resolve their own)
+PATCH /api/visits/:id
 Body: {
   status: 'resolved';
 }
 
-// Reopen ticket
-POST /api/tickets/:id/reopen
+// Reopen visit
+POST /api/visits/:id/reopen
 
 // Upload attachment
 POST /api/attachments
@@ -266,16 +268,15 @@ Response: {
 POST /api/webhooks/resend
 ```
 
-### Support Admin Interface
+### Admin Interface (Autumn's View)
 
-A separate admin interface at `echo.grove.place/admin` (protected by Heartwood admin role):
+A separate admin interface at `porch.grove.place/admin` (protected by Heartwood admin role):
 
-- **Queue view**: All open tickets, sorted by priority then age
-- **Ticket assignment**: Claim tickets to work on
-- **Canned responses**: Pre-written responses for common issues
-- **Internal notes**: Add notes visible only to support staff
-- **Ticket transfer**: Reassign to another support person
-- **Metrics dashboard**: Response times, resolution rates, volume trends
+- **The Porch**: All open visits, sorted by priority then age
+- **Claim a visit**: Pick up a conversation to respond to
+- **Saved responses**: Pre-written responses for common questions
+- **Internal notes**: Add notes visible only to Autumn
+- **Metrics**: Response times, resolution rates, volume trends
 
 ---
 
@@ -285,7 +286,7 @@ A separate admin interface at `echo.grove.place/admin` (protected by Heartwood a
 
 ### Overview
 
-Phase 2 adds an alternative communication channel for users who have Ivy enabled. Instead of receiving support emails at their external address, they can receive tickets directly in their `@grove.place` Ivy inbox.
+Phase 2 adds an alternative communication channel for users who have Ivy enabled. Instead of receiving porch updates at their external email, they can receive visits directly in their `@grove.place` Ivy inbox.
 
 ### Architecture
 
@@ -295,12 +296,12 @@ Phase 2 adds an alternative communication channel for users who have Ivy enabled
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   ┌─────────────────┐                                          │
-│   │ echo.grove.place│                                          │
+│   │porch.grove.place│                                          │
 │   └────────┬────────┘                                          │
 │            │                                                    │
 │            ▼                                                    │
 │   ┌─────────────────┐     ┌──────────────────┐                │
-│   │  Echo Worker    │────▶│   D1 Database    │                │
+│   │  Porch Worker   │────▶│   D1 Database    │                │
 │   │                 │     │                  │                │
 │   └────────┬────────┘     └──────────────────┘                │
 │            │                                                    │
@@ -328,43 +329,43 @@ interface SupportPreferences {
 
 ### Ivy Thread Model
 
-When a user with Ivy preference submits a ticket:
+When a user with Ivy preference starts a visit:
 
-1. Create ticket in D1 (same as Phase 1)
+1. Create visit in D1 (same as Phase 1)
 2. Create a new thread in user's Ivy inbox
 3. Messages sync bidirectionally:
-   - Support replies → New message in Ivy thread
-   - User Ivy replies → New message in Echo ticket
+   - Autumn's replies → New message in Ivy thread
+   - User Ivy replies → New message in Porch visit
 
 ### Database Additions (Phase 2)
 
 ```sql
 -- Add Ivy thread tracking
-ALTER TABLE echo_threads ADD COLUMN ivy_thread_id TEXT;
-ALTER TABLE echo_threads ADD COLUMN notification_channel TEXT DEFAULT 'email';
+ALTER TABLE porch_visits ADD COLUMN ivy_thread_id TEXT;
+ALTER TABLE porch_visits ADD COLUMN notification_channel TEXT DEFAULT 'email';
 
 -- Track Ivy message mapping
-CREATE TABLE echo_ivy_messages (
+CREATE TABLE porch_ivy_messages (
   id TEXT PRIMARY KEY,
-  echo_message_id TEXT NOT NULL,
+  porch_message_id TEXT NOT NULL,
   ivy_message_id TEXT NOT NULL,
   synced_at INTEGER NOT NULL,
 
-  FOREIGN KEY (echo_message_id) REFERENCES echo_messages(id)
+  FOREIGN KEY (porch_message_id) REFERENCES porch_messages(id)
 );
 ```
 
 ### Ivy API Integration
 
 ```typescript
-// Send support message to Ivy
-async function sendToIvy(userId: string, ticket: Ticket, message: Message) {
+// Send porch message to Ivy
+async function sendToIvy(userId: string, visit: Visit, message: Message) {
   await ivy.createMessage({
     to: userId,
-    from: 'support@grove.place',
-    subject: `[${ticket.thread_number}] ${ticket.subject}`,
+    from: 'porch@grove.place',
+    subject: `[${visit.visit_number}] ${visit.subject}`,
     body: message.content,
-    thread_id: ticket.ivy_thread_id,
+    thread_id: visit.ivy_thread_id,
   });
 }
 
@@ -383,21 +384,21 @@ Body: {
 
 When Phase 2 launches:
 
-1. Existing tickets remain email-only
-2. New tickets from Ivy users can use Ivy channel
+1. Existing visits remain email-only
+2. New visits from Ivy users can use Ivy channel
 3. Users can switch preference at any time
-4. Switching mid-ticket keeps email for that ticket, new tickets use new preference
+4. Switching mid-visit keeps email for that visit, new visits use new preference
 
 ---
 
 ## File Storage (R2)
 
-Attachments stored in Grove's R2 bucket under `echo/` prefix:
+Attachments stored in Grove's R2 bucket under `porch/` prefix:
 
 ```
-echo/
+porch/
   attachments/
-    {thread_id}/
+    {visit_id}/
       {message_id}/
         {filename}
 ```
@@ -407,27 +408,27 @@ echo/
 - Images: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`
 - Documents: `.pdf`, `.txt`, `.md`
 - Archives: `.zip`
-- Max size: 10MB per file, 25MB per ticket
+- Max size: 10MB per file, 25MB per visit
 
 ### Access Control
 
 - Signed URLs for upload (10 minute expiry)
 - Signed URLs for download (1 hour expiry)
-- Only ticket participants can access attachments
+- Only visit participants can access attachments
 
 ---
 
-## Thread Numbering
+## Visit Numbering
 
-Thread numbers follow the format: `ECHO-{YEAR}-{SEQUENCE}`
+Visit numbers follow the format: `PORCH-{YEAR}-{SEQUENCE}`
 
-- `ECHO-2026-00001` - First ticket of 2026
-- `ECHO-2026-00042` - 42nd ticket of 2026
+- `PORCH-2026-00001` - First visit of 2026
+- `PORCH-2026-00042` - 42nd visit of 2026
 
 Sequence resets each year. Stored in KV for atomic increment:
 
 ```typescript
-// KV key: echo:thread_sequence:{year}
+// KV key: porch:visit_sequence:{year}
 // Value: current sequence number
 ```
 
@@ -435,8 +436,8 @@ Sequence resets each year. Stored in KV for atomic increment:
 
 ## Rate Limiting
 
-- **Ticket creation**: 5 per hour per user, 10 per hour per IP
-- **Messages**: 20 per hour per ticket
+- **Visit creation**: 5 per hour per user, 10 per hour per IP
+- **Messages**: 20 per hour per visit
 - **Attachments**: 10 per hour per user
 
 ---
@@ -447,16 +448,16 @@ Sequence resets each year. Stored in KV for atomic increment:
 
 | Event | Email | Ivy (Phase 2) |
 |-------|-------|---------------|
-| Ticket created | ✅ Confirmation | ✅ Thread created |
-| Support reply | ✅ Email with reply | ✅ New message |
-| Ticket resolved | ✅ Resolution notice | ✅ Resolution message |
-| Ticket reopened | ✅ Reopen notice | ✅ Reopen message |
+| Visit started | ✅ Confirmation | ✅ Thread created |
+| Autumn's reply | ✅ Email with reply | ✅ New message |
+| Visit resolved | ✅ Resolution notice | ✅ Resolution message |
+| Visit reopened | ✅ Reopen notice | ✅ Reopen message |
 
-### Support Notifications
+### Autumn Notifications
 
-- New ticket: Email to support@grove.place (or Slack webhook)
-- Urgent ticket: Immediate alert
-- SLA warning: Ticket approaching 24h without response
+- New visit: Email to porch@grove.place (or Slack webhook)
+- Urgent visit: Immediate alert
+- Response reminder: Visit approaching 24h without response
 
 ---
 
@@ -474,9 +475,9 @@ These are guidelines, not contractual obligations:
 ## Security Considerations
 
 1. **Authentication**: Heartwood session validation
-2. **Authorization**: Users can only view their own tickets
+2. **Authorization**: Users can only view their own visits
 3. **Input sanitization**: Markdown content sanitized before rendering
-4. **Email validation**: Verify email ownership for guest tickets
+4. **Email validation**: Verify email ownership for guest visits
 5. **Attachment scanning**: Basic file type validation
 
 ---
@@ -487,11 +488,11 @@ These are guidelines, not contractual obligations:
 # Resend
 RESEND_API_KEY=re_xxx
 
-# Support email
-SUPPORT_FROM_EMAIL=support@grove.place
+# Porch email
+PORCH_FROM_EMAIL=porch@grove.place
 
 # D1 Database
-DB=echo-db
+DB=porch-db
 
 # R2 Bucket
 ATTACHMENTS_BUCKET=grove-cdn
@@ -532,8 +533,8 @@ HEARTWOOD_API_URL=https://auth-api.grove.place
 | **Heartwood** | User authentication, admin roles |
 | **Resend** | Email delivery and inbound processing |
 | **R2** | Attachment storage |
-| **D1** | Ticket and message persistence |
-| **KV** | Thread sequence numbers |
+| **D1** | Visit and message persistence |
+| **KV** | Visit sequence numbers |
 | **Ivy** | Future: Alternative notification channel |
 
 ---
@@ -542,7 +543,7 @@ HEARTWOOD_API_URL=https://auth-api.grove.place
 
 - [Ivy Mail Spec](ivy-mail-spec.md) - Email client (Phase 2 dependency)
 - [Heartwood Spec](heartwood-spec.md) - Authentication
-- [Waystone Spec](waystone-spec.md) - Help center (self-service before tickets)
+- [Waystone Spec](waystone-spec.md) - Help center (self-service before visits)
 
 ---
 
@@ -550,8 +551,9 @@ HEARTWOOD_API_URL=https://auth-api.grove.place
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-06 | 1.1 | Renamed from Echo to Porch; tickets → visits |
 | 2026-01-06 | 1.0 | Initial specification |
 
 ---
 
-*Voices carry across the grove. Questions asked, answers returned.*
+*Have a seat on the porch. We'll figure it out together.*

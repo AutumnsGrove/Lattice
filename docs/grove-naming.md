@@ -311,14 +311,14 @@ Reeds is Grove's comment system, supporting both private replies (author-only) a
 
 ---
 
-## Echo
-**Support Tickets** · `echo.grove.place`
+## Porch
+**Front Porch Conversations** · `porch.grove.place`
 
-An echo returns what you send out. You call into the forest, and your voice comes back—transformed, but recognizable. That's what good support feels like: you ask a question, and you get a response that shows someone actually listened.
+A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat.
 
-Echo is Grove's support system. Submit a question, and we'll get back to you. Not a corporate help desk with ticket numbers and SLAs, but a conversation that happens to be tracked. Email notifications keep you updated, and authenticated users can view their history on the web.
+Porch is Grove's support system—but it's more than that. It's where you reach out when you need help, or when you just want to say hi. Submit a question, start a conversation, or drop by to see what Autumn's up to. Every visit is tracked, but it never feels like a ticket number.
 
-*Voices carry across the grove. Questions asked, answers returned.*
+*Have a seat on the porch. We'll figure it out together.*
 
 ---
 
@@ -352,7 +352,7 @@ Echo is Grove's support system. Submit a question, and we'll get back to you. No
 | **Clearing** | Status page | status.grove.place |
 | **Waystone** | Help center | *(integrated)* |
 | **Reeds** | Comments system | *(integrated)* |
-| **Echo** | Support tickets | echo.grove.place |
+| **Porch** | Front porch conversations | porch.grove.place |
 
 ---
 
@@ -388,7 +388,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Clearing | GroveClear |
 | Waystone | GroveWaystone |
 | Reeds | GroveReeds |
-| Echo | GroveSupport |
+| Porch | GrovePorch |
 
 ---
 

@@ -87,7 +87,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Pantry](pantry-spec.md)** | Shop, merchandise & provisioning | **New** | Stripe, Printful |
-| **[Echo](echo-spec.md)** | Support tickets & user communication | **New** | Resend, Heartwood |
+| **[Porch](porch-spec.md)** | Front porch conversations & support | **New** | Resend, Heartwood |
 | **[Nook](nook-spec.md)** | Private video sharing | Planned | R2, Heartwood |
 | **[Reeds](reeds-spec.md)** | Comments system | Active | Engine, TenantDO |
 | **[Waystone](waystone-spec.md)** | Help center & documentation | Planned | Engine |

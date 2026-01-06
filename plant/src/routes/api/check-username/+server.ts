@@ -67,7 +67,7 @@ const ADDITIONAL_RESERVED = [
 	'reeds',
 	'mc',
 	'domains',
-	'echo'
+	'porch'
 ];
 
 interface CheckResult {

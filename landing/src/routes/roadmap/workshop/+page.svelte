@@ -161,14 +161,14 @@
 					spec: '/knowledge/specs/waystone-spec'
 				},
 				{
-					name: 'Echo',
-					tagline: 'Support Tickets',
-					description: 'Voices carry across the grove. Echo is Grove\'s support system—submit a question, and we\'ll get back to you. Not a corporate help desk, but a conversation that happens to be tracked. Email notifications keep you updated.',
+					name: 'Porch',
+					tagline: 'Front Porch Conversations',
+					description: 'A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.',
 					status: 'planned',
 					icon: 'lifebuoy',
-					domain: 'echo.grove.place',
-					integration: 'Support channel for all Grove users',
-					spec: '/knowledge/specs/echo-spec'
+					domain: 'porch.grove.place',
+					integration: 'Support and conversation for all Grove users',
+					spec: '/knowledge/specs/porch-spec'
 				},
 			]
 		},
