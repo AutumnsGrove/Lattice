@@ -2,26 +2,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
-	import {
-		Check,
-		// Row icons
-		PenLine,
-		FileText,
-		HardDrive,
-		Palette,
-		Flower2,
-		MessageCircle,
-		Globe,
-		Mail,
-		LifeBuoy,
-		CalendarDays,
-		Clock,
-		// Tier header icons
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown
-	} from 'lucide-svelte';
+
+	// Centralized icon registry - single source of truth for all icons
+	import { pricingIcons } from '$lib/utils/icons';
 </script>
 
 <SEO
@@ -63,28 +46,28 @@
 							</th>
 							<th class="py-4 px-3 text-center">
 								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
-									<Sprout class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+									<svelte:component this={pricingIcons.sprout} class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div class="font-serif text-foreground">Seedling</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$8<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
 								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
-									<TreeDeciduous class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+									<svelte:component this={pricingIcons.treedeciduous} class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div class="font-serif text-foreground">Sapling</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$12<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
 								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
-									<Trees class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+									<svelte:component this={pricingIcons.trees} class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div class="font-serif text-foreground">Oak</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$25<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
 							</th>
 							<th class="py-4 px-3 text-center">
 								<div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2">
-									<Crown class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+									<svelte:component this={pricingIcons.crown} class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div class="font-serif text-foreground">Evergreen</div>
 								<div class="text-2xl font-sans font-bold text-accent-muted">$35<span class="text-sm font-normal text-foreground-faint">/mo</span></div>
@@ -95,20 +78,20 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<PenLine class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.penline} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Blog
 								</span>
 							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<FileText class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.filetext} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Blog Posts
 								</span>
 							</td>
@@ -121,7 +104,7 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<HardDrive class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.harddrive} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Storage
 								</span>
 							</td>
@@ -134,7 +117,7 @@
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<Palette class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.palette} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Themes
 								</span>
 							</td>
@@ -147,20 +130,20 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<Flower2 class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.flower2} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Meadow
 								</span>
 							</td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<MessageCircle class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.messagecircle} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Public Comments
 								</span>
 							</td>
@@ -173,7 +156,7 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<Globe class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.searchcode} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Custom Domain
 								</span>
 							</td>
@@ -181,12 +164,12 @@
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground">BYOD</td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<Mail class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.mail} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									@grove.place Email
 								</span>
 							</td>
@@ -199,20 +182,20 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<Clock class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.clock} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Centennial
 								</span>
 							</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
 							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
-							<td class="py-3 px-3 text-center text-accent-muted"><Check class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
+							<td class="py-3 px-3 text-center text-accent-muted"><svelte:component this={pricingIcons.check} class="w-5 h-5 mx-auto" /></td>
 						</tr>
 						<tr class="border-b border-subtle bg-surface">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<LifeBuoy class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.lifebuoy} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Support
 								</span>
 							</td>
@@ -233,7 +216,7 @@
 						<tr>
 							<td class="py-4 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
-									<CalendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									<svelte:component this={pricingIcons.calendardays} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Yearly
 								</span>
 							</td>

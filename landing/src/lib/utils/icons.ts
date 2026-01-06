@@ -79,6 +79,13 @@ import {
   // Beyond page icons
   Music,
   Newspaper,
+  // Pricing page icons
+  Globe,
+  MessageCircle,
+  CalendarDays,
+  TreeDeciduous,
+  Crown,
+  LifeBuoy,
   // Workshop/Tool specific icons
   Pickaxe,
   Codesandbox,
@@ -301,6 +308,33 @@ export const roadmapFeatureIcons = {
   qrcode: QrCode,              // Community Boards (was Lightbulb)
   bookopen: BookOpen,
   home: Home,
+} as const;
+
+// ============================================================================
+// PRICING PAGE ICONS
+// ============================================================================
+/** Icons for pricing page features and tiers */
+export const pricingIcons = {
+  // Tier icons
+  sprout: Sprout,
+  treedeciduous: TreeDeciduous,
+  trees: Trees,
+  crown: Crown,
+  // Feature row icons
+  penline: PenLine,
+  filetext: FileText,
+  harddrive: HardDrive,
+  palette: Palette,
+  flower2: Flower2,
+  messagecircle: MessageCircle,
+  globe: Globe,              // Legacy - prefer searchcode for domains (Forage)
+  searchcode: SearchCode,    // Forage - domain discovery
+  mail: Mail,
+  lifebuoy: LifeBuoy,
+  calendardays: CalendarDays,
+  clock: Clock,
+  // Checkmark
+  check: Check,
 } as const;
 
 // ============================================================================
