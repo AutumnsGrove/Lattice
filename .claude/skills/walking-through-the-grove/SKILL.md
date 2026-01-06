@@ -210,7 +210,9 @@ Support isn't a ticket system. It's a porch conversation.
 
 ---
 
-## Integration with grove-ui-design
+## Integration with Other Skills
+
+### grove-ui-design
 
 When the `grove-ui-design` skill encounters something that needs naming:
 
@@ -220,6 +222,16 @@ When the `grove-ui-design` skill encounters something that needs naming:
 4. Return to UI work with the new name
 
 This keeps the naming intentional rather than rushed.
+
+### grove-documentation
+
+After finding the right name, you'll need to write its description. Invoke the **grove-documentation** skill when:
+
+1. Writing the entry for `docs/grove-naming.md`
+2. Crafting the tagline
+3. Writing the poetic one-liner
+
+The naming document entries should follow Grove's voice: warm, direct, avoiding AI patterns. The `grove-documentation` skill has the full guidelines.
 
 ---
 

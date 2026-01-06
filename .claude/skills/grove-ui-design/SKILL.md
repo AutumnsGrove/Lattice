@@ -798,6 +798,18 @@ Use the SEO component which handles OG meta tags:
 
 ---
 
+## Integration with Other Skills
+
+When writing text for Grove UI (tooltips, buttons, onboarding, error messages), invoke the **grove-documentation** skill first. The voice should match the visuals.
+
+**Typical flow:**
+1. Design the UI component/page
+2. Activate `grove-documentation` for any user-facing text
+3. Write content following Grove voice principles
+4. Return to visual implementation
+
+---
+
 ## Quick Checklist
 
 Before shipping a Grove page:
@@ -810,3 +822,4 @@ Before shipping a Grove page:
 - [ ] Seasonal colors match the page's emotional tone?
 - [ ] Trees randomized with proper spacing (8% minimum gap)?
 - [ ] Dark mode supported with appropriate glass variants?
+- [ ] User-facing text follows Grove voice (see `grove-documentation`)?
