@@ -325,10 +325,12 @@ export function createAuth(env: Env) {
       },
     },
 
-    // Rate limiting (see Appendix D for considerations)
+    // Rate limiting: Disabled - use Threshold pattern instead
+    // Better Auth's built-in rate limiting is bypassed in favor of Grove's
+    // multi-layer Threshold system (Edge → Tenant → User → Endpoint)
+    // See: docs/patterns/threshold-pattern.md
     rateLimit: {
-      window: 60, // 1 minute
-      max: 20, // 20 requests per minute per IP (increased for shared IPs)
+      enabled: false, // Threshold handles this
     },
 
     // Trusted origins
@@ -1488,6 +1490,40 @@ export async function POST({ request, platform }) {
 
 Uses same authentication pattern - sessions are shared across all Grove subdomains via `.grove.place` cookie domain.
 
+#### Amber (Media/CDN)
+
+```typescript
+// src/routes/api/media/[...path]/+server.ts
+import { createAuth } from "$lib/server/auth/better-auth";
+import { error } from "@sveltejs/kit";
+
+export async function GET({ request, platform, params }) {
+  const auth = createAuth(platform!.env);
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  // Public media doesn't require auth
+  const isPublicPath = params.path.startsWith("public/");
+  if (isPublicPath) {
+    return serveFromR2(params.path);
+  }
+
+  // Private media requires authentication and ownership check
+  if (!session?.user) {
+    throw error(401, "Unauthorized");
+  }
+
+  // Extract tenant from path: /media/{tenantId}/...
+  const [tenantId] = params.path.split("/");
+  if (session.user.tenantId !== tenantId) {
+    throw error(403, "You don't have access to this media");
+  }
+
+  return serveFromR2(params.path);
+}
+```
+
 #### Rings (Analytics)
 
 ```typescript
@@ -1701,10 +1737,14 @@ GROVEAUTH_URL = "https://auth.grove.place"
 - [ ] Logout clears session properly
 - [ ] Logout invalidates KV cache entry
 
-#### Rate Limiting
-- [ ] Rate limiting works (10 req/min per IP)
-- [ ] Rate limit headers returned correctly
-- [ ] Blocked requests return 429 status
+#### Rate Limiting (via Threshold)
+- [ ] Cloudflare edge rate limiting blocks high-volume attacks
+- [ ] Tenant rate limiting respects tier (Seedling: 100/min, Oak: 1000/min)
+- [ ] User rate limiting per endpoint works (auth: 5/5min)
+- [ ] Magic link rate limit works (3 per hour per email)
+- [ ] X-RateLimit-* headers returned correctly
+- [ ] Graduated response works (warning → slowdown → block → ban)
+- [ ] Shadow ban adds delay without revealing status
 
 #### Caching
 - [ ] KV caching works (check CloudFlare dashboard)
@@ -1736,11 +1776,16 @@ GROVEAUTH_URL = "https://auth.grove.place"
 ### Security Testing
 
 - [ ] CSRF protection prevents cross-site requests
-- [ ] Session fixation attack prevented
-- [ ] Session tokens are cryptographically random
-- [ ] Sensitive data not logged
-- [ ] OAuth state parameter validated
-- [ ] Redirect URLs validated against allowlist
+- [ ] Session fixation attack prevented (new session on login)
+- [ ] Session tokens are cryptographically random (min 128 bits entropy)
+- [ ] Sensitive data not logged (tokens, secrets, PII)
+- [ ] OAuth state parameter validated (CSRF protection)
+- [ ] OAuth scope validation (only requested scopes granted)
+- [ ] Redirect URLs validated against allowlist (trustedOrigins)
+- [ ] X-Forwarded-Host spoofing prevented
+- [ ] Subdomain tenant isolation verified
+- [ ] Token refresh rotation working (old refresh token invalidated)
+- [ ] Session binding to user agent (optional, if enabled)
 
 ### Post-Cutover Monitoring
 
@@ -1828,33 +1873,57 @@ GROVEAUTH_URL = "https://auth.grove.place"
   any subdomain can read them. This is intentional for SSO but requires
   trust in all subdomains.
 
-### Rate Limiting Considerations
+### Rate Limiting via Threshold
 
-The default rate limit of 10 requests per minute per IP may be too restrictive
-for users behind shared IPs (corporate NAT, VPNs, mobile carriers).
+Better Auth's built-in rate limiting is **disabled** in favor of Grove's
+comprehensive **Threshold** pattern, which provides:
 
-**Recommendations**:
-1. Consider increasing to 20 requests per minute
-2. Add per-email rate limiting as secondary control
-3. Implement graduated rate limiting (warn before block)
-4. Exclude authenticated requests from IP-based limits
+**4-Layer Protection:**
+```
+Layer 1: Cloudflare Edge    → 1000 req/min per IP (blocks before Workers)
+Layer 2: TenantDO           → Tier-based (Seedling: 100/min, Oak: 1000/min)
+Layer 3: SessionDO          → Per-user endpoint limits
+Layer 4: Endpoint-specific  → Auth: 5/5min, Magic link: 3/hour
+```
+
+**Graduated Response:**
+```
+1st violation  → Allow + X-RateLimit-Warning header
+2nd violation  → Allow + Warning + Log
+3rd violation  → 429 + 1 min cooldown
+4th violation  → 429 + 5 min cooldown + Shadow ban
+5th violation  → 429 + 24 hour ban
+```
+
+**Auth-Specific Limits (in Threshold config):**
+
+| Endpoint | Limit | Window | Rationale |
+|----------|-------|--------|-----------|
+| `/api/auth/magic-link` | 3 | 1 hour | Prevent email spam |
+| `/api/auth/callback/*` | 20 | 5 min | OAuth flow protection |
+| `/api/auth/passkey/register` | 5 | 1 hour | Prevent credential stuffing |
+| `/api/auth/passkey/authenticate` | 10 | 5 min | Brute force protection |
+
+**Integration Point:**
 
 ```typescript
-// Enhanced rate limiting configuration
-rateLimit: {
-  window: 60,
-  max: 20, // Increased from 10
-  // Add per-email limiting for sensitive operations
-  customRules: [
-    {
-      pathPattern: "/api/auth/magic-link",
-      max: 5,
-      window: 300, // 5 per 5 minutes per email
-      keyGenerator: (req) => req.body?.email || req.ip,
-    },
-  ],
-},
+// In hooks.server.ts - Threshold runs BEFORE Better Auth
+import { checkThresholdRateLimit } from "$lib/server/threshold";
+
+export const handle: Handle = async ({ event, resolve }) => {
+  // Layer 2-4: Threshold rate limiting
+  const rateLimitResult = await checkThresholdRateLimit(event);
+  if (rateLimitResult.blocked) {
+    return rateLimitResult.response; // 429 with proper headers
+  }
+
+  // Continue to Better Auth and route handling...
+};
 ```
+
+**References:**
+- Full specification: `docs/patterns/threshold-pattern.md`
+- Implementation guide: `docs/guides/rate-limiting-guide.md`
 
 ### Session Security
 
@@ -1867,9 +1936,36 @@ rateLimit: {
 - **Binding**: Consider binding sessions to IP/User-Agent for high-security
   tenants (configurable per-tenant feature).
 
+### CSRF Protection
+
+Better Auth includes built-in CSRF protection. However, Grove also maintains
+its own CSRF layer in `hooks.server.ts` for non-auth routes.
+
+**How it works**:
+1. Better Auth validates `Origin` header against `trustedOrigins`
+2. OAuth flows use `state` parameter for CSRF protection
+3. Grove's existing `csrf_token` cookie continues protecting other routes
+
+**Configuration**:
+```typescript
+// In createAuth() - already configured
+trustedOrigins: [
+  "https://grove.place",
+  "https://*.grove.place",
+],
+```
+
+**Important**: The existing CSRF protection in `hooks.server.ts` should remain
+for non-auth POST/PUT/DELETE routes. Better Auth handles auth routes internally.
+
 ---
 
-*Document Version: 1.1*
+*Document Version: 1.3*
 *Last Updated: January 2026*
 *Status: Planning*
-*Changelog: v1.1 - Added security considerations, extended timeline, improved testing*
+
+**Changelog:**
+- v1.3 - Integrated with Threshold rate limiting pattern; added CSRF docs; added Amber integration
+- v1.2 - Added security considerations, extended timeline, improved testing
+- v1.1 - Fixed provider assumption, added tenant validation, expanded error handling
+- v1.0 - Initial migration plan
