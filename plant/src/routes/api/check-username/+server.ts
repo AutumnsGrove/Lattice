@@ -12,17 +12,62 @@ import type { RequestHandler } from './$types';
 const USERNAME_REGEX = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 // Reserved words that can't be usernames (in addition to database table)
+// This includes all Grove service subdomains and common infrastructure names
 const ADDITIONAL_RESERVED = [
+	// Infrastructure
 	'admin',
 	'api',
 	'www',
 	'mail',
+	'cdn',
+	'og',
+	'auth',
+	'login',
+	'status',
+	'scout',
+	'search',
+	// Grove brand
 	'grove',
-	'plant',
+	'lattice',
+	'autumn',
+	// Common words
 	'create',
 	'new',
 	'support',
-	'help'
+	'help',
+	'test',
+	'demo',
+	'example',
+	// Grove services (public names)
+	'meadow',
+	'forage',
+	'foliage',
+	'heartwood',
+	'patina',
+	'trove',
+	'outpost',
+	'aria',
+	'music',
+	'plant',
+	'rings',
+	'ivy',
+	'amber',
+	'shade',
+	'trails',
+	'vineyard',
+	'bloom',
+	'mycelium',
+	'vista',
+	'wisp',
+	'terrarium',
+	'pantry',
+	'nook',
+	'clearing',
+	'waystone',
+	'reeds',
+	'mc',
+	'domains',
+	'porch'
 ];
 
 interface CheckResult {

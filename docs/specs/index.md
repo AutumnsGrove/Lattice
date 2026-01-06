@@ -82,6 +82,16 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
 
+### 🛒 Commerce & Community
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[Pantry](pantry-spec.md)** | Shop, merchandise & provisioning | **New** | Stripe, Printful |
+| **[Porch](porch-spec.md)** | Front porch conversations & support | **New** | Resend, Heartwood |
+| **[Nook](nook-spec.md)** | Private video sharing | Planned | R2, Heartwood |
+| **[Reeds](reeds-spec.md)** | Comments system | Active | Engine, TenantDO |
+| **[Waystone](waystone-spec.md)** | Help center & documentation | Planned | Engine |
+
 ---
 
 ## Specification Details
@@ -297,6 +307,8 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-01-06 | 2.2 | Added Echo support ticket spec |
+| 2026-01-06 | 2.1 | Added Pantry spec; added Commerce & Community section |
 | 2026-01-02 | 2.0 | Added Vineyard, Vista LoadTest specs; updated integration matrix |
 | 2025-12-25 | 1.5 | Added Mycelium, Patina, Renovate specs |
 | 2025-11-30 | 1.0 | Initial specifications collection |

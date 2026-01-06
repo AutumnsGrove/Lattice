@@ -255,6 +255,73 @@ Create a scene in Terrarium, export it as a decoration, apply it via Foliage to 
 
 ---
 
+## Pantry
+**Shop & Provisioning** · `pantry.grove.place`
+
+A pantry is where you keep what sustains you. Flour, honey, preserves—the things you reach for when you need them. It's not a storefront with bright lights and sales pressure. It's a cupboard in a warm kitchen, stocked and waiting.
+
+Pantry is Grove's shop. Subscriptions, merchandise, credits, gift cards—the things that keep the grove running and growing. You come when you need something, find what you're looking for, and take it home. Simple, warm, no fuss.
+
+*The cupboard is always stocked.*
+
+---
+
+## Nook
+**Private Video Sharing** · `nook.grove.place`
+**Repository:** [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook)
+
+A nook is a tucked-away corner, a quiet space set apart from the main room. Somewhere intimate and private.
+
+Nook is a privacy-focused video sharing platform for small, trusted friend groups. Not a YouTube channel, not a public archive—just a cozy space where your closest friends can watch the videos you've been meaning to share. All processing happens locally before content becomes accessible. Unknown faces automatically blurred. Your moments, shared only with people you choose.
+
+*Gather close. Share quietly.*
+
+---
+
+## Clearing
+**Status Page** · `status.grove.place`
+
+A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.
+
+Clearing is Grove's public status page: transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without needing to contact support. Honest updates, component status, incident history. No spin, just clarity.
+
+*Where you go to see what's happening.*
+
+---
+
+## Waystone
+**Help Center** · *Integrated into platform*
+
+Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.
+
+Waystone is Grove's built-in help center: searchable documentation, contextual help buttons throughout the interface, and a lantern to light your path when you're lost. Not an external docs site, not a separate login. Just help, right where you need it.
+
+*Trail markers for when you're lost.*
+
+---
+
+## Reeds
+**Comments System** · *Integrated into blogs*
+
+Reeds sway together at the water's edge, whispering in the breeze: a gentle murmur of community.
+
+Reeds is Grove's comment system, supporting both private replies (author-only) and public conversations (author-moderated). The dual system encourages thoughtful engagement while giving blog authors full control over their public-facing content. No reactions on comments—just threaded replies, HN-style simplicity.
+
+*Whisper together at the water's edge.*
+
+---
+
+## Porch
+**Front Porch Conversations** · `porch.grove.place`
+
+A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat.
+
+Porch is Grove's support system—but it's more than that. It's where you reach out when you need help, or when you just want to say hi. Submit a question, start a conversation, or drop by to see what Autumn's up to. Every visit is tracked, but it never feels like a ticket number.
+
+*Have a seat on the porch. We'll figure it out together.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -280,6 +347,12 @@ Create a scene in Terrarium, export it as a decoration, apply it via Foliage to 
 | **Mycelium** | MCP server | mycelium.grove.place |
 | **Vista** | Infrastructure observability | vista.grove.place |
 | **Wisp** | Writing assistant (+ Fireside) | *(integrated)* |
+| **Pantry** | Shop & provisioning | pantry.grove.place |
+| **Nook** | Private video sharing | nook.grove.place |
+| **Clearing** | Status page | status.grove.place |
+| **Waystone** | Help center | *(integrated)* |
+| **Reeds** | Comments system | *(integrated)* |
+| **Porch** | Front porch conversations | porch.grove.place |
 
 ---
 
@@ -310,6 +383,12 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Mycelium | GroveMCP |
 | Vista | GroveMonitor |
 | Wisp | GroveWisp |
+| Pantry | GroveShop |
+| Nook | GroveNook |
+| Clearing | GroveClear |
+| Waystone | GroveWaystone |
+| Reeds | GroveReeds |
+| Porch | GrovePorch |
 
 ---
 
@@ -321,5 +400,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 2026*
+*Last updated: January 6, 2026*
 *Status: Placeholder names, pending launch*

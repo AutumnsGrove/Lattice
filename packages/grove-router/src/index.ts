@@ -28,12 +28,12 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   heartwood: "groveauth-frontend.pages.dev",
 
   // Grove internal Pages projects
-  amber: "amber-4x2.pages.dev", // Amber
+  amber: "amber-4x2.pages.dev", // Amber storage
   ivy: "ivy-3uv.pages.dev", // Ivy mail client
   autumn: "autumn-website.pages.dev", // Autumn's Grove
   example: "grove-example-site.pages.dev", // GroveEngine example
-  plant: "grove-plant.pages.dev", // Grove Plant
-  vineyard: "vineyard-grove-place.pages.dev", // Vineyard blog
+  plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
+  vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
   cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
   // Domain management
@@ -53,6 +53,20 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   "mc-control": "mc-control.m7jv4v7npb.workers.dev",
   mycelium: "mycelium.m7jv4v7npb.workers.dev",
   og: "grove-og.m7jv4v7npb.workers.dev", // OG image generation
+
+  // Reserved subdomains - route to landing until services are built
+  // These are claimed to prevent user registration conflicts
+  pantry: "grove-landing.pages.dev", // Pantry shop (coming soon)
+  nook: "grove-landing.pages.dev", // Nook video sharing (coming soon)
+  trove: "grove-landing.pages.dev", // Trove library finder (coming soon)
+  bloom: "grove-landing.pages.dev", // Bloom remote coding (coming soon)
+  vista: "grove-landing.pages.dev", // Vista monitoring (coming soon)
+  foliage: "grove-landing.pages.dev", // Foliage theming (coming soon)
+  status: "grove-landing.pages.dev", // Clearing status page (coming soon)
+  clearing: "grove-landing.pages.dev", // Clearing alias
+  mc: "grove-landing.pages.dev", // Outpost Minecraft (coming soon)
+  search: "grove-landing.pages.dev", // Search (coming soon)
+  porch: "grove-landing.pages.dev", // Porch conversations (coming soon)
 
   // Special handling
   www: "REDIRECT", // Redirect to root

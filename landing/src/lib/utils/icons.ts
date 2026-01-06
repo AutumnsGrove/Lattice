@@ -113,6 +113,7 @@ import {
   Signpost,
   Database,
   Zap,
+  Store,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -260,6 +261,10 @@ export const toolIcons = {
   book: BookOpen,
   newspaper: Newspaper,
   telescope: Telescope,
+  // Commerce
+  store: Store,
+  // Support
+  lifebuoy: LifeBuoy,
 } as const;
 
 // ============================================================================
