@@ -66,7 +66,7 @@
         <li class="toc-item" class:active={activeId === header.id}>
           <button
             type="button"
-            on:click={() => scrollToHeader(header.id)}
+            onclick={() => scrollToHeader(header.id)}
             class="toc-link"
             style="padding-left: {(header.level - 1) * 0.75}rem"
           >
@@ -81,7 +81,7 @@
   <div class="lg:hidden fixed bottom-6 right-6 z-50">
     <button
       type="button"
-      on:click={() => isOpen = !isOpen}
+      onclick={() => isOpen = !isOpen}
       class="toc-mobile-button"
       aria-expanded={isOpen}
       aria-label="Table of contents"
@@ -95,8 +95,8 @@
       <div class="toc-mobile-dropdown">
         <div class="toc-mobile-header">
           <span class="font-medium">On this page</span>
-          <button type="button" on:click={() => isOpen = false} class="toc-mobile-close">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button type="button" onclick={() => isOpen = false} class="toc-mobile-close" aria-label="Close table of contents">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -106,7 +106,7 @@
             <li>
               <button
                 type="button"
-                on:click={() => scrollToHeader(header.id)}
+                onclick={() => scrollToHeader(header.id)}
                 class="toc-mobile-link"
                 class:active={activeId === header.id}
                 style="padding-left: {(header.level - 1) * 0.75 + 1}rem"

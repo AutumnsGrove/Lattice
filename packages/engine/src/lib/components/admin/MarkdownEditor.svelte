@@ -824,9 +824,8 @@
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
-  <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview">
-    <!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-    <div class="full-preview-backdrop" onclick={() => (showFullPreview = false)}></div>
+  <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview" tabindex="-1" onkeydown={(e) => e.key === 'Escape' && (showFullPreview = false)}>
+    <button type="button" class="full-preview-backdrop" onclick={() => (showFullPreview = false)} aria-label="Close preview"></button>
     <div class="full-preview-container">
       <header class="full-preview-header">
         <h2>:: full preview</h2>
@@ -1768,6 +1767,9 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
+    border: none;
+    padding: 0;
+    cursor: pointer;
   }
   .full-preview-container {
     position: relative;

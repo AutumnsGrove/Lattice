@@ -177,7 +177,7 @@
 	role="button"
 	tabindex="0"
 	aria-label="{asset.componentName} at position {asset.position.x}, {asset.position.y}"
-	aria-selected={isSelected}
+	aria-pressed={isSelected}
 	onmousedown={handleMouseDown}
 	ontouchstart={handleTouchStart}
 	ontouchmove={handleTouchMove}

@@ -245,7 +245,6 @@
 		<input
 			type="search"
 			id={searchId}
-			role="searchbox"
 			aria-label={placeholder}
 			aria-describedby={showClearButton && searchQuery ? clearButtonId : undefined}
 			{placeholder}

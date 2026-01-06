@@ -31,8 +31,14 @@
 
 <div class="gutter-item" data-anchor={item.anchor || ''}>
 	{#if item.type === 'comment' || item.type === 'markdown'}
-		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-		<div class="gutter-comment" onclick={handleContentClick}>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<div
+			class="gutter-comment"
+			onclick={handleContentClick}
+			onkeydown={(e) => e.key === 'Enter' && handleContentClick(e)}
+			role="group"
+			aria-label="Gutter annotation - click images to enlarge"
+		>
 			{@html sanitizeHTML(item.content)}
 		</div>
 	{:else if item.type === 'photo' || item.type === 'image'}

@@ -523,14 +523,14 @@
 					</div>
 					<div class="max-w-sm space-y-4">
 						<div>
-							<label class="text-sm text-bark-600 mb-1 block">ScoreBar ({scoreValue}%)</label>
+							<label for="score-slider" class="text-sm text-bark-600 mb-1 block">ScoreBar ({scoreValue}%)</label>
 							<ScoreBar value={scoreValue} max={100} />
-							<input type="range" bind:value={scoreValue} min="0" max="100" class="w-full mt-2" />
+							<input id="score-slider" type="range" bind:value={scoreValue} min="0" max="100" class="w-full mt-2" />
 						</div>
 						<div>
-							<label class="text-sm text-bark-600 mb-1 block">CreditBalance</label>
+							<label for="credit-slider" class="text-sm text-bark-600 mb-1 block">CreditBalance</label>
 							<CreditBalance credits={creditValue} />
-							<input type="range" bind:value={creditValue} min="0" max="100" class="w-full mt-2" />
+							<input id="credit-slider" type="range" bind:value={creditValue} min="0" max="100" class="w-full mt-2" />
 						</div>
 					</div>
 				</div>

@@ -175,11 +175,13 @@
 	});
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_no_noninteractive_tabindex -->
 <div
 	bind:this={canvasElement}
 	class="relative w-full h-full overflow-hidden select-none"
 	role="application"
-	aria-label="Terrarium canvas workspace"
+	tabindex="0"
+	aria-label="Terrarium canvas workspace - Use arrow keys to pan, scroll to zoom"
 	onmousedown={handleMouseDown}
 	ontouchstart={handleTouchStart}
 	ontouchmove={handleTouchMove}
