@@ -231,6 +231,8 @@ Not everyone wants their words to outlive them. Centennial is automatic once ear
 
 For full technical details, see the [Centennial Specification](/knowledge/specs/centennial-spec).
 
+**How we keep this promise**: The 100-year guarantee isn't just words—it's backed by Grove's financial structure, including The Reserve (a dedicated sustainability fund) and succession planning. See [How Grove Lasts](/docs/grove-sustainability) for the full breakdown.
+
 ---
 
 ## @grove.place Email
