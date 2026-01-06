@@ -4,10 +4,10 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
 
-  export let data;
+  let { data } = $props();
   const { specs, helpArticles, legalDocs, marketingDocs, patterns } = data;
 
-  let searchQuery = '';
+  let searchQuery = $state('');
 
   function handleSearch(e) {
     e.preventDefault();

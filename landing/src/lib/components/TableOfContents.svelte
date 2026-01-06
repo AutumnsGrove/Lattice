@@ -2,10 +2,14 @@
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
 
-  export let headers: Array<{ id: string; text: string; level: number }> = [];
+  interface Props {
+    headers?: Array<{ id: string; text: string; level: number }>;
+  }
 
-  let activeId = '';
-  let isOpen = false;
+  let { headers = [] }: Props = $props();
+
+  let activeId = $state('');
+  let isOpen = $state(false);
 
   onMount(() => {
     if (!browser || headers.length === 0) return;

@@ -6,17 +6,19 @@
   import TableOfContents from '$lib/components/TableOfContents.svelte';
   import '$lib/styles/content.css';
 
-  export let data;
+  let { data } = $props();
 
-  $: doc = data.doc;
-  $: category = $page.params.category;
-  $: slug = $page.params.slug;
-  $: headers = doc?.headers || [];
+  let doc = $derived(data.doc);
+  let category = $derived($page.params.category);
+  let slug = $derived($page.params.slug);
+  let headers = $derived(doc?.headers || []);
 
-  $: categoryTitle = category === 'specs' ? 'Technical Specifications' :
-                     category === 'help' ? 'Help Center' :
-                     category === 'patterns' ? 'Architecture Patterns' :
-                     category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies';
+  let categoryTitle = $derived(
+    category === 'specs' ? 'Technical Specifications' :
+    category === 'help' ? 'Help Center' :
+    category === 'patterns' ? 'Architecture Patterns' :
+    category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies'
+  );
 </script>
 
 <SEO

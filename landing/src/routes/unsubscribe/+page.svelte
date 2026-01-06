@@ -7,12 +7,11 @@
 	import { enhance } from '$app/forms';
 	import { MailX, Check } from 'lucide-svelte';
 
-	export let data;
-	export let form;
+	let { data, form } = $props();
 
-	let email = data.email || '';
-	let unsubscribeType: 'onboarding' | 'all' = 'onboarding';
-	let submitting = false;
+	let email = $state(data.email || '');
+	let unsubscribeType: 'onboarding' | 'all' = $state('onboarding');
+	let submitting = $state(false);
 </script>
 
 <SEO
