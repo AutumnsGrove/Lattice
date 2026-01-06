@@ -108,6 +108,17 @@ export const specs: Doc[] = [
     readingTime: 15,
   },
   {
+    slug: "weave-spec",
+    title: "Weave — Visual Composition Studio",
+    description:
+      "Node-graph editor for animations and diagrams within Terrarium",
+    excerpt:
+      "Weave your world together. Place elements on a grid, draw tendrils between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and Lucide icons. A lightweight Mermaid alternative with Grove's aesthetic.",
+    category: "specs",
+    lastUpdated: "2026-01-06",
+    readingTime: 12,
+  },
+  {
     slug: "clearing-spec",
     title: "Clearing — Status Page",
     description:

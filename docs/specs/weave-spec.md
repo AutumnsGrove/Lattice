@@ -1,9 +1,13 @@
 ---
+aliases: []
 date created: Tuesday, January 6th 2026
 date modified: Tuesday, January 6th 2026
-tags: []
+tags:
+  - animation
+  - diagrams
+  - node-graph
+  - terrarium
 type: tech-spec
-status: draft
 ---
 
 # Weave — Visual Composition Studio
