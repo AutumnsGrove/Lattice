@@ -4,28 +4,25 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
-	// Centralized icon registry
-	import { roadmapFeatureIcons, seasonalIconColors, getPhaseColor } from '$lib/utils/icons';
-
-	// Additional Lucide icons for hero/nav
+	// Centralized icon registry - single source of truth for all icons
 	import {
-		MapPin,
-		Check,
-		CheckCircle,
-		Sun,
-		Sparkles,
-		Star,
-		Flower2,
-		Moon as MoonIcon,
-		TreeDeciduous,
-		SwatchBook,
-		Gem,
-		Zap,
-		Accessibility,
-		Smartphone,
-		Puzzle,
-		Sprout
-	} from 'lucide-svelte';
+		roadmapFeatureIcons,
+		seasonalIconColors,
+		getPhaseColor,
+		stateIcons,
+		navIcons,
+		phaseIcons
+	} from '$lib/utils/icons';
+
+	// Local aliases from centralized registry for cleaner template usage
+	const MapPin = navIcons.roadmap;
+	const Check = stateIcons.check;
+	const CheckCircle = stateIcons.checkcircle;
+	const Sun = phaseIcons.sun;
+	const Gem = phaseIcons.gem;
+	const MoonIcon = phaseIcons.moon;
+	const Star = phaseIcons.star;
+	const Sprout = phaseIcons.sprout;
 
 	// Import nature assets from engine package
 	import {
