@@ -149,6 +149,7 @@ The existing Terrarium canvas, enhanced to play animations.
 - **Unit:** 0.5rem increments (half-steps)
 - **Purpose:** Precise, even alignment — whole numbers with half-steps between
 - **Snap behavior:** Assets snap to grid intersections when dragged
+- **Snap override:** Hold `Shift` while dragging for pixel-perfect free placement (standard design tool behavior)
 
 ### Alignment Options
 
@@ -228,12 +229,14 @@ The rock-and-vines example:
 
 ## Export Options
 
-| Format | Use Case |
-|--------|----------|
-| **Blog Import** | Live animation plays on Grove blog (uses Foliage) |
-| **GIF** | Shareable, loops forever |
-| **Video (WebM/MP4)** | Higher quality, social sharing |
-| **PNG Sequence** | Frame-by-frame for external editing |
+| Format | Use Case | Mode |
+|--------|----------|------|
+| **Blog Import** | Live animation plays on Grove blog (uses Foliage) | Sway |
+| **GIF** | Shareable, loops forever | Sway |
+| **Video (WebM/MP4)** | Higher quality, social sharing | Sway |
+| **PNG Sequence** | Frame-by-frame for external editing | Sway |
+| **SVG** | Scalable vectors for docs, embeds | Fern |
+| **PNG** | Static image export | Both |
 
 ---
 
@@ -503,7 +506,7 @@ packages/engine/src/lib/ui/components/
   ```
   ````
   Rendered via Cloudflare Worker, displayed live in posts.
-- [x] **Dark/light mode** → Auto-adapt to site theme, **dark mode by default**
+- [x] **Dark/light mode** → Editor UI defaults to dark mode (better for creative tools). Exports inherit the *target blog's* theme setting, not the editor's. Markdown shortcode diagrams auto-adapt to page theme.
 
 ### Open Questions (Remaining)
 - [ ] Starter Lucide icon palette — which icons to include by default?
@@ -539,7 +542,27 @@ const safeLabel = sanitize(thread.label, { maxLength: 50 });
 const safeName = sanitize(node.name, { maxLength: 100 });
 ```
 
-For SVG exports, escape attribute values and text content.
+**SVG Export Sanitization:**
+
+SVG files can contain executable JavaScript. All SVG exports must:
+- Strip `<script>` tags entirely
+- Remove event handlers (`onclick`, `onload`, `onerror`, `onmouseover`, etc.)
+- Remove `javascript:` URLs from `href` and `xlink:href` attributes
+- Whitelist safe SVG elements only (no `<foreignObject>`, `<use>` with external refs)
+- Escape text content and attribute values
+- Use DOMPurify or equivalent for final sanitization pass
+
+```typescript
+// SVG export sanitization
+import DOMPurify from 'dompurify';
+
+const safeSvg = DOMPurify.sanitize(svgString, {
+  USE_PROFILES: { svg: true },
+  ADD_TAGS: ['use'], // Allow internal use refs only
+  FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover'],
+  FORBID_TAGS: ['script', 'foreignObject']
+});
+```
 
 ### Resource Limits
 

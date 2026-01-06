@@ -278,3 +278,43 @@ The node-graph engine beneath powers both modes: timing and propagation for anim
 ---
 
 *Walk completed: January 6, 2026, 11:47 PM*
+
+---
+
+## Final Decision: Weave
+
+*Updated after further discussion*
+
+After living with "Bower" for a few hours, we pivoted to **Weave**.
+
+### Why the change?
+
+**Bower** felt right initially but had friction:
+- It's a noun — you *use* a bower, you don't *bower* something
+- Requires explaining what a bowerbird is
+- More about the result than the action
+
+**Weave** won because:
+- It's a **verb** — "weave your scene together" is an action
+- Immediately intuitive — everyone knows what weaving means
+- The metaphor still works: threads connecting nodes, patterns emerging
+- "Weave" as the studio, "Threads" as the connections — natural pairing
+
+### Final naming structure
+
+| Public Name | Internal Name | Icon | Purpose |
+|-------------|---------------|------|---------|
+| **Weave** | GroveWeave | `spline-pointer` | Unified composition studio |
+| **Sway** | GroveSway | `waves` | Animation sub-mode |
+| **Fern** | GroveFern | `waypoints` | Diagram sub-mode |
+| **Threads** | GroveThreads | `route` | Connections between nodes |
+
+### The tagline
+
+> *Weave your world together.*
+
+Active, warm, clear. Fits Grove's voice perfectly.
+
+---
+
+*Decision finalized: January 6, 2026*
