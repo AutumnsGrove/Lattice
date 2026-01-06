@@ -291,7 +291,7 @@
 					tagline: 'Image Processing CLI',
 					description: 'A press takes something raw and makes it ready. Press converts images to WebP, generates AI descriptions for accessibility, deduplicates by content hash, and uploads to R2. One command, and your images are ready to publish.',
 					status: 'live',
-					icon: 'upload',
+					icon: 'stamp',
 					integration: 'CLI tool for content creators and developers',
 					github: 'https://github.com/AutumnsGrove/CDNUploader',
 					spec: '/knowledge/specs/press-spec'

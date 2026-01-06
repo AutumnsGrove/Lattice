@@ -114,6 +114,7 @@ import {
   Database,
   Zap,
   Store,
+  Stamp,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -265,6 +266,8 @@ export const toolIcons = {
   store: Store,
   // Support
   lifebuoy: LifeBuoy,
+  // Press - image processing CLI
+  stamp: Stamp,
 } as const;
 
 // ============================================================================
