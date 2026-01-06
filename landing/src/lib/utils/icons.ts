@@ -55,6 +55,7 @@ import {
   Sparkles,
   Star,
   Moon,
+  Sun,
   // Actions
   Compass,
   Megaphone,
@@ -182,6 +183,7 @@ export const phaseIcons = {
   sparkles: Sparkles,
   star: Star,
   moon: Moon,
+  sun: Sun,
   sprout: Sprout,
 } as const;
 
