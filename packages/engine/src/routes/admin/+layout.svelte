@@ -30,7 +30,7 @@
 </script>
 
 <svelte:head>
-  <title>Admin - Autumns Grove</title>
+  <title>Admin - {data.tenant?.displayName || data.tenant?.subdomain || 'Grove'}</title>
 </svelte:head>
 
 <div class="admin-layout leaf-pattern">
@@ -41,7 +41,7 @@
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
     </button>
-    <a href="/" class="mobile-home-link" aria-label="Go to home page">The Grove</a>
+    <a href="/" class="mobile-home-link" aria-label="Go to home page">{data.tenant?.displayName || data.tenant?.subdomain || 'The Grove'}</a>
     <span class="mobile-header-spacer"></span>
   </header>
 

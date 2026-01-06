@@ -1,5 +1,6 @@
 <script>
   import { Button, Badge, GlassCard } from '$lib/ui';
+  import { Plus } from 'lucide-svelte';
 
   let { data } = $props();
 
@@ -20,6 +21,10 @@
       <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Site Pages</h1>
       <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">{data.pages.length} pages</p>
     </div>
+    <a href="/admin/pages/create" class="btn-primary inline-flex items-center gap-2">
+      <Plus class="w-5 h-5" />
+      <span>Create Page</span>
+    </a>
   </header>
 
   <GlassCard variant="default" class="overflow-hidden mb-8">
@@ -55,7 +60,7 @@
         {:else}
           <tr>
             <td colspan="4" class="text-center text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] py-12 px-4 transition-colors">
-              No pages yet. Run the sync script to import pages.
+              No pages yet. Click "Create Page" to get started.
             </td>
           </tr>
         {/each}
@@ -64,16 +69,11 @@
   </GlassCard>
 
   <GlassCard variant="muted">
-    <h3>How Pages Work</h3>
-    <p>
-      Site pages (Home, About, Contact, etc.) can be edited directly from the admin panel or synced from files.
+    <h3>About Pages</h3>
+    <p class="text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)]">
+      Pages are standalone content like About, Contact, or custom landing pages.
+      Unlike blog posts, pages appear in your site navigation and are designed for timeless content.
     </p>
-    <ul>
-      <li>Use <strong>Edit</strong> links to modify page content with the markdown editor</li>
-      <li>Pages from <code>UserContent/Home/</code>, <code>UserContent/About/</code>, etc. can be synced</li>
-      <li>Run <code>node scripts/sync-pages.cjs --remote</code> to sync from files to database</li>
-      <li>Edit the hero section, description, and content directly in the editor</li>
-    </ul>
   </GlassCard>
 </div>
 
