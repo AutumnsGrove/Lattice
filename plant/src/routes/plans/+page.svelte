@@ -43,14 +43,6 @@
 	}
 
 	// ============================================================================
-	// STATE
-	// ============================================================================
-
-	let billingCycle = $state<'monthly' | 'yearly'>('monthly');
-	// Pre-select Seedling since it's the only available tier at launch
-	let selectedPlan = $state<string | null>('seedling');
-
-	// ============================================================================
 	// DATA
 	// ============================================================================
 
@@ -131,6 +123,16 @@
 			icon: 'evergreen'
 		}
 	];
+
+	// ============================================================================
+	// STATE
+	// ============================================================================
+
+	let billingCycle = $state<'monthly' | 'yearly'>('monthly');
+	// Auto-select first available tier (future-proof if tier availability changes)
+	let selectedPlan = $state<string | null>(
+		plans.find((p) => p.status === 'available')?.id ?? null
+	);
 
 	// ============================================================================
 	// STATUS COLOR HELPERS
