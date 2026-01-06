@@ -555,16 +555,21 @@ For SVG exports, escape attribute values and text content.
 ### Cycle Detection
 
 Circular connections are allowed (useful for showing circular dependencies in diagrams) but:
-- Display warning indicator on cyclic threads
-- Disable propagation preview for cyclic chains (infinite loop prevention)
+- Display warning indicator on cyclic threads (orange dashed outline)
 - Export warnings note cycle presence
+
+**Live Mode behavior for cycles:**
+- Propagation stops at the cycle point (no infinite loops)
+- User sees animation propagate up to the repeated node, then halt
+- Visual indicator pulses briefly on the cycle-completing thread
+- Tooltip: "Chain stopped: circular connection detected"
 
 ### Rate Limiting
 
 Composition operations follow standard Threshold patterns:
 - Create: 10/minute per user
 - Update: 30/minute per user
-- Export: 5/minute per user (CPU-intensive)
+- Export: 10/minute per user (allows retries for failed exports)
 
 ---
 
@@ -591,9 +596,9 @@ CREATE TABLE weave_nodes (
   component_name TEXT NOT NULL, -- 'Rock', 'Vine', 'GlassCard', etc.
   position_x REAL NOT NULL,
   position_y REAL NOT NULL,
-  props TEXT, -- JSON for component-specific props
+  props TEXT CHECK(length(props) <= 10240), -- 10KB limit
   z_index INTEGER DEFAULT 0,
-  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id)
+  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id) ON DELETE CASCADE
 );
 
 -- Threads (connections between nodes)
@@ -606,10 +611,10 @@ CREATE TABLE weave_threads (
   delay REAL DEFAULT 0, -- seconds (animation only)
   easing TEXT DEFAULT 'ease-out',
   line_style TEXT DEFAULT 'solid', -- 'solid' | 'dashed' | 'arrow'
-  label TEXT, -- optional connection label
-  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id),
-  FOREIGN KEY (source_node_id) REFERENCES weave_nodes(id),
-  FOREIGN KEY (target_node_id) REFERENCES weave_nodes(id)
+  label TEXT CHECK(length(label) <= 50), -- 50 char limit
+  FOREIGN KEY (composition_id) REFERENCES weave_compositions(id) ON DELETE CASCADE,
+  FOREIGN KEY (source_node_id) REFERENCES weave_nodes(id) ON DELETE CASCADE,
+  FOREIGN KEY (target_node_id) REFERENCES weave_nodes(id) ON DELETE CASCADE
 );
 ```
 
