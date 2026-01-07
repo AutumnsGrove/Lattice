@@ -6,7 +6,8 @@
 	import {
 		DEFAULT_MOBILE_NAV_ITEMS,
 		DEFAULT_MOBILE_RESOURCE_LINKS,
-		DEFAULT_MOBILE_CONNECT_LINKS
+		DEFAULT_MOBILE_CONNECT_LINKS,
+		DIVIDER_HORIZONTAL
 	} from './defaults';
 	import { GroveDivider } from '../nature';
 
@@ -136,8 +137,8 @@
 		</button>
 	</div>
 
-	<!-- Navigation -->
-	<nav class="p-2 overflow-y-auto flex-1">
+	<!-- Navigation with scroll shadow -->
+	<nav class="p-2 overflow-y-auto flex-1 scroll-shadow">
 		<!-- Main Navigation Items -->
 		{#each items as item}
 			{@const Icon = item.icon}
@@ -165,7 +166,7 @@
 		<!-- Resources Section -->
 		{#if resources.length > 0}
 			<div class="py-4">
-				<GroveDivider count={7} size="xs" glass />
+				<GroveDivider {...DIVIDER_HORIZONTAL} />
 			</div>
 
 			<section aria-labelledby="mobile-menu-resources">
@@ -200,7 +201,7 @@
 		<!-- Connect Section -->
 		{#if connect.length > 0}
 			<div class="py-4">
-				<GroveDivider count={7} size="xs" glass />
+				<GroveDivider {...DIVIDER_HORIZONTAL} />
 			</div>
 
 			<section aria-labelledby="mobile-menu-connect">
@@ -233,3 +234,26 @@
 		{/if}
 	</nav>
 </div>
+
+<style>
+	/* Scroll shadow indicator - shows gradient shadows when content is scrollable */
+	.scroll-shadow {
+		--shadow-color: rgb(0 0 0 / 0.08);
+		--shadow-size: 16px;
+		background:
+			/* Top shadow */
+			linear-gradient(to bottom, var(--shadow-color), transparent) top / 100% var(--shadow-size),
+			/* Bottom shadow */
+			linear-gradient(to top, var(--shadow-color), transparent) bottom / 100% var(--shadow-size),
+			/* Top cover (hides shadow when scrolled to top) */
+			linear-gradient(to bottom, var(--color-surface, white), var(--color-surface, white)) top / 100% var(--shadow-size),
+			/* Bottom cover (hides shadow when scrolled to bottom) */
+			linear-gradient(to top, var(--color-surface, white), var(--color-surface, white)) bottom / 100% var(--shadow-size);
+		background-repeat: no-repeat;
+		background-attachment: local, local, scroll, scroll;
+	}
+
+	:global(.dark) .scroll-shadow {
+		--shadow-color: rgb(0 0 0 / 0.25);
+	}
+</style>

@@ -17,7 +17,7 @@
 	} from 'lucide-svelte';
 	import { seasonStore } from '../../stores/season';
 	import type { FooterLink, MaxWidth, Season } from './types';
-	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS } from './defaults';
+	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS, DIVIDER_VERTICAL } from './defaults';
 
 	interface Props {
 		resourceLinks?: FooterLink[];
@@ -67,7 +67,7 @@
 
 			<!-- Vertical Divider (hidden on mobile/tablet) -->
 			<div class="hidden lg:flex items-center px-2">
-				<GroveDivider count={15} size="xs" glass vertical gap="gap-1" />
+				<GroveDivider {...DIVIDER_VERTICAL} />
 			</div>
 
 			<!-- Column 2: Resources (hidden on mobile) -->
@@ -89,7 +89,7 @@
 
 			<!-- Vertical Divider (hidden on mobile/tablet) -->
 			<div class="hidden lg:flex items-center px-2">
-				<GroveDivider count={15} size="xs" glass vertical gap="gap-1" />
+				<GroveDivider {...DIVIDER_VERTICAL} />
 			</div>
 
 			<!-- Column 3: Connect (hidden on mobile) -->
