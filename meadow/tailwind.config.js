@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{html,js,svelte,ts}"],
+  content: [
+    "./src/**/*.{html,js,svelte,ts}",
+    // Include engine package components for Tailwind to scan
+    "../packages/engine/src/lib/**/*.{html,js,svelte,ts}"
+  ],
   darkMode: "class",
   theme: {
     extend: {
