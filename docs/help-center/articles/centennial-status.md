@@ -21,9 +21,9 @@ You don't apply for Centennial. You don't unlock it through a special action. It
 
 - **Yearly subscription (Sapling+):** You're Centennial the moment you renew for a second year
 - **Monthly subscription (Sapling+):** After 12 payments, you're in
-- **Mixed path:** All your qualifying months add up, even if you pause or switch plans
+- **Mixed path:** All your qualifying months add up, even if you pause or switch plans. Six months on Sapling, three months on Seedling, then six months on Oak? That's 12 qualifying months.
 
-The counter only moves forward. If you downgrade to Seedling for a few months and come back, your progress stays.
+The counter only moves forward. Time on Seedling or Free doesn't add months, but it doesn't reset your progress either.
 
 ### What qualifies
 
@@ -39,7 +39,7 @@ Sapling is where people start investing seriously. That's the threshold.
 
 ### The 100-year clock
 
-The preservation period starts from when you created your Grove account—not when you earned Centennial. If you planted your grove in 2026, it's preserved until 2126.
+The preservation period starts from your signup date—when you first created your Grove account—not when you earned Centennial. If you planted your grove in 2026, it's preserved until 2126.
 
 Earning Centennial retroactively protects everything from day one.
 
@@ -60,7 +60,7 @@ Your site becomes a **read-only archive**:
 - Visitors can still read everything
 - RSS still works
 - You can't edit, delete, or publish new posts
-- A small "archived" notice appears on your site
+- A subtle indicator shows the site is preserved (not abandoned)
 
 Think of it like a book on a library shelf. It's still there. People can still read it. You just can't add new chapters unless you come back.
 
@@ -85,8 +85,6 @@ If Grove ever needs to wind down:
 - Centennial sites stay accessible
 
 Even the worst case honors the promise.
-
-You can read the full breakdown in [How Grove Lasts](/docs/grove-sustainability).
 
 ## Opting out
 
@@ -114,7 +112,7 @@ Once you hit 12, you'll get an email confirming your grove has earned permanent 
 
 ### What if I want to change my username?
 
-Your Centennial preservation applies to whatever username you have when you stop paying. If you change usernames while active, the new one becomes your preserved domain.
+While you're an active subscriber, you can change your username anytime—Centennial follows your current username. When you eventually stop paying (if you ever do), whichever username you have at that moment becomes your preserved domain for the next century.
 
 ### What if someone wants my username after I'm gone?
 
@@ -131,7 +129,7 @@ Preservation is the default. Respect for family wishes is the exception.
 
 ### Is this legally binding?
 
-Centennial is a commitment backed by Grove's financial structure, not a legal contract. The sustainability model, The Reserve, and succession planning exist specifically to make this promise keepable. Read [How Grove Lasts](/docs/grove-sustainability) for the full picture.
+Centennial is a commitment backed by Grove's financial structure, not a legal contract. The sustainability model, The Reserve, and succession planning exist specifically to make this promise keepable—not just words, but infrastructure designed for longevity.
 
 ---
 
