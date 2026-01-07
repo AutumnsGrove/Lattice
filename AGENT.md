@@ -186,6 +186,13 @@ docs: Update README
 - **When working with seasonal themes** → Use skill: `grove-ui-design`
 - **When building navigation patterns** → Use skill: `grove-ui-design`
 
+### Grove Documentation
+- **When writing help center articles** → Use skill: `grove-documentation`
+- **When drafting specs or technical docs** → Use skill: `grove-documentation`
+- **When writing user-facing text** → Use skill: `grove-documentation`
+- **When writing onboarding, tooltips, or error messages** → Use skill: `grove-documentation`
+- **When reviewing docs for voice consistency** → Use skill: `grove-documentation`
+
 ### CLI Development
 - **When building terminal interfaces** → Use skill: `rich-terminal-output`
 - **For Rich library patterns** → Use skill: `rich-terminal-output`
@@ -227,6 +234,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `svelte5-development` | Svelte 5 with runes |
 | `rich-terminal-output` | Terminal UI with Rich |
 | `grove-ui-design` | Glassmorphism, seasons, forests, warm UI |
+| `grove-documentation` | Grove voice, help articles, user-facing text |
 | `research-strategy` | Systematic research |
 
 ---
