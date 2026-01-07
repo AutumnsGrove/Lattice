@@ -165,7 +165,7 @@
 		<!-- Divider -->
 		{#if resources.length > 0}
 			<div class="py-4">
-				<GroveDivider count={7} size="xs" />
+				<GroveDivider count={7} size="xs" glass />
 			</div>
 
 			<!-- Resources Section -->
@@ -199,7 +199,7 @@
 		<!-- Divider -->
 		{#if connect.length > 0}
 			<div class="py-4">
-				<GroveDivider count={7} size="xs" />
+				<GroveDivider count={7} size="xs" glass />
 			</div>
 
 			<!-- Connect Section -->

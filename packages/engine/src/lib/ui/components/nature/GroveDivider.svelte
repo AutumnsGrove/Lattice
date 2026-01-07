@@ -1,6 +1,6 @@
 <!--
   Grove — A place to Be
-  Copyright (c) 2025 Autumn Brown
+  Copyright (c) 2026 Autumn Brown
   Licensed under AGPL-3.0
 
   GroveDivider - A decorative divider featuring alternating Grove logos
