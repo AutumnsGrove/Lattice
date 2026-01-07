@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
-	import { Logo } from '../nature';
+	import { Logo, GroveDivider } from '../nature';
 	import {
 		Github,
 		ExternalLink,
@@ -17,7 +17,7 @@
 	} from 'lucide-svelte';
 	import { seasonStore } from '../../stores/season';
 	import type { FooterLink, MaxWidth, Season } from './types';
-	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS } from './defaults';
+	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS, DIVIDER_VERTICAL } from './defaults';
 
 	interface Props {
 		resourceLinks?: FooterLink[];
@@ -48,10 +48,11 @@
 
 <footer class="py-12 border-t border-default">
 	<div class="{maxWidthClass[maxWidth]} mx-auto px-6">
-		<!-- Three Column Layout (stacked on mobile) -->
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 mb-10">
-			<!-- Column 1: Grove Brand -->
-			<div class="text-center sm:text-left">
+		<!-- Responsive Layout: Brand only (mobile) → Three columns with glass dividers (desktop) -->
+		<!-- Resources/Connect sections are in the mobile overflow menu instead -->
+		<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-6 sm:mb-10">
+			<!-- Column 1: Grove Brand (always visible) -->
+			<div class="text-center sm:text-left lg:flex-1">
 				<div class="flex items-center gap-2 justify-center sm:justify-start mb-3">
 					<Logo class="w-6 h-6" season={season || $seasonStore} />
 					<span class="text-xl font-serif text-foreground">Grove</span>
@@ -64,8 +65,13 @@
 				</p>
 			</div>
 
-			<!-- Column 2: Resources -->
-			<div class="text-center sm:text-left">
+			<!-- Vertical Divider (hidden on mobile/tablet) -->
+			<div class="hidden lg:flex items-center px-2">
+				<GroveDivider {...DIVIDER_VERTICAL} />
+			</div>
+
+			<!-- Column 2: Resources (hidden on mobile) -->
+			<div class="hidden sm:block text-center sm:text-left lg:flex-1">
 				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Resources</h3>
 				<ul class="space-y-2.5 text-sm font-sans">
 					{#each resources as link}
@@ -81,8 +87,13 @@
 				</ul>
 			</div>
 
-			<!-- Column 3: Connect -->
-			<div class="text-center sm:text-left">
+			<!-- Vertical Divider (hidden on mobile/tablet) -->
+			<div class="hidden lg:flex items-center px-2">
+				<GroveDivider {...DIVIDER_VERTICAL} />
+			</div>
+
+			<!-- Column 3: Connect (hidden on mobile) -->
+			<div class="hidden sm:block text-center sm:text-left lg:flex-1">
 				<h3 class="text-sm font-sans font-medium text-foreground uppercase tracking-wide mb-4">Connect</h3>
 				<ul class="space-y-2.5 text-sm font-sans">
 					{#each connect as link}

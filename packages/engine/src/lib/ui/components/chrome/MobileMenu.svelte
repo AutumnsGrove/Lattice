@@ -1,19 +1,37 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { X } from 'lucide-svelte';
-	import type { NavItem } from './types';
+	import { X, ExternalLink } from 'lucide-svelte';
+	import type { NavItem, FooterLink } from './types';
 	import { isActivePath } from './types';
-	import { DEFAULT_MOBILE_NAV_ITEMS } from './defaults';
+	import {
+		DEFAULT_MOBILE_NAV_ITEMS,
+		DEFAULT_MOBILE_RESOURCE_LINKS,
+		DEFAULT_MOBILE_CONNECT_LINKS,
+		DIVIDER_HORIZONTAL
+	} from './defaults';
+	import { GroveDivider } from '../nature';
 
 	interface Props {
 		open: boolean;
 		onClose: () => void;
 		navItems?: NavItem[];
+		resourceLinks?: FooterLink[];
+		connectLinks?: FooterLink[];
 	}
 
-	let { open = $bindable(), onClose, navItems }: Props = $props();
+	let {
+		open = $bindable(),
+		onClose,
+		navItems,
+		resourceLinks,
+		connectLinks
+	}: Props = $props();
 
 	let currentPath = $derived($page.url.pathname);
+
+	// Use provided links or defaults
+	const resources = resourceLinks ?? DEFAULT_MOBILE_RESOURCE_LINKS;
+	const connect = connectLinks ?? DEFAULT_MOBILE_CONNECT_LINKS;
 
 	// References for focus management
 	let closeButtonRef: HTMLButtonElement | undefined = $state();
@@ -97,7 +115,7 @@
 <!-- Slide-out panel -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
+	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out flex flex-col {open
 		? 'translate-x-0'
 		: 'translate-x-full'}"
 	role="dialog"
@@ -119,8 +137,9 @@
 		</button>
 	</div>
 
-	<!-- Navigation -->
-	<nav class="p-2">
+	<!-- Navigation with scroll shadow -->
+	<nav class="p-2 overflow-y-auto flex-1 scroll-shadow">
+		<!-- Main Navigation Items -->
 		{#each items as item}
 			{@const Icon = item.icon}
 			{@const active = isActivePath(item.href, currentPath)}
@@ -134,12 +153,118 @@
 					? 'bg-accent/10 text-accent-muted'
 					: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
 			>
-				<Icon class="w-5 h-5 flex-shrink-0" />
+				{#if Icon}
+					<Icon class="w-5 h-5 flex-shrink-0" />
+				{/if}
 				<span class="text-sm font-medium">{item.label}</span>
 				{#if item.external}
-					<span class="text-xs text-foreground-subtle ml-auto">External</span>
+					<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
 				{/if}
 			</a>
 		{/each}
+
+		<!-- Resources Section -->
+		{#if resources.length > 0}
+			<div class="py-4">
+				<GroveDivider {...DIVIDER_HORIZONTAL} />
+			</div>
+
+			<section aria-labelledby="mobile-menu-resources">
+				<h3 id="mobile-menu-resources" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+					Resources
+				</h3>
+				{#each resources as link}
+					{@const Icon = link.icon}
+					{@const active = isActivePath(link.href, currentPath)}
+					<a
+						href={link.href}
+						target={link.external ? '_blank' : undefined}
+						rel={link.external ? 'noopener noreferrer' : undefined}
+						onclick={handleClose}
+						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+							{active
+							? 'bg-accent/10 text-accent-muted'
+							: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+					>
+						{#if Icon}
+							<Icon class="w-5 h-5 flex-shrink-0" />
+						{/if}
+						<span class="text-sm font-medium">{link.label}</span>
+						{#if link.external}
+							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+						{/if}
+					</a>
+				{/each}
+			</section>
+		{/if}
+
+		<!-- Connect Section -->
+		{#if connect.length > 0}
+			<div class="py-4">
+				<GroveDivider {...DIVIDER_HORIZONTAL} />
+			</div>
+
+			<section aria-labelledby="mobile-menu-connect">
+				<h3 id="mobile-menu-connect" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+					Connect
+				</h3>
+				{#each connect as link}
+					{@const Icon = link.icon}
+					{@const active = isActivePath(link.href, currentPath)}
+					<a
+						href={link.href}
+						target={link.external ? '_blank' : undefined}
+						rel={link.external ? 'noopener noreferrer' : undefined}
+						onclick={handleClose}
+						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+							{active
+							? 'bg-accent/10 text-accent-muted'
+							: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+					>
+						{#if Icon}
+							<Icon class="w-5 h-5 flex-shrink-0" />
+						{/if}
+						<span class="text-sm font-medium">{link.label}</span>
+						{#if link.external}
+							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+						{/if}
+					</a>
+				{/each}
+			</section>
+		{/if}
 	</nav>
 </div>
+
+<style>
+	/*
+	 * Scroll shadow indicator
+	 * Shows gradient shadows at top/bottom when content is scrollable.
+	 * Uses background-attachment: local/scroll trick for pure CSS solution.
+	 */
+	.scroll-shadow {
+		/* Shadow and surface colors - uses theme CSS variables with sensible fallbacks */
+		--scroll-shadow-color: rgb(0 0 0 / 0.08);
+		--scroll-shadow-size: 16px;
+		/* Surface color for cover gradients - matches bg-surface */
+		--scroll-surface-light: hsl(var(--surface, 0 0% 100%));
+		--scroll-surface-dark: hsl(var(--surface, 240 10% 4%));
+		--scroll-surface: var(--scroll-surface-light);
+
+		background:
+			/* Top shadow - fades in when scrolled down */
+			linear-gradient(to bottom, var(--scroll-shadow-color), transparent) top / 100% var(--scroll-shadow-size),
+			/* Bottom shadow - fades in when more content below */
+			linear-gradient(to top, var(--scroll-shadow-color), transparent) bottom / 100% var(--scroll-shadow-size),
+			/* Top cover - hides shadow when at scroll top */
+			linear-gradient(to bottom, var(--scroll-surface), var(--scroll-surface)) top / 100% var(--scroll-shadow-size),
+			/* Bottom cover - hides shadow when at scroll bottom */
+			linear-gradient(to top, var(--scroll-surface), var(--scroll-surface)) bottom / 100% var(--scroll-shadow-size);
+		background-repeat: no-repeat;
+		background-attachment: local, local, scroll, scroll;
+	}
+
+	:global(.dark) .scroll-shadow {
+		--scroll-shadow-color: rgb(0 0 0 / 0.3);
+		--scroll-surface: var(--scroll-surface-dark);
+	}
+</style>

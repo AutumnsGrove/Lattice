@@ -27,13 +27,7 @@
 	import { tweened } from 'svelte/motion';
 	import { cubicInOut } from 'svelte/easing';
 	import { browser } from '$app/environment';
-
-	type GlassVariant =
-		| "default"   // Light translucent - uses seasonal color or white/emerald
-		| "accent"    // Accent-colored glass
-		| "frosted"   // Strong frosted effect, more opaque
-		| "dark"      // Dark translucent for light backgrounds
-		| "ethereal"; // Dreamy, highly transparent with glow
+	import type { GlassVariant } from './types';
 
 	type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
