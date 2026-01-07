@@ -65,6 +65,9 @@
 		LogoWinterGrove,
 		// The Mega Forest
 		LogoMegaForest,
+		// The Badge Collection (v7)
+		LogoGroveBadge,
+		LogoGroveCircle,
 		// The artifact 😂
 		LogoArtifact
 	} from '$lib/components/logo-concepts';
@@ -842,6 +845,108 @@
 										<span class="text-2xl font-bold text-orange-400">1</span>
 										<span class="text-xs text-purple-300/60 block">Hearth</span>
 									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- THE BADGE COLLECTION (v7) - Compact Wordmarks -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/50 dark:via-orange-950/50 dark:to-rose-950/50 border-2 border-amber-400/50 dark:border-amber-600/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-2xl">🏷️</span>
+							<h3 class="text-xl font-bold text-foreground">The Badge Collection (v7)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-medium">wordmarks</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-6">
+							Tight, compact, ready for use. Glass-styled badges with the Grove wordmark in Calistoga.<br/>
+							<em class="text-xs text-foreground-faint">Square and circle variants, each with 4 seasonal moods.</em>
+						</p>
+
+						<!-- Badge Showcase Grid -->
+						<div class="space-y-8">
+							<!-- Square Badges -->
+							<div>
+								<h4 class="text-sm font-medium text-foreground-muted mb-3 flex items-center gap-2">
+									<span class="w-4 h-4 rounded bg-amber-200 dark:bg-amber-800"></span>
+									Square Badge
+								</h4>
+								<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-slate-800/50">
+										<LogoGroveBadge class="w-24 h-24" variant="default" />
+										<span class="text-xs text-foreground-faint">Default</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-amber-100/50 dark:bg-amber-900/30">
+										<LogoGroveBadge class="w-24 h-24" variant="autumn" />
+										<span class="text-xs text-foreground-faint">Autumn</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-slate-100/50 dark:bg-slate-700/50">
+										<LogoGroveBadge class="w-24 h-24" variant="winter" />
+										<span class="text-xs text-foreground-faint">Winter</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-indigo-950">
+										<LogoGroveBadge class="w-24 h-24" variant="night" />
+										<span class="text-xs text-indigo-300">Night</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Circle Badges -->
+							<div>
+								<h4 class="text-sm font-medium text-foreground-muted mb-3 flex items-center gap-2">
+									<span class="w-4 h-4 rounded-full bg-amber-200 dark:bg-amber-800"></span>
+									Circle Badge
+								</h4>
+								<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-slate-800/50">
+										<LogoGroveCircle class="w-24 h-24" variant="default" />
+										<span class="text-xs text-foreground-faint">Default</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-amber-100/50 dark:bg-amber-900/30">
+										<LogoGroveCircle class="w-24 h-24" variant="autumn" />
+										<span class="text-xs text-foreground-faint">Autumn</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-slate-100/50 dark:bg-slate-700/50">
+										<LogoGroveCircle class="w-24 h-24" variant="winter" />
+										<span class="text-xs text-foreground-faint">Winter</span>
+									</div>
+									<div class="flex flex-col items-center gap-2 p-3 rounded-lg bg-indigo-950">
+										<LogoGroveCircle class="w-24 h-24" variant="night" />
+										<span class="text-xs text-indigo-300">Night</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Size Comparison -->
+							<div class="pt-4 border-t border-amber-300/30 dark:border-amber-700/30">
+								<h4 class="text-sm font-medium text-foreground-muted mb-3">Size Comparison</h4>
+								<div class="flex items-end justify-center gap-6 p-4 bg-white/40 dark:bg-slate-800/40 rounded-lg">
+									<div class="text-center">
+										<LogoGroveBadge class="w-12 h-12" variant="autumn" />
+										<span class="text-xs text-foreground-faint block mt-1">48px</span>
+									</div>
+									<div class="text-center">
+										<LogoGroveBadge class="w-16 h-16" variant="autumn" />
+										<span class="text-xs text-foreground-faint block mt-1">64px</span>
+									</div>
+									<div class="text-center">
+										<LogoGroveBadge class="w-24 h-24" variant="autumn" />
+										<span class="text-xs text-foreground-faint block mt-1">96px</span>
+									</div>
+									<div class="text-center">
+										<LogoGroveBadge class="w-32 h-32" variant="autumn" />
+										<span class="text-xs text-foreground-faint block mt-1">128px</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Icon-only variants -->
+							<div class="pt-4 border-t border-amber-300/30 dark:border-amber-700/30">
+								<h4 class="text-sm font-medium text-foreground-muted mb-3">Icon Only (no text)</h4>
+								<div class="flex items-center justify-center gap-6 p-4 bg-gradient-to-r from-indigo-950 via-purple-950 to-indigo-950 rounded-lg">
+									<LogoGroveBadge class="w-16 h-16" variant="night" showText={false} />
+									<LogoGroveCircle class="w-16 h-16" variant="night" showText={false} />
+									<LogoGroveBadge class="w-12 h-12" variant="night" showText={false} />
+									<LogoGroveCircle class="w-12 h-12" variant="night" showText={false} />
 								</div>
 							</div>
 						</div>

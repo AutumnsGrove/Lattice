@@ -92,6 +92,11 @@ export { default as LogoWinterGrove } from "./LogoWinterGrove.svelte";
 // The Mega Forest - panoramic showcase of everything
 export { default as LogoMegaForest } from "./LogoMegaForest.svelte";
 
+// The Badge Collection (v7) - compact, glassy wordmarks
+// "Tight, warm, home."
+export { default as LogoGroveBadge } from "./LogoGroveBadge.svelte";
+export { default as LogoGroveCircle } from "./LogoGroveCircle.svelte";
+
 // Re-export Tabler's Linktree icon as a historical artifact 😂
 // "The logo that started the journey"
 export { IconBrandLinktree as LogoArtifact } from "@tabler/icons-svelte";
