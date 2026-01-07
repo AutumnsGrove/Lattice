@@ -76,7 +76,7 @@
         <li class="toc-item" class:active={activeId === header.id}>
           <button
             type="button"
-            onclick={() => scrollToHeader(header.id)}
+            onclick={() => scrollTo(header.id)}
             class="toc-link"
             style="padding-left: {(header.level - 1) * 0.75}rem"
           >
@@ -116,7 +116,7 @@
             <li>
               <button
                 type="button"
-                onclick={() => scrollToHeader(header.id)}
+                onclick={() => scrollTo(header.id)}
                 class="toc-mobile-link"
                 class:active={activeId === header.id}
                 style="padding-left: {(header.level - 1) * 0.75 + 1}rem"
