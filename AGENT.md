@@ -128,6 +128,12 @@ docs: Update README
 
 **This project uses Claude Code Skills for specialized workflows. Invoke skills using the Skill tool when you encounter these situations:**
 
+### Authentication
+- **When adding sign-in to a Grove app** → Use skill: `heartwood-auth`
+- **When protecting admin routes** → Use skill: `heartwood-auth`
+- **When validating user sessions** → Use skill: `heartwood-auth`
+- **When integrating with Heartwood (GroveAuth)** → Use skill: `heartwood-auth`
+
 ### Secrets & API Keys
 - **When managing API keys or secrets** → Use skill: `secrets-management`
 - **Before implementing secrets loading** → Use skill: `secrets-management`
@@ -216,6 +222,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 ### Available Skills Reference
 | Skill | Purpose |
 |-------|---------|
+| `heartwood-auth` | Heartwood (GroveAuth) integration, sign-in, sessions |
 | `secrets-management` | API keys, credentials, secrets.json |
 | `api-integration` | External REST API integration |
 | `database-management` | SQLite, database.py patterns |
