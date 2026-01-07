@@ -1,19 +1,36 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { X } from 'lucide-svelte';
-	import type { NavItem } from './types';
+	import { X, ExternalLink } from 'lucide-svelte';
+	import type { NavItem, FooterLink } from './types';
 	import { isActivePath } from './types';
-	import { DEFAULT_MOBILE_NAV_ITEMS } from './defaults';
+	import {
+		DEFAULT_MOBILE_NAV_ITEMS,
+		DEFAULT_MOBILE_RESOURCE_LINKS,
+		DEFAULT_MOBILE_CONNECT_LINKS
+	} from './defaults';
+	import { GroveDivider } from '../nature';
 
 	interface Props {
 		open: boolean;
 		onClose: () => void;
 		navItems?: NavItem[];
+		resourceLinks?: FooterLink[];
+		connectLinks?: FooterLink[];
 	}
 
-	let { open = $bindable(), onClose, navItems }: Props = $props();
+	let {
+		open = $bindable(),
+		onClose,
+		navItems,
+		resourceLinks,
+		connectLinks
+	}: Props = $props();
 
 	let currentPath = $derived($page.url.pathname);
+
+	// Use provided links or defaults
+	const resources = resourceLinks ?? DEFAULT_MOBILE_RESOURCE_LINKS;
+	const connect = connectLinks ?? DEFAULT_MOBILE_CONNECT_LINKS;
 
 	// References for focus management
 	let closeButtonRef: HTMLButtonElement | undefined = $state();
@@ -97,7 +114,7 @@
 <!-- Slide-out panel -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out {open
+	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out flex flex-col {open
 		? 'translate-x-0'
 		: 'translate-x-full'}"
 	role="dialog"
@@ -120,7 +137,8 @@
 	</div>
 
 	<!-- Navigation -->
-	<nav class="p-2">
+	<nav class="p-2 overflow-y-auto flex-1">
+		<!-- Main Navigation Items -->
 		{#each items as item}
 			{@const Icon = item.icon}
 			{@const active = isActivePath(item.href, currentPath)}
@@ -134,12 +152,82 @@
 					? 'bg-accent/10 text-accent-muted'
 					: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
 			>
-				<Icon class="w-5 h-5 flex-shrink-0" />
+				{#if Icon}
+					<Icon class="w-5 h-5 flex-shrink-0" />
+				{/if}
 				<span class="text-sm font-medium">{item.label}</span>
 				{#if item.external}
-					<span class="text-xs text-foreground-subtle ml-auto">External</span>
+					<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
 				{/if}
 			</a>
 		{/each}
+
+		<!-- Divider -->
+		{#if resources.length > 0}
+			<div class="py-4">
+				<GroveDivider count={7} size="xs" />
+			</div>
+
+			<!-- Resources Section -->
+			<div class="px-3 py-2">
+				<h3 class="text-xs font-medium text-foreground-subtle uppercase tracking-wide">Resources</h3>
+			</div>
+			{#each resources as link}
+				{@const Icon = link.icon}
+				{@const active = isActivePath(link.href, currentPath)}
+				<a
+					href={link.href}
+					target={link.external ? '_blank' : undefined}
+					rel={link.external ? 'noopener noreferrer' : undefined}
+					onclick={handleClose}
+					class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+						{active
+						? 'bg-accent/10 text-accent-muted'
+						: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+				>
+					{#if Icon}
+						<Icon class="w-5 h-5 flex-shrink-0" />
+					{/if}
+					<span class="text-sm font-medium">{link.label}</span>
+					{#if link.external}
+						<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+					{/if}
+				</a>
+			{/each}
+		{/if}
+
+		<!-- Divider -->
+		{#if connect.length > 0}
+			<div class="py-4">
+				<GroveDivider count={7} size="xs" />
+			</div>
+
+			<!-- Connect Section -->
+			<div class="px-3 py-2">
+				<h3 class="text-xs font-medium text-foreground-subtle uppercase tracking-wide">Connect</h3>
+			</div>
+			{#each connect as link}
+				{@const Icon = link.icon}
+				{@const active = isActivePath(link.href, currentPath)}
+				<a
+					href={link.href}
+					target={link.external ? '_blank' : undefined}
+					rel={link.external ? 'noopener noreferrer' : undefined}
+					onclick={handleClose}
+					class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+						{active
+						? 'bg-accent/10 text-accent-muted'
+						: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+				>
+					{#if Icon}
+						<Icon class="w-5 h-5 flex-shrink-0" />
+					{/if}
+					<span class="text-sm font-medium">{link.label}</span>
+					{#if link.external}
+						<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+					{/if}
+				</a>
+			{/each}
+		{/if}
 	</nav>
 </div>

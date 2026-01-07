@@ -20,6 +20,9 @@
 // Logo - Grove's tree-star logo
 export { default as Logo } from './Logo.svelte';
 
+// GroveDivider - Decorative divider with alternating logos
+export { default as GroveDivider } from './GroveDivider.svelte';
+
 // Palette - Seasonal color system
 export * from './palette';
 
