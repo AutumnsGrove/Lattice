@@ -1,6 +1,8 @@
-# Domain Blocklist Policy
+# Bark
 
-> *Protecting the grove from squatters, impersonators, and those who would plant poison.*
+> *The first layer of protection. The last line against harm.*
+
+**Name Protection** · *Internal service*
 
 **Status:** Draft
 **Last updated:** January 7, 2026
@@ -9,7 +11,13 @@
 
 ## Overview
 
-This document defines the comprehensive domain/username blocklist policy for Grove. It ensures that:
+Bark is the first thing you touch when you reach for a tree. It's the outer layer that takes the damage, the weathering, the attempts at harm. Beneath it, the living tissue stays safe.
+
+Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. No alerts, no drama—just quiet validation that keeps the grove healthy.
+
+*Every tree needs its bark.*
+
+This document defines the comprehensive domain/username blocklist policy implemented by Bark. It ensures that:
 
 1. **System integrity** — Infrastructure and service names cannot be claimed
 2. **Brand protection** — Grove products and trademarks are reserved

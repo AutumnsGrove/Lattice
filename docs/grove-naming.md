@@ -336,6 +336,17 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 
 ---
 
+## Bark
+**Name Protection** · *Internal service*
+
+Bark is the first thing you touch when you reach for a tree. It's the outer layer that takes the damage, the weathering, the attempts at harm. Beneath it, the living tissue stays safe. Bark doesn't fight back—it simply absorbs what would hurt, and lets the tree keep growing.
+
+Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. No alerts, no drama—just quiet validation that keeps the grove healthy. You'll never think about Bark unless you try to plant something that doesn't belong. And then you'll understand: every tree needs its bark.
+
+*The first layer of protection. The last line against harm.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -368,6 +379,7 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 | **Waystone** | Help center | *(integrated)* |
 | **Reeds** | Comments system | *(integrated)* |
 | **Porch** | Front porch conversations | porch.grove.place |
+| **Bark** | Name protection | *(internal)* |
 
 ---
 
@@ -405,6 +417,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Waystone | GroveWaystone |
 | Reeds | GroveReeds |
 | Porch | GrovePorch |
+| Bark | GroveBark |
 
 ---
 
@@ -416,5 +429,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 6, 2026*
+*Last updated: January 7, 2026*
 *Status: Placeholder names, pending launch*

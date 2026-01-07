@@ -281,6 +281,16 @@ export const specs: Doc[] = [
     lastUpdated: "2025-12-01",
     readingTime: 15,
   },
+  {
+    slug: "bark-spec",
+    title: "Bark — Name Protection",
+    description: "Username and domain validation system protecting the grove from harm",
+    excerpt:
+      "Bark is Grove's username and domain validation system. It checks every name against patterns of harm: slurs, impersonation attempts, reserved words, fraud patterns, spam signatures. Every tree needs its bark.",
+    category: "specs",
+    lastUpdated: "2026-01-07",
+    readingTime: 12,
+  },
 ];
 
 // Help Center Articles

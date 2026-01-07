@@ -1,9 +1,10 @@
 /**
- * Domain Blocklist Configuration
+ * Bark - Domain Blocklist Configuration
  *
+ * Part of the Bark name protection system.
  * Comprehensive list of blocked usernames/subdomains organized by category.
- * See docs/specs/domain-blocklist-policy.md for full documentation.
  *
+ * @see docs/specs/bark-spec.md
  * @module domain-blocklist
  */
 
