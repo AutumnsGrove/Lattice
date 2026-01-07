@@ -345,11 +345,11 @@
 
 			<!-- Quick link to version history -->
 			<a
-				href="/roadmap/versions"
+				href="/journey"
 				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-slate-800 transition-colors"
 			>
 				<Tag class="w-4 h-4" />
-				View Version History
+				View the Journey
 			</a>
 		</div>
 

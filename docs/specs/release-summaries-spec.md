@@ -88,7 +88,7 @@ This system automatically generates 2-4 sentence summaries for each version rele
          │
          ▼
 ┌─────────────────┐
-│ Roadmap Page    │  /roadmap/versions displays summaries
+│ Roadmap Page    │  /journey displays summaries
 │ Displays        │
 └─────────────────┘
 ```
@@ -109,7 +109,7 @@ GroveEngine/
 │   └── history.csv                    # Existing metrics
 │
 ├── landing/
-│   ├── src/routes/roadmap/versions/
+│   ├── src/routes/journey/
 │   │   └── +page.svelte               # Version history page
 │   └── static/data/summaries/         # Synced summaries
 │       ├── v0.9.0.json
@@ -310,7 +310,7 @@ cp -r snapshots/summaries/* landing/static/data/summaries/
 
 ### Version History Page
 
-**URL:** `/roadmap/versions`
+**URL:** `/journey`
 
 **Features:**
 - Displays all releases in reverse chronological order
@@ -362,7 +362,7 @@ Assuming 50 releases per year:
 
 1. **Summaries generated**: Check `snapshots/summaries/` directory
 2. **Summaries synced**: Check `landing/static/data/summaries/`
-3. **Page displays correctly**: Visit `/roadmap/versions`
+3. **Page displays correctly**: Visit `/journey`
 4. **No workflow failures**: Check GitHub Actions logs
 
 ### Common Issues
@@ -432,7 +432,7 @@ cat snapshots/summaries/v0.9.0.json | jq .
 # Test version page (requires dev server)
 cd landing
 pnpm dev
-# Visit http://localhost:5173/roadmap/versions
+# Visit http://localhost:5173/journey
 ```
 
 ### Validation Checklist
@@ -476,7 +476,7 @@ pnpm dev
 
 1. **`.github/workflows/auto-tag.yml`** - Added summary generation step
 2. **`landing/src/routes/roadmap/+page.svelte`** - Added link to versions
-3. **`landing/src/routes/roadmap/versions/+page.svelte`** - NEW: Version history page
+3. **`landing/src/routes/journey/+page.svelte`** - NEW: Version history page
 
 ### Files Created
 

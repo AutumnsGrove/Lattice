@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Tag, Sprout } from 'lucide-svelte';
+	import { Tag, Sprout, ChevronDown, Sparkles, Wrench } from 'lucide-svelte';
 
 	let { data } = $props();
+
+	// Get summary for a version label
+	function getSummary(label: string) {
+		return data.summaries[label] || null;
+	}
 
 	function formatNumber(num: number): string {
 		return num.toLocaleString();
@@ -245,19 +250,93 @@
 					<div class="space-y-8">
 						{#each milestones as snapshot, i}
 							{@const isLeft = i % 2 === 0}
-							<div class="relative flex items-center {isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}">
+							{@const summary = getSummary(snapshot.label)}
+							<div class="relative flex items-start {isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}">
 								<!-- Dot -->
-								<div class="absolute left-4 md:left-1/2 w-3 h-3 bg-accent-muted rounded-full transform -translate-x-1/2 z-10"></div>
+								<div class="absolute left-4 md:left-1/2 w-3 h-3 bg-accent-muted rounded-full transform -translate-x-1/2 z-10 mt-5"></div>
 
 								<!-- Content -->
-								<div class="ml-12 md:ml-0 md:w-1/2 {isLeft ? 'md:pr-12 md:text-right' : 'md:pl-12'}">
-									<div class="card p-4">
+								<div class="ml-12 md:ml-0 md:w-1/2 {isLeft ? 'md:pr-12' : 'md:pl-12'}">
+									<div class="card p-5 {isLeft ? 'md:text-right' : ''}">
+										<!-- Header -->
 										<div class="text-xs font-mono text-foreground-faint mb-1">{snapshot.date}</div>
-										<div class="font-serif text-accent-muted mb-2 flex items-center gap-2">
+										<div class="font-serif text-xl text-accent-muted mb-2 flex items-center gap-2 {isLeft ? 'md:justify-end' : ''}">
 											<Tag class="w-4 h-4" /> {snapshot.label}
 										</div>
-										<div class="text-sm text-foreground-muted font-sans">
-											{formatNumber(snapshot.totalCodeLines)} lines · {formatNumber(snapshot.commits)} commits
+
+										<!-- AI Summary -->
+										{#if summary}
+											<p class="text-sm text-foreground-muted font-sans leading-relaxed mb-3 {isLeft ? 'md:text-right' : ''}">
+												{summary.summary}
+											</p>
+
+											<!-- Stats badges -->
+											<div class="flex flex-wrap gap-2 mb-3 {isLeft ? 'md:justify-end' : ''}">
+												{#if summary.stats.features > 0}
+													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+														<Sparkles class="w-3 h-3" />
+														{summary.stats.features} features
+													</span>
+												{/if}
+												{#if summary.stats.fixes > 0}
+													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+														<Wrench class="w-3 h-3" />
+														{summary.stats.fixes} fixes
+													</span>
+												{/if}
+											</div>
+
+											<!-- Expandable highlights -->
+											{#if summary.highlights.features.length > 0 || summary.highlights.fixes.length > 0}
+												<details class="group mt-3 pt-3 border-t border-divider">
+													<summary class="cursor-pointer text-xs font-medium text-accent hover:text-accent-hover transition-colors flex items-center gap-1 {isLeft ? 'md:justify-end' : ''}">
+														<ChevronDown class="w-3 h-3 transition-transform group-open:rotate-180" />
+														View highlights
+													</summary>
+
+													<div class="mt-3 space-y-3 text-left">
+														{#if summary.highlights.features.length > 0}
+															<div>
+																<h4 class="text-xs font-semibold text-foreground mb-1.5">Features</h4>
+																<ul class="space-y-1 text-xs text-foreground-muted">
+																	{#each summary.highlights.features.slice(0, 5) as feature}
+																		<li class="flex items-start gap-1.5">
+																			<span class="text-green-500 mt-0.5">●</span>
+																			<span>{feature}</span>
+																		</li>
+																	{/each}
+																</ul>
+															</div>
+														{/if}
+
+														{#if summary.highlights.fixes.length > 0}
+															<div>
+																<h4 class="text-xs font-semibold text-foreground mb-1.5">Fixes</h4>
+																<ul class="space-y-1 text-xs text-foreground-muted">
+																	{#each summary.highlights.fixes.slice(0, 5) as fix}
+																		<li class="flex items-start gap-1.5">
+																			<span class="text-blue-500 mt-0.5">●</span>
+																			<span>{fix}</span>
+																		</li>
+																	{/each}
+																</ul>
+															</div>
+														{/if}
+													</div>
+												</details>
+											{/if}
+										{:else}
+											<!-- Fallback for versions without summaries -->
+											<div class="text-sm text-foreground-muted font-sans">
+												{formatNumber(snapshot.totalCodeLines)} lines · {formatNumber(snapshot.commits)} commits
+											</div>
+										{/if}
+
+										<!-- Stats footer -->
+										<div class="text-xs text-foreground-faint font-mono mt-3 pt-3 border-t border-divider flex items-center gap-3 {isLeft ? 'md:justify-end' : ''}">
+											<span>{formatNumber(snapshot.totalCodeLines)} lines</span>
+											<span>·</span>
+											<span>{formatNumber(snapshot.commits)} commits</span>
 										</div>
 									</div>
 								</div>

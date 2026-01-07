@@ -1,4 +1,6 @@
 import historyData from "../../../static/data/history.csv?raw";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 /**
  * CSV Schema (17 columns):
@@ -7,6 +9,26 @@ import historyData from "../../../static/data/history.csv?raw";
  * estimated_tokens, commits, test_files, test_lines, bundle_size_kb
  */
 const EXPECTED_COLUMNS = 17;
+
+interface VersionSummary {
+  version: string;
+  date: string;
+  commitHash: string;
+  summary: string;
+  stats: {
+    totalCommits: number;
+    features: number;
+    fixes: number;
+    refactoring: number;
+    docs: number;
+    tests: number;
+    performance: number;
+  };
+  highlights: {
+    features: string[];
+    fixes: string[];
+  };
+}
 
 interface SnapshotData {
   timestamp: string;
@@ -116,8 +138,34 @@ function parseCSV(csv: string): SnapshotData[] {
   return results;
 }
 
-export function load() {
+async function loadSummaries(): Promise<Map<string, VersionSummary>> {
+  const summaries = new Map<string, VersionSummary>();
+
+  try {
+    const summariesDir = join(process.cwd(), "static/data/summaries");
+    const files = await readdir(summariesDir);
+
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue;
+
+      try {
+        const content = await readFile(join(summariesDir, file), "utf-8");
+        const summary = JSON.parse(content) as VersionSummary;
+        summaries.set(summary.version, summary);
+      } catch {
+        // Skip malformed files
+      }
+    }
+  } catch {
+    // Summaries directory doesn't exist yet
+  }
+
+  return summaries;
+}
+
+export async function load() {
   const snapshots = parseCSV(historyData);
+  const summaries = await loadSummaries();
 
   // Handle empty data gracefully
   if (snapshots.length === 0) {
@@ -126,6 +174,7 @@ export function load() {
       latest: null,
       growth: null,
       totalSnapshots: 0,
+      summaries: Object.fromEntries(summaries),
     };
   }
 
@@ -148,5 +197,6 @@ export function load() {
     latest,
     growth,
     totalSnapshots: snapshots.length,
+    summaries: Object.fromEntries(summaries),
   };
 }

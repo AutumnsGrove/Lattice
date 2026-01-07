@@ -46,7 +46,7 @@ When you bump the version in `packages/engine/package.json` and push to main:
 4. ✅ Syncs summaries to landing page
 5. ✅ Commits and pushes changes
 
-Summaries appear on: https://grove.place/roadmap/versions
+Summaries appear on: https://grove.place/journey
 
 ## Fallback Behavior
 
