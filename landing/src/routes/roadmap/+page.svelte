@@ -330,9 +330,18 @@
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
 				The Journey Ahead
 			</h1>
-			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
+			<p class="text-lg text-foreground-muted max-w-xl mx-auto mb-6">
 				A grove doesn't grow overnight. Here's the path we're walking together—from first frost to midnight bloom.
 			</p>
+
+			<!-- Quick link to version history -->
+			<a
+				href="/roadmap/versions"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-slate-800 transition-colors"
+			>
+				<Tag class="w-4 h-4" />
+				View Version History
+			</a>
 		</div>
 
 		<!-- Decorative clouds -->

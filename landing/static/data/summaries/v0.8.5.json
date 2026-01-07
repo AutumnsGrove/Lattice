@@ -1,0 +1,28 @@
+{
+  "version": "v0.8.5",
+  "date": "2026-01-04T23:23:38Z",
+  "commitHash": "8e7ad55",
+  "summary": "Major expansion of the workshop showcase with detailed feature pages for Bloom, Mycelium, Vista, and other tools. This release deepened Grove's documentation and added comprehensive technical specifications for internal tooling. The knowledge base grew significantly with new articles covering Grove's development philosophy and infrastructure.",
+  "stats": {
+    "totalCommits": 152,
+    "features": 68,
+    "fixes": 12,
+    "refactoring": 8,
+    "docs": 55,
+    "tests": 2,
+    "performance": 1
+  },
+  "highlights": {
+    "features": [
+      "Workshop pages for Bloom, Mycelium, Vista",
+      "Comprehensive specs for internal tools",
+      "Knowledge base expansion",
+      "Enhanced feature showcase patterns"
+    ],
+    "fixes": [
+      "Workshop navigation improvements",
+      "Mobile responsiveness",
+      "Documentation consistency"
+    ]
+  }
+}
