@@ -5,7 +5,8 @@
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season';
 	import { Menu } from 'lucide-svelte';
-	import type { NavItem, MaxWidth } from './types';
+	import type { NavItem, MaxWidth, Season } from './types';
+	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 
 	// Determine current page for highlighting
@@ -15,7 +16,7 @@
 		navItems?: NavItem[];
 		maxWidth?: MaxWidth;
 		brandTitle?: string;
-		season?: string;
+		season?: Season;
 		onSeasonChange?: () => void;
 	}
 
@@ -46,11 +47,6 @@
 	}
 
 	const items = navItems || DEFAULT_NAV_ITEMS;
-
-	function isActive(href: string): boolean {
-		if (href === '/') return currentPath === '/';
-		return currentPath.startsWith(href);
-	}
 </script>
 
 <header class="sticky top-0 z-40 py-6 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
@@ -89,7 +85,7 @@
 					href={item.href}
 					target={item.external ? '_blank' : undefined}
 					rel={item.external ? 'noopener noreferrer' : undefined}
-					class="transition-colors whitespace-nowrap {isActive(item.href)
+					class="transition-colors whitespace-nowrap {isActivePath(item.href, currentPath)
 						? 'text-accent-muted'
 						: 'text-foreground-subtle hover:text-accent-muted'}"
 				>

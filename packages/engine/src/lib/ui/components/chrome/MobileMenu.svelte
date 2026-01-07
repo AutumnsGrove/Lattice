@@ -1,19 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import {
-		Home,
-		Telescope,
-		CircleDollarSign,
-		BookOpen,
-		Trees,
-		Map,
-		PenLine,
-		X,
-		Send,
-		Scroll
-	} from 'lucide-svelte';
+	import { X } from 'lucide-svelte';
 	import type { NavItem } from './types';
+	import { isActivePath } from './types';
+	import { DEFAULT_MOBILE_NAV_ITEMS } from './defaults';
 
 	interface Props {
 		open: boolean;
@@ -72,25 +62,7 @@
 		}
 	});
 
-	// Default mobile navigation items
-	const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
-		{ href: '/', label: 'Home', icon: Home },
-		{ href: '/manifesto', label: 'Manifesto', icon: Scroll },
-		{ href: '/vision', label: 'Vision', icon: Telescope },
-		{ href: '/roadmap', label: 'Roadmap', icon: Map },
-		{ href: '/pricing', label: 'Pricing', icon: CircleDollarSign },
-		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
-		{ href: '/forest', label: 'Forest', icon: Trees },
-		{ href: '/contact', label: 'Contact', icon: Send },
-		{ href: 'https://autumnsgrove.com/blog', label: 'Blog', icon: PenLine, external: true }
-	];
-
 	const items = navItems || DEFAULT_MOBILE_NAV_ITEMS;
-
-	function isActive(href: string): boolean {
-		if (href === '/') return currentPath === '/';
-		return currentPath.startsWith(href);
-	}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -134,7 +106,7 @@
 	<nav class="p-2">
 		{#each items as item}
 			{@const Icon = item.icon}
-			{@const active = isActive(item.href)}
+			{@const active = isActivePath(item.href, currentPath)}
 			<a
 				href={item.href}
 				target={item.external ? '_blank' : undefined}

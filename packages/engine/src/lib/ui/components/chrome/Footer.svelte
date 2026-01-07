@@ -16,14 +16,14 @@
 		Trees
 	} from 'lucide-svelte';
 	import { seasonStore } from '../../stores/season';
-	import type { FooterLink, MaxWidth } from './types';
+	import type { FooterLink, MaxWidth, Season } from './types';
 	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS } from './defaults';
 
 	interface Props {
 		resourceLinks?: FooterLink[];
 		connectLinks?: FooterLink[];
 		legalLinks?: FooterLink[];
-		season?: string;
+		season?: Season;
 		maxWidth?: MaxWidth;
 	}
 
