@@ -265,12 +265,12 @@
 					</div>
 
 					<div class="card p-5">
-						<h3 class="text-lg font-serif text-foreground mb-1">SST</h3>
+						<h3 class="text-lg font-serif text-foreground mb-1">Better Auth</h3>
 						<p class="text-foreground-muted font-sans text-sm">
-							Infrastructure-as-code framework. Manages Cloudflare Workers, Stripe products, and all Grove infrastructure in a single TypeScript config.
+							Authentication framework powering Heartwood. Handles OAuth, magic links, passkeys, and session management with KV-cached sessions for sub-100ms validation.
 						</p>
-						<a href="https://sst.dev" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
-							sst.dev →
+						<a href="https://better-auth.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
+							better-auth.com →
 						</a>
 					</div>
 
