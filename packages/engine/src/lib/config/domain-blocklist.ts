@@ -1,0 +1,732 @@
+/**
+ * Domain Blocklist Configuration
+ *
+ * Comprehensive list of blocked usernames/subdomains organized by category.
+ * See docs/specs/domain-blocklist-policy.md for full documentation.
+ *
+ * @module domain-blocklist
+ */
+
+export type BlocklistReason =
+	| 'system'
+	| 'grove_service'
+	| 'trademark'
+	| 'impersonation'
+	| 'offensive'
+	| 'fraud'
+	| 'future_reserved';
+
+export interface BlocklistEntry {
+	username: string;
+	reason: BlocklistReason;
+	category?: string;
+}
+
+// =============================================================================
+// CATEGORY 1: System & Infrastructure
+// =============================================================================
+
+const SYSTEM_WEB: string[] = [
+	'www',
+	'api',
+	'app',
+	'auth',
+	'login',
+	'logout',
+	'signin',
+	'signout',
+	'signup',
+	'register',
+	'account',
+	'accounts',
+	'oauth',
+	'oauth2',
+	'sso',
+	'admin',
+	'administrator',
+	'dashboard',
+	'panel',
+	'console',
+	'backend',
+	'control',
+	'billing',
+	'checkout',
+	'subscribe',
+	'unsubscribe',
+	'payment',
+	'payments',
+	'pay',
+	'settings',
+	'preferences',
+	'config',
+	'configuration',
+	'profile',
+	'profiles',
+	'user',
+	'users',
+	'member',
+	'members'
+];
+
+const SYSTEM_EMAIL: string[] = [
+	'mail',
+	'email',
+	'emails',
+	'smtp',
+	'imap',
+	'pop',
+	'pop3',
+	'postmaster',
+	'webmail',
+	'mx',
+	'newsletter',
+	'newsletters',
+	'noreply',
+	'no-reply',
+	'mailer',
+	'bounce',
+	'mailbox'
+];
+
+const SYSTEM_NETWORK: string[] = [
+	'ftp',
+	'sftp',
+	'ssh',
+	'vpn',
+	'proxy',
+	'gateway',
+	'firewall',
+	'cdn',
+	'static',
+	'assets',
+	'media',
+	'images',
+	'files',
+	'img',
+	'js',
+	'css',
+	'fonts',
+	'upload',
+	'uploads',
+	'download',
+	'downloads',
+	'cache',
+	'server',
+	'servers',
+	'node',
+	'nodes',
+	'cluster',
+	'worker',
+	'workers'
+];
+
+const SYSTEM_DNS: string[] = ['ns', 'ns1', 'ns2', 'ns3', 'dns', 'nameserver', 'whois', 'rdap'];
+
+const SYSTEM_METADATA: string[] = [
+	'rss',
+	'atom',
+	'feed',
+	'feeds',
+	'sitemap',
+	'sitemaps',
+	'robots',
+	'favicon',
+	'manifest',
+	'status',
+	'health',
+	'healthcheck',
+	'ping',
+	'metrics',
+	'analytics',
+	'telemetry',
+	'logs',
+	'log',
+	'debug',
+	'trace',
+	'error',
+	'errors'
+];
+
+const SYSTEM_DEV: string[] = [
+	'root',
+	'null',
+	'undefined',
+	'void',
+	'nan',
+	'test',
+	'testing',
+	'tests',
+	'demo',
+	'demos',
+	'example',
+	'examples',
+	'sample',
+	'samples',
+	'sandbox',
+	'staging',
+	'dev',
+	'development',
+	'prod',
+	'production',
+	'temp',
+	'tmp',
+	'localhost',
+	'local',
+	'internal',
+	'beta',
+	'alpha',
+	'canary',
+	'nightly',
+	'preview',
+	'release',
+	'releases'
+];
+
+const SYSTEM_LEGAL: string[] = [
+	'legal',
+	'terms',
+	'privacy',
+	'dmca',
+	'copyright',
+	'trademark',
+	'tos',
+	'eula',
+	'abuse',
+	'report',
+	'reports',
+	'security',
+	'vulnerability',
+	'cve',
+	'compliance',
+	'gdpr',
+	'ccpa',
+	'dsar'
+];
+
+const SYSTEM_DOCS: string[] = [
+	'docs',
+	'documentation',
+	'wiki',
+	'guide',
+	'guides',
+	'tutorial',
+	'tutorials',
+	'faq',
+	'faqs',
+	'help',
+	'support',
+	'knowledge',
+	'kb',
+	'knowledgebase',
+	'manual',
+	'manuals',
+	'reference',
+	'spec',
+	'specs',
+	'about',
+	'info',
+	'contact',
+	'contacts'
+];
+
+// =============================================================================
+// CATEGORY 2: Grove Services & Products
+// =============================================================================
+
+const GROVE_PUBLIC_SERVICES: string[] = [
+	// Core
+	'grove',
+	'lattice',
+	// Subdomain services
+	'meadow',
+	'forage',
+	'foliage',
+	'heartwood',
+	'trove',
+	'outpost',
+	'aria',
+	'plant',
+	'ivy',
+	'amber',
+	'bloom',
+	'mycelium',
+	'vista',
+	'pantry',
+	'nook',
+	'clearing',
+	'porch',
+	// Route-based services
+	'shade',
+	'trails',
+	'vineyard',
+	'terrarium',
+	'weave'
+];
+
+const GROVE_INTERNAL_SERVICES: string[] = [
+	'patina',
+	'rings',
+	'waystone',
+	'reeds',
+	'press',
+	'wisp',
+	'thorn',
+	'fireside',
+	'vines',
+	'arbor',
+	'sway',
+	'fern'
+];
+
+const GROVE_ALIASES: string[] = [
+	'domains',
+	'music',
+	'mc',
+	'auth-api',
+	'scout',
+	'search',
+	'og',
+	'monitor'
+];
+
+const GROVE_INTERNAL_CODENAMES: string[] = [
+	'grovesocial',
+	'grovedomaintool',
+	'grovethemes',
+	'groveauth',
+	'grovepatina',
+	'treasuretrove',
+	'grovemc',
+	'grovemusic',
+	'seedbed',
+	'groveanalytics',
+	'grovemail',
+	'grovestorage',
+	'groveshade',
+	'grovetrails',
+	'groveshowcase',
+	'grovebloom',
+	'grovemcp',
+	'grovemonitor',
+	'grovepress',
+	'grovewisp',
+	'groveshop',
+	'grovenook',
+	'groveclear',
+	'grovewaystone',
+	'grovereeds',
+	'groveporch',
+	'grovethorn',
+	'grovearbor',
+	'grovescout',
+	'groveengine',
+	'groveplace'
+];
+
+// =============================================================================
+// CATEGORY 3: Grove Brand & Trademarks
+// =============================================================================
+
+const GROVE_BRAND: string[] = [
+	'grove',
+	'groveplace',
+	'grove-place',
+	'thegrove',
+	'the-grove',
+	'autumnsgrove',
+	'autumns-grove',
+	'autumngrove',
+	'autumn-grove',
+	'autumn',
+	'autumns'
+];
+
+const GROVE_TIERS: string[] = [
+	'seedling',
+	'sapling',
+	'oak',
+	'evergreen',
+	'free',
+	'premium',
+	'pro',
+	'plus',
+	'basic',
+	'starter',
+	'enterprise'
+];
+
+const GROVE_CONCEPTS: string[] = [
+	'centennial',
+	'seasons',
+	'acorn',
+	'canopy',
+	'understory',
+	'overstory',
+	'forest',
+	'woods',
+	'woodland',
+	'tree',
+	'trees',
+	'branch',
+	'branches',
+	'root',
+	'roots',
+	'leaf',
+	'leaves',
+	'grove-keeper',
+	'grovekeeper'
+];
+
+// =============================================================================
+// CATEGORY 4: Authority & Impersonation Prevention
+// =============================================================================
+
+const IMPERSONATION_OFFICIAL: string[] = [
+	'official',
+	'verified',
+	'authentic',
+	'real',
+	'true',
+	'original',
+	'genuine',
+	'certified',
+	'approved',
+	'authorized',
+	'licensed',
+	'legit',
+	'legitimate'
+];
+
+const IMPERSONATION_ROLES: string[] = [
+	'admin',
+	'administrator',
+	'moderator',
+	'mod',
+	'mods',
+	'staff',
+	'employee',
+	'team',
+	'founder',
+	'cofounder',
+	'co-founder',
+	'ceo',
+	'cto',
+	'cfo',
+	'coo',
+	'president',
+	'director',
+	'manager',
+	'owner',
+	'operator',
+	'creator',
+	'developer',
+	'engineer',
+	'maintainer'
+];
+
+const IMPERSONATION_SUPPORT: string[] = [
+	'support',
+	'helpdesk',
+	'help-desk',
+	'customerservice',
+	'customer-service',
+	'trust',
+	'safety',
+	'security',
+	'moderation',
+	'enforcement',
+	'billing-support',
+	'tech-support'
+];
+
+// =============================================================================
+// CATEGORY 5: Fraud & Spam Patterns
+// =============================================================================
+
+const FRAUD_MONEY: string[] = [
+	'free-money',
+	'freemoney',
+	'getrich',
+	'get-rich',
+	'makemoney',
+	'make-money',
+	'earnmoney',
+	'earn-money',
+	'crypto-giveaway',
+	'cryptogiveaway',
+	'giveaway',
+	'airdrop',
+	'freebitcoin',
+	'free-bitcoin'
+];
+
+const FRAUD_PHISHING: string[] = [
+	'password',
+	'passwords',
+	'login-here',
+	'signin-here',
+	'sign-in',
+	'click-here',
+	'clickhere',
+	'download-now',
+	'downloadnow',
+	'limited-time',
+	'limitedtime',
+	'act-now',
+	'actnow'
+];
+
+const FRAUD_SCAM: string[] = [
+	'winner',
+	'congratulations',
+	'congrats',
+	'prize',
+	'prizes',
+	'lottery',
+	'jackpot',
+	'invoice',
+	'receipt',
+	'verify',
+	'verification',
+	'confirm',
+	'confirmation',
+	'account-suspended',
+	'account-locked',
+	'urgent',
+	'warning',
+	'alert',
+	'suspended'
+];
+
+const FRAUD_IMPERSONATION: string[] = [
+	'paypal',
+	'stripe',
+	'venmo',
+	'cashapp',
+	'zelle',
+	'apple',
+	'google',
+	'microsoft',
+	'amazon',
+	'facebook',
+	'instagram',
+	'twitter',
+	'tiktok',
+	'netflix',
+	'spotify'
+];
+
+// =============================================================================
+// CATEGORY 6: Future Reserved (Potential Grove Services)
+// =============================================================================
+
+const FUTURE_NATURE_PLACES: string[] = [
+	'hollow',
+	'glade',
+	'thicket',
+	'copse',
+	'dell',
+	'glen',
+	'grove-commons',
+	'bower',
+	'arbor-day',
+	'arborday'
+];
+
+const FUTURE_NATURE_GROWING: string[] = [
+	'seedbank',
+	'greenhouse',
+	'nursery',
+	'mulch',
+	'compost',
+	'humus',
+	'topsoil',
+	'loam',
+	'sprout',
+	'bud',
+	'petal'
+];
+
+const FUTURE_NATURE_CREATURES: string[] = [
+	'birdsong',
+	'cricket',
+	'firefly',
+	'moth',
+	'owl',
+	'fox',
+	'deer',
+	'rabbit',
+	'cardinal',
+	'robin',
+	'bluebird',
+	'chickadee'
+];
+
+const FUTURE_NATURE_PLANTS: string[] = [
+	'moss',
+	'lichen',
+	'fern',
+	'mushroom',
+	'fungus',
+	'truffle',
+	'clover',
+	'daisy',
+	'wildflower'
+];
+
+const FUTURE_NATURE_WATER: string[] = [
+	'stream',
+	'brook',
+	'creek',
+	'pond',
+	'spring',
+	'well',
+	'rain',
+	'mist',
+	'dew'
+];
+
+const FUTURE_NATURE_TIME: string[] = [
+	'sunrise',
+	'sunset',
+	'dawn',
+	'dusk',
+	'twilight',
+	'midnight',
+	'noon',
+	'solstice',
+	'equinox'
+];
+
+// =============================================================================
+// COMBINED EXPORTS
+// =============================================================================
+
+export const SYSTEM_RESERVED: string[] = [
+	...SYSTEM_WEB,
+	...SYSTEM_EMAIL,
+	...SYSTEM_NETWORK,
+	...SYSTEM_DNS,
+	...SYSTEM_METADATA,
+	...SYSTEM_DEV,
+	...SYSTEM_LEGAL,
+	...SYSTEM_DOCS
+];
+
+export const GROVE_SERVICES: string[] = [
+	...GROVE_PUBLIC_SERVICES,
+	...GROVE_INTERNAL_SERVICES,
+	...GROVE_ALIASES,
+	...GROVE_INTERNAL_CODENAMES
+];
+
+export const GROVE_TRADEMARKS: string[] = [...GROVE_BRAND, ...GROVE_TIERS, ...GROVE_CONCEPTS];
+
+export const IMPERSONATION_TERMS: string[] = [
+	...IMPERSONATION_OFFICIAL,
+	...IMPERSONATION_ROLES,
+	...IMPERSONATION_SUPPORT
+];
+
+export const FRAUD_TERMS: string[] = [
+	...FRAUD_MONEY,
+	...FRAUD_PHISHING,
+	...FRAUD_SCAM,
+	...FRAUD_IMPERSONATION
+];
+
+export const FUTURE_RESERVED: string[] = [
+	...FUTURE_NATURE_PLACES,
+	...FUTURE_NATURE_GROWING,
+	...FUTURE_NATURE_CREATURES,
+	...FUTURE_NATURE_PLANTS,
+	...FUTURE_NATURE_WATER,
+	...FUTURE_NATURE_TIME
+];
+
+/**
+ * Complete blocklist with all categories
+ */
+export const COMPLETE_BLOCKLIST: BlocklistEntry[] = [
+	...SYSTEM_RESERVED.map((u) => ({ username: u, reason: 'system' as const })),
+	...GROVE_SERVICES.map((u) => ({ username: u, reason: 'grove_service' as const })),
+	...GROVE_TRADEMARKS.map((u) => ({ username: u, reason: 'trademark' as const })),
+	...IMPERSONATION_TERMS.map((u) => ({ username: u, reason: 'impersonation' as const })),
+	...FRAUD_TERMS.map((u) => ({ username: u, reason: 'fraud' as const })),
+	...FUTURE_RESERVED.map((u) => ({ username: u, reason: 'future_reserved' as const }))
+];
+
+/**
+ * Fast lookup Set for validation
+ */
+export const BLOCKED_USERNAMES: Set<string> = new Set(COMPLETE_BLOCKLIST.map((e) => e.username));
+
+/**
+ * Check if a username is blocked
+ * @param username - The username to check (will be lowercased)
+ * @returns The blocking reason if blocked, null if allowed
+ */
+export function isUsernameBlocked(username: string): BlocklistReason | null {
+	const normalized = username.toLowerCase().trim();
+
+	// Check exact match
+	const entry = COMPLETE_BLOCKLIST.find((e) => e.username === normalized);
+	if (entry) {
+		return entry.reason;
+	}
+
+	// Check if starts with blocked prefix (e.g., "grove-anything")
+	const blockedPrefixes = ['grove-', 'admin-', 'official-', 'verified-'];
+	for (const prefix of blockedPrefixes) {
+		if (normalized.startsWith(prefix)) {
+			return 'impersonation';
+		}
+	}
+
+	// Check if ends with blocked suffix
+	const blockedSuffixes = ['-official', '-verified', '-admin', '-support'];
+	for (const suffix of blockedSuffixes) {
+		if (normalized.endsWith(suffix)) {
+			return 'impersonation';
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Get a user-friendly error message for a blocked username
+ * @param reason - The blocking reason
+ * @returns A user-friendly error message
+ */
+export function getBlockedMessage(reason: BlocklistReason): string {
+	switch (reason) {
+		case 'system':
+			return 'This username is reserved for system use';
+		case 'grove_service':
+			return 'This username is reserved for a Grove service';
+		case 'trademark':
+			return 'This username is reserved';
+		case 'impersonation':
+			return 'This username is not available';
+		case 'offensive':
+			return 'This username is not available';
+		case 'fraud':
+			return 'This username is not available';
+		case 'future_reserved':
+			return 'This username is reserved';
+		default:
+			return 'This username is not available';
+	}
+}
+
+/**
+ * Validation configuration
+ */
+export const VALIDATION_CONFIG = {
+	minLength: 3,
+	maxLength: 30,
+	pattern: /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/,
+	patternDescription:
+		'Must start with a letter, contain only lowercase letters, numbers, and single hyphens'
+};

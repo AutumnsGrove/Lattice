@@ -2,73 +2,20 @@
  * Username Availability Check API
  *
  * Returns availability status and suggestions if taken.
- * Checks: reserved_usernames, existing tenants, in-progress onboarding
+ * Checks: blocklist, reserved_usernames, existing tenants, in-progress onboarding
+ *
+ * @see docs/specs/domain-blocklist-policy.md
  */
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
-// Username validation regex: starts with letter, lowercase alphanumeric and single hyphens
-const USERNAME_REGEX = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-
-// Reserved words that can't be usernames (in addition to database table)
-// This includes all Grove service subdomains and common infrastructure names
-const ADDITIONAL_RESERVED = [
-	// Infrastructure
-	'admin',
-	'api',
-	'www',
-	'mail',
-	'cdn',
-	'og',
-	'auth',
-	'login',
-	'status',
-	'scout',
-	'search',
-	// Grove brand
-	'grove',
-	'lattice',
-	'autumn',
-	// Common words
-	'create',
-	'new',
-	'support',
-	'help',
-	'test',
-	'demo',
-	'example',
-	// Grove services (public names)
-	'meadow',
-	'forage',
-	'foliage',
-	'heartwood',
-	'patina',
-	'trove',
-	'outpost',
-	'aria',
-	'music',
-	'plant',
-	'rings',
-	'ivy',
-	'amber',
-	'shade',
-	'trails',
-	'vineyard',
-	'bloom',
-	'mycelium',
-	'vista',
-	'wisp',
-	'terrarium',
-	'pantry',
-	'nook',
-	'clearing',
-	'waystone',
-	'reeds',
-	'mc',
-	'domains',
-	'porch'
-];
+import {
+	isUsernameBlocked,
+	getBlockedMessage,
+	VALIDATION_CONFIG,
+	type BlocklistReason
+} from '@autumnsgrove/groveengine/config/domain-blocklist';
+import { containsOffensiveContent } from '@autumnsgrove/groveengine/config/offensive-blocklist';
 
 interface CheckResult {
 	available: boolean;
@@ -80,22 +27,25 @@ interface CheckResult {
 /**
  * Generate username suggestions when original is taken
  */
-function generateSuggestions(base: string): string[] {
+function generateSuggestions(base: string, reason: BlocklistReason | null): string[] {
+	// Don't suggest alternatives for offensive terms
+	if (reason === 'offensive') {
+		return [];
+	}
+
 	const year = new Date().getFullYear();
-	const suffixes = [
-		`-writes`,
-		`-blog`,
-		`${year}`,
-		`-place`,
-		`-garden`,
-		`-space`
-	];
+	const suffixes = ['-writes', '-blog', `${year}`, '-place', '-garden', '-space'];
 
 	return suffixes
 		.map((suffix) => {
 			const suggestion = base + suffix;
-			// Ensure suggestion is valid
-			if (USERNAME_REGEX.test(suggestion) && suggestion.length <= 30) {
+			// Ensure suggestion is valid and not also blocked
+			if (
+				VALIDATION_CONFIG.pattern.test(suggestion) &&
+				suggestion.length <= VALIDATION_CONFIG.maxLength &&
+				!isUsernameBlocked(suggestion) &&
+				!containsOffensiveContent(suggestion)
+			) {
 				return suggestion;
 			}
 			return null;
@@ -111,38 +61,50 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		return json({ available: false, username: '', error: 'Username is required' } as CheckResult);
 	}
 
-	// Basic validation
-	if (username.length < 3) {
+	// Length validation
+	if (username.length < VALIDATION_CONFIG.minLength) {
 		return json({
 			available: false,
 			username,
-			error: 'Username must be at least 3 characters'
+			error: `Username must be at least ${VALIDATION_CONFIG.minLength} characters`
 		} as CheckResult);
 	}
 
-	if (username.length > 30) {
+	if (username.length > VALIDATION_CONFIG.maxLength) {
 		return json({
 			available: false,
 			username,
-			error: 'Username must be 30 characters or less'
+			error: `Username must be ${VALIDATION_CONFIG.maxLength} characters or less`
 		} as CheckResult);
 	}
 
-	if (!USERNAME_REGEX.test(username)) {
+	// Pattern validation
+	if (!VALIDATION_CONFIG.pattern.test(username)) {
 		return json({
 			available: false,
 			username,
-			error: 'Username must start with a letter and contain only lowercase letters, numbers, and single hyphens'
+			error: VALIDATION_CONFIG.patternDescription
 		} as CheckResult);
 	}
 
-	// Check additional reserved words
-	if (ADDITIONAL_RESERVED.includes(username)) {
+	// Check offensive content first (no suggestions, generic error)
+	if (containsOffensiveContent(username)) {
 		return json({
 			available: false,
 			username,
-			error: 'This username is reserved',
-			suggestions: generateSuggestions(username)
+			error: 'This username is not available'
+			// Intentionally no suggestions for offensive terms
+		} as CheckResult);
+	}
+
+	// Check blocklist (reserved/trademarked/system names)
+	const blockedReason = isUsernameBlocked(username);
+	if (blockedReason) {
+		return json({
+			available: false,
+			username,
+			error: getBlockedMessage(blockedReason),
+			suggestions: generateSuggestions(username, blockedReason)
 		} as CheckResult);
 	}
 
@@ -156,18 +118,20 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	}
 
 	try {
-		// Check reserved_usernames table
+		// Check reserved_usernames table (for any additional entries)
 		const reserved = await db
-			.prepare('SELECT username FROM reserved_usernames WHERE username = ?')
+			.prepare('SELECT username, reason FROM reserved_usernames WHERE username = ?')
 			.bind(username)
-			.first();
+			.first<{ username: string; reason: string }>();
 
 		if (reserved) {
+			// Map database reason to blocklist reason type
+			const reason = (reserved.reason || 'system') as BlocklistReason;
 			return json({
 				available: false,
 				username,
-				error: 'This username is reserved',
-				suggestions: generateSuggestions(username)
+				error: getBlockedMessage(reason),
+				suggestions: generateSuggestions(username, reason)
 			} as CheckResult);
 		}
 
@@ -182,7 +146,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 				available: false,
 				username,
 				error: 'This username is already taken',
-				suggestions: generateSuggestions(username)
+				suggestions: generateSuggestions(username, null)
 			} as CheckResult);
 		}
 
@@ -191,7 +155,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			.prepare(
 				`SELECT username FROM user_onboarding
 				 WHERE username = ? AND tenant_id IS NULL
-				 AND created_at > unixepoch() - 3600` // Only check last hour
+				 AND created_at > unixepoch() - 3600`
 			)
 			.bind(username)
 			.first();
@@ -201,7 +165,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 				available: false,
 				username,
 				error: 'This username is currently being registered',
-				suggestions: generateSuggestions(username)
+				suggestions: generateSuggestions(username, null)
 			} as CheckResult);
 		}
 
