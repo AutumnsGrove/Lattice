@@ -1,4 +1,5 @@
 name: Backfill Release Summaries
+# Generates AI summaries for historical versions
 
 on:
   workflow_dispatch:
