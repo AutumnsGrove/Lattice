@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Grove Logo Concept 8: The Grove Seal
+  A rounded seal/badge shape with organic internal elements
+  Evokes: A place, an identity, belonging
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Outer ring - the boundary of the grove -->
+  <circle
+    cx="16" cy="16" r="13"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  />
+
+  <!-- Inner organic elements - three converging paths/branches -->
+  <path
+    d="M16 6
+       Q16 10, 16 14"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+  <path
+    d="M8 22
+       Q12 18, 15 16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+  <path
+    d="M24 22
+       Q20 18, 17 16"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+
+  <!-- Center point where all paths meet -->
+  <circle cx="16" cy="16" r="2.5" fill="currentColor" />
+</svg>

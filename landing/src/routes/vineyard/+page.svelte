@@ -13,8 +13,21 @@
 		Palette,
 		MousePointer,
 		Eye,
-		Type
+		Type,
+		Leaf as LeafIcon
 	} from 'lucide-svelte';
+
+	// Import logo concepts
+	import {
+		LogoClearingRing,
+		LogoConnectedCanopy,
+		LogoOrganicG,
+		LogoGathering,
+		LogoMycelium,
+		LogoClearingPath,
+		LogoThreeLeaves,
+		LogoGroveSeal
+	} from '$lib/components/logo-concepts';
 
 	// Import Glass components
 	import {
@@ -53,7 +66,70 @@
 	} from '@autumnsgrove/groveengine/ui/typography';
 
 	// Section expansion state
-	let expandedSection = $state<'glass' | 'nature' | 'typography' | null>('glass');
+	let expandedSection = $state<'glass' | 'nature' | 'typography' | 'logos' | null>('logos');
+
+	// Logo concept definitions
+	const logoConcepts = [
+		{
+			name: 'Clearing Ring',
+			component: LogoClearingRing,
+			description: 'Three organic curves forming a sheltered ring shape',
+			rationale: 'Evokes a clearing in the forest, paths meeting, an open welcoming space',
+			verdict: 'Abstract but disconnected - curves dont create unity'
+		},
+		{
+			name: 'Connected Canopy',
+			component: LogoConnectedCanopy,
+			description: 'Three overlapping leaf/canopy shapes creating unity',
+			rationale: 'Looking up through the trees, community shelter. Individual trees creating something larger.',
+			verdict: 'Strong concept - overlapping shapes work well'
+		},
+		{
+			name: 'Organic G',
+			component: LogoOrganicG,
+			description: 'A letter G that feels grown, not drawn - like a living branch',
+			rationale: 'G for Grove. Simple, direct, memorable. The organic curves and leaf accent warm it up.',
+			verdict: 'STRONG CONTENDER - Clear, memorable, works at all sizes'
+		},
+		{
+			name: 'The Gathering',
+			component: LogoGathering,
+			description: 'Three stylized trees leaning inward, forming community',
+			rationale: 'Trees coming together, shared shelter, gathering place',
+			verdict: 'Too generic - could be any forest company'
+		},
+		{
+			name: 'Mycelium',
+			component: LogoMycelium,
+			description: 'Interconnected nodes representing the underground network',
+			rationale: 'Hidden connections, community roots, shared foundation',
+			verdict: 'Conceptually beautiful but too complex for favicon sizes'
+		},
+		{
+			name: 'Clearing Path',
+			component: LogoClearingPath,
+			description: 'An arch/doorway shape made of two converging branches',
+			rationale: 'Entering the grove - two trees arch together, creating an opening. This is invitation.',
+			verdict: 'STRONG CONTENDER - Evokes threshold and welcome'
+		},
+		{
+			name: 'Three Leaves',
+			component: LogoThreeLeaves,
+			description: 'Three leaves arranged in a gentle spiral around a center',
+			rationale: 'Growth, renewal, community of individuals. Each unique but part of the same grove.',
+			verdict: 'STRONG CONTENDER - Works at any size, organic, distinct'
+		},
+		{
+			name: 'Grove Seal',
+			component: LogoGroveSeal,
+			description: 'A circular ring with three internal paths meeting at center',
+			rationale: 'A waystone marker showing three paths that meet at this grove. Badge quality with organic internals.',
+			verdict: 'STRONG CONTENDER - Best balance of formal and organic'
+		}
+	];
+
+	// Selected logo for larger preview
+	let selectedLogoConcept = $state(logoConcepts[2]); // Default to Organic G
 
 	// Typography state
 	let selectedFont = $state<FontId>('lexend');
@@ -327,6 +403,174 @@
 					<span>4 Seasonal Themes</span>
 				</div>
 			</div>
+		</div>
+	</section>
+
+	<!-- Logo Concepts Section -->
+	<section class="py-8 px-6">
+		<div class="max-w-5xl mx-auto">
+			<!-- Section Header -->
+			<button
+				type="button"
+				class="w-full flex items-center justify-between p-4 rounded-xl bg-amber-50/70 dark:bg-amber-900/20 backdrop-blur-sm border border-amber-200/60 dark:border-amber-700/40 shadow-sm hover:bg-amber-100/90 dark:hover:bg-amber-900/30 transition-all mb-4"
+				onclick={() => expandedSection = expandedSection === 'logos' ? null : 'logos'}
+				aria-expanded={expandedSection === 'logos'}
+				aria-controls="logos-section-content"
+			>
+				<div class="flex items-center gap-3">
+					<div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/40">
+						<LeafIcon class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+					</div>
+					<div class="text-left">
+						<h2 class="text-xl font-serif text-foreground">Logo Concepts</h2>
+						<p class="text-sm text-foreground-muted">8 new logo directions for Grove (replacing the asterisk)</p>
+					</div>
+				</div>
+				<ChevronDown class="w-5 h-5 text-foreground-muted transition-transform {expandedSection === 'logos' ? 'rotate-180' : ''}" aria-hidden="true" />
+			</button>
+
+			{#if expandedSection === 'logos'}
+				<div id="logos-section-content" class="space-y-6 animate-in slide-in-from-top-2 duration-300">
+					<!-- Main Preview + Grid -->
+					<div class="grid lg:grid-cols-2 gap-6">
+						<!-- Large Preview -->
+						<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+							<h3 class="text-lg font-semibold text-foreground mb-4">{selectedLogoConcept.name}</h3>
+
+							<!-- Large preview with different backgrounds -->
+							<div class="grid grid-cols-3 gap-3 mb-4">
+								<!-- Light background -->
+								<div class="bg-gradient-to-br from-emerald-50 to-green-100 rounded-xl p-6 flex items-center justify-center aspect-square">
+									<svelte:component this={selectedLogoConcept.component} class="w-20 h-20" color={greens.grove} />
+								</div>
+								<!-- Dark background -->
+								<div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 flex items-center justify-center aspect-square">
+									<svelte:component this={selectedLogoConcept.component} class="w-20 h-20" color="#ffffff" />
+								</div>
+								<!-- Autumn background -->
+								<div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 rounded-xl p-6 flex items-center justify-center aspect-square">
+									<svelte:component this={selectedLogoConcept.component} class="w-20 h-20" color={autumn.pumpkin} />
+								</div>
+							</div>
+
+							<!-- Size test -->
+							<div class="flex items-end gap-4 p-4 bg-white/60 dark:bg-slate-700/60 rounded-lg mb-4">
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-4 h-4" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">16px</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-6 h-6" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">24px</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-8 h-8" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">32px</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-12 h-12" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">48px</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-16 h-16" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">64px</span>
+								</div>
+							</div>
+
+							<!-- Description -->
+							<p class="text-sm text-foreground-muted mb-2">{selectedLogoConcept.description}</p>
+							<p class="text-sm text-foreground-faint italic mb-3">{selectedLogoConcept.rationale}</p>
+							<p class="text-sm font-medium {selectedLogoConcept.verdict.includes('STRONG') ? 'text-grove-600 dark:text-grove-400' : 'text-foreground-muted'}">
+								{selectedLogoConcept.verdict}
+							</p>
+						</div>
+
+						<!-- Logo Grid -->
+						<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+							<h3 class="text-lg font-semibold text-foreground mb-4">All Concepts</h3>
+							<div class="grid grid-cols-4 gap-3">
+								{#each logoConcepts as concept}
+									<button
+										type="button"
+										class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 {selectedLogoConcept.name === concept.name ? 'border-grove-500 bg-grove-50 dark:bg-grove-900/30' : 'border-transparent bg-white/60 dark:bg-slate-700/40 hover:bg-white dark:hover:bg-slate-700/60'}"
+										onclick={() => selectedLogoConcept = concept}
+									>
+										<svelte:component this={concept.component} class="w-10 h-10" color={greens.grove} />
+										<span class="text-xs text-foreground-muted text-center leading-tight">{concept.name}</span>
+									</button>
+								{/each}
+							</div>
+
+							<!-- Seasonal colors test -->
+							<h4 class="text-sm font-medium text-foreground-muted uppercase tracking-wide mt-6 mb-3">Seasonal Adaptation</h4>
+							<div class="flex justify-around">
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={pinks.standard} />
+									<span class="text-xs text-foreground-faint block mt-1">Spring</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={greens.grove} />
+									<span class="text-xs text-foreground-faint block mt-1">Summer</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={autumn.pumpkin} />
+									<span class="text-xs text-foreground-faint block mt-1">Autumn</span>
+								</div>
+								<div class="text-center">
+									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={winter.frostedPine} />
+									<span class="text-xs text-foreground-faint block mt-1">Winter</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Glass Variant Preview -->
+					<div class="p-6 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/40 dark:border-slate-700/40">
+						<h3 class="text-lg font-semibold text-foreground mb-4">Glass Variant Consideration</h3>
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+							<!-- Glass on gradient -->
+							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-6 flex flex-col items-center justify-center">
+								<Glass variant="card" class="p-4 rounded-xl">
+									<svelte:component this={selectedLogoConcept.component} class="w-12 h-12" color={greens.grove} />
+								</Glass>
+								<span class="text-xs text-foreground-muted mt-2">Glass Card</span>
+							</div>
+							<!-- Frosted -->
+							<div class="bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-xl p-6 flex flex-col items-center justify-center">
+								<Glass variant="tint" class="p-4 rounded-xl">
+									<svelte:component this={selectedLogoConcept.component} class="w-12 h-12" color={midnightBloom.purple} />
+								</Glass>
+								<span class="text-xs text-foreground-muted mt-2">Glass Tint</span>
+							</div>
+							<!-- Accent -->
+							<div class="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 rounded-xl p-6 flex flex-col items-center justify-center">
+								<Glass variant="accent" class="p-4 rounded-xl">
+									<svelte:component this={selectedLogoConcept.component} class="w-12 h-12" color={autumn.amber} />
+								</Glass>
+								<span class="text-xs text-foreground-muted mt-2">Glass Accent</span>
+							</div>
+							<!-- Dark overlay -->
+							<div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 flex flex-col items-center justify-center">
+								<Glass variant="overlay" class="p-4 rounded-xl">
+									<svelte:component this={selectedLogoConcept.component} class="w-12 h-12" color="#ffffff" />
+								</Glass>
+								<span class="text-xs text-slate-400 mt-2">Glass Overlay</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Notes -->
+					<div class="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-800">
+						<p class="text-sm text-foreground-muted">
+							<strong>Design Goals:</strong> The new logo must be distinctly original (no similarity to Linktree's asterisk-tree),
+							work at small sizes (16x16 favicon), have a legible monochrome version, and feel like it could be a Lucide icon.
+						</p>
+						<p class="text-sm text-foreground-faint mt-2">
+							Top candidates: <strong>Organic G</strong>, <strong>Clearing Path</strong>, <strong>Three Leaves</strong>, and <strong>Grove Seal</strong>
+						</p>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</section>
 
