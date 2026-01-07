@@ -19,6 +19,7 @@
 
 	// Import logo concepts
 	import {
+		// Original (v1)
 		LogoClearingRing,
 		LogoConnectedCanopy,
 		LogoOrganicG,
@@ -26,8 +27,46 @@
 		LogoMycelium,
 		LogoClearingPath,
 		LogoThreeLeaves,
-		LogoGroveSeal
+		LogoGroveSeal,
+		// Sprout-based (v2)
+		SproutCore,
+		SproutRing,
+		SproutDouble,
+		SproutG,
+		SproutRooted,
+		SproutHeart,
+		// Space-based (v3)
+		LogoLantern,
+		LogoLanternMinimal,
+		LogoThreshold,
+		LogoClearing,
+		// Forest (v4)
+		LogoForestLantern,
+		LogoGrove,
+		LogoThreePines,
+		LogoForestFireflies,
+		LogoForestNight,
+		LogoForestHearth,
+		LogoForestPath,
+		LogoForestOwl,
+		LogoForestNest,
+		LogoForestSwing,
+		LogoForestFairyRing,
+		LogoForestBirdhouse,
+		LogoForestSnow,
+		// The Garden (v5)
+		LogoGarden,
+		LogoGardenMinimal,
+		// Lucide Compositions (v6)
+		LogoFireflyForest,
+		LogoGatheringHearth,
+		LogoStarlightPines,
+		LogoShelter,
+		LogoWinterGrove,
+		// The artifact 😂
+		LogoArtifact
 	} from '$lib/components/logo-concepts';
+	import LogoGrid from '$lib/components/logo-concepts/LogoGrid.svelte';
 
 	// Import Glass components
 	import {
@@ -126,6 +165,56 @@
 			rationale: 'A waystone marker showing three paths that meet at this grove. Badge quality with organic internals.',
 			verdict: 'STRONG CONTENDER - Best balance of formal and organic'
 		}
+	];
+
+	// Sprout-based logo concepts (v2)
+	const sproutConcepts = [
+		{ component: SproutCore, name: 'Sprout Core', props: {} },
+		{ component: SproutRing, name: 'Sprout Ring', props: {} },
+		{ component: SproutDouble, name: 'Sprout Double', props: {} },
+		{ component: SproutG, name: 'Sprout G', props: {} },
+		{ component: SproutRooted, name: 'Sprout Rooted', props: {} },
+		{ component: SproutHeart, name: 'Sprout Heart', props: {} }
+	];
+
+	// Space-based logo concepts (v3) - "what happens IN the grove"
+	const spaceConcepts = [
+		{ component: LogoLantern, name: 'The Lantern', props: {} },
+		{ component: LogoLanternMinimal, name: 'Lantern Minimal', props: {} },
+		{ component: LogoThreshold, name: 'The Threshold', props: {} },
+		{ component: LogoClearing, name: 'The Clearing', props: {} }
+	];
+
+	// Forest concepts (v4) - "the grove itself"
+	const forestConcepts = [
+		{ component: LogoForestLantern, name: 'Forest Lantern', props: {} },
+		{ component: LogoGrove, name: 'The Grove', props: {} },
+		{ component: LogoThreePines, name: 'Three Pines', props: {} },
+		{ component: LogoForestFireflies, name: 'Fireflies', props: {} },
+		{ component: LogoForestNight, name: 'Night Grove', props: {} },
+		{ component: LogoForestHearth, name: 'The Hearth', props: {} },
+		{ component: LogoForestPath, name: 'Forest Path', props: {} },
+		{ component: LogoForestOwl, name: 'Grove Keeper', props: {} },
+		{ component: LogoForestNest, name: 'The Nest', props: {} },
+		{ component: LogoForestSwing, name: 'The Swing', props: {} },
+		{ component: LogoForestFairyRing, name: 'Fairy Ring', props: {} },
+		{ component: LogoForestBirdhouse, name: 'Birdhouse', props: {} },
+		{ component: LogoForestSnow, name: 'First Snow', props: {} }
+	];
+
+	// The Garden (v5) - the full experience
+	const gardenConcepts = [
+		{ component: LogoGarden, name: 'The Garden', props: {} },
+		{ component: LogoGardenMinimal, name: 'Garden Minimal', props: {} }
+	];
+
+	// Lucide Compositions (v6) - actual Lucide icon paths as building blocks
+	const lucideCompositions = [
+		{ component: LogoFireflyForest, name: 'Firefly Forest', props: {} },
+		{ component: LogoGatheringHearth, name: 'The Gathering', props: {} },
+		{ component: LogoStarlightPines, name: 'Starlight Pines', props: {} },
+		{ component: LogoShelter, name: 'The Shelter', props: {} },
+		{ component: LogoWinterGrove, name: 'Winter Grove', props: {} }
 	];
 
 	// Selected logo for larger preview
@@ -505,7 +594,7 @@
 							<h4 class="text-sm font-medium text-foreground-muted uppercase tracking-wide mt-6 mb-3">Seasonal Adaptation</h4>
 							<div class="flex justify-around">
 								<div class="text-center">
-									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={pinks.standard} />
+									<svelte:component this={selectedLogoConcept.component} class="w-10 h-10" color={pinks.pink} />
 									<span class="text-xs text-foreground-faint block mt-1">Spring</span>
 								</div>
 								<div class="text-center">
@@ -568,6 +657,153 @@
 						<p class="text-sm text-foreground-faint mt-2">
 							Top candidates: <strong>Organic G</strong>, <strong>Clearing Path</strong>, <strong>Three Leaves</strong>, and <strong>Grove Seal</strong>
 						</p>
+					</div>
+
+					<!-- Sprout Concepts (v2) -->
+					<div class="mt-8 p-6 rounded-xl bg-grove-50/50 dark:bg-grove-950/20 border border-grove-200 dark:border-grove-800">
+						<div class="flex items-center gap-2 mb-4">
+							<LeafIcon class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+							<h3 class="text-lg font-semibold text-foreground">Sprout Concepts (v2)</h3>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							Enhanced variations based on Lucide's Sprout icon—already marked as "Grove brand" in our icon registry.
+						</p>
+						<LogoGrid
+							logos={sproutConcepts}
+							initialSize={48}
+							color={greens.grove}
+							backgrounds={[
+								{ name: 'Dark', class: 'bg-slate-800' },
+								{ name: 'Light', class: 'bg-slate-100' },
+								{ name: 'Grove', class: 'bg-grove-900' },
+								{ name: 'Autumn', class: 'bg-amber-900' },
+								{ name: 'Midnight', class: 'bg-purple-950' }
+							]}
+						/>
+					</div>
+
+					<!-- Space Concepts (v3) -->
+					<div class="mt-8 p-6 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+						<div class="flex items-center gap-2 mb-4">
+							<Sparkles class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+							<h3 class="text-lg font-semibold text-foreground">Space Concepts (v3)</h3>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							A philosophical shift: the logo isn't about the trees—it's about what happens <em>in</em> the grove.
+							The lantern someone left for you. The threshold inviting you in. The clearing with room for you.
+						</p>
+						<LogoGrid
+							logos={spaceConcepts}
+							initialSize={48}
+							color={autumn.amber}
+							backgrounds={[
+								{ name: 'Dark', class: 'bg-slate-800' },
+								{ name: 'Light', class: 'bg-slate-100' },
+								{ name: 'Grove', class: 'bg-grove-900' },
+								{ name: 'Autumn', class: 'bg-amber-900' },
+								{ name: 'Warm', class: 'bg-orange-950' }
+							]}
+						/>
+					</div>
+
+					<!-- Forest Concepts (v4) -->
+					<div class="mt-8 p-6 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
+						<div class="flex items-center gap-2 mb-4">
+							<TreeIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+							<h3 class="text-lg font-semibold text-foreground">Forest Concepts (v4)</h3>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							The grove itself—multiple trees creating community. Variety in unity.
+							Mixed tree types from Lucide + Tabler Icons (both MIT licensed).
+						</p>
+						<LogoGrid
+							logos={forestConcepts}
+							initialSize={64}
+							color={greens.grove}
+							backgrounds={[
+								{ name: 'Dark', class: 'bg-slate-800' },
+								{ name: 'Light', class: 'bg-slate-100' },
+								{ name: 'Grove', class: 'bg-grove-900' },
+								{ name: 'Forest', class: 'bg-emerald-950' },
+								{ name: 'Dusk', class: 'bg-indigo-950' }
+							]}
+						/>
+					</div>
+
+					<!-- The Garden (v5) - The Full Experience -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-amber-50/50 via-emerald-50/50 to-purple-50/50 dark:from-amber-950/30 dark:via-emerald-950/30 dark:to-purple-950/30 border-2 border-amber-300/50 dark:border-amber-700/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-xl">🌳</span>
+							<h3 class="text-lg font-semibold text-foreground">The Garden (v5)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-200 to-emerald-200 dark:from-amber-800 dark:to-emerald-800 text-foreground-muted">full experience</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							Everything together. Trees, light, magic, life. The complete grove vision—a world unto itself.
+						</p>
+						<LogoGrid
+							logos={gardenConcepts}
+							initialSize={96}
+							color={greens.grove}
+							backgrounds={[
+								{ name: 'Dark', class: 'bg-slate-800' },
+								{ name: 'Light', class: 'bg-slate-100' },
+								{ name: 'Grove', class: 'bg-grove-900' },
+								{ name: 'Twilight', class: 'bg-gradient-to-b from-indigo-900 to-purple-950' },
+								{ name: 'Golden', class: 'bg-gradient-to-b from-amber-800 to-orange-900' }
+							]}
+						/>
+					</div>
+
+					<!-- Lucide Compositions (v6) - Icons as Building Blocks -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-sky-50/50 via-violet-50/50 to-rose-50/50 dark:from-sky-950/30 dark:via-violet-950/30 dark:to-rose-950/30 border-2 border-sky-300/50 dark:border-sky-700/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-xl">✨</span>
+							<h3 class="text-lg font-semibold text-foreground">Lucide Compositions (v6)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-sky-200 to-violet-200 dark:from-sky-800 dark:to-violet-800 text-foreground-muted">pure icons</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							"The grove doesn't need to be drawn. It just needs to be arranged."<br/>
+							<em class="text-xs">Built entirely from actual Lucide icon paths—TreePine, TreeDeciduous, Moon, Flame—composed together with SVG transforms.</em>
+						</p>
+						<LogoGrid
+							logos={lucideCompositions}
+							initialSize={64}
+							color={greens.grove}
+							backgrounds={[
+								{ name: 'Twilight', class: 'bg-gradient-to-b from-indigo-900 to-purple-950' },
+								{ name: 'Dark', class: 'bg-slate-800' },
+								{ name: 'Light', class: 'bg-slate-100' },
+								{ name: 'Grove', class: 'bg-grove-900' },
+								{ name: 'Dawn', class: 'bg-gradient-to-b from-rose-200 to-orange-100' }
+							]}
+						/>
+					</div>
+
+					<!-- The Artifact (Historical Easter Egg) -->
+					<div class="mt-8 p-6 rounded-xl bg-slate-100/50 dark:bg-slate-900/50 border border-dashed border-slate-300 dark:border-slate-700">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-xl">🏛️</span>
+							<h3 class="text-lg font-semibold text-foreground">The Artifact</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-foreground-muted">museum piece</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-4">
+							The logo that started the journey. Found hiding in Tabler Icons as <code class="px-1 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs">brand-linktree</code>.
+							We keep it here as a reminder of where we came from. 😂
+						</p>
+						<div class="flex items-center gap-8 p-4 bg-white/60 dark:bg-slate-800/60 rounded-lg">
+							<div class="text-center">
+								<LogoArtifact size={48} color={greens.grove} />
+								<span class="text-xs text-foreground-faint block mt-2">The OG</span>
+							</div>
+							<div class="text-center">
+								<LogoArtifact size={48} color={autumn.amber} />
+								<span class="text-xs text-foreground-faint block mt-2">Autumn vibes</span>
+							</div>
+							<div class="text-center opacity-30">
+								<LogoArtifact size={48} color={greens.grove} />
+								<span class="text-xs text-foreground-faint block mt-2">Fading away...</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			{/if}

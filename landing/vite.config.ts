@@ -11,4 +11,8 @@ export default defineConfig({
       external: ["workers-og"],
     },
   },
+  ssr: {
+    // These packages ship .svelte files that need processing during SSR
+    noExternal: ["lucide-svelte", "@lucide/svelte", "@tabler/icons-svelte"],
+  },
 });
