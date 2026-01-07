@@ -90,8 +90,8 @@
 		<a
 			href="/auth?provider=google"
 			class="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full
-				bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md
-				border border-white/40 dark:border-emerald-800/25
+				bg-slate-100/60 dark:bg-slate-800/40 backdrop-blur-md
+				border border-slate-200/50 dark:border-slate-700/40
 				text-foreground-muted hover:text-foreground hover:border-primary/50
 				transition-all"
 		>
@@ -113,7 +113,7 @@
 
 	<!-- Section 1: Welcome -->
 	<section class="text-center space-y-6">
-		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md border border-white/40 dark:border-emerald-800/25 mb-2">
+		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100/40 dark:bg-emerald-900/30 backdrop-blur-md border border-emerald-200/40 dark:border-emerald-700/30 mb-2">
 			<Logo class="w-12 h-12" />
 		</div>
 
@@ -127,21 +127,21 @@
 			</p>
 		</div>
 
-		<div class="flex items-center justify-center gap-4 text-foreground-subtle text-sm">
+		<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm">
 			<span class="flex items-center gap-1.5">
 				<Leaf class="w-4 h-4 text-primary" />
 				yourname.grove.place
 			</span>
-			<span class="text-foreground-faint">|</span>
+			<span class="text-foreground-faint hidden sm:inline">|</span>
 			<span class="flex items-center gap-1.5">
 				<Shield class="w-4 h-4 text-primary" />
 				AI-free zone
 			</span>
 		</div>
 
-		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5">
-			<Users class="w-4 h-4" />
-			Join {WAITLIST_COUNT} writers already on the waitlist
+		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5 flex-wrap">
+			<Users class="w-4 h-4 flex-shrink-0" />
+			<span>Join {WAITLIST_COUNT} writers already on the waitlist</span>
 		</p>
 	</section>
 
@@ -211,7 +211,7 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-4 stagger-children">
+		<div class="grid grid-cols-2 gap-6 stagger-children">
 			{#each planPreviews as plan}
 				{@const PlanIcon = tierIcons[plan.id]}
 				{@const isAvailable = plan.status === 'available'}
@@ -312,10 +312,10 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Begin your journey</h2>
 
-		<GlassCard variant="frosted" class="max-w-md mx-auto">
+		<GlassCard variant="frosted" class="max-w-lg mx-auto">
 			{#if !authExpanded}
 				<!-- Collapsed: Get Started button -->
-				<div class="text-center space-y-4">
+				<div class="text-center space-y-5 py-2">
 					<p class="text-foreground-muted">
 						Ready to plant your blog? We'll walk you through the rest.
 					</p>
@@ -336,7 +336,7 @@
 
 				<div class="space-y-3">
 					<!-- Google -->
-					<a href="/auth?provider=google" class="btn-auth">
+					<a href="/auth?provider=google" class="btn-auth bg-grove-600 hover:bg-grove-700 text-white border-grove-600 hover:border-grove-700">
 						{@html GoogleIcon}
 						<span>Continue with Google</span>
 					</a>
@@ -348,12 +348,12 @@
 					</a>
 
 					<!-- Divider -->
-					<div class="relative my-4">
+					<div class="relative my-5">
 						<div class="absolute inset-0 flex items-center">
-							<div class="w-full border-t border-default"></div>
+							<div class="w-full border-t border-slate-300 dark:border-slate-600"></div>
 						</div>
 						<div class="relative flex justify-center text-sm">
-							<span class="px-3 bg-surface-elevated text-foreground-subtle">or</span>
+							<span class="px-3 bg-white/70 dark:bg-slate-800/70 text-foreground-subtle rounded">or</span>
 						</div>
 					</div>
 
