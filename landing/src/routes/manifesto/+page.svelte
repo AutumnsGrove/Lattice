@@ -14,6 +14,9 @@
 		Leaf,
 		TreePine
 	} from '@autumnsgrove/groveengine/ui/nature';
+
+	// Icon for solarpunk link
+	import { SolarPanel } from 'lucide-svelte';
 </script>
 
 <SEO
@@ -373,6 +376,18 @@
 								<span class="text-amber-300/80">We grow at the pace of roots.</span>
 							</p>
 						</div>
+					</section>
+
+					<!-- Solarpunk Link -->
+					<section class="pt-4">
+						<a
+							href="/knowledge/help/what-is-solarpunk"
+							class="group inline-flex items-center justify-center gap-3 px-6 py-3 bg-amber-900/30 hover:bg-amber-800/40 border border-amber-600/30 rounded-lg text-amber-200 hover:text-amber-100 transition-all text-sm"
+						>
+							<SolarPanel class="w-4 h-4 text-amber-400" />
+							<span>This is <strong>solarpunk</strong> thinking</span>
+							<span class="text-amber-400/60 group-hover:text-amber-300/80 group-hover:translate-x-0.5 transition-all">→</span>
+						</a>
 					</section>
 
 					<!-- Divider -->
