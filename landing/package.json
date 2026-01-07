@@ -36,6 +36,7 @@
   "dependencies": {
     "@autumnsgrove/groveengine": "workspace:*",
     "@lucide/lab": "^0.1.2",
+    "@tabler/icons-svelte": "^3.36.1",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
     "marked": "^17.0.1",
