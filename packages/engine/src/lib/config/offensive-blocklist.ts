@@ -666,8 +666,40 @@ export const OFFENSIVE_SET: Set<string> = new Set(OFFENSIVE_TERMS);
 const DANGEROUS_SUBSTRINGS = [...HATE_GROUPS, ...VIOLENCE_TERMS, ...TERRORIST_GROUPS];
 
 /**
+ * Severe slurs that should be caught even as substrings.
+ * These are carefully selected to minimize false positives.
+ * Excludes short terms (3 chars or less) that might appear in legitimate words.
+ */
+const SLUR_SUBSTRINGS: string[] = [
+	// Racial slurs (4+ chars, unlikely to appear in legitimate words)
+	'nigger',
+	'nigga',
+	'chink',
+	'wetback',
+	'beaner',
+	'redskin',
+	'sandnigger',
+	'towelhead',
+	'raghead',
+	// LGBTQ slurs (4+ chars)
+	'faggot',
+	'tranny',
+	'shemale',
+	// Ableist slurs (4+ chars)
+	'retard',
+	'retarded',
+	'spastic',
+	// Exploitation (4+ chars)
+	'pedo',
+	'pedophile',
+	'jailbait',
+	'lolita',
+	'groomer'
+];
+
+/**
  * Check if a username contains offensive content
- * Uses exact matching and substring matching for dangerous terms
+ * Uses exact matching and substring matching for dangerous/severe terms
  *
  * @param username - The username to check
  * @returns true if offensive content detected
@@ -685,10 +717,17 @@ export function containsOffensiveContent(username: string): boolean {
 		return true;
 	}
 
-	// Substring match for dangerous terms
+	// Substring match for dangerous terms (hate groups, violence, terrorist)
 	for (const term of DANGEROUS_SUBSTRINGS) {
 		const normalizedTerm = term.replace(/-/g, '');
 		if (normalized.includes(normalizedTerm)) {
+			return true;
+		}
+	}
+
+	// Substring match for severe slurs (catches "badword123" patterns)
+	for (const slur of SLUR_SUBSTRINGS) {
+		if (normalized.includes(slur)) {
 			return true;
 		}
 	}

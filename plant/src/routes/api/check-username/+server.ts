@@ -4,7 +4,9 @@
  * Returns availability status and suggestions if taken.
  * Checks: blocklist, reserved_usernames, existing tenants, in-progress onboarding
  *
- * @see docs/specs/domain-blocklist-policy.md
+ * Rate limited to prevent blocklist enumeration attacks.
+ *
+ * @see docs/specs/loam-spec.md
  */
 
 import { json } from '@sveltejs/kit';
@@ -13,15 +15,66 @@ import {
 	isUsernameBlocked,
 	getBlockedMessage,
 	VALIDATION_CONFIG,
-	type BlocklistReason
+	type BlocklistReason,
+	VALID_BLOCKLIST_REASONS
 } from '@autumnsgrove/groveengine/config/domain-blocklist';
 import { containsOffensiveContent } from '@autumnsgrove/groveengine/config/offensive-blocklist';
+
+/** Time window (in seconds) for in-progress registration checks */
+const IN_PROGRESS_WINDOW_SECONDS = 3600; // 1 hour
+
+/** Rate limit configuration */
+const RATE_LIMIT = {
+	maxRequests: 30, // Max requests per window
+	windowSeconds: 60 // 1 minute window
+};
 
 interface CheckResult {
 	available: boolean;
 	username: string;
 	error?: string;
 	suggestions?: string[];
+}
+
+/**
+ * Simple KV-based rate limiter
+ * Returns true if request should be allowed, false if rate limited
+ */
+async function checkRateLimit(
+	kv: KVNamespace | undefined,
+	clientIp: string
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+	if (!kv) {
+		// No KV available, allow the request (development mode)
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests, resetAt: 0 };
+	}
+
+	const key = `rate:username-check:${clientIp}`;
+	const now = Math.floor(Date.now() / 1000);
+
+	try {
+		const data = await kv.get(key, 'json') as { count: number; resetAt: number } | null;
+
+		if (!data || now >= data.resetAt) {
+			// New window
+			const newData = { count: 1, resetAt: now + RATE_LIMIT.windowSeconds };
+			await kv.put(key, JSON.stringify(newData), { expirationTtl: RATE_LIMIT.windowSeconds + 60 });
+			return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1, resetAt: newData.resetAt };
+		}
+
+		if (data.count >= RATE_LIMIT.maxRequests) {
+			// Rate limited
+			return { allowed: false, remaining: 0, resetAt: data.resetAt };
+		}
+
+		// Increment counter
+		const newData = { count: data.count + 1, resetAt: data.resetAt };
+		await kv.put(key, JSON.stringify(newData), { expirationTtl: data.resetAt - now + 60 });
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests - newData.count, resetAt: data.resetAt };
+	} catch {
+		// On error, allow the request
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests, resetAt: 0 };
+	}
 }
 
 /**
@@ -54,7 +107,28 @@ function generateSuggestions(base: string, reason: BlocklistReason | null): stri
 		.slice(0, 3);
 }
 
-export const GET: RequestHandler = async ({ url, platform }) => {
+export const GET: RequestHandler = async ({ url, platform, getClientAddress }) => {
+	// Rate limiting check
+	const clientIp = getClientAddress();
+	const kv = platform?.env?.KV as KVNamespace | undefined;
+	const rateLimit = await checkRateLimit(kv, clientIp);
+
+	if (!rateLimit.allowed) {
+		const retryAfter = rateLimit.resetAt - Math.floor(Date.now() / 1000);
+		return json(
+			{ available: false, username: '', error: 'Too many requests. Please try again shortly.' } as CheckResult,
+			{
+				status: 429,
+				headers: {
+					'Retry-After': String(retryAfter),
+					'X-RateLimit-Limit': String(RATE_LIMIT.maxRequests),
+					'X-RateLimit-Remaining': '0',
+					'X-RateLimit-Reset': String(rateLimit.resetAt)
+				}
+			}
+		);
+	}
+
 	const username = url.searchParams.get('username')?.toLowerCase().trim();
 
 	if (!username) {
@@ -125,8 +199,12 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			.first<{ username: string; reason: string }>();
 
 		if (reserved) {
-			// Map database reason to blocklist reason type
-			const reason = (reserved.reason || 'system') as BlocklistReason;
+			// Validate that database reason is a valid BlocklistReason, fallback to 'system'
+			const reason: BlocklistReason = VALID_BLOCKLIST_REASONS.includes(
+				reserved.reason as BlocklistReason
+			)
+				? (reserved.reason as BlocklistReason)
+				: 'system';
 			return json({
 				available: false,
 				username,
@@ -155,9 +233,9 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			.prepare(
 				`SELECT username FROM user_onboarding
 				 WHERE username = ? AND tenant_id IS NULL
-				 AND created_at > unixepoch() - 3600`
+				 AND created_at > unixepoch() - ?`
 			)
-			.bind(username)
+			.bind(username, IN_PROGRESS_WINDOW_SECONDS)
 			.first();
 
 		if (inProgress) {

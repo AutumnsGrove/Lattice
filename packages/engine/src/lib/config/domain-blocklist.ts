@@ -17,6 +17,20 @@ export type BlocklistReason =
 	| 'fraud'
 	| 'future_reserved';
 
+/**
+ * Array of valid blocklist reasons for runtime validation
+ * Use this to validate database values before type assertion
+ */
+export const VALID_BLOCKLIST_REASONS: BlocklistReason[] = [
+	'system',
+	'grove_service',
+	'trademark',
+	'impersonation',
+	'offensive',
+	'fraud',
+	'future_reserved'
+];
+
 export interface BlocklistEntry {
 	username: string;
 	reason: BlocklistReason;
@@ -659,9 +673,22 @@ export const COMPLETE_BLOCKLIST: BlocklistEntry[] = [
 ];
 
 /**
- * Fast lookup Set for validation
+ * Fast lookup Set for validation (checks existence only)
  */
 export const BLOCKED_USERNAMES: Set<string> = new Set(COMPLETE_BLOCKLIST.map((e) => e.username));
+
+/**
+ * Fast lookup Map for validation with reason (O(1) lookup)
+ */
+export const BLOCKED_USERNAMES_MAP: Map<string, BlocklistReason> = new Map(
+	COMPLETE_BLOCKLIST.map((e) => [e.username, e.reason])
+);
+
+/** Prefixes that indicate impersonation attempts */
+const BLOCKED_PREFIXES = ['grove-', 'admin-', 'official-', 'verified-'];
+
+/** Suffixes that indicate impersonation attempts */
+const BLOCKED_SUFFIXES = ['-official', '-verified', '-admin', '-support'];
 
 /**
  * Check if a username is blocked
@@ -671,23 +698,21 @@ export const BLOCKED_USERNAMES: Set<string> = new Set(COMPLETE_BLOCKLIST.map((e)
 export function isUsernameBlocked(username: string): BlocklistReason | null {
 	const normalized = username.toLowerCase().trim();
 
-	// Check exact match
-	const entry = COMPLETE_BLOCKLIST.find((e) => e.username === normalized);
-	if (entry) {
-		return entry.reason;
+	// O(1) exact match lookup using Map
+	const exactMatch = BLOCKED_USERNAMES_MAP.get(normalized);
+	if (exactMatch) {
+		return exactMatch;
 	}
 
 	// Check if starts with blocked prefix (e.g., "grove-anything")
-	const blockedPrefixes = ['grove-', 'admin-', 'official-', 'verified-'];
-	for (const prefix of blockedPrefixes) {
+	for (const prefix of BLOCKED_PREFIXES) {
 		if (normalized.startsWith(prefix)) {
 			return 'impersonation';
 		}
 	}
 
 	// Check if ends with blocked suffix
-	const blockedSuffixes = ['-official', '-verified', '-admin', '-support'];
-	for (const suffix of blockedSuffixes) {
+	for (const suffix of BLOCKED_SUFFIXES) {
 		if (normalized.endsWith(suffix)) {
 			return 'impersonation';
 		}
