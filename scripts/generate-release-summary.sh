@@ -153,14 +153,14 @@ Respond with ONLY the summary text, no additional formatting or labels.
 EOF
 
     # Call OpenRouter API
-    # Using claude-3.5-haiku for cost-effectiveness (~$1/million tokens)
+    # Using deepseek-v3.2 for cost-effectiveness (~$0.55/million tokens)
     RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $OPENROUTER_API_KEY" \
         -H "HTTP-Referer: https://grove.place" \
         -H "X-Title: Grove Release Summary Generator" \
         -d "{
-            \"model\": \"anthropic/claude-3.5-haiku\",
+            \"model\": \"deepseek/deepseek-v3.2\",
             \"messages\": [
                 {
                     \"role\": \"user\",

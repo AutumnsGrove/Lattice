@@ -175,10 +175,10 @@ Each version summary is stored as JSON:
 - Straightforward API (OpenAI-compatible)
 - Pay-as-you-go pricing
 
-**Model:** `anthropic/claude-3.5-haiku`
-- Cost: ~$1 per million tokens
-- Estimated: $0.001 per release summary
-- Quality: Excellent for summarization tasks
+**Model:** `deepseek/deepseek-v3.2`
+- Cost: ~$0.55 per million tokens (input) / ~$2.20 per million tokens (output)
+- Estimated: $0.0005 per release summary
+- Quality: Excellent for summarization tasks, competitive with GPT-4
 - Speed: ~2-3 seconds per summary
 
 ### Prompt Engineering
@@ -337,10 +337,10 @@ The main `/roadmap` page includes a prominent link to version history in the her
 ### Per-Release Cost
 
 **LLM API Call:**
-- Model: Claude 3.5 Haiku
+- Model: DeepSeek V3.2
 - Input tokens: ~500-1000 (prompt + commits)
 - Output tokens: ~100-150 (summary)
-- Cost: ~$0.001 per release
+- Cost: ~$0.0005 per release
 
 **GitHub Actions:**
 - Minutes used: +30 seconds per release
@@ -349,7 +349,7 @@ The main `/roadmap` page includes a prominent link to version history in the her
 ### Annual Projection
 
 Assuming 50 releases per year:
-- LLM costs: $0.05/year
+- LLM costs: $0.025/year (~2.5 cents)
 - GitHub Actions: Free
 
 **Negligible cost impact** for significant UX improvement.
@@ -399,12 +399,16 @@ Assuming 50 releases per year:
 
 If cost or quality becomes an issue:
 
+**Current model:**
+- `deepseek/deepseek-v3.2` - $0.55/$2.20 per M tokens (~$0.0005/release) ← **In use**
+
 **Cheaper options:**
 - `openai/gpt-4o-mini` - $0.15/M tokens (~$0.0002/release)
 - `google/gemini-2.0-flash-exp` - Free tier available
 
-**Higher quality:**
+**Higher quality (if needed):**
 - `anthropic/claude-3.5-sonnet` - $3/M tokens (~$0.003/release)
+- `anthropic/claude-3.5-haiku` - $1/M tokens (~$0.001/release)
 - `openai/gpt-4o` - $2.5/M tokens (~$0.0025/release)
 
 ---
@@ -482,5 +486,35 @@ pnpm dev
 
 ---
 
+## Setup Instructions
+
+### 1. Get OpenRouter API Key
+
+1. Visit https://openrouter.ai/
+2. Sign up or log in
+3. Go to https://openrouter.ai/keys
+4. Create a new API key
+5. Copy the key (starts with `sk-or-v1-...`)
+
+### 2. Add to GitHub Secrets
+
+1. Go to your GitHub repository
+2. Navigate to: **Settings → Secrets and variables → Actions**
+3. Click **"New repository secret"**
+4. Name: `OPENROUTER_API_KEY`
+5. Value: Paste your API key
+6. Click **"Add secret"**
+
+### 3. Verify Setup
+
+The workflow will automatically use the key when generating summaries. You can verify by:
+- Checking workflow logs for "Generating release summary"
+- Looking for generated files in `snapshots/summaries/`
+- No error messages about missing API key
+
+**Cost tracking:** OpenRouter dashboard shows usage at https://openrouter.ai/activity
+
+---
+
 *Last Updated: January 2026*
-*Model: Claude 3.5 Haiku via OpenRouter*
+*Model: DeepSeek V3.2 via OpenRouter*
