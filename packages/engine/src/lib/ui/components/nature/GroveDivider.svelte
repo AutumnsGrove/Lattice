@@ -5,17 +5,27 @@
 
   GroveDivider - A decorative divider featuring alternating Grove logos
 
-  @example
+  @example Basic usage
   ```svelte
   <GroveDivider />                    <!-- 7 logos (default) -->
   <GroveDivider count={5} />          <!-- 5 logos -->
   <GroveDivider count={12} size="md" /> <!-- 12 medium logos -->
   ```
+
+  @example Glass variant
+  ```svelte
+  <GroveDivider glass />                          <!-- Glass logos -->
+  <GroveDivider glass variant="frosted" />        <!-- Frosted glass -->
+  <GroveDivider glass variant="ethereal" breathing /> <!-- Dreamy animated -->
+  ```
 -->
 <script lang="ts">
 	import Logo from './Logo.svelte';
+	import GlassLogo from '../ui/GlassLogo.svelte';
 	import type { Season } from './palette';
 	import { seasonStore } from '../../stores/season';
+
+	type GlassVariant = 'default' | 'accent' | 'frosted' | 'dark' | 'ethereal';
 
 	interface Props {
 		/** Number of logos to display (default: 7) */
@@ -28,6 +38,16 @@
 		class?: string;
 		/** Gap between logos (Tailwind gap class, e.g., 'gap-1', 'gap-2') */
 		gap?: string;
+		/** Use GlassLogo instead of regular Logo */
+		glass?: boolean;
+		/** Glass variant (only applies when glass=true) */
+		variant?: GlassVariant;
+		/** Add breathing animation to logos */
+		breathing?: boolean;
+		/** Monochrome mode - trunk matches foliage color */
+		monochrome?: boolean;
+		/** Custom color override (for regular Logo) */
+		color?: string;
 	}
 
 	let {
@@ -35,7 +55,12 @@
 		size = 'sm',
 		season,
 		class: className = '',
-		gap = 'gap-1.5'
+		gap = 'gap-1.5',
+		glass = false,
+		variant = 'default',
+		breathing = false,
+		monochrome = false,
+		color
 	}: Props = $props();
 
 	// Size mappings
@@ -64,7 +89,22 @@
 >
 	{#each logos as index}
 		<div class={isFlipped(index) ? 'rotate-180' : ''}>
-			<Logo class={sizeClasses[size]} season={activeSeason} />
+			{#if glass}
+				<GlassLogo
+					class={sizeClasses[size]}
+					season={activeSeason}
+					{variant}
+					{breathing}
+					{monochrome}
+				/>
+			{:else}
+				<Logo
+					class={sizeClasses[size]}
+					season={activeSeason}
+					{color}
+					breathing={breathing}
+				/>
+			{/if}
 		</div>
 	{/each}
 </div>
