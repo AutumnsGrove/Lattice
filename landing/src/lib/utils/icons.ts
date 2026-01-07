@@ -119,6 +119,39 @@ import {
   Waves,
   Waypoints,
   Route,
+  // Subicon additions for workshop features
+  LayoutList,
+  Origami,
+  Feather,
+  ToolCase,
+  CloudCog,
+  Building2,
+  House,
+  ShieldOff,
+  Key,
+  Codepen,
+  FileCode,
+  PaintbrushVertical,
+  SlidersHorizontal,
+  BookType,
+  Component,
+  Lock,
+  Contact,
+  Eye,
+  BookOpenCheck,
+  Goal,
+  // Additional subicon imports (round 2)
+  Chrome,
+  Wand2,
+  Layout,
+  Image,
+  Reply,
+  Bot,
+  Bug,
+  Cpu,
+  Frame,
+  Shapes,
+  Share2,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -277,6 +310,42 @@ export const toolIcons = {
   waves: Waves,                  // Sway - animation mode
   waypoints: Waypoints,          // Fern - diagram mode
   route: Route,                  // Thread - connections
+  // Subicons for workshop features
+  layoutlist: LayoutList,        // Lattice - Vines
+  origami: Origami,              // Songbird - Canary
+  feather: Feather,              // Songbird - Kestrel
+  toolcase: ToolCase,            // Songbird - Robin
+  cloudcog: CloudCog,            // Threshold - Edge
+  building2: Building2,          // Threshold - Tenant
+  house: House,                  // Threshold - User
+  shieldoff: ShieldOff,          // Threshold - Endpoint
+  key: Key,                      // Loom - Session
+  codepen: Codepen,              // Loom - Tenant
+  filecode: FileCode,            // Loom - Post
+  paintbrush: PaintbrushVertical, // Foliage - Themes
+  sliders: SlidersHorizontal,    // Foliage - Customizer
+  booktype: BookType,            // Foliage - Fonts
+  component: Component,          // Ivy - Compose
+  lock: Lock,                    // Ivy - Encrypt
+  contact: Contact,              // Ivy - Contacts
+  eye: Eye,                      // Rings - Views
+  bookopencheck: BookOpenCheck,  // Rings - Readers
+  goal: Goal,                    // Rings - Resonance
+  // Additional subicons (round 2)
+  chrome: Chrome,                // Heartwood - Google
+  github: Github,                // Heartwood - GitHub
+  wand2: Wand2,                  // Heartwood - Magic
+  penline: PenLine,              // Arbor - Posts
+  layout: Layout,                // Arbor - Pages
+  image: Image,                  // Arbor - Media
+  reply: Reply,                  // Reeds - Replies
+  messagecircle: MessageCircle,  // Reeds - Comments
+  bot: Bot,                      // Shade - Bot
+  bug: Bug,                      // Shade - Scraper
+  cpu: Cpu,                      // Vista - Workers
+  frame: Frame,                  // Terrarium - Canvas
+  shapes: Shapes,                // Terrarium - Assets
+  share2: Share2,                // Terrarium - Export
 } as const;
 
 // ============================================================================
