@@ -33,8 +33,9 @@
 	class={className}
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 32 32"
-	role={title ? 'img' : undefined}
+	role={title ? 'img' : 'presentation'}
 	aria-label={title}
+	aria-hidden={!title}
 >
 	{#if title}<title>{title}</title>{/if}
 	<!-- Three trees leaning toward center, each with organic canopy and trunk -->
