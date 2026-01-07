@@ -56,11 +56,11 @@ These patterns make text sound like AI wrote it. Avoid them completely.
 
 ### Em-Dashes
 
-**Never use em-dashes (—).** One tasteful use per thousand words, maximum. Use commas, periods, or parentheses instead.
+**Avoid em-dashes (—).** One tasteful use per thousand words, maximum. Use commas, periods, or parentheses instead.
 
-**Bad:** The forest—our home—is where we gather.
-**Good:** The forest is our home. It's where we gather.
-**Also good:** The forest (our home) is where we gather.
+**Avoid:** The forest—our home—is where we gather.
+**Better:** The forest is our home. It's where we gather.
+**Also fine:** The forest (our home) is where we gather.
 
 ### The "Not X, But Y" Pattern
 
@@ -184,6 +184,27 @@ Grove is explicitly queer-friendly. This means:
 - Safe space messaging where appropriate
 - Pride in what we're building, not defensiveness
 
+### Concrete Examples
+
+| Avoid | Use Instead |
+|-------|-------------|
+| "Add your husband/wife" | "Add your partner" or "Add someone special" |
+| "he or she" | "they" or rephrase to avoid pronouns |
+| "Dear Sir/Madam" | "Hello" or "Hi there" |
+| "mankind" | "people" or "everyone" |
+| Examples with only straight couples | Vary your examples, or keep them neutral |
+
+### In User Flows
+
+When asking for relationship info (if ever needed):
+- Use open text fields over dropdowns with limited options
+- Don't require titles (Mr/Mrs/Ms)
+- Let people describe themselves rather than selecting from boxes
+
+### Tone
+
+We don't make a big deal of being queer-friendly. We just are. No rainbow-washing, no performative allyship. The inclusivity is baked in, not bolted on.
+
 ---
 
 ## Technical Docs vs. User Docs
@@ -193,6 +214,96 @@ Grove is explicitly queer-friendly. This means:
 **User-facing docs** (help center, onboarding, error messages) carry the full Grove voice.
 
 Both should avoid AI patterns.
+
+### The Voice Spectrum
+
+**API Reference (minimal warmth, maximum clarity):**
+```
+POST /api/posts
+
+Creates a new blog post.
+
+Parameters:
+- title (string, required): Post title
+- content (string, required): Markdown content
+- published (boolean): Default false
+
+Returns: Post object or 400 error
+```
+
+**Internal Spec (clear, some personality):**
+```
+## Feed Caching Strategy
+
+Feed pages cache for 5 minutes in KV. When a new post is shared,
+we invalidate the chronological feed but let popular/hot feeds
+age out naturally. This keeps things fresh without hammering D1.
+```
+
+**Getting Started Guide (full Grove voice):**
+```
+## Your First Post
+
+Welcome. Let's get something published.
+
+The editor opens to a blank page. That's intentional. No templates,
+no suggested topics. Just you and your words.
+
+Write something. Anything. Hit publish when it feels ready.
+```
+
+**Onboarding Tooltip (warm but concise):**
+```
+This is your dashboard. Everything you need, nothing you don't.
+```
+
+---
+
+## Error Messages
+
+When things break, stay warm but be honest. Don't blame the user. Don't hide behind vague language.
+
+### Error Message Principles
+
+1. **Say what happened** (briefly)
+2. **Say what they can do** (if anything)
+3. **Don't over-apologize** (one "sorry" max)
+4. **Don't be cute when things are broken**
+
+### Examples
+
+**Good:**
+```
+Couldn't save your post. Check your connection and try again.
+```
+
+```
+That page doesn't exist. It may have been moved or deleted.
+```
+
+```
+Something went wrong on our end. We're looking into it.
+Your draft is saved locally.
+```
+
+**Avoid:**
+```
+Oops! 😅 Looks like something went wrong! Don't worry though,
+these things happen! Please try again later!
+```
+
+```
+Error 500: Internal Server Error. Contact administrator.
+```
+
+```
+We're SO sorry!!! We feel TERRIBLE about this!!!
+Please forgive us and try again!
+```
+
+### The Balance
+
+Be honest about what broke. Be helpful about next steps. Don't make them feel stupid. Don't make yourself sound incompetent. One sentence is usually enough.
 
 ---
 
@@ -246,7 +357,7 @@ When you're ready, hit **Publish**. Your words are live.
 *The blank page isn't as scary as it looks.*
 ```
 
-### Help Center Article (Bad - AI Patterns)
+### Help Center Article (Bad - Obvious AI Patterns)
 
 ```markdown
 # Your First Post
@@ -259,6 +370,35 @@ Additionally, Grove utilizes Markdown—a comprehensive formatting system that e
 
 Embark on your blogging journey today!
 ```
+
+### Help Center Article (Bad - Subtle AI Patterns)
+
+This one's trickier. It looks okay at first glance:
+
+```markdown
+# Your First Post
+
+Ready to share your thoughts with the world? Let's get started.
+
+From your admin panel, click **New Post** in the sidebar. You'll see our editor—a clean, distraction-free space for your writing.
+
+Grove uses Markdown for formatting. It's not complicated—here are the basics you'll need:
+- **Bold:** `**text**`
+- *Italic:* `*text*`
+- Links: `[text](url)`
+
+The preview panel lets you see how your post will look before publishing. When you're satisfied with your work, hit **Publish**.
+
+Your voice matters. We can't wait to see what you create.
+```
+
+**What's wrong:**
+- "Ready to share your thoughts with the world?" (generic opener)
+- "Let's get started" (overused)
+- "distraction-free space" (marketing-speak)
+- "It's not complicated" (defensive hedge, "not X" pattern adjacent)
+- "When you're satisfied with your work" (formal)
+- "Your voice matters. We can't wait to see what you create." (hollow encouragement)
 
 ---
 
