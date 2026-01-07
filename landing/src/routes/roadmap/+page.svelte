@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
+	import TableOfContents from '$lib/components/TableOfContents.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
 	import {
@@ -182,6 +183,13 @@
 		'golden-hour': getPhaseStatus('golden-hour'),
 		'midnight-bloom': getPhaseStatus('midnight-bloom')
 	};
+
+	// Table of Contents headers
+	const tocHeaders = PHASE_ORDER.map(key => ({
+		id: key,
+		text: phases[key].title,
+		level: 2
+	}));
 
 	// =============================================================================
 	// RANDOMIZED TREE GENERATION
@@ -945,6 +953,8 @@
 			</div>
 		</section>
 	</div>
+
+	<TableOfContents headers={tocHeaders} />
 
 	<Footer />
 </main>
