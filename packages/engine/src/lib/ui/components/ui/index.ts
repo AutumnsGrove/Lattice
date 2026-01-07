@@ -6,6 +6,9 @@
 // Usage:
 //   import { Button, Card } from '@groveengine/ui/ui';
 
+// Types
+export * from './types';
+
 // Wrapper components
 export { default as Button } from './Button.svelte';
 export { default as Card } from './Card.svelte';

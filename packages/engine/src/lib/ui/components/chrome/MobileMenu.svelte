@@ -236,24 +236,35 @@
 </div>
 
 <style>
-	/* Scroll shadow indicator - shows gradient shadows when content is scrollable */
+	/*
+	 * Scroll shadow indicator
+	 * Shows gradient shadows at top/bottom when content is scrollable.
+	 * Uses background-attachment: local/scroll trick for pure CSS solution.
+	 */
 	.scroll-shadow {
-		--shadow-color: rgb(0 0 0 / 0.08);
-		--shadow-size: 16px;
+		/* Shadow and surface colors - uses theme CSS variables with sensible fallbacks */
+		--scroll-shadow-color: rgb(0 0 0 / 0.08);
+		--scroll-shadow-size: 16px;
+		/* Surface color for cover gradients - matches bg-surface */
+		--scroll-surface-light: hsl(var(--surface, 0 0% 100%));
+		--scroll-surface-dark: hsl(var(--surface, 240 10% 4%));
+		--scroll-surface: var(--scroll-surface-light);
+
 		background:
-			/* Top shadow */
-			linear-gradient(to bottom, var(--shadow-color), transparent) top / 100% var(--shadow-size),
-			/* Bottom shadow */
-			linear-gradient(to top, var(--shadow-color), transparent) bottom / 100% var(--shadow-size),
-			/* Top cover (hides shadow when scrolled to top) */
-			linear-gradient(to bottom, var(--color-surface, white), var(--color-surface, white)) top / 100% var(--shadow-size),
-			/* Bottom cover (hides shadow when scrolled to bottom) */
-			linear-gradient(to top, var(--color-surface, white), var(--color-surface, white)) bottom / 100% var(--shadow-size);
+			/* Top shadow - fades in when scrolled down */
+			linear-gradient(to bottom, var(--scroll-shadow-color), transparent) top / 100% var(--scroll-shadow-size),
+			/* Bottom shadow - fades in when more content below */
+			linear-gradient(to top, var(--scroll-shadow-color), transparent) bottom / 100% var(--scroll-shadow-size),
+			/* Top cover - hides shadow when at scroll top */
+			linear-gradient(to bottom, var(--scroll-surface), var(--scroll-surface)) top / 100% var(--scroll-shadow-size),
+			/* Bottom cover - hides shadow when at scroll bottom */
+			linear-gradient(to top, var(--scroll-surface), var(--scroll-surface)) bottom / 100% var(--scroll-shadow-size);
 		background-repeat: no-repeat;
 		background-attachment: local, local, scroll, scroll;
 	}
 
 	:global(.dark) .scroll-shadow {
-		--shadow-color: rgb(0 0 0 / 0.25);
+		--scroll-shadow-color: rgb(0 0 0 / 0.3);
+		--scroll-surface: var(--scroll-surface-dark);
 	}
 </style>

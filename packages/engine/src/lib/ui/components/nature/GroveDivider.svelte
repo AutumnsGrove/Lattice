@@ -21,10 +21,9 @@
 <script lang="ts">
 	import Logo from './Logo.svelte';
 	import GlassLogo from '../ui/GlassLogo.svelte';
+	import type { GlassVariant } from '../ui/types';
 	import type { Season } from './palette';
 	import { seasonStore } from '../../stores/season';
-
-	type GlassVariant = 'default' | 'accent' | 'frosted' | 'dark' | 'ethereal';
 
 	interface Props {
 		/** Number of logos to display (default: 7) */
