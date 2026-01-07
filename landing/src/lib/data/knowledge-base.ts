@@ -291,6 +291,16 @@ export const specs: Doc[] = [
     lastUpdated: "2026-01-07",
     readingTime: 12,
   },
+  {
+    slug: "press-spec",
+    title: "Press — Image Processing CLI",
+    description: "CLI tool for WebP conversion, AI descriptions, and CDN upload",
+    excerpt:
+      "A press takes something raw and makes it ready. Press is Grove's image processing CLI: convert to WebP, generate AI descriptions for accessibility, deduplicate by content hash, and upload to R2. One command, and your images are ready to publish.",
+    category: "specs",
+    lastUpdated: "2026-01-06",
+    readingTime: 10,
+  },
 ];
 
 // Help Center Articles
@@ -415,6 +425,17 @@ export const helpArticles: Doc[] = [
     category: "help",
     lastUpdated: "2025-12-25",
     readingTime: 6,
+  },
+  {
+    slug: "what-is-zdr",
+    title: "What is ZDR and Why Does It Matter?",
+    description:
+      "Zero Data Retention: how Grove's AI features process your content without storing it",
+    excerpt:
+      "When you use AI features on Grove, your words pass through external services. Most AI providers log everything. Grove's AI features work differently. We use Zero Data Retention: your words go in, results come out, everything in between vanishes.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 4,
   },
   {
     slug: "how-grove-backs-up-your-data",

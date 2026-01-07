@@ -29,6 +29,7 @@
 		name: string;
 		icon: string;
 		description?: string;
+		href?: string;
 	}
 
 	interface Tool {
@@ -243,7 +244,7 @@
 					subComponents: [
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
-						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
 				},
 				{
@@ -269,7 +270,7 @@
 					spec: '/knowledge/specs/thorn-spec',
 					subComponents: [
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
-						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
 				},
 				{
@@ -338,7 +339,7 @@
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
 					github: 'https://github.com/AutumnsGrove/Forage',
 					subComponents: [
-						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention' }
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
 				},
 				{
@@ -489,7 +490,8 @@
 					subComponents: [
 						{ name: 'Canary', icon: 'origami', description: 'Tripwire detection' },
 						{ name: 'Kestrel', icon: 'feather', description: 'Semantic validation' },
-						{ name: 'Robin', icon: 'toolcase', description: 'Safe response' }
+						{ name: 'Robin', icon: 'toolcase', description: 'Safe response' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
 				},
 				{
@@ -608,15 +610,17 @@
 								{#if tool.subComponents && tool.subComponents.length > 0}
 									<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
 										{#each tool.subComponents as sub}
-											<span
-												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted"
+											<svelte:element
+												this={sub.href ? 'a' : 'span'}
+												href={sub.href}
+												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted transition-colors {sub.href ? 'cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300' : ''}"
 												title={sub.description}
 												role="listitem"
 												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
 											>
 												<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
 												{sub.name}
-											</span>
+											</svelte:element>
 										{/each}
 									</div>
 								{/if}
