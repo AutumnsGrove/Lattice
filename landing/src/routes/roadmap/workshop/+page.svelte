@@ -599,6 +599,7 @@
 		{#each tocItems as item, itemIndex}
 			{@const categoryTools = categories[itemIndex]?.tools ?? []}
 			{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
+			{@const ItemIcon = getToolIcon(item.icon)}
 			<div class="relative group">
 				<a
 					href="#{item.id}"
@@ -606,19 +607,20 @@
 					aria-label="Jump to {item.text}"
 					title={item.text}
 				>
-					<svelte:component this={getToolIcon(item.icon)} class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+					<ItemIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
 				</a>
-				
+
 				<!-- Sub-components revealed on hover -->
 				{#if allSubComponents.length > 0}
 					<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2">
 						{#each allSubComponents as sub}
+							{@const SubIcon = getToolIcon(sub.icon)}
 							<a
 								href={sub.href ?? '#'}
 								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
 								title={sub.name}
 							>
-								<svelte:component this={getToolIcon(sub.icon)} class="w-3.5 h-3.5" />
+								<SubIcon class="w-3.5 h-3.5" />
 								<span class="text-xs font-medium">{sub.name}</span>
 							</a>
 						{/each}
@@ -646,7 +648,7 @@
 			<div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden max-h-[70vh] overflow-y-auto">
 				<div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
 					<span class="font-medium text-foreground">Navigate</span>
-					<button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground">
+					<button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close table of contents">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 						</svg>
@@ -656,26 +658,28 @@
 					{#each tocItems as item, itemIndex}
 						{@const categoryTools = categories[itemIndex]?.tools ?? []}
 						{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
+						{@const ItemIcon = getToolIcon(item.icon)}
 						<div class="mb-2">
 							<a
 								href="#{item.id}"
 								onclick={() => isMobileTocOpen = false}
 								class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
 							>
-								<svelte:component this={getToolIcon(item.icon)} class="w-5 h-5 text-amber-500" />
+								<ItemIcon class="w-5 h-5 text-amber-500" />
 								<span class="font-medium">{item.text}</span>
 							</a>
-							
+
 							<!-- Sub-components for this category -->
 							{#if allSubComponents.length > 0}
 								<div class="ml-8 mt-1 space-y-1">
 									{#each allSubComponents as sub}
+										{@const SubIcon = getToolIcon(sub.icon)}
 										<a
 											href={sub.href ?? '#'}
 											onclick={() => isMobileTocOpen = false}
 											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
 										>
-											<svelte:component this={getToolIcon(sub.icon)} class="w-4 h-4 text-amber-400" />
+											<SubIcon class="w-4 h-4 text-amber-400" />
 											<span>{sub.name}</span>
 										</a>
 									{/each}
@@ -704,11 +708,12 @@
 						{#each category.tools as tool}
 							{@const badge = getStatusBadge(tool.status)}
 							{@const cardClass = getCardClass(category.name)}
+							{@const ToolIcon = getToolIcon(tool.icon)}
 							<article class={cardClass}>
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-											<svelte:component this={getToolIcon(tool.icon)} class="w-5 h-5" />
+											<ToolIcon class="w-5 h-5" />
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>
@@ -723,6 +728,7 @@
 								{#if tool.subComponents && tool.subComponents.length > 0}
 									<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
 										{#each tool.subComponents as sub}
+											{@const SubIcon = getToolIcon(sub.icon)}
 											<svelte:element
 												this={sub.href ? 'a' : 'span'}
 												href={sub.href}
@@ -731,7 +737,7 @@
 												role="listitem"
 												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
 											>
-												<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
+												<SubIcon class="w-3 h-3" aria-hidden="true" />
 												{sub.name}
 											</svelte:element>
 										{/each}
