@@ -84,13 +84,35 @@ jobs:
 
           echo "tag_name=$TAG" >> $GITHUB_OUTPUT
 
-      - name: Sync CSV to landing page
+      - name: Generate release summary
+        id: summary
+        if: steps.snapshot.outcome == 'success'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          TAG="${{ steps.snapshot.outputs.tag_name }}"
+          echo "Generating release summary for: $TAG"
+
+          # Make script executable
+          chmod +x ./scripts/generate-release-summary.sh
+
+          # Generate summary (will use previous tag automatically)
+          ./scripts/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
+
+      - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
         run: |
           # Ensure landing data directory exists
           mkdir -p landing/static/data
+
           # Copy the history CSV so the /journey page can display it
           cp snapshots/history.csv landing/static/data/history.csv
+
+          # Copy release summaries so the /roadmap page can display them
+          if [ -d snapshots/summaries ]; then
+            mkdir -p landing/static/data/summaries
+            cp -r snapshots/summaries/* landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
+          fi
 
       - name: Commit and push snapshot
         if: steps.snapshot.outcome == 'success'
@@ -98,7 +120,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Add snapshot files and landing data
+          # Add snapshot files, summaries, and landing data
           git add snapshots/ landing/static/data/
 
           # Check if there are changes to commit
@@ -107,5 +129,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: add repository snapshot for ${{ steps.snapshot.outputs.tag_name }}"
+          git commit -m "docs: add repository snapshot and release summary for ${{ steps.snapshot.outputs.tag_name }}"
           git push origin main

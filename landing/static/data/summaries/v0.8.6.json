@@ -1,0 +1,28 @@
+{
+  "version": "v0.8.6",
+  "date": "2026-01-05T13:12:20Z",
+  "commitHash": "d621d9b",
+  "summary": "A focused release improving documentation quality and expanding the help center. Added comprehensive guides for the Plant signup flow and status system, along with enhanced accessibility across documentation. The workshop page saw visual refinements with icon improvements and better mobile responsiveness.",
+  "stats": {
+    "totalCommits": 48,
+    "features": 12,
+    "fixes": 8,
+    "refactoring": 5,
+    "docs": 15,
+    "tests": 1,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+      "Plant signup flow documentation",
+      "Status system documentation",
+      "Help center article improvements",
+      "Workshop page icon refinements"
+    ],
+    "fixes": [
+      "Documentation accessibility improvements",
+      "Mobile layout fixes",
+      "Icon rendering consistency"
+    ]
+  }
+}
