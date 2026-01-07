@@ -60,7 +60,7 @@
 	class={cn(
 		"block rounded-2xl p-6 transition-transform hover:scale-[1.02] group",
 		"bg-white/60 dark:bg-slate-800/40 backdrop-blur-md",
-		"border border-white/40 dark:border-emerald-700/40",
+		"border border-white/40 dark:border-slate-700/40",
 		className
 	)}
 >
