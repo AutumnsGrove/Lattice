@@ -673,6 +673,17 @@ export const helpArticles: Doc[] = [
     lastUpdated: "2026-01-07",
     readingTime: 4,
   },
+  {
+    slug: "what-is-solarpunk",
+    title: "What is Solarpunk?",
+    description:
+      "The philosophy behind Grove's approach to technology and community",
+    excerpt:
+      "Solarpunk is a vision of the future that's optimistic without being naive. Technology in service of people, not the other way around. Community ownership over corporate extraction. Here's what it means for Grove.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 5,
+  },
 ];
 
 // Legal Documents
