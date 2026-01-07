@@ -543,6 +543,22 @@
 			default: return { text: status, class: 'bg-slate-100 text-slate-600' };
 		}
 	}
+
+	// TOC state
+	let isMobileTocOpen = $state(false);
+
+	// Generate category IDs for TOC navigation
+	const categoryIds = categories.map(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+
+	// TOC items for floating navigation (icon-only on desktop, list on mobile)
+	const tocItems = [
+		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'codesandbox' },
+		{ id: categoryIds[1], text: 'Platform Services', icon: 'server' },
+		{ id: categoryIds[2], text: 'Content & Community', icon: 'users' },
+		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'tool' },
+		{ id: categoryIds[4], text: 'Operations', icon: 'cog' },
+		{ id: categoryIds[5], text: 'Patterns', icon: 'triangle' }
+	];
 </script>
 
 <SEO
@@ -578,11 +594,105 @@
 		</div>
 	</section>
 
+	<!-- Floating TOC Icon Navigation with Sub-Components -->
+	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
+		{#each tocItems as item, itemIndex}
+			{@const categoryTools = categories[itemIndex]?.tools ?? []}
+			{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
+			<div class="relative group">
+				<a
+					href="#{item.id}"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
+					aria-label="Jump to {item.text}"
+					title={item.text}
+				>
+					<svelte:component this={getToolIcon(item.icon)} class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+				</a>
+				
+				<!-- Sub-components revealed on hover -->
+				{#if allSubComponents.length > 0}
+					<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2">
+						{#each allSubComponents as sub}
+							<a
+								href={sub.href ?? '#'}
+								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
+								title={sub.name}
+							>
+								<svelte:component this={getToolIcon(sub.icon)} class="w-3.5 h-3.5" />
+								<span class="text-xs font-medium">{sub.name}</span>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		{/each}
+	</nav>
+
+	<!-- Mobile TOC Button & Dropdown with Sub-Components -->
+	<div class="lg:hidden fixed bottom-6 right-6 z-50">
+		<button
+			type="button"
+			onclick={() => isMobileTocOpen = !isMobileTocOpen}
+			class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+			aria-expanded={isMobileTocOpen}
+			aria-label="Table of contents"
+		>
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+			</svg>
+		</button>
+
+		{#if isMobileTocOpen}
+			<div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden max-h-[70vh] overflow-y-auto">
+				<div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
+					<span class="font-medium text-foreground">Navigate</span>
+					<button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="py-2">
+					{#each tocItems as item, itemIndex}
+						{@const categoryTools = categories[itemIndex]?.tools ?? []}
+						{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
+						<div class="mb-2">
+							<a
+								href="#{item.id}"
+								onclick={() => isMobileTocOpen = false}
+								class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+							>
+								<svelte:component this={getToolIcon(item.icon)} class="w-5 h-5 text-amber-500" />
+								<span class="font-medium">{item.text}</span>
+							</a>
+							
+							<!-- Sub-components for this category -->
+							{#if allSubComponents.length > 0}
+								<div class="ml-8 mt-1 space-y-1">
+									{#each allSubComponents as sub}
+										<a
+											href={sub.href ?? '#'}
+											onclick={() => isMobileTocOpen = false}
+											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+										>
+											<svelte:component this={getToolIcon(sub.icon)} class="w-4 h-4 text-amber-400" />
+											<span>{sub.name}</span>
+										</a>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
+
 	<!-- Categories -->
 	<section class="flex-1 py-12 px-6">
 		<div class="max-w-5xl mx-auto space-y-16">
-			{#each categories as category}
-				<div>
+			{#each categories as category, index}
+				<div id={categoryIds[index]}>
 					<!-- Category Header -->
 					<div class="mb-8">
 						<h2 class="text-2xl font-serif text-foreground mb-2">{category.name}</h2>
