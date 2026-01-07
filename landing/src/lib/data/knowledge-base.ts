@@ -438,6 +438,17 @@ export const helpArticles: Doc[] = [
     readingTime: 4,
   },
   {
+    slug: "what-is-swarm",
+    title: "What is Swarm and How Does It Work?",
+    description:
+      "How Grove uses multiple AI agents working in parallel to deliver better results faster",
+    excerpt:
+      "Some Grove tools use a swarm approach. Instead of one AI assistant working through a task step by step, multiple agents work in parallel, each handling a piece of the problem. Think of it like a research team versus a single researcher.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 4,
+  },
+  {
     slug: "how-grove-backs-up-your-data",
     title: "How Grove Backs Up Your Data",
     description: "Patina: Automated nightly backups with 12-week retention",

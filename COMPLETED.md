@@ -262,4 +262,29 @@
 
 ---
 
-*Last updated: 2026-01-05*
+## Swarm Sub Icon & Help Article (2026-01-07)
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Install @lucide/lab package | ✓ | Experimental lucide icons for bee |
+| Create BeeIcon wrapper component | ✓ | `landing/src/lib/components/icons/BeeIcon.svelte` |
+| Add bee to toolIcons registry | ✓ | `icons.ts` updated |
+| Update beyond page for subComponents | ✓ | Added interfaces and rendering logic |
+| Add Swarm to Forage (workshop) | ✓ | Alongside existing ZDR badge |
+| Add Swarm to Scout (beyond) | ✓ | New subComponents feature |
+| Add Swarm to Daily Clearing (beyond) | ✓ | New subComponents feature |
+| Write swarm help article | ✓ | `docs/help-center/articles/what-is-swarm.md` |
+| Register in knowledge-base.ts | ✓ | Added after ZDR article |
+
+### Files Changed
+- `landing/package.json` - Added @lucide/lab dependency
+- `landing/src/lib/components/icons/BeeIcon.svelte` - New wrapper component
+- `landing/src/lib/utils/icons.ts` - Added bee to toolIcons
+- `landing/src/routes/roadmap/beyond/+page.svelte` - Added subComponents support
+- `landing/src/routes/roadmap/workshop/+page.svelte` - Added Swarm to Forage
+- `landing/src/lib/data/knowledge-base.ts` - Registered help article
+- `docs/help-center/articles/what-is-swarm.md` - New help article
+
+---
+
+*Last updated: 2026-01-07*

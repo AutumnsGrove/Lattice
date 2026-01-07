@@ -17,8 +17,27 @@
 	// Import nature assets from engine package
 	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';
 
+	interface SubComponent {
+		name: string;
+		icon: string;
+		description?: string;
+		href?: string;
+	}
+
+	interface Tool {
+		name: string;
+		tagline: string;
+		description: string;
+		status: string;
+		icon: string;
+		domain: string;
+		stack: string;
+		github?: string;
+		subComponents?: SubComponent[];
+	}
+
 	// Standalone tools - built for personal use, shared with the world
-	const tools = [
+	const tools: Tool[] = [
 		{
 			name: 'Aria',
 			tagline: 'Music Curation',
@@ -47,7 +66,10 @@
 			icon: 'newspaper',
 			domain: 'clearing.grove.place',
 			stack: 'Python + Cloudflare Workers',
-			github: 'https://github.com/AutumnsGrove/AgenticNewspaper'
+			github: 'https://github.com/AutumnsGrove/AgenticNewspaper',
+			subComponents: [
+				{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
+			]
 		},
 		{
 			name: 'Scout',
@@ -57,7 +79,10 @@
 			icon: 'telescope',
 			domain: 'scout.grove.place',
 			stack: 'Python + TypeScript',
-			github: 'https://github.com/AutumnsGrove/GroveScout'
+			github: 'https://github.com/AutumnsGrove/GroveScout',
+			subComponents: [
+				{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
+			]
 		}
 	];
 
@@ -141,6 +166,24 @@
 								{badge.text}
 							</span>
 						</div>
+
+						{#if tool.subComponents && tool.subComponents.length > 0}
+							<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
+								{#each tool.subComponents as sub}
+									<svelte:element
+										this={sub.href ? 'a' : 'span'}
+										href={sub.href}
+										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-700/50 text-xs text-slate-400 transition-colors {sub.href ? 'cursor-pointer hover:bg-indigo-900/50 hover:text-indigo-300' : ''}"
+										title={sub.description}
+										role="listitem"
+										aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
+									>
+										<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
+										{sub.name}
+									</svelte:element>
+								{/each}
+							</div>
+						{/if}
 
 						<p class="text-slate-300 mb-4 leading-relaxed">
 							{tool.description}
