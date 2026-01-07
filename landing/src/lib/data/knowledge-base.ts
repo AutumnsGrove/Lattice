@@ -630,6 +630,17 @@ export const helpArticles: Doc[] = [
     lastUpdated: "2026-01-06",
     readingTime: 6,
   },
+  {
+    slug: "why-some-usernames-arent-available",
+    title: "Why Some Usernames Aren't Available",
+    description:
+      "How Grove protects the community through username validation",
+    excerpt:
+      "Every name passes through the same earth before taking root. Grove's username system quietly filters reserved terms, impersonation attempts, and harmful content. If your preferred username isn't available, here's why.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 4,
+  },
 ];
 
 // Legal Documents
