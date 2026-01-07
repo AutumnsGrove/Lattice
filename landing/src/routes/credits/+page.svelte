@@ -2,6 +2,7 @@
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
+	import { Shredder } from 'lucide-svelte';
 
 	const headers = [
 		{ id: 'supporters', text: 'Supporters & Community', level: 2 },
@@ -229,9 +230,19 @@
 								</p>
 							</div>
 						</div>
-						<a href="https://kilocode.ai" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-3 inline-block">
-							kilocode.ai →
-						</a>
+						<div class="flex items-center gap-3 mt-3">
+							<a href="https://kilocode.ai" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
+								kilocode.ai →
+							</a>
+							<a
+								href="/knowledge/help/what-is-zdr"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								title="Zero Data Retention"
+							>
+								<Shredder class="w-3 h-3" />
+								ZDR
+							</a>
+						</div>
 					</div>
 				</div>
 			</section>
