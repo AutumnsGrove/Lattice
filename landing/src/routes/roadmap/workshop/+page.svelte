@@ -712,24 +712,63 @@
 								<tbody>
 									{#each category.tools as tool, toolIndex}
 										{@const badge = getStatusBadge(tool.status)}
-										<tr class="border-b border-slate-100 dark:border-slate-700/50 last:border-0 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors">
+										{@const toolId = tool.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+										<!-- Service Row -->
+										<tr id={toolId} class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 transition-colors">
 											<td class="px-4 py-2.5">
 												<div class="flex items-center gap-2.5">
 													<div class="w-7 h-7 rounded-md bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
 														<svelte:component this={getToolIcon(tool.icon)} class="w-4 h-4" />
 													</div>
-													<div class="min-w-0">
-														<span class="font-medium text-foreground block truncate">{tool.name}</span>
+													<div class="min-w-0 flex-1">
+														{#if tool.spec}
+															<a href={tool.spec} class="font-medium text-foreground hover:text-accent block truncate transition-colors">{tool.name}</a>
+														{:else}
+															<span class="font-medium text-foreground block truncate">{tool.name}</span>
+														{/if}
 														<span class="text-xs text-foreground-faint truncate block">{tool.tagline}</span>
+													</div>
+													<!-- Icon buttons for spec/github -->
+													<div class="flex items-center gap-1 flex-shrink-0">
+														{#if tool.spec}
+															<a href={tool.spec} class="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30 text-foreground-faint hover:text-amber-600 dark:hover:text-amber-400 transition-colors" title="Spec">
+																<FileText class="w-3.5 h-3.5" />
+															</a>
+														{/if}
+														{#if tool.github}
+															<a href={tool.github} target="_blank" rel="noopener noreferrer" class="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30 text-foreground-faint hover:text-amber-600 dark:hover:text-amber-400 transition-colors" title="GitHub">
+																<Github class="w-3.5 h-3.5" />
+															</a>
+														{/if}
 													</div>
 												</div>
 											</td>
-											<td class="px-4 py-2.5 text-right">
+											<td class="px-4 py-2.5 text-right align-top">
 												<span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {badge.class}">
 													{badge.text}
 												</span>
 											</td>
 										</tr>
+										<!-- Sub-components (indented rows) -->
+										{#if tool.subComponents && tool.subComponents.length > 0}
+											<tr class="border-b border-slate-100 dark:border-slate-700/50 last:border-0 bg-slate-50/50 dark:bg-slate-900/30">
+												<td colspan="2" class="px-4 py-2">
+													<div class="pl-6 pr-2 flex flex-wrap gap-1.5">
+														{#each tool.subComponents as sub}
+															<svelte:element
+																this={sub.href ? 'a' : 'span'}
+																href={sub.href}
+																class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-foreground-muted transition-colors {sub.href ? 'cursor-pointer hover:border-amber-300 dark:hover:border-amber-700 hover:text-amber-700 dark:hover:text-amber-300' : ''}"
+																title={sub.description}
+															>
+																<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" />
+																{sub.name}
+															</svelte:element>
+														{/each}
+													</div>
+												</td>
+											</tr>
+										{/if}
 									{/each}
 								</tbody>
 							</table>
