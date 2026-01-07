@@ -48,7 +48,8 @@
 
 <footer class="py-12 border-t border-default">
 	<div class="{maxWidthClass[maxWidth]} mx-auto px-6">
-		<!-- Three Column Layout with Vertical Dividers (Resources/Connect hidden on mobile - they're in the mobile menu) -->
+		<!-- Responsive Layout: Brand only (mobile) → Three columns with glass dividers (desktop) -->
+		<!-- Resources/Connect sections are in the mobile overflow menu instead -->
 		<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-6 sm:mb-10">
 			<!-- Column 1: Grove Brand (always visible) -->
 			<div class="text-center sm:text-left lg:flex-1">

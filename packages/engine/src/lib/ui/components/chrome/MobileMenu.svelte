@@ -162,72 +162,74 @@
 			</a>
 		{/each}
 
-		<!-- Divider -->
+		<!-- Resources Section -->
 		{#if resources.length > 0}
 			<div class="py-4">
 				<GroveDivider count={7} size="xs" glass />
 			</div>
 
-			<!-- Resources Section -->
-			<div class="px-3 py-2">
-				<h3 class="text-xs font-medium text-foreground-subtle uppercase tracking-wide">Resources</h3>
-			</div>
-			{#each resources as link}
-				{@const Icon = link.icon}
-				{@const active = isActivePath(link.href, currentPath)}
-				<a
-					href={link.href}
-					target={link.external ? '_blank' : undefined}
-					rel={link.external ? 'noopener noreferrer' : undefined}
-					onclick={handleClose}
-					class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
-						{active
-						? 'bg-accent/10 text-accent-muted'
-						: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
-				>
-					{#if Icon}
-						<Icon class="w-5 h-5 flex-shrink-0" />
-					{/if}
-					<span class="text-sm font-medium">{link.label}</span>
-					{#if link.external}
-						<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
-					{/if}
-				</a>
-			{/each}
+			<section aria-labelledby="mobile-menu-resources">
+				<h3 id="mobile-menu-resources" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+					Resources
+				</h3>
+				{#each resources as link}
+					{@const Icon = link.icon}
+					{@const active = isActivePath(link.href, currentPath)}
+					<a
+						href={link.href}
+						target={link.external ? '_blank' : undefined}
+						rel={link.external ? 'noopener noreferrer' : undefined}
+						onclick={handleClose}
+						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+							{active
+							? 'bg-accent/10 text-accent-muted'
+							: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+					>
+						{#if Icon}
+							<Icon class="w-5 h-5 flex-shrink-0" />
+						{/if}
+						<span class="text-sm font-medium">{link.label}</span>
+						{#if link.external}
+							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+						{/if}
+					</a>
+				{/each}
+			</section>
 		{/if}
 
-		<!-- Divider -->
+		<!-- Connect Section -->
 		{#if connect.length > 0}
 			<div class="py-4">
 				<GroveDivider count={7} size="xs" glass />
 			</div>
 
-			<!-- Connect Section -->
-			<div class="px-3 py-2">
-				<h3 class="text-xs font-medium text-foreground-subtle uppercase tracking-wide">Connect</h3>
-			</div>
-			{#each connect as link}
-				{@const Icon = link.icon}
-				{@const active = isActivePath(link.href, currentPath)}
-				<a
-					href={link.href}
-					target={link.external ? '_blank' : undefined}
-					rel={link.external ? 'noopener noreferrer' : undefined}
-					onclick={handleClose}
-					class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
-						{active
-						? 'bg-accent/10 text-accent-muted'
-						: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
-				>
-					{#if Icon}
-						<Icon class="w-5 h-5 flex-shrink-0" />
-					{/if}
-					<span class="text-sm font-medium">{link.label}</span>
-					{#if link.external}
-						<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
-					{/if}
-				</a>
-			{/each}
+			<section aria-labelledby="mobile-menu-connect">
+				<h3 id="mobile-menu-connect" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+					Connect
+				</h3>
+				{#each connect as link}
+					{@const Icon = link.icon}
+					{@const active = isActivePath(link.href, currentPath)}
+					<a
+						href={link.href}
+						target={link.external ? '_blank' : undefined}
+						rel={link.external ? 'noopener noreferrer' : undefined}
+						onclick={handleClose}
+						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
+							{active
+							? 'bg-accent/10 text-accent-muted'
+							: 'text-foreground hover:bg-surface-hover hover:text-accent-muted'}"
+					>
+						{#if Icon}
+							<Icon class="w-5 h-5 flex-shrink-0" />
+						{/if}
+						<span class="text-sm font-medium">{link.label}</span>
+						{#if link.external}
+							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+						{/if}
+					</a>
+				{/each}
+			</section>
 		{/if}
 	</nav>
 </div>
