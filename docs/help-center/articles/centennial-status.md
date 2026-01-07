@@ -19,9 +19,9 @@ Centennial is Grove's promise that your words can have real longevity. After 12 
 
 You don't apply for Centennial. You don't unlock it through a special action. It happens automatically:
 
-- **Yearly subscription (Sapling+):** You're Centennial the moment you renew for a second year
+- **Yearly subscription (Sapling+):** After your first year completes, you're Centennial
 - **Monthly subscription (Sapling+):** After 12 payments, you're in
-- **Mixed path:** All your qualifying months add up, even if you pause or switch plans. Six months on Sapling, three months on Seedling, then six months on Oak? That's 12 qualifying months.
+- **Mixed path:** Only months on Sapling, Oak, or Evergreen count. Six months on Sapling, three months on Seedling (doesn't count), then six more on Oak? That's 12 qualifying months.
 
 The counter only moves forward. Time on Seedling or Free doesn't add months, but it doesn't reset your progress either.
 
@@ -62,7 +62,7 @@ Your site becomes a **read-only archive**:
 - You can't edit, delete, or publish new posts
 - A subtle indicator shows the site is preserved (not abandoned)
 
-Think of it like a book on a library shelf. It's still there. People can still read it. You just can't add new chapters unless you come back.
+Think of it like finding a book on a library shelf years after it was written. It's still there. People can still read it. You just can't add new chapters unless you come back.
 
 ## Why this promise is real
 
@@ -90,7 +90,7 @@ Even the worst case honors the promise.
 
 Not everyone wants their words to outlive them. Centennial is automatic, but you control it:
 
-**Disable preservation:** In **Settings → Privacy**, toggle off "Preserve my grove." Your domain returns to the pool when your subscription ends.
+**Disable preservation:** In your account settings, you can toggle off preservation. Your domain returns to the pool when your subscription ends.
 
 **Delete your account:** Full deletion removes everything immediately. Your content is gone, your domain is released.
 
@@ -100,13 +100,7 @@ The default is preservation because most people want their work to persist. But 
 
 ## Checking your progress
 
-If you haven't earned Centennial yet:
-
-1. Go to **Admin → Settings → Account**
-2. Look for the **Centennial** section
-3. You'll see how many qualifying months you've accumulated
-
-Once you hit 12, you'll get an email confirming your grove has earned permanent status.
+Your account settings show how many qualifying months you've accumulated toward Centennial status. Once you hit 12, you'll get an email confirming your grove has earned permanent status.
 
 ## Common questions
 
