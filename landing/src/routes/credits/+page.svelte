@@ -152,6 +152,10 @@
 								<span class="supporter-name">Jack Sheckles</span>
 								<span class="supporter-desc">— very excited for me, wants to see me bloom</span>
 							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Rebecca Gordon</span>
+								<span class="supporter-desc">— caring and cautious, always checking in to make sure I'm okay out here</span>
+							</div>
 						</div>
 					</div>
 
