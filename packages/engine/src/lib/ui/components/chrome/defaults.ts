@@ -38,7 +38,7 @@ export const DIVIDER_VERTICAL = {
   count: 9,
   size: "xs" as const,
   glass: true,
-  vertical: false,
+  vertical: true,
   spacing: "0.5rem",
 } as const;
 
