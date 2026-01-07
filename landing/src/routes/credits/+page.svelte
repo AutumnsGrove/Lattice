@@ -225,7 +225,7 @@
 								<h3 class="text-lg font-serif text-foreground mb-1">Kilo Code</h3>
 								<p class="text-foreground-subtle font-sans text-sm mb-2">VS Code Extension</p>
 								<p class="text-foreground-muted font-sans text-sm">
-									Secondary development tool. Used with DeepSeek V3.2 and Kimi K2 (0905 and thinking models) for additional perspectives and rapid iteration.
+									Secondary development tool. Used with DeepSeek V3.2, Kimi K2 (0905 and thinking models), and Minimax M2/M2.1 for additional perspectives and rapid iteration.
 								</p>
 							</div>
 						</div>
