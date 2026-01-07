@@ -83,9 +83,9 @@
 	// Tier availability types
 	type TierStatus = 'available' | 'coming_soon' | 'future';
 
-	// Icon mapping for pricing tiers
+	// Icon mapping for pricing tiers (keys match plan IDs)
 	const planIcons = {
-		sprout: Sprout,
+		seedling: Sprout,
 		sapling: TreeDeciduous,
 		oak: Trees,
 		evergreen: Crown
@@ -98,7 +98,7 @@
 			tagline: 'Just planted',
 			price: 8,
 			highlights: ['50 posts', '1 GB storage', '3 themes'],
-			icon: 'sprout' as keyof typeof planIcons,
+			icon: 'seedling' as keyof typeof planIcons,
 			status: 'available' as TierStatus
 		},
 		{

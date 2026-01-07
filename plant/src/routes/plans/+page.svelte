@@ -281,6 +281,7 @@
 							Coming Soon
 						</span>
 					</div>
+					<span class="sr-only">This plan is coming soon and will be available shortly after launch.</span>
 				{:else if isFuture}
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
@@ -291,6 +292,7 @@
 							Future
 						</span>
 					</div>
+					<span class="sr-only">This plan is planned for a future release.</span>
 				{/if}
 
 				<button
