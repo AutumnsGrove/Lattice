@@ -250,6 +250,100 @@ describe('GroveDivider Default Values', () => {
 });
 
 // =============================================================================
+// ROTATION MODE TESTS
+// =============================================================================
+
+describe('GroveDivider Rotation Modes', () => {
+	type RotationMode = 'default' | 'left-right' | 'up-down';
+
+	/**
+	 * Determines effective rotation mode based on orientation
+	 * - 'default': vertical uses 'left-right', horizontal uses 'up-down'
+	 */
+	function getEffectiveRotation(rotation: RotationMode, vertical: boolean): 'left-right' | 'up-down' {
+		return rotation === 'default'
+			? (vertical ? 'left-right' : 'up-down')
+			: rotation;
+	}
+
+	/**
+	 * Get rotation class based on mode and index
+	 */
+	function getRotationClass(index: number, mode: 'left-right' | 'up-down'): string {
+		if (index % 2 === 0) return ''; // Even indices: no rotation
+		return mode === 'left-right' ? 'rotate-90' : 'rotate-180';
+	}
+
+	it('should use left-right rotation for vertical dividers by default', () => {
+		const effectiveMode = getEffectiveRotation('default', true);
+		expect(effectiveMode).toBe('left-right');
+	});
+
+	it('should use up-down rotation for horizontal dividers by default', () => {
+		const effectiveMode = getEffectiveRotation('default', false);
+		expect(effectiveMode).toBe('up-down');
+	});
+
+	it('should respect explicit left-right rotation regardless of orientation', () => {
+		expect(getEffectiveRotation('left-right', true)).toBe('left-right');
+		expect(getEffectiveRotation('left-right', false)).toBe('left-right');
+	});
+
+	it('should respect explicit up-down rotation regardless of orientation', () => {
+		expect(getEffectiveRotation('up-down', true)).toBe('up-down');
+		expect(getEffectiveRotation('up-down', false)).toBe('up-down');
+	});
+
+	it('should apply rotate-90 for odd indices in left-right mode', () => {
+		const pattern = [0, 1, 2, 3, 4].map(i => getRotationClass(i, 'left-right'));
+		expect(pattern).toEqual(['', 'rotate-90', '', 'rotate-90', '']);
+	});
+
+	it('should apply rotate-180 for odd indices in up-down mode', () => {
+		const pattern = [0, 1, 2, 3, 4].map(i => getRotationClass(i, 'up-down'));
+		expect(pattern).toEqual(['', 'rotate-180', '', 'rotate-180', '']);
+	});
+
+	it('should not rotate even indices in any mode', () => {
+		expect(getRotationClass(0, 'left-right')).toBe('');
+		expect(getRotationClass(0, 'up-down')).toBe('');
+		expect(getRotationClass(2, 'left-right')).toBe('');
+		expect(getRotationClass(2, 'up-down')).toBe('');
+	});
+});
+
+// =============================================================================
+// SPACING TESTS
+// =============================================================================
+
+describe('GroveDivider Spacing', () => {
+	/**
+	 * Compute container style for spacing
+	 */
+	function getContainerStyle(spacing?: string): string {
+		return spacing ? `gap: ${spacing}` : '';
+	}
+
+	it('should return empty style when no spacing provided', () => {
+		expect(getContainerStyle()).toBe('');
+		expect(getContainerStyle(undefined)).toBe('');
+	});
+
+	it('should generate gap style for pixel spacing', () => {
+		expect(getContainerStyle('8px')).toBe('gap: 8px');
+	});
+
+	it('should generate gap style for rem spacing', () => {
+		expect(getContainerStyle('0.5rem')).toBe('gap: 0.5rem');
+	});
+
+	it('should generate gap style for any valid CSS value', () => {
+		expect(getContainerStyle('1em')).toBe('gap: 1em');
+		expect(getContainerStyle('16px')).toBe('gap: 16px');
+	});
+});
+
+// =============================================================================
 // DIVIDER CONFIGURATION TESTS
 // =============================================================================
 
@@ -262,11 +356,11 @@ describe('GroveDivider Configuration Constants', () => {
 	};
 
 	const DIVIDER_VERTICAL = {
-		count: 15,
+		count: 9,
 		size: 'xs' as const,
 		glass: true,
 		vertical: true,
-		gap: 'gap-1',
+		spacing: '0.5rem',
 	};
 
 	it('should have horizontal config with 7 logos', () => {
@@ -277,16 +371,16 @@ describe('GroveDivider Configuration Constants', () => {
 		expect(DIVIDER_HORIZONTAL.glass).toBe(true);
 	});
 
-	it('should have vertical config with 15 logos', () => {
-		expect(DIVIDER_VERTICAL.count).toBe(15);
+	it('should have vertical config with 9 logos', () => {
+		expect(DIVIDER_VERTICAL.count).toBe(9);
 	});
 
 	it('should have vertical config with vertical layout', () => {
 		expect(DIVIDER_VERTICAL.vertical).toBe(true);
 	});
 
-	it('should have vertical config with tighter gap', () => {
-		expect(DIVIDER_VERTICAL.gap).toBe('gap-1');
+	it('should have vertical config with custom spacing', () => {
+		expect(DIVIDER_VERTICAL.spacing).toBe('0.5rem');
 	});
 
 	it('should have both configs using xs size for subtle appearance', () => {
