@@ -1,134 +1,17 @@
 <script lang="ts">
 	// Use centralized icon registry for consistent icons across Grove
-	import {
-		Check,
-		Clock,
-		Lock,
-		ArrowRight,
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown
-	} from '@autumnsgrove/groveengine/ui/icons';
+	import { Check, Clock, Lock, ArrowRight } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
-	// ============================================================================
-	// CONSTANTS
-	// ============================================================================
-
-	/** Annual billing discount (15% off) */
-	const YEARLY_DISCOUNT = 0.15;
-
-	/** Calculate yearly price with discount */
-	function calculateYearlyPrice(monthlyPrice: number): number {
-		return monthlyPrice * 12 * (1 - YEARLY_DISCOUNT);
-	}
-
-	// ============================================================================
-	// TYPES
-	// ============================================================================
-
-	type TierStatus = 'available' | 'coming_soon' | 'future';
-	type TierIconKey = 'seedling' | 'sapling' | 'oak' | 'evergreen';
-
-	interface Plan {
-		id: string;
-		name: string;
-		tagline: string;
-		description: string;
-		monthlyPrice: number;
-		features: string[];
-		status: TierStatus;
-		icon: TierIconKey;
-	}
-
-	// ============================================================================
-	// DATA
-	// ============================================================================
-
-	const tierIcons: Record<TierIconKey, typeof Sprout> = {
-		seedling: Sprout,
-		sapling: TreeDeciduous,
-		oak: Trees,
-		evergreen: Crown
-	};
-
-	const plans: Plan[] = [
-		{
-			id: 'seedling',
-			name: 'Seedling',
-			tagline: 'Just planted',
-			description: 'Perfect for getting started. A quiet corner to call your own.',
-			monthlyPrice: 8,
-			features: [
-				'50 posts',
-				'1 GB storage',
-				'3 curated themes',
-				'Meadow access',
-				'RSS feed',
-				'No ads ever'
-			],
-			status: 'available',
-			icon: 'seedling'
-		},
-		{
-			id: 'sapling',
-			name: 'Sapling',
-			tagline: 'Growing strong',
-			description: 'For blogs finding their voice. Room to stretch and grow.',
-			monthlyPrice: 12,
-			features: [
-				'250 posts',
-				'5 GB storage',
-				'10 themes',
-				'Email forwarding',
-				'Centennial eligible',
-				'Everything in Seedling'
-			],
-			status: 'coming_soon',
-			icon: 'sapling'
-		},
-		{
-			id: 'oak',
-			name: 'Oak',
-			tagline: 'Deep roots',
-			description: 'Full creative control. Your blog, your rules.',
-			monthlyPrice: 25,
-			features: [
-				'Unlimited posts',
-				'20 GB storage',
-				'Theme customizer',
-				'Bring your own domain',
-				'Centennial eligible',
-				'Priority support'
-			],
-			status: 'future',
-			icon: 'oak'
-		},
-		{
-			id: 'evergreen',
-			name: 'Evergreen',
-			tagline: 'Always flourishing',
-			description: 'The complete package. Everything Grove has to offer.',
-			monthlyPrice: 35,
-			features: [
-				'Unlimited everything',
-				'100 GB storage',
-				'Custom fonts',
-				'Domain included',
-				'Centennial eligible',
-				'8 hrs/mo dedicated support'
-			],
-			status: 'future',
-			icon: 'evergreen'
-		}
-	];
+	// Shared data and utilities
+	import { plans, tierIcons, type Plan, type TierStatus } from '$lib/data/plans';
+	import { formatPrice, formatYearlySavings, type BillingCycle } from '$lib/utils/pricing';
 
 	// ============================================================================
 	// STATE
 	// ============================================================================
 
-	let billingCycle = $state<'monthly' | 'yearly'>('monthly');
+	let billingCycle = $state<BillingCycle>('monthly');
 	// Auto-select first available tier (future-proof if tier availability changes)
 	let selectedPlan = $state<string | null>(
 		plans.find((p) => p.status === 'available')?.id ?? null
@@ -168,18 +51,12 @@
 	// PRICE HELPERS
 	// ============================================================================
 
-	function getPrice(plan: Plan): string | number {
-		if (billingCycle === 'yearly') {
-			const yearlyPrice = calculateYearlyPrice(plan.monthlyPrice);
-			return (yearlyPrice / 12).toFixed(2);
-		}
-		return plan.monthlyPrice;
+	function getPrice(plan: Plan): string {
+		return formatPrice(plan.monthlyPrice, billingCycle);
 	}
 
 	function getYearlySavings(plan: Plan): string {
-		const yearlyPrice = calculateYearlyPrice(plan.monthlyPrice);
-		const savings = plan.monthlyPrice * 12 - yearlyPrice;
-		return savings.toFixed(0);
+		return formatYearlySavings(plan.monthlyPrice);
 	}
 
 	// ============================================================================

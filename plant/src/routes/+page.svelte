@@ -26,12 +26,12 @@
 		ArrowRight,
 		Clock,
 		Lock,
-		// Pricing tier icons
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown
+		// Pricing tier icon (only need Sprout for Get Started button)
+		Sprout
 	} from '@autumnsgrove/groveengine/ui/icons';
+
+	// Shared data
+	import { tierIcons, getPlanPreviews } from '$lib/data/plans';
 	// Auth section state
 	let authExpanded = $state(false);
 
@@ -80,52 +80,8 @@
 		}
 	];
 
-	// Tier availability types
-	type TierStatus = 'available' | 'coming_soon' | 'future';
-
-	// Icon mapping for pricing tiers (keys match plan IDs)
-	const planIcons = {
-		seedling: Sprout,
-		sapling: TreeDeciduous,
-		oak: Trees,
-		evergreen: Crown
-	};
-
-	// Plan tier summaries for preview cards with availability status
-	const planPreviews = [
-		{
-			name: 'Seedling',
-			tagline: 'Just planted',
-			price: 8,
-			highlights: ['50 posts', '1 GB storage', '3 themes'],
-			icon: 'seedling' as keyof typeof planIcons,
-			status: 'available' as TierStatus
-		},
-		{
-			name: 'Sapling',
-			tagline: 'Growing strong',
-			price: 12,
-			highlights: ['250 posts', '5 GB storage', 'Email forwarding'],
-			icon: 'sapling' as keyof typeof planIcons,
-			status: 'coming_soon' as TierStatus
-		},
-		{
-			name: 'Oak',
-			tagline: 'Deep roots',
-			price: 25,
-			highlights: ['Unlimited posts', 'Custom domain', 'Theme customizer'],
-			icon: 'oak' as keyof typeof planIcons,
-			status: 'future' as TierStatus
-		},
-		{
-			name: 'Evergreen',
-			tagline: 'Always flourishing',
-			price: 35,
-			highlights: ['Everything', '100 GB storage', 'Domain included'],
-			icon: 'evergreen' as keyof typeof planIcons,
-			status: 'future' as TierStatus
-		}
-	];
+	// Get plan preview data from shared module
+	const planPreviews = getPlanPreviews();
 </script>
 
 <div class="space-y-12 animate-fade-in">
@@ -257,7 +213,7 @@
 
 		<div class="grid grid-cols-2 gap-4 stagger-children">
 			{#each planPreviews as plan}
-				{@const PlanIcon = planIcons[plan.icon]}
+				{@const PlanIcon = tierIcons[plan.id]}
 				{@const isAvailable = plan.status === 'available'}
 				{@const isComingSoon = plan.status === 'coming_soon'}
 				{@const isFuture = plan.status === 'future'}
@@ -320,7 +276,7 @@
 								</p>
 
 								<p class="text-2xl font-semibold text-foreground mb-3">
-									${plan.price}<span class="text-sm font-normal text-foreground-muted">/mo</span>
+									${plan.monthlyPrice}<span class="text-sm font-normal text-foreground-muted">/mo</span>
 								</p>
 
 								<ul class="text-xs text-foreground-muted space-y-1">

@@ -1,8 +1,9 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { isValidPlanId, isPlanAvailable, getPlanById } from '$lib/data/plans';
+import type { BillingCycle } from '$lib/utils/pricing';
 
-const VALID_PLANS = ['seedling', 'sapling', 'oak', 'evergreen'];
-const VALID_BILLING_CYCLES = ['monthly', 'yearly'];
+const VALID_BILLING_CYCLES: BillingCycle[] = ['monthly', 'yearly'];
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user, onboarding } = await parent();
@@ -35,11 +36,21 @@ export const actions: Actions = {
 		const billingCycle = formData.get('billingCycle')?.toString() || 'monthly';
 
 		// Validate plan
-		if (!plan || !VALID_PLANS.includes(plan)) {
-			return fail(400, { error: 'Please select a plan' });
+		if (!plan || !isValidPlanId(plan)) {
+			return fail(400, { error: 'Please select a valid plan' });
 		}
 
-		if (!VALID_BILLING_CYCLES.includes(billingCycle)) {
+		// Check plan availability
+		if (!isPlanAvailable(plan)) {
+			const selectedPlan = getPlanById(plan);
+			const statusMessage =
+				selectedPlan?.status === 'coming_soon'
+					? 'This plan is coming soon and not yet available.'
+					: 'This plan is not currently available.';
+			return fail(400, { error: statusMessage });
+		}
+
+		if (!VALID_BILLING_CYCLES.includes(billingCycle as BillingCycle)) {
 			return fail(400, { error: 'Invalid billing cycle' });
 		}
 
