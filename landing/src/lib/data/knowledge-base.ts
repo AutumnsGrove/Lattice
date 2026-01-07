@@ -281,6 +281,16 @@ export const specs: Doc[] = [
     lastUpdated: "2025-12-01",
     readingTime: 15,
   },
+  {
+    slug: "loam-spec",
+    title: "Loam — Name Protection",
+    description: "Username and domain validation system protecting the grove from harm",
+    excerpt:
+      "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.",
+    category: "specs",
+    lastUpdated: "2026-01-07",
+    readingTime: 12,
+  },
 ];
 
 // Help Center Articles
@@ -619,6 +629,17 @@ export const helpArticles: Doc[] = [
     category: "help",
     lastUpdated: "2026-01-06",
     readingTime: 6,
+  },
+  {
+    slug: "why-some-usernames-arent-available",
+    title: "Why Some Usernames Aren't Available",
+    description:
+      "How Grove protects the community through username validation",
+    excerpt:
+      "Every name passes through the same earth before taking root. Grove's username system quietly filters reserved terms, impersonation attempts, and harmful content. If your preferred username isn't available, here's why.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 4,
   },
 ];
 

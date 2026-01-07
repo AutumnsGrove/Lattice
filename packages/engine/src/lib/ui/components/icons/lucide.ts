@@ -47,6 +47,7 @@ import {
   Rss,
   Eye,
   Github,
+  Layers,
   // Nature/Growth (Grove themed)
   Sprout,
   Heart,
@@ -178,6 +179,7 @@ export const featureIcons = {
   rss: Rss,
   eye: Eye,
   download: Download,
+  layers: Layers,
 } as const;
 
 // ============================================================================
@@ -319,6 +321,7 @@ export {
   Rss,
   Eye,
   MessageCircle,
+  Layers,
   // States
   Loader2,
   AlertTriangle,

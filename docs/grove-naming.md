@@ -336,6 +336,17 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 
 ---
 
+## Loam
+**Name Protection** · *Internal service*
+
+Loam is the ideal soil. Rich, dark, perfectly balanced. Sand for drainage, silt for nutrients, clay for structure. Every gardener knows it. It's what you want beneath your roots, the foundation that decides what can grow.
+
+Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. You won't notice it working. That's the point. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.
+
+*What flourishes starts with what the soil allows.*
+
+---
+
 ## The Ecosystem
 
 | Name | Purpose | Domain |
@@ -368,6 +379,7 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 | **Waystone** | Help center | *(integrated)* |
 | **Reeds** | Comments system | *(integrated)* |
 | **Porch** | Front porch conversations | porch.grove.place |
+| **Loam** | Name protection | *(internal)* |
 
 ---
 
@@ -405,6 +417,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Waystone | GroveWaystone |
 | Reeds | GroveReeds |
 | Porch | GrovePorch |
+| Loam | GroveLoam |
 
 ---
 
@@ -416,5 +429,5 @@ The Grove is the place. These are the things you find there.
 
 ---
 
-*Last updated: January 6, 2026*
+*Last updated: January 7, 2026*
 *Status: Placeholder names, pending launch*

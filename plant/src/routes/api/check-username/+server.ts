@@ -2,73 +2,33 @@
  * Username Availability Check API
  *
  * Returns availability status and suggestions if taken.
- * Checks: reserved_usernames, existing tenants, in-progress onboarding
+ * Checks: blocklist, reserved_usernames, existing tenants, in-progress onboarding
+ *
+ * Rate limited to prevent blocklist enumeration attacks.
+ *
+ * @see docs/specs/loam-spec.md
  */
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import {
+	isUsernameBlocked,
+	getBlockedMessage,
+	VALIDATION_CONFIG,
+	type BlocklistReason,
+	VALID_BLOCKLIST_REASONS
+} from '@autumnsgrove/groveengine/config/domain-blocklist';
+import { containsOffensiveContent } from '@autumnsgrove/groveengine/config/offensive-blocklist';
 
-// Username validation regex: starts with letter, lowercase alphanumeric and single hyphens
-const USERNAME_REGEX = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
+/** Time window (in seconds) for in-progress registration checks */
+const IN_PROGRESS_WINDOW_SECONDS = 3600; // 1 hour
 
-// Reserved words that can't be usernames (in addition to database table)
-// This includes all Grove service subdomains and common infrastructure names
-const ADDITIONAL_RESERVED = [
-	// Infrastructure
-	'admin',
-	'api',
-	'www',
-	'mail',
-	'cdn',
-	'og',
-	'auth',
-	'login',
-	'status',
-	'scout',
-	'search',
-	// Grove brand
-	'grove',
-	'lattice',
-	'autumn',
-	// Common words
-	'create',
-	'new',
-	'support',
-	'help',
-	'test',
-	'demo',
-	'example',
-	// Grove services (public names)
-	'meadow',
-	'forage',
-	'foliage',
-	'heartwood',
-	'patina',
-	'trove',
-	'outpost',
-	'aria',
-	'music',
-	'plant',
-	'rings',
-	'ivy',
-	'amber',
-	'shade',
-	'trails',
-	'vineyard',
-	'bloom',
-	'mycelium',
-	'vista',
-	'wisp',
-	'terrarium',
-	'pantry',
-	'nook',
-	'clearing',
-	'waystone',
-	'reeds',
-	'mc',
-	'domains',
-	'porch'
-];
+/** Rate limit configuration */
+const RATE_LIMIT = {
+	maxRequests: 30, // Max requests per window
+	windowSeconds: 60, // 1 minute window
+	kvBufferSeconds: 60 // Extra TTL buffer to prevent edge cases
+};
 
 interface CheckResult {
 	available: boolean;
@@ -78,24 +38,84 @@ interface CheckResult {
 }
 
 /**
+ * Simple KV-based rate limiter
+ * Returns true if request should be allowed, false if rate limited
+ */
+async function checkRateLimit(
+	kv: KVNamespace | undefined,
+	clientIp: string
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+	if (!kv) {
+		// No KV available, allow the request (development mode)
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests, resetAt: 0 };
+	}
+
+	const key = `rate:username-check:${clientIp}`;
+	const now = Math.floor(Date.now() / 1000);
+
+	try {
+		const data = (await kv.get(key, 'json')) as { count: number; resetAt: number } | null;
+
+		if (!data || now >= data.resetAt) {
+			// New window
+			const newData = { count: 1, resetAt: now + RATE_LIMIT.windowSeconds };
+			await kv.put(key, JSON.stringify(newData), {
+				expirationTtl: RATE_LIMIT.windowSeconds + RATE_LIMIT.kvBufferSeconds
+			});
+			return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1, resetAt: newData.resetAt };
+		}
+
+		if (data.count >= RATE_LIMIT.maxRequests) {
+			// Rate limited
+			return { allowed: false, remaining: 0, resetAt: data.resetAt };
+		}
+
+		// Increment counter
+		const newData = { count: data.count + 1, resetAt: data.resetAt };
+		await kv.put(key, JSON.stringify(newData), {
+			expirationTtl: data.resetAt - now + RATE_LIMIT.kvBufferSeconds
+		});
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests - newData.count, resetAt: data.resetAt };
+	} catch (error) {
+		// Log error but allow the request to prevent blocking users on KV failures
+		console.error('[Rate Limit] KV error:', error);
+		return { allowed: true, remaining: RATE_LIMIT.maxRequests, resetAt: 0 };
+	}
+}
+
+/**
+ * Generate rate limit headers for responses
+ */
+function getRateLimitHeaders(rateLimit: { remaining: number; resetAt: number }): Record<string, string> {
+	return {
+		'X-RateLimit-Limit': String(RATE_LIMIT.maxRequests),
+		'X-RateLimit-Remaining': String(rateLimit.remaining),
+		'X-RateLimit-Reset': String(rateLimit.resetAt)
+	};
+}
+
+/**
  * Generate username suggestions when original is taken
  */
-function generateSuggestions(base: string): string[] {
+function generateSuggestions(base: string, reason: BlocklistReason | null): string[] {
+	// Don't suggest alternatives for offensive terms
+	if (reason === 'offensive') {
+		return [];
+	}
+
 	const year = new Date().getFullYear();
-	const suffixes = [
-		`-writes`,
-		`-blog`,
-		`${year}`,
-		`-place`,
-		`-garden`,
-		`-space`
-	];
+	const suffixes = ['-writes', '-blog', `${year}`, '-place', '-garden', '-space'];
 
 	return suffixes
 		.map((suffix) => {
 			const suggestion = base + suffix;
-			// Ensure suggestion is valid
-			if (USERNAME_REGEX.test(suggestion) && suggestion.length <= 30) {
+			// Ensure suggestion is valid and not also blocked
+			if (
+				VALIDATION_CONFIG.pattern.test(suggestion) &&
+				suggestion.length <= VALIDATION_CONFIG.maxLength &&
+				!isUsernameBlocked(suggestion) &&
+				!containsOffensiveContent(suggestion)
+			) {
 				return suggestion;
 			}
 			return null;
@@ -104,71 +124,108 @@ function generateSuggestions(base: string): string[] {
 		.slice(0, 3);
 }
 
-export const GET: RequestHandler = async ({ url, platform }) => {
+export const GET: RequestHandler = async ({ url, platform, getClientAddress }) => {
+	// Rate limiting check
+	const clientIp = getClientAddress();
+	const kv = platform?.env?.KV as KVNamespace | undefined;
+	const rateLimit = await checkRateLimit(kv, clientIp);
+	const rateLimitHeaders = getRateLimitHeaders(rateLimit);
+
+	// Helper to return JSON with rate limit headers
+	const respond = (data: CheckResult, status = 200, extraHeaders: Record<string, string> = {}) =>
+		json(data, { status, headers: { ...rateLimitHeaders, ...extraHeaders } });
+
+	if (!rateLimit.allowed) {
+		const retryAfter = rateLimit.resetAt - Math.floor(Date.now() / 1000);
+		return respond(
+			{ available: false, username: '', error: 'Too many requests. Please try again shortly.' },
+			429,
+			{ 'Retry-After': String(retryAfter) }
+		);
+	}
+
 	const username = url.searchParams.get('username')?.toLowerCase().trim();
 
 	if (!username) {
-		return json({ available: false, username: '', error: 'Username is required' } as CheckResult);
+		return respond({ available: false, username: '', error: 'Username is required' });
 	}
 
-	// Basic validation
-	if (username.length < 3) {
-		return json({
+	// Length validation
+	if (username.length < VALIDATION_CONFIG.minLength) {
+		return respond({
 			available: false,
 			username,
-			error: 'Username must be at least 3 characters'
-		} as CheckResult);
+			error: `Username must be at least ${VALIDATION_CONFIG.minLength} characters`
+		});
 	}
 
-	if (username.length > 30) {
-		return json({
+	if (username.length > VALIDATION_CONFIG.maxLength) {
+		return respond({
 			available: false,
 			username,
-			error: 'Username must be 30 characters or less'
-		} as CheckResult);
+			error: `Username must be ${VALIDATION_CONFIG.maxLength} characters or less`
+		});
 	}
 
-	if (!USERNAME_REGEX.test(username)) {
-		return json({
+	// Pattern validation
+	if (!VALIDATION_CONFIG.pattern.test(username)) {
+		return respond({
 			available: false,
 			username,
-			error: 'Username must start with a letter and contain only lowercase letters, numbers, and single hyphens'
-		} as CheckResult);
+			error: VALIDATION_CONFIG.patternDescription
+		});
 	}
 
-	// Check additional reserved words
-	if (ADDITIONAL_RESERVED.includes(username)) {
-		return json({
+	// Check offensive content first (no suggestions, generic error)
+	if (containsOffensiveContent(username)) {
+		return respond({
 			available: false,
 			username,
-			error: 'This username is reserved',
-			suggestions: generateSuggestions(username)
-		} as CheckResult);
+			error: 'This username is not available'
+			// Intentionally no suggestions for offensive terms
+		});
+	}
+
+	// Check blocklist (reserved/trademarked/system names)
+	const blockedReason = isUsernameBlocked(username);
+	if (blockedReason) {
+		return respond({
+			available: false,
+			username,
+			error: getBlockedMessage(blockedReason),
+			suggestions: generateSuggestions(username, blockedReason)
+		});
 	}
 
 	const db = platform?.env?.DB;
 	if (!db) {
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: 'Service temporarily unavailable'
-		} as CheckResult);
+		});
 	}
 
 	try {
-		// Check reserved_usernames table
+		// Check reserved_usernames table (for any additional entries)
 		const reserved = await db
-			.prepare('SELECT username FROM reserved_usernames WHERE username = ?')
+			.prepare('SELECT username, reason FROM reserved_usernames WHERE username = ?')
 			.bind(username)
-			.first();
+			.first<{ username: string; reason: string }>();
 
 		if (reserved) {
-			return json({
+			// Validate that database reason is a valid BlocklistReason, fallback to 'system'
+			const reason: BlocklistReason = VALID_BLOCKLIST_REASONS.includes(
+				reserved.reason as BlocklistReason
+			)
+				? (reserved.reason as BlocklistReason)
+				: 'system';
+			return respond({
 				available: false,
 				username,
-				error: 'This username is reserved',
-				suggestions: generateSuggestions(username)
-			} as CheckResult);
+				error: getBlockedMessage(reason),
+				suggestions: generateSuggestions(username, reason)
+			});
 		}
 
 		// Check existing tenants
@@ -178,44 +235,46 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			.first();
 
 		if (existingTenant) {
-			return json({
+			return respond({
 				available: false,
 				username,
 				error: 'This username is already taken',
-				suggestions: generateSuggestions(username)
-			} as CheckResult);
+				suggestions: generateSuggestions(username, null)
+			});
 		}
 
 		// Check in-progress onboarding (someone else might be signing up with this username)
+		// Use calculated timestamp for consistency across database engines
+		const cutoffTimestamp = Math.floor(Date.now() / 1000) - IN_PROGRESS_WINDOW_SECONDS;
 		const inProgress = await db
 			.prepare(
 				`SELECT username FROM user_onboarding
 				 WHERE username = ? AND tenant_id IS NULL
-				 AND created_at > unixepoch() - 3600` // Only check last hour
+				 AND created_at > ?`
 			)
-			.bind(username)
+			.bind(username, cutoffTimestamp)
 			.first();
 
 		if (inProgress) {
-			return json({
+			return respond({
 				available: false,
 				username,
 				error: 'This username is currently being registered',
-				suggestions: generateSuggestions(username)
-			} as CheckResult);
+				suggestions: generateSuggestions(username, null)
+			});
 		}
 
 		// Username is available!
-		return json({
+		return respond({
 			available: true,
 			username
-		} as CheckResult);
+		});
 	} catch (error) {
 		console.error('[Check Username] Error:', error);
-		return json({
+		return respond({
 			available: false,
 			username,
 			error: 'Unable to check availability'
-		} as CheckResult);
+		});
 	}
 };
