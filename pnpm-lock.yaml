@@ -121,6 +121,9 @@ importers:
       '@autumnsgrove/groveengine':
         specifier: workspace:*
         version: link:../packages/engine
+      '@lucide/lab':
+        specifier: ^0.1.2
+        version: 0.1.2
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -1100,6 +1103,9 @@ packages:
 
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
+  '@lucide/lab@0.1.2':
+    resolution: {integrity: sha512-VprF2BJa7ZuTGOhUd5cf8tHJXyL63wdxcGieAiVVoR9hO0YmPsnZO0AGqDiX2/br+/MC6n8BoJcmPilltOXIJA==}
 
   '@lucide/svelte@0.482.0':
     resolution: {integrity: sha512-n2ycHU9cNcleRDwwpEHBJ6pYzVhHIaL3a+9dQa8kns9hB2g05bY+v2p2KP8v0pZwtNhYTHk/F2o2uZ1bVtQGhw==}
@@ -3286,6 +3292,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@kurkle/color@0.3.4': {}
+
+  '@lucide/lab@0.1.2': {}
 
   '@lucide/svelte@0.482.0(svelte@5.46.1)':
     dependencies:

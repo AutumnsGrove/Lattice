@@ -13,6 +13,9 @@
  * ```
  */
 
+// Lab icons - experimental icons from @lucide/lab wrapped as Svelte components
+import BeeIcon from '$lib/components/icons/BeeIcon.svelte';
+
 import {
   // Navigation
   Home,
@@ -376,6 +379,8 @@ export const toolIcons = {
   servercog: ServerCog,          // Threshold - Edge
   solarpanel: SolarPanel,        // Firefly - Solarpunk aligned
   monitorcloud: MonitorCloud,    // Outpost - main icon
+  // Lab icons (experimental @lucide/lab)
+  bee: BeeIcon,                  // Swarm - agentic swarm mode
 } as const;
 
 // ============================================================================
