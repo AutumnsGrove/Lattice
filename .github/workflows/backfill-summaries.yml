@@ -1,0 +1,78 @@
+name: Backfill Release Summaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (show what would be generated without calling API)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for commit analysis
+
+      - name: Show versions to process
+        run: |
+          echo "📋 Versions in history.csv:"
+          tail -n +2 snapshots/history.csv | cut -d',' -f2 | grep '^v' | sort -V
+          echo ""
+          echo "📦 Existing summaries:"
+          ls -1 snapshots/summaries/ 2>/dev/null || echo "  (none)"
+          echo ""
+          echo "🔄 Will generate summaries for versions without existing files"
+
+      - name: Run backfill script
+        if: ${{ !inputs.dry_run }}
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          chmod +x ./scripts/backfill-summaries.sh
+          chmod +x ./scripts/generate-release-summary.sh
+          ./scripts/backfill-summaries.sh
+
+      - name: Sync to landing page
+        if: ${{ !inputs.dry_run }}
+        run: |
+          mkdir -p landing/static/data/summaries
+          cp -r snapshots/summaries/* landing/static/data/summaries/
+          echo ""
+          echo "📦 Synced summaries to landing/static/data/summaries/"
+          ls -1 landing/static/data/summaries/
+
+      - name: Commit and push
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add snapshots/summaries/ landing/static/data/summaries/
+
+          if git diff --staged --quiet; then
+            echo "No new summaries generated"
+            exit 0
+          fi
+
+          # Count new summaries
+          NEW_COUNT=$(git diff --staged --name-only | grep -c '\.json$' || echo "0")
+
+          git commit -m "docs: backfill $NEW_COUNT historical release summaries
+
+Generated AI summaries for versions that were missing them.
+This enriches the /journey page timeline with historical context.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+
+          git push origin main
+
+          echo ""
+          echo "✅ Pushed $NEW_COUNT new summaries to main"
