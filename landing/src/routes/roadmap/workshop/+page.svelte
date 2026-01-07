@@ -516,7 +516,7 @@
 					integration: 'Powers Bloom and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern',
 					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned' }
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
 				},
 				{
