@@ -97,7 +97,7 @@
 	<rect width="64" height="64" fill="url(#autumnMagicBg)" />
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
-	<!-- GROUNDED TREES - warm on left, transitioning to cool on right -->
+	<!-- MAIN TREES (ROW 1) - warm on left, transitioning to cool on right -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
 	<!-- Far left background (warmest, small) -->
@@ -160,6 +160,116 @@
 		stroke-linecap="round"
 		stroke-linejoin="round"
 		opacity="0.92"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
+
+	<!-- ═══════════════════════════════════════════════════════════════ -->
+	<!-- "GROVE" TEXT - centered in row 1, Lexend font -->
+	<!-- ═══════════════════════════════════════════════════════════════ -->
+
+	<text
+		x="32"
+		y="42"
+		text-anchor="middle"
+		font-family="Lexend, system-ui, sans-serif"
+		font-size="10"
+		font-weight="600"
+		fill="#fef3c7"
+		opacity="0.95"
+	>Grove</text>
+
+	<!-- ═══════════════════════════════════════════════════════════════ -->
+	<!-- FOREGROUND TREES (ROW 2) - 7 smaller trees along the bottom -->
+	<!-- ═══════════════════════════════════════════════════════════════ -->
+
+	<!-- Foreground 1 (far left, warm orange) -->
+	<g
+		transform="translate(-4, 42) scale(0.45)"
+		stroke="#f59e0b"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.55"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
+
+	<!-- Foreground 2 (orange-amber) -->
+	<g
+		transform="translate(6, 41) scale(0.48)"
+		stroke="#ea580c"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.52"
+	>
+		<path d={treeDeciduous.canopy} />
+		<path d={treeDeciduous.trunk} />
+	</g>
+
+	<!-- Foreground 3 (amber) -->
+	<g
+		transform="translate(16, 42) scale(0.44)"
+		stroke="#d97706"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.5"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
+
+	<!-- Foreground 4 (center, rust-purple transition) -->
+	<g
+		transform="translate(26, 41) scale(0.46)"
+		stroke="#9333ea"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.48"
+	>
+		<path d={treeDeciduous.canopy} />
+		<path d={treeDeciduous.trunk} />
+	</g>
+
+	<!-- Foreground 5 (purple) -->
+	<g
+		transform="translate(36, 42) scale(0.45)"
+		stroke="#8b5cf6"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.5"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
+
+	<!-- Foreground 6 (violet-indigo) -->
+	<g
+		transform="translate(46, 41) scale(0.47)"
+		stroke="#7c3aed"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.52"
+	>
+		<path d={treeDeciduous.canopy} />
+		<path d={treeDeciduous.trunk} />
+	</g>
+
+	<!-- Foreground 7 (far right, indigo) -->
+	<g
+		transform="translate(54, 42) scale(0.44)"
+		stroke="#6366f1"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.55"
 	>
 		<path d={treePine.canopy} />
 		<path d={treePine.trunk} />

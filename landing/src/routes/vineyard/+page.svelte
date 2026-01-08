@@ -79,6 +79,8 @@
 		LogoAutumnSparkle,
 		LogoFirstFrost,
 		LogoAutumnMagic,
+		// The Grove Mark (v10)
+		LogoGroveMark,
 		// The artifact 😂
 		LogoArtifact
 	} from '$lib/components/logo-concepts';
@@ -1028,6 +1030,37 @@
 								{ name: 'Frost', class: 'bg-gradient-to-b from-slate-100 via-blue-50 to-slate-100' }
 							]}
 						/>
+					</div>
+
+					<!-- THE GROVE MARK (v10) - The Official Circular Mark -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 border-2 border-amber-500/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-2xl">⭕</span>
+							<h3 class="text-xl font-bold text-white">The Grove Mark (v10)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-purple-400 text-white font-medium">official</span>
+						</div>
+						<p class="text-sm text-slate-300 mb-6">
+							The circular mark. Night mode aesthetic with warm-to-cool trees and "Grove" in a glass pill.<br/>
+							<em class="text-xs text-slate-400">"A window into the grove."</em>
+						</p>
+						<div class="flex items-center justify-center gap-8 p-6">
+							<div class="text-center">
+								<LogoGroveMark class="w-24 h-24" />
+								<span class="text-xs text-slate-400 block mt-2">96px</span>
+							</div>
+							<div class="text-center">
+								<LogoGroveMark class="w-16 h-16" />
+								<span class="text-xs text-slate-400 block mt-2">64px</span>
+							</div>
+							<div class="text-center">
+								<LogoGroveMark class="w-12 h-12" />
+								<span class="text-xs text-slate-400 block mt-2">48px</span>
+							</div>
+							<div class="text-center">
+								<LogoGroveMark class="w-8 h-8" />
+								<span class="text-xs text-slate-400 block mt-2">32px</span>
+							</div>
+						</div>
 					</div>
 
 					<!-- The Artifact (Historical Easter Egg) -->
