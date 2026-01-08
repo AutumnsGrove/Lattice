@@ -173,6 +173,8 @@ import {
   CloudCog as MonitorCloud,
   ShoppingBasket,
   ScanQrCode,
+  SendToBack,
+  Regex,
 } from 'lucide-svelte';
 
 // ============================================================================
@@ -328,10 +330,11 @@ export const toolIcons = {
   stamp: Stamp,
   // Creative/Composition (Weave)
   splinepointer: SplinePointer,  // Weave - main icon
-  wind: Wind,                    // Breeze - animation mode
+  'send-to-back': SendToBack,    // Breeze - animation mode
   waves: Waves,                  // (legacy Sway reference)
   waypoints: Waypoints,          // Trace - diagram mode
   route: Route,                  // Thread - connections
+  regex: Regex,                  // Patterns - design system
   // Subicons for workshop features
   layoutlist: LayoutList,        // Lattice - Vines
   origami: Origami,              // Songbird - Canary

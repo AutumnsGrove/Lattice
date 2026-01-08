@@ -181,7 +181,7 @@
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
 					subComponents: [
-						{ name: 'Breeze', icon: 'wind', description: 'Animation mode' },
+						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
 						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
 						{ name: 'Thread', icon: 'route', description: 'Connections' }
 					]
@@ -558,7 +558,7 @@
 		{ id: categoryIds[2], text: 'Content & Community', icon: 'users' },
 		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'pickaxe' },
 		{ id: categoryIds[4], text: 'Operations', icon: 'binoculars' },
-		{ id: categoryIds[5], text: 'Patterns', icon: 'triangle' }
+		{ id: categoryIds[5], text: 'Patterns', icon: 'regex' }
 	];
 
 	// Helper to generate tool ID for navigation
