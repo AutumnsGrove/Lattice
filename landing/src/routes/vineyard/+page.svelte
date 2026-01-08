@@ -68,6 +68,13 @@
 		// The Badge Collection (v7)
 		LogoGroveBadge,
 		LogoGroveCircle,
+		// Seasonal Scenes (v8)
+		LogoDawnForest,
+		LogoTwilightGrove,
+		LogoStormForest,
+		LogoSpringBloom,
+		LogoHarvestGrove,
+		LogoEnchantedForest,
 		// The artifact 😂
 		LogoArtifact
 	} from '$lib/components/logo-concepts';
@@ -220,6 +227,16 @@
 		{ component: LogoStarlightPines, name: 'Starlight Pines', props: {} },
 		{ component: LogoShelter, name: 'The Shelter', props: {} },
 		{ component: LogoWinterGrove, name: 'Winter Grove', props: {} }
+	];
+
+	// Seasonal Scenes (v8) - the grove through times and moods
+	const seasonalScenes = [
+		{ component: LogoDawnForest, name: 'Dawn Forest', props: {} },
+		{ component: LogoTwilightGrove, name: 'Twilight Grove', props: {} },
+		{ component: LogoStormForest, name: 'Storm Forest', props: {} },
+		{ component: LogoSpringBloom, name: 'Spring Bloom', props: {} },
+		{ component: LogoHarvestGrove, name: 'Harvest Grove', props: {} },
+		{ component: LogoEnchantedForest, name: 'Enchanted Forest', props: {} }
 	];
 
 	// Selected logo for larger preview
@@ -950,6 +967,32 @@
 								</div>
 							</div>
 						</div>
+					</div>
+
+					<!-- SEASONAL SCENES (v8) - The Grove Through Times and Moods -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-rose-100 via-amber-50 to-indigo-100 dark:from-rose-950/40 dark:via-amber-950/30 dark:to-indigo-950/40 border-2 border-rose-400/50 dark:border-rose-600/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-2xl">🌅</span>
+							<h3 class="text-xl font-bold text-foreground">Seasonal Scenes (v8)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-rose-400 via-amber-400 to-indigo-400 text-white font-medium">moods</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-6">
+							The grove through times and moods. Dawn, twilight, storms, spring bloom, harvest, and enchanted nights.<br/>
+							<em class="text-xs text-foreground-faint">"Every forest has its seasons. Every grove has its light."</em>
+						</p>
+						<LogoGrid
+							logos={seasonalScenes}
+							initialSize={80}
+							color={greens.grove}
+							backgrounds={[
+								{ name: 'Dawn', class: 'bg-gradient-to-b from-rose-200 via-orange-100 to-amber-50' },
+								{ name: 'Twilight', class: 'bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900' },
+								{ name: 'Storm', class: 'bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900' },
+								{ name: 'Spring', class: 'bg-gradient-to-b from-pink-100 via-rose-50 to-white' },
+								{ name: 'Autumn', class: 'bg-gradient-to-b from-amber-100 via-orange-50 to-amber-50' },
+								{ name: 'Night', class: 'bg-gradient-to-b from-indigo-950 via-purple-950 to-slate-950' }
+							]}
+						/>
 					</div>
 
 					<!-- The Artifact (Historical Easter Egg) -->

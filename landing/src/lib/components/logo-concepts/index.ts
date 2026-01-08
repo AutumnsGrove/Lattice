@@ -97,6 +97,14 @@ export { default as LogoMegaForest } from "./LogoMegaForest.svelte";
 export { default as LogoGroveBadge } from "./LogoGroveBadge.svelte";
 export { default as LogoGroveCircle } from "./LogoGroveCircle.svelte";
 
+// Seasonal Scenes (v8) - the grove through times and moods
+export { default as LogoDawnForest } from "./LogoDawnForest.svelte";
+export { default as LogoTwilightGrove } from "./LogoTwilightGrove.svelte";
+export { default as LogoStormForest } from "./LogoStormForest.svelte";
+export { default as LogoSpringBloom } from "./LogoSpringBloom.svelte";
+export { default as LogoHarvestGrove } from "./LogoHarvestGrove.svelte";
+export { default as LogoEnchantedForest } from "./LogoEnchantedForest.svelte";
+
 // Re-export Tabler's Linktree icon as a historical artifact 😂
 // "The logo that started the journey"
 export { IconBrandLinktree as LogoArtifact } from "@tabler/icons-svelte";
