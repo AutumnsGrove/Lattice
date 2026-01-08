@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   tag-and-snapshot:
+    if: github.event.inputs.backfill_summaries != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -182,10 +183,7 @@ jobs:
           fi
 
           NEW_COUNT=$(git diff --staged --name-only | grep -c '\.json$' || echo "0")
-          git commit -m "docs: backfill $NEW_COUNT historical release summaries
-
-Generated AI summaries for versions that were missing them.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+          git commit -m "docs: backfill $NEW_COUNT historical release summaries"
           git push origin main
-          echo "✅ Pushed $NEW_COUNT new summaries"
+          echo "Pushed $NEW_COUNT new summaries to main"
+
