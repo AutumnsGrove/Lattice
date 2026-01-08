@@ -1,18 +1,7 @@
 name: Backfill Release Summaries
-# Generates AI summaries for historical versions
 
 on:
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Dry run - just show versions without generating'
-        required: false
-        default: false
-        type: boolean
-  # Temporary: trigger once on push to register the workflow
-  push:
-    paths:
-      - '.github/workflows/backfill-summaries.yml'
 
 permissions:
   contents: write
@@ -24,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for commit analysis
+          fetch-depth: 0
 
       - name: Show versions to process
         run: |
@@ -37,7 +26,6 @@ jobs:
           echo "🔄 Will generate summaries for versions without existing files"
 
       - name: Run backfill script
-        if: ${{ !inputs.dry_run }}
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
@@ -46,7 +34,6 @@ jobs:
           ./scripts/backfill-summaries.sh
 
       - name: Sync to landing page
-        if: ${{ !inputs.dry_run }}
         run: |
           mkdir -p landing/static/data/summaries
           cp -r snapshots/summaries/* landing/static/data/summaries/
@@ -55,7 +42,6 @@ jobs:
           ls -1 landing/static/data/summaries/
 
       - name: Commit and push
-        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -67,7 +53,6 @@ jobs:
             exit 0
           fi
 
-          # Count new summaries
           NEW_COUNT=$(git diff --staged --name-only | grep -c '\.json$' || echo "0")
 
           git commit -m "docs: backfill $NEW_COUNT historical release summaries
