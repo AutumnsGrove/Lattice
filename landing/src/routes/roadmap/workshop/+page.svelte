@@ -550,15 +550,21 @@
 	// Generate category IDs for TOC navigation
 	const categoryIds = categories.map(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
 
-	// TOC items for floating navigation (icon-only on desktop, list on mobile)
+	// TOC items for floating navigation
+	// Icons must exist in toolIcons (icons.ts) - using valid icons for each category
 	const tocItems = [
 		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'codesandbox' },
-		{ id: categoryIds[1], text: 'Platform Services', icon: 'server' },
+		{ id: categoryIds[1], text: 'Platform Services', icon: 'circuitboard' },
 		{ id: categoryIds[2], text: 'Content & Community', icon: 'users' },
-		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'tool' },
-		{ id: categoryIds[4], text: 'Operations', icon: 'cog' },
+		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'pickaxe' },
+		{ id: categoryIds[4], text: 'Operations', icon: 'binoculars' },
 		{ id: categoryIds[5], text: 'Patterns', icon: 'triangle' }
 	];
+
+	// Helper to generate tool ID for navigation
+	function getToolId(toolName: string): string {
+		return `tool-${toolName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+	}
 </script>
 
 <SEO
@@ -594,11 +600,10 @@
 		</div>
 	</section>
 
-	<!-- Floating TOC Icon Navigation with Sub-Components -->
+	<!-- Floating TOC Icon Navigation with Tools -->
 	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
 		{#each tocItems as item, itemIndex}
 			{@const categoryTools = categories[itemIndex]?.tools ?? []}
-			{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
 			{@const ItemIcon = getToolIcon(item.icon)}
 			<div class="relative group">
 				<a
@@ -610,18 +615,18 @@
 					<ItemIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
 				</a>
 
-				<!-- Sub-components revealed on hover -->
-				{#if allSubComponents.length > 0}
-					<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2">
-						{#each allSubComponents as sub}
-							{@const SubIcon = getToolIcon(sub.icon)}
+				<!-- Tools revealed on hover -->
+				{#if categoryTools.length > 0}
+					<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2 flex-wrap justify-end max-w-xs">
+						{#each categoryTools as tool}
+							{@const ToolIconComponent = getToolIcon(tool.icon)}
 							<a
-								href={sub.href ?? '#'}
+								href="#{getToolId(tool.name)}"
 								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
-								title={sub.name}
+								title={tool.tagline}
 							>
-								<SubIcon class="w-3.5 h-3.5" />
-								<span class="text-xs font-medium">{sub.name}</span>
+								<ToolIconComponent class="w-3.5 h-3.5" />
+								<span class="text-xs font-medium">{tool.name}</span>
 							</a>
 						{/each}
 					</div>
@@ -630,8 +635,8 @@
 		{/each}
 	</nav>
 
-	<!-- Mobile TOC Button & Dropdown with Sub-Components -->
-	<div class="lg:hidden fixed bottom-6 right-6 z-50">
+	<!-- Floating TOC Button & Dropdown with Tools (visible on all screen sizes) -->
+	<div class="fixed bottom-6 right-6 z-50">
 		<button
 			type="button"
 			onclick={() => isMobileTocOpen = !isMobileTocOpen}
@@ -657,7 +662,6 @@
 				<div class="py-2">
 					{#each tocItems as item, itemIndex}
 						{@const categoryTools = categories[itemIndex]?.tools ?? []}
-						{@const allSubComponents = categoryTools.flatMap(t => t.subComponents ?? [])}
 						{@const ItemIcon = getToolIcon(item.icon)}
 						<div class="mb-2">
 							<a
@@ -669,18 +673,18 @@
 								<span class="font-medium">{item.text}</span>
 							</a>
 
-							<!-- Sub-components for this category -->
-							{#if allSubComponents.length > 0}
+							<!-- Tools for this category -->
+							{#if categoryTools.length > 0}
 								<div class="ml-8 mt-1 space-y-1">
-									{#each allSubComponents as sub}
-										{@const SubIcon = getToolIcon(sub.icon)}
+									{#each categoryTools as tool}
+										{@const ToolIconComponent = getToolIcon(tool.icon)}
 										<a
-											href={sub.href ?? '#'}
+											href="#{getToolId(tool.name)}"
 											onclick={() => isMobileTocOpen = false}
 											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
 										>
-											<SubIcon class="w-4 h-4 text-amber-400" />
-											<span>{sub.name}</span>
+											<ToolIconComponent class="w-4 h-4 text-amber-400" />
+											<span>{tool.name}</span>
 										</a>
 									{/each}
 								</div>
@@ -709,7 +713,7 @@
 							{@const badge = getStatusBadge(tool.status)}
 							{@const cardClass = getCardClass(category.name)}
 							{@const ToolIcon = getToolIcon(tool.icon)}
-							<article class={cardClass}>
+							<article id={getToolId(tool.name)} class={cardClass}>
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
