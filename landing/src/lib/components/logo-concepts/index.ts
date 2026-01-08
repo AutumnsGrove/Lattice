@@ -105,6 +105,12 @@ export { default as LogoSpringBloom } from "./LogoSpringBloom.svelte";
 export { default as LogoHarvestGrove } from "./LogoHarvestGrove.svelte";
 export { default as LogoEnchantedForest } from "./LogoEnchantedForest.svelte";
 
+// Autumn Sparkle Collection (v9) - autumn trees with floating sparkles
+// "Grounded trees, floating magic"
+export { default as LogoAutumnSparkle } from "./LogoAutumnSparkle.svelte";
+export { default as LogoFirstFrost } from "./LogoFirstFrost.svelte";
+export { default as LogoAutumnMagic } from "./LogoAutumnMagic.svelte";
+
 // Re-export Tabler's Linktree icon as a historical artifact 😂
 // "The logo that started the journey"
 export { IconBrandLinktree as LogoArtifact } from "@tabler/icons-svelte";

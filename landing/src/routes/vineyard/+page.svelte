@@ -75,6 +75,10 @@
 		LogoSpringBloom,
 		LogoHarvestGrove,
 		LogoEnchantedForest,
+		// Autumn Sparkle Collection (v9)
+		LogoAutumnSparkle,
+		LogoFirstFrost,
+		LogoAutumnMagic,
 		// The artifact 😂
 		LogoArtifact
 	} from '$lib/components/logo-concepts';
@@ -237,6 +241,13 @@
 		{ component: LogoSpringBloom, name: 'Spring Bloom', props: {} },
 		{ component: LogoHarvestGrove, name: 'Harvest Grove', props: {} },
 		{ component: LogoEnchantedForest, name: 'Enchanted Forest', props: {} }
+	];
+
+	// Autumn Sparkle Collection (v9) - grounded autumn trees with floating sparkles
+	const autumnSparkles = [
+		{ component: LogoAutumnSparkle, name: 'Autumn Sparkle', props: {} },
+		{ component: LogoFirstFrost, name: 'First Frost', props: {} },
+		{ component: LogoAutumnMagic, name: 'Autumn Magic', props: {} }
 	];
 
 	// Selected logo for larger preview
@@ -991,6 +1002,30 @@
 								{ name: 'Spring', class: 'bg-gradient-to-b from-pink-100 via-rose-50 to-white' },
 								{ name: 'Autumn', class: 'bg-gradient-to-b from-amber-100 via-orange-50 to-amber-50' },
 								{ name: 'Night', class: 'bg-gradient-to-b from-indigo-950 via-purple-950 to-slate-950' }
+							]}
+						/>
+					</div>
+
+					<!-- AUTUMN SPARKLE COLLECTION (v9) - Grounded trees, floating magic -->
+					<div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-amber-100 via-purple-50 to-indigo-100 dark:from-amber-950/40 dark:via-purple-950/30 dark:to-indigo-950/40 border-2 border-amber-500/50 dark:border-purple-600/50">
+						<div class="flex items-center gap-2 mb-4">
+							<span class="text-2xl">✨</span>
+							<h3 class="text-xl font-bold text-foreground">Autumn Sparkle Collection (v9)</h3>
+							<span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-purple-400 to-indigo-400 text-white font-medium">grounded</span>
+						</div>
+						<p class="text-sm text-foreground-muted mb-6">
+							Properly grounded autumn trees with floating sparkles. The magic drifts down like the first snow.<br/>
+							<em class="text-xs text-foreground-faint">"Grounded trees, floating magic."</em>
+						</p>
+						<LogoGrid
+							logos={autumnSparkles}
+							initialSize={80}
+							color={autumn.amber}
+							backgrounds={[
+								{ name: 'Warm', class: 'bg-gradient-to-b from-amber-100 via-orange-50 to-amber-50' },
+								{ name: 'Twilight', class: 'bg-gradient-to-b from-amber-200 via-purple-100 to-indigo-200' },
+								{ name: 'Night', class: 'bg-gradient-to-b from-indigo-950 via-purple-950 to-slate-950' },
+								{ name: 'Frost', class: 'bg-gradient-to-b from-slate-100 via-blue-50 to-slate-100' }
 							]}
 						/>
 					</div>
