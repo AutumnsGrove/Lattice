@@ -7,13 +7,10 @@
     "totalCommits": 24,
     "features": 10,
     "fixes": 11,
-    "refactoring": 0
-0,
+    "refactoring": 0,
     "docs": 3,
-    "tests": 0
-0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [

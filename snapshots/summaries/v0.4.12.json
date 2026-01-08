@@ -5,16 +5,12 @@
   "summary": "This release focuses on polishing Grove's stability and security behind the scenes. We've tackled a pesky toolbar freeze and bolstered the security of your data with enhanced protections for form submissions. It's all about making your blogging experience even more reliable and secure.\n",
   "stats": {
     "totalCommits": 4,
-    "features": 0
-0,
+    "features": 0,
     "fixes": 2,
-    "refactoring": 0
-0,
+    "refactoring": 0,
     "docs": 1,
-    "tests": 0
-0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [],

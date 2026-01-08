@@ -5,16 +5,12 @@
   "summary": "This release focuses on making Grove more accessible and reliable for everyone. We've resolved some technical hurdles to ensure smoother installations directly from GitHub, and we've updated our documentation to reflect the exciting split of our UI components into their own dedicated project. Think of this as a solid foundation update that paves the way for cleaner development and easier setup for our growing community.\n",
   "stats": {
     "totalCommits": 6,
-    "features": 0
-0,
+    "features": 0,
     "fixes": 2,
-    "refactoring": 0
-0,
+    "refactoring": 0,
     "docs": 2,
-    "tests": 0
-0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [],

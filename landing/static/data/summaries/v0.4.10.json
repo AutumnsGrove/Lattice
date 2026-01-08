@@ -5,17 +5,12 @@
   "summary": "This release strengthens Grove's security and performance to better protect your content and community. We've added an extra layer of security to keep your data safe and streamlined a key process to help your blogs run even faster. It's all about making your platform more reliable and robust behind the scenes.\n",
   "stats": {
     "totalCommits": 1,
-    "features": 0
-0,
+    "features": 0,
     "fixes": 1,
-    "refactoring": 0
-0,
-    "docs": 0
-0,
-    "tests": 0
-0,
+    "refactoring": 0,
+    "docs": 0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [],

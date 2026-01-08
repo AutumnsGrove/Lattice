@@ -5,15 +5,12 @@
   "summary": "This release brings important improvements to Grove's stability and developer experience, especially for deployments on Cloudflare. We've resolved several deployment and compatibility issues, enhanced our documentation to help you get started faster, and polished the admin panel for a smoother experience on mobile devices. It's all about making Grove more reliable and easier to work with, wherever you choose to run it.\n",
   "stats": {
     "totalCommits": 15,
-    "features": 0
-0,
+    "features": 0,
     "fixes": 9,
     "refactoring": 1,
     "docs": 2,
-    "tests": 0
-0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [],

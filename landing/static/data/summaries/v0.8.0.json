@@ -8,12 +8,9 @@
     "features": 12,
     "fixes": 7,
     "refactoring": 3,
-    "docs": 0
-0,
-    "tests": 0
-0,
+    "docs": 0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [

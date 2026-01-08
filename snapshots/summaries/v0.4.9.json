@@ -5,16 +5,12 @@
   "summary": "This release focuses on polishing Grove's core writing experience, with particular attention to improving the Markdown editor for a smoother and more reliable drafting process. We've also made important security enhancements under the hood to keep your content safe. While it's primarily a maintenance update, these fixes pave the way for some exciting new features we're building for you next.\n",
   "stats": {
     "totalCommits": 8,
-    "features": 0
-0,
+    "features": 0,
     "fixes": 2,
-    "refactoring": 0
-0,
+    "refactoring": 0,
     "docs": 1,
-    "tests": 0
-0,
+    "tests": 0,
     "performance": 0
-0
   },
   "highlights": {
     "features": [],
