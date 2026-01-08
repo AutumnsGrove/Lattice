@@ -225,7 +225,7 @@
 					tagline: 'Front Porch Conversations',
 					description: 'A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.',
 					status: 'planned',
-					icon: 'lifebuoy',
+					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
 					integration: 'Support and conversation for all Grove users',
 					spec: '/knowledge/specs/porch-spec'
@@ -430,7 +430,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'brickwallshield',
+					icon: 'blinds',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
 					subComponents: [
@@ -553,11 +553,11 @@
 	// TOC items for floating navigation
 	// Icons must exist in toolIcons (icons.ts) - using valid icons for each category
 	const tocItems = [
-		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'codesandbox' },
+		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'pyramid' },
 		{ id: categoryIds[1], text: 'Platform Services', icon: 'circuitboard' },
-		{ id: categoryIds[2], text: 'Content & Community', icon: 'users' },
-		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'pickaxe' },
-		{ id: categoryIds[4], text: 'Operations', icon: 'binoculars' },
+		{ id: categoryIds[2], text: 'Content & Community', icon: 'id-card-lanyard' },
+		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'toolbox' },
+		{ id: categoryIds[4], text: 'Operations', icon: 'dock' },
 		{ id: categoryIds[5], text: 'Patterns', icon: 'regex' }
 	];
 
