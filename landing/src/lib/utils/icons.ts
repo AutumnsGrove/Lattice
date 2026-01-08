@@ -179,7 +179,7 @@ import {
   Pyramid,
   Blinds,
   RockingChair,
-  Toolbox,
+  Wrench,
   Dock,
   IdCardLanyard,
 } from 'lucide-svelte';
@@ -404,7 +404,7 @@ export const toolIcons = {
   pyramid: Pyramid,              // Core Infrastructure TOC
   blinds: Blinds,                // Shade - AI protection
   'rocking-chair': RockingChair, // Porch - front porch conversations
-  toolbox: Toolbox,              // Standalone Tools TOC
+  toolbox: Wrench,               // Standalone Tools TOC
   dock: Dock,                    // Operations TOC
   'id-card-lanyard': IdCardLanyard, // Content & Community TOC
 } as const;
