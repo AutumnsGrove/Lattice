@@ -1,6 +1,4 @@
 import historyData from "../../../static/data/history.csv?raw";
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
 
 /**
  * CSV Schema (17 columns):
@@ -138,34 +136,30 @@ function parseCSV(csv: string): SnapshotData[] {
   return results;
 }
 
-async function loadSummaries(): Promise<Map<string, VersionSummary>> {
+// Load all summary JSON files at build time using Vite's import.meta.glob
+const summaryModules = import.meta.glob(
+  "../../../static/data/summaries/*.json",
+  {
+    eager: true,
+    import: "default",
+  },
+) as Record<string, VersionSummary>;
+
+function loadSummaries(): Map<string, VersionSummary> {
   const summaries = new Map<string, VersionSummary>();
 
-  try {
-    const summariesDir = join(process.cwd(), "static/data/summaries");
-    const files = await readdir(summariesDir);
-
-    for (const file of files) {
-      if (!file.endsWith(".json")) continue;
-
-      try {
-        const content = await readFile(join(summariesDir, file), "utf-8");
-        const summary = JSON.parse(content) as VersionSummary;
-        summaries.set(summary.version, summary);
-      } catch {
-        // Skip malformed files
-      }
+  for (const [path, summary] of Object.entries(summaryModules)) {
+    if (summary && summary.version) {
+      summaries.set(summary.version, summary);
     }
-  } catch {
-    // Summaries directory doesn't exist yet
   }
 
   return summaries;
 }
 
-export async function load() {
+export function load() {
   const snapshots = parseCSV(historyData);
-  const summaries = await loadSummaries();
+  const summaries = loadSummaries();
 
   // Handle empty data gracefully
   if (snapshots.length === 0) {
