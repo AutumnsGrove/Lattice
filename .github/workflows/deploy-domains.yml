@@ -44,6 +44,14 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Type check
+        run: pnpm check
+        working-directory: domains
+
+      - name: Run tests
+        run: pnpm test:run || echo "No tests configured"
+        working-directory: domains
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

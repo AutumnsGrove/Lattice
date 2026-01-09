@@ -66,11 +66,14 @@ export function validateCSRF(request) {
         return false;
       }
 
-      // Check if origin matches host OR is a *.grove.place subdomain
-      const hostMatches = host && originUrl.host === host;
-      const isGroveDomain = originUrl.hostname.endsWith(".grove.place") || originUrl.hostname === "grove.place";
+      // STRICT: Require exact hostname match (same-origin)
+      // This prevents cross-tenant CSRF attacks where tenant1.grove.place
+      // could make requests to tenant2.grove.place
+      const hostUrl = host ? new URL(`https://${host}`) : null;
+      const isSameHost = hostUrl && originUrl.hostname === hostUrl.hostname;
 
-      if (!isLocalhost && !hostMatches && !isGroveDomain) {
+      // Only allow same-host or localhost
+      if (!isLocalhost && !isSameHost) {
         return false;
       }
     } catch {

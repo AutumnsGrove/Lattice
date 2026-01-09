@@ -112,7 +112,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     // Only enforce if Turnstile is configured (has secret key)
     if (secretKey) {
-      const isVerified = validateVerificationCookie(verificationCookie ?? undefined, secretKey);
+      const isVerified = await validateVerificationCookie(verificationCookie ?? undefined, secretKey);
 
       if (!isVerified) {
         // Redirect to verification page with return URL
@@ -228,24 +228,40 @@ export const handle: Handle = async ({ event, resolve }) => {
       );
 
       if (response.ok) {
-        const data = (await response.json()) as {
-          valid: boolean;
-          user?: {
-            id: string;
-            email: string;
-            name: string;
-            avatarUrl: string;
-            isAdmin: boolean;
-          };
-        };
+        const data = await response.json();
 
+        // Validate response shape
+        if (!data || typeof data !== 'object') {
+          console.error('[Auth] Invalid SessionDO response: expected object');
+          return;
+        }
+
+        if (typeof data.valid !== 'boolean') {
+          console.error('[Auth] Invalid SessionDO response: valid must be boolean');
+          return;
+        }
+
+        // Validate user object if present
         if (data.valid && data.user) {
+          const user = data.user;
+          if (
+            typeof user !== 'object' ||
+            typeof user.id !== 'string' ||
+            typeof user.email !== 'string' ||
+            typeof user.name !== 'string' ||
+            typeof user.avatarUrl !== 'string' ||
+            typeof user.isAdmin !== 'boolean'
+          ) {
+            console.error('[Auth] Invalid SessionDO response: user object has invalid fields');
+            return;
+          }
+
           event.locals.user = {
-            id: data.user.id,
-            email: data.user.email,
-            name: data.user.name,
-            picture: data.user.avatarUrl,
-            isAdmin: data.user.isAdmin,
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            picture: user.avatarUrl,
+            isAdmin: user.isAdmin,
           };
         }
       }
@@ -267,13 +283,26 @@ export const handle: Handle = async ({ event, resolve }) => {
         });
 
         if (userInfoResponse.ok) {
-          const userInfo = (await userInfoResponse.json()) as {
-            sub: string;
-            email: string;
-            name: string;
-            picture: string;
-            provider: string;
-          };
+          const userInfo = await userInfoResponse.json();
+
+          // Validate response shape
+          if (!userInfo || typeof userInfo !== 'object') {
+            console.error('[Auth] Invalid userinfo response: expected object');
+            return;
+          }
+
+          // Validate required fields
+          if (
+            typeof userInfo.sub !== 'string' ||
+            typeof userInfo.email !== 'string' ||
+            typeof userInfo.name !== 'string' ||
+            typeof userInfo.picture !== 'string' ||
+            typeof userInfo.provider !== 'string'
+          ) {
+            console.error('[Auth] Invalid userinfo response: missing or invalid required fields');
+            return;
+          }
+
           event.locals.user = {
             id: userInfo.sub,
             email: userInfo.email,

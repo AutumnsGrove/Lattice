@@ -1,6 +1,12 @@
 /**
  * Server-side logging utility with in-memory circular buffers
  * Supports real-time log streaming to admin console
+ *
+ * PII POLICY:
+ * NEVER pass personally identifiable information (PII) to logging functions.
+ * - DO NOT log: email addresses, names, IP addresses, payment details
+ * - DO log: user IDs, GroveAuth subs, anonymized identifiers
+ * - When debugging user issues, use user.id or userInfo.sub instead of email
  */
 
 /** Log severity levels */

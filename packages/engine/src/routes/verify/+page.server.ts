@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ cookies, platform, url }) => {
 
 	// Check if already verified
 	const existingCookie = cookies.get(TURNSTILE_COOKIE_NAME);
-	if (existingCookie && secretKey && validateVerificationCookie(existingCookie, secretKey)) {
+	if (existingCookie && secretKey && await validateVerificationCookie(existingCookie, secretKey)) {
 		// Already verified, redirect to intended destination or home
 		const returnTo = url.searchParams.get('return') || '/';
 		throw redirect(302, returnTo);

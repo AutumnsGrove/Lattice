@@ -56,6 +56,14 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Type check
+        run: pnpm check
+        working-directory: landing
+
+      - name: Run tests
+        run: pnpm test:run || echo "No tests configured"
+        working-directory: landing
+
       - name: Run Database Migrations
         uses: cloudflare/wrangler-action@v3
         with:

@@ -136,40 +136,52 @@
 
 <svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
-<img
-	{src}
-	{alt}
-	class="zoomable-image {className}"
-	class:zoomed={zoomLevel > 0}
-	class:dragging={isDragging}
-	style="transform: translate({panX}px, {panY}px) scale({scaleValue})"
+<button
+	class="zoomable-image-wrapper"
+	onclick={handleClick}
+	onkeydown={handleKeydown}
 	onmousedown={handleMouseDown}
 	ontouchstart={handleTouchStart}
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
-	onclick={handleClick}
-	onkeydown={handleKeydown}
-	tabindex="0"
-	role="button"
 	aria-label="Click to zoom image"
-/>
+>
+	<img
+		{src}
+		{alt}
+		class="zoomable-image {className}"
+		class:zoomed={zoomLevel > 0}
+		class:dragging={isDragging}
+		style="transform: translate({panX}px, {panY}px) scale({scaleValue})"
+	/>
+</button>
 
 <style>
-	.zoomable-image {
+	.zoomable-image-wrapper {
+		border: none;
+		background: none;
+		padding: 0;
+		margin: 0;
+		display: inline-block;
 		cursor: zoom-in;
+	}
+
+	.zoomable-image-wrapper:has(.zoomable-image.zoomed) {
+		cursor: grab;
+	}
+
+	.zoomable-image-wrapper:has(.zoomable-image.dragging) {
+		cursor: grabbing;
+	}
+
+	.zoomable-image {
+		display: block;
 		transition: transform 0.3s ease;
 		user-select: none;
 		-webkit-user-drag: none;
 	}
 
-	.zoomable-image.zoomed {
-		cursor: grab;
-	}
-
 	.zoomable-image.dragging {
-		cursor: grabbing;
 		transition: none;
 	}
 </style>

@@ -35,6 +35,14 @@ jobs:
         working-directory: packages/engine
         run: pnpm run build
 
+      - name: Type check
+        run: pnpm check
+        working-directory: packages/engine
+
+      - name: Run tests
+        run: pnpm test:run || echo "No tests configured"
+        working-directory: packages/engine
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

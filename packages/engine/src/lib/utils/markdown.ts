@@ -186,7 +186,10 @@ renderer.code = function (token: Tokens.Code | string): string {
   // Render markdown/md code blocks as formatted HTML (like GitHub)
   if (lang === "markdown" || lang === "md") {
     // Parse the markdown content and render it
-    const renderedContent = marked.parse(code, { async: false }) as string;
+    // SECURITY: Sanitize recursively-rendered markdown to prevent XSS
+    const renderedContent = sanitizeMarkdown(
+      marked.parse(code, { async: false }) as string,
+    );
     // Escape the raw markdown for the copy button
     const escapedCode = code
       .replace(/&/g, "&amp;")
@@ -306,6 +309,7 @@ export function processAnchorTags(html: string): string {
 
 /**
  * Parse markdown content and convert to HTML
+ * SECURITY: Now sanitizes output by default to prevent XSS
  */
 export function parseMarkdownContent(markdownContent: string): ParsedContent {
   const { data, content: markdown } = matter(markdownContent);
@@ -314,6 +318,10 @@ export function parseMarkdownContent(markdownContent: string): ParsedContent {
 
   // Process anchor tags in the HTML content
   htmlContent = processAnchorTags(htmlContent);
+
+  // SECURITY: Sanitize markdown-generated HTML to prevent XSS
+  // This protects blog posts and recipes from malicious content
+  htmlContent = sanitizeMarkdown(htmlContent);
 
   // Extract headers for table of contents
   const headers = extractHeaders(markdown);
@@ -389,9 +397,12 @@ export function processGutterContent(
 
         if (mdEntry) {
           const markdownContent = mdEntry[1];
-          const htmlContent = marked.parse(markdownContent, {
-            async: false,
-          }) as string;
+          // SECURITY: Sanitize gutter markdown content to prevent XSS
+          const htmlContent = sanitizeMarkdown(
+            marked.parse(markdownContent, {
+              async: false,
+            }) as string,
+          );
 
           return {
             ...baseItem,

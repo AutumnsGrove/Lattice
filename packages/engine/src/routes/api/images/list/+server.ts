@@ -41,13 +41,18 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     throw error(401, "Unauthorized");
   }
 
+  // Tenant check (CRITICAL for security)
+  if (!locals.tenantId) {
+    throw error(403, "Tenant context required");
+  }
+
   // Check for R2 binding
   if (!platform?.env?.IMAGES) {
     throw error(500, "R2 bucket not configured");
   }
 
   try {
-    const prefix = url.searchParams.get("prefix") || "";
+    const requestedPrefix = url.searchParams.get("prefix") || "";
     const cursor = url.searchParams.get("cursor") || undefined;
     const limit = parseInt(url.searchParams.get("limit") || "50", 10);
     const sortBy = url.searchParams.get("sortBy") || "date-desc";
@@ -57,6 +62,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     const tagSlug = url.searchParams.get("tag") || null;
     const category = url.searchParams.get("category") || null;
     const year = url.searchParams.get("year") || null;
+
+    // CRITICAL: Force tenant isolation - always scope to tenant's prefix
+    const tenantPrefix = `${locals.tenantId}/`;
+    const prefix = tenantPrefix + requestedPrefix;
 
     // List objects from R2
     const listResult = await platform.env.IMAGES.list({

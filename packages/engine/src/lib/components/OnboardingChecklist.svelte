@@ -32,6 +32,7 @@
 			<button
 				onclick={onDismiss}
 				class="text-foreground-subtle hover:text-foreground transition-colors"
+				aria-label="Dismiss getting started checklist"
 				title="Dismiss checklist"
 			>
 				<X size={16} />

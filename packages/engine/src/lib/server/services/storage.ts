@@ -105,12 +105,16 @@ export type StorageErrorCode =
 // Configuration
 // ============================================================================
 
-/** Default max file size: 50MB */
-const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024;
+/**
+ * Default max file size: 10MB
+ * This matches the image upload endpoint limit for consistency.
+ * Specific use cases (e.g., video uploads) can override this via maxFileSize option.
+ */
+const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 /** Storage configuration - can be customized per-upload */
 export interface StorageConfig {
-	/** Maximum file size in bytes (default: 50MB) */
+	/** Maximum file size in bytes (default: 10MB, can be overridden for specific use cases) */
 	maxFileSize?: number;
 	/** Additional allowed content types beyond the defaults */
 	additionalContentTypes?: string[];
@@ -362,14 +366,24 @@ export async function uploadFile(
 /**
  * Get a file from storage
  *
+ * IMPORTANT: The returned ReadableStream MUST be consumed or cancelled.
+ * Failing to consume the stream will leak resources and may cause memory issues.
+ * Always use the stream in a Response or explicitly cancel it.
+ *
  * @example
  * ```ts
  * const file = await storage.getFile(bucket, 'images/photo.jpg');
  * if (file) {
+ *   // ✅ CORRECT: Stream is consumed by Response
  *   return new Response(file.body, {
  *     headers: { 'Content-Type': file.contentType }
  *   });
  * }
+ *
+ * // ❌ INCORRECT: Stream is created but never consumed
+ * const file = await storage.getFile(bucket, 'images/photo.jpg');
+ * if (!file) return null;
+ * // Returning without using file.body leaks the stream!
  * ```
  */
 export async function getFile(bucket: R2Bucket, key: string): Promise<GetFileResult | null> {

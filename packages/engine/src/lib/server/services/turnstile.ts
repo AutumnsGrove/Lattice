@@ -104,30 +104,31 @@ export const TURNSTILE_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 /**
  * Create the verification cookie value (signed timestamp)
- * Simple format: timestamp:hash
+ * Format: timestamp:signature
+ * Uses HMAC-SHA256 for cryptographically secure signing
  */
-export function createVerificationCookie(secretKey: string): string {
+export async function createVerificationCookie(secretKey: string): Promise<string> {
 	const timestamp = Date.now().toString();
-	// Simple hash using the timestamp and a portion of the secret
-	const hash = simpleHash(timestamp + secretKey.slice(0, 16));
-	return `${timestamp}:${hash}`;
+	const signature = await signCookie(timestamp, secretKey);
+	return `${timestamp}:${signature}`;
 }
 
 /**
  * Validate a verification cookie
  * Returns true if valid and not expired
+ * Uses HMAC-SHA256 for cryptographically secure verification
  */
-export function validateVerificationCookie(
+export async function validateVerificationCookie(
 	cookie: string | undefined,
 	secretKey: string,
 	maxAgeMs: number = TURNSTILE_COOKIE_MAX_AGE * 1000
-): boolean {
+): Promise<boolean> {
 	if (!cookie) return false;
 
 	const parts = cookie.split(':');
 	if (parts.length !== 2) return false;
 
-	const [timestamp, hash] = parts;
+	const [timestamp, signature] = parts;
 	const timestampNum = parseInt(timestamp, 10);
 
 	if (isNaN(timestampNum)) return false;
@@ -135,23 +136,36 @@ export function validateVerificationCookie(
 	// Check expiration
 	if (Date.now() - timestampNum > maxAgeMs) return false;
 
-	// Verify hash
-	const expectedHash = simpleHash(timestamp + secretKey.slice(0, 16));
-	return hash === expectedHash;
+	// Verify signature
+	return await verifyCookie(timestamp, signature, secretKey);
 }
 
 /**
- * Simple hash function for cookie signing
- * Not cryptographically secure, but sufficient for cookie validation
+ * Sign a value using HMAC-SHA256 for secure cookie signing
+ * Uses Web Crypto API for cryptographically secure signing
  */
-function simpleHash(str: string): string {
-	let hash = 0;
-	for (let i = 0; i < str.length; i++) {
-		const char = str.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
-		hash = hash & hash; // Convert to 32bit integer
-	}
-	return Math.abs(hash).toString(36);
+async function signCookie(value: string, secret: string): Promise<string> {
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		'raw',
+		encoder.encode(secret),
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
+	const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(value));
+	return Array.from(new Uint8Array(signature))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+}
+
+/**
+ * Verify a signed cookie value using HMAC-SHA256
+ * Returns true if the signature matches
+ */
+async function verifyCookie(value: string, signature: string, secret: string): Promise<boolean> {
+	const expectedSignature = await signCookie(value, secret);
+	return signature === expectedSignature;
 }
 
 /**

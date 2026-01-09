@@ -2,8 +2,7 @@
  * Centralized sanitization utilities for XSS prevention
  *
  * Uses DOMPurify for client-side sanitization. On the server (SSR),
- * content is passed through unsanitized since it will be sanitized
- * when the page hydrates on the client.
+ * uses a regex-based fallback to strip dangerous tags and attributes.
  *
  * This approach avoids bundling jsdom (required by isomorphic-dompurify)
  * which doesn't work in Cloudflare Workers.
@@ -22,6 +21,80 @@ if (BROWSER) {
 }
 
 /**
+ * Server-safe sanitization fallback for SSR/Cloudflare Workers
+ * Uses regex-based approach since DOMPurify requires DOM
+ *
+ * SECURITY NOTE: This is a basic sanitizer for SSR. It strips:
+ * - <script>, <iframe>, <object>, <embed>, <link>, <style>
+ * - <form>, <input>, <button>, <base>, <meta>
+ * - Event handlers (onclick, onerror, etc.)
+ * - javascript: and data: protocol URLs
+ */
+function sanitizeServerSafe(html: string): string {
+  if (!html || typeof html !== "string") {
+    return "";
+  }
+
+  let sanitized = html;
+
+  // Strip script tags and their content
+  sanitized = sanitized.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
+
+  // Strip iframe tags
+  sanitized = sanitized.replace(
+    /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+    "",
+  );
+
+  // Strip other dangerous tags (with and without content)
+  const dangerousTags = [
+    "object",
+    "embed",
+    "link",
+    "style",
+    "form",
+    "button",
+    "base",
+    "meta",
+  ];
+  for (const tag of dangerousTags) {
+    // Tags with closing tag
+    const regex = new RegExp(
+      `<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`,
+      "gi",
+    );
+    sanitized = sanitized.replace(regex, "");
+    // Self-closing or unclosed tags
+    const selfClosing = new RegExp(`<${tag}\\b[^>]*\/?>`, "gi");
+    sanitized = sanitized.replace(selfClosing, "");
+  }
+
+  // Strip event handlers (on* attributes)
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, "");
+
+  // Strip javascript: protocol in href/src (with optional leading whitespace)
+  sanitized = sanitized.replace(
+    /href\s*=\s*["']\s*javascript:[^"']*["']/gi,
+    'href="#"',
+  );
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*javascript:[^"']*["']/gi, "");
+
+  // Strip data: protocol in href/src (except images, with optional leading whitespace)
+  sanitized = sanitized.replace(/href\s*=\s*["']\s*data:[^"']*["']/gi, 'href="#"');
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*data:(?!image\/)[^"']*["']/gi, "");
+
+  // Strip vbscript: and other dangerous protocols (with optional leading whitespace)
+  sanitized = sanitized.replace(/href\s*=\s*["']\s*vbscript:[^"']*["']/gi, 'href="#"');
+  sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
+
+  return sanitized;
+}
+
+/**
  * Sanitize HTML content to prevent XSS attacks
  * @param html - Raw HTML string to sanitize
  * @returns Sanitized HTML safe for rendering
@@ -31,9 +104,9 @@ export function sanitizeHTML(html: string): string {
     return "";
   }
 
-  // On server, pass through - will be sanitized on client hydration
+  // On server, use regex-based fallback sanitization
   if (!BROWSER || !DOMPurify) {
-    return html;
+    return sanitizeServerSafe(html);
   }
 
   const config: Config = {
@@ -83,9 +156,9 @@ export function sanitizeSVG(svg: string): string {
     return "";
   }
 
-  // On server, pass through - will be sanitized on client hydration
+  // On server, use regex-based fallback sanitization
   if (!BROWSER || !DOMPurify) {
-    return svg;
+    return sanitizeServerSafe(svg);
   }
 
   return DOMPurify.sanitize(svg, {
@@ -184,9 +257,9 @@ export function sanitizeMarkdown(markdownHTML: string): string {
     return "";
   }
 
-  // On server, pass through - will be sanitized on client hydration
+  // On server, use regex-based fallback sanitization
   if (!BROWSER || !DOMPurify) {
-    return markdownHTML;
+    return sanitizeServerSafe(markdownHTML);
   }
 
   // For markdown, we allow a broader set of tags but still sanitize

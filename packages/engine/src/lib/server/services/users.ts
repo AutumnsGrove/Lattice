@@ -60,7 +60,7 @@ interface GroveAuthUserInfo {
  * ```typescript
  * const user = await getUserByGroveAuthId(db, 'groveauth-user-id');
  * if (user) {
- *   console.log('User:', user.email);
+ *   console.log('User:', user.id);
  * }
  * ```
  */

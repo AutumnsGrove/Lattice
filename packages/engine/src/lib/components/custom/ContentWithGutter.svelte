@@ -429,12 +429,14 @@
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
 	/** @type {any} */
 	let DOMPurify = $state(null);
+	let isPurifyReady = $state(false);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
 	onMount(async () => {
 		if (browser) {
 			const module = await import('dompurify');
 			DOMPurify = module.default;
+			isPurifyReady = true;
 		}
 	});
 
@@ -466,7 +468,7 @@
 						'href', 'src', 'alt', 'title', 'target', 'rel',
 						// Styling and identification
 						'class', 'id', 'style',
-						// Data attributes for custom functionality
+						// ONLY allow specific safe data attributes
 						'data-anchor', 'data-language', 'data-line-numbers', 'data-code',
 						// Accessibility
 						'aria-label', 'aria-hidden', 'role',
@@ -479,7 +481,9 @@
 						// Tables
 						'colspan', 'rowspan', 'scope'
 					],
-					ALLOW_DATA_ATTR: true
+					// SECURITY FIX: Disable blanket data attributes to prevent attribute-based XSS
+					// We explicitly allow only safe data attributes in ALLOWED_ATTR above
+					ALLOW_DATA_ATTR: false
 			  })
 			: processedContent
 	);
@@ -557,7 +561,12 @@
 		{/if}
 
 		<div class="prose prose-lg dark:prose-invert max-w-none content-body" bind:this={contentBodyElement}>
-			{@html sanitizedContent}
+			{#if browser && !isPurifyReady}
+				<!-- Loading state: show placeholder while DOMPurify loads (prevents race condition) -->
+				<div style="opacity: 0.5;">Loading content...</div>
+			{:else}
+				{@html sanitizedContent}
+			{/if}
 		</div>
 
 		<!-- Overflow gutter items rendered inline -->

@@ -46,6 +46,7 @@
 	<div class="scout-search">
 		<Icons name="search" class="scout-search-icon" />
 		<textarea
+		aria-label="Search query"
 			bind:value
 			{placeholder}
 			disabled={disabled || loading}

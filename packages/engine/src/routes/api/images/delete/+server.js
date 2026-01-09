@@ -11,6 +11,11 @@ export async function DELETE({ request, platform, locals }) {
     throw error(401, "Unauthorized");
   }
 
+  // Tenant check (CRITICAL for security)
+  if (!locals.tenantId) {
+    throw error(403, "Tenant context required");
+  }
+
   // CSRF Protection: Validate origin header against host
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
@@ -62,6 +67,13 @@ export async function DELETE({ request, platform, locals }) {
     const existingObject = await platform.env.IMAGES.head(sanitizedKey);
     if (!existingObject) {
       throw error(404, "Image not found");
+    }
+
+    // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
+    const expectedPrefix = `${locals.tenantId}/`;
+    if (!sanitizedKey.startsWith(expectedPrefix)) {
+      console.warn(`Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`);
+      throw error(403, "Access denied");
     }
 
     // Delete from R2

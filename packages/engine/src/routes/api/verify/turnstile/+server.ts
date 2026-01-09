@@ -58,7 +58,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   // Create the verification cookie
-  const cookieValue = createVerificationCookie(secretKey);
+  const cookieValue = await createVerificationCookie(secretKey);
 
   // Build Set-Cookie header manually to ensure it's correct
   // Format: name=value; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place

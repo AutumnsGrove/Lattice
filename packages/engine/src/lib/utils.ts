@@ -6,4 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Type utility for components that need element ref
-export type WithElementRef<T> = T & { ref?: any };
+export type WithElementRef<T, E extends HTMLElement = HTMLElement> = T & {
+	ref?: E | null;
+};

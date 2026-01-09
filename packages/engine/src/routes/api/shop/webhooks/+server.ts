@@ -76,6 +76,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     }
 
     // Insert webhook event
+    // TODO(privacy): Implement 30-day TTL for webhook_events table
+    // TODO(privacy): Sanitize payloads before storage - remove customer PII (email, name, payment_method details beyond last4/brand)
     await platform.env.DB.prepare(
       `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
          VALUES (?, ?, ?, ?, ?, ?)`,

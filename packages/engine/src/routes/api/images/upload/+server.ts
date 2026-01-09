@@ -33,6 +33,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(401, "Unauthorized");
   }
 
+  // Tenant check (CRITICAL for security)
+  if (!locals.tenantId) {
+    throw error(403, "Tenant context required");
+  }
+
   // CSRF check
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
@@ -146,8 +151,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       filename = `${filename}-${timestamp}`;
     }
 
-    // Build the R2 key
-    const key = `${datePath}/${filename}`;
+    // Build the R2 key with tenant isolation
+    const key = `${locals.tenantId}/${datePath}/${filename}`;
 
     // Upload to R2 with cache headers and custom metadata
     const metadata: Record<string, string> = {};

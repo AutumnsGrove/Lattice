@@ -66,7 +66,8 @@ export type DatabaseErrorCode =
 	| 'CONSTRAINT_VIOLATION'
 	| 'TRANSACTION_FAILED'
 	| 'CONNECTION_ERROR'
-	| 'INVALID_QUERY';
+	| 'INVALID_QUERY'
+	| 'VALIDATION_ERROR';
 
 // ============================================================================
 // Utility Functions

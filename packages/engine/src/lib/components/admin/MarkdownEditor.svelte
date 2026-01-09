@@ -577,6 +577,7 @@
           {/each}
         </div>
         <textarea
+          aria-label="Markdown editor content"
           bind:this={textareaRef}
           bind:value={content}
           oninput={updateCursorPosition}

@@ -15,6 +15,12 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  getClientIP,
+  getEndpointLimit
+} from "$lib/server/rate-limits";
 
 /**
  * Generate a cryptographically secure random string for PKCE
@@ -42,7 +48,32 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+  // ============================================================================
+  // Rate Limiting (Threshold pattern)
+  // Protects against automated login attempts
+  // ============================================================================
+  const kv = platform?.env?.CACHE;
+  if (kv) {
+    const clientIp = getClientIP(request);
+    const limitConfig = getEndpointLimit('auth/login');
+    const rateLimitKey = buildRateLimitKey('auth/login', clientIp);
+
+    const { response: rateLimitResponse } = await checkRateLimit({
+      kv,
+      key: rateLimitKey,
+      limit: limitConfig.limit,
+      windowSeconds: limitConfig.windowSeconds,
+      namespace: 'auth-ratelimit'
+    });
+
+    // Return 429 if rate limited
+    if (rateLimitResponse) {
+      console.warn('[Auth Login] Rate limited:', { ip: clientIp });
+      return rateLimitResponse;
+    }
+  }
+
   const authBaseUrl =
     platform?.env?.GROVEAUTH_URL || "https://auth.grove.place";
   const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";

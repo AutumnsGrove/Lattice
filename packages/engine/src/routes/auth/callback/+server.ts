@@ -11,6 +11,12 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  getClientIP,
+  getEndpointLimit
+} from "$lib/server/rate-limits";
 
 // ============================================================================
 // Constants
@@ -127,7 +133,32 @@ function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+  // ============================================================================
+  // Rate Limiting (Threshold pattern)
+  // Protects against brute force attacks on auth callback
+  // ============================================================================
+  const kv = platform?.env?.CACHE;
+  if (kv) {
+    const clientIp = getClientIP(request);
+    const limitConfig = getEndpointLimit('auth/callback');
+    const rateLimitKey = buildRateLimitKey('auth/callback', clientIp);
+
+    const { response: rateLimitResponse } = await checkRateLimit({
+      kv,
+      key: rateLimitKey,
+      limit: limitConfig.limit,
+      windowSeconds: limitConfig.windowSeconds,
+      namespace: 'auth-ratelimit'
+    });
+
+    // Return 429 if rate limited
+    if (rateLimitResponse) {
+      console.warn('[Auth Callback] Rate limited:', { ip: clientIp });
+      return rateLimitResponse;
+    }
+  }
+
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const errorParam = url.searchParams.get("error");
@@ -197,13 +228,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.json() as ErrorResponse;
+      // Only log sensitive debugging info in development
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
-        error: errorData,
-        authApiUrl: authConfig.apiUrl,
-        clientId: authConfig.clientId,
-        hasSecret: !!authConfig.clientSecret,
-        redirectUri,
+        error: errorData?.error,
+        // Include detailed debugging info only in development
+        ...(import.meta.env.DEV && {
+          authApiUrl: authConfig.apiUrl,
+          clientId: authConfig.clientId,
+          hasSecret: !!authConfig.clientSecret,
+          redirectUri,
+          errorDescription: errorData?.error_description,
+        })
       });
       const debugError =
         errorData?.error_description ||
@@ -262,14 +298,13 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
           .bind(userId, userInfo.sub, userInfo.email, displayName, userInfo.picture || null)
           .run();
 
-        console.log("[Auth Callback] User upserted:", userInfo.email);
+        console.log("[Auth Callback] User upserted:", userInfo.sub);
       } catch (dbErr) {
         // Log with structured data for debugging, but don't fail auth
         // User can still proceed - they'll be created on next login
         console.error("[Auth Callback] Failed to upsert user:", {
           error: dbErr instanceof Error ? dbErr.message : "Unknown error",
           groveauth_id: userInfo.sub,
-          email: userInfo.email,
         });
       }
     }

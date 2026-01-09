@@ -26,6 +26,11 @@ function getFriendlyErrorMessage(errorCode: string): string {
 }
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+  // TODO(security): Add server-side rate limiting
+  // Limit: 5 failed auth attempts per 15 minutes per IP
+  // Use Cloudflare Workers rate limiting or KV-based counter
+  // Client-side rate limiting in $lib/groveauth/rate-limit.ts is bypassable
+
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const errorParam = url.searchParams.get("error");
@@ -123,14 +128,23 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     const tokens = (await tokenResponse.json()) as Record<string, unknown>;
 
+    // Determine if we're in production
+    const isProduction =
+      url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+
+    // Only set cross-subdomain cookie if we're actually on grove.place
+    // This prevents issues on staging, test, or other deployments
+    const isGrovePlatform = url.hostname.endsWith("grove.place");
+    const cookieDomain = isProduction && isGrovePlatform ? ".grove.place" : undefined;
+
     // Set cookies with domain=.grove.place for cross-subdomain access
     // This allows admin.grove.place to read these cookies
     const cookieOptions = {
       path: "/",
       httpOnly: true,
-      secure: true,
+      secure: isProduction,
       sameSite: "lax" as const,
-      domain: ".grove.place", // Cross-subdomain cookie
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
 
     // Set access token (used for API calls)

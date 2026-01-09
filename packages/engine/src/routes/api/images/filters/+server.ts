@@ -29,6 +29,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     throw error(401, "Unauthorized");
   }
 
+  // Tenant check (CRITICAL for security)
+  if (!locals.tenantId) {
+    throw error(403, "Tenant context required");
+  }
+
   if (!platform?.env?.IMAGES) {
     throw error(500, "R2 bucket not configured");
   }
@@ -37,12 +42,25 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     const categories = new Set<string>();
     const years = new Set<string>();
 
+    // CRITICAL: Force tenant isolation
+    const tenantPrefix = `${locals.tenantId}/`;
+
     // Scan R2 images for categories and dates
     let cursor: string | undefined = undefined;
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"];
 
+    // SAFETY: Limit iterations to prevent infinite loops (20 iterations × 500 items = 10,000 max images)
+    let iterations = 0;
+    const MAX_ITERATIONS = 20;
+
     do {
+      if (++iterations > MAX_ITERATIONS) {
+        console.warn(`R2 list scan reached maximum iterations (${MAX_ITERATIONS}), stopping early`);
+        break;
+      }
+
       const listResult: R2ListResult = await platform.env.IMAGES.list({
+        prefix: tenantPrefix,
         cursor: cursor,
         limit: 500,
       });

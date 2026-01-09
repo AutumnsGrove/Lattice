@@ -1,9 +1,9 @@
 import { getAllPosts, getSiteConfig } from "$lib/utils/markdown.js";
 import type { RequestHandler } from "./$types.js";
 
-export const prerender = true;
+export const prerender = false;
 
-export const GET: RequestHandler = () => {
+export const GET: RequestHandler = (event) => {
   const posts = getAllPosts();
   const siteConfig = getSiteConfig();
 
@@ -12,7 +12,14 @@ export const GET: RequestHandler = () => {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  const siteUrl = "https://autumnsgrove.com";
+  // Get site URL from tenant context (dynamic per-tenant)
+  const context = event.locals.context;
+  const siteUrl =
+    context?.type === "tenant"
+      ? `https://${context.tenant.subdomain}.grove.place`
+      : context?.type === "app"
+        ? `https://${context.app}.grove.place`
+        : "https://grove.place";
   const feedTitle = `${siteConfig.site?.title || "AutumnsGrove"} Blog`;
   const feedDescription =
     siteConfig.site?.description ||

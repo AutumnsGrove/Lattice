@@ -88,7 +88,7 @@ function buildKey(namespace: string | undefined, key: string): string {
  * ```ts
  * const user = await cache.get<User>(kv, 'user:123');
  * if (user) {
- *   console.log(user.name);
+ *   console.log('Cached user:', user.id);
  * }
  * ```
  */
