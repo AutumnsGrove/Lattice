@@ -33,9 +33,13 @@
   // Load collapsed state from localStorage
   onMount(() => {
     if (browser) {
-      const saved = localStorage.getItem("editor-details-collapsed");
-      if (saved !== null) {
-        detailsCollapsed = saved === "true";
+      const savedDetails = localStorage.getItem("editor-details-collapsed");
+      if (savedDetails !== null) {
+        detailsCollapsed = savedDetails === "true";
+      }
+      const savedGutter = localStorage.getItem("editor-gutter-visible");
+      if (savedGutter !== null) {
+        showGutter = savedGutter === "true";
       }
     }
   });
@@ -44,6 +48,13 @@
     detailsCollapsed = !detailsCollapsed;
     if (browser) {
       localStorage.setItem("editor-details-collapsed", String(detailsCollapsed));
+    }
+  }
+
+  function toggleGutter() {
+    showGutter = !showGutter;
+    if (browser) {
+      localStorage.setItem("editor-gutter-visible", String(showGutter));
     }
   }
 
@@ -303,7 +314,7 @@
       </div>
       <button
         class="toggle-vines-btn"
-        onclick={() => (showGutter = !showGutter)}
+        onclick={toggleGutter}
         title={showGutter ? "Hide Vines panel" : "Show Vines panel"}
       >
         {showGutter ? "Hide Vines" : "Show Vines"}

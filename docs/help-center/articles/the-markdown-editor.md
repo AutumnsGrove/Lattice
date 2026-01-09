@@ -3,7 +3,7 @@ title: "The Markdown Editor"
 slug: the-markdown-editor
 category: writing-and-publishing
 order: 2
-keywords: [editor, markdown, writing, interface, toolbar, preview, zen mode, ambient sounds, keyboard shortcuts]
+keywords: [editor, markdown, writing, interface, toolbar, preview, zen mode, keyboard shortcuts]
 related: [writing-your-first-post, formatting-your-posts, drafts-and-scheduling]
 ---
 
@@ -21,25 +21,39 @@ If you prefer keyboard shortcuts:
 - **⌘/Ctrl + S** — Save
 - **Tab** — Indent
 
-## Preview modes
+## Editor modes
 
-**Side-by-side preview**: Click `[show preview]` in the toolbar to see your rendered Markdown alongside your writing. The preview scrolls in sync with your editor.
+The editor has three viewing modes, each suited to different parts of your writing workflow:
 
-**Full preview**: Click `[full]` to see exactly how your post will look on your published blog—with your theme, fonts, and styling applied. Press Escape to close.
+**Source mode** (⌘/Ctrl + 1): Just the editor. Clean, focused writing without distractions. Perfect for when you're in the flow and don't need to see the preview.
+
+**Split mode** (⌘/Ctrl + 2): Editor and live preview side by side. Watch your Markdown render in real-time as you type. This is the default mode—best of both worlds.
+
+**Preview mode** (⌘/Ctrl + 3): Preview only, no editing. Great for reviewing your work before publishing or reading through what you've written.
+
+You can also press **⌘/Ctrl + P** to cycle through the modes.
+
+The toolbar shows three icons for quick switching: a pen (Source), columns (Split), and book (Preview).
+
+## Full preview
+
+Click the expand icon in the toolbar to see exactly how your post will look on your published blog—with your theme, fonts, and styling applied. Press **Escape** to close.
 
 ## The status bar
 
 At the bottom of the editor, you'll find:
 - Current line and column position
 - Total lines, words, and estimated reading time
-- Draft save status
-- Ambient sounds control
+- Current editor mode
+- Draft save status (Unsaved → Saving draft → Draft saved ✓)
 
 ## Autosave and drafts
 
-Grove saves your work to your browser automatically as you type. If you close the tab or your browser crashes, you'll see a prompt to restore your draft when you return.
+Grove saves your work to your browser automatically as you type. The status bar shows when changes are pending and confirms when they've been saved.
 
-This local draft is separate from saving to the server—think of it as a safety net. Click **Save** (or ⌘/Ctrl + S) to publish your changes to Grove's servers.
+If you close the tab or your browser crashes, you'll see a prompt to restore your draft when you return. This local draft is separate from saving to the server—think of it as a safety net.
+
+Click **Save** (or ⌘/Ctrl + S) to publish your changes to Grove's servers.
 
 ## Adding images
 
@@ -58,31 +72,6 @@ For distraction-free writing, press **⌘/Ctrl + Shift + Enter** to enter Zen mo
 Press **Escape** to exit.
 
 Zen mode automatically enables typewriter mode, which keeps your current line vertically centered as you write—no more typing at the bottom of the screen.
-
-## Ambient sounds
-
-Writing is easier with the right atmosphere. Click the sound button in the bottom-right corner of the status bar (it shows the current sound name, like `[forest]`).
-
-Five ambient soundscapes are available:
-- **Forest** — birds and wind through trees
-- **Rain** — gentle rainfall
-- **Fire** — crackling campfire
-- **Night** — crickets and evening breeze
-- **Cafe** — soft background murmurs
-
-Adjust the volume with the slider. Your sound preference is remembered between sessions.
-
-## Snippets
-
-If you frequently type the same text—a signature, a standard disclaimer, a formatting template—save it as a snippet.
-
-Snippets can have optional triggers. If you set a trigger like `sig`, typing `/sig` in the editor will insert your saved snippet.
-
-## Campfire sessions
-
-Campfire is a timed writing mode. Start a session, and Grove tracks how long you've been writing and how many words you've added. A warm ember glows in the corner as a gentle reminder to keep going.
-
-Use it for writing sprints, daily practice, or when you need a little accountability.
 
 ## Line numbers
 

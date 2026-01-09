@@ -87,7 +87,7 @@ GroveEngine/
 
 ### Core Platform
 - **Gutter Annotations** — Unique sidebar annotation system for contextual notes on blog posts
-- **Markdown Editor** — Full-featured editor with live preview, 7 themes, drag-drop images, snippets, and ambient sounds
+- **Markdown Editor** — Full-featured editor with live preview modes (Source/Split/Preview), drag-drop images, and zen mode
 - **Heartwood Integration** — Google Sign-In with OAuth 2.0 + PKCE via [Heartwood](https://github.com/AutumnsGrove/GroveAuth)
 - **Multi-Tenant Architecture** — Subdomain-based isolation with per-tenant databases
 - **Cloudflare Native** — D1 database, R2 storage, KV caching, Workers deployment

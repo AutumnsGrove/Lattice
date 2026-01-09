@@ -6,16 +6,14 @@
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import FloatingToolbar from "./FloatingToolbar.svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen } from "lucide-svelte";
+  import { browser } from "$app/environment";
 
-  // Import composables (simplified - removed command palette and slash commands)
+  // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
   import {
-    useAmbientSounds,
-    soundLibrary,
     useEditorTheme,
     themes,
-    useSnippets,
     useDraftManager,
-    useWritingSession,
   } from "./composables/index.js";
 
   /**
@@ -45,7 +43,11 @@
   let previewRef = $state(null);
   /** @type {HTMLElement | null} */
   let lineNumbersRef = $state(null);
-  let showPreview = $state(false);  // Default to false for Medium-style focused writing
+
+  // Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
+  /** @type {"write" | "split" | "preview"} */
+  let editorMode = $state("split");  // Default to split for live preview experience
+
   let cursorLine = $state(1);
   let cursorCol = $state(1);
   let isUpdating = $state(false);
@@ -73,13 +75,7 @@
   let isZenMode = $state(false);
 
   // Initialize composables
-  const ambientSounds = useAmbientSounds();
   const editorTheme = useEditorTheme();
-  const snippetsManager = useSnippets();
-
-  const writingSession = useWritingSession({
-    getWordCount: () => wordCount,
-  });
 
   // svelte-ignore state_referenced_locally - draftKey, readonly, onDraftRestored don't change during lifecycle
   const draftManager = useDraftManager({
@@ -102,10 +98,6 @@
     const minutes = Math.ceil(wordCount / 200);
     return minutes < 1 ? "< 1 min" : `~${minutes} min read`;
   });
-
-  let goalProgress = $derived.by(() => writingSession.getGoalProgress(wordCount));
-
-  let campfireElapsed = $derived.by(() => writingSession.getCampfireElapsed());
 
   let lineNumbers = $derived.by(() => {
     const count = content.split("\n").length;
@@ -203,21 +195,31 @@
       e.preventDefault();
       wrapSelection("_", "_");
     }
+
+    // Mode switching: Cmd/Ctrl + 1/2/3
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
+      if (e.key === "1") {
+        e.preventDefault();
+        setEditorMode("write");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        setEditorMode("split");
+      } else if (e.key === "3") {
+        e.preventDefault();
+        setEditorMode("preview");
+      }
+    }
+
+    // Cmd/Ctrl + P to cycle modes (when not in preview-only)
+    if (e.key === "p" && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+      e.preventDefault();
+      cycleEditorMode();
+    }
   }
 
   /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
-      if (ambientSounds.showPanel) {
-        ambientSounds.closePanel();
-        e.preventDefault();
-        return;
-      }
-      if (snippetsManager.modal.open) {
-        snippetsManager.closeModal();
-        e.preventDefault();
-        return;
-      }
       if (showFullPreview) {
         showFullPreview = false;
         e.preventDefault();
@@ -230,6 +232,36 @@
     isZenMode = !isZenMode;
     if (isZenMode) {
       editorSettings.typewriterMode = true;
+    }
+  }
+
+  // Editor mode switching
+  /** @param {"write" | "split" | "preview"} mode */
+  function setEditorMode(mode) {
+    editorMode = mode;
+    if (browser) {
+      localStorage.setItem("editor-mode", mode);
+    }
+    // Focus textarea when switching to write or split mode
+    if (mode !== "preview" && textareaRef) {
+      setTimeout(() => textareaRef?.focus(), 50);
+    }
+  }
+
+  function cycleEditorMode() {
+    const modes = /** @type {const} */ (["write", "split", "preview"]);
+    const currentIndex = modes.indexOf(editorMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    setEditorMode(modes[nextIndex]);
+  }
+
+  // Load editor mode from localStorage
+  function loadEditorMode() {
+    if (browser) {
+      const saved = localStorage.getItem("editor-mode");
+      if (saved === "write" || saved === "split" || saved === "preview") {
+        editorMode = saved;
+      }
     }
   }
 
@@ -465,13 +497,11 @@
 
   onMount(() => {
     updateCursorPosition();
-    snippetsManager.load();
-    ambientSounds.loadSettings();
     editorTheme.loadTheme();
     draftManager.init(content);
+    loadEditorMode();
 
     return () => {
-      ambientSounds.cleanup();
       draftManager.cleanup();
     };
   });
@@ -483,7 +513,6 @@
   class="editor-container"
   class:dragging={isDragging}
   class:zen-mode={isZenMode}
-  class:campfire-mode={writingSession.isCampfireActive}
   aria-label="Markdown editor with live preview"
   role="application"
   ondragenter={handleDragEnter}
@@ -537,78 +566,107 @@
     </div>
   {/if}
 
-  <!-- Minimal Toolbar (Medium-style - formatting via floating toolbar on selection) -->
+  <!-- Mode-based Toolbar -->
   <div class="toolbar">
     <div class="toolbar-left">
-      <span class="toolbar-hint">Select text to format</span>
+      <span class="toolbar-hint">{editorMode === "preview" ? "Preview mode (read-only)" : "Select text to format"}</span>
     </div>
 
     <div class="toolbar-spacer"></div>
 
-    <div class="toolbar-group">
+    <div class="toolbar-group mode-group">
       <button
         type="button"
-        class="toolbar-btn toggle-btn"
-        class:active={showPreview}
-        onclick={() => (showPreview = !showPreview)}
-        title="Toggle Preview"
+        class="toolbar-icon-btn mode-btn"
+        class:active={editorMode === "write"}
+        onclick={() => setEditorMode("write")}
+        title="Source Mode (⌘1)"
+        aria-label="Source mode - editor only"
       >
-        {#if showPreview}[hide <span class="key">p</span>review]{:else}[show <span class="key">p</span>review]{/if}
+        <PenLine class="toolbar-icon" />
       </button>
       <button
         type="button"
-        class="toolbar-btn full-preview-btn"
-        onclick={() => (showFullPreview = true)}
-        title="Open Full Preview (site styling)"
+        class="toolbar-icon-btn mode-btn"
+        class:active={editorMode === "split"}
+        onclick={() => setEditorMode("split")}
+        title="Split Mode (⌘2)"
+        aria-label="Split mode - editor and preview"
       >
-        [<span class="key">f</span>ull]
+        <Columns2 class="toolbar-icon" />
+      </button>
+      <button
+        type="button"
+        class="toolbar-icon-btn mode-btn"
+        class:active={editorMode === "preview"}
+        onclick={() => setEditorMode("preview")}
+        title="Preview Mode (⌘3)"
+        aria-label="Preview mode - preview only"
+      >
+        <BookOpen class="toolbar-icon" />
+      </button>
+    </div>
+
+    <div class="toolbar-divider-line"></div>
+
+    <div class="toolbar-group">
+      <button
+        type="button"
+        class="toolbar-icon-btn full-btn"
+        onclick={() => (showFullPreview = true)}
+        title="Full Preview with Styling"
+        aria-label="Open full preview with blog styling"
+      >
+        <Maximize2 class="toolbar-icon" />
       </button>
     </div>
   </div>
 
   <!-- Editor Area -->
-  <div class="editor-area" class:split={showPreview}>
-    <!-- Editor Panel -->
-    <div class="editor-panel">
-      <div class="editor-wrapper">
-        <div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
-          {#each lineNumbers as num}
-            <span class:current={num === cursorLine}>{num}</span>
-          {/each}
+  <div class="editor-area" class:split={editorMode === "split"} class:preview-only={editorMode === "preview"}>
+    <!-- Editor Panel (hidden in preview mode) -->
+    {#if editorMode !== "preview"}
+      <div class="editor-panel">
+        <div class="editor-wrapper">
+          <div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
+            {#each lineNumbers as num}
+              <span class:current={num === cursorLine}>{num}</span>
+            {/each}
+          </div>
+          <textarea
+            aria-label="Markdown editor content"
+            bind:this={textareaRef}
+            bind:value={content}
+            oninput={updateCursorPosition}
+            onclick={updateCursorPosition}
+            onkeyup={updateCursorPosition}
+            onkeydown={handleKeydown}
+            onscroll={handleScroll}
+            onpaste={handlePaste}
+            placeholder="Start writing your post... (Drag & drop or paste images)"
+            spellcheck="true"
+            disabled={readonly}
+            class="editor-textarea"
+          ></textarea>
         </div>
-        <textarea
-          aria-label="Markdown editor content"
-          bind:this={textareaRef}
-          bind:value={content}
-          oninput={updateCursorPosition}
-          onclick={updateCursorPosition}
-          onkeyup={updateCursorPosition}
-          onkeydown={handleKeydown}
-          onscroll={handleScroll}
-          onpaste={handlePaste}
-          placeholder="Start writing your post... (Drag & drop or paste images)"
-          spellcheck="true"
-          disabled={readonly}
-          class="editor-textarea"
-        ></textarea>
       </div>
-    </div>
+    {/if}
 
-    <!-- Preview Panel -->
-    {#if showPreview}
-      <div class="preview-panel">
+    <!-- Preview Panel (shown in split and preview modes) -->
+    {#if editorMode === "split" || editorMode === "preview"}
+      <div class="preview-panel" class:full-width={editorMode === "preview"}>
         <div class="preview-header">
-          <span class="preview-label">:: preview</span>
+          <span class="preview-label">:: {editorMode === "preview" ? "preview (read-only)" : "live preview"}</span>
           <Logo class="preview-logo" />
         </div>
         <div class="preview-content" bind:this={previewRef}>
           {#if previewHtml}
             {#key previewHtml}
-              <div>{@html previewHtml}</div>
+              <div class="rendered-content">{@html previewHtml}</div>
             {/key}
           {:else}
             <p class="preview-placeholder">
-              Your rendered markdown will appear here...
+              {editorMode === "preview" ? "No content to preview..." : "Start typing to see your rendered markdown..."}
             </p>
           {/if}
         </div>
@@ -626,25 +684,11 @@
       <span class="status-item">{wordCount} words</span>
       <span class="status-divider">|</span>
       <span class="status-item">{readingTime}</span>
-      {#if writingSession.isGoalEnabled}
-        <span class="status-divider">|</span>
-        <span class="status-goal">Goal: {goalProgress}%</span>
-      {/if}
-      {#if writingSession.isCampfireActive}
-        <span class="status-divider">|</span>
-        <span class="status-campfire">~ {campfireElapsed}</span>
-      {/if}
     </div>
     <div class="status-right">
-      <button
-        type="button"
-        class="status-sound-btn"
-        class:playing={ambientSounds.enabled}
-        onclick={() => ambientSounds.togglePanel()}
-        title="Ambient sounds"
-      >
-        [{soundLibrary[/** @type {keyof typeof soundLibrary} */ (ambientSounds.currentSound)]?.name || "snd"}]{#if ambientSounds.enabled}<span class="sound-wave">~</span>{/if}
-      </button>
+      <span class="status-mode-indicator" title="Editor mode (⌘1/2/3)">
+        {editorMode === "write" ? "Source" : editorMode === "split" ? "Split" : "Preview"}
+      </span>
       <span class="status-divider">|</span>
       {#if editorSettings.typewriterMode}
         <span class="status-mode">Typewriter</span>
@@ -652,8 +696,12 @@
       {/if}
       {#if saving}
         <span class="status-saving">Saving...</span>
+      {:else if draftKey && draftManager.saveStatus === "saving"}
+        <span class="status-draft-saving">Saving draft...</span>
+      {:else if draftKey && draftManager.saveStatus === "saved"}
+        <span class="status-draft-saved">Draft saved ✓</span>
       {:else if draftKey && draftManager.hasUnsavedChanges(content)}
-        <span class="status-draft">Draft saving...</span>
+        <span class="status-draft-unsaved">Unsaved</span>
       {:else}
         <span class="status-item">Markdown</span>
       {/if}
@@ -668,160 +716,6 @@
   {readonly}
   onContentChange={(c) => content = c}
 />
-
-<!-- Campfire Session Controls -->
-{#if writingSession.isCampfireActive}
-  <div class="campfire-controls">
-    <div class="campfire-ember"></div>
-    <div class="campfire-stats">
-      <span class="campfire-time">{campfireElapsed}</span>
-      <span class="campfire-words">+{writingSession.getCampfireWords(wordCount)} words</span>
-    </div>
-    <button type="button" class="campfire-end" onclick={() => writingSession.endCampfire()}>
-      [<span class="key">e</span>nd]
-    </button>
-  </div>
-{/if}
-
-<!-- Snippets Modal -->
-<Dialog
-  bind:open={snippetsManager.modal.open}
-  title={`:: ${snippetsManager.modal.editingId ? "edit snippet" : "new snippet"}`}
->
-  <div class="snippets-modal-body">
-    <div class="snippets-form">
-      <div class="snippet-field">
-        <label for="snippet-name">Name</label>
-        <Input
-          id="snippet-name"
-          type="text"
-          bind:value={snippetsManager.modal.name}
-          placeholder="e.g., Blog signature"
-        />
-      </div>
-
-      <div class="snippet-field">
-        <label for="snippet-trigger">Trigger (optional)</label>
-        <Input
-          id="snippet-trigger"
-          type="text"
-          bind:value={snippetsManager.modal.trigger}
-          placeholder="e.g., sig"
-        />
-        <span class="field-hint">Type /trigger to quickly insert</span>
-      </div>
-
-      <div class="snippet-field">
-        <label for="snippet-content">Content</label>
-        <textarea
-          id="snippet-content"
-          bind:value={snippetsManager.modal.content}
-          placeholder="Enter your markdown snippet..."
-          rows="6"
-        ></textarea>
-      </div>
-
-      <div class="snippet-actions">
-        {#if snippetsManager.modal.editingId}
-          <Button variant="danger" onclick={() => {
-            const id = snippetsManager.modal.editingId;
-            if (id) snippetsManager.deleteSnippet(id);
-          }}>
-            [<span class="key">d</span>elete]
-          </Button>
-        {/if}
-        <div class="snippet-actions-right">
-          <Button variant="outline" onclick={() => snippetsManager.closeModal()}>
-            [<span class="key">c</span>ancel]
-          </Button>
-          <Button
-            onclick={() => snippetsManager.saveSnippet()}
-            disabled={!snippetsManager.modal.name.trim() || !snippetsManager.modal.content.trim()}
-          >
-            {#if snippetsManager.modal.editingId}[<span class="key">u</span>pdate]{:else}[<span class="key">s</span>ave]{/if}
-          </Button>
-        </div>
-      </div>
-    </div>
-
-    {#if snippetsManager.snippets.length > 0 && !snippetsManager.modal.editingId}
-      <div class="snippets-list-divider">
-        <span>:: your snippets</span>
-      </div>
-      <div class="snippets-list">
-        {#each snippetsManager.snippets as snippet}
-          <button
-            type="button"
-            class="snippet-list-item"
-            onclick={() => snippetsManager.openModal(snippet.id)}
-          >
-            <span class="snippet-name">{snippet.name}</span>
-            {#if snippet.trigger}
-              <span class="snippet-trigger">/{snippet.trigger}</span>
-            {/if}
-          </button>
-        {/each}
-      </div>
-    {/if}
-  </div>
-</Dialog>
-
-<!-- Ambient Sound Panel -->
-{#if ambientSounds.showPanel}
-  <div class="sound-panel">
-    <div class="sound-panel-header">
-      <span class="sound-panel-title">:: ambient sounds</span>
-      <button type="button" class="sound-panel-close" onclick={() => ambientSounds.closePanel()}>
-        [x]
-      </button>
-    </div>
-
-    <div class="sound-options">
-      {#each Object.entries(soundLibrary) as [key, sound]}
-        <button
-          type="button"
-          class="sound-option"
-          class:active={ambientSounds.currentSound === key}
-          class:playing={ambientSounds.enabled && ambientSounds.currentSound === key}
-          onclick={() => ambientSounds.selectSound(key)}
-        >
-          [<span class="key">{sound.key}</span>] {sound.name}
-        </button>
-      {/each}
-    </div>
-
-    <div class="sound-controls">
-      <label class="volume-label">
-        <span>vol:</span>
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.05"
-          value={ambientSounds.volume}
-          oninput={(e) => {
-            const target = /** @type {HTMLInputElement} */ (e.target);
-            ambientSounds.setVolume(parseFloat(target.value));
-          }}
-          class="volume-slider"
-        />
-      </label>
-
-      <button
-        type="button"
-        class="sound-play-btn"
-        class:playing={ambientSounds.enabled}
-        onclick={() => ambientSounds.toggle()}
-      >
-        {#if ambientSounds.enabled}[<span class="key">s</span>top]{:else}[<span class="key">p</span>lay]{/if}
-      </button>
-    </div>
-
-    <div class="sound-note">
-      <span>; add audio to /static/sounds/</span>
-    </div>
-  </div>
-{/if}
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
@@ -1056,7 +950,7 @@
   }
   .toolbar-group {
     display: flex;
-    gap: 0.1rem;
+    gap: 0.25rem;
   }
   .toolbar-btn {
     padding: 0.2rem 0.35rem;
@@ -1100,6 +994,38 @@
   .toolbar-btn.full-preview-btn .key {
     color: #9ac5ff;
   }
+  /* Icon-based toolbar buttons */
+  .toolbar-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--editor-accent-dim, #7a9a7a);
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .toolbar-icon-btn:hover {
+    color: var(--editor-accent-bright, #a8dca8);
+    background: color-mix(in srgb, var(--editor-accent, #8bc48b) 10%, transparent);
+  }
+  .toolbar-icon-btn.active {
+    color: var(--editor-accent, #8bc48b);
+    background: color-mix(in srgb, var(--editor-accent, #8bc48b) 15%, transparent);
+  }
+  .toolbar-icon-btn.full-btn {
+    color: #7ab3ff;
+  }
+  .toolbar-icon-btn.full-btn:hover {
+    color: #9ac5ff;
+    background: color-mix(in srgb, #7ab3ff 10%, transparent);
+  }
+  :global(.toolbar-icon) {
+    width: 1rem;
+    height: 1rem;
+  }
   /* svelte-ignore css-unused-selector */
   .toolbar-divider {
     color: #4a4a4a;
@@ -1118,6 +1044,22 @@
     font-size: 0.75rem;
     font-style: italic;
   }
+  /* Mode toggle group */
+  .mode-group {
+    background: var(--editor-bg-secondary, #252526);
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .mode-btn.active {
+    background: var(--editor-accent, #8bc48b) !important;
+    color: var(--editor-bg, #1e1e1e) !important;
+  }
+  .toolbar-divider-line {
+    width: 1px;
+    height: 1.25rem;
+    background: var(--editor-border, #3a3a3a);
+    margin: 0 0.5rem;
+  }
   .editor-area {
     display: flex;
     flex: 1;
@@ -1129,6 +1071,18 @@
   }
   .editor-area:not(.split) .editor-panel {
     width: 100%;
+  }
+  /* Preview-only mode */
+  .editor-area.preview-only {
+    background: var(--editor-bg, #1e1e1e);
+  }
+  .editor-area.preview-only .preview-panel {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .preview-panel.full-width {
+    border-left: none;
   }
   .editor-panel {
     display: flex;
@@ -1316,6 +1270,14 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    overflow: hidden;
+  }
+  .status-left {
+    flex: 1;
+    min-width: 0;
+  }
+  .status-right {
+    flex-shrink: 0;
   }
   .status-item {
     opacity: 0.9;
@@ -1327,20 +1289,26 @@
     color: #f0c674;
     animation: pulse 1s ease-in-out infinite;
   }
-  .status-draft {
+  .status-draft-saving {
     color: #7a9a7a;
     font-style: italic;
   }
-  .status-goal {
+  .status-draft-saved {
     color: var(--editor-accent, #8bc48b);
     font-weight: 500;
   }
-  .status-campfire {
-    color: #f0a060;
+  .status-draft-unsaved {
+    color: #e0a050;
+    font-style: italic;
   }
   .status-mode {
     color: #7ab3ff;
     font-size: 0.75rem;
+  }
+  .status-mode-indicator {
+    color: var(--editor-accent, #8bc48b);
+    font-weight: 500;
+    cursor: default;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -1367,6 +1335,27 @@
       padding: 0.3rem 0.5rem;
       font-size: 0.75rem;
     }
+    .toolbar-hint {
+      display: none;
+    }
+    .status-bar {
+      font-size: 0.7rem;
+      gap: 0.25rem;
+    }
+    .status-left,
+    .status-right {
+      gap: 0.25rem;
+    }
+    /* Hide less important status items on mobile */
+    .status-left .status-item:nth-child(n+4) {
+      display: none;
+    }
+  }
+  @media (max-width: 480px) {
+    .status-left .status-item:nth-child(n+3),
+    .status-left .status-divider:nth-child(n+3) {
+      display: none;
+    }
   }
   .editor-container.zen-mode {
     position: fixed;
@@ -1389,372 +1378,6 @@
   }
   .editor-container.zen-mode .editor-area {
     height: calc(100vh - 80px);
-  }
-  .editor-container.campfire-mode {
-    border-color: #8b5a2b;
-    box-shadow: 0 0 30px rgba(240, 160, 96, 0.15);
-  }
-  .campfire-controls {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1.25rem;
-    background: rgba(40, 30, 20, 0.95);
-    border: 1px solid #8b5a2b;
-    border-radius: 8px;
-    color: #f0d0a0;
-    z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    animation: fade-in 0.3s ease;
-  }
-  .campfire-ember {
-    width: 12px;
-    height: 12px;
-    background: linear-gradient(135deg, #ff6b35, #f0a060);
-    border-radius: 50%;
-    animation: ember-glow 2s ease-in-out infinite;
-  }
-  @keyframes ember-glow {
-    0%, 100% { box-shadow: 0 0 8px #ff6b35, 0 0 16px rgba(240, 107, 53, 0.5); }
-    50% { box-shadow: 0 0 12px #f0a060, 0 0 24px rgba(240, 160, 96, 0.6); }
-  }
-  .campfire-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-  .campfire-time {
-    font-size: 1.1rem;
-    font-weight: 600;
-    font-family: "JetBrains Mono", monospace;
-  }
-  .campfire-words {
-    font-size: 0.75rem;
-    color: #c0a080;
-  }
-  .campfire-end {
-    padding: 0.3rem 0.5rem;
-    background: transparent;
-    border: none;
-    color: #c0a080;
-    font-size: 0.8rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-  }
-  .campfire-end:hover {
-    color: #f0d0a0;
-  }
-  /* Slash menu and command palette styles removed - using FloatingToolbar instead */
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes scale-in {
-    from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  }
-  @keyframes slide-down {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .snippets-modal-body {
-    padding: 1.25rem;
-    overflow-y: auto;
-  }
-  .snippets-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .snippet-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  .snippet-field label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #a8dca8;
-  }
-  .snippet-field textarea {
-    padding: 0.6rem 0.75rem;
-    background: #252526;
-    border: 1px solid var(--light-border-primary);
-    border-radius: 6px;
-    color: #d4d4d4;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    resize: vertical;
-    min-height: 100px;
-    transition: border-color 0.2s ease;
-  }
-  .snippet-field textarea:focus {
-    outline: none;
-    border-color: #4a7c4a;
-  }
-  .field-hint {
-    font-size: 0.75rem;
-    color: #6a6a6a;
-    font-style: italic;
-  }
-  .snippet-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--light-bg-tertiary);
-  }
-  .snippet-actions-right {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto;
-  }
-  .snippets-list-divider {
-    display: flex;
-    align-items: center;
-    margin: 1.25rem 0 0.75rem;
-    color: #8bc48b;
-    font-size: 0.8rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-  }
-  .snippets-list-divider::before,
-  .snippets-list-divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--light-border-primary);
-  }
-  .snippets-list-divider span {
-    padding: 0 0.75rem;
-  }
-  .snippets-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .snippet-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    background: #252526;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    color: #d4d4d4;
-    font-size: 0.9rem;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .snippet-list-item:hover {
-    background: var(--light-bg-tertiary);
-    border-color: var(--light-border-primary);
-  }
-  .snippet-name {
-    font-weight: 500;
-  }
-  .snippet-trigger {
-    font-size: 0.75rem;
-    color: #7ab3ff;
-    font-family: "JetBrains Mono", monospace;
-    background: #1a2a3a;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-  }
-  .status-sound-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.15rem 0.4rem;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    color: #7a9a7a;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-  }
-  .status-sound-btn:hover {
-    background: rgba(139, 196, 139, 0.1);
-    color: #a8dca8;
-  }
-  .status-sound-btn.playing {
-    color: #8bc48b;
-  }
-  .sound-wave {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #8bc48b;
-    animation: sound-pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes sound-pulse {
-    0%, 100% { opacity: 0.4; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1); }
-  }
-  .sound-panel {
-    position: fixed;
-    bottom: 3.5rem;
-    right: 1rem;
-    width: 280px;
-    background: var(--light-bg-primary);
-    border: 1px solid var(--light-border-primary);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1003; /* above modals and gutters */
-    animation: slide-up 0.2s ease;
-    overflow: hidden;
-  }
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .sound-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--light-border-primary);
-  }
-  .sound-panel-title {
-    font-size: 0.85rem;
-    font-weight: 500;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    color: #8bc48b;
-  }
-  .sound-panel-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: #7a9a7a;
-    font-size: 0.85rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-  }
-  .sound-panel-close:hover {
-    color: #a8dca8;
-  }
-  .sound-options {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-  .sound-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 0.25rem;
-    background: #252526;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-size: 0.65rem;
-    color: #9d9d9d;
-  }
-  .sound-option:hover {
-    background: var(--light-bg-tertiary);
-    border-color: var(--light-border-primary);
-  }
-  .sound-option.active {
-    background: var(--light-border-secondary);
-    border-color: #4a7c4a;
-    color: #a8dca8;
-  }
-  .sound-option.playing {
-    border-color: #8bc48b;
-    box-shadow: 0 0 8px rgba(139, 196, 139, 0.3);
-  }
-  .sound-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0 1rem 1rem;
-  }
-  .volume-label {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .volume-label span {
-    font-size: 0.75rem;
-    color: #7a9a7a;
-  }
-  .volume-slider {
-    width: 100%;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--light-border-primary);
-    border-radius: 2px;
-    cursor: pointer;
-  }
-  .volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: #8bc48b;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.15s ease;
-  }
-  .volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-  }
-  .volume-slider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: #8bc48b;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-  }
-  .sound-play-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.3rem 0.5rem;
-    background: transparent;
-    border: none;
-    color: #7a9a7a;
-    font-size: 0.8rem;
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    cursor: pointer;
-    transition: color 0.1s ease;
-  }
-  .sound-play-btn:hover {
-    color: #a8dca8;
-  }
-  .sound-play-btn.playing {
-    color: #8bc48b;
-  }
-  .sound-play-btn.playing:hover {
-    color: #c8f0c8;
-  }
-  .sound-note {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: #252526;
-    border-top: 1px solid var(--light-border-primary);
-    border-radius: 0 0 12px 12px;
-    font-size: 0.7rem;
-    color: #6a6a6a;
   }
   .full-preview-modal {
     position: fixed;

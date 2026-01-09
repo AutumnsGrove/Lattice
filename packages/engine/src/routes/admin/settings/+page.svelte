@@ -14,6 +14,13 @@
    * @property {string} [timestamp]
    */
 
+  // Props from parent layout (user data)
+  let { data } = $props();
+
+  // Only show system health to platform admins
+  // Regular blog owners don't need to see infrastructure status
+  const isPlatformAdmin = $derived(data.user?.isAdmin === true);
+
   let clearingCache = $state(false);
   let cacheMessage = $state('');
   /** @type {HealthStatus | null} */
@@ -105,7 +112,10 @@
   }
 
   $effect(() => {
-    fetchHealth();
+    // Only fetch health status for platform admins
+    if (isPlatformAdmin) {
+      fetchHealth();
+    }
     fetchCurrentFont();
   });
 </script>
@@ -116,55 +126,58 @@
     <p class="subtitle">Manage site configuration and maintenance</p>
   </header>
 
-  <GlassCard variant="frosted" class="mb-6">
-    <h2>System Health</h2>
-    {#if loadingHealth}
-      <div class="health-grid">
-        <Spinner />
-      </div>
-    {:else}
-      <div class="health-grid">
-        <div class="health-item">
-          <span class="health-label">Overall Status</span>
-          <span class="health-value" class:healthy={healthStatus?.status === 'healthy'} class:error={healthStatus?.status !== 'healthy'}>
-            {healthStatus?.status === 'healthy' ? 'Healthy' : 'Issues Detected'}
-          </span>
+  <!-- System Health - Only visible to platform admins -->
+  {#if isPlatformAdmin}
+    <GlassCard variant="frosted" class="mb-6">
+      <h2>System Health</h2>
+      {#if loadingHealth}
+        <div class="health-grid">
+          <Spinner />
         </div>
-
-        <div class="health-item">
-          <span class="health-label">GitHub Token</span>
-          <span class="health-value" class:healthy={healthStatus?.github_token_configured} class:error={!healthStatus?.github_token_configured}>
-            {healthStatus?.github_token_configured ? 'Configured' : 'Missing'}
-          </span>
-        </div>
-
-        <div class="health-item">
-          <span class="health-label">KV Cache</span>
-          <span class="health-value" class:healthy={healthStatus?.kv_configured} class:error={!healthStatus?.kv_configured}>
-            {healthStatus?.kv_configured ? 'Connected' : 'Not Configured'}
-          </span>
-        </div>
-
-        <div class="health-item">
-          <span class="health-label">D1 Database</span>
-          <span class="health-value" class:healthy={healthStatus?.d1_configured} class:error={!healthStatus?.d1_configured}>
-            {healthStatus?.d1_configured ? 'Connected' : 'Not Configured'}
-          </span>
-        </div>
-
-        {#if healthStatus?.timestamp}
-          <div class="health-item full-width">
-            <span class="health-label">Last Check</span>
-            <span class="health-value">{new Date(healthStatus.timestamp).toLocaleString()}</span>
+      {:else}
+        <div class="health-grid">
+          <div class="health-item">
+            <span class="health-label">Overall Status</span>
+            <span class="health-value" class:healthy={healthStatus?.status === 'healthy'} class:error={healthStatus?.status !== 'healthy'}>
+              {healthStatus?.status === 'healthy' ? 'Healthy' : 'Issues Detected'}
+            </span>
           </div>
-        {/if}
-      </div>
-    {/if}
 
-    <Button onclick={fetchHealth} variant="secondary" disabled={loadingHealth}>
-      {loadingHealth ? 'Checking...' : 'Refresh Status'}
-    </Button>
-  </GlassCard>
+          <div class="health-item">
+            <span class="health-label">GitHub Token</span>
+            <span class="health-value" class:healthy={healthStatus?.github_token_configured} class:error={!healthStatus?.github_token_configured}>
+              {healthStatus?.github_token_configured ? 'Configured' : 'Missing'}
+            </span>
+          </div>
+
+          <div class="health-item">
+            <span class="health-label">KV Cache</span>
+            <span class="health-value" class:healthy={healthStatus?.kv_configured} class:error={!healthStatus?.kv_configured}>
+              {healthStatus?.kv_configured ? 'Connected' : 'Not Configured'}
+            </span>
+          </div>
+
+          <div class="health-item">
+            <span class="health-label">D1 Database</span>
+            <span class="health-value" class:healthy={healthStatus?.d1_configured} class:error={!healthStatus?.d1_configured}>
+              {healthStatus?.d1_configured ? 'Connected' : 'Not Configured'}
+            </span>
+          </div>
+
+          {#if healthStatus?.timestamp}
+            <div class="health-item full-width">
+              <span class="health-label">Last Check</span>
+              <span class="health-value">{new Date(healthStatus.timestamp).toLocaleString()}</span>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
+      <Button onclick={fetchHealth} variant="secondary" disabled={loadingHealth}>
+        {loadingHealth ? 'Checking...' : 'Refresh Status'}
+      </Button>
+    </GlassCard>
+  {/if}
 
   <GlassCard variant="frosted" class="mb-6">
     <h2>Typography</h2>

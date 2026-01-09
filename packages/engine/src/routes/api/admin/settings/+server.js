@@ -19,9 +19,15 @@ export async function PUT({ request, platform, locals }) {
     throw error(403, "Invalid origin");
   }
 
-  const db = /** @type {any} */ (platform?.env)?.GIT_STATS_DB;
+  // Use the correct D1 database binding (multi-tenant architecture)
+  const db = platform?.env?.DB;
   if (!db) {
     throw error(500, "Database not configured");
+  }
+
+  // Require tenant context for settings
+  if (!locals.tenantId) {
+    throw error(401, "Tenant context required");
   }
 
   try {
@@ -68,19 +74,20 @@ export async function PUT({ request, platform, locals }) {
     }
 
     const now = Math.floor(Date.now() / 1000);
+    const tenantId = locals.tenantId;
 
-    // Upsert the setting
+    // Upsert the setting (scoped to tenant)
     await db
       .prepare(
         `
-      INSERT INTO site_settings (setting_key, setting_value, updated_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(setting_key) DO UPDATE SET
+      INSERT INTO site_settings (tenant_id, setting_key, setting_value, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(tenant_id, setting_key) DO UPDATE SET
         setting_value = excluded.setting_value,
         updated_at = excluded.updated_at
     `,
       )
-      .bind(setting_key, setting_value, now)
+      .bind(tenantId, setting_key, setting_value, now)
       .run();
 
     return json({
@@ -90,7 +97,7 @@ export async function PUT({ request, platform, locals }) {
       updated_at: now,
     });
   } catch (err) {
-    if (err instanceof Error && 'status' in err) throw err;
+    if (err instanceof Error && "status" in err) throw err;
     console.error("Settings update error:", err);
     throw error(500, "Failed to update setting");
   }

@@ -42,8 +42,11 @@ const AUTO_SAVE_DELAY = 2000; // 2 seconds
  * @param {DraftManagerOptions} options - Configuration options
  * @returns {DraftManager} Draft state and controls
  */
-export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({})) {
-  const { draftKey, getContent, setContent, onDraftRestored, readonly } = options;
+export function useDraftManager(
+  options = /** @type {DraftManagerOptions} */ ({}),
+) {
+  const { draftKey, getContent, setContent, onDraftRestored, readonly } =
+    options;
 
   let lastSavedContent = $state("");
   /** @type {ReturnType<typeof setTimeout> | null} */
@@ -52,11 +55,15 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
   let draftRestorePrompt = $state(false);
   /** @type {StoredDraft | null} */
   let storedDraft = $state(null);
+  let saveStatus = $state(/** @type {"idle" | "saving" | "saved"} */ ("idle"));
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let savedConfirmTimer = $state(null);
 
   function saveDraft() {
     if (!draftKey || readonly || !getContent) return;
 
     const content = getContent();
+    saveStatus = "saving";
     try {
       const draft = {
         content,
@@ -65,8 +72,16 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
       localStorage.setItem(`draft:${draftKey}`, JSON.stringify(draft));
       lastSavedContent = content;
       hasDraft = true;
+      saveStatus = "saved";
+
+      // Clear "saved" status after 2 seconds
+      if (savedConfirmTimer) clearTimeout(savedConfirmTimer);
+      savedConfirmTimer = setTimeout(() => {
+        saveStatus = "idle";
+      }, 2000);
     } catch (e) {
       console.warn("Failed to save draft:", e);
+      saveStatus = "idle";
     }
   }
 
@@ -151,6 +166,9 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
     if (draftSaveTimer) {
       clearTimeout(draftSaveTimer);
     }
+    if (savedConfirmTimer) {
+      clearTimeout(savedConfirmTimer);
+    }
   }
 
   function getStatus() {
@@ -174,6 +192,9 @@ export function useDraftManager(options = /** @type {DraftManagerOptions} */ ({}
     },
     get lastSavedContent() {
       return lastSavedContent;
+    },
+    get saveStatus() {
+      return saveStatus;
     },
     init,
     scheduleSave,
