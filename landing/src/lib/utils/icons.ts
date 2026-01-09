@@ -250,6 +250,7 @@ export const stateIcons = {
   help: HelpCircle,
   info: InfoIcon,
   circle: Circle, // Fallback/default
+  tag: Tag, // For version tags, labels
 } as const;
 
 // ============================================================================
