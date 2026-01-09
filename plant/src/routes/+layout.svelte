@@ -5,7 +5,6 @@
 	import { ThemeToggle, MobileMenu, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from 'lucide-svelte';
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
-	import type { Component } from 'svelte';
 
 	// Centralized external links to prevent drift
 	const GROVE_LINKS = {
@@ -45,19 +44,18 @@
 	}
 
 	// Plant-specific navigation (minimal for onboarding focus)
-	// Cast Lucide icons to Component type for cross-package compatibility
 	const navItems: NavItem[] = [
-		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: ArrowLeft as unknown as Component, external: true },
-		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins as unknown as Component, external: true }
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: ArrowLeft, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins, external: true }
 	];
 
 	// Mobile menu items (more comprehensive)
 	const mobileNavItems: NavItem[] = [
-		{ href: '/', label: 'Start', icon: Home as unknown as Component },
-		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: Trees as unknown as Component, external: true },
-		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins as unknown as Component, external: true },
-		{ href: GROVE_LINKS.TERMS, label: 'Terms', icon: FileText as unknown as Component, external: true },
-		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: FileText as unknown as Component, external: true }
+		{ href: '/', label: 'Start', icon: Home },
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: Trees, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins, external: true },
+		{ href: GROVE_LINKS.TERMS, label: 'Terms', icon: FileText, external: true },
+		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: FileText, external: true }
 	];
 
 	// Plant onboarding doesn't need additional menu sections
