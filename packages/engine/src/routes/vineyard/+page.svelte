@@ -565,7 +565,7 @@
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-bark-900">Typography</h2>
-				<p class="text-bark-600">20 fonts for every mood - from cozy headers to crisp code</p>
+				<p class="text-bark-600">11 fonts for every mood - from cozy headers to crisp code</p>
 			</div>
 		</div>
 
@@ -618,37 +618,6 @@
 				</div>
 			</GlassCard>
 
-			<!-- Serif Fonts -->
-			<GlassCard title="Serif Fonts" variant="default">
-				<p class="text-sm text-bark-600 mb-4">Classic elegance for body text and refined headers</p>
-				<div class="grid md:grid-cols-2 gap-4">
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Cormorant as="h3" class="text-xl text-bark-800 mb-2">Cormorant</Cormorant>
-						<Cormorant as="p" class="text-bark-600">Elegant display serif inspired by Garamond. Refined and classic.</Cormorant>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<BodoniModa as="h3" class="text-xl text-bark-800 mb-2">Bodoni Moda</BodoniModa>
-						<BodoniModa as="p" class="text-bark-600">High contrast modern serif. Bold and sophisticated.</BodoniModa>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Lora as="h3" class="text-xl text-bark-800 mb-2">Lora</Lora>
-						<Lora as="p" class="text-bark-600">Well-balanced contemporary serif. Excellent for body text.</Lora>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<EBGaramond as="h3" class="text-xl text-bark-800 mb-2">EB Garamond</EBGaramond>
-						<EBGaramond as="p" class="text-bark-600">Revival of classic Garamond. Timeless book typography.</EBGaramond>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Merriweather as="h3" class="text-xl text-bark-800 mb-2">Merriweather</Merriweather>
-						<Merriweather as="p" class="text-bark-600">Designed for screen reading. Excellent legibility.</Merriweather>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Fraunces as="h3" class="text-xl text-bark-800 mb-2">Fraunces</Fraunces>
-						<Fraunces as="p" class="text-bark-600">Soft serif with "wonky" optical axes. Warm personality.</Fraunces>
-					</div>
-				</div>
-			</GlassCard>
-
 			<!-- Sans-Serif Fonts -->
 			<GlassCard title="Sans-Serif Fonts" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Clean, modern fonts for interfaces and body text</p>
@@ -658,20 +627,8 @@
 						<Lexend as="p" class="text-bark-600">Modern, highly readable sans-serif. Grove's default font.</Lexend>
 					</div>
 					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Nunito as="h3" class="text-xl text-bark-800 mb-2">Nunito</Nunito>
-						<Nunito as="p" class="text-bark-600">Friendly rounded sans-serif. Warm and approachable.</Nunito>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
 						<Quicksand as="h3" class="text-xl text-bark-800 mb-2">Quicksand</Quicksand>
 						<Quicksand as="p" class="text-bark-600">Geometric sans with rounded terminals. Light and modern.</Quicksand>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<Manrope as="h3" class="text-xl text-bark-800 mb-2">Manrope</Manrope>
-						<Manrope as="p" class="text-bark-600">Professional geometric sans. Clean and contemporary.</Manrope>
-					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
-						<InstrumentSans as="h3" class="text-xl text-bark-800 mb-2">Instrument Sans</InstrumentSans>
-						<InstrumentSans as="p" class="text-bark-600">Low contrast sans with humanist touches. Elegant simplicity.</InstrumentSans>
 					</div>
 					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
 						<PlusJakartaSans as="h3" class="text-xl text-bark-800 mb-2">Plus Jakarta Sans</PlusJakartaSans>
@@ -707,7 +664,7 @@ $ npm run dev
 			<!-- Accessibility Fonts -->
 			<GlassCard title="Accessibility Fonts" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Designed for maximum readability and inclusion</p>
-				<div class="grid md:grid-cols-3 gap-4">
+				<div class="grid md:grid-cols-2 gap-4">
 					<div class="p-4 bg-grove-50 rounded-lg border border-grove-200">
 						<Atkinson as="h3" class="text-lg text-grove-900 mb-2">Atkinson Hyperlegible</Atkinson>
 						<Atkinson as="p" class="text-grove-700 text-sm">
@@ -719,12 +676,6 @@ $ npm run dev
 						<OpenDyslexic as="p" class="text-blue-700 text-sm">
 							Weighted bottoms reduce letter confusion for dyslexic readers.
 						</OpenDyslexic>
-					</div>
-					<div class="p-4 bg-amber-50 rounded-lg border border-amber-200">
-						<Luciole as="h3" class="text-lg text-amber-900 mb-2">Luciole</Luciole>
-						<Luciole as="p" class="text-amber-700 text-sm">
-							French accessibility font designed for visually impaired readers.
-						</Luciole>
 					</div>
 				</div>
 			</GlassCard>
@@ -839,7 +790,7 @@ $ npm run dev
 					<ul class="space-y-2 text-sm text-bark-600">
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (8 components)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Core UI components (15+ components)</li>
-						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Typography components (20 fonts)</li>
+						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Typography components (11 fonts)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Nature color palettes (12 palettes)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Seasonal theming system</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Interactive demos</li>
