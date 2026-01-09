@@ -99,14 +99,14 @@ echo -e "Found ${GREEN}$COMMIT_COUNT${NC} commits"
 
 echo -e "Analyzing commit types..."
 
-# Count by type
-FEAT_COUNT=$(echo "$COMMITS" | grep -c "^feat" || echo 0)
-FIX_COUNT=$(echo "$COMMITS" | grep -c "^fix" || echo 0)
-REFACTOR_COUNT=$(echo "$COMMITS" | grep -c "^refactor" || echo 0)
-DOCS_COUNT=$(echo "$COMMITS" | grep -c "^docs" || echo 0)
-CHORE_COUNT=$(echo "$COMMITS" | grep -c "^chore" || echo 0)
-TEST_COUNT=$(echo "$COMMITS" | grep -c "^test" || echo 0)
-PERF_COUNT=$(echo "$COMMITS" | grep -c "^perf" || echo 0)
+# Count by type (using grep | wc -l to avoid grep's exit code 1 on no matches)
+FEAT_COUNT=$(echo "$COMMITS" | grep "^feat" | wc -l | tr -d ' ')
+FIX_COUNT=$(echo "$COMMITS" | grep "^fix" | wc -l | tr -d ' ')
+REFACTOR_COUNT=$(echo "$COMMITS" | grep "^refactor" | wc -l | tr -d ' ')
+DOCS_COUNT=$(echo "$COMMITS" | grep "^docs" | wc -l | tr -d ' ')
+CHORE_COUNT=$(echo "$COMMITS" | grep "^chore" | wc -l | tr -d ' ')
+TEST_COUNT=$(echo "$COMMITS" | grep "^test" | wc -l | tr -d ' ')
+PERF_COUNT=$(echo "$COMMITS" | grep "^perf" | wc -l | tr -d ' ')
 
 echo -e "  Features:    ${GREEN}$FEAT_COUNT${NC}"
 echo -e "  Fixes:       ${GREEN}$FIX_COUNT${NC}"
