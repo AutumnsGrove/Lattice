@@ -175,14 +175,14 @@
 				{
 					name: 'Weave',
 					tagline: 'Visual Composition Studio',
-					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Sway mode) and diagrams (Fern mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
+					description: 'Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove\'s dark-mode-first aesthetic.',
 					status: 'planned',
 					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
 					subComponents: [
-						{ name: 'Sway', icon: 'waves', description: 'Animation mode' },
-						{ name: 'Fern', icon: 'waypoints', description: 'Diagram mode' },
+						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
+						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
 						{ name: 'Thread', icon: 'route', description: 'Connections' }
 					]
 				},
@@ -225,7 +225,7 @@
 					tagline: 'Front Porch Conversations',
 					description: 'A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.',
 					status: 'planned',
-					icon: 'lifebuoy',
+					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
 					integration: 'Support and conversation for all Grove users',
 					spec: '/knowledge/specs/porch-spec'
@@ -430,7 +430,7 @@
 					tagline: 'AI Content Protection',
 					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
-					icon: 'brickwallshield',
+					icon: 'blinds',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
 					subComponents: [
@@ -516,7 +516,7 @@
 					integration: 'Powers Bloom and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern',
 					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned' }
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
 				},
 				{
@@ -542,6 +542,28 @@
 			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' };
 			default: return { text: status, class: 'bg-slate-100 text-slate-600' };
 		}
+	}
+
+	// TOC state
+	let isMobileTocOpen = $state(false);
+
+	// Generate category IDs for TOC navigation
+	const categoryIds = categories.map(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+
+	// TOC items for floating navigation
+	// Icons must exist in toolIcons (icons.ts) - using valid icons for each category
+	const tocItems = [
+		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'pyramid' },
+		{ id: categoryIds[1], text: 'Platform Services', icon: 'circuitboard' },
+		{ id: categoryIds[2], text: 'Content & Community', icon: 'id-card-lanyard' },
+		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'toolbox' },
+		{ id: categoryIds[4], text: 'Operations', icon: 'dock' },
+		{ id: categoryIds[5], text: 'Patterns', icon: 'regex' }
+	];
+
+	// Helper to generate tool ID for navigation
+	function getToolId(toolName: string): string {
+		return `tool-${toolName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 	}
 </script>
 
@@ -578,11 +600,107 @@
 		</div>
 	</section>
 
+	<!-- Floating TOC Icon Navigation with Tools -->
+	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
+		{#each tocItems as item, itemIndex}
+			{@const categoryTools = categories[itemIndex]?.tools ?? []}
+			{@const ItemIcon = getToolIcon(item.icon)}
+			<div class="relative group">
+				<a
+					href="#{item.id}"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
+					aria-label="Jump to {item.text}"
+					title={item.text}
+				>
+					<ItemIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+				</a>
+
+				<!-- Tools revealed on hover -->
+				{#if categoryTools.length > 0}
+					<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2 flex-wrap justify-end max-w-xs">
+						{#each categoryTools as tool}
+							{@const ToolIconComponent = getToolIcon(tool.icon)}
+							<a
+								href="#{getToolId(tool.name)}"
+								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
+								title={tool.tagline}
+							>
+								<ToolIconComponent class="w-3.5 h-3.5" />
+								<span class="text-xs font-medium">{tool.name}</span>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		{/each}
+	</nav>
+
+	<!-- Floating TOC Button & Dropdown with Tools (visible on all screen sizes) -->
+	<div class="fixed bottom-6 right-6 z-50">
+		<button
+			type="button"
+			onclick={() => isMobileTocOpen = !isMobileTocOpen}
+			class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+			aria-expanded={isMobileTocOpen}
+			aria-label="Table of contents"
+		>
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+			</svg>
+		</button>
+
+		{#if isMobileTocOpen}
+			<div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden max-h-[70vh] overflow-y-auto">
+				<div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
+					<span class="font-medium text-foreground">Navigate</span>
+					<button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close table of contents">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="py-2">
+					{#each tocItems as item, itemIndex}
+						{@const categoryTools = categories[itemIndex]?.tools ?? []}
+						{@const ItemIcon = getToolIcon(item.icon)}
+						<div class="mb-2">
+							<a
+								href="#{item.id}"
+								onclick={() => isMobileTocOpen = false}
+								class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+							>
+								<ItemIcon class="w-5 h-5 text-amber-500" />
+								<span class="font-medium">{item.text}</span>
+							</a>
+
+							<!-- Tools for this category -->
+							{#if categoryTools.length > 0}
+								<div class="ml-8 mt-1 space-y-1">
+									{#each categoryTools as tool}
+										{@const ToolIconComponent = getToolIcon(tool.icon)}
+										<a
+											href="#{getToolId(tool.name)}"
+											onclick={() => isMobileTocOpen = false}
+											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+										>
+											<ToolIconComponent class="w-4 h-4 text-amber-400" />
+											<span>{tool.name}</span>
+										</a>
+									{/each}
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</div>
+
 	<!-- Categories -->
 	<section class="flex-1 py-12 px-6">
 		<div class="max-w-5xl mx-auto space-y-16">
-			{#each categories as category}
-				<div>
+			{#each categories as category, index}
+				<div id={categoryIds[index]}>
 					<!-- Category Header -->
 					<div class="mb-8">
 						<h2 class="text-2xl font-serif text-foreground mb-2">{category.name}</h2>
@@ -594,11 +712,12 @@
 						{#each category.tools as tool}
 							{@const badge = getStatusBadge(tool.status)}
 							{@const cardClass = getCardClass(category.name)}
-							<article class={cardClass}>
+							{@const ToolIcon = getToolIcon(tool.icon)}
+							<article id={getToolId(tool.name)} class={cardClass}>
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-											<svelte:component this={getToolIcon(tool.icon)} class="w-5 h-5" />
+											<ToolIcon class="w-5 h-5" />
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">{tool.name}</h3>
@@ -613,6 +732,7 @@
 								{#if tool.subComponents && tool.subComponents.length > 0}
 									<div class="flex flex-wrap gap-1.5 mb-3" role="list" aria-label="Components">
 										{#each tool.subComponents as sub}
+											{@const SubIcon = getToolIcon(sub.icon)}
 											<svelte:element
 												this={sub.href ? 'a' : 'span'}
 												href={sub.href}
@@ -621,7 +741,7 @@
 												role="listitem"
 												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
 											>
-												<svelte:component this={getToolIcon(sub.icon)} class="w-3 h-3" aria-hidden="true" />
+												<SubIcon class="w-3 h-3" aria-hidden="true" />
 												{sub.name}
 											</svelte:element>
 										{/each}

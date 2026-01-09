@@ -4,7 +4,7 @@
 	import {
 		Home,
 		Telescope,
-		CircleDollarSign,
+		HandCoins,
 		BookOpen,
 		Trees,
 		Map,
@@ -100,7 +100,7 @@
 		{ href: '/manifesto', label: 'Manifesto', icon: Scroll },
 		{ href: '/vision', label: 'Vision', icon: Telescope },
 		{ href: '/roadmap', label: 'Roadmap', icon: Map },
-		{ href: '/pricing', label: 'Pricing', icon: CircleDollarSign },
+		{ href: '/pricing', label: 'Pricing', icon: HandCoins },
 		{ href: '/knowledge', label: 'Knowledge', icon: BookOpen },
 		{ href: '/forest', label: 'Forest', icon: Trees },
 		{ href: '/contact', label: 'Contact', icon: Send },

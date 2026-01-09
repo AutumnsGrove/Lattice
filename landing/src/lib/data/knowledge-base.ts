@@ -284,7 +284,8 @@ export const specs: Doc[] = [
   {
     slug: "loam-spec",
     title: "Loam — Name Protection",
-    description: "Username and domain validation system protecting the grove from harm",
+    description:
+      "Username and domain validation system protecting the grove from harm",
     excerpt:
       "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.",
     category: "specs",
@@ -294,7 +295,8 @@ export const specs: Doc[] = [
   {
     slug: "press-spec",
     title: "Press — Image Processing CLI",
-    description: "CLI tool for WebP conversion, AI descriptions, and CDN upload",
+    description:
+      "CLI tool for WebP conversion, AI descriptions, and CDN upload",
     excerpt:
       "A press takes something raw and makes it ready. Press is Grove's image processing CLI: convert to WebP, generate AI descriptions for accessibility, deduplicate by content hash, and upload to R2. One command, and your images are ready to publish.",
     category: "specs",
@@ -665,13 +667,23 @@ export const helpArticles: Doc[] = [
   {
     slug: "why-some-usernames-arent-available",
     title: "Why Some Usernames Aren't Available",
-    description:
-      "How Grove protects the community through username validation",
+    description: "How Grove protects the community through username validation",
     excerpt:
       "Every name passes through the same earth before taking root. Grove's username system quietly filters reserved terms, impersonation attempts, and harmful content. If your preferred username isn't available, here's why.",
     category: "help",
     lastUpdated: "2026-01-07",
     readingTime: 4,
+  },
+  {
+    slug: "what-is-solarpunk",
+    title: "What is Solarpunk?",
+    description:
+      "The philosophy behind Grove's approach to technology and community",
+    excerpt:
+      "Solarpunk is a vision of the future that's optimistic without being naive. Technology in service of people, not the other way around. Community ownership over corporate extraction. Here's what it means for Grove.",
+    category: "help",
+    lastUpdated: "2026-01-07",
+    readingTime: 5,
   },
 ];
 
@@ -749,6 +761,7 @@ export const patterns: Doc[] = [
     excerpt:
       "Light enters plain and emerges transformed. Prism defines Grove's visual language: glassmorphism surfaces, seasonal theming, randomized forests, and the warm aesthetic that makes every page feel like a place you want to visit.",
     category: "patterns",
+    icon: "triangle",
     lastUpdated: "2026-01-02",
     readingTime: 20,
   },
@@ -759,6 +772,7 @@ export const patterns: Doc[] = [
     excerpt:
       "The Songbird Pattern is a three-layer defense against prompt injection. Canary detects poison early, Kestrel validates semantically, Robin produces safe output. Each layer costs fractions of a cent but protects all Grove AI features.",
     category: "patterns",
+    icon: "bird",
     lastUpdated: "2026-01-01",
     readingTime: 12,
   },
@@ -770,6 +784,7 @@ export const patterns: Doc[] = [
     excerpt:
       "The framework where Grove's threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.",
     category: "patterns",
+    icon: "spool",
     lastUpdated: "2026-01-01",
     readingTime: 18,
   },
@@ -781,6 +796,7 @@ export const patterns: Doc[] = [
     excerpt:
       "The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Uses Durable Objects for precision and graduated response.",
     category: "patterns",
+    icon: "gauge",
     lastUpdated: "2026-01-01",
     readingTime: 15,
   },
@@ -791,6 +807,7 @@ export const patterns: Doc[] = [
     excerpt:
       "Vineyard is a documentation pattern every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed. A consistent way to showcase the ecosystem.",
     category: "patterns",
+    icon: "grape",
     lastUpdated: "2025-12-30",
     readingTime: 5,
   },
@@ -802,6 +819,7 @@ export const patterns: Doc[] = [
     excerpt:
       "The watchful guardian who tests the forest's defenses before the storm. Sentinel doesn't just ask 'can it handle 500 users?'—it asks 'what happens to p95 latency during the ramp-up, and which Durable Object becomes the bottleneck first?'",
     category: "patterns",
+    icon: "radar",
     lastUpdated: "2026-01-01",
     readingTime: 20,
   },
@@ -813,6 +831,7 @@ export const patterns: Doc[] = [
     excerpt:
       "A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability, full VM capabilities.",
     category: "patterns",
+    icon: "webhook",
     lastUpdated: "2026-01-01",
     readingTime: 18,
   },

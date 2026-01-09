@@ -59,9 +59,11 @@
 	}: Props = $props();
 
 	// Variant-specific styles - warm grove tones with true glass transparency
+	// See grove-ui-design skill for opacity guidelines:
+	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/60 dark:bg-emerald-950/25
+			bg-white/60 dark:bg-slate-800/50
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
@@ -77,32 +79,32 @@
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/30 dark:bg-emerald-950/15
+			bg-white/40 dark:bg-slate-800/30
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/70 dark:bg-emerald-950/35
+			bg-white/80 dark:bg-slate-800/70
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
 	// Border colors per variant - subtle, warm borders
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-emerald-800/25",
+		default: "border-white/40 dark:border-slate-700/40",
 		accent: "border-accent/30 dark:border-accent/20",
 		dark: "border-slate-700/30 dark:border-slate-600/30",
-		muted: "border-white/20 dark:border-emerald-800/15",
-		frosted: "border-white/50 dark:border-emerald-800/30"
+		muted: "border-white/20 dark:border-slate-700/30",
+		frosted: "border-white/50 dark:border-slate-700/40"
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/70 dark:hover:bg-emerald-950/35 hover:shadow-lg hover:border-white/50 dark:hover:border-emerald-700/30",
+		default: "hover:bg-white/70 dark:hover:bg-slate-800/50 hover:shadow-lg hover:border-white/50 dark:hover:border-slate-600/50",
 		accent: "hover:bg-accent/30 dark:hover:bg-accent/25 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
 		dark: "hover:bg-slate-900/50 dark:hover:bg-slate-950/50 hover:shadow-xl hover:border-slate-600/40",
-		muted: "hover:bg-white/40 dark:hover:bg-emerald-950/25 hover:shadow-md hover:border-white/30",
-		frosted: "hover:bg-white/80 dark:hover:bg-emerald-950/45 hover:shadow-lg hover:border-white/60"
+		muted: "hover:bg-white/40 dark:hover:bg-slate-800/40 hover:shadow-md hover:border-white/30 dark:hover:border-slate-600/40",
+		frosted: "hover:bg-white/80 dark:hover:bg-slate-800/60 hover:shadow-lg hover:border-white/60 dark:hover:border-slate-600/50"
 	};
 
 	const computedClass = $derived(

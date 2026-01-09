@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { toolIcons } from '$lib/utils/icons';
 
   let { data } = $props();
   const { specs, helpArticles, legalDocs, marketingDocs, patterns } = data;
@@ -211,8 +212,13 @@
         <div class="grid md:grid-cols-3 gap-4 mb-4">
           {#each patterns as pattern}
             <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <a href="/knowledge/patterns/{pattern.slug}" class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors">
-                {pattern.title}
+              <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
+                {#if pattern.icon && toolIcons[pattern.icon]}
+                  <div class="flex-shrink-0 w-5 h-5 mt-0.5">
+                    <svelte:component this={toolIcons[pattern.icon]} class="w-5 h-5" />
+                  </div>
+                {/if}
+                <span>{pattern.title}</span>
               </a>
               <p class="text-foreground-subtle text-xs mt-1">{pattern.description}</p>
             </div>

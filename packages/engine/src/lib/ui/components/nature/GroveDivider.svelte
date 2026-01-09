@@ -16,6 +16,8 @@
     color     - Custom color override (regular Logo only)
     season    - Override season (uses seasonStore by default)
     gap       - Tailwind gap class (default: 'gap-1.5')
+    spacing   - Gap in pixels or rem (overrides gap if provided)
+    rotation  - Logo rotation mode: 'default' | 'left-right' | 'up-down' (default: auto based on orientation)
     class     - Additional CSS classes
 -->
 <script lang="ts">
@@ -24,6 +26,8 @@
 	import type { GlassVariant } from '../ui/types';
 	import type { Season } from './palette';
 	import { seasonStore } from '../../stores/season';
+
+	type RotationMode = 'default' | 'left-right' | 'up-down';
 
 	interface Props {
 		/** Number of logos to display (default: 7) */
@@ -36,6 +40,10 @@
 		class?: string;
 		/** Gap between logos (Tailwind gap class, e.g., 'gap-1', 'gap-2') */
 		gap?: string;
+		/** Spacing in pixels or rem (e.g., '8px', '0.5rem') - overrides gap if provided */
+		spacing?: string;
+		/** Logo rotation mode: 'default' auto-selects based on orientation, 'left-right' alternates horizontal rotation, 'up-down' alternates vertical rotation */
+		rotation?: RotationMode;
 		/** Use GlassLogo instead of regular Logo */
 		glass?: boolean;
 		/** Glass variant (only applies when glass=true) */
@@ -56,6 +64,8 @@
 		season,
 		class: className = '',
 		gap = 'gap-1.5',
+		spacing,
+		rotation = 'default',
 		glass = false,
 		variant = 'default',
 		breathing = false,
@@ -75,21 +85,37 @@
 	// Generate array for iteration
 	const logos = $derived(Array.from({ length: count }, (_, i) => i));
 
-	// Determine if a logo should be flipped (every odd index)
-	function isFlipped(index: number): boolean {
-		return index % 2 === 1;
+	// Determine effective rotation mode based on orientation
+	// - 'default': vertical orientation uses 'left-right', horizontal uses 'up-down'
+	// - 'left-right': logos alternate rotating 90deg left and right (horizontal tilt)
+	// - 'up-down': logos alternate upright and upside-down (180deg rotation)
+	const effectiveRotation = $derived(
+		rotation === 'default'
+			? (vertical ? 'left-right' : 'up-down')
+			: rotation
+	);
+
+	// Get rotation class based on mode and index
+	function getRotationClass(index: number): string {
+		if (index % 2 === 0) return ''; // Even indices: no rotation
+		// Odd indices: apply rotation based on mode
+		return effectiveRotation === 'left-right' ? 'rotate-90' : 'rotate-180';
 	}
 
 	const activeSeason = $derived(season ?? $seasonStore);
+
+	// Compute inline style for spacing (overrides gap class)
+	const containerStyle = $derived(spacing ? `gap: ${spacing}` : '');
 </script>
 
 <div
-	class="flex items-center justify-center {gap} {vertical ? 'flex-col' : 'flex-row'} {className}"
+	class="flex items-center justify-center {spacing ? '' : gap} {vertical ? 'flex-col' : 'flex-row'} {className}"
+	style={containerStyle}
 	role="separator"
 	aria-hidden="true"
 >
 	{#each logos as index}
-		<div class={isFlipped(index) ? 'rotate-180' : ''}>
+		<div class={getRotationClass(index)}>
 			{#if glass}
 				<GlassLogo
 					class={sizeClasses[size]}

@@ -1,18 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import { getToolIcon, type ToolIconKey } from '$lib/utils/icons';
 
   interface Props {
     headers?: Array<{ id: string; text: string; level: number }>;
+    iconItems?: Array<{ id: string; text: string; icon: string }>;
   }
 
-  let { headers = [] }: Props = $props();
+  let { headers = [], iconItems = [] }: Props = $props();
 
   let activeId = $state('');
   let isOpen = $state(false);
 
   onMount(() => {
-    if (!browser || headers.length === 0) return;
+    if (!browser || (headers.length === 0 && iconItems.length === 0)) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -36,10 +38,18 @@
       }
     });
 
+    // Observe icon items
+    iconItems.forEach((item) => {
+      const element = document.getElementById(item.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
     return () => observer.disconnect();
   });
 
-  function scrollToHeader(id: string) {
+  function scrollTo(id: string) {
     const element = document.getElementById(id);
     if (element) {
       const offset = 120; // Account for sticky header + breathing room
@@ -66,7 +76,7 @@
         <li class="toc-item" class:active={activeId === header.id}>
           <button
             type="button"
-            onclick={() => scrollToHeader(header.id)}
+            onclick={() => scrollTo(header.id)}
             class="toc-link"
             style="padding-left: {(header.level - 1) * 0.75}rem"
           >
@@ -106,7 +116,7 @@
             <li>
               <button
                 type="button"
-                onclick={() => scrollToHeader(header.id)}
+                onclick={() => scrollTo(header.id)}
                 class="toc-mobile-link"
                 class:active={activeId === header.id}
                 style="padding-left: {(header.level - 1) * 0.75 + 1}rem"

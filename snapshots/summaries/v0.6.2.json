@@ -1,0 +1,23 @@
+{
+  "version": "v0.6.2",
+  "date": "2025-12-16 17:59:27 -0500",
+  "commitHash": "6811fa3",
+  "summary": "This release brings a fresh polish to Grove with a rebrand of our storage service to Amber, making it easier to recognize and use. We've also enhanced our platform plans with clearer tiers and expanded features, giving you more flexibility to grow your blog. Behind the scenes, we've added thorough testing to ensure everything runs smoothly, keeping your publishing experience reliable and enjoyable.\n",
+  "stats": {
+    "totalCommits": 6,
+    "features": 3,
+    "fixes": 0,
+    "refactoring": 0,
+    "docs": 1,
+    "tests": 1,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "bump engine version to 0.6.2 and publish to npm",
+  "rename Cellar to Amber across documentation",
+  "rename plan tiers and expand platform plan features"
+],
+    "fixes": []
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "version": "v0.6.0",
+  "date": "2025-12-14 23:08:31 -0500",
+  "commitHash": "c1af492",
+  "summary": "Grove v0.6.0 brings a beautifully refreshed identity with our rebrand to Lattice, making the platform feel more connected and organic. We’ve rolled out a smooth new tenant onboarding flow and enhanced our multi-tenant routing so every blog feels right at home. You’ll also find a richer visual experience with a new vine-inspired landing page, more fonts, and a handy dark mode toggle—all part of our ongoing commitment to a caring, vibrant community.\n",
+  "stats": {
+    "totalCommits": 70,
+    "features": 16,
+    "fixes": 12,
+    "refactoring": 0,
+    "docs": 32,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "Tenant onboarding flow at plant.grove.place (#72)",
+  "update footer branding to Lattice",
+  "migrate from magic code to Heartwood OAuth",
+  "Fix multi-tenant routing and deploy engine for all tenants",
+  "add 11 new fonts to Grove font collection (20 total)",
+  "enhance credits page with font previews",
+  "add credits page for fonts, tech stack, and AI tools",
+  "add repository snapshot generator for tracking project growth (#67)",
+  "add dark mode toggle with CSS variables (#64)",
+  "add email signup CTA to vision page (#63)"
+],
+    "fixes": [
+  "deploy engine package instead of example-site",
+  "set Lexend as default font across all Grove properties",
+  "address theme toggle PR feedback (#65)",
+  "update UpgradePrompt tier names to match new pricing structure (#62)",
+  "update terms of service with accurate pricing and rename Grove Social to Meadow (#61)",
+  "move vision, pricing, and legal pages from domains to landing (#60)",
+  "update SITE_NAME to Acorn in domains wrangler config",
+  "proxy auth-api and mc-control through grove-router",
+  "update deploy workflow to use correct Pages project name",
+  "correct Pages hostname and add subdomain routing map"
+]
+  }
+}

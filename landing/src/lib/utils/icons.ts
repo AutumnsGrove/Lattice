@@ -14,7 +14,7 @@
  */
 
 // Lab icons - experimental icons from @lucide/lab wrapped as Svelte components
-import BeeIcon from '$lib/components/icons/BeeIcon.svelte';
+import BeeIcon from "$lib/components/icons/BeeIcon.svelte";
 
 import {
   // Navigation
@@ -22,7 +22,7 @@ import {
   Info,
   Telescope,
   MapPin,
-  CircleDollarSign,
+  HandCoins,
   BookOpen,
   Trees,
   PenLine,
@@ -173,7 +173,16 @@ import {
   CloudCog as MonitorCloud,
   ShoppingBasket,
   ScanQrCode,
-} from 'lucide-svelte';
+  SendToBack,
+  Regex,
+  // Icon additions for workshop TOC and tools
+  Pyramid,
+  Blinds,
+  RockingChair,
+  Wrench,
+  Dock,
+  IdCardLanyard,
+} from "lucide-svelte";
 
 // ============================================================================
 // NAVIGATION ICONS
@@ -184,7 +193,7 @@ export const navIcons = {
   about: Info,
   vision: Telescope,
   roadmap: MapPin,
-  pricing: CircleDollarSign,
+  pricing: HandCoins,
   knowledge: BookOpen,
   forest: Trees,
   blog: PenLine,
@@ -327,68 +336,77 @@ export const toolIcons = {
   // Press - image processing CLI
   stamp: Stamp,
   // Creative/Composition (Weave)
-  splinepointer: SplinePointer,  // Weave - main icon
-  waves: Waves,                  // Sway - animation mode
-  waypoints: Waypoints,          // Fern - diagram mode
-  route: Route,                  // Thread - connections
+  splinepointer: SplinePointer, // Weave - main icon
+  "send-to-back": SendToBack, // Breeze - animation mode
+  waves: Waves, // (legacy Sway reference)
+  waypoints: Waypoints, // Trace - diagram mode
+  route: Route, // Thread - connections
+  regex: Regex, // Patterns - design system
   // Subicons for workshop features
-  layoutlist: LayoutList,        // Lattice - Vines
-  origami: Origami,              // Songbird - Canary
-  feather: Feather,              // Songbird - Kestrel
-  toolcase: ToolCase,            // Songbird - Robin
-  cloudcog: CloudCog,            // Threshold - Edge
-  building2: Building2,          // Threshold - Tenant
-  house: House,                  // Threshold - User
-  shieldoff: ShieldOff,          // Threshold - Endpoint
-  key: Key,                      // Loom - Session
-  codepen: Codepen,              // Loom - Tenant
-  filecode: FileCode,            // Loom - Post
+  layoutlist: LayoutList, // Lattice - Vines
+  origami: Origami, // Songbird - Canary
+  feather: Feather, // Songbird - Kestrel
+  toolcase: ToolCase, // Songbird - Robin
+  cloudcog: CloudCog, // Threshold - Edge
+  building2: Building2, // Threshold - Tenant
+  house: House, // Threshold - User
+  shieldoff: ShieldOff, // Threshold - Endpoint
+  key: Key, // Loom - Session
+  codepen: Codepen, // Loom - Tenant
+  filecode: FileCode, // Loom - Post
   paintbrush: PaintbrushVertical, // Foliage - Themes
-  sliders: SlidersHorizontal,    // Foliage - Customizer
-  booktype: BookType,            // Foliage - Fonts
-  component: Component,          // Ivy - Compose
-  lock: Lock,                    // Ivy - Encrypt
-  contact: Contact,              // Ivy - Contacts
-  eye: Eye,                      // Rings - Views
-  bookopencheck: BookOpenCheck,  // Rings - Readers
-  goal: Goal,                    // Rings - Resonance
+  sliders: SlidersHorizontal, // Foliage - Customizer
+  booktype: BookType, // Foliage - Fonts
+  component: Component, // Ivy - Compose
+  lock: Lock, // Ivy - Encrypt
+  contact: Contact, // Ivy - Contacts
+  eye: Eye, // Rings - Views
+  bookopencheck: BookOpenCheck, // Rings - Readers
+  goal: Goal, // Rings - Resonance
   // Additional subicons (round 2)
-  chrome: Chrome,                // Heartwood - Google
-  github: Github,                // Heartwood - GitHub
-  wand2: Wand2,                  // Heartwood - Magic
-  penline: PenLine,              // Arbor - Posts
-  layout: Layout,                // Arbor - Pages
-  image: Image,                  // Arbor - Media
-  reply: Reply,                  // Reeds - Replies
-  messagecircle: MessageCircle,  // Reeds - Comments
-  bot: Bot,                      // Shade - Bot
-  bug: Bug,                      // Shade - Scraper
-  cpu: Cpu,                      // Vista - Workers
-  frame: Frame,                  // Terrarium - Canvas
-  shapes: Shapes,                // Terrarium - Assets
-  share2: Share2,                // Terrarium - Export
+  chrome: Chrome, // Heartwood - Google
+  github: Github, // Heartwood - GitHub
+  wand2: Wand2, // Heartwood - Magic
+  penline: PenLine, // Arbor - Posts
+  layout: Layout, // Arbor - Pages
+  image: Image, // Arbor - Media
+  reply: Reply, // Reeds - Replies
+  messagecircle: MessageCircle, // Reeds - Comments
+  bot: Bot, // Shade - Bot
+  bug: Bug, // Shade - Scraper
+  cpu: Cpu, // Vista - Workers
+  frame: Frame, // Terrarium - Canvas
+  shapes: Shapes, // Terrarium - Assets
+  share2: Share2, // Terrarium - Export
   // Additional subicons (round 3) - workshop expansion
-  imageup: ImageUp,              // Terrarium - Export (alternative)
-  flamekindling: FlameKindling,  // Wisp - Fireside mode
-  globelock: GlobeLock,          // Wisp/Shade/Thorn - Privacy
-  shredder: Trash2,              // ZDR - Zero Data Retention
-  rss: Rss,                      // Meadow - RSS feeds
+  imageup: ImageUp, // Terrarium - Export (alternative)
+  flamekindling: FlameKindling, // Wisp - Fireside mode
+  globelock: GlobeLock, // Wisp/Shade/Thorn - Privacy
+  shredder: Trash2, // ZDR - Zero Data Retention
+  rss: Rss, // Meadow - RSS feeds
   squareasterisk: SquareAsterisk, // Meadow - Opt-in
-  idcard: IdCard,                // Heartwood - Identity
-  badgecheck: BadgeCheck,        // Nook/Outpost - Private access
-  refrigerator: Refrigerator,    // Vista - Storage
-  brickwallfire: BrickWallFire,  // Shade - Complete protection
-  filebox: FileBox,              // Loom - main icon
-  servercog: ServerCog,          // Threshold - Edge
-  solarpanel: SolarPanel,        // Firefly - Solarpunk aligned
-  monitorcloud: MonitorCloud,    // Outpost - main icon
+  idcard: IdCard, // Heartwood - Identity
+  badgecheck: BadgeCheck, // Nook/Outpost - Private access
+  refrigerator: Refrigerator, // Vista - Storage
+  brickwallfire: BrickWallFire, // Shade - Complete protection
+  filebox: FileBox, // Loom - main icon
+  servercog: ServerCog, // Threshold - Edge
+  solarpanel: SolarPanel, // Firefly - Solarpunk aligned
+  monitorcloud: MonitorCloud, // Outpost - main icon
   // Lab icons (experimental @lucide/lab)
-  bee: BeeIcon,                  // Swarm - agentic swarm mode
+  bee: BeeIcon, // Swarm - agentic swarm mode
   // Loam - name protection & validation
-  funnel: Funnel,                // Loam - filters valid names
+  funnel: Funnel, // Loam - filters valid names
   // Scout & Trove
-  'shopping-basket': ShoppingBasket, // Scout - shopping research
-  'scan-qr-code': ScanQrCode,    // Trove - book discovery
+  "shopping-basket": ShoppingBasket, // Scout - shopping research
+  "scan-qr-code": ScanQrCode, // Trove - book discovery
+  // Workshop TOC icons
+  pyramid: Pyramid, // Core Infrastructure TOC
+  blinds: Blinds, // Shade - AI protection
+  "rocking-chair": RockingChair, // Porch - front porch conversations
+  toolbox: Wrench, // Standalone Tools TOC
+  dock: Dock, // Operations TOC
+  "id-card-lanyard": IdCardLanyard, // Content & Community TOC
 } as const;
 
 // ============================================================================
@@ -407,17 +425,17 @@ export const roadmapFeatureIcons = {
   download: Download,
   lifebuoy: HelpCircle,
   signpost: Signpost,
-  terminal: Terminal,          // Bloom - remote coding (was FileText)
-  network: CircuitBoard,       // Mycelium - MCP server (was Github)
-  database: Database,          // Patina - backups (was HardDrive)
+  terminal: Terminal, // Bloom - remote coding (was FileText)
+  network: CircuitBoard, // Mycelium - MCP server (was Github)
+  database: Database, // Patina - backups (was HardDrive)
   // First Buds Phase
-  ivy: Mailbox,                // Ivy - email (was Mail, Workshop uses mailbox)
-  amber: HardDrive,            // Amber - storage
-  trails: MapPinPlus,          // Trails - personal roadmaps (was MapPin, Workshop uses mapplus)
+  ivy: Mailbox, // Ivy - email (was Mail, Workshop uses mailbox)
+  amber: HardDrive, // Amber - storage
+  trails: MapPinPlus, // Trails - personal roadmaps (was MapPin, Workshop uses mapplus)
   tree: Trees,
-  swatchbook: SwatchBook,      // Foliage - theming (was Palette)
+  swatchbook: SwatchBook, // Foliage - theming (was Palette)
   // Full Bloom Phase
-  meadow: Users,               // Meadow - social feed (was Flower2, Workshop uses users)
+  meadow: Users, // Meadow - social feed (was Flower2, Workshop uses users)
   clock: Clock,
   message: MessagesSquare,
   heart: Heart,
@@ -425,16 +443,16 @@ export const roadmapFeatureIcons = {
   crown: Star,
   paintbrush: Palette,
   users: Users,
-  shield: UserRoundCheck,      // Thorn - moderation (was ShieldUser)
+  shield: UserRoundCheck, // Thorn - moderation (was ShieldUser)
   // Golden Hour Phase
   gem: Gem,
-  zap: Zap,                    // Performance (was TrendingUp)
+  zap: Zap, // Performance (was TrendingUp)
   accessibility: Info,
   smartphone: FileText,
   puzzle: Lightbulb,
   // Midnight Bloom Phase
-  coffee: Coffee,              // The Cafe (was Heart)
-  qrcode: QrCode,              // Community Boards (was Lightbulb)
+  coffee: Coffee, // The Cafe (was Heart)
+  qrcode: QrCode, // Community Boards (was Lightbulb)
   bookopen: BookOpen,
   home: Home,
 } as const;
@@ -456,8 +474,8 @@ export const pricingIcons = {
   palette: Palette,
   flower2: Flower2,
   messagecircle: MessageCircle,
-  globe: Globe,              // Legacy - prefer searchcode for domains (Forage)
-  searchcode: SearchCode,    // Forage - domain discovery
+  globe: Globe, // Legacy - prefer searchcode for domains (Forage)
+  searchcode: SearchCode, // Forage - domain discovery
   mail: Mail,
   lifebuoy: LifeBuoy,
   calendardays: CalendarDays,
@@ -501,7 +519,7 @@ export type ToolIconKey = keyof typeof toolIcons;
  */
 export function getIcon<T extends Record<string, any>>(
   map: T,
-  key: keyof T | string
+  key: keyof T | string,
 ) {
   return (map as Record<string, any>)[key as string];
 }
@@ -525,27 +543,27 @@ export function getIconFromAll(key: string) {
  * Seasonal icon colors for roadmap phases
  */
 export const seasonalIconColors = {
-  'first-frost': 'text-blue-500',
-  'thaw': 'text-teal-500',
-  'first-buds': 'text-pink-500',
-  'full-bloom': 'text-green-500',
-  'golden-hour': 'text-amber-500',
-  'midnight-bloom': 'text-purple-300',
+  "first-frost": "text-blue-500",
+  thaw: "text-teal-500",
+  "first-buds": "text-pink-500",
+  "full-bloom": "text-green-500",
+  "golden-hour": "text-amber-500",
+  "midnight-bloom": "text-purple-300",
 } as const;
 
 /**
  * Status-based icon colors
  */
 export const statusIconColors = {
-  live: 'text-green-500',
-  complete: 'text-green-500',
-  integrated: 'text-blue-500',
-  implemented: 'text-blue-500',
-  building: 'text-amber-500',
-  planned: 'text-slate-400',
-  past: 'text-green-500',
-  current: 'text-accent',
-  future: 'text-slate-400',
+  live: "text-green-500",
+  complete: "text-green-500",
+  integrated: "text-blue-500",
+  implemented: "text-blue-500",
+  building: "text-amber-500",
+  planned: "text-slate-400",
+  past: "text-green-500",
+  current: "text-accent",
+  future: "text-slate-400",
 } as const;
 
 /**

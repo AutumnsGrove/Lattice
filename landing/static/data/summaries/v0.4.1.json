@@ -1,0 +1,29 @@
+{
+  "version": "v0.4.1",
+  "date": "2025-12-05 13:33:45 -0500",
+  "commitHash": "858d0cd",
+  "summary": "This release brings important improvements to Grove's stability and developer experience, especially for deployments on Cloudflare. We've resolved several deployment and compatibility issues, enhanced our documentation to help you get started faster, and polished the admin panel for a smoother experience on mobile devices. It's all about making Grove more reliable and easier to work with, wherever you choose to run it.\n",
+  "stats": {
+    "totalCommits": 15,
+    "features": 0,
+    "fixes": 9,
+    "refactoring": 1,
+    "docs": 2,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "replace sonner with svelte-sonner for Cloudflare compatibility",
+  "pass D1 binding explicitly in wrangler pages deploy",
+  "add email_signups table migration for automatic deployment",
+  "add missing email_signups table migration",
+  "resolve TypeScript errors breaking landing page build",
+  "remove non-existent packages/ui step from deploy workflow",
+  "add cache-dependency-path to pnpm workflow caching",
+  "correct gutter item positioning to align with content anchors",
+  "prevent mobile zoom issues in admin panel"
+]
+  }
+}

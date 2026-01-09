@@ -1,0 +1,22 @@
+{
+  "version": "v0.4.9",
+  "date": "2025-12-07 15:13:09 -0500",
+  "commitHash": "4319492",
+  "summary": "This release focuses on polishing Grove's core writing experience, with particular attention to improving the Markdown editor for a smoother and more reliable drafting process. We've also made important security enhancements under the hood to keep your content safe. While it's primarily a maintenance update, these fixes pave the way for some exciting new features we're building for you next.\n",
+  "stats": {
+    "totalCommits": 8,
+    "features": 0,
+    "fixes": 2,
+    "refactoring": 0,
+    "docs": 1,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "resolve UI bugs in MarkdownEditor and CSRF token flow",
+  "update ContentWithGutter to use dompurify instead of isomorphic-dompurify"
+]
+  }
+}

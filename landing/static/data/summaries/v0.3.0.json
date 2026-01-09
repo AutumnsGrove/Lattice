@@ -1,0 +1,21 @@
+{
+  "version": "v0.3.0",
+  "date": "2025-12-03 18:20:30 -0500",
+  "commitHash": "befe8b2",
+  "summary": "This release marks a major step forward in Grove's architecture by separating our core UI into its own dedicated package. This foundational change paves the way for a more robust and customizable platform, making it easier for us to deliver exciting new features and improvements in the future. We've also updated our internal documentation to ensure a smooth transition for our development team.\n",
+  "stats": {
+    "totalCommits": 5,
+    "features": 1,
+    "fixes": 0,
+    "refactoring": 0,
+    "docs": 3,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "Migrate generic UI to @groveengine/ui package"
+],
+    "fixes": []
+  }
+}

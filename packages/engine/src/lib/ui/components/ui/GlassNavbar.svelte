@@ -71,8 +71,8 @@
 <header
 	class={cn(
 		"sticky top-0 z-40 py-4 px-6",
-		"bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md",
-		"border-b border-white/40 dark:border-emerald-800/25",
+		"bg-white/60 dark:bg-slate-900/60 backdrop-blur-md",
+		"border-b border-white/40 dark:border-slate-700/40",
 		className
 	)}
 >

@@ -8,6 +8,26 @@ import historyData from "../../../static/data/history.csv?raw";
  */
 const EXPECTED_COLUMNS = 17;
 
+interface VersionSummary {
+  version: string;
+  date: string;
+  commitHash: string;
+  summary: string;
+  stats: {
+    totalCommits: number;
+    features: number;
+    fixes: number;
+    refactoring: number;
+    docs: number;
+    tests: number;
+    performance: number;
+  };
+  highlights: {
+    features: string[];
+    fixes: string[];
+  };
+}
+
 interface SnapshotData {
   timestamp: string;
   label: string;
@@ -116,8 +136,30 @@ function parseCSV(csv: string): SnapshotData[] {
   return results;
 }
 
+// Load all summary JSON files at build time using Vite's import.meta.glob
+const summaryModules = import.meta.glob(
+  "../../../static/data/summaries/*.json",
+  {
+    eager: true,
+    import: "default",
+  },
+) as Record<string, VersionSummary>;
+
+function loadSummaries(): Map<string, VersionSummary> {
+  const summaries = new Map<string, VersionSummary>();
+
+  for (const [path, summary] of Object.entries(summaryModules)) {
+    if (summary && summary.version) {
+      summaries.set(summary.version, summary);
+    }
+  }
+
+  return summaries;
+}
+
 export function load() {
   const snapshots = parseCSV(historyData);
+  const summaries = loadSummaries();
 
   // Handle empty data gracefully
   if (snapshots.length === 0) {
@@ -126,6 +168,7 @@ export function load() {
       latest: null,
       growth: null,
       totalSnapshots: 0,
+      summaries: Object.fromEntries(summaries),
     };
   }
 
@@ -148,5 +191,6 @@ export function load() {
     latest,
     growth,
     totalSnapshots: snapshots.length,
+    summaries: Object.fromEntries(summaries),
   };
 }

@@ -561,7 +561,7 @@ Use these icons consistently across the project:
 | About | `Info` | |
 | Vision | `Telescope` | Looking forward |
 | Roadmap | `Map` | Journey/direction |
-| Pricing | `CircleDollarSign` | Money/currency |
+| Pricing | `HandCoins` | Money/currency |
 | Knowledge | `BookOpen` | Learning/docs |
 | Forest | `Trees` | Community blogs |
 | Blog | `PenLine` | Writing |

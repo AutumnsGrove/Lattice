@@ -18,7 +18,7 @@ Grove uses **Lucide icons exclusively**. No emojis in UI components. Icons enhan
 | About | `Info` | Information, learn more | Sidebar, help links |
 | Vision | `Telescope` | Looking forward, future plans | Main nav |
 | Roadmap | `MapPin` | Journey, development phases | Main nav, progress |
-| Pricing | `CircleDollarSign` | Costs, subscription tiers | Main nav, pricing pages |
+| Pricing | `HandCoins` | Costs, subscription tiers | Main nav, pricing pages |
 | Knowledge | `BookOpen` | Learning, documentation | Main nav, help |
 | Forest/Community | `Trees` | Grove blogs, user content | Main nav, forest page |
 | Blog | `PenLine` | Writing, personal blog | Main nav, external links |
@@ -173,7 +173,7 @@ landing/
 
 import {
   // Navigation
-  Home, Info, Telescope, MapPin, CircleDollarSign, BookOpen, Trees, PenLine,
+  Home, Info, Telescope, MapPin, HandCoins, BookOpen, Trees, PenLine,
   // Features
   Mail, HardDrive, Palette, ShieldCheck, Cloud, SearchCode, Archive, Upload,
   MessagesSquare, ExternalLink, Github,
@@ -196,7 +196,7 @@ export const navIcons = {
   about: Info,
   vision: Telescope,
   roadmap: MapPin,
-  pricing: CircleDollarSign,
+  pricing: HandCoins,
   knowledge: BookOpen,
   forest: Trees,
   blog: PenLine,

@@ -1,0 +1,40 @@
+{
+  "version": "v0.6.3",
+  "date": "2025-12-18 10:45:54 -0500",
+  "commitHash": "ba237c9",
+  "summary": "This release brings Grove's forest to life with a beautiful, interactive visualization on the new /forest page, complete with seasonally reactive trees and falling leaves. We've polished our animated logo and made several under-the-hood improvements, including converting core utilities to TypeScript for better reliability. Overall, it's a release focused on enriching the visual identity and strengthening the platform's foundation.\n",
+  "stats": {
+    "totalCommits": 35,
+    "features": 9,
+    "fixes": 15,
+    "refactoring": 1,
+    "docs": 3,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "add subdomain routes for internal projects",
+  "add falling leaves to forest page (#85)",
+  "add nature palette system and TreeAspen component (#83)",
+  "add trunk color customization to Logo and new tree components (#82)",
+  "add /forest page with logo-based tree visualization (#81)",
+  "add Header to homepage",
+  "add optional color prop to Logo component",
+  "add logo to header and footer",
+  "update logo and favicon to new hashtag design"
+],
+    "fixes": [
+  "convert route files to TypeScript for proper module resolution",
+  "convert utils to TypeScript and add JSDoc types to composables (#95)",
+  "add breathing animation and fix reactivity (#94)",
+  "reduce falling leaves distance and move toggle to bottom right (#93)",
+  "make season toggle icon-only and fix falling leaves visibility (#92)",
+  "make tree component colors reactive to season changes",
+  "fix forest page tree colors and layout positioning (#90)",
+  "improve forest page layout and autumn color reactivity (#88)",
+  "refine falling leaves animation and behavior (#87)",
+  "improve TreeBirch and TreeAspen leaf shapes (#86)"
+]
+  }
+}

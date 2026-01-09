@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
+	import TableOfContents from '$lib/components/TableOfContents.svelte';
 
 	// Centralized icon registry - single source of truth for all icons
 	import {
@@ -24,6 +25,7 @@
 	const MapPin = navIcons.roadmap;
 	const Check = stateIcons.check;
 	const CheckCircle = stateIcons.checkcircle;
+	const Tag = stateIcons.tag;
 	const Sun = phaseIcons.sun;
 	const Gem = phaseIcons.gem;
 	const MoonIcon = phaseIcons.moon;
@@ -182,6 +184,13 @@
 		'midnight-bloom': getPhaseStatus('midnight-bloom')
 	};
 
+	// Table of Contents headers
+	const tocHeaders = PHASE_ORDER.map(key => ({
+		id: key,
+		text: phases[key].title,
+		level: 2
+	}));
+
 	// =============================================================================
 	// RANDOMIZED TREE GENERATION
 	// =============================================================================
@@ -330,9 +339,18 @@
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
 				The Journey Ahead
 			</h1>
-			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
+			<p class="text-lg text-foreground-muted max-w-xl mx-auto mb-6">
 				A grove doesn't grow overnight. Here's the path we're walking together—from first frost to midnight bloom.
 			</p>
+
+			<!-- Quick link to version history -->
+			<a
+				href="/journey"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-slate-800 transition-colors"
+			>
+				<Tag class="w-4 h-4" />
+				View the Journey
+			</a>
 		</div>
 
 		<!-- Decorative clouds -->
@@ -935,6 +953,8 @@
 			</div>
 		</section>
 	</div>
+
+	<TableOfContents headers={tocHeaders} />
 
 	<Footer />
 </main>

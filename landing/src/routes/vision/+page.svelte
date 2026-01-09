@@ -6,6 +6,9 @@
 	// Centralized icon registry
 	import { navIcons, contentIcons, actionIcons, toolIcons } from '$lib/utils/icons';
 
+	// SolarPanel icon for solarpunk callout
+	const solarpunkIcon = toolIcons.solarpanel;
+
 	// Icon mapping for Core Values cards
 	const coreValueIcons = {
 		accessibility: toolIcons.helpcircle,
@@ -148,6 +151,17 @@
 							</p>
 						</div>
 					</div>
+
+					<!-- Solarpunk Callout -->
+					<a
+						href="/knowledge/help/what-is-solarpunk"
+						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/90 dark:hover:bg-amber-900/40 rounded-lg border border-amber-200/60 dark:border-amber-800/40 transition-colors"
+					>
+						<svelte:component this={solarpunkIcon} class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+						<span class="text-sm text-foreground-muted group-hover:text-foreground transition-colors">
+							These values reflect <strong class="text-amber-700 dark:text-amber-300">solarpunk</strong> thinking. <span class="text-foreground-subtle group-hover:text-foreground-muted">Learn what that means →</span>
+						</span>
+					</a>
 				</section>
 
 				<!-- Meadow Section -->

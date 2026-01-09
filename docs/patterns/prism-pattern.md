@@ -579,7 +579,7 @@ Maintain consistency by using the same icon for the same concept:
 | About | `Info` | |
 | Vision | `Telescope` | Looking forward |
 | Roadmap | `Map` | Journey/direction |
-| Pricing | `CircleDollarSign` | |
+| Pricing | `HandCoins` | |
 | Knowledge/Docs | `BookOpen` | |
 | Forest (community) | `Trees` | |
 | Blog/Writing | `PenLine` | |

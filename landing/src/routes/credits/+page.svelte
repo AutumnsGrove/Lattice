@@ -2,8 +2,7 @@
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
-	import { Shredder, Heart, Sprout } from 'lucide-svelte';
-	import { IconTree, IconHeart } from '@tabler/icons-svelte';
+	import { Shredder } from 'lucide-svelte';
 
 	const headers = [
 		{ id: 'supporters', text: 'Supporters & Community', level: 2 },
@@ -152,6 +151,10 @@
 							<div class="supporter-item">
 								<span class="supporter-name">Jack Sheckles</span>
 								<span class="supporter-desc">— very excited for me, wants to see me bloom</span>
+							</div>
+							<div class="supporter-item">
+								<span class="supporter-name">Rebecca Gordon</span>
+								<span class="supporter-desc">— caring and cautious, always checking in to make sure I'm okay out here</span>
 							</div>
 						</div>
 					</div>
@@ -435,45 +438,16 @@
 					The icon set used throughout Grove.
 				</p>
 
-				<div class="grid gap-4">
-					<div class="card p-5">
-						<div class="flex items-start gap-4">
-							<div class="flex-shrink-0 mt-1">
-								<Heart class="w-6 h-6 text-accent-muted" />
-							</div>
-							<div class="flex-1">
-								<h3 class="text-lg font-serif text-foreground mb-1">Lucide</h3>
-								<p class="text-foreground-muted font-sans text-sm">
-									Beautiful, consistent icon set. Open source fork of Feather Icons with an expanded library and active community.
-								</p>
-								<div class="flex items-center gap-4 mt-3">
-									<a href="https://lucide.dev" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
-										lucide.dev →
-									</a>
-									<span class="text-foreground-faint text-xs font-sans">ISC License</span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="card p-5">
-						<div class="flex items-start gap-4">
-							<div class="flex-shrink-0 mt-1">
-								<IconTree class="w-6 h-6 text-accent-muted" />
-							</div>
-							<div class="flex-1">
-								<h3 class="text-lg font-serif text-foreground mb-1">Tabler Icons</h3>
-								<p class="text-foreground-muted font-sans text-sm">
-									Free and open source icons designed to be readable and consistent. Used for our experimental logo concepts and special icon needs.
-								</p>
-								<div class="flex items-center gap-4 mt-3">
-									<a href="https://tabler-icons.io" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
-										tabler-icons.io →
-									</a>
-									<span class="text-foreground-faint text-xs font-sans">MIT License</span>
-								</div>
-							</div>
-						</div>
+				<div class="card p-5">
+					<h3 class="text-lg font-serif text-foreground mb-1">Lucide</h3>
+					<p class="text-foreground-muted font-sans text-sm">
+						Beautiful, consistent icon set. Open source fork of Feather Icons with an expanded library and active community.
+					</p>
+					<div class="flex items-center gap-4 mt-3">
+						<a href="https://lucide.dev" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
+							lucide.dev →
+						</a>
+						<span class="text-foreground-faint text-xs font-sans">ISC License</span>
 					</div>
 				</div>
 			</section>
