@@ -213,9 +213,9 @@
           {#each patterns as pattern}
             <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
               <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
-                {#if pattern.icon && toolIcons[pattern.icon]}
+                {#if pattern.icon && toolIcons[pattern.icon as keyof typeof toolIcons]}
                   <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                    <svelte:component this={toolIcons[pattern.icon]} class="w-5 h-5" />
+                    <svelte:component this={toolIcons[pattern.icon as keyof typeof toolIcons]} class="w-5 h-5" />
                   </div>
                 {/if}
                 <span>{pattern.title}</span>

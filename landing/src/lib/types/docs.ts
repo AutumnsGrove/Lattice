@@ -18,6 +18,8 @@ export interface Doc extends Record<string, unknown> {
   category: DocCategory;
   lastUpdated?: string;
   readingTime: number;
+  /** Optional icon key for pattern documents (matches keys in toolIcons) */
+  icon?: string;
 }
 
 /** Header extracted from markdown for table of contents */
