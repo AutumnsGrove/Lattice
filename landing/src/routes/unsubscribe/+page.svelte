@@ -7,7 +7,9 @@
 
 	let { data, form } = $props();
 
-	let email = $state(data.email || '');
+	// Initialize email from URL param (intentionally captures initial value - form field should be editable)
+	const initialEmail = data.email || '';
+	let email = $state(initialEmail);
 	let unsubscribeType: 'onboarding' | 'all' = $state('onboarding');
 	let submitting = $state(false);
 </script>

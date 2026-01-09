@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { helpArticles } from '$lib/data/knowledge-base';
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 
   let { data } = $props();
-  const { helpArticles: articles } = data;
+  const articles = $derived(data.helpArticles);
 </script>
 
 <SEO

@@ -5,7 +5,11 @@
   import { toolIcons } from '$lib/utils/icons';
 
   let { data } = $props();
-  const { specs, helpArticles, legalDocs, marketingDocs, patterns } = data;
+  const specs = $derived(data.specs);
+  const helpArticles = $derived(data.helpArticles);
+  const legalDocs = $derived(data.legalDocs);
+  const marketingDocs = $derived(data.marketingDocs);
+  const patterns = $derived(data.patterns);
 
   let searchQuery = $state('');
 
@@ -214,8 +218,9 @@
             <div class="text-sm p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
               <a href="/knowledge/patterns/{pattern.slug}" class="flex items-start gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors group">
                 {#if pattern.icon && toolIcons[pattern.icon as keyof typeof toolIcons]}
+                  {@const Icon = toolIcons[pattern.icon as keyof typeof toolIcons]}
                   <div class="flex-shrink-0 w-5 h-5 mt-0.5">
-                    <svelte:component this={toolIcons[pattern.icon as keyof typeof toolIcons]} class="w-5 h-5" />
+                    <Icon class="w-5 h-5" />
                   </div>
                 {/if}
                 <span>{pattern.title}</span>

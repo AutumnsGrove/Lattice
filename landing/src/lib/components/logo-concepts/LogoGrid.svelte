@@ -62,8 +62,9 @@
 			<div class="flex flex-wrap gap-6 items-center">
 				<!-- Size control -->
 				<div class="flex items-center gap-3">
-					<label class="text-sm text-slate-400">Size:</label>
+					<label for="logo-grid-size" class="text-sm text-slate-400">Size:</label>
 					<input
+						id="logo-grid-size"
 						type="range"
 						min="16"
 						max="128"
@@ -88,8 +89,9 @@
 
 				<!-- Gap control -->
 				<div class="flex items-center gap-3">
-					<label class="text-sm text-slate-400">Gap:</label>
+					<label for="logo-grid-gap" class="text-sm text-slate-400">Gap:</label>
 					<input
+						id="logo-grid-gap"
 						type="range"
 						min="4"
 						max="48"

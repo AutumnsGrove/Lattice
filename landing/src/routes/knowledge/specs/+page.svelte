@@ -1,10 +1,9 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
-  import { specs } from '$lib/data/knowledge-base';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 
   let { data } = $props();
-  const { specs: specsList } = data;
+  const specsList = $derived(data.specs);
 </script>
 
 <SEO

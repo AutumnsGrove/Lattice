@@ -3,7 +3,7 @@
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 
   let { data } = $props();
-  const { legalDocs } = data;
+  const legalDocs = $derived(data.legalDocs);
 </script>
 
 <SEO
