@@ -100,6 +100,8 @@
 						{@const Icon = item.icon}
 						<a
 							href={item.href}
+							target={item.external ? '_blank' : undefined}
+							rel={item.external ? 'noopener noreferrer' : undefined}
 							class="flex items-center gap-1.5 text-foreground-subtle hover:text-accent-muted transition-colors"
 						>
 							{#if Icon}
