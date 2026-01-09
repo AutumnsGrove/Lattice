@@ -114,6 +114,10 @@ export { default as LogoAutumnMagic } from "./LogoAutumnMagic.svelte";
 // The Grove Mark (v10) - the official circular mark
 export { default as LogoGroveMark } from "./LogoGroveMark.svelte";
 
+// The Sanctuary (v11) - a warm light in the night forest
+// "Someone left a light on for you"
+export { default as LogoSanctuary } from "./LogoSanctuary.svelte";
+
 // Re-export Tabler's Linktree icon as a historical artifact 😂
 // "The logo that started the journey"
 export { IconBrandLinktree as LogoArtifact } from "@tabler/icons-svelte";
