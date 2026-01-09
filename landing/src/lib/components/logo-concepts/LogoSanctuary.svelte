@@ -8,6 +8,10 @@
 	 * Grove Logo: Sanctuary
 	 * Night grove with various stylized trees and a central glowing flame
 	 * The vibe: warmth, safety, community gathering in the dark
+	 *
+	 * Typography: Uses Calistoga for the wordmark—intentionally distinct from
+	 * body text (Lexend). Calistoga's warm, rounded character matches the
+	 * sanctuary theme. This is a deliberate design choice; keep it unique.
 	 */
 	interface Props {
 		/** CSS classes for sizing and positioning */
@@ -245,6 +249,8 @@
 
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 	<!-- "GROVE" TEXT -->
+	<!-- NOTE: Calistoga is intentionally used here for its unique, warm character. -->
+	<!-- This is the logo wordmark—keep it distinct from body text (Lexend). -->
 	<!-- ═══════════════════════════════════════════════════════════════ -->
 
 	{#if showText}
@@ -252,11 +258,10 @@
 			x="50"
 			y="108"
 			text-anchor="middle"
-			font-family="serif"
+			font-family="Calistoga, serif"
 			font-size="16"
-			font-weight="500"
 			fill={lineColor}
-			letter-spacing="2"
+			letter-spacing="1"
 		>
 			Grove
 		</text>
