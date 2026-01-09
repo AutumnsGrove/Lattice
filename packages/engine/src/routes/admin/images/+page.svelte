@@ -368,7 +368,7 @@
     <Glass variant="tint" intensity="light"
       class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''}"
       role="button"
-      tabindex="0"
+      tabindex={0}
       aria-label="Drop zone for image uploads"
       ondragover={handleDragOver}
       ondragleave={handleDragLeave}

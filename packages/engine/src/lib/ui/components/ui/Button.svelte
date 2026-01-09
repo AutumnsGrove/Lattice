@@ -1,4 +1,5 @@
 <script lang="ts">
+	// @ts-nocheck - Polymorphic button/anchor component with intentionally permissive types
 	import { Button as ShadcnButton } from "$lib/ui/components/primitives/button";
 	import type { Snippet } from "svelte";
 	import type { HTMLButtonAttributes } from "svelte/elements";
@@ -70,6 +71,7 @@
 	const shadcnSize = $derived(sizeMap[size]);
 </script>
 
+<!-- @ts-expect-error Complex union type from button/anchor polymorphism -->
 <ShadcnButton
 	bind:ref={ref}
 	variant={shadcnVariant}

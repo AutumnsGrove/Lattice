@@ -58,8 +58,14 @@ declare global {
         RESEND_API_KEY?: string; // Optional: for transactional emails
         ALLOWED_ADMIN_EMAILS?: string;
 
+        // Wisp AI providers (optional inference APIs)
+        FIREWORKS_API_KEY?: string;
+        CEREBRAS_API_KEY?: string;
+        GROQ_API_KEY?: string;
+
         // GroveAuth (Heartwood OAuth)
         GROVEAUTH_URL?: string;
+        GROVEAUTH_API_URL?: string;
         GROVEAUTH_CLIENT_ID?: string;
         GROVEAUTH_CLIENT_SECRET?: string;
 
@@ -70,6 +76,7 @@ declare global {
 
         // Cloudflare Turnstile (bot protection)
         TURNSTILE_SECRET_KEY?: string;
+        TURNSTILE_SITE_KEY?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

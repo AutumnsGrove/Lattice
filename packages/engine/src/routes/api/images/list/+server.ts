@@ -126,7 +126,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 
         // Merge metadata into images
         const metadataMap = new Map(
-          (metadata.results as MetadataRow[]).map((m) => [m.r2_key, m])
+          (metadata.results as unknown as MetadataRow[]).map((m) => [
+            m.r2_key,
+            m,
+          ]),
         );
 
         images = images.map((img) => {
@@ -188,15 +191,19 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     switch (sortBy) {
       case "date-desc":
         images.sort((a, b) => {
-          const dateA = a.custom_date || a.parsed_date || a.uploaded.toISOString();
-          const dateB = b.custom_date || b.parsed_date || b.uploaded.toISOString();
+          const dateA =
+            a.custom_date || a.parsed_date || a.uploaded.toISOString();
+          const dateB =
+            b.custom_date || b.parsed_date || b.uploaded.toISOString();
           return new Date(dateB).getTime() - new Date(dateA).getTime();
         });
         break;
       case "date-asc":
         images.sort((a, b) => {
-          const dateA = a.custom_date || a.parsed_date || a.uploaded.toISOString();
-          const dateB = b.custom_date || b.parsed_date || b.uploaded.toISOString();
+          const dateA =
+            a.custom_date || a.parsed_date || a.uploaded.toISOString();
+          const dateB =
+            b.custom_date || b.parsed_date || b.uploaded.toISOString();
           return new Date(dateA).getTime() - new Date(dateB).getTime();
         });
         break;
@@ -217,7 +224,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     return json({
       success: true,
       images: images,
-      cursor: listResult.cursor || null,
+      cursor: listResult.truncated ? listResult.cursor : null,
       truncated: listResult.truncated,
     });
   } catch (err) {

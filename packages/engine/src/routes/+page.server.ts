@@ -23,6 +23,15 @@ interface GutterItem {
   [key: string]: unknown;
 }
 
+interface HeroData {
+  title?: string;
+  subtitle?: string;
+  cta?: {
+    text: string;
+    link: string;
+  };
+}
+
 interface PageData {
   slug: string;
   title: string;
@@ -51,7 +60,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     slug: string;
     title: string;
     description: string;
-    hero?: unknown;
+    hero?: HeroData | null;
     content: string;
     headers: Header[];
     gutterContent: GutterItem[];
@@ -75,7 +84,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
       if (pageData) {
         // Parse hero JSON
-        let hero: unknown = null;
+        let hero: HeroData | null = null;
         if (pageData.hero && typeof pageData.hero === "string") {
           try {
             hero = JSON.parse(pageData.hero);
@@ -169,7 +178,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       // Valid tenant but no content - show setup page
       return {
         needsSetup: true,
-        tenantName: context.tenant.display_name,
+        tenantName: context.tenant.name,
         tenantSubdomain: context.tenant.subdomain,
         title: "Welcome",
         description: "Set up your new blog",

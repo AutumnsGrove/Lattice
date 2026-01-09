@@ -244,7 +244,7 @@ export const POST: RequestHandler = async ({
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    const priceId = (platform.env as Record<string, string>)[
+    const priceId = (platform.env as unknown as Record<string, string>)[
       `STRIPE_PRICE_${data.plan.toUpperCase()}`
     ];
 
@@ -452,7 +452,7 @@ export const PATCH: RequestHandler = async ({
           throw error(400, "Invalid plan");
         }
 
-        const newPriceId = (platform.env as Record<string, string>)[
+        const newPriceId = (platform.env as unknown as Record<string, string>)[
           `STRIPE_PRICE_${data.plan.toUpperCase()}`
         ];
 

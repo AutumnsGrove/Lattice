@@ -163,9 +163,12 @@ export const POST: RequestHandler = async ({
     }
 
     // Determine checkout mode
-    const mode = hasSubscription
+    const mode: "payment" | "subscription" | "setup" = hasSubscription
       ? "subscription"
-      : (data.mode as string) || "payment";
+      : (((data.mode as string) || "payment") as
+          | "payment"
+          | "subscription"
+          | "setup");
 
     // Create or get customer
     let customer = null;
@@ -260,7 +263,7 @@ export const POST: RequestHandler = async ({
           ? { allowedCountries: ["US", "CA", "GB", "AU"] }
           : undefined,
         allowPromotionCodes: (data.allowPromoCodes as boolean) !== false,
-        connectedAccountId,
+        connectedAccountId: connectedAccountId || undefined,
         applicationFeeAmount,
         metadata: {
           grove_order_id: orderId,

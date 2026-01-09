@@ -183,7 +183,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           {
             name: (variant.name as string) || `Variant ${i + 1}`,
             sku: variant.sku as string | undefined,
-            priceAmount: variant.priceAmount as number | undefined,
+            priceAmount: (variant.priceAmount as number | undefined) ?? 0,
             priceCurrency: (variant.priceCurrency as string) || "usd",
             compareAtPrice: variant.compareAtPrice as number | undefined,
             pricingType: ((variant.pricingType as string) ||

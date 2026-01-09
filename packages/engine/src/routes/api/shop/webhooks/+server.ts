@@ -273,7 +273,7 @@ async function handleCheckoutCompleted(
   console.log(
     "Order completed:",
     order.id,
-    (order as Record<string, unknown>).orderNumber || "unknown",
+    (order as unknown as Record<string, unknown>).orderNumber || "unknown",
   );
 
   // TODO: Send order confirmation email via Resend

@@ -55,7 +55,9 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
     do {
       if (++iterations > MAX_ITERATIONS) {
-        console.warn(`R2 list scan reached maximum iterations (${MAX_ITERATIONS}), stopping early`);
+        console.warn(
+          `R2 list scan reached maximum iterations (${MAX_ITERATIONS}), stopping early`,
+        );
         break;
       }
 
@@ -67,7 +69,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
       listResult.objects
         .filter((obj) =>
-          imageExtensions.some((ext) => obj.key.toLowerCase().endsWith(ext))
+          imageExtensions.some((ext) => obj.key.toLowerCase().endsWith(ext)),
         )
         .forEach((obj) => {
           const parsed = parseImageFilename(obj.key);
@@ -89,18 +91,19 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     let tags: TagRecord[] = [];
     if (platform?.env?.DB) {
       const tagResults = await platform.env.DB.prepare(
-        "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC"
+        "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC",
       ).all();
-      tags = (tagResults.results as TagRecord[]) || [];
+      tags = (tagResults.results as unknown as TagRecord[]) || [];
     }
 
     // Fetch collections from D1
     let collections: CollectionRecord[] = [];
     if (platform?.env?.DB) {
       const collectionResults = await platform.env.DB.prepare(
-        "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC"
+        "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC",
       ).all();
-      collections = (collectionResults.results as CollectionRecord[]) || [];
+      collections =
+        (collectionResults.results as unknown as CollectionRecord[]) || [];
     }
 
     return json({

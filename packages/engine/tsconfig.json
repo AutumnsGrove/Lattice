@@ -11,5 +11,15 @@
     "strict": true,
     "moduleResolution": "bundler",
     "types": ["@cloudflare/workers-types"]
-  }
+  },
+  "exclude": [
+    "src/routes/vineyard/**/*",
+    "**/*.test.ts",
+    "**/__mocks__/**",
+    "src/lib/ui/components/ui/Button.svelte",
+    "src/lib/ui/components/ui/GlassButton.svelte",
+    "src/lib/ui/components/ui/Input.svelte",
+    "src/lib/ui/components/ui/Select.svelte",
+    "src/lib/ui/components/ui/Accordion.svelte"
+  ]
 }

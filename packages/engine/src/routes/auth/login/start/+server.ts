@@ -19,7 +19,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
   getClientIP,
-  getEndpointLimit
+  getEndpointLimit,
 } from "$lib/server/rate-limits";
 
 /**
@@ -48,28 +48,33 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
   // ============================================================================
   // Rate Limiting (Threshold pattern)
   // Protects against automated login attempts
   // ============================================================================
-  const kv = platform?.env?.CACHE;
+  const kv = platform?.env?.CACHE_KV;
   if (kv) {
     const clientIp = getClientIP(request);
-    const limitConfig = getEndpointLimit('auth/login');
-    const rateLimitKey = buildRateLimitKey('auth/login', clientIp);
+    const limitConfig = getEndpointLimit("auth/login");
+    const rateLimitKey = buildRateLimitKey("auth/login", clientIp);
 
     const { response: rateLimitResponse } = await checkRateLimit({
       kv,
       key: rateLimitKey,
       limit: limitConfig.limit,
       windowSeconds: limitConfig.windowSeconds,
-      namespace: 'auth-ratelimit'
+      namespace: "auth-ratelimit",
     });
 
     // Return 429 if rate limited
     if (rateLimitResponse) {
-      console.warn('[Auth Login] Rate limited:', { ip: clientIp });
+      console.warn("[Auth Login] Rate limited:", { ip: clientIp });
       return rateLimitResponse;
     }
   }

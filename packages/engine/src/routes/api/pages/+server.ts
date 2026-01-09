@@ -135,7 +135,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       return json({
         success: true,
         slug,
-        id: result.id,
+        id:
+          typeof result === "string" ? result : (result as { id?: string })?.id,
         message: "Page created successfully",
       });
     } catch (insertErr) {

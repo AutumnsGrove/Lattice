@@ -15,7 +15,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
   getClientIP,
-  getEndpointLimit
+  getEndpointLimit,
 } from "$lib/server/rate-limits";
 
 // ============================================================================
@@ -88,10 +88,10 @@ interface ErrorResponse {
  * over HTTPS. Runtime validation is omitted for performance.
  */
 interface UserInfoResponse {
-  sub: string;           // GroveAuth user ID
-  email: string;         // User's email
-  name?: string;         // Display name
-  picture?: string;      // Avatar URL
+  sub: string; // GroveAuth user ID
+  email: string; // User's email
+  name?: string; // Display name
+  picture?: string; // Avatar URL
 }
 
 // ============================================================================
@@ -112,7 +112,7 @@ function getDisplayNameFromEmail(email: string): string {
   // Split on common separators and capitalize each word
   return username
     .split(/[._-]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
 
@@ -133,28 +133,33 @@ function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
   // ============================================================================
   // Rate Limiting (Threshold pattern)
   // Protects against brute force attacks on auth callback
   // ============================================================================
-  const kv = platform?.env?.CACHE;
+  const kv = platform?.env?.CACHE_KV;
   if (kv) {
     const clientIp = getClientIP(request);
-    const limitConfig = getEndpointLimit('auth/callback');
-    const rateLimitKey = buildRateLimitKey('auth/callback', clientIp);
+    const limitConfig = getEndpointLimit("auth/callback");
+    const rateLimitKey = buildRateLimitKey("auth/callback", clientIp);
 
     const { response: rateLimitResponse } = await checkRateLimit({
       kv,
       key: rateLimitKey,
       limit: limitConfig.limit,
       windowSeconds: limitConfig.windowSeconds,
-      namespace: 'auth-ratelimit'
+      namespace: "auth-ratelimit",
     });
 
     // Return 429 if rate limited
     if (rateLimitResponse) {
-      console.warn('[Auth Callback] Rate limited:', { ip: clientIp });
+      console.warn("[Auth Callback] Rate limited:", { ip: clientIp });
       return rateLimitResponse;
     }
   }
@@ -227,7 +232,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
     });
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json() as ErrorResponse;
+      const errorData = (await tokenResponse.json()) as ErrorResponse;
       // Only log sensitive debugging info in development
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
@@ -239,7 +244,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
           hasSecret: !!authConfig.clientSecret,
           redirectUri,
           errorDescription: errorData?.error_description,
-        })
+        }),
       });
       const debugError =
         errorData?.error_description ||
@@ -248,7 +253,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
       redirect(302, `/auth/login?error=${encodeURIComponent(debugError)}`);
     }
 
-    const tokens = await tokenResponse.json() as TokenResponse;
+    const tokens = (await tokenResponse.json()) as TokenResponse;
 
     // Fetch user info from GroveAuth
     let userInfo: UserInfoResponse | null = null;
@@ -260,7 +265,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
       });
 
       if (userInfoResponse.ok) {
-        userInfo = await userInfoResponse.json() as UserInfoResponse;
+        userInfo = (await userInfoResponse.json()) as UserInfoResponse;
       } else {
         console.warn("[Auth Callback] Failed to fetch user info:", {
           status: userInfoResponse.status,
@@ -269,7 +274,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
       }
     } catch (userInfoErr) {
       console.warn("[Auth Callback] Error fetching user info:", {
-        error: userInfoErr instanceof Error ? userInfoErr.message : "Unknown error",
+        error:
+          userInfoErr instanceof Error ? userInfoErr.message : "Unknown error",
         authApiUrl: authConfig.apiUrl,
       });
     }
@@ -282,9 +288,11 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
       try {
         const userId = crypto.randomUUID();
         // Use display name from GroveAuth, or fall back to email username for better UX
-        const displayName = userInfo.name || getDisplayNameFromEmail(userInfo.email);
+        const displayName =
+          userInfo.name || getDisplayNameFromEmail(userInfo.email);
 
-        await platform.env.DB.prepare(`
+        await platform.env.DB.prepare(
+          `
           INSERT INTO users (id, groveauth_id, email, display_name, avatar_url, last_login_at, login_count, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, unixepoch(), 1, unixepoch(), unixepoch())
           ON CONFLICT (groveauth_id) DO UPDATE SET
@@ -294,8 +302,15 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
             last_login_at = unixepoch(),
             login_count = login_count + 1,
             updated_at = unixepoch()
-        `)
-          .bind(userId, userInfo.sub, userInfo.email, displayName, userInfo.picture || null)
+        `,
+        )
+          .bind(
+            userId,
+            userInfo.sub,
+            userInfo.email,
+            displayName,
+            userInfo.picture || null,
+          )
           .run();
 
         console.log("[Auth Callback] User upserted:", userInfo.sub);
@@ -316,7 +331,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
     // Only set cross-subdomain cookie if we're actually on grove.place
     // This prevents issues on staging, test, or other deployments
     const isGrovePlatform = url.hostname.endsWith("grove.place");
-    const cookieDomain = isProduction && isGrovePlatform ? GROVE_PLATFORM_DOMAIN : undefined;
+    const cookieDomain =
+      isProduction && isGrovePlatform ? GROVE_PLATFORM_DOMAIN : undefined;
 
     // Set cookies - use .grove.place domain for cross-subdomain access on platform
     const cookieOptions = {

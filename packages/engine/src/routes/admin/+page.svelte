@@ -63,9 +63,9 @@
     fetchStats();
   });
 
-  // Get display name for greeting: prefer display_name, fallback to email username
+  // Get display name for greeting: prefer name, fallback to email username
   const userName = $derived(
-    data.user?.display_name || data.user?.email?.split('@')[0] || 'there'
+    data.user?.name || data.user?.email?.split('@')[0] || 'there'
   );
 
   /** @param {number} num */

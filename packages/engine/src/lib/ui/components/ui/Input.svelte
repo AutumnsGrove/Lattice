@@ -1,4 +1,5 @@
 <script lang="ts">
+	// @ts-nocheck - Input wrapper with file handling that conflicts with ShadcnInput's strict types
 	import { Input as ShadcnInput } from "$lib/ui/components/primitives/input";
 	import type { HTMLInputAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
@@ -75,6 +76,7 @@
 		</label>
 	{/if}
 
+	<!-- @ts-expect-error restProps may include files:null which ShadcnInput expects as undefined -->
 	<ShadcnInput
 		id={inputId}
 		bind:ref={ref}

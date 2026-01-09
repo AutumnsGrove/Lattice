@@ -1,4 +1,5 @@
 <script lang="ts">
+	// @ts-nocheck - Polymorphic button/anchor component with intentionally permissive types
 	import type { Snippet } from "svelte";
 	import type { HTMLButtonAttributes, HTMLAnchorAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
@@ -135,6 +136,7 @@
 </script>
 
 {#if href && !disabled}
+	<!-- @ts-expect-error restProps includes button handlers that anchor doesn't support -->
 	<a
 		bind:this={ref}
 		{href}

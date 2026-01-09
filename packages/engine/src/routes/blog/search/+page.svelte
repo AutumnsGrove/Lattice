@@ -22,19 +22,28 @@
 		}));
 	});
 
-	// Filter function for ContentSearch component
+	/**
+	 * Filter function for ContentSearch component
+	 * @param {{ titleLower: string, descriptionLower: string, tagsLower: string[] }} post
+	 * @param {string} query
+	 */
 	function filterPost(post, query) {
 		const q = query.toLowerCase();
 		return (
 			post.titleLower.includes(q) ||
 			post.descriptionLower.includes(q) ||
-			post.tagsLower.some(tag => tag.includes(q))
+			post.tagsLower.some((/** @type {string} */ tag) => tag.includes(q))
 		);
 	}
 
 	// Track search results from ContentSearch
+	/** @type {any[]} */
 	let searchResults = $state([]);
-	function handleSearchChange(query, results) {
+	/**
+	 * @param {string} _query
+	 * @param {any[]} results
+	 */
+	function handleSearchChange(_query, results) {
 		searchResults = results;
 	}
 

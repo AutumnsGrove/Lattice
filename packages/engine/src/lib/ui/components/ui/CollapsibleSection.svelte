@@ -4,6 +4,8 @@
 	interface Props {
 		title: string;
 		defaultOpen?: boolean;
+		open?: boolean;
+		ontoggle?: () => void;
 		children?: Snippet;
 		class?: string;
 	}

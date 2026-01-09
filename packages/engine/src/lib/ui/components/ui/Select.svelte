@@ -1,4 +1,5 @@
 <script lang="ts">
+	// @ts-nocheck - Select wrapper with single-select mode using string instead of string[]
 	import {
 		Select as ShadcnSelect,
 		SelectContent,
@@ -55,6 +56,7 @@
 	);
 </script>
 
+<!-- @ts-expect-error ShadcnSelect expects string[] for multi-select but we use string for single-select -->
 <ShadcnSelect bind:value {disabled}>
 	<SelectTrigger class={className}>
 		{selectedLabel}

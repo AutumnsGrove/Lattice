@@ -148,7 +148,7 @@ export const PATCH: RequestHandler = async ({
           await updateVariant(platform.env.DB, variantData.id as string, {
             name: variantData.name as string | undefined,
             sku: variantData.sku as string | undefined,
-            priceAmount: variantData.priceAmount as number | undefined,
+            priceAmount: (variantData.priceAmount as number | undefined) ?? 0,
             compareAtPrice: variantData.compareAtPrice as number | undefined,
             pricingType: variantData.pricingType as string | undefined as
               | PricingType
@@ -182,7 +182,7 @@ export const PATCH: RequestHandler = async ({
           await createVariant(platform.env.DB, product.id, tenantId, {
             name: (variantData.name as string) || "New Variant",
             sku: variantData.sku as string | undefined,
-            priceAmount: variantData.priceAmount as number | undefined,
+            priceAmount: (variantData.priceAmount as number | undefined) ?? 0,
             priceCurrency: (variantData.priceCurrency as string) || "usd",
             compareAtPrice: variantData.compareAtPrice as number | undefined,
             pricingType: ((variantData.pricingType as string) ||

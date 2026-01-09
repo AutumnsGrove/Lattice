@@ -52,6 +52,7 @@
   }
 
   // Validate URL for safe schemes (prevent javascript: XSS)
+  /** @param {string | null | undefined} url */
   function isValidUrl(url) {
     if (!url) return true;
     const trimmed = url.trim();
@@ -296,7 +297,6 @@
       </h2>
       <MarkdownEditor
         bind:content
-        placeholder="# New Page\n\nStart writing..."
       />
     </GlassCard>
   </div>
