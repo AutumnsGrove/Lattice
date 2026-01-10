@@ -42,7 +42,7 @@ These are the blockers. Get these done and you're live.
   - Rule 2: Challenge bot-like user agents (except Google, Bing, Yandex, Kagi)
   - Rule 3: High threat score filtering
 - [ ] **Set up rate limiting rules** (60/min general, 200/5min crawling)
-- [ ] **Create `/shade` policy page** — Explain Grove's AI protection to users
+- [x] **Create `/shade` policy page** — Explain Grove's AI protection to users ✅
 - [ ] **Update Terms of Service** with AI prohibition language
 - [ ] Add footer link to /shade on all pages
 
