@@ -5,6 +5,7 @@
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
   import { GlassCard, Glass } from '$lib/ui';
+  import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
 
   // Form state
@@ -118,10 +119,17 @@
       // Clear draft on successful save
       editorRef?.clearDraft();
 
-      // Redirect to the edit page or blog admin
+      // Show success toast
+      toast.success("Post created!", {
+        description: `"${result.title}" has been saved.`,
+      });
+
+      // Redirect to the edit page
       goto(`/admin/blog/edit/${result.slug}`);
     } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      error = errorMessage;
+      toast.error("Failed to create post", { description: errorMessage });
     } finally {
       saving = false;
     }

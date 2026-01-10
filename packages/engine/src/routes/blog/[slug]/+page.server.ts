@@ -94,7 +94,10 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
             post: {
               slug: post.slug as string,
               title: post.title as string,
-              date: post.published_at as string,
+              // Convert unix timestamp (seconds) to ISO string for frontend
+              date: post.published_at
+                ? new Date((post.published_at as number) * 1000).toISOString()
+                : new Date().toISOString(),
               tags,
               description: (post.description as string) || "",
               content: processedHtml,

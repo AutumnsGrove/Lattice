@@ -31,7 +31,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   amber: "amber-4x2.pages.dev", // Amber storage
   ivy: "ivy-3uv.pages.dev", // Ivy mail client
   autumn: "autumn-website.pages.dev", // Autumn's Grove
-  example: "grove-example-site.pages.dev", // GroveEngine example
+  // example subdomain routes to groveengine (tenant in D1)
   plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
   vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
   cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
@@ -158,7 +158,7 @@ export default {
     // (null routes were removed - all special subdomains now have explicit targets)
 
     // Determine target hostname - default to main engine for tenant blogs
-    // Note: The Pages project is named "groveengine" but deploys to grove-example-site.pages.dev
+    // Note: wrangler.toml says "groveengine" but the Cloudflare Pages project is "grove-example-site"
     const targetHostname = routeTarget || "grove-example-site.pages.dev";
 
     // Proxy to target

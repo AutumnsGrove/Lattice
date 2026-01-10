@@ -151,6 +151,35 @@ Clearing lives **inside GroveEngine** as a monorepo package, not as a separate r
 
 ---
 
+## 📸 Tour Walkthrough Screenshots — HUMAN TASK
+
+> **Location:** `plant/static/tour/`
+> **Context:** The onboarding tour shows 6 placeholder images. Need actual screenshots.
+
+### Screenshots Needed (6 total)
+
+| File | Step Title | What to Screenshot |
+|------|------------|-------------------|
+| `homepage.png` | Your Blog Homepage | example.grove.place - clean landing page with Midnight Bloom branding |
+| `post.png` | Blog Posts | A blog post page showing markdown content with images |
+| `vines.png` | Vines - Margin Notes | A post with visible vine/margin annotations in the sidebar |
+| `admin.png` | Your Dashboard | The admin panel overview (your-blog.grove.place/admin) |
+| `editor.png` | The Post Editor | Markdown editor with live preview, showing drag-drop for images |
+| `autumnsgrove.png` | See It In Action | autumnsgrove.com homepage as a real-world example |
+
+### Technical Requirements
+- **Dimensions:** 16:9 aspect ratio recommended (matches the `aspect-video` container)
+- **Resolution:** 1280×720 or 1920×1080, will be displayed in ~600px wide container
+- **Theme:** Use light mode for consistency (or match Grove's default theme)
+- **Format:** PNG for screenshots
+
+### Notes
+- First step (Welcome) and last step (You're Ready!) use icons, no screenshot needed
+- Tour code is in `plant/src/routes/tour/+page.svelte`
+- Current placeholder shows "Preview of [location]" text
+
+---
+
 ## 🔍 Safari Reader Mode & Glass Cards — QUICK FIX
 
 > **Issue:** Safari Reader Mode strips `backdrop-blur` and translucent backgrounds, making glass card content invisible.

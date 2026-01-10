@@ -6,7 +6,7 @@
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import FloatingToolbar from "./FloatingToolbar.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2 } from "lucide-svelte";
   import { browser } from "$app/environment";
 
   // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
@@ -46,7 +46,7 @@
 
   // Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
   /** @type {"write" | "split" | "preview"} */
-  let editorMode = $state("split");  // Default to split for live preview experience
+  let editorMode = $state("write");  // Default to source/raw mode for focused writing
 
   let cursorLine = $state(1);
   let cursorCol = $state(1);
@@ -220,6 +220,13 @@
   /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
+      // Exit zen mode first (higher priority)
+      if (isZenMode) {
+        isZenMode = false;
+        e.preventDefault();
+        return;
+      }
+      // Then check for full preview
       if (showFullPreview) {
         showFullPreview = false;
         e.preventDefault();
@@ -619,6 +626,20 @@
         aria-label="Open full preview with blog styling"
       >
         <Maximize2 class="toolbar-icon" />
+      </button>
+      <button
+        type="button"
+        class="toolbar-icon-btn zen-btn"
+        class:active={isZenMode}
+        onclick={toggleZenMode}
+        title={isZenMode ? "Exit Zen Mode (Esc)" : "Zen Mode (⌘⇧↵)"}
+        aria-label={isZenMode ? "Exit zen mode" : "Enter zen mode for focused writing"}
+      >
+        {#if isZenMode}
+          <Minimize2 class="toolbar-icon" />
+        {:else}
+          <Focus class="toolbar-icon" />
+        {/if}
       </button>
     </div>
   </div>
@@ -1022,6 +1043,18 @@
   .toolbar-icon-btn.full-btn:hover {
     color: #9ac5ff;
     background: color-mix(in srgb, #7ab3ff 10%, transparent);
+  }
+  .toolbar-icon-btn.zen-btn {
+    color: #d4a5ff;
+  }
+  .toolbar-icon-btn.zen-btn:hover {
+    color: #e4c5ff;
+    background: color-mix(in srgb, #d4a5ff 10%, transparent);
+  }
+  .toolbar-icon-btn.zen-btn.active {
+    color: #e4c5ff;
+    background: color-mix(in srgb, #d4a5ff 20%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, #d4a5ff 30%, transparent);
   }
   :global(.toolbar-icon) {
     width: 1rem;

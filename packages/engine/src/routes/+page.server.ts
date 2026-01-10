@@ -263,7 +263,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         latestPost = {
           slug: post.slug,
           title: post.title,
-          date: post.date || "",
+          // Convert unix timestamp (seconds) to ISO string for frontend
+          date: post.date
+            ? new Date((post.date as unknown as number) * 1000).toISOString()
+            : "",
           tags,
           description: post.description || "",
           content: processedHtml,

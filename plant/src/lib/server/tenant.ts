@@ -96,6 +96,40 @@ export async function createTenant(
     .bind(tenantId, input.onboardingId)
     .run();
 
+  // 5. Create default home page
+  const homePageId = crypto.randomUUID();
+  const homeContent = `# Welcome to ${input.displayName}
+
+Thanks for visiting! This is my blog on Grove.
+
+## About This Site
+
+I'm just getting started here. Check back soon for new posts!
+
+*Powered by [Grove](https://grove.place) — the cozy blogging platform.*`;
+
+  await db
+    .prepare(
+      `INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
+       VALUES (?, ?, 'home', ?, ?, 'home', ?, ?, ?, '[]', 'default', unixepoch(), unixepoch())`,
+    )
+    .bind(
+      homePageId,
+      tenantId,
+      input.displayName,
+      `Welcome to ${input.displayName}`,
+      homeContent,
+      `<h1>Welcome to ${input.displayName}</h1><p>Thanks for visiting! This is my blog on Grove.</p><h2>About This Site</h2><p>I'm just getting started here. Check back soon for new posts!</p><p><em>Powered by <a href="https://grove.place">Grove</a> — the cozy blogging platform.</em></p>`,
+      JSON.stringify({
+        title: input.displayName,
+        subtitle: "Welcome to my corner of the internet",
+        cta: { text: "Read the Blog", link: "/blog" },
+      }),
+    )
+    .run();
+
+  console.log("[Tenant] Default home page created");
+
   return {
     tenantId,
     subdomain: input.username,

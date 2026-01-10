@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
           `SELECT slug, title, published_at, tags, description
 				 FROM posts
 				 WHERE tenant_id = ? AND status = 'published'
-				 ORDER BY published_at DESC`
+				 ORDER BY published_at DESC`,
         )
         .bind(tenantId)
         .all();
@@ -34,7 +34,10 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
       posts = result.results.map((post) => ({
         slug: post.slug as string,
         title: post.title as string,
-        date: post.published_at as string,
+        // Convert unix timestamp (seconds) to ISO string for frontend
+        date: post.published_at
+          ? new Date((post.published_at as number) * 1000).toISOString()
+          : new Date().toISOString(),
         tags: post.tags ? JSON.parse(post.tags as string) : [],
         description: (post.description as string) || "",
       }));
