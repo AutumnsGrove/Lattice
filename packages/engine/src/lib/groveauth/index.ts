@@ -41,6 +41,18 @@ export type {
   CanPostResponse,
   SubscriptionTier,
   AuthError,
+  // OAuth types
+  OAuthProvider,
+  // Passkey types
+  Passkey,
+  PasskeyRegisterOptions,
+  PasskeyAuthOptions,
+  // 2FA types
+  TwoFactorStatus,
+  TwoFactorEnableResponse,
+  TwoFactorVerifyResponse,
+  // Linked accounts
+  LinkedAccount,
 } from './types.js';
 
 export { GroveAuthError, TIER_POST_LIMITS, TIER_NAMES } from './types.js';

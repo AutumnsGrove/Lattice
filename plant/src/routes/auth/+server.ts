@@ -43,7 +43,7 @@ async function generatePKCE(): Promise<{
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const provider = url.searchParams.get("provider") || "google";
-  const validProviders = ["google", "email"];
+  const validProviders = ["google", "discord", "email"];
 
   if (!validProviders.includes(provider)) {
     redirect(302, "/?error=invalid_provider");
