@@ -66,10 +66,11 @@ These are the blockers. Get these done and you're live.
 
 ---
 
-## 🚦 Rate Limiting (Threshold) — HIGH PRIORITY
+## 🚦 Rate Limiting (Threshold) — CORE COMPLETE ✅
 
 > **Spec:** `docs/patterns/threshold-pattern.md`
-> **Why now:** Security + abuse prevention before launch. Basic IP limiting isn't enough.
+> **Implementation:** `packages/engine/src/lib/server/rate-limits/`
+> **Status:** Core KV-based rate limiting complete. See "Rate Limiting Enhancement" section below for details.
 
 ### Phase 1: Cloudflare Edge Rate Limiting (Days 1-2)
 - [ ] Configure Cloudflare WAF rate limiting rules (Layer 1)
@@ -79,19 +80,18 @@ These are the blockers. Get these done and you're live.
   - AI endpoint limit: 500 req/day per IP
 - [ ] Test rules don't block legitimate traffic
 
-### Phase 2: Tenant Rate Limiting (Days 3-4)
-- [ ] Add rate limit tables to TenantDO schema
-- [ ] Implement `checkTenantRateLimit()` method
-- [ ] Add tier-based limits (Seedling: 100/min, Oak: 1000/min)
-- [ ] Integrate with router middleware
-- [ ] Add rate limit headers to responses (`X-RateLimit-*`)
+### Phase 2: Tenant Rate Limiting ✅ COMPLETE
+- [x] Implement `checkTenantRateLimit()` method
+- [x] Add tier-based limits (Seedling: 100/min, Oak: 1000/min)
+- [x] Add rate limit headers to responses (`X-RateLimit-*`)
+- [ ] Add rate limit tables to TenantDO schema (deferred to DO phase)
+- [ ] Integrate with router middleware (after TenantDO ready)
 
-### Phase 3: User Rate Limiting (Days 5-7)
-- [ ] Add rate limit tables to SessionDO schema
-- [ ] Add abuse state tracking table
-- [ ] Implement `checkUserRateLimit()` method
-- [ ] Implement graduated response (warning → slowdown → block → ban)
-- [ ] Add shadow ban functionality
+### Phase 3: User Rate Limiting ✅ PARTIAL
+- [x] Implement abuse state tracking (KV-based)
+- [x] Implement `checkRateLimit()` middleware
+- [x] Implement graduated response (warning → 24h ban after 5 violations)
+- [ ] Add rate limit tables to SessionDO schema (deferred to DO phase)
 - [ ] Integrate with Heartwood login flow
 
 ### Phase 4: Monitoring (Post-Launch OK)
@@ -812,6 +812,68 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 - [ ] **Failed attempts cleanup** - Add cleanup for old `failed_attempts` records
 - [ ] **CSP headers** - Add Content-Security-Policy headers in hooks
 - [ ] **Alt text sanitization** - Sanitize before DB storage in CDN patch endpoint
+
+---
+
+## Rate Limiting Enhancement (Threshold Pattern)
+
+> **Spec:** See `docs/patterns/threshold-pattern.md` for full technical specification.
+> **Priority:** HIGH - Immediate security benefits and abuse prevention.
+> **Implementation:** `packages/engine/src/lib/server/rate-limits/`
+
+### ✅ Core Rate Limiting COMPLETE (2026-01-08)
+
+**What was built:**
+- ✅ KV-based rate limiting with tier config (seedling/sapling/oak/evergreen)
+- ✅ Endpoint-specific rate limits (auth, posts, uploads, AI)
+- ✅ `checkRateLimit()` middleware helper for SvelteKit routes
+- ✅ `checkTenantRateLimit()` for tier-based tenant limiting
+- ✅ Abuse tracking with graduated response (warning → 24h ban after 5 violations)
+- ✅ Rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`)
+- ✅ Wisp route updated to use new middleware
+- ✅ Full test coverage (57 tests)
+- ✅ Server export path: `import { checkRateLimit } from '@autumnsgrove/groveengine/server'`
+- ✅ `getClientIP()` helper for IP extraction from CF headers
+
+**Files:**
+- `packages/engine/src/lib/server/rate-limits/config.ts` - Tier and endpoint config
+- `packages/engine/src/lib/server/rate-limits/middleware.ts` - SvelteKit helpers
+- `packages/engine/src/lib/server/rate-limits/tenant.ts` - Tenant rate limiting
+- `packages/engine/src/lib/server/rate-limits/abuse.ts` - Graduated response system
+- `packages/engine/src/lib/server/rate-limits/test-utils.ts` - Shared test mocks
+- `packages/engine/src/lib/server/index.ts` - Server exports
+
+### Remaining: Cloudflare Edge Layer
+- [ ] Configure Cloudflare WAF rate limiting rules (Layer 1 - IP-based)
+  - General request limit: 1000 req/min per IP
+  - Auth endpoint limit: 50 req/5min per IP
+  - Upload endpoint limit: 100 req/hour per IP
+  - AI endpoint limit: 500 req/day per IP
+- [ ] Test with synthetic traffic
+
+### Remaining: Route Integration
+- [ ] Add rate limiting to auth endpoints (`/api/auth/*`)
+- [ ] Add rate limiting to CDN upload endpoints (`/api/cdn/*`)
+- [ ] Add rate limiting to post creation endpoints
+- [ ] Add rate limiting to comment creation endpoints
+- [ ] Integrate `checkTenantRateLimit()` in router middleware (when TenantDO is ready)
+
+### Remaining: Heartwood Integration
+- [ ] Add rate limit check in Heartwood login flow
+- [ ] Add abuse state check for banned users
+- [ ] Return appropriate 403 response for banned users
+
+### Remaining: Durable Objects Integration (when DO is ready)
+- [ ] Move tenant rate limits to TenantDO (atomic operations)
+- [ ] Move user rate limits to SessionDO (cross-request consistency)
+- [ ] Real-time rate limit dashboard via WebSocket
+
+### Remaining: Monitoring & Documentation
+- [ ] Add rate limit event logging to Vista
+- [ ] Create Vista dashboard component for rate limit metrics
+- [ ] Configure alert thresholds (ban events, high violation rates)
+- [ ] Document runbooks for common scenarios
+- [ ] Add rate limiting section to engine README
 
 ---
 

@@ -1,26 +1,88 @@
 /**
- * Rate Limiting Module
+ * Threshold Rate Limiting Module
  *
- * Server-side rate limiting utilities following the Threshold pattern.
- * All exports are available from '@autumnsgrove/groveengine/server'.
+ * Provides a complete rate limiting solution for Grove applications:
+ * - Tier-based limits (seedling, sapling, oak, evergreen)
+ * - Endpoint-specific limits
+ * - Middleware helpers for SvelteKit
+ * - Abuse tracking with graduated response
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   checkRateLimit,
+ *   rateLimitHeaders,
+ *   TIER_RATE_LIMITS
+ * } from '@autumnsgrove/groveengine/server';
+ *
+ * // In a SvelteKit route
+ * const { result, response } = await checkRateLimit({
+ *   kv: platform.env.CACHE,
+ *   key: `endpoint:${userId}`,
+ *   limit: 10,
+ *   windowSeconds: 60,
+ * });
+ * if (response) return response;
+ * ```
  *
  * @see docs/patterns/threshold-pattern.md
- * @see plans/threshold-engine-integration.md
  */
 
+// ============================================================================
 // Configuration
-export { TIER_RATE_LIMITS, ENDPOINT_RATE_LIMITS, getEndpointLimit } from './config';
-export type { SubscriptionTier, RateLimitCategory, EndpointKey } from './config';
+// ============================================================================
 
-// Middleware helpers
 export {
-	checkRateLimit,
-	rateLimitHeaders,
-	buildRateLimitKey,
-	getClientIP
-} from './middleware';
+	TIER_RATE_LIMITS,
+	ENDPOINT_RATE_LIMITS,
+	ENDPOINT_MAP,
+	getEndpointLimit,
+	getTierLimit,
+	isValidTier
+} from './config.js';
+
 export type {
-	RateLimitResult,
-	RateLimitMiddlewareOptions,
-	RateLimitCheckResult
-} from './middleware';
+	SubscriptionTier,
+	RateLimitCategory,
+	EndpointKey,
+	RateLimitConfig
+} from './config.js';
+
+// ============================================================================
+// Core Rate Limiting (re-exported from cache for convenience)
+// ============================================================================
+
+export { rateLimit, type RateLimitResult } from '../services/cache.js';
+
+// ============================================================================
+// Middleware Helpers
+// ============================================================================
+
+export { checkRateLimit, rateLimitHeaders, buildRateLimitKey, getClientIP } from './middleware.js';
+
+export type { RateLimitMiddlewareOptions, RateLimitCheckResult } from './middleware.js';
+
+// ============================================================================
+// Tenant Rate Limiting
+// ============================================================================
+
+export {
+	checkTenantRateLimit,
+	categorizeRequest,
+	getTenantLimitInfo,
+	formatLimit
+} from './tenant.js';
+
+// ============================================================================
+// Abuse Tracking (Graduated Response)
+// ============================================================================
+
+export {
+	getAbuseState,
+	recordViolation,
+	isBanned,
+	getBanRemaining,
+	clearAbuseState
+} from './abuse.js';
+
+export type { AbuseState, ViolationResult } from './abuse.js';

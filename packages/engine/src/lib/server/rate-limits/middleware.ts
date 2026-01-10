@@ -1,25 +1,18 @@
 /**
- * Rate Limit Middleware Helper
+ * Rate Limit Middleware for SvelteKit
  *
- * Reusable rate limiting utilities for SvelteKit routes.
- * Uses KV-based rate limiting from cache.ts.
+ * Provides helper functions for rate limiting in SvelteKit routes.
+ * Fails open on KV errors (allows request but logs error).
  *
  * @see docs/patterns/threshold-pattern.md
  */
 
 import { json } from '@sveltejs/kit';
-import { rateLimit } from '../services/cache';
+import { rateLimit, type RateLimitResult } from '../services/cache.js';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-/** Result from a rate limit check */
-export interface RateLimitResult {
-	allowed: boolean;
-	remaining: number;
-	resetAt: number;
-}
 
 export interface RateLimitMiddlewareOptions {
 	kv: KVNamespace;
@@ -42,20 +35,22 @@ export interface RateLimitCheckResult {
  * Check rate limit and return a 429 response if exceeded.
  *
  * Fails open on KV errors (allows request but logs error).
- * This is intentional - we prefer availability over strict enforcement
- * when infrastructure has issues.
  *
  * @example
  * ```typescript
  * const { result, response } = await checkRateLimit({
  *   kv: platform.env.CACHE,
- *   key: `auth:callback:${ip}`,
- *   limit: 20,
- *   windowSeconds: 300,
+ *   key: `endpoint:${userId}`,
+ *   limit: 10,
+ *   windowSeconds: 60,
  * });
  *
  * if (response) return response; // 429 with headers
- * // ... continue processing
+ *
+ * // Add headers to successful response
+ * return json(data, {
+ *   headers: rateLimitHeaders(result, 10)
+ * });
  * ```
  */
 export async function checkRateLimit(
@@ -82,7 +77,7 @@ export async function checkRateLimit(
 		const response = json(
 			{
 				error: 'rate_limited',
-				message: 'Too many requests. Please try again later.',
+				message: "You're moving faster than we can keep up! Take a moment and try again soon.",
 				retryAfter,
 				resetAt: new Date(result.resetAt * 1000).toISOString()
 			},
@@ -124,16 +119,12 @@ export function rateLimitHeaders(
 }
 
 /**
- * Build a rate limit key from endpoint and identifier.
- *
- * @param endpoint - Endpoint identifier (e.g., 'auth/callback')
- * @param identifier - User or IP identifier
- * @returns Formatted key for rate limiting
+ * Build a unique rate limit key from components.
  *
  * @example
  * ```typescript
- * const key = buildRateLimitKey('auth/callback', clientIp);
- * // Returns: 'auth/callback:192.168.1.1'
+ * const key = buildRateLimitKey('posts/create', userId);
+ * // Returns: 'posts/create:user123'
  * ```
  */
 export function buildRateLimitKey(endpoint: string, identifier: string): string {

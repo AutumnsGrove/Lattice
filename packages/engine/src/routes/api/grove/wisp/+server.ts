@@ -24,7 +24,7 @@ import {
   smartTruncate,
 } from "$lib/server/inference-client.js";
 import { calculateReadability } from "$lib/utils/readability.js";
-import * as cache from "$lib/server/services/cache.js";
+import { checkRateLimit } from "$lib/server/rate-limits/index.js";
 
 export const prerender = false;
 
@@ -129,23 +129,17 @@ export async function POST({ request, platform, locals }) {
     }
   }
 
-  // Rate limiting
+  // Rate limiting using Threshold middleware
   if (kv) {
-    const rateResult = await cache.rateLimit(kv, `wisp:${locals.user.id}`, {
+    const { result, response } = await checkRateLimit({
+      kv,
+      key: `wisp:${locals.user.id}`,
       limit: RATE_LIMIT.maxRequestsPerHour,
       windowSeconds: RATE_LIMIT.windowSeconds,
       namespace: "wisp",
     });
 
-    if (!rateResult.allowed) {
-      return json(
-        {
-          error: "Rate limit exceeded. Try again in an hour.",
-          resetAt: rateResult.resetAt,
-        },
-        { status: 429 },
-      );
-    }
+    if (response) return response; // 429 with proper headers
   }
 
   // Monthly cost cap check

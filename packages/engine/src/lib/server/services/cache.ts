@@ -365,6 +365,13 @@ export async function touch(
 // Rate Limiting Helpers
 // ============================================================================
 
+/** Result from a rate limit check */
+export interface RateLimitResult {
+	allowed: boolean;
+	remaining: number;
+	resetAt: number;
+}
+
 /**
  * Simple rate limiting using KV
  * Returns true if the action is allowed, false if rate limited
@@ -400,7 +407,7 @@ export async function rateLimit(
 		/** Namespace for the rate limit key */
 		namespace?: string;
 	}
-): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+): Promise<RateLimitResult> {
 	const fullKey = buildKey(options.namespace ?? 'ratelimit', key);
 
 	// Get current count

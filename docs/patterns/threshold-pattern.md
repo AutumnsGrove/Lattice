@@ -907,5 +907,29 @@ async function reportRateLimitEvent(env: Env, event: {
 
 ---
 
+## Implementation Notes
+
+### KV vs DO for Rate Limiting
+
+The current implementation uses Cloudflare KV for rate limit state storage. This has important implications:
+
+**KV Race Conditions:** KV's eventual consistency model means concurrent requests can read stale counts. Under high concurrency, a user might exceed their limit before the counter catches up. This is acceptable because:
+
+1. Rate limits are protective, not billing-critical — slight overruns are fine
+2. The fail-open design already allows requests on KV errors
+3. KV's global distribution provides low-latency reads
+
+**When to Migrate to DO:** For endpoints where precision matters (auth brute-force protection, billing-sensitive AI calls), consider Durable Objects:
+
+- DO provides strong consistency within a single object
+- Trade-off: single point of execution (slightly higher latency for distant users)
+- Migration path: Create `RateLimitDO` for high-precision endpoints
+
+**Recommended Architecture:**
+- **KV:** General rate limits (requests, writes, uploads)
+- **DO:** Auth endpoints, AI endpoints, billing-sensitive operations
+
+---
+
 *Pattern created: January 2026*  
 *For use by: Heartwood, Lattice, all Grove Workers*
