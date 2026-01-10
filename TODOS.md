@@ -102,6 +102,20 @@ These are the blockers. Get these done and you're live.
 
 ---
 
+## 📊 Status Page (Vista) — BACKEND READY
+
+> **Spec:** `docs/specs/vista-spec.md`
+> **Status:** Infrastructure done, just need a public-facing page
+
+### Remaining Tasks
+- [ ] Create `/status` route in landing site
+- [ ] Display current system health (pull from Vista backend)
+- [ ] Show recent incidents (if any)
+- [ ] Add link to status page in footer
+- [ ] Consider status.grove.place subdomain (optional, can redirect)
+
+---
+
 ## 📋 Legal Pre-Launch Checklist
 
 - [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
