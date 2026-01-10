@@ -41,6 +41,18 @@ export type {
   CanPostResponse,
   SubscriptionTier,
   AuthError,
+  // OAuth types
+  OAuthProvider,
+  // Passkey types
+  Passkey,
+  PasskeyRegisterOptions,
+  PasskeyAuthOptions,
+  // 2FA types
+  TwoFactorStatus,
+  TwoFactorEnableResponse,
+  TwoFactorVerifyResponse,
+  // Linked accounts
+  LinkedAccount,
 } from './types.js';
 
 export { GroveAuthError, TIER_POST_LIMITS, TIER_NAMES } from './types.js';
@@ -74,3 +86,14 @@ export {
   withRateLimit,
   DEFAULT_RATE_LIMITS,
 } from './rate-limit.js';
+
+// Validation utilities
+export {
+  isValidTotpCode,
+  isValidCredential,
+  getRequiredEnv,
+  TOTP_CODE_LENGTH,
+  TOTP_CODE_REGEX,
+} from './validation.js';
+
+export type { PasskeyCredential } from './validation.js';

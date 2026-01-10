@@ -46,7 +46,95 @@ export interface UserInfo {
   email: string;
   name: string | null;
   picture: string | null;
-  provider: "google" | "magic_code";
+  provider: "google" | "discord" | "magic_code";
+}
+
+// =============================================================================
+// OAUTH TYPES
+// =============================================================================
+
+export type OAuthProvider = "google" | "discord";
+
+// =============================================================================
+// PASSKEY TYPES
+// =============================================================================
+
+export interface Passkey {
+  id: string;
+  credentialId: string;
+  name: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+export interface PasskeyRegisterOptions {
+  challenge: string;
+  rp: {
+    name: string;
+    id: string;
+  };
+  user: {
+    id: string;
+    name: string;
+    displayName: string;
+  };
+  pubKeyCredParams: Array<{
+    type: "public-key";
+    alg: number;
+  }>;
+  authenticatorSelection: {
+    authenticatorAttachment?: "platform" | "cross-platform";
+    requireResidentKey?: boolean;
+    residentKey?: "discouraged" | "preferred" | "required";
+    userVerification?: "required" | "preferred" | "discouraged";
+  };
+  timeout: number;
+  attestation: "none" | "indirect" | "direct" | "enterprise";
+}
+
+export interface PasskeyAuthOptions {
+  challenge: string;
+  rpId: string;
+  allowCredentials?: Array<{
+    type: "public-key";
+    id: string;
+    transports?: Array<"usb" | "ble" | "nfc" | "internal" | "hybrid">;
+  }>;
+  userVerification?: "required" | "preferred" | "discouraged";
+  timeout: number;
+}
+
+// =============================================================================
+// TWO-FACTOR AUTHENTICATION TYPES
+// =============================================================================
+
+export interface TwoFactorStatus {
+  enabled: boolean;
+  enabledAt: string | null;
+  backupCodesRemaining: number;
+}
+
+export interface TwoFactorEnableResponse {
+  secret: string;
+  qrCodeUrl: string;
+  backupCodes: string[];
+}
+
+export interface TwoFactorVerifyResponse {
+  success: boolean;
+  backupCodes?: string[];
+}
+
+// =============================================================================
+// LINKED ACCOUNTS TYPES
+// =============================================================================
+
+export interface LinkedAccount {
+  provider: OAuthProvider;
+  providerId: string;
+  email: string | null;
+  name: string | null;
+  linkedAt: string;
 }
 
 export interface LoginUrlResult {

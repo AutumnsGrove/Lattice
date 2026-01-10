@@ -14,6 +14,14 @@ import type {
   SubscriptionResponse,
   CanPostResponse,
   SubscriptionTier,
+  OAuthProvider,
+  Passkey,
+  PasskeyRegisterOptions,
+  PasskeyAuthOptions,
+  TwoFactorStatus,
+  TwoFactorEnableResponse,
+  TwoFactorVerifyResponse,
+  LinkedAccount,
 } from "./types.js";
 import { GroveAuthError } from "./types.js";
 
@@ -705,6 +713,438 @@ export class GroveAuthClient {
     });
 
     return data;
+  }
+
+  // ===========================================================================
+  // OAUTH - SOCIAL PROVIDERS
+  // ===========================================================================
+
+  /**
+   * Initiate social OAuth sign-in.
+   * Returns the redirect URL to start the OAuth flow.
+   */
+  async signInWithSocial(provider: OAuthProvider): Promise<{ url: string }> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/sign-in/social`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          provider,
+          redirect_uri: this.config.redirectUri,
+          client_id: this.config.clientId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "oauth_error",
+        data.message || `Failed to initiate ${provider} sign-in`,
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<{ url: string }>;
+  }
+
+  // ===========================================================================
+  // PASSKEY AUTHENTICATION
+  // ===========================================================================
+
+  /**
+   * Sign in with a passkey (WebAuthn).
+   * Returns authentication options for the browser to use.
+   */
+  async getPasskeyAuthOptions(): Promise<PasskeyAuthOptions> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/sign-in/passkey`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: this.config.clientId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_error",
+        data.message || "Failed to get passkey authentication options",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<PasskeyAuthOptions>;
+  }
+
+  /**
+   * Verify passkey authentication and exchange for tokens.
+   *
+   * IMPORTANT: This method should only be called from server-side code
+   * (e.g., SvelteKit server endpoints). Never expose passkey verification
+   * directly to client-side JavaScript.
+   */
+  async verifyPasskeyAuth(credential: {
+    id: string;
+    rawId: string;
+    response: {
+      authenticatorData: string;
+      clientDataJSON: string;
+      signature: string;
+      userHandle?: string;
+    };
+    type: string;
+  }): Promise<TokenResponse> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/sign-in/passkey/verify`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          credential,
+          client_id: this.config.clientId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_verify_error",
+        data.message || "Failed to verify passkey authentication",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<TokenResponse>;
+  }
+
+  /**
+   * Get passkey registration options for adding a new passkey.
+   */
+  async getPasskeyRegisterOptions(
+    accessToken: string,
+  ): Promise<PasskeyRegisterOptions> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/passkey/generate-register-options`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_error",
+        data.message || "Failed to get passkey registration options",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<PasskeyRegisterOptions>;
+  }
+
+  /**
+   * Verify and register a new passkey.
+   */
+  async verifyPasskeyRegistration(
+    accessToken: string,
+    credential: {
+      id: string;
+      rawId: string;
+      response: {
+        attestationObject: string;
+        clientDataJSON: string;
+      };
+      type: string;
+    },
+    name?: string,
+  ): Promise<Passkey> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/passkey/verify-registration`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ credential, name }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_register_error",
+        data.message || "Failed to register passkey",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<Passkey>;
+  }
+
+  /**
+   * List all passkeys for the authenticated user.
+   */
+  async listPasskeys(accessToken: string): Promise<Passkey[]> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/passkey/list-user-passkeys`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_list_error",
+        data.message || "Failed to list passkeys",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<Passkey[]>;
+  }
+
+  /**
+   * Delete a passkey.
+   */
+  async deletePasskey(accessToken: string, passkeyId: string): Promise<void> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/passkey/delete-passkey`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ passkeyId }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "passkey_delete_error",
+        data.message || "Failed to delete passkey",
+        response.status,
+      );
+    }
+  }
+
+  // ===========================================================================
+  // TWO-FACTOR AUTHENTICATION
+  // ===========================================================================
+
+  /**
+   * Get the current 2FA status for the authenticated user.
+   */
+  async getTwoFactorStatus(accessToken: string): Promise<TwoFactorStatus> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/two-factor/get-status`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "2fa_status_error",
+        data.message || "Failed to get 2FA status",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<TwoFactorStatus>;
+  }
+
+  /**
+   * Enable 2FA for the authenticated user.
+   * Returns the TOTP secret and QR code URL for setup.
+   */
+  async enableTwoFactor(accessToken: string): Promise<TwoFactorEnableResponse> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/two-factor/enable`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "2fa_enable_error",
+        data.message || "Failed to enable 2FA",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<TwoFactorEnableResponse>;
+  }
+
+  /**
+   * Verify a TOTP code to complete 2FA setup or during sign-in.
+   */
+  async verifyTwoFactorCode(
+    accessToken: string,
+    code: string,
+  ): Promise<TwoFactorVerifyResponse> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/two-factor/verify-totp`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "2fa_verify_error",
+        data.message || "Failed to verify 2FA code",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<TwoFactorVerifyResponse>;
+  }
+
+  /**
+   * Disable 2FA for the authenticated user.
+   */
+  async disableTwoFactor(accessToken: string, code: string): Promise<void> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/two-factor/disable`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "2fa_disable_error",
+        data.message || "Failed to disable 2FA",
+        response.status,
+      );
+    }
+  }
+
+  /**
+   * Generate new backup codes (invalidates existing codes).
+   */
+  async generateBackupCodes(accessToken: string): Promise<string[]> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/two-factor/generate-backup-codes`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "backup_codes_error",
+        data.message || "Failed to generate backup codes",
+        response.status,
+      );
+    }
+
+    const data = (await response.json()) as { backupCodes: string[] };
+    return data.backupCodes;
+  }
+
+  // ===========================================================================
+  // LINKED ACCOUNTS
+  // ===========================================================================
+
+  /**
+   * Get all linked OAuth accounts for the authenticated user.
+   */
+  async getLinkedAccounts(accessToken: string): Promise<LinkedAccount[]> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/linked-accounts`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "linked_accounts_error",
+        data.message || "Failed to get linked accounts",
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<LinkedAccount[]>;
+  }
+
+  /**
+   * Unlink an OAuth provider from the account.
+   */
+  async unlinkAccount(
+    accessToken: string,
+    provider: OAuthProvider,
+  ): Promise<void> {
+    const response = await fetch(
+      `${this.config.authBaseUrl}/api/auth/linked-accounts/${provider}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const data = (await response.json()) as any;
+      throw new GroveAuthError(
+        data.error || "unlink_error",
+        data.message || `Failed to unlink ${provider} account`,
+        response.status,
+      );
+    }
   }
 }
 
