@@ -16,6 +16,7 @@
 		Key,
 		RefreshCw
 	} from '@autumnsgrove/groveengine/ui/icons';
+	import { base64urlToBuffer, bufferToBase64url } from '@autumnsgrove/groveengine/utils';
 
 	// Type definitions
 	interface Passkey {
@@ -191,27 +192,6 @@
 		}
 	}
 
-	// Base64url helpers
-	function base64urlToBuffer(base64url: string): ArrayBuffer {
-		const padding = '='.repeat((4 - (base64url.length % 4)) % 4);
-		const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/') + padding;
-		const binary = atob(base64);
-		const bytes = new Uint8Array(binary.length);
-		for (let i = 0; i < binary.length; i++) {
-			bytes[i] = binary.charCodeAt(i);
-		}
-		return bytes.buffer;
-	}
-
-	function bufferToBase64url(buffer: ArrayBuffer): string {
-		const bytes = new Uint8Array(buffer);
-		let binary = '';
-		for (let i = 0; i < bytes.length; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-	}
-
 	// Format date
 	function formatDate(dateString: string | null): string {
 		if (!dateString) return 'Never';
@@ -282,9 +262,9 @@
 									<button
 										type="submit"
 										class="p-2 rounded-lg text-foreground-muted hover:text-error hover:bg-error/10 transition-colors"
-										title="Delete passkey"
+										aria-label="Delete passkey {passkey.name || 'unnamed'}"
 									>
-										<Trash2 class="w-4 h-4" />
+										<Trash2 class="w-4 h-4" aria-hidden="true" />
 									</button>
 								</form>
 							</div>
@@ -515,12 +495,13 @@
 						<button
 							onclick={copyBackupCodes}
 							class="btn-secondary flex items-center gap-2 text-sm"
+							aria-label={copiedBackupCodes ? 'Backup codes copied to clipboard' : 'Copy backup codes to clipboard'}
 						>
 							{#if copiedBackupCodes}
-								<Check class="w-4 h-4" />
+								<Check class="w-4 h-4" aria-hidden="true" />
 								Copied!
 							{:else}
-								<Copy class="w-4 h-4" />
+								<Copy class="w-4 h-4" aria-hidden="true" />
 								Copy Codes
 							{/if}
 						</button>
@@ -531,6 +512,7 @@
 								invalidateAll();
 							}}
 							class="btn-primary"
+							aria-label="Finish two-factor authentication setup"
 						>
 							Done
 						</button>

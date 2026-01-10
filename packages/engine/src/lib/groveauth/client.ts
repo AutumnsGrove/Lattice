@@ -787,6 +787,10 @@ export class GroveAuthClient {
 
   /**
    * Verify passkey authentication and exchange for tokens.
+   *
+   * IMPORTANT: This method should only be called from server-side code
+   * (e.g., SvelteKit server endpoints). Never expose passkey verification
+   * directly to client-side JavaScript.
    */
   async verifyPasskeyAuth(credential: {
     id: string;
@@ -809,7 +813,6 @@ export class GroveAuthClient {
         body: JSON.stringify({
           credential,
           client_id: this.config.clientId,
-          client_secret: this.config.clientSecret,
         }),
       },
     );
