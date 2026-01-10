@@ -78,6 +78,10 @@ import {
   Download,
   Settings,
   Menu,
+  Plus,
+  Copy,
+  Trash2,
+  RefreshCw,
   // Metrics
   Clock,
   TrendingUp,
@@ -90,6 +94,10 @@ import {
   Globe,
   CalendarDays,
   LifeBuoy,
+  // Authentication & Security
+  Fingerprint,
+  Key,
+  Link2,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -222,6 +230,22 @@ export const actionIcons = {
   trend: TrendingUp,
   trenddown: TrendingDown,
   arrow: ArrowRight,
+  plus: Plus,
+  copy: Copy,
+  trash: Trash2,
+  refresh: RefreshCw,
+} as const;
+
+// ============================================================================
+// AUTHENTICATION ICONS
+// ============================================================================
+/** Icons for authentication and account security */
+export const authIcons = {
+  fingerprint: Fingerprint,
+  key: Key,
+  link: Link2,
+  shield: Shield,
+  lock: Lock,
 } as const;
 
 // ============================================================================
@@ -249,6 +273,7 @@ export const allIcons = {
   ...growthIcons,
   ...phaseIcons,
   ...actionIcons,
+  ...authIcons,
   ...metricsIcons,
 } as const;
 
@@ -334,4 +359,13 @@ export {
   TrendingUp,
   Users,
   Activity,
+  // Actions
+  Plus,
+  Copy,
+  Trash2,
+  RefreshCw,
+  // Authentication
+  Fingerprint,
+  Key,
+  Link2,
 };
