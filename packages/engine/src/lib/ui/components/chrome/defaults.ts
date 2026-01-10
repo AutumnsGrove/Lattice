@@ -18,6 +18,7 @@ import {
   Footprints,
   HeartHandshake,
   Activity,
+  Blinds,
 } from "lucide-svelte";
 
 // =============================================================================
@@ -143,4 +144,5 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
 export const DEFAULT_LEGAL_LINKS: FooterLink[] = [
   { href: "/legal/privacy", label: "Privacy" },
   { href: "/legal/terms", label: "Terms" },
+  { href: "/shade", label: "Shade", icon: Blinds },
 ];

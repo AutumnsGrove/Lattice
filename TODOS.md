@@ -6,22 +6,179 @@
 
 ---
 
-## 🌿 Vines Subicons Brainstorm (2026-01-07) — IN PROGRESS
+# 🚀 LAUNCH SPRINT
 
-> **Context:** Vines are "gutter widgets" - margin content that climbs alongside posts (comments, photos, galleries).
+These are the blockers. Get these done and you're live.
+
+---
+
+## 🛡️ Shade Implementation — ALMOST DONE
+
+> **Spec:** `docs/specs/shade-spec.md`
+> **Philosophy:** Users own their words. In a forest full of harvesters, this grove stays shaded.
+
+### ✅ Completed
+- [x] Subscribe to Dark Visitors for ongoing blocklist updates
+- [x] Create Turnstile widget in Cloudflare Dashboard
+- [x] Add site key to wrangler.toml files
+- [x] Add secret key to Cloudflare Pages (engine, landing, plant, ivy, amber)
+- [x] Implement TurnstileWidget.svelte component
+- [x] Add server-side verification utility (turnstile.ts)
+- [x] Create /api/verify/turnstile endpoint
+- [x] Update CSP to allow challenges.cloudflare.com
+- [x] Add verification page (/verify) for first-time visitors
+- [x] Set grove_verified cookie (7-day expiry)
+- [x] Write help center article (how-grove-protects-your-content.md)
+- [x] Verify "Block AI Bots" toggle is ON in Cloudflare Dashboard
+- [x] Enable "Bot Fight Mode"
+- [x] Check if "AI Labyrinth" is available and enable
+- [x] Deploy comprehensive robots.txt to grove.place
+- [x] Add `noai, noimageai` meta tags to all pages (root layout)
+- [x] Set `X-Robots-Tag: noai, noimageai` header via Transform Rules
+
+### 🔥 Remaining (Launch Blockers)
+- [ ] **Configure WAF custom rules** (3 of 5 slots):
+  - Rule 1: Block empty/suspicious user agents
+  - Rule 2: Challenge bot-like user agents (except Google, Bing, Yandex, Kagi)
+  - Rule 3: High threat score filtering
+- [ ] **Set up rate limiting rules** (60/min general, 200/5min crawling)
+- [x] **Create `/shade` policy page** — Explain Grove's AI protection to users ✅
+- [ ] **Update Terms of Service** with AI prohibition language
+- [x] Add footer link to /shade on all pages ✅
+
+---
+
+## 💳 Stripe Production Configuration — READY TO SWITCH
+
+> **Code:** Complete in `plant/src/lib/server/stripe.ts`
+> **Setup Guide:** `docs/STRIPE-SETUP.md`
+
+### Remaining Steps
+- [ ] Switch Stripe Dashboard from test mode to live mode
+- [ ] Create 4 products (Seedling $8, Sapling $12, Oak $25, Evergreen $35)
+- [ ] Create 8 prices (monthly + yearly for each tier)
+- [ ] Copy live price IDs to `plant/src/lib/server/stripe.ts`
+- [ ] Set production secrets in Cloudflare Dashboard:
+  - `STRIPE_SECRET_KEY` (live mode)
+  - `STRIPE_PUBLISHABLE_KEY` (live mode)
+  - `STRIPE_WEBHOOK_SECRET` (create new webhook for production URL)
+- [ ] Verify GROVEAUTH_* secrets are set for OAuth flow
+
+---
+
+## 🚦 Rate Limiting (Threshold) — HIGH PRIORITY
+
+> **Spec:** `docs/patterns/threshold-pattern.md`
+> **Why now:** Security + abuse prevention before launch. Basic IP limiting isn't enough.
+
+### Phase 1: Cloudflare Edge Rate Limiting (Days 1-2)
+- [ ] Configure Cloudflare WAF rate limiting rules (Layer 1)
+  - General request limit: 1000 req/min per IP
+  - Auth endpoint limit: 50 req/5min per IP
+  - Upload endpoint limit: 100 req/hour per IP
+  - AI endpoint limit: 500 req/day per IP
+- [ ] Test rules don't block legitimate traffic
+
+### Phase 2: Tenant Rate Limiting (Days 3-4)
+- [ ] Add rate limit tables to TenantDO schema
+- [ ] Implement `checkTenantRateLimit()` method
+- [ ] Add tier-based limits (Seedling: 100/min, Oak: 1000/min)
+- [ ] Integrate with router middleware
+- [ ] Add rate limit headers to responses (`X-RateLimit-*`)
+
+### Phase 3: User Rate Limiting (Days 5-7)
+- [ ] Add rate limit tables to SessionDO schema
+- [ ] Add abuse state tracking table
+- [ ] Implement `checkUserRateLimit()` method
+- [ ] Implement graduated response (warning → slowdown → block → ban)
+- [ ] Add shadow ban functionality
+- [ ] Integrate with Heartwood login flow
+
+### Phase 4: Monitoring (Post-Launch OK)
+- [ ] Add rate limit event logging
+- [ ] Create Vista dashboard component
+- [ ] Configure alert thresholds
+- [ ] Document runbooks for common scenarios
+
+---
+
+## 📊 Status Page (Vista) — BACKEND READY
+
+> **Spec:** `docs/specs/vista-spec.md`
+> **Status:** Infrastructure done, just need a public-facing page
+
+### Remaining Tasks
+- [ ] Create `/status` route in landing site
+- [ ] Display current system health (pull from Vista backend)
+- [ ] Show recent incidents (if any)
+- [ ] Add link to status page in footer
+- [ ] Consider status.grove.place subdomain (optional, can redirect)
+
+---
+
+## 📋 Legal Pre-Launch Checklist
+
+- [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
+  - Required for DMCA safe harbor protection
+  - Register at: https://www.copyright.gov/dmca-directory/
+- [ ] Review ToS for any needed updates
+- [ ] Review Privacy Policy for accuracy
+- [ ] Review AUP for clarity and enforceability
+
+---
+
+# 📅 THIS WEEK (Non-Blocking but Important)
+
+---
+
+## 🔍 Safari Reader Mode & Glass Cards — QUICK FIX
+
+> **Issue:** Safari Reader Mode strips `backdrop-blur` and translucent backgrounds, making glass card content invisible.
+> **Discovered:** 2026-01-06 while reviewing Vision page Core Values cards
+> **Severity:** Medium — affects content accessibility for users who prefer reader mode
+
+### The Problem
+- Glass cards use `bg-white/60 backdrop-blur-md` styling
+- Reader mode extracts semantic content and strips most CSS
+- Content inside glass cards becomes unreadable (no background, no contrast)
+
+### Implementation Tasks
+- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback in Tailwind config or global CSS
+  ```css
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass-card, [class*="Glass"] {
+      background: rgba(255, 255, 255, 0.95) !important;
+      /* or use solid bg-white dark:bg-slate-800 */
+    }
+  }
+  ```
+- [ ] Wrap glass card content in semantic `<article>` or `<section>` elements
+- [ ] Ensure text inside glass cards has sufficient color contrast even without backdrop
+- [ ] Test fix in Safari iOS (Settings → Safari → Show Reader) and Safari macOS (View → Show Reader)
+
+### Pages to Test After Fix
+- `/vision` — Core Values cards (5 cards)
+- `/pricing` — Plan comparison cards
+- `/roadmap` — Feature lists
+- Any glass-heavy content pages
+
+---
+
+## 🌿 Vines Subicons Brainstorm — ON HOLD
+
+> **Context:** Vines are "gutter widgets" - margin content that climbs alongside posts.
 > **Current:** GutterManager.svelte implements Comment, Photo, Gallery types
-> **Brainstorming:** What other subicon types should Vines support?
+> **Status:** Brainstorming paused for launch sprint
 
-**Ideas to explore:**
+**Ideas to explore (post-launch):**
 - Content annotation: Footnote, Aside, Callout, Definition
 - Media: Audio, Video, Code snippets, Diagrams (Weave/Fern)
 - Navigation: Related posts, Backlinks, Series nav, External links
 - Interactive: Polls, Reactions, Bookmarks
 
 **Reference files:**
-- `packages/engine/src/lib/components/admin/GutterManager.svelte` - Current implementation
-- `docs/specs/lattice-spec.md` - Gutter links feature docs
-- `docs/scratch/lattice-grove-journey.md` - Lattice/Vines naming rationale
+- `packages/engine/src/lib/components/admin/GutterManager.svelte`
+- `docs/specs/lattice-spec.md`
 
 ---
 
@@ -640,58 +797,12 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ---
 
-## 🛡️ Shade Implementation (Pre-Launch)
-
-> **Spec:** See `docs/specs/shade-spec.md` for full technical specification.
-> **Philosophy:** Users own their words. In a forest full of harvesters, this grove stays shaded.
-
-### Phase 1: Cloudflare Configuration (Today)
-- [ ] Verify "Block AI Bots" toggle is ON in Cloudflare Dashboard
-- [ ] Enable "Bot Fight Mode"
-- [ ] Check if "AI Labyrinth" is available and enable
-- [x] Subscribe to Dark Visitors for ongoing blocklist updates ✅
-
-### Phase 2: Technical Implementation (This Week)
-- [ ] Deploy comprehensive robots.txt to grove.place
-- [ ] Add `noai, noimageai` meta tags to all pages (root layout)
-- [ ] Set `X-Robots-Tag: noai, noimageai` header via Transform Rules
-- [ ] Configure WAF custom rules (3 of 5 slots):
-  - Rule 1: Block empty/suspicious user agents
-  - Rule 2: Challenge bot-like user agents (except Google, Bing, Yandex, Kagi)
-  - Rule 3: High threat score filtering
-- [ ] Set up rate limiting rules (60/min general, 200/5min crawling)
-
-### Phase 2.5: Turnstile Human Verification
-- [x] Create Turnstile widget in Cloudflare Dashboard ✅
-- [x] Add site key to wrangler.toml files ✅
-- [x] Add secret key to Cloudflare Pages (engine, landing, plant, ivy, amber) ✅
-- [x] Implement TurnstileWidget.svelte component ✅
-- [x] Add server-side verification utility (turnstile.ts) ✅
-- [x] Create /api/verify/turnstile endpoint ✅
-- [x] Update CSP to allow challenges.cloudflare.com ✅
-- [x] Add verification page (/verify) for first-time visitors ✅
-- [x] Set grove_verified cookie (7-day expiry) ✅
-- [x] Write help center article (how-grove-protects-your-content.md) ✅
-
-### Phase 3: Legal & Public Pages
-- [ ] Create and publish `/shade` policy page
-- [ ] Update Terms of Service with AI prohibition language
-- [ ] Add footer link to /shade on all pages
-
-### Phase 4: Post-Launch Monitoring
-- [ ] Set up monitoring dashboard for blocked requests
-- [ ] Document any false positive patterns
-- [ ] Review and adjust rate limits based on real traffic
-
----
-
-## Security Audit - Remaining Items
+## 🔒 Security Audit - Remaining Items (Post-Launch OK)
 
 ### Medium Priority
 - [ ] **CDN magic byte validation** - Add file signature validation
   - Location: `landing/src/routes/api/admin/cdn/upload/+server.ts`
 - [ ] **CSRF token rotation** - Implement per-session or periodic rotation
-- [ ] **Rate limiting** - Add to image upload, post creation, settings endpoints
 - [ ] **Content-Disposition headers** - Add to R2 uploads for forced download
 - [ ] **Image bomb protection** - Add dimension validation after image load
 - [ ] **JS/CSS CDN uploads** - Force download or remove from allowed types
@@ -701,42 +812,6 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 - [ ] **Failed attempts cleanup** - Add cleanup for old `failed_attempts` records
 - [ ] **CSP headers** - Add Content-Security-Policy headers in hooks
 - [ ] **Alt text sanitization** - Sanitize before DB storage in CDN patch endpoint
-
----
-
-## Rate Limiting Enhancement (Threshold Pattern)
-
-> **Spec:** See `docs/patterns/threshold-pattern.md` for full technical specification.
-> **Priority:** HIGH - Immediate security benefits and abuse prevention.
-
-### Phase 1: Cloudflare Edge Rate Limiting (Days 1-2)
-- [ ] Configure Cloudflare WAF rate limiting rules (Layer 1)
-  - General request limit: 1000 req/min per IP
-  - Auth endpoint limit: 50 req/5min per IP
-  - Upload endpoint limit: 100 req/hour per IP
-  - AI endpoint limit: 500 req/day per IP
-- [ ] Test with synthetic traffic
-
-### Phase 2: Tenant Rate Limiting (Days 3-4)
-- [ ] Add rate limit tables to TenantDO schema
-- [ ] Implement `checkTenantRateLimit()` method
-- [ ] Add tier-based limits (Seedling: 100/min, Oak: 1000/min)
-- [ ] Integrate with router middleware
-- [ ] Add rate limit headers to responses
-
-### Phase 3: User Rate Limiting (Days 5-7)
-- [ ] Add rate limit tables to SessionDO schema
-- [ ] Add abuse state tracking table
-- [ ] Implement `checkUserRateLimit()` method
-- [ ] Implement graduated response system (warning → slowdown → block → ban)
-- [ ] Add shadow ban functionality
-- [ ] Integrate with Heartwood login flow
-
-### Phase 4: Monitoring (Days 8-10)
-- [ ] Add rate limit event logging
-- [ ] Create Vista dashboard component
-- [ ] Configure alert thresholds
-- [ ] Document runbooks for common scenarios
 
 ---
 
