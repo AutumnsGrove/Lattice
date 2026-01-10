@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
-	import { Trees, X, Check } from 'lucide-svelte';
+	import { toolIcons, stateIcons } from '$lib/utils/icons';
+
+	const ShadeIcon = toolIcons.blinds;
+	const BlockIcon = stateIcons.x;
+	const AllowIcon = stateIcons.check;
 </script>
 
 <svelte:head>
@@ -15,7 +19,7 @@
 		<div class="max-w-3xl mx-auto">
 			<!-- Hero -->
 			<header class="text-center mb-12">
-				<Trees class="w-12 h-12 mx-auto mb-4 text-grove-600" />
+				<ShadeIcon class="w-12 h-12 mx-auto mb-4 text-grove-600" />
 				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">Shade</h1>
 				<p class="text-xl text-foreground-faint font-serif italic">
 					In a forest full of harvesters, this grove stays shaded.
@@ -50,15 +54,15 @@
 					<h3 class="text-lg font-semibold text-foreground mb-3">What we block</h3>
 					<ul class="space-y-2 text-foreground-muted">
 						<li class="flex items-start gap-2">
-							<X class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
 							<span>AI training crawlers (GPTBot, ClaudeBot, CCBot, and dozens more)</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<X class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
 							<span>Automated scrapers and data harvesters</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<X class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
 							<span>Bulk archiving services</span>
 						</li>
 					</ul>
@@ -68,15 +72,15 @@
 					<h3 class="text-lg font-semibold text-foreground mb-3">What we allow</h3>
 					<ul class="space-y-2 text-foreground-muted">
 						<li class="flex items-start gap-2">
-							<Check class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
+							<AllowIcon class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
 							<span>Search engines (Google, Bing, Kagi, DuckDuckGo)</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
+							<AllowIcon class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
 							<span>Human readers (always welcome)</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<Check class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
+							<AllowIcon class="w-4 h-4 mt-0.5 text-grove-600 shrink-0" />
 							<span>RSS feeds for your subscribers</span>
 						</li>
 					</ul>
