@@ -102,26 +102,27 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<!-- Backdrop -->
+<!-- Backdrop (mobile only) -->
 {#if open}
 	<button
 		type="button"
-		class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity"
+		class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity md:hidden"
 		onclick={handleClose}
 		aria-label="Close menu"
 	></button>
 {/if}
 
-<!-- Slide-out panel -->
+<!-- Slide-out panel (mobile only) -->
 <div
 	bind:this={menuPanelRef}
-	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-transform duration-300 ease-out flex flex-col {open
-		? 'translate-x-0'
-		: 'translate-x-full'}"
+	class="fixed top-0 right-0 z-[110] h-full w-64 transform bg-surface border-l border-default shadow-xl transition-all duration-300 ease-out flex flex-col md:hidden {open
+		? 'translate-x-0 visible'
+		: 'translate-x-full invisible'}"
 	role="dialog"
 	aria-modal="true"
 	aria-label="Navigation menu"
 	aria-hidden={!open}
+	inert={!open}
 >
 	<!-- Header -->
 	<div class="flex items-center justify-between p-4 border-b border-default">
