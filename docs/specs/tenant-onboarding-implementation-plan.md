@@ -32,7 +32,7 @@
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
 | **Subdomain** | `create.grove.place` | Dedicated signup experience, separate from landing |
-| **Auth Provider** | Heartwood (GroveAuth) | Already integrated; handles Google, GitHub, magic code |
+| **Auth Provider** | Heartwood (GroveAuth) | Already integrated; handles Google, magic code |
 | **Auth Flow** | Heartwood first → collect profile after | Leverages existing OAuth, avoids duplicate systems |
 | **Tour Location** | `example.grove.place` + `autumnsgrove.com` | Demo site (Midnight Bloom) + real-world example |
 | **D1 Creation** | After profile completion (free) or payment (paid) | Ensures commitment before provisioning |
@@ -49,7 +49,7 @@
 │     └─→ "Start your blog" button → create.grove.place                       │
 │                                                                             │
 │  2. Create Subdomain (create.grove.place)                                   │
-│     ├─→ /                     Welcome + auth options (Google/GitHub/Email)  │
+│     ├─→ /                     Welcome + auth options (Google/Email)         │
 │     ├─→ /auth/callback        Heartwood callback → redirect to /profile     │
 │     ├─→ /profile              Collect: username, display name, color, etc.  │
 │     ├─→ /plans                Select plan (Seedling/Sapling/Oak/Evergreen)  │
@@ -207,7 +207,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 │   │   │   ├── email.ts                    # Email sending
 │   │   │   └── validation.ts               # Username validation
 │   │   └── components/
-│   │       ├── AuthButtons.svelte          # Google/GitHub/Email buttons
+│   │       ├── AuthButtons.svelte          # Google/Email buttons
 │   │       ├── UsernameInput.svelte        # Username with availability check
 │   │       ├── ColorPicker.svelte          # Favorite color selector
 │   │       ├── InterestsPicker.svelte      # Multi-select interests
@@ -229,14 +229,14 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 #### 3.1 Welcome Page (`/`)
 
 ```svelte
-<!-- Shows auth options: Google, GitHub, Email -->
+<!-- Shows auth options: Google, Email -->
 <!-- Warm welcome message -->
 <!-- Links to pricing for comparison -->
 <!-- Progress indicator: Step 1 of 4 -->
 ```
 
 **Functionality:**
-- Display auth buttons (Google, GitHub, Magic Code)
+- Display auth buttons (Google, Magic Code)
 - Each button initiates Heartwood OAuth with appropriate provider
 - Store `return_to` in cookie for post-auth redirect
 
@@ -244,7 +244,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 
 **`/auth` (GET):**
 - Initiate Heartwood OAuth
-- Query param: `?provider=google|github|email`
+- Query param: `?provider=google|email`
 - Set PKCE state cookies
 - Redirect to GroveAuth authorize endpoint
 

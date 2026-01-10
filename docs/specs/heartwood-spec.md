@@ -61,7 +61,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 ### Goals
 
 - **Single source of truth** for user authentication
-- **Multiple auth providers** (Google, GitHub, Magic Code)
+- **Multiple auth providers** (Google, Magic Code)
 - **Secure token-based sessions** that client sites can verify
 - **Simple integration** for any site in the AutumnsGrove ecosystem
 - **Admin-only access** (no public registration - allowlist based)
@@ -96,10 +96,9 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 │                        GroveAuth Service                            │
 │                       auth.grove.place                              │
 │                                                                     │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                  │
-│  │   Google    │  │   GitHub    │  │ Magic Code  │                  │
-│  │   OAuth     │  │   OAuth     │  │   (Email)   │                  │
-│  └─────────────┘  └─────────────┘  └─────────────┘                  │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐          │
+│  │      Google OAuth      │  │   Magic Code (Email)    │          │
+│  └─────────────────────────┘  └─────────────────────────┘          │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────┐            │
 │  │              Session & Token Management             │            │
@@ -186,22 +185,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 - Name (display purposes)
 - Profile picture URL (optional)
 
-### 2. GitHub OAuth
-
-**Purpose**: Alternative sign-in for developers
-
-**Flow**: Authorization Code Grant
-
-**Scopes Required**:
-- `user:email`
-- `read:user`
-
-**Data Retrieved**:
-- Email address (primary identifier)
-- Username
-- Avatar URL (optional)
-
-### 3. Magic Code (Email)
+### 2. Magic Code (Email)
 
 **Purpose**: Fallback for users who prefer email-based auth
 
@@ -241,7 +225,7 @@ CREATE TABLE users (
     email TEXT UNIQUE NOT NULL,             -- Primary identifier
     name TEXT,                              -- Display name
     avatar_url TEXT,                        -- Profile picture
-    provider TEXT NOT NULL,                 -- 'google', 'github', 'magic_code'
+    provider TEXT NOT NULL,                 -- 'google', 'magic_code'
     provider_id TEXT,                       -- ID from OAuth provider
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     last_login TEXT
@@ -346,8 +330,6 @@ https://auth.grove.place
 | GET | `/login` | Login page with provider selection |
 | GET | `/oauth/google` | Initiate Google OAuth |
 | GET | `/oauth/google/callback` | Google OAuth callback |
-| GET | `/oauth/github` | Initiate GitHub OAuth |
-| GET | `/oauth/github/callback` | GitHub OAuth callback |
 | POST | `/magic/send` | Send magic code email |
 | POST | `/magic/verify` | Verify magic code |
 | POST | `/token` | Exchange auth code for tokens |
@@ -375,7 +357,7 @@ https://auth.grove.place
 | `code_challenge` | No | PKCE challenge (recommended) |
 | `code_challenge_method` | No | Must be `S256` if challenge provided |
 
-**Response**: HTML login page with Google, GitHub, and Magic Code options
+**Response**: HTML login page with Google and Magic Code options
 
 **Error Responses**:
 - `400` - Missing required parameters
@@ -413,30 +395,6 @@ https://auth.grove.place
 ```
 {redirect_uri}?error=access_denied&error_description=...&state={state}
 ```
-
----
-
-#### `GET /oauth/github`
-
-**Purpose**: Initiate GitHub OAuth flow
-
-**Query Parameters**: Same as `/login`
-
-**Response**: `302` Redirect to GitHub OAuth consent screen
-
----
-
-#### `GET /oauth/github/callback`
-
-**Purpose**: Handle GitHub OAuth callback
-
-**Query Parameters**:
-| Parameter | Description |
-|-----------|-------------|
-| `code` | Authorization code from GitHub |
-| `state` | State parameter for CSRF verification |
-
-**Response**: Same as Google callback
 
 ---
 
@@ -1065,8 +1023,6 @@ AUTH_BASE_URL = "https://auth.grove.place"
 # JWT_PUBLIC_KEY - RSA public key for verifying JWTs (PEM format)
 # GOOGLE_CLIENT_ID - Google OAuth client ID
 # GOOGLE_CLIENT_SECRET - Google OAuth client secret
-# GITHUB_CLIENT_ID - GitHub OAuth client ID
-# GITHUB_CLIENT_SECRET - GitHub OAuth client secret
 # RESEND_API_KEY - Resend API key for sending emails
 ```
 
@@ -1099,8 +1055,7 @@ groveauth/
 │   ├── routes/
 │   │   ├── login.ts          # Login page handler
 │   │   ├── oauth/
-│   │   │   ├── google.ts     # Google OAuth handlers
-│   │   │   └── github.ts     # GitHub OAuth handlers
+│   │   │   └── google.ts     # Google OAuth handlers
 │   │   ├── magic.ts          # Magic code handlers
 │   │   ├── token.ts          # Token exchange handlers
 │   │   └── verify.ts         # Token verification
@@ -1170,7 +1125,6 @@ groveauth/
 - [ ] Run schema migrations
 - [ ] Generate RSA keypair for JWT signing
 - [ ] Set up Google OAuth credentials (console.cloud.google.com)
-- [ ] Set up GitHub OAuth app (github.com/settings/developers)
 - [ ] Set up Resend account and verify domain
 - [ ] Configure DNS for auth.grove.place
 - [ ] Set all secrets via `wrangler secret put`
@@ -1213,7 +1167,7 @@ groveauth/
 | **Authorization Code** | Short-lived code exchanged for tokens |
 | **PKCE** | Proof Key for Code Exchange - prevents code interception |
 | **Client** | A registered application that uses GroveAuth |
-| **Provider** | Authentication method (Google, GitHub, Magic Code) |
+| **Provider** | Authentication method (Google, Magic Code) |
 
 ---
 

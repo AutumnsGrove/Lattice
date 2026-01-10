@@ -18,7 +18,7 @@ declare global {
         name?: string;
         /** Profile picture URL */
         picture?: string;
-        /** Auth provider (google, github, magic_code) */
+        /** Auth provider (google, magic_code) */
         provider?: string;
         /** Whether user has admin privileges */
         isAdmin?: boolean;

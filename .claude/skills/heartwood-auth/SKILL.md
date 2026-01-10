@@ -25,7 +25,7 @@ Activate this skill when:
 
 ### Key Features
 
-- **OAuth Providers**: Google, GitHub
+- **OAuth Providers**: Google
 - **Magic Links**: Click-to-login emails via Resend
 - **Passkeys**: WebAuthn passwordless authentication
 - **KV-Cached Sessions**: Sub-100ms validation

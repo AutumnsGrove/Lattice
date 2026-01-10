@@ -9,7 +9,6 @@
 		Mail,
 		LogIn,
 		ChevronDown,
-		Github,
 		// Feature icons
 		Leaf,
 		Shield,
@@ -339,12 +338,6 @@
 					<a href="/auth?provider=google" class="btn-auth bg-grove-600 hover:bg-grove-700 text-white border-grove-600 hover:border-grove-700">
 						{@html GoogleIcon}
 						<span>Continue with Google</span>
-					</a>
-
-					<!-- GitHub -->
-					<a href="/auth?provider=github" class="btn-auth">
-						<Github class="w-5 h-5" />
-						<span>Continue with GitHub</span>
 					</a>
 
 					<!-- Divider -->

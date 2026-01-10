@@ -125,7 +125,7 @@ Add documentation comments to your site's `wrangler.toml`:
 2. Test the login flow:
    - Navigate to `https://yoursite.com/admin` (or protected route)
    - Should redirect to `https://auth.grove.place/login`
-   - Choose Google, GitHub, or Magic Code authentication
+   - Choose Google or Magic Code authentication
    - After authentication, should redirect back to `/auth/callback`
    - Should create session and redirect to your app
 

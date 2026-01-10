@@ -46,7 +46,7 @@ export interface UserInfo {
   email: string;
   name: string | null;
   picture: string | null;
-  provider: "google" | "github" | "magic_code";
+  provider: "google" | "magic_code";
 }
 
 export interface LoginUrlResult {

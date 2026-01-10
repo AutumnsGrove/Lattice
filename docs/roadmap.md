@@ -32,7 +32,6 @@ The groundwork laid in stillness. Foundations built when no one was watching.
 
 - [x] **Authentication (Heartwood):** Secure OAuth 2.0 + PKCE
   - Google OAuth provider
-  - GitHub OAuth provider
   - Magic code email auth via Resend
   - Session management in D1
   - Cross-subdomain cookies
@@ -67,7 +66,7 @@ Grove opens its doors. The first trees take root.
 ### Active Work
 
 - [x] **Sign Up Flow:** plant.grove.place
-  - Google, GitHub, email auth options
+  - Google, email auth options
   - Profile creation with username
   - Plan selection (Seedling/Sapling/Oak/Evergreen)
   - Stripe checkout integration

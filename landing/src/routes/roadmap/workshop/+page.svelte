@@ -80,7 +80,7 @@
 				{
 					name: 'Heartwood',
 					tagline: 'Centralized Authentication',
-					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth, GitHub, or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
+					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
 					status: 'live',
 					icon: 'shieldcheck',
 					domain: 'heartwood.grove.place',
@@ -88,7 +88,6 @@
 					github: 'https://github.com/AutumnsGrove/GroveAuth',
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
-						{ name: 'GitHub', icon: 'github', description: 'GitHub OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
 						{ name: 'Identity', icon: 'idcard', description: 'Verified identity' }
 					]
