@@ -44,7 +44,7 @@ These are the blockers. Get these done and you're live.
 - [ ] **Set up rate limiting rules** (60/min general, 200/5min crawling)
 - [x] **Create `/shade` policy page** — Explain Grove's AI protection to users ✅
 - [ ] **Update Terms of Service** with AI prohibition language
-- [ ] Add footer link to /shade on all pages
+- [x] Add footer link to /shade on all pages ✅
 
 ---
 
