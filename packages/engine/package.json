@@ -173,6 +173,10 @@
     "./config/terrarium": {
       "types": "./dist/config/terrarium.d.ts",
       "default": "./dist/config/terrarium.js"
+    },
+    "./groveauth": {
+      "types": "./dist/groveauth/index.d.ts",
+      "default": "./dist/groveauth/index.js"
     }
   },
   "files": [

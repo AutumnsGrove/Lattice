@@ -66,6 +66,17 @@ export {
   TrendingUp,
   Users,
   Activity,
+  // Actions
+  Plus,
+  Copy,
+  Trash2,
+  RefreshCw,
+  // Authentication
+  Fingerprint,
+  Key,
+  Link2,
+  // Also export the authIcons map
+  authIcons,
 } from './lucide';
 
 export const ICONS_VERSION = '0.3.0';

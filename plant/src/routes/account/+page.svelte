@@ -95,8 +95,8 @@
 		if (form?.success) {
 			if (form.action === 'enableTwoFactor' && form.qrCodeUrl) {
 				twoFactorSetupStep = 'qr';
-				twoFactorSecret = form.secret;
-				twoFactorQrCode = form.qrCodeUrl;
+				twoFactorSecret = form.secret ?? null;
+				twoFactorQrCode = form.qrCodeUrl ?? null;
 			} else if (form.action === 'verifyTwoFactor' && form.backupCodes) {
 				twoFactorSetupStep = 'backup';
 				backupCodes = form.backupCodes;
