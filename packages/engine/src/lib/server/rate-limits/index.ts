@@ -37,6 +37,7 @@ export {
 	ENDPOINT_RATE_LIMITS,
 	ENDPOINT_MAP,
 	getEndpointLimit,
+	getEndpointLimitByKey,
 	getTierLimit,
 	isValidTier
 } from './config.js';

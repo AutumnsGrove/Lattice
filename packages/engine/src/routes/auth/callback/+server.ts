@@ -15,7 +15,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
   getClientIP,
-  getEndpointLimit,
+  getEndpointLimitByKey,
 } from "$lib/server/rate-limits";
 
 // ============================================================================
@@ -146,7 +146,7 @@ export const GET: RequestHandler = async ({
   const kv = platform?.env?.CACHE_KV;
   if (kv) {
     const clientIp = getClientIP(request);
-    const limitConfig = getEndpointLimit("auth/callback");
+    const limitConfig = getEndpointLimitByKey("auth/callback");
     const rateLimitKey = buildRateLimitKey("auth/callback", clientIp);
 
     const { response: rateLimitResponse } = await checkRateLimit({

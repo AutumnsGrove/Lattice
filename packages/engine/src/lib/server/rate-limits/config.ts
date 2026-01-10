@@ -53,6 +53,7 @@ export const TIER_RATE_LIMITS = {
 export const ENDPOINT_RATE_LIMITS = {
 	// Auth endpoints (most sensitive)
 	'auth/login': { limit: 5, windowSeconds: 300 },
+	'auth/callback': { limit: 10, windowSeconds: 300 },
 	'auth/token': { limit: 10, windowSeconds: 60 },
 	'auth/password-reset': { limit: 3, windowSeconds: 3600 },
 
@@ -116,13 +117,22 @@ export interface RateLimitConfig {
 // ============================================================================
 
 /**
- * Get rate limit configuration for an endpoint.
+ * Get rate limit configuration for an endpoint by method and pathname.
  * Returns default limits if endpoint is not explicitly configured.
  */
 export function getEndpointLimit(method: string, pathname: string): RateLimitConfig {
 	const key = `${method}:${pathname}`;
 	const endpointKey = ENDPOINT_MAP[key] ?? 'default';
 	return ENDPOINT_RATE_LIMITS[endpointKey];
+}
+
+/**
+ * Get rate limit configuration by direct endpoint key.
+ * Use this when you know the endpoint key directly (e.g., 'auth/login', 'auth/callback').
+ * Returns default limits if the key is not found.
+ */
+export function getEndpointLimitByKey(key: EndpointKey): RateLimitConfig {
+	return ENDPOINT_RATE_LIMITS[key] ?? ENDPOINT_RATE_LIMITS['default'];
 }
 
 /**
