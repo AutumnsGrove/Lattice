@@ -102,17 +102,19 @@ These are the blockers. Get these done and you're live.
 
 ---
 
-## 📊 Status Page (Vista) — BACKEND READY
+## 📊 Clearing (Public Status Page) — READY TO DEPLOY
 
-> **Spec:** `docs/specs/vista-spec.md`
-> **Status:** Infrastructure done, just need a public-facing page
+> **What it is:** Public-facing status page at `status.grove.place` (NOT Vista — Vista is the internal monitoring dashboard)
+> **Location:** `clearing/` directory - complete SvelteKit application
+> **Spec:** `docs/specs/clearing-spec.md`
+> **Status:** Application built, needs deployment
 
 ### Remaining Tasks
-- [ ] Create `/status` route in landing site
-- [ ] Display current system health (pull from Vista backend)
-- [ ] Show recent incidents (if any)
-- [ ] Add link to status page in footer
-- [ ] Consider status.grove.place subdomain (optional, can redirect)
+- [ ] Run database migrations (`wrangler d1 execute grove-engine-db --remote --file=clearing/migrations/0001_status_tables.sql`)
+- [ ] Create Cloudflare Pages project `grove-clearing`
+- [ ] Configure custom domain `status.grove.place` in Cloudflare Dashboard
+- [ ] Deploy to production (`cd clearing && pnpm run deploy`)
+- [ ] Update grove-router to point `status` subdomain to `grove-clearing.pages.dev` (currently points to landing)
 
 ---
 
