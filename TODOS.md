@@ -107,14 +107,32 @@ These are the blockers. Get these done and you're live.
 > **What it is:** Public-facing status page at `status.grove.place` (NOT Vista — Vista is the internal monitoring dashboard)
 > **Location:** `clearing/` directory - complete SvelteKit application
 > **Spec:** `docs/specs/clearing-spec.md`
-> **Status:** Application built, needs deployment
+> **Status:** Application built, needs Cloudflare deployment
 
-### Remaining Tasks
+### Architecture Decision (2026-01-10)
+Clearing lives **inside GroveEngine** as a monorepo package, not as a separate repo. The external `AutumnsGrove/Clearing` repo was archived — it was just a template placeholder with no implementation. Benefits:
+- Shared D1 database with main engine (no cross-repo coordination)
+- Single pnpm workspace for consistent tooling
+- Simpler deployment pipeline
+
+### What's Built
+- 7 Svelte components: `GlassStatusBanner`, `GlassStatusCard`, `GlassUptimeBar`, `IncidentCard`, `ScheduledMaintenanceCard`, `Header`, `Footer`
+- Full routes: status page, incident details (`/incidents/[slug]`), RSS feed (`/feed`)
+- D1 queries in `src/lib/server/status.ts`
+- TypeScript types in `src/lib/types/status.ts`
+- Database migration ready: `migrations/0001_status_tables.sql`
+
+### Deployment Tasks
 - [ ] Run database migrations (`wrangler d1 execute grove-engine-db --remote --file=clearing/migrations/0001_status_tables.sql`)
 - [ ] Create Cloudflare Pages project `grove-clearing`
 - [ ] Configure custom domain `status.grove.place` in Cloudflare Dashboard
 - [ ] Deploy to production (`cd clearing && pnpm run deploy`)
 - [ ] Update grove-router to point `status` subdomain to `grove-clearing.pages.dev` (currently points to landing)
+
+### Phase 2 (Post-Launch)
+- [ ] Admin interface in GroveAuth for creating/updating incidents
+- [ ] Component status override controls
+- [ ] Scheduled maintenance UI
 
 ---
 
