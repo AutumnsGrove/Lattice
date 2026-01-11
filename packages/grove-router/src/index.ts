@@ -62,8 +62,8 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   bloom: "grove-landing.pages.dev", // Bloom remote coding (coming soon)
   vista: "grove-landing.pages.dev", // Vista monitoring (coming soon)
   foliage: "grove-landing.pages.dev", // Foliage theming (coming soon)
-  status: "grove-landing.pages.dev", // Clearing status page (coming soon)
-  clearing: "grove-landing.pages.dev", // Clearing alias
+  status: "grove-clearing.pages.dev", // Clearing status page
+  clearing: "grove-clearing.pages.dev", // Clearing alias
   mc: "grove-landing.pages.dev", // Outpost Minecraft (coming soon)
   search: "grove-landing.pages.dev", // Search (coming soon)
   porch: "grove-landing.pages.dev", // Porch conversations (coming soon)

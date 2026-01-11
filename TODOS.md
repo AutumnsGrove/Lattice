@@ -104,12 +104,12 @@ These are the blockers. Get these done and you're live.
 
 ---
 
-## 📊 Clearing (Public Status Page) — READY TO DEPLOY
+## 📊 Clearing (Public Status Page) — ✅ DEPLOYED!
 
 > **What it is:** Public-facing status page at `status.grove.place` (NOT Vista — Vista is the internal monitoring dashboard)
 > **Location:** `clearing/` directory - complete SvelteKit application
 > **Spec:** `docs/specs/clearing-spec.md`
-> **Status:** Application built, needs Cloudflare deployment
+> **Status:** ✅ **LIVE at https://status.grove.place** (Deployed 2026-01-11)
 
 ### Architecture Decision (2026-01-10)
 Clearing lives **inside GroveEngine** as a monorepo package, not as a separate repo. The external `AutumnsGrove/Clearing` repo was archived — it was just a template placeholder with no implementation. Benefits:
@@ -124,12 +124,12 @@ Clearing lives **inside GroveEngine** as a monorepo package, not as a separate r
 - TypeScript types in `src/lib/types/status.ts`
 - Database migration ready: `migrations/0001_status_tables.sql`
 
-### Deployment Tasks
-- [ ] Run database migrations (`wrangler d1 execute grove-engine-db --remote --file=clearing/migrations/0001_status_tables.sql`)
-- [ ] Create Cloudflare Pages project `grove-clearing`
-- [ ] Configure custom domain `status.grove.place` in Cloudflare Dashboard
-- [ ] Deploy to production (`cd clearing && pnpm run deploy`)
-- [ ] Update grove-router to point `status` subdomain to `grove-clearing.pages.dev` (currently points to landing)
+### Deployment Tasks ✅ COMPLETED
+- [x] Run database migrations (`wrangler d1 execute grove-engine-db --remote --file=clearing/migrations/0001_status_tables.sql`)
+- [x] Create Cloudflare Pages project `grove-clearing`
+- [x] Configure custom domain `status.grove.place` via grove-router
+- [x] Deploy to production (`cd clearing && pnpm run deploy`)
+- [x] Update grove-router to point `status` subdomain to `grove-clearing.pages.dev`
 
 ### Phase 2 (Post-Launch)
 - [ ] Admin interface in GroveAuth for creating/updating incidents
