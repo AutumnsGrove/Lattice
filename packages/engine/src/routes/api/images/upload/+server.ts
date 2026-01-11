@@ -115,6 +115,35 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       );
     }
 
+    // Map of MIME types to valid extensions
+    const MIME_TO_EXTENSIONS: Record<string, string[]> = {
+      "image/jpeg": ["jpg", "jpeg"],
+      "image/png": ["png"],
+      "image/gif": ["gif"],
+      "image/webp": ["webp"],
+    };
+
+    // Extract and validate extension
+    const originalName = file.name;
+    const ext = originalName.split(".").pop()?.toLowerCase();
+
+    if (!ext) {
+      throw error(400, "File must have an extension");
+    }
+
+    const validExtensions = MIME_TO_EXTENSIONS[file.type];
+    if (!validExtensions || !validExtensions.includes(ext)) {
+      throw error(
+        400,
+        `File extension '.${ext}' does not match content type '${file.type}'`,
+      );
+    }
+
+    // Block double extensions that might indicate attacks
+    if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
+      throw error(400, "Invalid file name");
+    }
+
     // Validate file size
     if (file.size > MAX_SIZE) {
       throw error(400, "File too large. Maximum size is 10MB");

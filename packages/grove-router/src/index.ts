@@ -73,6 +73,25 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
 };
 
 /**
+ * Validate and return the appropriate CORS origin.
+ * Restricts access to grove.place domain and its subdomains.
+ */
+function validateOrigin(origin: string | null): string {
+  if (!origin) return "https://grove.place";
+
+  // Allow grove.place and all subdomains
+  if (
+    origin === "https://grove.place" ||
+    origin === "https://www.grove.place" ||
+    /^https:\/\/[\w-]+\.grove\.place$/.test(origin)
+  ) {
+    return origin;
+  }
+
+  return "https://grove.place";
+}
+
+/**
  * Get content type based on file extension
  */
 function getContentType(filename: string): string {
@@ -149,7 +168,10 @@ export default {
       const headers = new Headers();
       headers.set("Content-Type", contentType);
       headers.set("Cache-Control", "public, max-age=31536000"); // 1 year for immutable assets
-      headers.set("Access-Control-Allow-Origin", "*");
+      const origin = request.headers.get("Origin");
+      const validatedOrigin = validateOrigin(origin);
+      headers.set("Access-Control-Allow-Origin", validatedOrigin);
+      headers.set("Vary", "Origin");
 
       return new Response(object.body, { headers });
     }

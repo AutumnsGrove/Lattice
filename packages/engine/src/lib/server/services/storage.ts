@@ -33,48 +33,48 @@
 // ============================================================================
 
 export interface StorageFile {
-	id: string;
-	filename: string;
-	originalFilename: string;
-	key: string;
-	contentType: string;
-	sizeBytes: number;
-	folder: string;
-	altText: string | null;
-	uploadedBy: string;
-	createdAt: string;
+  id: string;
+  filename: string;
+  originalFilename: string;
+  key: string;
+  contentType: string;
+  sizeBytes: number;
+  folder: string;
+  altText: string | null;
+  uploadedBy: string;
+  createdAt: string;
 }
 
 export interface UploadOptions {
-	/** The file data as ArrayBuffer */
-	data: ArrayBuffer;
-	/** Original filename from the user */
-	filename: string;
-	/** MIME type of the file */
-	contentType: string;
-	/** Folder path (e.g., "/images", "/fonts") - defaults to "/" */
-	folder?: string;
-	/** Alt text for accessibility */
-	altText?: string;
-	/** User ID who uploaded the file */
-	uploadedBy: string;
-	/** Override default file size limit (in bytes) */
-	maxFileSize?: number;
+  /** The file data as ArrayBuffer */
+  data: ArrayBuffer;
+  /** Original filename from the user */
+  filename: string;
+  /** MIME type of the file */
+  contentType: string;
+  /** Folder path (e.g., "/images", "/fonts") - defaults to "/" */
+  folder?: string;
+  /** Alt text for accessibility */
+  altText?: string;
+  /** User ID who uploaded the file */
+  uploadedBy: string;
+  /** Override default file size limit (in bytes) */
+  maxFileSize?: number;
 }
 
 export interface GetFileResult {
-	body: ReadableStream<Uint8Array>;
-	contentType: string;
-	cacheControl: string;
-	etag: string;
-	size: number;
+  body: ReadableStream<Uint8Array>;
+  contentType: string;
+  cacheControl: string;
+  etag: string;
+  size: number;
 }
 
 export interface FileMetadata {
-	contentType: string;
-	cacheControl: string;
-	etag: string;
-	size: number;
+  contentType: string;
+  cacheControl: string;
+  etag: string;
+  size: number;
 }
 
 // ============================================================================
@@ -82,24 +82,24 @@ export interface FileMetadata {
 // ============================================================================
 
 export class StorageError extends Error {
-	constructor(
-		message: string,
-		public readonly code: StorageErrorCode,
-		public readonly cause?: unknown
-	) {
-		super(message);
-		this.name = 'StorageError';
-	}
+  constructor(
+    message: string,
+    public readonly code: StorageErrorCode,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "StorageError";
+  }
 }
 
 export type StorageErrorCode =
-	| 'FILE_NOT_FOUND'
-	| 'FILE_TOO_LARGE'
-	| 'INVALID_TYPE'
-	| 'UPLOAD_FAILED'
-	| 'DELETE_FAILED'
-	| 'METADATA_FAILED'
-	| 'BUCKET_UNAVAILABLE';
+  | "FILE_NOT_FOUND"
+  | "FILE_TOO_LARGE"
+  | "INVALID_TYPE"
+  | "UPLOAD_FAILED"
+  | "DELETE_FAILED"
+  | "METADATA_FAILED"
+  | "BUCKET_UNAVAILABLE";
 
 // ============================================================================
 // Configuration
@@ -114,115 +114,118 @@ const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 /** Storage configuration - can be customized per-upload */
 export interface StorageConfig {
-	/** Maximum file size in bytes (default: 10MB, can be overridden for specific use cases) */
-	maxFileSize?: number;
-	/** Additional allowed content types beyond the defaults */
-	additionalContentTypes?: string[];
+  /** Maximum file size in bytes (default: 10MB, can be overridden for specific use cases) */
+  maxFileSize?: number;
+  /** Additional allowed content types beyond the defaults */
+  additionalContentTypes?: string[];
 }
 
 /** Default storage configuration */
 export const STORAGE_DEFAULTS = {
-	MAX_FILE_SIZE: DEFAULT_MAX_FILE_SIZE
+  MAX_FILE_SIZE: DEFAULT_MAX_FILE_SIZE,
 } as const;
 
 const ALLOWED_CONTENT_TYPES = new Set([
-	// Images
-	'image/jpeg',
-	'image/png',
-	'image/gif',
-	'image/webp',
-	'image/avif',
-	'image/svg+xml',
-	// Documents
-	'application/pdf',
-	// Video
-	'video/mp4',
-	'video/webm',
-	// Audio
-	'audio/mpeg',
-	'audio/wav',
-	'audio/webm',
-	// Fonts
-	'font/woff',
-	'font/woff2',
-	'font/ttf',
-	'font/otf',
-	// Web assets
-	'application/json',
-	'text/css',
-	'text/javascript',
-	'application/javascript'
+  // Images
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+  // 'image/svg+xml', // REMOVED - XSS risk
+  // Documents
+  "application/pdf",
+  // Video
+  "video/mp4",
+  "video/webm",
+  // Audio
+  "audio/mpeg",
+  "audio/wav",
+  "audio/webm",
+  // Fonts
+  "font/woff",
+  "font/woff2",
+  "font/ttf",
+  "font/otf",
+  // Web assets
+  "application/json",
+  "text/css",
+  "text/javascript",
+  "application/javascript",
 ]);
 
 const CACHE_CONTROL: Record<string, string> = {
-	// Immutable assets (1 year) - content-addressed or versioned
-	'image/jpeg': 'public, max-age=31536000, immutable',
-	'image/png': 'public, max-age=31536000, immutable',
-	'image/gif': 'public, max-age=31536000, immutable',
-	'image/webp': 'public, max-age=31536000, immutable',
-	'image/avif': 'public, max-age=31536000, immutable',
-	'image/svg+xml': 'public, max-age=31536000, immutable',
-	'font/woff': 'public, max-age=31536000, immutable',
-	'font/woff2': 'public, max-age=31536000, immutable',
-	'font/ttf': 'public, max-age=31536000, immutable',
-	'font/otf': 'public, max-age=31536000, immutable',
-	'video/mp4': 'public, max-age=31536000, immutable',
-	'video/webm': 'public, max-age=31536000, immutable',
-	'audio/mpeg': 'public, max-age=31536000, immutable',
-	'audio/wav': 'public, max-age=31536000, immutable',
-	'audio/webm': 'public, max-age=31536000, immutable',
-	// Mutable assets (shorter TTL)
-	'application/pdf': 'public, max-age=86400',
-	'application/json': 'public, max-age=3600',
-	'text/css': 'public, max-age=86400',
-	'text/javascript': 'public, max-age=86400',
-	'application/javascript': 'public, max-age=86400'
+  // Immutable assets (1 year) - content-addressed or versioned
+  "image/jpeg": "public, max-age=31536000, immutable",
+  "image/png": "public, max-age=31536000, immutable",
+  "image/gif": "public, max-age=31536000, immutable",
+  "image/webp": "public, max-age=31536000, immutable",
+  "image/avif": "public, max-age=31536000, immutable",
+  // 'image/svg+xml': 'public, max-age=31536000, immutable', // REMOVED - XSS risk
+  "font/woff": "public, max-age=31536000, immutable",
+  "font/woff2": "public, max-age=31536000, immutable",
+  "font/ttf": "public, max-age=31536000, immutable",
+  "font/otf": "public, max-age=31536000, immutable",
+  "video/mp4": "public, max-age=31536000, immutable",
+  "video/webm": "public, max-age=31536000, immutable",
+  "audio/mpeg": "public, max-age=31536000, immutable",
+  "audio/wav": "public, max-age=31536000, immutable",
+  "audio/webm": "public, max-age=31536000, immutable",
+  // Mutable assets (shorter TTL)
+  "application/pdf": "public, max-age=86400",
+  "application/json": "public, max-age=3600",
+  "text/css": "public, max-age=86400",
+  "text/javascript": "public, max-age=86400",
+  "application/javascript": "public, max-age=86400",
 };
 
-const DEFAULT_CACHE_CONTROL = 'public, max-age=86400';
+const DEFAULT_CACHE_CONTROL = "public, max-age=86400";
 
 // ============================================================================
 // Utility Functions
 // ============================================================================
 
 function generateId(): string {
-	return crypto.randomUUID();
+  return crypto.randomUUID();
 }
 
 function now(): string {
-	return new Date().toISOString();
+  return new Date().toISOString();
 }
 
 function sanitizeFilename(filename: string): string {
-	return filename
-		.replace(/[/\\:*?"<>|]/g, '-')
-		.replace(/\s+/g, '-')
-		.replace(/-+/g, '-')
-		.toLowerCase();
+  return filename
+    .replace(/[/\\:*?"<>|]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase();
 }
 
 function generateUniqueFilename(originalFilename: string): string {
-	const ext = originalFilename.split('.').pop() || '';
-	const nameWithoutExt =
-		originalFilename.slice(0, originalFilename.lastIndexOf('.')) || originalFilename;
-	const sanitized = sanitizeFilename(nameWithoutExt);
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 8);
-	return ext ? `${sanitized}-${timestamp}-${random}.${ext}` : `${sanitized}-${timestamp}-${random}`;
+  const ext = originalFilename.split(".").pop() || "";
+  const nameWithoutExt =
+    originalFilename.slice(0, originalFilename.lastIndexOf(".")) ||
+    originalFilename;
+  const sanitized = sanitizeFilename(nameWithoutExt);
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return ext
+    ? `${sanitized}-${timestamp}-${random}.${ext}`
+    : `${sanitized}-${timestamp}-${random}`;
 }
 
 function getCacheControl(contentType: string): string {
-	return CACHE_CONTROL[contentType] || DEFAULT_CACHE_CONTROL;
+  return CACHE_CONTROL[contentType] || DEFAULT_CACHE_CONTROL;
 }
 
 function normalizeFolder(folder?: string): string {
-	if (!folder) return '/';
-	return folder.startsWith('/') ? folder : `/${folder}`;
+  if (!folder) return "/";
+  return folder.startsWith("/") ? folder : `/${folder}`;
 }
 
 function buildStorageKey(folder: string, filename: string): string {
-	const cleanFolder = normalizeFolder(folder);
-	return cleanFolder === '/' ? filename : `${cleanFolder.slice(1)}/${filename}`;
+  const cleanFolder = normalizeFolder(folder);
+  return cleanFolder === "/" ? filename : `${cleanFolder.slice(1)}/${filename}`;
 }
 
 // ============================================================================
@@ -237,26 +240,29 @@ function buildStorageKey(folder: string, filename: string): string {
  * @param config - Optional configuration to override defaults
  */
 export function validateFile(
-	data: ArrayBuffer,
-	contentType: string,
-	config?: StorageConfig
+  data: ArrayBuffer,
+  contentType: string,
+  config?: StorageConfig,
 ): void {
-	const maxSize = config?.maxFileSize ?? DEFAULT_MAX_FILE_SIZE;
+  const maxSize = config?.maxFileSize ?? DEFAULT_MAX_FILE_SIZE;
 
-	if (data.byteLength > maxSize) {
-		throw new StorageError(
-			`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`,
-			'FILE_TOO_LARGE'
-		);
-	}
+  if (data.byteLength > maxSize) {
+    throw new StorageError(
+      `File too large. Maximum size is ${maxSize / 1024 / 1024}MB`,
+      "FILE_TOO_LARGE",
+    );
+  }
 
-	const isAllowed =
-		ALLOWED_CONTENT_TYPES.has(contentType) ||
-		config?.additionalContentTypes?.includes(contentType);
+  const isAllowed =
+    ALLOWED_CONTENT_TYPES.has(contentType) ||
+    config?.additionalContentTypes?.includes(contentType);
 
-	if (!isAllowed) {
-		throw new StorageError(`Content type not allowed: ${contentType}`, 'INVALID_TYPE');
-	}
+  if (!isAllowed) {
+    throw new StorageError(
+      `Content type not allowed: ${contentType}`,
+      "INVALID_TYPE",
+    );
+  }
 }
 
 /**
@@ -265,8 +271,15 @@ export function validateFile(
  * @param contentType - MIME type to check
  * @param additionalTypes - Additional types to allow beyond defaults
  */
-export function isAllowedContentType(contentType: string, additionalTypes?: string[]): boolean {
-	return ALLOWED_CONTENT_TYPES.has(contentType) || additionalTypes?.includes(contentType) || false;
+export function isAllowedContentType(
+  contentType: string,
+  additionalTypes?: string[],
+): boolean {
+  return (
+    ALLOWED_CONTENT_TYPES.has(contentType) ||
+    additionalTypes?.includes(contentType) ||
+    false
+  );
 }
 
 // ============================================================================
@@ -290,77 +303,96 @@ type D1DatabaseOrSession = D1Database | D1DatabaseSession;
  * ```
  */
 export async function uploadFile(
-	bucket: R2Bucket,
-	db: D1DatabaseOrSession,
-	options: UploadOptions
+  bucket: R2Bucket,
+  db: D1DatabaseOrSession,
+  options: UploadOptions,
 ): Promise<StorageFile> {
-	const { data, filename, contentType, folder, altText, uploadedBy, maxFileSize } = options;
+  const {
+    data,
+    filename,
+    contentType,
+    folder,
+    altText,
+    uploadedBy,
+    maxFileSize,
+  } = options;
 
-	// Validate with optional custom size limit
-	validateFile(data, contentType, { maxFileSize });
+  // Validate with optional custom size limit
+  validateFile(data, contentType, { maxFileSize });
 
-	// Generate unique key
-	const uniqueFilename = generateUniqueFilename(filename);
-	const normalizedFolder = normalizeFolder(folder);
-	const key = buildStorageKey(normalizedFolder, uniqueFilename);
+  // Generate unique key
+  const uniqueFilename = generateUniqueFilename(filename);
+  const normalizedFolder = normalizeFolder(folder);
+  const key = buildStorageKey(normalizedFolder, uniqueFilename);
 
-	// Upload to R2
-	try {
-		await bucket.put(key, data, {
-			httpMetadata: {
-				contentType,
-				cacheControl: getCacheControl(contentType)
-			}
-		});
-	} catch (err) {
-		throw new StorageError('Failed to upload file to storage', 'UPLOAD_FAILED', err);
-	}
+  // Upload to R2
+  try {
+    await bucket.put(key, data, {
+      httpMetadata: {
+        contentType,
+        cacheControl: getCacheControl(contentType),
+      },
+    });
+  } catch (err) {
+    throw new StorageError(
+      "Failed to upload file to storage",
+      "UPLOAD_FAILED",
+      err,
+    );
+  }
 
-	// Store metadata in D1
-	const id = generateId();
-	const timestamp = now();
+  // Store metadata in D1
+  const id = generateId();
+  const timestamp = now();
 
-	try {
-		await db
-			.prepare(
-				`INSERT INTO cdn_files (id, filename, original_filename, key, content_type, size_bytes, folder, alt_text, uploaded_by, created_at)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-			)
-			.bind(
-				id,
-				uniqueFilename,
-				filename,
-				key,
-				contentType,
-				data.byteLength,
-				normalizedFolder,
-				altText ?? null,
-				uploadedBy,
-				timestamp
-			)
-			.run();
-	} catch (err) {
-		// Attempt to clean up the uploaded file
-		try {
-			await bucket.delete(key);
-		} catch (cleanupErr) {
-			console.error('[Storage] Failed to cleanup R2 object after metadata failure:', cleanupErr);
-		}
-		throw new StorageError('Failed to store file metadata', 'METADATA_FAILED', err);
-	}
+  try {
+    await db
+      .prepare(
+        `INSERT INTO cdn_files (id, filename, original_filename, key, content_type, size_bytes, folder, alt_text, uploaded_by, created_at)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        id,
+        uniqueFilename,
+        filename,
+        key,
+        contentType,
+        data.byteLength,
+        normalizedFolder,
+        altText ?? null,
+        uploadedBy,
+        timestamp,
+      )
+      .run();
+  } catch (err) {
+    // Attempt to clean up the uploaded file
+    try {
+      await bucket.delete(key);
+    } catch (cleanupErr) {
+      console.error(
+        "[Storage] Failed to cleanup R2 object after metadata failure:",
+        cleanupErr,
+      );
+    }
+    throw new StorageError(
+      "Failed to store file metadata",
+      "METADATA_FAILED",
+      err,
+    );
+  }
 
-	return {
-		id,
-		filename: uniqueFilename,
-		originalFilename: filename,
-		key,
-		contentType,
-		sizeBytes: data.byteLength,
-		folder: normalizedFolder,
-		altText: altText ?? null,
-		uploadedBy,
-		createdAt: timestamp
-	};
+  return {
+    id,
+    filename: uniqueFilename,
+    originalFilename: filename,
+    key,
+    contentType,
+    sizeBytes: data.byteLength,
+    folder: normalizedFolder,
+    altText: altText ?? null,
+    uploadedBy,
+    createdAt: timestamp,
+  };
 }
 
 /**
@@ -386,22 +418,26 @@ export async function uploadFile(
  * // Returning without using file.body leaks the stream!
  * ```
  */
-export async function getFile(bucket: R2Bucket, key: string): Promise<GetFileResult | null> {
-	const object = await bucket.get(key);
+export async function getFile(
+  bucket: R2Bucket,
+  key: string,
+): Promise<GetFileResult | null> {
+  const object = await bucket.get(key);
 
-	if (!object) {
-		return null;
-	}
+  if (!object) {
+    return null;
+  }
 
-	const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
+  const contentType =
+    object.httpMetadata?.contentType || "application/octet-stream";
 
-	return {
-		body: object.body,
-		contentType,
-		cacheControl: getCacheControl(contentType),
-		etag: object.httpEtag,
-		size: object.size
-	};
+  return {
+    body: object.body,
+    contentType,
+    cacheControl: getCacheControl(contentType),
+    etag: object.httpEtag,
+    size: object.size,
+  };
 }
 
 /**
@@ -416,23 +452,24 @@ export async function getFile(bucket: R2Bucket, key: string): Promise<GetFileRes
  * ```
  */
 export async function getFileMetadata(
-	bucket: R2Bucket,
-	key: string
+  bucket: R2Bucket,
+  key: string,
 ): Promise<FileMetadata | null> {
-	const object = await bucket.head(key);
+  const object = await bucket.head(key);
 
-	if (!object) {
-		return null;
-	}
+  if (!object) {
+    return null;
+  }
 
-	const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
+  const contentType =
+    object.httpMetadata?.contentType || "application/octet-stream";
 
-	return {
-		contentType,
-		cacheControl: getCacheControl(contentType),
-		etag: object.httpEtag,
-		size: object.size
-	};
+  return {
+    contentType,
+    cacheControl: getCacheControl(contentType),
+    etag: object.httpEtag,
+    size: object.size,
+  };
 }
 
 /**
@@ -445,9 +482,12 @@ export async function getFileMetadata(
  * }
  * ```
  */
-export async function fileExists(bucket: R2Bucket, key: string): Promise<boolean> {
-	const object = await bucket.head(key);
-	return object !== null;
+export async function fileExists(
+  bucket: R2Bucket,
+  key: string,
+): Promise<boolean> {
+  const object = await bucket.head(key);
+  return object !== null;
 }
 
 /**
@@ -459,33 +499,41 @@ export async function fileExists(bucket: R2Bucket, key: string): Promise<boolean
  * ```
  */
 export async function deleteFile(
-	bucket: R2Bucket,
-	db: D1DatabaseOrSession,
-	fileId: string
+  bucket: R2Bucket,
+  db: D1DatabaseOrSession,
+  fileId: string,
 ): Promise<void> {
-	// Get file metadata first
-	const file = await db
-		.prepare('SELECT key FROM cdn_files WHERE id = ?')
-		.bind(fileId)
-		.first<{ key: string }>();
+  // Get file metadata first
+  const file = await db
+    .prepare("SELECT key FROM cdn_files WHERE id = ?")
+    .bind(fileId)
+    .first<{ key: string }>();
 
-	if (!file) {
-		throw new StorageError('File not found', 'FILE_NOT_FOUND');
-	}
+  if (!file) {
+    throw new StorageError("File not found", "FILE_NOT_FOUND");
+  }
 
-	// Delete from R2
-	try {
-		await bucket.delete(file.key);
-	} catch (err) {
-		throw new StorageError('Failed to delete file from storage', 'DELETE_FAILED', err);
-	}
+  // Delete from R2
+  try {
+    await bucket.delete(file.key);
+  } catch (err) {
+    throw new StorageError(
+      "Failed to delete file from storage",
+      "DELETE_FAILED",
+      err,
+    );
+  }
 
-	// Delete metadata from D1
-	try {
-		await db.prepare('DELETE FROM cdn_files WHERE id = ?').bind(fileId).run();
-	} catch (err) {
-		throw new StorageError('Failed to delete file metadata', 'METADATA_FAILED', err);
-	}
+  // Delete metadata from D1
+  try {
+    await db.prepare("DELETE FROM cdn_files WHERE id = ?").bind(fileId).run();
+  } catch (err) {
+    throw new StorageError(
+      "Failed to delete file metadata",
+      "METADATA_FAILED",
+      err,
+    );
+  }
 }
 
 /**
@@ -497,23 +545,31 @@ export async function deleteFile(
  * ```
  */
 export async function deleteFileByKey(
-	bucket: R2Bucket,
-	db: D1DatabaseOrSession,
-	key: string
+  bucket: R2Bucket,
+  db: D1DatabaseOrSession,
+  key: string,
 ): Promise<void> {
-	// Delete from R2
-	try {
-		await bucket.delete(key);
-	} catch (err) {
-		throw new StorageError('Failed to delete file from storage', 'DELETE_FAILED', err);
-	}
+  // Delete from R2
+  try {
+    await bucket.delete(key);
+  } catch (err) {
+    throw new StorageError(
+      "Failed to delete file from storage",
+      "DELETE_FAILED",
+      err,
+    );
+  }
 
-	// Delete metadata from D1 (if it exists)
-	try {
-		await db.prepare('DELETE FROM cdn_files WHERE key = ?').bind(key).run();
-	} catch (err) {
-		throw new StorageError('Failed to delete file metadata', 'METADATA_FAILED', err);
-	}
+  // Delete metadata from D1 (if it exists)
+  try {
+    await db.prepare("DELETE FROM cdn_files WHERE key = ?").bind(key).run();
+  } catch (err) {
+    throw new StorageError(
+      "Failed to delete file metadata",
+      "METADATA_FAILED",
+      err,
+    );
+  }
 }
 
 // ============================================================================
@@ -524,127 +580,129 @@ export async function deleteFileByKey(
  * Get file metadata from D1 by ID
  */
 export async function getFileRecord(
-	db: D1DatabaseOrSession,
-	fileId: string
+  db: D1DatabaseOrSession,
+  fileId: string,
 ): Promise<StorageFile | null> {
-	const row = await db
-		.prepare('SELECT * FROM cdn_files WHERE id = ?')
-		.bind(fileId)
-		.first<CdnFileRow>();
+  const row = await db
+    .prepare("SELECT * FROM cdn_files WHERE id = ?")
+    .bind(fileId)
+    .first<CdnFileRow>();
 
-	return row ? mapRowToStorageFile(row) : null;
+  return row ? mapRowToStorageFile(row) : null;
 }
 
 /**
  * Get file metadata from D1 by key
  */
 export async function getFileRecordByKey(
-	db: D1DatabaseOrSession,
-	key: string
+  db: D1DatabaseOrSession,
+  key: string,
 ): Promise<StorageFile | null> {
-	const row = await db
-		.prepare('SELECT * FROM cdn_files WHERE key = ?')
-		.bind(key)
-		.first<CdnFileRow>();
+  const row = await db
+    .prepare("SELECT * FROM cdn_files WHERE key = ?")
+    .bind(key)
+    .first<CdnFileRow>();
 
-	return row ? mapRowToStorageFile(row) : null;
+  return row ? mapRowToStorageFile(row) : null;
 }
 
 /**
  * List files in a folder
  */
 export async function listFiles(
-	db: D1DatabaseOrSession,
-	options?: {
-		folder?: string;
-		limit?: number;
-		offset?: number;
-	}
+  db: D1DatabaseOrSession,
+  options?: {
+    folder?: string;
+    limit?: number;
+    offset?: number;
+  },
 ): Promise<{ files: StorageFile[]; total: number }> {
-	const folder = normalizeFolder(options?.folder);
-	const limit = options?.limit ?? 50;
-	const offset = options?.offset ?? 0;
+  const folder = normalizeFolder(options?.folder);
+  const limit = options?.limit ?? 50;
+  const offset = options?.offset ?? 0;
 
-	const [filesResult, countResult] = await Promise.all([
-		db
-			.prepare(
-				`SELECT * FROM cdn_files
+  const [filesResult, countResult] = await Promise.all([
+    db
+      .prepare(
+        `SELECT * FROM cdn_files
 				 WHERE folder = ?
 				 ORDER BY created_at DESC
-				 LIMIT ? OFFSET ?`
-			)
-			.bind(folder, limit, offset)
-			.all<CdnFileRow>(),
-		db
-			.prepare('SELECT COUNT(*) as count FROM cdn_files WHERE folder = ?')
-			.bind(folder)
-			.first<{ count: number }>()
-	]);
+				 LIMIT ? OFFSET ?`,
+      )
+      .bind(folder, limit, offset)
+      .all<CdnFileRow>(),
+    db
+      .prepare("SELECT COUNT(*) as count FROM cdn_files WHERE folder = ?")
+      .bind(folder)
+      .first<{ count: number }>(),
+  ]);
 
-	return {
-		files: (filesResult.results ?? []).map(mapRowToStorageFile),
-		total: countResult?.count ?? 0
-	};
+  return {
+    files: (filesResult.results ?? []).map(mapRowToStorageFile),
+    total: countResult?.count ?? 0,
+  };
 }
 
 /**
  * List all files across all folders
  */
 export async function listAllFiles(
-	db: D1DatabaseOrSession,
-	options?: {
-		limit?: number;
-		offset?: number;
-	}
+  db: D1DatabaseOrSession,
+  options?: {
+    limit?: number;
+    offset?: number;
+  },
 ): Promise<{ files: StorageFile[]; total: number }> {
-	const limit = options?.limit ?? 50;
-	const offset = options?.offset ?? 0;
+  const limit = options?.limit ?? 50;
+  const offset = options?.offset ?? 0;
 
-	const [filesResult, countResult] = await Promise.all([
-		db
-			.prepare(
-				`SELECT * FROM cdn_files
+  const [filesResult, countResult] = await Promise.all([
+    db
+      .prepare(
+        `SELECT * FROM cdn_files
 				 ORDER BY created_at DESC
-				 LIMIT ? OFFSET ?`
-			)
-			.bind(limit, offset)
-			.all<CdnFileRow>(),
-		db.prepare('SELECT COUNT(*) as count FROM cdn_files').first<{ count: number }>()
-	]);
+				 LIMIT ? OFFSET ?`,
+      )
+      .bind(limit, offset)
+      .all<CdnFileRow>(),
+    db
+      .prepare("SELECT COUNT(*) as count FROM cdn_files")
+      .first<{ count: number }>(),
+  ]);
 
-	return {
-		files: (filesResult.results ?? []).map(mapRowToStorageFile),
-		total: countResult?.count ?? 0
-	};
+  return {
+    files: (filesResult.results ?? []).map(mapRowToStorageFile),
+    total: countResult?.count ?? 0,
+  };
 }
 
 /**
  * Get all unique folders
  */
 export async function listFolders(db: D1DatabaseOrSession): Promise<string[]> {
-	const result = await db
-		.prepare('SELECT DISTINCT folder FROM cdn_files ORDER BY folder')
-		.all<{ folder: string }>();
+  const result = await db
+    .prepare("SELECT DISTINCT folder FROM cdn_files ORDER BY folder")
+    .all<{ folder: string }>();
 
-	return (result.results ?? []).map((r) => r.folder);
+  return (result.results ?? []).map((r) => r.folder);
 }
 
 /**
  * Update file alt text
  */
 export async function updateAltText(
-	db: D1DatabaseOrSession,
-	fileId: string,
-	altText: string
+  db: D1DatabaseOrSession,
+  fileId: string,
+  altText: string,
 ): Promise<void> {
-	const result = await db
-		.prepare('UPDATE cdn_files SET alt_text = ? WHERE id = ?')
-		.bind(altText, fileId)
-		.run();
+  const result = await db
+    .prepare("UPDATE cdn_files SET alt_text = ? WHERE id = ?")
+    .bind(altText, fileId)
+    .run();
 
-	if (result.meta.changes === 0) {
-		throw new StorageError('File not found', 'FILE_NOT_FOUND');
-	}
+  if (result.meta.changes === 0) {
+    throw new StorageError("File not found", "FILE_NOT_FOUND");
+  }
 }
 
 // ============================================================================
@@ -652,31 +710,31 @@ export async function updateAltText(
 // ============================================================================
 
 interface CdnFileRow {
-	id: string;
-	filename: string;
-	original_filename: string;
-	key: string;
-	content_type: string;
-	size_bytes: number;
-	folder: string;
-	alt_text: string | null;
-	uploaded_by: string;
-	created_at: string;
+  id: string;
+  filename: string;
+  original_filename: string;
+  key: string;
+  content_type: string;
+  size_bytes: number;
+  folder: string;
+  alt_text: string | null;
+  uploaded_by: string;
+  created_at: string;
 }
 
 function mapRowToStorageFile(row: CdnFileRow): StorageFile {
-	return {
-		id: row.id,
-		filename: row.filename,
-		originalFilename: row.original_filename,
-		key: row.key,
-		contentType: row.content_type,
-		sizeBytes: row.size_bytes,
-		folder: row.folder,
-		altText: row.alt_text,
-		uploadedBy: row.uploaded_by,
-		createdAt: row.created_at
-	};
+  return {
+    id: row.id,
+    filename: row.filename,
+    originalFilename: row.original_filename,
+    key: row.key,
+    contentType: row.content_type,
+    sizeBytes: row.size_bytes,
+    folder: row.folder,
+    altText: row.alt_text,
+    uploadedBy: row.uploaded_by,
+    createdAt: row.created_at,
+  };
 }
 
 // ============================================================================
@@ -687,26 +745,26 @@ function mapRowToStorageFile(row: CdnFileRow): StorageFile {
  * Check if request can use cached version (304 Not Modified)
  */
 export function shouldReturn304(request: Request, etag: string): boolean {
-	const ifNoneMatch = request.headers.get('If-None-Match');
-	return ifNoneMatch === etag;
+  const ifNoneMatch = request.headers.get("If-None-Match");
+  return ifNoneMatch === etag;
 }
 
 /**
  * Build response headers for a file
  */
 export function buildFileHeaders(
-	file: GetFileResult | FileMetadata,
-	options?: { enableCors?: boolean }
+  file: GetFileResult | FileMetadata,
+  options?: { enableCors?: boolean },
 ): Headers {
-	const headers = new Headers();
-	headers.set('Content-Type', file.contentType);
-	headers.set('Cache-Control', file.cacheControl);
-	headers.set('ETag', file.etag);
+  const headers = new Headers();
+  headers.set("Content-Type", file.contentType);
+  headers.set("Cache-Control", file.cacheControl);
+  headers.set("ETag", file.etag);
 
-	// Enable CORS for fonts (required for cross-origin font loading)
-	if (options?.enableCors || file.contentType.startsWith('font/')) {
-		headers.set('Access-Control-Allow-Origin', '*');
-	}
+  // Enable CORS for fonts (required for cross-origin font loading)
+  if (options?.enableCors || file.contentType.startsWith("font/")) {
+    headers.set("Access-Control-Allow-Origin", "*");
+  }
 
-	return headers;
+  return headers;
 }

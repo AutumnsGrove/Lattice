@@ -160,7 +160,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     return json({ received: true });
   } catch (error) {
-    console.error("[Webhook] Error processing event:", error);
+    console.error("[Webhook] Error processing event", {
+      eventId: event.id,
+      eventType: event.type,
+      errorType: error instanceof Error ? error.name : "Unknown",
+    });
 
     // Store error
     await db
@@ -253,7 +257,10 @@ async function handleCheckoutComplete(
     stripeSubscriptionId: subscriptionId,
   });
 
-  console.log(`[Webhook] Created tenant for ${onboarding.username}`);
+  console.log("[Webhook] Tenant created", {
+    onboardingId: onboarding.id,
+    stripeCustomerId: customerId,
+  });
 }
 
 /**
@@ -359,13 +366,15 @@ async function handlePaymentFailed(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Payment failed email sent to ${billing.email} for subscription ${subscriptionId}`,
-    );
+    console.log("[Webhook] Payment failed email sent", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(
-      `[Webhook] Failed to send payment failed email: ${result.error}`,
-    );
+    console.error("[Webhook] Failed to send payment failed email", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }
 
@@ -456,11 +465,17 @@ async function handleInvoicePaid(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Payment receipt sent to ${billing.email} for invoice ${invoiceId}`,
-    );
+    console.log("[Webhook] Payment receipt sent", {
+      invoiceId: invoiceId,
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(`[Webhook] Failed to send payment receipt: ${result.error}`);
+    console.error("[Webhook] Failed to send payment receipt", {
+      invoiceId: invoiceId,
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }
 
@@ -542,12 +557,14 @@ async function handleTrialWillEnd(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Trial ending email sent to ${billing.email} for ${billing.subdomain}.grove.place`,
-    );
+    console.log("[Webhook] Trial ending email sent", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(
-      `[Webhook] Failed to send trial ending email: ${result.error}`,
-    );
+    console.error("[Webhook] Failed to send trial ending email", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }
