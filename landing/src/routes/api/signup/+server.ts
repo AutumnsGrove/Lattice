@@ -79,7 +79,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     return json({ success: true, message: "Thanks for signing up!" });
   } catch (error) {
-    console.error("Signup error:", error);
+    console.error("Signup error", {
+      errorType: error instanceof Error ? error.name : "Unknown",
+    });
     return json(
       { error: "Something went wrong. Please try again." },
       { status: 500 },
