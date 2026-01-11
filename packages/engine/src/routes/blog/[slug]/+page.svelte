@@ -94,7 +94,7 @@
 			<header class="content-header">
 				<h1 class="article-title">{data.post.title}</h1>
 				<div class="post-meta article-meta">
-					<address class="author-name article-author" rel="author">
+					<address class="author-name article-author">
 						<span class="author-prefix">By </span><a href="/about" rel="author">{data.post.author}</a>
 					</address>
 					<time datetime={data.post.date} class="entry-date dateline published-date">
