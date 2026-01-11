@@ -848,9 +848,30 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ---
 
-## 🔒 Security Audit - Remaining Items (Post-Launch OK)
+## 🔒 Security Audit - Grove 1.0 Pre-Release (2026-01-08)
 
-### Medium Priority
+> **Audit Report:** `archives/audit-reports/grove-1.0-pre-release-audit.md`
+> **Status:** All 6 critical issues FIXED. Ready for 1.0 launch.
+
+### ✅ Critical Issues COMPLETE (P0 Blockers)
+
+| Issue | Fix Location |
+|-------|--------------|
+| SSR Sanitization Bypass | `sanitize.ts:33-95` - Added `sanitizeServerSafe()` regex-based fallback |
+| Blog Posts Not Sanitized | `markdown.ts:324` - `parseMarkdownContent()` calls `sanitizeMarkdown()` |
+| Recursive Markdown XSS | `markdown.ts:190-192` - Recursive content wrapped in `sanitizeMarkdown()` |
+| No Tenant Isolation in R2 | `upload/+server.ts:155` - Keys prefixed with `${tenantId}/` |
+| No Ownership on Delete | `delete/+server.ts:77-82` - Verifies tenant prefix before deletion |
+| PII Logged in Production | `auth/callback/+server.ts:316` - Logs `userInfo.sub` not email |
+
+### ✅ High Priority Issues COMPLETE
+
+- [x] **Rate limiting on auth endpoints** - Threshold pattern implemented
+- [x] **Tenant filtering in R2 list** - `list/+server.ts:66-68` forces tenant prefix
+- [x] **Gutter content sanitization** - `markdown.ts:401` sanitizes gutter markdown
+
+### Medium Priority (Post-Launch OK)
+
 - [ ] **CDN magic byte validation** - Add file signature validation
   - Location: `landing/src/routes/api/admin/cdn/upload/+server.ts`
 - [ ] **CSRF token rotation** - Implement per-session or periodic rotation
@@ -859,6 +880,7 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 - [ ] **JS/CSS CDN uploads** - Force download or remove from allowed types
 
 ### Low Priority (Polish)
+
 - [ ] **Logout CSRF** - Consider requiring POST instead of GET
 - [ ] **Failed attempts cleanup** - Add cleanup for old `failed_attempts` records
 - [ ] **CSP headers** - Add Content-Security-Policy headers in hooks
