@@ -106,7 +106,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (!session) {
       // Clear invalid session cookie with proper attributes
-      event.cookies.delete("session", { path: "/", httpOnly: true, secure: true });
+      event.cookies.delete("session", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+      });
       return resolve(event);
     }
 

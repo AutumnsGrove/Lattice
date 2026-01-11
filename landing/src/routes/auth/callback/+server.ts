@@ -74,7 +74,11 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
   // Clear auth cookies with proper attributes
   cookies.delete("auth_state", { path: "/", httpOnly: true, secure: true });
-  cookies.delete("auth_code_verifier", { path: "/", httpOnly: true, secure: true });
+  cookies.delete("auth_code_verifier", {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+  });
   cookies.delete("auth_return_to", { path: "/", httpOnly: true, secure: true });
 
   try {
@@ -135,7 +139,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     // Only set cross-subdomain cookie if we're actually on grove.place
     // This prevents issues on staging, test, or other deployments
     const isGrovePlatform = url.hostname.endsWith("grove.place");
-    const cookieDomain = isProduction && isGrovePlatform ? ".grove.place" : undefined;
+    const cookieDomain =
+      isProduction && isGrovePlatform ? ".grove.place" : undefined;
 
     // Set cookies with domain=.grove.place for cross-subdomain access
     // This allows admin.grove.place to read these cookies

@@ -207,7 +207,11 @@ export const GET: RequestHandler = async ({
 
   // Clear auth cookies immediately with proper attributes
   cookies.delete("auth_state", { path: "/", httpOnly: true, secure: true });
-  cookies.delete("auth_code_verifier", { path: "/", httpOnly: true, secure: true });
+  cookies.delete("auth_code_verifier", {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+  });
   cookies.delete("auth_return_to", { path: "/", httpOnly: true, secure: true });
 
   try {
