@@ -103,7 +103,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         {
           method: "POST",
           headers: { Cookie: `grove_session=${groveSession}` },
-        }
+        },
       );
 
       if (response.ok) {
@@ -124,7 +124,8 @@ export const handle: Handle = async ({ event, resolve }) => {
             email: data.user.email,
             is_admin: data.user.isAdmin,
           };
-          return resolve(event);
+          const response = await resolve(event);
+          return addSecurityHeaders(response);
         }
       }
     } catch (err) {
@@ -137,7 +138,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   const sessionId = event.cookies.get("session");
   if (!sessionId || !event.locals.dbSession) {
-    return resolve(event);
+    const response = await resolve(event);
+    return addSecurityHeaders(response);
   }
 
   try {
@@ -149,7 +151,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (!session) {
       // Clear invalid session cookie
       event.cookies.delete("session", { path: "/" });
-      return resolve(event);
+      const response = await resolve(event);
+      return addSecurityHeaders(response);
     }
 
     // Check if access token needs refresh
@@ -215,5 +218,40 @@ export const handle: Handle = async ({ event, resolve }) => {
     console.error("[Auth Hook Error]", error);
   }
 
-  return resolve(event);
+  const response = await resolve(event);
+  return addSecurityHeaders(response);
 };
+
+/**
+ * Apply security headers to all responses
+ */
+function addSecurityHeaders(response: Response): Response {
+  // Security headers
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(), microphone=(), camera=()",
+  );
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains; preload",
+  );
+
+  // CSP for domains app
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' https://cdn.grove.place data:",
+    "connect-src 'self' https://*.grove.place",
+    "frame-src https://challenges.cloudflare.com",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+  response.headers.set("Content-Security-Policy", csp);
+
+  return response;
+}

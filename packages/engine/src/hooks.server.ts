@@ -390,6 +390,10 @@ export const handle: Handle = async ({ event, resolve }) => {
     "Permissions-Policy",
     "geolocation=(), microphone=(), camera=()",
   );
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains; preload",
+  );
 
   // Content-Security-Policy
   // Note: 'unsafe-eval' is required for Mermaid diagram rendering

@@ -1,7 +1,8 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from "./$types";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 export const prerender = false;
 
@@ -36,6 +37,12 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
+    // Verify tenant ownership
+    const tenantId = await getVerifiedTenantId(
+      db,
+      locals.tenantId,
+      locals.user,
+    );
     const body = sanitizeObject(await request.json()) as SettingsBody;
     const { setting_key, setting_value } = body;
 
@@ -79,7 +86,6 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const tenantId = locals.tenantId;
 
     // Upsert the setting (scoped to tenant)
     await db

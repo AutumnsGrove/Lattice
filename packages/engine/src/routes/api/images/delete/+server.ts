@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from "./$types";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 interface DeleteBody {
   key: string;
@@ -29,15 +30,19 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     try {
       const originUrl = new URL(origin);
       // Allow localhost for development, otherwise validate host matches
-      const isLocalhost = originUrl.hostname === "localhost" || originUrl.hostname === "127.0.0.1";
+      const isLocalhost =
+        originUrl.hostname === "localhost" ||
+        originUrl.hostname === "127.0.0.1";
       const hostMatches = host && originUrl.host === host;
 
       if (!isLocalhost && !hostMatches) {
-        console.warn(`CSRF violation: origin ${origin} does not match host ${host}`);
+        console.warn(
+          `CSRF violation: origin ${origin} does not match host ${host}`,
+        );
         throw error(403, "Invalid origin");
       }
     } catch (err) {
-      if (err instanceof Error && 'status' in err) throw err;
+      if (err instanceof Error && "status" in err) throw err;
       throw error(403, "Invalid origin header");
     }
   }
@@ -47,7 +52,17 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     throw error(500, "R2 bucket not configured");
   }
 
+  // Check for database
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
   try {
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
     const body = sanitizeObject(await request.json()) as DeleteBody;
     const { key } = body;
 
@@ -57,14 +72,18 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 
     // Comprehensive key sanitization to prevent directory traversal
     let sanitizedKey = key
-      .replace(/\.\./g, "")           // Remove parent directory traversal
-      .replace(/^\/+/, "")            // Remove leading slashes
-      .replace(/\/\/+/g, "/")         // Remove consecutive slashes
-      .replace(/\\/g, "/")            // Normalize backslashes to forward slashes
+      .replace(/\.\./g, "") // Remove parent directory traversal
+      .replace(/^\/+/, "") // Remove leading slashes
+      .replace(/\/\/+/g, "/") // Remove consecutive slashes
+      .replace(/\\/g, "/") // Normalize backslashes to forward slashes
       .trim();
 
     // Additional validation: ensure key doesn't contain dangerous patterns
-    if (sanitizedKey.includes("..") || sanitizedKey.startsWith("/") || !sanitizedKey) {
+    if (
+      sanitizedKey.includes("..") ||
+      sanitizedKey.startsWith("/") ||
+      !sanitizedKey
+    ) {
       throw error(400, "Invalid image key format");
     }
 
@@ -75,9 +94,11 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
-    const expectedPrefix = `${locals.tenantId}/`;
+    const expectedPrefix = `${tenantId}/`;
     if (!sanitizedKey.startsWith(expectedPrefix)) {
-      console.warn(`Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`);
+      console.warn(
+        `Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`,
+      );
       throw error(403, "Access denied");
     }
 
@@ -90,7 +111,7 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
       key: sanitizedKey,
     });
   } catch (err) {
-    if (err instanceof Error && 'status' in err) throw err;
+    if (err instanceof Error && "status" in err) throw err;
     console.error("Delete error:", err);
     throw error(500, "Failed to delete image");
   }

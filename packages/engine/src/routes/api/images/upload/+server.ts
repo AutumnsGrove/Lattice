@@ -1,6 +1,12 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  rateLimitHeaders,
+} from "$lib/server/rate-limits/middleware.js";
 
 /** File signatures for MIME type validation */
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -48,7 +54,48 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(500, "R2 bucket not configured");
   }
 
+  // Verify tenant ownership
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
+  // Rate limit uploads
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const { result, response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("upload/image", locals.user.id),
+      limit: 50,
+      windowSeconds: 3600, // 1 hour
+      namespace: "upload-ratelimit",
+    });
+
+    if (response) {
+      return new Response(
+        JSON.stringify({
+          error: "rate_limited",
+          message:
+            "Upload limit reached. Please wait before uploading more images.",
+          remaining: 0,
+          resetAt: new Date(result.resetAt * 1000).toISOString(),
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            ...rateLimitHeaders(result, 50),
+          },
+        },
+      );
+    }
+  }
+
   try {
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
     const formData = await request.formData();
     const file = formData.get("file");
     const customFilename = formData.get("filename") as string | null;
@@ -64,7 +111,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
       throw error(
         400,
-        `Invalid file type: ${file.type}. Allowed: jpg, png, gif, webp`
+        `Invalid file type: ${file.type}. Allowed: jpg, png, gif, webp`,
       );
     }
 
@@ -86,7 +133,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!isValidSignature) {
       throw error(
         400,
-        "Invalid file signature - file may be corrupted or spoofed"
+        "Invalid file signature - file may be corrupted or spoofed",
       );
     }
 
@@ -94,9 +141,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (hash && platform?.env?.DB) {
       try {
         const existing = (await platform.env.DB.prepare(
-          "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?"
+          "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
         )
-          .bind(hash, locals.tenantId)
+          .bind(hash, tenantId)
           .first()) as { key: string; url: string } | null;
 
         if (existing) {
@@ -152,7 +199,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Build the R2 key with tenant isolation
-    const key = `${locals.tenantId}/${datePath}/${filename}`;
+    const key = `${tenantId}/${datePath}/${filename}`;
 
     // Upload to R2 with cache headers and custom metadata
     const metadata: Record<string, string> = {};
@@ -179,9 +226,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           INSERT INTO image_hashes (hash, key, url, tenant_id, created_at)
           VALUES (?, ?, ?, ?, datetime('now'))
           ON CONFLICT(hash, tenant_id) DO NOTHING
-        `
+        `,
         )
-          .bind(hash, key, cdnUrl, locals.tenantId)
+          .bind(hash, key, cdnUrl, tenantId)
           .run();
       } catch (dbError) {
         // Non-critical, continue
@@ -213,7 +260,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         headers: {
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
