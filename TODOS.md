@@ -144,9 +144,9 @@ Clearing lives **inside GroveEngine** as a monorepo package, not as a separate r
 - [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
   - Required for DMCA safe harbor protection
   - Register at: https://www.copyright.gov/dmca-directory/
-- [ ] Review ToS for any needed updates
-- [ ] Review Privacy Policy for accuracy
-- [ ] Review AUP for clarity and enforceability
+- [x] Review ToS for any needed updates — ✅ Added AI prohibition section, updated dates
+- [x] Review Privacy Policy for accuracy — ✅ Already comprehensive, updated dates
+- [x] Review AUP for clarity and enforceability — ✅ Excellent as-is, updated dates
 
 ---
 
