@@ -96,6 +96,21 @@ function shouldSkipTurnstile(pathname: string): boolean {
   return TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
 }
 
+/**
+ * Determine if a route needs 'unsafe-eval' for Mermaid diagram rendering
+ * Routes that need it:
+ * - Admin routes (Monaco editor + Mermaid)
+ * - Tenant pages that render Mermaid diagrams
+ * - Preview routes
+ */
+function needsUnsafeEval(pathname: string): boolean {
+  return (
+    pathname.startsWith("/admin/") ||
+    pathname.match(/^\/[^/]+$/) || // Root tenant pages like /about
+    pathname.includes("/preview")
+  );
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   // Initialize context and user
   event.locals.user = null;
@@ -396,12 +411,15 @@ export const handle: Handle = async ({ event, resolve }) => {
   );
 
   // Content-Security-Policy
-  // Note: 'unsafe-eval' is required for Mermaid diagram rendering
+  // Note: 'unsafe-eval' is only allowed on routes that need Mermaid diagram rendering
   // Note: 'unsafe-inline' is used for the theme script in app.html
   // Note: challenges.cloudflare.com is required for Turnstile (Shade)
+  const hasUnsafeEval = needsUnsafeEval(event.url.pathname);
+  const scriptSrc = `'self' 'unsafe-inline' ${hasUnsafeEval ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
+
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
+    `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
     "font-src 'self' https://cdn.grove.place",
