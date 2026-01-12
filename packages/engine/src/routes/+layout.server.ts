@@ -43,10 +43,12 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
         // Load pages that should appear in navigation
         // COALESCE handles case where column doesn't exist yet (before migration)
+        // Exclude 'home' and 'about' since they're hardcoded in the nav
         const navResult = await db
           .prepare(
             `SELECT slug, title FROM pages
              WHERE tenant_id = ? AND COALESCE(show_in_nav, 0) = 1
+               AND slug NOT IN ('home', 'about')
              ORDER BY COALESCE(nav_order, 0) ASC, title ASC`,
           )
           .bind(tenantId)
