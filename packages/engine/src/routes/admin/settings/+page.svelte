@@ -33,6 +33,11 @@
   let fontMessage = $state('');
   let loadingFont = $state(true);
 
+  // Accent color settings state
+  let currentAccentColor = $state('#16a34a');
+  let savingColor = $state(false);
+  let colorMessage = $state('');
+
   async function fetchHealth() {
     loadingHealth = true;
     try {
@@ -63,16 +68,18 @@
     clearingCache = false;
   }
 
-  // Fetch current font setting
-  async function fetchCurrentFont() {
+  // Fetch current settings (font and accent color)
+  async function fetchCurrentSettings() {
     loadingFont = true;
     try {
       const data = await api.get('/api/settings');
       currentFont = data.font_family || 'lexend';
+      currentAccentColor = data.accent_color || '#16a34a';
     } catch (error) {
-      toast.error('Failed to load font settings');
-      console.error('Failed to fetch font setting:', error);
+      toast.error('Failed to load settings');
+      console.error('Failed to fetch settings:', error);
       currentFont = 'lexend';
+      currentAccentColor = '#16a34a';
     }
     loadingFont = false;
   }
@@ -111,12 +118,31 @@
     savingFont = false;
   }
 
+  // Save accent color setting
+  async function saveAccentColor() {
+    savingColor = true;
+    colorMessage = '';
+
+    try {
+      await api.put('/api/admin/settings', {
+        setting_key: 'accent_color',
+        setting_value: currentAccentColor
+      });
+
+      colorMessage = 'Accent color saved! Refresh to see changes across your blog.';
+    } catch (error) {
+      colorMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+    }
+
+    savingColor = false;
+  }
+
   $effect(() => {
     // Only fetch health status for platform admins
     if (isPlatformAdmin) {
       fetchHealth();
     }
-    fetchCurrentFont();
+    fetchCurrentSettings();
   });
 </script>
 
@@ -336,6 +362,49 @@
         See <a href="/credits">font credits and licenses</a> for attribution.
       </p>
     {/if}
+  </GlassCard>
+
+  <GlassCard variant="frosted" class="mb-6">
+    <h2>Accent Color</h2>
+    <p class="section-description">
+      Customize the accent color used for tags and interactive elements on your blog.
+    </p>
+
+    <div class="color-picker-section">
+      <div class="color-preview-wrapper">
+        <input
+          type="color"
+          id="accent-color"
+          bind:value={currentAccentColor}
+          class="color-input"
+        />
+        <div class="color-preview" style:background-color={currentAccentColor}>
+          <span class="color-hex">{currentAccentColor}</span>
+        </div>
+      </div>
+
+      <div class="color-presets">
+        <span class="presets-label">Presets:</span>
+        <button type="button" class="preset-btn" style:background="#16a34a" title="Grove Green" onclick={() => currentAccentColor = '#16a34a'}></button>
+        <button type="button" class="preset-btn" style:background="#2563eb" title="Ocean Blue" onclick={() => currentAccentColor = '#2563eb'}></button>
+        <button type="button" class="preset-btn" style:background="#7c3aed" title="Violet" onclick={() => currentAccentColor = '#7c3aed'}></button>
+        <button type="button" class="preset-btn" style:background="#db2777" title="Pink" onclick={() => currentAccentColor = '#db2777'}></button>
+        <button type="button" class="preset-btn" style:background="#ea580c" title="Orange" onclick={() => currentAccentColor = '#ea580c'}></button>
+        <button type="button" class="preset-btn" style:background="#ca8a04" title="Amber" onclick={() => currentAccentColor = '#ca8a04'}></button>
+      </div>
+    </div>
+
+    {#if colorMessage}
+      <div class="message" class:success={colorMessage.includes('saved')} class:error={!colorMessage.includes('saved')}>
+        {colorMessage}
+      </div>
+    {/if}
+
+    <div class="button-row">
+      <Button onclick={saveAccentColor} variant="primary" disabled={savingColor}>
+        {savingColor ? 'Saving...' : 'Save Accent Color'}
+      </Button>
+    </div>
   </GlassCard>
 
   <GlassCard variant="frosted" class="mb-6">
@@ -576,5 +645,77 @@
     display: flex;
     gap: 0.75rem;
     margin-bottom: 1rem;
+  }
+  /* Color picker styles */
+  .color-picker-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .color-preview-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .color-input {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    cursor: pointer;
+    background: transparent;
+  }
+  .color-input::-webkit-color-swatch-wrapper {
+    padding: 4px;
+  }
+  .color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: calc(var(--border-radius-standard) - 4px);
+  }
+  .color-preview {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-standard);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  .color-hex {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+  }
+  .color-presets {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .presets-label {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-right: 0.25rem;
+  }
+  .preset-btn {
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .preset-btn:hover {
+    transform: scale(1.15);
+    border-color: var(--color-text);
+  }
+  .preset-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 </style>

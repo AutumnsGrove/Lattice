@@ -56,9 +56,19 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Whitelist allowed settings to prevent arbitrary data injection
-    const allowedSettings = ["font_family"];
+    const allowedSettings = ["font_family", "accent_color"];
     if (!allowedSettings.includes(setting_key)) {
       throw error(400, "Invalid setting key");
+    }
+
+    // Validate accent_color (hex format)
+    if (setting_key === "accent_color") {
+      // Allow 3, 4, 6, or 8 digit hex colors with # prefix
+      const hexColorRegex =
+        /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+      if (!hexColorRegex.test(setting_value)) {
+        throw error(400, "Invalid color format. Use hex format like #16a34a");
+      }
     }
 
     // Validate font_family value specifically
