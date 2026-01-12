@@ -144,9 +144,18 @@ export async function POST({ request, platform, locals }) {
     }
   }
 
-  // Rate limiting using Threshold middleware
-  if (kv) {
-    const { result, response } = await checkRateLimit({
+  // Rate limiting using Threshold middleware (fail-closed to prevent cost overruns)
+  if (!kv) {
+    // Fail closed: AI operations are expensive, so we reject if we can't enforce limits
+    console.error("[Wisp] Rate limiting failed: CACHE_KV not configured");
+    return json(
+      { error: "Service temporarily unavailable. Please try again." },
+      { status: 503 },
+    );
+  }
+
+  const { result: rateLimitResult, response: rateLimitResponse } =
+    await checkRateLimit({
       kv,
       key: `wisp:${locals.user.id}`,
       limit: RATE_LIMIT.maxRequestsPerHour,
@@ -154,8 +163,7 @@ export async function POST({ request, platform, locals }) {
       namespace: "wisp",
     });
 
-    if (response) return response; // 429 with proper headers
-  }
+  if (rateLimitResponse) return rateLimitResponse; // 429 with proper headers
 
   // Monthly cost cap check (fail-closed: reject if we can't verify limits)
   if (db && COST_CAP.enabled) {

@@ -97,11 +97,25 @@ function shouldSkipTurnstile(pathname: string): boolean {
 }
 
 /**
- * Determine if a route needs 'unsafe-eval' for Mermaid diagram rendering
+ * Determine if a route needs 'unsafe-eval' in Content-Security-Policy.
+ *
+ * WHY these routes need this directive:
+ * - Monaco Editor (admin): The code editor uses dynamic code evaluation for
+ *   syntax highlighting, IntelliSense, and language services. This is a
+ *   fundamental requirement of Monaco's architecture.
+ * - Mermaid.js (admin + tenant pages): The diagram rendering library parses
+ *   diagram definitions dynamically. This is required for flowcharts,
+ *   sequence diagrams, and other Mermaid visualizations.
+ *
+ * SECURITY NOTES:
+ * - This directive is ONLY enabled on routes that render user content with these tools
+ * - All other routes use a strict CSP without dynamic code capabilities
+ * - User input is still sanitized before being passed to these libraries
+ *
  * Routes that need it:
- * - Admin routes (Monaco editor + Mermaid)
- * - Tenant pages that render Mermaid diagrams
- * - Preview routes
+ * - /admin/... - Monaco editor for Markdown/code editing, Mermaid for diagrams
+ * - /[slug] (root tenant pages) - Mermaid diagrams in published content
+ * - /.../preview - Preview routes for draft content with diagrams
  */
 function needsUnsafeEval(pathname: string): boolean {
   return (

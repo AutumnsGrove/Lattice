@@ -8,6 +8,7 @@ import {
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
+import { validateEnv } from "$lib/server/env-validation.js";
 
 interface ClaudeContentBlock {
   type: string;
@@ -44,32 +45,31 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(403, "Invalid origin");
   }
 
-  // Check for API key
-  const apiKey = platform?.env?.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error("AI analysis failed: ANTHROPIC_API_KEY not configured");
+  // Validate required environment variables (fail-fast with actionable errors)
+  const envValidation = validateEnv(platform?.env, [
+    "DB",
+    "ANTHROPIC_API_KEY",
+    "CACHE_KV",
+  ]);
+  if (!envValidation.valid) {
+    console.error(`[AI Analyze] ${envValidation.message}`);
     throw error(503, "AI analysis service temporarily unavailable");
   }
 
-  // Check for database
-  if (!platform?.env?.DB) {
-    console.error("Database not configured for analyze endpoint");
-    throw error(503, "Service temporarily unavailable");
-  }
+  // Safe to access after validation (non-null assertion is safe here)
+  const db = platform!.env!.DB;
+  const apiKey = platform!.env!.ANTHROPIC_API_KEY as string;
+  const kv = platform!.env!.CACHE_KV;
 
   // Verify tenant ownership
   try {
-    await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
+    await getVerifiedTenantId(db, locals.tenantId, locals.user);
   } catch (err) {
     throw err;
   }
 
   // Check subscription access to AI features
-  const featureCheck = await checkFeatureAccess(
-    platform.env.DB,
-    locals.tenantId,
-    "ai",
-  );
+  const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
   if (!featureCheck.allowed) {
     throw error(
       403,
@@ -77,34 +77,31 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  // Rate limit expensive AI operations
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const { result, response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("ai/analyze", locals.user.id),
-      limit: 20,
-      windowSeconds: 86400, // 24 hours
-      namespace: "ai-ratelimit",
-    });
+  // Rate limit expensive AI operations (fail-closed - already validated above)
+  const { result, response } = await checkRateLimit({
+    kv,
+    key: buildRateLimitKey("ai/analyze", locals.user.id),
+    limit: 20,
+    windowSeconds: 86400, // 24 hours
+    namespace: "ai-ratelimit",
+  });
 
-    if (response) {
-      return new Response(
-        JSON.stringify({
-          error: "rate_limited",
-          message: "Daily AI analysis limit reached. Limit resets in 24 hours.",
-          remaining: 0,
-          resetAt: new Date(result.resetAt * 1000).toISOString(),
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            ...rateLimitHeaders(result, 20),
-          },
+  if (response) {
+    return new Response(
+      JSON.stringify({
+        error: "rate_limited",
+        message: "Daily AI analysis limit reached. Limit resets in 24 hours.",
+        remaining: 0,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...rateLimitHeaders(result, 20),
         },
-      );
-    }
+      },
+    );
   }
 
   try {
