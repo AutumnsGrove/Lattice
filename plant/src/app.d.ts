@@ -41,6 +41,8 @@ declare global {
         STRIPE_SECRET_KEY: string;
         STRIPE_PUBLISHABLE_KEY: string;
         STRIPE_WEBHOOK_SECRET: string;
+        /** Number of trial days for new subscriptions (default: 14) */
+        STRIPE_TRIAL_DAYS?: string;
         RESEND_API_KEY: string;
         /** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
         PUBLIC_APP_URL?: string;
