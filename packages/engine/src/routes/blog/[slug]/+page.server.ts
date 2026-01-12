@@ -6,6 +6,7 @@ import {
 import { error } from "@sveltejs/kit";
 import { marked } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { getTenantDb } from "$lib/server/services/database.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -21,6 +22,7 @@ interface PostRecord {
   slug: string;
   title: string;
   description?: string;
+  markdown_content?: string;
   html_content?: string;
   gutter_content?: string;
   tags?: string;
@@ -35,20 +37,28 @@ export const load: PageServerLoad = async ({ params, locals, platform }) => {
 
   try {
     // Try D1 first for posts created via admin panel
-    if (platform?.env?.DB) {
+    if (platform?.env?.DB && tenantId) {
       try {
-        const post = (await platform.env.DB.prepare(
-          `SELECT slug, title, description, html_content, gutter_content, tags, status, published_at, font
-					 FROM posts WHERE slug = ? AND tenant_id = ? AND status = 'published'`,
-        )
-          .bind(slug, tenantId)
-          .first()) as PostRecord | null;
+        // Use TenantDb for automatic tenant isolation (like the API does)
+        const tenantDb = getTenantDb(platform.env.DB, { tenantId });
+
+        const post = await tenantDb.queryOne<PostRecord>(
+          "posts",
+          "slug = ? AND status = ?",
+          [slug, "published"],
+        );
 
         if (post) {
+          // Generate HTML from markdown if html_content is not stored
+          let htmlContent = post.html_content;
+          if (!htmlContent && post.markdown_content) {
+            htmlContent = sanitizeMarkdown(
+              marked.parse(post.markdown_content, { async: false }) as string,
+            );
+          }
+
           // Process anchor tags in HTML content (same as filesystem posts)
-          const processedHtml = processAnchorTags(
-            (post.html_content as string) || "",
-          );
+          const processedHtml = processAnchorTags(htmlContent || "");
 
           // Extract headers from HTML for table of contents
           // Note: For D1 posts, we extract from HTML since we don't store raw markdown
