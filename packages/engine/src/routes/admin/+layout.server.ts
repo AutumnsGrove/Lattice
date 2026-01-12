@@ -19,7 +19,11 @@ interface TenantRow {
 }
 
 export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
-  if (!locals.user) {
+  // Special case: Example tenant admin is publicly accessible for demos
+  // This allows visitors to explore the admin panel without signing in
+  const isExampleTenant = locals.tenantId === "example-tenant-001";
+
+  if (!locals.user && !isExampleTenant) {
     throw redirect(
       302,
       `/auth/login?redirect=${encodeURIComponent(url.pathname)}`,
@@ -30,15 +34,18 @@ export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
   let tenant: TenantInfo | null = null;
   if (locals.tenantId && platform?.env?.DB) {
     try {
-      // Verify tenant ownership before loading tenant data
-      const isOwner = await verifyTenantOwnership(
-        platform.env.DB,
-        locals.tenantId,
-        locals.user.email,
-      );
+      // Skip ownership verification for example tenant (public demo)
+      if (!isExampleTenant) {
+        // Verify tenant ownership before loading tenant data
+        const isOwner = await verifyTenantOwnership(
+          platform.env.DB,
+          locals.tenantId,
+          locals.user!.email,
+        );
 
-      if (!isOwner) {
-        throw redirect(302, `/?error=access_denied`);
+        if (!isOwner) {
+          throw redirect(302, `/?error=access_denied`);
+        }
       }
 
       const result = await platform.env.DB.prepare(
