@@ -23,13 +23,75 @@ interface Env {
   COLD_STORAGE: R2Bucket;
   ENGINE: Fetcher;
 
-  // Config vars
+  // Config vars (defaults, overridden by tier-specific thresholds)
   HOT_TO_WARM_DAYS: string;
   WARM_TO_COLD_DAYS: string;
-  HOT_VIEW_THRESHOLD: string;
-  WARM_VIEW_THRESHOLD: string;
   BATCH_SIZE: string;
 }
+
+/**
+ * Tier-based storage migration thresholds
+ *
+ * Philosophy: Higher-tier tenants pay more, so we keep their content
+ * in faster storage tiers longer. Lower thresholds = stay hot/warm longer.
+ *
+ * Views per week required to stay in current tier:
+ * - hotViewThreshold: Views needed to stay in HOT storage
+ * - warmViewThreshold: Views needed to stay in WARM storage (vs moving to COLD)
+ * - coldPromotionThreshold: Views that trigger promotion back from COLD
+ */
+type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+
+interface StorageTierThresholds {
+  hotViewThreshold: number; // Views/week to stay HOT
+  warmViewThreshold: number; // Views/week to stay WARM
+  coldPromotionThreshold: number; // Views/week to promote from COLD
+  hotToWarmDays: number; // Days before eligible for HOT→WARM
+  warmToColdDays: number; // Days before eligible for WARM→COLD
+}
+
+const STORAGE_THRESHOLDS: Record<TierKey, StorageTierThresholds> = {
+  // Free tier: Most aggressive migration (no blog, but for future)
+  free: {
+    hotViewThreshold: 15,
+    warmViewThreshold: 3,
+    coldPromotionThreshold: 5,
+    hotToWarmDays: 5,
+    warmToColdDays: 21,
+  },
+  // Seedling: Entry tier, moderate thresholds
+  seedling: {
+    hotViewThreshold: 10,
+    warmViewThreshold: 2,
+    coldPromotionThreshold: 3,
+    hotToWarmDays: 7,
+    warmToColdDays: 30,
+  },
+  // Sapling: Growing tier, keep content warmer
+  sapling: {
+    hotViewThreshold: 7,
+    warmViewThreshold: 1,
+    coldPromotionThreshold: 2,
+    hotToWarmDays: 10,
+    warmToColdDays: 45,
+  },
+  // Oak: Premium tier, content stays warm longer
+  oak: {
+    hotViewThreshold: 5,
+    warmViewThreshold: 1,
+    coldPromotionThreshold: 1,
+    hotToWarmDays: 14,
+    warmToColdDays: 60,
+  },
+  // Evergreen: Top tier, most permissive - rarely moves to cold
+  evergreen: {
+    hotViewThreshold: 3,
+    warmViewThreshold: 1,
+    coldPromotionThreshold: 1,
+    hotToWarmDays: 21,
+    warmToColdDays: 90,
+  },
+};
 
 interface PostRecord {
   id: number;
@@ -43,6 +105,15 @@ interface PostRecord {
   r2_key: string | null;
   published_at: string | null;
   updated_at: string;
+  tier?: TierKey; // From joined tenants table
+}
+
+/**
+ * Get storage thresholds for a tier, with fallback to seedling
+ */
+function getStorageThresholds(tier: string | undefined): StorageTierThresholds {
+  const key = tier as TierKey;
+  return STORAGE_THRESHOLDS[key] ?? STORAGE_THRESHOLDS.seedling;
 }
 
 interface MigrationResult {
@@ -164,25 +235,24 @@ async function runMigration(env: Env): Promise<MigrationResult> {
     errors: [],
   };
 
-  const hotToWarmDays = parseInt(env.HOT_TO_WARM_DAYS || "7", 10);
-  const warmToColdDays = parseInt(env.WARM_TO_COLD_DAYS || "30", 10);
-  const hotViewThreshold = parseInt(env.HOT_VIEW_THRESHOLD || "10", 10);
-  const warmViewThreshold = parseInt(env.WARM_VIEW_THRESHOLD || "1", 10);
+  // Default values from env (used as fallback)
+  const defaultHotToWarmDays = parseInt(env.HOT_TO_WARM_DAYS || "7", 10);
+  const defaultWarmToColdDays = parseInt(env.WARM_TO_COLD_DAYS || "30", 10);
   const batchSize = parseInt(env.BATCH_SIZE || "100", 10);
 
-  // Calculate cutoff timestamps
   const now = Date.now();
-  const hotCutoff = now - hotToWarmDays * 24 * 60 * 60 * 1000;
-  const warmCutoff = now - warmToColdDays * 24 * 60 * 60 * 1000;
   const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
 
   // --- Hot → Warm Migration ---
-  // Posts older than 7 days with <10 views in the past week
+  // Fetch posts with their tenant's tier, then apply tier-specific thresholds
   try {
+    // Get all HOT posts with their tier and view counts
     const hotPosts = await env.DB.prepare(
       `
-      SELECT p.id, p.tenant_id, p.slug, p.title, p.storage_location
+      SELECT p.id, p.tenant_id, p.slug, p.title, p.storage_location,
+             p.published_at, t.plan as tier, COALESCE(v.view_count, 0) as view_count
       FROM posts p
+      JOIN tenants t ON p.tenant_id = t.id
       LEFT JOIN (
         SELECT post_id, COUNT(*) as view_count
         FROM post_views
@@ -190,44 +260,56 @@ async function runMigration(env: Env): Promise<MigrationResult> {
         GROUP BY post_id
       ) v ON p.id = v.post_id
       WHERE p.storage_location = 'hot'
-        AND p.published_at < ?
-        AND COALESCE(v.view_count, 0) < ?
+        AND p.published_at IS NOT NULL
       LIMIT ?
     `,
     )
-      .bind(weekAgo, hotCutoff, hotViewThreshold, batchSize)
-      .all();
+      .bind(weekAgo, batchSize * 5) // Fetch more, filter in code
+      .all<PostRecord & { view_count: number }>();
 
     for (const post of hotPosts.results || []) {
-      try {
-        await env.DB.prepare(
-          `
-          UPDATE posts SET storage_location = 'warm', updated_at = ? WHERE id = ?
-        `,
-        )
-          .bind(Date.now(), post.id)
-          .run();
+      const thresholds = getStorageThresholds(post.tier);
+      const publishedAt = new Date(post.published_at!).getTime();
+      const ageDays = (now - publishedAt) / (24 * 60 * 60 * 1000);
 
-        result.hotToWarm++;
-        console.log(
-          `[PostMigrator] Hot → Warm: ${post.tenant_id}/${post.slug}`,
-        );
-      } catch (err) {
-        result.errors.push(`Hot→Warm failed for ${post.slug}: ${err}`);
+      // Check tier-specific criteria
+      if (
+        ageDays >= thresholds.hotToWarmDays &&
+        post.view_count < thresholds.hotViewThreshold
+      ) {
+        try {
+          await env.DB.prepare(
+            `UPDATE posts SET storage_location = 'warm', updated_at = ? WHERE id = ?`,
+          )
+            .bind(Date.now(), post.id)
+            .run();
+
+          result.hotToWarm++;
+          console.log(
+            `[PostMigrator] Hot → Warm: ${post.tenant_id}/${post.slug} (tier: ${post.tier}, ${post.view_count} views, ${Math.floor(ageDays)}d old)`,
+          );
+        } catch (err) {
+          result.errors.push(`Hot→Warm failed for ${post.slug}: ${err}`);
+        }
       }
+
+      // Respect batch size for actual migrations
+      if (result.hotToWarm >= batchSize) break;
     }
   } catch (err) {
     result.errors.push(`Hot→Warm query failed: ${err}`);
   }
 
   // --- Warm → Cold Migration ---
-  // Posts older than 30 days with <1 view in the past week, move content to R2
+  // Move content to R2 for posts that haven't been viewed
   try {
     const warmPosts = await env.DB.prepare(
       `
       SELECT p.id, p.tenant_id, p.slug, p.title, p.markdown_content,
-             p.html_content, p.gutter_content, p.storage_location
+             p.html_content, p.gutter_content, p.storage_location,
+             p.published_at, t.plan as tier, COALESCE(v.view_count, 0) as view_count
       FROM posts p
+      JOIN tenants t ON p.tenant_id = t.id
       LEFT JOIN (
         SELECT post_id, COUNT(*) as view_count
         FROM post_views
@@ -235,54 +317,65 @@ async function runMigration(env: Env): Promise<MigrationResult> {
         GROUP BY post_id
       ) v ON p.id = v.post_id
       WHERE p.storage_location = 'warm'
-        AND p.published_at < ?
-        AND COALESCE(v.view_count, 0) < ?
         AND p.r2_key IS NULL
+        AND p.published_at IS NOT NULL
       LIMIT ?
     `,
     )
-      .bind(weekAgo, warmCutoff, warmViewThreshold, batchSize)
-      .all<PostRecord>();
+      .bind(weekAgo, batchSize * 5)
+      .all<PostRecord & { view_count: number }>();
 
     for (const post of warmPosts.results || []) {
-      try {
-        // Generate R2 key
-        const r2Key = `cold/${post.tenant_id}/${post.slug}.json`;
+      const thresholds = getStorageThresholds(post.tier);
+      const publishedAt = new Date(post.published_at!).getTime();
+      const ageDays = (now - publishedAt) / (24 * 60 * 60 * 1000);
 
-        // Upload content to R2
-        await env.COLD_STORAGE.put(
-          r2Key,
-          JSON.stringify({
-            markdownContent: post.markdown_content,
-            htmlContent: post.html_content,
-            gutterContent: post.gutter_content,
-          }),
-          { httpMetadata: { contentType: "application/json" } },
-        );
+      // Check tier-specific criteria
+      if (
+        ageDays >= thresholds.warmToColdDays &&
+        post.view_count < thresholds.warmViewThreshold
+      ) {
+        try {
+          // Generate R2 key
+          const r2Key = `cold/${post.tenant_id}/${post.slug}.json`;
 
-        // Update D1 - clear content, set r2_key
-        await env.DB.prepare(
-          `
-          UPDATE posts
-          SET storage_location = 'cold',
-              markdown_content = '',
-              html_content = '',
-              gutter_content = '[]',
-              r2_key = ?,
-              updated_at = ?
-          WHERE id = ?
-        `,
-        )
-          .bind(r2Key, Date.now(), post.id)
-          .run();
+          // Upload content to R2
+          await env.COLD_STORAGE.put(
+            r2Key,
+            JSON.stringify({
+              markdownContent: post.markdown_content,
+              htmlContent: post.html_content,
+              gutterContent: post.gutter_content,
+            }),
+            { httpMetadata: { contentType: "application/json" } },
+          );
 
-        result.warmToCold++;
-        console.log(
-          `[PostMigrator] Warm → Cold: ${post.tenant_id}/${post.slug} → ${r2Key}`,
-        );
-      } catch (err) {
-        result.errors.push(`Warm→Cold failed for ${post.slug}: ${err}`);
+          // Update D1 - clear content, set r2_key
+          await env.DB.prepare(
+            `
+            UPDATE posts
+            SET storage_location = 'cold',
+                markdown_content = '',
+                html_content = '',
+                gutter_content = '[]',
+                r2_key = ?,
+                updated_at = ?
+            WHERE id = ?
+          `,
+          )
+            .bind(r2Key, Date.now(), post.id)
+            .run();
+
+          result.warmToCold++;
+          console.log(
+            `[PostMigrator] Warm → Cold: ${post.tenant_id}/${post.slug} → ${r2Key} (tier: ${post.tier})`,
+          );
+        } catch (err) {
+          result.errors.push(`Warm→Cold failed for ${post.slug}: ${err}`);
+        }
       }
+
+      if (result.warmToCold >= batchSize) break;
     }
   } catch (err) {
     result.errors.push(`Warm→Cold query failed: ${err}`);
@@ -293,73 +386,104 @@ async function runMigration(env: Env): Promise<MigrationResult> {
   try {
     const coldPosts = await env.DB.prepare(
       `
-      SELECT p.id, p.tenant_id, p.slug, p.r2_key, v.view_count
+      SELECT p.id, p.tenant_id, p.slug, p.r2_key, t.plan as tier,
+             COALESCE(v.view_count, 0) as view_count
       FROM posts p
-      INNER JOIN (
+      JOIN tenants t ON p.tenant_id = t.id
+      LEFT JOIN (
         SELECT post_id, COUNT(*) as view_count
         FROM post_views
         WHERE viewed_at > ?
         GROUP BY post_id
-        HAVING COUNT(*) >= ?
       ) v ON p.id = v.post_id
       WHERE p.storage_location = 'cold'
         AND p.r2_key IS NOT NULL
       LIMIT ?
     `,
     )
-      .bind(weekAgo, warmViewThreshold, batchSize)
+      .bind(weekAgo, batchSize * 5)
       .all<PostRecord & { view_count: number }>();
 
     for (const post of coldPosts.results || []) {
-      try {
-        // Fetch content from R2
-        const r2Object = await env.COLD_STORAGE.get(post.r2_key!);
-        if (!r2Object) {
-          result.errors.push(`Cold→Warm: R2 object not found for ${post.slug}`);
-          continue;
-        }
+      const thresholds = getStorageThresholds(post.tier);
 
-        const content = (await r2Object.json()) as {
-          markdownContent: string;
-          htmlContent: string;
-          gutterContent: string;
-        };
+      // Check tier-specific promotion threshold
+      if (post.view_count >= thresholds.coldPromotionThreshold) {
+        try {
+          // Fetch content from R2
+          const r2Object = await env.COLD_STORAGE.get(post.r2_key!);
+          if (!r2Object) {
+            result.errors.push(
+              `Cold→Warm: R2 object not found for ${post.slug}`,
+            );
+            continue;
+          }
 
-        // Restore content to D1
-        await env.DB.prepare(
-          `
-          UPDATE posts
-          SET storage_location = 'warm',
-              markdown_content = ?,
-              html_content = ?,
-              gutter_content = ?,
-              r2_key = NULL,
-              updated_at = ?
-          WHERE id = ?
-        `,
-        )
-          .bind(
-            content.markdownContent,
-            content.htmlContent,
-            content.gutterContent,
-            Date.now(),
-            post.id,
+          const content = (await r2Object.json()) as {
+            markdownContent: string;
+            htmlContent: string;
+            gutterContent: string;
+          };
+
+          // Restore content to D1
+          await env.DB.prepare(
+            `
+            UPDATE posts
+            SET storage_location = 'warm',
+                markdown_content = ?,
+                html_content = ?,
+                gutter_content = ?,
+                r2_key = NULL,
+                updated_at = ?
+            WHERE id = ?
+          `,
           )
-          .run();
+            .bind(
+              content.markdownContent,
+              content.htmlContent,
+              content.gutterContent,
+              Date.now(),
+              post.id,
+            )
+            .run();
 
-        // Delete from R2 (content is now in D1)
-        await env.COLD_STORAGE.delete(post.r2_key!);
+          // Delete from R2 (content is now in D1)
+          await env.COLD_STORAGE.delete(post.r2_key!);
 
-        result.coldToWarm++;
-        console.log(
-          `[PostMigrator] Cold → Warm: ${post.tenant_id}/${post.slug} (${post.view_count} views)`,
-        );
-      } catch (err) {
-        result.errors.push(`Cold→Warm failed for ${post.slug}: ${err}`);
+          result.coldToWarm++;
+          console.log(
+            `[PostMigrator] Cold → Warm: ${post.tenant_id}/${post.slug} (tier: ${post.tier}, ${post.view_count} views)`,
+          );
+        } catch (err) {
+          result.errors.push(`Cold→Warm failed for ${post.slug}: ${err}`);
+        }
       }
+
+      if (result.coldToWarm >= batchSize) break;
     }
   } catch (err) {
     result.errors.push(`Cold→Warm query failed: ${err}`);
+  }
+
+  // Log migration run for observability
+  try {
+    await env.DB.prepare(
+      `
+      INSERT INTO migration_runs (run_at, hot_to_warm, warm_to_cold, cold_to_warm, errors)
+      VALUES (?, ?, ?, ?, ?)
+    `,
+    )
+      .bind(
+        Date.now(),
+        result.hotToWarm,
+        result.warmToCold,
+        result.coldToWarm,
+        result.errors.length > 0 ? JSON.stringify(result.errors) : null,
+      )
+      .run();
+  } catch {
+    // Non-critical - don't fail migration if logging fails
+    console.warn("[PostMigrator] Failed to log migration run");
   }
 
   return result;

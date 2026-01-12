@@ -19,9 +19,37 @@
 // Types
 // ============================================================================
 
+/**
+ * Tier-based popular post thresholds
+ *
+ * Philosophy: Higher-tier tenants pay more, so they get lower thresholds
+ * for "popular" status. This makes their posts more likely to show popular
+ * indicators, which is a subtle perk of higher tiers.
+ *
+ * Values represent daily views required for "popular" status.
+ */
+type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+
+const POPULAR_POST_THRESHOLDS: Record<TierKey, number> = {
+  free: 150, // Highest bar (no blog anyway)
+  seedling: 100, // Entry tier - standard threshold
+  sapling: 75, // Growing tier - slightly easier
+  oak: 50, // Premium tier - more posts become "popular"
+  evergreen: 25, // Top tier - most permissive
+};
+
+/**
+ * Get the popular post threshold for a tier, with fallback to seedling
+ */
+function getPopularThreshold(tier: string | undefined): number {
+  const key = tier as TierKey;
+  return POPULAR_POST_THRESHOLDS[key] ?? POPULAR_POST_THRESHOLDS.seedling;
+}
+
 export interface PostMeta {
   tenantId: string;
   slug: string;
+  tier?: TierKey; // Tenant's subscription tier (for threshold calculation)
   viewCount: number;
   reactions: ReactionCounts;
   lastViewed: number;
@@ -170,6 +198,7 @@ export class PostMetaDO implements DurableObject {
     const data = (await request.json()) as {
       tenantId: string;
       slug: string;
+      tier?: TierKey; // Optional tier for popular threshold calculation
     };
 
     if (!data.tenantId || !data.slug) {
@@ -180,11 +209,17 @@ export class PostMetaDO implements DurableObject {
       this.meta = {
         tenantId: data.tenantId,
         slug: data.slug,
+        tier: data.tier,
         viewCount: 0,
         reactions: { likes: 0, bookmarks: 0 },
         lastViewed: Date.now(),
         isPopular: false,
       };
+      await this.persistMeta();
+    } else if (data.tier && this.meta.tier !== data.tier) {
+      // Update tier if it changed (e.g., tenant upgraded)
+      this.meta.tier = data.tier;
+      this.updatePopularStatus(); // Recalculate with new threshold
       await this.persistMeta();
     }
 
@@ -423,7 +458,8 @@ export class PostMetaDO implements DurableObject {
   private updatePopularStatus(): void {
     if (!this.meta) return;
     const dailyViews = this.calculateDailyViews();
-    this.meta.isPopular = dailyViews >= 100;
+    const threshold = getPopularThreshold(this.meta.tier);
+    this.meta.isPopular = dailyViews >= threshold;
   }
 
   private calculateDailyViews(): number {

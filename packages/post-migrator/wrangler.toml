@@ -44,13 +44,17 @@ service = "groveengine"
 # Environment Variables
 # =============================================================================
 [vars]
-# Migration thresholds (days)
+# Default fallback values (tier-specific thresholds defined in src/index.ts)
+# These are only used if tier lookup fails
 HOT_TO_WARM_DAYS = "7"
 WARM_TO_COLD_DAYS = "30"
 
-# View thresholds (weekly views to stay in tier)
-HOT_VIEW_THRESHOLD = "10"
-WARM_VIEW_THRESHOLD = "1"
-
-# Batch size for processing
+# Batch size for processing (migrations per run)
 BATCH_SIZE = "100"
+
+# Note: View thresholds are now tier-dependent (see STORAGE_THRESHOLDS in src/index.ts):
+# - Evergreen: 3 views/week hot, 1 view/week warm, 21+ days to migrate
+# - Oak: 5 views/week hot, 1 view/week warm, 14+ days to migrate
+# - Sapling: 7 views/week hot, 1 view/week warm, 10+ days to migrate
+# - Seedling: 10 views/week hot, 2 views/week warm, 7+ days to migrate
+# - Free: 15 views/week hot, 3 views/week warm, 5+ days to migrate
