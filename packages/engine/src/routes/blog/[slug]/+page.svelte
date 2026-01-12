@@ -4,6 +4,9 @@
 
 	let { data } = $props();
 
+	// Get accent color from site settings (falls back to default if not set)
+	const accentColor = $derived(data.siteSettings?.accent_color || null);
+
 	/** @type {Record<string, string>} */
 	// Font family mapping - same as in +layout.svelte
 	const fontMap = {
@@ -93,26 +96,31 @@
 			<!-- Article header with title and metadata -->
 			<header class="content-header">
 				<h1 class="article-title">{data.post.title}</h1>
-				<div class="post-meta article-meta">
-					<address class="author-name article-author">
-						<span class="author-prefix">By </span><a href="/about" rel="author">{data.post.author}</a>
-					</address>
-					<time datetime={data.post.date} class="entry-date dateline published-date">
-						{new Date(data.post.date).toLocaleDateString('en-US', {
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric'
-						})}
-					</time>
-					{#if data.post.tags.length > 0}
-						<div class="tags">
-							{#each data.post.tags as tag (tag)}
-								<a href="/blog/search?tag={encodeURIComponent(tag)}">
-									<Badge variant="tag">{tag}</Badge>
-								</a>
-							{/each}
-						</div>
-					{/if}
+				<div class="post-meta-glass" style:--accent-color={accentColor}>
+					<div class="post-meta article-meta">
+						<address class="author-name article-author">
+							<span class="author-prefix">By:</span>
+							<a href="/about" rel="author">{data.post.author}</a>
+						</address>
+						<span class="meta-separator" aria-hidden="true"></span>
+						<time datetime={data.post.date} class="entry-date dateline published-date">
+							{new Date(data.post.date).toLocaleDateString('en-US', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric'
+							})}
+						</time>
+						{#if data.post.tags.length > 0}
+							<span class="meta-separator" aria-hidden="true"></span>
+							<div class="tags">
+								{#each data.post.tags as tag (tag)}
+									<a href="/blog/search?tag={encodeURIComponent(tag)}" class="tag-link">
+										<Badge variant="tag" class="accent-tag">{tag}</Badge>
+									</a>
+								{/each}
+							</div>
+						{/if}
+					</div>
 				</div>
 			</header>
 		{/snippet}
@@ -138,16 +146,60 @@
 	.post-wrapper.has-custom-font :global(.content-body h6) {
 		font-family: var(--post-font, var(--font-family-main));
 	}
+
 	/* Override content-header h1 to add margin for post meta */
 	.content-header h1 {
 		margin: 0 0 1rem 0;
 	}
 
+	/* Glassmorphism container for post metadata */
+	.post-meta-glass {
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		border-radius: 12px;
+		padding: 1rem 1.25rem;
+		margin-bottom: 1.5rem;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	}
+
+	:global(.dark) .post-meta-glass {
+		background: rgba(36, 36, 36, 0.7);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Reduced motion: disable blur for accessibility */
+	@media (prefers-reduced-motion: reduce) {
+		.post-meta-glass {
+			backdrop-filter: none;
+			-webkit-backdrop-filter: none;
+			background: rgba(255, 255, 255, 0.95);
+		}
+		:global(.dark) .post-meta-glass {
+			background: rgba(36, 36, 36, 0.95);
+		}
+	}
+
 	.post-meta {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.75rem;
 		flex-wrap: wrap;
+	}
+
+	/* Meta separator dot */
+	.meta-separator {
+		width: 4px;
+		height: 4px;
+		background: #999;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	:global(.dark) .meta-separator {
+		background: #666;
 	}
 
 	/* Author byline styling for Safari Reader detection */
@@ -155,6 +207,9 @@
 		font-style: normal;
 		color: var(--light-border-secondary);
 		font-weight: 500;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
 	}
 
 	:global(.dark) .post-meta .author-name {
@@ -192,6 +247,27 @@
 
 	:global(.dark) .post-meta .entry-date {
 		color: var(--color-text-muted-dark);
+	}
+
+	/* Tags with accent color support */
+	.tags {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.tag-link {
+		text-decoration: none;
+	}
+
+	/* Apply accent color to tags when set via CSS custom property */
+	.post-meta-glass[style*="--accent-color"] .tag-link :global(.accent-tag) {
+		background: var(--accent-color, var(--tag-bg));
+		border-color: var(--accent-color, var(--tag-bg));
+	}
+
+	.post-meta-glass[style*="--accent-color"] .tag-link:hover :global(.accent-tag) {
+		filter: brightness(1.1);
 	}
 
 	/* Article navigation */

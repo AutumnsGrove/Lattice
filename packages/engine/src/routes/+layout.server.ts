@@ -3,7 +3,8 @@ import type { AppContext } from "../app.d.ts";
 
 interface SiteSettings {
   font_family: string;
-  [key: string]: string;
+  accent_color?: string;
+  [key: string]: string | undefined;
 }
 
 export const load: LayoutServerLoad = async ({ locals, platform }) => {

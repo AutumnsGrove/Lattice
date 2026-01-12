@@ -4,6 +4,9 @@
 
 	let { data } = $props();
 
+	// Get accent color from site settings (falls back to default if not set)
+	const accentColor = $derived(data.siteSettings?.accent_color || null);
+
 	/**
 	 * @param {MouseEvent} event
 	 * @param {string} slug
@@ -78,10 +81,10 @@
 						})}
 					</time>
 					{#if post.tags.length > 0}
-						<div class="tags">
+						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}
-								<a href="/blog/search?tag={encodeURIComponent(tag)}" aria-label="Filter posts by tag: {tag}">
-									<Badge variant="tag">{tag}</Badge>
+								<a href="/blog/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
+									<Badge variant="tag" class="accent-tag">{tag}</Badge>
 								</a>
 							{/each}
 						</div>
@@ -139,5 +142,20 @@
 		line-height: 1.6;
 		margin: 0;
 		transition: color 0.3s ease;
+	}
+
+	/* Tag link styling */
+	.tag-link {
+		text-decoration: none;
+	}
+
+	/* Apply accent color to tags when set via CSS custom property */
+	.tags[style*="--accent-color"] .tag-link :global(.accent-tag) {
+		background: var(--accent-color, var(--tag-bg));
+		border-color: var(--accent-color, var(--tag-bg));
+	}
+
+	.tags[style*="--accent-color"] .tag-link:hover :global(.accent-tag) {
+		filter: brightness(1.1);
 	}
 </style>
