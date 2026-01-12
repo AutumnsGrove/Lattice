@@ -264,6 +264,7 @@
 			<a href="/" class="logo">{siteName}</a>
 
 			<!-- Desktop Navigation -->
+			<!-- DEBUG: navPages count = {data.navPages?.length ?? 'undefined'} -->
 			<div class="nav-links desktop-nav">
 				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
 				<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')}>Blog</a>
