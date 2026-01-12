@@ -182,6 +182,7 @@ import {
   Wrench,
   Dock,
   IdCardLanyard,
+  ListTree,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -489,7 +490,7 @@ export const pricingIcons = {
   // Checkmark
   check: Check,
   // Navigation
-  layout: Layout,
+  listTree: ListTree,
 } as const;
 
 // ============================================================================
