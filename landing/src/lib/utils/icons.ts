@@ -405,7 +405,8 @@ export const toolIcons = {
   pyramid: Pyramid, // Core Infrastructure TOC
   blinds: Blinds, // Shade - AI protection
   "rocking-chair": RockingChair, // Porch - front porch conversations
-  toolbox: Wrench, // Standalone Tools TOC
+  toolbox: Wrench, // Standalone Tools TOC (legacy)
+  wrench: Wrench, // Standalone Tools TOC
   dock: Dock, // Operations TOC
   "id-card-lanyard": IdCardLanyard, // Content & Community TOC
   // Knowledge base additional icons

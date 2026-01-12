@@ -35,7 +35,7 @@ export const specCategories: {
     id: "standalone-tools",
     name: "Standalone Tools",
     description: "Independent tools that integrate with Grove",
-    icon: "toolbox",
+    icon: "wrench",
   },
   {
     id: "operations",

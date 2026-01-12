@@ -14,10 +14,15 @@
     return toolIcons[icon as ToolIconKey] ?? stateIcons.circle;
   }
 
-  // Get specs for a category
-  function getSpecsForCategory(categoryId: SpecCategory) {
-    return specsList.filter(spec => spec.specCategory === categoryId);
-  }
+  // Memoized specs by category (avoids repeated filtering in template)
+  const specsByCategory = $derived(
+    Object.fromEntries(
+      categories.map(cat => [
+        cat.id,
+        specsList.filter(spec => spec.specCategory === cat.id)
+      ])
+    ) as Record<SpecCategory, typeof specsList>
+  );
 
   // Generate category ID for anchor links
   function getCategoryId(name: string): string {
@@ -41,7 +46,7 @@
   <section class="relative py-12 px-6 text-center bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950">
     <div class="max-w-3xl mx-auto">
       <nav class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
-        <a href="/knowledge" class="hover:text-accent transition-colors">Knowledge Base</a>
+        <a href="/knowledge" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
         <span>/</span>
         <span class="text-foreground">Technical Specifications</span>
       </nav>
@@ -56,28 +61,28 @@
   </section>
 
   <!-- Floating TOC Icon Navigation (desktop) -->
-  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3">
+  <nav class="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3" aria-label="Category navigation">
     {#each categories as category}
       {@const CategoryIcon = getIcon(category.icon)}
-      {@const categorySpecs = getSpecsForCategory(category.id)}
+      {@const categorySpecs = specsByCategory[category.id] ?? []}
       <div class="relative group">
         <a
           href="#{getCategoryId(category.name)}"
-          class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 transition-all duration-200 motion-reduce:transition-none"
           aria-label="Jump to {category.name}"
           title="{category.name} ({categorySpecs.length})"
         >
-          <CategoryIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+          <CategoryIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 motion-reduce:group-hover:scale-100 transition-transform motion-reduce:transition-none" />
         </a>
 
         <!-- Specs revealed on hover -->
         {#if categorySpecs.length > 0}
-          <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex items-center gap-2 flex-wrap justify-end max-w-xs">
+          <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 motion-reduce:transition-none flex items-center gap-2 flex-wrap justify-end max-w-xs">
             {#each categorySpecs.slice(0, 6) as spec}
               {@const SpecIcon = getIcon(spec.icon)}
               <a
                 href="/knowledge/specs/{spec.slug}"
-                class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
+                class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition-colors motion-reduce:transition-none whitespace-nowrap"
                 title={spec.description}
               >
                 <SpecIcon class="w-3.5 h-3.5" />
@@ -98,7 +103,7 @@
     <button
       type="button"
       onclick={() => isMobileTocOpen = !isMobileTocOpen}
-      class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+      class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none"
       aria-expanded={isMobileTocOpen}
       aria-label="Table of contents"
     >
@@ -111,7 +116,7 @@
       <div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden max-h-[70vh] overflow-y-auto">
         <div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
           <span class="font-medium text-foreground">Navigate</span>
-          <button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close">
+          <button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 rounded transition-colors motion-reduce:transition-none" aria-label="Close">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -120,12 +125,12 @@
         <div class="py-2">
           {#each categories as category}
             {@const CategoryIcon = getIcon(category.icon)}
-            {@const categorySpecs = getSpecsForCategory(category.id)}
+            {@const categorySpecs = specsByCategory[category.id] ?? []}
             <div class="mb-2">
               <a
                 href="#{getCategoryId(category.name)}"
                 onclick={() => isMobileTocOpen = false}
-                class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 focus-visible:outline-none focus-visible:bg-amber-50 dark:focus-visible:bg-amber-900/20 focus-visible:text-foreground transition-colors motion-reduce:transition-none"
               >
                 <CategoryIcon class="w-5 h-5 text-amber-500" />
                 <span class="font-medium">{category.name}</span>
@@ -142,7 +147,7 @@
   <section class="flex-1 py-12 px-6">
     <div class="max-w-5xl mx-auto space-y-16">
       {#each categories as category}
-        {@const categorySpecs = getSpecsForCategory(category.id)}
+        {@const categorySpecs = specsByCategory[category.id] ?? []}
         {@const CategoryIcon = getIcon(category.icon)}
 
         {#if categorySpecs.length > 0}
@@ -162,14 +167,14 @@
             <div class="grid gap-4 md:grid-cols-2">
               {#each categorySpecs as spec}
                 {@const SpecIcon = getIcon(spec.icon)}
-                <article class="p-5 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200/50 dark:border-slate-700 hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700/50 transition-all">
+                <article class="p-5 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-amber-200/50 dark:border-slate-700 hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700/50 focus-within:shadow-md focus-within:border-amber-300 dark:focus-within:border-amber-700/50 transition-all motion-reduce:transition-none">
                   <div class="flex items-start gap-3 mb-3">
                     <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
                       <SpecIcon class="w-4 h-4" />
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="text-lg font-semibold text-foreground leading-tight">
-                        <a href="/knowledge/specs/{spec.slug}" class="hover:text-accent transition-colors">
+                        <a href="/knowledge/specs/{spec.slug}" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none transition-colors motion-reduce:transition-none">
                           {spec.title}
                         </a>
                       </h3>
@@ -198,7 +203,7 @@
         <p class="text-foreground-muted mb-4">
           If you need clarification on any technical specification or want to suggest improvements, we'd love to hear from you.
         </p>
-        <a href="mailto:autumnbrown23@pm.me" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
+        <a href="mailto:autumnbrown23@pm.me" class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
           Contact Us
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -211,10 +216,10 @@
   <!-- Links -->
   <section class="py-8 px-6 bg-white/50 dark:bg-slate-900/50 border-t border-divider">
     <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground transition-colors">
+      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         ← Knowledge Base
       </a>
-      <a href="/knowledge/patterns" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground transition-colors">
+      <a href="/knowledge/patterns" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         Architecture Patterns →
       </a>
     </div>
