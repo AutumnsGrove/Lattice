@@ -19,8 +19,18 @@ const ROOT = join(__dirname, "..");
 
 // Configuration
 const WORKER_PATH = join(ROOT, ".svelte-kit/cloudflare/_worker.js");
-const DO_SOURCE = join(ROOT, "src/lib/durable-objects/TenantDO.ts");
-const DO_COMPILED = join(ROOT, ".svelte-kit/cloudflare/TenantDO.js");
+const DO_DIR = join(ROOT, "src/lib/durable-objects");
+const OUT_DIR = join(ROOT, ".svelte-kit/cloudflare");
+
+// All DO classes to compile and inject
+const DO_CLASSES = [
+  { name: "TenantDO", description: "config caching, draft sync, analytics" },
+  { name: "PostMetaDO", description: "reactions, views, real-time presence" },
+  {
+    name: "PostContentDO",
+    description: "content caching, hot/warm/cold storage",
+  },
+];
 
 // Marker to detect if DOs are already injected
 const INJECTION_MARKER = "// === DURABLE OBJECTS (injected) ===";
@@ -30,13 +40,7 @@ console.log("🔧 Injecting Durable Objects into worker...\n");
 // Check if build output exists
 if (!existsSync(WORKER_PATH)) {
   console.error("❌ Worker not found at:", WORKER_PATH);
-  console.error("   Run 'pnpm build' first.");
-  process.exit(1);
-}
-
-// Check if DO source exists
-if (!existsSync(DO_SOURCE)) {
-  console.error("❌ TenantDO source not found at:", DO_SOURCE);
+  console.error("   Run 'pnpm build:sveltekit' first.");
   process.exit(1);
 }
 
@@ -49,46 +53,63 @@ if (workerCode.includes(INJECTION_MARKER)) {
   process.exit(0);
 }
 
-// Compile TenantDO.ts to JS using esbuild (bundled with vite)
-// Using spawnSync with explicit arguments to avoid shell injection
-console.log("📦 Compiling TenantDO.ts...");
-const esbuildResult = spawnSync(
-  "npx",
-  [
-    "esbuild",
-    DO_SOURCE,
-    `--outfile=${DO_COMPILED}`,
-    "--format=esm",
-    "--target=es2022",
-    "--platform=neutral",
-  ],
-  {
-    cwd: ROOT,
-    stdio: "inherit",
-    shell: false,
-  },
-);
+// Compile each DO class
+const compiledCode = [];
 
-if (esbuildResult.status !== 0) {
-  console.error("❌ Failed to compile TenantDO");
-  process.exit(1);
+for (const doClass of DO_CLASSES) {
+  const sourcePath = join(DO_DIR, `${doClass.name}.ts`);
+  const outPath = join(OUT_DIR, `${doClass.name}.js`);
+
+  // Check if source exists
+  if (!existsSync(sourcePath)) {
+    console.error(`❌ ${doClass.name} source not found at:`, sourcePath);
+    process.exit(1);
+  }
+
+  console.log(`📦 Compiling ${doClass.name}.ts...`);
+
+  // Compile with esbuild
+  const result = spawnSync(
+    "npx",
+    [
+      "esbuild",
+      sourcePath,
+      `--outfile=${outPath}`,
+      "--format=esm",
+      "--target=es2022",
+      "--platform=neutral",
+    ],
+    {
+      cwd: ROOT,
+      stdio: "inherit",
+      shell: false,
+    },
+  );
+
+  if (result.status !== 0) {
+    console.error(`❌ Failed to compile ${doClass.name}`);
+    process.exit(1);
+  }
+
+  // Read compiled code
+  const code = readFileSync(outPath, "utf-8");
+  compiledCode.push(`// --- ${doClass.name} ---\n${code}`);
 }
 
-// Read compiled DO code
-const doCode = readFileSync(DO_COMPILED, "utf-8");
-
-// Extract the TenantDO class and related exports
-// The compiled code exports TenantDO class - we need to append it
+// Create injection block
 const doExport = `
 ${INJECTION_MARKER}
-${doCode}
+
+${compiledCode.join("\n\n")}
 `;
 
 // Append DO exports to worker
 workerCode += doExport;
 writeFileSync(WORKER_PATH, workerCode);
 
-console.log("✅ Injected TenantDO into _worker.js");
+console.log("\n✅ Injected Durable Objects into _worker.js");
 console.log("\n📋 DO exports added:");
-console.log("   - TenantDO (config caching, draft sync, analytics)");
+for (const doClass of DO_CLASSES) {
+  console.log(`   - ${doClass.name} (${doClass.description})`);
+}
 console.log("\n🚀 Ready to deploy with: pnpm deploy");

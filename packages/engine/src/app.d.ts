@@ -54,6 +54,12 @@ declare global {
         /** TenantDO - Per-tenant Durable Object for config, drafts, analytics */
         TENANTS: DurableObjectNamespace;
 
+        /** PostMetaDO - Per-post reactions, views, real-time presence */
+        POST_META: DurableObjectNamespace;
+
+        /** PostContentDO - Per-post content caching */
+        POST_CONTENT: DurableObjectNamespace;
+
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
