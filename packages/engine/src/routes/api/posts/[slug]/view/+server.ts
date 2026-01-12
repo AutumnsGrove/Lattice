@@ -1,5 +1,4 @@
-import { json, error } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types.js";
+import { json, error, type RequestHandler } from "@sveltejs/kit";
 
 /**
  * POST /api/posts/[slug]/view - Record a view for a post

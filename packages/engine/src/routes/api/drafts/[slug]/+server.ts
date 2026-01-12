@@ -1,7 +1,6 @@
-import { json, error } from "@sveltejs/kit";
+import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import type { RequestHandler } from "./$types.js";
 
 /**
  * Helper to get TenantDO stub for the current tenant

@@ -10,6 +10,7 @@ import {
   validateVerificationCookie,
 } from "$lib/server/services/turnstile.js";
 import type { TenantConfig } from "$lib/durable-objects/TenantDO.js";
+import { TIERS, type TierKey } from "$lib/config/tiers.js";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -186,6 +187,115 @@ function shouldSkipTurnstile(pathname: string): boolean {
 }
 
 /**
+ * Extended tenant info including the tenant UUID
+ */
+interface TenantLookupResult extends TenantConfig {
+  id: string;
+}
+
+/**
+ * Try to get tenant config from TenantDO first, fall back to D1
+ *
+ * TenantDO caches config in memory, eliminating D1 reads on hot paths.
+ * Falls back to D1 if DO unavailable or on first access (to get tenant ID).
+ */
+async function getTenantConfig(
+  subdomain: string,
+  platform: App.Platform | undefined,
+): Promise<TenantLookupResult | null> {
+  const db = platform?.env?.DB;
+  if (!db) return null;
+
+  // Try TenantDO first for cached config
+  const tenants = platform?.env?.TENANTS;
+  if (tenants) {
+    try {
+      const doId = tenants.idFromName(`tenant:${subdomain}`);
+      const stub = tenants.get(doId);
+      const response = await stub.fetch("https://tenant.internal/config");
+
+      if (response.ok) {
+        const config = (await response.json()) as TenantConfig & {
+          id?: string;
+        };
+        // TenantDO returns cached config - we still need tenant ID from D1
+        // For now, fetch ID from D1 (TODO: cache ID in TenantDO)
+        if (config.subdomain) {
+          const tenant = await db
+            .prepare(
+              "SELECT id FROM tenants WHERE subdomain = ? AND active = 1",
+            )
+            .bind(subdomain)
+            .first<{ id: string }>();
+
+          if (tenant) {
+            return {
+              ...config,
+              id: tenant.id,
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.error("[Hooks] TenantDO lookup failed, falling back to D1:", err);
+    }
+  }
+
+  // Fall back to D1 (first access or DO unavailable)
+  try {
+    const tenant = await db
+      .prepare(
+        "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+      )
+      .bind(subdomain)
+      .first<{
+        id: string;
+        subdomain: string;
+        display_name: string;
+        email: string;
+        theme: string | null;
+        plan: string;
+      }>();
+
+    if (!tenant) return null;
+
+    // Map D1 result to TenantConfig format
+    const tier = (tenant.plan || "seedling") as TenantConfig["tier"];
+    return {
+      id: tenant.id,
+      subdomain: tenant.subdomain,
+      displayName: tenant.display_name,
+      theme: tenant.theme ? JSON.parse(tenant.theme) : null,
+      tier,
+      ownerId: tenant.email,
+      limits: getTierLimits(tier),
+    };
+  } catch (err) {
+    console.error("[Hooks] D1 tenant lookup failed:", err);
+    return null;
+  }
+}
+
+/**
+ * Get tier limits from centralized tiers.ts config
+ */
+function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
+  // Map TenantConfig tier to TierKey (they're compatible)
+  const tierConfig = TIERS[tier as TierKey] ?? TIERS.seedling;
+
+  return {
+    postsPerMonth:
+      tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
+    storageBytes: tierConfig.limits.storage,
+    customDomains: tierConfig.features.customDomain
+      ? tier === "evergreen"
+        ? 10
+        : 1
+      : 0,
+  };
+}
+
+/**
  * Determine if a route needs 'unsafe-eval' in Content-Security-Policy.
  *
  * WHY these routes need this directive:
@@ -288,7 +398,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     // These are handled by separate Workers, shouldn't hit this
     return new Response("Service not found", { status: 404 });
   }
-  // Must be a tenant subdomain - look up via TenantDO or D1
+  // Must be a tenant subdomain - look up via TenantDO (cached) or D1 (fallback)
   else {
     const tenant = await getTenantConfig(subdomain, event.platform);
 

@@ -7,7 +7,7 @@
  * @see docs/specs/writing-assistant-unified-spec.md
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   MAX_CONTENT_LENGTH,
@@ -33,10 +33,7 @@ export const prerender = false;
 // POST - Analyze Content
 // ============================================================================
 
-/**
- * @type {import('./$types').RequestHandler}
- */
-export async function POST({ request, platform, locals }) {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     return json({ error: "Unauthorized" }, { status: 401 });
@@ -337,16 +334,13 @@ export async function POST({ request, platform, locals }) {
       { status: 500 },
     );
   }
-}
+};
 
 // ============================================================================
 // GET - Usage Statistics
 // ============================================================================
 
-/**
- * @type {import('./$types').RequestHandler}
- */
-export async function GET({ platform, locals }) {
+export const GET: RequestHandler = async ({ platform, locals }) => {
   if (!locals.user) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -385,7 +379,7 @@ export async function GET({ platform, locals }) {
   } catch {
     return json({ requests: 0, tokens: 0, cost: 0 });
   }
-}
+};
 
 // ============================================================================
 // Analysis Functions
