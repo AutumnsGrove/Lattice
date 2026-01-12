@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PageInput {
@@ -41,13 +42,19 @@ export const PUT: RequestHandler = async ({
   }
 
   const { slug } = params;
-  const { tenantId } = locals;
 
   if (!slug) {
     throw error(400, "Slug is required");
   }
 
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PageInput;
 
     // Validate required fields
@@ -68,7 +75,7 @@ export const PUT: RequestHandler = async ({
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
       );
     }
 
@@ -78,7 +85,7 @@ export const PUT: RequestHandler = async ({
 
     // Check if page exists and belongs to tenant
     const existing = await platform.env.DB.prepare(
-      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?"
+      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?",
     )
       .bind(slug, tenantId)
       .first();
@@ -89,7 +96,7 @@ export const PUT: RequestHandler = async ({
 
     // Generate HTML from markdown and sanitize to prevent XSS
     const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string
+      marked.parse(data.markdown_content, { async: false }) as string,
     );
 
     const now = new Date().toISOString();
@@ -110,7 +117,9 @@ export const PUT: RequestHandler = async ({
       tenantId,
     ];
 
-    await platform.env.DB.prepare(updateQuery).bind(...queryParams).run();
+    await platform.env.DB.prepare(updateQuery)
+      .bind(...queryParams)
+      .run();
 
     return json({
       success: true,
@@ -122,7 +131,7 @@ export const PUT: RequestHandler = async ({
     console.error("Error updating page:", err);
     throw error(
       500,
-      err instanceof Error ? err.message : "Failed to update page"
+      err instanceof Error ? err.message : "Failed to update page",
     );
   }
 };

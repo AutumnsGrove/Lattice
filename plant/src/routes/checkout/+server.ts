@@ -23,6 +23,9 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
   // This ensures redirects go to the correct domain (plant.grove.place, not pages.dev)
   const baseUrl = platform?.env?.PUBLIC_APP_URL || "https://plant.grove.place";
 
+  // Parse trial days from environment, default to 14
+  const trialDays = parseInt(platform?.env?.STRIPE_TRIAL_DAYS || "14", 10);
+
   if (!db) {
     console.error("[Checkout] Database not available");
     return json({ error: "Database not configured" }, { status: 503 });
@@ -72,6 +75,7 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
       billingCycle,
       successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/plans`,
+      trialDays,
     });
 
     // Store the checkout session ID

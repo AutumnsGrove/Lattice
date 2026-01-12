@@ -1,6 +1,13 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  rateLimitHeaders,
+} from "$lib/server/rate-limits/middleware.js";
+import { validateEnv } from "$lib/server/env-validation.js";
 
 /** File signatures for MIME type validation */
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -23,6 +30,58 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
 
+/** Maximum image dimension (8192px = 8K) */
+const MAX_IMAGE_DIMENSION = 8192;
+
+/** Maximum total pixels (50 megapixels) */
+const MAX_IMAGE_PIXELS = 50_000_000;
+
+/**
+ * Validate image dimensions by parsing file signatures
+ * Prevents extremely large images that could cause memory issues
+ */
+async function validateImageDimensions(
+  file: File,
+  buffer: Uint8Array,
+): Promise<void> {
+  let width = 0;
+  let height = 0;
+
+  // PNG: dimensions at bytes 16-23 (big-endian)
+  if (file.type === "image/png" && buffer.length >= 24) {
+    width =
+      (buffer[16] << 24) | (buffer[17] << 16) | (buffer[18] << 8) | buffer[19];
+    height =
+      (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
+  }
+
+  // GIF: dimensions at bytes 6-9 (little-endian)
+  if (file.type === "image/gif" && buffer.length >= 10) {
+    width = buffer[6] | (buffer[7] << 8);
+    height = buffer[8] | (buffer[9] << 8);
+  }
+
+  // For JPEG and WebP, we rely on file size validation
+  // Full dimension parsing requires walking marker tables (complex)
+  if (file.type === "image/jpeg" || file.type === "image/webp") {
+    // File size already validated (max 10MB), which is a reasonable proxy
+    return;
+  }
+
+  // Validate dimensions if we could parse them
+  if (width > 0 && height > 0) {
+    if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+      throw error(
+        400,
+        `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
+      );
+    }
+    if (width * height > MAX_IMAGE_PIXELS) {
+      throw error(400, "Image has too many pixels (max 50 megapixels)");
+    }
+  }
+}
+
 /**
  * Enhanced Image Upload Endpoint
  * Supports date-based organization, duplicate detection, and AI metadata
@@ -43,12 +102,56 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(403, "Invalid origin");
   }
 
-  // Check for R2 binding
-  if (!platform?.env?.IMAGES) {
-    throw error(500, "R2 bucket not configured");
+  // Validate required environment variables (fail-fast with actionable errors)
+  const envValidation = validateEnv(platform?.env, [
+    "DB",
+    "IMAGES",
+    "CACHE_KV",
+  ]);
+  if (!envValidation.valid) {
+    console.error(`[Image Upload] ${envValidation.message}`);
+    throw error(503, "Upload service temporarily unavailable");
+  }
+
+  // Safe to access after validation
+  const db = platform!.env!.DB;
+  const images = platform!.env!.IMAGES;
+  const kv = platform!.env!.CACHE_KV;
+
+  // Rate limit uploads (fail-closed to prevent storage abuse)
+  const { result, response } = await checkRateLimit({
+    kv,
+    key: buildRateLimitKey("upload/image", locals.user.id),
+    limit: 50,
+    windowSeconds: 3600, // 1 hour
+    namespace: "upload-ratelimit",
+  });
+
+  if (response) {
+    return new Response(
+      JSON.stringify({
+        error: "rate_limited",
+        message:
+          "Upload limit reached. Please wait before uploading more images.",
+        remaining: 0,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...rateLimitHeaders(result, 50),
+        },
+      },
+    );
   }
 
   try {
+    const tenantId = await getVerifiedTenantId(
+      db,
+      locals.tenantId,
+      locals.user,
+    );
     const formData = await request.formData();
     const file = formData.get("file");
     const customFilename = formData.get("filename") as string | null;
@@ -64,8 +167,37 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
       throw error(
         400,
-        `Invalid file type: ${file.type}. Allowed: jpg, png, gif, webp`
+        `Invalid file type: ${file.type}. Allowed: jpg, png, gif, webp`,
       );
+    }
+
+    // Map of MIME types to valid extensions
+    const MIME_TO_EXTENSIONS: Record<string, string[]> = {
+      "image/jpeg": ["jpg", "jpeg"],
+      "image/png": ["png"],
+      "image/gif": ["gif"],
+      "image/webp": ["webp"],
+    };
+
+    // Extract and validate extension
+    const originalName = file.name;
+    const ext = originalName.split(".").pop()?.toLowerCase();
+
+    if (!ext) {
+      throw error(400, "File must have an extension");
+    }
+
+    const validExtensions = MIME_TO_EXTENSIONS[file.type];
+    if (!validExtensions || !validExtensions.includes(ext)) {
+      throw error(
+        400,
+        `File extension '.${ext}' does not match content type '${file.type}'`,
+      );
+    }
+
+    // Block double extensions that might indicate attacks
+    if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
+      throw error(400, "Invalid file name");
     }
 
     // Validate file size
@@ -86,17 +218,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!isValidSignature) {
       throw error(
         400,
-        "Invalid file signature - file may be corrupted or spoofed"
+        "Invalid file signature - file may be corrupted or spoofed",
       );
     }
 
+    // Validate image dimensions to prevent DoS attacks
+    await validateImageDimensions(file, buffer);
+
     // Check for duplicates if hash provided
-    if (hash && platform?.env?.DB) {
+    if (hash && db) {
       try {
-        const existing = (await platform.env.DB.prepare(
-          "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?"
-        )
-          .bind(hash, locals.tenantId)
+        const existing = (await db
+          .prepare(
+            "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
+          )
+          .bind(hash, tenantId)
           .first()) as { key: string; url: string } | null;
 
         if (existing) {
@@ -152,7 +288,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Build the R2 key with tenant isolation
-    const key = `${locals.tenantId}/${datePath}/${filename}`;
+    const key = `${tenantId}/${datePath}/${filename}`;
 
     // Upload to R2 with cache headers and custom metadata
     const metadata: Record<string, string> = {};
@@ -160,7 +296,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (description) metadata.description = description.substring(0, 1000);
     if (hash) metadata.hash = hash;
 
-    await platform.env.IMAGES.put(key, arrayBuffer, {
+    await images.put(key, arrayBuffer, {
       httpMetadata: {
         contentType: file.type,
         cacheControl: "public, max-age=31536000, immutable",
@@ -172,16 +308,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 
     // Store hash for future duplicate detection
-    if (hash && platform?.env?.DB) {
+    if (hash && db) {
       try {
-        await platform.env.DB.prepare(
-          `
+        await db
+          .prepare(
+            `
           INSERT INTO image_hashes (hash, key, url, tenant_id, created_at)
           VALUES (?, ?, ?, ?, datetime('now'))
           ON CONFLICT(hash, tenant_id) DO NOTHING
-        `
-        )
-          .bind(hash, key, cdnUrl, locals.tenantId)
+        `,
+          )
+          .bind(hash, key, cdnUrl, tenantId)
           .run();
       } catch (dbError) {
         // Non-critical, continue
@@ -213,7 +350,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         headers: {
           "Cache-Control": "no-store",
         },
-      }
+      },
     );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;

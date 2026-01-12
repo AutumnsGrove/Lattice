@@ -5,6 +5,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -33,15 +34,15 @@ interface PostInput {
 
 /**
  * GET /api/posts/[slug] - Get a single post
+ *
+ * Access levels:
+ * - Anonymous: Only published posts (for public blog access)
+ * - Authenticated owner: All posts including drafts
+ *
  * Uses TenantDb for automatic tenant isolation
  * Falls back to filesystem (UserContent) if not in D1
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
-  // Auth check
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
-
   const { slug } = params;
 
   if (!slug) {
@@ -49,17 +50,41 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throw error(400, "Tenant context required");
+  }
+
+  // Determine access level
+  let isOwner = false;
+  if (locals.user && platform?.env?.DB) {
+    try {
+      await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
+      isOwner = true;
+    } catch {
+      // User doesn't own this tenant - treat as anonymous
+      isOwner = false;
+    }
   }
 
   // Try D1 first with TenantDb
   if (platform?.env?.DB) {
     try {
-      const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+      const tenantDb = getTenantDb(platform.env.DB, {
+        tenantId: locals.tenantId,
+      });
 
-      const post = await tenantDb.queryOne<PostRecord>('posts', 'slug = ?', [slug]);
+      const post = await tenantDb.queryOne<PostRecord & { status?: string }>(
+        "posts",
+        "slug = ?",
+        [slug],
+      );
 
       if (post) {
+        // Check access: owners can see all, anonymous only published
+        const isPublished = !post.status || post.status === "published";
+        if (!isOwner && !isPublished) {
+          throw error(404, "Post not found");
+        }
+
         return json({
           source: "d1",
           post: {
@@ -72,6 +97,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
         });
       }
     } catch (err) {
+      if ((err as { status?: number }).status === 404) throw err;
       console.error("D1 fetch error:", err);
       // Fall through to filesystem fallback
     }
@@ -141,6 +167,13 @@ export const PUT: RequestHandler = async ({
   }
 
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PostInput;
 
     // Validate required fields
@@ -161,7 +194,7 @@ export const PUT: RequestHandler = async ({
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
       );
     }
 
@@ -183,10 +216,10 @@ export const PUT: RequestHandler = async ({
     }
 
     // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 
     // Check if post exists for this tenant
-    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
+    const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (!existing) {
       throw error(404, "Post not found");
@@ -194,7 +227,7 @@ export const PUT: RequestHandler = async ({
 
     // Generate HTML from markdown and sanitize to prevent XSS
     const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string
+      marked.parse(data.markdown_content, { async: false }) as string,
     );
 
     // Generate a simple hash of the content
@@ -211,7 +244,7 @@ export const PUT: RequestHandler = async ({
 
     // Update using TenantDb (automatically adds tenant_id to WHERE clause)
     await tenantDb.update(
-      'posts',
+      "posts",
       {
         title: data.title,
         date: data.date || timestamp.split("T")[0],
@@ -222,9 +255,10 @@ export const PUT: RequestHandler = async ({
         file_hash,
         gutter_content: data.gutter_content || "[]",
         font: data.font || "default",
+        updated_at: timestamp,
       },
-      'slug = ?',
-      [slug]
+      "slug = ?",
+      [slug],
     );
 
     return json({
@@ -274,18 +308,25 @@ export const DELETE: RequestHandler = async ({
   }
 
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 
     // Check if post exists for this tenant
-    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
+    const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (!existing) {
       throw error(404, "Post not found");
     }
 
     // Delete using TenantDb (automatically adds tenant_id to WHERE clause)
-    await tenantDb.delete('posts', 'slug = ?', [slug]);
+    await tenantDb.delete("posts", "slug = ?", [slug]);
 
     return json({
       success: true,

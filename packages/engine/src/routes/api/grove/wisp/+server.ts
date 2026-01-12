@@ -25,6 +25,7 @@ import {
 } from "$lib/server/inference-client.js";
 import { calculateReadability } from "$lib/utils/readability.js";
 import { checkRateLimit } from "$lib/server/rate-limits/index.js";
+import { checkFeatureAccess } from "$lib/server/billing.js";
 
 export const prerender = false;
 
@@ -67,6 +68,20 @@ export async function POST({ request, platform, locals }) {
       }
     } catch {
       // If settings table doesn't exist, allow (for initial setup)
+    }
+  }
+
+  // Check subscription access to AI features (after wisp_enabled, before request parsing)
+  if (db && locals.tenantId) {
+    const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
+    if (!featureCheck.allowed) {
+      return json(
+        {
+          error:
+            featureCheck.reason || "AI features require an active subscription",
+        },
+        { status: 403 },
+      );
     }
   }
 
@@ -129,9 +144,18 @@ export async function POST({ request, platform, locals }) {
     }
   }
 
-  // Rate limiting using Threshold middleware
-  if (kv) {
-    const { result, response } = await checkRateLimit({
+  // Rate limiting using Threshold middleware (fail-closed to prevent cost overruns)
+  if (!kv) {
+    // Fail closed: AI operations are expensive, so we reject if we can't enforce limits
+    console.error("[Wisp] Rate limiting failed: CACHE_KV not configured");
+    return json(
+      { error: "Service temporarily unavailable. Please try again." },
+      { status: 503 },
+    );
+  }
+
+  const { result: rateLimitResult, response: rateLimitResponse } =
+    await checkRateLimit({
       kv,
       key: `wisp:${locals.user.id}`,
       limit: RATE_LIMIT.maxRequestsPerHour,
@@ -139,10 +163,9 @@ export async function POST({ request, platform, locals }) {
       namespace: "wisp",
     });
 
-    if (response) return response; // 429 with proper headers
-  }
+  if (rateLimitResponse) return rateLimitResponse; // 429 with proper headers
 
-  // Monthly cost cap check
+  // Monthly cost cap check (fail-closed: reject if we can't verify limits)
   if (db && COST_CAP.enabled) {
     // Use single Date instance to avoid edge case at month boundary
     const now = new Date();
@@ -151,24 +174,36 @@ export async function POST({ request, platform, locals }) {
       now.getMonth(),
       1,
     ).toISOString();
+
+    let usage: { monthly_cost: number } | null;
     try {
-      const usage = (await db
+      usage = (await db
         .prepare(
           "SELECT COALESCE(SUM(cost), 0) as monthly_cost FROM wisp_requests WHERE user_id = ? AND created_at > ?",
         )
         .bind(locals.user.id, monthStart)
         .first()) as { monthly_cost: number } | null;
+    } catch (err) {
+      // Fail closed: reject request if we can't verify cost limits for safety
+      console.error(
+        "[Wisp] Cost limit check failed - blocking request:",
+        err instanceof Error ? err.message : "Unknown database error",
+      );
+      return json(
+        {
+          error: "Unable to verify usage limits. Please try again.",
+        },
+        { status: 503 },
+      );
+    }
 
-      if (usage && usage.monthly_cost >= COST_CAP.maxCostUSD) {
-        return json(
-          {
-            error: `Monthly usage limit reached ($${COST_CAP.maxCostUSD.toFixed(2)}). Resets on the 1st.`,
-          },
-          { status: 429 },
-        );
-      }
-    } catch {
-      // Table might not exist yet
+    if (usage && usage.monthly_cost >= COST_CAP.maxCostUSD) {
+      return json(
+        {
+          error: `Monthly usage limit reached ($${COST_CAP.maxCostUSD.toFixed(2)}). Resets on the 1st.`,
+        },
+        { status: 429 },
+      );
     }
   }
 
@@ -272,9 +307,13 @@ export async function POST({ request, platform, locals }) {
             context?.slug || null,
           )
           .run();
-      } catch {
-        // Table might not exist yet - non-fatal
-        console.warn("[Wisp] Could not log usage - table may not exist");
+      } catch (err) {
+        // Usage logging is non-fatal - table might not exist yet or DB temporarily unavailable
+        // Request already succeeded, so we log but don't fail
+        console.warn(
+          "[Wisp] Could not log usage:",
+          err instanceof Error ? err.message : "Unknown error",
+        );
       }
     }
 

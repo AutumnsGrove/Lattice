@@ -10,11 +10,35 @@ sst-env.d.ts
 build/
 dist/
 .svelte-kit/
+
+# Environment files
 .env
+.env.*
 .env.local
 .env.*.local
+!.env.example
+
+# Secrets
+*.secret
+*.key
+*.pem
+
+# IDE
 .vscode/
 .idea/
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Test coverage
+coverage/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+
+# Misc
 *.swp
 *.swo
 *~

@@ -205,10 +205,14 @@ export const GET: RequestHandler = async ({
   // Get return URL
   const returnTo = cookies.get("auth_return_to") || "/admin";
 
-  // Clear auth cookies immediately
-  cookies.delete("auth_state", { path: "/" });
-  cookies.delete("auth_code_verifier", { path: "/" });
-  cookies.delete("auth_return_to", { path: "/" });
+  // Clear auth cookies immediately with proper attributes
+  cookies.delete("auth_state", { path: "/", httpOnly: true, secure: true });
+  cookies.delete("auth_code_verifier", {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+  });
+  cookies.delete("auth_return_to", { path: "/", httpOnly: true, secure: true });
 
   try {
     // Get typed auth configuration

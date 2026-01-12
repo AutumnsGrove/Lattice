@@ -219,6 +219,50 @@ function generateHtml(
 }
 
 // =============================================================================
+// SSRF PREVENTION - URL VALIDATION
+// =============================================================================
+
+// Allowed domains for fetching
+const ALLOWED_DOMAINS = new Set([
+  "grove.place",
+  "cdn.grove.place",
+  "imagedelivery.net", // Cloudflare Images
+]);
+
+function isAllowedUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+
+    // Block non-HTTPS
+    if (url.protocol !== "https:") {
+      return false;
+    }
+
+    // Block internal/private IPs
+    const hostname = url.hostname;
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.168.") ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("172.") ||
+      hostname.endsWith(".local")
+    ) {
+      return false;
+    }
+
+    // Check against allowlist OR allow subdomains of grove.place
+    if (ALLOWED_DOMAINS.has(hostname) || hostname.endsWith(".grove.place")) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// =============================================================================
 // DYNAMIC CONTENT FETCHING
 // =============================================================================
 
@@ -344,14 +388,9 @@ export default {
       let pageMeta: PageMeta | null = null;
 
       if (pageUrl) {
-        // Validate URL is from grove.place for security
-        try {
-          const parsed = new URL(pageUrl);
-          if (parsed.hostname.endsWith("grove.place")) {
-            pageMeta = await fetchPageMeta(pageUrl);
-          }
-        } catch {
-          // Invalid URL, ignore
+        // Validate URL against SSRF prevention rules
+        if (isAllowedUrl(pageUrl)) {
+          pageMeta = await fetchPageMeta(pageUrl);
         }
       }
 

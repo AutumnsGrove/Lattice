@@ -1,6 +1,14 @@
 import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import type { RequestHandler } from './$types';
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  rateLimitHeaders,
+} from "$lib/server/rate-limits/middleware.js";
+import type { RequestHandler } from "./$types";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { checkFeatureAccess } from "$lib/server/billing.js";
+import { validateEnv } from "$lib/server/env-validation.js";
 
 interface ClaudeContentBlock {
   type: string;
@@ -27,15 +35,73 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(401, "Unauthorized");
   }
 
+  // Tenant check (CRITICAL for security)
+  if (!locals.tenantId) {
+    throw error(403, "Tenant context required");
+  }
+
   // CSRF check
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
   }
 
-  // Check for API key
-  const apiKey = platform?.env?.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw error(500, "AI analysis not configured - ANTHROPIC_API_KEY not set");
+  // Validate required environment variables (fail-fast with actionable errors)
+  const envValidation = validateEnv(platform?.env, [
+    "DB",
+    "ANTHROPIC_API_KEY",
+    "CACHE_KV",
+  ]);
+  if (!envValidation.valid) {
+    console.error(`[AI Analyze] ${envValidation.message}`);
+    throw error(503, "AI analysis service temporarily unavailable");
+  }
+
+  // Safe to access after validation (non-null assertion is safe here)
+  const db = platform!.env!.DB;
+  const apiKey = platform!.env!.ANTHROPIC_API_KEY as string;
+  const kv = platform!.env!.CACHE_KV;
+
+  // Verify tenant ownership
+  try {
+    await getVerifiedTenantId(db, locals.tenantId, locals.user);
+  } catch (err) {
+    throw err;
+  }
+
+  // Check subscription access to AI features
+  const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
+  if (!featureCheck.allowed) {
+    throw error(
+      403,
+      featureCheck.reason || "AI features require an active subscription",
+    );
+  }
+
+  // Rate limit expensive AI operations (fail-closed - already validated above)
+  const { result, response } = await checkRateLimit({
+    kv,
+    key: buildRateLimitKey("ai/analyze", locals.user.id),
+    limit: 20,
+    windowSeconds: 86400, // 24 hours
+    namespace: "ai-ratelimit",
+  });
+
+  if (response) {
+    return new Response(
+      JSON.stringify({
+        error: "rate_limited",
+        message: "Daily AI analysis limit reached. Limit resets in 24 hours.",
+        remaining: 0,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...rateLimitHeaders(result, 20),
+        },
+      },
+    );
   }
 
   try {
@@ -57,8 +123,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const base64 = btoa(
       new Uint8Array(arrayBuffer).reduce(
         (data, byte) => data + String.fromCharCode(byte),
-        ""
-      )
+        "",
+      ),
     );
 
     // Determine media type for Claude API
@@ -109,7 +175,7 @@ Respond in this exact JSON format only, no other text:
       throw error(500, "AI analysis failed");
     }
 
-    const result = await response.json() as ClaudeResponse;
+    const result = (await response.json()) as ClaudeResponse;
 
     // Extract the text content from Claude's response
     const textContent = result.content?.find((c) => c.type === "text")?.text;
@@ -152,7 +218,7 @@ Respond in this exact JSON format only, no other text:
       altText: analysis.altText || "Image",
     });
   } catch (err) {
-    if (err instanceof Error && 'status' in err) throw err;
+    if (err instanceof Error && "status" in err) throw err;
     console.error("Analysis error:", err);
     throw error(500, "Failed to analyze image");
   }

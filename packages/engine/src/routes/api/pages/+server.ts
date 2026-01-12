@@ -4,6 +4,11 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PageInput {
@@ -38,7 +43,28 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(401, "Tenant ID not found");
   }
 
+  // Rate limit content creation to prevent spam
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const { response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("pages/create", locals.user.id),
+      limit: 20,
+      windowSeconds: 3600, // 20 pages per hour
+      namespace: "content-ratelimit",
+    });
+
+    if (response) return response;
+  }
+
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PageInput;
 
     // Validate required fields
@@ -93,7 +119,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Use TenantDb for automatic tenant isolation
     const tenantDb = getTenantDb(platform.env.DB, {
-      tenantId: locals.tenantId,
+      tenantId,
     });
 
     // Check if slug already exists for this tenant

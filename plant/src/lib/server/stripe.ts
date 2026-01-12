@@ -22,24 +22,37 @@
 
 // Stripe Price IDs - Get these from your Stripe Dashboard → Products → [Product] → Pricing
 // IMPORTANT: These must be from the SAME Stripe account as your STRIPE_SECRET_KEY
-export const STRIPE_PRICES = {
-  seedling: {
-    monthly: "price_1ShXzXRpJ6WVdxl3dwuzZX90",
-    yearly: "price_1ShXzXRpJ6WVdxl38ZgKg4Wk",
-  },
-  sapling: {
-    monthly: "price_1ShY0MRpJ6WVdxl33inwSBKH",
-    yearly: "price_1ShY0MRpJ6WVdxl3RI7YAUBK",
-  },
-  oak: {
-    monthly: "price_1ShY0yRpJ6WVdxl3GRhURSI8",
-    yearly: "price_1ShY0yRpJ6WVdxl38u1qm3EX",
-  },
-  evergreen: {
-    monthly: "price_1ShY1fRpJ6WVdxl3IiVhJ7BQ",
-    yearly: "price_1ShY1fRpJ6WVdxl3rOJXhOkP",
-  },
-} as const;
+// Environment variables are required for production; defaults below are for development only
+export function getStripesPrices(env?: Record<string, string>) {
+  return {
+    seedling: {
+      monthly:
+        env?.STRIPE_SEEDLING_PRICE_MONTHLY || "price_1ShXzXRpJ6WVdxl3dwuzZX90",
+      yearly:
+        env?.STRIPE_SEEDLING_PRICE_YEARLY || "price_1ShXzXRpJ6WVdxl38ZgKg4Wk",
+    },
+    sapling: {
+      monthly:
+        env?.STRIPE_SAPLING_PRICE_MONTHLY || "price_1ShY0MRpJ6WVdxl33inwSBKH",
+      yearly:
+        env?.STRIPE_SAPLING_PRICE_YEARLY || "price_1ShY0MRpJ6WVdxl3RI7YAUBK",
+    },
+    oak: {
+      monthly:
+        env?.STRIPE_OAK_PRICE_MONTHLY || "price_1ShY0yRpJ6WVdxl3GRhURSI8",
+      yearly: env?.STRIPE_OAK_PRICE_YEARLY || "price_1ShY0yRpJ6WVdxl38u1qm3EX",
+    },
+    evergreen: {
+      monthly:
+        env?.STRIPE_EVERGREEN_PRICE_MONTHLY || "price_1ShY1fRpJ6WVdxl3IiVhJ7BQ",
+      yearly:
+        env?.STRIPE_EVERGREEN_PRICE_YEARLY || "price_1ShY1fRpJ6WVdxl3rOJXhOkP",
+    },
+  } as const;
+}
+
+// Backward compatibility - returns prices with default env
+export const STRIPE_PRICES = getStripesPrices();
 
 export type PlanId = keyof typeof STRIPE_PRICES;
 export type BillingCycle = "monthly" | "yearly";
@@ -90,7 +103,10 @@ export async function createCheckoutSession(params: {
   billingCycle: string;
   successUrl: string;
   cancelUrl: string;
+  trialDays?: number;
 }): Promise<{ sessionId: string; url: string }> {
+  // Default to 14 days if not provided, but allow override via parameter
+  const trialDays = params.trialDays ?? 14;
   // IMPORTANT: Create customer first (required for Stripe Accounts V2)
   const customerResponse = await fetch("https://api.stripe.com/v1/customers", {
     method: "POST",
@@ -133,7 +149,7 @@ export async function createCheckoutSession(params: {
       "line_items[0][quantity]": "1",
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
-      "subscription_data[trial_period_days]": "14",
+      "subscription_data[trial_period_days]": String(trialDays),
       "subscription_data[metadata][onboarding_id]": params.onboardingId,
       "subscription_data[metadata][username]": params.username,
       "subscription_data[metadata][plan]": params.plan,

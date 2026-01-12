@@ -96,6 +96,35 @@ function shouldSkipTurnstile(pathname: string): boolean {
   return TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
 }
 
+/**
+ * Determine if a route needs 'unsafe-eval' in Content-Security-Policy.
+ *
+ * WHY these routes need this directive:
+ * - Monaco Editor (admin): The code editor uses dynamic code evaluation for
+ *   syntax highlighting, IntelliSense, and language services. This is a
+ *   fundamental requirement of Monaco's architecture.
+ * - Mermaid.js (admin + tenant pages): The diagram rendering library parses
+ *   diagram definitions dynamically. This is required for flowcharts,
+ *   sequence diagrams, and other Mermaid visualizations.
+ *
+ * SECURITY NOTES:
+ * - This directive is ONLY enabled on routes that render user content with these tools
+ * - All other routes use a strict CSP without dynamic code capabilities
+ * - User input is still sanitized before being passed to these libraries
+ *
+ * Routes that need it:
+ * - /admin/... - Monaco editor for Markdown/code editing, Mermaid for diagrams
+ * - /[slug] (root tenant pages) - Mermaid diagrams in published content
+ * - /.../preview - Preview routes for draft content with diagrams
+ */
+function needsUnsafeEval(pathname: string): boolean {
+  return (
+    pathname.startsWith("/admin/") ||
+    /^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
+    pathname.includes("/preview")
+  );
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   // Initialize context and user
   event.locals.user = null;
@@ -390,14 +419,22 @@ export const handle: Handle = async ({ event, resolve }) => {
     "Permissions-Policy",
     "geolocation=(), microphone=(), camera=()",
   );
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains; preload",
+  );
 
   // Content-Security-Policy
-  // Note: 'unsafe-eval' is required for Mermaid diagram rendering
+  // Note: 'unsafe-eval' is only allowed on routes that need Mermaid diagram rendering
   // Note: 'unsafe-inline' is used for the theme script in app.html
   // Note: challenges.cloudflare.com is required for Turnstile (Shade)
+  const hasUnsafeEval = needsUnsafeEval(event.url.pathname);
+  const scriptSrc = `'self' 'unsafe-inline' ${hasUnsafeEval ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
+
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
+    "upgrade-insecure-requests",
+    `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
     "font-src 'self' https://cdn.grove.place",

@@ -18,7 +18,94 @@ import type {
   Money,
   PricingType,
   BillingInterval,
-} from './types.js';
+} from "./types.js";
+
+// =============================================================================
+// COLUMN WHITELISTS FOR SAFE UPDATES
+// =============================================================================
+
+/**
+ * Whitelisted columns for product updates.
+ * Only these columns can be updated to prevent SQL injection via column names.
+ */
+const PRODUCT_UPDATE_COLUMNS = new Set([
+  "name",
+  "slug",
+  "description",
+  "short_description",
+  "type",
+  "status",
+  "images",
+  "featured_image",
+  "meta_title",
+  "meta_description",
+  "category",
+  "tags",
+  "provider_product_id",
+  "metadata",
+]);
+
+/**
+ * Whitelisted columns for variant updates.
+ * Only these columns can be updated to prevent SQL injection via column names.
+ */
+const VARIANT_UPDATE_COLUMNS = new Set([
+  "name",
+  "sku",
+  "price_amount",
+  "compare_at_price",
+  "pricing_type",
+  "billing_interval",
+  "billing_interval_count",
+  "inventory_quantity",
+  "inventory_policy",
+  "track_inventory",
+  "download_url",
+  "download_limit",
+  "requires_shipping",
+  "provider_price_id",
+  "is_default",
+  "position",
+  "metadata",
+]);
+
+/**
+ * Whitelisted columns for customer updates.
+ * Only these columns can be updated to prevent SQL injection via column names.
+ */
+const CUSTOMER_UPDATE_COLUMNS = new Set([
+  "name",
+  "phone",
+  "provider_customer_id",
+  "default_shipping_address",
+  "default_billing_address",
+  "total_orders",
+  "total_spent",
+]);
+
+/**
+ * Whitelisted columns for order status updates.
+ * Only these columns can be updated to prevent SQL injection via column names.
+ */
+const ORDER_UPDATE_COLUMNS = new Set([
+  "status",
+  "payment_status",
+  "provider_payment_id",
+  "paid_at",
+]);
+
+/**
+ * Validates that a column name is in the whitelist.
+ * Throws an error if the column is not allowed.
+ */
+function validateUpdateColumn(
+  column: string,
+  allowedColumns: Set<string>,
+): void {
+  if (!allowedColumns.has(column)) {
+    throw new Error(`Column "${column}" is not allowed for update operations`);
+  }
+}
 
 // =============================================================================
 // TYPES FOR DATABASE ROWS
@@ -191,7 +278,7 @@ export async function getProducts(
     category?: string;
     limit?: number;
     offset?: number;
-  } = {}
+  } = {},
 ): Promise<Product[]> {
   let query = `
     SELECT * FROM products
@@ -200,40 +287,45 @@ export async function getProducts(
   const params: unknown[] = [tenantId];
 
   if (options.status) {
-    query += ' AND status = ?';
+    query += " AND status = ?";
     params.push(options.status);
   }
 
   if (options.type) {
-    query += ' AND type = ?';
+    query += " AND type = ?";
     params.push(options.type);
   }
 
   if (options.category) {
-    query += ' AND category = ?';
+    query += " AND category = ?";
     params.push(options.category);
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += " ORDER BY created_at DESC";
 
   if (options.limit) {
-    query += ' LIMIT ?';
+    query += " LIMIT ?";
     params.push(options.limit);
   }
 
   if (options.offset) {
-    query += ' OFFSET ?';
+    query += " OFFSET ?";
     params.push(options.offset);
   }
 
-  const result = await db.prepare(query).bind(...params).all<ProductRow>();
+  const result = await db
+    .prepare(query)
+    .bind(...params)
+    .all<ProductRow>();
   const products = result.results.map(mapProductRow);
 
   // Fetch variants for each product
   for (const product of products) {
     const variants = await getProductVariants(db, product.id);
     (product as Product).variants = variants;
-    (product as Product).defaultVariantId = variants.find(v => v.isDefault)?.id;
+    (product as Product).defaultVariantId = variants.find(
+      (v) => v.isDefault,
+    )?.id;
   }
 
   return products as Product[];
@@ -242,10 +334,10 @@ export async function getProducts(
 export async function getProductBySlug(
   db: D1Database,
   tenantId: string,
-  slug: string
+  slug: string,
 ): Promise<Product | null> {
   const row = await db
-    .prepare('SELECT * FROM products WHERE tenant_id = ? AND slug = ?')
+    .prepare("SELECT * FROM products WHERE tenant_id = ? AND slug = ?")
     .bind(tenantId, slug)
     .first<ProductRow>();
 
@@ -257,16 +349,16 @@ export async function getProductBySlug(
   return {
     ...product,
     variants,
-    defaultVariantId: variants.find(v => v.isDefault)?.id,
+    defaultVariantId: variants.find((v) => v.isDefault)?.id,
   };
 }
 
 export async function getProductById(
   db: D1Database,
-  productId: string
+  productId: string,
 ): Promise<Product | null> {
   const row = await db
-    .prepare('SELECT * FROM products WHERE id = ?')
+    .prepare("SELECT * FROM products WHERE id = ?")
     .bind(productId)
     .first<ProductRow>();
 
@@ -278,7 +370,7 @@ export async function getProductById(
   return {
     ...product,
     variants,
-    defaultVariantId: variants.find(v => v.isDefault)?.id,
+    defaultVariantId: variants.find((v) => v.isDefault)?.id,
   };
 }
 
@@ -297,7 +389,7 @@ export async function createProduct(
     category?: string;
     tags?: string[];
     metadata?: Record<string, string>;
-  }
+  },
 ): Promise<{ id: string }> {
   const id = crypto.randomUUID();
   const now = Math.floor(Date.now() / 1000);
@@ -308,7 +400,7 @@ export async function createProduct(
         id, tenant_id, name, slug, description, short_description,
         type, status, images, featured_image, category, tags, metadata,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -317,15 +409,15 @@ export async function createProduct(
       data.slug,
       data.description || null,
       data.shortDescription || null,
-      data.type || 'physical',
-      data.status || 'draft',
+      data.type || "physical",
+      data.status || "draft",
       JSON.stringify(data.images || []),
       data.featuredImage || null,
       data.category || null,
       JSON.stringify(data.tags || []),
       JSON.stringify(data.metadata || {}),
       now,
-      now
+      now,
     )
     .run();
 
@@ -348,77 +440,105 @@ export async function updateProduct(
     tags: string[];
     providerProductId: string;
     metadata: Record<string, string>;
-  }>
+  }>,
 ): Promise<void> {
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    name: "name",
+    slug: "slug",
+    description: "description",
+    shortDescription: "short_description",
+    type: "type",
+    status: "status",
+    images: "images",
+    featuredImage: "featured_image",
+    category: "category",
+    tags: "tags",
+    providerProductId: "provider_product_id",
+    metadata: "metadata",
+  };
+
   if (data.name !== undefined) {
-    updates.push('name = ?');
+    validateUpdateColumn(columnMap.name, PRODUCT_UPDATE_COLUMNS);
+    updates.push("name = ?");
     params.push(data.name);
   }
   if (data.slug !== undefined) {
-    updates.push('slug = ?');
+    validateUpdateColumn(columnMap.slug, PRODUCT_UPDATE_COLUMNS);
+    updates.push("slug = ?");
     params.push(data.slug);
   }
   if (data.description !== undefined) {
-    updates.push('description = ?');
+    validateUpdateColumn(columnMap.description, PRODUCT_UPDATE_COLUMNS);
+    updates.push("description = ?");
     params.push(data.description);
   }
   if (data.shortDescription !== undefined) {
-    updates.push('short_description = ?');
+    validateUpdateColumn(columnMap.shortDescription, PRODUCT_UPDATE_COLUMNS);
+    updates.push("short_description = ?");
     params.push(data.shortDescription);
   }
   if (data.type !== undefined) {
-    updates.push('type = ?');
+    validateUpdateColumn(columnMap.type, PRODUCT_UPDATE_COLUMNS);
+    updates.push("type = ?");
     params.push(data.type);
   }
   if (data.status !== undefined) {
-    updates.push('status = ?');
+    validateUpdateColumn(columnMap.status, PRODUCT_UPDATE_COLUMNS);
+    updates.push("status = ?");
     params.push(data.status);
   }
   if (data.images !== undefined) {
-    updates.push('images = ?');
+    validateUpdateColumn(columnMap.images, PRODUCT_UPDATE_COLUMNS);
+    updates.push("images = ?");
     params.push(JSON.stringify(data.images));
   }
   if (data.featuredImage !== undefined) {
-    updates.push('featured_image = ?');
+    validateUpdateColumn(columnMap.featuredImage, PRODUCT_UPDATE_COLUMNS);
+    updates.push("featured_image = ?");
     params.push(data.featuredImage);
   }
   if (data.category !== undefined) {
-    updates.push('category = ?');
+    validateUpdateColumn(columnMap.category, PRODUCT_UPDATE_COLUMNS);
+    updates.push("category = ?");
     params.push(data.category);
   }
   if (data.tags !== undefined) {
-    updates.push('tags = ?');
+    validateUpdateColumn(columnMap.tags, PRODUCT_UPDATE_COLUMNS);
+    updates.push("tags = ?");
     params.push(JSON.stringify(data.tags));
   }
   if (data.providerProductId !== undefined) {
-    updates.push('provider_product_id = ?');
+    validateUpdateColumn(columnMap.providerProductId, PRODUCT_UPDATE_COLUMNS);
+    updates.push("provider_product_id = ?");
     params.push(data.providerProductId);
   }
   if (data.metadata !== undefined) {
-    updates.push('metadata = ?');
+    validateUpdateColumn(columnMap.metadata, PRODUCT_UPDATE_COLUMNS);
+    updates.push("metadata = ?");
     params.push(JSON.stringify(data.metadata));
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   params.push(Math.floor(Date.now() / 1000));
   params.push(productId);
 
   await db
-    .prepare(`UPDATE products SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE products SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...params)
     .run();
 }
 
 export async function deleteProduct(
   db: D1Database,
-  productId: string
+  productId: string,
 ): Promise<void> {
-  await db.prepare('DELETE FROM products WHERE id = ?').bind(productId).run();
+  await db.prepare("DELETE FROM products WHERE id = ?").bind(productId).run();
 }
 
 // =============================================================================
@@ -427,10 +547,12 @@ export async function deleteProduct(
 
 export async function getProductVariants(
   db: D1Database,
-  productId: string
+  productId: string,
 ): Promise<ProductVariant[]> {
   const result = await db
-    .prepare('SELECT * FROM product_variants WHERE product_id = ? ORDER BY position')
+    .prepare(
+      "SELECT * FROM product_variants WHERE product_id = ? ORDER BY position",
+    )
     .bind(productId)
     .all<VariantRow>();
 
@@ -439,10 +561,10 @@ export async function getProductVariants(
 
 export async function getVariantById(
   db: D1Database,
-  variantId: string
+  variantId: string,
 ): Promise<ProductVariant | null> {
   const row = await db
-    .prepare('SELECT * FROM product_variants WHERE id = ?')
+    .prepare("SELECT * FROM product_variants WHERE id = ?")
     .bind(variantId)
     .first<VariantRow>();
 
@@ -463,7 +585,7 @@ export async function createVariant(
     billingInterval?: BillingInterval;
     billingIntervalCount?: number;
     inventoryQuantity?: number;
-    inventoryPolicy?: 'deny' | 'continue';
+    inventoryPolicy?: "deny" | "continue";
     trackInventory?: boolean;
     downloadUrl?: string;
     downloadLimit?: number;
@@ -471,7 +593,7 @@ export async function createVariant(
     isDefault?: boolean;
     position?: number;
     metadata?: Record<string, string>;
-  }
+  },
 ): Promise<{ id: string }> {
   const id = crypto.randomUUID();
   const now = Math.floor(Date.now() / 1000);
@@ -485,7 +607,7 @@ export async function createVariant(
         inventory_quantity, inventory_policy, track_inventory,
         download_url, download_limit, requires_shipping,
         is_default, position, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -494,13 +616,13 @@ export async function createVariant(
       data.name,
       data.sku || null,
       data.priceAmount,
-      data.priceCurrency || 'usd',
+      data.priceCurrency || "usd",
       data.compareAtPrice || null,
-      data.pricingType || 'one_time',
+      data.pricingType || "one_time",
       data.billingInterval || null,
       data.billingIntervalCount || 1,
       data.inventoryQuantity ?? null,
-      data.inventoryPolicy || 'deny',
+      data.inventoryPolicy || "deny",
       data.trackInventory ? 1 : 0,
       data.downloadUrl || null,
       data.downloadLimit || null,
@@ -509,7 +631,7 @@ export async function createVariant(
       data.position ?? 0,
       JSON.stringify(data.metadata || {}),
       now,
-      now
+      now,
     )
     .run();
 
@@ -528,7 +650,7 @@ export async function updateVariant(
     billingInterval: BillingInterval;
     billingIntervalCount: number;
     inventoryQuantity: number;
-    inventoryPolicy: 'deny' | 'continue';
+    inventoryPolicy: "deny" | "continue";
     trackInventory: boolean;
     downloadUrl: string;
     downloadLimit: number;
@@ -537,98 +659,139 @@ export async function updateVariant(
     isDefault: boolean;
     position: number;
     metadata: Record<string, string>;
-  }>
+  }>,
 ): Promise<void> {
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    name: "name",
+    sku: "sku",
+    priceAmount: "price_amount",
+    compareAtPrice: "compare_at_price",
+    pricingType: "pricing_type",
+    billingInterval: "billing_interval",
+    billingIntervalCount: "billing_interval_count",
+    inventoryQuantity: "inventory_quantity",
+    inventoryPolicy: "inventory_policy",
+    trackInventory: "track_inventory",
+    downloadUrl: "download_url",
+    downloadLimit: "download_limit",
+    requiresShipping: "requires_shipping",
+    providerPriceId: "provider_price_id",
+    isDefault: "is_default",
+    position: "position",
+    metadata: "metadata",
+  };
+
   if (data.name !== undefined) {
-    updates.push('name = ?');
+    validateUpdateColumn(columnMap.name, VARIANT_UPDATE_COLUMNS);
+    updates.push("name = ?");
     params.push(data.name);
   }
   if (data.sku !== undefined) {
-    updates.push('sku = ?');
+    validateUpdateColumn(columnMap.sku, VARIANT_UPDATE_COLUMNS);
+    updates.push("sku = ?");
     params.push(data.sku);
   }
   if (data.priceAmount !== undefined) {
-    updates.push('price_amount = ?');
+    validateUpdateColumn(columnMap.priceAmount, VARIANT_UPDATE_COLUMNS);
+    updates.push("price_amount = ?");
     params.push(data.priceAmount);
   }
   if (data.compareAtPrice !== undefined) {
-    updates.push('compare_at_price = ?');
+    validateUpdateColumn(columnMap.compareAtPrice, VARIANT_UPDATE_COLUMNS);
+    updates.push("compare_at_price = ?");
     params.push(data.compareAtPrice);
   }
   if (data.pricingType !== undefined) {
-    updates.push('pricing_type = ?');
+    validateUpdateColumn(columnMap.pricingType, VARIANT_UPDATE_COLUMNS);
+    updates.push("pricing_type = ?");
     params.push(data.pricingType);
   }
   if (data.billingInterval !== undefined) {
-    updates.push('billing_interval = ?');
+    validateUpdateColumn(columnMap.billingInterval, VARIANT_UPDATE_COLUMNS);
+    updates.push("billing_interval = ?");
     params.push(data.billingInterval);
   }
   if (data.billingIntervalCount !== undefined) {
-    updates.push('billing_interval_count = ?');
+    validateUpdateColumn(
+      columnMap.billingIntervalCount,
+      VARIANT_UPDATE_COLUMNS,
+    );
+    updates.push("billing_interval_count = ?");
     params.push(data.billingIntervalCount);
   }
   if (data.inventoryQuantity !== undefined) {
-    updates.push('inventory_quantity = ?');
+    validateUpdateColumn(columnMap.inventoryQuantity, VARIANT_UPDATE_COLUMNS);
+    updates.push("inventory_quantity = ?");
     params.push(data.inventoryQuantity);
   }
   if (data.inventoryPolicy !== undefined) {
-    updates.push('inventory_policy = ?');
+    validateUpdateColumn(columnMap.inventoryPolicy, VARIANT_UPDATE_COLUMNS);
+    updates.push("inventory_policy = ?");
     params.push(data.inventoryPolicy);
   }
   if (data.trackInventory !== undefined) {
-    updates.push('track_inventory = ?');
+    validateUpdateColumn(columnMap.trackInventory, VARIANT_UPDATE_COLUMNS);
+    updates.push("track_inventory = ?");
     params.push(data.trackInventory ? 1 : 0);
   }
   if (data.downloadUrl !== undefined) {
-    updates.push('download_url = ?');
+    validateUpdateColumn(columnMap.downloadUrl, VARIANT_UPDATE_COLUMNS);
+    updates.push("download_url = ?");
     params.push(data.downloadUrl);
   }
   if (data.downloadLimit !== undefined) {
-    updates.push('download_limit = ?');
+    validateUpdateColumn(columnMap.downloadLimit, VARIANT_UPDATE_COLUMNS);
+    updates.push("download_limit = ?");
     params.push(data.downloadLimit);
   }
   if (data.requiresShipping !== undefined) {
-    updates.push('requires_shipping = ?');
+    validateUpdateColumn(columnMap.requiresShipping, VARIANT_UPDATE_COLUMNS);
+    updates.push("requires_shipping = ?");
     params.push(data.requiresShipping ? 1 : 0);
   }
   if (data.providerPriceId !== undefined) {
-    updates.push('provider_price_id = ?');
+    validateUpdateColumn(columnMap.providerPriceId, VARIANT_UPDATE_COLUMNS);
+    updates.push("provider_price_id = ?");
     params.push(data.providerPriceId);
   }
   if (data.isDefault !== undefined) {
-    updates.push('is_default = ?');
+    validateUpdateColumn(columnMap.isDefault, VARIANT_UPDATE_COLUMNS);
+    updates.push("is_default = ?");
     params.push(data.isDefault ? 1 : 0);
   }
   if (data.position !== undefined) {
-    updates.push('position = ?');
+    validateUpdateColumn(columnMap.position, VARIANT_UPDATE_COLUMNS);
+    updates.push("position = ?");
     params.push(data.position);
   }
   if (data.metadata !== undefined) {
-    updates.push('metadata = ?');
+    validateUpdateColumn(columnMap.metadata, VARIANT_UPDATE_COLUMNS);
+    updates.push("metadata = ?");
     params.push(JSON.stringify(data.metadata));
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   params.push(Math.floor(Date.now() / 1000));
   params.push(variantId);
 
   await db
-    .prepare(`UPDATE product_variants SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE product_variants SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...params)
     .run();
 }
 
 export async function deleteVariant(
   db: D1Database,
-  variantId: string
+  variantId: string,
 ): Promise<void> {
   await db
-    .prepare('DELETE FROM product_variants WHERE id = ?')
+    .prepare("DELETE FROM product_variants WHERE id = ?")
     .bind(variantId)
     .run();
 }
@@ -639,16 +802,16 @@ export async function deleteVariant(
 
 export async function generateOrderNumber(
   db: D1Database,
-  tenantId: string
+  tenantId: string,
 ): Promise<string> {
   // Get the count of orders for this tenant
   const result = await db
-    .prepare('SELECT COUNT(*) as count FROM orders WHERE tenant_id = ?')
+    .prepare("SELECT COUNT(*) as count FROM orders WHERE tenant_id = ?")
     .bind(tenantId)
     .first<{ count: number }>();
 
   const count = (result?.count || 0) + 1;
-  return `GRV-${count.toString().padStart(4, '0')}`;
+  return `GRV-${count.toString().padStart(4, "0")}`;
 }
 
 export async function createOrder(
@@ -680,12 +843,12 @@ export async function createOrder(
     providerSessionId?: string;
     customerNotes?: string;
     metadata?: Record<string, string>;
-  }
+  },
 ): Promise<{ id: string; orderNumber: string }> {
   const id = crypto.randomUUID();
   const orderNumber = await generateOrderNumber(db, tenantId);
   const now = Math.floor(Date.now() / 1000);
-  const requiresShipping = data.lineItems.some(item => item.requiresShipping);
+  const requiresShipping = data.lineItems.some((item) => item.requiresShipping);
 
   // Insert order
   await db
@@ -695,7 +858,7 @@ export async function createOrder(
         subtotal, tax_total, shipping_total, discount_total, total, currency,
         status, payment_status, shipping_address, billing_address, requires_shipping,
         provider_session_id, customer_notes, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -709,9 +872,9 @@ export async function createOrder(
       data.shippingTotal || 0,
       data.discountTotal || 0,
       data.total,
-      data.currency || 'usd',
-      'pending',
-      'pending',
+      data.currency || "usd",
+      "pending",
+      "pending",
       data.shippingAddress ? JSON.stringify(data.shippingAddress) : null,
       data.billingAddress ? JSON.stringify(data.billingAddress) : null,
       requiresShipping ? 1 : 0,
@@ -719,7 +882,7 @@ export async function createOrder(
       data.customerNotes || null,
       JSON.stringify(data.metadata || {}),
       now,
-      now
+      now,
     )
     .run();
 
@@ -732,7 +895,7 @@ export async function createOrder(
           id, order_id, tenant_id, product_id, variant_id, product_name, variant_name,
           sku, quantity, unit_price, total_price, tax_amount, type, requires_shipping,
           metadata, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         lineItemId,
@@ -747,10 +910,10 @@ export async function createOrder(
         item.unitPrice,
         item.unitPrice * item.quantity,
         item.taxAmount || 0,
-        'product',
+        "product",
         item.requiresShipping ? 1 : 0,
-        '{}',
-        now
+        "{}",
+        now,
       )
       .run();
   }
@@ -760,17 +923,17 @@ export async function createOrder(
 
 export async function getOrderById(
   db: D1Database,
-  orderId: string
+  orderId: string,
 ): Promise<Order | null> {
   const row = await db
-    .prepare('SELECT * FROM orders WHERE id = ?')
+    .prepare("SELECT * FROM orders WHERE id = ?")
     .bind(orderId)
     .first<OrderRow>();
 
   if (!row) return null;
 
   const lineItemRows = await db
-    .prepare('SELECT * FROM order_line_items WHERE order_id = ?')
+    .prepare("SELECT * FROM order_line_items WHERE order_id = ?")
     .bind(orderId)
     .all<LineItemRow>();
 
@@ -779,17 +942,17 @@ export async function getOrderById(
 
 export async function getOrderBySessionId(
   db: D1Database,
-  sessionId: string
+  sessionId: string,
 ): Promise<Order | null> {
   const row = await db
-    .prepare('SELECT * FROM orders WHERE provider_session_id = ?')
+    .prepare("SELECT * FROM orders WHERE provider_session_id = ?")
     .bind(sessionId)
     .first<OrderRow>();
 
   if (!row) return null;
 
   const lineItemRows = await db
-    .prepare('SELECT * FROM order_line_items WHERE order_id = ?')
+    .prepare("SELECT * FROM order_line_items WHERE order_id = ?")
     .bind(row.id)
     .all<LineItemRow>();
 
@@ -804,36 +967,48 @@ export async function updateOrderStatus(
     paymentStatus?: PaymentStatus;
     providerPaymentId?: string;
     paidAt?: number;
-  }
+  },
 ): Promise<void> {
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    status: "status",
+    paymentStatus: "payment_status",
+    providerPaymentId: "provider_payment_id",
+    paidAt: "paid_at",
+  };
+
   if (data.status !== undefined) {
-    updates.push('status = ?');
+    validateUpdateColumn(columnMap.status, ORDER_UPDATE_COLUMNS);
+    updates.push("status = ?");
     params.push(data.status);
   }
   if (data.paymentStatus !== undefined) {
-    updates.push('payment_status = ?');
+    validateUpdateColumn(columnMap.paymentStatus, ORDER_UPDATE_COLUMNS);
+    updates.push("payment_status = ?");
     params.push(data.paymentStatus);
   }
   if (data.providerPaymentId !== undefined) {
-    updates.push('provider_payment_id = ?');
+    validateUpdateColumn(columnMap.providerPaymentId, ORDER_UPDATE_COLUMNS);
+    updates.push("provider_payment_id = ?");
     params.push(data.providerPaymentId);
   }
   if (data.paidAt !== undefined) {
-    updates.push('paid_at = ?');
+    validateUpdateColumn(columnMap.paidAt, ORDER_UPDATE_COLUMNS);
+    updates.push("paid_at = ?");
     params.push(data.paidAt);
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   params.push(Math.floor(Date.now() / 1000));
   params.push(orderId);
 
   await db
-    .prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE orders SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...params)
     .run();
 }
@@ -846,39 +1021,42 @@ export async function getOrders(
     paymentStatus?: PaymentStatus;
     limit?: number;
     offset?: number;
-  } = {}
+  } = {},
 ): Promise<Order[]> {
-  let query = 'SELECT * FROM orders WHERE tenant_id = ?';
+  let query = "SELECT * FROM orders WHERE tenant_id = ?";
   const params: unknown[] = [tenantId];
 
   if (options.status) {
-    query += ' AND status = ?';
+    query += " AND status = ?";
     params.push(options.status);
   }
 
   if (options.paymentStatus) {
-    query += ' AND payment_status = ?';
+    query += " AND payment_status = ?";
     params.push(options.paymentStatus);
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += " ORDER BY created_at DESC";
 
   if (options.limit) {
-    query += ' LIMIT ?';
+    query += " LIMIT ?";
     params.push(options.limit);
   }
 
   if (options.offset) {
-    query += ' OFFSET ?';
+    query += " OFFSET ?";
     params.push(options.offset);
   }
 
-  const result = await db.prepare(query).bind(...params).all<OrderRow>();
+  const result = await db
+    .prepare(query)
+    .bind(...params)
+    .all<OrderRow>();
 
   const orders: Order[] = [];
   for (const row of result.results) {
     const lineItemRows = await db
-      .prepare('SELECT * FROM order_line_items WHERE order_id = ?')
+      .prepare("SELECT * FROM order_line_items WHERE order_id = ?")
       .bind(row.id)
       .all<LineItemRow>();
 
@@ -899,11 +1077,11 @@ export async function getOrCreateCustomer(
   data?: {
     name?: string;
     phone?: string;
-  }
+  },
 ): Promise<Customer> {
   // Try to find existing customer
   const existing = await db
-    .prepare('SELECT * FROM customers WHERE tenant_id = ? AND email = ?')
+    .prepare("SELECT * FROM customers WHERE tenant_id = ? AND email = ?")
     .bind(tenantId, email)
     .first<CustomerRow>();
 
@@ -919,7 +1097,7 @@ export async function getOrCreateCustomer(
     .prepare(
       `INSERT INTO customers (
         id, tenant_id, email, name, phone, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -927,9 +1105,9 @@ export async function getOrCreateCustomer(
       email,
       data?.name || null,
       data?.phone || null,
-      '{}',
+      "{}",
       now,
-      now
+      now,
     )
     .run();
 
@@ -956,48 +1134,72 @@ export async function updateCustomer(
     defaultBillingAddress: object;
     totalOrders: number;
     totalSpent: number;
-  }>
+  }>,
 ): Promise<void> {
   const updates: string[] = [];
   const params: unknown[] = [];
 
+  // Map of camelCase keys to database column names for validation
+  const columnMap: Record<string, string> = {
+    name: "name",
+    phone: "phone",
+    providerCustomerId: "provider_customer_id",
+    defaultShippingAddress: "default_shipping_address",
+    defaultBillingAddress: "default_billing_address",
+    totalOrders: "total_orders",
+    totalSpent: "total_spent",
+  };
+
   if (data.name !== undefined) {
-    updates.push('name = ?');
+    validateUpdateColumn(columnMap.name, CUSTOMER_UPDATE_COLUMNS);
+    updates.push("name = ?");
     params.push(data.name);
   }
   if (data.phone !== undefined) {
-    updates.push('phone = ?');
+    validateUpdateColumn(columnMap.phone, CUSTOMER_UPDATE_COLUMNS);
+    updates.push("phone = ?");
     params.push(data.phone);
   }
   if (data.providerCustomerId !== undefined) {
-    updates.push('provider_customer_id = ?');
+    validateUpdateColumn(columnMap.providerCustomerId, CUSTOMER_UPDATE_COLUMNS);
+    updates.push("provider_customer_id = ?");
     params.push(data.providerCustomerId);
   }
   if (data.defaultShippingAddress !== undefined) {
-    updates.push('default_shipping_address = ?');
+    validateUpdateColumn(
+      columnMap.defaultShippingAddress,
+      CUSTOMER_UPDATE_COLUMNS,
+    );
+    updates.push("default_shipping_address = ?");
     params.push(JSON.stringify(data.defaultShippingAddress));
   }
   if (data.defaultBillingAddress !== undefined) {
-    updates.push('default_billing_address = ?');
+    validateUpdateColumn(
+      columnMap.defaultBillingAddress,
+      CUSTOMER_UPDATE_COLUMNS,
+    );
+    updates.push("default_billing_address = ?");
     params.push(JSON.stringify(data.defaultBillingAddress));
   }
   if (data.totalOrders !== undefined) {
-    updates.push('total_orders = ?');
+    validateUpdateColumn(columnMap.totalOrders, CUSTOMER_UPDATE_COLUMNS);
+    updates.push("total_orders = ?");
     params.push(data.totalOrders);
   }
   if (data.totalSpent !== undefined) {
-    updates.push('total_spent = ?');
+    validateUpdateColumn(columnMap.totalSpent, CUSTOMER_UPDATE_COLUMNS);
+    updates.push("total_spent = ?");
     params.push(data.totalSpent);
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   params.push(Math.floor(Date.now() / 1000));
   params.push(customerId);
 
   await db
-    .prepare(`UPDATE customers SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE customers SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...params)
     .run();
 }
@@ -1014,8 +1216,8 @@ function mapProductRow(row: ProductRow): ProductBase {
     description: row.description || undefined,
     type: row.type as ProductType,
     status: row.status as ProductStatus,
-    images: JSON.parse(row.images || '[]'),
-    metadata: JSON.parse(row.metadata || '{}'),
+    images: JSON.parse(row.images || "[]"),
+    metadata: JSON.parse(row.metadata || "{}"),
     createdAt: new Date(row.created_at * 1000),
     updatedAt: new Date(row.updated_at * 1000),
   };
@@ -1036,14 +1238,14 @@ function mapVariantRow(row: VariantRow): ProductVariant {
       : undefined,
     pricingType: row.pricing_type as PricingType,
     recurring:
-      row.billing_interval && row.pricing_type === 'recurring'
+      row.billing_interval && row.pricing_type === "recurring"
         ? {
             interval: row.billing_interval as BillingInterval,
             intervalCount: row.billing_interval_count || 1,
           }
         : undefined,
     inventoryQuantity: row.inventory_quantity ?? undefined,
-    inventoryPolicy: row.inventory_policy as 'deny' | 'continue',
+    inventoryPolicy: row.inventory_policy as "deny" | "continue",
     downloadUrl: row.download_url || undefined,
     downloadLimit: row.download_limit ?? undefined,
     providerPriceId: row.provider_price_id || undefined,
@@ -1091,17 +1293,17 @@ function mapOrderRow(row: OrderRow, lineItemRows: LineItemRow[]): Order {
 function mapLineItemRow(row: LineItemRow): LineItem {
   return {
     id: row.id,
-    variantId: row.variant_id || '',
-    productId: row.product_id || '',
+    variantId: row.variant_id || "",
+    productId: row.product_id || "",
     productName: row.product_name,
     variantName: row.variant_name,
     quantity: row.quantity,
-    unitPrice: { amount: row.unit_price, currency: 'usd' },
-    totalPrice: { amount: row.total_price, currency: 'usd' },
+    unitPrice: { amount: row.unit_price, currency: "usd" },
+    totalPrice: { amount: row.total_price, currency: "usd" },
     taxAmount: row.tax_amount
-      ? { amount: row.tax_amount, currency: 'usd' }
+      ? { amount: row.tax_amount, currency: "usd" }
       : undefined,
-    metadata: JSON.parse(row.metadata || '{}'),
+    metadata: JSON.parse(row.metadata || "{}"),
   };
 }
 
@@ -1119,7 +1321,7 @@ function mapCustomerRow(row: CustomerRow): Customer {
       ? JSON.parse(row.default_billing_address)
       : undefined,
     providerCustomerId: row.provider_customer_id || undefined,
-    metadata: JSON.parse(row.metadata || '{}'),
+    metadata: JSON.parse(row.metadata || "{}"),
     createdAt: new Date(row.created_at * 1000),
     updatedAt: new Date(row.updated_at * 1000),
   };

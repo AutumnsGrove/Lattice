@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { parseImageFilename } from "$lib/utils/gallery.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 /** Tag associated with an image */
 interface ImageTag {
@@ -51,7 +52,17 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     throw error(500, "R2 bucket not configured");
   }
 
+  // Check for database
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
   try {
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
     const requestedPrefix = url.searchParams.get("prefix") || "";
     const cursor = url.searchParams.get("cursor") || undefined;
     const limit = parseInt(url.searchParams.get("limit") || "50", 10);
@@ -64,7 +75,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     const year = url.searchParams.get("year") || null;
 
     // CRITICAL: Force tenant isolation - always scope to tenant's prefix
-    const tenantPrefix = `${locals.tenantId}/`;
+    const tenantPrefix = `${tenantId}/`;
     const prefix = tenantPrefix + requestedPrefix;
 
     // List objects from R2

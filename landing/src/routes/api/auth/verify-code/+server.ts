@@ -1,92 +1,101 @@
 // Verify Magic Login Code
 // POST /api/auth/verify-code
 
-import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { verifyMagicCode, getUserByEmail, createSession } from '$lib/server/db';
+import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { validateCSRF } from "$lib/utils/csrf.js";
+import { verifyMagicCode, getUserByEmail, createSession } from "$lib/server/db";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
-	if (!platform?.env?.DB) {
-		throw error(500, 'Database not available');
-	}
+  // CSRF check
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
+  }
 
-	let body: { email?: string; code?: string };
-	try {
-		body = await request.json();
-	} catch {
-		throw error(400, 'Invalid request body');
-	}
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not available");
+  }
 
-	const { email, code } = body;
+  let body: { email?: string; code?: string };
+  try {
+    body = await request.json();
+  } catch {
+    throw error(400, "Invalid request body");
+  }
 
-	if (!email || typeof email !== 'string') {
-		throw error(400, 'Email is required');
-	}
+  const { email, code } = body;
 
-	if (!code || typeof code !== 'string') {
-		throw error(400, 'Code is required');
-	}
+  if (!email || typeof email !== "string") {
+    throw error(400, "Email is required");
+  }
 
-	const normalizedEmail = email.toLowerCase().trim();
-	const normalizedCode = code.toUpperCase().trim();
+  if (!code || typeof code !== "string") {
+    throw error(400, "Code is required");
+  }
 
-	try {
-		const { DB, ADMIN_EMAILS } = platform.env;
+  const normalizedEmail = email.toLowerCase().trim();
+  const normalizedCode = code.toUpperCase().trim();
 
-		// Verify the magic code
-		const isValid = await verifyMagicCode(DB, normalizedEmail, normalizedCode);
+  try {
+    const { DB, ADMIN_EMAILS } = platform.env;
 
-		if (!isValid) {
-			throw error(400, 'Invalid or expired code');
-		}
+    // Verify the magic code
+    const isValid = await verifyMagicCode(DB, normalizedEmail, normalizedCode);
 
-		// Get the user
-		const user = await getUserByEmail(DB, normalizedEmail);
+    if (!isValid) {
+      throw error(400, "Invalid or expired code");
+    }
 
-		if (!user) {
-			throw error(400, 'User not found');
-		}
+    // Get the user
+    const user = await getUserByEmail(DB, normalizedEmail);
 
-		// Check if user is admin
-		const adminEmails = (ADMIN_EMAILS || '')
-			.split(',')
-			.map((e: string) => e.trim().toLowerCase())
-			.filter(Boolean);
+    if (!user) {
+      throw error(400, "User not found");
+    }
 
-		const isAdmin = adminEmails.length === 0 || adminEmails.includes(normalizedEmail);
+    // Check if user is admin
+    const adminEmails = (ADMIN_EMAILS || "")
+      .split(",")
+      .map((e: string) => e.trim().toLowerCase())
+      .filter(Boolean);
 
-		// Update user's admin status if needed
-		if (isAdmin && !user.is_admin) {
-			await DB.prepare('UPDATE users SET is_admin = 1, updated_at = datetime("now") WHERE id = ?')
-				.bind(user.id)
-				.run();
-		}
+    const isAdmin =
+      adminEmails.length === 0 || adminEmails.includes(normalizedEmail);
 
-		// Create session
-		const session = await createSession(DB, user.id);
+    // Update user's admin status if needed
+    if (isAdmin && !user.is_admin) {
+      await DB.prepare(
+        'UPDATE users SET is_admin = 1, updated_at = datetime("now") WHERE id = ?',
+      )
+        .bind(user.id)
+        .run();
+    }
 
-		// Set session cookie
-		cookies.set('session', session.id, {
-			path: '/',
-			httpOnly: true,
-			secure: true,
-			sameSite: 'lax',
-			maxAge: 30 * 24 * 60 * 60 // 30 days
-		});
+    // Create session
+    const session = await createSession(DB, user.id);
 
-		return json({
-			success: true,
-			message: 'Login successful',
-			user: {
-				email: user.email,
-				is_admin: isAdmin
-			}
-		});
-	} catch (err) {
-		console.error('[Verify Code Error]', err);
-		if (err instanceof Error && 'status' in err) {
-			throw err;
-		}
-		throw error(500, 'Failed to verify code');
-	}
+    // Set session cookie
+    cookies.set("session", session.id, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
+    return json({
+      success: true,
+      message: "Login successful",
+      user: {
+        email: user.email,
+        is_admin: isAdmin,
+      },
+    });
+  } catch (err) {
+    console.error("[Verify Code Error]", err);
+    if (err instanceof Error && "status" in err) {
+      throw err;
+    }
+    throw error(500, "Failed to verify code");
+  }
 };

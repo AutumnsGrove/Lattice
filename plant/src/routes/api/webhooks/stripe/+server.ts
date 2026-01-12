@@ -160,7 +160,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     return json({ received: true });
   } catch (error) {
-    console.error("[Webhook] Error processing event:", error);
+    console.error("[Webhook] Error processing event", {
+      eventId: event.id,
+      eventType: event.type,
+      errorType: error instanceof Error ? error.name : "Unknown",
+    });
 
     // Store error
     await db
@@ -175,6 +179,24 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 };
 
 /**
+ * Validate required metadata fields
+ */
+function validateMetadata(
+  metadata: Record<string, string> | null | undefined,
+  requiredFields: string[],
+): void {
+  if (!metadata) {
+    throw new Error("Missing metadata in event");
+  }
+
+  for (const field of requiredFields) {
+    if (!metadata[field] || metadata[field].trim() === "") {
+      throw new Error(`Missing or empty required metadata field: ${field}`);
+    }
+  }
+}
+
+/**
  * Handle successful checkout completion
  */
 async function handleCheckoutComplete(
@@ -183,13 +205,20 @@ async function handleCheckoutComplete(
   session: Record<string, unknown>,
 ) {
   const sessionId = session.id as string;
-  const metadata = session.metadata as Record<string, string>;
-  const onboardingId = metadata?.onboarding_id;
+  const metadata = session.metadata as Record<string, string> | undefined;
 
-  if (!onboardingId) {
-    console.error("[Webhook] No onboarding_id in checkout session metadata");
-    return;
+  // Validate required metadata
+  try {
+    validateMetadata(metadata, ["onboarding_id"]);
+  } catch (error) {
+    console.error("[Webhook] Metadata validation failed for checkout session", {
+      sessionId,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    throw error;
   }
+
+  const onboardingId = metadata!.onboarding_id;
 
   // Get full session details
   const fullSession = await getCheckoutSession(stripeSecretKey, sessionId);
@@ -253,7 +282,10 @@ async function handleCheckoutComplete(
     stripeSubscriptionId: subscriptionId,
   });
 
-  console.log(`[Webhook] Created tenant for ${onboarding.username}`);
+  console.log("[Webhook] Tenant created", {
+    onboardingId: onboarding.id,
+    stripeCustomerId: customerId,
+  });
 }
 
 /**
@@ -359,13 +391,15 @@ async function handlePaymentFailed(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Payment failed email sent to ${billing.email} for subscription ${subscriptionId}`,
-    );
+    console.log("[Webhook] Payment failed email sent", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(
-      `[Webhook] Failed to send payment failed email: ${result.error}`,
-    );
+    console.error("[Webhook] Failed to send payment failed email", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }
 
@@ -456,11 +490,17 @@ async function handleInvoicePaid(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Payment receipt sent to ${billing.email} for invoice ${invoiceId}`,
-    );
+    console.log("[Webhook] Payment receipt sent", {
+      invoiceId: invoiceId,
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(`[Webhook] Failed to send payment receipt: ${result.error}`);
+    console.error("[Webhook] Failed to send payment receipt", {
+      invoiceId: invoiceId,
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }
 
@@ -542,12 +582,14 @@ async function handleTrialWillEnd(
   });
 
   if (result.success) {
-    console.log(
-      `[Webhook] Trial ending email sent to ${billing.email} for ${billing.subdomain}.grove.place`,
-    );
+    console.log("[Webhook] Trial ending email sent", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   } else {
-    console.error(
-      `[Webhook] Failed to send trial ending email: ${result.error}`,
-    );
+    console.error("[Webhook] Failed to send trial ending email", {
+      subscriptionId: subscriptionId,
+      tenantId: billing.id,
+    });
   }
 }

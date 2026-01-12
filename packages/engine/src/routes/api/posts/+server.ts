@@ -4,6 +4,11 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -29,33 +34,63 @@ interface PostInput {
 }
 
 /**
- * GET /api/posts - List all posts from D1
+ * GET /api/posts - List posts from D1
+ *
+ * Access levels:
+ * - Anonymous: Only published posts (for public blog, RSS, crawlers)
+ * - Authenticated owner: All posts including drafts (for admin)
+ *
  * Uses TenantDb for automatic tenant isolation
  */
-export const GET: RequestHandler = async ({ platform, locals }) => {
-  // Auth check for admin access
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
-
+export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throw error(400, "Tenant context required");
   }
 
   try {
-    // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+    // Determine access level
+    let isOwner = false;
+    if (locals.user) {
+      try {
+        // Check if authenticated user owns this tenant
+        await getVerifiedTenantId(
+          platform.env.DB,
+          locals.tenantId,
+          locals.user,
+        );
+        isOwner = true;
+      } catch {
+        // User is authenticated but doesn't own this tenant - treat as anonymous
+        isOwner = false;
+      }
+    }
 
-    const posts = await tenantDb.queryMany<PostRecord>(
-      'posts',
-      undefined,
-      [],
-      { orderBy: 'date DESC' }
-    );
+    // Use TenantDb for automatic tenant isolation
+    const tenantDb = getTenantDb(platform.env.DB, {
+      tenantId: locals.tenantId,
+    });
+
+    // Query based on access level
+    let posts: PostRecord[];
+    if (isOwner) {
+      // Owner sees all posts (including drafts)
+      posts = await tenantDb.queryMany<PostRecord>("posts", undefined, [], {
+        orderBy: "date DESC",
+      });
+    } else {
+      // Anonymous/non-owner only sees published posts
+      // Check for status column, fall back to returning all if no status field exists
+      posts = await tenantDb.queryMany<PostRecord>(
+        "posts",
+        "status = ? OR status IS NULL",
+        ["published"],
+        { orderBy: "date DESC" },
+      );
+    }
 
     // Parse JSON tags field
     const formattedPosts = posts.map((post) => ({
@@ -65,6 +100,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
     return json({ posts: formattedPosts });
   } catch (err) {
+    if ((err as { status?: number }).status) throw err;
     console.error("Error fetching posts:", err);
     throw error(500, "Failed to fetch posts");
   }
@@ -93,14 +129,35 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(401, "Tenant ID not found");
   }
 
+  // Rate limit content creation to prevent spam
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const { response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("posts/create", locals.user.id),
+      limit: 30,
+      windowSeconds: 3600, // 30 posts per hour
+      namespace: "content-ratelimit",
+    });
+
+    if (response) return response;
+  }
+
   try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
     const data = sanitizeObject(await request.json()) as PostInput;
 
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
       throw error(
         400,
-        "Missing required fields: title, slug, markdown_content"
+        "Missing required fields: title, slug, markdown_content",
       );
     }
 
@@ -118,7 +175,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
       throw error(
         400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`
+        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
       );
     }
 
@@ -151,10 +208,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .replace(/^-|-$/g, "");
 
     // Use TenantDb for automatic tenant isolation
-    const tenantDb = getTenantDb(platform.env.DB, { tenantId: locals.tenantId });
+    const tenantDb = getTenantDb(platform.env.DB, { tenantId });
 
     // Check if slug already exists for this tenant
-    const existing = await tenantDb.exists('posts', 'slug = ?', [slug]);
+    const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (existing) {
       throw error(409, "A post with this slug already exists");
@@ -162,7 +219,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Generate HTML from markdown and sanitize to prevent XSS
     const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string
+      marked.parse(data.markdown_content, { async: false }) as string,
     );
 
     // Generate a simple hash of the content
@@ -178,7 +235,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const tags = JSON.stringify(data.tags || []);
 
     // Insert using TenantDb (automatically adds tenant_id and generates id)
-    await tenantDb.insert('posts', {
+    await tenantDb.insert("posts", {
       slug,
       title: data.title,
       date: data.date || timestamp.split("T")[0],
