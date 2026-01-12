@@ -94,10 +94,18 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
   console.log("[Layout] FINAL navPages:", navPages);
 
+  // DEBUG: Include debug info in response
+  const _debug = {
+    tenantId: tenantId ?? "NO_TENANT_ID",
+    hasDb: !!platform?.env?.DB,
+    navPagesCount: navPages.length,
+  };
+
   return {
     user: locals.user || null,
     context: locals.context as AppContext,
     siteSettings,
     navPages,
+    _debug,
   };
 };
