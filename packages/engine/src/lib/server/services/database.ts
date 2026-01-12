@@ -25,24 +25,24 @@ export type D1DatabaseOrSession = D1Database | D1DatabaseSession;
  * Query result metadata from D1
  */
 export interface QueryMeta {
-	/** Number of rows changed (for INSERT/UPDATE/DELETE) */
-	changes: number;
-	/** Duration of the query in milliseconds */
-	duration: number;
-	/** Last inserted row ID (SQLite) */
-	lastRowId: number;
-	/** Number of rows read */
-	rowsRead: number;
-	/** Number of rows written */
-	rowsWritten: number;
+  /** Number of rows changed (for INSERT/UPDATE/DELETE) */
+  changes: number;
+  /** Duration of the query in milliseconds */
+  duration: number;
+  /** Last inserted row ID (SQLite) */
+  lastRowId: number;
+  /** Number of rows read */
+  rowsRead: number;
+  /** Number of rows written */
+  rowsWritten: number;
 }
 
 /**
  * Result from an execute (non-SELECT) operation
  */
 export interface ExecuteResult {
-	success: boolean;
-	meta: QueryMeta;
+  success: boolean;
+  meta: QueryMeta;
 }
 
 // ============================================================================
@@ -50,24 +50,24 @@ export interface ExecuteResult {
 // ============================================================================
 
 export class DatabaseError extends Error {
-	constructor(
-		message: string,
-		public readonly code: DatabaseErrorCode,
-		public readonly cause?: unknown
-	) {
-		super(message);
-		this.name = 'DatabaseError';
-	}
+  constructor(
+    message: string,
+    public readonly code: DatabaseErrorCode,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "DatabaseError";
+  }
 }
 
 export type DatabaseErrorCode =
-	| 'QUERY_FAILED'
-	| 'NOT_FOUND'
-	| 'CONSTRAINT_VIOLATION'
-	| 'TRANSACTION_FAILED'
-	| 'CONNECTION_ERROR'
-	| 'INVALID_QUERY'
-	| 'VALIDATION_ERROR';
+  | "QUERY_FAILED"
+  | "NOT_FOUND"
+  | "CONSTRAINT_VIOLATION"
+  | "TRANSACTION_FAILED"
+  | "CONNECTION_ERROR"
+  | "INVALID_QUERY"
+  | "VALIDATION_ERROR";
 
 // ============================================================================
 // Utility Functions
@@ -77,14 +77,14 @@ export type DatabaseErrorCode =
  * Generate a UUID v4 identifier
  */
 export function generateId(): string {
-	return crypto.randomUUID();
+  return crypto.randomUUID();
 }
 
 /**
  * Get current timestamp in ISO format
  */
 export function now(): string {
-	return new Date().toISOString();
+  return new Date().toISOString();
 }
 
 /**
@@ -92,14 +92,14 @@ export function now(): string {
  * @param ms - Milliseconds from now
  */
 export function futureTimestamp(ms: number): string {
-	return new Date(Date.now() + ms).toISOString();
+  return new Date(Date.now() + ms).toISOString();
 }
 
 /**
  * Check if a timestamp has expired
  */
 export function isExpired(timestamp: string): boolean {
-	return new Date(timestamp) < new Date();
+  return new Date(timestamp) < new Date();
 }
 
 // ============================================================================
@@ -120,19 +120,19 @@ export function isExpired(timestamp: string): boolean {
  * ```
  */
 export async function queryOne<T>(
-	db: D1DatabaseOrSession,
-	sql: string,
-	params: unknown[] = []
+  db: D1DatabaseOrSession,
+  sql: string,
+  params: unknown[] = [],
 ): Promise<T | null> {
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...params)
-			.first<T>();
-		return result ?? null;
-	} catch (err) {
-		throw new DatabaseError(`Query failed: ${sql}`, 'QUERY_FAILED', err);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...params)
+      .first<T>();
+    return result ?? null;
+  } catch (err) {
+    throw new DatabaseError(`Query failed: ${sql}`, "QUERY_FAILED", err);
+  }
 }
 
 /**
@@ -149,16 +149,16 @@ export async function queryOne<T>(
  * ```
  */
 export async function queryOneOrThrow<T>(
-	db: D1DatabaseOrSession,
-	sql: string,
-	params: unknown[] = [],
-	errorMessage = 'Record not found'
+  db: D1DatabaseOrSession,
+  sql: string,
+  params: unknown[] = [],
+  errorMessage = "Record not found",
 ): Promise<T> {
-	const result = await queryOne<T>(db, sql, params);
-	if (result === null) {
-		throw new DatabaseError(errorMessage, 'NOT_FOUND');
-	}
-	return result;
+  const result = await queryOne<T>(db, sql, params);
+  if (result === null) {
+    throw new DatabaseError(errorMessage, "NOT_FOUND");
+  }
+  return result;
 }
 
 /**
@@ -174,19 +174,19 @@ export async function queryOneOrThrow<T>(
  * ```
  */
 export async function queryMany<T>(
-	db: D1DatabaseOrSession,
-	sql: string,
-	params: unknown[] = []
+  db: D1DatabaseOrSession,
+  sql: string,
+  params: unknown[] = [],
 ): Promise<T[]> {
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...params)
-			.all<T>();
-		return result.results ?? [];
-	} catch (err) {
-		throw new DatabaseError(`Query failed: ${sql}`, 'QUERY_FAILED', err);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...params)
+      .all<T>();
+    return result.results ?? [];
+  } catch (err) {
+    throw new DatabaseError(`Query failed: ${sql}`, "QUERY_FAILED", err);
+  }
 }
 
 /**
@@ -203,29 +203,29 @@ export async function queryMany<T>(
  * ```
  */
 export async function execute(
-	db: D1DatabaseOrSession,
-	sql: string,
-	params: unknown[] = []
+  db: D1DatabaseOrSession,
+  sql: string,
+  params: unknown[] = [],
 ): Promise<ExecuteResult> {
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...params)
-			.run();
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...params)
+      .run();
 
-		return {
-			success: result.success,
-			meta: {
-				changes: result.meta.changes ?? 0,
-				duration: result.meta.duration,
-				lastRowId: result.meta.last_row_id ?? 0,
-				rowsRead: result.meta.rows_read ?? 0,
-				rowsWritten: result.meta.rows_written ?? 0
-			}
-		};
-	} catch (err) {
-		throw new DatabaseError(`Execute failed: ${sql}`, 'QUERY_FAILED', err);
-	}
+    return {
+      success: result.success,
+      meta: {
+        changes: result.meta.changes ?? 0,
+        duration: result.meta.duration,
+        lastRowId: result.meta.last_row_id ?? 0,
+        rowsRead: result.meta.rows_read ?? 0,
+        rowsWritten: result.meta.rows_written ?? 0,
+      },
+    };
+  } catch (err) {
+    throw new DatabaseError(`Execute failed: ${sql}`, "QUERY_FAILED", err);
+  }
 }
 
 /**
@@ -242,16 +242,16 @@ export async function execute(
  * ```
  */
 export async function executeOrThrow(
-	db: D1DatabaseOrSession,
-	sql: string,
-	params: unknown[] = [],
-	errorMessage = 'No rows affected'
+  db: D1DatabaseOrSession,
+  sql: string,
+  params: unknown[] = [],
+  errorMessage = "No rows affected",
 ): Promise<ExecuteResult> {
-	const result = await execute(db, sql, params);
-	if (result.meta.changes === 0) {
-		throw new DatabaseError(errorMessage, 'NOT_FOUND');
-	}
-	return result;
+  const result = await execute(db, sql, params);
+  if (result.meta.changes === 0) {
+    throw new DatabaseError(errorMessage, "NOT_FOUND");
+  }
+  return result;
 }
 
 // ============================================================================
@@ -271,46 +271,48 @@ export async function executeOrThrow(
  * ```
  */
 export async function batch(
-	db: D1Database,
-	statements: Array<{ sql: string; params?: unknown[] }>
+  db: D1Database,
+  statements: Array<{ sql: string; params?: unknown[] }>,
 ): Promise<ExecuteResult[]> {
-	try {
-		const prepared = statements.map((stmt, index) => {
-			try {
-				return db.prepare(stmt.sql).bind(...(stmt.params ?? []));
-			} catch (prepareErr) {
-				throw new DatabaseError(
-					`Batch statement ${index + 1}/${statements.length} failed to prepare: ${stmt.sql.slice(0, 100)}`,
-					'INVALID_QUERY',
-					prepareErr
-				);
-			}
-		});
+  try {
+    const prepared = statements.map((stmt, index) => {
+      try {
+        return db.prepare(stmt.sql).bind(...(stmt.params ?? []));
+      } catch (prepareErr) {
+        throw new DatabaseError(
+          `Batch statement ${index + 1}/${statements.length} failed to prepare: ${stmt.sql.slice(0, 100)}`,
+          "INVALID_QUERY",
+          prepareErr,
+        );
+      }
+    });
 
-		const results = await db.batch(prepared);
+    const results = await db.batch(prepared);
 
-		return results.map((result) => ({
-			success: result.success,
-			meta: {
-				changes: result.meta.changes ?? 0,
-				duration: result.meta.duration,
-				lastRowId: result.meta.last_row_id ?? 0,
-				rowsRead: result.meta.rows_read ?? 0,
-				rowsWritten: result.meta.rows_written ?? 0
-			}
-		}));
-	} catch (err) {
-		if (err instanceof DatabaseError) {
-			throw err;
-		}
-		// Include statement count for context
-		const stmtSummary = statements.map((s, i) => `${i + 1}: ${s.sql.slice(0, 50)}...`).join('; ');
-		throw new DatabaseError(
-			`Batch operation failed (${statements.length} statements: ${stmtSummary})`,
-			'TRANSACTION_FAILED',
-			err
-		);
-	}
+    return results.map((result) => ({
+      success: result.success,
+      meta: {
+        changes: result.meta.changes ?? 0,
+        duration: result.meta.duration,
+        lastRowId: result.meta.last_row_id ?? 0,
+        rowsRead: result.meta.rows_read ?? 0,
+        rowsWritten: result.meta.rows_written ?? 0,
+      },
+    }));
+  } catch (err) {
+    if (err instanceof DatabaseError) {
+      throw err;
+    }
+    // Include statement count for context
+    const stmtSummary = statements
+      .map((s, i) => `${i + 1}: ${s.sql.slice(0, 50)}...`)
+      .join("; ");
+    throw new DatabaseError(
+      `Batch operation failed (${statements.length} statements: ${stmtSummary})`,
+      "TRANSACTION_FAILED",
+      err,
+    );
+  }
 }
 
 /**
@@ -326,15 +328,19 @@ export async function batch(
  * ```
  */
 export async function withSession<T>(
-	db: D1Database,
-	fn: (session: D1DatabaseSession) => Promise<T>
+  db: D1Database,
+  fn: (session: D1DatabaseSession) => Promise<T>,
 ): Promise<T> {
-	const session = db.withSession();
-	try {
-		return await fn(session);
-	} catch (err) {
-		throw new DatabaseError('Session operation failed', 'TRANSACTION_FAILED', err);
-	}
+  const session = db.withSession();
+  try {
+    return await fn(session);
+  } catch (err) {
+    throw new DatabaseError(
+      "Session operation failed",
+      "TRANSACTION_FAILED",
+      err,
+    );
+  }
 }
 
 // ============================================================================
@@ -348,27 +354,27 @@ export async function withSession<T>(
 const VALID_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 function validateTableName(table: string): void {
-	if (!VALID_IDENTIFIER.test(table)) {
-		throw new DatabaseError(
-			`Invalid table name: ${table}. Table names must be alphanumeric with underscores only.`,
-			'INVALID_QUERY'
-		);
-	}
+  if (!VALID_IDENTIFIER.test(table)) {
+    throw new DatabaseError(
+      `Invalid table name: ${table}. Table names must be alphanumeric with underscores only.`,
+      "INVALID_QUERY",
+    );
+  }
 }
 
 function validateColumnName(column: string): void {
-	if (!VALID_IDENTIFIER.test(column)) {
-		throw new DatabaseError(
-			`Invalid column name: ${column}. Column names must be alphanumeric with underscores only.`,
-			'INVALID_QUERY'
-		);
-	}
+  if (!VALID_IDENTIFIER.test(column)) {
+    throw new DatabaseError(
+      `Invalid column name: ${column}. Column names must be alphanumeric with underscores only.`,
+      "INVALID_QUERY",
+    );
+  }
 }
 
 function validateColumnNames(columns: string[]): void {
-	for (const column of columns) {
-		validateColumnName(column);
-	}
+  for (const column of columns) {
+    validateColumnName(column);
+  }
 }
 
 // ============================================================================
@@ -390,50 +396,50 @@ function validateColumnNames(columns: string[]): void {
  * ```
  */
 export async function insert(
-	db: D1DatabaseOrSession,
-	table: string,
-	data: Record<string, unknown>,
-	options?: { id?: string }
+  db: D1DatabaseOrSession,
+  table: string,
+  data: Record<string, unknown>,
+  options?: { id?: string },
 ): Promise<string> {
-	validateTableName(table);
-	validateColumnNames(Object.keys(data));
+  validateTableName(table);
+  validateColumnNames(Object.keys(data));
 
-	const id = options?.id ?? generateId();
-	const timestamp = now();
+  const id = options?.id ?? generateId();
+  const timestamp = now();
 
-	const dataWithMeta = {
-		id,
-		...data,
-		created_at: timestamp,
-		updated_at: timestamp
-	};
+  const dataWithMeta = {
+    id,
+    ...data,
+    created_at: timestamp,
+    updated_at: timestamp,
+  };
 
-	const columns = Object.keys(dataWithMeta);
-	const placeholders = columns.map(() => '?').join(', ');
-	const values = Object.values(dataWithMeta);
+  const columns = Object.keys(dataWithMeta);
+  const placeholders = columns.map(() => "?").join(", ");
+  const values = Object.values(dataWithMeta);
 
-	const sql = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
+  const sql = `INSERT INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`;
 
-	try {
-		await db
-			.prepare(sql)
-			.bind(...values)
-			.run();
-		return id;
-	} catch (err) {
-		if (err instanceof Error && err.message.includes('UNIQUE constraint')) {
-			throw new DatabaseError(
-				`Duplicate entry in ${table} (columns: ${columns.join(', ')})`,
-				'CONSTRAINT_VIOLATION',
-				err
-			);
-		}
-		throw new DatabaseError(
-			`Insert into ${table} failed (columns: ${columns.join(', ')})`,
-			'QUERY_FAILED',
-			err
-		);
-	}
+  try {
+    await db
+      .prepare(sql)
+      .bind(...values)
+      .run();
+    return id;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("UNIQUE constraint")) {
+      throw new DatabaseError(
+        `Duplicate entry in ${table} (columns: ${columns.join(", ")})`,
+        "CONSTRAINT_VIOLATION",
+        err,
+      );
+    }
+    throw new DatabaseError(
+      `Insert into ${table} failed (columns: ${columns.join(", ")})`,
+      "QUERY_FAILED",
+      err,
+    );
+  }
 }
 
 // ============================================================================
@@ -452,41 +458,41 @@ export async function insert(
  * ```
  */
 export async function update(
-	db: D1DatabaseOrSession,
-	table: string,
-	data: Record<string, unknown>,
-	where: string,
-	whereParams: unknown[] = []
+  db: D1DatabaseOrSession,
+  table: string,
+  data: Record<string, unknown>,
+  where: string,
+  whereParams: unknown[] = [],
 ): Promise<number> {
-	validateTableName(table);
-	validateColumnNames(Object.keys(data));
+  validateTableName(table);
+  validateColumnNames(Object.keys(data));
 
-	const dataWithTimestamp = {
-		...data,
-		updated_at: now()
-	};
+  const dataWithTimestamp = {
+    ...data,
+    updated_at: now(),
+  };
 
-	const setClauses = Object.keys(dataWithTimestamp)
-		.map((key) => `${key} = ?`)
-		.join(', ');
-	const values = [...Object.values(dataWithTimestamp), ...whereParams];
+  const setClauses = Object.keys(dataWithTimestamp)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = [...Object.values(dataWithTimestamp), ...whereParams];
 
-	const sql = `UPDATE ${table} SET ${setClauses} WHERE ${where}`;
+  const sql = `UPDATE ${table} SET ${setClauses} WHERE ${where}`;
 
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...values)
-			.run();
-		return result.meta.changes ?? 0;
-	} catch (err) {
-		const fields = Object.keys(dataWithTimestamp).join(', ');
-		throw new DatabaseError(
-			`Update ${table} failed (fields: ${fields}, where: ${where})`,
-			'QUERY_FAILED',
-			err
-		);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...values)
+      .run();
+    return result.meta.changes ?? 0;
+  } catch (err) {
+    const fields = Object.keys(dataWithTimestamp).join(", ");
+    throw new DatabaseError(
+      `Update ${table} failed (fields: ${fields}, where: ${where})`,
+      "QUERY_FAILED",
+      err,
+    );
+  }
 }
 
 // ============================================================================
@@ -505,23 +511,27 @@ export async function update(
  * ```
  */
 export async function deleteWhere(
-	db: D1DatabaseOrSession,
-	table: string,
-	where: string,
-	whereParams: unknown[] = []
+  db: D1DatabaseOrSession,
+  table: string,
+  where: string,
+  whereParams: unknown[] = [],
 ): Promise<number> {
-	validateTableName(table);
-	const sql = `DELETE FROM ${table} WHERE ${where}`;
+  validateTableName(table);
+  const sql = `DELETE FROM ${table} WHERE ${where}`;
 
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...whereParams)
-			.run();
-		return result.meta.changes ?? 0;
-	} catch (err) {
-		throw new DatabaseError(`Delete from ${table} failed (where: ${where})`, 'QUERY_FAILED', err);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...whereParams)
+      .run();
+    return result.meta.changes ?? 0;
+  } catch (err) {
+    throw new DatabaseError(
+      `Delete from ${table} failed (where: ${where})`,
+      "QUERY_FAILED",
+      err,
+    );
+  }
 }
 
 /**
@@ -533,12 +543,12 @@ export async function deleteWhere(
  * ```
  */
 export async function deleteById(
-	db: D1DatabaseOrSession,
-	table: string,
-	id: string
+  db: D1DatabaseOrSession,
+  table: string,
+  id: string,
 ): Promise<boolean> {
-	const changes = await deleteWhere(db, table, 'id = ?', [id]);
-	return changes > 0;
+  const changes = await deleteWhere(db, table, "id = ?", [id]);
+  return changes > 0;
 }
 
 // ============================================================================
@@ -559,23 +569,27 @@ export async function deleteById(
  * ```
  */
 export async function exists(
-	db: D1DatabaseOrSession,
-	table: string,
-	where: string,
-	whereParams: unknown[] = []
+  db: D1DatabaseOrSession,
+  table: string,
+  where: string,
+  whereParams: unknown[] = [],
 ): Promise<boolean> {
-	validateTableName(table);
-	const sql = `SELECT 1 FROM ${table} WHERE ${where} LIMIT 1`;
+  validateTableName(table);
+  const sql = `SELECT 1 FROM ${table} WHERE ${where} LIMIT 1`;
 
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...whereParams)
-			.first();
-		return result !== null;
-	} catch (err) {
-		throw new DatabaseError(`Existence check on ${table} failed`, 'QUERY_FAILED', err);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...whereParams)
+      .first();
+    return result !== null;
+  } catch (err) {
+    throw new DatabaseError(
+      `Existence check on ${table} failed`,
+      "QUERY_FAILED",
+      err,
+    );
+  }
 }
 
 /**
@@ -590,25 +604,25 @@ export async function exists(
  * ```
  */
 export async function count(
-	db: D1DatabaseOrSession,
-	table: string,
-	where?: string,
-	whereParams: unknown[] = []
+  db: D1DatabaseOrSession,
+  table: string,
+  where?: string,
+  whereParams: unknown[] = [],
 ): Promise<number> {
-	validateTableName(table);
-	const sql = where
-		? `SELECT COUNT(*) as count FROM ${table} WHERE ${where}`
-		: `SELECT COUNT(*) as count FROM ${table}`;
+  validateTableName(table);
+  const sql = where
+    ? `SELECT COUNT(*) as count FROM ${table} WHERE ${where}`
+    : `SELECT COUNT(*) as count FROM ${table}`;
 
-	try {
-		const result = await db
-			.prepare(sql)
-			.bind(...whereParams)
-			.first<{ count: number }>();
-		return result?.count ?? 0;
-	} catch (err) {
-		throw new DatabaseError(`Count on ${table} failed`, 'QUERY_FAILED', err);
-	}
+  try {
+    const result = await db
+      .prepare(sql)
+      .bind(...whereParams)
+      .first<{ count: number }>();
+    return result?.count ?? 0;
+  } catch (err) {
+    throw new DatabaseError(`Count on ${table} failed`, "QUERY_FAILED", err);
+  }
 }
 
 // ============================================================================
@@ -619,10 +633,10 @@ export async function count(
  * Error thrown when tenant context is missing or invalid
  */
 export class TenantContextError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'TenantContextError';
-	}
+  constructor(message: string) {
+    super(message);
+    this.name = "TenantContextError";
+  }
 }
 
 /**
@@ -630,10 +644,10 @@ export class TenantContextError extends Error {
  * Ensures all queries are automatically scoped to a specific tenant
  */
 export interface TenantContext {
-	/** The tenant ID for this context */
-	tenantId: string;
-	/** Optional user ID for audit logging */
-	userId?: string;
+  /** The tenant ID for this context */
+  tenantId: string;
+  /** Optional user ID for audit logging */
+  userId?: string;
 }
 
 /**
@@ -658,235 +672,258 @@ export interface TenantContext {
  * ```
  */
 export class TenantDb {
-	private db: D1DatabaseOrSession;
-	private context: TenantContext;
+  private db: D1DatabaseOrSession;
+  private context: TenantContext;
 
-	constructor(db: D1DatabaseOrSession, context: TenantContext) {
-		if (!context.tenantId) {
-			throw new TenantContextError('Tenant ID is required for database operations');
-		}
-		this.db = db;
-		this.context = context;
-	}
+  constructor(db: D1DatabaseOrSession, context: TenantContext) {
+    if (!context.tenantId) {
+      throw new TenantContextError(
+        "Tenant ID is required for database operations",
+      );
+    }
+    this.db = db;
+    this.context = context;
+  }
 
-	/**
-	 * Get the tenant ID for this context
-	 */
-	get tenantId(): string {
-		return this.context.tenantId;
-	}
+  /**
+   * Get the tenant ID for this context
+   */
+  get tenantId(): string {
+    return this.context.tenantId;
+  }
 
-	/**
-	 * Query a single row with automatic tenant scoping
-	 */
-	async queryOne<T>(
-		table: string,
-		where?: string,
-		whereParams: unknown[] = []
-	): Promise<T | null> {
-		validateTableName(table);
-		const tenantWhere = where
-			? `tenant_id = ? AND (${where})`
-			: 'tenant_id = ?';
-		const params = [this.context.tenantId, ...whereParams];
-		const sql = `SELECT * FROM ${table} WHERE ${tenantWhere} LIMIT 1`;
-		return queryOne<T>(this.db, sql, params);
-	}
+  /**
+   * Query a single row with automatic tenant scoping
+   */
+  async queryOne<T>(
+    table: string,
+    where?: string,
+    whereParams: unknown[] = [],
+  ): Promise<T | null> {
+    validateTableName(table);
+    const tenantWhere = where
+      ? `tenant_id = ? AND (${where})`
+      : "tenant_id = ?";
+    const params = [this.context.tenantId, ...whereParams];
+    const sql = `SELECT * FROM ${table} WHERE ${tenantWhere} LIMIT 1`;
+    return queryOne<T>(this.db, sql, params);
+  }
 
-	/**
-	 * Query a single row, throw if not found
-	 */
-	async queryOneOrThrow<T>(
-		table: string,
-		where?: string,
-		whereParams: unknown[] = [],
-		errorMessage = 'Record not found'
-	): Promise<T> {
-		const result = await this.queryOne<T>(table, where, whereParams);
-		if (result === null) {
-			throw new DatabaseError(errorMessage, 'NOT_FOUND');
-		}
-		return result;
-	}
+  /**
+   * Query a single row, throw if not found
+   */
+  async queryOneOrThrow<T>(
+    table: string,
+    where?: string,
+    whereParams: unknown[] = [],
+    errorMessage = "Record not found",
+  ): Promise<T> {
+    const result = await this.queryOne<T>(table, where, whereParams);
+    if (result === null) {
+      throw new DatabaseError(errorMessage, "NOT_FOUND");
+    }
+    return result;
+  }
 
-	/**
-	 * Query multiple rows with automatic tenant scoping
-	 */
-	async queryMany<T>(
-		table: string,
-		where?: string,
-		whereParams: unknown[] = [],
-		options?: { orderBy?: string; limit?: number; offset?: number }
-	): Promise<T[]> {
-		validateTableName(table);
-		const tenantWhere = where
-			? `tenant_id = ? AND (${where})`
-			: 'tenant_id = ?';
-		const params = [this.context.tenantId, ...whereParams];
+  /**
+   * Query multiple rows with automatic tenant scoping
+   */
+  async queryMany<T>(
+    table: string,
+    where?: string,
+    whereParams: unknown[] = [],
+    options?: { orderBy?: string; limit?: number; offset?: number },
+  ): Promise<T[]> {
+    validateTableName(table);
+    const tenantWhere = where
+      ? `tenant_id = ? AND (${where})`
+      : "tenant_id = ?";
+    const params = [this.context.tenantId, ...whereParams];
 
-		let sql = `SELECT * FROM ${table} WHERE ${tenantWhere}`;
+    let sql = `SELECT * FROM ${table} WHERE ${tenantWhere}`;
 
-		if (options?.orderBy) {
-			// Strict validation for ORDER BY - only allow column names and ASC/DESC
-			const orderParts = options.orderBy.split(/\s+/);
-			if (orderParts.length > 2) {
-				throw new DatabaseError(`Invalid ORDER BY clause: too many parts`, 'VALIDATION_ERROR');
-			}
-			validateColumnName(orderParts[0]);
-			const direction = orderParts[1]?.toUpperCase();
-			if (direction && direction !== 'ASC' && direction !== 'DESC') {
-				throw new DatabaseError(`Invalid ORDER BY direction: ${direction}`, 'VALIDATION_ERROR');
-			}
-			sql += ` ORDER BY ${orderParts[0]}${direction ? ` ${direction}` : ''}`;
-		}
+    if (options?.orderBy) {
+      // Support multi-column ORDER BY (e.g., "published_at DESC, created_at DESC")
+      // Split by comma to get each column+direction pair
+      const orderClauses = options.orderBy
+        .split(",")
+        .map((clause) => clause.trim());
+      const validatedClauses: string[] = [];
 
-		if (options?.limit !== undefined) {
-			// Clamp to reasonable bounds to prevent Infinity or excessive values
-			const limit = Math.max(0, Math.min(Math.floor(options.limit), 1000));
-			sql += ` LIMIT ${limit}`;
-		}
+      for (const clause of orderClauses) {
+        const parts = clause.split(/\s+/);
+        if (parts.length > 2) {
+          throw new DatabaseError(
+            `Invalid ORDER BY clause: "${clause}" has too many parts`,
+            "VALIDATION_ERROR",
+          );
+        }
+        validateColumnName(parts[0]);
+        const direction = parts[1]?.toUpperCase();
+        if (direction && direction !== "ASC" && direction !== "DESC") {
+          throw new DatabaseError(
+            `Invalid ORDER BY direction: ${direction}`,
+            "VALIDATION_ERROR",
+          );
+        }
+        validatedClauses.push(`${parts[0]}${direction ? ` ${direction}` : ""}`);
+      }
 
-		if (options?.offset !== undefined) {
-			// Clamp to reasonable bounds to prevent Infinity or excessive values
-			const offset = Math.max(0, Math.min(Math.floor(options.offset), 100000));
-			sql += ` OFFSET ${offset}`;
-		}
+      sql += ` ORDER BY ${validatedClauses.join(", ")}`;
+    }
 
-		return queryMany<T>(this.db, sql, params);
-	}
+    if (options?.limit !== undefined) {
+      // Clamp to reasonable bounds to prevent Infinity or excessive values
+      const limit = Math.max(0, Math.min(Math.floor(options.limit), 1000));
+      sql += ` LIMIT ${limit}`;
+    }
 
-	/**
-	 * Insert a row with automatic tenant_id injection
-	 */
-	async insert(
-		table: string,
-		data: Record<string, unknown>,
-		options?: { id?: string }
-	): Promise<string> {
-		const dataWithTenant = {
-			...data,
-			tenant_id: this.context.tenantId
-		};
-		return insert(this.db, table, dataWithTenant, options);
-	}
+    if (options?.offset !== undefined) {
+      // Clamp to reasonable bounds to prevent Infinity or excessive values
+      const offset = Math.max(0, Math.min(Math.floor(options.offset), 100000));
+      sql += ` OFFSET ${offset}`;
+    }
 
-	/**
-	 * Update rows with automatic tenant scoping
-	 * The WHERE clause is automatically combined with tenant_id check
-	 */
-	async update(
-		table: string,
-		data: Record<string, unknown>,
-		where: string,
-		whereParams: unknown[] = []
-	): Promise<number> {
-		validateTableName(table);
-		const tenantWhere = `tenant_id = ? AND (${where})`;
-		const params = [this.context.tenantId, ...whereParams];
-		return update(this.db, table, data, tenantWhere, params);
-	}
+    return queryMany<T>(this.db, sql, params);
+  }
 
-	/**
-	 * Update a row by ID with tenant scoping
-	 */
-	async updateById(
-		table: string,
-		id: string,
-		data: Record<string, unknown>
-	): Promise<boolean> {
-		const changes = await this.update(table, data, 'id = ?', [id]);
-		return changes > 0;
-	}
+  /**
+   * Insert a row with automatic tenant_id injection
+   */
+  async insert(
+    table: string,
+    data: Record<string, unknown>,
+    options?: { id?: string },
+  ): Promise<string> {
+    const dataWithTenant = {
+      ...data,
+      tenant_id: this.context.tenantId,
+    };
+    return insert(this.db, table, dataWithTenant, options);
+  }
 
-	/**
-	 * Delete rows with automatic tenant scoping
-	 */
-	async delete(
-		table: string,
-		where: string,
-		whereParams: unknown[] = []
-	): Promise<number> {
-		validateTableName(table);
-		const tenantWhere = `tenant_id = ? AND (${where})`;
-		const params = [this.context.tenantId, ...whereParams];
-		return deleteWhere(this.db, table, tenantWhere, params);
-	}
+  /**
+   * Update rows with automatic tenant scoping
+   * The WHERE clause is automatically combined with tenant_id check
+   */
+  async update(
+    table: string,
+    data: Record<string, unknown>,
+    where: string,
+    whereParams: unknown[] = [],
+  ): Promise<number> {
+    validateTableName(table);
+    const tenantWhere = `tenant_id = ? AND (${where})`;
+    const params = [this.context.tenantId, ...whereParams];
+    return update(this.db, table, data, tenantWhere, params);
+  }
 
-	/**
-	 * Delete a row by ID with tenant scoping
-	 */
-	async deleteById(table: string, id: string): Promise<boolean> {
-		const changes = await this.delete(table, 'id = ?', [id]);
-		return changes > 0;
-	}
+  /**
+   * Update a row by ID with tenant scoping
+   */
+  async updateById(
+    table: string,
+    id: string,
+    data: Record<string, unknown>,
+  ): Promise<boolean> {
+    const changes = await this.update(table, data, "id = ?", [id]);
+    return changes > 0;
+  }
 
-	/**
-	 * Check if a row exists with tenant scoping
-	 */
-	async exists(
-		table: string,
-		where: string,
-		whereParams: unknown[] = []
-	): Promise<boolean> {
-		validateTableName(table);
-		const tenantWhere = `tenant_id = ? AND (${where})`;
-		const params = [this.context.tenantId, ...whereParams];
-		return exists(this.db, table, tenantWhere, params);
-	}
+  /**
+   * Delete rows with automatic tenant scoping
+   */
+  async delete(
+    table: string,
+    where: string,
+    whereParams: unknown[] = [],
+  ): Promise<number> {
+    validateTableName(table);
+    const tenantWhere = `tenant_id = ? AND (${where})`;
+    const params = [this.context.tenantId, ...whereParams];
+    return deleteWhere(this.db, table, tenantWhere, params);
+  }
 
-	/**
-	 * Count rows with tenant scoping
-	 */
-	async count(
-		table: string,
-		where?: string,
-		whereParams: unknown[] = []
-	): Promise<number> {
-		validateTableName(table);
-		const tenantWhere = where
-			? `tenant_id = ? AND (${where})`
-			: 'tenant_id = ?';
-		const params = [this.context.tenantId, ...whereParams];
-		return count(this.db, table, tenantWhere, params);
-	}
+  /**
+   * Delete a row by ID with tenant scoping
+   */
+  async deleteById(table: string, id: string): Promise<boolean> {
+    const changes = await this.delete(table, "id = ?", [id]);
+    return changes > 0;
+  }
 
-	/**
-	 * Execute a raw query with tenant scoping
-	 *
-	 * WARNING: You must ensure the query includes tenant_id filtering.
-	 * This method validates that 'tenant_id' appears in the SQL.
-	 */
-	async rawQuery<T>(sql: string, params: unknown[] = []): Promise<T[]> {
-		if (!sql.toLowerCase().includes('tenant_id')) {
-			throw new TenantContextError(
-				'Raw queries must include tenant_id filtering. Use the scoped methods or add tenant_id to your WHERE clause.'
-			);
-		}
-		return queryMany<T>(this.db, sql, params);
-	}
+  /**
+   * Check if a row exists with tenant scoping
+   */
+  async exists(
+    table: string,
+    where: string,
+    whereParams: unknown[] = [],
+  ): Promise<boolean> {
+    validateTableName(table);
+    const tenantWhere = `tenant_id = ? AND (${where})`;
+    const params = [this.context.tenantId, ...whereParams];
+    return exists(this.db, table, tenantWhere, params);
+  }
 
-	/**
-	 * Execute a raw statement with tenant scoping validation
-	 *
-	 * WARNING: You must ensure the statement includes tenant_id filtering.
-	 */
-	async rawExecute(sql: string, params: unknown[] = []): Promise<ExecuteResult> {
-		const sqlLower = sql.toLowerCase();
-		// INSERT statements should have tenant_id in the columns
-		// UPDATE/DELETE statements should have tenant_id in WHERE
-		if (sqlLower.startsWith('insert') && !sqlLower.includes('tenant_id')) {
-			throw new TenantContextError(
-				'INSERT statements must include tenant_id. Use the insert() method instead.'
-			);
-		}
-		if ((sqlLower.startsWith('update') || sqlLower.startsWith('delete')) &&
-			!sqlLower.includes('tenant_id')) {
-			throw new TenantContextError(
-				'UPDATE/DELETE statements must include tenant_id in WHERE clause. Use the scoped methods instead.'
-			);
-		}
-		return execute(this.db, sql, params);
-	}
+  /**
+   * Count rows with tenant scoping
+   */
+  async count(
+    table: string,
+    where?: string,
+    whereParams: unknown[] = [],
+  ): Promise<number> {
+    validateTableName(table);
+    const tenantWhere = where
+      ? `tenant_id = ? AND (${where})`
+      : "tenant_id = ?";
+    const params = [this.context.tenantId, ...whereParams];
+    return count(this.db, table, tenantWhere, params);
+  }
+
+  /**
+   * Execute a raw query with tenant scoping
+   *
+   * WARNING: You must ensure the query includes tenant_id filtering.
+   * This method validates that 'tenant_id' appears in the SQL.
+   */
+  async rawQuery<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+    if (!sql.toLowerCase().includes("tenant_id")) {
+      throw new TenantContextError(
+        "Raw queries must include tenant_id filtering. Use the scoped methods or add tenant_id to your WHERE clause.",
+      );
+    }
+    return queryMany<T>(this.db, sql, params);
+  }
+
+  /**
+   * Execute a raw statement with tenant scoping validation
+   *
+   * WARNING: You must ensure the statement includes tenant_id filtering.
+   */
+  async rawExecute(
+    sql: string,
+    params: unknown[] = [],
+  ): Promise<ExecuteResult> {
+    const sqlLower = sql.toLowerCase();
+    // INSERT statements should have tenant_id in the columns
+    // UPDATE/DELETE statements should have tenant_id in WHERE
+    if (sqlLower.startsWith("insert") && !sqlLower.includes("tenant_id")) {
+      throw new TenantContextError(
+        "INSERT statements must include tenant_id. Use the insert() method instead.",
+      );
+    }
+    if (
+      (sqlLower.startsWith("update") || sqlLower.startsWith("delete")) &&
+      !sqlLower.includes("tenant_id")
+    ) {
+      throw new TenantContextError(
+        "UPDATE/DELETE statements must include tenant_id in WHERE clause. Use the scoped methods instead.",
+      );
+    }
+    return execute(this.db, sql, params);
+  }
 }
 
 /**
@@ -920,6 +957,9 @@ export class TenantDb {
  * }
  * ```
  */
-export function getTenantDb(db: D1DatabaseOrSession, context: TenantContext): TenantDb {
-	return new TenantDb(db, context);
+export function getTenantDb(
+  db: D1DatabaseOrSession,
+  context: TenantContext,
+): TenantDb {
+  return new TenantDb(db, context);
 }
