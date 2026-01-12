@@ -50,11 +50,13 @@
 </script>
 
 <div class="max-w-screen-xl">
-  <!-- Debug banner - TEMPORARY -->
-  {#if data.debug}
-    <div class="mb-4 p-3 bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 rounded text-sm font-mono">
-      <strong>Debug:</strong> tenantId={data.debug.tenantId ?? 'null'}, reason={data.debug.reason}, count={data.debug.count ?? 'N/A'}
-      {#if data.debug.error}<br/>Error: {data.debug.error}{/if}
+  <!-- Example Site Notice -->
+  {#if data.isExampleSite}
+    <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+      <p class="m-0 text-amber-800 dark:text-amber-200 text-sm">
+        <strong>✨ Welcome to the Example Site!</strong> This admin panel is publicly accessible so you can explore Grove's features.
+        On your own site, this panel is private and only accessible to you.
+      </p>
     </div>
   {/if}
 

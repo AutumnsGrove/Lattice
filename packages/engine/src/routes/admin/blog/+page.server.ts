@@ -8,7 +8,8 @@ interface PostRecord {
   /** JSON string of tags array */
   tags?: string;
   description?: string;
-  created_at?: string;
+  /** Can be ISO string or Unix timestamp (number) */
+  created_at?: string | number;
 }
 
 interface BlogPost {
@@ -23,26 +24,18 @@ interface BlogPost {
  * Fetch posts from D1 database (multi-tenant)
  */
 export const load: PageServerLoad = async ({ platform, locals }) => {
-  // Debug: Log what we're receiving
-  console.log("[Admin Blog] tenantId:", locals.tenantId);
-  console.log("[Admin Blog] user:", locals.user?.email ?? "null");
+  const isExampleSite = locals.tenantId === "example-tenant-001";
 
   // Require tenant context
   if (!locals.tenantId) {
     console.error("[Admin Blog] No tenant ID found");
-    return {
-      posts: [] as BlogPost[],
-      debug: { tenantId: null, reason: "no_tenant_id" },
-    };
+    return { posts: [] as BlogPost[], isExampleSite: false };
   }
 
   // Require database
   if (!platform?.env?.DB) {
     console.error("[Admin Blog] D1 database not available");
-    return {
-      posts: [] as BlogPost[],
-      debug: { tenantId: locals.tenantId, reason: "no_database" },
-    };
+    return { posts: [] as BlogPost[], isExampleSite };
   }
 
   try {
@@ -60,32 +53,32 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     );
 
     // Transform posts - parse tags from JSON string
-    const posts: BlogPost[] = postsArray.map((post) => ({
-      slug: post.slug,
-      title: post.title,
-      date: post.date || post.created_at?.split("T")[0] || "",
-      tags: post.tags ? JSON.parse(post.tags) : [],
-      description: post.description || "",
-    }));
+    const posts: BlogPost[] = postsArray.map((post) => {
+      // Handle date - could be ISO string, Unix timestamp, or undefined
+      let date = "";
+      if (post.date) {
+        date = post.date;
+      } else if (post.created_at) {
+        // created_at could be Unix timestamp (number) or ISO string
+        if (typeof post.created_at === "number") {
+          date = new Date(post.created_at * 1000).toISOString().split("T")[0];
+        } else if (typeof post.created_at === "string") {
+          date = post.created_at.split("T")[0];
+        }
+      }
 
-    console.log("[Admin Blog] Found", posts.length, "posts");
-    return {
-      posts,
-      debug: {
-        tenantId: locals.tenantId,
-        reason: "success",
-        count: posts.length,
-      },
-    };
+      return {
+        slug: post.slug,
+        title: post.title,
+        date,
+        tags: post.tags ? JSON.parse(post.tags) : [],
+        description: post.description || "",
+      };
+    });
+
+    return { posts, isExampleSite };
   } catch (error) {
     console.error("[Admin Blog] Error fetching posts:", error);
-    return {
-      posts: [] as BlogPost[],
-      debug: {
-        tenantId: locals.tenantId,
-        reason: "error",
-        error: String(error),
-      },
-    };
+    return { posts: [] as BlogPost[], isExampleSite };
   }
 };
