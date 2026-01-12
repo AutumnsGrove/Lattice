@@ -267,6 +267,8 @@
 			<div class="nav-links desktop-nav">
 				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
 				<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')}>Blog</a>
+				<a href="/menu" class:active={$page.url.pathname === '/menu'}>Menu</a>
+				<a href="/gallery" class:active={$page.url.pathname === '/gallery'}>Gallery</a>
 				<a href="/about" class:active={$page.url.pathname.startsWith('/about')}>About</a>
 
 				<!-- Search -->
@@ -357,6 +359,8 @@
 			</form>
 			<a href="/" class:active={$page.url.pathname === '/'} onclick={closeMobileMenu}>Home</a>
 			<a href="/blog" class:active={$page.url.pathname.startsWith('/blog')} onclick={closeMobileMenu}>Blog</a>
+			<a href="/menu" class:active={$page.url.pathname === '/menu'} onclick={closeMobileMenu}>Menu</a>
+			<a href="/gallery" class:active={$page.url.pathname === '/gallery'} onclick={closeMobileMenu}>Gallery</a>
 			<a href="/about" class:active={$page.url.pathname.startsWith('/about')} onclick={closeMobileMenu}>About</a>
 		</div>
 	</header>

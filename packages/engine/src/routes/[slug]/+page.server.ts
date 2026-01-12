@@ -1,14 +1,12 @@
 import { error } from "@sveltejs/kit";
 import { marked } from "marked";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
-import type { GutterItem } from "$lib/utils/markdown.js";
+import {
+  extractHeaders,
+  type GutterItem,
+  type Header,
+} from "$lib/utils/markdown.js";
 import type { PageServerLoad } from "./$types.js";
-
-interface Header {
-  level: number;
-  id: string;
-  text: string;
-}
 
 interface HeroData {
   title?: string;
@@ -85,18 +83,16 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 
     // Generate HTML from markdown if not stored
     let htmlContent = pageData.html_content;
-    if (
-      !htmlContent &&
-      pageData.markdown_content &&
-      typeof pageData.markdown_content === "string"
-    ) {
+    const rawMarkdown = pageData.markdown_content || "";
+    if (!htmlContent && rawMarkdown && typeof rawMarkdown === "string") {
       htmlContent = sanitizeMarkdown(
-        marked.parse(pageData.markdown_content, { async: false }) as string,
+        marked.parse(rawMarkdown, { async: false }) as string,
       );
     }
 
-    // Extract headers from HTML for table of contents
-    const headers = extractHeadersFromHtml(String(htmlContent || ""));
+    // Extract headers from raw markdown for table of contents
+    // Note: ContentWithGutter will add IDs to headers client-side based on this data
+    const headers = extractHeaders(rawMarkdown);
 
     // Safe JSON parsing for gutter content
     let gutterContent: GutterItem[] = [];
@@ -150,22 +146,3 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     throw error(500, "Failed to load page");
   }
 };
-
-/**
- * Extract headers from HTML content for table of contents
- */
-function extractHeadersFromHtml(html: string): Header[] {
-  const headers: Header[] = [];
-  const headerRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[1-6]>/gi;
-
-  let match;
-  while ((match = headerRegex.exec(html)) !== null) {
-    headers.push({
-      level: parseInt(match[1]),
-      id: match[2],
-      text: match[3].trim(),
-    });
-  }
-
-  return headers;
-}
