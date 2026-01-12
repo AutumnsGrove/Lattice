@@ -34,15 +34,15 @@ interface PostInput {
 
 /**
  * GET /api/posts/[slug] - Get a single post
+ *
+ * Access levels:
+ * - Anonymous: Only published posts (for public blog access)
+ * - Authenticated owner: All posts including drafts
+ *
  * Uses TenantDb for automatic tenant isolation
  * Falls back to filesystem (UserContent) if not in D1
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
-  // Auth check
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
-
   const { slug } = params;
 
   if (!slug) {
@@ -50,26 +50,41 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throw error(400, "Tenant context required");
+  }
+
+  // Determine access level
+  let isOwner = false;
+  if (locals.user && platform?.env?.DB) {
+    try {
+      await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
+      isOwner = true;
+    } catch {
+      // User doesn't own this tenant - treat as anonymous
+      isOwner = false;
+    }
   }
 
   // Try D1 first with TenantDb
   if (platform?.env?.DB) {
     try {
-      // Verify the authenticated user owns this tenant
-      const tenantId = await getVerifiedTenantId(
-        platform.env.DB,
-        locals.tenantId,
-        locals.user,
+      const tenantDb = getTenantDb(platform.env.DB, {
+        tenantId: locals.tenantId,
+      });
+
+      const post = await tenantDb.queryOne<PostRecord & { status?: string }>(
+        "posts",
+        "slug = ?",
+        [slug],
       );
 
-      const tenantDb = getTenantDb(platform.env.DB, { tenantId });
-
-      const post = await tenantDb.queryOne<PostRecord>("posts", "slug = ?", [
-        slug,
-      ]);
-
       if (post) {
+        // Check access: owners can see all, anonymous only published
+        const isPublished = !post.status || post.status === "published";
+        if (!isOwner && !isPublished) {
+          throw error(404, "Post not found");
+        }
+
         return json({
           source: "d1",
           post: {
@@ -82,6 +97,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
         });
       }
     } catch (err) {
+      if ((err as { status?: number }).status === 404) throw err;
       console.error("D1 fetch error:", err);
       // Fall through to filesystem fallback
     }

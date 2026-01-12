@@ -5,6 +5,10 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PageInput {
@@ -37,6 +41,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!locals.tenantId) {
     throw error(401, "Tenant ID not found");
+  }
+
+  // Rate limit content creation to prevent spam
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const { response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("pages/create", locals.user.id),
+      limit: 20,
+      windowSeconds: 3600, // 20 pages per hour
+      namespace: "content-ratelimit",
+    });
+
+    if (response) return response;
   }
 
   try {
