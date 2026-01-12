@@ -36,17 +36,23 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
       if (db) {
         // If we have a tenant context, load tenant-specific settings
         if (tenantId) {
-          const result = await db
-            .prepare(
-              "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
-            )
-            .bind(tenantId)
-            .all<{ setting_key: string; setting_value: string }>();
+          // Site settings query - wrapped separately so it doesn't block nav
+          try {
+            const result = await db
+              .prepare(
+                "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
+              )
+              .bind(tenantId)
+              .all<{ setting_key: string; setting_value: string }>();
 
-          if (result?.results) {
-            for (const row of result.results) {
-              siteSettings[row.setting_key] = row.setting_value;
+            if (result?.results) {
+              for (const row of result.results) {
+                siteSettings[row.setting_key] = row.setting_value;
+              }
             }
+          } catch (settingsError) {
+            // site_settings table might not exist yet - that's OK
+            console.warn("[Layout] site_settings query failed:", settingsError);
           }
 
           // Load pages that should appear in navigation
