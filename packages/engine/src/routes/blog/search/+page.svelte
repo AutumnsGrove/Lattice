@@ -5,6 +5,9 @@
 
 	let { data } = $props();
 
+	// Get accent color from site settings (falls back to default if not set)
+	const accentColor = $derived(data.siteSettings?.accent_color || null);
+
 	// Get initial values from URL params
 	const initialQuery = $page.url.searchParams.get('q') || '';
 	const initialTag = $page.url.searchParams.get('tag') || '';
@@ -109,11 +112,11 @@
 			{#if data.allTags.length > 0}
 				<div class="tags-filter">
 					<span class="filter-label">Filter by tag:</span>
-					<div class="tags">
+					<div class="tags" style:--accent-color={accentColor}>
 						{#each data.allTags as tag (tag)}
 							<Badge
 								variant="tag"
-								class="{selectedTag === tag ? 'bg-green-800 dark:bg-green-600 text-white' : ''} cursor-pointer select-none"
+								class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer select-none"
 								onclick={() => selectTag(tag)}
 							>
 								{tag}
@@ -162,11 +165,11 @@
 							})}
 						</time>
 						{#if post.tags.length > 0}
-							<div class="tags">
+							<div class="tags" style:--accent-color={accentColor}>
 								{#each post.tags as tag (tag)}
 									<Badge
 										variant="tag"
-										class="{selectedTag === tag ? 'bg-green-800 dark:bg-green-600 text-white' : ''} cursor-pointer"
+										class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer"
 										onclick={(e) => { e.preventDefault(); e.stopPropagation(); selectTag(tag); }}
 									>
 										{tag}
@@ -280,5 +283,30 @@
 		.search-header h1 {
 			font-size: 2rem;
 		}
+	}
+
+	/* Apply accent color to tags when set via CSS custom property */
+	.tags[style*="--accent-color"] :global(.accent-tag) {
+		background: var(--accent-color, var(--tag-bg));
+		border-color: var(--accent-color, var(--tag-bg));
+	}
+
+	.tags[style*="--accent-color"] :global(.accent-tag:hover) {
+		filter: brightness(1.1);
+	}
+
+	/* Selected tag styling - uses higher specificity to override accent color */
+	.tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
+	.tags :global(.selected-tag) {
+		background: #2c5f2d;
+		border-color: #2c5f2d;
+		color: white;
+		filter: none;
+	}
+
+	:global(.dark) .tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
+	:global(.dark) .tags :global(.selected-tag) {
+		background: #16a34a;
+		border-color: #16a34a;
 	}
 </style>
