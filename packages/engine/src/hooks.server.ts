@@ -209,7 +209,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       try {
         const tenant = await db
           .prepare(
-            "SELECT id, subdomain, display_name, email, theme FROM tenants WHERE subdomain = ? AND active = 1",
+            "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
           )
           .bind(subdomain)
           .first<{
@@ -218,6 +218,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             display_name: string;
             email: string;
             theme: string | null;
+            plan: string;
           }>();
 
         if (!tenant) {
@@ -233,6 +234,7 @@ export const handle: Handle = async ({ event, resolve }) => {
               name: tenant.display_name,
               theme: tenant.theme,
               ownerId: tenant.email,
+              plan: tenant.plan || "seedling", // Default to seedling if not set
             },
           };
           event.locals.tenantId = tenant.id;

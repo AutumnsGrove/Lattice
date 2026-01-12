@@ -111,6 +111,8 @@ interface TenantInfo {
   theme: string | null;
   /** Owner's email address */
   ownerId: string;
+  /** Subscription tier (free, seedling, sapling, oak, evergreen) */
+  plan: string;
 }
 
 export { AppContext, TenantInfo };

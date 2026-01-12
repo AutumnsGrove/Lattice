@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
+import { getNavPageLimit } from "$lib/server/tier-features.js";
 
 interface SiteSettings {
   font_family: string;
@@ -56,18 +57,26 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           try {
             const navResult = await db
               .prepare(
-                `SELECT slug, title, show_in_nav FROM pages WHERE tenant_id = ?`,
+                `SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
               )
               .bind(tenantId)
-              .all<NavPage & { show_in_nav: number }>();
+              .all<NavPage & { show_in_nav: number; nav_order: number }>();
 
             // Filter: only pages with show_in_nav enabled, excluding hardcoded nav items
             if (navResult?.results) {
+              // Get tier-based nav page limit
+              const context = locals.context;
+              const plan =
+                context.type === "tenant" ? context.tenant.plan : "seedling";
+              const navLimit = getNavPageLimit(plan);
+
               navPages = navResult.results
                 .filter(
                   (p) =>
                     p.show_in_nav && p.slug !== "home" && p.slug !== "about",
                 )
+                .sort((a, b) => (a.nav_order || 0) - (b.nav_order || 0))
+                .slice(0, navLimit) // Apply tier limit
                 .map((p) => ({ slug: p.slug, title: p.title }));
             }
           } catch (navError) {
@@ -101,10 +110,16 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     }
   }
 
+  // Get nav page limit for the current tier (for UI display)
+  const context = locals.context;
+  const plan = context.type === "tenant" ? context.tenant.plan : "seedling";
+  const navPageLimit = getNavPageLimit(plan);
+
   return {
     user: locals.user || null,
     context: locals.context as AppContext,
     siteSettings,
     navPages,
+    navPageLimit,
   };
 };

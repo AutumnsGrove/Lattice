@@ -1,12 +1,22 @@
 <script>
   import { Button, Badge, GlassCard, toast } from '$lib/ui';
-  import { Plus } from 'lucide-svelte';
+  import { Plus, AlertCircle } from 'lucide-svelte';
   import { api } from '$lib/utils';
 
   let { data } = $props();
 
   /** @type {Record<string, boolean>} */
   let togglingNav = $state({});
+
+  // Count pages currently in nav (excluding home/about which are hardcoded)
+  let navPagesUsed = $derived(
+    data.pages.filter(
+      (/** @type {{ show_in_nav: number; slug: string }} */ p) =>
+        p.show_in_nav && p.slug !== 'home' && p.slug !== 'about'
+    ).length
+  );
+  let navLimit = $derived(data.navPageLimit || 3);
+  let atLimit = $derived(navPagesUsed >= navLimit);
 
   /** @param {string | number} dateValue */
   function formatDate(dateValue) {
@@ -28,6 +38,13 @@
    */
   async function toggleNav(slug, currentValue) {
     const newValue = !currentValue;
+
+    // Check limit when trying to add (not remove)
+    if (newValue && atLimit) {
+      toast.error(`Navigation limit reached (${navLimit} pages). Upgrade to add more.`);
+      return;
+    }
+
     togglingNav[slug] = true;
 
     try {
@@ -53,13 +70,26 @@
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
       <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Site Pages</h1>
-      <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">{data.pages.length} pages</p>
+      <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">
+        {data.pages.length} pages
+        <span class="mx-2">·</span>
+        <span class:text-amber-600={atLimit} class:dark:text-amber-400={atLimit}>
+          {navPagesUsed}/{navLimit} nav slots used
+        </span>
+      </p>
     </div>
     <a href="/admin/pages/create" class="btn-primary inline-flex items-center gap-2">
       <Plus class="w-5 h-5" />
       <span>Create Page</span>
     </a>
   </header>
+
+  {#if atLimit}
+    <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
+      <AlertCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="text-sm">Navigation page limit reached. <a href="/admin/billing" class="underline hover:no-underline">Upgrade your plan</a> for more.</span>
+    </div>
+  {/if}
 
   <GlassCard variant="default" class="overflow-hidden mb-8">
     <table class="w-full border-collapse">
@@ -87,13 +117,18 @@
               <Badge variant="tag">{page.type}</Badge>
             </td>
             <td class="p-4 text-center border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:hidden">
+              {@const isInNav = page.show_in_nav === 1}
+              {@const canToggle = isInNav || !atLimit}
               <input
                 type="checkbox"
-                checked={page.show_in_nav === 1}
-                disabled={togglingNav[page.slug]}
-                onchange={() => toggleNav(page.slug, page.show_in_nav === 1)}
-                class="w-4 h-4 cursor-pointer accent-[var(--color-primary)] disabled:opacity-50 disabled:cursor-wait"
-                title={page.show_in_nav === 1 ? 'Remove from navigation' : 'Add to navigation'}
+                checked={isInNav}
+                disabled={togglingNav[page.slug] || !canToggle}
+                onchange={() => toggleNav(page.slug, isInNav)}
+                class="w-4 h-4 accent-[var(--color-primary)] disabled:opacity-50"
+                class:cursor-pointer={canToggle && !togglingNav[page.slug]}
+                class:cursor-not-allowed={!canToggle}
+                class:cursor-wait={togglingNav[page.slug]}
+                title={!canToggle ? `Limit reached (${navLimit})` : isInNav ? 'Remove from navigation' : 'Add to navigation'}
                 aria-label={`Toggle navigation visibility for ${page.title}`}
               />
             </td>
@@ -118,7 +153,11 @@
     <h3>About Pages</h3>
     <p class="text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)]">
       Pages are standalone content like About, Contact, or custom landing pages.
-      Unlike blog posts, pages appear in your site navigation and are designed for timeless content.
+      Unlike blog posts, pages can appear in your site navigation and are designed for timeless content.
+    </p>
+    <p class="text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-sm mt-2">
+      <strong>Navigation limits:</strong> Your plan allows up to {navLimit} custom navigation pages.
+      Home, Blog, and About are always included in navigation automatically.
     </p>
   </GlassCard>
 </div>
