@@ -13,6 +13,11 @@ interface PageInput {
   hero?: string;
 }
 
+interface PagePatchInput {
+  show_in_nav?: boolean;
+  nav_order?: number;
+}
+
 /**
  * PUT /api/pages/[slug] - Update an existing page in D1
  */
@@ -129,6 +134,104 @@ export const PUT: RequestHandler = async ({
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error updating page:", err);
+    throw error(
+      500,
+      err instanceof Error ? err.message : "Failed to update page",
+    );
+  }
+};
+
+/**
+ * PATCH /api/pages/[slug] - Quick update for specific fields (e.g., show_in_nav toggle)
+ */
+export const PATCH: RequestHandler = async ({
+  params,
+  request,
+  platform,
+  locals,
+}) => {
+  // Auth check
+  if (!locals.user) {
+    throw error(401, "Unauthorized");
+  }
+
+  // Tenant check
+  if (!locals.tenantId) {
+    throw error(401, "Tenant not found");
+  }
+
+  // CSRF check
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
+  }
+
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
+  const { slug } = params;
+
+  if (!slug) {
+    throw error(400, "Slug is required");
+  }
+
+  try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
+    const data = sanitizeObject(await request.json()) as PagePatchInput;
+
+    // Check if page exists and belongs to tenant
+    const existing = await platform.env.DB.prepare(
+      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?",
+    )
+      .bind(slug, tenantId)
+      .first();
+
+    if (!existing) {
+      throw error(404, "Page not found");
+    }
+
+    // Build dynamic update based on provided fields
+    const updates: string[] = [];
+    const values: (string | number)[] = [];
+
+    if (typeof data.show_in_nav === "boolean") {
+      updates.push("show_in_nav = ?");
+      values.push(data.show_in_nav ? 1 : 0);
+    }
+
+    if (typeof data.nav_order === "number") {
+      updates.push("nav_order = ?");
+      values.push(data.nav_order);
+    }
+
+    if (updates.length === 0) {
+      throw error(400, "No valid fields to update");
+    }
+
+    // Always update the timestamp
+    updates.push("updated_at = unixepoch()");
+
+    const updateQuery = `UPDATE pages SET ${updates.join(", ")} WHERE slug = ? AND tenant_id = ?`;
+    values.push(slug, tenantId);
+
+    await platform.env.DB.prepare(updateQuery)
+      .bind(...values)
+      .run();
+
+    return json({
+      success: true,
+      slug,
+      message: "Page updated successfully",
+    });
+  } catch (err) {
+    if ((err as { status?: number }).status) throw err;
+    console.error("Error patching page:", err);
     throw error(
       500,
       err instanceof Error ? err.message : "Failed to update page",

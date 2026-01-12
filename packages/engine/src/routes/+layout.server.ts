@@ -6,9 +6,16 @@ interface SiteSettings {
   [key: string]: string;
 }
 
+interface NavPage {
+  slug: string;
+  title: string;
+}
+
 export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Default site settings
   let siteSettings: SiteSettings = { font_family: "lexend" };
+  // Navigation pages (pages with show_in_nav enabled)
+  let navPages: NavPage[] = [];
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
@@ -32,6 +39,21 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           for (const row of result.results) {
             siteSettings[row.setting_key] = row.setting_value;
           }
+        }
+
+        // Load pages that should appear in navigation
+        // COALESCE handles case where column doesn't exist yet (before migration)
+        const navResult = await db
+          .prepare(
+            `SELECT slug, title FROM pages
+             WHERE tenant_id = ? AND COALESCE(show_in_nav, 0) = 1
+             ORDER BY COALESCE(nav_order, 0) ASC, title ASC`,
+          )
+          .bind(tenantId)
+          .all<NavPage>();
+
+        if (navResult?.results) {
+          navPages = navResult.results;
         }
       } else {
         // Fallback to global settings (for landing page or legacy)
@@ -57,5 +79,6 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     user: locals.user || null,
     context: locals.context as AppContext,
     siteSettings,
+    navPages,
   };
 };

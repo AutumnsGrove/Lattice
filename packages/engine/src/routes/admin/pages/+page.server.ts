@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad } from "./$types";
 
 interface PageRecord {
   slug: string;
@@ -8,6 +8,7 @@ interface PageRecord {
   type: string;
   updated_at: string;
   created_at: string;
+  show_in_nav: number; // 0 or 1 (SQLite boolean)
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   if (platform?.env?.DB) {
     try {
       const result = await platform.env.DB.prepare(
-        `SELECT slug, title, description, type, updated_at, created_at
+        `SELECT slug, title, description, type, updated_at, created_at, COALESCE(show_in_nav, 0) as show_in_nav
          FROM pages
          WHERE tenant_id = ?
          ORDER BY slug ASC`,

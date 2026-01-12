@@ -1,8 +1,12 @@
 <script>
-  import { Button, Badge, GlassCard } from '$lib/ui';
+  import { Button, Badge, GlassCard, toast } from '$lib/ui';
   import { Plus } from 'lucide-svelte';
+  import { api } from '$lib/utils';
 
   let { data } = $props();
+
+  /** @type {Record<string, boolean>} */
+  let togglingNav = $state({});
 
   /** @param {string} dateString */
   function formatDate(dateString) {
@@ -12,6 +16,33 @@
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  /**
+   * Toggle navigation visibility for a page
+   * @param {string} slug
+   * @param {boolean} currentValue
+   */
+  async function toggleNav(slug, currentValue) {
+    const newValue = !currentValue;
+    togglingNav[slug] = true;
+
+    try {
+      await api.patch(`/api/pages/${slug}`, { show_in_nav: newValue });
+
+      // Update local state
+      const pageIndex = data.pages.findIndex((/** @type {{ slug: string }} */ p) => p.slug === slug);
+      if (pageIndex !== -1) {
+        data.pages[pageIndex].show_in_nav = newValue ? 1 : 0;
+      }
+
+      toast.success(newValue ? 'Added to navigation' : 'Removed from navigation');
+    } catch (error) {
+      console.error('Failed to toggle navigation:', error);
+      toast.error('Failed to update navigation');
+    } finally {
+      togglingNav[slug] = false;
+    }
   }
 </script>
 
@@ -33,6 +64,7 @@
         <tr>
           <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
           <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
+          <th class="p-4 text-center border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
           <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
           <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
@@ -51,6 +83,17 @@
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:hidden">
               <Badge variant="tag">{page.type}</Badge>
             </td>
+            <td class="p-4 text-center border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:hidden">
+              <input
+                type="checkbox"
+                checked={page.show_in_nav === 1}
+                disabled={togglingNav[page.slug]}
+                onchange={() => toggleNav(page.slug, page.show_in_nav === 1)}
+                class="w-4 h-4 cursor-pointer accent-[var(--color-primary)] disabled:opacity-50 disabled:cursor-wait"
+                title={page.show_in_nav === 1 ? 'Remove from navigation' : 'Add to navigation'}
+                aria-label={`Toggle navigation visibility for ${page.title}`}
+              />
+            </td>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-sm transition-[border-color,color] max-md:hidden">{formatDate(page.updated_at)}</td>
             <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/{page.slug === 'home' ? '' : page.slug}" target="_blank" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
@@ -59,7 +102,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan="4" class="text-center text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] py-12 px-4 transition-colors">
+            <td colspan="5" class="text-center text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] py-12 px-4 transition-colors">
               No pages yet. Click "Create Page" to get started.
             </td>
           </tr>
