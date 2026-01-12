@@ -83,7 +83,7 @@
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">Paperwork settled!</span> All the legal stuff is sorted. Grove opens its doors very soon.
+				<span class="font-medium">Almost there.</span> Logo and testing in progress. Mid-January.
 			</p>
 		</div>
 	</div>
@@ -125,7 +125,7 @@
 			<Sprout class="w-4 h-4" />
 		</a>
 		<p class="text-foreground-subtle text-sm font-sans mb-6">
-			Signups aren't open yet, but feel free to look around.
+			Signups open mid-January. Feel free to look around.
 		</p>
 
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
