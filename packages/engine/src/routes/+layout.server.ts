@@ -18,6 +18,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   let siteSettings: SiteSettings = { font_family: "lexend" };
   // Navigation pages (pages with show_in_nav enabled)
   let navPages: NavPage[] = [];
+  // DEBUG: capture raw query results
+  let _rawPages: unknown[] = [];
+  let _queryRan = false;
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
@@ -53,6 +56,10 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
             )
             .bind(tenantId)
             .all<NavPage & { show_in_nav: number }>();
+
+          // DEBUG: Capture raw results
+          _queryRan = true;
+          _rawPages = navResult?.results ?? [];
 
           console.log("[Layout] ALL pages for tenant:", {
             tenantId,
@@ -99,9 +106,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   console.log("[Layout] FINAL navPages:", navPages);
 
   // DEBUG: Include debug info in response (avoid platform.env access during build)
-  const _debug = {
+  // @ts-expect-error - temporary debug field
+  const _debug: Record<string, unknown> = {
     tenantId: tenantId ?? "NO_TENANT_ID",
     hasDb: building ? "BUILDING" : !!platform?.env?.DB,
+    queryRan: _queryRan,
+    rawPagesCount: _rawPages.length,
+    rawPages: _rawPages,
     navPagesCount: navPages.length,
   };
 
