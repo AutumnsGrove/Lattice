@@ -73,6 +73,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 |----------|---------|
 | `docs/patterns/grove-durable-objects-architecture.md` | Durable Objects design for auth, tenant coordination, real-time features, D1 scaling |
 | `docs/specs/rings-spec.md` | Rings analytics system with privacy-first design and DO integration |
+| `docs/grove-ai-gateway-integration.md` | Cloudflare AI Gateway integration for per-tenant AI quotas and observability |
 
 ---
 

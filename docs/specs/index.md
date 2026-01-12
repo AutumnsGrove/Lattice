@@ -82,6 +82,12 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Patina](patina-spec.md)** | Backup & disaster recovery | Active | D1, R2 |
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
 
+### 🤖 AI & Machine Learning
+
+| Specification | Purpose | Status | Integration |
+|---------------|---------|--------|-------------|
+| **[AI Gateway](../grove-ai-gateway-integration.md)** | Central AI observability & per-tenant quota management | **New** | Heartwood, D1, Pricing Tiers |
+
 ### 🛒 Commerce & Community
 
 | Specification | Purpose | Status | Integration |
@@ -229,6 +235,7 @@ graph TB
 | **Rings** | ✅ Integration | ✅ Metrics | ✅ Core | ✅ Storage | ❌ | ✅ PostDO |
 | **Vineyard** | ⚠️ Testing | ✅ Primary | ⚠️ Correlation | ✅ Results | ❌ | ✅ DO tests |
 | **Engine** | ✅ Framework | ✅ Metrics | ✅ Analytics | ✅ Content | ✅ Media | ✅ PostDO |
+| **AI Gateway** | ✅ Framework | ✅ Analytics | ⚠️ Correlation | ✅ Quota tracking | ❌ | ⚠️ TenantDO |
 
 **Legend:** ✅ Direct integration, ⚠️ Indirect/metrics only, ❌ No integration
 

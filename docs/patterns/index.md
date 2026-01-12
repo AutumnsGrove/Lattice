@@ -208,6 +208,9 @@ graph TB
 - [Rings Spec](../specs/rings-spec.md) - Analytics system
 - [Multi-Tenant Architecture](../multi-tenant-architecture.md) - Core architecture
 
+### Integration Guides
+- [AI Gateway Integration](../grove-ai-gateway-integration.md) - Cloudflare AI Gateway setup for per-tenant AI quotas and observability
+
 ### Guides
 - [Rate Limiting Guide](../guides/rate-limiting-guide.md) - Threshold implementation
 - [Load Testing Guide](../guides/load-testing-guide.md) - Sentinel implementation

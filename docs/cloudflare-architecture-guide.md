@@ -375,3 +375,11 @@ For your specific scenario (10-50 client blogs, 6-month horizon, media-heavy, 1K
 **Definitive recommendation**: Cloudflare Workers + Pages with per-tenant D1 databases, shared R2 storage, and R2 + Images transformations for media. Expect $0-5/month costs for the first 6 months. Implement wildcard DNS routing from day one to avoid DNS record limit issues. Budget $5-15/month if growth exceeds 50 clients or traffic consistently hits 100K+ requests daily.
 
 This architecture delivers enterprise-grade global performance, 99.99% uptime, automatic DDoS protection, zero egress fees, and scales to 1,000+ clients at $15-50/month. Costs that would reach $500-2,000/month on competing platforms.
+
+---
+
+## Related Documentation
+
+- [AI Gateway Integration Guide](grove-ai-gateway-integration.md) - Cloudflare AI Gateway for per-tenant AI quotas, observability, and cost attribution
+- [Multi-Tenant Architecture](multi-tenant-architecture.md) - Core multi-tenant design patterns
+- [Durable Objects Architecture](patterns/grove-durable-objects-architecture.md) - DO coordination for sessions, tenants, and posts
