@@ -38,7 +38,7 @@ export const TIER_FEATURE_LIMITS = {
     posts: 50,
     storage: 1 * 1024 * 1024 * 1024, // 1 GB in bytes
     themes: 3,
-    navPages: 3, // 3 custom nav pages
+    navPages: 0, // No custom nav pages at entry tier
     emailForwarding: false,
     customDomain: false,
     themeCustomizer: false,
@@ -48,7 +48,7 @@ export const TIER_FEATURE_LIMITS = {
     posts: 250,
     storage: 5 * 1024 * 1024 * 1024, // 5 GB in bytes
     themes: 10,
-    navPages: 5, // 5 custom nav pages
+    navPages: 3, // 3 custom nav pages
     emailForwarding: true,
     customDomain: false,
     themeCustomizer: false,
@@ -58,7 +58,7 @@ export const TIER_FEATURE_LIMITS = {
     posts: Infinity, // Unlimited
     storage: 20 * 1024 * 1024 * 1024, // 20 GB in bytes
     themes: Infinity, // All themes
-    navPages: 8, // 8 custom nav pages
+    navPages: 5, // 5 custom nav pages
     emailForwarding: true,
     customDomain: true, // BYOD
     themeCustomizer: true,
@@ -68,7 +68,7 @@ export const TIER_FEATURE_LIMITS = {
     posts: Infinity,
     storage: 100 * 1024 * 1024 * 1024, // 100 GB in bytes
     themes: Infinity,
-    navPages: 8, // Same as Oak - nav pages cap at 8
+    navPages: 8, // Full nav customization
     emailForwarding: true,
     customDomain: true, // Domain included
     themeCustomizer: true,

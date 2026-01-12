@@ -129,6 +129,19 @@
 						<tr class="border-b border-subtle">
 							<td class="py-3 px-3 text-foreground-muted">
 								<span class="inline-flex items-center gap-2">
+									<svelte:component this={pricingIcons.layout} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
+									Nav Pages
+								</span>
+							</td>
+							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
+							<td class="py-3 px-3 text-center text-foreground-faint">—</td>
+							<td class="py-3 px-3 text-center text-foreground">3</td>
+							<td class="py-3 px-3 text-center text-foreground">5</td>
+							<td class="py-3 px-3 text-center text-foreground">8</td>
+						</tr>
+						<tr class="border-b border-subtle bg-surface">
+							<td class="py-3 px-3 text-foreground-muted">
+								<span class="inline-flex items-center gap-2">
 									<svelte:component this={pricingIcons.flower2} class="w-4 h-4 text-accent-subtle flex-shrink-0" />
 									Meadow
 								</span>
@@ -262,6 +275,20 @@
 							<strong>Sapling:</strong> All 10 themes plus accent color.
 							<strong>Oak+:</strong> Full theme customizer (colors, fonts, layout, custom CSS) plus community themes.
 							<strong>Evergreen:</strong> Everything Oak gets, plus upload your own custom fonts.
+						</p>
+					</div>
+
+					<div>
+						<h3 class="font-medium text-foreground mb-2">Navigation Pages</h3>
+						<p>
+							<strong>Every blog includes Home, Blog, and About in the navigation.</strong>
+							Nav Pages let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation.
+							<strong>Sapling:</strong> 3 custom nav pages.
+							<strong>Oak:</strong> 5 custom nav pages.
+							<strong>Evergreen:</strong> 8 custom nav pages.
+						</p>
+						<p class="mt-2 text-xs text-foreground-faint">
+							Seedling users can still create unlimited pages—they just won't appear in the navigation bar. Link to them from posts or your About page.
 						</p>
 					</div>
 

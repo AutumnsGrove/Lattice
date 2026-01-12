@@ -84,10 +84,15 @@
     </a>
   </header>
 
-  {#if atLimit}
+  {#if navLimit === 0}
+    <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+      <AlertCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="text-sm">Custom navigation pages are available starting with Sapling. <a href="/admin/billing" class="underline hover:no-underline">Upgrade your plan</a> to add pages to your nav.</span>
+    </div>
+  {:else if atLimit}
     <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
       <AlertCircle class="w-4 h-4 flex-shrink-0" />
-      <span class="text-sm">Navigation page limit reached. <a href="/admin/billing" class="underline hover:no-underline">Upgrade your plan</a> for more.</span>
+      <span class="text-sm">Navigation page limit reached ({navLimit}). <a href="/admin/billing" class="underline hover:no-underline">Upgrade your plan</a> for more.</span>
     </div>
   {/if}
 

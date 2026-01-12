@@ -272,6 +272,17 @@
 		</p>
 	</div>
 
+	<!-- Fine print -->
+	<div class="text-center py-2 space-y-1">
+		<p class="text-xs text-foreground-subtle">
+			<strong>Navigation pages:</strong> Seedling includes default nav only.
+			Sapling adds 3 custom nav pages, Oak adds 5, Evergreen includes 8.
+		</p>
+		<p class="text-xs text-foreground-subtle">
+			Home, Blog, and About are always included in your navigation for free.
+		</p>
+	</div>
+
 	<!-- Continue button -->
 	<form method="POST" class="space-y-4">
 		<input type="hidden" name="plan" value={selectedPlan || ''} />

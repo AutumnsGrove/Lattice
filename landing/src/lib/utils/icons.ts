@@ -488,6 +488,8 @@ export const pricingIcons = {
   clock: Clock,
   // Checkmark
   check: Check,
+  // Navigation
+  layout: Layout,
 } as const;
 
 // ============================================================================
