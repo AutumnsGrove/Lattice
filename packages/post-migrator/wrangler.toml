@@ -1,0 +1,56 @@
+# Post Migrator Worker - Hot/Warm/Cold Storage Migration
+#
+# This worker runs on a cron schedule to migrate posts between storage tiers:
+# - Hot: Active posts in DO memory (fast access)
+# - Warm: Inactive posts in DO SQLite (hibernated, low cost)
+# - Cold: Archived posts in R2 (bulk storage, cheapest)
+#
+# Cloudflare Pages doesn't support cron triggers, so this runs as a separate Worker.
+
+name = "grove-post-migrator"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Cron Triggers - Run daily at 3 AM UTC (off-peak hours)
+# =============================================================================
+[triggers]
+crons = ["0 3 * * *"]
+
+# =============================================================================
+# D1 Database - Same database as GroveEngine
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# R2 Bucket - Cold storage destination
+# =============================================================================
+[[r2_buckets]]
+binding = "COLD_STORAGE"
+bucket_name = "grove-media"
+
+# =============================================================================
+# Durable Object Bindings - To trigger migrations
+# =============================================================================
+# PostContentDO handles the actual content migration
+[[services]]
+binding = "ENGINE"
+service = "groveengine"
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+[vars]
+# Migration thresholds (days)
+HOT_TO_WARM_DAYS = "7"
+WARM_TO_COLD_DAYS = "30"
+
+# View thresholds (weekly views to stay in tier)
+HOT_VIEW_THRESHOLD = "10"
+WARM_VIEW_THRESHOLD = "1"
+
+# Batch size for processing
+BATCH_SIZE = "100"

@@ -263,6 +263,13 @@
 			<!-- TITLE AREA -->
 			<a href="/" class="logo">{siteName}</a>
 
+			<!-- DEBUG: Remove after fixing -->
+			{#if data.navPages?.length}
+				<!-- navPages: {JSON.stringify(data.navPages)} -->
+			{:else}
+				<!-- navPages EMPTY - tenantId: {data.context?.tenant?.id ?? 'no tenant'} -->
+			{/if}
+
 			<!-- Desktop Navigation -->
 			<div class="nav-links desktop-nav">
 				<a href="/" class:active={$page.url.pathname === '/'}>Home</a>
