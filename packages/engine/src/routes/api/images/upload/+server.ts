@@ -7,6 +7,7 @@ import {
   buildRateLimitKey,
   rateLimitHeaders,
 } from "$lib/server/rate-limits/middleware.js";
+import { validateEnv } from "$lib/server/env-validation.js";
 
 /** File signatures for MIME type validation */
 const FILE_SIGNATURES: Record<string, number[][]> = {
@@ -101,50 +102,53 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(403, "Invalid origin");
   }
 
-  // Check for R2 binding
-  if (!platform?.env?.IMAGES) {
-    throw error(500, "R2 bucket not configured");
+  // Validate required environment variables (fail-fast with actionable errors)
+  const envValidation = validateEnv(platform?.env, [
+    "DB",
+    "IMAGES",
+    "CACHE_KV",
+  ]);
+  if (!envValidation.valid) {
+    console.error(`[Image Upload] ${envValidation.message}`);
+    throw error(503, "Upload service temporarily unavailable");
   }
 
-  // Verify tenant ownership
-  if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
-  }
+  // Safe to access after validation
+  const db = platform!.env!.DB;
+  const images = platform!.env!.IMAGES;
+  const kv = platform!.env!.CACHE_KV;
 
-  // Rate limit uploads
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const { result, response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("upload/image", locals.user.id),
-      limit: 50,
-      windowSeconds: 3600, // 1 hour
-      namespace: "upload-ratelimit",
-    });
+  // Rate limit uploads (fail-closed to prevent storage abuse)
+  const { result, response } = await checkRateLimit({
+    kv,
+    key: buildRateLimitKey("upload/image", locals.user.id),
+    limit: 50,
+    windowSeconds: 3600, // 1 hour
+    namespace: "upload-ratelimit",
+  });
 
-    if (response) {
-      return new Response(
-        JSON.stringify({
-          error: "rate_limited",
-          message:
-            "Upload limit reached. Please wait before uploading more images.",
-          remaining: 0,
-          resetAt: new Date(result.resetAt * 1000).toISOString(),
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            ...rateLimitHeaders(result, 50),
-          },
+  if (response) {
+    return new Response(
+      JSON.stringify({
+        error: "rate_limited",
+        message:
+          "Upload limit reached. Please wait before uploading more images.",
+        remaining: 0,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...rateLimitHeaders(result, 50),
         },
-      );
-    }
+      },
+    );
   }
 
   try {
     const tenantId = await getVerifiedTenantId(
-      platform.env.DB,
+      db,
       locals.tenantId,
       locals.user,
     );
@@ -222,11 +226,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     await validateImageDimensions(file, buffer);
 
     // Check for duplicates if hash provided
-    if (hash && platform?.env?.DB) {
+    if (hash && db) {
       try {
-        const existing = (await platform.env.DB.prepare(
-          "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
-        )
+        const existing = (await db
+          .prepare(
+            "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
+          )
           .bind(hash, tenantId)
           .first()) as { key: string; url: string } | null;
 
@@ -291,7 +296,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (description) metadata.description = description.substring(0, 1000);
     if (hash) metadata.hash = hash;
 
-    await platform.env.IMAGES.put(key, arrayBuffer, {
+    await images.put(key, arrayBuffer, {
       httpMetadata: {
         contentType: file.type,
         cacheControl: "public, max-age=31536000, immutable",
@@ -303,15 +308,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 
     // Store hash for future duplicate detection
-    if (hash && platform?.env?.DB) {
+    if (hash && db) {
       try {
-        await platform.env.DB.prepare(
-          `
+        await db
+          .prepare(
+            `
           INSERT INTO image_hashes (hash, key, url, tenant_id, created_at)
           VALUES (?, ?, ?, ?, datetime('now'))
           ON CONFLICT(hash, tenant_id) DO NOTHING
         `,
-        )
+          )
           .bind(hash, key, cdnUrl, tenantId)
           .run();
       } catch (dbError) {
