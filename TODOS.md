@@ -8,33 +8,61 @@
 
 # 🔄 CURRENT SESSION (Jan 12, 2026)
 
-## Just Completed ✅
-- **Fixed dynamic navigation pages not showing** - Root cause: `site_settings` table query failing blocked everything in same try/catch
-- Navigation toggle checkbox now works in admin
-- Menu and Gallery pages now appear in nav bar
+## Completed This Session ✅
 
-## In Progress 🔄
-- Clean up debug code from layout.server.ts (need to format & commit)
+### Dynamic Navigation Pages Feature
+- [x] **Fixed navigation pages not appearing** - Root cause discovered and fixed!
+  - Problem: `site_settings` table didn't exist, query threw error
+  - Error was in same try/catch as `pages` query, blocking everything
+  - Fix: Wrapped each query in its own try/catch (isolated failures)
+- [x] Navigation toggle checkbox works in admin (`/admin/pages`)
+- [x] Menu and Gallery pages now appear in navigation bar
+- [x] Cleaned up all debug code from `+layout.server.ts`
+- [x] Removed debug UI from `+layout.svelte`
+
+### Documentation & Lessons Learned
+- [x] **Updated AGENT.md** with critical lesson about isolating database queries
+- [x] Added code examples showing bad vs good patterns
+- [x] Updated this TODOS.md with session progress
+
+### Technical Fixes Along the Way
+- [x] Added `building` check before `platform.env` access (Cloudflare adapter requirement)
+- [x] Used truthy check for `show_in_nav` filter (D1 type flexibility)
+- [x] Fixed prerender errors during SvelteKit build
 
 ## Next Up 📋
-1. Update AGENT.md - Add lesson about isolating database queries
-2. Create site_settings table migration
-3. Implement tier-based navigation limits (T1:0, T2:3, T3:5, T4:8)
-4. Update admin UI with limits
-5. Update pricing page, fine print, roadmap, docs
+1. [ ] Create `site_settings` table migration (table doesn't exist yet)
+2. [ ] Implement tier-based navigation limits:
+   - T1 (Seedling): 0 nav pages
+   - T2 (Sapling): 3 nav pages
+   - T3 (Tree): 5 nav pages
+   - T4 (Grove): 8 nav pages
+3. [ ] Update admin UI to show nav page limits
+4. [ ] Update pricing page with nav limits feature
+5. [ ] Update fine print with nav limits
+6. [ ] Update roadmap page
+7. [ ] Update documentation
 
 ## 💡 KEY LESSON: Isolate Database Queries!
+
+**NEVER put multiple independent queries in the same try/catch block.**
+
 ```typescript
-// BAD - cascading failure
+// ❌ BAD - cascading failure
 try {
-  const a = await db.prepare(...).all(); // fails = everything blocked
-  const b = await db.prepare(...).all();
+  const a = await db.prepare(...).all(); // If this fails...
+  const b = await db.prepare(...).all(); // ...this NEVER runs!
 } catch {}
 
-// GOOD - isolated failures
-try { const a = await db.prepare(...).all(); } catch {}
-try { const b = await db.prepare(...).all(); } catch {}
+// ✅ GOOD - isolated failures
+try { const a = await db.prepare(...).all(); } catch { /* fallback */ }
+try { const b = await db.prepare(...).all(); } catch { /* fallback */ }
 ```
+
+This cost us hours of debugging. The `site_settings` table was missing, which
+silently blocked the `pages` query because they shared a try/catch block.
+
+**Also documented in:** `AGENT.md` → Database Management section
 
 ---
 
