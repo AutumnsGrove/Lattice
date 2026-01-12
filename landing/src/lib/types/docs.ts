@@ -9,6 +9,15 @@
 /** Document category */
 export type DocCategory = "specs" | "help" | "legal" | "marketing" | "patterns";
 
+/** Spec subcategories (mirrors workshop page organization) */
+export type SpecCategory =
+  | "core-infrastructure"
+  | "platform-services"
+  | "content-community"
+  | "standalone-tools"
+  | "operations"
+  | "reference";
+
 /** Base document metadata (used for listings and static data) */
 export interface Doc extends Record<string, unknown> {
   slug: string;
@@ -18,8 +27,10 @@ export interface Doc extends Record<string, unknown> {
   category: DocCategory;
   lastUpdated?: string;
   readingTime: number;
-  /** Optional icon key for pattern documents (matches keys in toolIcons) */
+  /** Optional icon key for documents (matches keys in toolIcons) */
   icon?: string;
+  /** Optional spec subcategory for grouping specs like workshop page */
+  specCategory?: SpecCategory;
 }
 
 /** Header extracted from markdown for table of contents */

@@ -1,52 +1,62 @@
-import type { Doc } from "$lib/types/docs";
+import type { Doc, SpecCategory } from "$lib/types/docs";
 
 // Re-export for convenience
-export type { Doc } from "$lib/types/docs";
+export type { Doc, SpecCategory } from "$lib/types/docs";
 
-// Technical Specifications
+/**
+ * Spec category metadata (mirrors workshop page organization)
+ * Icons use keys from $lib/utils/icons.ts toolIcons map
+ */
+export const specCategories: {
+  id: SpecCategory;
+  name: string;
+  description: string;
+  icon: string;
+}[] = [
+  {
+    id: "core-infrastructure",
+    name: "Core Infrastructure",
+    description: "The foundation everything grows from",
+    icon: "pyramid",
+  },
+  {
+    id: "platform-services",
+    name: "Platform Services",
+    description: "Essential services that power every Grove blog",
+    icon: "circuitboard",
+  },
+  {
+    id: "content-community",
+    name: "Content & Community",
+    description: "Writing, moderation, and social features",
+    icon: "id-card-lanyard",
+  },
+  {
+    id: "standalone-tools",
+    name: "Standalone Tools",
+    description: "Independent tools that integrate with Grove",
+    icon: "toolbox",
+  },
+  {
+    id: "operations",
+    name: "Operations",
+    description: "Internal infrastructure keeping Grove running",
+    icon: "dock",
+  },
+  {
+    id: "reference",
+    name: "Reference",
+    description: "Implementation guides and auxiliary documentation",
+    icon: "filecode",
+  },
+];
+
+// Technical Specifications - organized by category like workshop page
 export const specs: Doc[] = [
-  {
-    slug: "centennial-spec",
-    title: "Centennial — Domain Preservation",
-    description: "100-year domain preservation for long-term Grove members",
-    excerpt:
-      "Some trees outlive the people who planted them. Centennial is Grove's promise that your words can have that same longevity. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years from the day you planted it.",
-    category: "specs",
-    lastUpdated: "2026-01-04",
-    readingTime: 8,
-  },
-  {
-    slug: "thorn-spec",
-    title: "Thorn — Content Moderation",
-    description:
-      "Privacy-first automated content moderation using AI models with zero data retention, protected by Songbird pattern",
-    excerpt:
-      "Grove uses automated content moderation to enforce our Acceptable Use Policy while maintaining strict privacy protections. This system is designed with a privacy-first architecture: no human eyes on user data, no retention of content, and fully encrypted processing. Uses the Songbird pattern (Canary → Kestrel → Robin) for prompt injection protection.",
-    category: "specs",
-    lastUpdated: "2026-01-01",
-    readingTime: 18,
-  },
-  {
-    slug: "rings-spec",
-    title: "Rings — Private Analytics",
-    description: "Privacy-respecting analytics system for Grove platform",
-    excerpt:
-      "Grove Analytics provides insights into blog performance while respecting user privacy. No personal data is collected, and all metrics are aggregated and anonymized.",
-    category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 8,
-  },
-  {
-    slug: "reeds-spec",
-    title: "Reeds — Comment System",
-    description:
-      "Dual-mode comment system with private replies and public comments",
-    excerpt:
-      "Grove implements a custom comment system with two modes: Replies (private messages to authors) and Comments (public, requiring approval).",
-    category: "specs",
-    lastUpdated: "2025-12-05",
-    readingTime: 10,
-  },
+  // ============================================================================
+  // CORE INFRASTRUCTURE
+  // The foundation everything grows from
+  // ============================================================================
   {
     slug: "lattice-spec",
     title: "Lattice — Core Framework",
@@ -54,28 +64,40 @@ export const specs: Doc[] = [
     excerpt:
       "GroveEngine is the core framework powering the Grove ecosystem. Built on Cloudflare Workers with SvelteKit frontend.",
     category: "specs",
+    specCategory: "core-infrastructure",
+    icon: "codesandbox",
     lastUpdated: "2025-11-15",
     readingTime: 12,
   },
+
+  // ============================================================================
+  // PLATFORM SERVICES
+  // Essential services that power every Grove blog
+  // ============================================================================
   {
-    slug: "waystone-spec",
-    title: "Waystone — Help Center",
-    description: "Integrated help system with contextual assistance",
+    slug: "heartwood-spec",
+    title: "Heartwood — Centralized Authentication",
+    description:
+      "One identity across all Grove properties with Google OAuth and magic links",
     excerpt:
-      "Grove's Help Center is built directly into the platform—no external docs site, no separate logins.",
+      "One identity, verified and protected, that works across every Grove property. Google OAuth or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.",
     category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 11,
+    specCategory: "platform-services",
+    icon: "shieldcheck",
+    lastUpdated: "2026-01-04",
+    readingTime: 20,
   },
   {
-    slug: "meadow-spec",
-    title: "Meadow — Social Feed",
-    description: "Community feed, sharing, voting, and reactions system",
+    slug: "arbor-spec",
+    title: "Arbor — Admin Panel",
+    description: "Content management and site administration interface",
     excerpt:
-      "Grove Social enables blogs to share posts to a community feed where users can vote and react with emojis.",
+      "The Grove Admin Panel is where bloggers manage their content, customize their site, and configure settings. Designed to be simple, focused, and get out of the way.",
     category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 9,
+    specCategory: "platform-services",
+    icon: "dashboard",
+    lastUpdated: "2025-12-24",
+    readingTime: 10,
   },
   {
     slug: "plant-spec",
@@ -84,8 +106,48 @@ export const specs: Doc[] = [
     excerpt:
       "Comprehensive onboarding system guiding users through account creation, plan selection, payment, and initial setup.",
     category: "specs",
+    specCategory: "platform-services",
+    icon: "landplot",
     lastUpdated: "2025-12-01",
     readingTime: 7,
+  },
+  {
+    slug: "loam-spec",
+    title: "Loam — Name Protection",
+    description:
+      "Username and domain validation system protecting the grove from harm",
+    excerpt:
+      "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "funnel",
+    lastUpdated: "2026-01-07",
+    readingTime: 12,
+  },
+  {
+    slug: "amber-spec",
+    title: "Amber — Storage Management",
+    description: "Unified storage management system for Grove",
+    excerpt:
+      "Amber is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "harddrive",
+    lastUpdated: "2025-12-01",
+    readingTime: 10,
+  },
+  {
+    slug: "pantry-spec",
+    title: "Pantry — Shop & Provisioning",
+    description:
+      "Grove's shop for subscriptions, merchandise, gift cards, and credits",
+    excerpt:
+      "A pantry is where you keep what sustains you. Pantry is Grove's shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "store",
+    lastUpdated: "2026-01-06",
+    readingTime: 12,
   },
   {
     slug: "foliage-project-spec",
@@ -94,6 +156,8 @@ export const specs: Doc[] = [
     excerpt:
       "Grove offers 10 hand-curated themes with tiered access based on subscription plans.",
     category: "specs",
+    specCategory: "platform-services",
+    icon: "swatchbook",
     lastUpdated: "2025-12-01",
     readingTime: 8,
   },
@@ -104,6 +168,8 @@ export const specs: Doc[] = [
     excerpt:
       "A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations.",
     category: "specs",
+    specCategory: "platform-services",
+    icon: "pencilruler",
     lastUpdated: "2026-01-05",
     readingTime: 15,
   },
@@ -113,10 +179,24 @@ export const specs: Doc[] = [
     description:
       "Node-graph editor for animations and diagrams within Terrarium",
     excerpt:
-      "Weave your world together. Place elements on a grid, draw threads between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and Lucide icons. A lightweight Mermaid alternative with Grove's aesthetic.",
+      "Weave your world together. Place elements on a grid, draw threads between them, watch relationships come alive. Create animations where chained vines ripple when shaken. Build diagrams with glass cards and Lucide icons.",
     category: "specs",
+    specCategory: "platform-services",
+    icon: "splinepointer",
     lastUpdated: "2026-01-06",
     readingTime: 12,
+  },
+  {
+    slug: "rings-spec",
+    title: "Rings — Private Analytics",
+    description: "Privacy-respecting analytics system for Grove platform",
+    excerpt:
+      "Grove Analytics provides insights into blog performance while respecting user privacy. No personal data is collected, and all metrics are aggregated and anonymized.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "barchart",
+    lastUpdated: "2025-12-01",
+    readingTime: 8,
   },
   {
     slug: "clearing-spec",
@@ -126,28 +206,254 @@ export const specs: Doc[] = [
     excerpt:
       "The Grove Status page provides transparent, real-time communication about platform health. When something goes wrong—or when maintenance is planned—users can check status.grove.place.",
     category: "specs",
+    specCategory: "platform-services",
+    icon: "activity",
     lastUpdated: "2025-12-24",
     readingTime: 12,
   },
   {
-    slug: "arbor-spec",
-    title: "Arbor — Admin Panel",
-    description: "Content management and site administration interface",
+    slug: "waystone-spec",
+    title: "Waystone — Help Center",
+    description: "Integrated help system with contextual assistance",
     excerpt:
-      "The Grove Admin Panel is where bloggers manage their content, customize their site, and configure settings. Designed to be simple, focused, and get out of the way.",
+      "Grove's Help Center is built directly into the platform—no external docs site, no separate logins.",
     category: "specs",
-    lastUpdated: "2025-12-24",
+    specCategory: "platform-services",
+    icon: "signpost",
+    lastUpdated: "2025-12-01",
+    readingTime: 11,
+  },
+  {
+    slug: "porch-spec",
+    title: "Porch — Front Porch Conversations",
+    description:
+      "Warm, accessible support where you chat with the grove keeper",
+    excerpt:
+      "A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "rocking-chair",
+    lastUpdated: "2026-01-06",
     readingTime: 10,
   },
   {
-    slug: "customer-repo-spec",
-    title: "Customer Repository Specification",
-    description: "Template structure for customer blog repositories",
+    slug: "centennial-spec",
+    title: "Centennial — Domain Preservation",
+    description: "100-year domain preservation for long-term Grove members",
     excerpt:
-      "Each customer has their own repository that imports @groveengine/core as a dependency. This single-tenant model provides isolation, customization, and independence.",
+      "Some trees outlive the people who planted them. Centennial is Grove's promise that your words can have that same longevity. After 12 months on Sapling tier or above, your grove earns Centennial status—your site stays online for 100 years.",
     category: "specs",
-    lastUpdated: "2025-11-26",
+    specCategory: "platform-services",
+    icon: "clock",
+    lastUpdated: "2026-01-04",
+    readingTime: 8,
+  },
+
+  // ============================================================================
+  // CONTENT & COMMUNITY
+  // Writing, moderation, and social features
+  // ============================================================================
+  {
+    slug: "wisp-spec",
+    title: "Wisp — Writing Assistant",
+    description: "Ethical AI writing tool that polishes without replacing",
+    excerpt:
+      "Wisp is an ethical AI writing assistant that helps users polish their voice without replacing it. It analyzes content for grammar, tone, and readability—never generates or expands content.",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "wind",
+    lastUpdated: "2025-12-30",
     readingTime: 6,
+  },
+  {
+    slug: "reeds-spec",
+    title: "Reeds — Comment System",
+    description:
+      "Dual-mode comment system with private replies and public comments",
+    excerpt:
+      "Grove implements a custom comment system with two modes: Replies (private messages to authors) and Comments (public, requiring approval).",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "messagessquare",
+    lastUpdated: "2025-12-05",
+    readingTime: 10,
+  },
+  {
+    slug: "thorn-spec",
+    title: "Thorn — Content Moderation",
+    description:
+      "Privacy-first automated content moderation using AI models with zero data retention",
+    excerpt:
+      "Grove uses automated content moderation to enforce our Acceptable Use Policy while maintaining strict privacy protections. This system is designed with a privacy-first architecture: no human eyes on user data, no retention of content.",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "shielduser",
+    lastUpdated: "2026-01-01",
+    readingTime: 18,
+  },
+  {
+    slug: "meadow-spec",
+    title: "Meadow — Social Feed",
+    description: "Community feed, sharing, voting, and reactions system",
+    excerpt:
+      "Grove Social enables blogs to share posts to a community feed where users can vote and react with emojis.",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "users",
+    lastUpdated: "2025-12-01",
+    readingTime: 9,
+  },
+  {
+    slug: "trails-spec",
+    title: "Trails — Personal Roadmaps",
+    description: "Build in public with beautiful project roadmaps",
+    excerpt:
+      "Trails lets Grove users create and share personal roadmaps. Build in public, plan content, and track progress with a beautiful way to show the journey.",
+    category: "specs",
+    specCategory: "content-community",
+    icon: "mapplus",
+    lastUpdated: "2025-12-29",
+    readingTime: 6,
+  },
+
+  // ============================================================================
+  // STANDALONE TOOLS
+  // Independent tools that integrate with Grove
+  // ============================================================================
+  {
+    slug: "ivy-mail-spec",
+    title: "Ivy — Mail Client",
+    description: "First-party mail client for @grove.place email addresses",
+    excerpt:
+      "Ivy is Grove's first-party mail client for @grove.place email addresses. Rather than forcing users to configure IMAP in third-party clients, Ivy provides a focused, privacy-first web interface.",
+    category: "specs",
+    specCategory: "standalone-tools",
+    icon: "mailbox",
+    lastUpdated: "2025-12-01",
+    readingTime: 15,
+  },
+  {
+    slug: "bloom-spec",
+    title: "Bloom — Remote Coding Infrastructure",
+    description: "Serverless autonomous coding agent on transient VPS",
+    excerpt:
+      "Bloom is a personal, serverless remote coding agent. Text it and forget it—send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs.",
+    category: "specs",
+    specCategory: "standalone-tools",
+    icon: "terminal",
+    lastUpdated: "2025-12-30",
+    readingTime: 23,
+  },
+  {
+    slug: "forage-spec",
+    title: "Forage — Domain Discovery",
+    description:
+      "AI-powered domain hunting that reduces weeks of searching to hours",
+    excerpt:
+      "Before you can plant, you have to search. Forage is an AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit.",
+    category: "specs",
+    specCategory: "standalone-tools",
+    icon: "searchcode",
+    lastUpdated: "2026-01-04",
+    readingTime: 15,
+  },
+  {
+    slug: "nook-spec",
+    title: "Nook — Private Video Sharing",
+    description:
+      "Cozy corner for sharing videos with close friends, not the world",
+    excerpt:
+      "Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you've been meaning to share.",
+    category: "specs",
+    specCategory: "standalone-tools",
+    icon: "projector",
+    lastUpdated: "2026-01-04",
+    readingTime: 12,
+  },
+
+  // ============================================================================
+  // OPERATIONS
+  // Internal infrastructure keeping Grove running
+  // ============================================================================
+  {
+    slug: "press-spec",
+    title: "Press — Image Processing CLI",
+    description:
+      "CLI tool for WebP conversion, AI descriptions, and CDN upload",
+    excerpt:
+      "A press takes something raw and makes it ready. Press is Grove's image processing CLI: convert to WebP, generate AI descriptions for accessibility, deduplicate by content hash, and upload to R2.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "stamp",
+    lastUpdated: "2026-01-06",
+    readingTime: 10,
+  },
+  {
+    slug: "vista-spec",
+    title: "Vista — Infrastructure Monitoring",
+    description:
+      "Real-time metrics, historical data, alerting, and cost tracking",
+    excerpt:
+      "A clearing in the forest where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "binoculars",
+    lastUpdated: "2026-01-04",
+    readingTime: 18,
+  },
+  {
+    slug: "patina-spec",
+    title: "Patina — Automated Backup System",
+    description:
+      "Nightly database backups with weekly archives and 12-week retention",
+    excerpt:
+      "A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "database",
+    lastUpdated: "2025-12-31",
+    readingTime: 25,
+  },
+  {
+    slug: "mycelium-spec",
+    title: "Mycelium — MCP Server",
+    description: "Model Context Protocol server for Grove ecosystem",
+    excerpt:
+      "Mycelium is Grove's Model Context Protocol (MCP) server—the wood wide web that lets AI agents interact with the entire Grove ecosystem. Claude talks to Grove through Mycelium.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "circuitboard",
+    lastUpdated: "2025-12-30",
+    readingTime: 15,
+  },
+  {
+    slug: "shade-spec",
+    title: "Shade — AI Content Protection System",
+    description: "Layered defense against AI crawlers and scrapers",
+    excerpt:
+      "Users own their words. Shade is Grove's seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.",
+    category: "specs",
+    specCategory: "operations",
+    icon: "blinds",
+    lastUpdated: "2025-12-26",
+    readingTime: 18,
+  },
+
+  // ============================================================================
+  // REFERENCE
+  // Implementation guides and auxiliary documentation
+  // ============================================================================
+  {
+    slug: "vineyard-spec",
+    title: "Vineyard — Tool Showcase Pattern",
+    description: "Consistent documentation and demo pattern for Grove tools",
+    excerpt:
+      "Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed.",
+    category: "specs",
+    specCategory: "reference",
+    icon: "grape",
+    lastUpdated: "2025-12-30",
+    readingTime: 5,
   },
   {
     slug: "seasons-spec",
@@ -156,8 +462,22 @@ export const specs: Doc[] = [
     excerpt:
       "GroveEngine follows Semantic Versioning 2.0.0 for all releases. This document defines how versions are managed and how updates propagate to customer repositories.",
     category: "specs",
+    specCategory: "reference",
+    icon: "tag",
     lastUpdated: "2025-11-26",
     readingTime: 7,
+  },
+  {
+    slug: "customer-repo-spec",
+    title: "Customer Repository Specification",
+    description: "Template structure for customer blog repositories",
+    excerpt:
+      "Each customer has their own repository that imports @groveengine/core as a dependency. This single-tenant model provides isolation, customization, and independence.",
+    category: "specs",
+    specCategory: "reference",
+    icon: "filecode",
+    lastUpdated: "2025-11-26",
+    readingTime: 6,
   },
   {
     slug: "website-spec",
@@ -166,6 +486,8 @@ export const specs: Doc[] = [
     excerpt:
       "Grove Website is the main marketing site and client management platform. It handles marketing, client acquisition, onboarding, billing, and provides a dashboard for clients to manage their blogs.",
     category: "specs",
+    specCategory: "reference",
+    icon: "globe",
     lastUpdated: "2025-11-21",
     readingTime: 10,
   },
@@ -176,90 +498,10 @@ export const specs: Doc[] = [
     excerpt:
       "Ready-to-implement plan covering architecture decisions, flow diagrams, and step-by-step implementation details for the tenant signup experience.",
     category: "specs",
+    specCategory: "reference",
+    icon: "layout",
     lastUpdated: "2025-12-01",
     readingTime: 12,
-  },
-  {
-    slug: "shade-spec",
-    title: "Shade — AI Content Protection System",
-    description: "Layered defense against AI crawlers and scrapers",
-    excerpt:
-      "Users own their words. Shade is Grove's seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.",
-    category: "specs",
-    lastUpdated: "2025-12-26",
-    readingTime: 18,
-  },
-  {
-    slug: "bloom-spec",
-    title: "Bloom — Remote Coding Infrastructure",
-    description: "Serverless autonomous coding agent on transient VPS",
-    excerpt:
-      "Bloom is a personal, serverless remote coding agent. Text it and forget it—send a task from your phone, the agent works until done, commits code, and the infrastructure self-destructs.",
-    category: "specs",
-    lastUpdated: "2025-12-30",
-    readingTime: 23,
-  },
-  {
-    slug: "mycelium-spec",
-    title: "Mycelium — MCP Server",
-    description: "Model Context Protocol server for Grove ecosystem",
-    excerpt:
-      "Mycelium is Grove's Model Context Protocol (MCP) server—the wood wide web that lets AI agents interact with the entire Grove ecosystem. Claude talks to Grove through Mycelium.",
-    category: "specs",
-    lastUpdated: "2025-12-30",
-    readingTime: 15,
-  },
-  {
-    slug: "patina-spec",
-    title: "Patina — Automated Backup System",
-    description:
-      "Nightly database backups with weekly archives and 12-week retention",
-    excerpt:
-      "A patina forms on copper over time—not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.",
-    category: "specs",
-    lastUpdated: "2025-12-31",
-    readingTime: 25,
-  },
-  {
-    slug: "trails-spec",
-    title: "Trails — Personal Roadmaps",
-    description: "Build in public with beautiful project roadmaps",
-    excerpt:
-      "Trails lets Grove users create and share personal roadmaps. Build in public, plan content, and track progress with a beautiful way to show the journey.",
-    category: "specs",
-    lastUpdated: "2025-12-29",
-    readingTime: 6,
-  },
-  {
-    slug: "vineyard-spec",
-    title: "Vineyard — Tool Showcase Pattern",
-    description: "Consistent documentation and demo pattern for Grove tools",
-    excerpt:
-      "Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed.",
-    category: "specs",
-    lastUpdated: "2025-12-30",
-    readingTime: 5,
-  },
-  {
-    slug: "wisp-spec",
-    title: "Wisp — Writing Assistant",
-    description: "Ethical AI writing tool that polishes without replacing",
-    excerpt:
-      "Wisp is an ethical AI writing assistant that helps users polish their voice without replacing it. It analyzes content for grammar, tone, and readability—never generates or expands content.",
-    category: "specs",
-    lastUpdated: "2025-12-30",
-    readingTime: 6,
-  },
-  // Completed Specs (implemented or superseded)
-  {
-    slug: "amber-spec",
-    title: "Amber — Storage Management",
-    description: "Unified storage management system for Grove",
-    excerpt:
-      "Amber is Grove's unified storage management system. Every file you upload—blog images, email attachments, profile pictures—is preserved in Amber, organized and accessible from one place.",
-    category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 10,
   },
   {
     slug: "fiction-house-publishing-spec",
@@ -268,40 +510,10 @@ export const specs: Doc[] = [
     excerpt:
       "Fiction House Publishing is a publishing house portfolio site—the first customer deployment of GroveEngine with custom book catalog features.",
     category: "specs",
+    specCategory: "reference",
+    icon: "book",
     lastUpdated: "2025-12-01",
     readingTime: 8,
-  },
-  {
-    slug: "ivy-mail-spec",
-    title: "Ivy — Mail Client",
-    description: "First-party mail client for @grove.place email addresses",
-    excerpt:
-      "Ivy is Grove's first-party mail client for @grove.place email addresses. Rather than forcing users to configure IMAP in third-party clients, Ivy provides a focused, privacy-first web interface.",
-    category: "specs",
-    lastUpdated: "2025-12-01",
-    readingTime: 15,
-  },
-  {
-    slug: "loam-spec",
-    title: "Loam — Name Protection",
-    description:
-      "Username and domain validation system protecting the grove from harm",
-    excerpt:
-      "Loam is Grove's username and domain validation system. Every name passes through it before taking root: reserved words, impersonation attempts, harmful content, fraud patterns. Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.",
-    category: "specs",
-    lastUpdated: "2026-01-07",
-    readingTime: 12,
-  },
-  {
-    slug: "press-spec",
-    title: "Press — Image Processing CLI",
-    description:
-      "CLI tool for WebP conversion, AI descriptions, and CDN upload",
-    excerpt:
-      "A press takes something raw and makes it ready. Press is Grove's image processing CLI: convert to WebP, generate AI descriptions for accessibility, deduplicate by content hash, and upload to R2. One command, and your images are ready to publish.",
-    category: "specs",
-    lastUpdated: "2026-01-06",
-    readingTime: 10,
   },
 ];
 
