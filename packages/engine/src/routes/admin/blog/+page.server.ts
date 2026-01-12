@@ -1,5 +1,5 @@
 import { getTenantDb } from "$lib/server/services/database";
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad } from "./$types";
 
 interface PostRecord {
   slug: string;
@@ -41,12 +41,12 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       tenantId: locals.tenantId,
     });
 
-    // Fetch all posts for this tenant, ordered by date descending
+    // Fetch all posts for this tenant, ordered by publish date descending
     const postsArray = await tenantDb.queryMany<PostRecord>(
       "posts",
       undefined, // No additional WHERE clause (tenant_id is automatic)
       [],
-      { orderBy: "created_at DESC" },
+      { orderBy: "published_at DESC, created_at DESC" },
     );
 
     // Transform posts - parse tags from JSON string

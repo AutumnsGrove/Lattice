@@ -79,7 +79,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     if (isOwner) {
       // Owner sees all posts (including drafts)
       posts = await tenantDb.queryMany<PostRecord>("posts", undefined, [], {
-        orderBy: "date DESC",
+        orderBy: "published_at DESC",
       });
     } else {
       // Anonymous/non-owner only sees published posts
@@ -88,7 +88,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
         "posts",
         "status = ? OR status IS NULL",
         ["published"],
-        { orderBy: "date DESC" },
+        { orderBy: "published_at DESC" },
       );
     }
 
