@@ -194,16 +194,17 @@ export function loadDocBySlug(
     return null;
   }
 
-  const docsPath =
-    category === "specs"
-      ? join(DOCS_ROOT, "specs")
-      : category === "help"
-        ? join(DOCS_ROOT, "help-center/articles")
-        : category === "marketing"
-          ? join(DOCS_ROOT, "marketing")
-          : category === "patterns"
-            ? join(DOCS_ROOT, "patterns")
-            : join(DOCS_ROOT, "legal");
+  const categoryPaths: Record<DocCategory, string> = {
+    specs: join(DOCS_ROOT, "specs"),
+    help: join(DOCS_ROOT, "help-center/articles"),
+    marketing: join(DOCS_ROOT, "marketing"),
+    patterns: join(DOCS_ROOT, "patterns"),
+    legal: join(DOCS_ROOT, "legal"),
+    philosophy: join(DOCS_ROOT, "philosophy"),
+    design: join(DOCS_ROOT, "design"),
+    developer: join(DOCS_ROOT, "developer"),
+  };
+  const docsPath = categoryPaths[category];
 
   const docs = loadDocsFromDir(docsPath, category);
 

@@ -922,6 +922,135 @@ export const marketingDocs: Doc[] = [
   },
 ];
 
+// Philosophy Documents
+export const philosophyDocs: Doc[] = [
+  {
+    slug: "grove-naming",
+    title: "The Grove Naming System",
+    description:
+      "The complete philosophy and naming system for the Grove ecosystem",
+    excerpt:
+      "A forest of voices. Every user is a tree in the grove. These names aren't just branding—they're the language of an ecosystem. Each one draws from the same soil: forests, growth, shelter, connection.",
+    category: "philosophy",
+    lastUpdated: "2026-01-07",
+    readingTime: 15,
+  },
+  {
+    slug: "walking-through-the-grove",
+    title: "Walking Through the Grove",
+    description: "A naming ritual for new Grove services and features",
+    excerpt:
+      "Finding the right name is a walk through the forest. You create a visualization scratchpad, step into the metaphor, and let the concept find where it naturally belongs among the trees.",
+    category: "philosophy",
+    lastUpdated: "2026-01-12",
+    readingTime: 8,
+  },
+  {
+    slug: "grove-voice",
+    title: "The Grove Voice",
+    description:
+      "Writing guidelines for authentic, warm, human-sounding documentation",
+    excerpt:
+      "Write with the warmth of a midnight tea shop and the clarity of good documentation. Avoid AI patterns, em-dashes, and hollow encouragement. Say what you mean. Earn your poetic closers.",
+    category: "philosophy",
+    lastUpdated: "2026-01-12",
+    readingTime: 12,
+  },
+  {
+    slug: "grove-sustainability",
+    title: "Sustainability",
+    description: "Grove's approach to environmental and social sustainability",
+    excerpt:
+      "Technology in service of people, not the other way around. Community ownership over corporate extraction. Solarpunk-aligned infrastructure that respects both users and the planet.",
+    category: "philosophy",
+    lastUpdated: "2026-01-12",
+    readingTime: 6,
+  },
+];
+
+// Design Documents
+export const designDocs: Doc[] = [
+  {
+    slug: "grove-ui-patterns",
+    title: "Grove UI Patterns",
+    description:
+      "Glassmorphism, seasonal themes, and the visual language of Grove",
+    excerpt:
+      "Warm, nature-themed UI with glass surfaces, seasonal color palettes, randomized forests, and accessible design patterns. Every page should feel like a place you want to visit.",
+    category: "design",
+    lastUpdated: "2026-01-12",
+    readingTime: 18,
+  },
+  {
+    slug: "grove-product-standards",
+    title: "Product Standards",
+    description: "Design principles and product philosophy for Grove",
+    excerpt:
+      "Grove is intentionally focused. We don't add features for the sake of features. Every addition must serve the core mission: helping people own their words online.",
+    category: "design",
+    lastUpdated: "2026-01-12",
+    readingTime: 10,
+  },
+  {
+    slug: "icon-standards",
+    title: "Icon Standards",
+    description: "Comprehensive guide to icon usage and composition in Grove",
+    excerpt:
+      "Icons are visual shorthand. Grove uses Lucide icons with specific conventions for size, color, composition, and meaning. Consistency across the ecosystem.",
+    category: "design",
+    lastUpdated: "2026-01-12",
+    readingTime: 12,
+  },
+];
+
+// Developer Documents
+export const developerDocs: Doc[] = [
+  {
+    slug: "multi-tenant-architecture",
+    title: "Multi-Tenant Architecture",
+    description:
+      "How Grove handles multiple blogs on subdomains with shared infrastructure",
+    excerpt:
+      "Each user gets their own subdomain (username.grove.place) while sharing underlying infrastructure. Tenant isolation, data separation, and efficient resource sharing.",
+    category: "developer",
+    lastUpdated: "2026-01-12",
+    readingTime: 15,
+  },
+  {
+    slug: "ai-gateway-integration",
+    title: "AI Gateway Integration",
+    description:
+      "Cloudflare AI Gateway for per-tenant AI quotas and observability",
+    excerpt:
+      "Grove uses Cloudflare AI Gateway to manage AI features across tenants. Per-user quotas, request logging, cost tracking, and graceful degradation when limits are reached.",
+    category: "developer",
+    lastUpdated: "2026-01-12",
+    readingTime: 20,
+  },
+  {
+    slug: "cloudflare-infrastructure",
+    title: "Cloudflare Infrastructure",
+    description:
+      "Complete guide to Grove's Cloudflare-first architecture",
+    excerpt:
+      "Workers for compute, D1 for databases, KV for caching, R2 for storage. How Grove builds on Cloudflare's edge infrastructure for global performance and cost efficiency.",
+    category: "developer",
+    lastUpdated: "2026-01-12",
+    readingTime: 25,
+  },
+  {
+    slug: "ai-development-process",
+    title: "Building with AI: The Grove Development Process",
+    description:
+      "How Grove was built in 50 days using Claude Code, Kilo Code, and AI-assisted development",
+    excerpt:
+      "The complete workflow behind building Grove at speed. How to structure context, work across CLI and web interfaces, maintain quality while moving fast, and think alongside AI instead of just prompting it.",
+    category: "developer",
+    lastUpdated: "2026-01-12",
+    readingTime: 0, // Coming soon
+  },
+];
+
 // Combined export for convenience
 export const allDocs = [
   ...specs,
@@ -929,4 +1058,7 @@ export const allDocs = [
   ...legalDocs,
   ...marketingDocs,
   ...patterns,
+  ...philosophyDocs,
+  ...designDocs,
+  ...developerDocs,
 ];

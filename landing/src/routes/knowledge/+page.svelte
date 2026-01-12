@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
-  import { toolIcons } from '$lib/utils/icons';
+  import { toolIcons, knowledgeCategoryIcons } from '$lib/utils/icons';
 
   let { data } = $props();
   const specs = $derived(data.specs);
@@ -10,6 +10,13 @@
   const legalDocs = $derived(data.legalDocs);
   const marketingDocs = $derived(data.marketingDocs);
   const patterns = $derived(data.patterns);
+  const philosophyDocs = $derived(data.philosophyDocs);
+  const designDocs = $derived(data.designDocs);
+  const developerDocs = $derived(data.developerDocs);
+
+  const PhilosophyIcon = knowledgeCategoryIcons.philosophy;
+  const DesignIcon = knowledgeCategoryIcons.design;
+  const DeveloperIcon = knowledgeCategoryIcons.developer;
 
   let searchQuery = $state('');
 
@@ -231,6 +238,100 @@
         </div>
         <a href="/knowledge/patterns" class="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors">
           View all patterns
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Philosophy -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-4">
+            <PhilosophyIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Philosophy</h2>
+            <p class="text-sm text-foreground-subtle">{philosophyDocs.length} documents</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          The heart of Grove. Naming systems, voice guidelines, sustainability, and the principles that shape everything.
+        </p>
+        <div class="space-y-2 mb-4">
+          {#each philosophyDocs.slice(0, 3) as doc}
+            <div class="text-sm">
+              <a href="/knowledge/philosophy/{doc.slug}" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors">
+                {doc.title}
+              </a>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/philosophy" class="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors">
+          Explore philosophy
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Design -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center mr-4">
+            <DesignIcon class="w-6 h-6 text-rose-600 dark:text-rose-400" />
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Design</h2>
+            <p class="text-sm text-foreground-subtle">{designDocs.length} documents</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Visual language, UI patterns, icons, and the aesthetic that makes Grove feel like home.
+        </p>
+        <div class="space-y-2 mb-4">
+          {#each designDocs.slice(0, 3) as doc}
+            <div class="text-sm">
+              <a href="/knowledge/design/{doc.slug}" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors">
+                {doc.title}
+              </a>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/design" class="inline-flex items-center text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium transition-colors">
+          Browse design docs
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Developer Guides -->
+      <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center mr-4">
+            <DeveloperIcon class="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-foreground">Developer Guides</h2>
+            <p class="text-sm text-foreground-subtle">{developerDocs.length} guides</p>
+          </div>
+        </div>
+        <p class="text-foreground-muted mb-4">
+          Technical deep-dives into Grove's architecture. Multi-tenant systems, Cloudflare infrastructure, AI integration.
+        </p>
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+          {#each developerDocs as doc}
+            <div class="text-sm p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+              <a href="/knowledge/developer/{doc.slug}" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium transition-colors">
+                {doc.title}
+              </a>
+              <p class="text-foreground-subtle text-xs mt-1">{doc.description}</p>
+            </div>
+          {/each}
+        </div>
+        <a href="/knowledge/developer" class="inline-flex items-center text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium transition-colors">
+          View all guides
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>

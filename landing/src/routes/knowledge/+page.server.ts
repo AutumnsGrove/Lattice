@@ -1,4 +1,13 @@
-import { specs, helpArticles, legalDocs, marketingDocs, patterns } from "$lib/data/knowledge-base";
+import {
+  specs,
+  helpArticles,
+  legalDocs,
+  marketingDocs,
+  patterns,
+  philosophyDocs,
+  designDocs,
+  developerDocs,
+} from "$lib/data/knowledge-base";
 
 export async function load() {
   return {
@@ -7,5 +16,8 @@ export async function load() {
     legalDocs,
     marketingDocs,
     patterns,
+    philosophyDocs,
+    designDocs,
+    developerDocs,
   };
 }

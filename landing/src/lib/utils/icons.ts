@@ -486,6 +486,24 @@ export const pricingIcons = {
 } as const;
 
 // ============================================================================
+// KNOWLEDGE BASE CATEGORY ICONS
+// ============================================================================
+/** Icons for knowledge base categories */
+export const knowledgeCategoryIcons = {
+  specs: FileText,
+  help: HelpCircle,
+  legal: ShieldCheck,
+  marketing: Megaphone,
+  patterns: Layers,
+  philosophy: Trees,
+  design: PaintbrushVertical,
+  developer: Terminal,
+} as const;
+
+/** Type for knowledge category icon keys */
+export type KnowledgeCategoryIconKey = keyof typeof knowledgeCategoryIcons;
+
+// ============================================================================
 // UNIFIED EXPORT
 // ============================================================================
 /** All icons in one map (use specific maps above when possible) */

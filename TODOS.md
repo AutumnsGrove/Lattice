@@ -1295,6 +1295,12 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 - [ ] Add usage examples for tenants
 - [ ] Write testing documentation
+- [ ] **Write AI Development Process Guide** — Document the full workflow for building Grove with Claude Code, Kilo Code, and AI-assisted development
+  - How to structure prompts and context
+  - Working with Claude Code CLI vs web vs mobile
+  - The mental model behind rapid prototyping with AI
+  - Tips for maintaining code quality at speed
+  - Placeholder added to Knowledge Base at `/knowledge/developer/ai-development-process`
 
 ---
 

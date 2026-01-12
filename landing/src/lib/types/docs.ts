@@ -7,7 +7,15 @@
  */
 
 /** Document category */
-export type DocCategory = "specs" | "help" | "legal" | "marketing" | "patterns";
+export type DocCategory =
+  | "specs"
+  | "help"
+  | "legal"
+  | "marketing"
+  | "patterns"
+  | "philosophy"
+  | "design"
+  | "developer";
 
 /** Base document metadata (used for listings and static data) */
 export interface Doc extends Record<string, unknown> {
