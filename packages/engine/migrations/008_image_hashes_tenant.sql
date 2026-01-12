@@ -7,13 +7,11 @@
 -- Step 1: Add column (nullable to handle existing rows)
 ALTER TABLE image_hashes ADD COLUMN tenant_id TEXT;
 
--- Step 2: Create composite index for tenant-scoped lookups
--- Drop old index if it exists before creating new one
+-- Step 2: Drop old hash-only index and create unique composite index
+-- The unique index serves both query optimization AND constraint enforcement
+-- (A separate non-unique index would be redundant)
 DROP INDEX IF EXISTS idx_image_hashes_hash;
-CREATE INDEX idx_image_hashes_tenant_hash ON image_hashes(tenant_id, hash);
-
--- Step 3: Add unique constraint for tenant+hash combination
-CREATE UNIQUE INDEX IF NOT EXISTS idx_image_hashes_unique ON image_hashes(tenant_id, hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_image_hashes_tenant_hash ON image_hashes(tenant_id, hash);
 
 -- Note: Existing rows will have NULL tenant_id
 -- They will be naturally replaced on re-upload with proper tenant_id values
