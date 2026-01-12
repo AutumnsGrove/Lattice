@@ -21,7 +21,6 @@
 interface Env {
   DB: D1Database;
   COLD_STORAGE: R2Bucket;
-  ENGINE: Fetcher;
 
   // Config vars (defaults, overridden by tier-specific thresholds)
   HOT_TO_WARM_DAYS: string;

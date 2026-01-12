@@ -33,14 +33,6 @@ binding = "COLD_STORAGE"
 bucket_name = "grove-media"
 
 # =============================================================================
-# Durable Object Bindings - To trigger migrations
-# =============================================================================
-# PostContentDO handles the actual content migration
-[[services]]
-binding = "ENGINE"
-service = "groveengine"
-
-# =============================================================================
 # Environment Variables
 # =============================================================================
 [vars]
