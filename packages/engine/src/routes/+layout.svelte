@@ -263,12 +263,10 @@
 			<!-- TITLE AREA -->
 			<a href="/" class="logo">{siteName}</a>
 
-			<!-- DEBUG: Remove after fixing -->
-			{#if data.navPages?.length}
-				<!-- navPages: {JSON.stringify(data.navPages)} -->
-			{:else}
-				<!-- navPages EMPTY - tenantId: {data.context?.tenant?.id ?? 'no tenant'} -->
-			{/if}
+			<!-- DEBUG: Visible debug box - REMOVE AFTER FIXING -->
+			<div style="background: #ff0; color: #000; padding: 4px 8px; font-size: 12px; font-family: monospace; border-radius: 4px;">
+				DEBUG: tenantId={data._debug?.tenantId ?? 'undefined'} | hasDb={data._debug?.hasDb} | navPages={data._debug?.navPagesCount ?? 0}
+			</div>
 
 			<!-- Desktop Navigation -->
 			<div class="nav-links desktop-nav">
