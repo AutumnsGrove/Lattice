@@ -264,8 +264,9 @@
 			<a href="/" class="logo">{siteName}</a>
 
 			<!-- DEBUG: Visible debug box - REMOVE AFTER FIXING -->
-			<div style="background: #ff0; color: #000; padding: 4px 8px; font-size: 10px; font-family: monospace; border-radius: 4px; max-width: 600px; overflow: auto;">
-				tenantId={data._debug?.tenantId} | hasDb={data._debug?.hasDb} | queryRan={data._debug?.queryRan} | rawCount={data._debug?.rawPagesCount} | navCount={data._debug?.navPagesCount}
+			<div style="background: #ff0; color: #000; padding: 4px 8px; font-size: 10px; font-family: monospace; border-radius: 4px; max-width: 700px; overflow: auto;">
+				tenant={data._debug?.tenantId} | db={data._debug?.hasDb} | ran={data._debug?.queryRan} | raw={data._debug?.rawPagesCount} | nav={data._debug?.navPagesCount}
+				{#if data._debug?.error}<br/><span style="color: red;">ERROR: {data._debug.error}</span>{/if}
 				<br/>rawPages: {JSON.stringify(data._debug?.rawPages)}
 			</div>
 

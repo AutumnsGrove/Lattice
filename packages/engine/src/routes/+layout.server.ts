@@ -21,6 +21,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // DEBUG: capture raw query results
   let _rawPages: unknown[] = [];
   let _queryRan = false;
+  let _error: string | null = null;
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
@@ -99,6 +100,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
       // If DB bindings aren't configured, gracefully fall back to defaults
       // This prevents 500 errors when D1 bindings aren't set up in Cloudflare Pages dashboard
       const message = error instanceof Error ? error.message : "Unknown error";
+      _error = message;
       console.error("Failed to load site settings (using defaults):", message);
     }
   }
@@ -110,6 +112,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     tenantId: tenantId ?? "NO_TENANT_ID",
     hasDb: building ? "BUILDING" : !!platform?.env?.DB,
     queryRan: _queryRan,
+    error: _error,
     rawPagesCount: _rawPages.length,
     rawPages: _rawPages,
     navPagesCount: navPages.length,
