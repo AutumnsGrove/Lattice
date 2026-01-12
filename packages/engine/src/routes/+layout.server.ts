@@ -93,10 +93,21 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     console.error("Failed to load site settings (using defaults):", message);
   }
 
+  // TEMP DEBUG: Force hardcoded navPages to verify data flow
+  const finalNavPages =
+    navPages.length > 0
+      ? navPages
+      : [
+          { slug: "menu", title: "DEBUG Menu" },
+          { slug: "gallery", title: "DEBUG Gallery" },
+        ];
+
+  console.log("[Layout] FINAL returning navPages:", finalNavPages);
+
   return {
     user: locals.user || null,
     context: locals.context as AppContext,
     siteSettings,
-    navPages,
+    navPages: finalNavPages,
   };
 };
