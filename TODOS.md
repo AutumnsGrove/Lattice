@@ -6,6 +6,38 @@
 
 ---
 
+# 🔄 CURRENT SESSION (Jan 12, 2026)
+
+## Just Completed ✅
+- **Fixed dynamic navigation pages not showing** - Root cause: `site_settings` table query failing blocked everything in same try/catch
+- Navigation toggle checkbox now works in admin
+- Menu and Gallery pages now appear in nav bar
+
+## In Progress 🔄
+- Clean up debug code from layout.server.ts (need to format & commit)
+
+## Next Up 📋
+1. Update AGENT.md - Add lesson about isolating database queries
+2. Create site_settings table migration
+3. Implement tier-based navigation limits (T1:0, T2:3, T3:5, T4:8)
+4. Update admin UI with limits
+5. Update pricing page, fine print, roadmap, docs
+
+## 💡 KEY LESSON: Isolate Database Queries!
+```typescript
+// BAD - cascading failure
+try {
+  const a = await db.prepare(...).all(); // fails = everything blocked
+  const b = await db.prepare(...).all();
+} catch {}
+
+// GOOD - isolated failures
+try { const a = await db.prepare(...).all(); } catch {}
+try { const b = await db.prepare(...).all(); } catch {}
+```
+
+---
+
 # 🚀 LAUNCH SPRINT
 
 These are the blockers. Get these done and you're live.
