@@ -68,7 +68,6 @@
 	let cardHoverable = $state(false);
 	let logoVariant = $state<'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'>('default');
 	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
-	let logoBreathing = $state(false);
 
 	// Overlay demo state
 	let showOverlayDemo = $state(false);
@@ -120,8 +119,8 @@
 	}
 
 	const assets: Record<string, AssetInfo> = {
-		'Logo': { component: Logo, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate', 'animateEntrance', 'breathing'] },
-		'GlassLogo': { component: GlassLogo, category: 'Trees', props: ['variant', 'season', 'animate', 'breathing', 'breathingSpeed', 'monochrome', 'accentColor'] },
+		'Logo': { component: Logo, category: 'Trees', props: ['season', 'size', 'rotation', 'shadow', 'interactive', 'monochromeColor', 'monochromeTrunk'] },
+		'GlassLogo': { component: GlassLogo, category: 'Trees', props: ['variant', 'season', 'size', 'rotation', 'shadow', 'interactive', 'accentColor', 'monochromeTrunk'] },
 		'TreePine': { component: TreePine, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeCherry': { component: TreeCherry, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
 		'TreeAspen': { component: TreeAspen, category: 'Trees', props: ['color', 'trunkColor', 'season', 'animate'] },
@@ -608,7 +607,6 @@
 								<GlassLogo
 									variant={logoVariant}
 									season={logoSeason}
-									breathing={logoBreathing}
 									class="w-24 h-32"
 								/>
 							</div>
@@ -633,10 +631,6 @@
 										<option value="winter">winter</option>
 									</select>
 								</div>
-								<label class="flex items-center gap-3 cursor-pointer">
-									<input type="checkbox" bind:checked={logoBreathing} class="w-5 h-5 rounded" />
-									<span class="text-sm text-foreground">Breathing animation</span>
-								</label>
 							</div>
 						</div>
 					</div>
