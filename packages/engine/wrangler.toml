@@ -29,7 +29,7 @@ id = "514e91e81cc44d128a82ec6f668303e4"
 # Then update the ID below with the actual value from the creation output
 [[kv_namespaces]]
 binding = "FLAGS_KV"
-id = "PLACEHOLDER_CREATE_WITH_WRANGLER"
+id = "65a600876aa14e9cbec8f8acd7d53b5f"
 
 # =============================================================================
 # R2 Bucket - For image and media storage

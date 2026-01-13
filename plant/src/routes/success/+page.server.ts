@@ -1,14 +1,17 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { getCheckoutSession } from "$lib/server/stripe";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { getTenantForOnboarding } from "$lib/server/tenant";
 
-// Helper to extract ID from Stripe expandable fields (string | object)
-function getStripeId(value: string | { id: string } | null | undefined): string | undefined {
-  if (!value) return undefined;
-  return typeof value === 'string' ? value : value.id;
-}
-
+/**
+ * Success Page Server Load
+ *
+ * This page handles the redirect after Lemon Squeezy checkout completion.
+ * The actual tenant creation happens in the webhook handler - this page
+ * just verifies the user's state and waits for the tenant to be ready.
+ *
+ * URL params:
+ * - checkout_id: Lemon Squeezy checkout ID (from LS redirect)
+ */
 export const load: PageServerLoad = async ({
   url,
   cookies,
@@ -17,22 +20,27 @@ export const load: PageServerLoad = async ({
 }) => {
   const { user, onboarding } = await parent();
 
-  // Get session_id from URL (Stripe redirect)
-  const sessionId = url.searchParams.get("session_id");
+  // Get checkout_id from URL (Lemon Squeezy redirect)
+  const checkoutId = url.searchParams.get("checkout_id");
   const db = platform?.env?.DB;
-  const stripeSecretKey = platform?.env?.STRIPE_SECRET_KEY;
 
-  // If coming from Stripe with session_id but not authenticated, handle specially
-  if (sessionId && db && stripeSecretKey && !user) {
+  // If coming from Lemon Squeezy with checkout_id but not authenticated,
+  // try to find and redirect to the tenant
+  if (checkoutId && db && !user) {
     try {
-      // Verify the checkout session
-      const session = await getCheckoutSession(stripeSecretKey, sessionId);
+      // Look up onboarding by checkout ID
+      const onboardingRecord = await db
+        .prepare(
+          `SELECT id FROM user_onboarding WHERE lemonsqueezy_checkout_id = ?`,
+        )
+        .bind(checkoutId)
+        .first();
 
-      if (session.status === "complete" && session.metadata?.onboarding_id) {
-        // Get the tenant that was created
+      if (onboardingRecord) {
+        // Check if tenant was created by webhook
         const tenant = await getTenantForOnboarding(
           db,
-          session.metadata.onboarding_id,
+          onboardingRecord.id as string,
         );
 
         if (tenant) {
@@ -45,7 +53,7 @@ export const load: PageServerLoad = async ({
       }
     } catch (error) {
       console.error(
-        "[Success] Error handling unauthenticated Stripe redirect:",
+        "[Success] Error handling unauthenticated checkout redirect:",
         error,
       );
       // Fall through to normal flow
@@ -67,63 +75,27 @@ export const load: PageServerLoad = async ({
     redirect(302, "/plans");
   }
 
-  // If we have a session_id and haven't processed payment yet
-  if (sessionId && db && stripeSecretKey && !onboarding?.paymentCompleted) {
-    try {
-      // Verify the checkout session
-      const session = await getCheckoutSession(stripeSecretKey, sessionId);
+  // If we have a checkout_id, update the onboarding record
+  // (The webhook handles the actual tenant creation)
+  if (checkoutId && db && !onboarding?.paymentCompleted) {
+    const onboardingId = cookies.get("onboarding_id");
 
-      if (session.status === "complete") {
-        const onboardingId = cookies.get("onboarding_id");
-
-        if (onboardingId) {
-          // Update payment status
-          await db
-            .prepare(
-              `UPDATE user_onboarding
-							 SET stripe_customer_id = ?,
-									 stripe_subscription_id = ?,
-									 payment_completed_at = unixepoch(),
-									 updated_at = unixepoch()
-							 WHERE id = ? AND payment_completed_at IS NULL`,
-            )
-            .bind(session.customer, session.subscription, onboardingId)
-            .run();
-
-          // Check if tenant exists (webhook might have created it)
-          const existingTenant = await getTenantForOnboarding(db, onboardingId);
-
-          if (!existingTenant) {
-            // Create tenant now (backup if webhook hasn't fired yet)
-            const onboardingData = await db
-              .prepare(
-                `SELECT id, username, display_name, email, plan_selected, favorite_color
-								 FROM user_onboarding WHERE id = ?`,
-              )
-              .bind(onboardingId)
-              .first();
-
-            if (onboardingData) {
-              await createTenant(db, {
-                onboardingId: onboardingData.id as string,
-                username: onboardingData.username as string,
-                displayName: onboardingData.display_name as string,
-                email: onboardingData.email as string,
-                plan: onboardingData.plan_selected as
-                  | "seedling"
-                  | "sapling"
-                  | "oak"
-                  | "evergreen",
-                favoriteColor: onboardingData.favorite_color as string | null,
-                stripeCustomerId: getStripeId(session.customer),
-                stripeSubscriptionId: getStripeId(session.subscription),
-              });
-            }
-          }
-        }
+    if (onboardingId) {
+      try {
+        // Just mark that we received the checkout redirect
+        // The webhook will handle the rest
+        await db
+          .prepare(
+            `UPDATE user_onboarding
+             SET lemonsqueezy_checkout_id = ?,
+                 updated_at = unixepoch()
+             WHERE id = ? AND lemonsqueezy_checkout_id IS NULL`,
+          )
+          .bind(checkoutId, onboardingId)
+          .run();
+      } catch (error) {
+        console.error("[Success] Error updating checkout ID:", error);
       }
-    } catch (error) {
-      console.error("[Success] Error verifying session:", error);
     }
   }
 

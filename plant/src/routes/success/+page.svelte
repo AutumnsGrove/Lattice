@@ -86,7 +86,7 @@
 
 			<p class="text-foreground-muted max-w-md mx-auto">
 				{status === 'verifying'
-					? "We're confirming your payment with Stripe."
+					? "We're confirming your payment..."
 					: "We're creating your blog at " + (data.user?.username || 'your') + '.grove.place'}
 			</p>
 
