@@ -44,12 +44,13 @@
 	 */
 
 	import type { GlassVariant } from './types';
+	import type { Season } from '$lib/ui/types/season';
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// TYPES
 	// ─────────────────────────────────────────────────────────────────────────────
 
-	export type Season = 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight';
+	export type { Season };
 	export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | number;
 
 	/** Color pair for a branch tier (dark side / light side) */
@@ -297,7 +298,9 @@
 
 	const finalClass = $derived.by(() => {
 		const base = size ? '' : (className || 'w-8 h-8');
-		const interactiveClass = interactive ? 'cursor-pointer transition-transform hover:scale-105' : '';
+		const interactiveClass = interactive
+			? 'cursor-pointer transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current rounded-sm'
+			: '';
 		return [base, interactiveClass].filter(Boolean).join(' ');
 	});
 
