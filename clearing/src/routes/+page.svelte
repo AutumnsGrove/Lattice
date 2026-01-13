@@ -10,6 +10,7 @@
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';
+	import GlassBackupStatus from '$lib/components/GlassBackupStatus.svelte';
 	import IncidentCard from '$lib/components/IncidentCard.svelte';
 	import ScheduledMaintenanceCard from '$lib/components/ScheduledMaintenanceCard.svelte';
 	import { formatDateFull } from '$lib/utils/date';
@@ -145,6 +146,11 @@
 					</button>
 				{/if}
 			</section>
+
+			<!-- Data Protection (Backup Status) -->
+			{#if data.backupStatus}
+				<GlassBackupStatus backupStatus={data.backupStatus} />
+			{/if}
 
 			<!-- Uptime History -->
 			<section aria-labelledby="uptime-history-heading">

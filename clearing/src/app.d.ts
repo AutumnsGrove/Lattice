@@ -10,6 +10,7 @@ declare global {
     interface Platform {
       env: {
         DB: D1Database;
+        BACKUPS_DB: D1Database;
         CDN_URL?: string;
       };
       context: {

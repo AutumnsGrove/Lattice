@@ -16,6 +16,12 @@ binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
+# Backups database (for Data Protection section)
+[[d1_databases]]
+binding = "BACKUPS_DB"
+database_name = "grove-backups-db"
+database_id = "4ad25abc-f972-4159-ac81-578806709275"
+
 # NOTE: For production deployment, configure:
 # - Custom domain: status.grove.place
 # - See DEPLOY.md for deployment instructions
