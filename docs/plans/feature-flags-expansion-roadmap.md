@@ -159,44 +159,7 @@ Enable/disable infrastructure components independently.
 
 ## Detailed Flag Specifications
 
-### 1. Payment Provider Switch (`payment_provider`)
-
-**Purpose:** Migrate from Stripe to Lemon Squeezy without big-bang cutover.
-
-**Type:** Variant (string value)
-
-**Values:**
-- `"stripe"` — Current Stripe integration
-- `"lemonsqueezy"` — New Lemon Squeezy integration
-- `"hybrid"` — New signups → LS, existing → Stripe (future)
-
-**Integration Point:** `packages/engine/src/lib/payments/index.ts`
-
-```typescript
-// Usage in payment factory
-const provider = await getFeatureValue('payment_provider', context, env, 'stripe');
-
-export function createPaymentProvider(type?: string, config) {
-  const providerType = type ?? provider; // Use flag if not explicit
-
-  switch (providerType) {
-    case 'stripe': return createStripeProvider(config);
-    case 'lemonsqueezy': return createLemonSqueezyProvider(config);
-    default: return createStripeProvider(config);
-  }
-}
-```
-
-**Rules:**
-| Priority | Rule | Result |
-|----------|------|--------|
-| 100 | Kill switch ON | "stripe" |
-| 50 | Tenant in beta list | "lemonsqueezy" |
-| 10 | Default | "stripe" |
-
----
-
-### 2. Shop Feature (`shop_enabled`)
+### 1. Shop Feature (`shop_enabled`)
 
 **Purpose:** Re-enable e-commerce functionality when ready.
 
@@ -229,7 +192,7 @@ if (!shopEnabled) {
 
 ---
 
-### 3. Durable Objects Toggles
+### 2. Durable Objects Toggles
 
 **Purpose:** Phased DO rollout with per-component control.
 
@@ -268,7 +231,7 @@ if (useSessionDO) {
 
 ---
 
-### 4. Custom Domains (`custom_domains`)
+### 3. Custom Domains (`custom_domains`)
 
 **Purpose:** Gate Cloudflare for SaaS feature by tier.
 
@@ -298,7 +261,7 @@ if (!canUseCustomDomain) {
 
 ---
 
-### 5. Rate Limiting Enforcement (`rate_limiting_strict`)
+### 4. Rate Limiting Enforcement (`rate_limiting_strict`)
 
 **Purpose:** Gradually enforce tier-based rate limits.
 
@@ -329,7 +292,7 @@ if (isRateLimited) {
 
 ---
 
-### 6. Beta Feature Access
+### 5. Beta Feature Access
 
 **Pattern:** Tenant-list based access for invite-only features.
 
@@ -384,15 +347,6 @@ VALUES
    'Emergency disable all payment processing', 'boolean', 'false', 0),
   ('uploads_kill_switch', 'Uploads Kill Switch',
    'Emergency disable file uploads', 'boolean', 'false', 0);
-
--- =============================================================================
--- PROVIDER SWITCHES (service migrations)
--- =============================================================================
-
-INSERT INTO feature_flags (id, name, description, flag_type, default_value, enabled)
-VALUES
-  ('payment_provider', 'Payment Provider',
-   'Active payment provider: stripe, lemonsqueezy', 'variant', '"stripe"', 1);
 
 -- =============================================================================
 -- FEATURE TOGGLES (enable/disable features)
@@ -535,27 +489,7 @@ if (useJxl) return processAsJxl(file);
 return processAsWebP(file);
 ```
 
-### Pattern 4: Provider Selection
-
-For service migrations:
-
-```typescript
-import { getFeatureValue } from '$lib/feature-flags';
-
-const provider = await getFeatureValue<'stripe' | 'lemonsqueezy'>(
-  'payment_provider',
-  { tenantId },
-  platform.env,
-  'stripe'  // default
-);
-
-if (provider === 'lemonsqueezy') {
-  return createLemonSqueezyCheckout(params);
-}
-return createStripeCheckout(params);
-```
-
-### Pattern 5: Beta Tenant List
+### Pattern 4: Beta Tenant List
 
 For invite-only features:
 
@@ -594,8 +528,8 @@ const hasBetaAccess = await isFeatureEnabled('trails_beta', {
 | Flag | Integration |
 |------|-------------|
 | `jxl_encoding` | imageProcessor.ts |
-| `payment_provider` | payments/index.ts |
 | `shop_enabled` | Shop routes |
+| `comments_enabled` | Comments system |
 
 ### Phase 3: Tier-Gating (Week 3)
 
