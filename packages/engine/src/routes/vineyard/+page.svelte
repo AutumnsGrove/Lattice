@@ -305,12 +305,8 @@
 					</div>
 					<!-- Features -->
 					<div>
-						<p class="text-xs text-bark-500 mb-3">Features: breathing, shadow, interactive</p>
+						<p class="text-xs text-bark-500 mb-3">Features: shadow, interactive, rotation</p>
 						<div class="flex justify-center gap-8 items-end">
-							<div class="text-center">
-								<Logo size="lg" season={logoSeason} breathing />
-								<p class="text-xs text-bark-500 mt-2">Breathing</p>
-							</div>
 							<div class="text-center">
 								<Logo size="lg" season={logoSeason} shadow />
 								<p class="text-xs text-bark-500 mt-2">Shadow</p>
@@ -326,7 +322,11 @@
 								<p class="text-xs text-bark-500 mt-2">Interactive</p>
 							</div>
 							<div class="text-center">
-								<Logo size="lg" season={logoSeason} breathing shadow />
+								<Logo size="lg" season={logoSeason} rotation={0} />
+								<p class="text-xs text-bark-500 mt-2">No rotation</p>
+							</div>
+							<div class="text-center">
+								<Logo size="lg" season={logoSeason} shadow interactive />
 								<p class="text-xs text-bark-500 mt-2">All effects</p>
 							</div>
 						</div>
@@ -365,8 +365,8 @@
 							<p class="text-xs text-bark-500 mt-2">Dark</p>
 						</div>
 						<div class="text-center">
-							<GlassLogo size={80} season={logoSeason} variant="ethereal" breathing />
-							<p class="text-xs text-bark-500 mt-2">Ethereal + Breathing</p>
+							<GlassLogo size={80} season={logoSeason} variant="ethereal" />
+							<p class="text-xs text-bark-500 mt-2">Ethereal</p>
 						</div>
 					</div>
 					<p class="text-xs text-bark-500 text-center mt-2">Try winter for snow caps or spring for cherry blossoms!</p>

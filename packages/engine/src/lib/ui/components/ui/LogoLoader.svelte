@@ -34,7 +34,7 @@
 	role="status"
 	aria-label={label || 'Loading'}
 >
-	<Logo class={sizeClasses[size]} breathing monochrome />
+	<Logo class="{sizeClasses[size]} animate-pulse" />
 	{#if label}
 		<span class="loader-label">{label}</span>
 	{/if}

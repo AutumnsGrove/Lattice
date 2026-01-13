@@ -6,7 +6,7 @@
 	import { seasonStore } from '../../stores/season';
 	import { Menu } from 'lucide-svelte';
 	import type { NavItem, MaxWidth } from './types';
-	import type { Season } from '../ui/Logo.svelte';
+	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 
