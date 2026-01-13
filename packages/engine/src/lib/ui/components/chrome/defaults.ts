@@ -93,7 +93,7 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
-  { href: "/clearing", label: "Status", icon: Activity },
+  { href: "https://status.grove.place", label: "Status", icon: Activity, external: true },
 ];
 
 // Connect section (desktop footer)
@@ -121,7 +121,7 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
-  { href: "/clearing", label: "Status", icon: Activity },
+  { href: "https://status.grove.place", label: "Status", icon: Activity, external: true },
 ];
 
 // Connect section (mobile menu)
