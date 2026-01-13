@@ -404,7 +404,7 @@
 
 			<!-- Single tree - the beginning (positioned at 25% to not block waitlist card) -->
 			<div class="absolute bottom-0 left-[25%] -translate-x-1/2 w-32 h-40 opacity-60" aria-hidden="true">
-				<Logo class="w-full h-full" season="winter" animate />
+				<Logo class="w-full h-full" season="winter" />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
@@ -461,11 +461,11 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="winter" animate />
+						<Logo class="w-full h-full" season="winter" />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" season="winter" animate />
+						<TreeBirch class="w-full h-full" season="winter" />
 					{/if}
 				</div>
 			{/each}
@@ -542,20 +542,20 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="spring" animate />
+						<Logo class="w-full h-full" season="spring" />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
 					{:else if tree.treeType === 'cherry'}
-						<TreeCherry class="w-full h-full" season="spring" animate />
+						<TreeCherry class="w-full h-full" season="spring" />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" season="spring" animate />
+						<TreeBirch class="w-full h-full" season="spring" />
 					{/if}
 				</div>
 			{/each}
 
 			<!-- Ivy climbing! -->
 			<div class="absolute bottom-0 left-[40%] w-10 h-20 opacity-70" aria-hidden="true">
-				<Vine class="w-full h-full" variant="ivy" season="spring" animate />
+				<Vine class="w-full h-full" variant="ivy" season="spring" />
 			</div>
 
 			<!-- Spring flowers - daffodils, tulips, wildflowers -->
@@ -657,15 +657,15 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="summer" animate />
+						<Logo class="w-full h-full" season="summer" />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
 					{:else if tree.treeType === 'cherry'}
-						<TreeCherry class="w-full h-full" season="summer" animate />
+						<TreeCherry class="w-full h-full" season="summer" />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" season="summer" animate />
+						<TreeBirch class="w-full h-full" season="summer" />
 					{:else if tree.treeType === 'aspen'}
-						<TreeAspen class="w-full h-full" season="summer" animate />
+						<TreeAspen class="w-full h-full" season="summer" />
 					{/if}
 				</div>
 			{/each}
@@ -779,15 +779,15 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="autumn" animate />
+						<Logo class="w-full h-full" season="autumn" />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="autumn" animate color={autumn.gold} />
 					{:else if tree.treeType === 'cherry'}
-						<TreeCherry class="w-full h-full" season="autumn" animate />
+						<TreeCherry class="w-full h-full" season="autumn" />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" season="autumn" animate />
+						<TreeBirch class="w-full h-full" season="autumn" />
 					{:else if tree.treeType === 'aspen'}
-						<TreeAspen class="w-full h-full" season="autumn" animate />
+						<TreeAspen class="w-full h-full" season="autumn" />
 					{/if}
 				</div>
 			{/each}
@@ -878,7 +878,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="winter" color="#4c1d95" />
+						<Logo class="w-full h-full" season="midnight" />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="winter" color={nightColor} />
 					{:else if tree.treeType === 'cherry'}
