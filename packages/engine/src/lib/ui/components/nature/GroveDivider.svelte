@@ -21,10 +21,10 @@
     class     - Additional CSS classes
 -->
 <script lang="ts">
-	import Logo from './Logo.svelte';
+	import Logo from '../ui/Logo.svelte';
 	import GlassLogo from '../ui/GlassLogo.svelte';
 	import type { GlassVariant } from '../ui/types';
-	import type { Season } from './palette';
+	import type { Season } from '../../types/season';
 	import { seasonStore } from '../../stores/season';
 
 	type RotationMode = 'default' | 'left-right' | 'up-down';
