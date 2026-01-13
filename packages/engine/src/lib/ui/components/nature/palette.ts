@@ -100,9 +100,9 @@ export const springSky = {
 } as const;
 
 /**
- * Wildflowers - spring and general meadow flowers
- * Unified wildflower palette for all seasons.
- * Used for spring wildflowers and general meadow accents.
+ * Wildflowers - meadow and garden flowers (excluding cherry blossoms)
+ * Contains all non-tree flower colors: yellows, purples, pinks, whites.
+ * Used for wildflower meadows, garden scenes, and spring accents.
  */
 export const wildflowers = {
   // Yellows
@@ -147,6 +147,72 @@ export const cherryBlossomsPeak = {
   light: "#f9a8d4", // Soft rose petals
   pale: "#fbcfe8", // Pale blush
   falling: "#fce7f3", // Very pale falling petals
+} as const;
+
+// =============================================================================
+// FLOWERS PALETTE - UNIFIED FLOWER COLORS
+// =============================================================================
+
+/**
+ * Flowers - unified palette for all flower colors
+ *
+ * This consolidates all flower-related colors into one organized namespace,
+ * separating flower colors from foliage (spring greens, autumn leaves, etc.).
+ *
+ * Structure:
+ * - `flowers.wildflower` - Meadow flowers: yellows, purples, pinks, whites
+ * - `flowers.cherry` - Cherry blossom colors (standard summer)
+ * - `flowers.cherryPeak` - Cherry blossoms at peak bloom (vibrant spring)
+ *
+ * @example
+ * import { flowers } from './palette';
+ * const tulipColor = flowers.wildflower.tulipPink;
+ * const blossomColor = flowers.cherry.standard;
+ */
+export const flowers = {
+  /**
+   * Meadow wildflowers - yellows, purples, pinks, whites
+   * For wildflower meadows, garden scenes, and floral accents.
+   */
+  wildflower: {
+    // Yellows
+    buttercup: wildflowers.buttercup,
+    daffodil: wildflowers.daffodil,
+    // Purples and violets
+    crocus: wildflowers.crocus,
+    violet: wildflowers.violet,
+    purple: wildflowers.purple,
+    lavender: wildflowers.lavender,
+    // Pinks and reds
+    tulipPink: wildflowers.tulipPink,
+    tulipRed: wildflowers.tulipRed,
+    // Neutrals
+    white: wildflowers.white,
+  },
+
+  /**
+   * Cherry blossoms - standard summer version
+   * Pink gradient from dense centers to falling petals.
+   */
+  cherry: {
+    deep: cherryBlossoms.deep,
+    standard: cherryBlossoms.standard,
+    light: cherryBlossoms.light,
+    pale: cherryBlossoms.pale,
+    falling: cherryBlossoms.falling,
+  },
+
+  /**
+   * Cherry blossoms at peak bloom - vibrant spring version
+   * Extra saturated for when cherry trees are at their most beautiful.
+   */
+  cherryPeak: {
+    deep: cherryBlossomsPeak.deep,
+    standard: cherryBlossomsPeak.standard,
+    light: cherryBlossomsPeak.light,
+    pale: cherryBlossomsPeak.pale,
+    falling: cherryBlossomsPeak.falling,
+  },
 } as const;
 
 // =============================================================================
@@ -238,21 +304,21 @@ export const accents = {
     gill: "#fde8e8", // Pale pink gills underneath
   },
   /**
-   * @deprecated Use the top-level `wildflowers` export instead. Will be removed in v1.0.
+   * @deprecated Use the top-level `flowers.wildflower` export instead. Will be removed in v1.0.
    *
    * Historical context: Flower colors were originally split between two places:
    * - `spring` palette had wildflower accents (crocus, lilac, tulips, buttercup, daffodil)
    * - `accents.flower` had generic flower colors (purple, violet, yellow, white, lavender)
    *
-   * This caused confusion and duplicate values. Now unified in the top-level `wildflowers`
-   * palette which contains all meadow flower colors in one place.
+   * This caused confusion and duplicate values. Now unified in the top-level `flowers`
+   * palette which contains all flower colors organized by type (wildflower, cherry, cherryPeak).
    */
   flower: {
-    purple: wildflowers.purple,
-    violet: wildflowers.violet,
-    yellow: wildflowers.buttercup,
-    white: wildflowers.white,
-    lavender: wildflowers.lavender,
+    purple: flowers.wildflower.purple,
+    violet: flowers.wildflower.violet,
+    yellow: flowers.wildflower.buttercup,
+    white: flowers.wildflower.white,
+    lavender: flowers.wildflower.lavender,
   },
   /** Firefly bioluminescence - warm yellow-green glow */
   firefly: {
@@ -510,6 +576,9 @@ export const naturePalette = {
   bark,
   earth,
   natural,
+
+  // Flowers (unified flower palette)
+  flowers,
 
   // Spring
   springFoliage,

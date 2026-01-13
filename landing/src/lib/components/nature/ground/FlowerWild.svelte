@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { accents, greens } from '../palette';
+	import { flowers, greens } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -22,8 +22,8 @@
 		animate = true
 	}: Props = $props();
 
-	const petals = $derived(petalColor ?? accents.flower.purple);
-	const center = $derived(centerColor ?? accents.flower.yellow);
+	const petals = $derived(petalColor ?? flowers.wildflower.purple);
+	const center = $derived(centerColor ?? flowers.wildflower.buttercup);
 	const stem = $derived(stemColor ?? greens.deepGreen);
 </script>
 

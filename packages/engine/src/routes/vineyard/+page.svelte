@@ -44,7 +44,7 @@
 		springFoliage, springSky, wildflowers,
 		cherryBlossoms, cherryBlossomsPeak,
 		autumn, autumnReds, winter,
-		midnightBloom
+		midnightBloom, flowers
 	} from '$lib/ui/components/nature/palette';
 	import { grove, cream, bark as barkTokens, status } from '$lib/ui/tokens/colors';
 	import { Sparkles, Palette, Box, ChevronRight, Type } from 'lucide-svelte';
@@ -884,6 +884,17 @@ $ npm run dev
 			</div>
 		</div>
 
+		<!-- Flowers Palette -->
+		<div class="mb-12">
+			<h3 class="text-lg font-semibold text-bark-800 mb-4">Flowers</h3>
+			<p class="text-bark-600 mb-6">All flower colors unified in one palette — separated from foliage for clarity.</p>
+			<div class="grid gap-6">
+				{@render PaletteRow({ name: "Wildflowers", colors: flowers.wildflower, description: "Meadow flowers - yellows, purples, pinks, whites" })}
+				{@render PaletteRow({ name: "Cherry Blossoms", colors: flowers.cherry, description: "Standard summer cherry blossoms" })}
+				{@render PaletteRow({ name: "Cherry Peak", colors: flowers.cherryPeak, description: "Extra vibrant spring peak bloom" })}
+			</div>
+		</div>
+
 		<!-- Seasonal Palettes -->
 		<div class="mb-12">
 			<h3 class="text-lg font-semibold text-bark-800 mb-4">Seasonal Palettes</h3>
@@ -892,9 +903,6 @@ $ npm run dev
 				<!-- Spring -->
 				{@render PaletteRow({ name: "Spring Foliage", colors: springFoliage, description: "Fresh yellow-green growth of new leaves" })}
 				{@render PaletteRow({ name: "Spring Sky", colors: springSky, description: "Clear, bright spring atmosphere" })}
-				{@render PaletteRow({ name: "Wildflowers", colors: wildflowers, description: "Meadow flowers - yellows, purples, pinks" })}
-				{@render PaletteRow({ name: "Cherry Blossoms", colors: cherryBlossoms, description: "Standard summer cherry blossoms" })}
-				{@render PaletteRow({ name: "Cherry Blossoms Peak", colors: cherryBlossomsPeak, description: "Extra vibrant spring peak bloom" })}
 				<!-- Autumn -->
 				{@render PaletteRow({ name: "Autumn", colors: autumn, description: "Warm golds, ambers, and falling leaves" })}
 				{@render PaletteRow({ name: "Autumn Reds", colors: autumnReds, description: "Maple and cherry fall foliage" })}

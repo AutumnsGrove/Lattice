@@ -9,6 +9,7 @@ import {
 	autumnReds,
 	accents,
 	wildflowers,
+	flowers,
 	springFoliage,
 	springSky,
 	cherryBlossoms,
@@ -60,10 +61,39 @@ describe('palette.ts', () => {
 			expect(accents.sky).toBeDefined();
 		});
 
-		it('accents.flower should alias wildflowers colors', () => {
-			expect(accents.flower.purple).toBe(wildflowers.purple);
-			expect(accents.flower.yellow).toBe(wildflowers.buttercup);
-			expect(accents.flower.white).toBe(wildflowers.white);
+		it('accents.flower should alias flowers.wildflower colors', () => {
+			expect(accents.flower.purple).toBe(flowers.wildflower.purple);
+			expect(accents.flower.yellow).toBe(flowers.wildflower.buttercup);
+			expect(accents.flower.white).toBe(flowers.wildflower.white);
+		});
+
+		it('should export flowers unified palette', () => {
+			expect(flowers).toBeDefined();
+			expect(flowers.wildflower).toBeDefined();
+			expect(flowers.cherry).toBeDefined();
+			expect(flowers.cherryPeak).toBeDefined();
+		});
+
+		it('flowers.wildflower should match wildflowers palette', () => {
+			expect(flowers.wildflower.buttercup).toBe(wildflowers.buttercup);
+			expect(flowers.wildflower.daffodil).toBe(wildflowers.daffodil);
+			expect(flowers.wildflower.crocus).toBe(wildflowers.crocus);
+			expect(flowers.wildflower.purple).toBe(wildflowers.purple);
+			expect(flowers.wildflower.tulipPink).toBe(wildflowers.tulipPink);
+		});
+
+		it('flowers.cherry should match cherryBlossoms palette', () => {
+			expect(flowers.cherry.deep).toBe(cherryBlossoms.deep);
+			expect(flowers.cherry.standard).toBe(cherryBlossoms.standard);
+			expect(flowers.cherry.light).toBe(cherryBlossoms.light);
+			expect(flowers.cherry.pale).toBe(cherryBlossoms.pale);
+			expect(flowers.cherry.falling).toBe(cherryBlossoms.falling);
+		});
+
+		it('flowers.cherryPeak should match cherryBlossomsPeak palette', () => {
+			expect(flowers.cherryPeak.deep).toBe(cherryBlossomsPeak.deep);
+			expect(flowers.cherryPeak.standard).toBe(cherryBlossomsPeak.standard);
+			expect(flowers.cherryPeak.falling).toBe(cherryBlossomsPeak.falling);
 		});
 
 		it('greens should have expected color keys', () => {
