@@ -1,0 +1,57 @@
+# Grove Durable Objects Worker
+# Hosts all Durable Objects for the Grove Platform
+#
+# This worker exports DO classes that are referenced by:
+# - GroveEngine (Pages) via service binding
+# - Post-Migrator worker
+#
+# Deploy: pnpm deploy (from this directory)
+
+name = "grove-durable-objects"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Durable Objects - Loom Pattern (Grove's coordination layer)
+# =============================================================================
+
+# TenantDO: Per-tenant config caching, draft sync, analytics buffering
+[[durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+
+# PostMetaDO: Per-post reactions, views, real-time presence (hot data)
+[[durable_objects.bindings]]
+name = "POST_META"
+class_name = "PostMetaDO"
+
+# PostContentDO: Per-post content caching (warm data, hibernates quickly)
+[[durable_objects.bindings]]
+name = "POST_CONTENT"
+class_name = "PostContentDO"
+
+# =============================================================================
+# DO Migrations - Declare new SQLite-backed classes
+# =============================================================================
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TenantDO"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["PostMetaDO", "PostContentDO"]
+
+# =============================================================================
+# D1 Database - For DO fallback queries
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# R2 Bucket - For cold storage migration
+# =============================================================================
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "grove-media"
