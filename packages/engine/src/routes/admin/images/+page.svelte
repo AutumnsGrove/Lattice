@@ -12,6 +12,13 @@
     formatBytes,
     compressionRatio
   } from "$lib/utils";
+  import {
+    UPLOAD_ACCEPT_ATTR,
+    ALLOWED_IMAGE_TYPES,
+    ALLOWED_EXTENSIONS,
+    ALLOWED_TYPES_DISPLAY,
+    validateImageFile
+  } from "$lib/utils/upload-validation";
 
   // Upload options (defaults with AI analysis enabled)
   let quality = $state(80);
@@ -66,10 +73,10 @@
 
       const data = await api.get(`/api/images/list?${params}`);
 
-      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico', '.avif'];
+      // Filter to show only allowed image types in gallery
       const filteredImages = data.images.filter(/** @param {any} img */ img => {
         const key = img.key.toLowerCase();
-        return imageExtensions.some(ext => key.endsWith(ext));
+        return ALLOWED_EXTENSIONS.some(ext => key.endsWith(`.${ext}`));
       });
 
       if (append) {
@@ -141,12 +148,34 @@
 
   /** @param {File[]} files */
   async function uploadFiles(files) {
-    const imageFiles = files.filter(/** @param {File} f */ f => f.type.startsWith('image/'));
+    // Validate each file against allowed types
+    const validFiles = [];
+    const rejectedFiles = [];
 
-    if (imageFiles.length === 0) {
-      toast.error('Please select image files only');
+    for (const file of files) {
+      const error = validateImageFile(file);
+      if (error) {
+        rejectedFiles.push({ name: file.name, error });
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    // Show errors for rejected files
+    if (rejectedFiles.length > 0) {
+      for (const { name, error } of rejectedFiles) {
+        toast.error(`${name}: ${error}`);
+      }
+    }
+
+    if (validFiles.length === 0) {
+      if (rejectedFiles.length === 0) {
+        toast.error(`Please select image files (${ALLOWED_TYPES_DISPLAY})`);
+      }
       return;
     }
+
+    const imageFiles = validFiles;
 
     uploading = true;
 
@@ -385,7 +414,7 @@
       <input
         type="file"
         id="file-input"
-        accept="image/*"
+        accept={UPLOAD_ACCEPT_ATTR}
         multiple
         onchange={handleFileSelect}
         hidden

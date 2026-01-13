@@ -132,6 +132,7 @@ const ALLOWED_CONTENT_TYPES = new Set([
   "image/gif",
   "image/webp",
   "image/avif",
+  "image/jxl",
   // 'image/svg+xml', // REMOVED - XSS risk
   // Documents
   "application/pdf",
@@ -161,6 +162,7 @@ const CACHE_CONTROL: Record<string, string> = {
   "image/gif": "public, max-age=31536000, immutable",
   "image/webp": "public, max-age=31536000, immutable",
   "image/avif": "public, max-age=31536000, immutable",
+  "image/jxl": "public, max-age=31536000, immutable",
   // 'image/svg+xml': 'public, max-age=31536000, immutable', // REMOVED - XSS risk
   "font/woff": "public, max-age=31536000, immutable",
   "font/woff2": "public, max-age=31536000, immutable",

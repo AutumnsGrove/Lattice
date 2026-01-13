@@ -3,7 +3,7 @@
  */
 
 /** Supported image MIME types for file signature validation */
-type ImageMimeType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+type ImageMimeType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' | 'image/jxl';
 
 // File signature database for magic byte validation
 const FILE_SIGNATURES: Record<ImageMimeType, number[][]> = {
@@ -17,7 +17,11 @@ const FILE_SIGNATURES: Record<ImageMimeType, number[][]> = {
     [0x47, 0x49, 0x46, 0x38, 0x37, 0x61], // GIF87a
     [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]  // GIF89a
   ],
-  'image/webp': [[0x52, 0x49, 0x46, 0x46]] // RIFF (WebP container)
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF (WebP container)
+  'image/jxl': [
+    [0xFF, 0x0A], // JPEG XL naked codestream
+    [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20] // JPEG XL container
+  ]
 };
 
 /**
