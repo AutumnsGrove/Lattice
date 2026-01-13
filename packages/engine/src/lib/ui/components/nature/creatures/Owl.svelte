@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { bark, earth, accents } from '../palette';
+	import { bark, earth, flowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -22,7 +22,7 @@
 
 	const feathers = $derived(featherColor ?? bark.bark);
 	const lightFeathers = $derived(earth.clay);
-	const eyeColor = $derived(accents.flower.yellow);
+	const eyeColor = $derived(flowers.wildflower.buttercup);
 	const scaleX = $derived(facing === 'left' ? -1 : 1);
 </script>
 

@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { accents, greens } from '../palette';
+	import { flowers, greens } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -23,7 +23,7 @@
 	}: Props = $props();
 
 	const pad = $derived(padColor ?? greens.grove);
-	const flower = $derived(flowerColor ?? accents.flower.white);
+	const flower = $derived(flowerColor ?? flowers.wildflower.white);
 	const padDark = $derived(greens.deepGreen);
 </script>
 

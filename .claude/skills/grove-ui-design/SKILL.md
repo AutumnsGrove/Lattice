@@ -190,6 +190,41 @@ cherryBlossomsPeak.pale      // #fbcfe8
 cherryBlossomsPeak.falling   // #fce7f3
 ```
 
+#### Unified Flowers Palette (NEW!)
+
+The `flowers` namespace consolidates all flower colors into one organized structure:
+
+```typescript
+import { flowers } from '@autumnsgrove/groveengine/ui/nature';
+
+// Meadow wildflowers (yellows, purples, pinks, whites)
+flowers.wildflower.buttercup   // #facc15 - Yellow
+flowers.wildflower.daffodil    // #fde047 - Pale yellow
+flowers.wildflower.crocus      // #a78bfa - Purple crocus
+flowers.wildflower.violet      // #8b5cf6 - Wild violets
+flowers.wildflower.purple      // #a855f7 - Lupine, thistle
+flowers.wildflower.lavender    // #c4b5fd - Distant masses
+flowers.wildflower.tulipPink   // #f9a8d4 - Pink tulips
+flowers.wildflower.tulipRed    // #fb7185 - Red tulips
+flowers.wildflower.white       // #fefefe - Daisies, trillium
+
+// Cherry blossoms - standard summer
+flowers.cherry.deep      // #db2777
+flowers.cherry.standard  // #ec4899
+flowers.cherry.light     // #f472b6
+flowers.cherry.pale      // #f9a8d4
+flowers.cherry.falling   // #fbcfe8
+
+// Cherry blossoms at peak bloom - vibrant spring
+flowers.cherryPeak.deep      // #ec4899
+flowers.cherryPeak.standard  // #f472b6
+flowers.cherryPeak.light     // #f9a8d4
+flowers.cherryPeak.pale      // #fbcfe8
+flowers.cherryPeak.falling   // #fce7f3
+```
+
+**Use `flowers.wildflower` instead of `accents.flower`** — the accents version is deprecated.
+
 #### Autumn & Winter Palettes
 
 ```typescript
@@ -245,7 +280,7 @@ accents.bird.chickadeeCap, accents.bird.chickadeeBody, accents.bird.chickadeeBel
 accents.bird.robinBody, accents.bird.robinBreast, accents.bird.robinBeak
 accents.bird.bluebirdBody, accents.bird.bluebirdWing, accents.bird.bluebirdBreast
 
-// NOTE: accents.flower is deprecated - use wildflowers instead
+// NOTE: accents.flower is deprecated - use flowers.wildflower instead
 ```
 
 #### Seasonal Helper Functions
@@ -284,7 +319,7 @@ import { spring, pinks, springBlossoms } from '@autumnsgrove/groveengine/ui/natu
 // spring → use springFoliage, wildflowers, springSky instead
 // pinks → use cherryBlossoms instead
 // springBlossoms → use cherryBlossomsPeak instead
-// accents.flower → use wildflowers instead
+// accents.flower → use flowers.wildflower instead
 ```
 
 #### Season Mood Summary

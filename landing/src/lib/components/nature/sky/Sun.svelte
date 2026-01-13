@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { accents } from '../palette';
+	import { flowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -20,7 +20,7 @@
 		animate = true
 	}: Props = $props();
 
-	const sunColor = $derived(color ?? accents.flower.yellow);
+	const sunColor = $derived(color ?? flowers.wildflower.buttercup);
 </script>
 
 <!-- Sun with optional rays -->

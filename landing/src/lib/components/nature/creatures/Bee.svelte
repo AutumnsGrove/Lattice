@@ -4,7 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import { accents, bark } from '../palette';
+	import { flowers, bark } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -20,7 +20,7 @@
 		animate = true
 	}: Props = $props();
 
-	const body = $derived(bodyColor ?? accents.flower.yellow);
+	const body = $derived(bodyColor ?? flowers.wildflower.buttercup);
 	const stripes = $derived(stripeColor ?? bark.darkBark);
 	const wingColor = $derived('#e0f2fe'); // Light blue-ish transparent
 </script>

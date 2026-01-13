@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { Season } from '../palette';
-	import { bark, greens, autumn, accents } from '../palette';
+	import { bark, greens, autumn, flowers } from '../palette';
 
 	interface Props {
 		class?: string;
@@ -27,7 +27,7 @@
 	const defaultVineColor = $derived(season === 'autumn' ? autumn.rust : greens.grove);
 	const vine = $derived(vineColor ?? defaultVineColor);
 	const leafColor = $derived(season === 'autumn' ? autumn.amber : greens.meadow);
-	const flowerColor = $derived(accents.flower.purple);
+	const flowerColor = $derived(flowers.wildflower.purple);
 </script>
 
 <!-- Lattice with climbing vine -->

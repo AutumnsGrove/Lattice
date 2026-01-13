@@ -96,6 +96,14 @@ describe('palette.ts', () => {
 			expect(flowers.cherryPeak.falling).toBe(cherryBlossomsPeak.falling);
 		});
 
+		it('flowers.wildflower should include all wildflowers colors', () => {
+			const wildflowerKeys = Object.keys(wildflowers);
+			const flowersWildflowerKeys = Object.keys(flowers.wildflower);
+			wildflowerKeys.forEach((key) => {
+				expect(flowersWildflowerKeys).toContain(key);
+			});
+		});
+
 		it('greens should have expected color keys', () => {
 			expect(greens.darkForest).toBe('#0d4a1c');
 			expect(greens.grove).toBe('#16a34a');
