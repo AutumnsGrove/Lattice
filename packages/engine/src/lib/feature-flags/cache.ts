@@ -31,6 +31,16 @@ const INSTANT_FLAGS = new Set(["jxl_kill_switch", "maintenance_mode"]);
 // =============================================================================
 
 /**
+ * Sanitize a value for use in cache keys.
+ * Removes colons and other separator characters to prevent key injection.
+ */
+function sanitizeForCacheKey(value: string): string {
+  // Replace colons (our separator) and control characters
+  // Keep alphanumeric, dash, underscore, and dot
+  return value.replace(/[^a-zA-Z0-9\-_.]/g, "-");
+}
+
+/**
  * Build a deterministic cache key from flag ID and context.
  *
  * Key format: flag:{flagId}:{context_parts}
@@ -40,26 +50,28 @@ const INSTANT_FLAGS = new Set(["jxl_kill_switch", "maintenance_mode"]);
  *   flag:jxl_encoding:tenant:abc123
  *   flag:meadow_access:tier:oak
  *   flag:meadow_access:tenant:xyz:tier:oak
+ *
+ * Context values are sanitized to prevent cache key injection.
  */
 export function buildCacheKey(
   flagId: string,
   context: EvaluationContext,
 ): string {
-  const parts = ["flag", flagId];
+  const parts = ["flag", sanitizeForCacheKey(flagId)];
 
-  // Add context parts in consistent order
+  // Add context parts in consistent order (sanitized)
   if (context.tenantId) {
-    parts.push("tenant", context.tenantId);
+    parts.push("tenant", sanitizeForCacheKey(context.tenantId));
   }
   if (context.tier) {
-    parts.push("tier", context.tier);
+    parts.push("tier", sanitizeForCacheKey(context.tier));
   }
   if (context.userId) {
-    parts.push("user", context.userId);
+    parts.push("user", sanitizeForCacheKey(context.userId));
   }
   if (context.sessionId && !context.userId && !context.tenantId) {
     // Only include sessionId if no other identifiers
-    parts.push("session", context.sessionId);
+    parts.push("session", sanitizeForCacheKey(context.sessionId));
   }
 
   // If no context, use 'global'
@@ -176,42 +188,69 @@ export function cachedToResult<T>(
 /**
  * Invalidate all cached values for a specific flag.
  * Called when a flag is updated in the admin UI.
+ *
+ * Handles pagination for flags with >1000 cached variants.
  */
 export async function invalidateFlag(
   flagId: string,
   env: FeatureFlagsEnv,
 ): Promise<number> {
+  const sanitizedFlagId = sanitizeForCacheKey(flagId);
+  const prefix = `flag:${sanitizedFlagId}:`;
+  let totalDeleted = 0;
+  let cursor: string | undefined;
+
   try {
-    // List all keys for this flag
-    const list = await env.FLAGS_KV.list({ prefix: `flag:${flagId}:` });
+    do {
+      const list = await env.FLAGS_KV.list({ prefix, cursor });
 
-    // Delete all matching keys
-    await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+      if (list.keys.length > 0) {
+        await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+        totalDeleted += list.keys.length;
+      }
 
-    console.log(
-      `Invalidated ${list.keys.length} cache entries for flag ${flagId}`,
-    );
-    return list.keys.length;
+      // Continue if there are more keys (list_complete is false when there's more)
+      cursor = list.list_complete ? undefined : list.cursor;
+    } while (cursor);
+
+    if (totalDeleted > 0) {
+      console.log(`Invalidated ${totalDeleted} cache entries for flag ${flagId}`);
+    }
+    return totalDeleted;
   } catch (error) {
     console.error(`Failed to invalidate cache for flag ${flagId}:`, error);
-    return 0;
+    return totalDeleted; // Return what we managed to delete
   }
 }
 
 /**
  * Invalidate all feature flag caches.
  * Use sparingly - only for emergency situations.
+ *
+ * Handles pagination for >1000 total cached flags.
  */
 export async function invalidateAllFlags(env: FeatureFlagsEnv): Promise<number> {
-  try {
-    const list = await env.FLAGS_KV.list({ prefix: "flag:" });
-    await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+  const prefix = "flag:";
+  let totalDeleted = 0;
+  let cursor: string | undefined;
 
-    console.log(`Invalidated ${list.keys.length} total flag cache entries`);
-    return list.keys.length;
+  try {
+    do {
+      const list = await env.FLAGS_KV.list({ prefix, cursor });
+
+      if (list.keys.length > 0) {
+        await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+        totalDeleted += list.keys.length;
+      }
+
+      cursor = list.list_complete ? undefined : list.cursor;
+    } while (cursor);
+
+    console.log(`Invalidated ${totalDeleted} total flag cache entries`);
+    return totalDeleted;
   } catch (error) {
     console.error("Failed to invalidate all flag caches:", error);
-    return 0;
+    return totalDeleted;
   }
 }
 

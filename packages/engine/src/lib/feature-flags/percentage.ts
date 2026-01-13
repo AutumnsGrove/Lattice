@@ -52,9 +52,14 @@ export async function evaluatePercentageRule(
   const identifier = context.userId ?? context.tenantId ?? context.sessionId;
 
   if (!identifier) {
-    // No identifier available - use random assignment (not recommended)
-    // This will be inconsistent across requests
-    return Math.random() * 100 < percentage;
+    // No identifier available - fail safe by returning false
+    // Random assignment would break the "deterministic" promise and cause
+    // inconsistent user experiences across requests
+    console.warn(
+      `No identifier for percentage rollout of flag "${flagId}" - returning false. ` +
+        "Provide userId, tenantId, or sessionId in context for consistent bucketing.",
+    );
+    return false;
   }
 
   // Hash identifier with flag-specific salt for independence between flags

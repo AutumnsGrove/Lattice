@@ -31,21 +31,32 @@ import type {
 
 /**
  * Load a flag with its rules from D1.
+ *
+ * Uses isolated try-catch blocks per Grove's database pattern to prevent
+ * cascading failures. A broken flag_rules table won't prevent flag evaluation
+ * with default values.
  */
 async function loadFlagWithRules(
   flagId: string,
   db: D1Database,
 ): Promise<FeatureFlag | null> {
+  // Load flag - isolated query
+  let flagRow: FeatureFlagRow | null = null;
   try {
-    // Load flag
-    const flagRow = await db
+    flagRow = await db
       .prepare("SELECT * FROM feature_flags WHERE id = ?")
       .bind(flagId)
       .first<FeatureFlagRow>();
+  } catch (error) {
+    console.error(`Failed to query feature_flags table for ${flagId}:`, error);
+    return null;
+  }
 
-    if (!flagRow) return null;
+  if (!flagRow) return null;
 
-    // Load rules
+  // Load rules - isolated query (failure here returns flag with no rules)
+  let rules: FlagRule[] = [];
+  try {
     const rulesResult = await db
       .prepare(
         "SELECT * FROM flag_rules WHERE flag_id = ? AND enabled = 1 ORDER BY priority DESC",
@@ -53,43 +64,78 @@ async function loadFlagWithRules(
       .bind(flagId)
       .all<FlagRuleRow>();
 
-    const rules: FlagRule[] = (rulesResult.results ?? []).map((row) =>
-      rowToRule(row),
-    );
-
-    return rowToFlag(flagRow, rules);
+    rules = (rulesResult.results ?? [])
+      .map((row) => safeRowToRule(row))
+      .filter((rule): rule is FlagRule => rule !== null);
   } catch (error) {
-    console.error(`Failed to load flag ${flagId}:`, error);
+    console.error(`Failed to load rules for flag ${flagId}, using default:`, error);
+    // Continue with empty rules - flag will use default value
+  }
+
+  return safeRowToFlag(flagRow, rules);
+}
+
+/**
+ * Safely parse JSON with error handling.
+ * Returns null if parsing fails.
+ */
+function safeJsonParse<T>(json: string, context: string): T | null {
+  try {
+    return JSON.parse(json) as T;
+  } catch (error) {
+    console.error(`Invalid JSON in ${context}:`, error);
     return null;
   }
 }
 
 /**
- * Convert a database row to a FlagRule.
+ * Convert a database row to a FlagRule with safe JSON parsing.
+ * Returns null if JSON parsing fails (rule will be skipped).
  */
-function rowToRule(row: FlagRuleRow): FlagRule {
+function safeRowToRule(row: FlagRuleRow): FlagRule | null {
+  const ruleValue = safeJsonParse<RuleCondition>(
+    row.rule_value,
+    `rule ${row.id} rule_value`,
+  );
+  const resultValue = safeJsonParse<unknown>(
+    row.result_value,
+    `rule ${row.id} result_value`,
+  );
+
+  if (ruleValue === null || resultValue === null) {
+    console.warn(`Skipping rule ${row.id} due to invalid JSON`);
+    return null;
+  }
+
   return {
     id: row.id,
     flagId: row.flag_id,
     priority: row.priority,
     ruleType: row.rule_type as FlagRule["ruleType"],
-    ruleValue: JSON.parse(row.rule_value) as RuleCondition,
-    resultValue: JSON.parse(row.result_value),
+    ruleValue,
+    resultValue,
     enabled: row.enabled === 1,
     createdAt: new Date(row.created_at),
   };
 }
 
 /**
- * Convert a database row to a FeatureFlag.
+ * Convert a database row to a FeatureFlag with safe JSON parsing.
+ * Returns a flag with safe defaults if JSON parsing fails.
  */
-function rowToFlag(row: FeatureFlagRow, rules: FlagRule[]): FeatureFlag {
+function safeRowToFlag(row: FeatureFlagRow, rules: FlagRule[]): FeatureFlag {
+  const defaultValue = safeJsonParse<unknown>(
+    row.default_value,
+    `flag ${row.id} default_value`,
+  );
+
   return {
     id: row.id,
     name: row.name,
     description: row.description ?? undefined,
     flagType: row.flag_type as FeatureFlag["flagType"],
-    defaultValue: JSON.parse(row.default_value),
+    // Fall back to false if default_value JSON is malformed
+    defaultValue: defaultValue ?? false,
     enabled: row.enabled === 1,
     cacheTtl: row.cache_ttl ?? undefined,
     rules,
