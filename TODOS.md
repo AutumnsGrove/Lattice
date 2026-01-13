@@ -1275,11 +1275,53 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ---
 
+## 🚩 Feature Flags System (Infrastructure)
+
+> **Priority:** Medium - Prerequisite for safe feature rollouts
+> **Status:** Not started - Needs research and planning
+> **Blocks:** JXL migration gradual rollout, A/B testing
+
+### Context
+
+Grove currently lacks a feature flag system for controlled rollouts. This is needed for:
+- Safe JXL migration (percentage rollout, quick disable)
+- Future A/B testing
+- Per-tenant feature access
+- Kill switches for new features
+
+### Research Questions
+
+- [ ] Evaluate options: D1 table vs KV vs environment variables vs third-party (LaunchDarkly, Statsig)
+- [ ] Determine caching strategy (KV cache of D1 flags? How often to refresh?)
+- [ ] Design API: `isFeatureEnabled(flagName, context?)` with tenant/user context
+- [ ] Plan admin UI for flag management
+- [ ] Consider percentage rollouts and cohort assignment
+
+### Implementation Tasks (TBD after research)
+
+- [ ] Design feature flag schema (D1 or KV)
+- [ ] Implement flag evaluation function
+- [ ] Add admin UI for flag management
+- [ ] Integrate with Rings analytics for rollout monitoring
+- [ ] Document usage patterns for future features
+
+### Interim Solution
+
+Until feature flags exist, use environment variables in `wrangler.toml`:
+
+```toml
+[vars]
+JXL_ENCODING_ENABLED = "false"  # Set to "true" to enable
+```
+
+---
+
 ## 🖼️ JPEG XL Migration (Image Compression Modernization)
 
 > **Spec:** `docs/plans/jxl-migration-spec.md`
 > **Priority:** Medium - Post-launch optimization
 > **Status:** Research complete, implementation planned
+> **Prerequisites:** Feature Flags System (for gradual rollout)
 
 ### Context
 

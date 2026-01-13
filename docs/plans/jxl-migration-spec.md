@@ -289,9 +289,15 @@ export async function processImage(
   }
 
   // Load and resize image via canvas (strips EXIF)
+  // IMPORTANT: Drawing to canvas then extracting ImageData strips all metadata
+  // including EXIF, GPS, and camera info - this is intentional for privacy
   const img = await loadImage(file);
   const { width, height } = calculateTargetDimensions(img, quality, fullResolution);
   const imageData = getImageData(img, width, height);
+
+  // VERIFY: @jsquash/jxl encode() receives ImageData (pixel array), NOT the
+  // original file buffer, so EXIF metadata is NOT passed to the encoder.
+  // Add test in Phase 2 to verify output JXL contains no EXIF (see Testing Plan)
 
   // Encode to target format
   let blob: Blob;
@@ -319,20 +325,19 @@ export async function processImage(
  * Higher effort = better compression but slower encoding
  *
  * Mobile devices: effort 5 (faster, preserves battery)
- * Desktop: effort 7 (balanced)
- * High-end: effort 9 (maximum compression, for power users)
+ * Desktop/High-end: effort 7 (balanced, stays under 3s target)
  */
 function getAdaptiveEffort(): number {
   // Detect mobile via user agent or screen size
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
     || window.innerWidth < 768;
 
-  // Check for high-end device (8+ logical cores)
-  const isHighEnd = navigator.hardwareConcurrency >= 8;
-
+  // Mobile gets lower effort for battery/performance
   if (isMobile) return 5;
-  if (isHighEnd) return 9;
-  return 7;  // Default balanced
+
+  // Cap at 7 to stay under 3s encoding target
+  // High-end users can override via advanced settings if desired
+  return 7;
 }
 ```
 
@@ -342,7 +347,9 @@ function getAdaptiveEffort(): number {
 |--------|--------|---------------|-------------|
 | Mobile | 5 | ~1s | Good |
 | Desktop | 7 | ~2s | Better |
-| High-end | 9 | ~4s | Best |
+| High-end | 7 | ~2s | Better |
+
+> **Note**: Originally proposed effort 9 for high-end devices (~4s), but this exceeds the <3s performance target. Cap at effort 7 for all devices to ensure consistent UX. Users can override via advanced settings if desired.
 
 ### Phase 3: Update Upload Endpoint (with Enhanced Validation)
 
@@ -358,34 +365,45 @@ const ALLOWED_TYPES = [
   'image/jxl'  // New
 ];
 
-// Add JXL magic bytes with minimum length validation
-const FILE_SIGNATURES: Record<string, { patterns: number[][]; minLength: number }> = {
-  // ... existing types ...
-  'image/jxl': {
-    patterns: [
-      [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20], // Container format (ISO BMFF)
-      [0xFF, 0x0A]  // Codestream format (naked)
-    ],
-    minLength: 12  // Container needs 12+ bytes, codestream 2+
-  }
+// JXL has two valid formats with different signatures
+// Pattern structure: { bytes: magic bytes, minLength: minimum file size }
+interface SignaturePattern {
+  bytes: number[];
+  minLength: number;
+}
+
+const FILE_SIGNATURES: Record<string, SignaturePattern[]> = {
+  // ... existing types (update structure) ...
+  'image/jxl': [
+    {
+      bytes: [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20],
+      minLength: 12  // Container format (ISO BMFF) needs 12+ bytes
+    },
+    {
+      bytes: [0xFF, 0x0A],
+      minLength: 2   // Codestream format (naked) only needs 2 bytes
+    }
+  ]
 };
 
 /**
- * Validate file signature with length check
+ * Validate file signature with per-pattern length check
+ * Fixes bug where global minLength rejected valid codestream files
  */
 function validateMagicBytes(buffer: ArrayBuffer, mimeType: string): boolean {
   const bytes = new Uint8Array(buffer);
-  const sig = FILE_SIGNATURES[mimeType];
+  const patterns = FILE_SIGNATURES[mimeType];
 
-  if (!sig) return false;
+  if (!patterns) return false;
 
-  // Check minimum length
-  if (bytes.length < sig.minLength) return false;
+  // Check each pattern - file must match at least one
+  return patterns.some(pattern => {
+    // Check minimum length for THIS pattern
+    if (bytes.length < pattern.minLength) return false;
 
-  // Check if any pattern matches
-  return sig.patterns.some(pattern =>
-    pattern.every((byte, i) => bytes[i] === byte)
-  );
+    // Check if pattern matches
+    return pattern.bytes.every((byte, i) => bytes[i] === byte);
+  });
 }
 
 // Add extension mapping
@@ -394,6 +412,8 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   'image/jxl': ['jxl']
 };
 ```
+
+**Note**: The original validation had a bug where `minLength: 12` was global, which would reject valid 2-byte JXL codestream files. The fix uses per-pattern minimum lengths.
 
 ### Phase 4: Update Storage Service (with Security Headers)
 
@@ -761,21 +781,28 @@ export class BatchTranscoder {
 
 ## Rollback Plan
 
-### Feature Flag Disable
+### Feature Flag Prerequisite
 
-If JXL causes issues, disable via feature flag:
+> **NOTE**: Grove does not currently have a feature flag system implemented. Before implementing JXL rollout, a feature flag system should be designed and built.
+>
+> **Tracking**: See TODOS.md → "Feature Flags System (Infrastructure)" for planning task.
+>
+> **Interim solution**: Use environment variable (`JXL_ENCODING_ENABLED=true/false`) in `wrangler.toml` for basic toggle until proper feature flags exist.
+
+### Feature Flag Disable (Future)
+
+Once feature flags are implemented, JXL can be disabled via flag:
 
 ```typescript
-// In feature flags config
-const FEATURES = {
-  jxl_encoding: {
-    enabled: false,  // Set to false to disable
-    rollout_percentage: 0
-  }
-};
-
+// Example feature flag check (implementation TBD)
 // In imageProcessor
 if (!isFeatureEnabled('jxl_encoding')) {
+  return processImageAsWebP(file, options);
+}
+
+// Interim: environment variable approach
+const JXL_ENABLED = env.JXL_ENCODING_ENABLED === 'true';
+if (!JXL_ENABLED) {
   return processImageAsWebP(file, options);
 }
 ```
@@ -953,8 +980,30 @@ describe('imageProcessor', () => {
     expect(result.blob.type).toBe('image/gif');
     expect(result.skipped).toBe(true);
   });
+
+  // CRITICAL: Privacy test - verify EXIF stripping works with JXL
+  it('strips EXIF/GPS metadata from JXL output', async () => {
+    // Create test image WITH EXIF data (GPS coordinates, camera info)
+    const fileWithExif = await createImageWithExif('test-with-gps.jpg', {
+      GPSLatitude: 37.7749,
+      GPSLongitude: -122.4194,
+      Make: 'TestCamera',
+      Model: 'TestModel'
+    });
+
+    const result = await processImage(fileWithExif, { format: 'jxl' });
+
+    // Parse output JXL and verify no EXIF present
+    const exifData = await extractExifFromBlob(result.blob);
+    expect(exifData).toBeNull();
+    // Or more specifically:
+    expect(exifData?.GPSLatitude).toBeUndefined();
+    expect(exifData?.Make).toBeUndefined();
+  });
 });
 ```
+
+> **IMPORTANT**: The EXIF stripping test is critical for privacy. Grove strips location data as a selling point. If this test fails, the JXL encoding path must be fixed or disabled.
 
 ### Integration Tests
 
@@ -977,10 +1026,39 @@ describe('image upload', () => {
 
 ### E2E Tests
 
+**Upload Tests:**
 1. Upload image in Chrome (should use JXL)
 2. Upload same image in Firefox (should use WebP)
-3. View image in Chrome (should serve JXL)
-4. View image in Firefox (should serve WebP fallback)
+
+**Content Negotiation Tests:**
+3. Request image with `Accept: image/jxl, image/webp, */*` → should serve JXL
+4. Request image with `Accept: image/webp, */*` → should serve WebP
+5. Verify `Vary: Accept` header present in all image responses
+6. Verify `X-Content-Type-Options: nosniff` header present
+
+**CDN Cache Tests:**
+```typescript
+describe('content negotiation', () => {
+  it('serves JXL to Chrome with correct headers', async () => {
+    const response = await fetch('/photos/2026/01/test.jxl', {
+      headers: { 'Accept': 'image/jxl, image/webp, */*' }
+    });
+
+    expect(response.headers.get('Content-Type')).toBe('image/jxl');
+    expect(response.headers.get('Vary')).toBe('Accept');
+    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+  });
+
+  it('serves WebP fallback to Firefox', async () => {
+    const response = await fetch('/photos/2026/01/test.jxl', {
+      headers: { 'Accept': 'image/webp, image/png, */*' }  // No JXL
+    });
+
+    expect(response.headers.get('Content-Type')).toBe('image/webp');
+    expect(response.headers.get('Vary')).toBe('Accept');
+  });
+});
+```
 
 ---
 
@@ -1110,18 +1188,27 @@ async function benchmarkCompression() {
 |--------|--------|
 | Average file size reduction (JXL vs WebP) | >20% |
 | JXL encoding success rate | >95% |
-| Client-side encoding time | <2s for typical images |
+| Client-side encoding time | <3s for typical images |
 | Browser fallback rate | <25% (Firefox users) |
 | User-visible errors | 0 |
 
 ---
 
-*Document version: 1.1*
+*Document version: 1.2*
 *Created: 2026-01-13*
 *Updated: 2026-01-13*
 *Author: Claude (AI-assisted research and planning)*
 
 ### Changelog
+
+**v1.2** (2026-01-13):
+- **BUGFIX**: Fixed magic byte validation to use per-pattern minLength (codestream: 2 bytes, container: 12 bytes)
+- Added EXIF stripping verification test requirement (privacy critical)
+- Capped effort level at 7 for all devices (was 9 for high-end, exceeded 3s target)
+- Added detailed E2E tests for content negotiation headers
+- Noted feature flags system as prerequisite (Grove doesn't have one yet)
+- Added interim environment variable solution for JXL toggle
+- Adjusted encoding time target from <2s to <3s
 
 **v1.1** (2026-01-13):
 - Added WASM lazy loading guidance to avoid bundle bloat
