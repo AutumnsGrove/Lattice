@@ -123,6 +123,8 @@ The same storage pool is used by:
 
 #### Optimization (Phase 2)
 - **Image compression:** Automatically optimize uploaded images
+  - See `docs/plans/jxl-migration-spec.md` for JPEG XL migration plan
+  - Target: 20-60% smaller files with JXL vs current WebP
 - **Attachment compression:** Compress large email attachments
 - **Duplicate detection:** Identify and merge duplicate files
 - **Cleanup suggestions:** "These files are large and unused"
