@@ -8,24 +8,15 @@ import {
   rateLimitHeaders,
 } from "$lib/server/rate-limits/middleware.js";
 import { validateEnv } from "$lib/server/env-validation.js";
-
-/** File signatures for MIME type validation */
-const FILE_SIGNATURES: Record<string, number[][]> = {
-  "image/jpeg": [
-    [0xff, 0xd8, 0xff, 0xe0], // JPEG/JFIF
-    [0xff, 0xd8, 0xff, 0xe1], // JPEG/Exif
-    [0xff, 0xd8, 0xff, 0xe8], // JPEG/SPIFF
-  ],
-  "image/png": [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]],
-  "image/gif": [
-    [0x47, 0x49, 0x46, 0x38, 0x37, 0x61], // GIF87a
-    [0x47, 0x49, 0x46, 0x38, 0x39, 0x61], // GIF89a
-  ],
-  "image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF (WebP container)
-};
-
-/** Allowed image MIME types */
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+import {
+  ALLOWED_IMAGE_TYPES,
+  ALLOWED_TYPES_DISPLAY,
+  FILE_SIGNATURES,
+  MIME_TO_EXTENSIONS,
+  WEBP_MARKER,
+  isAllowedImageType,
+  type AllowedImageType,
+} from "$lib/utils/upload-validation.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -61,9 +52,13 @@ async function validateImageDimensions(
     height = buffer[8] | (buffer[9] << 8);
   }
 
-  // For JPEG and WebP, we rely on file size validation
+  // For JPEG, WebP, and JPEG XL, we rely on file size validation
   // Full dimension parsing requires walking marker tables (complex)
-  if (file.type === "image/jpeg" || file.type === "image/webp") {
+  if (
+    file.type === "image/jpeg" ||
+    file.type === "image/webp" ||
+    file.type === "image/jxl"
+  ) {
     // File size already validated (max 10MB), which is a reasonable proxy
     return;
   }
@@ -163,21 +158,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       throw error(400, "No file provided");
     }
 
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    // Validate file type using shared constants
+    if (!isAllowedImageType(file.type)) {
       throw error(
         400,
-        `Invalid file type: ${file.type}. Allowed: jpg, png, gif, webp`,
+        `Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES_DISPLAY}`,
       );
     }
-
-    // Map of MIME types to valid extensions
-    const MIME_TO_EXTENSIONS: Record<string, string[]> = {
-      "image/jpeg": ["jpg", "jpeg"],
-      "image/png": ["png"],
-      "image/gif": ["gif"],
-      "image/webp": ["webp"],
-    };
 
     // Extract and validate extension
     const originalName = file.name;
@@ -187,7 +174,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       throw error(400, "File must have an extension");
     }
 
-    const validExtensions = MIME_TO_EXTENSIONS[file.type];
+    const validExtensions = MIME_TO_EXTENSIONS[file.type as AllowedImageType];
     if (!validExtensions || !validExtensions.includes(ext)) {
       throw error(
         400,
@@ -210,16 +197,33 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate magic bytes to prevent MIME type spoofing
     const buffer = new Uint8Array(arrayBuffer);
-    const signatures = FILE_SIGNATURES[file.type];
-    const isValidSignature =
+    const signatures = FILE_SIGNATURES[file.type as AllowedImageType];
+    const matchesSignature =
       signatures &&
       signatures.some((sig) => sig.every((byte, i) => buffer[i] === byte));
 
-    if (!isValidSignature) {
+    if (!matchesSignature) {
       throw error(
         400,
         "Invalid file signature - file may be corrupted or spoofed",
       );
+    }
+
+    // Additional WebP validation: verify WEBP marker at offset 8
+    // This prevents other RIFF-based formats (WAV, AVI) from being accepted
+    if (file.type === "image/webp") {
+      if (buffer.length < 12) {
+        throw error(400, "Invalid WebP file - too small");
+      }
+      const hasWebpMarker = WEBP_MARKER.every(
+        (byte, i) => buffer[8 + i] === byte,
+      );
+      if (!hasWebpMarker) {
+        throw error(
+          400,
+          "Invalid WebP file - missing WEBP marker (may be a different RIFF format)",
+        );
+      }
     }
 
     // Validate image dimensions to prevent DoS attacks
@@ -260,15 +264,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Determine filename
     let filename: string;
     if (customFilename) {
-      // Use AI-generated filename
-      const ext =
-        file.type === "image/gif"
-          ? "gif"
-          : file.type === "image/webp"
-            ? "webp"
-            : file.type === "image/png"
-              ? "png"
-              : "webp";
+      // Use AI-generated filename with correct extension for file type
+      const extMap: Record<string, string> = {
+        "image/gif": "gif",
+        "image/webp": "webp",
+        "image/png": "png",
+        "image/jpeg": "jpg",
+        "image/jxl": "jxl",
+      };
+      const ext = extMap[file.type] || "webp";
       filename = `${customFilename}.${ext}`;
     } else {
       // Sanitize original filename
