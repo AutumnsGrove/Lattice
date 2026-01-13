@@ -28,15 +28,19 @@ const LAST_REGULAR_KEY = "grove-last-regular-season";
 function getInitialSeason(): Season {
   if (!browser) return DEFAULT_SEASON;
 
-  // Check if user has a stored preference
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && ALL_SEASONS.includes(stored as Season)) {
-    return stored as Season;
-  }
+  try {
+    // Check if user has a stored preference
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored && ALL_SEASONS.includes(stored as Season)) {
+      return stored as Season;
+    }
 
-  // Clean up invalid stored value if present
-  if (stored) {
-    localStorage.removeItem(STORAGE_KEY);
+    // Clean up invalid stored value if present
+    if (stored) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // localStorage unavailable (private browsing, etc.) - use default
   }
 
   // First visit (or invalid value): default to autumn (Grove's signature season)
@@ -46,9 +50,13 @@ function getInitialSeason(): Season {
 function getLastRegularSeason(): RegularSeason {
   if (!browser) return DEFAULT_SEASON;
 
-  const stored = localStorage.getItem(LAST_REGULAR_KEY);
-  if (stored && REGULAR_SEASONS.includes(stored as RegularSeason)) {
-    return stored as RegularSeason;
+  try {
+    const stored = localStorage.getItem(LAST_REGULAR_KEY);
+    if (stored && REGULAR_SEASONS.includes(stored as RegularSeason)) {
+      return stored as RegularSeason;
+    }
+  } catch {
+    // localStorage unavailable - use default
   }
 
   return DEFAULT_SEASON;
@@ -59,13 +67,19 @@ function createSeasonStore() {
   let lastRegularSeason: RegularSeason = getLastRegularSeason();
 
   // Persist to localStorage on change
+  // Wrapped in try-catch: localStorage can throw in private browsing or when full
   if (browser) {
     season.subscribe((s) => {
-      localStorage.setItem(STORAGE_KEY, s);
-      // Track the last regular season for returning from midnight
-      if (s !== "midnight") {
-        lastRegularSeason = s as RegularSeason;
-        localStorage.setItem(LAST_REGULAR_KEY, s);
+      try {
+        localStorage.setItem(STORAGE_KEY, s);
+        // Track the last regular season for returning from midnight
+        if (s !== "midnight") {
+          lastRegularSeason = s as RegularSeason;
+          localStorage.setItem(LAST_REGULAR_KEY, s);
+        }
+      } catch {
+        // Gracefully degrade if localStorage unavailable (private browsing, quota exceeded)
+        // Season preference still works for current session, just won't persist
       }
     });
   }

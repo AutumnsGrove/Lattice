@@ -298,8 +298,9 @@
 
 	const finalClass = $derived.by(() => {
 		const base = size ? '' : (className || 'w-8 h-8');
+		// Uses motion-safe: to respect prefers-reduced-motion for transitions
 		const interactiveClass = interactive
-			? 'cursor-pointer transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current rounded-sm'
+			? 'cursor-pointer motion-safe:transition-transform motion-safe:hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current rounded-sm'
 			: '';
 		return [base, interactiveClass].filter(Boolean).join(' ');
 	});

@@ -100,6 +100,34 @@ export function hslToHex(h: number, s: number, l: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Tier color adjustment constants
+ *
+ * These values control how the 3D depth effect is generated from a base color.
+ * The dark side simulates shadow (lower lightness, higher saturation for richness),
+ * while the light side simulates illumination (higher lightness, lower saturation
+ * to mimic light washing out color).
+ */
+const TIER_ADJUSTMENTS = {
+  // Tier 1 (top branches): Most ethereal, catches the most light
+  tier1: {
+    dark: { saturation: 5, lightness: -8 }, // Slightly richer shadow
+    light: { saturation: -10, lightness: 25 }, // Bright, washed-out highlight
+  },
+  // Tier 2 (middle branches): Moderate depth
+  tier2: {
+    dark: { saturation: 0, lightness: -12 }, // Deeper shadow
+    light: { saturation: -5, lightness: 18 }, // Softer highlight
+  },
+  // Tier 3 (bottom branches): Most grounded, deepest shadows
+  tier3: {
+    dark: { saturation: 10, lightness: -18 }, // Rich, deep shadow
+    light: { saturation: 0, lightness: 10 }, // Subtle highlight
+  },
+  // Lightness caps prevent pure white (95) or overly bright (90, 85) highlights
+  maxLightness: { tier1: 95, tier2: 90, tier3: 85 },
+} as const;
+
+/**
  * Generate tier colors from a base color for the Logo component
  *
  * Creates light/dark variants for the 3D tree effect:
@@ -113,23 +141,48 @@ export function hslToHex(h: number, s: number, l: number): string {
  */
 export function generateTierColors(baseColor: string): LogoTierColors {
   const hsl = hexToHsl(baseColor);
+  const adj = TIER_ADJUSTMENTS;
 
   // tier1 (top branches): lighter, more ethereal
   const tier1: TierColors = {
-    dark: hslToHex(hsl.h, Math.min(hsl.s + 5, 100), Math.max(hsl.l - 8, 0)),
-    light: hslToHex(hsl.h, Math.max(hsl.s - 10, 0), Math.min(hsl.l + 25, 95)),
+    dark: hslToHex(
+      hsl.h,
+      Math.min(hsl.s + adj.tier1.dark.saturation, 100),
+      Math.max(hsl.l + adj.tier1.dark.lightness, 0),
+    ),
+    light: hslToHex(
+      hsl.h,
+      Math.max(hsl.s + adj.tier1.light.saturation, 0),
+      Math.min(hsl.l + adj.tier1.light.lightness, adj.maxLightness.tier1),
+    ),
   };
 
   // tier2 (middle branches): base color variations
   const tier2: TierColors = {
-    dark: hslToHex(hsl.h, hsl.s, Math.max(hsl.l - 12, 0)),
-    light: hslToHex(hsl.h, Math.max(hsl.s - 5, 0), Math.min(hsl.l + 18, 90)),
+    dark: hslToHex(
+      hsl.h,
+      hsl.s + adj.tier2.dark.saturation,
+      Math.max(hsl.l + adj.tier2.dark.lightness, 0),
+    ),
+    light: hslToHex(
+      hsl.h,
+      Math.max(hsl.s + adj.tier2.light.saturation, 0),
+      Math.min(hsl.l + adj.tier2.light.lightness, adj.maxLightness.tier2),
+    ),
   };
 
   // tier3 (bottom branches): darker, more grounded
   const tier3: TierColors = {
-    dark: hslToHex(hsl.h, Math.min(hsl.s + 10, 100), Math.max(hsl.l - 18, 0)),
-    light: hslToHex(hsl.h, hsl.s, Math.min(hsl.l + 10, 85)),
+    dark: hslToHex(
+      hsl.h,
+      Math.min(hsl.s + adj.tier3.dark.saturation, 100),
+      Math.max(hsl.l + adj.tier3.dark.lightness, 0),
+    ),
+    light: hslToHex(
+      hsl.h,
+      hsl.s + adj.tier3.light.saturation,
+      Math.min(hsl.l + adj.tier3.light.lightness, adj.maxLightness.tier3),
+    ),
   };
 
   // trunk: warm brown tones (consistent for natural look)
