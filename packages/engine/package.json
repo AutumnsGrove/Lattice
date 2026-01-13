@@ -187,7 +187,8 @@
   "scripts": {
     "dev": "vite dev",
     "dev:wrangler": "wrangler pages dev -- vite dev",
-    "build": "vite build",
+    "build": "vite build && node scripts/inject-durable-objects.mjs",
+    "build:sveltekit": "vite build",
     "build:package": "svelte-kit sync && svelte-package -o dist",
     "package": "svelte-kit sync && svelte-package -o dist",
     "prepublishOnly": "pnpm run package",

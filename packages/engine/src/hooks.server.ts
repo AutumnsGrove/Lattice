@@ -9,6 +9,8 @@ import {
   TURNSTILE_COOKIE_NAME,
   validateVerificationCookie,
 } from "$lib/server/services/turnstile.js";
+import type { TenantConfig } from "$lib/durable-objects/TenantDO.js";
+import { TIERS, type TierKey } from "$lib/config/tiers.js";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -76,6 +78,14 @@ function extractSubdomain(
 }
 
 /**
+ * Extended tenant info returned from getTenantConfig
+ * Includes both TenantConfig fields and the tenant UUID
+ */
+interface TenantLookupResult extends TenantConfig {
+  id: string; // Tenant UUID from D1
+}
+
+/**
  * Paths that should skip Turnstile verification
  */
 const TURNSTILE_EXCLUDED_PATHS = [
@@ -94,6 +104,113 @@ const TURNSTILE_EXCLUDED_PATHS = [
  */
 function shouldSkipTurnstile(pathname: string): boolean {
   return TURNSTILE_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix));
+}
+
+/**
+ * Extended tenant info including the tenant UUID
+ */
+interface TenantLookupResult extends TenantConfig {
+  id: string;
+}
+
+/**
+ * Try to get tenant config from TenantDO first, fall back to D1
+ *
+ * TenantDO caches config in memory (including tenant ID), eliminating
+ * D1 reads on hot paths. Falls back to D1 if DO unavailable.
+ *
+ * The X-Tenant-Subdomain header is passed to help TenantDO identify
+ * itself on first access before config is cached.
+ */
+async function getTenantConfig(
+  subdomain: string,
+  platform: App.Platform | undefined,
+): Promise<TenantLookupResult | null> {
+  const db = platform?.env?.DB;
+  if (!db) return null;
+
+  // Try TenantDO first for cached config (includes tenant ID)
+  const tenants = platform?.env?.TENANTS;
+  if (tenants) {
+    try {
+      const doId = tenants.idFromName(`tenant:${subdomain}`);
+      const stub = tenants.get(doId);
+
+      // Pass subdomain header so TenantDO knows its identity on first access
+      const response = await stub.fetch("https://tenant.internal/config", {
+        headers: { "X-Tenant-Subdomain": subdomain },
+      });
+
+      if (response.ok) {
+        const config = (await response.json()) as TenantConfig & {
+          id?: string;
+        };
+
+        // TenantDO now caches tenant ID - no need for separate D1 query
+        if (config.id && config.subdomain) {
+          return {
+            ...config,
+            id: config.id,
+          };
+        }
+      }
+    } catch (err) {
+      console.error("[Hooks] TenantDO lookup failed, falling back to D1:", err);
+    }
+  }
+
+  // Fall back to D1 (first access or DO unavailable)
+  try {
+    const tenant = await db
+      .prepare(
+        "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+      )
+      .bind(subdomain)
+      .first<{
+        id: string;
+        subdomain: string;
+        display_name: string;
+        email: string;
+        theme: string | null;
+        plan: string;
+      }>();
+
+    if (!tenant) return null;
+
+    // Map D1 result to TenantConfig format
+    const tier = (tenant.plan || "seedling") as TenantConfig["tier"];
+    return {
+      id: tenant.id,
+      subdomain: tenant.subdomain,
+      displayName: tenant.display_name,
+      theme: tenant.theme ? JSON.parse(tenant.theme) : null,
+      tier,
+      ownerId: tenant.email,
+      limits: getTierLimits(tier),
+    };
+  } catch (err) {
+    console.error("[Hooks] D1 tenant lookup failed:", err);
+    return null;
+  }
+}
+
+/**
+ * Get tier limits from centralized tiers.ts config
+ */
+function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
+  // Map TenantConfig tier to TierKey (they're compatible)
+  const tierConfig = TIERS[tier as TierKey] ?? TIERS.seedling;
+
+  return {
+    postsPerMonth:
+      tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
+    storageBytes: tierConfig.limits.storage,
+    customDomains: tierConfig.features.customDomain
+      ? tier === "evergreen"
+        ? 10
+        : 1
+      : 0,
+  };
 }
 
 /**
@@ -199,50 +316,27 @@ export const handle: Handle = async ({ event, resolve }) => {
     // These are handled by separate Workers, shouldn't hit this
     return new Response("Service not found", { status: 404 });
   }
-  // Must be a tenant subdomain - look up in D1
+  // Must be a tenant subdomain - look up via TenantDO (cached) or D1 (fallback)
   else {
-    const db = event.platform?.env?.DB;
-    if (!db) {
-      console.error("[Hooks] D1 database not available");
+    const tenant = await getTenantConfig(subdomain, event.platform);
+
+    if (!tenant) {
+      // Subdomain not registered or inactive
       event.locals.context = { type: "not_found", subdomain };
     } else {
-      try {
-        const tenant = await db
-          .prepare(
-            "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
-          )
-          .bind(subdomain)
-          .first<{
-            id: string;
-            subdomain: string;
-            display_name: string;
-            email: string;
-            theme: string | null;
-            plan: string;
-          }>();
-
-        if (!tenant) {
-          // Subdomain not registered or inactive
-          event.locals.context = { type: "not_found", subdomain };
-        } else {
-          // Valid tenant - set context
-          event.locals.context = {
-            type: "tenant",
-            tenant: {
-              id: tenant.id,
-              subdomain: tenant.subdomain,
-              name: tenant.display_name,
-              theme: tenant.theme,
-              ownerId: tenant.email,
-              plan: tenant.plan || "seedling", // Default to seedling if not set
-            },
-          };
-          event.locals.tenantId = tenant.id;
-        }
-      } catch (err) {
-        console.error("[Hooks] Error looking up tenant:", err);
-        event.locals.context = { type: "not_found", subdomain };
-      }
+      // Valid tenant - set context (config from TenantDO cache)
+      event.locals.context = {
+        type: "tenant",
+        tenant: {
+          id: tenant.id,
+          subdomain: tenant.subdomain,
+          name: tenant.displayName,
+          theme: tenant.theme ? JSON.stringify(tenant.theme) : null,
+          ownerId: tenant.ownerId,
+          plan: tenant.tier || "seedling",
+        },
+      };
+      event.locals.tenantId = tenant.id;
     }
   }
 

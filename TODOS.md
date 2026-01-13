@@ -1413,6 +1413,41 @@ Grove currently compresses uploaded images to WebP format using the browser's Ca
 ### Internal Tools
 - [ ] Add search queue support (allow multiple concurrent domain searches)
 
+### Cache Busting Admin Tool (Heartwood/GroveAuth)
+> **Location:** `Heartwood/` (GroveAuth admin dashboard)
+> **Priority:** Medium — Developer/admin convenience for content debugging
+> **Context:** Discovered while debugging blog gutter content not appearing due to stale KV + CDN cache
+
+**The Problem:**
+- Blog posts have KV caching (5 min TTL) + CDN edge caching (up to 1 hour)
+- When content is updated directly in D1 (migrations, manual fixes), cached content persists
+- Currently requires manual `wrangler kv key delete` commands + waiting for CDN to expire
+- No visibility into what's cached or when it expires
+
+**Implementation Tasks:**
+- [ ] Add "Cache Management" section to GroveAuth admin dashboard
+- [ ] Build UI to list cached keys by tenant (KV namespace browser)
+- [ ] Add "Purge Cache" button per-post and bulk "Purge All" for tenant
+- [ ] Integrate Cloudflare API for CDN cache purge (`POST /zones/{zone}/purge_cache`)
+- [ ] Add cache status indicator showing TTL remaining
+- [ ] Log cache purge events for debugging
+
+**API Endpoints Needed:**
+```
+POST /api/admin/cache/purge
+  body: { keys: ["blog:tenant:slug", ...] }
+
+GET /api/admin/cache/list?prefix=blog:tenant-id
+  returns: [{ key, ttl_remaining, size }]
+
+POST /api/admin/cache/purge-cdn
+  body: { urls: ["https://example.grove.place/blog/slug", ...] }
+```
+
+**UI Location:**
+- Heartwood admin → Settings → Cache Management
+- Or: Per-post action button "🔄 Purge Cache" in blog list
+
 ### Vista Pre-requisites
 - [ ] **Add `/health` endpoint to autumnsgrove worker** — Required for Vista health monitoring
   - Location: autumnsgrove repo (autumnsgrove.dev)

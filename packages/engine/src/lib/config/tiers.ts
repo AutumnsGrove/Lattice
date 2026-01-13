@@ -389,6 +389,21 @@ export const TIERS: Record<TierKey, TierConfig> = {
 } as const;
 
 // =============================================================================
+// CONSTANTS
+// =============================================================================
+
+/**
+ * Default tier used when tier is unknown, invalid, or not yet determined.
+ * Used as a safe fallback throughout the codebase to ensure consistent behavior.
+ *
+ * Seedling is the default because:
+ * - It's the entry-level paid tier with reasonable limits
+ * - Free tier doesn't have blog access, so can't be a safe default
+ * - It provides a good baseline without being overly permissive
+ */
+export const DEFAULT_TIER: TierKey = "seedling";
+
+// =============================================================================
 // HELPER ARRAYS
 // =============================================================================
 

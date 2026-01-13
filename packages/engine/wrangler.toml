@@ -47,6 +47,33 @@ binding = "AUTH"
 service = "groveauth"
 
 # =============================================================================
+# Durable Objects - Loom Pattern (Grove's coordination layer)
+# =============================================================================
+# TenantDO: Per-tenant config caching, draft sync, analytics buffering
+[[durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+
+# PostMetaDO: Per-post reactions, views, real-time presence (hot data)
+[[durable_objects.bindings]]
+name = "POST_META"
+class_name = "PostMetaDO"
+
+# PostContentDO: Per-post content caching (warm data, hibernates quickly)
+[[durable_objects.bindings]]
+name = "POST_CONTENT"
+class_name = "PostContentDO"
+
+# DO migrations - declare new classes
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TenantDO"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["PostMetaDO", "PostContentDO"]
+
+# =============================================================================
 # Environment Variables (non-sensitive)
 # =============================================================================
 [vars]

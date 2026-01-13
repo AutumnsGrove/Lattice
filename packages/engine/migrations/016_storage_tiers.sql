@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS migration_runs (
   hot_to_warm INTEGER DEFAULT 0,
   warm_to_cold INTEGER DEFAULT 0,
   cold_to_warm INTEGER DEFAULT 0,
-  errors_count INTEGER DEFAULT 0,
+  errors TEXT,                           -- JSON array of error messages (NULL if no errors)
   duration_ms INTEGER,
   completed_at INTEGER
 );
