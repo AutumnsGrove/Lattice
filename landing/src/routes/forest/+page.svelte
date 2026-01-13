@@ -212,10 +212,10 @@
 			if (brightness === 'mid') return [winter.winterGreen, winter.winterGreen];
 			return [winter.coldSpruce, winter.coldSpruce];
 		} else if (currentSeason === 'midnight') {
-			// Midnight bloom - deep purples and rose tones
-			if (brightness === 'dark') return [midnightBloom.deepPlum, midnightBloom.plum];
-			if (brightness === 'mid') return [midnightBloom.plum, midnightBloom.mauve];
-			return [midnightBloom.mauve, midnightBloom.dustyRose, midnightBloom.blush];
+			// Midnight bloom - deep purples and violet tones
+			if (brightness === 'dark') return [midnightBloom.deepPlum, midnightBloom.purple];
+			if (brightness === 'mid') return [midnightBloom.purple, midnightBloom.violet];
+			return [midnightBloom.violet, midnightBloom.softGold, midnightBloom.warmCream];
 		} else {
 			if (brightness === 'dark') return [greens.darkForest, greens.deepGreen];
 			if (brightness === 'mid') return [greens.grove, greens.meadow];
@@ -235,8 +235,8 @@
 			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
 			return [winter.bareBranch, winter.frostedBark, winter.coldWood];
 		} else if (currentSeason === 'midnight') {
-			// Midnight bloom - roses and warm amber accents for cherry trees
-			return [midnightBloom.dustyRose, midnightBloom.blush, midnightBloom.warmAmber];
+			// Midnight bloom - soft golds and warm amber accents for cherry trees
+			return [midnightBloom.softGold, midnightBloom.warmCream, midnightBloom.amber];
 		} else {
 			// Summer - cherry trees have green foliage, not pink!
 			// Return greens based on depth (will be used by getTreeColor)
@@ -260,8 +260,8 @@
 			const colors = [spring.hillDeep, spring.hillMid, spring.hillNear, spring.hillFront];
 			return colors[layerIndex] ?? colors[0];
 		} else if (isMidnight) {
-			// Midnight bloom - deep purple to mauve hills
-			const colors = [midnightBloom.deepPlum, midnightBloom.plum, midnightBloom.mauve, midnightBloom.dustyRose];
+			// Midnight bloom - deep purple to violet hills
+			const colors = [midnightBloom.deepPlum, midnightBloom.purple, midnightBloom.violet, midnightBloom.softGold];
 			return colors[layerIndex] ?? colors[0];
 		} else {
 			// Summer - rich deep greens
