@@ -55,7 +55,7 @@
 			name: 'Aria',
 			tagline: 'Music Curation',
 			description: 'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
-			status: 'early',
+			status: 'paused',
 			icon: 'music',
 			domain: 'aria.grove.place',
 			stack: 'Python + SvelteKit',
@@ -105,6 +105,7 @@
 			case 'building': return { text: 'Building', class: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' };
 			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' };
 			case 'early': return { text: 'Early Research', class: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' };
+			case 'paused': return { text: 'Paused', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
 			default: return { text: status, class: 'bg-slate-100 text-slate-600' };
 		}
 	}
