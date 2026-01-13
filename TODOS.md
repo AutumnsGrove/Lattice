@@ -1275,6 +1275,117 @@ Create a dedicated `/vineyard/palettes` page showcasing ALL project color palett
 
 ---
 
+## 🚩 Feature Flags System (Infrastructure)
+
+> **Priority:** Medium - Prerequisite for safe feature rollouts
+> **Status:** Not started - Needs research and planning
+> **Blocks:** JXL migration gradual rollout, A/B testing
+
+### Context
+
+Grove currently lacks a feature flag system for controlled rollouts. This is needed for:
+- Safe JXL migration (percentage rollout, quick disable)
+- Future A/B testing
+- Per-tenant feature access
+- Kill switches for new features
+
+### Research Questions
+
+- [ ] Evaluate options: D1 table vs KV vs environment variables vs third-party (LaunchDarkly, Statsig)
+- [ ] Determine caching strategy (KV cache of D1 flags? How often to refresh?)
+- [ ] Design API: `isFeatureEnabled(flagName, context?)` with tenant/user context
+- [ ] Plan admin UI for flag management
+- [ ] Consider percentage rollouts and cohort assignment
+
+### Implementation Tasks (TBD after research)
+
+- [ ] Design feature flag schema (D1 or KV)
+- [ ] Implement flag evaluation function
+- [ ] Add admin UI for flag management
+- [ ] Integrate with Rings analytics for rollout monitoring
+- [ ] Document usage patterns for future features
+
+### Interim Solution
+
+Until feature flags exist, use environment variables in `wrangler.toml`:
+
+```toml
+[vars]
+JXL_ENCODING_ENABLED = "false"  # Set to "true" to enable
+```
+
+---
+
+## 🖼️ JPEG XL Migration (Image Compression Modernization)
+
+> **Spec:** `docs/plans/jxl-migration-spec.md`
+> **Priority:** Medium - Post-launch optimization
+> **Status:** Research complete, implementation planned
+> **Prerequisites:** Feature Flags System (for gradual rollout)
+
+### Context
+
+Grove currently compresses uploaded images to WebP format using the browser's Canvas API. With JPEG XL (JXL) support now in Chrome mainline and Safari 17+, migrating to JXL offers 20-60% better compression at equivalent quality.
+
+### Research Summary
+
+**Current implementation:**
+- Client-side only (Canvas API → WebP)
+- Quality-based compression (default 80%)
+- EXIF/GPS stripping via canvas redraw
+- Duplicate detection via SHA-256 hash
+
+**Recommended approach:** Hybrid (browser + server fallback)
+- Use `@jsquash/jxl` for browser-side WASM encoding
+- Fall back to WebP for browsers without WASM
+- Content negotiation for serving (JXL vs WebP based on Accept header)
+
+### Implementation Phases
+
+#### Phase 1: Foundation
+- [ ] Add `@jsquash/jxl` dependency to engine package
+- [ ] Update `imageProcessor.ts` with JXL encoding support
+- [ ] Add `image/jxl` to upload endpoint allowed types
+- [ ] Add JXL magic byte validation (0xFF 0x0A for codestream)
+- [ ] Run compression benchmarks on sample Grove images
+
+#### Phase 2: UI & Testing
+- [ ] Replace "Convert to WebP" toggle with format selector in admin UI
+- [ ] Add WASM support detection for graceful degradation
+- [ ] Write unit tests for JXL encoding path
+- [ ] Test across browsers (Chrome ✓, Safari ✓, Firefox fallback, Edge ✓)
+
+#### Phase 3: Feature Flag Rollout
+- [ ] Deploy behind feature flag
+- [ ] Enable for internal testing
+- [ ] Monitor compression ratios and error rates
+- [ ] Gradual rollout: 10% → 50% → 100%
+
+#### Phase 4: Content Negotiation
+- [ ] Implement serving-side negotiation (Accept header)
+- [ ] Consider dual-format storage (JXL + WebP fallback)
+- [ ] Create batch transcoding job for existing WebP images
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `packages/engine/package.json` | Add `@jsquash/jxl` |
+| `packages/engine/src/lib/utils/imageProcessor.ts` | JXL encoding |
+| `packages/engine/src/routes/api/images/upload/+server.ts` | JXL validation |
+| `packages/engine/src/lib/server/services/storage.ts` | JXL allowed type |
+| `packages/engine/src/routes/admin/images/+page.svelte` | Format selector |
+| `packages/engine/src/lib/utils/gallery.ts` | `.jxl` extension |
+
+### Success Metrics
+
+- Average 20%+ file size reduction vs WebP
+- >95% JXL encoding success rate
+- <2s encoding time for typical images
+- 0 user-visible errors
+
+---
+
 ## Future Considerations (Post-Launch)
 
 ### Shop Feature (E-commerce) - DEFERRED
