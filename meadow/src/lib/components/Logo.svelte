@@ -1,260 +1,155 @@
-<!--
-  Grove — A place to Be
-  Copyright (c) 2025 Autumn Brown
-  Licensed under AGPL-3.0
--->
 <script lang="ts">
-	import type { Season } from './nature/palette';
-	import { autumn, winter, greens, bark, cherryBlossomsPeak } from './nature/palette';
-	import { onMount } from 'svelte';
+	/**
+	 * Grove Logo Component — The Tree Mark (Meadow)
+	 *
+	 * Re-exports the tree logo with meadow-specific defaults.
+	 * This wrapper exists for backwards compatibility with meadow imports.
+	 *
+	 * For the full feature set, import directly from @autumnsgrove/groveengine/ui
+	 */
+
+	import { tweened } from 'svelte/motion';
+	import { cubicInOut } from 'svelte/easing';
+	import { browser } from '$app/environment';
+
+	type Season = 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight';
+	type BreathingSpeed = 'slow' | 'normal' | 'fast';
+
+	// Seasonal color palettes from grove-logo-final.html
+	const SEASONAL_PALETTES = {
+		spring: {
+			tier1: { dark: '#be185d', light: '#fecdd3' },
+			tier2: { dark: '#9d174d', light: '#fda4af' },
+			tier3: { dark: '#831843', light: '#fb7185' },
+			trunk: { dark: '#5a3f30', light: '#6f4d39' }
+		},
+		summer: {
+			tier1: { dark: '#15803d', light: '#86efac' },
+			tier2: { dark: '#166534', light: '#4ade80' },
+			tier3: { dark: '#14532d', light: '#22c55e' },
+			trunk: { dark: '#3d2914', light: '#5a3f30' }
+		},
+		autumn: {
+			tier1: { dark: '#DC2626', light: '#FCD34D' },
+			tier2: { dark: '#991B1B', light: '#F59E0B' },
+			tier3: { dark: '#7C2D12', light: '#EA580C' },
+			trunk: { dark: '#5C3317', light: '#8B4520' }
+		},
+		winter: {
+			tier1: { dark: '#1e3a5f', light: '#bfdbfe' },
+			tier2: { dark: '#1e3a5f', light: '#93c5fd' },
+			tier3: { dark: '#0f172a', light: '#60a5fa' },
+			trunk: { dark: '#1e293b', light: '#334155' }
+		},
+		midnight: {
+			tier1: { dark: '#4c1d95', light: '#fce7f3' },
+			tier2: { dark: '#3b0764', light: '#f9a8d4' },
+			tier3: { dark: '#1e1b4b', light: '#ec4899' },
+			trunk: { dark: '#1a1a2e', light: '#2d1b4e' }
+		}
+	} as const;
+
+	const BREATHING_SPEEDS = {
+		slow: 1500,
+		normal: 800,
+		fast: 400
+	} as const;
 
 	interface Props {
 		class?: string;
-		color?: string;
-		trunkColor?: string;
 		season?: Season;
-		animate?: boolean;
-		animateEntrance?: boolean;
-		/** Add breathing animation (subtle pulse for loading states) */
 		breathing?: boolean;
+		breathingSpeed?: BreathingSpeed;
+		animate?: boolean;
 	}
 
 	let {
 		class: className = 'w-6 h-6',
-		color,
-		trunkColor,
-		season = 'autumn',  // Default to autumn (Grove's signature season)
-		animate = false,
-		animateEntrance = false,
-		breathing = false
+		season = 'summer',
+		breathing = false,
+		breathingSpeed = 'normal',
+		animate = false
 	}: Props = $props();
 
-	// Check if winter for snow accents (Logo keeps foliage, just gets snow-dusted)
-	const isWinter = $derived(season === 'winter');
+	// Get the palette for the current season
+	const palette = $derived(SEASONAL_PALETTES[season]);
 
-	// Build animation class - breathing takes precedence over sway
-	const animationClass = $derived(breathing ? 'breathing' : (animate ? 'sway' : ''));
+	// Reduced motion preference
+	const reducedMotionQuery = browser ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+	let prefersReducedMotion = $state(reducedMotionQuery?.matches ?? false);
 
-	// Seasonal color mapping for the logo
-	// - Spring: Blossom pink - celebrating cherry blossom season!
-	// - Summer: Grove brand green
-	// - Autumn: Warm orange tones matching the forest palette
-	// - Winter: Frosted cool spruce (heavily snow-dusted evergreen)
-	const defaultColor = $derived(
-		season === 'spring' ? cherryBlossomsPeak.standard :  // Blossom pink for spring!
-		season === 'autumn' ? autumn.pumpkin :               // Orange matching autumn forest palette
-		season === 'winter' ? winter.coldSpruce :            // Cool spruce with heavy snow
-		greens.grove  // Summer uses Grove brand green
-	);
-	const foliageColor = $derived(color ?? defaultColor);
-	// Trunk should always be brown (like real tree bark), not match the foliage
-	const actualTrunkColor = $derived(trunkColor ?? bark.bark);
-
-	// Animation state for entrance animation
-	let mounted = $state(false);
-
-	onMount(() => {
-		if (animateEntrance) {
-			// Small delay to ensure CSS transition triggers
-			requestAnimationFrame(() => {
-				mounted = true;
-			});
-		}
+	$effect(() => {
+		if (!reducedMotionQuery) return;
+		const handler = (e: MediaQueryListEvent) => { prefersReducedMotion = e.matches; };
+		reducedMotionQuery.addEventListener('change', handler);
+		return () => reducedMotionQuery.removeEventListener('change', handler);
 	});
 
-	// Calculate if arrows should be in final position
-	const inPosition = $derived(animateEntrance ? mounted : true);
+	// Breathing animation
+	const breathValue = tweened(0, { easing: cubicInOut });
+
+	$effect(() => {
+		const duration = BREATHING_SPEEDS[breathingSpeed];
+		const shouldAnimate = breathing || animate;
+
+		if (!shouldAnimate || prefersReducedMotion) {
+			breathValue.set(0, { duration: Math.min(duration / 2, 300) });
+			return;
+		}
+
+		let cancelled = false;
+
+		async function pulse() {
+			while (!cancelled) {
+				await breathValue.set(1, { duration });
+				if (cancelled) break;
+				await breathValue.set(0, { duration });
+				if (cancelled) break;
+			}
+		}
+
+		pulse();
+		return () => { cancelled = true; };
+	});
+
+	const breathScale = $derived(1 + $breathValue * 0.05);
+	const breathTransform = $derived((breathing || animate) ? `scale(${breathScale})` : '');
+
+	// SVG paths
+	const tier1DarkPath = "M50 5 L18 32 L50 18 Z";
+	const tier1LightPath = "M50 5 L50 18 L82 32 Z";
+	const tier2DarkPath = "M50 20 L12 50 L50 35 Z";
+	const tier2LightPath = "M50 20 L50 35 L88 50 Z";
+	const tier3DarkPath = "M50 38 L18 68 L50 54 Z";
+	const tier3LightPath = "M50 38 L50 54 L82 68 Z";
+	const trunkDarkPath = "M50 54 L42 58 L46 92 L50 92 Z";
+	const trunkLightPath = "M50 54 L58 58 L54 92 L50 92 Z";
 </script>
 
-{#if animateEntrance}
-	<!-- Animated version with 4 separate arrows -->
-	<svg
-		class="{className} {animationClass}"
-		xmlns="http://www.w3.org/2000/svg"
-		viewBox="0 0 417 512.238"
+<svg
+	class={className}
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 100 100"
+	aria-label="Grove logo"
+>
+	<g
+		transform="rotate(-12 50 50)"
+		style={breathTransform ? `transform-origin: 50px 50px; transform: ${breathTransform};` : undefined}
 	>
-		<defs>
-			<!-- Clip paths to isolate each arrow direction -->
-			<clipPath id="clip-top">
-				<polygon points="0,0 417,0 417,208.5 208.5,208.5 0,208.5" />
-			</clipPath>
-			<clipPath id="clip-right">
-				<polygon points="208.5,0 417,0 417,400 208.5,400 208.5,208.5" />
-			</clipPath>
-			<clipPath id="clip-bottom">
-				<polygon points="0,208.5 208.5,208.5 417,208.5 417,400 0,400" />
-			</clipPath>
-			<clipPath id="clip-left">
-				<polygon points="0,0 208.5,0 208.5,208.5 208.5,400 0,400" />
-			</clipPath>
-		</defs>
+		<!-- Tier 1: Top branches -->
+		<path fill={palette.tier1.dark} d={tier1DarkPath} />
+		<path fill={palette.tier1.light} d={tier1LightPath} />
 
-		<!-- Trunk (static) -->
-		<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
+		<!-- Tier 2: Middle branches -->
+		<path fill={palette.tier2.dark} d={tier2DarkPath} />
+		<path fill={palette.tier2.light} d={tier2LightPath} />
 
-		<!-- Top Arrow -->
-		<g
-			class="arrow arrow-top"
-			class:in-position={inPosition}
-			clip-path="url(#clip-top)"
-		>
-			<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		</g>
+		<!-- Tier 3: Bottom branches -->
+		<path fill={palette.tier3.dark} d={tier3DarkPath} />
+		<path fill={palette.tier3.light} d={tier3LightPath} />
 
-		<!-- Right Arrow -->
-		<g
-			class="arrow arrow-right"
-			class:in-position={inPosition}
-			clip-path="url(#clip-right)"
-		>
-			<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		</g>
-
-		<!-- Bottom Arrow -->
-		<g
-			class="arrow arrow-bottom"
-			class:in-position={inPosition}
-			clip-path="url(#clip-bottom)"
-		>
-			<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		</g>
-
-		<!-- Left Arrow -->
-		<g
-			class="arrow arrow-left"
-			class:in-position={inPosition}
-			clip-path="url(#clip-left)"
-		>
-			<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		</g>
-	</svg>
-{:else}
-	<!-- Static version -->
-	<svg
-		class="{className} {animationClass}"
-		xmlns="http://www.w3.org/2000/svg"
-		viewBox="0 0 417 512.238"
-	>
 		<!-- Trunk -->
-		<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-		<!-- Foliage -->
-		<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-		<!-- Snow accents in winter - natural snow coverage on upper branches only -->
-		{#if isWinter}
-			<!-- Top point snow cap - organic shape following the arrow tip -->
-			<path fill={winter.snow} d="M170 8 Q175 -2 208 -4 Q241 -2 246 8 Q244 18 235 22 Q220 26 208 24 Q196 26 181 22 Q172 18 170 8 Z" opacity="0.95" />
-			<path fill={winter.frost} d="M182 12 Q190 6 208 5 Q226 6 234 12 Q232 20 222 22 Q212 24 208 23 Q204 24 194 22 Q184 20 182 12 Z" opacity="0.55" />
-			<!-- Snow particles on top -->
-			<circle fill={winter.snow} cx="195" cy="2" r="4" opacity="0.8" />
-			<circle fill={winter.snow} cx="221" cy="3" r="3" opacity="0.75" />
-			<circle fill={winter.frost} cx="208" cy="-2" r="5" opacity="0.6" />
-
-			<!-- Upper-left diagonal arm - snow sitting on the angled surface -->
-			<path fill={winter.snow} d="M22 42 Q28 32 48 28 Q68 30 72 44 Q68 56 55 62 Q40 66 28 60 Q18 54 22 42 Z" opacity="0.93" transform="rotate(-8 47 47)" />
-			<path fill={winter.frost} d="M32 46 Q38 38 52 36 Q64 40 66 50 Q62 58 52 60 Q42 62 34 56 Q30 52 32 46 Z" opacity="0.5" transform="rotate(-8 49 48)" />
-			<!-- Scattered snow bits -->
-			<circle fill={winter.snow} cx="58" cy="38" r="5" opacity="0.85" />
-			<circle fill={winter.snow} cx="36" cy="52" r="4" opacity="0.8" />
-			<circle fill={winter.frost} cx="48" cy="44" r="3" opacity="0.6" />
-
-			<!-- Upper-right diagonal arm - mirrored snow -->
-			<path fill={winter.snow} d="M395 42 Q389 32 369 28 Q349 30 345 44 Q349 56 362 62 Q377 66 389 60 Q399 54 395 42 Z" opacity="0.93" transform="rotate(8 370 47)" />
-			<path fill={winter.frost} d="M385 46 Q379 38 365 36 Q353 40 351 50 Q355 58 365 60 Q375 62 383 56 Q387 52 385 46 Z" opacity="0.5" transform="rotate(8 368 48)" />
-			<!-- Scattered snow bits -->
-			<circle fill={winter.snow} cx="359" cy="38" r="5" opacity="0.85" />
-			<circle fill={winter.snow} cx="381" cy="52" r="4" opacity="0.8" />
-			<circle fill={winter.frost} cx="369" cy="44" r="3" opacity="0.6" />
-
-			<!-- Left horizontal arm - snow along the top edge -->
-			<path fill={winter.snow} d="M4 162 Q8 154 28 152 Q58 150 78 156 Q88 162 86 172 Q82 180 62 182 Q38 184 18 180 Q6 176 4 168 Q2 164 4 162 Z" opacity="0.94" />
-			<path fill={winter.frost} d="M16 166 Q22 160 42 158 Q62 160 72 166 Q74 174 58 176 Q38 178 22 174 Q16 172 16 166 Z" opacity="0.5" />
-			<!-- Snow particles -->
-			<circle fill={winter.snow} cx="24" cy="158" r="6" opacity="0.85" />
-			<circle fill={winter.snow} cx="52" cy="156" r="4" opacity="0.8" />
-			<circle fill={winter.snow} cx="72" cy="160" r="5" opacity="0.75" />
-			<circle fill={winter.frost} cx="38" cy="162" r="3" opacity="0.55" />
-
-			<!-- Right horizontal arm - snow along the top edge -->
-			<path fill={winter.snow} d="M413 162 Q409 154 389 152 Q359 150 339 156 Q329 162 331 172 Q335 180 355 182 Q379 184 399 180 Q411 176 413 168 Q415 164 413 162 Z" opacity="0.94" />
-			<path fill={winter.frost} d="M401 166 Q395 160 375 158 Q355 160 345 166 Q343 174 359 176 Q379 178 395 174 Q401 172 401 166 Z" opacity="0.5" />
-			<!-- Snow particles -->
-			<circle fill={winter.snow} cx="393" cy="158" r="6" opacity="0.85" />
-			<circle fill={winter.snow} cx="365" cy="156" r="4" opacity="0.8" />
-			<circle fill={winter.snow} cx="345" cy="160" r="5" opacity="0.75" />
-			<circle fill={winter.frost} cx="379" cy="162" r="3" opacity="0.55" />
-
-			<!-- Center intersection - light dusting where branches meet -->
-			<path fill={winter.snow} d="M178 168 Q182 158 208 156 Q234 158 238 168 Q240 178 228 184 Q216 188 208 186 Q200 188 188 184 Q176 178 178 168 Z" opacity="0.7" />
-			<circle fill={winter.frost} cx="196" cy="172" r="4" opacity="0.45" />
-			<circle fill={winter.frost} cx="220" cy="172" r="4" opacity="0.45" />
-			<circle fill={winter.snow} cx="208" cy="164" r="5" opacity="0.6" />
-
-			<!-- Light frost accents on inner branch edges (upper only) -->
-			<circle fill={winter.ice} cx="135" cy="128" r="6" opacity="0.35" />
-			<circle fill={winter.ice} cx="282" cy="128" r="6" opacity="0.35" />
-			<circle fill={winter.ice} cx="165" cy="95" r="4" opacity="0.3" />
-			<circle fill={winter.ice} cx="252" cy="95" r="4" opacity="0.3" />
-		{/if}
-	</svg>
-{/if}
-
-<style>
-	@keyframes sway {
-		0%, 100% { transform: rotate(0deg); }
-		50% { transform: rotate(1deg); }
-	}
-
-	@keyframes breathe {
-		0%, 100% {
-			transform: scale(1);
-			opacity: 0.7;
-		}
-		50% {
-			transform: scale(1.05);
-			opacity: 1;
-		}
-	}
-
-	.sway {
-		transform-origin: center bottom;
-		animation: sway 4s ease-in-out infinite;
-	}
-
-	.breathing {
-		transform-origin: center center;
-		animation: breathe 2s ease-in-out infinite;
-	}
-
-	/* Arrow entrance animations */
-	.arrow {
-		transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bounce easing */
-	}
-
-	/* Starting positions (offset by ~20%) */
-	.arrow-top {
-		transform: translateY(-40px);
-	}
-	.arrow-right {
-		transform: translateX(40px);
-	}
-	.arrow-bottom {
-		transform: translateY(40px);
-	}
-	.arrow-left {
-		transform: translateX(-40px);
-	}
-
-	/* Final positions */
-	.arrow-top.in-position {
-		transform: translateY(0);
-	}
-	.arrow-right.in-position {
-		transform: translateX(0);
-	}
-	.arrow-bottom.in-position {
-		transform: translateY(0);
-	}
-	.arrow-left.in-position {
-		transform: translateX(0);
-	}
-</style>
+		<path fill={palette.trunk.dark} d={trunkDarkPath} />
+		<path fill={palette.trunk.light} d={trunkLightPath} />
+	</g>
+</svg>

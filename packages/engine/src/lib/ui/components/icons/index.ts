@@ -8,8 +8,8 @@
 //   import { stateIcons, pricingIcons, Check } from '@autumnsgrove/groveengine/ui/icons';
 
 // Custom SVG components
-export { default as Icons } from './Icons.svelte';
-export { default as IconLegend } from './IconLegend.svelte';
+export { default as Icons } from "./Icons.svelte";
+export { default as IconLegend } from "./IconLegend.svelte";
 
 // Lucide icon registries and utilities
 export {
@@ -20,6 +20,7 @@ export {
   featureIcons,
   growthIcons,
   phaseIcons,
+  seasonIcons,
   actionIcons,
   metricsIcons,
   allIcons,
@@ -62,6 +63,9 @@ export {
   HelpCircle,
   Lock,
   Sparkles,
+  Moon,
+  Sun,
+  Snowflake,
   Clock,
   TrendingUp,
   Users,
@@ -77,6 +81,6 @@ export {
   Link2,
   // Also export the authIcons map
   authIcons,
-} from './lucide';
+} from "./lucide";
 
-export const ICONS_VERSION = '0.3.0';
+export const ICONS_VERSION = "0.3.0";

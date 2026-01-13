@@ -71,6 +71,7 @@ import {
   Star,
   Moon,
   Sun,
+  Snowflake,
   // Actions
   Compass,
   Megaphone,
@@ -217,6 +218,18 @@ export const phaseIcons = {
 } as const;
 
 // ============================================================================
+// SEASON ICONS
+// ============================================================================
+/** Icons for Grove's seasonal theming system */
+export const seasonIcons = {
+  spring: Flower2,
+  summer: Sun,
+  autumn: Leaf,
+  winter: Snowflake,
+  midnight: Moon,
+} as const;
+
+// ============================================================================
 // ACTION ICONS
 // ============================================================================
 /** Icons for user actions and processes */
@@ -275,6 +288,7 @@ export const allIcons = {
   ...featureIcons,
   ...growthIcons,
   ...phaseIcons,
+  ...seasonIcons,
   ...actionIcons,
   ...authIcons,
   ...metricsIcons,
@@ -355,8 +369,11 @@ export {
   AlertTriangle,
   HelpCircle,
   Lock,
-  // Phase/Special
+  // Phase/Special & Seasons
   Sparkles,
+  Moon,
+  Sun,
+  Snowflake,
   // Metrics
   Clock,
   TrendingUp,

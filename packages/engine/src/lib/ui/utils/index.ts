@@ -4,7 +4,20 @@
 //
 // Usage:
 //   import { cn } from '@groveengine/ui/utils';
+//   import { generateTierColors, hexToHsl } from '@groveengine/ui/utils';
 
-export { cn } from './cn.js';
+export { cn } from "./cn.js";
 
-export const UTILS_VERSION = '0.2.0';
+// Color manipulation utilities
+export {
+  hexToHsl,
+  hslToHex,
+  generateTierColors,
+  adjustLightness,
+  adjustSaturation,
+  type HSLColor,
+  type TierColors,
+  type LogoTierColors,
+} from "./color.js";
+
+export const UTILS_VERSION = "0.2.0";

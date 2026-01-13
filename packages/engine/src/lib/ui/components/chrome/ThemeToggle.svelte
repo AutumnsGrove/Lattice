@@ -1,34 +1,93 @@
 <script lang="ts">
-	import { themeStore } from '$lib/ui/stores/theme';
+	/**
+	 * Season Indicator — Footer Easter Egg
+	 *
+	 * Displays the current season and acts as the gateway to Midnight mode.
+	 * - Shows current season icon + label
+	 * - Tap to activate Midnight (the queer fifth season)
+	 * - In midnight mode, tap again to return to previous season
+	 *
+	 * The header logo cycles through 4 regular seasons.
+	 * This indicator is the only way to enter midnight mode.
+	 */
 
-	// Extract the resolvedTheme store and toggle function
-	const { resolvedTheme, toggle } = themeStore;
-	let isDark = $derived($resolvedTheme === 'dark');
+	import { seasonStore } from "$lib/ui/stores/season";
+	import { SEASON_LABELS, type Season } from "$lib/ui/types/season";
+	import { seasonIcons } from "$lib/ui/components/icons/lucide";
+
+	// Current season from store
+	let currentSeason: Season = $derived($seasonStore);
+	let isMidnight = $derived(currentSeason === "midnight");
+
+	// Get display info for current season
+	let label = $derived(SEASON_LABELS[currentSeason]);
+	let IconComponent = $derived(seasonIcons[currentSeason]);
+
+	// Handle click - toggle midnight mode (easter egg!)
+	function handleClick() {
+		seasonStore.toggleMidnight();
+	}
 </script>
 
 <button
-	onclick={() => toggle()}
-	class="p-2 rounded-lg text-foreground-subtle hover:text-accent-muted hover:bg-surface transition-colors"
-	aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+	onclick={handleClick}
+	class="relative group flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-300
+		{isMidnight
+		? 'text-purple-300 bg-purple-950/60 hover:bg-purple-900/60 ring-1 ring-purple-500/40 shadow-lg shadow-purple-500/20'
+		: 'text-foreground-subtle hover:text-foreground hover:bg-surface/80'}"
+	aria-label={isMidnight
+		? "Exit midnight mode"
+		: `Current season: ${label}. Tap for midnight mode.`}
+	title={isMidnight ? "Return to daylight" : `${label} — tap for something special`}
 >
-	{#if isDark}
-		<!-- Sun icon - shown in dark mode -->
-		<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<circle cx="12" cy="12" r="5" />
-			<line x1="12" y1="1" x2="12" y2="3" />
-			<line x1="12" y1="21" x2="12" y2="23" />
-			<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-			<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-			<line x1="1" y1="12" x2="3" y2="12" />
-			<line x1="21" y1="12" x2="23" y2="12" />
-			<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-			<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-		</svg>
-	{:else}
-		<!-- Moon icon - shown in light mode -->
-		<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-		</svg>
+	<!-- Season icon with bloom animation on midnight -->
+	<span
+		class="transition-transform duration-500 ease-out
+			{isMidnight ? 'scale-110' : 'group-hover:scale-110'}"
+	>
+		<svelte:component
+			this={IconComponent}
+			class="w-4 h-4 {isMidnight ? 'animate-pulse' : ''}"
+			strokeWidth={2}
+		/>
+	</span>
+
+	<!-- Season label - compact display -->
+	<span
+		class="text-xs font-medium tracking-wide transition-colors duration-300
+			{isMidnight
+			? 'text-purple-200'
+			: 'text-foreground-muted group-hover:text-foreground-subtle'}"
+	>
+		{label}
+	</span>
+
+	<!-- Subtle glow ring when in midnight (easter egg active indicator) -->
+	{#if isMidnight}
+		<span
+			class="absolute inset-0 rounded-lg ring-2 ring-purple-400/20 animate-pulse pointer-events-none"
+		></span>
 	{/if}
 </button>
+
+<style>
+	/* Bloom animation for entering midnight */
+	@keyframes bloom {
+		0% {
+			transform: scale(1);
+			filter: brightness(1);
+		}
+		50% {
+			transform: scale(1.15);
+			filter: brightness(1.2);
+		}
+		100% {
+			transform: scale(1.1);
+			filter: brightness(1);
+		}
+	}
+
+	button:active span:first-child {
+		animation: bloom 0.3s ease-out;
+	}
+</style>

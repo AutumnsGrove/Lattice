@@ -1,219 +1,319 @@
 <script lang="ts">
 	/**
-	 * Grove Logo Component
+	 * Grove Logo Component — The Tree Mark
 	 *
-	 * A seasonal logo with beautiful nature-inspired colors.
-	 * Defaults to summer (emerald green) but supports all seasons.
+	 * A beautifully crafted tree logo with seasonal color palettes,
+	 * 3D depth through light/dark branch splits, and extensive customization.
 	 *
-	 * The trunk defaults to Grove's classic bark brown (#5d4037).
+	 * The logo features three tiers of branches with a gentle -12° rotation
+	 * that gives it an organic, windswept feel.
+	 *
+	 * ## Seasons
+	 * - `spring` — Rose Gold (cherry blossoms)
+	 * - `summer` — Sunlit (lush green) [default]
+	 * - `autumn` — Sunset (warm red/gold)
+	 * - `winter` — Ice (cool blue)
+	 * - `midnight` — Rose Bloom (purple/pink, the queer fifth season 🌙)
 	 *
 	 * @example Basic usage
 	 * ```svelte
-	 * <Logo />  <!-- Summer green by default -->
-	 * <Logo season="spring" />  <!-- Cherry blossom pink -->
-	 * <Logo season="autumn" />  <!-- Warm orange -->
-	 * <Logo season="winter" />  <!-- Frosted green -->
+	 * <Logo />
+	 * <Logo season="autumn" />
+	 * <Logo season="midnight" size="lg" />
 	 * ```
 	 *
-	 * @example Loading state (breathing animation)
+	 * @example Size variants
 	 * ```svelte
-	 * <Logo breathing />
-	 * <Logo breathing breathingSpeed="slow" />
+	 * <Logo size="xs" />  <!-- 16px -->
+	 * <Logo size="sm" />  <!-- 24px -->
+	 * <Logo size="md" />  <!-- 32px -->
+	 * <Logo size="lg" />  <!-- 48px -->
+	 * <Logo size="xl" />  <!-- 64px -->
+	 * <Logo size="2xl" /> <!-- 80px -->
+	 * <Logo size="3xl" /> <!-- 120px -->
+	 * <Logo size={100} /> <!-- 100px custom -->
 	 * ```
-	 * Note: breathing is intended for single loading indicators, not lists.
+	 *
+	 * @example Custom rotation and colors
+	 * ```svelte
+	 * <Logo rotation={0} />  <!-- No tilt -->
+	 * <Logo rotation={-20} />  <!-- More dramatic tilt -->
+	 * <Logo tier1={{ dark: '#ff0000', light: '#ffcccc' }} />
+	 * ```
+	 *
+	 * @example Interactive
+	 * ```svelte
+	 * <Logo interactive />  <!-- Hover effects -->
+	 * <Logo shadow />  <!-- Drop shadow -->
+	 * ```
 	 */
 
-	import { tweened } from 'svelte/motion';
-	import { cubicInOut } from 'svelte/easing';
-	import { browser } from '$app/environment';
+	import type { Season } from '$lib/ui/types/season';
 
-	type Season = 'spring' | 'summer' | 'autumn' | 'winter';
-	type BreathingSpeed = 'slow' | 'normal' | 'fast';
+	// ─────────────────────────────────────────────────────────────────────────────
+	// TYPES
+	// ─────────────────────────────────────────────────────────────────────────────
 
-	// Seasonal color palette - matches GlassLogo for consistency
-	const seasonalColors = {
-		spring: '#f472b6',    // pink-400 - cherry blossom
-		summer: '#10b981',    // emerald-500 - lush growth
-		autumn: '#fb923c',    // orange-400 - warm harvest
-		winter: '#86efac'     // green-300 - frosted evergreen
+	export type { Season };
+	export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | number;
+
+	/** Color pair for a branch tier (dark side / light side) */
+	export interface TierColors {
+		dark: string;
+		light: string;
+	}
+
+	/** Color pair for the trunk */
+	export interface TrunkColors {
+		dark: string;
+		light: string;
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// SEASONAL COLOR PALETTES
+	// ─────────────────────────────────────────────────────────────────────────────
+
+	const SEASONAL_PALETTES = {
+		spring: {
+			// Rose Gold — Cherry blossoms, hope, renewal
+			tier1: { dark: '#be185d', light: '#fecdd3' },
+			tier2: { dark: '#9d174d', light: '#fda4af' },
+			tier3: { dark: '#831843', light: '#fb7185' },
+			trunk: { dark: '#5a3f30', light: '#6f4d39' }
+		},
+		summer: {
+			// Sunlit — Lush growth, warmth, vitality
+			tier1: { dark: '#15803d', light: '#86efac' },
+			tier2: { dark: '#166534', light: '#4ade80' },
+			tier3: { dark: '#14532d', light: '#22c55e' },
+			trunk: { dark: '#3d2914', light: '#5a3f30' }
+		},
+		autumn: {
+			// Sunset — Harvest, reflection, warm embrace
+			tier1: { dark: '#DC2626', light: '#FCD34D' },
+			tier2: { dark: '#991B1B', light: '#F59E0B' },
+			tier3: { dark: '#7C2D12', light: '#EA580C' },
+			trunk: { dark: '#5C3317', light: '#8B4520' }
+		},
+		winter: {
+			// Ice — Stillness, rest, crystalline beauty
+			tier1: { dark: '#1e3a5f', light: '#bfdbfe' },
+			tier2: { dark: '#1e3a5f', light: '#93c5fd' },
+			tier3: { dark: '#0f172a', light: '#60a5fa' },
+			trunk: { dark: '#1e293b', light: '#334155' }
+		},
+		midnight: {
+			// Rose Bloom — The queer fifth season, purple twilight, magic
+			tier1: { dark: '#4c1d95', light: '#fce7f3' },
+			tier2: { dark: '#3b0764', light: '#f9a8d4' },
+			tier3: { dark: '#1e1b4b', light: '#ec4899' },
+			trunk: { dark: '#1a1a2e', light: '#2d1b4e' }
+		}
 	} as const;
 
+	// Size presets in pixels
+	const SIZE_PRESETS = {
+		xs: 16,
+		sm: 24,
+		md: 32,
+		lg: 48,
+		xl: 64,
+		'2xl': 80,
+		'3xl': 120
+	} as const;
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// PROPS
+	// ─────────────────────────────────────────────────────────────────────────────
+
 	interface Props {
+		/** CSS class for sizing (e.g., 'w-8 h-8'). Overridden if `size` is set. */
 		class?: string;
-		/** Seasonal color theme - defaults to summer */
+
+		// ── Season & Colors ──────────────────────────────────────────────────────
+
+		/** Seasonal color theme */
 		season?: Season;
-		/** Custom foliage color - overrides season if provided */
-		color?: string;
-		/** Trunk color - defaults to classic bark brown */
-		trunkColor?: string;
-		/** Whether foliage and trunk should be the same color */
-		monochrome?: boolean;
-		/** Add breathing animation (for loading states, not lists) */
-		breathing?: boolean;
-		/** Breathing animation speed - 'slow' (1500ms), 'normal' (800ms), 'fast' (400ms) */
-		breathingSpeed?: BreathingSpeed;
+
+		/** Override tier 1 (top) branch colors */
+		tier1?: TierColors;
+
+		/** Override tier 2 (middle) branch colors */
+		tier2?: TierColors;
+
+		/** Override tier 3 (bottom) branch colors */
+		tier3?: TierColors;
+
+		/** Override trunk colors */
+		trunk?: TrunkColors;
+
+		/** Use a single color for the entire logo (foliage only) */
+		monochromeColor?: string;
+
+		/** Make trunk match foliage colors */
+		monochromeTrunk?: boolean;
+
+		// ── Size & Geometry ──────────────────────────────────────────────────────
+
+		/** Size preset or pixel value. Overrides class-based sizing. */
+		size?: LogoSize;
+
+		/** Rotation in degrees. Negative = lean left. Default: -12 */
+		rotation?: number;
+
+		// ── Effects & Interactivity ──────────────────────────────────────────────
+
+		/** Add subtle drop shadow */
+		shadow?: boolean;
+
+		/** Enable hover effects (slight scale, glow) */
+		interactive?: boolean;
+
+		/** Click handler */
+		onclick?: (event: MouseEvent) => void;
+
+		// ── Accessibility & IDs ──────────────────────────────────────────────────
+
+		/** Accessible label for the logo */
+		ariaLabel?: string;
+
+		/** Unique ID prefix for SVG filters (auto-generated if not provided) */
+		filterId?: string;
+
+		/** Additional title for tooltip on hover */
+		title?: string;
 	}
 
 	let {
-		class: className = 'w-6 h-6',
+		class: className = '',
 		season = 'summer',
-		color,
-		trunkColor,
-		monochrome = false,
-		breathing = false,
-		breathingSpeed = 'normal'
+		tier1,
+		tier2,
+		tier3,
+		trunk,
+		monochromeColor,
+		monochromeTrunk = false,
+		size,
+		rotation = -12,
+		shadow = false,
+		interactive = false,
+		onclick,
+		ariaLabel = 'Grove logo',
+		filterId,
+		title
 	}: Props = $props();
 
-	// Breathing speed presets (duration per half-cycle in ms)
-	const BREATHING_SPEEDS = {
-		slow: 1500,    // 3s full cycle - calm, meditative
-		normal: 800,   // 1.6s full cycle - balanced
-		fast: 400      // 0.8s full cycle - urgent
-	} as const;
+	// ─────────────────────────────────────────────────────────────────────────────
+	// DERIVED VALUES
+	// ─────────────────────────────────────────────────────────────────────────────
 
-	// Respect user's reduced motion preference (reactive to system changes)
-	const reducedMotionQuery = browser ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-	let prefersReducedMotion = $state(reducedMotionQuery?.matches ?? false);
+	// Generate unique ID for SVG elements
+	const randomId = `grove-logo-${Math.random().toString(36).slice(2, 9)}`;
+	const uniqueId = $derived(filterId ?? randomId);
 
-	$effect(() => {
-		if (!reducedMotionQuery) return;
-		const handler = (e: MediaQueryListEvent) => { prefersReducedMotion = e.matches; };
-		reducedMotionQuery.addEventListener('change', handler);
-		return () => reducedMotionQuery.removeEventListener('change', handler);
+	// Get the palette for the current season
+	const palette = $derived(SEASONAL_PALETTES[season]);
+
+	// Compute final colors with overrides
+	const colors = $derived({
+		tier1: monochromeColor
+			? { dark: monochromeColor, light: monochromeColor }
+			: (tier1 ?? palette.tier1),
+		tier2: monochromeColor
+			? { dark: monochromeColor, light: monochromeColor }
+			: (tier2 ?? palette.tier2),
+		tier3: monochromeColor
+			? { dark: monochromeColor, light: monochromeColor }
+			: (tier3 ?? palette.tier3),
+		trunk: monochromeTrunk && monochromeColor
+			? { dark: monochromeColor, light: monochromeColor }
+			: (trunk ?? palette.trunk)
 	});
 
-	// Classic bark brown from the nature palette
-	const BARK_BROWN = '#5d4037';
+	// Compute size styles
+	const sizeStyles = $derived.by(() => {
+		if (!size) return undefined;
 
-	// Compute actual colors - use custom color if provided, otherwise use seasonal color
-	const foliageColor = $derived(color ?? seasonalColors[season]);
-	const actualTrunkColor = $derived(monochrome
-		? foliageColor
-		: (trunkColor ?? BARK_BROWN));
-
-	// Breathing animation using tweened store (duration set dynamically in $effect)
-	const breathValue = tweened(0, { easing: cubicInOut });
-
-	// Animation loop for breathing effect
-	// Re-runs when breathing or breathingSpeed changes, ensuring reactive duration updates
-	$effect(() => {
-		const duration = BREATHING_SPEEDS[breathingSpeed];
-
-		// Disable animation if breathing is off or user prefers reduced motion
-		if (!breathing || prefersReducedMotion) {
-			// Use half the breathing duration for smoother exit transition
-			breathValue.set(0, { duration: Math.min(duration / 2, 300) });
-			return;
-		}
-
-		let cancelled = false;
-
-		async function pulse() {
-			while (!cancelled) {
-				await breathValue.set(1, { duration });
-				if (cancelled) break;
-				await breathValue.set(0, { duration });
-				if (cancelled) break;
-			}
-		}
-
-		pulse();
-
-		return () => {
-			cancelled = true;
-		};
+		const pixels = typeof size === 'number' ? size : SIZE_PRESETS[size];
+		return `width: ${pixels}px; height: ${pixels}px;`;
 	});
 
-	// Expansion values for breathing animation (in SVG units, tied to viewBox 417×512.238)
-	// These are absolute values within the SVG coordinate system, so they scale
-	// proportionally with the logo regardless of rendered size.
-	const expansion = $derived($breathValue * 22);
-	const diagExpansion = $derived($breathValue * 16); // ~16px at 45° angles
+	// Compute final class (use Tailwind sizing if no explicit size)
+	// Uses motion-safe: to respect prefers-reduced-motion for transitions
+	const finalClass = $derived.by(() => {
+		const base = size ? '' : (className || 'w-8 h-8');
+		const interactiveClass = interactive
+			? 'cursor-pointer motion-safe:transition-transform motion-safe:hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current rounded-sm'
+			: '';
+		return [base, interactiveClass].filter(Boolean).join(' ');
+	});
 
-	// Individual branch transforms
-	const leftTransform = $derived(`translate(${-expansion}, 0)`);
-	const rightTransform = $derived(`translate(${expansion}, 0)`);
-	const topTransform = $derived(`translate(0, ${-expansion})`);
-	const topLeftTransform = $derived(`translate(${-diagExpansion}, ${-diagExpansion})`);
-	const topRightTransform = $derived(`translate(${diagExpansion}, ${-diagExpansion})`);
-	const bottomLeftTransform = $derived(`translate(${-diagExpansion}, ${diagExpansion})`);
-	const bottomRightTransform = $derived(`translate(${diagExpansion}, ${diagExpansion})`);
+	// ─────────────────────────────────────────────────────────────────────────────
+	// SVG PATHS
+	// ─────────────────────────────────────────────────────────────────────────────
 
-	// Decomposed foliage paths for breathing animation
-	// Each bar extends toward the center so they overlap at rest, forming the complete logo
-	// When expanded, the overlapping regions separate creating the burst effect
+	// The logo is built from triangular branch pairs and a trunk
+	// ViewBox: 0 0 100 100
 
-	// Left horizontal bar - extends right to center
-	const leftBarPath = "M0 173.468 L171.476 173.468 L171.476 243.97 L0 243.97 Z";
+	// Tier 1 (top branches)
+	const tier1DarkPath = "M50 5 L18 32 L50 18 Z";
+	const tier1LightPath = "M50 5 L50 18 L82 32 Z";
 
-	// Right horizontal bar - extends left to center
-	const rightBarPath = "M245.562 173.268 L417 173.268 L417 243.77 L245.562 243.77 Z";
+	// Tier 2 (middle branches)
+	const tier2DarkPath = "M50 20 L12 50 L50 35 Z";
+	const tier2LightPath = "M50 20 L50 35 L88 50 Z";
 
-	// Top vertical bar - extends down to center
-	const topBarPath = "M171.476 0 L245.562 0 L245.562 173.468 L171.476 173.468 Z";
+	// Tier 3 (bottom branches)
+	const tier3DarkPath = "M50 38 L18 68 L50 54 Z";
+	const tier3LightPath = "M50 38 L50 54 L82 68 Z";
 
-	// Top-left diagonal - arrow with extended inner edge
-	const topLeftDiagPath = "M171.476 173.468 L171.476 124.872 L86.037 37.043 L36.446 88.028 L126 173.468 Z";
-
-	// Top-right diagonal - arrow with extended inner edge
-	const topRightDiagPath = "M245.562 173.268 L245.562 124.872 L331 37.243 L380.552 88.028 L290.972 173.268 Z";
-
-	// Bottom-left diagonal - arrow with extended inner edge to center point
-	const bottomLeftDiagPath = "M171.476 243.97 L208.519 258.11 L86.037 381.192 L36.446 331.601 L126.664 243.97 Z";
-
-	// Bottom-right diagonal - arrow with extended inner edge to center point
-	const bottomRightDiagPath = "M245.562 243.77 L208.519 258.11 L331 381.192 L380.435 331.399 L290.252 243.77 Z";
+	// Trunk (two-tone for depth)
+	const trunkDarkPath = "M50 54 L42 58 L46 92 L50 92 Z";
+	const trunkLightPath = "M50 54 L58 58 L54 92 L50 92 Z";
 </script>
 
 <svg
-	class={className}
+	class={finalClass}
+	style={sizeStyles}
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 -30 417 542.238"
-	aria-label="Grove logo"
+	viewBox="0 0 100 100"
+	aria-label={ariaLabel}
+	role={onclick ? 'button' : 'img'}
+	tabindex={onclick ? 0 : undefined}
+	onclick={onclick}
+	onkeydown={(e) => onclick && (e.key === 'Enter' || e.key === ' ') && onclick(e as unknown as MouseEvent)}
 >
-	<!-- Trunk (always static) -->
-	<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-
-	{#if breathing}
-		<!-- Decomposed foliage with breathing animation - bars expand outward from center -->
-
-		<!-- Left horizontal bar -->
-		<g transform={leftTransform}>
-			<path fill={foliageColor} d={leftBarPath}/>
-		</g>
-
-		<!-- Right horizontal bar -->
-		<g transform={rightTransform}>
-			<path fill={foliageColor} d={rightBarPath}/>
-		</g>
-
-		<!-- Top vertical bar -->
-		<g transform={topTransform}>
-			<path fill={foliageColor} d={topBarPath}/>
-		</g>
-
-		<!-- Top-left diagonal -->
-		<g transform={topLeftTransform}>
-			<path fill={foliageColor} d={topLeftDiagPath}/>
-		</g>
-
-		<!-- Top-right diagonal -->
-		<g transform={topRightTransform}>
-			<path fill={foliageColor} d={topRightDiagPath}/>
-		</g>
-
-		<!-- Bottom-left diagonal -->
-		<g transform={bottomLeftTransform}>
-			<path fill={foliageColor} d={bottomLeftDiagPath}/>
-		</g>
-
-		<!-- Bottom-right diagonal -->
-		<g transform={bottomRightTransform}>
-			<path fill={foliageColor} d={bottomRightDiagPath}/>
-		</g>
-	{:else}
-		<!-- Original single foliage path (for non-breathing state) -->
-		<path fill={foliageColor} d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
+	{#if title}
+		<title>{title}</title>
 	{/if}
-</svg>
 
+	{#if shadow}
+		<defs>
+			<filter id="{uniqueId}-shadow" x="-20%" y="-20%" width="140%" height="140%">
+				<feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.25" />
+			</filter>
+		</defs>
+	{/if}
+
+	<!-- Main tree group with rotation -->
+	<g
+		transform="rotate({rotation} 50 50)"
+		filter={shadow ? `url(#${uniqueId}-shadow)` : undefined}
+	>
+		<!-- Tier 1: Top branches -->
+		<path fill={colors.tier1.dark} d={tier1DarkPath} />
+		<path fill={colors.tier1.light} d={tier1LightPath} />
+
+		<!-- Tier 2: Middle branches -->
+		<path fill={colors.tier2.dark} d={tier2DarkPath} />
+		<path fill={colors.tier2.light} d={tier2LightPath} />
+
+		<!-- Tier 3: Bottom branches -->
+		<path fill={colors.tier3.dark} d={tier3DarkPath} />
+		<path fill={colors.tier3.light} d={tier3LightPath} />
+
+		<!-- Trunk -->
+		<path fill={colors.trunk.dark} d={trunkDarkPath} />
+		<path fill={colors.trunk.light} d={trunkLightPath} />
+	</g>
+</svg>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grove Logo — Final Seasonal Collection</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #1a1915;
+      color: #f5f2ea;
+      padding: 40px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #22c55e;
+      font-weight: 400;
+      margin-bottom: 8px;
+      font-size: 1.75rem;
+    }
+    .subtitle {
+      color: #777267;
+      margin-bottom: 48px;
+      font-size: 14px;
+    }
+    
+    /* Main grid */
+    .seasons-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+      margin-bottom: 64px;
+    }
+    @media (max-width: 1000px) {
+      .seasons-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .seasons-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .season-card {
+      text-align: center;
+      padding: 24px 16px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .season-card svg {
+      display: block;
+      margin: 0 auto 16px;
+    }
+    .season-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .season-variant {
+      font-size: 11px;
+      color: #5c584f;
+      margin-bottom: 16px;
+    }
+    
+    /* Season-specific colors */
+    .spring .season-name { color: #f9a8d4; }
+    .summer .season-name { color: #4ade80; }
+    .autumn .season-name { color: #F59E0B; }
+    .winter .season-name { color: #60a5fa; }
+    .midnight .season-name { color: #c084fc; }
+    
+    /* Size showcase */
+    .sizes {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: flex-end;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .size-label {
+      font-size: 9px;
+      color: #43403a;
+    }
+    
+    /* Section titles */
+    .section {
+      margin-bottom: 64px;
+    }
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #5c584f;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* Background tests */
+    .bg-tests {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 800px) {
+      .bg-tests { grid-template-columns: 1fr; }
+    }
+    .bg-card {
+      padding: 32px;
+      border-radius: 16px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .bg-card.dark { background: #1a1915; border: 1px solid rgba(255,255,255,0.1); }
+    .bg-card.cream { background: #fefdfb; }
+    .bg-card.purple { background: #2d1b4e; }
+    .bg-label {
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      color: #5c584f;
+      margin-top: 8px;
+    }
+    .bg-card.cream .bg-label { color: #777267; }
+    
+    /* Inline row */
+    .inline-row {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    .inline-item {
+      text-align: center;
+    }
+    .inline-item span {
+      display: block;
+      font-size: 11px;
+      color: #5c584f;
+      margin-top: 8px;
+    }
+    
+    /* Export section */
+    .export-section {
+      background: rgba(34, 197, 94, 0.05);
+      border: 1px solid rgba(34, 197, 94, 0.15);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 64px;
+    }
+    .export-section h3 {
+      color: #22c55e;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 800px) {
+      .export-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .export-item {
+      text-align: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+    }
+    .export-item svg {
+      display: block;
+      margin: 0 auto 8px;
+    }
+    .export-item span {
+      font-size: 10px;
+      color: #5c584f;
+    }
+    
+    /* Color reference */
+    .color-ref {
+      margin-top: 48px;
+      padding: 24px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .color-ref h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #5c584f;
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+    .color-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .color-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .color-group-label {
+      font-size: 10px;
+      color: #43403a;
+      margin-bottom: 4px;
+    }
+    .color-swatches {
+      display: flex;
+      gap: 4px;
+    }
+    .mini-swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Grove Logo — Final Seasonal Collection 🌿</h1>
+  <p class="subtitle">M2 base • Unified branch angles • 5 seasonal variations</p>
+
+  <!-- MAIN 5 SEASONS -->
+  <div class="section">
+    <div class="section-title">The Five Seasons</div>
+    <div class="seasons-grid">
+      
+      <!-- SPRING D: Rose Gold -->
+      <div class="season-card spring">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <g transform="rotate(-12 50 50)">
+            <path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#831843" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/>
+            <path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/>
+          </g>
+        </svg>
+        <div class="season-name">🌸 Spring</div>
+        <div class="season-variant">Rose Gold</div>
+        <div class="sizes">
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">32</span>
+          </div>
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">16</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- SUMMER B: Sunlit -->
+      <div class="season-card summer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <g transform="rotate(-12 50 50)">
+            <path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#166534" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/>
+            <path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/>
+          </g>
+        </svg>
+        <div class="season-name">☀️ Summer</div>
+        <div class="season-variant">Sunlit</div>
+        <div class="sizes">
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">32</span>
+          </div>
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">16</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- AUTUMN C: Sunset -->
+      <div class="season-card autumn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <g transform="rotate(-12 50 50)">
+            <path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/>
+            <path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/>
+          </g>
+        </svg>
+        <div class="season-name">🍂 Autumn</div>
+        <div class="season-variant">Sunset</div>
+        <div class="sizes">
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">32</span>
+          </div>
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">16</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- WINTER C: Ice -->
+      <div class="season-card winter">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <g transform="rotate(-12 50 50)">
+            <path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/>
+            <path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/>
+          </g>
+        </svg>
+        <div class="season-name">❄️ Winter</div>
+        <div class="season-variant">Ice</div>
+        <div class="sizes">
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">32</span>
+          </div>
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">16</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- MIDNIGHT BLOOM B: Rose Bloom -->
+      <div class="season-card midnight">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <g transform="rotate(-12 50 50)">
+            <path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/>
+            <path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/>
+          </g>
+        </svg>
+        <div class="season-name">🌙 Midnight Bloom</div>
+        <div class="season-variant">Rose Bloom</div>
+        <div class="sizes">
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">32</span>
+          </div>
+          <div class="size-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+            <span class="size-label">16</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- BACKGROUND TESTS -->
+  <div class="section">
+    <div class="section-title">Background Tests</div>
+    <div class="bg-tests">
+      
+      <!-- Dark background -->
+      <div class="bg-card dark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span class="bg-label">Dark (#1a1915)</span>
+      </div>
+      
+      <!-- Cream background -->
+      <div class="bg-card cream">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span class="bg-label">Cream (#fefdfb)</span>
+      </div>
+      
+      <!-- Purple background -->
+      <div class="bg-card purple">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span class="bg-label">Purple (#2d1b4e)</span>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- LARGE SHOWCASE -->
+  <div class="section">
+    <div class="section-title">Large Format</div>
+    <div class="inline-row">
+      <div class="inline-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>Spring</span>
+      </div>
+      <div class="inline-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>Summer</span>
+      </div>
+      <div class="inline-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>Autumn</span>
+      </div>
+      <div class="inline-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>Winter</span>
+      </div>
+      <div class="inline-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>Midnight Bloom</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR REFERENCE -->
+  <div class="color-ref">
+    <h4>Color Reference</h4>
+    <div class="color-row">
+      <div class="color-group">
+        <span class="color-group-label">Spring (Rose Gold)</span>
+        <div class="color-swatches">
+          <div class="mini-swatch" style="background: #be185d;" title="#be185d"></div>
+          <div class="mini-swatch" style="background: #9d174d;" title="#9d174d"></div>
+          <div class="mini-swatch" style="background: #831843;" title="#831843"></div>
+          <div class="mini-swatch" style="background: #fecdd3;" title="#fecdd3"></div>
+          <div class="mini-swatch" style="background: #fda4af;" title="#fda4af"></div>
+          <div class="mini-swatch" style="background: #fb7185;" title="#fb7185"></div>
+        </div>
+      </div>
+      <div class="color-group">
+        <span class="color-group-label">Summer (Sunlit)</span>
+        <div class="color-swatches">
+          <div class="mini-swatch" style="background: #15803d;" title="#15803d"></div>
+          <div class="mini-swatch" style="background: #166534;" title="#166534"></div>
+          <div class="mini-swatch" style="background: #14532d;" title="#14532d"></div>
+          <div class="mini-swatch" style="background: #86efac;" title="#86efac"></div>
+          <div class="mini-swatch" style="background: #4ade80;" title="#4ade80"></div>
+          <div class="mini-swatch" style="background: #22c55e;" title="#22c55e"></div>
+        </div>
+      </div>
+      <div class="color-group">
+        <span class="color-group-label">Autumn (Sunset)</span>
+        <div class="color-swatches">
+          <div class="mini-swatch" style="background: #DC2626;" title="#DC2626"></div>
+          <div class="mini-swatch" style="background: #991B1B;" title="#991B1B"></div>
+          <div class="mini-swatch" style="background: #7C2D12;" title="#7C2D12"></div>
+          <div class="mini-swatch" style="background: #FCD34D;" title="#FCD34D"></div>
+          <div class="mini-swatch" style="background: #F59E0B;" title="#F59E0B"></div>
+          <div class="mini-swatch" style="background: #EA580C;" title="#EA580C"></div>
+        </div>
+      </div>
+      <div class="color-group">
+        <span class="color-group-label">Winter (Ice)</span>
+        <div class="color-swatches">
+          <div class="mini-swatch" style="background: #1e3a5f;" title="#1e3a5f"></div>
+          <div class="mini-swatch" style="background: #0f172a;" title="#0f172a"></div>
+          <div class="mini-swatch" style="background: #bfdbfe;" title="#bfdbfe"></div>
+          <div class="mini-swatch" style="background: #93c5fd;" title="#93c5fd"></div>
+          <div class="mini-swatch" style="background: #60a5fa;" title="#60a5fa"></div>
+        </div>
+      </div>
+      <div class="color-group">
+        <span class="color-group-label">Midnight Bloom</span>
+        <div class="color-swatches">
+          <div class="mini-swatch" style="background: #4c1d95;" title="#4c1d95"></div>
+          <div class="mini-swatch" style="background: #3b0764;" title="#3b0764"></div>
+          <div class="mini-swatch" style="background: #1e1b4b;" title="#1e1b4b"></div>
+          <div class="mini-swatch" style="background: #fce7f3;" title="#fce7f3"></div>
+          <div class="mini-swatch" style="background: #f9a8d4;" title="#f9a8d4"></div>
+          <div class="mini-swatch" style="background: #ec4899;" title="#ec4899"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT READY -->
+  <div class="export-section">
+    <h3>🌿 Export Ready</h3>
+    <p style="color: #777267; font-size: 12px; margin-bottom: 24px;">Copy SVG code directly from source, or export from browser</p>
+    <div class="export-grid">
+      <div class="export-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64"><g transform="rotate(-12 50 50)"><path fill="#be185d" d="M50 5 L18 32 L50 18 Z"/><path fill="#fecdd3" d="M50 5 L50 18 L82 32 Z"/><path fill="#9d174d" d="M50 20 L12 50 L50 35 Z"/><path fill="#fda4af" d="M50 20 L50 35 L88 50 Z"/><path fill="#831843" d="M50 38 L18 68 L50 54 Z"/><path fill="#fb7185" d="M50 38 L50 54 L82 68 Z"/><path fill="#5a3f30" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#6f4d39" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>grove-spring.svg</span>
+      </div>
+      <div class="export-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64"><g transform="rotate(-12 50 50)"><path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/><path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/><path fill="#166534" d="M50 20 L12 50 L50 35 Z"/><path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/><path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/><path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/><path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>grove-summer.svg</span>
+      </div>
+      <div class="export-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64"><g transform="rotate(-12 50 50)"><path fill="#DC2626" d="M50 5 L18 32 L50 18 Z"/><path fill="#FCD34D" d="M50 5 L50 18 L82 32 Z"/><path fill="#991B1B" d="M50 20 L12 50 L50 35 Z"/><path fill="#F59E0B" d="M50 20 L50 35 L88 50 Z"/><path fill="#7C2D12" d="M50 38 L18 68 L50 54 Z"/><path fill="#EA580C" d="M50 38 L50 54 L82 68 Z"/><path fill="#5C3317" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#8B4520" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>grove-autumn.svg</span>
+      </div>
+      <div class="export-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64"><g transform="rotate(-12 50 50)"><path fill="#1e3a5f" d="M50 5 L18 32 L50 18 Z"/><path fill="#bfdbfe" d="M50 5 L50 18 L82 32 Z"/><path fill="#1e3a5f" d="M50 20 L12 50 L50 35 Z"/><path fill="#93c5fd" d="M50 20 L50 35 L88 50 Z"/><path fill="#0f172a" d="M50 38 L18 68 L50 54 Z"/><path fill="#60a5fa" d="M50 38 L50 54 L82 68 Z"/><path fill="#1e293b" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#334155" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>grove-winter.svg</span>
+      </div>
+      <div class="export-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64"><g transform="rotate(-12 50 50)"><path fill="#4c1d95" d="M50 5 L18 32 L50 18 Z"/><path fill="#fce7f3" d="M50 5 L50 18 L82 32 Z"/><path fill="#3b0764" d="M50 20 L12 50 L50 35 Z"/><path fill="#f9a8d4" d="M50 20 L50 35 L88 50 Z"/><path fill="#1e1b4b" d="M50 38 L18 68 L50 54 Z"/><path fill="#ec4899" d="M50 38 L50 54 L82 68 Z"/><path fill="#1a1a2e" d="M50 54 L42 58 L46 92 L50 92 Z"/><path fill="#2d1b4e" d="M50 54 L58 58 L54 92 L50 92 Z"/></g></svg>
+        <span>grove-midnight.svg</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

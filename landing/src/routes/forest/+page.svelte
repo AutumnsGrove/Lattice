@@ -18,12 +18,14 @@
 		Cloud,
 		// Color palettes
 		spring, autumn, winter, greens, springBlossoms, autumnReds, bark,
+		midnightBloom,
 		// Type
 		type Season
 	} from '@autumnsgrove/groveengine/ui/nature';
 
-	// Import glass components
+	// Import glass components and color utilities
 	import { Glass } from '@autumnsgrove/groveengine/ui';
+	import { generateTierColors } from '@autumnsgrove/groveengine/ui/utils';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';
@@ -32,6 +34,7 @@
 	const isSpring = $derived($seasonStore === 'spring');
 	const isAutumn = $derived($seasonStore === 'autumn');
 	const isWinter = $derived($seasonStore === 'winter');
+	const isMidnight = $derived($seasonStore === 'midnight');
 
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
@@ -208,6 +211,11 @@
 			if (brightness === 'dark') return [winter.frostedPine, winter.frostedPine];
 			if (brightness === 'mid') return [winter.winterGreen, winter.winterGreen];
 			return [winter.coldSpruce, winter.coldSpruce];
+		} else if (currentSeason === 'midnight') {
+			// Midnight bloom - deep purples and rose tones
+			if (brightness === 'dark') return [midnightBloom.deepPlum, midnightBloom.plum];
+			if (brightness === 'mid') return [midnightBloom.plum, midnightBloom.mauve];
+			return [midnightBloom.mauve, midnightBloom.dustyRose, midnightBloom.blush];
 		} else {
 			if (brightness === 'dark') return [greens.darkForest, greens.deepGreen];
 			if (brightness === 'mid') return [greens.grove, greens.meadow];
@@ -226,6 +234,9 @@
 		} else if (currentSeason === 'winter') {
 			// In winter, cherry trees are bare - return branch/bark colors for trunk rendering
 			return [winter.bareBranch, winter.frostedBark, winter.coldWood];
+		} else if (currentSeason === 'midnight') {
+			// Midnight bloom - roses and warm amber accents for cherry trees
+			return [midnightBloom.dustyRose, midnightBloom.blush, midnightBloom.warmAmber];
 		} else {
 			// Summer - cherry trees have green foliage, not pink!
 			// Return greens based on depth (will be used by getTreeColor)
@@ -247,6 +258,10 @@
 		} else if (isSpring) {
 			// Fresh spring meadow - bright yellow-green hills
 			const colors = [spring.hillDeep, spring.hillMid, spring.hillNear, spring.hillFront];
+			return colors[layerIndex] ?? colors[0];
+		} else if (isMidnight) {
+			// Midnight bloom - deep purple to mauve hills
+			const colors = [midnightBloom.deepPlum, midnightBloom.plum, midnightBloom.mauve, midnightBloom.dustyRose];
 			return colors[layerIndex] ?? colors[0];
 		} else {
 			// Summer - rich deep greens
@@ -544,7 +559,7 @@
 	image="https://grove.place/api/og/forest"
 />
 
-<main class="min-h-screen flex flex-col transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-slate-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
+<main class="min-h-screen flex flex-col transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-indigo-950' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-slate-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-slate-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950'}">
 	<Header />
 
 	<article class="flex-1 relative overflow-hidden">
@@ -552,10 +567,20 @@
 		<div class="absolute bottom-6 right-6 z-40">
 			<button
 				onclick={toggleSeason}
-				class="p-3 rounded-full bg-white/70 dark:bg-emerald-950/35 backdrop-blur-md shadow-lg border border-white/30 dark:border-emerald-800/25 hover:scale-110 hover:bg-white/80 dark:hover:bg-emerald-950/45 transition-all duration-200"
-				aria-label={isSpring ? 'Switch to summer' : isAutumn ? 'Switch to winter' : isWinter ? 'Switch to spring' : 'Switch to autumn'}
+				class="p-3 rounded-full backdrop-blur-md shadow-lg border hover:scale-110 transition-all duration-200 {isMidnight
+					? 'bg-purple-950/70 border-purple-500/30 hover:bg-purple-900/70'
+					: 'bg-white/70 dark:bg-emerald-950/35 border-white/30 dark:border-emerald-800/25 hover:bg-white/80 dark:hover:bg-emerald-950/45'}"
+				aria-label={isMidnight ? 'Exit midnight mode' : isSpring ? 'Switch to summer' : isAutumn ? 'Switch to winter' : isWinter ? 'Switch to spring' : 'Switch to autumn'}
 			>
-				{#if isSpring}
+				{#if isMidnight}
+					<!-- Glowing moon with stars - midnight mode -->
+					<svg class="w-6 h-6 text-purple-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+						<circle cx="19" cy="5" r="0.5" fill="currentColor" />
+						<circle cx="21" cy="8" r="0.3" fill="currentColor" />
+						<circle cx="17" cy="3" r="0.4" fill="currentColor" />
+					</svg>
+				{:else if isSpring}
 					<!-- Cherry blossom icon - spring -->
 					<svg class="w-6 h-6 text-pink-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="3" />
@@ -603,7 +628,7 @@
 		</div>
 
 		<!-- Sky background gradient -->
-		<div class="absolute inset-0 transition-colors duration-1000 {isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
+		<div class="absolute inset-0 transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-900/60 via-indigo-900/30 to-transparent' : isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-slate-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
 		<!-- Clouds (decorative) - floating across the sky -->
 		<div class="absolute top-6 left-0 opacity-70" aria-hidden="true">
@@ -733,7 +758,7 @@
 						d={hill.fillPath}
 						class="transition-colors duration-1000"
 						fill={getHillColor(i)}
-						fill-opacity={isWinter ? 0.5 : isAutumn ? 0.35 : 0.4}
+						fill-opacity={isMidnight ? 0.6 : isWinter ? 0.5 : isAutumn ? 0.35 : 0.4}
 					/>
 				</svg>
 			{/each}
@@ -754,8 +779,17 @@
 						filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 					"
 				>
+					{@const tierColors = generateTierColors(tree.color)}
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
+						<Logo
+							class="w-full h-full"
+							tier1={tierColors.tier1}
+							tier2={tierColors.tier2}
+							tier3={tierColors.tier3}
+							trunk={tierColors.trunk}
+							season={$seasonStore}
+							animate
+						/>
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
 					{:else if tree.treeType === 'aspen'}
