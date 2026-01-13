@@ -6,19 +6,18 @@
   GroveDivider - A decorative divider featuring alternating Grove logos
 
   Props:
-    count     - Number of logos (default: 7)
-    size      - 'xs' | 'sm' | 'md' | 'lg' (default: 'sm')
-    glass     - Use GlassLogo instead of regular Logo
-    variant   - Glass variant: 'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'
-    vertical  - Display vertically instead of horizontally
-    breathing - Enable breathing animation
-    monochrome - Trunk matches foliage color
-    color     - Custom color override (regular Logo only)
-    season    - Override season (uses seasonStore by default)
-    gap       - Tailwind gap class (default: 'gap-1.5')
-    spacing   - Gap in pixels or rem (overrides gap if provided)
-    rotation  - Logo rotation mode: 'default' | 'left-right' | 'up-down' (default: auto based on orientation)
-    class     - Additional CSS classes
+    count           - Number of logos (default: 7)
+    size            - 'xs' | 'sm' | 'md' | 'lg' (default: 'sm')
+    glass           - Use GlassLogo instead of regular Logo
+    variant         - Glass variant: 'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'
+    vertical        - Display vertically instead of horizontally
+    monochromeTrunk - Trunk matches foliage color
+    monochromeColor - Custom color override (applies to all tiers)
+    season          - Override season (uses seasonStore by default)
+    gap             - Tailwind gap class (default: 'gap-1.5')
+    spacing         - Gap in pixels or rem (overrides gap if provided)
+    rotation        - Logo rotation mode: 'default' | 'left-right' | 'up-down' (default: auto based on orientation)
+    class           - Additional CSS classes
 -->
 <script lang="ts">
 	import Logo from '../ui/Logo.svelte';
@@ -48,12 +47,10 @@
 		glass?: boolean;
 		/** Glass variant (only applies when glass=true) */
 		variant?: GlassVariant;
-		/** Add breathing animation to logos */
-		breathing?: boolean;
-		/** Monochrome mode - trunk matches foliage color */
-		monochrome?: boolean;
-		/** Custom color override (for regular Logo) */
-		color?: string;
+		/** Make trunk match foliage colors */
+		monochromeTrunk?: boolean;
+		/** Custom color override (applies to all tiers) */
+		monochromeColor?: string;
 		/** Display vertically instead of horizontally */
 		vertical?: boolean;
 	}
@@ -68,9 +65,8 @@
 		rotation = 'default',
 		glass = false,
 		variant = 'default',
-		breathing = false,
-		monochrome = false,
-		color,
+		monochromeTrunk = false,
+		monochromeColor,
 		vertical = false
 	}: Props = $props();
 
@@ -121,15 +117,15 @@
 					class={sizeClasses[size]}
 					season={activeSeason}
 					{variant}
-					{breathing}
-					{monochrome}
+					{monochromeColor}
+					{monochromeTrunk}
 				/>
 			{:else}
 				<Logo
 					class={sizeClasses[size]}
 					season={activeSeason}
-					{color}
-					breathing={breathing}
+					{monochromeColor}
+					{monochromeTrunk}
 				/>
 			{/if}
 		</div>
