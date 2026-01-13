@@ -765,6 +765,7 @@
 
 			<!-- Trees (rendered separately for proper z-ordering) -->
 			{#each forestTrees as tree (tree.id)}
+				{@const tierColors = generateTierColors(tree.color)}
 				<div
 					class="absolute transition-all duration-300 hover:scale-110 pointer-events-auto"
 					style="
@@ -779,7 +780,6 @@
 						filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 					"
 				>
-					{@const tierColors = generateTierColors(tree.color)}
 					{#if tree.treeType === 'logo'}
 						<Logo
 							class="w-full h-full"
