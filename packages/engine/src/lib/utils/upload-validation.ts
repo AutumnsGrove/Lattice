@@ -112,6 +112,10 @@ export function validateFileSignature(buffer: Uint8Array, mimeType: AllowedImage
   const signatures = FILE_SIGNATURES[mimeType];
   if (!signatures) return false;
 
+  // Calculate minimum buffer length needed for this MIME type's signatures
+  const minLength = Math.max(...signatures.map((sig) => sig.length));
+  if (buffer.length < minLength) return false;
+
   const matchesSignature = signatures.some((sig) =>
     sig.every((byte, i) => buffer[i] === byte)
   );
@@ -166,6 +170,29 @@ export function validateImageFile(file: File): string | null {
 }
 
 /**
+ * Calculate the minimum header size needed for all signature validations.
+ * This accounts for:
+ * - PNG: 8 bytes
+ * - JPEG XL container: 8 bytes
+ * - GIF: 6 bytes
+ * - WebP: 4 bytes header + 8 bytes to reach WEBP marker = 12 bytes total
+ */
+function getRequiredHeaderSize(): number {
+  // WebP needs 12 bytes (RIFF header + offset to WEBP marker)
+  const webpSize = 12;
+
+  // Get max signature length across all types
+  const maxSignatureLength = Math.max(
+    ...Object.values(FILE_SIGNATURES).flatMap((sigs) => sigs.map((sig) => sig.length))
+  );
+
+  return Math.max(maxSignatureLength, webpSize);
+}
+
+/** Cached header size for performance */
+const REQUIRED_HEADER_SIZE = getRequiredHeaderSize();
+
+/**
  * Validate file with magic byte checking (async, reads file buffer).
  * Returns null if valid, or an error message if invalid.
  */
@@ -175,8 +202,7 @@ export async function validateImageFileDeep(file: File): Promise<string | null> 
   if (basicError) return basicError;
 
   // Read file header for magic byte validation
-  const headerSize = 16; // Enough for all our signatures
-  const slice = file.slice(0, headerSize);
+  const slice = file.slice(0, REQUIRED_HEADER_SIZE);
   const buffer = new Uint8Array(await slice.arrayBuffer());
 
   if (!validateFileSignature(buffer, file.type as AllowedImageType)) {

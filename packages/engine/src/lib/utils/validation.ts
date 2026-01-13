@@ -2,40 +2,27 @@
  * Security validation utilities for file uploads and input sanitization
  */
 
-/** Supported image MIME types for file signature validation */
-type ImageMimeType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' | 'image/jxl';
-
-// File signature database for magic byte validation
-const FILE_SIGNATURES: Record<ImageMimeType, number[][]> = {
-  'image/jpeg': [
-    [0xFF, 0xD8, 0xFF, 0xE0], // JPEG/JFIF
-    [0xFF, 0xD8, 0xFF, 0xE1], // JPEG/Exif
-    [0xFF, 0xD8, 0xFF, 0xE8]  // JPEG/SPIFF
-  ],
-  'image/png': [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]],
-  'image/gif': [
-    [0x47, 0x49, 0x46, 0x38, 0x37, 0x61], // GIF87a
-    [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]  // GIF89a
-  ],
-  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF (WebP container)
-  'image/jxl': [
-    [0xFF, 0x0A], // JPEG XL naked codestream
-    [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20] // JPEG XL container
-  ]
-};
+import {
+  FILE_SIGNATURES,
+  validateFileSignature as validateSignature,
+  type AllowedImageType,
+} from './upload-validation.js';
 
 /**
- * Validates file signature (magic bytes) to prevent MIME type spoofing
+ * Validates file signature (magic bytes) to prevent MIME type spoofing.
+ *
+ * @deprecated Use `validateImageFileDeep` from `upload-validation.ts` instead,
+ * which provides more comprehensive validation including extension checks.
  */
 export async function validateFileSignature(file: File, expectedType: string): Promise<boolean> {
-  const buffer = new Uint8Array(await file.arrayBuffer());
-  const signatures = FILE_SIGNATURES[expectedType as ImageMimeType];
+  // Read enough bytes for the longest signature (PNG: 8 bytes, but WebP needs 12 for marker check)
+  const headerSize = 16;
+  const slice = file.slice(0, headerSize);
+  const buffer = new Uint8Array(await slice.arrayBuffer());
 
-  if (!signatures) return false;
-
-  return signatures.some((sig) =>
-    sig.every((byte, i) => buffer[i] === byte)
-  );
+  // Delegate to the centralized validation function
+  if (!FILE_SIGNATURES[expectedType as AllowedImageType]) return false;
+  return validateSignature(buffer, expectedType as AllowedImageType);
 }
 
 // Dangerous object keys that can lead to prototype pollution
