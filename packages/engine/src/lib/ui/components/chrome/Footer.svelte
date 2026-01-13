@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ThemeToggle from './ThemeToggle.svelte';
-	import { Logo, GroveDivider } from '../nature';
+	import { Logo } from '../ui';
+	import { GroveDivider } from '../nature';
 	import {
 		Github,
 		ExternalLink,

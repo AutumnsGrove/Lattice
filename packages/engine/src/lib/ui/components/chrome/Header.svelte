@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Logo } from '../nature';
+	import { Logo } from '../ui';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season';
 	import { Menu } from 'lucide-svelte';
-	import type { NavItem, MaxWidth, Season } from './types';
+	import type { NavItem, MaxWidth } from './types';
+	import type { Season } from '../ui/Logo.svelte';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
 
@@ -54,14 +55,14 @@
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
 			<!-- Logo icon - clickable to toggle season -->
-			<button
+			<Logo
+				class="w-6 h-6"
+				season={season || $seasonStore}
+				interactive
 				onclick={handleLogoClick}
-				class="flex-shrink-0 transition-transform hover:scale-110 active:scale-95"
-				aria-label="Toggle season theme"
 				title="Click to change season"
-			>
-				<Logo class="w-6 h-6" season={season || $seasonStore} />
-			</button>
+				ariaLabel="Toggle season theme"
+			/>
 
 			<!-- Brand title or "Grove" text - home link, hidden on mobile -->
 			{#if brandTitle}

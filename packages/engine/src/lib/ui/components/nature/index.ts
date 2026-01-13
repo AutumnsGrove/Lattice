@@ -17,35 +17,38 @@
  * ```
  */
 
-// Logo - Grove's tree-star logo
-export { default as Logo } from './Logo.svelte';
+// Logo - Re-export from ui module (new tree design)
+export { Logo } from "../ui";
+
+// LogoArchive - Original asterisk logo with nature animations (deprecated)
+export { default as LogoArchive } from "./LogoArchive.svelte";
 
 // GroveDivider - Decorative divider with alternating logos
-export { default as GroveDivider } from './GroveDivider.svelte';
+export { default as GroveDivider } from "./GroveDivider.svelte";
 
 // Palette - Seasonal color system
-export * from './palette';
+export * from "./palette";
 
 // Trees
-export * from './trees';
+export * from "./trees";
 
 // Botanical elements
-export * from './botanical';
+export * from "./botanical";
 
 // Creatures
-export * from './creatures';
+export * from "./creatures";
 
 // Ground elements
-export * from './ground';
+export * from "./ground";
 
 // Sky elements
-export * from './sky';
+export * from "./sky";
 
 // Structural elements
-export * from './structural';
+export * from "./structural";
 
 // Water elements
-export * from './water';
+export * from "./water";
 
 // Weather effects
-export * from './weather';
+export * from "./weather";

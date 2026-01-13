@@ -9,6 +9,10 @@
 		GlassNavbar,
 		GlassOverlay,
 		GlassLogo,
+		GlassLogoArchive,
+		// Logo components
+		Logo,
+		LogoArchive,
 		// Basic UI
 		Button,
 		Card,
@@ -58,7 +62,7 @@
 	let dialogOpen = $state(false);
 	let scoreValue = $state(75);
 	let creditValue = $state(42);
-	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
+	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter' | 'midnight'>('summer');
 	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('surface');
 	let glassIntensity = $state<'none' | 'light' | 'medium' | 'strong'>('medium');
 	let carouselVariant = $state<'default' | 'frosted' | 'minimal'>('default');
@@ -85,7 +89,7 @@
 		setTimeout(() => confirmResult = null, 3000);
 	}
 
-	const seasons = ['spring', 'summer', 'autumn', 'winter'] as const;
+	const seasons = ['spring', 'summer', 'autumn', 'winter', 'midnight'] as const;
 	const glassVariants = ['surface', 'overlay', 'card', 'tint', 'accent', 'muted'] as const;
 	const glassIntensities = ['none', 'light', 'medium', 'strong'] as const;
 	const carouselVariants = ['default', 'frosted', 'minimal'] as const;
@@ -256,9 +260,83 @@
 				{/if}
 			</GlassCard>
 
-			<!-- GlassLogo -->
+			<!-- Logo (New Tree Design) -->
+			<GlassCard title="Logo" variant="frosted">
+				<p class="text-sm text-bark-600 mb-4">The new Grove tree logo — 3-tier branches with seasonal palettes</p>
+				<div class="space-y-6">
+					<div class="flex flex-wrap gap-2 mb-4">
+						<span class="text-sm text-bark-600">Season:</span>
+						{#each seasons as s}
+							<button
+								class="px-3 py-1 text-sm rounded-full transition-colors {logoSeason === s ? 'bg-grove-600 text-white' : 'bg-bark-100 text-bark-700 hover:bg-bark-200'}"
+								onclick={() => logoSeason = s}
+							>{s}</button>
+						{/each}
+					</div>
+					<!-- Size Variants -->
+					<div>
+						<p class="text-xs text-bark-500 mb-3">Sizes: xs → 3xl</p>
+						<div class="flex justify-center gap-6 items-end">
+							<div class="text-center">
+								<Logo size="xs" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">xs (16px)</p>
+							</div>
+							<div class="text-center">
+								<Logo size="sm" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">sm (24px)</p>
+							</div>
+							<div class="text-center">
+								<Logo size="md" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">md (32px)</p>
+							</div>
+							<div class="text-center">
+								<Logo size="lg" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">lg (48px)</p>
+							</div>
+							<div class="text-center">
+								<Logo size="xl" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">xl (64px)</p>
+							</div>
+							<div class="text-center">
+								<Logo size="2xl" season={logoSeason} />
+								<p class="text-xs text-bark-500 mt-2">2xl (96px)</p>
+							</div>
+						</div>
+					</div>
+					<!-- Features -->
+					<div>
+						<p class="text-xs text-bark-500 mb-3">Features: breathing, shadow, interactive</p>
+						<div class="flex justify-center gap-8 items-end">
+							<div class="text-center">
+								<Logo size="lg" season={logoSeason} breathing />
+								<p class="text-xs text-bark-500 mt-2">Breathing</p>
+							</div>
+							<div class="text-center">
+								<Logo size="lg" season={logoSeason} shadow />
+								<p class="text-xs text-bark-500 mt-2">Shadow</p>
+							</div>
+							<div class="text-center">
+								<Logo
+									size="lg"
+									season={logoSeason}
+									interactive
+									onclick={() => alert('Logo clicked!')}
+									title="Click me!"
+								/>
+								<p class="text-xs text-bark-500 mt-2">Interactive</p>
+							</div>
+							<div class="text-center">
+								<Logo size="lg" season={logoSeason} breathing shadow />
+								<p class="text-xs text-bark-500 mt-2">All effects</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</GlassCard>
+
+			<!-- GlassLogo (New Tree with Glass Effects) -->
 			<GlassCard title="GlassLogo" variant="frosted">
-				<p class="text-sm text-bark-600 mb-4">Animated Grove logo with seasonal color palettes</p>
+				<p class="text-sm text-bark-600 mb-4">The tree logo with glassmorphism effects and seasonal accents</p>
 				<div class="space-y-4">
 					<div class="flex flex-wrap gap-2 mb-4">
 						<span class="text-sm text-bark-600">Season:</span>
@@ -279,9 +357,64 @@
 							<p class="text-xs text-bark-500 mt-2">Frosted</p>
 						</div>
 						<div class="text-center">
+							<GlassLogo size={80} season={logoSeason} variant="accent" />
+							<p class="text-xs text-bark-500 mt-2">Accent</p>
+						</div>
+						<div class="text-center">
+							<GlassLogo size={80} season={logoSeason} variant="dark" />
+							<p class="text-xs text-bark-500 mt-2">Dark</p>
+						</div>
+						<div class="text-center">
 							<GlassLogo size={80} season={logoSeason} variant="ethereal" breathing />
 							<p class="text-xs text-bark-500 mt-2">Ethereal + Breathing</p>
 						</div>
+					</div>
+					<p class="text-xs text-bark-500 text-center mt-2">Try winter for snow caps or spring for cherry blossoms!</p>
+				</div>
+			</GlassCard>
+
+			<!-- Archive: LogoArchive (Original Asterisk) -->
+			<GlassCard title="LogoArchive" variant="default">
+				<div class="flex items-center gap-2 mb-2">
+					<Badge variant="secondary">Archived</Badge>
+					<span class="text-xs text-bark-500">Original asterisk design</span>
+				</div>
+				<p class="text-sm text-bark-600 mb-4">The original Grove asterisk logo — preserved for backwards compatibility</p>
+				<div class="flex justify-center gap-8 items-end">
+					<div class="text-center">
+						<LogoArchive size={48} season={logoSeason} />
+						<p class="text-xs text-bark-500 mt-2">Static</p>
+					</div>
+					<div class="text-center">
+						<LogoArchive size={48} season={logoSeason} breathing />
+						<p class="text-xs text-bark-500 mt-2">Breathing</p>
+					</div>
+					<div class="text-center">
+						<LogoArchive size={48} season={logoSeason} animate />
+						<p class="text-xs text-bark-500 mt-2">Animate</p>
+					</div>
+				</div>
+			</GlassCard>
+
+			<!-- Archive: GlassLogoArchive (Original Glass Asterisk) -->
+			<GlassCard title="GlassLogoArchive" variant="default">
+				<div class="flex items-center gap-2 mb-2">
+					<Badge variant="secondary">Archived</Badge>
+					<span class="text-xs text-bark-500">Original glass asterisk design</span>
+				</div>
+				<p class="text-sm text-bark-600 mb-4">The original asterisk logo with glass effects — preserved for backwards compatibility</p>
+				<div class="flex justify-center gap-8 items-end">
+					<div class="text-center">
+						<GlassLogoArchive size={64} season={logoSeason} />
+						<p class="text-xs text-bark-500 mt-2">Default</p>
+					</div>
+					<div class="text-center">
+						<GlassLogoArchive size={64} season={logoSeason} variant="frosted" />
+						<p class="text-xs text-bark-500 mt-2">Frosted</p>
+					</div>
+					<div class="text-center">
+						<GlassLogoArchive size={64} season={logoSeason} variant="ethereal" breathing />
+						<p class="text-xs text-bark-500 mt-2">Ethereal + Breathing</p>
 					</div>
 				</div>
 			</GlassCard>
