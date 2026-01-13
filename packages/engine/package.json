@@ -177,6 +177,10 @@
     "./groveauth": {
       "types": "./dist/groveauth/index.d.ts",
       "default": "./dist/groveauth/index.js"
+    },
+    "./feature-flags": {
+      "types": "./dist/feature-flags/index.d.ts",
+      "default": "./dist/feature-flags/index.js"
     }
   },
   "files": [

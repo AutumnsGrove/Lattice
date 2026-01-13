@@ -23,6 +23,15 @@ binding = "CACHE_KV"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
 # =============================================================================
+# KV Namespace - For feature flags caching
+# =============================================================================
+# Create with: npx wrangler kv:namespace create FLAGS_KV
+# Then update the ID below with the actual value from the creation output
+[[kv_namespaces]]
+binding = "FLAGS_KV"
+id = "PLACEHOLDER_CREATE_WITH_WRANGLER"
+
+# =============================================================================
 # R2 Bucket - For image and media storage
 # =============================================================================
 [[r2_buckets]]
