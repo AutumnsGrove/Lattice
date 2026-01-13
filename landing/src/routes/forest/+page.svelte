@@ -343,7 +343,7 @@
 					aspectRatio,
 					treeType,
 					trunkColor: pickRandom([bark.bark, bark.warmBark, bark.lightBark]),
-					rotation: (Math.random() - 0.5) * 10,
+					rotation: 0,
 					slopeRotation: point.angle,
 					opacity: hill.opacity,
 					zIndex: hill.zIndex,
@@ -775,7 +775,7 @@
 						height: {tree.size * tree.aspectRatio}px;
 						opacity: {tree.opacity};
 						z-index: {tree.zIndex + 10};
-						transform: translateX(-50%) translateY(-97%) rotate({tree.rotation + tree.slopeRotation * 0.12}deg);
+						transform: translateX(-50%) translateY(-97%) rotate({tree.rotation}deg);
 						transform-origin: bottom center;
 						filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 					"
