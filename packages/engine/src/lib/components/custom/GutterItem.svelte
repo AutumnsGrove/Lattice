@@ -63,7 +63,7 @@
 		{#if item.images?.length > 0}
 			<div class="gutter-gallery">
 				<GlassCarousel
-					images={item.images.map(img => ({ url: img.url, alt: img.alt || 'Gallery image', caption: img.caption }))}
+					images={item.images.map((/** @type {{url?: string, alt?: string, caption?: string}} */ img) => ({ url: img.url || '', alt: img.alt || 'Gallery image', caption: img.caption || '' }))}
 					variant="frosted"
 					showArrows={false}
 					class="gutter-carousel"
