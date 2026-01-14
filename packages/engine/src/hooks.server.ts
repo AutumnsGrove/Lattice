@@ -179,11 +179,24 @@ async function getTenantConfig(
 
     // Map D1 result to TenantConfig format
     const tier = (tenant.plan || "seedling") as TenantConfig["tier"];
+
+    // Parse theme safely - handle both JSON objects and legacy plain strings
+    let parsedTheme = null;
+    if (tenant.theme) {
+      try {
+        // Try to parse as JSON (for structured theme config)
+        parsedTheme = JSON.parse(tenant.theme);
+      } catch {
+        // Legacy plain string like "default" - treat as null (use default theme)
+        parsedTheme = null;
+      }
+    }
+
     return {
       id: tenant.id,
       subdomain: tenant.subdomain,
       displayName: tenant.display_name,
-      theme: tenant.theme ? JSON.parse(tenant.theme) : null,
+      theme: parsedTheme,
       tier,
       ownerId: tenant.email,
       limits: getTierLimits(tier),
