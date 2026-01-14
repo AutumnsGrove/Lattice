@@ -37,17 +37,94 @@
 - [ ] Verify webhook fires and tenant is created
 - [ ] Check LS Dashboard for the subscription
 
-### 2. Optional: Custom Domain for Checkout
+### 2. 🌱 Plant Walkthrough Improvements (Priority!)
+
+> **Spec:** `docs/specs/plant-spec.md`
+> **Location:** `plant/src/routes/`
+> **Status:** Core flow complete, needs polish and missing features
+
+#### Currently Implemented ✅
+- Profile form with username/color/interests
+- Username validation via API (availability + format)
+- Plan selection with all 4 tiers + billing toggle
+- Checkout integration (Lemon Squeezy)
+- Interactive tour (8 steps, swipe/keyboard navigation)
+- Tenant provisioning on webhook success
+- Success page with confetti animation
+- Auth integration via Heartwood
+- Email templates (welcome, confirmation)
+
+#### Partially Implemented 🚧
+
+**Email Verification Flow**
+- [ ] Currently redirects on success but doesn't enforce verified email
+- [ ] Add email verification gate before plan selection
+- [ ] Send verification code via Resend
+- [ ] Create `/verify-email` page with code input
+
+**Onboarding Checklist**
+- [ ] Checklist items exist in tour but aren't persisted
+- [ ] Add `onboarding_checklist` table to track completion
+- [ ] Create migration: `020_onboarding_checklist.sql`
+- [ ] Show checklist progress in success page
+- [ ] Add checklist widget to admin dashboard
+
+**Follow-up Email Scheduling**
+- [ ] Email templates exist but scheduling not wired
+- [ ] Wire up Resend scheduled sends (day 1, 3, 7, 30)
+- [ ] Add email_queue table or use Resend scheduling API
+- [ ] Track email sent status per user
+
+#### Not Yet Implemented ❌
+
+**Tour Screenshots (HUMAN TASK)**
+> See detailed task list at "Tour Walkthrough Screenshots" section below
+
+- [ ] `homepage.png` - Example blog homepage
+- [ ] `post.png` - Blog post with markdown content
+- [ ] `vines.png` - Post with margin notes visible
+- [ ] `admin.png` - Admin dashboard overview
+- [ ] `editor.png` - Markdown editor with preview
+- [ ] `autumnsgrove.png` - autumnsgrove.com as example
+
+**Passkey Signup (Future)**
+- [ ] Spec mentions passkey as signup option
+- [ ] Currently OAuth-only via Heartwood
+- [ ] Add WebAuthn passkey registration flow
+- [ ] Store passkey credentials in Heartwood
+- [ ] Priority: Low (nice-to-have, not blocking)
+
+**Reserved Usernames Seed Data**
+- [ ] Create `reserved_usernames` table seed file
+- [ ] Add common reserved names: admin, support, help, api, www, etc.
+- [ ] Add Grove service names: heartwood, ivy, meadow, porch, etc.
+- [ ] Validation already checks table, just needs data
+
+**Analytics / Funnel Tracking**
+- [ ] Track funnel: OAuth → Profile → Plans → Checkout → Success
+- [ ] Add `acquisition_events` tracking (ties into Vista)
+- [ ] Track drop-off points for optimization
+- [ ] Add `?ref=` param parsing for attribution
+
+#### Quick Wins (15-30 min each)
+
+- [ ] **Add loading states** to form submissions (profile, checkout)
+- [ ] **Improve error messages** - currently generic, make contextual
+- [ ] **Add "back" navigation** - currently can't go profile → plans easily
+- [ ] **Tour mobile polish** - swipe hints, better touch targets
+- [ ] **Success page CTA** - add "Go to your blog" button with tenant URL
+
+### 3. Optional: Custom Domain for Checkout
 - [ ] Add `payments.grove.place` subdomain in Cloudflare DNS
 - [ ] Configure custom domain in LS Dashboard (Settings → Store)
 - [ ] Makes checkout feel more branded/trustworthy
 
-### 3. Optional: Product Assets
+### 4. Optional: Product Assets
 - [ ] Create tree imagery for each tier (seedling → sapling → oak → evergreen)
 - [ ] Upload to LS product images
 - [ ] Consider using in checkout flow and emails
 
-### 4. Cleanup (Low Priority)
+### 5. Cleanup (Low Priority)
 - [ ] Search codebase for remaining "Stripe" references in user-facing text
 - [ ] Update any marketing copy that mentions Stripe
 - [ ] Run Clearing DB migration when status page is set up
