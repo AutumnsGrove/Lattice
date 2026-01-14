@@ -71,92 +71,89 @@ interface OpenRouterKeyResponse {
  * Users can use ANY OpenRouter model, but these are recommended defaults
  */
 export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = {
-  // Anthropic (via OpenRouter)
-  "anthropic/claude-3.5-haiku": {
-    name: "Claude 3.5 Haiku",
+  // DeepSeek - DEFAULT (Best value for code summarization)
+  "deepseek/deepseek-v3.2": {
+    name: "DeepSeek V3.2",
+    quality: "highest",
+    speed: "fast",
+    inputCostPer1M: 0.25,
+    outputCostPer1M: 0.38,
+  },
+
+  // Kimi (Great reasoning, huge context)
+  "moonshotai/kimi-k2-0905": {
+    name: "Kimi K2",
+    quality: "highest",
+    speed: "fast",
+    inputCostPer1M: 0.39,
+    outputCostPer1M: 1.9,
+  },
+
+  // MiniMax (Fast, good quality)
+  "minimax/minimax-m2.1": {
+    name: "MiniMax M2.1",
     quality: "high",
     speed: "fastest",
+    inputCostPer1M: 0.27,
+    outputCostPer1M: 1.12,
+  },
+
+  // Anthropic (Premium quality)
+  "anthropic/claude-haiku-4.5": {
+    name: "Claude Haiku 4.5",
+    quality: "highest",
+    speed: "fast",
     inputCostPer1M: 1.0,
     outputCostPer1M: 5.0,
   },
-  "anthropic/claude-3.5-sonnet": {
-    name: "Claude 3.5 Sonnet",
-    quality: "highest",
+
+  // OpenAI OSS (Ultra budget)
+  "openai/gpt-oss-120b": {
+    name: "GPT-OSS 120B",
+    quality: "high",
     speed: "fast",
-    inputCostPer1M: 3.0,
-    outputCostPer1M: 15.0,
+    inputCostPer1M: 0.04,
+    outputCostPer1M: 0.19,
   },
 
-  // OpenAI (via OpenRouter)
-  "openai/gpt-4o-mini": {
-    name: "GPT-4o Mini",
+  // Qwen (Large context, budget friendly)
+  "qwen/qwen3-235b-a22b-2507": {
+    name: "Qwen3 235B",
     quality: "high",
-    speed: "fastest",
-    inputCostPer1M: 0.15,
-    outputCostPer1M: 0.6,
-  },
-  "openai/gpt-4o": {
-    name: "GPT-4o",
-    quality: "highest",
-    speed: "fast",
-    inputCostPer1M: 2.5,
-    outputCostPer1M: 10.0,
-  },
-
-  // Google (via OpenRouter)
-  "google/gemini-2.0-flash-001": {
-    name: "Gemini 2.0 Flash",
-    quality: "high",
-    speed: "fastest",
-    inputCostPer1M: 0.1,
-    outputCostPer1M: 0.4,
-  },
-  "google/gemini-pro-1.5": {
-    name: "Gemini Pro 1.5",
-    quality: "highest",
     speed: "medium",
-    inputCostPer1M: 1.25,
-    outputCostPer1M: 5.0,
+    inputCostPer1M: 0.07,
+    outputCostPer1M: 0.46,
   },
 
-  // Meta Llama (via OpenRouter)
+  // Meta Llama 3.3 (Open source, reliable)
   "meta-llama/llama-3.3-70b-instruct": {
     name: "Llama 3.3 70B",
     quality: "high",
     speed: "medium",
+    inputCostPer1M: 0.1,
+    outputCostPer1M: 0.32,
+  },
+
+  // GLM (Good multilingual)
+  "z-ai/glm-4.7": {
+    name: "GLM 4.7",
+    quality: "high",
+    speed: "fast",
     inputCostPer1M: 0.4,
-    outputCostPer1M: 0.4,
+    outputCostPer1M: 1.5,
   },
 
-  // DeepSeek (via OpenRouter)
-  "deepseek/deepseek-chat": {
-    name: "DeepSeek V3",
-    quality: "high",
-    speed: "fast",
-    inputCostPer1M: 0.14,
-    outputCostPer1M: 0.28,
-  },
-
-  // Mistral (via OpenRouter)
-  "mistralai/mistral-small-24b": {
-    name: "Mistral Small 24B",
-    quality: "high",
-    speed: "fast",
-    inputCostPer1M: 0.2,
-    outputCostPer1M: 0.6,
-  },
-
-  // Qwen (via OpenRouter)
-  "qwen/qwen-2.5-72b-instruct": {
-    name: "Qwen 2.5 72B",
+  // Meta Llama 4 Maverick (Massive 1M context)
+  "meta-llama/llama-4-maverick": {
+    name: "Llama 4 Maverick",
     quality: "high",
     speed: "medium",
-    inputCostPer1M: 0.35,
-    outputCostPer1M: 0.4,
+    inputCostPer1M: 0.15,
+    outputCostPer1M: 0.6,
   },
 };
 
-export const DEFAULT_OPENROUTER_MODEL = "anthropic/claude-3.5-haiku";
+export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v3.2";
 
 // =============================================================================
 // Utilities

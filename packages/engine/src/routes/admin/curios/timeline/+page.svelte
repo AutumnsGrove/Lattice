@@ -25,7 +25,7 @@
   let githubUsername = $state(data.config?.githubUsername ?? "");
   let githubToken = $state("");
   let openrouterKey = $state("");
-  let openrouterModel = $state(data.config?.openrouterModel ?? "anthropic/claude-3.5-haiku");
+  let openrouterModel = $state(data.config?.openrouterModel ?? "deepseek/deepseek-v3.2");
   let voicePreset = $state(data.config?.voicePreset ?? "professional");
   let customSystemPrompt = $state(data.config?.customSystemPrompt ?? "");
   let customSummaryInstructions = $state(data.config?.customSummaryInstructions ?? "");

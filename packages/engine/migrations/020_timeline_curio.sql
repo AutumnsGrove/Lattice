@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS timeline_curio_config (
     github_username TEXT,
     github_token_encrypted TEXT,      -- Encrypted at rest
     openrouter_key_encrypted TEXT,    -- Encrypted at rest
-    openrouter_model TEXT DEFAULT 'anthropic/claude-3.5-haiku',
+    openrouter_model TEXT DEFAULT 'deepseek/deepseek-v3.2',
     voice_preset TEXT DEFAULT 'professional',
     custom_system_prompt TEXT,        -- NULL unless voice_preset = 'custom'
     custom_summary_instructions TEXT, -- Additional instructions for summary style
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS timeline_ai_usage (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     tenant_id TEXT NOT NULL,
     used_at INTEGER NOT NULL,         -- Unix timestamp
-    model TEXT NOT NULL,              -- Full model string (e.g., "anthropic/claude-3.5-haiku")
+    model TEXT NOT NULL,              -- Full model string (e.g., "deepseek/deepseek-v3.2")
     input_tokens INTEGER DEFAULT 0,
     output_tokens INTEGER DEFAULT 0,
     cost_usd REAL DEFAULT 0,          -- Cost in USD
@@ -127,4 +127,4 @@ ON timeline_ai_usage(tenant_id, used_at DESC);
 -- 5. All tables cascade delete when tenant is removed
 --
 -- Voice presets: professional, quest, casual, poetic, minimal, custom
--- Default model: anthropic/claude-3.5-haiku via OpenRouter
+-- Default model: deepseek/deepseek-v3.2 via OpenRouter

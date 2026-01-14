@@ -82,6 +82,120 @@ Journey Curio is the **second Developer Curio** for Grove. It tracks a GitHub re
 
 ---
 
+## Tag-Walking Analysis Strategy
+
+The magic of Journey is seeing the **historical progression** across ALL version tags. This requires walking through every tag, not just analyzing the latest code.
+
+### The Algorithm
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  1. FULL CLONE                                                  │
+│     git clone --mirror https://github.com/user/repo             │
+│     (includes ALL history and tags)                             │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  2. DISCOVER TAGS                                               │
+│     git tag --sort=version:refname                              │
+│     → v0.1.0, v0.2.0, v0.3.0 ... v0.9.6                        │
+│     → Example: 30 tags to process                               │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  3. FOR EACH TAG (sequentially):                                │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ v0.6.1                                                   │   │
+│  │ 1. git checkout v0.6.1                                   │   │
+│  │ 2. Count lines per language → 60,021 total              │   │
+│  │ 3. git log v0.6.0..v0.6.1 → 12 commits since last tag   │   │
+│  │ 4. AI: "Summarize these 12 commits" → narrative         │   │
+│  │ 5. Store snapshot + summary to results                   │   │
+│  │ 6. Report progress: "4/30 tags complete"                 │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ v0.6.2                                                   │   │
+│  │ 1. git checkout v0.6.2                                   │   │
+│  │ 2. Count lines → 63,538 total (+3,517 from v0.6.1)      │   │
+│  │ 3. git log v0.6.1..v0.6.2 → 8 commits                   │   │
+│  │ 4. AI: "Summarize these 8 commits" → narrative          │   │
+│  │ 5. Store snapshot + summary                              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ... repeat for all tags ...                                   │
+│                                                                 │
+│  ⏱️ Total time: ~30-45 minutes for 30 tags                     │
+│  💰 Server cost: ~€0.01 (Hetzner)                              │
+│  💰 AI cost: ~$0.05-0.30 depending on model                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Why Tag-Walking Works
+
+| Problem | Solution |
+|---------|----------|
+| **2M lines would blow up AI** | We only send 8-20 commits per tag, not the whole repo |
+| **Need historical progression** | Walking tags gives us snapshots at each version |
+| **Token limits** | Each summary is ~500 tokens in, ~300 out. Tiny. |
+| **Server time** | 30 tags × 1 min each = 30 min. We pay €0.004. Worth it. |
+
+### AI Prompt Per Tag (Scoped to Delta)
+
+```
+You're summarizing version v0.9.6 of GroveEngine.
+
+Commits since v0.9.5 (11 commits):
+- feat: add Curios cabinet for visitor experience
+- feat: migrate payment system to Lemon Squeezy
+- fix: correct LineSquiggle icon name
+- fix: cast SDK attributes for TypeScript
+- docs: add legal pages to knowledge base
+...
+
+Stats: +13,000 lines added, -11,925 lines removed
+
+Write a 2-3 sentence narrative summary, then list top features and fixes.
+```
+
+**This is manageable.** 11 commits = ~200 tokens. The AI isn't overwhelmed.
+
+---
+
+## AI Models (via OpenRouter BYOK)
+
+Users bring their own OpenRouter key. These models are optimized for code summarization:
+
+| Model | Input $/1M | Output $/1M | Context | Notes |
+|-------|-----------|-------------|---------|-------|
+| **DeepSeek V3.2** ⭐ DEFAULT | $0.25 | $0.38 | 164K | Best value, excellent at code |
+| Kimi K2 | $0.39 | $1.90 | 262K | Great reasoning, huge context |
+| MiniMax M2.1 | $0.27 | $1.12 | 197K | Fast, good quality |
+| Claude Haiku 4.5 | $1.00 | $5.00 | 200K | Premium quality |
+| GPT-OSS 120B | $0.04 | $0.19 | 131K | Ultra cheap |
+| Qwen3 235B | $0.07 | $0.46 | 262K | Large context, budget friendly |
+| Llama 3.3 70B | $0.10 | $0.32 | 131K | Open source, reliable |
+| GLM 4.7 | $0.40 | $1.50 | 203K | Good multilingual |
+| Llama 4 Maverick | $0.15 | $0.60 | **1M** | Massive context window |
+
+### Cost Estimate for 30-Tag Analysis
+
+| Model | Est. Total Cost |
+|-------|-----------------|
+| GPT-OSS 120B | ~$0.02 |
+| DeepSeek V3.2 | ~$0.05 |
+| Qwen3 235B | ~$0.06 |
+| Llama 3.3 70B | ~$0.08 |
+| MiniMax M2.1 | ~$0.15 |
+| Claude Haiku 4.5 | ~$0.40 |
+
+**Recommended for bulk processing:** DeepSeek V3.2 (default) or GPT-OSS 120B (budget)
+
+---
+
 ## Database Schema
 
 ```sql
