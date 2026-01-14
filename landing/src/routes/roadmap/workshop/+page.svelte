@@ -245,6 +245,15 @@
 					integration: 'Support and conversation for all Grove users',
 					spec: '/knowledge/specs/porch-spec'
 				},
+				{
+					name: 'Centennial',
+					tagline: 'Domain Preservation',
+					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
+					status: 'planned',
+					icon: 'tree-deciduous',
+					integration: 'Automatic unlock after 12 months of Sapling+ membership',
+					spec: '/knowledge/specs/centennial-spec'
+				},
 			]
 		},
 		{
