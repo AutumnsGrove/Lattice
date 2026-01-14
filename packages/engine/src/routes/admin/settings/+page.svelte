@@ -434,21 +434,6 @@
       </div>
     </div>
   </GlassCard>
-
-  <GlassCard variant="frosted" class="mb-6">
-    <h2>Links</h2>
-    <ul class="links-list">
-      <li>
-        <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a>
-      </li>
-      <li>
-        <a href="https://github.com/AutumnsGrove/AutumnsGrove" target="_blank">GitHub Repository</a>
-      </li>
-      <li>
-        <a href="https://github.com/AutumnsGrove/AutumnsGrove/actions" target="_blank">GitHub Actions</a>
-      </li>
-    </ul>
-  </GlassCard>
 </div>
 
 <style>
@@ -561,28 +546,6 @@
   .env-value {
     font-weight: 500;
     font-size: 0.9rem;
-  }
-  .links-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .links-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--color-border);
-    transition: border-color 0.3s ease;
-  }
-  .links-list li:last-child {
-    border-bottom: none;
-  }
-  .links-list a {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
-  }
-  .links-list a:hover {
-    text-decoration: underline;
   }
   /* Font selector styles */
   .font-selector {
