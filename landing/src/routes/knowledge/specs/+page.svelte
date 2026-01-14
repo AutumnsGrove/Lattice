@@ -1,8 +1,18 @@
 <script lang="ts">
   import SEO from '$lib/components/SEO.svelte';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { GlassLegend } from '@autumnsgrove/groveengine/ui/ui';
   import { toolIcons, stateIcons, type ToolIconKey } from '$lib/utils/icons';
   import type { SpecCategory } from '$lib/types/docs';
+
+  // Status legend items for the specs page
+  const statusLegend = [
+    { label: 'Active', description: 'In production', color: 'green' as const },
+    { label: 'New', description: 'Recently added', color: 'amber' as const },
+    { label: 'Planned', description: 'Coming soon', color: 'slate' as const },
+    { label: 'Reference', description: 'Documentation only', color: 'blue' as const },
+    { label: 'Client', description: 'Customer-specific', color: 'purple' as const },
+  ];
 
   let { data } = $props();
   const specsList = $derived(data.specs);
@@ -53,10 +63,18 @@
       <h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
         Technical Specifications
       </h1>
-      <p class="text-lg text-foreground-muted max-w-xl mx-auto">
+      <p class="text-lg text-foreground-muted max-w-xl mx-auto mb-6">
         Detailed documentation about Grove's architecture, features, and implementation details.
         Transparency into how everything works.
       </p>
+
+      <GlassLegend
+        title="Status"
+        items={statusLegend}
+        layout="inline"
+        compact
+        class="max-w-md mx-auto"
+      />
     </div>
   </section>
 
