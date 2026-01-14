@@ -9,15 +9,36 @@ import type {
   DocHeader,
 } from "$lib/types/docs";
 
-// Custom renderer that adds IDs to headings for TOC navigation
-const renderer = new Renderer();
-renderer.heading = function ({ text, depth }) {
-  const id = text
+/**
+ * Strip HTML tags from text to get plain text content.
+ * In marked v17+, the heading renderer receives `text` with rendered HTML
+ * (e.g., `Hello <strong>World</strong>` instead of `Hello **World**`).
+ * This ensures IDs match between extractHeaders (raw markdown) and the renderer.
+ */
+function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, "");
+}
+
+/**
+ * Generate a URL-safe ID from text.
+ * Used by both extractHeaders and the heading renderer to ensure consistency.
+ */
+function generateHeadingId(text: string): string {
+  return text
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .trim();
+}
+
+// Custom renderer that adds IDs to headings for TOC navigation
+const renderer = new Renderer();
+renderer.heading = function ({ text, depth }) {
+  // Strip HTML tags to get plain text, then generate ID
+  // This ensures IDs match what extractHeaders produces from raw markdown
+  const plainText = stripHtmlTags(text);
+  const id = generateHeadingId(plainText);
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
 };
 
@@ -69,13 +90,8 @@ function extractHeaders(markdown: string): DocHeader[] {
   while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
-    // Create a slug-style ID from the header text
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
+    // Use shared helper to generate ID - ensures consistency with heading renderer
+    const id = generateHeadingId(text);
 
     headers.push({
       level,

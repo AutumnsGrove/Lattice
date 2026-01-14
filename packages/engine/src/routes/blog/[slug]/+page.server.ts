@@ -2,6 +2,7 @@ import {
   getPostBySlug,
   processAnchorTags,
   extractHeaders,
+  generateHeadingId,
   type GutterItem,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
@@ -18,6 +19,15 @@ interface Header {
   level: number;
   id: string;
   text: string;
+}
+
+/**
+ * Strip HTML tags from text to get plain text content.
+ * In marked v5+, the heading renderer receives `text` with rendered HTML
+ * (e.g., `Hello <strong>World</strong>` instead of `Hello **World**`).
+ */
+function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, "");
 }
 
 interface PostRecord {
@@ -170,13 +180,9 @@ async function fetchAndProcessPost(
     renderer.heading = function (token: Tokens.Heading): string {
       const text = token.text;
       const level = token.depth;
-      // Generate ID same way as extractHeaders
-      const id = text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
+      // Strip HTML tags and generate ID to match extractHeaders
+      const plainText = stripHtmlTags(text);
+      const id = generateHeadingId(plainText);
       return `<h${level} id="${id}">${text}</h${level}>`;
     };
 

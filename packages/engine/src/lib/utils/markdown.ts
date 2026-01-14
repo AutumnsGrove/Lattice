@@ -13,6 +13,20 @@ export interface Header {
   id: string;
 }
 
+/**
+ * Generate a URL-safe ID from header text.
+ * This is used both by extractHeaders and heading renderers to ensure
+ * the IDs in the TOC match the IDs in the generated HTML.
+ */
+export function generateHeadingId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
 /** Frontmatter data from markdown files */
 export interface Frontmatter {
   title?: string;
@@ -275,13 +289,8 @@ export function extractHeaders(markdown: string): Header[] {
   while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
     const level = match[1].length;
     const text = match[2].trim();
-    // Create a slug-style ID from the header text
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
+    // Use shared helper to generate ID - ensures consistency with heading renderers
+    const id = generateHeadingId(text);
 
     headers.push({
       level,
