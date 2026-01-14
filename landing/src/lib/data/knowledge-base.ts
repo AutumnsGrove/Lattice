@@ -543,6 +543,18 @@ export const helpArticles: Doc[] = [
     readingTime: 3,
   },
   {
+    slug: "why-grove-is-different",
+    title: "Why Grove is Different",
+    description:
+      "How Grove inverts every manipulation pattern used by algorithmic platforms",
+    excerpt:
+      "Most social platforms track every click, scroll, and pause. They feed that data into machine learning models that predict what will keep you engaged longest. Grove works differently.",
+    category: "help",
+    icon: "shield",
+    lastUpdated: "2026-01-14",
+    readingTime: 8,
+  },
+  {
     slug: "writing-your-first-post",
     title: "Writing Your First Post",
     description: "Learn how to write and publish your first blog post on Grove",
