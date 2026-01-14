@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import matter from "gray-matter";
-import { marked, Renderer } from "marked";
+import { marked, Renderer, type Tokens } from "marked";
 import type {
   Doc,
   DocCategory,
@@ -32,14 +32,50 @@ function generateHeadingId(text: string): string {
     .trim();
 }
 
-// Custom renderer that adds IDs to headings for TOC navigation
+// Custom renderer that adds IDs to headings and wraps code blocks
 const renderer = new Renderer();
+
+// Heading renderer - adds IDs for TOC navigation
 renderer.heading = function ({ text, depth }) {
   // Strip HTML tags to get plain text, then generate ID
   // This ensures IDs match what extractHeaders produces from raw markdown
   const plainText = stripHtmlTags(text);
   const id = generateHeadingId(plainText);
   return `<h${depth} id="${id}">${text}</h${depth}>\n`;
+};
+
+// Code renderer - wraps code blocks with GitHub-style header and copy button
+renderer.code = function (token: Tokens.Code | string): string {
+  // Handle both old (code, language) and new (token) API signatures
+  const code = typeof token === "string" ? token : token.text;
+  const language =
+    typeof token === "string"
+      ? (arguments as unknown as [string, string])[1]
+      : token.lang;
+
+  const lang = language || "text";
+
+  // Escape the code for safe HTML embedding
+  const escapedCode = code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+  return `<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span class="code-block-language">${lang}</span>
+    <button class="code-block-copy" aria-label="Copy code to clipboard" data-code="${escapedCode}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5.75 4.75H10.25V1.75H5.75V4.75ZM5.75 4.75H2.75V14.25H10.25V11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="5.75" y="4.75" width="7.5" height="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="copy-text">Copy</span>
+    </button>
+  </div>
+  <pre><code class="language-${lang}">${escapedCode}</code></pre>
+</div>`;
 };
 
 marked.use({ renderer });

@@ -1,5 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import TableOfContents from '$lib/components/TableOfContents.svelte';
@@ -18,6 +20,70 @@
     category === 'patterns' ? 'Architecture Patterns' :
     category === 'marketing' ? 'Marketing & Launch' : 'Legal & Policies'
   );
+
+  /**
+   * Decode HTML entities safely without innerHTML
+   * Handles common entities: &amp; &lt; &gt; &quot; &#39;
+   */
+  function decodeHtmlEntities(text: string): string {
+    return text
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  }
+
+  // Setup copy button functionality for code blocks
+  onMount(() => {
+    if (!browser) return;
+
+    const handleCopyClick = async (event: Event) => {
+      const button = event.currentTarget as HTMLElement;
+      const codeText = button.getAttribute('data-code');
+
+      if (!codeText) return;
+
+      try {
+        // Decode HTML entities back to original text safely
+        const decodedText = decodeHtmlEntities(codeText);
+
+        await navigator.clipboard.writeText(decodedText);
+
+        // Update button text and style to show success
+        const copyText = button.querySelector('.copy-text');
+        const originalText = copyText?.textContent || 'Copy';
+        if (copyText) copyText.textContent = 'Copied!';
+        button.classList.add('copied');
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+          if (copyText) copyText.textContent = originalText;
+          button.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy code:', err);
+        const copyText = button.querySelector('.copy-text');
+        if (copyText) copyText.textContent = 'Failed';
+        setTimeout(() => {
+          if (copyText) copyText.textContent = 'Copy';
+        }, 2000);
+      }
+    };
+
+    // Attach event listeners to all copy buttons
+    const copyButtons = document.querySelectorAll('.code-block-copy');
+    copyButtons.forEach(button => {
+      button.addEventListener('click', handleCopyClick);
+    });
+
+    // Cleanup
+    return () => {
+      copyButtons.forEach(button => {
+        button.removeEventListener('click', handleCopyClick);
+      });
+    };
+  });
 </script>
 
 <SEO
@@ -80,7 +146,7 @@
           </header>
 
           <!-- Article Content -->
-          <article class="prose prose-slate dark:prose-invert max-w-none">
+          <article class="content-body prose prose-slate dark:prose-invert max-w-none">
             {@html doc.html || `<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}
           </article>
 
