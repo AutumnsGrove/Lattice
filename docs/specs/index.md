@@ -10,7 +10,9 @@ type: index
 ---
 
 ```
-         🌲
+         /\
+        /  \
+       /____\
          |
       ___|___
      |       |
@@ -41,7 +43,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 
 ## Core Specifications
 
-### 🏗️ Foundation & Infrastructure
+### Foundation & Infrastructure
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -52,7 +54,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
 
-### 📊 Monitoring & Analytics
+### Monitoring & Analytics
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -61,7 +63,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Vineyard](vineyard-spec.md)** | Vista LoadTest package | **New** | Sentinel, Vista |
 | **[Vista LoadTest](vista-loadtest-spec.md)** | Load testing integration spec | **New** | Sentinel, Vista |
 
-### 🎨 Customization & Theming
+### Customization & Theming
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -70,7 +72,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | **New** | Terrarium |
 | **[Curios](curios-spec.md)** | Cabinet of wonders & personal touches | **New** | Engine, Foliage |
 
-### 🔧 Tools & Services
+### Tools & Services
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -85,7 +87,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Seasons](seasons-spec.md)** | Semantic versioning system | Active | npm, Lattice |
 | **[Versioning](versioning-spec.md)** | npm publishing workflow | Active | npm, Seasons |
 
-### 🛡️ Security & Operations
+### Security & Operations
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -95,7 +97,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Thorn](thorn-spec.md)** | Security scanning & compliance | Planned | CI/CD, D1 |
 | **[Centennial](centennial-spec.md)** | 100-year domain preservation | Planned | Heartwood, Membership |
 
-### 🤖 AI & Machine Learning
+### AI & Machine Learning
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -104,7 +106,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Wisp](wisp-spec.md)** | Ethical writing assistant | Planned | Engine, AI Gateway |
 | **[Release Summaries](release-summaries-spec.md)** | Automated LLM release note generation | Active | GitHub Actions, LLM |
 
-### 🛒 Commerce & Community
+### Commerce & Community
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -117,7 +119,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Wander](wander-spec.md)** | First-person grove discovery | **New** | Forests, Terrarium |
 | **[Trails](trails-spec.md)** | Personal roadmaps & build-in-public | Planned | Engine, TenantDO |
 
-### 📚 Reference & Client Sites
+### Reference & Client Sites
 
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
@@ -128,7 +130,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 
 ## Specification Details
 
-### 🏗️ Lattice Specification
+### Lattice Specification
 **Core framework & multi-tenant engine**
 
 **Key Components:**
@@ -146,7 +148,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 
 ---
 
-### 📊 Vista Specification  
+### Vista Specification  
 **Infrastructure monitoring dashboard**
 
 ```mermaid
@@ -182,7 +184,7 @@ graph TB
 
 ---
 
-### 📊 Rings Specification
+### Rings Specification
 **Privacy-first analytics system**
 
 **Key Principles:**
@@ -204,7 +206,7 @@ graph TB
 
 ---
 
-### 🔧 Vineyard Specification
+### Vineyard Specification
 **Vista LoadTest package**
 
 **Purpose:** Integration of Sentinel load testing framework with Vista monitoring dashboard.
@@ -218,10 +220,10 @@ graph TB
 **Implementation Status:** **NEW** (Specification complete, implementation planned)
 
 **Integration:**
-- ✅ Sentinel pattern compatibility
-- ✅ Vista dashboard integration
-- ✅ D1 metrics storage
-- ✅ Real-time KV caching
+- [x] Sentinel pattern compatibility
+- [x] Vista dashboard integration
+- [x] D1 metrics storage
+- [x] Real-time KV caching
 
 **Related Documents:**
 - [Sentinel Pattern](../patterns/sentinel-pattern.md) - Load testing framework
@@ -233,22 +235,22 @@ graph TB
 ## Implementation Roadmap
 
 ### Phase 1: Core Infrastructure (Complete)
-- ✅ Lattice framework
-- ✅ Engine blog rendering
-- ✅ Vista monitoring
-- ✅ Rings analytics
+- [x] Lattice framework
+- [x] Engine blog rendering
+- [x] Vista monitoring
+- [x] Rings analytics
 
 ### Phase 2: Security & Scale (Current)
-- 🔄 Threshold rate limiting
-- 🔄 Sentinel load testing
-- 🔄 Vineyard integration
-- 🔄 Mycelium secrets
+- [-] Threshold rate limiting
+- [-] Sentinel load testing
+- [-] Vineyard integration
+- [-] Mycelium secrets
 
 ### Phase 3: Community & Growth (Q1 2026)
-- 📅 Meadow community feed
-- 📅 Bloom newsletters
-- 📅 Arbor theme marketplace
-- 📅 Thorn security scanning
+- [ ] Meadow community feed
+- [ ] Bloom newsletters
+- [ ] Arbor theme marketplace
+- [ ] Thorn security scanning
 
 ---
 
@@ -256,14 +258,14 @@ graph TB
 
 | Specification | Lattice | Vista | Rings | D1 | R2 | DO |
 |---------------|---------|-------|-------|----|----|----|
-| **Lattice** | ✅ Core | ✅ Metrics | ✅ Analytics | ✅ Primary | ✅ Storage | ✅ All DOs |
-| **Vista** | ✅ Metrics | ✅ Core | ✅ Correlation | ✅ Storage | ⚠️ Indirect | ✅ DO metrics |
-| **Rings** | ✅ Integration | ✅ Metrics | ✅ Core | ✅ Storage | ❌ | ✅ PostDO |
-| **Vineyard** | ⚠️ Testing | ✅ Primary | ⚠️ Correlation | ✅ Results | ❌ | ✅ DO tests |
-| **Engine** | ✅ Framework | ✅ Metrics | ✅ Analytics | ✅ Content | ✅ Media | ✅ PostDO |
-| **AI Gateway** | ✅ Framework | ✅ Analytics | ⚠️ Correlation | ✅ Quota tracking | ❌ | ⚠️ TenantDO |
+| **Lattice** | Yes: Core | Yes: Metrics | Yes: Analytics | Yes: Primary | Yes: Storage | Yes: All DOs |
+| **Vista** | Yes: Metrics | Yes: Core | Yes: Correlation | Yes: Storage | Partial: Indirect | Yes: DO metrics |
+| **Rings** | Yes: Integration | Yes: Metrics | Yes: Core | Yes: Storage | No | Yes: PostDO |
+| **Vineyard** | Partial: Testing | Yes: Primary | Partial: Correlation | Yes: Results | No | Yes: DO tests |
+| **Engine** | Yes: Framework | Yes: Metrics | Yes: Analytics | Yes: Content | Yes: Media | Yes: PostDO |
+| **AI Gateway** | Yes: Framework | Yes: Analytics | Partial: Correlation | Yes: Quota tracking | No | Partial: TenantDO |
 
-**Legend:** ✅ Direct integration, ⚠️ Indirect/metrics only, ❌ No integration
+**Legend:** Yes = Direct integration, Partial = Indirect/metrics only, No = No integration
 
 ---
 
