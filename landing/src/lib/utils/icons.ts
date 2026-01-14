@@ -508,7 +508,9 @@ export const pricingIcons = {
   clock: Clock,
   // Checkmark
   check: Check,
-  // Navigation
+  // Curios (cabinet of wonders - custom nav pages)
+  amphora: Amphora,
+  // Navigation (legacy)
   listTree: ListTree,
 } as const;
 

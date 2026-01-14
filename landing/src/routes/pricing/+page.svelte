@@ -7,6 +7,7 @@
 
   // Destructure icons for Svelte 5 direct component rendering
   const {
+    amphora: AmphoraIcon,
     calendardays: CalendarDaysIcon,
     check: CheckIcon,
     clock: ClockIcon,
@@ -15,7 +16,6 @@
     flower2: FlowerIcon,
     harddrive: HardDriveIcon,
     lifebuoy: LifebuoyIcon,
-    listTree: ListIcon,
     mail: MailIcon,
     messagecircle: MessageCircleIcon,
     palette: PaletteIcon,
@@ -207,9 +207,9 @@
             <tr class="border-b border-subtle">
               <td class="py-3 px-3 text-foreground-muted">
                 <span class="inline-flex items-center gap-2">
-                  <ListIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
+                  <AmphoraIcon class="w-4 h-4 text-accent-subtle flex-shrink-0"
                   />
-                  Nav Pages
+                  Curios
                 </span>
               </td>
               <td class="py-3 px-3 text-center text-foreground-faint">{data.free.limits.navPages}</td>
@@ -406,16 +406,16 @@
           </div>
 
           <div>
-            <h3 class="font-medium text-foreground mb-2">Navigation Pages</h3>
+            <h3 class="font-medium text-foreground mb-2">Curios</h3>
             <p>
               <strong
                 >Every blog includes Home, Blog, and About in the navigation.</strong
               >
-              Nav Pages let you add custom pages (like Portfolio, Contact, or Gallery)
-              to your site navigation.
-              <strong>Sapling:</strong> 3 custom nav pages.
-              <strong>Oak:</strong> 5 custom nav pages.
-              <strong>Evergreen:</strong> 8 custom nav pages.
+              Curios let you add custom pages (like Portfolio, Contact, or Gallery)
+              to your site navigation—little treasures in your cabinet of wonders.
+              <strong>Sapling:</strong> 3 curios.
+              <strong>Oak:</strong> 5 curios.
+              <strong>Evergreen:</strong> 8 curios.
             </p>
             <p class="mt-2 text-xs text-foreground-faint">
               Seedling users can still create unlimited pages—they just won't
