@@ -90,3 +90,51 @@ export type {
 } from "./groveauth/index";
 
 export type { StatusColor as GroveAuthStatusColor } from "./groveauth/index";
+
+// =============================================================================
+// Curios - Developer Tools & Fun Website Features
+// =============================================================================
+
+// Timeline Curio - AI-powered daily summaries
+export {
+  // OpenRouter provider
+  callOpenRouter,
+  calculateOpenRouterCost,
+  getOpenRouterModels,
+  validateOpenRouterKey,
+  OPENROUTER_MODELS,
+  DEFAULT_OPENROUTER_MODEL,
+  // Voice presets
+  buildVoicedPrompt,
+  getAllVoices,
+  getVoice,
+  buildCustomVoice,
+  VOICE_PRESETS,
+  DEFAULT_VOICE,
+  professional,
+  quest,
+  casual,
+  poetic,
+  minimal,
+  // Utilities
+  parseAIResponse,
+  DEFAULT_TIMELINE_CONFIG,
+} from "./curios/timeline";
+
+export type {
+  // OpenRouter types
+  OpenRouterModel,
+  OpenRouterResponse,
+  OpenRouterOptions,
+  OpenRouterKeyValidation,
+  // Voice types
+  VoicePreset,
+  VoicePromptResult,
+  CustomVoiceConfig,
+  Commit,
+  GutterComment,
+  // Timeline types
+  TimelineCurioConfig,
+  TimelineSummary,
+  TimelineActivity,
+} from "./curios/timeline";

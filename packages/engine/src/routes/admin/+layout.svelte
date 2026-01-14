@@ -9,7 +9,8 @@
     Calendar,
     Settings,
     ChevronLeft,
-    LogOut
+    LogOut,
+    Sparkles
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -92,6 +93,10 @@
         <FileStack class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Pages</span>
       </a>
+      <a href="/admin/curios" class="nav-item" onclick={closeSidebar} title="Curios">
+        <Sparkles class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Curios</span>
+      </a>
       <a href="/admin/images" class="nav-item" onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Images</span>
@@ -100,9 +105,9 @@
         <BarChart3 class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Analytics</span>
       </a>
-      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Timeline">
+      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trails">
         <Calendar class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Timeline</span>
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Trails</span>
       </a>
       <a href="/admin/settings" class="nav-item" onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />

@@ -181,6 +181,18 @@
     "./feature-flags": {
       "types": "./dist/feature-flags/index.d.ts",
       "default": "./dist/feature-flags/index.js"
+    },
+    "./curios": {
+      "types": "./dist/curios/index.d.ts",
+      "default": "./dist/curios/index.js"
+    },
+    "./curios/timeline": {
+      "types": "./dist/curios/timeline/index.d.ts",
+      "default": "./dist/curios/timeline/index.js"
+    },
+    "./curios/timeline/voices": {
+      "types": "./dist/curios/timeline/voices/index.d.ts",
+      "default": "./dist/curios/timeline/voices/index.js"
     }
   },
   "files": [
