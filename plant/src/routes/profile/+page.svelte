@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, COLOR_PRESETS } from '@autumnsgrove/groveengine/ui';
 
 	let { data, form } = $props();
 
@@ -36,21 +36,7 @@
 		{ id: 'other', label: 'Other', icon: Star }
 	];
 
-	// Color presets - curated from Grove nature palette
-	const colorPresets = [
-		{ name: 'Grove Green', value: '142 76% 36%', hex: '#16a34a' },      // greens.grove
-		{ name: 'Deep Plum', value: '274 79% 32%', hex: '#581c87' },        // midnightBloom.deepPlum
-		{ name: 'Ocean Blue', value: '200 90% 46%', hex: '#0284c7' },       // accents.water.deep
-		{ name: 'Sunset Ember', value: '20 86% 42%', hex: '#c2410c' },      // autumn.ember
-		{ name: 'Cherry Blossom', value: '330 81% 60%', hex: '#ec4899' },   // cherryBlossoms.standard
-		{ name: 'Golden Amber', value: '38 92% 50%', hex: '#d97706' },      // autumn.amber
-		{ name: 'Lavender', value: '271 50% 68%', hex: '#a78bfa' },         // wildflowers.crocus
-		{ name: 'Cardinal Red', value: '0 75% 51%', hex: '#dc2626' },       // accents.bird.cardinalRed
-		{ name: 'Autumn Gold', value: '43 96% 56%', hex: '#eab308' },       // autumn.gold
-		{ name: 'Tulip Pink', value: '330 71% 79%', hex: '#f9a8d4' },       // wildflowers.tulipPink
-		{ name: 'Meadow Green', value: '142 76% 45%', hex: '#22c55e' },     // greens.meadow
-		{ name: 'Violet Purple', value: '271 76% 53%', hex: '#8b5cf6' }     // wildflowers.violet
-	];
+	// Color presets imported from shared config (ensures consistency with Arbor settings)
 
 	// Check username availability
 	async function checkUsername(value: string) {
@@ -211,15 +197,15 @@
 				<p class="text-xs text-foreground-subtle mb-3">This will be your blog's accent color. You can change it later.</p>
 
 				<div class="grid grid-cols-4 gap-2.5">
-					{#each colorPresets as color}
+					{#each COLOR_PRESETS as color}
 						<button
 							type="button"
-							onclick={() => (favoriteColor = favoriteColor === color.value ? null : color.value)}
-							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative {favoriteColor === color.value ? 'border-white shadow-lg' : 'border-white/30 dark:border-slate-700/30'}"
+							onclick={() => (favoriteColor = favoriteColor === color.hex ? null : color.hex)}
+							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative {favoriteColor === color.hex ? 'border-white shadow-lg' : 'border-white/30 dark:border-slate-700/30'}"
 							style="background-color: {color.hex}"
 							title={color.name}
 						>
-							{#if favoriteColor === color.value}
+							{#if favoriteColor === color.hex}
 								<div class="absolute inset-0 flex items-center justify-center">
 									<Check size={24} class="text-white drop-shadow-lg" />
 								</div>

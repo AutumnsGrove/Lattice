@@ -2,6 +2,7 @@
   import { Button, Spinner, GlassCard } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
+  import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
 
   /**
    * @typedef {Object} HealthStatus
@@ -28,13 +29,13 @@
   let loadingHealth = $state(true);
 
   // Font settings state
-  let currentFont = $state('lexend');
+  let currentFont = $state(DEFAULT_FONT);
   let savingFont = $state(false);
   let fontMessage = $state('');
   let loadingFont = $state(true);
 
   // Accent color settings state
-  let currentAccentColor = $state('#16a34a');
+  let currentAccentColor = $state(DEFAULT_ACCENT_COLOR);
   let savingColor = $state(false);
   let colorMessage = $state('');
 
@@ -73,13 +74,13 @@
     loadingFont = true;
     try {
       const data = await api.get('/api/settings');
-      currentFont = data.font_family || 'lexend';
-      currentAccentColor = data.accent_color || '#16a34a';
+      currentFont = data.font_family || DEFAULT_FONT;
+      currentAccentColor = data.accent_color || DEFAULT_ACCENT_COLOR;
     } catch (error) {
       toast.error('Failed to load settings');
       console.error('Failed to fetch settings:', error);
-      currentFont = 'lexend';
-      currentAccentColor = '#16a34a';
+      currentFont = DEFAULT_FONT;
+      currentAccentColor = DEFAULT_ACCENT_COLOR;
     }
     loadingFont = false;
   }
@@ -96,21 +97,8 @@
       });
 
       fontMessage = 'Font setting saved! Refresh to see changes site-wide.';
-      // Apply immediately for preview
-      /** @type {Record<string, string>} */
-      const fontMap = {
-        lexend: "'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        atkinson: "'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        opendyslexic: "'OpenDyslexic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        quicksand: "'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        'plus-jakarta-sans': "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        'ibm-plex-mono': "'IBM Plex Mono', 'Courier New', Consolas, monospace",
-        cozette: "'Cozette', 'Courier New', Consolas, monospace",
-        alagard: "'Alagard', fantasy, cursive",
-        calistoga: "'Calistoga', Georgia, serif",
-        caveat: "'Caveat', cursive, sans-serif"
-      };
-      document.documentElement.style.setProperty('--font-family-main', fontMap[currentFont] || fontMap.lexend);
+      // Apply immediately for preview using shared font config
+      document.documentElement.style.setProperty('--font-family-main', getFontFamily(currentFont));
     } catch (error) {
       fontMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
     }
@@ -385,12 +373,16 @@
 
       <div class="color-presets">
         <span class="presets-label">Presets:</span>
-        <button type="button" class="preset-btn" style:background="#16a34a" title="Grove Green" onclick={() => currentAccentColor = '#16a34a'}></button>
-        <button type="button" class="preset-btn" style:background="#2563eb" title="Ocean Blue" onclick={() => currentAccentColor = '#2563eb'}></button>
-        <button type="button" class="preset-btn" style:background="#7c3aed" title="Violet" onclick={() => currentAccentColor = '#7c3aed'}></button>
-        <button type="button" class="preset-btn" style:background="#db2777" title="Pink" onclick={() => currentAccentColor = '#db2777'}></button>
-        <button type="button" class="preset-btn" style:background="#ea580c" title="Orange" onclick={() => currentAccentColor = '#ea580c'}></button>
-        <button type="button" class="preset-btn" style:background="#ca8a04" title="Amber" onclick={() => currentAccentColor = '#ca8a04'}></button>
+        {#each COLOR_PRESETS as color}
+          <button
+            type="button"
+            class="preset-btn"
+            class:selected={currentAccentColor === color.hex}
+            style:background={color.hex}
+            title={color.name}
+            onclick={() => currentAccentColor = color.hex}
+          ></button>
+        {/each}
       </div>
     </div>
 
@@ -713,6 +705,10 @@
   .preset-btn:hover {
     transform: scale(1.15);
     border-color: var(--color-text);
+  }
+  .preset-btn.selected {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
   }
   .preset-btn:focus-visible {
     outline: 2px solid var(--color-primary);

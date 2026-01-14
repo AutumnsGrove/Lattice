@@ -70,18 +70,18 @@ export async function createTenant(
     )
     .run();
 
-  // 3. Create default tenant_settings
+  // 3. Create default site_settings (used by Arbor admin panel)
   const defaultSettings = [
     ["site_title", input.displayName],
     ["site_description", `${input.displayName}'s blog on Grove`],
     ["accent_color", input.favoriteColor || "#16a34a"],
-    ["font", "lexend"],
+    ["font_family", "lexend"],
   ];
 
   for (const [key, value] of defaultSettings) {
     await db
       .prepare(
-        `INSERT INTO tenant_settings (tenant_id, setting_key, setting_value, updated_at)
+        `INSERT INTO site_settings (tenant_id, setting_key, setting_value, updated_at)
 				 VALUES (?, ?, ?, unixepoch())`,
       )
       .bind(tenantId, key, value)
