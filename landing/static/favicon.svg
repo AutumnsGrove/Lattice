@@ -1,6 +1,19 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 417 512.238">
-  <!-- Trunk - classic bark brown -->
-  <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-  <!-- Foliage - grove green -->
-  <path fill="#16a34a" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <g transform="rotate(-12 50 50)">
+    <!-- Tier 1: Top branches -->
+    <path fill="#15803d" d="M50 5 L18 32 L50 18 Z" />
+    <path fill="#86efac" d="M50 5 L50 18 L82 32 Z" />
+
+    <!-- Tier 2: Middle branches -->
+    <path fill="#166534" d="M50 20 L12 50 L50 35 Z" />
+    <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z" />
+
+    <!-- Tier 3: Bottom branches -->
+    <path fill="#14532d" d="M50 38 L18 68 L50 54 Z" />
+    <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z" />
+
+    <!-- Trunk -->
+    <path fill="#3d2914" d="M50 54 L42 58 L46 92 L50 92 Z" />
+    <path fill="#5a3f30" d="M50 54 L58 58 L54 92 L50 92 Z" />
+  </g>
 </svg>
