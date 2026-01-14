@@ -30,7 +30,7 @@
 
 			<!-- Policy Links -->
 			<div class="grid gap-4">
-				<a href="/legal/terms" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/terms-of-service" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						Terms of Service
 					</h2>
@@ -39,7 +39,7 @@
 					</p>
 				</a>
 
-				<a href="/legal/privacy" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/privacy-policy" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						Privacy Policy
 					</h2>
@@ -48,7 +48,7 @@
 					</p>
 				</a>
 
-				<a href="/legal/acceptable-use" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/acceptable-use-policy" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						Acceptable Use Policy
 					</h2>
@@ -57,7 +57,7 @@
 					</p>
 				</a>
 
-				<a href="/legal/dmca" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/dmca-policy" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						DMCA Policy
 					</h2>
@@ -66,7 +66,7 @@
 					</p>
 				</a>
 
-				<a href="/legal/refund" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/refund-policy" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						Refund & Cancellation Policy
 					</h2>
@@ -75,7 +75,7 @@
 					</p>
 				</a>
 
-				<a href="/legal/data-portability" class="card p-6 hover:border-accent transition-colors group">
+				<a href="/knowledge/legal/data-portability-separation" class="card p-6 hover:border-accent transition-colors group">
 					<h2 class="text-lg font-serif text-foreground group-hover:text-accent-muted transition-colors mb-2">
 						Data Portability & Separation
 					</h2>
