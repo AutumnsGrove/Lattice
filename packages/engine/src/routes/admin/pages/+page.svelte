@@ -74,7 +74,7 @@
         {data.pages.length} pages
         <span class="mx-2">·</span>
         <span class:text-amber-600={atLimit} class:dark:text-amber-400={atLimit}>
-          {navPagesUsed}/{navLimit} nav slots used
+          {navPagesUsed}/{navLimit} curios used
         </span>
       </p>
     </div>
