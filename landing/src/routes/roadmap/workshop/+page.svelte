@@ -210,6 +210,7 @@
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
 					spec: '/knowledge/specs/rings-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Views', icon: 'eye', description: 'Page views' },
 						{ name: 'Readers', icon: 'bookopencheck', description: 'Engaged readers' },
 						{ name: 'Resonance', icon: 'goal', description: 'Content signals' }
@@ -252,7 +253,10 @@
 					status: 'planned',
 					icon: 'squares-exclude',
 					integration: 'Automatic unlock after 12 months of Sapling+ membership',
-					spec: '/knowledge/specs/centennial-spec'
+					spec: '/knowledge/specs/centennial-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
+					]
 				},
 			]
 		},
@@ -269,6 +273,7 @@
 					integration: 'Integrated into the Grove editor, off by default',
 					spec: '/knowledge/specs/wisp-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
@@ -296,6 +301,7 @@
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
@@ -310,6 +316,7 @@
 					integration: 'Optional social layer for Grove blogs',
 					spec: '/knowledge/specs/meadow-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
 						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first sharing' }
 					]
@@ -324,6 +331,7 @@
 					integration: 'Community discovery for all Grove users',
 					spec: '/knowledge/specs/forests-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Directory', icon: 'book-user', description: 'Member listings' },
 						{ name: 'Stroll', icon: 'git-branch', description: 'Random discovery' }
 					]
@@ -368,6 +376,7 @@
 					github: 'https://github.com/AutumnsGrove/Ivy',
 					spec: '/knowledge/specs/ivy-mail-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Compose', icon: 'component', description: 'Write emails' },
 						{ name: 'Encrypt', icon: 'lock', description: 'Zero-knowledge' },
 						{ name: 'Contacts', icon: 'contact', description: 'Address book' }
@@ -382,7 +391,10 @@
 					domain: 'bloom.grove.place',
 					integration: 'Personal serverless development infrastructure',
 					github: 'https://github.com/AutumnsGrove/GroveBloom',
-					spec: '/knowledge/specs/bloom-spec'
+					spec: '/knowledge/specs/bloom-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
+					]
 				},
 				{
 					name: 'Forage',
@@ -395,6 +407,7 @@
 					github: 'https://github.com/AutumnsGrove/Forage',
 					spec: '/knowledge/specs/forage-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
 						{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
 					]
@@ -423,6 +436,7 @@
 					integration: 'For Grove community members',
 					github: 'https://github.com/AutumnsGrove/GroveMC',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
@@ -503,6 +517,7 @@
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
 					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
 						{ name: 'Scraper', icon: 'bug', description: 'Scraper blocking' },
 						{ name: 'Protection', icon: 'brickwallfire', description: 'Complete protection' }
