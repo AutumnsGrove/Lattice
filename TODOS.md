@@ -42,12 +42,44 @@
   - Option B: Disable OAuth flow temporarily
   - Option C: Add waitlist capture instead
 
-### 🕸️ Gossamer & Shutter Development
-- [ ] Continue Gossamer ASCII visual effects library
-  - Spec: `docs/specs/gossamer-spec.md`
-  - GitHub: `AutumnsGrove/Gossamer`
-- [ ] Continue Shutter web content distillation
-  - Spec: `docs/specs/shutter-spec.md`
+### 🕸️ Gossamer (v0.1.0) — Phase M4 In Progress
+> **Location:** `~/Documents/Projects/Gossamer`
+> **Status:** Core complete, Svelte components complete (107 tests passing)
+
+**Complete ✅:**
+- [x] GossamerRenderer class + 5 pattern generators (Perlin, fBm, waves, ripple, static)
+- [x] 12 character sets + animation loop with FPS limiting
+- [x] 5 Svelte components (Clouds, Image, Text, Overlay, Border)
+- [x] 11 presets (grove, seasonal, ambient themes)
+
+**Next (Phase M4):**
+- [ ] Create vanilla JS examples (`examples/vanilla/`)
+- [ ] Create SvelteKit integration example (`examples/svelte-kit/`)
+- [ ] Finish API documentation (`docs/API.md`)
+- [ ] Configure ESLint/Prettier
+- [ ] Set up CI/CD pipeline
+
+### 🔐 Shutter (v1.5.0) — v1.6 Auth Next
+> **Location:** `~/Documents/Projects/Shutter`
+> **Status:** Python + Cloudflare Workers complete, PyPI published as `grove-shutter`
+
+**Complete ✅:**
+- [x] Python CLI with Jina → Tavily → httpx fetch chain
+- [x] 2-phase Canary prompt injection detection (17 patterns + LLM)
+- [x] OpenRouter integration (4 model tiers)
+- [x] Cloudflare Workers port with D1 offenders database
+- [x] Published to PyPI
+
+**🚨 SECURITY (before resuming):**
+- [ ] Rotate OpenRouter API key (exposed during dev)
+- [ ] Re-add secrets: `wrangler secret put OPENROUTER_API_KEY`
+
+**Next (v1.6 — Auth):**
+- [ ] Register Shutter as GroveAuth OAuth client
+- [ ] Implement OAuth PKCE flow + JWT verification
+- [ ] Rate limiting via Durable Objects
+- [ ] Deploy to `shutter.grove.place`
+- [ ] NPM package: `@groveengine/shutter`
 
 ### 🗓️ Timeline Curio — PHASE 7 COMPLETE! 🎉
 > **Implementation Plan:** `docs/plans/timeline-curio-implementation.md`
