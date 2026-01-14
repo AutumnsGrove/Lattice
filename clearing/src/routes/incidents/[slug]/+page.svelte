@@ -4,7 +4,7 @@
 	 *
 	 * Shows full incident details with complete timeline.
 	 */
-	import Header from '$lib/components/Header.svelte';
+	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/components/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import { cn } from '$lib/utils/cn';
 	import { getIncidentStatusLabel } from '$lib/types/status';
@@ -18,8 +18,14 @@
 		CheckCircle,
 		Search,
 		Eye,
-		Clock
+		Clock,
+		Trees
 	} from 'lucide-svelte';
+
+	// Status page navigation - just a way home
+	const navItems: NavItem[] = [
+		{ href: 'https://grove.place', label: 'Grove', icon: Trees, external: true }
+	];
 
 	let { data } = $props();
 	const incident = $derived(data.incident);
@@ -87,7 +93,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
-	<Header />
+	<Header {navItems} brandTitle="Status" />
 
 	<main class="flex-1 py-8 px-4 sm:px-6">
 		<div class="max-w-3xl mx-auto">

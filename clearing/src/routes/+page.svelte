@@ -5,7 +5,7 @@
 	 * A clearing in the forest where you can see what's happening.
 	 * Public-facing status page showing platform health, incidents, and uptime.
 	 */
-	import Header from '$lib/components/Header.svelte';
+	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/components/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
@@ -20,8 +20,14 @@
 		Calendar,
 		ChevronDown,
 		BarChart3,
-		FlaskConical
+		FlaskConical,
+		Trees
 	} from 'lucide-svelte';
+
+	// Status page navigation - just a way home
+	const navItems: NavItem[] = [
+		{ href: 'https://grove.place', label: 'Grove', icon: Trees, external: true }
+	];
 
 	let { data } = $props();
 
@@ -52,7 +58,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
-	<Header />
+	<Header {navItems} brandTitle="Status" />
 
 	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">

@@ -4,7 +4,6 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season';
-	import { themeStore } from '../../stores/theme';
 	import { Menu } from 'lucide-svelte';
 	import type { NavItem, MaxWidth } from './types';
 	import type { Season } from '../../types/season';
@@ -37,9 +36,9 @@
 	// Mobile menu state
 	let mobileMenuOpen = $state(false);
 
-	// Toggle dark/light mode on logo click
+	// Cycle through seasons on logo click (spring → summer → autumn → winter)
 	function handleLogoClick() {
-		themeStore.toggle();
+		seasonStore.cycle();
 	}
 
 	const items = navItems || DEFAULT_NAV_ITEMS;
@@ -49,14 +48,14 @@
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
-			<!-- Logo icon - clickable to toggle dark/light mode -->
+			<!-- Logo icon - clickable to cycle through seasons -->
 			<Logo
 				class="w-6 h-6"
 				season={season || $seasonStore}
 				interactive
 				onclick={handleLogoClick}
-				title="Toggle dark/light mode"
-				ariaLabel="Toggle dark or light theme"
+				title="Change season"
+				ariaLabel="Cycle through seasons"
 			/>
 
 			<!-- Brand title or "Grove" text - home link, hidden on mobile -->
