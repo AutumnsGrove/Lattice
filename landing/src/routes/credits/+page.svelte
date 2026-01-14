@@ -300,12 +300,12 @@
 					</div>
 
 					<div class="card p-5">
-						<h3 class="text-lg font-serif text-foreground mb-1">Stripe</h3>
+						<h3 class="text-lg font-serif text-foreground mb-1">Lemon Squeezy</h3>
 						<p class="text-foreground-muted font-sans text-sm">
-							Payment processing. Handles subscriptions, billing, and secure payment flows.
+							Payment processing and merchant of record. Handles subscriptions, billing, tax compliance, and secure payment flows—so we can focus on building, not paperwork.
 						</p>
-						<a href="https://stripe.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
-							stripe.com →
+						<a href="https://lemonsqueezy.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
+							lemonsqueezy.com →
 						</a>
 					</div>
 
