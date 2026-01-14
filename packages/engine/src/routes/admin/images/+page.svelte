@@ -7,10 +7,12 @@
     api,
     apiRequest,
     processImage,
+    supportsJxlEncoding,
     calculateFileHash,
     generateDatePath,
     formatBytes,
-    compressionRatio
+    compressionRatio,
+    formatName,
   } from "$lib/utils";
   import {
     UPLOAD_ACCEPT_ATTR,
@@ -20,10 +22,20 @@
     validateImageFile
   } from "$lib/utils/upload-validation";
 
+  /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean } } }} */
+  let { data } = $props();
+
+  // Feature flags from server
+  const jxlFeatureEnabled = data.jxl?.jxlEnabled ?? false;
+  const jxlKillSwitchActive = data.jxl?.jxlKillSwitchActive ?? false;
+
   // Upload options (defaults with AI analysis enabled)
   let quality = $state(80);
-  let convertToWebP = $state(true);
+  /** @type {'auto' | 'jxl' | 'webp' | 'original'} */
+  // Default to 'auto' if JXL feature is enabled, otherwise 'webp'
+  let imageFormat = $state(/** @type {'auto' | 'jxl' | 'webp' | 'original'} */ (jxlFeatureEnabled ? 'auto' : 'webp'));
   let fullResolution = $state(false);
+  let jxlSupported = $state(false);
   let useAiAnalysis = $state(true);
   let showAdvanced = $state(false);
 
@@ -56,8 +68,10 @@
   let imageToDelete = $state(null);
   let deleting = $state(false);
 
-  onMount(() => {
+  onMount(async () => {
     loadGallery();
+    // Check JXL support on mount
+    jxlSupported = await supportsJxlEncoding();
   });
 
   async function loadGallery(append = false) {
@@ -200,6 +214,7 @@
       aiData: null,
       originalSize: file.size,
       processedSize: null,
+      format: /** @type {string | null} */ (null),
       markdown: null,
       html: null,
       svelte: null,
@@ -220,15 +235,15 @@
       const hash = await calculateFileHash(file);
       updateUpload({ progress: 10, stage: 'Processing image...' });
 
-      // Step 2: Process image (WebP conversion, quality, EXIF strip)
+      // Step 2: Process image (JXL/WebP conversion, quality, EXIF strip)
       let processedBlob = file;
       /** @type {any} */
-      let processResult = { originalSize: file.size, processedSize: file.size, skipped: true };
+      let processResult = { originalSize: file.size, processedSize: file.size, format: 'gif', skipped: true };
 
       if (!file.type.includes('gif')) { // Don't process GIFs
         processResult = await processImage(file, {
           quality,
-          convertToWebP,
+          format: imageFormat,
           fullResolution
         });
         processedBlob = processResult.blob;
@@ -237,7 +252,8 @@
       updateUpload({
         progress: 30,
         stage: useAiAnalysis ? 'Analyzing with AI...' : 'Uploading...',
-        processedSize: processResult.processedSize
+        processedSize: processResult.processedSize,
+        format: processResult.format
       });
 
       // Step 3: AI Analysis (if enabled)
@@ -499,12 +515,27 @@
             </div>
           </div>
 
-          <div class="toggle-options">
-            <label class="toggle-option">
-              <input type="checkbox" bind:checked={convertToWebP} />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">Convert to WebP</span>
-            </label>
+          <div class="format-options">
+            <div class="format-control">
+              <label for="imageFormat">Output Format:</label>
+              <select id="imageFormat" bind:value={imageFormat}>
+                {#if jxlFeatureEnabled && !jxlKillSwitchActive}
+                  <option value="auto">Auto (JXL → WebP fallback)</option>
+                  <option value="jxl">JPEG XL only</option>
+                {/if}
+                <option value="webp">WebP only</option>
+                <option value="original">Keep original</option>
+              </select>
+              {#if jxlFeatureEnabled && !jxlKillSwitchActive}
+                {#if jxlSupported}
+                  <span class="format-badge supported">JXL supported</span>
+                {:else}
+                  <span class="format-badge unsupported">JXL unavailable</span>
+                {/if}
+              {:else if jxlKillSwitchActive}
+                <span class="format-badge unsupported">JXL disabled (emergency)</span>
+              {/if}
+            </div>
 
             <label class="toggle-option">
               <input type="checkbox" bind:checked={fullResolution} />
@@ -570,6 +601,9 @@
                       {formatBytes(upload.originalSize)} → {formatBytes(upload.processedSize)}
                       <span class="compression">{compressionRatio(upload.originalSize, upload.processedSize)}</span>
                     </span>
+                  {/if}
+                  {#if upload.format && upload.format !== 'original'}
+                    <span class="stat-pill format">{formatName(upload.format)}</span>
                   {/if}
                   {#if upload.duplicate}
                     <span class="stat-pill duplicate">Reused existing</span>
@@ -1018,6 +1052,51 @@
     margin-top: 0.25rem;
   }
 
+  .format-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .format-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .format-control label {
+    font-size: 0.85rem;
+    color: var(--color-text);
+  }
+
+  .format-control select {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    background: var(--mobile-menu-bg);
+    color: var(--color-text);
+    font-size: 0.85rem;
+  }
+
+  .format-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--border-radius-small);
+    font-weight: 500;
+  }
+
+  .format-badge.supported {
+    background: rgba(40, 167, 69, 0.15);
+    color: var(--accent-success);
+  }
+
+  .format-badge.unsupported {
+    background: rgba(255, 193, 7, 0.15);
+    color: #b8860b;
+  }
+
   .toggle-options {
     display: flex;
     gap: 1.5rem;
@@ -1196,6 +1275,11 @@
   }
 
   .stat-pill.duplicate {
+    color: var(--color-primary);
+  }
+
+  .stat-pill.format {
+    background: rgba(99, 102, 241, 0.15);
     color: var(--color-primary);
   }
 

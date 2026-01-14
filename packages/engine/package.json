@@ -260,6 +260,7 @@
   "dependencies": {
     "@autumnsgrove/vineyard": "link:../../../Vineyard",
     "@autumnsgrove/gossamer": "link:../../../Gossamer/packages/core",
+    "@jsquash/jxl": "^1.3.0",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",

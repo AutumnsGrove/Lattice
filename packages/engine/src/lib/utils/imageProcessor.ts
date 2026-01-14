@@ -1,7 +1,66 @@
 /**
  * Client-side image processing utility
- * Handles WebP conversion, quality adjustment, EXIF stripping, and hash generation
+ * Handles JXL/WebP conversion, quality adjustment, EXIF stripping, and hash generation
+ *
+ * JPEG XL (JXL) is preferred when supported, with WebP as fallback.
+ * Drawing to canvas automatically strips EXIF data including GPS for privacy.
  */
+
+// =============================================================================
+// JXL ENCODER (LAZY LOADED)
+// =============================================================================
+
+/**
+ * Lazily loaded JXL encoder module
+ * The @jsquash/jxl WASM module is ~800KB, so we only load it when needed
+ */
+let jxlModule: typeof import('@jsquash/jxl') | null = null;
+
+/**
+ * Get the JXL encoder, loading it on first use
+ */
+async function getJxlEncoder(): Promise<typeof import('@jsquash/jxl')> {
+  if (!jxlModule) {
+    jxlModule = await import('@jsquash/jxl');
+  }
+  return jxlModule;
+}
+
+/**
+ * Check if the browser supports JXL encoding via WASM
+ * Caches result after first check
+ */
+let jxlSupportChecked = false;
+let jxlSupported = false;
+
+export async function supportsJxlEncoding(): Promise<boolean> {
+  if (jxlSupportChecked) {
+    return jxlSupported;
+  }
+
+  try {
+    // Check for WebAssembly support
+    if (typeof WebAssembly !== 'object') {
+      jxlSupportChecked = true;
+      jxlSupported = false;
+      return false;
+    }
+
+    // Try to load the JXL encoder
+    await getJxlEncoder();
+    jxlSupportChecked = true;
+    jxlSupported = true;
+    return true;
+  } catch {
+    jxlSupportChecked = true;
+    jxlSupported = false;
+    return false;
+  }
+}
+
+// =============================================================================
+// CORE UTILITIES
+// =============================================================================
 
 /**
  * Calculate SHA-256 hash of file for duplicate detection
@@ -58,35 +117,126 @@ function getMaxDimensionForQuality(quality: number): number {
   return 960;
 }
 
+/**
+ * Get adaptive effort level based on device capabilities
+ * Higher effort = better compression but slower encoding
+ *
+ * Mobile devices: effort 5 (faster, preserves battery)
+ * Desktop: effort 7 (balanced, stays under 3s target)
+ */
+function getAdaptiveEffort(): number {
+  // Detect mobile via user agent or screen size
+  const isMobile = typeof navigator !== 'undefined' &&
+    (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (typeof window !== 'undefined' && window.innerWidth < 768));
+
+  // Mobile gets lower effort for battery/performance
+  if (isMobile) return 5;
+
+  // Cap at 7 to stay under 3s encoding target
+  return 7;
+}
+
+/**
+ * Get ImageData from an image, resizing as needed
+ * Drawing to canvas strips all EXIF metadata (privacy protection)
+ */
+function getImageData(img: HTMLImageElement, width: number, height: number): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Failed to get canvas 2d context');
+  }
+
+  // Drawing to canvas strips EXIF/GPS metadata
+  ctx.drawImage(img, 0, 0, width, height);
+  return ctx.getImageData(0, 0, width, height);
+}
+
+/**
+ * Convert canvas to WebP blob
+ */
+function canvasToWebP(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Failed to create WebP blob'));
+      },
+      'image/webp',
+      quality / 100
+    );
+  });
+}
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+/** Output format for processed images */
+export type ImageFormat = 'jxl' | 'webp' | 'gif' | 'original';
+
 export interface ProcessedImageResult {
   blob: Blob;
   width: number;
   height: number;
   originalSize: number;
   processedSize: number;
+  /** The format the image was encoded to */
+  format: ImageFormat;
+  /** True if processing was skipped (e.g., for GIFs) */
   skipped?: boolean;
+  /** Reason for skipping or fallback */
   reason?: string;
 }
 
 export interface ProcessImageOptions {
   /** Quality 0-100 (default 80) */
   quality?: number;
-  /** Convert to WebP format (default true) */
-  convertToWebP?: boolean;
+  /**
+   * Output format preference
+   * - 'auto': Use JXL if supported, fall back to WebP
+   * - 'jxl': Force JXL (falls back to WebP if not supported)
+   * - 'webp': Force WebP
+   * - 'original': Keep original format (only resizes, strips EXIF)
+   */
+  format?: 'auto' | 'jxl' | 'webp' | 'original';
   /** Skip resizing (default false) */
   fullResolution?: boolean;
+  /**
+   * @deprecated Use `format` instead. Kept for backward compatibility.
+   * If true and format is not set, uses WebP. If false and format not set, keeps original.
+   */
+  convertToWebP?: boolean;
 }
 
+// =============================================================================
+// MAIN PROCESSING FUNCTION
+// =============================================================================
+
 /**
- * Process an image: convert to WebP, adjust quality, strip EXIF
- * Drawing to canvas automatically strips EXIF data including GPS
+ * Process an image: convert to JXL/WebP, adjust quality, strip EXIF
+ *
+ * Privacy: Drawing to canvas automatically strips all EXIF data including GPS.
+ * The @jsquash/jxl encode() receives ImageData (pixel array), NOT the original
+ * file buffer, so EXIF metadata is NOT passed to the encoder.
  */
 export async function processImage(file: File, options: ProcessImageOptions = {}): Promise<ProcessedImageResult> {
   const {
     quality = 80,
-    convertToWebP = true,
-    fullResolution = false
+    fullResolution = false,
+    convertToWebP = true, // Backward compat
   } = options;
+
+  // Handle format option with backward compatibility
+  let formatPreference = options.format;
+  if (!formatPreference) {
+    // Backward compatibility: if convertToWebP is explicitly false, keep original
+    formatPreference = convertToWebP ? 'auto' : 'original';
+  }
 
   // For GIFs, return original to preserve animation
   if (file.type === 'image/gif') {
@@ -96,6 +246,7 @@ export async function processImage(file: File, options: ProcessImageOptions = {}
       height: 0,
       originalSize: file.size,
       processedSize: file.size,
+      format: 'gif',
       skipped: true,
       reason: 'GIF preserved for animation'
     };
@@ -126,16 +277,70 @@ export async function processImage(file: File, options: ProcessImageOptions = {}
   }
   ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-  // Convert to blob
-  const mimeType = convertToWebP ? 'image/webp' : file.type;
-  const qualityDecimal = quality / 100;
+  // Handle original format (just resize/strip EXIF)
+  if (formatPreference === 'original') {
+    const mimeType = file.type || 'image/png';
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => {
+          if (b) resolve(b);
+          else reject(new Error('Failed to create blob'));
+        },
+        mimeType,
+        quality / 100
+      );
+    });
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((b) => {
-      if (b) resolve(b);
-      else reject(new Error('Failed to create blob'));
-    }, mimeType, qualityDecimal);
-  });
+    return {
+      blob,
+      width: targetWidth,
+      height: targetHeight,
+      originalSize,
+      processedSize: blob.size,
+      format: 'original'
+    };
+  }
+
+  // Determine target format
+  let targetFormat: 'jxl' | 'webp' = 'webp';
+
+  if (formatPreference === 'jxl' || formatPreference === 'auto') {
+    const canUseJxl = await supportsJxlEncoding();
+    if (canUseJxl) {
+      targetFormat = 'jxl';
+    }
+  }
+
+  // Encode to target format
+  let blob: Blob;
+  let actualFormat: ImageFormat = targetFormat;
+
+  if (targetFormat === 'jxl') {
+    try {
+      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+      const effort = getAdaptiveEffort();
+
+      const { encode } = await getJxlEncoder();
+      const encoded = await encode(imageData, {
+        quality,
+        effort,
+        lossless: false,
+        progressive: true // Better loading UX
+      });
+
+      blob = new Blob([encoded], { type: 'image/jxl' });
+      actualFormat = 'jxl';
+    } catch (error) {
+      // Fall back to WebP on JXL encoding failure
+      console.warn('JXL encoding failed, falling back to WebP:', error);
+      blob = await canvasToWebP(canvas, quality);
+      actualFormat = 'webp';
+    }
+  } else {
+    // WebP via Canvas API
+    blob = await canvasToWebP(canvas, quality);
+    actualFormat = 'webp';
+  }
 
   return {
     blob,
@@ -143,9 +348,14 @@ export async function processImage(file: File, options: ProcessImageOptions = {}
     height: targetHeight,
     originalSize,
     processedSize: blob.size,
-    skipped: false
+    format: actualFormat,
+    reason: actualFormat !== targetFormat ? `Fallback from ${targetFormat} to ${actualFormat}` : undefined
   };
 }
+
+// =============================================================================
+// FILENAME UTILITIES
+// =============================================================================
 
 /**
  * Generate a date-based path for organizing uploads
@@ -161,8 +371,11 @@ export function generateDatePath(): string {
 
 /**
  * Generate a clean filename from original name for image files
+ *
+ * @param originalName - Original filename
+ * @param format - Target format ('jxl', 'webp', or undefined to keep original extension)
  */
-export function sanitizeImageFilename(originalName: string, useWebP = true): string {
+export function sanitizeImageFilename(originalName: string, format?: 'jxl' | 'webp'): string {
   // Get base name without extension
   const lastDot = originalName.lastIndexOf('.');
   const baseName = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;
@@ -180,10 +393,21 @@ export function sanitizeImageFilename(originalName: string, useWebP = true): str
   const timestamp = Date.now().toString(36);
 
   // Determine extension
-  const ext = useWebP && originalExt !== 'gif' ? 'webp' : originalExt;
+  let ext: string;
+  if (format) {
+    ext = format;
+  } else if (originalExt === 'gif') {
+    ext = 'gif'; // Preserve GIF extension
+  } else {
+    ext = 'webp'; // Default fallback for legacy calls
+  }
 
   return `${sanitized}-${timestamp}.${ext}`;
 }
+
+// =============================================================================
+// DISPLAY UTILITIES
+// =============================================================================
 
 /**
  * Format bytes to human-readable string
@@ -201,4 +425,17 @@ export function compressionRatio(original: number, processed: number): string {
   if (original <= 0) return '0%';
   const saved = ((original - processed) / original) * 100;
   return saved > 0 ? `-${saved.toFixed(0)}%` : `+${Math.abs(saved).toFixed(0)}%`;
+}
+
+/**
+ * Get human-readable format name
+ */
+export function formatName(format: ImageFormat): string {
+  switch (format) {
+    case 'jxl': return 'JPEG XL';
+    case 'webp': return 'WebP';
+    case 'gif': return 'GIF';
+    case 'original': return 'Original';
+    default: return format;
+  }
 }
