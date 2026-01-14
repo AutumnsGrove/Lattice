@@ -93,7 +93,12 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
-  { href: "https://status.grove.place", label: "Status", icon: Activity, external: true },
+  {
+    href: "https://status.grove.place",
+    label: "Status",
+    icon: Activity,
+    external: true,
+  },
 ];
 
 // Connect section (desktop footer)
@@ -121,7 +126,12 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/roadmap/workshop", label: "Workshop", icon: Hammer },
   { href: "/vineyard", label: "Vineyard", icon: Grape },
   { href: "/journey", label: "Journey", icon: Footprints },
-  { href: "https://status.grove.place", label: "Status", icon: Activity, external: true },
+  {
+    href: "https://status.grove.place",
+    label: "Status",
+    icon: Activity,
+    external: true,
+  },
 ];
 
 // Connect section (mobile menu)
@@ -142,7 +152,7 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
 
 // Default legal links (footer bottom bar)
 export const DEFAULT_LEGAL_LINKS: FooterLink[] = [
-  { href: "/legal/privacy", label: "Privacy" },
-  { href: "/legal/terms", label: "Terms" },
+  { href: "/knowledge/legal/privacy-policy", label: "Privacy" },
+  { href: "/knowledge/legal/terms-of-service", label: "Terms" },
   { href: "/shade", label: "Shade", icon: Blinds },
 ];

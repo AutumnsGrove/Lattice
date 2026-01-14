@@ -10,8 +10,8 @@
 	const GROVE_LINKS = {
 		HOME: 'https://grove.place',
 		PRICING: 'https://grove.place/pricing',
-		TERMS: 'https://grove.place/legal/terms',
-		PRIVACY: 'https://grove.place/legal/privacy'
+		TERMS: 'https://grove.place/knowledge/legal/terms-of-service',
+		PRIVACY: 'https://grove.place/knowledge/legal/privacy-policy'
 	} as const;
 
 	// Determine current step based on route

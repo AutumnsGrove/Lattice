@@ -151,9 +151,9 @@
 					<span class="text-divider hidden sm:inline">·</span>
 					<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
 					<span class="text-divider">·</span>
-					<a href="/legal/privacy" class="hover:text-accent-muted transition-colors">Privacy</a>
+					<a href="/knowledge/legal/privacy-policy" class="hover:text-accent-muted transition-colors">Privacy</a>
 					<span class="text-divider">·</span>
-					<a href="/legal/terms" class="hover:text-accent-muted transition-colors">Terms</a>
+					<a href="/knowledge/legal/terms-of-service" class="hover:text-accent-muted transition-colors">Terms</a>
 				</div>
 
 				<!-- Theme Toggle -->

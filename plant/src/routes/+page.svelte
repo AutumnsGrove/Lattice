@@ -345,9 +345,9 @@
 
 				<p class="text-xs text-foreground-subtle text-center mt-6">
 					By continuing, you agree to our
-					<a href="https://grove.place/legal/terms" class="text-primary hover:underline">Terms of Service</a>
+					<a href="https://grove.place/knowledge/legal/terms-of-service" class="text-primary hover:underline">Terms of Service</a>
 					and
-					<a href="https://grove.place/legal/privacy" class="text-primary hover:underline">Privacy Policy</a>.
+					<a href="https://grove.place/knowledge/legal/privacy-policy" class="text-primary hover:underline">Privacy Policy</a>.
 				</p>
 			{/if}
 		</GlassCard>

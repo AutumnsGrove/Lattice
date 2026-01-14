@@ -144,9 +144,9 @@
 					</a>
 				</p>
 				<p class="text-foreground-faint text-sm mt-4">
-					<a href="/legal/terms" class="hover:text-foreground-muted transition-colors">Terms of Service</a>
+					<a href="/knowledge/legal/terms-of-service" class="hover:text-foreground-muted transition-colors">Terms of Service</a>
 					<span class="mx-2">·</span>
-					<a href="/legal/privacy" class="hover:text-foreground-muted transition-colors">Privacy Policy</a>
+					<a href="/knowledge/legal/privacy-policy" class="hover:text-foreground-muted transition-colors">Privacy Policy</a>
 				</p>
 			</section>
 		</div>
