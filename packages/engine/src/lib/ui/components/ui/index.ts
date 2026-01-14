@@ -39,6 +39,7 @@ export { default as GlassOverlay } from "./GlassOverlay.svelte";
 export { default as GlassLogo } from "./GlassLogo.svelte";
 export { default as GlassLogoArchive } from "./GlassLogoArchive.svelte";
 export { default as GlassCarousel } from "./GlassCarousel.svelte";
+export { default as GlassLegend } from "./GlassLegend.svelte";
 
 // Table sub-components (from primitives)
 export {
