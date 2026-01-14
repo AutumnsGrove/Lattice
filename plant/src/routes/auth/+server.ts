@@ -2,7 +2,7 @@
  * OAuth Initiation - Start Heartwood OAuth flow
  *
  * Redirects to GroveAuth with PKCE parameters.
- * Supports providers: google, email
+ * Supports providers: google (others coming post-launch)
  */
 
 import { redirect } from "@sveltejs/kit";
@@ -43,7 +43,8 @@ async function generatePKCE(): Promise<{
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const provider = url.searchParams.get("provider") || "google";
-  const validProviders = ["google", "discord", "email"];
+  // Only Google for launch - Discord, Email, Passkey coming post-launch
+  const validProviders = ["google"];
 
   if (!validProviders.includes(provider)) {
     redirect(302, "/?error=invalid_provider");

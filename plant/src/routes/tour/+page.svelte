@@ -9,6 +9,43 @@
 	let currentStep = $state(0);
 	let showSkipConfirm = $state(false);
 
+	// Touch/swipe handling for mobile
+	let touchStartX = $state(0);
+	let touchEndX = $state(0);
+	let isSwiping = $state(false);
+	const SWIPE_THRESHOLD = 50; // Minimum swipe distance in pixels
+
+	function handleTouchStart(e: TouchEvent) {
+		touchStartX = e.touches[0].clientX;
+		isSwiping = true;
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		if (!isSwiping) return;
+		touchEndX = e.touches[0].clientX;
+	}
+
+	function handleTouchEnd() {
+		if (!isSwiping) return;
+		isSwiping = false;
+
+		const swipeDistance = touchStartX - touchEndX;
+
+		if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+			if (swipeDistance > 0 && currentStep < tourStops.length - 1) {
+				// Swiped left → go forward
+				nextStep();
+			} else if (swipeDistance < 0 && currentStep > 0) {
+				// Swiped right → go back
+				prevStep();
+			}
+		}
+
+		// Reset
+		touchStartX = 0;
+		touchEndX = 0;
+	}
+
 	// Tour stops configuration
 	const tourStops = [
 		{
@@ -139,7 +176,14 @@
 		</div>
 	</div>
 
-	<!-- Tour content -->
+	<!-- Tour content (touch-enabled for swipe navigation) -->
+	<div
+		ontouchstart={handleTouchStart}
+		ontouchmove={handleTouchMove}
+		ontouchend={handleTouchEnd}
+		role="region"
+		aria-label="Tour content - swipe left or right to navigate"
+	>
 	<GlassCard variant="frosted" class="max-w-2xl mx-auto">
 		<!-- Header -->
 		<div class="flex items-start justify-between mb-4">
@@ -230,6 +274,14 @@
 			{/if}
 		</div>
 	</GlassCard>
+	</div>
+
+	<!-- Mobile swipe hint (shown on first step only) -->
+	{#if currentStep === 0}
+		<p class="text-center text-xs text-foreground-subtle mt-4 md:hidden">
+			Swipe left or right to navigate
+		</p>
+	{/if}
 
 	<!-- Skip confirmation modal -->
 	{#if showSkipConfirm}

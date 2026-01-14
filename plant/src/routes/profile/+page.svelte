@@ -14,6 +14,9 @@
 	let favoriteColor = $state<string | null>(null);
 	let selectedInterests = $state<string[]>([]);
 
+	// Submission state
+	let isSubmitting = $state(false);
+
 	// Username validation state
 	let usernameStatus = $state<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
 	let usernameError = $state<string | null>(null);
@@ -113,7 +116,17 @@
 
 	<!-- Form -->
 	<GlassCard variant="frosted" class="max-w-md mx-auto">
-		<form method="POST" use:enhance class="space-y-6">
+		<form
+			method="POST"
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+				};
+			}}
+			class="space-y-6"
+		>
 			<!-- Display Name -->
 			<div>
 				<label for="displayName" class="block text-sm font-medium text-foreground mb-1.5">
@@ -253,10 +266,15 @@
 			<!-- Submit -->
 			<button
 				type="submit"
-				disabled={!displayName || usernameStatus !== 'available'}
+				disabled={!displayName || usernameStatus !== 'available' || isSubmitting}
 				class="btn-primary w-full"
 			>
-				Continue to Plans
+				{#if isSubmitting}
+					<Loader2 size={18} class="animate-spin" />
+					Saving...
+				{:else}
+					Continue to Plans
+				{/if}
 			</button>
 		</form>
 	</GlassCard>
