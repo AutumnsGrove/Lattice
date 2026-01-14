@@ -55,14 +55,14 @@ export const handle: Handle = async ({ event, resolve }) => {
     "max-age=31536000; includeSubDomains; preload",
   );
 
-  // CSP for plant (needs Stripe)
+  // CSP for plant (Lemon Squeezy uses redirect-based checkout, simpler CSP)
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.grove.place data:",
-    "frame-src https://js.stripe.com https://challenges.cloudflare.com",
-    "connect-src 'self' https://*.grove.place https://api.stripe.com",
+    "frame-src https://challenges.cloudflare.com",
+    "connect-src 'self' https://*.grove.place https://api.lemonsqueezy.com",
     "frame-ancestors 'none'",
     "upgrade-insecure-requests",
   ].join("; ");

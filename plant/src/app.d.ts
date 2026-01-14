@@ -38,11 +38,22 @@ declare global {
         GROVEAUTH_URL: string;
         GROVEAUTH_CLIENT_ID: string;
         GROVEAUTH_CLIENT_SECRET: string;
-        STRIPE_SECRET_KEY: string;
-        STRIPE_PUBLISHABLE_KEY: string;
-        STRIPE_WEBHOOK_SECRET: string;
-        /** Number of trial days for new subscriptions (default: 14) */
-        STRIPE_TRIAL_DAYS?: string;
+
+        // Lemon Squeezy payment processing
+        LEMON_SQUEEZY_API_KEY: string;
+        LEMON_SQUEEZY_STORE_ID: string;
+        LEMON_SQUEEZY_WEBHOOK_SECRET: string;
+
+        // Lemon Squeezy variant IDs (per plan × billing cycle)
+        LEMON_SQUEEZY_SEEDLING_VARIANT_MONTHLY?: string;
+        LEMON_SQUEEZY_SEEDLING_VARIANT_YEARLY?: string;
+        LEMON_SQUEEZY_SAPLING_VARIANT_MONTHLY?: string;
+        LEMON_SQUEEZY_SAPLING_VARIANT_YEARLY?: string;
+        LEMON_SQUEEZY_OAK_VARIANT_MONTHLY?: string;
+        LEMON_SQUEEZY_OAK_VARIANT_YEARLY?: string;
+        LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY?: string;
+        LEMON_SQUEEZY_EVERGREEN_VARIANT_YEARLY?: string;
+
         RESEND_API_KEY: string;
         /** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
         PUBLIC_APP_URL?: string;

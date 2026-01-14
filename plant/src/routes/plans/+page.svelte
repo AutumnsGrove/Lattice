@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	// Use centralized icon registry for consistent icons across Grove
-	import { Check, Clock, Lock, ArrowRight } from '@autumnsgrove/groveengine/ui/icons';
+	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	// Shared data and utilities
@@ -17,12 +18,20 @@
 		plans.find((p) => p.status === 'available')?.id ?? null
 	);
 
+	// Submission state
+	let isSubmitting = $state(false);
+
 	// ============================================================================
 	// STATUS COLOR HELPERS
 	// ============================================================================
 
 	/** Color schemes for each tier status */
-	const statusColors = {
+	const statusColors: Record<TierStatus, {
+		text: string;
+		bg: string;
+		check: string;
+		overlay: string;
+	}> = {
 		available: {
 			text: 'text-emerald-600 dark:text-emerald-400',
 			bg: 'bg-emerald-100/60 dark:bg-emerald-900/40',
@@ -40,8 +49,14 @@
 			bg: 'bg-slate-100/60 dark:bg-slate-800/40',
 			check: 'text-slate-400',
 			overlay: 'bg-slate-500/10 dark:bg-slate-500/10'
+		},
+		deprecated: {
+			text: 'text-red-600 dark:text-red-400',
+			bg: 'bg-red-100/60 dark:bg-red-900/40',
+			check: 'text-red-400',
+			overlay: 'bg-red-500/10 dark:bg-red-500/10'
 		}
-	} as const;
+	};
 
 	function getStatusColor(status: TierStatus, shade: keyof (typeof statusColors)['available']) {
 		return statusColors[status][shade];
@@ -83,11 +98,24 @@
 				return 'opacity-90';
 			case 'future':
 				return 'opacity-50 grayscale';
+			case 'deprecated':
+				return 'opacity-40 grayscale line-through';
 		}
 	}
 </script>
 
 <div class="animate-fade-in space-y-8">
+	<!-- Back navigation -->
+	<div class="flex items-center gap-2">
+		<a
+			href="/profile"
+			class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
+		>
+			<ArrowLeft class="w-4 h-4" />
+			Back to profile
+		</a>
+	</div>
+
 	<!-- Header -->
 	<header class="text-center space-y-3">
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground">
@@ -284,15 +312,28 @@
 	</div>
 
 	<!-- Continue button -->
-	<form method="POST" class="space-y-4">
+	<form
+		method="POST"
+		use:enhance={() => {
+			isSubmitting = true;
+			return async ({ update }) => {
+				await update();
+				isSubmitting = false;
+			};
+		}}
+		class="space-y-4"
+	>
 		<input type="hidden" name="plan" value={selectedPlan || ''} />
 		<input type="hidden" name="billingCycle" value={billingCycle} />
 		<button
 			type="submit"
-			disabled={!selectedPlan}
+			disabled={!selectedPlan || isSubmitting}
 			class="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
 		>
-			{#if selectedPlan}
+			{#if isSubmitting}
+				<Loader2 class="w-5 h-5 animate-spin" />
+				Processing...
+			{:else if selectedPlan}
 				Continue with {plans.find((p) => p.id === selectedPlan)?.name}
 			{:else}
 				Select a plan to continue

@@ -11,8 +11,10 @@ export interface CreateTenantInput {
   email: string;
   plan: "free" | "seedling" | "sapling" | "oak" | "evergreen";
   favoriteColor?: string | null;
-  stripeCustomerId?: string | null;
-  stripeSubscriptionId?: string | null;
+  /** Payment provider customer ID (Lemon Squeezy customer_id) */
+  providerCustomerId?: string | null;
+  /** Payment provider subscription ID (Lemon Squeezy subscription_id) */
+  providerSubscriptionId?: string | null;
 }
 
 /**
@@ -63,8 +65,8 @@ export async function createTenant(
       billingId,
       tenantId,
       input.plan,
-      input.stripeCustomerId || null,
-      input.stripeSubscriptionId || null,
+      input.providerCustomerId || null,
+      input.providerSubscriptionId || null,
     )
     .run();
 

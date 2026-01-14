@@ -62,11 +62,26 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
       "monthly") as BillingCycle;
 
     // Get variant ID from environment or config
-    const variantId = getVariantId(
-      plan,
-      billingCycle,
-      platform?.env as Record<string, string>,
-    );
+    // Extract only the string env vars needed for variant lookup
+    const envStrings: Record<string, string> = {
+      LEMON_SQUEEZY_SEEDLING_VARIANT_MONTHLY:
+        platform?.env?.LEMON_SQUEEZY_SEEDLING_VARIANT_MONTHLY ?? "",
+      LEMON_SQUEEZY_SEEDLING_VARIANT_YEARLY:
+        platform?.env?.LEMON_SQUEEZY_SEEDLING_VARIANT_YEARLY ?? "",
+      LEMON_SQUEEZY_SAPLING_VARIANT_MONTHLY:
+        platform?.env?.LEMON_SQUEEZY_SAPLING_VARIANT_MONTHLY ?? "",
+      LEMON_SQUEEZY_SAPLING_VARIANT_YEARLY:
+        platform?.env?.LEMON_SQUEEZY_SAPLING_VARIANT_YEARLY ?? "",
+      LEMON_SQUEEZY_OAK_VARIANT_MONTHLY:
+        platform?.env?.LEMON_SQUEEZY_OAK_VARIANT_MONTHLY ?? "",
+      LEMON_SQUEEZY_OAK_VARIANT_YEARLY:
+        platform?.env?.LEMON_SQUEEZY_OAK_VARIANT_YEARLY ?? "",
+      LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY:
+        platform?.env?.LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY ?? "",
+      LEMON_SQUEEZY_EVERGREEN_VARIANT_YEARLY:
+        platform?.env?.LEMON_SQUEEZY_EVERGREEN_VARIANT_YEARLY ?? "",
+    };
+    const variantId = getVariantId(plan, billingCycle, envStrings);
 
     if (!variantId || variantId === 0) {
       console.error(

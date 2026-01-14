@@ -39,7 +39,7 @@
 	);
 
 	onMount(async () => {
-		// Create checkout session and redirect to Stripe
+		// Create checkout session and redirect to Lemon Squeezy
 		try {
 			const res = await fetch('/checkout', {
 				method: 'POST',
@@ -49,7 +49,7 @@
 			const result = (await res.json()) as { url?: string; error?: string };
 
 			if (result.url) {
-				// Redirect to Stripe Checkout
+				// Redirect to Lemon Squeezy Checkout
 				window.location.href = result.url;
 			} else if (result.error) {
 				error = result.error;
@@ -130,7 +130,7 @@
 		</div>
 		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
 			<CreditCard size={18} />
-			<span>Powered by Stripe</span>
+			<span>Powered by Lemon Squeezy</span>
 		</div>
 	</div>
 </div>

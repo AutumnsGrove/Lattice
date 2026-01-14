@@ -250,8 +250,7 @@ async function handleSubscriptionCreated(
     .bind(customerId, subscriptionId, onboardingId)
     .run();
 
-  // Create the tenant
-  // Note: Using stripeCustomerId/stripeSubscriptionId params since they map to generic provider_* columns
+  // Create the tenant with Lemon Squeezy provider IDs
   await createTenant(db, {
     onboardingId: onboarding.id as string,
     username: onboarding.username as string,
@@ -263,8 +262,8 @@ async function handleSubscriptionCreated(
       | "oak"
       | "evergreen",
     favoriteColor: onboarding.favorite_color as string | null,
-    stripeCustomerId: customerId, // Generic provider customer ID
-    stripeSubscriptionId: subscriptionId, // Generic provider subscription ID
+    providerCustomerId: customerId,
+    providerSubscriptionId: subscriptionId,
   });
 
   console.log("[Webhook] Tenant created", {
