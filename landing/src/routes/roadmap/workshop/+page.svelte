@@ -197,7 +197,7 @@
 					spec: '/knowledge/specs/curios-spec',
 					subComponents: [
 						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
-						{ name: 'Shrines', icon: 'heart', description: 'Personal dedications' },
+						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
 						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
 					]
 				},
@@ -250,7 +250,7 @@
 					tagline: 'Domain Preservation',
 					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
 					status: 'planned',
-					icon: 'tree-deciduous',
+					icon: 'squares-exclude',
 					integration: 'Automatic unlock after 12 months of Sapling+ membership',
 					spec: '/knowledge/specs/centennial-spec'
 				},
@@ -292,7 +292,7 @@
 					tagline: 'Content Moderation',
 					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
 					status: 'planned',
-					icon: 'shielduser',
+					icon: 'file-warning',
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec',
 					subComponents: [
@@ -324,8 +324,8 @@
 					integration: 'Community discovery for all Grove users',
 					spec: '/knowledge/specs/forests-spec',
 					subComponents: [
-						{ name: 'Directory', icon: 'users', description: 'Member listings' },
-						{ name: 'Stroll', icon: 'compass', description: 'Random discovery' }
+						{ name: 'Directory', icon: 'book-user', description: 'Member listings' },
+						{ name: 'Stroll', icon: 'git-branch', description: 'Random discovery' }
 					]
 				},
 				{
@@ -338,7 +338,7 @@
 					integration: 'Immersive exploration mode for Forests',
 					spec: '/knowledge/specs/wander-spec',
 					subComponents: [
-						{ name: 'Active', icon: 'compass', description: 'WASD exploration' },
+						{ name: 'Active', icon: 'chevrons-left-right-ellipsis', description: 'WASD exploration' },
 						{ name: 'Drift', icon: 'line-squiggle', description: 'Passive wandering' }
 					]
 				},
@@ -378,7 +378,7 @@
 					tagline: 'Remote AI Coding',
 					description: 'Text it and forget it. Send development tasks from your phone, and an AI coding agent handles them on a temporary server that self-destructs when done. Your code syncs to cloud storage before shutdown. Autonomous coding from anywhere.',
 					status: 'building',
-					icon: 'terminal',
+					icon: 'loader',
 					domain: 'bloom.grove.place',
 					integration: 'Personal serverless development infrastructure',
 					github: 'https://github.com/AutumnsGrove/GroveBloom',
@@ -476,7 +476,7 @@
 				{
 					name: 'Patina',
 					tagline: 'Automated Backups',
-					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor.',
+					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor. Recent backup activity is visible at status.grove.place.',
 					status: 'live',
 					icon: 'database',
 					integration: 'Internal service protecting all Grove data',

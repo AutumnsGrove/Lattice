@@ -194,6 +194,14 @@ import {
   LineSquiggle,
   // Gossamer - ASCII visual effects
   SprayCan,
+  // Icon updates for workshop - January 2026
+  Loader,
+  SquaresExclude,
+  FileWarning,
+  GalleryHorizontalEnd,
+  GitBranch,
+  ChevronsLeftRightEllipsis,
+  BookUser,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -437,6 +445,14 @@ export const toolIcons = {
   clock: Clock, // Centennial - domain preservation
   tag: Tag, // Seasons - versioning
   globe: Globe, // Website spec
+  // Icon updates - January 2026
+  loader: Loader, // Bloom - remote coding (spinner/loading icon)
+  "squares-exclude": SquaresExclude, // Centennial - domain preservation (legacy/permanence)
+  "file-warning": FileWarning, // Thorn - content moderation
+  "gallery-horizontal-end": GalleryHorizontalEnd, // Curios/Shrines - dedications
+  "git-branch": GitBranch, // Forests/Stroll - random discovery (branching paths)
+  "chevrons-left-right-ellipsis": ChevronsLeftRightEllipsis, // Wander/Active - WASD exploration
+  "book-user": BookUser, // Forests/Directory - member listings
 } as const;
 
 // ============================================================================
