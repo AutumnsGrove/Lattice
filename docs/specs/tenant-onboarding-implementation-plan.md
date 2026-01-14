@@ -1,3 +1,14 @@
+---
+aliases: []
+date created: Sunday, December 14th 2025
+date modified: Monday, January 13th 2026
+tags:
+  - onboarding
+  - implementation-plan
+  - architecture
+type: implementation-plan
+---
+
 ```
     📋 PLANTING PLAN
    ┌─────────────────┐

@@ -1,4 +1,15 @@
-# Porch Specification
+---
+aliases: []
+date created: Monday, January 6th 2026
+date modified: Monday, January 13th 2026
+tags:
+  - support
+  - user-communication
+  - cloudflare-workers
+type: tech-spec
+---
+
+# Porch — Support System
 
 > *Have a seat on the porch. We'll figure it out together.*
 

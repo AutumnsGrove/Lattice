@@ -1,6 +1,7 @@
 ---
+aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Thursday, January 2nd 2026
+date modified: Monday, January 13th 2026
 tags:
   - specifications
   - architecture
