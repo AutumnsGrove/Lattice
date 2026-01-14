@@ -256,9 +256,9 @@ Composite ASCII effects over existing content.
 │                                     │
 │    Your existing content here       │
 │                                     │
-│    ·  .  ·    ·  .  ·    ·  .  ·   │  ← Gossamer overlay
-│  ·    .  ·  ·    .  ·  ·    .  ·   │     (semi-transparent)
-│    ·  .  ·    ·  .  ·    ·  .  ·   │
+│    ·  .  ·    ·  .  ·    ·  .  ·    │  ← Gossamer overlay
+│    ·  .  ·    ·  .  ·    ·  .  ·    │     (semi-transparent)
+│    ·  .  ·    ·  .  ·    ·  .  ·    │
 │                                     │
 └─────────────────────────────────────┘
 ```
@@ -397,7 +397,7 @@ export { grovePresets } from './grove-presets';  // Grove-specific presets
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        <Gossamer>                                  │
+│                        <Gossamer>                               │
 │  Base container with shared context (character sets, config)    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
@@ -791,7 +791,7 @@ export function generatePatternData(
 │         └───────────────────┼───────────────────┘               │
 │                             ▼                                   │
 │                   ┌───────────────────┐                         │
-│                   │       MOTES       │                         │
+│                   │     GOSSAMER      │                         │
 │                   │  ASCII Effects    │                         │
 │                   └───────────────────┘                         │
 │                             │                                   │
