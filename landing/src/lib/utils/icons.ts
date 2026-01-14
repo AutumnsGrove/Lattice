@@ -192,6 +192,8 @@ import {
   // Wander - immersive discovery
   Earth,
   LineSquiggle,
+  // Gossamer - ASCII visual effects
+  SprayCan,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -362,6 +364,8 @@ export const toolIcons = {
   // Wander - immersive discovery
   earth: Earth, // Wander - main icon (a world to explore)
   "line-squiggle": LineSquiggle, // Wander - Drift mode
+  // Gossamer - ASCII visual effects
+  spraycan: SprayCan, // Gossamer - main icon
   // Subicons for workshop features
   layoutlist: LayoutList, // Lattice - Vines
   origami: Origami, // Songbird - Canary

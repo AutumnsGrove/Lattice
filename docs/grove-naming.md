@@ -119,6 +119,18 @@ Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, c
 
 *What curiosities will they find?*
 
+### Gossamer
+**ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
+**Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
+
+Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.
+
+Gossamer is an open source visual effects library. ASCII patterns that add atmosphere without demanding attention. Floating textures, ambient backgrounds, image transformations. Not the content—the quality of light around it. Barely-there textures woven through your space, character-based patterns that feel handmade.
+
+Framework-agnostic at its core (`gossamer`), with adapters for Svelte (`@gossamer/svelte`), React, and Vue. Born in the Grove, but free to grow anywhere.
+
+*Threads of light.*
+
 ### Rings
 **Analytics** · *Integrated into admin dashboard*
 
@@ -389,6 +401,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Terrarium** | Platform | Creative canvas | grove.place/terrarium |
 | **Weave** | Platform | Visual composition | *(part of Terrarium)* |
 | **Curios** | Platform | Cabinet of wonders | curios.grove.place |
+| **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
 | **Rings** | Platform | Analytics | *(integrated)* |
 | **Clearing** | Platform | Status page | status.grove.place |
 | **Waystone** | Platform | Help center | *(integrated)* |
@@ -433,6 +446,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Terrarium | GroveTerrarium |
 | Weave | GroveWeave |
 | Curios | GroveCurios |
+| Gossamer | gossamer (npm) |
 | Rings | GroveAnalytics |
 | Clearing | GroveClear |
 | Waystone | GroveWaystone |

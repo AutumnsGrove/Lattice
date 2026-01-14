@@ -426,6 +426,21 @@
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
+				{
+					name: 'Gossamer',
+					tagline: 'ASCII Visual Effects',
+					description: 'Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.',
+					status: 'planned',
+					icon: 'spraycan',
+					integration: 'Open-source NPM package for any web project',
+					github: 'https://github.com/AutumnsGrove/Gossamer',
+					spec: '/knowledge/specs/gossamer-spec',
+					subComponents: [
+						{ name: 'Svelte', icon: 'component', description: '@gossamer/svelte' },
+						{ name: 'React', icon: 'component', description: '@gossamer/react' },
+						{ name: 'Vue', icon: 'component', description: '@gossamer/vue' }
+					]
+				},
 			]
 		},
 		{

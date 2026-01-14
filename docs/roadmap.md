@@ -171,6 +171,16 @@ New growth appears. The grove finds its voice.
   - Moodboard, Typewriter, Solarpunk
   - See `@autumnsgrove/foliage`
 
+- [ ] **Gossamer:** ASCII visual effects (Open Source)
+  - NPM: `gossamer` (core) + `@gossamer/svelte`
+  - Repository: github.com/AutumnsGrove/Gossamer
+  - 2D Canvas-based ASCII patterns
+  - Ambient backgrounds, floating textures
+  - Image → ASCII transformations
+  - Framework adapters (Svelte, React, Vue)
+  - Seasonal presets (grove-mist, winter-snow, etc.)
+  - See `docs/specs/gossamer-spec.md`
+
 ### Technical Implementation
 
 - [ ] Integrate Cloudflare Email Routing API
