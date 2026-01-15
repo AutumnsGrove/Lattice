@@ -2,7 +2,7 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { Mail, ExternalLink, Heart } from 'lucide-svelte';
+	import { Mail, ExternalLink, Heart, Compass } from 'lucide-svelte';
 </script>
 
 <SEO
@@ -21,9 +21,17 @@
 				<Logo class="w-16 h-16 mx-auto" season={$seasonStore} />
 			</div>
 			<h1 class="text-3xl md:text-4xl font-serif text-foreground mb-3">Hello there</h1>
-			<p class="text-lg text-foreground-muted font-sans">
+			<p class="text-lg text-foreground-muted font-sans mb-4">
 				I'm Autumn, and I built Grove.
 			</p>
+			<a
+				href="/knowledge/help/wanderers-and-pathfinders"
+				class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-subtle/20 text-sm text-accent-muted hover:bg-accent-subtle/30 hover:text-accent transition-colors"
+				title="The grove keeper who finds and shows the way"
+			>
+				<Compass class="w-3.5 h-3.5" />
+				<span>Wayfinder</span>
+			</a>
 		</div>
 
 		<!-- Personal note -->
