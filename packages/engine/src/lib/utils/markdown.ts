@@ -184,8 +184,17 @@ export interface ContentLoaderConfig {
 // Marked Configuration
 // ============================================================================
 
-// Configure marked renderer for GitHub-style code blocks
+// Configure marked renderer for GitHub-style code blocks and heading IDs
 const renderer = new marked.Renderer();
+
+// Add IDs to headings for table of contents linking
+// Note: marked v5+ removed headerIds option, so we use a custom renderer instead
+renderer.heading = function (token: Tokens.Heading): string {
+  const text = token.text;
+  const level = token.depth;
+  const id = generateHeadingId(text);
+  return `<h${level} id="${id}">${text}</h${level}>`;
+};
 
 renderer.code = function (token: Tokens.Code | string): string {
   // Handle both old (code, language) and new (token) API signatures

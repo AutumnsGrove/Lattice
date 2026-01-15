@@ -43,7 +43,7 @@
 				throw new Error('Failed to load more');
 			}
 
-			const result = await response.json();
+			const result = await response.json() as { summaries: PageData['summaries']; pagination: PageData['pagination'] };
 			summaries = [...summaries, ...result.summaries];
 			pagination = result.pagination;
 		} catch (error) {

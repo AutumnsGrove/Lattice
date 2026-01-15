@@ -79,8 +79,6 @@
 	// Configure marked for safe rendering
 	$effect(() => {
 		marked.setOptions({
-			headerIds: false,
-			mangle: false,
 			breaks: true
 		});
 	});
