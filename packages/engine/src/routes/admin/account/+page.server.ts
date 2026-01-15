@@ -57,6 +57,8 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
   }
 
   // Load billing information
+  // NOTE: Each database query is in its own try/catch to prevent cascading failures.
+  // See AGENT.md:248-270 for the isolated query pattern rationale.
   let billing: BillingRecord | null = null;
   let billingError = false;
   try {
