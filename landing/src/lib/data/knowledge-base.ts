@@ -1203,6 +1203,17 @@ export const philosophyDocs: Doc[] = [
     lastUpdated: "2026-01-12",
     readingTime: 6,
   },
+  {
+    slug: "grove-user-identity",
+    title: "Grove User Identity System",
+    description:
+      "The layered identity system that describes who you are in the grove",
+    excerpt:
+      "Wanderer, Rooted, Pathfinder, Wayfinder. These aren't membership tiers—they describe who you are in the community. Everyone enters as a wanderer, some take root, a few become pathfinders, one tends the grove.",
+    category: "philosophy",
+    lastUpdated: "2026-01-15",
+    readingTime: 5,
+  },
 ];
 
 // Design Documents

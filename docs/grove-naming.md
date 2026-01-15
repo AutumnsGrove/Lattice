@@ -534,7 +534,7 @@ Identity (Wanderer, Rooted, Pathfinder) describes who you are.
 
 These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen is a top-tier subscriber. A Pathfinder can be at any tier. Your tier is a product relationship. Your identity is a community relationship.
 
-*For full documentation, see [Grove User Identity](grove-user-identity.md).*
+*For full documentation, see [Grove User Identity](/knowledge/philosophy/grove-user-identity).*
 
 ---
 
