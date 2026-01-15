@@ -277,6 +277,215 @@ describe("Logo Color Computation", () => {
 });
 
 // =============================================================================
+// MONOCHROME MODE TESTS
+// =============================================================================
+
+describe("Logo Monochrome Mode", () => {
+  interface TierColors {
+    dark: string;
+    light: string;
+  }
+
+  interface LogoTierColors {
+    tier1: TierColors;
+    tier2: TierColors;
+    tier3: TierColors;
+    trunk: TierColors;
+  }
+
+  // Sample seasonal palette (simplified)
+  const samplePalette: LogoTierColors = {
+    tier1: { dark: "#2d5a27", light: "#4a7c43" },
+    tier2: { dark: "#1e4620", light: "#3d6b35" },
+    tier3: { dark: "#163318", light: "#2d5a27" },
+    trunk: { dark: "#3d2914", light: "#5a3f30" },
+  };
+
+  /**
+   * Flattens a tier to single-tone (uses dark color for both sides)
+   */
+  function flattenTier(tierColors: TierColors): TierColors {
+    return {
+      dark: tierColors.dark,
+      light: tierColors.dark,
+    };
+  }
+
+  /**
+   * Computes final colors based on props (mirrors component logic)
+   */
+  function computeColors(
+    palette: LogoTierColors,
+    options: {
+      tier1?: TierColors;
+      tier2?: TierColors;
+      tier3?: TierColors;
+      trunk?: TierColors;
+      monochromeColor?: string;
+      monochromeTrunk?: boolean;
+      monochrome?: boolean;
+    } = {},
+  ): LogoTierColors {
+    const {
+      tier1,
+      tier2,
+      tier3,
+      trunk,
+      monochromeColor,
+      monochromeTrunk = false,
+      monochrome = false,
+    } = options;
+
+    // Determine base tier colors
+    const baseTier1 = tier1 ?? palette.tier1;
+    const baseTier2 = tier2 ?? palette.tier2;
+    const baseTier3 = tier3 ?? palette.tier3;
+    const baseTrunk = trunk ?? palette.trunk;
+
+    // monochromeColor takes precedence
+    if (monochromeColor) {
+      const flatColor = { dark: monochromeColor, light: monochromeColor };
+      return {
+        tier1: flatColor,
+        tier2: flatColor,
+        tier3: flatColor,
+        trunk: monochromeTrunk ? flatColor : baseTrunk,
+      };
+    }
+
+    // monochrome: flatten each tier
+    if (monochrome) {
+      return {
+        tier1: flattenTier(baseTier1),
+        tier2: flattenTier(baseTier2),
+        tier3: flattenTier(baseTier3),
+        trunk: flattenTier(baseTrunk),
+      };
+    }
+
+    // Default: full split-tone
+    return {
+      tier1: baseTier1,
+      tier2: baseTier2,
+      tier3: baseTier3,
+      trunk: baseTrunk,
+    };
+  }
+
+  describe("flattenTier helper", () => {
+    it("should set light to match dark color", () => {
+      const result = flattenTier({ dark: "#ff0000", light: "#00ff00" });
+      expect(result.dark).toBe("#ff0000");
+      expect(result.light).toBe("#ff0000");
+    });
+
+    it("should preserve dark color exactly", () => {
+      const original = { dark: "#123456", light: "#abcdef" };
+      const result = flattenTier(original);
+      expect(result.dark).toBe(original.dark);
+    });
+  });
+
+  describe("monochrome prop behavior", () => {
+    it("should flatten all tiers when monochrome is true", () => {
+      const result = computeColors(samplePalette, { monochrome: true });
+
+      // Each tier should have matching dark/light values
+      expect(result.tier1.light).toBe(result.tier1.dark);
+      expect(result.tier2.light).toBe(result.tier2.dark);
+      expect(result.tier3.light).toBe(result.tier3.dark);
+      expect(result.trunk.light).toBe(result.trunk.dark);
+    });
+
+    it("should preserve tier-to-tier variation in monochrome mode", () => {
+      const result = computeColors(samplePalette, { monochrome: true });
+
+      // Different tiers should still have different colors
+      expect(result.tier1.dark).not.toBe(result.tier2.dark);
+      expect(result.tier2.dark).not.toBe(result.tier3.dark);
+      expect(result.tier3.dark).not.toBe(result.trunk.dark);
+    });
+
+    it("should preserve trunk/foliage differentiation in monochrome mode", () => {
+      const result = computeColors(samplePalette, { monochrome: true });
+
+      // Trunk should be different from foliage tiers
+      expect(result.trunk.dark).not.toBe(result.tier1.dark);
+      expect(result.trunk.dark).not.toBe(result.tier2.dark);
+      expect(result.trunk.dark).not.toBe(result.tier3.dark);
+    });
+
+    it("should use dark color values when flattened", () => {
+      const result = computeColors(samplePalette, { monochrome: true });
+
+      // Flattened colors should be the original dark values
+      expect(result.tier1.dark).toBe(samplePalette.tier1.dark);
+      expect(result.tier2.dark).toBe(samplePalette.tier2.dark);
+      expect(result.tier3.dark).toBe(samplePalette.tier3.dark);
+      expect(result.trunk.dark).toBe(samplePalette.trunk.dark);
+    });
+
+    it("should not flatten when monochrome is false (default)", () => {
+      const result = computeColors(samplePalette, { monochrome: false });
+
+      // Should preserve original split-tone
+      expect(result.tier1.dark).not.toBe(result.tier1.light);
+      expect(result.tier2.dark).not.toBe(result.tier2.light);
+    });
+  });
+
+  describe("monochrome with custom tier overrides", () => {
+    it("should flatten custom tier colors when monochrome is true", () => {
+      const customTier = { dark: "#ff0000", light: "#ffcccc" };
+      const result = computeColors(samplePalette, {
+        tier1: customTier,
+        monochrome: true,
+      });
+
+      expect(result.tier1.dark).toBe("#ff0000");
+      expect(result.tier1.light).toBe("#ff0000");
+    });
+
+    it("should flatten all overrides including trunk", () => {
+      const customTrunk = { dark: "#8b4513", light: "#deb887" };
+      const result = computeColors(samplePalette, {
+        trunk: customTrunk,
+        monochrome: true,
+      });
+
+      expect(result.trunk.dark).toBe("#8b4513");
+      expect(result.trunk.light).toBe("#8b4513");
+    });
+  });
+
+  describe("monochromeColor takes precedence over monochrome", () => {
+    it("should use monochromeColor when both props are set", () => {
+      const result = computeColors(samplePalette, {
+        monochromeColor: "#00ff00",
+        monochrome: true,
+      });
+
+      // All tiers should be the monochromeColor
+      expect(result.tier1.dark).toBe("#00ff00");
+      expect(result.tier1.light).toBe("#00ff00");
+      expect(result.tier2.dark).toBe("#00ff00");
+      expect(result.tier3.dark).toBe("#00ff00");
+    });
+
+    it("should apply monochromeColor to trunk only with monochromeTrunk", () => {
+      const result = computeColors(samplePalette, {
+        monochromeColor: "#00ff00",
+        monochromeTrunk: false,
+      });
+
+      // Trunk should keep palette colors
+      expect(result.trunk.dark).toBe(samplePalette.trunk.dark);
+      expect(result.trunk.light).toBe(samplePalette.trunk.light);
+    });
+  });
+});
+
+// =============================================================================
 // BREATHING ANIMATION STATE TESTS
 // =============================================================================
 
