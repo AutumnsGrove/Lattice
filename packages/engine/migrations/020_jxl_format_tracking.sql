@@ -74,7 +74,7 @@ CREATE INDEX IF NOT EXISTS idx_image_hashes_format ON image_hashes(image_format)
 
 -- JXL encoding feature flag (disabled by default for safe rollout)
 INSERT OR IGNORE INTO feature_flags (
-  key,
+  id,
   name,
   description,
   flag_type,
@@ -95,7 +95,7 @@ INSERT OR IGNORE INTO feature_flags (
 
 -- JXL kill switch (enabled = encoding allowed, disabled = force WebP)
 INSERT OR IGNORE INTO feature_flags (
-  key,
+  id,
   name,
   description,
   flag_type,
@@ -116,7 +116,7 @@ INSERT OR IGNORE INTO feature_flags (
 
 -- JXL percentage rollout flag for gradual enablement
 INSERT OR IGNORE INTO feature_flags (
-  key,
+  id,
   name,
   description,
   flag_type,
