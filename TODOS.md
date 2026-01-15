@@ -8,6 +8,69 @@
 
 # 🔄 CURRENT SESSION (Jan 15, 2026)
 
+## 🌲 V1 Release Planning Discussion
+
+> **Context:** Pre-v1 strategy session covering major architectural and workflow decisions
+
+### Topics Under Discussion
+
+#### 1. Repo/Package Renaming
+- [ ] Rename GitHub repo: `AutumnsGrove/GroveEngine` → `AutumnsGrove/Lattice`
+- [ ] Rename npm package: `@autumnsgrove/groveengine` → `@autumnsgrove/lattice`
+- [ ] Update all consumer apps (landing, plant, meadow, clearing, domains, etc.)
+- [ ] Update all import paths across codebase
+- [ ] Update documentation references
+
+#### 2. Branch Protection & Development Workflow
+- [ ] Protect `main` branch (require PR reviews, no direct pushes)
+- [ ] Create `develop` or `next` branch for integration
+- [ ] Define release workflow: feature → develop → main
+- [ ] Document critical hotfix process (direct-to-main when needed)
+- [ ] Update GitHub Actions for new branch strategy
+- [ ] Update CONTRIBUTING.md with new workflow
+
+#### 3. Testing Infrastructure
+- [ ] Plan comprehensive test coverage across repo
+- [ ] Consider subagent-optimized testing pattern (spawn agents per file)
+- [ ] Add test running to CI pipeline
+- [ ] Define testing standards (unit, integration, E2E)
+
+#### 4. Repo Structure & Separation of Concerns
+> **Question:** Should this be engine-only or Grove ecosystem mono-repo?
+> **Current:** Engine + multiple deployments (landing, plant, meadow, clearing, domains)
+
+Options to discuss:
+- A. Keep mono-repo (benefits: shared tooling, single PRs for cross-cutting changes)
+- B. Split: Engine in own repo, consumer apps in separate repos
+- C. Hybrid: Engine + core services together, satellite apps separate
+
+#### 5. Code Discoverability
+> **Problem:** Files are 15 folders deep, hard to navigate
+- [ ] Consider flattening some directory structures
+- [ ] Explore internal dev search tooling
+- [ ] Document key file locations in README or ARCHITECTURE.md
+- [ ] Improve grep/ripgrep usage for development
+
+#### 6. Spec Compliance Audit
+- [ ] Review engine-spec.md vs. current implementation
+- [ ] Check Glass usage consistency (desktop TOC needs it!)
+- [ ] Document deviations from original spec
+- [ ] Create cleanup/alignment tasks
+
+#### 7. Optimization & Abstraction Opportunities
+- [ ] Identify areas for better integration abstractions
+- [ ] Performance optimization candidates
+- [ ] Code deduplication opportunities
+
+---
+
+# 🔄 PREVIOUS SESSION (Jan 14, 2026)
+
+## 🎉 MAJOR MILESTONE: Site is LIVE!
+- **plant.grove.place is working!** Users can sign up and get accounts RIGHT NOW
+- ⏳ Lemon Squeezy verifying store — can't accept payments yet
+- 🚨 **Need to disable signups** until payment processing is approved
+
 ## Completed Today ✅
 
 ### 🚨 Signup Gate (Lemon Squeezy Verification Pending)
