@@ -317,74 +317,46 @@ export async function handleScheduledEvent(
 }
 
 // =============================================================================
-// MAINTENANCE MODE
+// CLEARING SERVICE INTEGRATION
 // =============================================================================
+// The Clearing is a separate service - communicate via API calls
 
 /**
- * Enable maintenance mode for a tenant
+ * Enable maintenance mode via Clearing API
+ * TODO: Configure CLEARING_API_URL in wrangler.toml
  */
 async function enableMaintenanceMode(
-  db: D1Database,
-  tenantId: string,
+  _db: D1Database,
+  _tenantId: string,
   message?: string
 ): Promise<void> {
-  const now = Math.floor(Date.now() / 1000);
-
-  await db
-    .prepare(
-      `INSERT INTO clearing_status (id, tenant_id, overall_status, maintenance_active, maintenance_message, maintenance_started_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(tenant_id) DO UPDATE SET
-         overall_status = 'maintenance',
-         maintenance_active = 1,
-         maintenance_message = excluded.maintenance_message,
-         maintenance_started_at = excluded.maintenance_started_at,
-         updated_at = excluded.updated_at`
-    )
-    .bind(
-      crypto.randomUUID(),
-      tenantId,
-      'maintenance',
-      1,
-      message ?? 'Scheduled maintenance in progress',
-      now,
-      now
-    )
-    .run();
+  // TODO: Call Clearing API to enable maintenance mode
+  // POST /api/maintenance { status: 'in_progress', title: message }
+  console.log(`[Sentinel] Would enable maintenance mode: ${message}`);
 }
 
 /**
- * Disable maintenance mode for a tenant
+ * Disable maintenance mode via Clearing API
  */
 async function disableMaintenanceMode(
-  db: D1Database,
-  tenantId: string
+  _db: D1Database,
+  _tenantId: string
 ): Promise<void> {
-  await db
-    .prepare(
-      `UPDATE clearing_status
-       SET overall_status = 'operational',
-           maintenance_active = 0,
-           maintenance_message = NULL,
-           maintenance_started_at = NULL,
-           maintenance_expected_end = NULL,
-           updated_at = ?
-       WHERE tenant_id = ?`
-    )
-    .bind(Math.floor(Date.now() / 1000), tenantId)
-    .run();
+  // TODO: Call Clearing API to disable maintenance mode
+  // POST /api/maintenance { status: 'completed' }
+  console.log('[Sentinel] Would disable maintenance mode');
 }
 
 /**
- * Update clearing status with sentinel results
+ * Update Clearing status with sentinel results
+ * Creates an incident if error rate is high
  */
 async function updateClearingFromResults(
-  db: D1Database,
-  tenantId: string,
+  _db: D1Database,
+  _tenantId: string,
   runId: string,
   results: { failedOperations: number; successfulOperations: number }
 ): Promise<void> {
-  const now = Math.floor(Date.now() / 1000);
   const errorRate = results.failedOperations / Math.max(results.successfulOperations + results.failedOperations, 1);
 
   // Determine status based on error rate
@@ -397,18 +369,9 @@ async function updateClearingFromResults(
     status = 'degraded';
   }
 
-  await db
-    .prepare(
-      `UPDATE clearing_status
-       SET overall_status = ?,
-           last_sentinel_run_id = ?,
-           last_sentinel_status = 'completed',
-           last_sentinel_at = ?,
-           updated_at = ?
-       WHERE tenant_id = ?`
-    )
-    .bind(status, runId, now, now, tenantId)
-    .run();
+  // TODO: Call Clearing API to update status or create incident
+  // POST /api/incidents if status indicates an issue
+  console.log(`[Sentinel] Run ${runId} completed with status: ${status}, error rate: ${(errorRate * 100).toFixed(1)}%`);
 }
 
 // =============================================================================

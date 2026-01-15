@@ -1,6 +1,6 @@
--- Migration 008: Sentinel Stress Testing System
+-- Migration 021: Sentinel Stress Testing System
 -- Infrastructure validation and load testing for Grove
--- Part of The Clearing - Grove's status and health monitoring
+-- Results feed into The Clearing (separate service) via API
 
 -- =============================================================================
 -- SENTINEL TEST RUNS
@@ -228,84 +228,7 @@ CREATE INDEX IF NOT EXISTS idx_sentinel_schedules_active ON sentinel_schedules(i
 CREATE INDEX IF NOT EXISTS idx_sentinel_schedules_next ON sentinel_schedules(next_run_at);
 
 -- =============================================================================
--- THE CLEARING - STATUS PAGE DATA
+-- NOTE: Status page tables (status_components, status_incidents, etc.)
+-- are managed by The Clearing service in its own D1 database.
+-- Sentinel results are pushed to Clearing via API calls.
 -- =============================================================================
--- Public-facing status information (The Clearing is Grove's status page)
-
-CREATE TABLE IF NOT EXISTS clearing_status (
-  id TEXT PRIMARY KEY,
-  tenant_id TEXT NOT NULL,
-
-  -- Current system status
-  overall_status TEXT NOT NULL DEFAULT 'operational' CHECK (overall_status IN ('operational', 'degraded', 'partial_outage', 'major_outage', 'maintenance')),
-
-  -- Component statuses (JSON)
-  -- e.g., {"database": "operational", "storage": "operational", "auth": "operational"}
-  component_statuses TEXT DEFAULT '{}',
-
-  -- Latest sentinel results (for transparency)
-  last_sentinel_run_id TEXT,
-  last_sentinel_status TEXT,
-  last_sentinel_at INTEGER,
-
-  -- Public metrics (optional, admin can toggle visibility)
-  show_latency INTEGER DEFAULT 0,
-  show_throughput INTEGER DEFAULT 0,
-  show_uptime INTEGER DEFAULT 1,
-
-  -- Uptime tracking
-  uptime_percentage_30d REAL,
-  uptime_percentage_90d REAL,
-
-  -- Maintenance windows
-  maintenance_active INTEGER DEFAULT 0,
-  maintenance_message TEXT,
-  maintenance_started_at INTEGER,
-  maintenance_expected_end INTEGER,
-
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-);
-
-CREATE INDEX IF NOT EXISTS idx_clearing_status_tenant ON clearing_status(tenant_id);
-
--- =============================================================================
--- CLEARING INCIDENTS
--- =============================================================================
--- Track incidents and their resolution (public status page)
-
-CREATE TABLE IF NOT EXISTS clearing_incidents (
-  id TEXT PRIMARY KEY,
-  tenant_id TEXT NOT NULL,
-
-  -- Incident details
-  title TEXT NOT NULL,
-  description TEXT,
-  severity TEXT NOT NULL DEFAULT 'minor' CHECK (severity IN ('minor', 'major', 'critical')),
-  status TEXT NOT NULL DEFAULT 'investigating' CHECK (status IN ('investigating', 'identified', 'monitoring', 'resolved')),
-
-  -- Affected components (JSON array)
-  affected_components TEXT DEFAULT '[]',
-
-  -- Timeline
-  started_at INTEGER NOT NULL,
-  identified_at INTEGER,
-  resolved_at INTEGER,
-
-  -- Updates (JSON array of {timestamp, message, status})
-  updates TEXT DEFAULT '[]',
-
-  -- Linked sentinel run (if detected by testing)
-  sentinel_run_id TEXT,
-
-  -- Public visibility
-  is_public INTEGER DEFAULT 1,
-
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-
-  FOREIGN KEY (sentinel_run_id) REFERENCES sentinel_runs(id) ON DELETE SET NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_clearing_incidents_tenant ON clearing_incidents(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_clearing_incidents_status ON clearing_incidents(status);
-CREATE INDEX IF NOT EXISTS idx_clearing_incidents_started ON clearing_incidents(started_at DESC);
