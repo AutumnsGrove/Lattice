@@ -6,151 +6,40 @@
 
 ---
 
-# 🔄 CURRENT SESSION (Jan 14, 2026)
-
-## 🎉 MAJOR MILESTONE: Site is LIVE!
-- **plant.grove.place is working!** Users can sign up and get accounts RIGHT NOW
-- ⏳ Lemon Squeezy verifying store — can't accept payments yet
-- 🚨 **Need to disable signups** until payment processing is approved
+# 🔄 CURRENT SESSION (Jan 15, 2026)
 
 ## Completed Today ✅
 
-### Engine v0.9.6 Released
-- [x] Consolidated duplicated utilities into engine package (deleted 11,925 lines of duplication)
-- [x] Added Engine-First pattern documentation to AGENT.md
-- [x] Fixed code block renderer with copy button in knowledge base
-- [x] Restored season cycling on logo tap
-- [x] Improved admin sidebar and Plant onboarding UX
-
-### Documentation & Content
-- [x] Added "Why Grove is Different" article (Twitter algorithm analysis)
-- [x] Consolidated legal pages into knowledge base with TOC support
-- [x] Added Gossamer ASCII visual effects library spec
-- [x] Added Solarpunk tags to aligned specs in workshop
-
-### Plant Improvements
-- [x] Simplified auth to Google-only
-- [x] Fixed color presets and settings persistence
-- [x] Completed Lemon Squeezy migration and type fixes
-- [x] Standardized header logo behavior
-
-## 🌅 Tomorrow's Plan (Jan 15, 2026)
+### 🚨 Signup Gate (Lemon Squeezy Verification Pending)
+- [x] Added `SIGNUPS_ENABLED` env var to `plant/wrangler.toml`
+- [x] Gate at OAuth entry point (`plant/src/routes/auth/+server.ts`)
+- [x] Added `?notice=coming_soon` banner on homepage
+- **To enable:** Set `SIGNUPS_ENABLED = "true"` in Cloudflare Dashboard when LS is verified
 
 ### 🖼️ PR #336: JXL Encoding Review Fixes
-> **PR:** https://github.com/AutumnsGrove/GroveEngine/pull/336
-> **Status:** Code review complete, needs fixes before merge
-> **Grade from reviewer:** B+ — Strong engineering with integration gaps
+- [x] Added idempotency documentation to migration (`020_jxl_format_tracking.sql`)
+- [x] Removed duplicate `@jsquash/jxl` dependency from root `package.json`
+- [x] Removed unused `getImageData()` function from `imageProcessor.ts`
+- [x] Client now sends format metadata in FormData (`imageFormat`, `originalSize`, `storedSize`)
+- [x] Server persists format metadata to `image_hashes` table
 
-**Critical Issues (must fix):**
-- [ ] Migration safety: Add "IF NOT EXISTS" protection to SQLite ALTER TABLE statements
-- [ ] Backend integration: Upload API endpoint needs to persist format metadata and populate analytics table
-- [ ] Dead code: Remove unused `getImageData` function (or use it)
+### ⏸️ Deferred to Follow-up PR
+- [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server
+  - The `jxl_encoding_metrics` table is ready in migration
+  - Needs: Client instrumentation + `/api/images/metrics` endpoint
+  - Track: encoding_time_ms, success/fallback_reason, device_type
 
-**Should Fix:**
-- [ ] Add metrics tracking to error paths (not just success)
-- [ ] Verify `@jsquash/jxl` dependency placement (appears in two locations — dedupe)
-- [ ] Add E2E test for JXL encoding flow
+---
 
-**Minor Polish (nice to have):**
-- [ ] Add tests for mobile detection logic
-- [ ] Add EXIF stripping verification test
-- [ ] Document feature flag default coordination
-- [ ] Consider more robust device detection than UA sniffing
+# 🔄 PREVIOUS SESSION (Jan 14, 2026)
 
-### 🚨 Immediate: Disable Signups
-- [ ] Add gate to prevent new signups until Lemon Squeezy approves store
-  - Option A: Show "Coming Soon" page at plant.grove.place
-  - Option B: Disable OAuth flow temporarily
-  - Option C: Add waitlist capture instead
+## Bugs Found During Testing 🐛
 
-### 🕸️ Gossamer (v0.1.0) — Phase M4 In Progress
-> **Location:** `~/Documents/Projects/Gossamer`
-> **Status:** Core complete, Svelte components complete (107 tests passing)
-
-**Complete ✅:**
-- [x] GossamerRenderer class + 5 pattern generators (Perlin, fBm, waves, ripple, static)
-- [x] 12 character sets + animation loop with FPS limiting
-- [x] 5 Svelte components (Clouds, Image, Text, Overlay, Border)
-- [x] 11 presets (grove, seasonal, ambient themes)
-
-**Next (Phase M4):**
-- [ ] Create vanilla JS examples (`examples/vanilla/`)
-- [ ] Create SvelteKit integration example (`examples/svelte-kit/`)
-- [ ] Finish API documentation (`docs/API.md`)
-- [ ] Configure ESLint/Prettier
-- [ ] Set up CI/CD pipeline
-
-### 🔐 Shutter (v1.5.0) — v1.6 Auth Next
-> **Location:** `~/Documents/Projects/Shutter`
-> **Status:** Python + Cloudflare Workers complete, PyPI published as `grove-shutter`
-
-**Complete ✅:**
-- [x] Python CLI with Jina → Tavily → httpx fetch chain
-- [x] 2-phase Canary prompt injection detection (17 patterns + LLM)
-- [x] OpenRouter integration (4 model tiers)
-- [x] Cloudflare Workers port with D1 offenders database
-- [x] Published to PyPI
-
-**🚨 SECURITY (before resuming):**
-- [ ] Rotate OpenRouter API key (exposed during dev)
-- [ ] Re-add secrets: `wrangler secret put OPENROUTER_API_KEY`
-
-**Next (v1.6 — Auth):**
-- [ ] Register Shutter as GroveAuth OAuth client
-- [ ] Implement OAuth PKCE flow + JWT verification
-- [ ] Rate limiting via Durable Objects
-- [ ] Deploy to `shutter.grove.place`
-- [ ] NPM package: `@groveengine/shutter`
-
-### 🗓️ Timeline Curio — PHASE 7 COMPLETE! 🎉
-> **Implementation Plan:** `docs/plans/timeline-curio-implementation.md`
-> **Status:** Phases 1-7 COMPLETE! Ready for deployment.
-
-**Phase 1-6 ✅:**
-- [x] OpenRouter provider with BYOK (`packages/engine/src/lib/curios/timeline/providers/openrouter.ts`)
-- [x] Voice presets (professional, quest, casual, poetic, minimal) + custom prompts
-- [x] Admin UI (`/admin/curios/timeline`) with API key management
-- [x] API endpoints (generate, activity, backfill, config)
-- [x] Database migration (`020_timeline_curio.sql`) with multi-tenant support
-
-**Phase 7 ✅ (just completed!):**
-- [x] Long-horizon context system (`context.ts`) - 12 task detection patterns, 3-day memory
-- [x] Timeline.svelte component with gutter comments, focus streaks, markdown rendering
-- [x] Heatmap.svelte - GitHub-style activity visualization (365 days, 5 intensity levels)
-- [x] Public `/timeline` route with pagination and "Load More"
-- [x] Full integration: context → voice → generate → store → display
-
-**Phase 8 — FUTURE: Self-Deploy Template:**
-> For power users who want full control over their Timeline Curio
-- [ ] Create `templates/timeline-curio/` standalone Cloudflare Worker
-- [ ] wrangler.toml template with all required bindings
-- [ ] README with step-by-step deployment guide
-- [ ] D1 database creation instructions
-- [ ] Secrets configuration (GitHub token, OpenRouter key)
-- [ ] Environment variable documentation
-- [ ] Optional: One-click deploy button for Cloudflare
-
-**AutumnsGrove Migration (next):**
-- [ ] Run migration on AutumnsGrove's D1 database
-- [ ] Configure GitHub token + OpenRouter key in Arbor
-- [ ] Test generation with AutumnsGrove's GitHub activity
-- [ ] Update AutumnsGrove to render Timeline from new Curio system
-- [ ] Retire old timeline implementation
-
-### 📦 Engine v0.9.7 Prep
-- [ ] Any additional fixes/features before next bump
-- [ ] Update changelog
-
-### 🌱 Plant Polish (Quick Wins)
-- [ ] Add loading states to form submissions (profile, checkout)
-- [ ] Improve error messages (make contextual, not generic)
-- [ ] Add "back" navigation (profile ↔ plans)
-- [ ] Tour mobile polish (swipe hints, better touch targets)
-- [ ] Success page CTA ("Go to your blog" button with tenant URL)
-
-### 📸 Tour Screenshots (HUMAN TASK)
-- [ ] Capture 6 screenshots for onboarding tour
-  - See detailed requirements in "Tour Walkthrough Screenshots" section below
+### Admin Sidebar UI Issues
+- [ ] "Dev" panel in sidebar shows clipped text ("De" only visible)
+- [ ] No clear way to expand collapsed sidebar panels
+- [ ] Consider adding hover-to-expand or click-to-expand behavior
+- **Location:** `packages/engine/src/routes/admin/+layout.svelte` (sidebar component)
 
 ---
 
@@ -176,13 +65,14 @@
 - [x] Fixed TypeScript type casting for LS SDK attributes
 - [x] All GitHub Actions workflows now green ✅
 
-## ✅ Completed (from Jan 13 plan)
+## 🌅 Pick Up Tomorrow 📋
 
-### 1. Test the Checkout Flow — SITE IS LIVE! 🎉
-- [x] Went to plant.grove.place — IT WORKS!
-- [x] Accounts can be created
-- [x] Plan selection works
-- ⏳ Checkout blocked by Lemon Squeezy store verification
+### 1. Test the Checkout Flow!
+- [ ] Go to plant.grove.place
+- [ ] Create a test account
+- [ ] Select a plan and complete checkout
+- [ ] Verify webhook fires and tenant is created
+- [ ] Check LS Dashboard for the subscription
 
 ### 2. 🌱 Plant Walkthrough Improvements (Priority!)
 
@@ -401,14 +291,10 @@ These are the blockers. Get these done and you're live.
 
 ---
 
-## 🍋 Lemon Squeezy Migration — ⏳ AWAITING STORE VERIFICATION
+## 🍋 Lemon Squeezy Migration — IN PROGRESS
 
 > **Migration Guide:** `docs/grove-payment-migration.md`
-> **Status:** Code complete, dashboard complete, awaiting Lemon Squeezy store verification
-
-### 🚨 BLOCKER: Store Verification
-- [ ] **Lemon Squeezy is verifying the store** — Cannot accept payments until approved
-- [ ] **TEMPORARY: Disable signups** until payments can be accepted (or add "coming soon" gate)
+> **Status:** Code complete, awaiting product setup in Lemon Squeezy Dashboard
 
 ### ✅ Code Implementation Complete
 - [x] Created LemonSqueezyProvider in `packages/engine/src/lib/payments/lemonsqueezy/`
@@ -418,18 +304,25 @@ These are the blockers. Get these done and you're live.
 - [x] Created database migration `packages/engine/migrations/019_lemonsqueezy_migration.sql`
 - [x] Removed trial functionality (using full refund policy instead)
 
-### ✅ Dashboard Setup Complete
-- [x] Created 4 products in Lemon Squeezy Dashboard:
+### 📋 Dashboard Setup (In Progress)
+- [ ] Create 4 products in Lemon Squeezy Dashboard:
   - Seedling ($8/month, $81.60/year)
   - Sapling ($12/month, $122.40/year)
   - Oak ($25/month, $255/year)
   - Evergreen ($35/month, $357/year)
-- [x] Noted variant IDs for each product/billing cycle
-- [x] Created webhook endpoint + webhook secret
-- [x] Set all 11 environment variables in Cloudflare Dashboard
+- [ ] Note variant IDs for each product/billing cycle
+- [ ] Create webhook endpoint → get webhook secret
+- [ ] Set environment variables in Cloudflare Dashboard:
+  - `LEMON_SQUEEZY_API_KEY`
+  - `LEMON_SQUEEZY_STORE_ID`
+  - `LEMON_SQUEEZY_WEBHOOK_SECRET`
+  - `LEMON_SQUEEZY_SEEDLING_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_SAPLING_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_OAK_VARIANT_MONTHLY` / `_YEARLY`
+  - `LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY` / `_YEARLY`
 
-### ✅ Database Migration Complete
-- [x] Ran migration: `019_lemonsqueezy_migration.sql`
+### 🗃️ Database Migration
+- [ ] Run migration: `wrangler d1 execute grove-engine-db --file=packages/engine/migrations/019_lemonsqueezy_migration.sql --remote`
 
 ### 🎨 Product Assets Needed
 - [ ] **Create tree imagery for each tier** — Trees that grow with tiers!

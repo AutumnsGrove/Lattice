@@ -42,6 +42,15 @@ async function generatePKCE(): Promise<{
 }
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+  // Check if signups are enabled (gate for Lemon Squeezy verification)
+  const env = platform?.env as Record<string, string> | undefined;
+  const signupsEnabled = env?.SIGNUPS_ENABLED === "true";
+
+  if (!signupsEnabled) {
+    // Redirect back to homepage with a friendly message
+    redirect(302, "/?notice=coming_soon");
+  }
+
   const provider = url.searchParams.get("provider") || "google";
   // Only Google for launch - Discord, Email, Passkey coming post-launch
   const validProviders = ["google"];
@@ -50,8 +59,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     redirect(302, "/?error=invalid_provider");
   }
 
-  // Get GroveAuth configuration
-  const env = platform?.env as Record<string, string> | undefined;
+  // Get GroveAuth configuration (env already defined above for signup gate check)
   const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
   const clientId = env?.GROVEAUTH_CLIENT_ID || "grove-plant";
   // Use canonical URL to avoid cookie domain mismatch between pages.dev and custom domain

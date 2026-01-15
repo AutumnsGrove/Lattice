@@ -8,6 +8,10 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 # Turnstile (Shade) - human verification
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
+# Signup gate - set to "true" when Lemon Squeezy store is verified
+# This prevents OAuth flow from proceeding until payment processing is ready
+SIGNUPS_ENABLED = "false"
+
 # D1 Database binding (same as landing/engine - shared database)
 [[d1_databases]]
 binding = "DB"

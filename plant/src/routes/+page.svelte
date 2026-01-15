@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import {
 		GlassCard,
 		Logo,
@@ -25,7 +26,9 @@
 		Clock,
 		Lock,
 		// Pricing tier icon (only need Sprout for Get Started button)
-		Sprout
+		Sprout,
+		// Notice icon
+		Info
 	} from '@autumnsgrove/groveengine/ui/icons';
 
 	// Shared data
@@ -33,6 +36,9 @@
 
 	// Auth section state
 	let authExpanded = $state(false);
+
+	// Check for signup gate redirect notice
+	const showSignupGateNotice = $derived($page.url.searchParams.get('notice') === 'coming_soon');
 
 	// Config - could be fetched from API or environment
 	const WAITLIST_COUNT = 59;
@@ -98,6 +104,19 @@
 			<span>Already have a blog? <span class="text-primary font-medium">Sign in</span></span>
 		</a>
 	</div>
+
+	<!-- Signup Gate Notice (shown when user tries to sign up but payments aren't ready) -->
+	{#if showSignupGateNotice}
+		<GlassCard variant="frosted" class="text-center border-amber-300/50 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20">
+			<div class="flex items-center justify-center gap-2 mb-2">
+				<Info class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+				<span class="font-medium text-foreground">Almost there!</span>
+			</div>
+			<p class="text-foreground-muted text-sm">
+				We're just finishing setting up payments. Join the waitlist at <a href="https://grove.place" class="text-primary hover:underline">grove.place</a> and we'll let you know the moment signups open!
+			</p>
+		</GlassCard>
+	{/if}
 
 	<!-- Coming Soon Notice -->
 	<GlassCard variant="accent" class="text-center">
