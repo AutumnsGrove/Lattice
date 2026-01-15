@@ -43,7 +43,6 @@ Grove patterns are reusable solutions to common problems in multi-tenant blog pl
 | Pattern | Purpose | Status | Integration |
 |---------|---------|--------|-------------|
 | **[Loom](loom-durable-objects-pattern.md)** | Durable Objects coordination layer | **Active** | All DOs, D1 batching |
-| **[Grove Durable Objects](grove-durable-objects-architecture.md)** | Core DO architecture reference | Active | SessionDO, TenantDO, PostDO |
 
 ---
 
@@ -139,7 +138,6 @@ graph TB
 **Implementation Status:** **ACTIVE** (Core infrastructure)
 
 **Related Documents:**
-- [Grove Durable Objects Architecture](grove-durable-objects-architecture.md)
 - [D1 Replication Analysis](../d1-replication-analysis.md)
 
 ---
@@ -217,7 +215,6 @@ graph TB
 - [Tenant Setup Guide](../tenant-setup-guide.md) - Multi-tenant configuration
 
 ### Architecture
-- [Grove Durable Objects](grove-durable-objects-architecture.md) - DO reference
 - [Cloudflare Architecture](../cloudflare-architecture-guide.md) - Infrastructure
 - [Project Organization](../project-organization.md) - Codebase structure
 

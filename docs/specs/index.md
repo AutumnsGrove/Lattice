@@ -144,7 +144,6 @@ Grove specifications define the architecture, interfaces, and implementation det
 **Related Patterns:**
 - [Loom Pattern](../patterns/loom-durable-objects-pattern.md) - DO coordination
 - [Threshold Pattern](../patterns/threshold-pattern.md) - Rate limiting
-- [Grove Durable Objects](../patterns/grove-durable-objects-architecture.md)
 
 ---
 
