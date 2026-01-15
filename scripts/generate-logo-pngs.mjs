@@ -15,6 +15,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, "../docs/internal/email-assets");
+const LANDING_STATIC_DIR = join(__dirname, "../landing/static");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEASONAL COLOR PALETTES (from Logo.svelte)
@@ -123,12 +124,37 @@ async function generatePng(season, size) {
   console.log(`  ✓ ${filename}`);
 }
 
+async function generateLandingIcons() {
+  console.log("📱 Generating landing static icons...");
+
+  // Use summer (default) palette for landing icons
+  const svg = generateSvg("summer");
+  const svgBuffer = Buffer.from(svg);
+
+  // Generate icon-192.png
+  const png192 = await sharp(svgBuffer).resize(192, 192).png().toBuffer();
+  await writeFile(join(LANDING_STATIC_DIR, "icon-192.png"), png192);
+  console.log("  ✓ icon-192.png");
+
+  // Generate icon-512.png
+  const png512 = await sharp(svgBuffer).resize(512, 512).png().toBuffer();
+  await writeFile(join(LANDING_STATIC_DIR, "icon-512.png"), png512);
+  console.log("  ✓ icon-512.png");
+
+  console.log("");
+}
+
 async function main() {
   console.log("🌲 Generating Grove tree logo PNGs...\n");
 
-  // Ensure output directory exists
+  // Ensure output directories exist
   await mkdir(OUTPUT_DIR, { recursive: true });
+  await mkdir(LANDING_STATIC_DIR, { recursive: true });
 
+  // Generate landing static icons (summer palette)
+  await generateLandingIcons();
+
+  // Generate seasonal email assets
   for (const season of SEASONS) {
     console.log(`${season}:`);
     for (const size of SIZES) {
@@ -138,8 +164,9 @@ async function main() {
   }
 
   console.log(
-    `✅ Generated ${SEASONS.length * SIZES.length} logo PNGs in ${OUTPUT_DIR}`,
+    `✅ Generated ${SEASONS.length * SIZES.length} email PNGs in ${OUTPUT_DIR}`,
   );
+  console.log(`✅ Generated 2 landing icons in ${LANDING_STATIC_DIR}`);
 }
 
 main().catch(console.error);
