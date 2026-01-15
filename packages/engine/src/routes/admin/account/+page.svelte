@@ -96,7 +96,7 @@
         `Are you sure you want to ${action} to ${tierInfo?.name}?\n\n` +
           (tierInfo?.isUpgrade
             ? "You will be charged the pro-rated difference immediately."
-            : "The change will take effect at your next billing date.")
+            : "You will receive a pro-rated credit for your remaining time.")
       )
     ) {
       return;
@@ -129,10 +129,7 @@
     openingPortal = true;
     try {
       const returnUrl = window.location.href;
-      const response = await api.put(
-        `/api/billing?return_url=${encodeURIComponent(returnUrl)}`,
-        {}
-      );
+      const response = await api.put("/api/billing", { returnUrl });
       if (response?.portalUrl) {
         window.location.href = response.portalUrl;
       } else {

@@ -554,9 +554,12 @@ export const PATCH: RequestHandler = async ({
 };
 
 /**
- * PUT /api/billing - Get billing portal URL
+ * POST /api/billing/portal - Create billing portal session
+ *
+ * POST is semantically correct here because we're creating a session
+ * on the payment provider's side, not simply retrieving data.
  */
-export const PUT: RequestHandler = async ({ url, platform, locals }) => {
+export const PUT: RequestHandler = async ({ url, request, platform, locals }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
   }
@@ -569,10 +572,18 @@ export const PUT: RequestHandler = async ({ url, platform, locals }) => {
     throw error(500, "Payment provider not configured");
   }
 
-  const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenantId;
+  // Accept return_url from either query params (legacy) or body (preferred)
+  let returnUrl = url.searchParams.get("return_url");
 
-  const returnUrl = url.searchParams.get("return_url");
+  if (!returnUrl) {
+    try {
+      const body = await request.json() as { returnUrl?: string };
+      returnUrl = body.returnUrl || null;
+    } catch {
+      // Body parsing failed, continue with null
+    }
+  }
+
   if (!returnUrl) {
     throw error(400, "Return URL required");
   }

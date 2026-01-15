@@ -181,6 +181,35 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       );
     }
 
+    // Check export size to prevent memory issues with very large datasets
+    // Tenants with >5000 items should contact support for bulk exports
+    const MAX_EXPORT_ITEMS = 5000;
+    if (exportType === "full" || exportType === "posts") {
+      const postCount = await platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?"
+      ).bind(tenantId).first<{ count: number }>();
+
+      if (postCount && postCount.count > MAX_EXPORT_ITEMS) {
+        throw error(
+          413,
+          `Export too large (${postCount.count} posts). Please contact support for bulk data exports.`
+        );
+      }
+    }
+
+    if (exportType === "full" || exportType === "media") {
+      const mediaCount = await platform.env.DB.prepare(
+        "SELECT COUNT(*) as count FROM image_hashes WHERE tenant_id = ?"
+      ).bind(tenantId).first<{ count: number }>();
+
+      if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {
+        throw error(
+          413,
+          `Export too large (${mediaCount.count} media files). Please contact support for bulk data exports.`
+        );
+      }
+    }
+
     const exportData: {
       exportedAt: string;
       type: ExportType;
