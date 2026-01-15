@@ -27,7 +27,7 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 |-------|-----|-------|
 | **Grove Green** | `#16a34a` | Accents, summer theme |
 | **Autumn Orange** | `#EA580C` | Accents, autumn theme |
-| **Bark Brown** | `#5C3317` | Logo trunk (see Logo Assets for full palette) |
+| **Bark Brown** | `#5C3317` | Logo trunk, autumn dark (see Logo Assets for full palette) |
 | **Cream** | `#fefdfb` | Background (light version) |
 | **Charcoal** | `#1e293b` | Background (dark version) |
 | **Text Dark** | `#374151` | Body text on light bg |
@@ -150,8 +150,8 @@ Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes â
 ## Logo Assets
 
 The Grove logo is a stylized tree SVG with 3D depth:
-- **Branches:** Three tiers of triangular branches, each with dark/light halves for depth
-- **Trunk:** Two-tone tapered trunk
+- **Branches:** Three tiers of paired triangular branches (six total), each pair split into dark/light halves for depth
+- **Trunk:** Two-tone tapered trunk (dark left, light right)
 
 ### Seasonal Variants
 
@@ -182,6 +182,33 @@ For business cards, **autumn** or **summer** are recommended for warmth and appr
 | Tier 2 (middle) | `#166534` | `#4ade80` |
 | Tier 3 (bottom) | `#14532d` | `#22c55e` |
 | Trunk | `#3d2914` | `#5a3f30` |
+
+### Color Reference (Spring)
+
+| Element | Dark | Light |
+|---------|------|-------|
+| Tier 1 (top) | `#be185d` | `#fecdd3` |
+| Tier 2 (middle) | `#9d174d` | `#fda4af` |
+| Tier 3 (bottom) | `#831843` | `#fb7185` |
+| Trunk | `#5a3f30` | `#6f4d39` |
+
+### Color Reference (Winter)
+
+| Element | Dark | Light |
+|---------|------|-------|
+| Tier 1 (top) | `#1e3a5f` | `#bfdbfe` |
+| Tier 2 (middle) | `#1e3a5f` | `#93c5fd` |
+| Tier 3 (bottom) | `#0f172a` | `#60a5fa` |
+| Trunk | `#1e293b` | `#334155` |
+
+### Color Reference (Midnight)
+
+| Element | Dark | Light |
+|---------|------|-------|
+| Tier 1 (top) | `#4c1d95` | `#fce7f3` |
+| Tier 2 (middle) | `#3b0764` | `#f9a8d4` |
+| Tier 3 (bottom) | `#1e1b4b` | `#ec4899` |
+| Trunk | `#1a1a2e` | `#2d1b4e` |
 
 Logo source: `packages/engine/src/lib/ui/components/ui/Logo.svelte`
 
