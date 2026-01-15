@@ -3,6 +3,7 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { invalidateAll, beforeNavigate } from "$app/navigation";
+  import { CONTACT } from "$lib/config/contact";
 
   // Import extracted components
   import SubscriptionCard from "./SubscriptionCard.svelte";
@@ -235,7 +236,7 @@
     <h2>Danger Zone</h2>
     <p class="section-description">
       Need to delete your account? Contact us at
-      <a href="mailto:autumnbrown23@pm.me">autumnbrown23@pm.me</a>.
+      <a href="mailto:{CONTACT.supportEmail}">{CONTACT.supportEmailDisplay}</a>.
       We'll help you export your data first and process the deletion within 30 days.
     </p>
 
