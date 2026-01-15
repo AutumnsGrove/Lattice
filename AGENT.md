@@ -71,7 +71,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 | Document | Purpose |
 |----------|---------|
-| `docs/patterns/grove-durable-objects-architecture.md` | Durable Objects design for auth, tenant coordination, real-time features, D1 scaling |
+| `docs/patterns/loom-durable-objects-pattern.md` | Loom DO coordination layer for auth, tenant coordination, D1 batching |
 | `docs/specs/rings-spec.md` | Rings analytics system with privacy-first design and DO integration |
 | `docs/grove-ai-gateway-integration.md` | Cloudflare AI Gateway integration for per-tenant AI quotas and observability |
 
@@ -159,6 +159,12 @@ We just deleted **11,925 lines** of duplicate code that accumulated because apps
 | **Glass UI** | `@autumnsgrove/groveengine/ui` | GlassCard, GlassButton |
 | **General Utils** | `@autumnsgrove/groveengine/utils` | csrf, sanitize, markdown |
 | **Content** | `@autumnsgrove/groveengine/ui/content` | ContentWithGutter, TOC |
+| **Forms** | `@autumnsgrove/groveengine/ui/forms` | Form components |
+| **Gallery** | `@autumnsgrove/groveengine/ui/gallery` | Image galleries |
+| **Charts** | `@autumnsgrove/groveengine/ui/charts` | Data visualization |
+| **Icons** | `@autumnsgrove/groveengine/ui/icons` | Icon components |
+| **Typography** | `@autumnsgrove/groveengine/ui/typography` | Text components |
+| **Auth** | `@autumnsgrove/groveengine/auth` | Authentication utilities |
 
 ### Common Violations (Don't Do These)
 
@@ -302,6 +308,19 @@ the `pages` query for hours because they shared a try/catch block.
 - **When writing onboarding, tooltips, or error messages** → Use skill: `grove-documentation`
 - **When reviewing docs for voice consistency** → Use skill: `grove-documentation`
 
+### Grove Specifications
+- **When creating new technical specifications** → Use skill: `grove-spec-writing`
+- **When reviewing specs for completeness** → Use skill: `grove-spec-writing`
+- **When standardizing spec formatting** → Use skill: `grove-spec-writing`
+
+### Grove Naming
+- **When naming a new service or feature** → Use skill: `walking-through-the-grove`
+- **When finding a Grove-themed name** → Use skill: `walking-through-the-grove`
+
+### Package Publishing
+- **When publishing to npm** → Use skill: `npm-publish`
+- **Before npm package releases** → Use skill: `npm-publish`
+
 ### CLI Development
 - **When building terminal interfaces** → Use skill: `rich-terminal-output`
 - **For Rich library patterns** → Use skill: `rich-terminal-output`
@@ -345,6 +364,9 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `rich-terminal-output` | Terminal UI with Rich |
 | `grove-ui-design` | Glassmorphism, seasons, forests, warm UI |
 | `grove-documentation` | Grove voice, help articles, user-facing text |
+| `grove-spec-writing` | Technical specifications with Grove formatting |
+| `walking-through-the-grove` | Finding Grove-themed names for new services |
+| `npm-publish` | npm package publishing workflow |
 | `research-strategy` | Systematic research |
 
 ---
@@ -391,5 +413,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-14*
+*Last updated: 2026-01-15*
 *Model: Claude Opus 4.5*
