@@ -318,6 +318,43 @@ pnpm test
 git add -A && git commit -m "test: add comprehensive test coverage via subagent generation"
 ```
 
+### Error Handling & Rollback Strategy
+
+When things go wrong during test generation, follow these protocols:
+
+**If a subagent fails to complete:**
+1. Orchestrator collects the error and context
+2. Retry once with a modified prompt (more specific instructions, simpler scope)
+3. If retry fails, mark the file as "needs manual testing"
+4. Log the failure and continue with other files
+5. Report all failures in the final summary
+
+**If generated tests fail validation:**
+1. Subagent runs `pnpm test <test-file>` after writing
+2. If tests fail, subagent analyzes the error and attempts to fix
+3. Maximum 2 debug/fix attempts before escalating
+4. If still failing after retries, the test file is:
+   - Kept but marked with a `// FIXME: Test needs manual review` comment
+   - Logged in the orchestrator's failure report
+
+**If generated tests are flaky:**
+1. Run the test 3 times to detect inconsistency
+2. Flaky tests are flagged with `// FLAKY: Needs investigation` comment
+3. Common causes to check:
+   - Timing-dependent assertions
+   - Global state pollution
+   - Mock cleanup issues
+
+**Rollback procedure:**
+```bash
+# If test generation causes widespread failures:
+git checkout -- packages/engine/src/  # Revert test files
+git clean -fd packages/engine/tests/  # Remove new test files
+
+# Or selectively revert:
+git checkout HEAD -- path/to/broken.test.ts
+```
+
 ---
 
 ## Test Environment Setup

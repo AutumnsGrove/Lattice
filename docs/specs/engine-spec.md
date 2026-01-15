@@ -19,6 +19,26 @@ type: tech-spec
 >
 > This file is kept for historical reference only.
 
+## Migration Guide
+
+If you're looking for information that was in this spec, here's where to find it in `lattice-spec.md`:
+
+| Old Section (engine-spec) | New Location (lattice-spec) |
+|---------------------------|------------------------------|
+| Overview | Overview |
+| Architecture / Tech Stack | Tech Stack |
+| Deployment Model | Multi-Tenant Architecture |
+| Package Structure | Package Structure |
+| Package Exports | API Exports |
+| Authentication Flow | Authentication Evolution |
+| Database Schema | Database Schema (D1) |
+| Cloudflare Bindings | Infrastructure Bindings |
+| Core Features | Core Features |
+| API Reference | API Reference |
+| Security | Security Considerations |
+| Performance | Performance Optimizations |
+| Testing | See `testing-spec.md` |
+
 ---
 
 ```

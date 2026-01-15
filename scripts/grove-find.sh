@@ -27,6 +27,35 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# =============================================================================
+# Dependency Checks
+# =============================================================================
+
+_grove_check_deps() {
+    local missing=0
+
+    if ! command -v rg &> /dev/null; then
+        echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
+        echo -e "  Install with: ${CYAN}brew install ripgrep${NC}"
+        missing=1
+    fi
+
+    if ! command -v fd &> /dev/null; then
+        echo -e "${RED}Error: fd is not installed.${NC}"
+        echo -e "  Install with: ${CYAN}brew install fd${NC}"
+        missing=1
+    fi
+
+    if [ $missing -eq 1 ]; then
+        echo -e "\n${YELLOW}Some grove-find functions will not work without these tools.${NC}"
+        return 1
+    fi
+    return 0
+}
+
+# Run dependency check on load
+_grove_check_deps || true
+
 # Get the Grove root directory (where this script lives)
 GROVE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

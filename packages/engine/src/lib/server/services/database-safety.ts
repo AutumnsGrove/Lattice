@@ -76,6 +76,13 @@ export interface SafetyConfig {
   dryRun?: boolean;
 
   /**
+   * Redact parameters from audit logs to prevent leaking sensitive data
+   * (passwords, tokens, PII). When true, params are replaced with "[REDACTED]".
+   * Default: true (secure by default)
+   */
+  redactParams?: boolean;
+
+  /**
    * Tables that are protected from DELETE operations
    * Operations on these tables will throw unless explicitly allowed
    */
@@ -108,13 +115,16 @@ const DDL_PATTERNS = [
 
 /**
  * Patterns that indicate potentially dangerous operations
+ *
+ * Note: SQL comments (-- line comments and block comments) are intentionally
+ * NOT blocked here. While they can be used in injection attacks, they're also
+ * used legitimately in SQL for documentation. The primary defense against
+ * injection is using parameterized queries, not blocking comment syntax.
  */
 const DANGEROUS_PATTERNS = [
-  /;\s*DROP\s+/i, // SQL injection attempt
-  /;\s*DELETE\s+/i, // SQL injection attempt
-  /;\s*TRUNCATE\s+/i, // SQL injection attempt
-  /--\s*$/m, // SQL comment at end of line (potential injection)
-  /\/\*.*\*\//s, // Block comments (potential injection)
+  /;\s*DROP\s+/i, // SQL injection attempt (stacked query)
+  /;\s*DELETE\s+/i, // SQL injection attempt (stacked query)
+  /;\s*TRUNCATE\s+/i, // SQL injection attempt (stacked query)
 ];
 
 /**
@@ -204,6 +214,7 @@ export class SafeDatabase {
       auditLog: config.auditLog ?? false,
       auditLogFn: config.auditLogFn ?? console.log,
       dryRun: config.dryRun ?? false,
+      redactParams: config.redactParams ?? true, // Secure by default
       protectedTables: config.protectedTables ?? [],
     };
   }
@@ -244,11 +255,11 @@ export class SafeDatabase {
       );
     }
 
-    // Check for protected tables
+    // Check for protected tables (includes UPDATE to prevent mass data corruption)
     if (
       table &&
       this.config.protectedTables.includes(table.toLowerCase()) &&
-      (operation === "DELETE" || operation === "DDL")
+      (operation === "DELETE" || operation === "UPDATE" || operation === "DDL")
     ) {
       throw new SafetyViolationError(
         `Table '${table}' is protected from ${operation} operations.`,
@@ -260,11 +271,19 @@ export class SafeDatabase {
 
   /**
    * Log an audit entry
+   *
+   * When redactParams is enabled (default), parameters are replaced with
+   * "[REDACTED]" to prevent sensitive data (passwords, tokens, PII) from
+   * appearing in logs.
    */
   private logAudit(entry: Omit<AuditLogEntry, "timestamp" | "dryRun">): void {
     if (this.config.auditLog) {
       const fullEntry: AuditLogEntry = {
         ...entry,
+        // Redact params by default to prevent sensitive data leakage
+        params: this.config.redactParams
+          ? entry.params?.map(() => "[REDACTED]")
+          : entry.params,
         timestamp: new Date().toISOString(),
         dryRun: this.config.dryRun,
       };
@@ -311,10 +330,23 @@ export class SafeDatabase {
 
     // For DELETE/UPDATE, check row limits before executing
     if (operation === "DELETE" || operation === "UPDATE") {
-      // First, count how many rows would be affected
+      // Transform query to count affected rows before execution.
+      //
+      // LIMITATION: This simple regex transformation only works for basic
+      // DELETE/UPDATE statements. Complex queries with subqueries, JOINs,
+      // CTEs, or USING clauses may not be counted correctly. Examples that
+      // won't be properly limited:
+      //   - DELETE FROM logs USING temp WHERE logs.id = temp.id
+      //   - DELETE FROM logs WHERE id IN (SELECT id FROM archive)
+      //   - WITH old AS (...) DELETE FROM logs WHERE ...
+      //
+      // In these cases, the count check will be skipped and a warning logged.
       const countSql = sql
         .replace(/^DELETE\s+FROM/i, "SELECT COUNT(*) as count FROM")
-        .replace(/^UPDATE\s+(\w+)\s+SET\s+.*?\s+WHERE/i, "SELECT COUNT(*) as count FROM $1 WHERE");
+        .replace(
+          /^UPDATE\s+(\w+)\s+SET\s+.*?\s+WHERE/i,
+          "SELECT COUNT(*) as count FROM $1 WHERE",
+        );
 
       // Only do the count check if we can transform the query
       if (countSql !== sql) {
@@ -339,9 +371,15 @@ export class SafeDatabase {
             );
           }
         } catch (err) {
-          // If count check fails, proceed with caution
+          // If count check fails, proceed with caution but log the warning
           if (err instanceof SafetyViolationError) throw err;
-          // Otherwise continue - the actual query will fail if there's an issue
+          // Log that we couldn't verify row count - the operation will proceed
+          // but without row limit enforcement
+          console.warn(
+            `[DB SAFETY] Could not verify row count for ${operation} operation. ` +
+              `Proceeding without row limit enforcement. Error:`,
+            err,
+          );
         }
       }
     }
@@ -407,11 +445,18 @@ export class SafeDatabase {
  *   maxDeleteRows: 50,
  *   maxUpdateRows: 500,
  *   auditLog: true,
+ *   redactParams: true,  // Redact params in audit logs (default: true)
  *   protectedTables: ['users', 'tenants', 'subscriptions'],
  * });
  *
  * // Dry-run mode for testing
  * const testDb = withSafetyGuards(db, { dryRun: true });
+ *
+ * // Opt-in to logging full parameters (use with caution!)
+ * const debugDb = withSafetyGuards(db, {
+ *   auditLog: true,
+ *   redactParams: false,  // Only in dev/debug environments
+ * });
  * ```
  */
 export function withSafetyGuards(
@@ -432,6 +477,7 @@ export const AGENT_SAFE_CONFIG: SafetyConfig = {
   maxDeleteRows: 50,
   maxUpdateRows: 200,
   auditLog: true,
+  redactParams: true, // Prevent sensitive data in logs
   protectedTables: [
     "users",
     "tenants",
