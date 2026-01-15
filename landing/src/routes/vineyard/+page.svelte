@@ -70,10 +70,11 @@
 	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
 
 	// Gossamer state
+	type GossamerPreset = 'grove-mist' | 'grove-fireflies' | 'grove-rain' | 'grove-dew' | 'winter-snow' | 'autumn-leaves' | 'spring-petals' | 'summer-heat' | 'ambient-static' | 'ambient-waves' | 'ambient-clouds';
 	let glassGossamerEnabled = $state(false);
-	let glassGossamerPreset = $state<string>('grove-mist');
+	let glassGossamerPreset = $state<GossamerPreset>('grove-mist');
 	let cardGossamerEnabled = $state(false);
-	let cardGossamerPreset = $state<string>('grove-fireflies');
+	let cardGossamerPreset = $state<GossamerPreset>('grove-fireflies');
 
 	const gossamerPresets = [
 		'grove-mist',
