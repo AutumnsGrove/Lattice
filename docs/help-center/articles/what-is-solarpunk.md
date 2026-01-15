@@ -39,7 +39,7 @@ Grove is solarpunk-aligned. That's not marketing language. It shapes our decisio
 
 When we're deciding how to build something, solarpunk alignment means asking:
 
-- Does this give users more control, or less?
+- Does this give Wanderers more control, or less?
 - Does this create lock-in, or freedom?
 - Does this serve people, or extract from them?
 - Will this still work in 10 years? 50?
@@ -52,7 +52,7 @@ The internet was supposed to be a garden. Somewhere along the way, it became a m
 
 Solarpunk says we can grow something different. Not by going backwards, but by building forward with intention. Technology that helps you connect without exploiting you. Infrastructure that serves communities instead of corporations.
 
-Grove is one small piece of that vision. A quiet corner of the web where your words can grow, where you own what you create, where the business model is "charge fair prices" instead of "sell user data."
+Grove is one small piece of that vision. A quiet corner of the web where your words can grow, where you own what you create, where the business model is "charge fair prices" instead of selling your data.
 
 ## Learn more
 

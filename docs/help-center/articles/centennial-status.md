@@ -49,7 +49,7 @@ Once earned, your grove has:
 
 - **100-year domain reservation** — `yourname.grove.place` is yours for a century
 - **Content preservation** — Your published posts stay publicly accessible
-- **Working RSS feed** — Subscribers can still receive your content
+- **Working RSS feed** — Wanderers can still receive your content
 - **Reactivation anytime** — Resume your subscription and pick up where you left off
 
 ### If you stop paying
@@ -115,7 +115,7 @@ Centennial domains are never reclaimed during the 100-year period. Even if someo
 ### What about my family?
 
 If family members contact us with proof of relationship and a death certificate, we'll work with them. They can request:
-- Transfer of the grove to another Grove user
+- Transfer of the grove to another Wanderer
 - Deletion of the content
 - Keeping things as they are
 

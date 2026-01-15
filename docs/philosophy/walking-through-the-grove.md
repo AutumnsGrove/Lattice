@@ -26,7 +26,7 @@ This is a journey, not a checklist.
 
 Start with `docs/grove-naming.md`. Read the entire document. Let it sink in:
 
-- "A forest of voices. Every user is a tree in the grove."
+- "A forest of voices. Every Wanderer is a tree in the grove."
 - Names aren't branding—they're the language of an ecosystem
 - Things that grow, shelter, connect
 - Not about trees directly—about what happens *in and around* the forest
@@ -70,7 +70,7 @@ Don't ask "where does it go?" first. Ask:
 - Is it a feature of the tree? (Foliage, Heartwood, Rings)
 - Is it a connection? (Ivy, Mycelium, Reeds)
 
-**What does it DO in the user's life?**
+**What does it DO in a Wanderer's life?**
 - Protect? (Shade, Patina)
 - Connect? (Ivy, Meadow, Reeds)
 - Store? (Amber, Trove)

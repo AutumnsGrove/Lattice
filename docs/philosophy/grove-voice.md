@@ -162,7 +162,7 @@ We don't make a big deal of being queer-friendly. We just are. No rainbow-washin
 
 ## Error Messages
 
-When things break, stay warm but be honest. Don't blame the user. Don't hide behind vague language.
+When things break, stay warm but be honest. Don't blame the Wanderer. Don't hide behind vague language.
 
 **Good:**
 ```

@@ -16,7 +16,7 @@
 
 **What I built:** Grove: a multi-tenant blogging platform where everyone gets `username.grove.place`. Built on Cloudflare Workers/D1/R2/KV with SvelteKit.
 
-**The twist:** It aggressively blocks AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.) using Cloudflare's bot management. Your words are not training data. I even block my own AI tools from scraping user content.
+**The twist:** It aggressively blocks AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.) using Cloudflare's bot management. Your words are not training data. I even block my own AI tools from scraping community content.
 
 **How I built it:** One month, mostly AI agents (Claude Code, DeepSeek, Kimi), and a neurodivergent brain that refused to accept surveillance capitalism as inevitable.
 

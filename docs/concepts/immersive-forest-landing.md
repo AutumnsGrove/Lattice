@@ -19,7 +19,7 @@ It's exploration as onboarding. Discovery instead of instruction.
 Grove isn't a product you sign up for - it's a place you arrive at. The forest metaphor runs through everything we build: trees for blogs, meadows for community, seasons that change. An immersive walk-through isn't a gimmick; it's the natural extension of what Grove already is.
 
 This approach:
-- **Respects the user's pace** - They walk, they stop, they look around
+- **Respects the Wanderer's pace** - They walk, they stop, they look around
 - **Shows rather than tells** - Features exist in the landscape, not in bullet points
 - **Sets the tone immediately** - "Oh, this is different. This is calm."
 - **Makes the metaphor tangible** - The forest isn't branding; it's the actual interface
@@ -60,7 +60,7 @@ The `/forest` page is a foundation. Right now it includes:
 
 ### Walking Through
 
-The user has some form of movement - maybe arrow keys, maybe click-to-walk, maybe just scrolling that feels like forward motion. The forest scrolls past. Parallax depth makes it feel dimensional. Trees pass on either side.
+The Wanderer has some form of movement - maybe arrow keys, maybe click-to-walk, maybe just scrolling that feels like forward motion. The forest scrolls past. Parallax depth makes it feel dimensional. Trees pass on either side.
 
 This might not be true 3D, but something that *feels* immersive with what we have: layered SVG planes, depth-based scaling, maybe subtle camera shake or sway.
 
@@ -106,7 +106,7 @@ These are open questions, not decisions:
 - **A game** - No score, no achievements, no failure states
 - **A tour** - No forced path, no checkpoints
 - **A requirement** - Never blocking access to the actual product
-- **A tech demo** - The forest serves the user, not the other way around
+- **A tech demo** - The forest serves the Wanderer, not the other way around
 
 ---
 
@@ -116,7 +116,7 @@ This is a "someday" feature. Way down the line, after:
 - Core platform is stable
 - Multi-tenant architecture is solid
 - Meadow community features exist
-- We have users to test with
+- We have Wanderers to test with
 
 It's documented now so the idea doesn't get lost, and so future decisions can keep this possibility open.
 

@@ -58,8 +58,8 @@ We use something called **Durable Objects**—think of them like little robot he
 Before this architecture, every request had to ask a central database "hey, is this person logged in?" Now, each person basically has their own little robot that already knows the answer. This means:
 
 - **Cheap to run** — Only pay for what's actually being used
-- **Fast everywhere** — Servers near every user
-- **Scales infinitely** — 10 users or 10 million, same system
+- **Fast everywhere** — Servers near every Wanderer
+- **Scales infinitely** — 10 Wanderers or 10 million, same system
 - **Private by design** — Each person's data is isolated
 
 *For the technical details of this architecture, see [Loom — Real-Time Coordination](/knowledge/patterns/loom-durable-objects-pattern).*

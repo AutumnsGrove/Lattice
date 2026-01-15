@@ -43,7 +43,7 @@
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-foreground mb-4">Knowledge Base</h1>
       <p class="text-xl text-foreground-muted max-w-3xl mx-auto">
-        Everything you need to know about Grove - from technical specifications to user guides
+        Everything you need to know about Grove - from technical specifications to guides for Wanderers
       </p>
     </div>
 

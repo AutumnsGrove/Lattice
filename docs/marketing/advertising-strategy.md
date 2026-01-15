@@ -204,7 +204,7 @@ That said, we still need to be discoverable. Here's the strategy.
 ### What We Don't Track
 - Vanity metrics (Twitter followers, page views without context)
 - Engagement metrics that encourage dark patterns
-- Anything that would compromise user privacy
+- Anything that would compromise Wanderer privacy
 
 ---
 

@@ -81,7 +81,7 @@ Remove ads, and you remove the need for:
 - Controversy amplification (no "engagement" to chase)
 - Filter bubbles (no "relevance" to predict)
 
-We charge for the service instead. You're the customer, not the product.
+We charge for the service instead. You're not the product.
 
 ## Private encouragement, not public performance
 

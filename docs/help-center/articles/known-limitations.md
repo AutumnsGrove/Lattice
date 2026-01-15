@@ -21,7 +21,7 @@ Grove doesn't support:
 - Shopping carts
 - Digital downloads for sale
 
-**Why:** E-commerce adds massive complexity: tax handling, fraud prevention, customer disputes, inventory management. It would pull focus from writing and turn Grove into something it's not.
+**Why:** E-commerce adds massive complexity: tax handling, fraud prevention, disputes, inventory management. It would pull focus from writing and turn Grove into something it's not.
 
 **Alternative:** If you need to sell things, use a dedicated platform (Gumroad, Shopify, Ko-fi) and link to it from your Grove blog.
 
@@ -43,7 +43,7 @@ In Meadow, votes exist but the counts are hidden. You can vote on posts, but you
 
 You can't install third-party plugins or extensions. What Grove offers is what Grove offers.
 
-**Why:** Plugins create security vulnerabilities, support nightmares, and inconsistent experiences. They also fragment the user base. Suddenly support requests become "I installed this plugin and now..."
+**Why:** Plugins create security vulnerabilities, support nightmares, and inconsistent experiences. They also fragment the community. Suddenly support requests become "I installed this plugin and now..."
 
 **What you get instead:** A curated, consistent experience. Features Grove adds work for everyone, reliably.
 

@@ -38,11 +38,11 @@ We only work with inference providers that guarantee zero retention. Our approve
 Before using any provider, we verify:
 
 - No logging of prompts or responses
-- No training on user data
+- No training on community data
 - SOC 2 compliance
 - US-based processing with encryption in transit
 
-We exclude providers that can't meet these standards. OpenAI, Anthropic's hosted API, and DeepSeek's direct API are all off the table for user content processing.
+We exclude providers that can't meet these standards. OpenAI, Anthropic's hosted API, and DeepSeek's direct API are all off the table for processing Wanderer content.
 
 ## What we do keep
 

@@ -27,7 +27,7 @@ Grove has internal services that need specific subdomains. Names like `meadow`, 
 
 ### System and infrastructure terms
 
-Technical terms that could cause confusion or security issues are blocked: `admin`, `support`, `login`, `mail`, and similar. These need to point to actual Grove infrastructure, not user blogs.
+Technical terms that could cause confusion or security issues are blocked: `admin`, `support`, `login`, `mail`, and similar. These need to point to actual Grove infrastructure, not Wanderer blogs.
 
 ### Brand protection
 
@@ -45,7 +45,7 @@ We don't provide specific feedback when these terms are blocked. The error messa
 
 ### Already taken
 
-The simplest reason: someone else got there first. Once a username is claimed, it stays with that user until they leave Grove.
+The simplest reason: someone else got there first. Once a username is claimed, it stays with that Wanderer until they leave Grove.
 
 ## Username requirements
 
