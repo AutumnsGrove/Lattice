@@ -153,6 +153,14 @@
 		/** Make trunk match foliage colors */
 		monochromeTrunk?: boolean;
 
+		/**
+		 * Remove the split-tone effect (single tonality per element).
+		 * When true, each tier uses one flat color instead of dark/light sides.
+		 * Preserves tier-to-tier variation and trunk/foliage differentiation.
+		 * Useful for visual consistency with single-toned tree assets.
+		 */
+		monochrome?: boolean;
+
 		// ── Size & Geometry ──────────────────────────────────────────────────────
 
 		/** Size preset or pixel value. Overrides class-based sizing. */
@@ -193,6 +201,7 @@
 		trunk,
 		monochromeColor,
 		monochromeTrunk = false,
+		monochrome = false,
 		size,
 		rotation = 0,
 		shadow = false,
@@ -214,20 +223,48 @@
 	// Get the palette for the current season
 	const palette = $derived(SEASONAL_PALETTES[season]);
 
+	// Helper to flatten a tier to single-tone (uses dark color for both sides)
+	const flattenTier = (tierColors: TierColors): TierColors => ({
+		dark: tierColors.dark,
+		light: tierColors.dark
+	});
+
 	// Compute final colors with overrides
-	const colors = $derived({
-		tier1: monochromeColor
-			? { dark: monochromeColor, light: monochromeColor }
-			: (tier1 ?? palette.tier1),
-		tier2: monochromeColor
-			? { dark: monochromeColor, light: monochromeColor }
-			: (tier2 ?? palette.tier2),
-		tier3: monochromeColor
-			? { dark: monochromeColor, light: monochromeColor }
-			: (tier3 ?? palette.tier3),
-		trunk: monochromeTrunk && monochromeColor
-			? { dark: monochromeColor, light: monochromeColor }
-			: (trunk ?? palette.trunk)
+	const colors = $derived.by(() => {
+		// Determine base tier colors (custom overrides or seasonal palette)
+		const baseTier1 = tier1 ?? palette.tier1;
+		const baseTier2 = tier2 ?? palette.tier2;
+		const baseTier3 = tier3 ?? palette.tier3;
+		const baseTrunk = trunk ?? palette.trunk;
+
+		// monochromeColor takes precedence: single color for entire logo
+		if (monochromeColor) {
+			const flatColor = { dark: monochromeColor, light: monochromeColor };
+			return {
+				tier1: flatColor,
+				tier2: flatColor,
+				tier3: flatColor,
+				trunk: monochromeTrunk ? flatColor : baseTrunk
+			};
+		}
+
+		// monochrome: flatten each tier (removes split-tone, keeps tier variation)
+		if (monochrome) {
+			return {
+				tier1: flattenTier(baseTier1),
+				tier2: flattenTier(baseTier2),
+				tier3: flattenTier(baseTier3),
+				trunk: flattenTier(baseTrunk)
+			};
+		}
+
+		// Default: full split-tone effect
+		return {
+			tier1: baseTier1,
+			tier2: baseTier2,
+			tier3: baseTier3,
+			trunk: baseTrunk
+		};
 	});
 
 	// Compute size styles
