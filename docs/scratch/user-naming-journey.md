@@ -698,3 +698,111 @@ Which is the first impression you want?
 ---
 
 *Sitting with this. The grove is quiet. The paths wind on.*
+
+---
+
+# Resolution: The Grove Identity System
+
+*We found it.*
+
+## The Hierarchy
+
+```
+              ✧ WAYFINDER ✧
+              (Autumn - singular)
+           "She finds the way."
+                    │
+           ─────────┴─────────
+              PATHFINDERS
+        (appointed by Wayfinder)
+       "They light paths for others."
+                    │
+           ─────────┴─────────
+              THE ROOTED
+           (subscribers)
+        "They've planted here."
+                    │
+           ─────────┴─────────
+              WANDERERS
+              (everyone)
+          "All are welcome."
+```
+
+## The Names
+
+| Identity | Who | How You Get It | Meaning |
+|----------|-----|----------------|---------|
+| **Wanderer** | Everyone | Just show up | Exploring the grove, finding your way |
+| **Rooted** | Subscribers | Subscribe (take root) | Committed, planted, has a home here |
+| **Pathfinder** | Trusted leaders | Appointed by Wayfinder | Lights paths for others, guides wanderers |
+| **Wayfinder** | Autumn (singular) | — | Finds the way, tends the grove |
+
+## The Poetry
+
+**Wanderer → Wayfinder** creates beautiful symmetry:
+- Wanderer = looking for the way
+- Wayfinder = showing the way
+
+**Rooted** is the commitment layer—you've stopped just passing through.
+
+**Pathfinder** is earned trust—you help others navigate.
+
+## Usage Examples
+
+### Greetings & Welcome
+- "Welcome, Wanderer."
+- "Welcome home, Wanderer. You've taken root."
+- "The Wayfinder welcomes you to the grove."
+
+### Community Language
+- "Fellow wanderers..."
+- "The Rooted know these paths well."
+- "Ask a Pathfinder—they'll show you the way."
+
+### About Page / Marketing
+- "Grove is a place for wanderers."
+- "Plant your tree. Take root. Grow."
+- "Some wanderers become Pathfinders. One tends the grove as Wayfinder."
+
+### Subscription Flow
+- "Ready to take root?" (CTA)
+- "You're one of the Rooted now." (confirmation)
+- "Welcome among the Rooted." (email)
+
+## How It Interacts with Tier Names
+
+Tier names (Seedling, Sapling, Oak, Evergreen) describe **subscription level**.
+Identity names describe **who you are in the community**.
+
+You can be:
+- A Rooted Seedling (new subscriber)
+- A Rooted Evergreen (top-tier subscriber)
+- A Pathfinder at any tier (appointed by Wayfinder)
+
+They're orthogonal. Tier = what you pay. Identity = who you are.
+
+## Implementation Notes
+
+- **Pathfinder** = similar to existing "Trusted Admins" role
+- Only Autumn (Wayfinder) can appoint Pathfinders
+- Consider: badge/flair in Meadow? Special icon?
+- Consider: Pathfinder-only features? Early access?
+
+## The Story
+
+> You enter the grove as a Wanderer.
+> You explore the paths, find the clearings, meet other wanderers.
+> Something resonates. You plant your tree. You take root.
+> Now you're Rooted—this is home.
+>
+> Time passes. You learn the paths by heart.
+> You help other wanderers find their way.
+> The Wayfinder notices. She makes you a Pathfinder.
+>
+> Now you light the way for others.
+> But you never stop wandering.
+> None of us do.
+
+---
+
+*The grove has names now. They fit.*
