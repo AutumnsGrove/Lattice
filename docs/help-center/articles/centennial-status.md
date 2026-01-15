@@ -74,7 +74,7 @@ Grove runs on Cloudflare infrastructure. Hosting costs stay under 1% of revenue 
 
 ### The Reserve
 
-Once Grove reaches stability, excess revenue goes into **The Reserve**—a fund specifically for long-term sustainability. At scale, this fund can generate enough interest to keep servers running for decades with zero new subscribers.
+Once Grove reaches stability, excess revenue goes into **The Reserve**—a fund specifically for long-term sustainability. At scale, this fund can generate enough interest to keep servers running for decades without new Rooted joining.
 
 ### The plan
 
@@ -106,7 +106,7 @@ Your account settings show how many qualifying months you've accumulated toward 
 
 ### What if I want to change my username?
 
-While you're an active subscriber, you can change your username anytime—Centennial follows your current username. When you eventually stop paying (if you ever do), whichever username you have at that moment becomes your preserved domain for the next century.
+While you're rooted, you can change your username anytime—Centennial follows your current username. When you eventually stop paying (if you ever do), whichever username you have at that moment becomes your preserved domain for the next century.
 
 ### What if someone wants my username after I'm gone?
 

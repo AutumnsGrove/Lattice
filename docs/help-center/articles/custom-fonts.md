@@ -69,7 +69,7 @@ For personality:
 
 ## Uploading custom fonts (Evergreen)
 
-Evergreen subscribers can upload their own fonts:
+Rooted Evergreens can upload their own fonts:
 
 1. Go to **Admin → Settings → Typography**
 2. Click **Upload Custom Font**

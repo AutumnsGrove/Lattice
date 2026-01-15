@@ -9,7 +9,7 @@ Grove.place is a return to something simpler. A place where people can plant the
 
 ## The Vision
 
-*A forest of voices.* Every user is a tree in the grove. Some are saplings just starting out. Some are ancient oaks with deep roots. All are welcome. All have space to grow.
+*A forest of voices.* Every Wanderer is a tree in the grove. Some are saplings just starting out. Some are ancient oaks with deep roots. All are welcome. All have space to grow.
 
 The platform should feel like walking through a peaceful forest at golden hour. Calm. Intentional. A refuge from the noise of social media.
 

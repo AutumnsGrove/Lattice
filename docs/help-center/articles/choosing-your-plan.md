@@ -102,7 +102,7 @@ If you're over the limits of your new plan (say, you have 100 posts and downgrad
 
 ## Centennial: Your grove can outlive you
 
-On Sapling and above, after 12 cumulative months of membership, your grove earns **Centennial status**. Your site stays online for 100 years from the day you planted it—even if you stop paying someday.
+On Sapling and above, after 12 cumulative months of being rooted, your grove earns **Centennial status**. Your site stays online for 100 years from the day you planted it—even if you stop paying someday.
 
 A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them. Yours can too.
 

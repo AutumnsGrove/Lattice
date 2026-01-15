@@ -115,7 +115,7 @@
 					status: 'live',
 					icon: 'landplot',
 					domain: 'plant.grove.place',
-					integration: 'Signup and onboarding for new Grove users',
+					integration: 'Signup and onboarding for new Wanderers',
 					spec: '/knowledge/specs/plant-spec',
 					subComponents: [
 						{ name: 'Loam', icon: 'funnel', description: 'Name protection & validation', href: '/knowledge/specs/loam-spec' }
@@ -128,7 +128,7 @@
 					status: 'building',
 					icon: 'harddrive',
 					domain: 'amber.grove.place',
-					integration: 'Storage dashboard for all Grove users',
+					integration: 'Storage dashboard for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Amber',
 					spec: '/knowledge/specs/amber-spec'
 				},
@@ -139,7 +139,7 @@
 					status: 'planned',
 					icon: 'store',
 					domain: 'pantry.grove.place',
-					integration: 'Shop and provisioning for Grove users',
+					integration: 'Shop and provisioning for Wanderers',
 					spec: '/knowledge/specs/pantry-spec'
 				},
 				{
@@ -223,7 +223,7 @@
 					status: 'planned',
 					icon: 'activity',
 					domain: 'status.grove.place',
-					integration: 'Public platform status for all Grove users',
+					integration: 'Public platform status for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Clearing',
 					spec: '/knowledge/specs/clearing-spec'
 				},
@@ -243,7 +243,7 @@
 					status: 'planned',
 					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
-					integration: 'Support and conversation for all Grove users',
+					integration: 'Support and conversation for all Wanderers',
 					spec: '/knowledge/specs/porch-spec'
 				},
 				{
@@ -328,11 +328,11 @@
 					status: 'planned',
 					icon: 'trees',
 					domain: '{forest}.grove.place',
-					integration: 'Community discovery for all Grove users',
+					integration: 'Community discovery for all Wanderers',
 					spec: '/knowledge/specs/forests-spec',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
-						{ name: 'Directory', icon: 'book-user', description: 'Member listings' },
+						{ name: 'Directory', icon: 'book-user', description: 'Wanderer listings' },
 						{ name: 'Stroll', icon: 'git-branch', description: 'Random discovery' }
 					]
 				},
@@ -433,7 +433,7 @@
 					status: 'live',
 					icon: 'telescope',
 					domain: 'mc.grove.place',
-					integration: 'For Grove community members',
+					integration: 'For Wanderers in the Grove',
 					github: 'https://github.com/AutumnsGrove/GroveMC',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
@@ -511,7 +511,7 @@
 				{
 					name: 'Shade',
 					tagline: 'AI Content Protection',
-					description: 'Users own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
+					description: 'Writers own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
 					icon: 'blinds',
 					integration: 'Automatic protection for all Grove blogs',

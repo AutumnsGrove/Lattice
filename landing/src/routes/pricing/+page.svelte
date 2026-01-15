@@ -371,7 +371,7 @@
             <p>
               <strong>Everyone can read Grove blogs—no login required.</strong> All
               blogs are publicly accessible by default. Meadow (the community feed)
-              requires a free account to browse. Only Evergreen tier users can choose
+              requires a free account to browse. Only Rooted Evergreens can choose
               to make their blog require login to view.
             </p>
             <p class="mt-2 text-xs text-foreground-faint">
@@ -418,7 +418,7 @@
               <strong>Evergreen:</strong> 8 curios.
             </p>
             <p class="mt-2 text-xs text-foreground-faint">
-              Seedling users can still create unlimited pages—they just won't
+              Those on Seedling can still create unlimited pages—they just won't
               appear in the navigation bar. Link to them from posts or your
               About page.
             </p>
@@ -429,8 +429,8 @@
             <p>
               Grove supports <strong>Replies</strong> (private, only the author
               sees) and <strong>Comments</strong> (public, after author approval).
-              Free users can post 20 public comments per week—paid users get unlimited.
-              Private replies are rate-limited for free users to reduce spam.
+              Free accounts can post 20 public comments per week—the Rooted get unlimited.
+              Private replies are rate-limited for free accounts to reduce spam.
             </p>
           </div>
 

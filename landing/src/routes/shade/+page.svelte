@@ -29,7 +29,7 @@
 			<!-- Core Message -->
 			<div class="card p-8 mb-10 bg-accent/10 border-accent/30 text-center">
 				<p class="text-xl font-serif text-foreground mb-4">
-					<strong>Users own their words.</strong>
+					<strong>Writers own their words.</strong>
 				</p>
 				<p class="text-foreground-muted">
 					Content on Grove may not be used for AI training, machine learning, or automated data harvesting.
@@ -126,7 +126,7 @@
 			<section class="mb-10">
 				<h2 class="text-2xl font-serif text-foreground mb-4">An open approach</h2>
 				<p class="text-foreground-muted mb-4">
-					Shade isn't just for Grove. The principles are universal, and we've documented our approach so others can adopt it. If you're building something where users should own their words, you're welcome to implement Shade on your platform.
+					Shade isn't just for Grove. The principles are universal, and we've documented our approach so others can adopt it. If you're building something where writers should own their words, you're welcome to implement Shade on your platform.
 				</p>
 				<p class="text-foreground-muted">
 					The full technical specification is open source.

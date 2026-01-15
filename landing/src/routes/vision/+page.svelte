@@ -70,7 +70,7 @@
 						The Vision
 					</h2>
 					<p class="text-foreground-muted font-sans leading-relaxed">
-						<em>A forest of voices.</em> Every user is a tree in the grove. Some are saplings just starting out.
+						<em>A forest of voices.</em> Every Wanderer is a tree in the grove. Some are saplings just starting out.
 						Some are ancient oaks with deep roots. All are welcome. All have space to grow.
 					</p>
 					<p class="text-foreground-muted font-sans leading-relaxed mt-4">
