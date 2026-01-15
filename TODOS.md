@@ -50,9 +50,9 @@
   - Needs: Client instrumentation + `/api/images/metrics` endpoint
   - Track: encoding_time_ms, success/fallback_reason, device_type
 
-### 📋 Remaining Quick Wins
-- [ ] **Improve error messages** — Currently generic (`form?.error`), make contextual
-- [ ] **Success page CTA** — Add direct "Go to your blog" link (currently only has admin link)
+### 📋 Quick Wins — ✅ COMPLETE!
+- [x] **Error messages** — Already contextual! Server returns specific errors, client displays inline
+- [x] **Success page CTA** — Added "Visit My Blog" button linking to public blog (opens in new tab)
 
 ---
 
