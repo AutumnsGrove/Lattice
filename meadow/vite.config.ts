@@ -6,4 +6,12 @@ export default defineConfig({
   server: {
     port: 5175,
   },
+  optimizeDeps: {
+    exclude: ["@jsquash/jxl"],
+  },
+  build: {
+    rollupOptions: {
+      external: ["@jsquash/jxl"],
+    },
+  },
 });

@@ -4,11 +4,11 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [sveltekit()],
   optimizeDeps: {
-    exclude: ["workers-og", "@autumnsgrove/gossamer"],
+    exclude: ["workers-og", "@autumnsgrove/gossamer", "@jsquash/jxl"],
   },
   build: {
     rollupOptions: {
-      external: ["workers-og"],
+      external: ["workers-og", "@jsquash/jxl"],
     },
   },
   ssr: {
