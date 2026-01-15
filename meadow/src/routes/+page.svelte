@@ -1,7 +1,7 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import Logo from '$lib/components/Logo.svelte';
+	import { Logo } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
 	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
@@ -35,7 +35,7 @@
 			aria-label="Toggle season theme"
 			title="Click to change season"
 		>
-			<Logo class="w-24 h-24" season={$seasonStore} />
+			<Logo size={96} season={$seasonStore} />
 		</button>
 	</div>
 
