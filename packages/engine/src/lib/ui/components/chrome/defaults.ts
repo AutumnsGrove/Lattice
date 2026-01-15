@@ -135,9 +135,11 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 ];
 
 // Connect section (mobile menu)
-// Excludes: Contact, Blog (already in mobile nav)
+// Note: Contact appears in both main nav and here for discoverability
+// (matches desktop footer placement)
 export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
+  { href: "/contact", label: "Contact", icon: Mail },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
     label: "GitHub",
