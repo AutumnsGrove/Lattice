@@ -181,16 +181,27 @@
 			</GlassCard>
 
 			<!-- Action buttons -->
-			<div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-				<a href="/tour" class="btn-primary flex-1 justify-center">
-					Take the Tour
-					<ArrowRight size={18} />
-				</a>
+			<div class="flex flex-col gap-3 justify-center max-w-md mx-auto">
+				<div class="flex flex-col sm:flex-row gap-3">
+					<a href="/tour" class="btn-primary flex-1 justify-center">
+						Take the Tour
+						<ArrowRight size={18} />
+					</a>
+					<a
+						href="https://{tenant.subdomain}.grove.place"
+						class="btn-secondary flex-1 justify-center"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Visit My Blog
+						<ArrowRight size={18} />
+					</a>
+				</div>
 				<a
 					href="https://{tenant.subdomain}.grove.place/admin?welcome=true"
-					class="btn-secondary flex-1 justify-center"
+					class="text-sm text-foreground-muted hover:text-foreground transition-colors text-center"
 				>
-					Skip to My Blog
+					Or go directly to your admin dashboard →
 				</a>
 			</div>
 		</div>
