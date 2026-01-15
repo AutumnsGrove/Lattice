@@ -1,12 +1,24 @@
 ---
 aliases: []
 date created: Friday, November 21st 2025
-date modified: Saturday, January 4th 2026
+date modified: Wednesday, January 15th 2026
 tags:
   - core
   - sveltekit
   - npm
+  - deprecated
 type: tech-spec
+---
+
+# ⚠️ DEPRECATED — See lattice-spec.md
+
+> **This spec has been superseded by `lattice-spec.md`**
+>
+> As of v1, the package is being renamed from `@autumnsgrove/groveengine` to `@autumnsgrove/lattice`.
+> The canonical specification is now: **[lattice-spec.md](./lattice-spec.md)**
+>
+> This file is kept for historical reference only.
+
 ---
 
 ```
@@ -30,7 +42,7 @@ type: tech-spec
 
 ---
 
-# GroveEngine — Technical Specification
+# GroveEngine — Technical Specification (ARCHIVED)
 
 The core technical specification for GroveEngine, Grove's Cloudflare-native blog engine published as an npm package. Documents the architecture, deployment model, and single-tenant design where each customer gets dedicated D1/KV/R2 resources.
 

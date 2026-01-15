@@ -12,55 +12,68 @@
 
 > **Context:** Pre-v1 strategy session covering major architectural and workflow decisions
 
-### Topics Under Discussion
+### Decisions Made
 
-#### 1. Repo/Package Renaming
-- [ ] Rename GitHub repo: `AutumnsGrove/GroveEngine` → `AutumnsGrove/Lattice`
-- [ ] Rename npm package: `@autumnsgrove/groveengine` → `@autumnsgrove/lattice`
-- [ ] Update all consumer apps (landing, plant, meadow, clearing, domains, etc.)
-- [ ] Update all import paths across codebase
+#### 1. Repo/Package Renaming → AT V1 LAUNCH
+> **Strategy:** Rename at v1 launch, keep both packages alive during transition, then sunset old one.
+
+- [ ] At v1: Rename GitHub repo `AutumnsGrove/GroveEngine` → `AutumnsGrove/Lattice`
+- [ ] At v1: Publish `@autumnsgrove/lattice` to npm
+- [ ] At v1: Update `@autumnsgrove/groveengine` to redirect/re-export from lattice
+- [ ] Update all consumer apps imports
 - [ ] Update documentation references
+- [ ] After transition period: Deprecate `@autumnsgrove/groveengine`
 
-#### 2. Branch Protection & Development Workflow
+#### 2. Branch Protection & Development Workflow → WEEKLY RELEASES
+> **Strategy:** Weekly bumps from develop → main, or on-demand as significant updates come in.
+
 - [ ] Protect `main` branch (require PR reviews, no direct pushes)
-- [ ] Create `develop` or `next` branch for integration
-- [ ] Define release workflow: feature → develop → main
+- [ ] Create `develop` branch for integration
+- [ ] Define release workflow: feature → develop → main (weekly or on-demand)
 - [ ] Document critical hotfix process (direct-to-main when needed)
 - [ ] Update GitHub Actions for new branch strategy
 - [ ] Update CONTRIBUTING.md with new workflow
 
-#### 3. Testing Infrastructure
-- [ ] Plan comprehensive test coverage across repo
-- [ ] Consider subagent-optimized testing pattern (spawn agents per file)
+#### 3. Testing Infrastructure → NOW, BEFORE V1! 🚨
+> **Priority:** CRITICAL - Comprehensive testing needed before launch
+> **Approach:** Subagent-optimized pattern (spawn agents per file)
+
+- [ ] Write testing infrastructure spec (`docs/specs/testing-spec.md`)
+- [ ] Implement subagent test generation orchestration
 - [ ] Add test running to CI pipeline
 - [ ] Define testing standards (unit, integration, E2E)
+- [ ] Achieve meaningful coverage before v1
 
-#### 4. Repo Structure & Separation of Concerns
-> **Question:** Should this be engine-only or Grove ecosystem mono-repo?
-> **Current:** Engine + multiple deployments (landing, plant, meadow, clearing, domains)
+#### 4. Repo Structure → KEEP MONO-REPO ✅
+> **Decision:** Keep current mono-repo structure. Separation is already decent.
 
-Options to discuss:
-- A. Keep mono-repo (benefits: shared tooling, single PRs for cross-cutting changes)
-- B. Split: Engine in own repo, consumer apps in separate repos
-- C. Hybrid: Engine + core services together, satellite apps separate
+No action needed - current structure works well.
 
-#### 5. Code Discoverability
-> **Problem:** Files are 15 folders deep, hard to navigate
-- [ ] Consider flattening some directory structures
-- [ ] Explore internal dev search tooling
-- [ ] Document key file locations in README or ARCHITECTURE.md
-- [ ] Improve grep/ripgrep usage for development
+#### 5. Code Discoverability → BUILD TOOLING
+> **Action:** Create RG aliases/scripts, potentially build a blazing fast search tool
 
-#### 6. Spec Compliance Audit
-- [ ] Review engine-spec.md vs. current implementation
+- [ ] Create `scripts/grove-find.sh` with useful RG aliases
+- [ ] Consider building `gf` (grove-find) CLI tool for blazing fast search
+- [ ] Document key file locations in ARCHITECTURE.md
+
+#### 6. Spec Compliance → MERGE SPECS
+> **Problem:** Two specs exist (engine-spec.md and lattice-spec.md) - merge them
+> **Note:** Auth is currently Google-only but will expand (magic codes, passkeys, Apple, Discord)
+
+- [ ] Merge `engine-spec.md` and `lattice-spec.md` into single source of truth
+- [ ] Update knowledge base references
+- [ ] Document planned vs. implemented features clearly
 - [ ] Check Glass usage consistency (desktop TOC needs it!)
-- [ ] Document deviations from original spec
-- [ ] Create cleanup/alignment tasks
 
-#### 7. Optimization & Abstraction Opportunities
-- [ ] Identify areas for better integration abstractions
-- [ ] Performance optimization candidates
-- [ ] Code deduplication opportunities
+#### 7. DB Abstraction → SAFETY LAYER
+> **Goal:** Create abstraction layer to prevent agents from accidentally destroying data
+> **Concern:** Agents running wild DB commands is risky
+
+- [ ] Design safe DB abstraction layer (`packages/engine/src/lib/server/db/`)
+- [ ] Add query validation/sanitization
+- [ ] Add destructive operation safeguards (confirm before DELETE, no DROP without explicit flag)
+- [ ] Create typed query builders for common operations
+- [ ] Document safe patterns in AGENT.md
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 aliases: []
 date created: Wednesday, January 1st 2026
-date modified: Saturday, January 4th 2026
+date modified: Wednesday, January 15th 2026
 tags:
   - core
   - sveltekit
@@ -11,6 +11,9 @@ type: tech-spec
 ---
 
 # Lattice — Core Platform
+
+> **This is the canonical specification for Grove's core engine.**
+> See [Implementation Status](#implementation-status) for what's live vs. planned.
 
 ```
               🌿            🌿            🌿
@@ -42,6 +45,45 @@ The npm package powering every Grove site. UI components, authentication utiliti
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. The lattice stays invisible; what matters is everything it supports.
 
 Lattice is the npm package powering every Grove site. UI components, authentication utilities, markdown rendering, database patterns: all the infrastructure that makes building on Grove feel effortless. You don't admire a lattice. You build on it, and watch what grows.
+
+---
+
+## Implementation Status
+
+> **Last Updated:** January 15, 2026
+
+### v1 Launch Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Tech Stack** | ✅ Live | SvelteKit 2, TypeScript, Tailwind, Cloudflare |
+| **Auth: Google OAuth** | ✅ Live | Via Heartwood (GroveAuth) |
+| **Auth: Magic Codes** | 🔮 Planned | Spec'd below, not yet implemented |
+| **Auth: Passkeys** | 🔮 Planned | WebAuthn support planned |
+| **Auth: Apple/Discord** | 🔮 Planned | Additional OAuth providers |
+| **Post Management** | ✅ Live | Full CRUD, markdown, gutters |
+| **Media Management** | ✅ Live | R2 storage, WebP conversion |
+| **Admin Panel** | ✅ Live | Glassmorphism design |
+| **Glass Components** | ✅ Live | 8 components in UI library |
+| **Rate Limiting** | ✅ Live | KV-based, tier-aware |
+| **Theme System** | 🚧 Partial | Basic theming, Foliage integration planned |
+| **Custom Domains** | 🚧 Partial | Oak+ tier, Cloudflare for SaaS |
+| **Durable Objects** | 🔮 Planned | TenantDO, PostDO, SessionDO |
+| **E2E Testing** | 🔮 Planned | Playwright setup needed |
+
+### Authentication Evolution
+
+The spec below documents the **target architecture** including magic code authentication. Currently, Grove uses **OAuth via Heartwood** (Google only) for simplicity. The authentication system will evolve:
+
+**Current (v1):**
+- Google OAuth via Heartwood (GroveAuth)
+- Session cookies stored in KV
+
+**Planned (v1.x):**
+- Magic code authentication (email-based)
+- Passkey/WebAuthn support
+- Additional OAuth providers (Apple, Discord)
+- Optional username/password
 
 ---
 
