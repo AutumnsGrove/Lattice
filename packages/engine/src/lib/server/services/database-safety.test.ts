@@ -142,66 +142,139 @@ describe("SafeDatabase - DELETE Operations", () => {
 });
 
 // ============================================================================
-// Known Limitations Tests
+// UPDATE Safety Tests
 // ============================================================================
 
-describe("SafeDatabase - Known Limitations", () => {
+describe("SafeDatabase - UPDATE Operations", () => {
+  it("blocks UPDATE exceeding row limit", async () => {
+    const db = createMockD1({ countResult: 1500 });
+    const safeDb = withSafetyGuards(db as any, { maxUpdateRows: 1000 });
+
+    await expect(
+      safeDb.execute("UPDATE users SET active = ? WHERE last_login < ?", [
+        false,
+        "2024-01-01",
+      ]),
+    ).rejects.toThrow(SafetyViolationError);
+
+    // Verify the error code
+    try {
+      await safeDb.execute("UPDATE users SET active = ? WHERE last_login < ?", [
+        false,
+        "2024-01-01",
+      ]);
+    } catch (e) {
+      expect((e as SafetyViolationError).code).toBe("ROW_LIMIT_EXCEEDED");
+    }
+  });
+
+  it("allows UPDATE within row limit", async () => {
+    const db = createMockD1({ countResult: 500 });
+    const safeDb = withSafetyGuards(db as any, { maxUpdateRows: 1000 });
+
+    await expect(
+      safeDb.execute("UPDATE users SET active = ? WHERE last_login < ?", [
+        false,
+        "2024-01-01",
+      ]),
+    ).resolves.not.toThrow();
+  });
+
+  it("uses separate limits for DELETE vs UPDATE", async () => {
+    const db = createMockD1({ countResult: 150 });
+    const safeDb = withSafetyGuards(db as any, {
+      maxDeleteRows: 100,
+      maxUpdateRows: 200,
+    });
+
+    // 150 rows: exceeds DELETE limit, within UPDATE limit
+    await expect(
+      safeDb.execute("DELETE FROM logs WHERE status = ?", ["old"]),
+    ).rejects.toThrow(SafetyViolationError);
+
+    await expect(
+      safeDb.execute("UPDATE logs SET archived = ? WHERE status = ?", [
+        true,
+        "old",
+      ]),
+    ).resolves.not.toThrow();
+  });
+});
+
+// ============================================================================
+// Complex Query Handling Tests
+// ============================================================================
+
+describe("SafeDatabase - Complex Query Handling", () => {
   /**
-   * IMPORTANT: These tests document known limitations of the row count validation.
-   * Complex queries with subqueries, JOINs, CTEs, or USING clauses cannot have
-   * their row counts accurately predicted by the simple regex transformation.
-   *
-   * In these cases, the operation proceeds with a warning logged.
+   * Complex queries (subqueries, JOINs, CTEs, USING) cannot have their row counts
+   * reliably validated. By default, these are BLOCKED for safety.
+   * When allowComplexQueries is true, they proceed with a warning.
    */
 
-  it("logs warning for complex DELETE with subquery (row count not validated)", async () => {
+  it("blocks complex DELETE with subquery by default", async () => {
     const db = createMockD1({ countResult: 5 });
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
 
-    // This complex query's row count cannot be validated by the regex transformation
-    // The safety layer will proceed but log a warning
-    await safeDb.execute(
-      "DELETE FROM logs WHERE id IN (SELECT id FROM archive WHERE processed = ?)",
-      [true],
-    );
+    // Subqueries bypass row limit enforcement, so they're blocked by default
+    await expect(
+      safeDb.execute(
+        "DELETE FROM logs WHERE id IN (SELECT id FROM archive WHERE processed = ?)",
+        [true],
+      ),
+    ).rejects.toThrow(SafetyViolationError);
 
-    // The operation should complete (we can't block what we can't count)
-    // but a warning should be logged about the limitation
-    expect(warnSpy).toHaveBeenCalled();
-
-    warnSpy.mockRestore();
+    try {
+      await safeDb.execute(
+        "DELETE FROM logs WHERE id IN (SELECT id FROM archive WHERE processed = ?)",
+        [true],
+      );
+    } catch (e) {
+      expect((e as SafetyViolationError).code).toBe("COMPLEX_QUERY_BLOCKED");
+    }
   });
 
-  it("logs warning for DELETE with JOIN/USING syntax (row count not validated)", async () => {
+  it("blocks DELETE with JOIN/USING syntax by default", async () => {
     const db = createMockD1({ countResult: 5 });
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
 
-    // USING clause makes this query too complex for simple regex transformation
-    await safeDb.execute(
-      "DELETE FROM logs USING temp_logs WHERE logs.id = temp_logs.id",
-      [],
-    );
-
-    // Warning should be logged about inability to verify row count
-    expect(warnSpy).toHaveBeenCalled();
-
-    warnSpy.mockRestore();
+    await expect(
+      safeDb.execute(
+        "DELETE FROM logs USING temp_logs WHERE logs.id = temp_logs.id",
+        [],
+      ),
+    ).rejects.toThrow(SafetyViolationError);
   });
 
-  it("handles CTE (WITH clause) queries gracefully", async () => {
+  it("blocks CTE (WITH clause) queries by default", async () => {
     const db = createMockD1({ countResult: 5 });
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const safeDb = withSafetyGuards(db as any, { maxDeleteRows: 10 });
 
-    // CTE syntax cannot be transformed by the simple regex
-    await safeDb.execute(
-      "WITH old_logs AS (SELECT id FROM logs WHERE age > 30) DELETE FROM logs WHERE id IN (SELECT id FROM old_logs)",
-      [],
-    );
+    await expect(
+      safeDb.execute(
+        "WITH old_logs AS (SELECT id FROM logs WHERE age > 30) DELETE FROM logs WHERE id IN (SELECT id FROM old_logs)",
+        [],
+      ),
+    ).rejects.toThrow(SafetyViolationError);
+  });
 
-    // Should proceed with warning
+  it("allows complex queries when allowComplexQueries is true", async () => {
+    const db = createMockD1({ countResult: 5 });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const safeDb = withSafetyGuards(db as any, {
+      maxDeleteRows: 10,
+      allowComplexQueries: true, // Explicitly allow
+    });
+
+    // Should proceed with warning when allowed
+    await expect(
+      safeDb.execute(
+        "DELETE FROM logs WHERE id IN (SELECT id FROM archive WHERE processed = ?)",
+        [true],
+      ),
+    ).resolves.not.toThrow();
+
+    // Warning should still be logged
     expect(warnSpy).toHaveBeenCalled();
 
     warnSpy.mockRestore();
@@ -264,6 +337,26 @@ describe("SafeDatabase - Protected Tables", () => {
     await expect(
       safeDb.execute("DELETE FROM logs WHERE id = ?", ["123"]),
     ).resolves.not.toThrow();
+  });
+
+  it("matches protected tables case-insensitively", async () => {
+    const db = createMockD1({ countResult: 1 });
+    const safeDb = withSafetyGuards(db as any, {
+      protectedTables: ["users"], // lowercase in config
+    });
+
+    // Should block even with different case in SQL
+    await expect(
+      safeDb.execute("DELETE FROM USERS WHERE id = ?", ["123"]),
+    ).rejects.toThrow(SafetyViolationError);
+
+    await expect(
+      safeDb.execute("DELETE FROM Users WHERE id = ?", ["123"]),
+    ).rejects.toThrow(SafetyViolationError);
+
+    await expect(
+      safeDb.execute("UPDATE USERS SET name = ? WHERE id = ?", ["test", "123"]),
+    ).rejects.toThrow(SafetyViolationError);
   });
 });
 

@@ -87,6 +87,14 @@ export interface SafetyConfig {
    * Operations on these tables will throw unless explicitly allowed
    */
   protectedTables?: string[];
+
+  /**
+   * Allow complex queries (subqueries, JOINs, CTEs, USING) that bypass
+   * row limit enforcement. When false (default), these queries are blocked.
+   * When true, they proceed with a warning logged.
+   * Default: false (secure by default)
+   */
+  allowComplexQueries?: boolean;
 }
 
 export interface AuditLogEntry {
@@ -209,6 +217,7 @@ export type SafetyErrorCode =
   | "MISSING_WHERE"
   | "PROTECTED_TABLE"
   | "ROW_LIMIT_EXCEEDED"
+  | "COMPLEX_QUERY_BLOCKED"
   | "DRY_RUN";
 
 // ============================================================================
@@ -230,6 +239,7 @@ export class SafeDatabase {
       dryRun: config.dryRun ?? false,
       redactParams: config.redactParams ?? true, // Secure by default
       protectedTables: config.protectedTables ?? [],
+      allowComplexQueries: config.allowComplexQueries ?? false, // Secure by default
     };
   }
 
@@ -353,13 +363,35 @@ export class SafeDatabase {
         /\(\s*SELECT\b/i.test(sql); // Subqueries
 
       if (isComplexQuery) {
-        // Skip count check for complex queries - we can't reliably count them
+        if (!this.config.allowComplexQueries) {
+          // Block complex queries by default - they bypass row limit enforcement
+          throw new SafetyViolationError(
+            `Complex ${operation} query blocked (contains subquery/JOIN/CTE/USING). ` +
+              `These queries bypass row limit enforcement. Set allowComplexQueries: true to permit.`,
+            "COMPLEX_QUERY_BLOCKED",
+            sql,
+          );
+        }
+
+        // If allowed, log for audit trail and proceed without row limit enforcement
         console.warn(
           `[DB SAFETY] Complex ${operation} query detected (subquery/JOIN/CTE/USING). ` +
             `Row limit enforcement skipped. SQL: ${sql.slice(0, 100)}...`,
         );
+
+        // Log to audit if enabled
+        this.logAudit({
+          operation,
+          sql,
+          params,
+          table: table ?? undefined,
+        });
       } else {
         // Transform query to count affected rows before execution.
+        //
+        // SECURITY NOTE: This assumes callers use parameterized queries.
+        // The safety layer catches common SQL injection patterns (stacked queries)
+        // but parameterization is the primary defense against injection attacks.
         //
         // LIMITATION: This simple regex transformation only works for basic
         // DELETE/UPDATE statements. Complex queries with subqueries, JOINs,
@@ -373,6 +405,17 @@ export class SafeDatabase {
 
         // Only do the count check if we can transform the query
         if (countSql !== sql) {
+          // Validate the transformed SQL too - defense in depth
+          for (const pattern of DANGEROUS_PATTERNS) {
+            if (pattern.test(countSql)) {
+              throw new SafetyViolationError(
+                `Potentially dangerous pattern in transformed count query. Original SQL: ${sql.slice(0, 100)}...`,
+                "DANGEROUS_PATTERN",
+                sql,
+              );
+            }
+          }
+
           try {
             const countResult = await this.db
               .prepare(countSql)
