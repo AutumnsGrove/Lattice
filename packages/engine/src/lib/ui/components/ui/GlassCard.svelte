@@ -2,17 +2,26 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
+	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
+	import "@autumnsgrove/gossamer/svelte/style.css";
 
 	/**
 	 * GlassCard - A card component with glassmorphism styling
 	 *
 	 * Beautiful translucent cards with backdrop blur effects.
-	 * Includes optional header, footer, and hoverable state.
+	 * Includes optional header, footer, hoverable state, and Gossamer backgrounds.
 	 *
 	 * @example Basic glass card
 	 * ```svelte
 	 * <GlassCard title="Settings" description="Manage your preferences">
 	 *   <p>Card content here</p>
+	 * </GlassCard>
+	 * ```
+	 *
+	 * @example With Gossamer ASCII background
+	 * ```svelte
+	 * <GlassCard title="Enchanted" gossamer="grove-mist" gossamerColor="#34d399">
+	 *   <p>Content with animated ASCII clouds</p>
 	 * </GlassCard>
 	 * ```
 	 *
@@ -33,6 +42,31 @@
 		| "muted"     // Very subtle, barely visible
 		| "frosted";  // Stronger blur effect, more opaque
 
+	/** Available Gossamer presets */
+	type GossamerPreset =
+		| "grove-mist"
+		| "grove-fireflies"
+		| "grove-rain"
+		| "grove-dew"
+		| "winter-snow"
+		| "autumn-leaves"
+		| "spring-petals"
+		| "summer-heat"
+		| "ambient-static"
+		| "ambient-waves"
+		| "ambient-clouds";
+
+	/** Custom Gossamer configuration */
+	interface GossamerConfig {
+		pattern?: "perlin" | "fbm" | "waves" | "static" | "ripple";
+		characters?: string;
+		frequency?: number;
+		amplitude?: number;
+		speed?: number;
+		cellSize?: number;
+		animated?: boolean;
+	}
+
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, "class"> {
 		variant?: GlassVariant;
 		title?: string;
@@ -43,6 +77,16 @@
 		header?: Snippet;
 		footer?: Snippet;
 		children?: Snippet;
+		/** Gossamer ASCII background - preset name or custom config */
+		gossamer?: GossamerPreset | GossamerConfig | false;
+		/** Override Gossamer color */
+		gossamerColor?: string;
+		/** Override Gossamer opacity (0-1) */
+		gossamerOpacity?: number;
+		/** Override Gossamer animation speed */
+		gossamerSpeed?: number;
+		/** Disable animation (show static pattern) */
+		gossamerStatic?: boolean;
 	}
 
 	let {
@@ -55,8 +99,18 @@
 		header,
 		footer,
 		children,
+		gossamer = false,
+		gossamerColor,
+		gossamerOpacity,
+		gossamerSpeed,
+		gossamerStatic = false,
 		...restProps
 	}: Props = $props();
+
+	// Determine if gossamer is a preset string or custom config
+	const isPreset = $derived(typeof gossamer === "string");
+	const gossamerPreset = $derived(isPreset ? gossamer as GossamerPreset : undefined);
+	const gossamerConfig = $derived(!isPreset && gossamer ? gossamer as GossamerConfig : undefined);
 
 	// Variant-specific styles - warm grove tones with true glass transparency
 	// See grove-ui-design skill for opacity guidelines:
@@ -110,6 +164,8 @@
 	const computedClass = $derived(
 		cn(
 			"rounded-xl transition-all duration-200",
+			// Add relative positioning and overflow hidden when gossamer is enabled
+			gossamer && "relative overflow-hidden",
 			variantClasses[variant],
 			border && `border ${borderClasses[variant]}`,
 			hoverable && `cursor-pointer ${hoverClasses[variant]}`,
@@ -133,30 +189,58 @@
 </script>
 
 <div class={computedClass} {...restProps}>
-	{#if header || title || description}
-		<div class="px-6 py-4 {(children || footer) ? 'border-b border-inherit' : ''}">
-			{#if header}
-				{@render header()}
-			{:else}
-				{#if title}
-					<h3 class="text-lg font-semibold {titleClass}">{title}</h3>
-				{/if}
-				{#if description}
-					<p class="text-sm {descriptionClass} mt-1">{description}</p>
-				{/if}
-			{/if}
-		</div>
+	{#if gossamer}
+		<!-- Gossamer ASCII background layer -->
+		{#if gossamerPreset}
+			<GossamerClouds
+				preset={gossamerPreset}
+				color={gossamerColor}
+				opacity={gossamerOpacity}
+				speed={gossamerSpeed}
+				animated={!gossamerStatic}
+			/>
+		{:else if gossamerConfig}
+			<GossamerClouds
+				pattern={gossamerConfig.pattern}
+				characters={gossamerConfig.characters}
+				frequency={gossamerConfig.frequency}
+				amplitude={gossamerConfig.amplitude}
+				speed={gossamerSpeed ?? gossamerConfig.speed}
+				cellSize={gossamerConfig.cellSize}
+				color={gossamerColor}
+				opacity={gossamerOpacity}
+				animated={!gossamerStatic && gossamerConfig.animated !== false}
+			/>
+		{/if}
 	{/if}
 
-	{#if children}
-		<div class="px-6 py-4">
-			{@render children()}
-		</div>
-	{/if}
+	<!-- Content layer (above Gossamer) -->
+	<div class={gossamer ? "relative z-10" : ""}>
+		{#if header || title || description}
+			<div class="px-6 py-4 {(children || footer) ? 'border-b border-inherit' : ''}">
+				{#if header}
+					{@render header()}
+				{:else}
+					{#if title}
+						<h3 class="text-lg font-semibold {titleClass}">{title}</h3>
+					{/if}
+					{#if description}
+						<p class="text-sm {descriptionClass} mt-1">{description}</p>
+					{/if}
+				{/if}
+			</div>
+		{/if}
 
-	{#if footer}
-		<div class="px-6 py-4 border-t border-inherit">
-			{@render footer()}
-		</div>
-	{/if}
+		{#if children}
+			<div class="px-6 py-4">
+				{@render children()}
+			</div>
+		{/if}
+
+		{#if footer}
+			<div class="px-6 py-4 border-t border-inherit">
+				{@render footer()}
+			</div>
+		{/if}
+	</div>
 </div>

@@ -2,6 +2,8 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
+	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
+	import "@autumnsgrove/gossamer/svelte/style.css";
 
 	/**
 	 * Glass component for creating glassmorphism effects
@@ -10,6 +12,8 @@
 	 * perfect for overlays, cards, navbars, and text containers while
 	 * maintaining visibility of background elements.
 	 *
+	 * Now with optional Gossamer ASCII cloud backgrounds!
+	 *
 	 * @example Basic usage
 	 * ```svelte
 	 * <Glass variant="card">
@@ -17,17 +21,17 @@
 	 * </Glass>
 	 * ```
 	 *
-	 * @example As a navbar
+	 * @example With Gossamer background
 	 * ```svelte
-	 * <Glass variant="surface" as="header" class="sticky top-0">
-	 *   <nav>...</nav>
+	 * <Glass variant="card" gossamer="grove-mist">
+	 *   <p>Content with animated ASCII clouds beneath the glass</p>
 	 * </Glass>
 	 * ```
 	 *
-	 * @example Accent tint for callouts
+	 * @example Custom Gossamer settings
 	 * ```svelte
-	 * <Glass variant="accent" intensity="light" class="p-6 rounded-xl">
-	 *   <p>Important message here</p>
+	 * <Glass variant="card" gossamer="grove-fireflies" gossamerColor="#34d399" gossamerOpacity={0.4}>
+	 *   <p>Customized ASCII effect</p>
 	 * </Glass>
 	 * ```
 	 */
@@ -48,6 +52,31 @@
 
 	type Element = "div" | "section" | "article" | "aside" | "header" | "footer" | "nav" | "main";
 
+	/** Available Gossamer presets */
+	type GossamerPreset =
+		| "grove-mist"
+		| "grove-fireflies"
+		| "grove-rain"
+		| "grove-dew"
+		| "winter-snow"
+		| "autumn-leaves"
+		| "spring-petals"
+		| "summer-heat"
+		| "ambient-static"
+		| "ambient-waves"
+		| "ambient-clouds";
+
+	/** Custom Gossamer configuration */
+	interface GossamerConfig {
+		pattern?: "perlin" | "fbm" | "waves" | "static" | "ripple";
+		characters?: string;
+		frequency?: number;
+		amplitude?: number;
+		speed?: number;
+		cellSize?: number;
+		animated?: boolean;
+	}
+
 	interface Props extends HTMLAttributes<HTMLElement> {
 		/** Visual style variant */
 		variant?: Variant;
@@ -63,6 +92,19 @@
 		class?: string;
 		/** Content */
 		children?: Snippet;
+		/**
+		 * Gossamer ASCII background effect
+		 * Pass a preset name (e.g., "grove-mist") or custom config object
+		 */
+		gossamer?: GossamerPreset | GossamerConfig | false;
+		/** Override Gossamer color (works with presets too) */
+		gossamerColor?: string;
+		/** Override Gossamer opacity (0-1) */
+		gossamerOpacity?: number;
+		/** Override Gossamer animation speed */
+		gossamerSpeed?: number;
+		/** Disable Gossamer animation (show static pattern) */
+		gossamerStatic?: boolean;
 	}
 
 	let {
@@ -73,8 +115,18 @@
 		shadow = false,
 		class: className,
 		children,
+		gossamer = false,
+		gossamerColor,
+		gossamerOpacity,
+		gossamerSpeed,
+		gossamerStatic = false,
 		...restProps
 	}: Props = $props();
+
+	// Determine if gossamer is a preset string or custom config
+	const isPreset = $derived(typeof gossamer === "string");
+	const gossamerPreset = $derived(isPreset ? gossamer as GossamerPreset : undefined);
+	const gossamerConfig = $derived(!isPreset && gossamer ? gossamer as GossamerConfig : undefined);
 
 	// Background colors per variant - warm grove tones, translucent for glass effect
 	const variantClasses: Record<Variant, string> = {
@@ -127,6 +179,8 @@
 
 	const computedClass = $derived(
 		cn(
+			// Add relative positioning and overflow hidden when gossamer is enabled
+			gossamer && "relative overflow-hidden",
 			variantClasses[variant],
 			intensityClasses[intensity],
 			border && `border ${borderClasses[variant]}`,
@@ -144,6 +198,11 @@
   - Background with alpha - Semi-transparent backgrounds (e.g., bg-white/80)
   - Border with alpha - Subtle borders that complement the glass effect
 
+  Gossamer Integration:
+  - When `gossamer` prop is set, renders ASCII cloud patterns behind the glass
+  - The backdrop-blur creates a beautiful frosted effect over the ASCII
+  - Patterns are accessible via preset names or custom configuration
+
   Browser Support:
   - backdrop-filter is supported in all modern browsers
   - Falls back gracefully to solid backgrounds in older browsers
@@ -154,5 +213,35 @@
 	class={computedClass}
 	{...restProps}
 >
-	{#if children}{@render children()}{/if}
+	{#if gossamer}
+		<!-- Gossamer ASCII background layer -->
+		{#if gossamerPreset}
+			<GossamerClouds
+				preset={gossamerPreset}
+				color={gossamerColor}
+				opacity={gossamerOpacity}
+				speed={gossamerSpeed}
+				animated={!gossamerStatic}
+			/>
+		{:else if gossamerConfig}
+			<GossamerClouds
+				pattern={gossamerConfig.pattern}
+				characters={gossamerConfig.characters}
+				frequency={gossamerConfig.frequency}
+				amplitude={gossamerConfig.amplitude}
+				speed={gossamerSpeed ?? gossamerConfig.speed}
+				cellSize={gossamerConfig.cellSize}
+				color={gossamerColor}
+				opacity={gossamerOpacity}
+				animated={!gossamerStatic && gossamerConfig.animated !== false}
+			/>
+		{/if}
+	{/if}
+
+	<!-- Content layer (above Gossamer) -->
+	{#if children}
+		<div class="relative z-10">
+			{@render children()}
+		</div>
+	{/if}
 </svelte:element>

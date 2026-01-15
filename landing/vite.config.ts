@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [sveltekit()],
   optimizeDeps: {
-    exclude: ["workers-og"],
+    exclude: ["workers-og", "@autumnsgrove/gossamer"],
   },
   build: {
     rollupOptions: {
@@ -13,6 +13,11 @@ export default defineConfig({
   },
   ssr: {
     // These packages ship .svelte files that need processing during SSR
-    noExternal: ["lucide-svelte", "@lucide/svelte", "@tabler/icons-svelte"],
+    noExternal: [
+      "lucide-svelte",
+      "@lucide/svelte",
+      "@tabler/icons-svelte",
+      "@autumnsgrove/gossamer",
+    ],
   },
 });

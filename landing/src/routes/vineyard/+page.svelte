@@ -69,6 +69,26 @@
 	let logoVariant = $state<'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'>('default');
 	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
 
+	// Gossamer state
+	let glassGossamerEnabled = $state(false);
+	let glassGossamerPreset = $state<string>('grove-mist');
+	let cardGossamerEnabled = $state(false);
+	let cardGossamerPreset = $state<string>('grove-fireflies');
+
+	const gossamerPresets = [
+		'grove-mist',
+		'grove-fireflies',
+		'grove-rain',
+		'grove-dew',
+		'winter-snow',
+		'autumn-leaves',
+		'spring-petals',
+		'summer-heat',
+		'ambient-static',
+		'ambient-waves',
+		'ambient-clouds'
+	];
+
 	// Overlay demo state
 	let showOverlayDemo = $state(false);
 
@@ -365,7 +385,12 @@
 						<div class="grid md:grid-cols-2 gap-6">
 							<!-- Preview -->
 							<div class="bg-gradient-to-br from-grove-100 to-emerald-100 dark:from-slate-700 dark:to-emerald-900 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
-								<Glass variant={glassVariant} intensity={glassIntensity} class="p-6 rounded-xl">
+								<Glass
+									variant={glassVariant}
+									intensity={glassIntensity}
+									gossamer={glassGossamerEnabled ? glassGossamerPreset : false}
+									class="p-6 rounded-xl"
+								>
 									<p class="text-foreground font-medium">Glass content here</p>
 									<p class="text-sm text-foreground-muted mt-1">With {glassVariant} variant</p>
 								</Glass>
@@ -392,6 +417,19 @@
 										<option value="medium">medium</option>
 										<option value="strong">strong</option>
 									</select>
+								</div>
+								<div class="pt-2 border-t border-divider">
+									<label class="flex items-center gap-3 cursor-pointer mb-3">
+										<input type="checkbox" bind:checked={glassGossamerEnabled} class="w-5 h-5 rounded accent-grove-600" />
+										<span class="text-sm font-medium text-foreground">Gossamer Background</span>
+									</label>
+									{#if glassGossamerEnabled}
+										<select bind:value={glassGossamerPreset} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm">
+											{#each gossamerPresets as preset}
+												<option value={preset}>{preset}</option>
+											{/each}
+										</select>
+									{/if}
 								</div>
 							</div>
 						</div>
@@ -448,6 +486,7 @@
 								<GlassCard
 									variant={cardVariant}
 									hoverable={cardHoverable}
+									gossamer={cardGossamerEnabled ? cardGossamerPreset : false}
 									title="Card Title"
 									description="A beautiful glass card"
 									class="w-full max-w-xs"
@@ -471,6 +510,19 @@
 									<input type="checkbox" bind:checked={cardHoverable} class="w-5 h-5 rounded" />
 									<span class="text-sm text-foreground">Hoverable</span>
 								</label>
+								<div class="pt-2 border-t border-divider">
+									<label class="flex items-center gap-3 cursor-pointer mb-3">
+										<input type="checkbox" bind:checked={cardGossamerEnabled} class="w-5 h-5 rounded accent-grove-600" />
+										<span class="text-sm font-medium text-foreground">Gossamer Background</span>
+									</label>
+									{#if cardGossamerEnabled}
+										<select bind:value={cardGossamerPreset} class="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-foreground text-sm">
+											{#each gossamerPresets as preset}
+												<option value={preset}>{preset}</option>
+											{/each}
+										</select>
+									{/if}
+								</div>
 							</div>
 						</div>
 					</div>

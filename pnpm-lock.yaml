@@ -250,6 +250,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@autumnsgrove/gossamer':
+        specifier: link:../../../Gossamer/packages/core
+        version: link:../../../Gossamer/packages/core
       '@autumnsgrove/vineyard':
         specifier: link:../../../Vineyard
         version: link:../../../Vineyard
