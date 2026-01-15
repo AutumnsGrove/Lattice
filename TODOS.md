@@ -29,11 +29,30 @@
   - `020_jxl_format_tracking.sql` - Added format tracking columns + JXL feature flags
 - [x] Fixed migration schema mismatch (`key` → `id` for feature_flags table)
 
+### 🌱 Loam Blocklist Updates
+- [x] Added new services from workshop/beyond pages:
+  - Public: wander, curios, forests, shutter, centennial
+  - Internal: gossamer, prism, loom, threshold, songbird, sentinel
+  - Sub-components: canary, kestrel, breeze, thread
+  - Codenames for all new services
+- [x] Fixed duplicate entries causing conflicting reasons
+- [x] Added null byte/control character stripping to validation
+- [x] All 41 blocklist tests pass ✅
+
+### ✅ Quick Wins Already Done (Found in Code)
+- [x] **Loading states** — Profile and plans pages already have `isSubmitting` + Loader2 spinner
+- [x] **Back navigation** — Plans page has "Back to profile" link
+- [x] **Tour mobile polish** — Already has swipe gestures, larger touch targets, navigation hints
+
 ### ⏸️ Deferred to Follow-up PR
 - [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server
   - The `jxl_encoding_metrics` table is ready in migration
   - Needs: Client instrumentation + `/api/images/metrics` endpoint
   - Track: encoding_time_ms, success/fallback_reason, device_type
+
+### 📋 Remaining Quick Wins
+- [ ] **Improve error messages** — Currently generic (`form?.error`), make contextual
+- [ ] **Success page CTA** — Add direct "Go to your blog" link (currently only has admin link)
 
 ---
 
