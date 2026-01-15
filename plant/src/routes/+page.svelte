@@ -28,7 +28,7 @@
 		// Pricing tier icon (only need Sprout for Get Started button)
 		Sprout,
 		// Notice icon
-		Info
+		AlertTriangle
 	} from '@autumnsgrove/groveengine/ui/icons';
 
 	// Shared data
@@ -109,7 +109,7 @@
 	{#if showSignupGateNotice}
 		<GlassCard variant="frosted" class="text-center border-amber-300/50 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20">
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<Info class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+				<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400" />
 				<span class="font-medium text-foreground">Almost there!</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
