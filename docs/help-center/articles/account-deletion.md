@@ -9,26 +9,28 @@ related: [exporting-your-content, understanding-your-privacy]
 
 # Deleting Your Account
 
-If you decide to leave Grove, you can delete your account and all associated data. Here's how it works.
+If you decide to leave Grove, you can request deletion of your account and all associated data. Here's how it works.
 
-## Before you delete
+## Before you request deletion
 
-**Export your content first.** Once your account is deleted, we can't recover it. If there's anything you want to keep (posts, images, comments), export it before proceeding.
+**Export your content first.** Once your account is deleted, we can't recover it. If there's anything you want to keep, export it before proceeding.
 
-Go to **Settings → Data → Export Data** to download a complete copy of everything.
+Go to **Account & Subscription** in your admin panel and scroll to the **Your Data** section. You can download all your posts, pages, and media information.
 
 See [Exporting Your Content](/knowledge/help/exporting-your-content) for details on what's included.
 
 ## How to delete your account
 
-1. Go to **Settings → Account** in your admin panel
-2. Scroll to the **Danger Zone** section
-3. Click **Delete Account**
-4. Read the confirmation message carefully
-5. Type your blog URL to confirm (e.g., `myblog.grove.place`)
-6. Click **Permanently Delete**
+Account deletion is handled through support to ensure you don't accidentally lose your data.
 
-This action is irreversible.
+1. Go to **Account & Subscription** in your admin panel
+2. Scroll to the **Danger Zone** section
+3. Click the email link to contact us
+4. Let us know you'd like to delete your account
+5. We'll confirm you've exported anything you want to keep
+6. We process the deletion within 30 days
+
+We'll help you through the process and make sure you have everything you need before we remove anything.
 
 ## What gets deleted
 
@@ -77,7 +79,7 @@ If you just want to stop paying, cancel your subscription instead. Your blog sta
 
 ## If you change your mind
 
-**Before deletion completes:** You have a brief window (about 24 hours) where you can contact support to attempt to halt the process. No guarantees, but we'll try.
+**Before deletion completes:** Since we process deletions manually, you can contact us to cancel the request any time before we've started. Just reply to your original email.
 
 **After deletion completes:** We cannot recover your account. The data is gone. You'd need to create a new account and start fresh.
 

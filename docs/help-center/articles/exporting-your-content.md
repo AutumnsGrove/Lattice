@@ -13,56 +13,65 @@ Everything you write on Grove belongs to you. Here's how to get a complete copy 
 
 ## How to export
 
-1. Go to **Settings → Data** in your admin panel
-2. Click **Export Data**
-3. Wait a moment while we package everything
-4. Download the ZIP file
+1. Go to **Account & Subscription** in your admin panel
+2. Scroll to the **Your Data** section
+3. Choose what to export:
+   - **Full Export**: All posts, pages, images, and settings
+   - **Posts Only**: Just your blog posts
+   - **Media Only**: Just your uploaded images and files
+4. Click **Export Data**
+5. Your browser downloads a JSON file
 
-Your export includes everything: posts, comments, media, and settings.
+The page shows an estimate before you export: how many posts, pages, and media files will be included.
 
 ## What's in the export
 
-Your download is a ZIP file organized like this:
+Your download is a JSON file containing:
 
+**Posts** include the title, content (in Markdown), tags, status, publication date, and featured image URL.
+
+**Pages** include any custom pages you've created.
+
+**Media** is a list of your uploaded files with filenames, URLs, sizes, and alt text. The actual image files aren't bundled, but the URLs let you download them.
+
+Example structure:
+```json
+{
+  "exportedAt": "2026-01-15T12:00:00.000Z",
+  "type": "full",
+  "posts": [
+    {
+      "slug": "my-first-post",
+      "title": "My First Post",
+      "content": "# Hello world...",
+      "tags": ["intro", "personal"],
+      "status": "published",
+      "publishedAt": "2026-01-10T10:00:00.000Z"
+    }
+  ],
+  "pages": [...],
+  "media": [
+    {
+      "filename": "sunset.jpg",
+      "url": "https://cdn.grove.place/...",
+      "size": 245000,
+      "mimeType": "image/jpeg"
+    }
+  ]
+}
 ```
-grove-export-yourusername-2025-01-15.zip
-├── posts/
-│   ├── 2025-01-15-my-first-post.md
-│   ├── 2025-02-20-another-post.md
-│   └── ...
-├── comments/
-│   ├── comments.json
-│   └── replies.json
-├── media/
-│   └── (your uploaded images)
-├── config/
-│   └── site-settings.json
-└── README.md
-```
 
-**Posts** are in Markdown format, the same format many other blogging platforms use. You can open them in any text editor or import them elsewhere.
+## Limits
 
-**Comments** are in JSON format, including the author name, content, timestamp, and which post they belong to. Both public comments and private replies are included.
+**Rate limit**: 10 exports per hour. This prevents abuse while giving you plenty of room for regular use.
 
-**Media** includes all images and files you've uploaded. Same filenames, same organization.
-
-**Settings** captures your blog configuration: title, description, theme choices, and preferences.
-
-## Standard formats only
-
-We use formats that work everywhere:
-
-- **Markdown** for posts: plain text, portable
-- **JSON** for structured data: comments, settings
-- **Original formats** for media: JPG, PNG, etc.
-
-No proprietary formats, no lock-in. Your content works outside of Grove.
+**Size limit**: 5,000 items per category (posts, pages, or media). If you have more than that, contact support for a bulk export.
 
 ## When you might want to export
 
 **Regular backups.** Even though we back up your data, having your own copy is smart. Export every few months if it gives you peace of mind.
 
-**Moving to another platform.** If Grove stops being the right fit, your export has everything you need. Most blogging platforms can import Markdown files.
+**Moving to another platform.** If Grove stops being the right fit, your export has everything you need. The JSON format is easy to parse, and your post content is already in Markdown.
 
 **Archiving.** If you're winding down a blog but want to keep the content, export gives you a permanent local copy.
 
@@ -70,8 +79,7 @@ No proprietary formats, no lock-in. Your content works outside of Grove.
 
 We believe your data should never be held hostage. When you cancel:
 
-- Export is available immediately through your admin panel
-- We'll also email you a download link within 24 hours
+- Export remains available through your admin panel
 - Your data stays available for 90 days after cancellation
 - After 90 days, it's permanently deleted from our servers
 
