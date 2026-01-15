@@ -1,9 +1,34 @@
 # GroveEngine File Reorganization Plan
 
-> **Status**: Ready for Implementation
+> **Status**: Partially Complete - Phase 5 Done
 > **Created**: 2026-01-14
-> **Updated**: 2026-01-14 (incorporated PR review feedback)
+> **Updated**: 2026-01-15 (status update after utility consolidation work)
 > **Purpose**: Comprehensive guide for reorganizing the GroveEngine codebase structure
+
+---
+
+## Completed Work Summary
+
+The following major work was completed on **2026-01-14** (commit `9b96872`):
+
+### ✅ Utility Consolidation (Phase 5 - App Directory Deduplication)
+- **Deleted ~130 duplicate files** from `landing/`, `clearing/`, and `meadow/`
+- Removed duplicate nature component subdirectories from all apps
+- Migrated apps to use `@autumnsgrove/groveengine` package exports
+- Fixed import paths to use `ui/chrome` instead of `ui/components/chrome`
+- Deleted unused `cn.ts` utility files across apps
+
+### ✅ Legal Pages Consolidation (commit `eaba81f`)
+- Moved legal pages into knowledge base at `/knowledge/legal/{slug}`
+- Removed 6 hardcoded legal page routes (~1,197 lines deleted)
+
+### ⏳ Remaining Work
+- **Phase 1**: Quick wins (archive rename, duplicate deletion, file renaming)
+- **Phase 2**: Documentation restructure
+- **Phase 3**: Root cleanup
+- **Phase 4**: Packages improvements (migration numbering, tsconfig base)
+- **Phase 6**: Structural moves (domains/, scripts/, root plans/)
+- **Phase 7**: Verification
 
 ---
 
@@ -437,9 +462,13 @@ When implementation is complete:
 
 ## 5. App Directories
 
-### Critical: Remove Duplicate Nature Components
+### ✅ COMPLETED: Remove Duplicate Nature Components
 
-**Issue**: `landing/` and `meadow/` both contain identical copies of ~200 nature component files. These are already available in the `@autumnsgrove/groveengine` package.
+> **Status**: DONE (commit `9b96872` on 2026-01-14)
+>
+> This section documents what was completed. The ~130 duplicate nature component files were deleted from `landing/`, `meadow/`, and `clearing/`. Apps now import from `@autumnsgrove/groveengine`.
+
+**Original Issue**: `landing/` and `meadow/` both contained identical copies of ~200 nature component files. These are already available in the `@autumnsgrove/groveengine` package.
 
 **⚠️ VERIFICATION REQUIRED BEFORE DELETION**
 
@@ -470,31 +499,17 @@ node -e "const m = require('./dist/ui/nature'); console.log('Exports:', Object.k
 
 **Only proceed with deletion if BOTH compile-time AND runtime verification pass.**
 
-**Action for `landing/src/lib/components/nature/`**:
+**Action for `landing/src/lib/components/nature/`**: ✅ COMPLETED
 
-1. **VERIFY** engine package exports work (steps above)
-2. **DELETE these subdirectories** (using `git rm -r` to preserve history):
-   - `sky/` (8 components)
-   - `trees/` (2 components)
-   - `ground/` (11 components)
-   - `creatures/` (11 components)
-   - `structural/` (8 components)
-   - `water/` (4 components)
-   - `botanical/` (10 components)
-   - `weather/` (3 components)
+1. ~~**VERIFY** engine package exports work (steps above)~~ ✅ Done
+2. ~~**DELETE these subdirectories** (using `git rm -r` to preserve history)~~ ✅ Done - all subdirectories removed
+3. ~~**KEEP** `palette.ts` (re-exports from engine)~~ ✅ Handled
+4. ~~**UPDATE imports** throughout `landing/` to use engine package~~ ✅ Done
+5. ~~**RUN BUILD** to verify no broken imports~~ ✅ Build passes
 
-3. **KEEP** `palette.ts` (re-exports from engine)
+**Action for `meadow/src/lib/components/nature/`**: ✅ COMPLETED
 
-4. **UPDATE imports** throughout `landing/` to use:
-   ```typescript
-   import { ComponentName } from '@autumnsgrove/groveengine/ui/nature';
-   ```
-
-5. **RUN BUILD** to verify no broken imports: `cd landing && pnpm build`
-
-**Action for `meadow/src/lib/components/nature/`**:
-
-Same as landing - verify first, then delete local copies, import from engine package.
+Same as landing - completed in same commit. Also included `clearing/` app.
 
 ### Font Declaration Consolidation
 
@@ -660,58 +675,73 @@ Execute changes in this order to minimize conflicts:
 
 ### Phase 1: Quick Wins (No Dependencies)
 
-1. ✅ Delete duplicate `docs/grove-sustainability.md`
-2. ✅ Rename `_archived/` → `_deprecated/`
-3. ✅ Add README files to `_deprecated/`, `archives/`
-4. ✅ Rename UPPERCASE docs to lowercase (STRIPE-SETUP.md → stripe-setup.md, etc.)
+> **Status**: ❌ NOT STARTED
+
+1. ⬚ Delete duplicate `docs/grove-sustainability.md` (duplicate still exists)
+2. ⬚ Rename `_archived/` → `_deprecated/` (still named `_archived/`)
+3. ⬚ Add README files to `_deprecated/`, `archives/`
+4. ⬚ Rename UPPERCASE docs to lowercase (LEMONSQUEEZY-SETUP.md, RELEASE-SUMMARY-SETUP.md, STRIPE-SETUP.md still UPPERCASE)
 
 ### Phase 2: Documentation Restructure
 
-1. Create new directory structure in `docs/`
-2. Move files from `docs/` root to appropriate subdirectories
-3. Move `docs/scratch/` contents to `docs/philosophy/naming-research/`
-4. Move root plans to `docs/plans/` structure
-5. Consolidate sparse directories (`business/`, `schema/`, `concepts/`, `migrations/`)
-6. Create `docs/README.md` and `docs/plans/README.md`
-7. Delete empty source directories
+> **Status**: ❌ NOT STARTED (53 files still in docs/scratch/, 40+ files at docs/ root)
+
+1. ⬚ Create new directory structure in `docs/`
+2. ⬚ Move files from `docs/` root to appropriate subdirectories
+3. ⬚ Move `docs/scratch/` contents to `docs/philosophy/naming-research/`
+4. ⬚ Move root plans to `docs/plans/` structure
+5. ⬚ Consolidate sparse directories (`business/`, `schema/`, `concepts/`, `migrations/`)
+6. ⬚ Create `docs/README.md` and `docs/plans/README.md`
+7. ⬚ Delete empty source directories
 
 ### Phase 3: Root Cleanup
 
-1. Move root markdown files to appropriate `docs/` locations
-2. Move `cdn-index.html` to `assets/`
-3. Delete root `plans/` directory after moving contents
+> **Status**: ❌ NOT STARTED (PLAN.md, CHROME-*.md, cloudflare-setup.md, icon-analysis.md, cdn-index.html still at root)
+
+1. ⬚ Move root markdown files to appropriate `docs/` locations
+2. ⬚ Move `cdn-index.html` to `assets/`
+3. ⬚ Delete root `plans/` directory after moving contents
 
 ### Phase 4: Packages Improvements
 
-1. Fix migration numbering in `packages/engine/migrations/`
-2. Create `packages/README.md`
-3. Create `packages/grove-router/README.md`
-4. Create `tsconfig.base.json` at repository root
-5. Update package tsconfigs to extend base
-6. Rename `ui/components/ui/` → `ui/components/glass/`
+> **Status**: ❌ NOT STARTED
+> **Note**: Migration collisions still exist: `010_*` (2 files), `014_*` (2 files), `018_*` (2 files)
+
+1. ⬚ Fix migration numbering in `packages/engine/migrations/`
+2. ⬚ Create `packages/README.md`
+3. ⬚ Create `packages/grove-router/README.md`
+4. ⬚ Create `tsconfig.base.json` at repository root
+5. ⬚ Update package tsconfigs to extend base
+6. ⬚ Rename `ui/components/ui/` → `ui/components/glass/`
 
 ### Phase 5: App Directory Deduplication
 
-1. Verify engine package exports all nature components
-2. Update imports in `landing/` to use engine package
-3. Delete duplicate nature components from `landing/`
-4. Repeat for `meadow/`
-5. Consolidate font declarations to engine package
-6. Update app CSS files to import from engine
+> **Status**: ✅ MOSTLY COMPLETE (commit `9b96872` on 2026-01-14)
+
+1. ✅ Verify engine package exports all nature components
+2. ✅ Update imports in `landing/` to use engine package
+3. ✅ Delete duplicate nature components from `landing/`
+4. ✅ Repeat for `meadow/` (and `clearing/`)
+5. ⬚ Consolidate font declarations to engine package (still pending)
+6. ⬚ Update app CSS files to import from engine (still pending)
 
 ### Phase 6: Structural Moves
 
-1. Move `domains/` → `packages/domains/`
-2. Update workspace configuration
-3. Organize `scripts/` into subdirectories
-4. Create `scripts/README.md`
+> **Status**: ❌ NOT STARTED (root `plans/` still exists with 2 files)
+
+1. ⬚ Move `domains/` → `packages/domains/`
+2. ⬚ Update workspace configuration
+3. ⬚ Organize `scripts/` into subdirectories
+4. ⬚ Create `scripts/README.md`
 
 ### Phase 7: Verification
 
-1. Run full build to verify no broken imports
-2. Run tests to verify functionality
-3. Update any broken cross-references in documentation
-4. Commit with comprehensive message
+> **Status**: ⏳ BLOCKED (waiting for other phases)
+
+1. ⬚ Run full build to verify no broken imports
+2. ⬚ Run tests to verify functionality
+3. ⬚ Update any broken cross-references in documentation
+4. ⬚ Commit with comprehensive message
 
 ---
 

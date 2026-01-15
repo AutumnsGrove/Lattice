@@ -48,7 +48,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | Specification | Purpose | Status | Integration |
 |---------------|---------|--------|-------------|
 | **[Lattice](lattice-spec.md)** | Core framework & multi-tenant engine | **Active** | All components |
-| **[Engine](engine-spec.md)** | Blog rendering & content management | Active | Lattice, TenantDO |
+| ~~[Engine](engine-spec.md)~~ | ~~Blog rendering & content management~~ | **Deprecated** | *Merged into Lattice* |
 | **[Heartwood](heartwood-spec.md)** | Centralized authentication service | **Active** | All services |
 | **[Plant](plant-spec.md)** | Tenant onboarding & signup flow | Planned | Lattice, Heartwood |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |

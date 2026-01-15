@@ -106,6 +106,26 @@ export {
 } from './database.js';
 
 // ============================================================================
+// Database Safety Layer
+// ============================================================================
+
+export * as dbSafety from './database-safety.js';
+export {
+	// Types
+	type SafetyConfig,
+	type AuditLogEntry,
+	// Errors
+	SafetyViolationError,
+	type SafetyErrorCode,
+	// Safe Database Wrapper
+	SafeDatabase,
+	withSafetyGuards,
+	// Agent-Safe Defaults
+	AGENT_SAFE_CONFIG,
+	withAgentSafetyGuards
+} from './database-safety.js';
+
+// ============================================================================
 // Cache Service (KV)
 // ============================================================================
 

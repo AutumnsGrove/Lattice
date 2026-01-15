@@ -8,6 +8,82 @@
 
 # 🔄 CURRENT SESSION (Jan 15, 2026)
 
+## 🌲 V1 Release Planning Discussion
+
+> **Context:** Pre-v1 strategy session covering major architectural and workflow decisions
+
+### Decisions Made
+
+#### 1. Repo/Package Renaming → AT V1 LAUNCH
+> **Strategy:** Rename at v1 launch, keep both packages alive during transition, then sunset old one.
+
+- [ ] At v1: Rename GitHub repo `AutumnsGrove/GroveEngine` → `AutumnsGrove/Lattice`
+- [ ] At v1: Publish `@autumnsgrove/lattice` to npm
+- [ ] At v1: Update `@autumnsgrove/groveengine` to redirect/re-export from lattice
+- [ ] Update all consumer apps imports
+- [ ] Update documentation references
+- [ ] After transition period: Deprecate `@autumnsgrove/groveengine`
+
+#### 2. Branch Protection & Development Workflow → WEEKLY RELEASES
+> **Strategy:** Weekly bumps from develop → main, or on-demand as significant updates come in.
+
+- [ ] Protect `main` branch (require PR reviews, no direct pushes)
+- [ ] Create `develop` branch for integration
+- [ ] Define release workflow: feature → develop → main (weekly or on-demand)
+- [ ] Document critical hotfix process (direct-to-main when needed)
+- [ ] Update GitHub Actions for new branch strategy
+- [ ] Update CONTRIBUTING.md with new workflow
+
+#### 3. Testing Infrastructure → NOW, BEFORE V1! 🚨
+> **Priority:** CRITICAL - Comprehensive testing needed before launch
+> **Approach:** Subagent-optimized pattern (spawn agents per file)
+
+- [ ] Write testing infrastructure spec (`docs/specs/testing-spec.md`)
+- [ ] Implement subagent test generation orchestration
+- [ ] Add test running to CI pipeline
+- [ ] Define testing standards (unit, integration, E2E)
+- [ ] Achieve meaningful coverage before v1
+
+#### 4. Repo Structure → KEEP MONO-REPO ✅
+> **Decision:** Keep current mono-repo structure. Separation is already decent.
+
+No action needed - current structure works well.
+
+#### 5. Code Discoverability → BUILD TOOLING
+> **Action:** Create RG aliases/scripts, potentially build a blazing fast search tool
+
+- [ ] Create `scripts/grove-find.sh` with useful RG aliases
+- [ ] Consider building `gf` (grove-find) CLI tool for blazing fast search
+- [ ] Document key file locations in ARCHITECTURE.md
+
+#### 6. Spec Compliance → MERGE SPECS
+> **Problem:** Two specs exist (engine-spec.md and lattice-spec.md) - merge them
+> **Note:** Auth is currently Google-only but will expand (magic codes, passkeys, Apple, Discord)
+
+- [ ] Merge `engine-spec.md` and `lattice-spec.md` into single source of truth
+- [ ] Update knowledge base references
+- [ ] Document planned vs. implemented features clearly
+- [ ] Check Glass usage consistency (desktop TOC needs it!)
+
+#### 7. DB Abstraction → SAFETY LAYER
+> **Goal:** Create abstraction layer to prevent agents from accidentally destroying data
+> **Concern:** Agents running wild DB commands is risky
+
+- [ ] Design safe DB abstraction layer (`packages/engine/src/lib/server/db/`)
+- [ ] Add query validation/sanitization
+- [ ] Add destructive operation safeguards (confirm before DELETE, no DROP without explicit flag)
+- [ ] Create typed query builders for common operations
+- [ ] Document safe patterns in AGENT.md
+
+---
+
+# 🔄 PREVIOUS SESSION (Jan 14, 2026)
+
+## 🎉 MAJOR MILESTONE: Site is LIVE!
+- **plant.grove.place is working!** Users can sign up and get accounts RIGHT NOW
+- ⏳ Lemon Squeezy verifying store — can't accept payments yet
+- 🚨 **Need to disable signups** until payment processing is approved
+
 ## Completed Today ✅
 
 ### 🚨 Signup Gate (Lemon Squeezy Verification Pending)
