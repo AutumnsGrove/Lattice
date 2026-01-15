@@ -1,33 +1,21 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
 	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { Trees, Users, Heart, Calendar, Zap, Sprout, ArrowRight } from 'lucide-svelte';
 
-	// Lucide icons
-	import {
-		Users,
-		Heart,
-		Calendar,
-		Zap,
-		Sprout,
-		ArrowRight,
-		Sparkles
-	} from 'lucide-svelte';
+	// Minimal navigation - just a way home
+	const navItems: NavItem[] = [
+		{ href: 'https://grove.place', label: 'Grove', icon: Trees, external: true }
+	];
 
 	// Toggle season on logo click
 	function handleLogoClick() {
 		seasonStore.cycle();
 	}
-
-	// TODO: Add full marketing page with features, social proof, pricing
-	// TODO: Add interactive feed preview (mockup with sample posts)
-	// TODO: Add animations for nature elements (floating flowers, grass sway)
-	// TODO: Add "How voting works" interactive demo
-	// TODO: Add "Emoji reactions" visual explainer
-	// TODO: Link to Meadow spec (/knowledge/specs/meadow-spec) when knowledge base is live
 </script>
 
 <SEO
@@ -36,7 +24,7 @@
 	url="/"
 />
 
-<Header />
+<Header {navItems} brandTitle="Meadow" />
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Logo/Brand -->
