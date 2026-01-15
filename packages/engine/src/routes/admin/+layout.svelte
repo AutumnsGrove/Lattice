@@ -10,7 +10,8 @@
     Settings,
     ChevronLeft,
     LogOut,
-    Sparkles
+    Sparkles,
+    CreditCard,
   } from "lucide-svelte";
 
   let { data, children } = $props();
@@ -129,6 +130,10 @@
       <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trails">
         <Calendar class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Trails</span>
+      </a>
+      <a href="/admin/account" class="nav-item" onclick={closeSidebar} title="Account">
+        <CreditCard class="nav-icon" />
+        <span class="nav-label" class:hidden={sidebarCollapsed}>Account</span>
       </a>
       <a href="/admin/settings" class="nav-item" onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />
