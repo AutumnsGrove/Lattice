@@ -46,6 +46,12 @@
 	 * <Logo interactive />  <!-- Hover effects -->
 	 * <Logo shadow />  <!-- Drop shadow -->
 	 * ```
+	 *
+	 * @example Monochrome (flat, single-tone per element)
+	 * ```svelte
+	 * <Logo monochrome />  <!-- Removes split-tone, keeps tier variation -->
+	 * <Logo monochrome season="autumn" />  <!-- Flat autumn colors -->
+	 * ```
 	 */
 
 	import type { Season } from '$lib/ui/types/season';
@@ -223,7 +229,7 @@
 	// Get the palette for the current season
 	const palette = $derived(SEASONAL_PALETTES[season]);
 
-	// Helper to flatten a tier to single-tone (uses dark color for both sides)
+	/** Flatten a tier to single-tone (uses dark color for both sides) */
 	const flattenTier = (tierColors: TierColors): TierColors => ({
 		dark: tierColors.dark,
 		light: tierColors.dark
