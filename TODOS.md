@@ -111,11 +111,12 @@ No action needed - current structure works well.
 
 ## Bugs Found During Testing 🐛
 
-### Admin Sidebar UI Issues
-- [ ] "Dev" panel in sidebar shows clipped text ("De" only visible)
-- [ ] No clear way to expand collapsed sidebar panels
-- [ ] Consider adding hover-to-expand or click-to-expand behavior
+### Admin Sidebar UI Issues ✅ FIXED
+- [x] ~~"Dev" panel in sidebar shows clipped text~~ (Note: No "Dev" panel exists - may have been misremembered)
+- [x] No clear way to expand collapsed sidebar panels - **ADDED hover-to-expand behavior**
+- [x] Consider adding hover-to-expand or click-to-expand behavior - **IMPLEMENTED**
 - **Location:** `packages/engine/src/routes/admin/+layout.svelte` (sidebar component)
+- **Fix:** When collapsed sidebar is hovered, it now expands to show full labels and user info
 
 ---
 

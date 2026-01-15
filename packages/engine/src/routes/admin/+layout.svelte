@@ -16,6 +16,10 @@
   let { data, children } = $props();
   let sidebarOpen = $state(false);
   let sidebarCollapsed = $state(false);
+  let sidebarHovered = $state(false);
+
+  // Computed: show expanded content when not collapsed OR when hovered
+  let showExpanded = $derived(!sidebarCollapsed || sidebarHovered);
 
   function toggleSidebar() {
     sidebarOpen = !sidebarOpen;
@@ -27,6 +31,16 @@
 
   function toggleCollapse() {
     sidebarCollapsed = !sidebarCollapsed;
+  }
+
+  function handleMouseEnter() {
+    if (sidebarCollapsed) {
+      sidebarHovered = true;
+    }
+  }
+
+  function handleMouseLeave() {
+    sidebarHovered = false;
   }
 </script>
 
@@ -55,17 +69,24 @@
     ></button>
   {/if}
 
-  <aside class="sidebar glass-sidebar" class:open={sidebarOpen} class:collapsed={sidebarCollapsed}>
+  <aside
+    class="sidebar glass-sidebar"
+    class:open={sidebarOpen}
+    class:collapsed={sidebarCollapsed}
+    class:hovered={sidebarHovered}
+    onmouseenter={handleMouseEnter}
+    onmouseleave={handleMouseLeave}
+  >
     <div class="sidebar-header">
-      {#if sidebarCollapsed}
-        <a href="/admin" class="sidebar-logo-link" title="Arbor Dashboard">
-          <Logo class="sidebar-logo" />
-        </a>
-      {:else}
+      {#if showExpanded}
         <div class="sidebar-brand">
           <Logo class="sidebar-logo-small" />
           <h2>Arbor <span class="admin-label">(admin panel)</span></h2>
         </div>
+      {:else}
+        <a href="/admin" class="sidebar-logo-link" title="Arbor Dashboard">
+          <Logo class="sidebar-logo" />
+        </a>
       {/if}
       <button
         class="collapse-btn"
@@ -83,39 +104,39 @@
     <nav class="sidebar-nav">
       <a href="/admin" class="nav-item" onclick={closeSidebar} title="Dashboard">
         <LayoutDashboard class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Dashboard</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Dashboard</span>
       </a>
       <a href="/admin/blog" class="nav-item" onclick={closeSidebar} title="Blog Posts">
         <FileText class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Blog Posts</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Blog Posts</span>
       </a>
       <a href="/admin/pages" class="nav-item" onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Pages</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Pages</span>
       </a>
       <a href="/admin/curios" class="nav-item" onclick={closeSidebar} title="Curios">
         <Sparkles class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Curios</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Curios</span>
       </a>
       <a href="/admin/images" class="nav-item" onclick={closeSidebar} title="Images">
         <Image class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Images</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
       <a href="/admin/analytics" class="nav-item" onclick={closeSidebar} title="Analytics">
         <BarChart3 class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Analytics</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Analytics</span>
       </a>
       <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trails">
         <Calendar class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Trails</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Trails</span>
       </a>
       <a href="/admin/settings" class="nav-item" onclick={closeSidebar} title="Settings">
         <Settings class="nav-icon" />
-        <span class="nav-label" class:hidden={sidebarCollapsed}>Settings</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Settings</span>
       </a>
     </nav>
 
-    {#if !sidebarCollapsed}
+    {#if showExpanded}
       <div class="sidebar-footer">
         <div class="user-info">
           <span class="email">{data.user?.email ?? 'Guest (Demo Mode)'}</span>
@@ -282,6 +303,13 @@
     width: 72px;
   }
 
+  /* Hover-to-expand: when collapsed sidebar is hovered, expand it */
+  .sidebar.collapsed.hovered {
+    width: 250px;
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+
   .sidebar-header {
     padding: 1.25rem;
     border-bottom: 1px solid var(--grove-border-subtle);
@@ -346,6 +374,12 @@
     padding: 1rem 0.5rem;
   }
 
+  /* When hovered, restore normal header layout */
+  .sidebar.collapsed.hovered .sidebar-header {
+    flex-direction: row;
+    padding: 1.25rem;
+  }
+
   .sidebar.collapsed .collapse-btn {
     background: var(--grove-overlay-8);
     padding: 0.5rem;
@@ -354,6 +388,12 @@
 
   .sidebar.collapsed .collapse-btn:hover {
     background: var(--grove-overlay-15);
+  }
+
+  /* When hovered, restore normal collapse button */
+  .sidebar.collapsed.hovered .collapse-btn {
+    background: none;
+    padding: 0.25rem;
   }
 
   .collapse-btn {
@@ -378,13 +418,13 @@
     background: var(--overlay-light-10);
   }
 
-  .collapse-icon {
+  :global(.collapse-icon) {
     width: 1.25rem;
     height: 1.25rem;
     transition: transform 0.3s ease;
   }
 
-  .collapse-icon.rotated {
+  :global(.collapse-icon.rotated) {
     transform: rotate(180deg);
   }
 
@@ -411,6 +451,13 @@
     justify-content: center;
     padding: 0.75rem;
     margin: 0.25rem 0.5rem;
+  }
+
+  /* When hovered, restore normal nav item layout */
+  .sidebar.collapsed.hovered .nav-item {
+    justify-content: flex-start;
+    padding: 0.75rem 1.25rem;
+    margin: 0.125rem 0.5rem;
   }
 
   .nav-item:hover {
@@ -571,6 +618,11 @@
 
     .sidebar.collapsed {
       width: 250px; /* Don't collapse on mobile */
+    }
+
+    .sidebar.collapsed.hovered {
+      width: 250px; /* No hover expansion on mobile */
+      box-shadow: var(--shadow-md);
     }
 
     .sidebar-overlay {
