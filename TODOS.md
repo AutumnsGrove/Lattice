@@ -36,6 +36,27 @@
 
 ## 🌅 Tomorrow's Plan (Jan 15, 2026)
 
+### 🖼️ PR #336: JXL Encoding Review Fixes
+> **PR:** https://github.com/AutumnsGrove/GroveEngine/pull/336
+> **Status:** Code review complete, needs fixes before merge
+> **Grade from reviewer:** B+ — Strong engineering with integration gaps
+
+**Critical Issues (must fix):**
+- [ ] Migration safety: Add "IF NOT EXISTS" protection to SQLite ALTER TABLE statements
+- [ ] Backend integration: Upload API endpoint needs to persist format metadata and populate analytics table
+- [ ] Dead code: Remove unused `getImageData` function (or use it)
+
+**Should Fix:**
+- [ ] Add metrics tracking to error paths (not just success)
+- [ ] Verify `@jsquash/jxl` dependency placement (appears in two locations — dedupe)
+- [ ] Add E2E test for JXL encoding flow
+
+**Minor Polish (nice to have):**
+- [ ] Add tests for mobile detection logic
+- [ ] Add EXIF stripping verification test
+- [ ] Document feature flag default coordination
+- [ ] Consider more robust device detection than UA sniffing
+
 ### 🚨 Immediate: Disable Signups
 - [ ] Add gate to prevent new signups until Lemon Squeezy approves store
   - Option A: Show "Coming Soon" page at plant.grove.place
