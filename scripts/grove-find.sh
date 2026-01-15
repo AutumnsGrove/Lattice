@@ -63,7 +63,15 @@ _grove_check_deps() {
 _grove_check_deps || true
 
 # Get the Grove root directory (where this script lives)
-GROVE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Works in both bash and zsh
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+    GROVE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+elif [ -n "${(%):-%x}" ]; then
+    GROVE_ROOT="$(cd "$(dirname "${(%):-%x}")/.." && pwd)"
+else
+    # Fallback: assume we're in the GroveEngine directory
+    GROVE_ROOT="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)" || GROVE_ROOT="$HOME/Documents/Projects/GroveEngine"
+fi
 
 # =============================================================================
 # Core Search Functions
@@ -80,7 +88,7 @@ gf() {
         return 1
     fi
 
-    rg --color=always \
+    command rg --color=always \
        --line-number \
        --no-heading \
        --smart-case \
@@ -106,16 +114,16 @@ gfc() {
 
     # Search for Svelte component files
     echo -e "\n${GREEN}Svelte Components:${NC}"
-    fd -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
+    command fd -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
 
     # Search for class definitions
     echo -e "\n${GREEN}Class Definitions:${NC}"
-    rg --color=always -n "class\s+$name" "$GROVE_ROOT" \
+    command rg --color=always -n "class\s+$name" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' --type ts --type js
 
     # Search for interface/type definitions
     echo -e "\n${GREEN}Type/Interface Definitions:${NC}"
-    rg --color=always -n "(interface|type)\s+$name" "$GROVE_ROOT" \
+    command rg --color=always -n "(interface|type)\s+$name" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' --type ts
 }
 
@@ -130,7 +138,7 @@ gff() {
 
     echo -e "${CYAN}🔍 Searching for function: ${name}${NC}"
 
-    rg --color=always -n \
+    command rg --color=always -n \
        "(function\s+$name|const\s+$name\s*=|let\s+$name\s*=|export\s+(async\s+)?function\s+$name|$name\s*[:=]\s*(async\s+)?\()" \
        "$GROVE_ROOT" \
        --glob '!node_modules' \
@@ -149,7 +157,7 @@ gfi() {
 
     echo -e "${CYAN}🔍 Searching for imports of: ${name}${NC}"
 
-    rg --color=always -n "import.*['\"].*$name" "$GROVE_ROOT" \
+    command rg --color=always -n "import.*['\"].*$name" "$GROVE_ROOT" \
        --glob '!node_modules' \
        --glob '!dist' \
        --type ts --type js --type svelte
@@ -198,8 +206,8 @@ gfr() {
     echo -e "${CYAN}🔍 SvelteKit routes${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        fd "+page" "$GROVE_ROOT" --exclude node_modules | rg -i "$pattern"
-        fd "+server" "$GROVE_ROOT" --exclude node_modules | rg -i "$pattern"
+        fd "+page" "$GROVE_ROOT" --exclude node_modules | command rg -i "$pattern"
+        fd "+server" "$GROVE_ROOT" --exclude node_modules | command rg -i "$pattern"
     else
         echo -e "\n${GREEN}Page Routes:${NC}"
         fd "+page.svelte" "$GROVE_ROOT" --exclude node_modules | head -30
@@ -215,11 +223,11 @@ gfd() {
     echo -e "${CYAN}🔍 Database queries${table:+ for table: $table}${NC}"
 
     if [ -n "$table" ]; then
-        rg --color=always -n "(SELECT|INSERT|UPDATE|DELETE).*$table" "$GROVE_ROOT" \
+        command rg --color=always -n "(SELECT|INSERT|UPDATE|DELETE).*$table" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type ts --type js
     else
-        rg --color=always -n "db\.(prepare|exec|batch)" "$GROVE_ROOT" \
+        command rg --color=always -n "db\.(prepare|exec|batch)" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type ts --type js | head -50
     fi
@@ -232,11 +240,11 @@ gfg() {
     echo -e "${CYAN}🔍 Glass component usage${variant:+ with variant: $variant}${NC}"
 
     if [ -n "$variant" ]; then
-        rg --color=always -n "Glass.*variant.*['\"]$variant" "$GROVE_ROOT" \
+        command rg --color=always -n "Glass.*variant.*['\"]$variant" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type svelte --type ts
     else
-        rg --color=always -n "<Glass" "$GROVE_ROOT" \
+        command rg --color=always -n "<Glass" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type svelte | head -50
     fi
@@ -249,7 +257,7 @@ gfspec() {
     echo -e "${CYAN}🔍 Spec files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        fd "spec" "$GROVE_ROOT/docs" | rg -i "$name"
+        fd "spec" "$GROVE_ROOT/docs" | command rg -i "$name"
     else
         fd "spec.md" "$GROVE_ROOT/docs" | head -30
     fi
@@ -262,7 +270,7 @@ gftest() {
     echo -e "${CYAN}🔍 Test files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | rg -i "$name"
+        fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | command rg -i "$name"
     else
         fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -30
     fi
