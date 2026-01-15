@@ -1,6 +1,6 @@
 # The Grove Naming System
 
-> *A forest of voices. Every user is a tree in the grove.*
+> *A forest of voices. Every Wanderer is a tree in the grove.*
 
 ---
 

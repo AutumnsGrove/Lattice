@@ -28,6 +28,7 @@
 				href="/knowledge/help/wanderers-and-pathfinders"
 				class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-subtle/20 text-sm text-accent-muted hover:bg-accent-subtle/30 hover:text-accent transition-colors"
 				title="The grove keeper who finds and shows the way"
+				aria-label="Learn about the Wayfinder role"
 			>
 				<Compass class="w-3.5 h-3.5" />
 				<span>Wayfinder</span>

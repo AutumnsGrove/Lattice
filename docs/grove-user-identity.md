@@ -1,6 +1,6 @@
 # Grove User Identity System
 
-> *A forest of voices. Every user walks their own path.*
+> *A forest of voices. Every Wanderer walks their own path.*
 
 ---
 
