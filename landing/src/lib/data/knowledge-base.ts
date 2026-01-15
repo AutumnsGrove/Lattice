@@ -922,6 +922,17 @@ export const helpArticles: Doc[] = [
     lastUpdated: "2026-01-07",
     readingTime: 5,
   },
+  {
+    slug: "wanderers-and-pathfinders",
+    title: "Wanderers and Pathfinders",
+    description:
+      "Learn about Grove's community identity system - Wanderers, Rooted, Pathfinders, and the Wayfinder",
+    excerpt:
+      "Grove doesn't call you a 'user' or a 'member.' Those words feel transactional. Instead, we use language that reflects how people actually move through this place.",
+    category: "help",
+    lastUpdated: "2026-01-15",
+    readingTime: 3,
+  },
 ];
 
 // Legal Documents
