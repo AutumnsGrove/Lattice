@@ -44,6 +44,28 @@
 - [x] **Back navigation** — Plans page has "Back to profile" link
 - [x] **Tour mobile polish** — Already has swipe gestures, larger touch targets, navigation hints
 
+### 💳 Subscription Management UI ✅ COMPLETE
+- [x] `/admin/account` page with billing, usage, plan changes, data export
+- [x] `/api/billing` endpoints (GET, PATCH, PUT)
+- [x] `/api/export` endpoint (POST with CSRF protection)
+- [x] Security: Open redirect prevention, rate limiting, input validation
+- [x] Component decomposition: Page reduced from 1200 to 315 lines
+- [x] 82 total tests (29 billing + 28 export + 25 utility)
+- [x] TypeScript migration: All components use `<script lang="ts">`
+
+**Follow-up items:**
+- [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
+- [ ] **Export pagination** — Add LIMIT/OFFSET for tenants with 1000+ posts
+- [ ] **Rate limit config** — Move RATE_LIMIT_MAX to shared config/env vars
+- [ ] **Billing rate limiting** — Add rate limits to billing operations (currently exports only)
+- [ ] **Support email config** — Move `autumnbrown23@pm.me` to config file
+- [ ] **Focus management** — Return focus to button after actions complete
+
+**Deployment checklist:**
+- [ ] `audit_log` table migration ready for production D1
+- [ ] `CACHE_KV` binding configured in wrangler.toml
+- [ ] Stripe webhook handles subscription updates
+
 ### ⏸️ Deferred to Follow-up PR
 - [ ] **JXL Metrics Tracking** — Wire client to send encoding metrics (success/failure, timing) to server
   - The `jxl_encoding_metrics` table is ready in migration

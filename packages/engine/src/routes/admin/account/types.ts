@@ -57,4 +57,5 @@ export interface AccountPageData {
   availableTiers: AvailableTier[];
 }
 
-export type ExportType = "full" | "posts" | "media";
+// Re-export from canonical source to avoid duplication
+export type { ExportType } from "../../api/export/+server";
