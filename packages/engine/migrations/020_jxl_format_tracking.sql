@@ -1,22 +1,30 @@
 -- JXL Format Tracking Migration
 -- Adds format tracking to support JPEG XL encoding analytics
 --
--- Run with: npx wrangler d1 execute groveengine-db --file=migrations/020_jxl_format_tracking.sql
+-- USAGE: wrangler d1 migrations apply groveengine-db --remote
+--
+-- IDEMPOTENCY: This migration is safe to run multiple times.
+-- - CREATE TABLE IF NOT EXISTS: Safe for tables
+-- - CREATE INDEX IF NOT EXISTS: Safe for indexes
+-- - INSERT OR IGNORE: Safe for seed data
+-- - ALTER TABLE: D1 migration system tracks which migrations have run, preventing re-runs.
+--   If manually executing, duplicate column errors are non-fatal and can be ignored.
 
 -- =============================================================================
 -- Update image_hashes table to track format conversions
 -- =============================================================================
 
--- Add tenant_id column if it doesn't exist (some instances may already have it)
--- SQLite doesn't support ALTER TABLE ADD COLUMN IF NOT EXISTS, so we handle errors
+-- Add columns for format tracking and compression analytics
+-- SQLite ALTER TABLE ADD COLUMN will fail if column exists (non-fatal error)
+-- D1 migrations system ensures this file only runs once per database
 
--- Add image_format column to track output format (jxl, webp, gif, original)
+-- Track output format (jxl, webp, gif, original)
 ALTER TABLE image_hashes ADD COLUMN image_format TEXT DEFAULT 'webp';
 
--- Add original_format column to track input format
+-- Track input format for analytics
 ALTER TABLE image_hashes ADD COLUMN original_format TEXT;
 
--- Add size tracking for compression analytics
+-- Track sizes for compression ratio analytics
 ALTER TABLE image_hashes ADD COLUMN original_size_bytes INTEGER;
 ALTER TABLE image_hashes ADD COLUMN stored_size_bytes INTEGER;
 
@@ -64,7 +72,7 @@ CREATE INDEX IF NOT EXISTS idx_image_hashes_format ON image_hashes(image_format)
 -- Feature flag seeds for JXL rollout
 -- =============================================================================
 
--- Insert JXL encoding feature flag (disabled by default for safe rollout)
+-- JXL encoding feature flag (disabled by default for safe rollout)
 INSERT OR IGNORE INTO feature_flags (
   key,
   name,
@@ -85,7 +93,7 @@ INSERT OR IGNORE INTO feature_flags (
   datetime('now')
 );
 
--- Insert JXL kill switch (enabled = encoding allowed, disabled = force WebP)
+-- JXL kill switch (enabled = encoding allowed, disabled = force WebP)
 INSERT OR IGNORE INTO feature_flags (
   key,
   name,
@@ -106,7 +114,7 @@ INSERT OR IGNORE INTO feature_flags (
   datetime('now')
 );
 
--- Insert JXL percentage rollout flag
+-- JXL percentage rollout flag for gradual enablement
 INSERT OR IGNORE INTO feature_flags (
   key,
   name,

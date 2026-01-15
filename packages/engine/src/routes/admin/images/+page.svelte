@@ -281,6 +281,13 @@
       formData.append('file', new File([processedBlob], file.name, { type: processedBlob.type }));
       formData.append('hash', hash);
 
+      // Include format metadata for analytics
+      if (processResult.format) {
+        formData.append('imageFormat', processResult.format);
+      }
+      formData.append('originalSize', String(processResult.originalSize));
+      formData.append('storedSize', String(processResult.processedSize));
+
       if (aiData) {
         formData.append('filename', aiData.filename);
         formData.append('altText', aiData.altText);

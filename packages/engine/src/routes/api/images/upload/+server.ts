@@ -154,6 +154,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const description = (formData.get("description") as string) || "";
     const hash = formData.get("hash") as string | null;
 
+    // Format metadata for analytics (JXL tracking)
+    const imageFormat = formData.get("imageFormat") as string | null;
+    const originalSizeStr = formData.get("originalSize") as string | null;
+    const storedSizeStr = formData.get("storedSize") as string | null;
+    const originalSizeBytes = originalSizeStr
+      ? parseInt(originalSizeStr, 10)
+      : null;
+    const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
+
     if (!file || !(file instanceof File)) {
       throw error(400, "No file provided");
     }
@@ -311,18 +320,33 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Build CDN URL
     const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 
-    // Store hash for future duplicate detection
+    // Store hash for future duplicate detection with format metadata
     if (hash && db) {
       try {
         await db
           .prepare(
             `
-          INSERT INTO image_hashes (hash, key, url, tenant_id, created_at)
-          VALUES (?, ?, ?, ?, datetime('now'))
-          ON CONFLICT(hash, tenant_id) DO NOTHING
+          INSERT INTO image_hashes (
+            hash, key, url, tenant_id, created_at,
+            image_format, original_format, original_size_bytes, stored_size_bytes
+          )
+          VALUES (?, ?, ?, ?, datetime('now'), ?, ?, ?, ?)
+          ON CONFLICT(hash, tenant_id) DO UPDATE SET
+            image_format = COALESCE(excluded.image_format, image_format),
+            original_size_bytes = COALESCE(excluded.original_size_bytes, original_size_bytes),
+            stored_size_bytes = COALESCE(excluded.stored_size_bytes, stored_size_bytes)
         `,
           )
-          .bind(hash, key, cdnUrl, tenantId)
+          .bind(
+            hash,
+            key,
+            cdnUrl,
+            tenantId,
+            imageFormat || "webp", // Default to webp if not specified
+            file.type.split("/")[1] || null, // Extract original format from MIME type
+            originalSizeBytes,
+            storedSizeBytes,
+          )
           .run();
       } catch (dbError) {
         // Non-critical, continue
