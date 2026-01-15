@@ -107,7 +107,12 @@ These files are foundational and must remain at the repository root:
 
 ### Current Structure Issues
 
-1. **Migration numbering collisions**: Two `014_*` and two `018_*` migrations
+> **Updated 2026-01-15**: Verified current collision state
+
+1. **Migration numbering collisions**: Three collision pairs exist:
+   - Two `010_*` migrations: `010_example_tenant_content.sql` and `010_update_tier_names.sql`
+   - Two `014_*` migrations: `014_wisp.sql` and `014_wisp_settings.sql`
+   - Two `018_*` migrations: `018_feature_flags.sql` and `018_storage_tier_indexes.sql`
 2. **Missing documentation**: No `packages/README.md`, no `grove-router/README.md`
 3. **TypeScript config drift**: Inconsistent targets and moduleResolution
 4. **Confusing nested naming**: `lib/ui/components/ui/` should be `lib/ui/components/glass/`
@@ -132,17 +137,28 @@ Document the actual collisions found before proceeding. The example below is bas
 
 **Step 2: Renumber to Eliminate Collisions**
 
-Example renumbering (verify against audit results):
+Example renumbering (verify against audit results - updated 2026-01-15):
 
 ```
 Current                              → New Name
-014_wisp.sql                         → 014_wisp.sql (keep)
-014_wisp_settings.sql                → 015_wisp_settings.sql
-015_* through 017_*                  → 016_* through 018_* (increment by 1)
-018_feature_flags.sql                → 019_feature_flags.sql
-018_storage_tier_indexes.sql         → 020_storage_tier_indexes.sql
-019_lemonsqueezy_migration.sql       → 021_lemonsqueezy_migration.sql
+# Fix 010_* collision first
+010_example_tenant_content.sql       → 010_example_tenant_content.sql (keep)
+010_update_tier_names.sql            → 011_update_tier_names.sql
+011_* through 013_*                  → 012_* through 014_* (increment by 1)
+
+# Then fix 014_* collision (now at 015)
+015_wisp.sql                         → 015_wisp.sql (keep, was 014)
+015_wisp_settings.sql                → 016_wisp_settings.sql
+016_* through 018_*                  → 017_* through 019_* (increment by 1)
+
+# Then fix 018_* collision (now at 020)
+020_feature_flags.sql                → 020_feature_flags.sql (keep)
+020_storage_tier_indexes.sql         → 021_storage_tier_indexes.sql
+021_lemonsqueezy_migration.sql       → 022_lemonsqueezy_migration.sql
+022_timeline_curio.sql               → 023_timeline_curio.sql
 ```
+
+**Simpler approach**: Renumber ALL migrations starting from the first collision to avoid cascading renumbers. Work backwards from highest collision.
 
 **Step 3: Use `git mv` for History**
 
