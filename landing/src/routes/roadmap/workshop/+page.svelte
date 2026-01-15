@@ -450,9 +450,9 @@
 					github: 'https://github.com/AutumnsGrove/Gossamer',
 					spec: '/knowledge/specs/gossamer-spec',
 					subComponents: [
-						{ name: 'Svelte', icon: 'component', description: '@gossamer/svelte' },
-						{ name: 'React', icon: 'component', description: '@gossamer/react' },
-						{ name: 'Vue', icon: 'component', description: '@gossamer/vue' }
+						{ name: 'Clouds', icon: 'cloud', description: 'Ambient ASCII backgrounds' },
+						{ name: 'Patterns', icon: 'waves', description: 'Pattern generators' },
+						{ name: 'Canvas', icon: 'frame', description: '2D rendering' }
 					]
 				},
 			]
