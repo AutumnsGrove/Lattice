@@ -1,6 +1,6 @@
 <script>
   import { GlassCard, Spinner } from '$lib/ui';
-  import { api } from "$lib/utils";
+  import { api, getUserDisplayName } from "$lib/utils";
   import {
     FileText,
     Image,
@@ -63,10 +63,8 @@
     fetchStats();
   });
 
-  // Get display name for greeting: prefer name, fallback to email username
-  const userName = $derived(
-    data.user?.name || data.user?.email?.split('@')[0] || 'there'
-  );
+  // Get display name for greeting (see docs/grove-user-identity.md)
+  const userName = $derived(getUserDisplayName(data.user));
 
   /** @param {number} num */
   function formatNumber(num) {

@@ -42,5 +42,6 @@ export * from "./json";
 export * from "./markdown";
 export * from "./readability";
 export * from "./sanitize";
+export * from "./user";
 export * from "./validation";
 export * from "./webauthn";
