@@ -157,10 +157,15 @@
 - [ ] **Tour mobile polish** - swipe hints, better touch targets
 - [ ] **Success page CTA** - add "Go to your blog" button with tenant URL
 
-### 3. Optional: Custom Domain for Checkout
-- [ ] Add `payments.grove.place` subdomain in Cloudflare DNS
-- [ ] Configure custom domain in LS Dashboard (Settings → Store)
-- [ ] Makes checkout feel more branded/trustworthy
+### 3. Custom Domain for Checkout — BLOCKED ON LS APPROVAL
+> **Wait until:** Lemon Squeezy store verification is approved
+> **Why wait:** Avoid any DNS/SSL issues during their review process
+
+- [ ] LS Dashboard → Settings → Domains → Add `payments.grove.place`
+- [ ] Note the IP address LS provides
+- [ ] Cloudflare DNS → Add A record: `payments` → LS IP (DNS-only, no proxy!)
+- [ ] LS Dashboard → Verify Domain
+- [ ] No code changes needed — LS SDK uses configured domain automatically
 
 ### 4. Optional: Product Assets
 - [ ] Create tree imagery for each tier (seedling → sapling → oak → evergreen)
