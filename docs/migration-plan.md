@@ -1,396 +1,322 @@
-# GroveEngine Migration Plan
+# GroveEngine Migration & Roadmap
 
 **Source:** AutumnsGrove (autumnsgrove.com)
 **Target:** GroveEngine (grove.place platform)
-**Status:** Planning Phase
+**Status:** Core Migration COMPLETE - Polish & New Features In Progress
 **Created:** November 30, 2025
+**Last Updated:** January 15, 2026
 
 ---
 
 ## Overview
 
-This document outlines the strategy for extracting the blog engine from AutumnsGrove into a standalone, multi-tenant platform (GroveEngine). The goal is a smooth migration that preserves all working code while adding multi-tenant capabilities.
+This document tracks the extraction of the blog engine from AutumnsGrove into the standalone, multi-tenant GroveEngine platform. The core migration is **COMPLETE**. This document now serves as the roadmap for remaining polish and new features.
 
 ---
 
-## Current State: AutumnsGrove
+## Migration Status Summary
 
-### Completed Features (Ready to Extract)
-
-| Component | Location | Extraction Priority | Notes |
-|-----------|----------|---------------------|-------|
-| **Blog Engine** | `src/routes/blog/` | Critical | Core markdown rendering, frontmatter |
-| **Gutter Annotations** | `src/lib/components/ContentWithGutter.svelte` | Critical | Unique feature, sidebar annotations |
-| **Table of Contents** | `src/lib/components/TableOfContents.svelte` | Critical | Auto-generated from headings |
-| **Admin Panel** | `src/routes/admin/` | Critical | Full CRUD for posts/pages/images |
-| **Markdown Parser** | `src/lib/utils/markdown.js` | Critical | Marked.js with custom extensions |
-| **R2 Image Hosting** | `src/routes/api/images/` | High | CDN integration, upload handling |
-| **D1 Database** | `src/lib/db/schema.sql` | High | Needs multi-tenant adaptation |
-| **Auth System** | `src/lib/auth/`, `src/routes/auth/` | High | GitHub OAuth, JWT, sessions |
-| **Security Patterns** | `src/lib/utils/csrf.js`, `hooks.server.js` | High | XSS/CSRF/rate limiting |
-| **Photo Gallery** | `src/lib/components/gallery/` | Medium | Lightbox, zoom, captions |
-| **Custom Fonts** | Admin settings, `static/fonts/` | Medium | 7 self-hosted fonts |
-| **Code Blocks** | Markdown renderer | Medium | GitHub-style with copy button |
-| **Pages System** | `src/routes/admin/pages/` | Medium | Home/About/Contact editable |
-
-### Features NOT to Extract (Personal/Site-Specific)
-
-| Component | Reason |
-|-----------|--------|
-| GitHub Dashboard | Personal feature, not needed for blog platform |
-| Timeline | Site-specific activity tracking |
-| Willow Gallery | Personal content |
-| AI Repository Analysis | GitHub-specific feature |
-
-### Security Status
-
-- **CVSS Score:** 8.6/10
-- **Tests:** 181 security tests passing
-- **XSS Protection:** DOMPurify sanitization
-- **CSRF Protection:** Token validation on all mutations
-- **Rate Limiting:** Exponential backoff, KV-based
-- **Headers:** Full security headers in hooks.server.js
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| Phase 1: Repository Setup | COMPLETE | Dec 2025 |
+| Phase 2: Multi-Tenant Foundation | COMPLETE | Dec 2025 |
+| Phase 3: Plan Enforcement | COMPLETE | Jan 2026 |
+| Phase 4: Theme System | IN PROGRESS | Foliage package exists |
+| Phase 5: Testing & Polish | COMPLETE | Jan 2026 |
+| Component Extraction | COMPLETE | Jan 14, 2026 |
+| Asset Deduplication | COMPLETE | Jan 14, 2026 (11,925 lines removed) |
 
 ---
 
-## Target State: GroveEngine
+## Completed Work
 
-### Multi-Tenant Architecture
+### Engine v0.9.6 (Jan 14, 2026)
 
-```
-grove.place/                 # Marketing site (grove-website)
-├── /pricing
-├── /signup
-├── /login
-└── /dashboard              # Client management
+- [x] Consolidated duplicated utilities into engine package
+- [x] Deleted 11,925 lines of duplication across apps
+- [x] Added Engine-First pattern documentation to AGENT.md
+- [x] Chrome components centralized (Header, Footer, MobileMenu, ThemeToggle)
+- [x] Fixed code block renderer with copy button
+- [x] Restored season cycling on logo tap
 
-username.grove.place/        # Individual blogs (grove-engine)
-├── /                       # Blog homepage
-├── /blog/[slug]           # Individual posts
-├── /about, /contact       # Static pages
-└── /admin/                # Blog admin panel
-```
+### Core Platform (Dec 2025 - Jan 2026)
 
-### Database Schema Changes
+- [x] Multi-tenant database schema deployed
+- [x] Subdomain routing functional (*.grove.place)
+- [x] API endpoints filter by tenant_id
+- [x] Admin panel scoped to tenant
+- [x] 4-tier pricing implemented (Seedling, Sapling, Oak, Evergreen)
+- [x] Lemon Squeezy payment integration (code complete, awaiting store verification)
+- [x] Plant signup flow deployed to plant.grove.place
+- [x] Shade (AI protection) deployed with Turnstile verification
+- [x] Rate limiting core (Threshold pattern) implemented
+- [x] Security audit completed (all P0 issues fixed)
+- [x] Glass design system 100% adopted across all properties
 
-**Current (Single Tenant):**
-```sql
-CREATE TABLE posts (
-  id INTEGER PRIMARY KEY,
-  slug TEXT UNIQUE,
-  title TEXT,
-  content TEXT,
-  ...
-);
-```
+### Component Extraction (All COMPLETE)
 
-**Target (Multi-Tenant):**
-```sql
-CREATE TABLE posts (
-  id INTEGER PRIMARY KEY,
-  tenant_id TEXT NOT NULL,  -- subdomain identifier
-  slug TEXT,
-  title TEXT,
-  content TEXT,
-  ...
-  UNIQUE(tenant_id, slug)   -- Composite unique constraint
-);
-
-CREATE TABLE tenants (
-  id TEXT PRIMARY KEY,      -- e.g., "username"
-  subdomain TEXT UNIQUE,
-  plan TEXT DEFAULT 'starter',
-  storage_used INTEGER DEFAULT 0,
-  post_count INTEGER DEFAULT 0,
-  created_at TEXT,
-  ...
-);
-```
-
-### Subdomain Routing
-
-```javascript
-// hooks.server.js
-export async function handle({ event, resolve }) {
-  const host = event.request.headers.get('host');
-  const subdomain = host?.split('.')[0];
-
-  if (subdomain && subdomain !== 'www' && subdomain !== 'grove') {
-    // This is a tenant blog
-    event.locals.tenant = await getTenant(subdomain);
-    event.locals.isTenantRequest = true;
-  }
-
-  return resolve(event);
-}
-```
+| Component | Status | Notes |
+|-----------|--------|-------|
+| ContentWithGutter.svelte | COMPLETE | Gutter annotations working |
+| TableOfContents.svelte | COMPLETE | Auto-generated TOC |
+| MarkdownEditor.svelte | COMPLETE | Post editing |
+| GutterManager.svelte | COMPLETE | Gutter UI |
+| ImageGallery.svelte | COMPLETE | In-post galleries |
+| Lightbox.svelte | COMPLETE | Image modal |
+| All UI components | COMPLETE | Shadcn components |
+| Chrome components | COMPLETE | Header, Footer, MobileMenu in engine |
 
 ---
 
-## Migration Phases
+## Remaining Work
 
-### Phase 1: Repository Setup (Week 1)
+### Priority 1: Immediate (This Week)
 
-- [ ] Create `grove-engine` repository from AutumnsGrove fork
-- [ ] Remove personal features (dashboard, timeline, willow gallery)
-- [ ] Update package.json, README, AGENT.md
-- [ ] Configure CI/CD for grove-engine
-- [ ] Set up development environment variables
+#### JXL Encoding (PR #336)
+> **Spec:** `docs/plans/jxl-migration-spec.md`
+> **Status:** Code review complete, needs fixes before merge
 
-**Files to Remove:**
-```
-src/routes/dashboard/
-src/routes/timeline/
-src/routes/showcase/
-src/routes/api/git/
-src/routes/api/ai/
-workers/daily-summary/
-UserContent/Posts/*  (keep structure, remove personal content)
-```
+**Critical Issues (must fix):**
+- [ ] Migration safety: Add "IF NOT EXISTS" protection to SQLite ALTER TABLE
+- [ ] Backend integration: Upload API needs to persist format metadata
+- [ ] Dead code: Remove unused `getImageData` function
 
-**Files to Keep (Core Engine):**
-```
-src/routes/blog/
-src/routes/admin/
-src/routes/auth/
-src/routes/api/posts/
-src/routes/api/images/
-src/routes/api/pages/
-src/lib/components/
-src/lib/utils/
-src/lib/auth/
-src/lib/db/
-```
+**Should Fix:**
+- [ ] Add metrics tracking to error paths
+- [ ] Verify `@jsquash/jxl` dependency placement (dedupe)
+- [ ] Add E2E test for JXL encoding flow
 
-### Phase 2: Multi-Tenant Foundation (Week 2-3)
+#### Disable Signups Gate
+- [ ] Add gate until Lemon Squeezy approves store
+  - Option A: Show "Coming Soon" page
+  - Option B: Disable OAuth temporarily
+  - Option C: Add waitlist capture
 
-- [ ] Add `tenant_id` column to all content tables
-- [ ] Create `tenants` table for subdomain management
-- [ ] Implement subdomain detection in hooks.server.js
-- [ ] Update all queries to filter by tenant_id
-- [ ] Add tenant context to all API routes
-- [ ] Create tenant provisioning script
+### Priority 2: Active Development
 
-**Key Files to Modify:**
-```
-src/lib/db/schema.sql       # Add tenant tables
-src/hooks.server.js         # Subdomain routing
-src/routes/api/**           # Add tenant filtering
-src/routes/admin/**         # Scope to current tenant
-```
+#### Gossamer (ASCII Visual Effects) - Phase M4
+> **Location:** `~/Documents/Projects/Gossamer`
+> **Status:** Core complete, 107 tests passing
 
-### Phase 3: Plan Enforcement (Week 3-4)
+**Complete:**
+- [x] GossamerRenderer class + 5 pattern generators
+- [x] 12 character sets + animation loop with FPS limiting
+- [x] 5 Svelte components (Clouds, Image, Text, Overlay, Border)
+- [x] 11 presets (grove, seasonal, ambient themes)
 
-- [ ] Implement post limits (Starter: 250, Pro: unlimited)
-- [ ] Implement storage limits (5GB, 20GB, 100GB)
-- [ ] Add archival system for over-limit posts (soft limits)
-- [ ] Create usage tracking in tenant table
-- [ ] Add upgrade prompts in admin panel
+**Remaining:**
+- [ ] Create vanilla JS examples (`examples/vanilla/`)
+- [ ] Create SvelteKit integration example (`examples/svelte-kit/`)
+- [ ] Finish API documentation (`docs/API.md`)
+- [ ] Configure ESLint/Prettier
+- [ ] Set up CI/CD pipeline
 
-**Limit Enforcement Logic:**
-```javascript
-async function canCreatePost(tenant) {
-  if (tenant.plan === 'professional' || tenant.plan === 'business') {
-    return { allowed: true };
-  }
+#### Timeline Curio - AutumnsGrove Migration
+> **Status:** Phase 7 COMPLETE, needs deployment to production
 
-  const count = await getPostCount(tenant.id);
-  if (count >= 250) {
-    return {
-      allowed: false,
-      reason: 'post_limit',
-      message: 'Upgrade to Professional for unlimited posts'
-    };
-  }
-  return { allowed: true };
-}
-```
+**Complete:**
+- [x] OpenRouter provider with BYOK
+- [x] Voice presets (professional, quest, casual, poetic, minimal)
+- [x] Admin UI (`/admin/curios/timeline`)
+- [x] API endpoints (generate, activity, backfill, config)
+- [x] Long-horizon context system (12 task patterns, 3-day memory)
+- [x] Timeline.svelte component with gutter comments
+- [x] Heatmap.svelte - GitHub-style activity visualization
 
-### Phase 4: Theme System (Week 4-5)
+**Remaining:**
+- [ ] Run migration on AutumnsGrove's D1 database
+- [ ] Configure GitHub token + OpenRouter key in Arbor
+- [ ] Test generation with AutumnsGrove's GitHub activity
+- [ ] Update AutumnsGrove to render Timeline from new Curio system
+- [ ] Retire old timeline implementation
 
-- [ ] Extract theme system from current implementation
-- [ ] Create 3-5 base themes
-- [ ] Add theme selector to admin panel
-- [ ] Implement per-tenant theme storage
-- [ ] Add theme preview functionality
+#### Journey Curio - Implementation
+> **Spec:** `docs/plans/journey-curio-implementation.md`
+> **Status:** Planning complete
 
-**Theme Structure:**
-```
-src/lib/themes/
-├── default/
-│   ├── theme.css
-│   └── config.json
-├── minimal/
-├── forest/
-├── ocean/
-└── sunset/
-```
+- [ ] Implement Journey Curio following spec
+- [ ] Tag-walking strategy for navigation
+- [ ] Integration with existing Curios system
 
-### Phase 5: Testing & Polish (Week 5-6)
+### Priority 3: Infrastructure
 
-- [ ] Migrate security tests to multi-tenant context
-- [ ] Add tenant isolation tests
-- [ ] Test subdomain routing edge cases
-- [ ] Performance testing with multiple tenants
-- [ ] Documentation updates
+#### Feature Flags System
+> **Spec:** `docs/plans/feature-flags-spec.md`
+> **Status:** Planning complete, prerequisite for JXL rollout
 
----
+**Phase 1: Core Infrastructure**
+- [ ] Create D1 migration (feature_flags, flag_rules, flag_audit_log tables)
+- [ ] Implement evaluation logic (`packages/engine/src/lib/feature-flags/`)
+- [ ] Add `FLAGS_KV` binding to wrangler.toml
+- [ ] Write unit tests for percentage rollout determinism
 
-## Component Extraction Checklist
+**Phase 2: Admin UI**
+- [ ] Create `/admin/flags` routes
+- [ ] Build RuleEditor, PercentageSlider, TierSelector components
+- [ ] Add audit log display
 
-### Critical Path (Must Have for MVP)
+**Phase 3: Integration**
+- [ ] Create initial flags (jxl_encoding, jxl_kill_switch, meadow_access)
+- [ ] Integrate with image processor for JXL rollout
+- [ ] Connect to Rings analytics for flag exposure tracking
 
-- [ ] **ContentWithGutter.svelte** - Main blog post layout
-- [ ] **GutterItem.svelte** - Sidebar annotation component
-- [ ] **LeftGutter.svelte** - Gutter container
-- [ ] **TableOfContents.svelte** - Auto-generated TOC
-- [ ] **MobileTOC.svelte** - Mobile-friendly TOC
-- [ ] **markdown.js** - Markdown parser with extensions
-- [ ] **Admin routes** - Post/page management
-- [ ] **Auth system** - OAuth + session management
-- [ ] **Image upload** - R2 integration
+#### Shutter (Content Protection) - v1.6 Auth
+> **Location:** `~/Documents/Projects/Shutter`
+> **Status:** Core complete, needs auth integration
 
-### High Priority (Should Have)
+**Complete:**
+- [x] Python CLI with Jina -> Tavily -> httpx fetch chain
+- [x] 2-phase Canary prompt injection detection
+- [x] OpenRouter integration (4 model tiers)
+- [x] Cloudflare Workers port with D1 offenders database
+- [x] Published to PyPI as `grove-shutter`
 
-- [ ] **ImageGallery.svelte** - Multi-image galleries
-- [ ] **Lightbox.svelte** - Modal image viewer
-- [ ] **ZoomableImage.svelte** - Pan/zoom support
-- [ ] **CodeBlock styling** - GitHub-style code blocks
-- [ ] **Custom fonts** - 7 self-hosted fonts
-- [ ] **CollapsibleSection.svelte** - Expandable content
+**Security (before resuming):**
+- [ ] Rotate OpenRouter API key (exposed during dev)
+- [ ] Re-add secrets: `wrangler secret put OPENROUTER_API_KEY`
 
-### Nice to Have (Can Wait)
+**v1.6 Auth:**
+- [ ] Register Shutter as GroveAuth OAuth client
+- [ ] Implement OAuth PKCE flow + JWT verification
+- [ ] Rate limiting via Durable Objects
+- [ ] Deploy to `shutter.grove.place`
+- [ ] NPM package: `@groveengine/shutter`
 
-- [ ] Recipe system with semantic icons
-- [ ] Mermaid diagram support
-- [ ] Advanced analytics
-- [ ] Comment system integration
+### Priority 4: Theme System (Foliage Integration)
 
----
+> **Repository:** https://github.com/AutumnsGrove/Foliage
+> **Status:** Package exists, needs engine integration
 
-## Data Migration Strategy
+**Foliage provides:**
+- 10 curated themes (Grove, Minimal, Night Garden, Zine, etc.)
+- Tier-gated access (Seedling=3, Sapling=10, Oak+=customizer)
+- CSS variable generation with WCAG AA contrast validation
+- Community themes (Oak+ can browse/submit)
+- Custom font uploads to R2 (Evergreen tier)
 
-### For First Beta Client
+**Integration Tasks:**
+- [ ] Add `@autumnsgrove/foliage` as dependency to engine
+- [ ] Run Foliage migrations (theme_settings, community_themes tables)
+- [ ] Add R2 bucket for custom fonts (`foliage-fonts`)
+- [ ] Import `loadThemeSettings` in engine's `+layout.server.ts`
+- [ ] Apply theme CSS vars via `applyThemeVariables()` in `+layout.svelte`
+- [ ] Add theme admin routes (`/admin/themes/`)
+- [ ] Wire up tier access using `canAccessTheme()`, `canUseCustomizer()`
 
-1. Export existing content from autumnsgrove.com
-2. Create new tenant in grove-engine
-3. Import content with new tenant_id
-4. Verify all posts, images, pages render correctly
-5. Update DNS to point to new subdomain
+### Priority 5: Post-Launch Polish
 
-### Content Export Script
+#### Plant Signup Flow Polish
+- [ ] Add loading states to form submissions
+- [ ] Improve error messages (contextual, not generic)
+- [ ] Add "back" navigation (profile <-> plans)
+- [ ] Tour mobile polish (swipe hints, better touch targets)
+- [ ] Success page CTA ("Go to your blog" button)
 
-```javascript
-// scripts/export-content.js
-async function exportContent(sourceDb) {
-  const posts = await sourceDb.prepare('SELECT * FROM posts').all();
-  const pages = await sourceDb.prepare('SELECT * FROM pages').all();
-  const images = await sourceDb.prepare('SELECT * FROM images').all();
+#### Rate Limiting Route Integration
+- [ ] Add rate limiting to auth endpoints (`/api/auth/*`)
+- [ ] Add rate limiting to CDN upload endpoints (`/api/cdn/*`)
+- [ ] Add rate limiting to post creation endpoints
+- [ ] Integrate `checkTenantRateLimit()` in router middleware
 
-  return {
-    posts: posts.results,
-    pages: pages.results,
-    images: images.results,
-    exported_at: new Date().toISOString()
-  };
-}
-```
-
-### Content Import Script
-
-```javascript
-// scripts/import-content.js
-async function importContent(targetDb, tenantId, exportData) {
-  for (const post of exportData.posts) {
-    await targetDb.prepare(`
-      INSERT INTO posts (tenant_id, slug, title, content, ...)
-      VALUES (?, ?, ?, ?, ...)
-    `).bind(tenantId, post.slug, post.title, post.content, ...).run();
-  }
-  // Similar for pages, images...
-}
-```
+#### Safari Reader Mode Fix
+- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback
+- [ ] Wrap glass card content in semantic elements
+- [ ] Test in Safari iOS and macOS
 
 ---
 
-## Risk Mitigation
+## Future Phases (Post-Launch)
 
-### Technical Risks
+### Durable Objects Implementation
+> **Spec:** `docs/grove-durable-objects-architecture.md`
 
-| Risk | Mitigation |
-|------|------------|
-| Data leakage between tenants | Per-tenant D1 databases OR strict tenant_id filtering with tests |
-| Subdomain routing failures | Comprehensive routing tests, fallback to main site |
-| Auth token cross-contamination | Tenant-scoped JWT claims, strict validation |
-| Storage quota bypass | Server-side enforcement, not client-side |
+- DO Phase 1: Auth (SessionDO) - Highest priority
+- DO Phase 2: Tenant Coordination (TenantDO)
+- DO Phase 3: Content Coordination (PostDO)
+- DO Phase 4: Meadow Social (FeedDO, NotificationDO)
+- DO Phase 5: Analytics (AnalyticsDO)
 
-### Business Risks
+### Meadow (Social Features)
+> **Spec:** `docs/specs/social-spec.md`
 
-| Risk | Mitigation |
-|------|------------|
-| Migration breaks existing site | Keep autumnsgrove.com running until grove-engine proven |
-| First beta client unhappy | Extensive testing with beta client before public launch |
-| Feature regression | Maintain comprehensive test suite from AutumnsGrove |
+- Landing page explaining Meadow philosophy
+- Chronological feed (no algorithmic ranking)
+- Reactions visible only to author
+- Connection without competition
 
----
+### Content Moderation System
+> **Spec:** `docs/Specs/CONTENT-MODERATION.md`
 
-## Success Criteria
-
-### Phase 1 Complete When:
-- [ ] grove-engine repo exists with clean codebase
-- [ ] All personal features removed
-- [ ] CI/CD pipeline passing
-- [ ] Local development works
-
-### Phase 2 Complete When:
-- [ ] Multiple subdomains can be created
-- [ ] Each subdomain shows its own content
-- [ ] No data leakage between tenants (tested)
-- [ ] Subdomain provisioning automated
-
-### Phase 3 Complete When:
-- [ ] Plan limits enforced correctly
-- [ ] Archival system works (no data loss)
-- [ ] Usage tracking accurate
-- [ ] Upgrade prompts display correctly
-
-### MVP Complete When:
-- [ ] First beta client live on subdomain
-- [ ] All existing features work
-- [ ] Admin panel fully functional
-- [ ] Zero data loss verified
-- [ ] Page load < 2 seconds
+- Fireworks AI / Groq integration
+- Encrypted content queue
+- Decision engine with confidence thresholds
+- Appeal submission flow
 
 ---
 
-## Timeline Summary
+## Architecture Reference
 
-| Week | Phase | Key Deliverables |
-|------|-------|------------------|
-| 1 | Setup | Clean grove-engine repo, CI/CD |
-| 2-3 | Multi-tenant | Subdomain routing, tenant DB |
-| 3-4 | Plan Enforcement | Limits, archival, tracking |
-| 4-5 | Themes | 3-5 themes, selector UI |
-| 5-6 | Testing | Security tests, performance |
-| 7+ | Launch | First beta client, iterate |
+### Current State
+
+```
+grove.place/                 # Landing site
+plant.grove.place/           # Signup flow
+status.grove.place/          # Clearing (status page)
+username.grove.place/        # Tenant blogs
+
+packages/
+├── engine/                  # Core blog engine (npm: @autumnsgrove/groveengine)
+├── grove-router/            # Cloudflare Worker routing
+├── og-worker/               # OG image generation
+├── durable-objects/         # DO implementations (future)
+└── post-migrator/           # Content migration tools
+```
+
+### Engine-First Pattern
+
+All apps import from the engine package:
+
+```typescript
+// DO THIS - import from engine
+import { Header, Footer } from '@autumnsgrove/groveengine/ui';
+import { parseMarkdown } from '@autumnsgrove/groveengine/utils';
+import { checkRateLimit } from '@autumnsgrove/groveengine/server';
+
+// NOT THIS - no local duplicates
+import Header from '$lib/components/Header.svelte'; // WRONG
+```
+
+### Database Schema
+
+Multi-tenant D1 with tenant_id on all content tables:
+- `tenants` - Subdomain, plan, storage tracking
+- `posts` - Blog posts with UNIQUE(tenant_id, slug)
+- `pages` - Static pages per tenant
+- `media` - R2 references per tenant
+- `site_settings` - Per-tenant configuration
 
 ---
 
-## Reference Links
+## Success Metrics
 
-- **AutumnsGrove Source:** [github.com/AutumnsGrove/AutumnsGrove](https://github.com/AutumnsGrove/AutumnsGrove)
-- **GroveEngine Specs:** [docs/specs/engine-spec.md](specs/engine-spec.md)
-- **Vision Document:** [THE_JOURNEY.md](https://github.com/AutumnsGrove/AutumnsGrove/blob/main/docs/THE_JOURNEY.md)
-- **Security Audit:** AutumnsGrove TODOS.md (Security & Polish Audit section)
+- [x] Zero data loss incidents
+- [x] Page load < 2 seconds
+- [x] Security audit passed (all P0 fixed)
+- [ ] 10 clients by Month 3
+- [ ] 20 clients by Month 6
+- [ ] $500 MRR by Month 12
 
 ---
 
 ## Related Documents
 
-- **[MIGRATION-STRATEGY.md](MIGRATION-STRATEGY.md)** - Detailed execution plan with file-by-file extraction guide
-- **[schema/multi-tenant-schema.sql](schema/multi-tenant-schema.sql)** - Complete D1 database schema for multi-tenant architecture
+- **TODOS.md** - Daily task tracking
+- **AGENT.md** - Development guidelines and patterns
+- **docs/specs/** - Feature specifications
+- **docs/plans/** - Implementation plans
+- **docs/patterns/** - Architecture patterns (Prism, Threshold)
 
 ---
 
-*Last Updated: December 1, 2025*
-*Status: Planning Complete - Ready for Execution*
+*This document consolidates the original migration-plan.md and migration-strategy.md.*
+*The detailed file extraction lists from migration-strategy.md are now archived as that work is complete.*
