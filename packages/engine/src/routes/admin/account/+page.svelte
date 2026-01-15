@@ -106,6 +106,7 @@
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
+        toast.warning("Page data may be stale. Please refresh if needed.");
       }
     } catch (error) {
       toast.error(sanitizeErrorMessage(error, "Failed to cancel subscription"));
@@ -127,6 +128,7 @@
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
+        toast.warning("Page data may be stale. Please refresh if needed.");
       }
     } catch (error) {
       toast.error(sanitizeErrorMessage(error, "Failed to resume subscription"));
@@ -167,6 +169,7 @@
         await invalidateAll();
       } catch (e) {
         console.error("Failed to refresh data:", e);
+        toast.warning("Page data may be stale. Please refresh if needed.");
       }
     } catch (error) {
       toast.error(sanitizeErrorMessage(error, "Failed to change plan"));

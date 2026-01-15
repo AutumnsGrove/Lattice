@@ -375,7 +375,11 @@ export const PATCH: RequestHandler = async ({
     const data = (await request.json()) as UpdateRequest;
 
     const billing = (await platform.env.DB.prepare(
-      "SELECT * FROM platform_billing WHERE tenant_id = ?",
+      `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
+              current_period_start, current_period_end, cancel_at_period_end,
+              trial_end, payment_method_last4, payment_method_brand,
+              created_at, updated_at
+       FROM platform_billing WHERE tenant_id = ?`,
     )
       .bind(tenantId)
       .first()) as BillingRecord | null;
