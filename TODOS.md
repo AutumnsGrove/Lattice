@@ -170,6 +170,16 @@
 
 # 📦 DEFERRED FEATURES
 
+## Cover Images for Blog Posts
+> **Found during:** Help center documentation review (Phase 2)
+> **Status:** Not implemented, docs updated to say "coming soon"
+
+- [ ] Add cover_image_url field to posts table
+- [ ] Add cover image upload UI to blog post editor (admin/blog/new and admin/blog/edit)
+- [ ] Display cover images at top of blog posts
+- [ ] Include cover images in social media previews (og:image meta tags)
+- [ ] Include cover images in RSS feed entries
+
 ## Amber ZIP Export Integration
 > **Plan:** `docs/plans/amber-zip-export-integration.md`
 > **Status:** Plan complete, ready for implementation post-v1

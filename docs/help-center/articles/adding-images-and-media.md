@@ -3,7 +3,7 @@ title: "Adding Images and Media"
 slug: adding-images-and-media
 category: writing
 order: 3
-keywords: [images, photos, upload, media, pictures, gif, png, jpeg, webp, featured image]
+keywords: [images, photos, upload, media, pictures, gif, png, jpeg, webp, cover image]
 related: [writing-your-first-post, formatting-your-posts]
 ---
 
@@ -32,20 +32,11 @@ Grove handles the technical details—your image is stored securely and served f
 
 **Size limit:** 10MB per image. That's plenty for most photos. If your image is larger, you'll need to resize it before uploading.
 
-## Featured images
+## Cover images (coming soon)
 
-Each post can have a featured image: the main visual that appears at the top of your post and in previews when you share links.
+Grove is working on a cover image feature that will let you set a main visual for each post—appearing at the top of your post and in social media previews when you share links.
 
-To set a featured image:
-
-1. Look for the **Featured Image** section in the post editor
-2. Click to upload or select an image
-3. Save your post
-
-Featured images show up in:
-- Your blog's post listing
-- Social media previews (when someone shares your link)
-- RSS feed entries
+For now, you can add images directly in your post content. The first image in your post often serves a similar purpose.
 
 ## Adding alt text
 

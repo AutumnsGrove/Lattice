@@ -9,6 +9,8 @@ related: [understanding-your-privacy, choosing-your-plan, writing-your-first-pos
 
 # What is Meadow?
 
+> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+
 Meadow is Grove's community feed: a shared space where bloggers can discover each other's work, react to posts, and have conversations.
 
 Think of it as a cozy town square for Grove writers.

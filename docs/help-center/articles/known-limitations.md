@@ -33,9 +33,9 @@ Your analytics dashboard shows data with a deliberate delay. You won't see live 
 
 **What you get instead:** Aggregated insights updated periodically. Enough to understand what resonates, not enough to obsess over.
 
-## No visible vote counts
+## No visible vote counts (coming in Full Bloom)
 
-In Meadow, votes exist but the counts are hidden. You can vote on posts, but you'll never see "142 upvotes" next to anything.
+When Meadow launches in Full Bloom, votes will exist but the counts will be hidden. You'll be able to vote on posts, but you'll never see "142 upvotes" next to anything.
 
 **Why:** Visible metrics gamify writing. People optimize for numbers instead of meaning. Hidden votes let you appreciate content without comparing it to everything else.
 

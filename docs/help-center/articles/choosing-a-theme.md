@@ -32,6 +32,16 @@ Most bloggers choose "System" to respect reader preferences. But if your content
 
 Changes apply immediately after saving—just refresh to see them site-wide.
 
+## Curated themes (coming in Foliage)
+
+Grove is building **Foliage**, a full theme system with curated visual presets. Here's what's coming:
+
+**First Buds** — The first 3 curated themes will be available to all paid plans. These hand-designed themes let you change your blog's overall look beyond just fonts and accent colors.
+
+**Full Bloom** — The complete Foliage release will include all 10 curated themes plus the theme customizer for Oak and Evergreen plans. The theme customizer gives you full control over colors, typography pairings, and visual style.
+
+For now, all paid plans have access to font selection and accent color customization.
+
 ## Fonts
 
 All paid plans have access to Grove's complete collection of 10 carefully curated fonts—no upgrades needed. These fonts are chosen for readability, accessibility, and personality, and they work beautifully across devices and screen sizes.

@@ -9,6 +9,8 @@ related: [what-is-grove, what-is-meadow, reactions-and-voting]
 
 # Sharing Posts to Meadow
 
+> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+
 Meadow is Grove's community feed—a place where blog posts from across Grove can be discovered, upvoted, and discussed. Sharing your posts there is entirely optional.
 
 ## How it works

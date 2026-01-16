@@ -136,32 +136,32 @@ All 16 high-priority articles reviewed and updated. Changes committed to `claude
 
 ---
 
-## Phase 2: Feature Documentation
+## Phase 2: Feature Documentation ✅ COMPLETE (Jan 16, 2026)
 
 ### Writing & Publishing
-- [ ] `formatting-your-posts.md` — Verify all markdown syntax works
-- [ ] `adding-images-and-media.md` — Verify upload limits, formats
-- [ ] `drafts-and-scheduling.md` — Verify scheduling actually works
-- [ ] `your-rss-feed.md` — Verify RSS format and availability
-- [ ] `tags-and-organization.md` — Verify tag behavior
+- [x] `formatting-your-posts.md` — **✅ VERIFIED**: All markdown syntax accurate (no changes needed)
+- [x] `adding-images-and-media.md` — **FIXED**: Removed non-existent "Featured Image" section → "Cover images (coming soon)", added to TODOS.md
+- [x] `drafts-and-scheduling.md` — **✅ VERIFIED**: Already notes scheduling as "not yet" (no changes needed)
+- [x] `your-rss-feed.md` — **✅ VERIFIED**: `/api/feed` endpoint confirmed (no changes needed)
+- [x] `tags-and-organization.md` — **✅ VERIFIED**: Tag behavior accurate (no changes needed)
 
-### Social & Community
-- [ ] `what-is-meadow.md` — Verify Meadow features match description
-- [ ] `opting-into-the-feed.md` — Verify opt-in process
-- [ ] `reactions-and-voting.md` — Verify reaction types available
-- [ ] `understanding-replies-vs-comments.md` — Verify comment system behavior
+### Social & Community (Meadow — Not Implemented Yet)
+- [x] `what-is-meadow.md` — **FIXED**: Added "Coming in Full Bloom" notice at top
+- [x] `opting-into-the-feed.md` — **FIXED**: Added "Coming in Full Bloom" notice at top
+- [x] `reactions-and-voting.md` — **FIXED**: Added "Coming in Full Bloom" notice at top
+- [x] `understanding-replies-vs-comments.md` — **FIXED**: Added "Coming in Full Bloom" notice at top (comments system not live yet)
 
 ### New/Recent Features
-- [ ] `what-is-swarm.md` — Verify Swarm is implemented
-- [ ] `what-is-zdr.md` — Verify ZDR claims match AI implementation
-- [ ] `what-is-solarpunk.md` — Philosophy doc, verify links work
-- [ ] `known-limitations.md` — Verify limitations are still accurate
+- [x] `what-is-swarm.md` — **✅ VERIFIED**: Describes architecture pattern, not specific feature availability (no changes needed)
+- [x] `what-is-zdr.md` — **✅ VERIFIED**: Wisp actually uses ZDR providers (Fireworks, Cerebras, Groq confirmed in code)
+- [x] `what-is-solarpunk.md` — **✅ VERIFIED**: Philosophy doc, all links work (no changes needed)
+- [x] `known-limitations.md` — **FIXED**: Updated Meadow vote counts section to note "coming in Full Bloom"
 
-### Privacy & Security (Previously Missing from Review)
-- [ ] `understanding-your-privacy.md` — May reference payment/auth providers
-- [ ] `how-grove-protects-your-content.md` — Shade AI features, verify claims
-- [ ] `how-grove-backs-up-your-data.md` — Data handling, verify backup claims
-- [ ] `why-grove-is-different.md` — Marketing claims, verify differentiators
+### Privacy & Security
+- [x] `understanding-your-privacy.md` — **FIXED**: Changed "Settings → Data" to "Account" (correct export location)
+- [x] `how-grove-protects-your-content.md` — **✅ VERIFIED**: robots.txt exists, Shade system documented (no changes needed)
+- [x] `how-grove-backs-up-your-data.md` — **✅ VERIFIED**: Patina backup system described accurately (no changes needed)
+- [x] `why-grove-is-different.md` — **FIXED**: Updated Meadow features to note "Full Bloom", replaced non-existent "Wander" with Meadow reference
 
 ---
 
@@ -250,10 +250,10 @@ verified_by: autumn
 | Category | Total | Reviewed | Updated | Notes |
 |----------|-------|----------|---------|-------|
 | High-Priority | 16 | 16 | 9 | **✅ Phase 1 COMPLETE** — All verified, 9 updated, 7 already accurate |
-| Features | 18 | 0 | 0 | Phase 2 (includes 4 privacy/security) |
+| Features | 17 | 17 | 10 | **✅ Phase 2 COMPLETE** — Meadow "Full Bloom" notices, cover images, navigation fixes |
 | Troubleshooting | 5 | 0 | 0 | Phase 3 |
 | Legal | 6 | 6 | 3 | **✅ Phase 4 COMPLETE** — Stripe → LemonSqueezy |
-| **Total** | **45** | **22** | **12** | 40 help center + 5 legal (GDPR is help center) |
+| **Total** | **44** | **39** | **22** | 40 help center + 4 legal (GDPR is help center) |
 
 ### Review Session Log
 
@@ -261,6 +261,8 @@ verified_by: autumn
 |------|-------------------|--------------|-------|
 | 2026-01-16 (morning) | 6 legal docs | 3 critical (Stripe refs) | Phase 4 complete — all legal docs updated |
 | 2026-01-16 (afternoon) | 16 high-priority help center | 9 requiring updates | Phase 1 complete — font/theme confusion resolved, navigation paths fixed, non-existent features removed |
+| 2026-01-16 (evening) | 3 theme-related docs | Theme/font clarification | Added Foliage (First Buds/Full Bloom) terminology to choosing-a-theme.md, choosing-your-plan.md, upgrading-or-downgrading.md — addresses PR #363 review feedback |
+| 2026-01-16 (evening) | 17 Phase 2 articles | 10 requiring updates | **Phase 2 complete** — Added "Full Bloom" notices to all Meadow/social features, fixed cover images, corrected Account nav path, verified Wisp ZDR implementation |
 
 ---
 
@@ -314,3 +316,4 @@ docs/
 | 2026-01-15 | Updated after codebase exploration: corrected auth status (Better Auth integrated as Heartwood), font count (11), added 7 missing articles, added account deletion implementation gap, updated verification sources with actual file paths, added review approach section | Claude |
 | 2026-01-16 | Rebased with main after PR #341 merged: marked account-deletion, exporting-your-content, data-portability as recently updated; removed account deletion implementation gap (now support-based flow); added new verification sources for admin account page and data export | Claude |
 | 2026-01-16 | **Phase 4 Complete:** Updated all 6 legal docs — replaced Stripe → LemonSqueezy in privacy-policy.md, terms-of-service.md; verified refund-policy.md, acceptable-use-policy.md, dmca-policy.md, data-portability-separation.md | Claude |
+| 2026-01-16 | **Phase 2 Complete:** Reviewed all 17 feature articles. Key findings: (1) Meadow/comments not implemented yet → added "Coming in Full Bloom" notices; (2) Featured images don't exist → updated to "Cover images coming soon", added to TODOS.md; (3) Data export is in Account not Settings; (4) Verified Wisp actually uses ZDR providers; (5) Updated why-grove-is-different.md to reflect Meadow features are future | Claude |

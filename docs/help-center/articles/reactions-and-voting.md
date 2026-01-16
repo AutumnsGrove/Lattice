@@ -9,6 +9,8 @@ related: [what-is-meadow, opting-into-the-feed]
 
 # Reactions and Voting in Meadow
 
+> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+
 Meadow has two ways to engage with posts: voting and emoji reactions. Here's how they work.
 
 ## Voting

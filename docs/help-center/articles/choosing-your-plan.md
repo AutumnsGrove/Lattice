@@ -34,6 +34,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 - Up to 50 posts
 - 1 GB storage for images and media
 - All 10 fonts + accent color customization
+- 3 curated themes (coming in Foliage First Buds)
 - Unlimited comments on your blog
 - RSS feed
 - Share posts to Meadow
@@ -47,6 +48,7 @@ More room to grow. If you're posting frequently or building up an archive, Sapli
 - Up to 250 posts
 - 5 GB storage
 - All 10 fonts + accent color
+- All 10 curated themes (coming in Foliage Full Bloom)
 - Email forwarding (`you@grove.place`)
 - **Centennial eligible** — after 12 months, your site stays online for 100 years
 - Everything in Seedling
@@ -60,7 +62,7 @@ Bring your own domain. Customize your theme fully. This is for bloggers who want
 - Unlimited posts
 - 20 GB storage
 - All 10 fonts + accent color
-- Theme customizer (coming soon)
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Custom domain support (bring your own domain)
 - Analytics
 - Priority support
@@ -74,8 +76,8 @@ Everything Grove offers, including a domain on us.
 
 - Unlimited posts
 - 100 GB storage
-- All 10 fonts + custom font uploads
-- Theme customizer
+- All 10 fonts + custom font uploads (coming in Foliage Full Bloom)
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Domain included (we register it for you)
 - Analytics
 - 8 hours/month dedicated support

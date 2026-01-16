@@ -26,7 +26,7 @@ That's the core of it. We're not building a profile on you. We're not tracking y
 
 **You can see everything we have.**
 
-In your admin panel under **Settings → Data**, you can export a complete copy of everything Grove stores about you. It's your data. You should be able to look at it.
+In your admin panel under **Account**, you can export a complete copy of everything Grove stores about you. It's your data. You should be able to look at it.
 
 **You can take it and leave.**
 
