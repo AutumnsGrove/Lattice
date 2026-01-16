@@ -153,7 +153,7 @@
 <main class="min-h-screen flex flex-col">
 	<Header />
 
-	<article class="flex-1 px-6 py-12">
+	<article class="flex-1 px-4 md:px-6 py-8 md:py-12">
 		<div class="max-w-4xl mx-auto">
 			<!-- Header -->
 			<header class="mb-12 text-center">
@@ -258,18 +258,18 @@
 				<section id="growth-over-time" class="mb-16 scroll-mt-24">
 					<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Growth Over Time</h2>
 
-					<div class="card p-6">
+					<div class="card p-4 md:p-6">
 						<!-- Stacked language bar chart -->
-						<div class="space-y-3">
+						<div class="space-y-2 md:space-y-3">
 							{#each data.snapshots as snapshot, i}
 								{@const barWidth = (snapshot.totalCodeLines / maxCodeLines) * 100}
 								{@const breakdown = getSnapshotBreakdown(snapshot)}
-								<div class="flex items-center gap-4">
-									<div class="w-32 text-right flex flex-col">
-										<span class="text-xs font-sans text-foreground-faint">{snapshot.date}</span>
-										<span class="text-xs font-mono text-accent-muted">{snapshot.label}</span>
+								<div class="flex items-center gap-2 md:gap-4">
+									<div class="w-[4.5rem] md:w-32 text-right flex flex-col shrink-0">
+										<span class="text-[9px] md:text-xs font-sans text-foreground-faint">{snapshot.date}</span>
+										<span class="text-[10px] md:text-xs font-mono text-accent-muted">{snapshot.label}</span>
 									</div>
-									<div class="flex-1 h-6 bg-surface rounded-full overflow-hidden">
+									<div class="flex-1 h-5 md:h-6 bg-surface rounded-full overflow-hidden min-w-0">
 										<div class="h-full flex" style="width: {barWidth}%">
 											{#each breakdown as lang}
 												<div
@@ -280,8 +280,8 @@
 											{/each}
 										</div>
 									</div>
-									<div class="w-20 text-left">
-										<span class="text-xs font-mono text-foreground-muted">{formatNumber(snapshot.totalCodeLines)}</span>
+									<div class="w-14 md:w-20 text-left shrink-0">
+										<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.totalCodeLines)}</span>
 									</div>
 								</div>
 							{/each}
@@ -435,23 +435,23 @@
 				</div>
 
 				<!-- Docs growth over time -->
-				<div class="card p-6 mt-6">
+				<div class="card p-4 md:p-6 mt-6">
 					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Documentation Growth</h3>
-					<div class="space-y-2">
+					<div class="space-y-1.5 md:space-y-2">
 						{#each data.snapshots as snapshot, i}
 							{@const barWidth = (snapshot.docWords / maxDocWords) * 100}
-							<div class="flex items-center gap-3">
-								<div class="w-16 text-right">
-									<span class="text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+							<div class="flex items-center gap-2 md:gap-3">
+								<div class="w-12 md:w-16 text-right shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
 								</div>
-								<div class="flex-1 h-4 bg-surface rounded-full overflow-hidden">
+								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden min-w-0">
 									<div
 										class="h-full bg-emerald-500 rounded-full transition-all duration-500"
 										style="width: {barWidth}%"
 									></div>
 								</div>
-								<div class="w-16 text-left">
-									<span class="text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docWords)}</span>
+								<div class="w-12 md:w-16 text-left shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docWords)}</span>
 								</div>
 							</div>
 						{/each}
@@ -465,33 +465,33 @@
 			<section id="typescript-migration" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">TypeScript Migration</h2>
 
-				<div class="card p-6">
+				<div class="card p-4 md:p-6">
 					<!-- Summary stats -->
-					<div class="flex justify-between items-center mb-6">
+					<div class="flex justify-between items-center mb-4 md:mb-6">
 						<div class="text-center">
-							<div class="text-2xl font-mono text-yellow-500">{tsProgression()?.startPct}%</div>
-							<div class="text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
+							<div class="text-xl md:text-2xl font-mono text-yellow-500">{tsProgression()?.startPct}%</div>
+							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
 						</div>
-						<div class="flex-1 mx-6 flex items-center gap-2">
+						<div class="flex-1 mx-3 md:mx-6 flex items-center gap-1.5 md:gap-2">
 							<div class="flex-1 h-px bg-divider"></div>
-							<div class="text-accent-muted font-mono text-sm">+{tsProgression()?.growth}%</div>
+							<div class="text-accent-muted font-mono text-xs md:text-sm">+{tsProgression()?.growth}%</div>
 							<div class="flex-1 h-px bg-divider"></div>
 						</div>
 						<div class="text-center">
-							<div class="text-2xl font-mono text-blue-500">{tsProgression()?.currentPct}%</div>
-							<div class="text-xs text-foreground-faint font-sans">{tsProgression()?.currentLabel}</div>
+							<div class="text-xl md:text-2xl font-mono text-blue-500">{tsProgression()?.currentPct}%</div>
+							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.currentLabel}</div>
 						</div>
 					</div>
 
 					<!-- Progress bar timeline -->
-					<div class="space-y-2">
+					<div class="space-y-1.5 md:space-y-2">
 						{#each data.snapshots as snapshot, i}
 							{@const tsPct = getTsPercentage(snapshot)}
-							<div class="flex items-center gap-3">
-								<div class="w-16 text-right">
-									<span class="text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+							<div class="flex items-center gap-2 md:gap-3">
+								<div class="w-12 md:w-16 text-right shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
 								</div>
-								<div class="flex-1 h-4 bg-surface rounded-full overflow-hidden flex">
+								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden flex min-w-0">
 									<div
 										class="h-full bg-blue-500 transition-all duration-500"
 										style="width: {tsPct}%"
@@ -503,8 +503,8 @@
 										title="JavaScript: {100 - tsPct}%"
 									></div>
 								</div>
-								<div class="w-12 text-left">
-									<span class="text-xs font-mono text-blue-400">{tsPct}%</span>
+								<div class="w-9 md:w-12 text-left shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-blue-400">{tsPct}%</span>
 								</div>
 							</div>
 						{/each}
