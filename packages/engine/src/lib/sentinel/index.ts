@@ -75,7 +75,7 @@ export {
   createStressTestProfile,
   createSoakTestProfile,
   // Cost estimation
-  estimateCloudflareCosat,
+  estimateCloudflareCost,
 } from './profiles.js';
 
 // Operations
@@ -103,3 +103,7 @@ export {
   getWeeklyMidnightScheduleConfig,
   getDailySmokeTestConfig,
 } from './scheduler.js';
+
+// Durable Object (Loom pattern for long-running tests)
+// Use SentinelDO for tests longer than 30 seconds to avoid Worker CPU limits
+export { SentinelDO } from './durable-object.js';

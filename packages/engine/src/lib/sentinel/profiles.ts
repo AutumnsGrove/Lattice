@@ -457,7 +457,7 @@ export function createSoakTestProfile(): LoadProfile {
  * Estimate Cloudflare costs for a test run
  * Based on Cloudflare's pricing as of 2024
  */
-export function estimateCloudflareCosat(profile: LoadProfile): {
+export function estimateCloudflareCost(profile: LoadProfile): {
   d1ReadsCost: number;
   d1WritesCost: number;
   kvOpsCost: number;

@@ -17,7 +17,7 @@ import type {
   KVNamespace,
   R2Bucket,
 } from './types.js';
-import { getOpsPerSecondAt, estimateCloudflareCosat } from './profiles.js';
+import { getOpsPerSecondAt, estimateCloudflareCost } from './profiles.js';
 import { executeOperation, cleanupSentinelData } from './operations.js';
 
 // =============================================================================
@@ -158,13 +158,6 @@ export class SentinelRunner {
         results,
       });
 
-      // Cleanup test data (async, don't block)
-      if (this.config.ctx) {
-        this.config.ctx.waitUntil(cleanupSentinelData(db, kv, r2, tenantId));
-      } else {
-        await cleanupSentinelData(db, kv, r2, tenantId);
-      }
-
       this.config.onComplete?.(results);
       return results;
 
@@ -176,6 +169,17 @@ export class SentinelRunner {
 
     } finally {
       this.isRunning = false;
+
+      // Always cleanup test data (runs on success, failure, or cancellation)
+      try {
+        if (this.config.ctx) {
+          this.config.ctx.waitUntil(cleanupSentinelData(db, kv, r2, tenantId));
+        } else {
+          await cleanupSentinelData(db, kv, r2, tenantId);
+        }
+      } catch {
+        // Cleanup is best-effort
+      }
     }
   }
 
@@ -427,7 +431,7 @@ export class SentinelRunner {
       };
     }
 
-    const costEstimate = estimateCloudflareCosat(profile);
+    const costEstimate = estimateCloudflareCost(profile);
 
     return {
       totalOperations: completedOps + failedOps,

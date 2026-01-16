@@ -115,6 +115,47 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, 'Name is required');
   }
 
+  // Input validation - prevent abuse and ensure reasonable limits
+  if (body.targetOperations !== undefined) {
+    if (body.targetOperations < 1 || body.targetOperations > 1_000_000) {
+      throw error(400, 'targetOperations must be between 1 and 1,000,000');
+    }
+  }
+
+  if (body.durationSeconds !== undefined) {
+    if (body.durationSeconds < 1 || body.durationSeconds > 3600) {
+      throw error(400, 'durationSeconds must be between 1 and 3600 (1 hour max)');
+    }
+  }
+
+  if (body.concurrency !== undefined) {
+    if (body.concurrency < 1 || body.concurrency > 500) {
+      throw error(400, 'concurrency must be between 1 and 500');
+    }
+  }
+
+  if (body.spikeMultiplier !== undefined) {
+    if (body.spikeMultiplier < 1 || body.spikeMultiplier > 100) {
+      throw error(400, 'spikeMultiplier must be between 1 and 100');
+    }
+  }
+
+  if (body.maxOpsPerSecond !== undefined) {
+    if (body.maxOpsPerSecond < 1 || body.maxOpsPerSecond > 10000) {
+      throw error(400, 'maxOpsPerSecond must be between 1 and 10,000');
+    }
+  }
+
+  // Validate target systems
+  const validSystems = ['d1_writes', 'd1_reads', 'kv_get', 'kv_put', 'r2_upload', 'r2_download', 'auth_flows', 'post_crud', 'media_ops'];
+  if (body.targetSystems) {
+    for (const system of body.targetSystems) {
+      if (!validSystems.includes(system)) {
+        throw error(400, `Invalid target system: ${system}. Valid options: ${validSystems.join(', ')}`);
+      }
+    }
+  }
+
   // Build load profile based on type
   let profile: LoadProfile;
 
