@@ -53,7 +53,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
 - **Infrastructure:** Wrangler (app deployment)
 - **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
-- **Payments:** Stripe
+- **Payments:** LemonSqueezy
 - **Email:** Resend
 - **Styling:** Tailwind CSS
 - **Package Manager:** pnpm
@@ -67,15 +67,15 @@ cd landing && pnpm dev      # or wrangler dev
 cd packages/engine && pnpm dev
 ```
 
-### Stripe Configuration
-Stripe products and prices are managed directly in the Stripe Dashboard.
+### LemonSqueezy Configuration
+Payments are processed through LemonSqueezy. Products and prices are managed in the LemonSqueezy Dashboard.
 
 **Setup:**
-1. Create products in [Stripe Dashboard](https://dashboard.stripe.com/products)
-2. Copy price IDs to `plant/src/lib/server/stripe.ts`
-3. Set secrets in Cloudflare Dashboard (STRIPE_SECRET_KEY, etc.)
+1. Create products in [LemonSqueezy Dashboard](https://app.lemonsqueezy.com/)
+2. Configure variants and pricing for each tier
+3. Set secrets in Cloudflare Dashboard (LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_WEBHOOK_SECRET)
 
-**Full instructions:** `docs/STRIPE-SETUP.md`
+**Full instructions:** `docs/setup/lemonsqueezy-setup.md`
 
 ### Production Deployment
 Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.
