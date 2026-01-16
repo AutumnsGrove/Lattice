@@ -11,7 +11,7 @@
 
 ## Overview
 
-As Grove has evolved, documentation has drifted from implementation. Articles written during planning or early development now describe features that have changed (fonts reduced from 20 to 10), features that didn't exist yet (unsubscribe flow), or workflows that have been redesigned.
+As Grove has evolved, documentation has drifted from implementation. Articles written during planning or early development now describe features that have changed (fonts reduced from 20 to 11), features that didn't exist yet (unsubscribe flow), or workflows that have been redesigned.
 
 **Goal**: Systematically review all documentation against actual implementation, update inaccuracies, and establish a lightweight process to prevent future drift.
 
@@ -24,18 +24,27 @@ These are **confirmed** inaccuracies that need immediate attention:
 | Issue | Affected Docs | Severity |
 |-------|---------------|----------|
 | **Stripe → LemonSqueezy** — Payment processor changed | Privacy Policy, Terms of Service, Refund Policy | 🔴 Critical |
-| **Auth → Better Auth (Google only)** — Auth system completely changed | Privacy Policy, `creating-your-account.md`, any signup references | 🔴 Critical |
-| **Font count** — Claims 20 fonts, now 10 | `custom-fonts.md` | 🔴 Critical |
-| **Unsubscribe flow** — Feature just added today | `account-deletion.md`, possibly others | 🟡 Moderate |
+| **Auth uses Better Auth** — Internally upgraded, still branded "Heartwood" | Privacy Policy, `creating-your-account.md`, any signup references | 🟡 Moderate |
+| **Font count** — Claims 20 fonts, now 11 | `custom-fonts.md` | 🟡 Moderate |
+
+### ✅ Recently Resolved (PR #341)
+
+The following issues were addressed in the subscription management PR:
+
+| Issue | Resolution | Status |
+|-------|------------|--------|
+| **Account deletion** — Article described non-existent UI | Updated to support-based flow (email to request deletion) | ✅ Fixed |
+| **Data export** — Export UI didn't exist | Admin "Account & Subscription" page now has "Your Data" section | ✅ Fixed |
+| **Data portability** — Process was unclear | Updated to describe current JSON export + coming Amber improvements | ✅ Fixed |
 
 ### Payment Processor: LemonSqueezy
 Legal docs currently reference Stripe as a third-party service. All payment-related documentation needs updating to reference **LemonSqueezy** instead.
 
-### Authentication: Better Auth (Google Sign-In Only)
-Auth system now uses **Better Auth** with **Google sign-in only** (more options coming later). Any documentation about:
-- Email/password signup → Wrong
+### Authentication: Heartwood (Better Auth Backend)
+Auth system uses **Better Auth** internally but is still branded **Heartwood** to users. Currently **Google sign-in only** (more options coming later). Review documentation for:
+- Email/password signup references → Wrong (Google only)
 - Multiple auth providers → Partially wrong (only Google currently)
-- Account creation flow → Likely outdated
+- Account creation flow → Verify matches current Google OAuth flow
 
 ---
 
@@ -74,13 +83,24 @@ Auth system now uses **Better Auth** with **Google sign-in only** (more options 
 
 | Claim Type | Where to Verify |
 |------------|-----------------|
-| Pricing/tiers | `apps/vineyard/src/lib/tiers.ts`, payment processor dashboard |
-| Feature limits | `packages/grove-engine/src/tiers/` |
+| Pricing/tiers | `packages/engine/src/lib/config/tiers.ts` |
+| Feature limits | `packages/engine/src/lib/config/tiers.ts` |
 | UI elements | Run the app, check actual screens |
-| Font options | Font configuration files, admin panel |
+| Font options | `packages/engine/src/lib/ui/tokens/fonts.ts` (11 fonts) |
+| Auth system | `packages/engine/src/lib/server/auth/` (Better Auth/Heartwood) |
 | Data retention | Privacy policy + actual TTLs in code |
 | Email workflows | `docs/templates/emails/`, Resend dashboard |
-| Payment processor | Current billing integration code |
+| Payment processor | `packages/engine/src/lib/server/billing/lemonsqueezy/` |
+| Account deletion | Support-based flow — contact via admin panel |
+| Data export | `packages/engine/src/routes/admin/account/DataExportCard.svelte` |
+| Subscription mgmt | `packages/engine/src/routes/admin/account/` (new in PR #341) |
+
+### Review Approach
+
+Use a **mix approach** for efficiency:
+- **Auto-fix**: Obvious factual errors (font counts, processor names, broken links)
+- **Flag for review**: Complex policy changes, tone rewrites, structural changes
+- **Document findings**: Track all changes and flags in the session log below
 
 ---
 
@@ -89,7 +109,7 @@ Auth system now uses **Better Auth** with **Google sign-in only** (more options 
 These articles are most likely to be outdated or have user-facing impact:
 
 ### Customization & Features
-- [ ] `custom-fonts.md` — **KNOWN ISSUE**: Claims 20 fonts, now 10
+- [ ] `custom-fonts.md` — **KNOWN ISSUE**: Claims 20 fonts, now 11
 - [ ] `choosing-a-theme.md` — Verify theme list matches available themes
 - [ ] `the-markdown-editor.md` — Verify editor features match description
 
@@ -99,18 +119,29 @@ These articles are most likely to be outdated or have user-facing impact:
 - [ ] `upgrading-or-downgrading.md` — Verify the actual flow matches
 - [ ] `centennial-status.md` — Verify earning criteria matches implementation
 
-### Account & Data
-- [ ] `account-deletion.md` — **KNOWN ISSUE**: Unsubscribe feature just added
-- [ ] `exporting-your-content.md` — Verify export formats match actual exports
-- [ ] `data-portability.md` — Verify domain transfer process
+### Account & Data (Updated in PR #341)
+- [ ] `account-deletion.md` — **✅ Recently updated** — Quick verify support-based flow is accurate
+  - Check: "Account & Subscription → Danger Zone → email link" flow matches
+  - Check: Data retention timelines still accurate
+- [ ] `exporting-your-content.md` — **✅ Recently updated** — Quick verify export UI matches
+  - Check: "Account & Subscription → Your Data" section exists and matches
+  - Check: JSON format description is accurate
+- [ ] `data-portability.md` — **✅ Recently updated** — Quick verify migration guidance
+  - Check: JSON export description matches actual format
+  - Check: "Amber update" timeline reference is appropriate
 
 ### Getting Started
-- [ ] `creating-your-account.md` — **🔴 CRITICAL: Auth changed to Better Auth (Google only)**
-  - Check: Remove any email/password signup references
-  - Check: Update to reflect Google sign-in flow
+- [ ] `creating-your-account.md` — **🟡 MODERATE**: Verify matches Heartwood/Google OAuth flow
+  - Check: Remove any email/password signup references (Google only)
+  - Check: Verify sign-in flow description is accurate
   - Check: Note that more auth options coming later
 - [ ] `understanding-the-admin-panel.md` — Verify navigation matches current UI
 - [ ] `wanderers-and-pathfinders.md` — Verify terminology matches implementation
+
+### Foundational (Previously Missing from Review)
+- [ ] `what-is-grove.md` — Core explainer, verify feature claims match reality
+- [ ] `writing-your-first-post.md` — Onboarding flow, verify UI matches
+- [ ] `groves-vision.md` — Philosophy doc, verify links and claims
 
 ---
 
@@ -134,6 +165,12 @@ These articles are most likely to be outdated or have user-facing impact:
 - [ ] `what-is-zdr.md` — Verify ZDR claims match AI implementation
 - [ ] `what-is-solarpunk.md` — Philosophy doc, verify links work
 - [ ] `known-limitations.md` — Verify limitations are still accurate
+
+### Privacy & Security (Previously Missing from Review)
+- [ ] `understanding-your-privacy.md` — May reference payment/auth providers
+- [ ] `how-grove-protects-your-content.md` — Shade AI features, verify claims
+- [ ] `how-grove-backs-up-your-data.md` — Data handling, verify backup claims
+- [ ] `why-grove-is-different.md` — Marketing claims, verify differentiators
 
 ---
 
@@ -159,9 +196,10 @@ All references to Stripe must be replaced with LemonSqueezy. Documents affected:
 - `terms-of-service.md` — May reference Stripe billing
 - `refund-policy.md` — May reference Stripe processes
 
-**Authentication: Heartwood → Better Auth (Google only)**
-Auth provider references need updating:
-- `privacy-policy.md` — May list old auth providers/methods
+**Authentication: Heartwood (Better Auth Backend)**
+Auth system uses Better Auth internally but is branded "Heartwood" externally. Only Google sign-in currently. Verify docs don't mention:
+- Email/password signup (not available)
+- Multiple OAuth providers (only Google for now)
 
 ### Core Legal
 - [ ] `privacy-policy.md` — **🔴 CRITICAL: Multiple infrastructure changes**
@@ -220,11 +258,11 @@ verified_by: autumn
 
 | Category | Total | Reviewed | Updated | Notes |
 |----------|-------|----------|---------|-------|
-| High-Priority | 13 | 0 | 0 | Phase 1 |
-| Features | 14 | 0 | 0 | Phase 2 |
+| High-Priority | 16 | 0 | 0 | Phase 1 (includes 3 foundational) |
+| Features | 18 | 0 | 0 | Phase 2 (includes 4 privacy/security) |
 | Troubleshooting | 5 | 0 | 0 | Phase 3 |
-| Legal | 7 | 0 | 0 | Phase 4 |
-| **Total** | **39** | **0** | **0** | |
+| Legal | 6 | 0 | 0 | Phase 4 |
+| **Total** | **45** | **0** | **0** | 40 help center + 5 legal (GDPR is help center) |
 
 ### Review Session Log
 
@@ -257,8 +295,11 @@ docs/
 ## Success Criteria
 
 - [ ] All 40 help center articles reviewed and updated
-- [ ] All 7 legal documents verified against implementation
+- [ ] All 6 legal documents verified against implementation
 - [ ] No critical (🔴) issues remaining
+- [ ] Stripe references replaced with LemonSqueezy in legal docs
+- [x] ~~Account deletion article addressed~~ (resolved in PR #341 — support-based flow)
+- [ ] PR #341 updates verified (account-deletion, exporting-your-content, data-portability)
 - [ ] `last_verified` frontmatter added to reviewed articles
 - [ ] Maintenance process documented and agreed upon
 
@@ -270,3 +311,13 @@ docs/
 - When in doubt, check the actual UI/code — don't assume docs are wrong
 - Legal docs may need legal review for significant changes
 - Keep Grove's warm, honest voice when updating — don't make it corporate
+
+---
+
+## Changelog
+
+| Date | Change | By |
+|------|--------|-----|
+| 2026-01-15 | Initial plan created | Autumn |
+| 2026-01-15 | Updated after codebase exploration: corrected auth status (Better Auth integrated as Heartwood), font count (11), added 7 missing articles, added account deletion implementation gap, updated verification sources with actual file paths, added review approach section | Claude |
+| 2026-01-16 | Rebased with main after PR #341 merged: marked account-deletion, exporting-your-content, data-portability as recently updated; removed account deletion implementation gap (now support-based flow); added new verification sources for admin account page and data export | Claude |
