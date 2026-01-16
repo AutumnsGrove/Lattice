@@ -35,7 +35,7 @@ From here you can:
 - Create new posts
 - Edit existing posts
 - View drafts vs. published content
-- Archive or delete posts you no longer want
+- Delete posts you no longer want
 
 Click any post title to jump into the editor.
 
@@ -45,35 +45,41 @@ Pages are for content that isn't a blog post: your About page, a Contact page, a
 
 Pages work almost identically to posts, just without dates or feed placement.
 
-### CDN Uploader
+### Curios
 
-Need to upload an image before you're ready to put it in a post? The CDN Uploader lets you add files to your media library directly.
+Curios are short-form thoughts and updates—like tweets or status updates. They're perfect for quick observations, links you want to share, or thoughts that don't need a full blog post.
 
-Uploaded files are:
+### Images
+
+Upload and manage your media files. Images are:
 - Served through Grove's CDN for fast loading
 - Available to use in any post or page
 - Organized by upload date
 
-See [Adding Images and Media](/knowledge/help/adding-images-and-media) for format and size details.
+You can also upload images directly when writing posts by dragging and dropping.
+
+### Analytics
+
+View your blog's performance metrics and visitor statistics. Available on Oak and Evergreen plans.
+
+### Trails
+
+Your creative timeline and activity feed. Track your writing journey over time.
+
+### Account
+
+Manage your subscription, billing, and account settings:
+- View your current plan and usage
+- Update payment information
+- Export your data
+- Account deletion
 
 ### Settings
 
-The settings section is where you configure how your blog looks and behaves:
-
-**Site Settings**
-- Blog title and description
-- Social media links
-- Default post visibility
-
-**Appearance**
-- Theme selection (light, dark, or system)
-- Accent color
-- Font choices (varies by plan)
-
-**Account**
-- Email preferences
-- Subscription management
-- Data export
+Configure how your blog looks and behaves:
+- Typography (font selection)
+- Accent color customization
+- System health (for platform admins)
 
 ## Navigation tips
 
