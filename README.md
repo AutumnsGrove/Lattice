@@ -1,4 +1,4 @@
-<h1><img src="docs/internal/email-assets/logo-autumn-32.png" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
+<h1><img src="docs/internal/email-assets/logo-summer-32.png" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
 
 [![npm version](https://img.shields.io/npm/v/@autumnsgrove/groveengine.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/groveengine)
 [![license](https://img.shields.io/npm/l/@autumnsgrove/groveengine.svg?style=flat-square&color=8b5a2b)](LICENSE)
