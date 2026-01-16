@@ -1066,7 +1066,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "By using Grove, you agree to these terms. Please read them carefully.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 8,
   },
   {
@@ -1076,7 +1076,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "Grove is committed to protecting your privacy. We collect minimal data necessary to provide our service.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 6,
   },
   {
@@ -1086,7 +1086,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "Grove is a platform for personal expression. This policy outlines what content is not allowed.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 5,
   },
   {
@@ -1096,7 +1096,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "If you believe your copyrighted work has been used on Grove in a way that constitutes infringement, please follow these procedures.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 4,
   },
   {
@@ -1106,7 +1106,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "Grove offers refunds within 14 days of purchase if you're not satisfied with our service.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 3,
   },
   {
@@ -1117,7 +1117,7 @@ export const legalDocs: Doc[] = [
     excerpt:
       "Your content is yours. Your domain is yours. Grove will never hold your data or domain hostage. This document outlines what happens when you cancel your subscription.",
     category: "legal",
-    lastUpdated: "2025-12-01",
+    lastUpdated: "2026-01-16",
     readingTime: 7,
   },
 ];
