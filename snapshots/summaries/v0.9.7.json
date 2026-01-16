@@ -1,0 +1,41 @@
+{
+  "version": "v0.9.7",
+  "date": "2026-01-15 21:39:17 -0500",
+  "commitHash": "64360886",
+  "summary": "Grove v0.9.7 brings a smarter, more connected experience. We've introduced a data-driven Help Center for your knowledge base, added new subscription management tools for administrators, and brought the beautiful new tree logo to life across the platform. This release also focuses on polish and stability, with numerous fixes for tests, images, and timezone handling to make everything run more smoothly for you.\n",
+  "stats": {
+    "totalCommits": 49,
+    "features": 14,
+    "fixes": 15,
+    "refactoring": 1,
+    "docs": 16,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "implement data-driven Help Center with section icons and TOC",
+  "add subscription management UI and data export (#341)",
+  "add monochrome prop to remove split-tone effect (#351)",
+  "connect test infrastructure to git hooks",
+  "update OG image assets to new tree logo",
+  "add Grove User Identity to knowledge base",
+  "add hover-to-expand behavior for collapsed sidebar",
+  "add direct blog link on success page",
+  "add new Grove services to blocklist",
+  "implement JPEG XL encoding with feature flag support (#336)"
+],
+    "fixes": [
+  "use noon UTC in formatDate test to avoid timezone boundary issues",
+  "add Contact link to mobile menu Connect section (#350)",
+  "resolve timezone failures in clearing date tests",
+  "resolve 21 test failures across the engine package",
+  "prevent HTML entities showing literally in OG images",
+  "register wanderers-and-pathfinders help article",
+  "correct GossamerPreset type in vineyard demo page",
+  "add @jsquash/jxl external config to all apps",
+  "resolve TypeScript errors for CI build",
+  "resolve CI deployment failures"
+]
+  }
+}
