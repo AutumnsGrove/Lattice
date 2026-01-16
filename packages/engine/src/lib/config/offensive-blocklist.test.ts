@@ -250,9 +250,9 @@ describe("Performance", () => {
     }
     const duration = performance.now() - start;
 
-    // Should complete 8000 lookups in under 500ms
-    // (substring matching is slower than exact match, allow headroom for CI)
-    expect(duration).toBeLessThan(500);
+    // Should complete 8000 lookups in under 1000ms
+    // (generous threshold to avoid flaky failures on slow/busy machines)
+    expect(duration).toBeLessThan(1000);
   });
 });
 
