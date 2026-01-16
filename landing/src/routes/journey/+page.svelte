@@ -265,8 +265,8 @@
 								{@const barWidth = (snapshot.totalCodeLines / maxCodeLines) * 100}
 								{@const breakdown = getSnapshotBreakdown(snapshot)}
 								<div class="flex items-center gap-2 md:gap-4">
-									<div class="w-20 md:w-32 text-right flex flex-col shrink-0">
-										<span class="text-[10px] md:text-xs font-sans text-foreground-faint hidden md:block">{snapshot.date}</span>
+									<div class="w-[4.5rem] md:w-32 text-right flex flex-col shrink-0">
+										<span class="text-[9px] md:text-xs font-sans text-foreground-faint">{snapshot.date}</span>
 										<span class="text-[10px] md:text-xs font-mono text-accent-muted">{snapshot.label}</span>
 									</div>
 									<div class="flex-1 h-5 md:h-6 bg-surface rounded-full overflow-hidden min-w-0">
