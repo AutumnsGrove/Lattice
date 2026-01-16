@@ -1,7 +1,59 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Tag, Sprout, ChevronDown, Sparkles, Wrench } from 'lucide-svelte';
+	import { Tag, Sprout, ChevronDown, Sparkles, Wrench, List } from 'lucide-svelte';
+
+	// Floating TOC state
+	let tocOpen = $state(false);
+	let activeSection = $state('');
+
+	// Define the sections for the TOC
+	const sections = [
+		{ id: 'current-growth', text: 'Current Growth' },
+		{ id: 'code-composition', text: 'Code Composition' },
+		{ id: 'growth-over-time', text: 'Growth Over Time' },
+		{ id: 'milestones', text: 'Milestones' },
+		{ id: 'documentation', text: 'Documentation' },
+		{ id: 'typescript-migration', text: 'TypeScript Migration' },
+		{ id: 'total-size', text: 'Total Project Size' }
+	];
+
+	function scrollToSection(id: string) {
+		const element = document.getElementById(id);
+		if (element) {
+			const offset = 80;
+			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+			window.scrollTo({
+				top: elementPosition - offset,
+				behavior: 'smooth'
+			});
+			history.pushState(null, '', `#${id}`);
+		}
+		tocOpen = false;
+	}
+
+	// Set up intersection observer for active section tracking
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						activeSection = entry.target.id;
+					}
+				});
+			},
+			{ rootMargin: '-20% 0% -60% 0%', threshold: 0 }
+		);
+
+		sections.forEach((section) => {
+			const element = document.getElementById(section.id);
+			if (element) observer.observe(element);
+		});
+
+		return () => observer.disconnect();
+	});
 
 	let { data } = $props();
 
@@ -121,7 +173,7 @@
 
 			{#if data.latest}
 			<!-- Current Stats Grid -->
-			<section class="mb-16">
+			<section id="current-growth" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Current Growth</h2>
 
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -172,7 +224,7 @@
 			</section>
 
 			<!-- Code Composition -->
-			<section class="mb-16">
+			<section id="code-composition" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Code Composition</h2>
 
 				<div class="card p-6">
@@ -203,7 +255,7 @@
 
 			<!-- Growth Over Time -->
 			{#if data.snapshots.length > 1}
-				<section class="mb-16">
+				<section id="growth-over-time" class="mb-16 scroll-mt-24">
 					<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Growth Over Time</h2>
 
 					<div class="card p-6">
@@ -240,7 +292,7 @@
 
 			<!-- Milestones Timeline -->
 			{#if milestones.length > 0}
-			<section class="mb-16">
+			<section id="milestones" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Milestones</h2>
 
 				<div class="relative">
@@ -349,7 +401,7 @@
 
 			<!-- Documentation -->
 			{#if data.snapshots.length > 1}
-			<section class="mb-16">
+			<section id="documentation" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Documentation</h2>
 
 				<div class="grid md:grid-cols-2 gap-6">
@@ -410,7 +462,7 @@
 
 			<!-- TypeScript Migration Progress -->
 			{#if tsProgression()}
-			<section class="mb-16">
+			<section id="typescript-migration" class="mb-16 scroll-mt-24">
 				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">TypeScript Migration</h2>
 
 				<div class="card p-6">
@@ -474,7 +526,7 @@
 			{/if}
 
 			<!-- Total Project Size -->
-			<section class="mb-16">
+			<section id="total-size" class="mb-16 scroll-mt-24">
 				<div class="card p-8 text-center bg-accent border-accent">
 					<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">Total Project Size</div>
 					<div class="text-4xl md:text-5xl font-serif text-accent-muted mb-2">
@@ -512,10 +564,192 @@
 	</article>
 
 	<Footer />
+
+	<!-- Floating TOC -->
+	{#if data.latest}
+		<div class="floating-toc-wrapper">
+			<button
+				class="toc-button"
+				onclick={() => tocOpen = !tocOpen}
+				aria-label="Toggle table of contents"
+				aria-expanded={tocOpen}
+			>
+				<List class="w-5 h-5" />
+			</button>
+
+			{#if tocOpen}
+				<nav class="toc-menu">
+					<h3 class="toc-title">Jump to Section</h3>
+					<ul class="toc-list">
+						{#each sections as section}
+							<li class="toc-item" class:active={activeSection === section.id}>
+								<button
+									type="button"
+									class="toc-link"
+									onclick={() => scrollToSection(section.id)}
+								>
+									{section.text}
+								</button>
+							</li>
+						{/each}
+					</ul>
+				</nav>
+			{/if}
+		</div>
+	{/if}
 </main>
 
 <style>
 	.bg-divider {
 		background-color: var(--color-divider);
+	}
+
+	/* Floating TOC */
+	.floating-toc-wrapper {
+		position: fixed;
+		bottom: 1.5rem;
+		right: 1.5rem;
+		z-index: 50;
+	}
+
+	.toc-button {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--color-accent, #2c5f2d);
+		border: none;
+		color: white;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.toc-button:hover {
+		background: var(--color-accent-hover, #3a7a3c);
+		transform: scale(1.05);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+	}
+
+	.toc-button:active {
+		transform: scale(0.95);
+	}
+
+	.toc-menu {
+		position: absolute;
+		bottom: 60px;
+		right: 0;
+		width: 240px;
+		max-height: 70vh;
+		overflow-y: auto;
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border-radius: 16px;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+		padding: 1rem;
+		animation: slideIn 0.2s ease;
+	}
+
+	:global(.dark) .toc-menu {
+		background: rgba(30, 40, 35, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.toc-title {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--color-foreground-faint, #888);
+		margin: 0 0 0.75rem 0;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	}
+
+	:global(.dark) .toc-title {
+		border-bottom-color: rgba(255, 255, 255, 0.1);
+	}
+
+	.toc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.toc-item {
+		margin: 0;
+	}
+
+	.toc-link {
+		display: block;
+		width: 100%;
+		text-align: left;
+		padding: 0.5rem 0.75rem;
+		margin: 0.125rem 0;
+		background: none;
+		border: none;
+		border-radius: 8px;
+		color: var(--color-foreground-muted, #555);
+		cursor: pointer;
+		transition: all 0.15s ease;
+		font-size: 0.875rem;
+		font-family: inherit;
+		line-height: 1.4;
+	}
+
+	.toc-link:hover {
+		background: rgba(44, 95, 45, 0.08);
+		color: var(--color-accent, #2c5f2d);
+		padding-left: 1rem;
+	}
+
+	:global(.dark) .toc-link:hover {
+		background: rgba(74, 222, 128, 0.1);
+		color: var(--color-accent, #4ade80);
+	}
+
+	.toc-item.active .toc-link {
+		background: rgba(44, 95, 45, 0.12);
+		color: var(--color-accent, #2c5f2d);
+		font-weight: 600;
+	}
+
+	:global(.dark) .toc-item.active .toc-link {
+		background: rgba(74, 222, 128, 0.15);
+		color: var(--color-accent, #4ade80);
+	}
+
+	/* Scrollbar styling for TOC menu */
+	.toc-menu::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	.toc-menu::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.toc-menu::-webkit-scrollbar-thumb {
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 2px;
+	}
+
+	:global(.dark) .toc-menu::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.2);
 	}
 </style>
