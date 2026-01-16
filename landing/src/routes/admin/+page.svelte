@@ -1,11 +1,24 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getUserDisplayName } from '@autumnsgrove/groveengine/utils';
+	import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
 	// Get display name for greeting (see docs/grove-user-identity.md)
 	const userName = $derived(getUserDisplayName(data.user));
+
+	// Dialog state
+	let showSignOutDialog = $state(false);
+
+	function handleSignOutClick() {
+		showSignOutDialog = true;
+	}
+
+	async function handleSignOutConfirm() {
+		await fetch('/api/auth/signout', { method: 'POST' });
+		window.location.href = '/';
+	}
 </script>
 
 <svelte:head>
@@ -92,13 +105,7 @@
 						← Back to Grove
 					</a>
 					<button
-						onclick={() => {
-							if (confirm('Are you sure you want to sign out?')) {
-								fetch('/api/auth/signout', { method: 'POST' }).then(() => {
-									window.location.href = '/';
-								});
-							}
-						}}
+						onclick={handleSignOutClick}
 						class="text-left text-bark/60 hover:text-red-600 font-sans text-sm transition-colors"
 					>
 						Sign Out
@@ -108,3 +115,12 @@
 		</section>
 	</main>
 </div>
+
+<GlassConfirmDialog
+	bind:open={showSignOutDialog}
+	title="Sign Out"
+	message="Are you sure you want to sign out of the admin dashboard?"
+	confirmLabel="Sign Out"
+	variant="default"
+	onconfirm={handleSignOutConfirm}
+/>

@@ -1,7 +1,7 @@
 <script>
   import { goto } from "$app/navigation";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
-  import { Input, Textarea, Button, GlassCard } from '$lib/ui';
+  import { Input, Textarea, Button, GlassCard, GlassConfirmDialog } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
 
@@ -22,6 +22,7 @@
   // UI state
   let creating = $state(false);
   let slugError = $state("");
+  let showDiscardDialog = $state(false);
 
   // Auto-generate slug from title
   $effect(() => {
@@ -143,12 +144,14 @@
 
   function handleCancel() {
     if (title || content !== "# New Page\n\nStart writing...") {
-      if (confirm("Discard changes and return to pages list?")) {
-        goto('/admin/pages');
-      }
+      showDiscardDialog = true;
     } else {
       goto('/admin/pages');
     }
+  }
+
+  function handleDiscardConfirm() {
+    goto('/admin/pages');
   }
 </script>
 
@@ -301,6 +304,15 @@
     </GlassCard>
   </div>
 </div>
+
+<GlassConfirmDialog
+  bind:open={showDiscardDialog}
+  title="Discard Changes?"
+  message="You have unsaved changes. Are you sure you want to discard them and return to the pages list?"
+  confirmLabel="Discard"
+  variant="warning"
+  onconfirm={handleDiscardConfirm}
+/>
 
 <style>
   .editor-container {

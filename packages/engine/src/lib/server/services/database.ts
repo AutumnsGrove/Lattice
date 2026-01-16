@@ -378,6 +378,54 @@ function validateColumnNames(columns: string[]): void {
 }
 
 // ============================================================================
+// Find Helpers
+// ============================================================================
+
+/**
+ * Find a single row by ID
+ *
+ * SECURITY: Table name is validated to prevent SQL injection.
+ * Only use with hardcoded table names, never user input.
+ *
+ * @example
+ * ```ts
+ * const user = await db.findById<User>(db, 'users', userId);
+ * if (!user) throw new Error('User not found');
+ * ```
+ */
+export async function findById<T>(
+  db: D1DatabaseOrSession,
+  table: string,
+  id: string,
+): Promise<T | null> {
+  validateTableName(table);
+  const sql = `SELECT * FROM ${table} WHERE id = ? LIMIT 1`;
+  return queryOne<T>(db, sql, [id]);
+}
+
+/**
+ * Find a single row by ID, throw if not found
+ *
+ * @example
+ * ```ts
+ * const user = await db.findByIdOrThrow<User>(db, 'users', userId);
+ * // user is guaranteed to exist here
+ * ```
+ */
+export async function findByIdOrThrow<T>(
+  db: D1DatabaseOrSession,
+  table: string,
+  id: string,
+  errorMessage = "Record not found",
+): Promise<T> {
+  const result = await findById<T>(db, table, id);
+  if (result === null) {
+    throw new DatabaseError(errorMessage, "NOT_FOUND");
+  }
+  return result;
+}
+
+// ============================================================================
 // Insert Helpers
 // ============================================================================
 
@@ -436,6 +484,72 @@ export async function insert(
     }
     throw new DatabaseError(
       `Insert into ${table} failed (columns: ${columns.join(", ")})`,
+      "QUERY_FAILED",
+      err,
+    );
+  }
+}
+
+/**
+ * Insert or update a row (upsert pattern)
+ *
+ * Uses SQLite's INSERT OR REPLACE which inserts a new row or replaces
+ * an existing one if the primary key (id) already exists.
+ *
+ * SECURITY: Table and column names are validated to prevent SQL injection.
+ * Only use with hardcoded names, never user input.
+ *
+ * @example
+ * ```ts
+ * // Insert new setting or update existing one
+ * await db.upsert(db, 'settings', {
+ *   id: 'theme',
+ *   value: 'dark'
+ * });
+ *
+ * // With explicit ID
+ * await db.upsert(db, 'user_preferences', {
+ *   user_id: userId,
+ *   preference_key: 'notifications',
+ *   value: 'enabled'
+ * }, { id: `${userId}-notifications` });
+ * ```
+ */
+export async function upsert(
+  db: D1DatabaseOrSession,
+  table: string,
+  data: Record<string, unknown>,
+  options?: { id?: string },
+): Promise<string> {
+  validateTableName(table);
+  validateColumnNames(Object.keys(data));
+
+  const id = options?.id ?? data.id ?? generateId();
+  const timestamp = now();
+
+  const dataWithMeta = {
+    id,
+    ...data,
+    created_at: timestamp,
+    updated_at: timestamp,
+  };
+
+  const columns = Object.keys(dataWithMeta);
+  const placeholders = columns.map(() => "?").join(", ");
+  const values = Object.values(dataWithMeta);
+
+  // Use INSERT OR REPLACE for upsert semantics
+  const sql = `INSERT OR REPLACE INTO ${table} (${columns.join(", ")}) VALUES (${placeholders})`;
+
+  try {
+    await db
+      .prepare(sql)
+      .bind(...values)
+      .run();
+    return id as string;
+  } catch (err) {
+    throw new DatabaseError(
+      `Upsert into ${table} failed (columns: ${columns.join(", ")})`,
       "QUERY_FAILED",
       err,
     );
@@ -726,6 +840,28 @@ export class TenantDb {
   }
 
   /**
+   * Find a single row by ID with tenant scoping
+   */
+  async findById<T>(table: string, id: string): Promise<T | null> {
+    return this.queryOne<T>(table, "id = ?", [id]);
+  }
+
+  /**
+   * Find a single row by ID, throw if not found
+   */
+  async findByIdOrThrow<T>(
+    table: string,
+    id: string,
+    errorMessage = "Record not found",
+  ): Promise<T> {
+    const result = await this.findById<T>(table, id);
+    if (result === null) {
+      throw new DatabaseError(errorMessage, "NOT_FOUND");
+    }
+    return result;
+  }
+
+  /**
    * Query multiple rows with automatic tenant scoping
    */
   async queryMany<T>(
@@ -800,6 +936,21 @@ export class TenantDb {
       tenant_id: this.context.tenantId,
     };
     return insert(this.db, table, dataWithTenant, options);
+  }
+
+  /**
+   * Insert or update a row (upsert) with automatic tenant_id injection
+   */
+  async upsert(
+    table: string,
+    data: Record<string, unknown>,
+    options?: { id?: string },
+  ): Promise<string> {
+    const dataWithTenant = {
+      ...data,
+      tenant_id: this.context.tenantId,
+    };
+    return upsert(this.db, table, dataWithTenant, options);
   }
 
   /**

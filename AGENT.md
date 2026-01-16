@@ -295,6 +295,44 @@ try {
 This lesson learned the hard way: a missing `site_settings` table silently blocked
 the `pages` query for hours because they shared a try/catch block.
 
+#### Typed Query Builders (database.ts)
+**Use the typed helpers in `packages/engine/src/lib/server/services/database.ts`** instead of raw SQL.
+
+```typescript
+import {
+  queryOne, queryMany, execute,
+  findById, findByIdOrThrow,
+  insert, upsert, update,
+  deleteWhere, deleteById,
+  exists, count,
+  getTenantDb
+} from '$lib/server/services/database';
+
+// ✅ GOOD - typed query helpers with validation
+const user = await findById<User>(db, 'users', userId);
+const posts = await queryMany<Post>(db, 'SELECT * FROM posts WHERE status = ?', ['published']);
+
+// ✅ GOOD - insert with auto-generated ID and timestamps
+const newId = await insert(db, 'posts', {
+  title: 'Hello World',
+  content: 'My first post'
+});
+
+// ✅ GOOD - upsert (insert or replace)
+await upsert(db, 'settings', { id: 'theme', value: 'dark' });
+
+// ✅ GOOD - multi-tenant operations (automatic tenant scoping)
+const tenantDb = getTenantDb(db, { tenantId: locals.tenant.id });
+const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published']);
+// Automatically adds: WHERE tenant_id = ? AND status = ?
+```
+
+**Key Benefits:**
+- **SQL injection prevention** - Table/column names validated against alphanumeric pattern
+- **Type safety** - Generic types for query results
+- **Auto timestamps** - `created_at`/`updated_at` handled automatically
+- **Tenant isolation** - `TenantDb` enforces multi-tenant boundaries
+
 ### Research & Analysis
 - **When researching technology decisions** → Use skill: `research-strategy`
 - **When analyzing unfamiliar codebases** → Use skill: `research-strategy`

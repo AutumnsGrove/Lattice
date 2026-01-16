@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard } from "$lib/ui";
+  import { GlassCard, GlassConfirmDialog } from "$lib/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { invalidateAll, beforeNavigate } from "$app/navigation";
@@ -27,23 +27,23 @@
   let exportingData = $state(false);
   let exportType = $state<ExportType>("full");
 
+  // Dialog states
+  let showCancelDialog = $state(false);
+  let showChangePlanDialog = $state(false);
+  let pendingPlanChange = $state<{ plan: string; tierInfo: { name: string; isUpgrade: boolean } | null }>({ plan: "", tierInfo: null });
+
   // Reset portal state if user navigates back to this page
   beforeNavigate(() => {
     openingPortal = false;
   });
 
-  // Cancel subscription
-  async function handleCancel(): Promise<void> {
-    if (
-      !confirm(
-        "Are you sure you want to cancel your subscription?\n\n" +
-          "Your subscription will remain active until the end of your current billing period. " +
-          "You can resume at any time before then."
-      )
-    ) {
-      return;
-    }
+  // Cancel subscription - show dialog
+  function handleCancelClick(): void {
+    showCancelDialog = true;
+  }
 
+  // Cancel subscription - confirmed
+  async function handleCancelConfirm(): Promise<void> {
     cancellingSubscription = true;
     try {
       await api.patch("/api/billing", {
@@ -85,23 +85,19 @@
     }
   }
 
-  // Change plan
-  async function handleChangePlan(newPlan: string): Promise<void> {
+  // Change plan - show dialog
+  function handleChangePlan(newPlan: string): void {
     if (newPlan === data.currentPlan) return;
 
     const tierInfo = data.availableTiers.find((t) => t.id === newPlan);
-    const action = tierInfo?.isUpgrade ? "upgrade" : "downgrade";
+    pendingPlanChange = { plan: newPlan, tierInfo: tierInfo ?? null };
+    showChangePlanDialog = true;
+  }
 
-    if (
-      !confirm(
-        `Are you sure you want to ${action} to ${tierInfo?.name}?\n\n` +
-          (tierInfo?.isUpgrade
-            ? "You will be charged the pro-rated difference immediately."
-            : "You will receive a pro-rated credit for your remaining time.")
-      )
-    ) {
-      return;
-    }
+  // Change plan - confirmed
+  async function handleChangePlanConfirm(): Promise<void> {
+    const { plan: newPlan, tierInfo } = pendingPlanChange;
+    if (!newPlan) return;
 
     changingPlan = true;
     selectedPlan = newPlan;
@@ -200,7 +196,7 @@
     tierConfig={data.tierConfig}
     {cancellingSubscription}
     {resumingSubscription}
-    onCancel={handleCancel}
+    onCancel={handleCancelClick}
     onResume={handleResume}
   />
 
@@ -248,6 +244,30 @@
     </p>
   </GlassCard>
 </div>
+
+<!-- Cancel Subscription Dialog -->
+<GlassConfirmDialog
+  bind:open={showCancelDialog}
+  title="Cancel Subscription"
+  message="Your subscription will remain active until the end of your current billing period. You can resume at any time before then."
+  confirmLabel="Cancel Subscription"
+  variant="danger"
+  loading={cancellingSubscription}
+  onconfirm={handleCancelConfirm}
+/>
+
+<!-- Change Plan Dialog -->
+<GlassConfirmDialog
+  bind:open={showChangePlanDialog}
+  title={pendingPlanChange.tierInfo?.isUpgrade ? "Upgrade Plan" : "Downgrade Plan"}
+  message={pendingPlanChange.tierInfo?.isUpgrade
+    ? `Are you sure you want to upgrade to ${pendingPlanChange.tierInfo?.name}? You will be charged the pro-rated difference immediately.`
+    : `Are you sure you want to downgrade to ${pendingPlanChange.tierInfo?.name}? You will receive a pro-rated credit for your remaining time.`}
+  confirmLabel={pendingPlanChange.tierInfo?.isUpgrade ? "Upgrade" : "Downgrade"}
+  variant={pendingPlanChange.tierInfo?.isUpgrade ? "default" : "warning"}
+  loading={changingPlan}
+  onconfirm={handleChangePlanConfirm}
+/>
 
 <style>
   .account-page {

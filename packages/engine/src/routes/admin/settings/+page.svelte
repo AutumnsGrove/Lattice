@@ -1,5 +1,5 @@
 <script>
-  import { Button, Spinner, GlassCard } from '$lib/ui';
+  import { Button, Spinner, GlassCard, GlassConfirmDialog } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
@@ -24,6 +24,7 @@
 
   let clearingCache = $state(false);
   let cacheMessage = $state('');
+  let showClearCacheDialog = $state(false);
   /** @type {HealthStatus | null} */
   let healthStatus = $state(null);
   let loadingHealth = $state(true);
@@ -51,11 +52,11 @@
     loadingHealth = false;
   }
 
-  async function clearCache() {
-    if (!confirm('Are you sure you want to clear the cache? This will cause the next requests to be slower while data is refetched.')) {
-      return;
-    }
+  function handleClearCacheClick() {
+    showClearCacheDialog = true;
+  }
 
+  async function clearCache() {
     clearingCache = true;
     cacheMessage = '';
 
@@ -412,7 +413,7 @@
       </div>
     {/if}
 
-    <Button onclick={clearCache} variant="danger" disabled={clearingCache}>
+    <Button onclick={handleClearCacheClick} variant="danger" disabled={clearingCache}>
       {clearingCache ? 'Clearing...' : 'Clear All Cache'}
     </Button>
 
@@ -435,6 +436,16 @@
     </div>
   </GlassCard>
 </div>
+
+<GlassConfirmDialog
+  bind:open={showClearCacheDialog}
+  title="Clear Cache"
+  message="This will clear all cached data. The next requests will be slower while data is refetched from the source."
+  confirmLabel="Clear Cache"
+  variant="warning"
+  loading={clearingCache}
+  onconfirm={clearCache}
+/>
 
 <style>
   .settings {

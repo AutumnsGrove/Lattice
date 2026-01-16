@@ -28,6 +28,31 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # =============================================================================
+# PATH Setup (ensure Homebrew and common tool paths are available)
+# =============================================================================
+
+# Add common Homebrew and tool paths if they exist
+# This handles the common case where tools are installed but PATH isn't set in sourced scripts
+_grove_setup_path() {
+    local paths_to_add=(
+        "/opt/homebrew/bin"           # Apple Silicon Homebrew
+        "/usr/local/bin"              # Intel Mac Homebrew / Linux
+        "$HOME/.local/bin"            # User-local installs
+        "$HOME/bin"                   # User bin
+        "$HOME/.cargo/bin"            # Rust/cargo installs
+    )
+
+    for p in "${paths_to_add[@]}"; do
+        if [ -d "$p" ] && [[ ":$PATH:" != *":$p:"* ]]; then
+            export PATH="$p:$PATH"
+        fi
+    done
+}
+
+# Setup PATH before checking dependencies
+_grove_setup_path
+
+# =============================================================================
 # Dependency Checks
 # =============================================================================
 
@@ -35,16 +60,19 @@ _grove_check_deps() {
     local missing=0
 
     if ! command -v rg &> /dev/null; then
-        echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
+        echo -e "${RED}Error: ripgrep (rg) is not installed or not in PATH.${NC}"
         echo -e "  ${CYAN}macOS:${NC}     brew install ripgrep"
         echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install ripgrep"
         echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S ripgrep"
         echo -e "  ${CYAN}Windows:${NC}   scoop install ripgrep  ${YELLOW}(or winget/choco)${NC}"
+        echo -e ""
+        echo -e "  ${YELLOW}If already installed, check your shell config (~/.zshrc or ~/.bashrc)${NC}"
+        echo -e "  ${YELLOW}Make sure Homebrew is in PATH: eval \"\$(${CYAN}/opt/homebrew/bin/brew${YELLOW} shellenv)\"${NC}"
         missing=1
     fi
 
     if ! command -v fd &> /dev/null; then
-        echo -e "${RED}Error: fd is not installed.${NC}"
+        echo -e "${RED}Error: fd is not installed or not in PATH.${NC}"
         echo -e "  ${CYAN}macOS:${NC}     brew install fd"
         echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install fd-find  ${YELLOW}(may need: ln -s \$(which fdfind) ~/.local/bin/fd)${NC}"
         echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S fd"
