@@ -1033,6 +1033,18 @@ export const helpArticles: Doc[] = [
     readingTime: 5,
   },
   {
+    slug: "what-is-loom",
+    title: "What is Loom?",
+    description:
+      "The coordination layer that makes Grove fast and private",
+    excerpt:
+      "You don't need to understand Loom to use Grove. But if you're curious about what makes the platform work under the hood—why it's fast everywhere, why your data stays isolated—here's the story.",
+    category: "help",
+    section: "philosophy-vision",
+    lastUpdated: "2026-01-16",
+    readingTime: 4,
+  },
+  {
     slug: "wanderers-and-pathfinders",
     title: "Wanderers and Pathfinders",
     description:
