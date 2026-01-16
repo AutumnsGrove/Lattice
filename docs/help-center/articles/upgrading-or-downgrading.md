@@ -85,4 +85,4 @@ Downgrades don't trigger refunds for the current period. You keep access to your
 
 ---
 
-*Questions about which plan fits? [Ask us](/support)—we'll give you an honest recommendation.*
+*Questions about which plan fits? [Ask us](/contact)—we'll give you an honest recommendation.*

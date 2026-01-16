@@ -88,4 +88,4 @@ Grove is built on a few principles:
 
 ---
 
-*Questions about whether Grove is right for you? [Reach out](/support)—we're happy to chat.*
+*Questions about whether Grove is right for you? [Reach out](/contact)—we're happy to chat.*

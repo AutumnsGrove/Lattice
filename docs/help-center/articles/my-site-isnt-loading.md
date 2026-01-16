@@ -46,7 +46,7 @@ If you see an incident listed, we're already aware and working on it. Status upd
 This usually means the domain isn't pointing to Grove correctly.
 
 **If you're using a grove.place subdomain:**
-This shouldn't happen. [Contact us](/support) with your blog URL—something's wrong on our end.
+This shouldn't happen. [Contact us](/contact) with your blog URL—something's wrong on our end.
 
 **If you're using a custom domain:**
 Check that your DNS records are still configured correctly:
@@ -68,7 +68,7 @@ Something went wrong on our end.
 
 - Refresh the page and try again
 - If it persists, check **status.grove.place** for known issues
-- If there's no incident posted, [contact us](/support): this is something we need to fix
+- If there's no incident posted, [contact us](/contact): this is something we need to fix
 
 ### Slow loading or timing out
 
@@ -76,7 +76,7 @@ If your site loads but takes forever:
 
 - Large images can slow things down. Consider compressing them before uploading.
 - If it's only slow sometimes, we might be experiencing high traffic. It should resolve on its own.
-- Persistent slowness? [Let us know](/support). We want your blog to be fast.
+- Persistent slowness? [Let us know](/contact). We want your blog to be fast.
 
 ## If you have a custom domain
 
@@ -86,7 +86,7 @@ Custom domain issues have their own quirks. Common culprits:
 - **Domain expired:** Check that your domain registration is current with your registrar.
 - **DNS provider issues:** Sometimes the problem is upstream. Try checking your registrar's status page.
 
-If you're still having trouble with your custom domain, [contact us](/support) with your domain name and we'll help you troubleshoot.
+If you're still having trouble with your custom domain, [contact us](/contact) with your domain name and we'll help you troubleshoot.
 
 ## Still stuck?
 
@@ -94,7 +94,7 @@ If you've tried the above and your site is still down:
 
 1. **Note the exact error message** you're seeing (screenshot if possible)
 2. **Note your blog URL** (subdomain or custom domain)
-3. **Contact us at [/support](/support)**
+3. **Contact us at [/contact](/contact)**
 
 Include those details in your message. We'll prioritize site-down issues and get back to you as quickly as we can.
 

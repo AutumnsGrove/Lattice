@@ -134,7 +134,7 @@ Grove is built on Cloudflare's global network. Your data may be processed in dif
 - Correct: Edit your content directly in the admin panel
 
 **Email** (for anything else):
-- Contact: [support](/support)
+- Contact: [support](/contact)
 - Response time: Within 30 days (usually much faster)
 
 ## For blog readers

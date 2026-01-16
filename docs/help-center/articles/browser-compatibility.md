@@ -97,7 +97,7 @@ If an extension is the problem, you can usually whitelist Grove rather than disa
 
 ### Step 5: Contact support
 
-If you've tried the above and things still aren't working, [contact us](/support) with:
+If you've tried the above and things still aren't working, [contact us](/contact) with:
 
 - Your browser and version
 - What you're trying to do
@@ -129,4 +129,4 @@ If you use assistive technology and encounter barriers, please let us know. Acce
 
 ---
 
-*Having browser issues we haven't covered? [Reach out](/support)—we want to know about edge cases.*
+*Having browser issues we haven't covered? [Reach out](/contact)—we want to know about edge cases.*

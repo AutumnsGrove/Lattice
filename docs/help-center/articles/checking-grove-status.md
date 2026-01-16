@@ -97,4 +97,4 @@ The status page shows the past 30 days of incidents. You can see what happened, 
 
 ---
 
-*If something's broken and the status page doesn't mention it, [let us know](/support). We want to know about issues we haven't caught yet.*
+*If something's broken and the status page doesn't mention it, [let us know](/contact). We want to know about issues we haven't caught yet.*

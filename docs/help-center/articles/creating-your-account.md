@@ -82,4 +82,4 @@ Your Grove account is tied to a specific Google account. You can't merge account
 
 ---
 
-*Questions about signing up? Something not working? [Reach out](/support). We'll help you get sorted.*
+*Questions about signing up? Something not working? [Reach out](/contact). We'll help you get sorted.*

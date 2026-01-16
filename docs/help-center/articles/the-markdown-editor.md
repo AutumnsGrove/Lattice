@@ -79,4 +79,4 @@ Line numbers appear on the left side of the editor. The current line is highligh
 
 ---
 
-*The editor should feel natural after a few posts. If something's confusing or not working as expected, [let us know](/support).*
+*The editor should feel natural after a few posts. If something's confusing or not working as expected, [let us know](/contact).*

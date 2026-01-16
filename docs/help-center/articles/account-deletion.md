@@ -95,4 +95,4 @@ If something about Grove drove you away, we'd genuinely appreciate knowing what.
 
 ---
 
-*Need help with the deletion process? [Contact support](/support) and we'll walk you through it.*
+*Need help with the deletion process? [Contact support](/contact) and we'll walk you through it.*

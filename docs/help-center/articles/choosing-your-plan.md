@@ -120,4 +120,4 @@ All plans include:
 
 ---
 
-*Questions about which plan fits? [Ask us](/support). We'll give you an honest answer, even if it's "Seedling is probably enough."*
+*Questions about which plan fits? [Ask us](/contact). We'll give you an honest answer, even if it's "Seedling is probably enough."*

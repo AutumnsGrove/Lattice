@@ -86,4 +86,4 @@ That's it. You're a blogger now.
 
 ---
 
-*Stuck on something? The writing experience should be smooth. If it's not, [let us know](/support).*
+*Stuck on something? The writing experience should be smooth. If it's not, [let us know](/contact).*
