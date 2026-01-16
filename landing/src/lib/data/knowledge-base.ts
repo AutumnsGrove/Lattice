@@ -1035,8 +1035,7 @@ export const helpArticles: Doc[] = [
   {
     slug: "what-is-loom",
     title: "What is Loom?",
-    description:
-      "The coordination layer that makes Grove fast and private",
+    description: "The coordination layer that makes Grove fast and private",
     excerpt:
       "You don't need to understand Loom to use Grove. But if you're curious about what makes the platform work under the hood—why it's fast everywhere, why your data stays isolated—here's the story.",
     category: "help",
@@ -1295,6 +1294,17 @@ export const marketingDocs: Doc[] = [
 
 // Philosophy Documents
 export const philosophyDocs: Doc[] = [
+  {
+    slug: "why-i-built-the-grove",
+    title: "Why I Built the Grove",
+    description:
+      "The personal story behind Grove—loss, sanctuary, texture, and transformation",
+    excerpt:
+      "I'm building a grove for people who lost their groves. Before Grove existed, I had a backyard with a hammock and a garden. A front porch where I watched sunrises. Then I lost it all.",
+    category: "philosophy",
+    lastUpdated: "2026-01-16",
+    readingTime: 8,
+  },
   {
     slug: "grove-naming",
     title: "The Grove Naming System",
