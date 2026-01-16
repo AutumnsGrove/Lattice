@@ -1,4 +1,7 @@
-<h1><img src="landing/static/favicon.svg" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
+<h1><img src="docs/internal/email-assets/logo-autumn-32.png" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
+
+[![npm version](https://img.shields.io/npm/v/@autumnsgrove/groveengine.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/groveengine)
+[![license](https://img.shields.io/npm/l/@autumnsgrove/groveengine.svg?style=flat-square&color=8b5a2b)](LICENSE)
 
 > **Internal codename:** GroveEngine
 
@@ -10,9 +13,12 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | 0.9.5 | Lattice — Multi-tenant blog engine with 185 UI components |
-| [landing](landing) | — | Marketing site at grove.place |
-| [domains](domains) | — | Forage — AI-powered domain discovery tool |
+| [@autumnsgrove/groveengine](packages/engine) | 0.9.71 | Lattice — Multi-tenant blog engine with 185 UI components |
+| [landing](packages/landing) | — | Marketing site at grove.place |
+| [domains](packages/domains) | — | Forage — AI-powered domain discovery tool |
+| [clearing](packages/clearing) | — | Status page & admin dashboard |
+| [plant](packages/plant) | — | Tenant blog management app |
+| [meadow](packages/meadow) | — | Community feed feature |
 | [og-worker](packages/og-worker) | — | Dynamic OG image generation Worker |
 | [grove-router](packages/grove-router) | — | Subdomain routing Worker |
 | [durable-objects](packages/durable-objects) | — | Cloudflare Durable Objects for caching and real-time features |
@@ -51,8 +57,8 @@ A modern, multi-tenant blogging platform where users get their own blogs on subd
 
 ```
 GroveEngine/
-├── packages/
-│   ├── engine/               # @autumnsgrove/groveengine - Core engine (0.9.5)
+├── packages/                 # All apps consolidated here
+│   ├── engine/               # @autumnsgrove/groveengine - Core engine (0.9.71)
 │   │   ├── src/lib/
 │   │   │   ├── auth/             # JWT and session management
 │   │   │   ├── components/       # Svelte components (admin, custom)
@@ -72,21 +78,21 @@ GroveEngine/
 │   │   │   └── utils/            # 12 utility modules
 │   │   ├── routes/           # SvelteKit routes (blog, admin, API, auth)
 │   │   └── migrations/       # D1 database migrations (13 migrations)
+│   ├── landing/              # Marketing site (grove.place)
+│   │   └── src/routes/
+│   │       ├── forest/           # Seasonal nature scene showcase
+│   │       ├── vineyard/         # Asset & component showcase
+│   │       ├── manifesto/        # Project philosophy
+│   │       ├── knowledge/        # Help center (10+ categories)
+│   │       └── legal/            # ToS, Privacy, DMCA, etc.
+│   ├── domains/              # Forage: AI-powered domain discovery
+│   ├── plant/                # Tenant blog management app
+│   ├── meadow/               # Community feed feature
+│   ├── clearing/             # Status page & admin dashboard
 │   ├── og-worker/            # Dynamic OG image generation (og.grove.place)
 │   ├── grove-router/         # Subdomain routing Worker
 │   ├── durable-objects/      # Caching & real-time Durable Objects
 │   └── post-migrator/        # Hot/warm/cold storage migration
-├── domains/                  # Forage: AI-powered domain discovery
-├── landing/                  # Marketing site for grove.place
-│   └── src/routes/
-│       ├── forest/           # Seasonal nature scene showcase
-│       ├── vineyard/         # Asset & component showcase
-│       ├── manifesto/        # Project philosophy
-│       ├── knowledge/        # Help center (10+ categories)
-│       └── legal/            # ToS, Privacy, DMCA, etc.
-├── plant/                    # Tenant blog management app
-├── meadow/                   # Community feed feature
-├── clearing/                 # Admin dashboard & data tools
 ├── docs/                     # Project documentation
 │   ├── specs/                # Technical specifications (50+ specs)
 │   ├── patterns/             # Design patterns (8 patterns)
@@ -143,9 +149,12 @@ import { parseMarkdown } from '@autumnsgrove/groveengine/utils/markdown';
 
 ## 🎯 Project Status
 
-**Current Phase:** Phase 1 - MVP Development | **Engine Version:** 0.9.5 | **Domain:** grove.place ✅
+**Current Phase:** Phase 1 - MVP Development | **Engine Version:** 0.9.71 | **Domain:** grove.place ✅
 
-### Recently Completed (v0.9.5)
+### Recently Completed (v0.9.71)
+- ✅ **Codebase Reorganization** — 6-phase consolidation moving all apps into `packages/` directory for cleaner workspace structure
+- ✅ **Test Coverage Expansion** — Comprehensive test suites for security modules, payments, utilities, feature flags, and auth (6 batches)
+- ✅ **Knowledge Base Enhancements** — Seasonal color palettes, related content sections, floating table of contents
 - ✅ **Forests** — Community aggregation inspired by GeoCities neighborhoods with 45 themed forests across 10 categories (The Prism, The Terminal, The Kitchen, etc.)
 - ✅ **Wander** — First-person immersive grove discovery with floating terrariums, time of day, seasons, weather, and ambient soundscape
 - ✅ **Curios** — Cabinet of wonders for old-web personalization (guestbooks, shrines, hit counters, custom cursors, link gardens)
@@ -300,11 +309,11 @@ pnpm dev
 pnpm dev:wrangler
 
 # Start landing page
-cd landing
+cd packages/landing
 pnpm dev
 
 # Start domain search tool (Forage)
-cd domains
+cd packages/domains
 pnpm dev
 ```
 
@@ -352,5 +361,5 @@ AGPL-3.0
 
 **Project Status:** Phase 1 - MVP Development
 **Domain:** grove.place ✅
-**Engine Version:** 0.9.5
-**Last Updated:** 2026-01-14
+**Engine Version:** 0.9.71
+**Last Updated:** 2026-01-16
