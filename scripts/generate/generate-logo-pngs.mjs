@@ -14,8 +14,8 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = join(__dirname, "../docs/internal/email-assets");
-const LANDING_STATIC_DIR = join(__dirname, "../landing/static");
+const OUTPUT_DIR = join(__dirname, "../../docs/internal/email-assets");
+const LANDING_STATIC_DIR = join(__dirname, "../../landing/static");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEASONAL COLOR PALETTES (from Logo.svelte)
@@ -80,11 +80,11 @@ const ROTATION = -12; // Windswept organic feel
 // SVG GENERATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-function generateSvg(season) {
+function generateSvg(season, { rotation = ROTATION } = {}) {
   const colors = SEASONAL_PALETTES[season];
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <g transform="rotate(${ROTATION} 50 50)">
+  <g transform="rotate(${rotation} 50 50)">
     <!-- Tier 1: Top branches -->
     <path fill="${colors.tier1.dark}" d="${PATHS.tier1Dark}" />
     <path fill="${colors.tier1.light}" d="${PATHS.tier1Light}" />
@@ -144,6 +144,61 @@ async function generateLandingIcons() {
   console.log("");
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// COMBINED SEASONAL LOGO GENERATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function generateCombinedLogo(logoSize = 512, overlap = 0) {
+  console.log("🎨 Generating combined seasonal logo...");
+
+  // Generate SVG buffers for each season (upright, no windswept rotation)
+  const logoBuffers = await Promise.all(
+    SEASONS.map(async (season) => {
+      const svg = generateSvg(season, { rotation: 0 });
+      return sharp(Buffer.from(svg))
+        .resize(logoSize, logoSize)
+        .png()
+        .toBuffer();
+    }),
+  );
+
+  // Calculate canvas dimensions
+  // With overlap: each subsequent logo overlaps by `overlap` pixels
+  const effectiveWidth = logoSize - overlap;
+  const canvasWidth = logoSize + effectiveWidth * (SEASONS.length - 1);
+  const canvasHeight = logoSize;
+
+  // Create composite inputs with positions
+  const compositeInputs = logoBuffers.map((buffer, index) => ({
+    input: buffer,
+    left: index * effectiveWidth,
+    top: 0,
+  }));
+
+  // Create transparent canvas and composite all logos
+  const combinedBuffer = await sharp({
+    create: {
+      width: canvasWidth,
+      height: canvasHeight,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite(compositeInputs)
+    .png()
+    .toBuffer();
+
+  // Save the combined logo
+  const overlapSuffix = overlap > 0 ? `-overlap${overlap}` : "";
+  const filename = `logo-seasons-combined-${logoSize}${overlapSuffix}.png`;
+  const filepath = join(OUTPUT_DIR, filename);
+
+  await writeFile(filepath, combinedBuffer);
+  console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
+
+  return filepath;
+}
+
 async function main() {
   console.log("🌲 Generating Grove tree logo PNGs...\n");
 
@@ -163,10 +218,18 @@ async function main() {
     console.log("");
   }
 
+  // Generate combined seasonal logos (upright trees, tightly packed)
+  // Moderate overlap (55%) - trees close together
+  await generateCombinedLogo(512, Math.round(512 * 0.55));
+  // Tight overlap (65%) - cozy forest feel
+  await generateCombinedLogo(512, Math.round(512 * 0.65));
+  console.log("");
+
   console.log(
     `✅ Generated ${SEASONS.length * SIZES.length} email PNGs in ${OUTPUT_DIR}`,
   );
   console.log(`✅ Generated 2 landing icons in ${LANDING_STATIC_DIR}`);
+  console.log(`✅ Generated 2 combined seasonal logos in ${OUTPUT_DIR}`);
 }
 
 main().catch(console.error);
