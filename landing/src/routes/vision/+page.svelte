@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GlassCard } from '@autumnsgrove/groveengine/ui/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry
@@ -84,7 +85,7 @@
 					<h2 class="text-2xl font-serif text-foreground mb-6">Core Values</h2>
 
 					<div class="grid gap-6">
-						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
+						<GlassCard>
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
 								<AccessibilityIcon class="w-5 h-5 text-accent-subtle" />
 								Accessibility
@@ -96,9 +97,9 @@
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								<strong class="text-foreground">Reading is always free.</strong> Every Grove blog is publicly accessible — no login, no paywall. You pay to write, not to read.
 							</p>
-						</div>
+						</GlassCard>
 
-						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
+						<GlassCard>
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
 								<OwnershipIcon class="w-5 h-5 text-accent-subtle" />
 								Ownership
@@ -107,9 +108,9 @@
 								Your words are yours. Your data is yours. You can export everything, anytime.
 								If you leave, you take your roots with you.
 							</p>
-						</div>
+						</GlassCard>
 
-						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
+						<GlassCard>
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
 								<SimplicityIcon class="w-5 h-5 text-accent-subtle" />
 								Simplicity
@@ -118,9 +119,9 @@
 								No feature bloat. No endless settings. Write in Markdown. Upload images. Publish. That's it.
 								The technology should disappear into the background.
 							</p>
-						</div>
+						</GlassCard>
 
-						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
+						<GlassCard>
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
 								<CommunityIcon class="w-5 h-5 text-accent-subtle" />
 								Community With Care
@@ -129,9 +130,9 @@
 								Intentionally queer-friendly. Welcoming to all. No engagement metrics breeding outrage.
 								No viral mechanics rewarding the loudest voice. Just people, sharing what matters to them.
 							</p>
-						</div>
+						</GlassCard>
 
-						<div class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-6 border border-white/40 dark:border-emerald-800/25 shadow-sm">
+						<GlassCard>
 							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
 								<AiSanctuaryIcon class="w-5 h-5 text-accent-subtle" />
 								AI Sanctuary
@@ -147,7 +148,7 @@
 							<p class="text-foreground-subtle font-sans italic mt-3">
 								Your voice remains yours. Not a dataset. Not a statistic. Yours.
 							</p>
-						</div>
+						</GlassCard>
 					</div>
 
 					<!-- Solarpunk Callout -->
@@ -209,6 +210,31 @@
 							<span><strong>Built on open standards.</strong> Your blog isn't locked into Grove. The connections between blogs use the same portable technology that powers podcasts and news readers. If you ever leave, your followers can still follow you wherever you go.</span>
 						</li>
 					</ul>
+				</section>
+
+				<!-- Where This Comes From -->
+				<section class="mb-12">
+					<h2 class="text-2xl font-serif text-foreground mb-4">Where This Comes From</h2>
+					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+						These aren't abstract principles. They come from somewhere real.
+					</p>
+					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+						Before Grove existed, I had a backyard with a hammock and a garden. A front porch where I watched sunrises. Birds I knew by song. Friends who came over just to exist together. My days had <em>texture</em>.
+					</p>
+					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+						Then I lost it all. And in the numbness that followed, I started building a place where people could plant their own little sanctuaries, tend their own corners of the internet, and find some of that texture again.
+					</p>
+					<GlassCard variant="accent" class="mb-6">
+						<p class="text-foreground-muted font-sans leading-relaxed">
+							Grove is a refuge because I needed one. <strong class="text-accent-muted">I'm building a grove for people who lost their groves.</strong>
+						</p>
+					</GlassCard>
+					<a
+						href="/knowledge/philosophy/why-i-built-the-grove"
+						class="inline-flex items-center gap-2 text-accent-muted hover:text-accent-foreground transition-colors font-sans"
+					>
+						Read the full story →
+					</a>
 				</section>
 
 				<!-- Closing -->

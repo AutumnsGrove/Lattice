@@ -4,7 +4,7 @@ slug: groves-vision
 category: legal
 order: 1
 keywords: [vision, philosophy, values, why, mission, purpose, about, story]
-related: [what-is-grove, understanding-your-privacy, how-grove-protects-your-content]
+related: [what-is-grove, understanding-your-privacy, how-grove-protects-your-content, why-i-built-the-grove]
 ---
 
 # Grove's Vision
@@ -72,6 +72,18 @@ That's what we're building. A forest of voices. A place where people can plant t
 The web is being scraped into datasets. Authentic human spaces are getting rarer. Platforms optimize for engagement, not wellbeing. Algorithms decide what you see.
 
 Grove is one small corner where things work differently. A refuge from the noise. A place to write for the sake of writing, and to read for the sake of reading.
+
+## Where This Comes From
+
+These aren't abstract principles. They come from somewhere real.
+
+Before Grove existed, I had a backyard with a hammock and a garden. A front porch where I watched sunrises. Birds I knew by song. Friends who came over just to exist together. My days had texture.
+
+Then I lost it all. And in the numbness that followed, I started building a place where people could plant their own little sanctuaries, tend their own corners of the internet, and find some of that texture again.
+
+Grove is a refuge because I needed one. I'm building a grove for people who lost their groves.
+
+*For the full story, see [Why I Built the Grove](/knowledge/philosophy/why-i-built-the-grove).*
 
 ---
 

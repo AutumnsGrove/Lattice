@@ -28,6 +28,22 @@ From 'I Want a Blog' to SaaS Platform
 
 **Week 3:** First NPM package published (@autumnsgrove/groveengine v0.5.0)
 
+## The Deeper Why
+
+The timeline tells you what happened. It doesn't tell you why it happened so fast, or why it happened at all.
+
+I wasn't just building a blogging platform. I was rebuilding everything I'd lost.
+
+Six months before Day 1, I had a backyard. A hammock. A garden I'd tended for two years. A front porch where I watched robins dance at sunrise. Friends who'd come over just to exist together in the same space. My days had *texture*.
+
+Then I lost all of it. Moved into my parents' basement. No windows. No garden. No sanctuary. My days went numb.
+
+Grove came into existence as my life was sparking back to life. The forest on the landing page exists because I missed my forest. The security system is named after birds because I missed my birds. Wander mode exists because I finally have the freedom to just pick a direction and walk.
+
+I'm building a grove for people who lost their groves.
+
+*For the full story, see [Why I Built the Grove](/knowledge/philosophy/why-i-built-the-grove).*
+
 ## Current Stats (as of Dec 9, 2025)
 
 - **20+ day coding streak**
@@ -118,6 +134,12 @@ Could easily lock customers in with data traps. Could be predatory with pricing.
 
 The money comes from providing value, not exploitation. The community comes from genuine connection, not gamified engagement. The growth comes from people who actually want what you're building.
 
+This isn't just business philosophy. It's personal.
+
+I know what it feels like to lose a sanctuary. I know what numb days feel like. I know what it means to finally find texture again. Grove exists because I needed it to exist, and I'm building it the way I wish every platform was built: with care, with honesty, with the understanding that the people using it are real humans looking for a place to belong.
+
 *All because I wanted a blog.*
 
-— Autumn, December 2025
+*All because I missed my backyard.*
+
+— Autumn, January 2026
