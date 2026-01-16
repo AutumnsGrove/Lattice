@@ -1,6 +1,6 @@
 {
   "name": "@autumnsgrove/groveengine",
-  "version": "0.9.7",
+  "version": "0.9.71",
   "description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
   "author": "AutumnsGrove",
   "license": "AGPL-3.0-only",

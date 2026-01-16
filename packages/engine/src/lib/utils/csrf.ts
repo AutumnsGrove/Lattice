@@ -13,7 +13,10 @@ export function generateCSRFToken(): string {
 /**
  * Validate CSRF token from request against session token
  */
-export function validateCSRFToken(request: Request, sessionToken: string): boolean {
+export function validateCSRFToken(
+  request: Request,
+  sessionToken: string,
+): boolean {
   if (!sessionToken) return false;
 
   const headerToken = request.headers.get("x-csrf-token");
@@ -39,7 +42,8 @@ export function validateCSRF(request: Request): boolean {
 
   const origin = request.headers.get("origin");
   // Check X-Forwarded-Host first (set by grove-router proxy), then fall back to host
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const host =
+    request.headers.get("x-forwarded-host") || request.headers.get("host");
 
   // Allow same-origin requests
   if (origin) {
@@ -60,14 +64,21 @@ export function validateCSRF(request: Request): boolean {
         return false;
       }
 
-      // STRICT: Require exact hostname match (same-origin)
+      // STRICT: Require exact origin match (same-origin policy)
       // This prevents cross-tenant CSRF attacks where tenant1.grove.place
       // could make requests to tenant2.grove.place
       const hostUrl = host ? new URL(`https://${host}`) : null;
       const isSameHost = hostUrl && originUrl.hostname === hostUrl.hostname;
 
-      // Only allow same-host or localhost
-      if (!isLocalhost && !isSameHost) {
+      // Check port match - same-origin policy requires protocol + host + port
+      // Default ports: 443 for https, 80 for http (empty string in URL.port)
+      const originPort =
+        originUrl.port || (originUrl.protocol === "https:" ? "443" : "80");
+      const hostPort = hostUrl?.port || "443"; // host header typically omits default port
+      const isSamePort = originPort === hostPort;
+
+      // Only allow same-host AND same-port, or localhost
+      if (!isLocalhost && (!isSameHost || !isSamePort)) {
         return false;
       }
     } catch {
