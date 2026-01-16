@@ -84,7 +84,9 @@
 				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true },
 				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
-				{ name: 'Email Waitlist', description: '59 seeds, waiting to sprout', done: true }
+				{ name: 'Email Waitlist', description: '59 seeds, waiting to sprout', done: true },
+				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
+				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' }
 			]
 		},
 		thaw: {
@@ -117,7 +119,12 @@
 				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
-				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook' }
+				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook' },
+				{ name: 'Gossamer', description: 'ASCII visual effects — delicate light for your pages', done: false, icon: 'gossamer' },
+				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp' },
+				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests' },
+				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch' },
+				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial' }
 			]
 		},
 		'full-bloom': {
@@ -134,7 +141,11 @@
 				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown' },
 				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
-				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' }
+				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' },
+				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios' },
+				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, icon: 'terrarium' },
+				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave' },
+				{ name: 'Outpost', description: 'Community Minecraft — a server that waits for you', done: false, icon: 'outpost' }
 			]
 		},
 		'golden-hour': {
@@ -143,7 +154,9 @@
 			season: 'autumn' as Season,
 			description: 'The grove settles into itself. A time for refinement.',
 			features: [
-				{ name: 'Polish', description: 'Attention to every detail', done: false, major: true, icon: 'gem' },
+				{ name: 'Wander', description: 'Immersive discovery — walk through the forest', done: false, major: true, icon: 'wander' },
+				{ name: 'Pantry', description: 'Shop system — subscriptions, merch, and more', done: false, icon: 'pantry' },
+				{ name: 'Polish', description: 'Attention to every detail', done: false, icon: 'gem' },
 				{ name: 'Performance', description: 'Fast everywhere, always', done: false, icon: 'zap' },
 				{ name: 'Accessibility', description: 'Grove for everyone', done: false, icon: 'accessibility' },
 				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false, icon: 'smartphone' },
@@ -595,14 +608,24 @@
 							amber: 'text-amber-500',
 							trails: 'text-teal-500',
 							tree: 'text-emerald-500',
-							swatchbook: 'text-violet-500'
+							swatchbook: 'text-violet-500',
+							gossamer: 'text-purple-400',
+							wisp: 'text-sky-400',
+							forests: 'text-green-600',
+							porch: 'text-orange-400',
+							centennial: 'text-indigo-500'
 						}}
 						{@const borderMap = {
 							ivy: 'border-l-4 border-green-500',
 							amber: 'border-l-4 border-amber-500',
 							trails: 'border-l-4 border-teal-500',
 							tree: 'border-l-4 border-emerald-500',
-							swatchbook: 'border-l-4 border-violet-500'
+							swatchbook: 'border-l-4 border-violet-500',
+							gossamer: 'border-l-4 border-purple-400',
+							wisp: 'border-l-4 border-sky-400',
+							forests: 'border-l-4 border-green-600',
+							porch: 'border-l-4 border-orange-400',
+							centennial: 'border-l-4 border-indigo-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
@@ -706,7 +729,11 @@
 							crown: 'text-amber-500',
 							paintbrush: 'text-violet-500',
 							users: 'text-indigo-500',
-							shield: 'text-slate-500'
+							shield: 'text-slate-500',
+							curios: 'text-amber-600',
+							terrarium: 'text-lime-500',
+							weave: 'text-cyan-500',
+							outpost: 'text-purple-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
 							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
@@ -813,7 +840,9 @@
 							zap: 'text-yellow-500',
 							accessibility: 'text-blue-500',
 							smartphone: 'text-slate-600 dark:text-slate-400',
-							puzzle: 'text-purple-500'
+							puzzle: 'text-purple-500',
+							wander: 'text-teal-500',
+							pantry: 'text-orange-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
 							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
