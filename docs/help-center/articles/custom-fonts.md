@@ -67,18 +67,18 @@ For personality:
 
 **For creative/artistic blogs:** Caveat, Calistoga, or Alagard add personality.
 
-## Uploading custom fonts (Evergreen)
+## Custom font uploads (Evergreen — coming soon)
 
-Rooted Evergreens can upload their own fonts:
+When the Evergreen plan launches, you'll be able to upload your own custom fonts:
 
 1. Go to **Admin → Settings → Typography**
 2. Click **Upload Custom Font**
 3. Select your font file (WOFF2 recommended for best performance)
 4. Name your font and save
 
-Once uploaded, your custom font appears in the font selector alongside Grove's built-in options.
+Once uploaded, your custom font will appear in the font selector alongside Grove's built-in options.
 
-**File formats supported:** WOFF2 (preferred), WOFF, TTF, OTF
+**Supported formats:** WOFF2 (preferred), WOFF, TTF, OTF
 
 **Legal note:** Make sure you have the right to use any font you upload. Many fonts require licenses for web use.
 

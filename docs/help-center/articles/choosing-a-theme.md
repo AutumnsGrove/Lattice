@@ -25,36 +25,28 @@ Most bloggers choose "System" to respect reader preferences. But if your content
 
 ## Changing your theme
 
-1. Go to **Settings** → **Appearance**
-2. Select your preferred mode
-3. That's it—changes apply immediately
+1. Go to **Admin** → **Settings**
+2. In the **Typography** section, select your preferred font
+3. In the **Accent Color** section, choose or customize your accent color
+4. Click **Save Font Setting** or **Save Accent Color**
 
-No save button. No page refresh. Just pick and go.
+Changes apply immediately after saving—just refresh to see them site-wide.
 
 ## Fonts
 
-Grove includes a curated selection of fonts, chosen for readability and personality. What's available depends on your plan:
+All paid plans have access to Grove's complete collection of 10 carefully curated fonts—no upgrades needed. These fonts are chosen for readability, accessibility, and personality, and they work beautifully across devices and screen sizes.
 
-| Plan | Font Options |
-|------|--------------|
-| Seedling | 3 fonts + accent color |
-| Sapling | 10 fonts + accent color |
-| Oak | Full font library + theme customizer |
-| Evergreen | Everything + custom font uploads |
+**Available fonts include:**
+- Accessibility fonts (optimized for low vision and dyslexic readers)
+- Modern sans-serif options (clean and contemporary)
+- Monospace fonts (perfect for technical or code-heavy blogs)
+- Display fonts (add personality and character)
 
-The default fonts are designed to work well across devices and screen sizes. If you're unsure, the defaults are genuinely good choices.
+Each font is tested for readability, proper rendering across browsers, and accessibility. See the [Custom Fonts](/knowledge/help/custom-fonts) article for the complete list and details.
 
-### Available fonts include:
+If you're unsure which to pick, Lexend (the default) is designed specifically for reading fluency and works well for most blogs.
 
-- **System fonts**: Fast-loading, familiar, accessible
-- **Serif options**: For a more traditional, literary feel
-- **Sans-serif options**: Clean and modern
-- **Monospace**: For code-heavy or technical blogs
-
-Each font is tested for:
-- Readability at various sizes
-- Proper rendering across browsers
-- Accessibility (clear letterforms, good spacing)
+**Custom font uploads:** When the Evergreen plan launches, it will include the ability to upload your own custom fonts. See the [Custom Fonts](/knowledge/help/custom-fonts) article for details.
 
 ## Accent colors
 
@@ -64,20 +56,7 @@ Every plan includes accent color customization. This color appears in:
 - Highlighted elements
 - Your blog's visual identity
 
-Choose something that feels right. A warm coral, a forest green, a deep purple—whatever represents you.
-
 Choose something that reflects your personality and works well with both light and dark modes.
-
-## Theme customizer (Oak and above)
-
-Oak and Evergreen plans unlock the full theme customizer, giving you control over:
-
-- Header layout options
-- Post list styling
-- Spacing and typography scale
-- Custom color combinations beyond the accent
-
-This is for people who want more control without writing CSS. If you're happy with the defaults, you never need to touch it.
 
 ## A note on design choices
 
@@ -91,11 +70,11 @@ This constraint is a feature. It means:
 
 If you need pixel-perfect control over every element, Grove isn't trying to be that tool.
 
-## Preview before committing
+## Experimenting with customization
 
-When you change theme settings, the preview updates in real-time. What you see in the admin panel is exactly what visitors will see.
+The settings page shows you what each font looks like and lets you pick colors with a visual preview. After saving, refresh your page to see the changes take effect across your blog.
 
-Take your time. Try different combinations. There's no penalty for experimenting.
+Take your time experimenting—you can change fonts and colors whenever you like.
 
 ---
 

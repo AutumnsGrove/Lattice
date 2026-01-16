@@ -33,12 +33,12 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 
 - Up to 50 posts
 - 1 GB storage for images and media
-- 3 themes + accent color customization
+- All 10 fonts + accent color customization
 - Unlimited comments on your blog
 - RSS feed
 - Share posts to Meadow
 
-### Sapling
+### Sapling (coming soon)
 
 **$12/month**: For regular bloggers.
 
@@ -46,12 +46,12 @@ More room to grow. If you're posting frequently or building up an archive, Sapli
 
 - Up to 250 posts
 - 5 GB storage
-- 10 themes + accent color
+- All 10 fonts + accent color
 - Email forwarding (`you@grove.place`)
 - **Centennial eligible** — after 12 months, your site stays online for 100 years
 - Everything in Seedling
 
-### Oak
+### Oak (coming soon)
 
 **$25/month**: Full control.
 
@@ -59,13 +59,14 @@ Bring your own domain. Customize your theme fully. This is for bloggers who want
 
 - Unlimited posts
 - 20 GB storage
-- 10 themes + theme customizer
-- Custom domain support (BYOD)
-- Community themes
+- All 10 fonts + accent color
+- Theme customizer (coming soon)
+- Custom domain support (bring your own domain)
+- Analytics
 - Priority support
 - Everything in Sapling
 
-### Evergreen
+### Evergreen (coming soon)
 
 **$35/month**: The complete package.
 
@@ -73,9 +74,11 @@ Everything Grove offers, including a domain on us.
 
 - Unlimited posts
 - 100 GB storage
-- Custom font uploads
-- Domain registration included (up to $100/year value)
-- 8 hours of included support time
+- All 10 fonts + custom font uploads
+- Theme customizer
+- Domain included (we register it for you)
+- Analytics
+- 8 hours/month dedicated support
 - Everything in Oak
 
 ## How to think about it
