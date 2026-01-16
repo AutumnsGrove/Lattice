@@ -501,6 +501,23 @@ export const roadmapFeatureIcons = {
   qrcode: QrCode, // Community Boards (was Lightbulb)
   bookopen: BookOpen,
   home: Home,
+  // First Frost additions
+  clearing: Activity, // Clearing - status page
+  forage: SearchCode, // Forage - domain discovery
+  // First Buds additions
+  gossamer: Sparkles, // Gossamer - ASCII visual effects
+  wisp: Wind, // Wisp - writing assistant
+  forests: Trees, // Forests - community groves
+  porch: RockingChair, // Porch - support conversations
+  centennial: SquaresExclude, // Centennial - 100-year preservation
+  // Full Bloom additions
+  curios: Amphora, // Curios - cabinet of wonders
+  terrarium: PencilRuler, // Terrarium - creative canvas
+  weave: SplinePointer, // Weave - visual composition
+  outpost: Telescope, // Outpost - Minecraft server
+  // Golden Hour additions
+  wander: Earth, // Wander - immersive discovery
+  pantry: Store, // Pantry - shop system
 } as const;
 
 // ============================================================================
