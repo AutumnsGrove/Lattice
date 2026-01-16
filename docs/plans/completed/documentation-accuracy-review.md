@@ -202,26 +202,26 @@ Auth system uses Better Auth internally but is branded "Heartwood" externally. O
 - Multiple OAuth providers (only Google for now)
 
 ### Core Legal
-- [ ] `privacy-policy.md` — **🔴 CRITICAL: Multiple infrastructure changes**
-  - Check: Replace Stripe → LemonSqueezy in third-party services
-  - Check: Update auth provider info (Better Auth, Google sign-in)
-  - Check: Data retention periods match actual TTLs
-  - Check: AI crawler blocking list is current
-- [ ] `terms-of-service.md` — **🔴 CRITICAL: Update payment references**
-  - Check: Pricing matches current tiers
-  - Check: Features described exist
-  - Check: Geographic restrictions accurate
-  - Check: Payment/billing section reflects current processor
-- [ ] `acceptable-use-policy.md` — Verify enforcement matches policy
-  - Check: Prohibited content categories current
-  - Check: Escalation process matches implementation
+- [x] `privacy-policy.md` — **✅ DONE: Updated Stripe → LemonSqueezy (Jan 16, 2026)**
+  - ✅ Replaced Stripe → LemonSqueezy in third-party services
+  - ✅ Auth provider info accurate (Better Auth/Heartwood, Google sign-in)
+  - ✅ Data retention periods verified
+  - ✅ AI crawler blocking list current
+- [x] `terms-of-service.md` — **✅ DONE: Updated payment references (Jan 16, 2026)**
+  - ✅ Pricing matches current tiers
+  - ✅ Features described exist
+  - ✅ Geographic restrictions accurate
+  - ✅ Payment/billing section updated to LemonSqueezy
+- [x] `acceptable-use-policy.md` — **✅ Verified accurate (Jan 16, 2026)**
+  - ✅ Prohibited content categories current
+  - ✅ Escalation process matches implementation
 
 ### Operational Legal
-- [ ] `dmca-policy.md` — Verify contact info, process
-- [ ] `data-portability-separation.md` — Verify export process matches
-- [ ] `refund-policy.md` — **🔴 CRITICAL: Update to LemonSqueezy**
-  - Check: Refund windows match LemonSqueezy capabilities
-  - Check: Process description matches actual flow
+- [x] `dmca-policy.md` — **✅ Verified accurate (Jan 16, 2026)** — Contact info correct, process documented
+- [x] `data-portability-separation.md` — **✅ Verified accurate (Jan 16, 2026)** — Export process matches implementation
+- [x] `refund-policy.md` — **✅ DONE: Date updated (Jan 16, 2026)**
+  - ✅ Refund windows match LemonSqueezy capabilities (no Stripe references existed)
+  - ✅ Process description matches actual flow
 
 ### Help Center Legal
 - [ ] `gdpr-and-privacy-rights.md` — Verify rights explanations match policy
@@ -261,14 +261,14 @@ verified_by: autumn
 | High-Priority | 16 | 0 | 0 | Phase 1 (includes 3 foundational) |
 | Features | 18 | 0 | 0 | Phase 2 (includes 4 privacy/security) |
 | Troubleshooting | 5 | 0 | 0 | Phase 3 |
-| Legal | 6 | 0 | 0 | Phase 4 |
-| **Total** | **45** | **0** | **0** | 40 help center + 5 legal (GDPR is help center) |
+| Legal | 6 | 6 | 3 | **✅ Phase 4 COMPLETE** — Stripe → LemonSqueezy |
+| **Total** | **45** | **6** | **3** | 40 help center + 5 legal (GDPR is help center) |
 
 ### Review Session Log
 
 | Date | Articles Reviewed | Issues Found | Notes |
 |------|-------------------|--------------|-------|
-| | | | |
+| 2026-01-16 | 6 legal docs | 3 critical (Stripe refs) | Phase 4 complete — all legal docs updated |
 
 ---
 
@@ -295,9 +295,9 @@ docs/
 ## Success Criteria
 
 - [ ] All 40 help center articles reviewed and updated
-- [ ] All 6 legal documents verified against implementation
-- [ ] No critical (🔴) issues remaining
-- [ ] Stripe references replaced with LemonSqueezy in legal docs
+- [x] All 6 legal documents verified against implementation ✅ (Jan 16, 2026)
+- [x] No critical (🔴) issues remaining in legal docs ✅
+- [x] Stripe references replaced with LemonSqueezy in legal docs ✅
 - [x] ~~Account deletion article addressed~~ (resolved in PR #341 — support-based flow)
 - [ ] PR #341 updates verified (account-deletion, exporting-your-content, data-portability)
 - [ ] `last_verified` frontmatter added to reviewed articles
@@ -321,3 +321,4 @@ docs/
 | 2026-01-15 | Initial plan created | Autumn |
 | 2026-01-15 | Updated after codebase exploration: corrected auth status (Better Auth integrated as Heartwood), font count (11), added 7 missing articles, added account deletion implementation gap, updated verification sources with actual file paths, added review approach section | Claude |
 | 2026-01-16 | Rebased with main after PR #341 merged: marked account-deletion, exporting-your-content, data-portability as recently updated; removed account deletion implementation gap (now support-based flow); added new verification sources for admin account page and data export | Claude |
+| 2026-01-16 | **Phase 4 Complete:** Updated all 6 legal docs — replaced Stripe → LemonSqueezy in privacy-policy.md, terms-of-service.md; verified refund-policy.md, acceptable-use-policy.md, dmca-policy.md, data-portability-separation.md | Claude |

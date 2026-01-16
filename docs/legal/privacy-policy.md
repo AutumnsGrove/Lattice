@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 11, 2026
+**Last Updated:** January 16, 2026
 
 *Note: Privacy controls feature (Evergreen tier) is planned for future release. This policy reflects both current and planned functionality.*
 
@@ -41,7 +41,7 @@ All Grove blogs are publicly accessible by default. This means:
 Only Evergreen tier users can choose to make their blog require login. For everyone else, **publishing a post makes it publicly accessible**. You should not publish content you want to keep private unless you are on the Evergreen tier and have enabled privacy controls.
 
 **Payment Information**
-- Billing details are processed by Stripe
+- Billing details are processed by LemonSqueezy
 - We do not store your credit card numbers
 - We retain transaction records for accounting purposes
 
@@ -99,7 +99,7 @@ We use your information solely to:
 | Purpose | Data Used |
 |---------|-----------|
 | Provide the Service | Account info, content, session data |
-| Process payments | Billing info (via Stripe) |
+| Process payments | Billing info (via LemonSqueezy) |
 | Send important updates | Email address |
 | Improve the Service | Aggregated, anonymized usage data |
 | Prevent abuse | IP addresses, rate limiting data |
@@ -129,7 +129,7 @@ We share limited data with trusted service providers who help us operate Grove:
 | Provider | Purpose | Data Shared |
 |----------|---------|-------------|
 | **Cloudflare** | Infrastructure, CDN, security | IP addresses, request data |
-| **Stripe** | Payment processing | Billing information |
+| **LemonSqueezy** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
 | **Fireworks AI / Cerebras / Groq** | Content moderation | Post content (zero data retention) |

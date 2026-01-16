@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 11, 2026
+**Last Updated:** January 16, 2026
 
 ---
 
@@ -72,7 +72,7 @@ Yearly plans save 15% — pay for 10 months, get 12.
 
 ### 5.2 Billing
 - Subscriptions are billed monthly in advance
-- Payment is processed through Stripe
+- Payment is processed through LemonSqueezy
 - You authorize us to charge your payment method on a recurring basis
 - Prices may change with 30 days' notice
 
@@ -161,7 +161,7 @@ We respect intellectual property rights and respond to valid copyright complaint
 
 The Service integrates with third-party services including:
 - **Cloudflare** - Infrastructure and content delivery
-- **Stripe** - Payment processing
+- **LemonSqueezy** - Payment processing
 - **Resend** - Email delivery
 - **Google** - Authentication (via GroveAuth)
 

@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Last Updated:** January 16, 2026
 
 ---
 
