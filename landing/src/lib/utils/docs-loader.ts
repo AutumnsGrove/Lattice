@@ -159,6 +159,7 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
     category,
     lastUpdated: data.lastUpdated || new Date().toISOString().split("T")[0],
     readingTime: calculateReadingTime(markdownContent),
+    related: Array.isArray(data.related) ? data.related : undefined,
     _filePath: filePath,
   };
 }

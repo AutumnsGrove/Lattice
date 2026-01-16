@@ -1,6 +1,6 @@
 import { loadDocBySlug } from "$lib/utils/docs-loader";
 import { allDocs } from "$lib/data/knowledge-base";
-import type { DocCategory } from "$lib/types/docs";
+import type { Doc, DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
 
@@ -42,7 +42,17 @@ export const load: PageServerLoad = async ({ params }) => {
     throw error(404, "Document not found");
   }
 
+  // Resolve related articles by slug (limit to 3 for clean presentation)
+  let relatedArticles: Doc[] = [];
+  if (doc.related && doc.related.length > 0) {
+    relatedArticles = doc.related
+      .slice(0, 3)
+      .map((relatedSlug) => allDocs.find((d) => d.slug === relatedSlug))
+      .filter((d): d is Doc => d !== undefined);
+  }
+
   return {
     doc,
+    relatedArticles,
   };
 };

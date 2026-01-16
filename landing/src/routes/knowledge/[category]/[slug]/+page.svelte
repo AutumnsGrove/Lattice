@@ -5,6 +5,7 @@
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
   import TableOfContents from '$lib/components/TableOfContents.svelte';
+  import RelatedArticles from '$lib/components/RelatedArticles.svelte';
   import { kbCategoryColors, categoryLabels } from '$lib/utils/kb-colors';
   import type { DocCategory } from '$lib/types/docs';
   import '$lib/styles/content.css';
@@ -12,6 +13,7 @@
   let { data } = $props();
 
   let doc = $derived(data.doc);
+  let relatedArticles = $derived(data.relatedArticles || []);
   let category = $derived($page.params.category as DocCategory);
   let slug = $derived($page.params.slug);
   let headers = $derived(doc?.headers || []);
@@ -154,6 +156,9 @@
           <article class="content-body prose prose-slate dark:prose-invert max-w-none">
             {@html doc.html || `<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}
           </article>
+
+          <!-- Related Articles -->
+          <RelatedArticles articles={relatedArticles} />
 
           <!-- Article Footer -->
           <footer class="flex items-center justify-between mt-12">

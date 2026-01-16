@@ -54,6 +54,8 @@ export interface Doc extends Record<string, unknown> {
   specCategory?: SpecCategory;
   /** Optional help section for grouping help articles */
   section?: HelpSection;
+  /** Optional array of related article slugs */
+  related?: string[];
 }
 
 /** Header extracted from markdown for table of contents */
