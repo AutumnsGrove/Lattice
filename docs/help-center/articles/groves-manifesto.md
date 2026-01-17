@@ -1,7 +1,7 @@
 ---
 title: "Grove's Manifesto"
 slug: groves-manifesto
-category: legal
+category: philosophy
 order: 2
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
 related: [groves-vision, what-is-grove, what-is-solarpunk, centennial-status, why-i-built-the-grove]

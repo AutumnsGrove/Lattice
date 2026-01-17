@@ -237,7 +237,7 @@
 								That's how Grove works.
 							</p>
 							<p class="text-lg md:text-xl text-purple-200/90 font-serif leading-relaxed">
-								You pay for a place to write. We don't sell your attention to anyone.
+								You pay for a place to write. I don't sell your attention to anyone.
 								Your words are just words. There's the membership, and that's it.
 							</p>
 						</div>
@@ -347,7 +347,7 @@
 							the company decided to pivot, or shut down, or get acquired.
 						</p>
 						<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed">
-							Here, if you grow with us long enough, your grove earns
+							Here, if you grow with Grove long enough, your grove earns
 							<span class="text-amber-300/90">Centennial status</span>—your site stays online
 							for a hundred years. Even after you're gone, if you want it to.
 						</p>
@@ -368,12 +368,12 @@
 					<section class="relative">
 						<div class="bg-slate-900/40 backdrop-blur-sm rounded-xl p-8 border border-slate-700/30">
 							<p class="text-lg md:text-xl text-purple-100 font-serif leading-relaxed mb-4">
-								We are building slowly, with care, without venture capital pressure to enshittify.
+								I'm building this slowly, with care, without venture capital pressure to enshittify.
 							</p>
 							<p class="text-lg md:text-xl text-purple-200 font-serif leading-relaxed">
-								We are a forest, not a factory.
+								Grove is a forest, not a factory.
 								<br />
-								<span class="text-amber-300/80">We grow at the pace of roots.</span>
+								<span class="text-amber-300/80">I grow at the pace of roots.</span>
 							</p>
 						</div>
 					</section>
