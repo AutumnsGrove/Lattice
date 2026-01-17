@@ -176,6 +176,28 @@ export function toSqliteBoolean(
   return (val !== undefined ? val : defaultVal) ? 1 : 0;
 }
 
+/**
+ * Safely parse an integer from a query param string
+ * Returns the default value if parsing fails or result is NaN
+ */
+export function safeParseInt(
+  value: string | null,
+  defaultValue: number,
+  min = 0,
+  max = Number.MAX_SAFE_INTEGER,
+): number {
+  if (!value) return defaultValue;
+  const parsed = parseInt(value, 10);
+  if (isNaN(parsed)) return defaultValue;
+  return Math.max(min, Math.min(parsed, max));
+}
+
+/**
+ * Special value to explicitly clear/delete a token
+ * Send this value to remove an existing token from the database
+ */
+export const CLEAR_TOKEN_VALUE = "__CLEAR__";
+
 // =============================================================================
 // Constants
 // =============================================================================

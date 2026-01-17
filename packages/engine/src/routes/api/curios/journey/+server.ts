@@ -11,6 +11,7 @@ import type { RequestHandler } from "./$types";
 import {
   type LanguageBreakdown,
   safeJsonParse,
+  safeParseInt,
   DEFAULT_SNAPSHOT_LIMIT,
   MAX_SNAPSHOT_LIMIT,
 } from "$lib/curios/journey";
@@ -58,12 +59,14 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     throw error(404, "Journey not enabled for this site");
   }
 
-  // Parse query params
-  const limit = Math.min(
-    parseInt(url.searchParams.get("limit") ?? String(DEFAULT_SNAPSHOT_LIMIT)),
+  // Parse query params with safe defaults for invalid values
+  const limit = safeParseInt(
+    url.searchParams.get("limit"),
+    DEFAULT_SNAPSHOT_LIMIT,
+    1,
     MAX_SNAPSHOT_LIMIT,
   );
-  const offset = parseInt(url.searchParams.get("offset") ?? "0");
+  const offset = safeParseInt(url.searchParams.get("offset"), 0, 0);
 
   // Query snapshots
   const results = await db

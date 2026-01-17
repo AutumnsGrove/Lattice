@@ -10,6 +10,7 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   safeJsonParse,
+  safeParseInt,
   DEFAULT_MILESTONE_LIMIT,
   MAX_MILESTONE_LIMIT,
 } from "$lib/curios/journey";
@@ -63,12 +64,14 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     throw error(404, "Milestones are disabled for this site");
   }
 
-  // Parse query params
-  const limit = Math.min(
-    parseInt(url.searchParams.get("limit") ?? String(DEFAULT_MILESTONE_LIMIT)),
+  // Parse query params with safe defaults for invalid values
+  const limit = safeParseInt(
+    url.searchParams.get("limit"),
+    DEFAULT_MILESTONE_LIMIT,
+    1,
     MAX_MILESTONE_LIMIT,
   );
-  const offset = parseInt(url.searchParams.get("offset") ?? "0");
+  const offset = safeParseInt(url.searchParams.get("offset"), 0, 0);
 
   // Query milestones with summaries
   const results = await db

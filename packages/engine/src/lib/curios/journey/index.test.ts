@@ -2,12 +2,14 @@ import { describe, it, expect } from "vitest";
 import {
   isValidGithubRepoUrl,
   safeJsonParse,
+  safeParseInt,
   toSqliteBoolean,
   GITHUB_REPO_PATTERN,
   DEFAULT_SNAPSHOT_LIMIT,
   MAX_SNAPSHOT_LIMIT,
   DEFAULT_MILESTONE_LIMIT,
   MAX_MILESTONE_LIMIT,
+  CLEAR_TOKEN_VALUE,
 } from "./index";
 
 describe("Journey Curio utilities", () => {
@@ -163,6 +165,55 @@ describe("Journey Curio utilities", () => {
   });
 
   // ============================================================================
+  // safeParseInt Tests
+  // ============================================================================
+
+  describe("safeParseInt", () => {
+    it("parses valid integers", () => {
+      expect(safeParseInt("10", 5)).toBe(10);
+      expect(safeParseInt("0", 5)).toBe(0);
+      expect(safeParseInt("100", 5)).toBe(100);
+    });
+
+    it("returns default for null input", () => {
+      expect(safeParseInt(null, 20)).toBe(20);
+    });
+
+    it("returns default for invalid input", () => {
+      expect(safeParseInt("abc", 20)).toBe(20);
+      expect(safeParseInt("", 20)).toBe(20);
+      expect(safeParseInt("NaN", 20)).toBe(20);
+      expect(safeParseInt("12.5", 20)).toBe(12); // parseInt truncates
+    });
+
+    it("respects min constraint", () => {
+      expect(safeParseInt("-5", 10, 0)).toBe(0);
+      expect(safeParseInt("0", 10, 1)).toBe(1);
+      expect(safeParseInt("5", 10, 10)).toBe(10);
+    });
+
+    it("respects max constraint", () => {
+      expect(safeParseInt("150", 20, 0, 100)).toBe(100);
+      expect(safeParseInt("50", 20, 0, 100)).toBe(50);
+    });
+
+    it("handles min and max together", () => {
+      expect(safeParseInt("5", 10, 1, 100)).toBe(5);
+      expect(safeParseInt("-5", 10, 1, 100)).toBe(1);
+      expect(safeParseInt("150", 10, 1, 100)).toBe(100);
+    });
+
+    it("handles edge cases for pagination", () => {
+      // Simulate ?limit=abc -> should return default
+      expect(safeParseInt("abc", 20, 1, 100)).toBe(20);
+      // Simulate ?offset=-1 -> should clamp to 0
+      expect(safeParseInt("-1", 0, 0)).toBe(0);
+      // Simulate ?limit=0 -> should clamp to min of 1
+      expect(safeParseInt("0", 20, 1, 100)).toBe(1);
+    });
+  });
+
+  // ============================================================================
   // Constants Tests
   // ============================================================================
 
@@ -182,6 +233,11 @@ describe("Journey Curio utilities", () => {
     it("exports GITHUB_REPO_PATTERN as a regex", () => {
       expect(GITHUB_REPO_PATTERN).toBeInstanceOf(RegExp);
       expect(GITHUB_REPO_PATTERN.test("owner/repo")).toBe(true);
+    });
+
+    it("exports CLEAR_TOKEN_VALUE for token deletion", () => {
+      expect(CLEAR_TOKEN_VALUE).toBe("__CLEAR__");
+      expect(typeof CLEAR_TOKEN_VALUE).toBe("string");
     });
   });
 });

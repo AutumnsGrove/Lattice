@@ -13,6 +13,7 @@ import {
   DEFAULT_JOURNEY_CONFIG,
   isValidGithubRepoUrl,
   toSqliteBoolean,
+  CLEAR_TOKEN_VALUE,
 } from "$lib/curios/journey";
 
 interface ConfigRow {
@@ -165,9 +166,23 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
   try {
     // TODO: Encrypt tokens before storing (use Cloudflare Workers secrets or app-layer encryption)
-    const githubTokenValue = githubToken?.trim() || null;
-    const openrouterKeyValue = openrouterKey?.trim() || null;
+    // Handle token values:
+    // - CLEAR_TOKEN_VALUE ("__CLEAR__") explicitly deletes the token
+    // - Empty string or whitespace preserves existing token (COALESCE)
+    // - Any other value sets the new token
+    const githubTokenValue =
+      githubToken === CLEAR_TOKEN_VALUE
+        ? "" // Empty string will be stored, clearing the token
+        : githubToken?.trim() || null; // null preserves existing via COALESCE
+    const openrouterKeyValue =
+      openrouterKey === CLEAR_TOKEN_VALUE
+        ? ""
+        : openrouterKey?.trim() || null;
 
+    // Use CASE expression to handle token clearing vs preservation
+    // When value is empty string -> clear the token (set to NULL)
+    // When value is NULL -> preserve existing (COALESCE)
+    // When value is set -> use the new value
     await db
       .prepare(
         `INSERT INTO journey_curio_config (
@@ -187,8 +202,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         ON CONFLICT(tenant_id) DO UPDATE SET
           enabled = excluded.enabled,
           github_repo_url = excluded.github_repo_url,
-          github_token = COALESCE(excluded.github_token, github_token),
-          openrouter_key = COALESCE(excluded.openrouter_key, openrouter_key),
+          github_token = CASE
+            WHEN excluded.github_token = '' THEN NULL
+            ELSE COALESCE(excluded.github_token, github_token)
+          END,
+          openrouter_key = CASE
+            WHEN excluded.openrouter_key = '' THEN NULL
+            ELSE COALESCE(excluded.openrouter_key, openrouter_key)
+          END,
           openrouter_model = excluded.openrouter_model,
           snapshot_frequency = excluded.snapshot_frequency,
           show_language_chart = excluded.show_language_chart,
