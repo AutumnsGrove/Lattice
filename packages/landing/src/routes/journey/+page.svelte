@@ -74,18 +74,18 @@
 
 	// Calculate percentages for the language bar
 	// Colors from Grove seasonal palettes:
-	// - Svelte: autumnReds.crimson (deep maple red)
+	// - Svelte: autumn vermillion (warm orange-red)
 	// - TypeScript: accents.water.deep (water blue)
-	// - JavaScript: winter.glacier (frosty ice)
+	// - JavaScript: autumn amber (warm yellow)
 	// - CSS: cherryBlossoms.light (blossom pink)
 	const languageBreakdown = $derived(() => {
 		if (!data.latest) return [];
 		const total = data.latest.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#be123c]', pct: Math.round((data.latest.svelteLines / total) * 100) },
+			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#e54d2e]', pct: Math.round((data.latest.svelteLines / total) * 100) },
 			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-[#0284c7]', pct: Math.round((data.latest.tsLines / total) * 100) },
-			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-[#94a3b8]', pct: Math.round((data.latest.jsLines / total) * 100) },
+			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-[#f59e0b]', pct: Math.round((data.latest.jsLines / total) * 100) },
 			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-[#f472b6]', pct: Math.round((data.latest.cssLines / total) * 100) }
 		];
 	});
@@ -108,9 +108,9 @@
 		const total = snapshot.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#be123c]' },
+			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#e54d2e]' },
 			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-[#0284c7]' },
-			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-[#94a3b8]' },
+			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-[#f59e0b]' },
 			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-[#f472b6]' }
 		];
 	}
@@ -475,7 +475,7 @@
 					<!-- Summary stats -->
 					<div class="flex justify-between items-center mb-4 md:mb-6">
 						<div class="text-center">
-							<div class="text-xl md:text-2xl font-mono text-[#94a3b8]">{tsProgression()?.startPct}%</div>
+							<div class="text-xl md:text-2xl font-mono text-[#f59e0b]">{tsProgression()?.startPct}%</div>
 							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
 						</div>
 						<div class="flex-1 mx-3 md:mx-6 flex items-center gap-1.5 md:gap-2">
@@ -504,7 +504,7 @@
 										title="TypeScript: {tsPct}%"
 									></div>
 									<div
-										class="h-full bg-[#94a3b8] transition-all duration-500"
+										class="h-full bg-[#f59e0b] transition-all duration-500"
 										style="width: {100 - tsPct}%"
 										title="JavaScript: {100 - tsPct}%"
 									></div>
@@ -523,7 +523,7 @@
 							<span class="text-xs font-sans text-foreground-muted">TypeScript</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 rounded-full bg-[#94a3b8]"></div>
+							<div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div>
 							<span class="text-xs font-sans text-foreground-muted">JavaScript</span>
 						</div>
 					</div>
