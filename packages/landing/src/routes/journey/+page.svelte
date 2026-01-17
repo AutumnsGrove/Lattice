@@ -15,7 +15,7 @@
 		{ id: 'milestones', text: 'Milestones' },
 		{ id: 'documentation', text: 'Documentation' },
 		{ id: 'typescript-migration', text: 'TypeScript Migration' },
-		{ id: 'total-size', text: 'Total Project Size' }
+		{ id: 'package-size', text: 'Package Size' }
 	];
 
 	function scrollToSection(id: string) {
@@ -64,6 +64,13 @@
 
 	function formatNumber(num: number): string {
 		return num.toLocaleString();
+	}
+
+	function formatBytes(bytes: number): string {
+		if (bytes === 0) return '0 B';
+		if (bytes < 1024) return `${bytes} B`;
+		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+		return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 	}
 
 	function getGrowthIcon(value: number): string {
@@ -531,16 +538,16 @@
 			</section>
 			{/if}
 
-			<!-- Total Project Size -->
-			<section id="total-size" class="mb-16 scroll-mt-24">
+			<!-- Package Size -->
+			<section id="package-size" class="mb-16 scroll-mt-24">
 				<div class="card p-8 text-center bg-accent border-accent">
-					<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">Total Project Size</div>
+					<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">NPM Package Size</div>
 					<div class="text-4xl md:text-5xl font-serif text-accent-muted mb-2">
-						~{formatNumber(data.latest.estimatedTokens)}
+						{formatBytes(data.latest.npmUnpackedSize)}
 					</div>
-					<div class="text-foreground-muted font-sans">estimated tokens</div>
+					<div class="text-foreground-muted font-sans">unpacked size</div>
 					<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-						That's roughly {Math.round(data.latest.estimatedTokens / 100000) * 100}k tokens — enough context for an AI to understand the entire codebase.
+						That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with Lattice.
 					</p>
 				</div>
 			</section>

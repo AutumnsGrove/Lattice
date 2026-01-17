@@ -1,12 +1,12 @@
 import historyData from "../../../static/data/history.csv?raw";
 
 /**
- * CSV Schema (17 columns):
+ * CSV Schema (18 columns):
  * timestamp, label, git_hash, total_code_lines, svelte_lines, ts_lines,
  * js_lines, css_lines, doc_words, doc_lines, total_files, directories,
- * estimated_tokens, commits, test_files, test_lines, bundle_size_kb
+ * estimated_tokens, commits, test_files, test_lines, bundle_size_kb, npm_unpacked_size
  */
-const EXPECTED_COLUMNS = 17;
+const EXPECTED_COLUMNS = 18;
 
 interface VersionSummary {
   version: string;
@@ -46,6 +46,7 @@ interface SnapshotData {
   testFiles: number;
   testLines: number;
   bundleSizeKb: number;
+  npmUnpackedSize: number;
   date: string;
 }
 
@@ -129,6 +130,7 @@ function parseCSV(csv: string): SnapshotData[] {
       testFiles: safeParseInt(values[14]),
       testLines: safeParseInt(values[15]),
       bundleSizeKb: safeParseInt(values[16]),
+      npmUnpackedSize: safeParseInt(values[17]),
       date: parseTimestampToDate(values[0]),
     });
   }
