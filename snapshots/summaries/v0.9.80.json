@@ -1,0 +1,34 @@
+{
+  "version": "v0.9.80",
+  "date": "2026-01-16 20:07:50 -0500",
+  "commitHash": "88d7901e",
+  "summary": "Version v0.9.80 includes 6 new features, 7 bug fixes, and 0 refactoring changes.\n",
+  "stats": {
+    "totalCommits": 46,
+    "features": 6,
+    "fixes": 7,
+    "refactoring": 0,
+    "docs": 18,
+    "tests": 6,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "complete Phase 2 security remediation",
+  "add combined seasonal logo with all 5 variants",
+  "add Why I Built the Grove philosophy article",
+  "add related content section to knowledge base articles (#360)",
+  "add floating table of contents for navigation",
+  "implement seasonal color palettes for knowledge base sections (#356)"
+],
+    "fixes": [
+  "update docs-loader path after packages/ move",
+  "correct GlassCard import path and flaky test timing",
+  "replace browser confirm() with GlassConfirmDialog + add DB helpers",
+  "improve mobile responsiveness for chart sections (#359)",
+  "replace broken /support links with /contact (#357)",
+  "use Grove green and default vine background for help center (#355)",
+  "remove duplicate Contact button from main navigation (#354)"
+]
+  }
+}
