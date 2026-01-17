@@ -23,8 +23,9 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Get script directory and project root
+# Script is at scripts/generate/generate-release-summary.sh, so go up two directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 SUMMARIES_DIR="$PROJECT_ROOT/snapshots/summaries"
 
 # Create summaries directory if it doesn't exist
