@@ -122,17 +122,17 @@
 		return Math.round((snapshot.tsLines / scriptLines) * 100);
 	}
 
-	// Get max doc words for chart scaling
-	const maxDocWords = $derived(
+	// Get max doc lines for chart scaling
+	const maxDocLines = $derived(
 		data.snapshots.length > 0
-			? Math.max(...data.snapshots.map((s: any) => s.docWords))
+			? Math.max(...data.snapshots.map((s: any) => s.docLines))
 			: 0
 	);
 
-	// Calculate code-to-docs ratio (lines of code per 100 words of docs)
+	// Calculate code-to-docs ratio (lines of code per line of docs)
 	function getCodeToDocsRatio(snapshot: any): number {
-		if (snapshot.docWords === 0) return 0;
-		return Math.round((snapshot.totalCodeLines / snapshot.docWords) * 100) / 100;
+		if (snapshot.docLines === 0) return 0;
+		return Math.round((snapshot.totalCodeLines / snapshot.docLines) * 100) / 100;
 	}
 
 	// Get first and latest TS percentages for migration stats
@@ -197,12 +197,12 @@
 
 					<div class="card p-6 text-center">
 						<div class="text-3xl md:text-4xl font-serif text-accent-muted mb-1">
-							{formatNumber(data.latest.docWords)}
+							{formatNumber(data.latest.docLines)}
 						</div>
-						<div class="text-sm text-foreground-muted font-sans">Words of Docs</div>
+						<div class="text-sm text-foreground-muted font-sans">Lines of Docs</div>
 						{#if data.growth}
 							<div class="text-xs text-foreground-faint mt-2 font-sans">
-								~{Math.round(data.latest.docWords / 500)} pages
+								~{Math.round(data.latest.docLines / 40)} pages
 							</div>
 						{/if}
 					</div>
@@ -417,11 +417,11 @@
 							<div class="text-3xl font-serif text-accent-muted mb-1">
 								{getCodeToDocsRatio(data.latest)}
 							</div>
-							<div class="text-sm text-foreground-muted font-sans">lines of code per doc word</div>
+							<div class="text-sm text-foreground-muted font-sans">lines of code per doc line</div>
 						</div>
 						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
-							<span>{formatNumber(data.latest.totalCodeLines)} lines</span>
-							<span>{formatNumber(data.latest.docWords)} words</span>
+							<span>{formatNumber(data.latest.totalCodeLines)} code</span>
+							<span>{formatNumber(data.latest.docLines)} docs</span>
 						</div>
 					</div>
 
@@ -429,13 +429,13 @@
 					<div class="card p-6">
 						<div class="text-center mb-4">
 							<div class="text-3xl font-serif text-accent-muted mb-1">
-								~{Math.round(data.latest.docWords / 500)}
+								~{Math.round(data.latest.docLines / 40)}
 							</div>
 							<div class="text-sm text-foreground-muted font-sans">pages of documentation</div>
 						</div>
 						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
 							<span>{formatNumber(data.latest.docLines)} lines</span>
-							<span>~500 words/page</span>
+							<span>~40 lines/page</span>
 						</div>
 					</div>
 				</div>
@@ -445,7 +445,7 @@
 					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Documentation Growth</h3>
 					<div class="space-y-1.5 md:space-y-2">
 						{#each data.snapshots as snapshot, i}
-							{@const barWidth = (snapshot.docWords / maxDocWords) * 100}
+							{@const barWidth = (snapshot.docLines / maxDocLines) * 100}
 							<div class="flex items-center gap-2 md:gap-3">
 								<div class="w-12 md:w-16 text-right shrink-0">
 									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
@@ -457,7 +457,7 @@
 									></div>
 								</div>
 								<div class="w-12 md:w-16 text-left shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docWords)}</span>
+									<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docLines)}</span>
 								</div>
 							</div>
 						{/each}

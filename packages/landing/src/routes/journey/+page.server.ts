@@ -180,7 +180,7 @@ export function load() {
     snapshots.length > 1
       ? {
           codeLines: latest.totalCodeLines - first.totalCodeLines,
-          docWords: latest.docWords - first.docWords,
+          docLines: latest.docLines - first.docLines,
           files: latest.totalFiles - first.totalFiles,
           commits: latest.commits - first.commits,
         }
