@@ -66,6 +66,22 @@
 	type PhaseKey = typeof PHASE_ORDER[number];
 
 	/**
+	 * Feature type for roadmap items.
+	 * - internal: Infrastructure/tooling features (displayed with reduced opacity)
+	 * - major: Highlighted features with special border styling
+	 * - dream: Future aspirational features in the Midnight Bloom phase
+	 */
+	type Feature = {
+		name: string;
+		description: string;
+		done: boolean;
+		icon?: string;
+		internal?: boolean;
+		major?: boolean;
+		dream?: boolean;
+	};
+
+	/**
 	 * HOWTO: Update this constant as Grove reaches new phases.
 	 * This controls the "You are here" indicator and phase status styling.
 	 *
@@ -74,7 +90,13 @@
 	const currentPhase: PhaseKey = 'thaw';
 
 	// Feature definitions for each phase
-	const phases = {
+	const phases: Record<PhaseKey, {
+		title: string;
+		subtitle: string;
+		season: Season;
+		description: string;
+		features: Feature[];
+	}> = {
 		'first-frost': {
 			title: 'First Frost',
 			subtitle: 'The quiet before dawn',

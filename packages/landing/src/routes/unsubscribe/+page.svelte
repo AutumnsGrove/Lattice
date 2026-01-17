@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
@@ -8,8 +9,8 @@
 	let { data, form } = $props();
 
 	// Initialize email from URL param (intentionally captures initial value - form field should be editable)
-	const initialEmail = data.email || '';
-	let email = $state(initialEmail);
+	// Using untrack to explicitly capture the initial value without reactivity
+	let email = $state(untrack(() => data.email || ''));
 	let unsubscribeType: 'onboarding' | 'all' = $state('onboarding');
 	let submitting = $state(false);
 </script>
