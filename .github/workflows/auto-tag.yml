@@ -105,25 +105,65 @@ jobs:
           # Generate summary (will use previous tag automatically)
           ./scripts/generate/generate-release-summary.sh "$TAG" || echo "Warning: Summary generation failed, continuing..."
 
-      - name: Setup Node.js for NPM size fetch
+      - name: Setup pnpm
+        if: steps.snapshot.outcome == 'success'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
         if: steps.snapshot.outcome == 'success'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Fetch NPM package sizes
+      - name: Calculate package size
         if: steps.snapshot.outcome == 'success'
         run: |
-          echo "Fetching NPM package sizes from registry..."
+          TAG="${{ steps.snapshot.outputs.tag_name }}"
+          echo "Calculating package size for: $TAG"
 
-          # Fetch fresh NPM metadata (remove any cached version)
-          rm -f scripts/journey/npm-metadata.json
-          curl -s "https://registry.npmjs.org/@autumnsgrove/groveengine" > scripts/journey/npm-metadata.json
+          # Install dependencies and build the package
+          pnpm install
+          cd packages/engine
+          pnpm run package
 
-          # Run the backfill script to update history.csv with NPM sizes
-          npx tsx scripts/journey/backfill-npm-sizes.ts
+          # Create tarball and measure its size
+          TARBALL=$(pnpm pack 2>/dev/null | tail -1)
+          TARBALL_SIZE=$(stat -c%s "$TARBALL" 2>/dev/null || stat -f%z "$TARBALL")
 
-          echo "NPM sizes updated in snapshots/history.csv"
+          # Get unpacked size by extracting and measuring
+          mkdir -p /tmp/pkg-measure
+          tar -xzf "$TARBALL" -C /tmp/pkg-measure
+          UNPACKED_SIZE=$(du -sb /tmp/pkg-measure/package | cut -f1)
+
+          echo "Tarball: $TARBALL"
+          echo "Compressed size: $TARBALL_SIZE bytes ($(numfmt --to=iec $TARBALL_SIZE 2>/dev/null || echo "$TARBALL_SIZE"))"
+          echo "Unpacked size: $UNPACKED_SIZE bytes ($(numfmt --to=iec $UNPACKED_SIZE 2>/dev/null || echo "$UNPACKED_SIZE"))"
+
+          # Update history.csv with the package size for this version
+          cd ../..
+          CSV_FILE="snapshots/history.csv"
+
+          # Check if npm_unpacked_size column exists, add if not
+          HEADER=$(head -1 "$CSV_FILE")
+          if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
+            # Add column header
+            sed -i "1s/$/,npm_unpacked_size/" "$CSV_FILE"
+            # Add 0 to all existing rows
+            sed -i "2,\$s/$/,0/" "$CSV_FILE"
+          fi
+
+          # Update the size for this specific version
+          sed -i "s/^\\([^,]*,$TAG,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*\\),.*$/\\1,$UNPACKED_SIZE/" "$CSV_FILE"
+
+          # Verify the update
+          grep "$TAG" "$CSV_FILE"
+          echo "Package size updated in $CSV_FILE"
+
+          # Cleanup
+          rm -f "$TARBALL"
+          rm -rf /tmp/pkg-measure
 
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
