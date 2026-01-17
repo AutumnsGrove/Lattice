@@ -12,8 +12,8 @@
 		{ id: 'current-growth', text: 'Current Growth' },
 		{ id: 'code-composition', text: 'Code Composition' },
 		{ id: 'growth-over-time', text: 'Growth Over Time' },
-		{ id: 'milestones', text: 'Milestones' },
 		{ id: 'documentation', text: 'Documentation' },
+		{ id: 'milestones', text: 'Milestones' },
 		{ id: 'typescript-migration', text: 'TypeScript Migration' },
 		{ id: 'total-size', text: 'Total Project Size' }
 	];
@@ -296,6 +296,67 @@
 				</section>
 			{/if}
 
+			<!-- Documentation -->
+			{#if data.snapshots.length > 1}
+			<section id="documentation" class="mb-16 scroll-mt-24">
+				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Documentation</h2>
+
+				<div class="grid md:grid-cols-2 gap-6">
+					<!-- Code to Docs Ratio Card -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								{getCodeToDocsRatio(data.latest)}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">lines of code per doc line</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>{formatNumber(data.latest.totalCodeLines)} code</span>
+							<span>{formatNumber(data.latest.docLines)} docs</span>
+						</div>
+					</div>
+
+					<!-- Doc Pages Estimate -->
+					<div class="card p-6">
+						<div class="text-center mb-4">
+							<div class="text-3xl font-serif text-accent-muted mb-1">
+								~{Math.round(data.latest.docLines / 40)}
+							</div>
+							<div class="text-sm text-foreground-muted font-sans">pages of documentation</div>
+						</div>
+						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
+							<span>{formatNumber(data.latest.docLines)} lines</span>
+							<span>~40 lines/page</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Docs growth over time -->
+				<div class="card p-4 md:p-6 mt-6">
+					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Documentation Growth</h3>
+					<div class="space-y-1.5 md:space-y-2">
+						{#each data.snapshots as snapshot, i}
+							{@const barWidth = (snapshot.docLines / maxDocLines) * 100}
+							<div class="flex items-center gap-2 md:gap-3">
+								<div class="w-12 md:w-16 text-right shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
+								</div>
+								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden min-w-0">
+									<div
+										class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+										style="width: {barWidth}%"
+									></div>
+								</div>
+								<div class="w-12 md:w-16 text-left shrink-0">
+									<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docLines)}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</section>
+			{/if}
+
 			<!-- Milestones Timeline -->
 			{#if milestones.length > 0}
 			<section id="milestones" class="mb-16 scroll-mt-24">
@@ -397,67 +458,6 @@
 											<span>{formatNumber(snapshot.commits)} commits</span>
 										</div>
 									</div>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			</section>
-			{/if}
-
-			<!-- Documentation -->
-			{#if data.snapshots.length > 1}
-			<section id="documentation" class="mb-16 scroll-mt-24">
-				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Documentation</h2>
-
-				<div class="grid md:grid-cols-2 gap-6">
-					<!-- Code to Docs Ratio Card -->
-					<div class="card p-6">
-						<div class="text-center mb-4">
-							<div class="text-3xl font-serif text-accent-muted mb-1">
-								{getCodeToDocsRatio(data.latest)}
-							</div>
-							<div class="text-sm text-foreground-muted font-sans">lines of code per doc line</div>
-						</div>
-						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
-							<span>{formatNumber(data.latest.totalCodeLines)} code</span>
-							<span>{formatNumber(data.latest.docLines)} docs</span>
-						</div>
-					</div>
-
-					<!-- Doc Pages Estimate -->
-					<div class="card p-6">
-						<div class="text-center mb-4">
-							<div class="text-3xl font-serif text-accent-muted mb-1">
-								~{Math.round(data.latest.docLines / 40)}
-							</div>
-							<div class="text-sm text-foreground-muted font-sans">pages of documentation</div>
-						</div>
-						<div class="flex justify-between text-xs text-foreground-faint font-sans pt-4 border-t border-default">
-							<span>{formatNumber(data.latest.docLines)} lines</span>
-							<span>~40 lines/page</span>
-						</div>
-					</div>
-				</div>
-
-				<!-- Docs growth over time -->
-				<div class="card p-4 md:p-6 mt-6">
-					<h3 class="text-xs font-sans text-foreground-faint uppercase tracking-wide mb-4">Documentation Growth</h3>
-					<div class="space-y-1.5 md:space-y-2">
-						{#each data.snapshots as snapshot, i}
-							{@const barWidth = (snapshot.docLines / maxDocLines) * 100}
-							<div class="flex items-center gap-2 md:gap-3">
-								<div class="w-12 md:w-16 text-right shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
-								</div>
-								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden min-w-0">
-									<div
-										class="h-full bg-emerald-500 rounded-full transition-all duration-500"
-										style="width: {barWidth}%"
-									></div>
-								</div>
-								<div class="w-12 md:w-16 text-left shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-foreground-muted">{formatNumber(snapshot.docLines)}</span>
 								</div>
 							</div>
 						{/each}
