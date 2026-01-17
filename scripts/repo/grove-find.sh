@@ -90,15 +90,15 @@ _grove_check_deps() {
 # Run dependency check on load
 _grove_check_deps || true
 
-# Get the Grove root directory (where this script lives)
+# Get the Grove root directory (script is in scripts/repo/, so go up 2 levels)
 # Works in both bash and zsh
 if [ -n "${BASH_SOURCE[0]:-}" ]; then
-    GROVE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    GROVE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 elif [ -n "${(%):-%x}" ]; then
-    GROVE_ROOT="$(cd "$(dirname "${(%):-%x}")/.." && pwd)"
+    GROVE_ROOT="$(cd "$(dirname "${(%):-%x}")/../.." && pwd)"
 else
     # Fallback: assume we're in the GroveEngine directory
-    GROVE_ROOT="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)" || GROVE_ROOT="$HOME/Documents/Projects/GroveEngine"
+    GROVE_ROOT="$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)" || GROVE_ROOT="$HOME/Documents/Projects/GroveEngine"
 fi
 
 # =============================================================================
