@@ -1,6 +1,13 @@
 ## Summary
 
-<!-- Brief description of what this PR does -->
+**REQUIRED: Write 2-4 sentences describing WHAT this PR does and WHY.**
+
+## Changes
+
+**REQUIRED: List the specific changes made in this PR:**
+-
+-
+-
 
 ## Type of Change
 
@@ -13,36 +20,48 @@
 
 ## Testing
 
-<!-- How was this tested? -->
+**Describe how this was tested:**
 
 - [ ] Unit tests added/updated
 - [ ] Manual testing performed
 - [ ] N/A (documentation only)
 
-## Documentation Checklist
-
-<!-- Check all that apply -->
+## Documentation
 
 - [ ] **No docs needed** — This change doesn't affect user-facing features
 - [ ] **Docs updated** — Help center articles updated to reflect this change
-- [ ] **Docs flagged** — This needs doc updates but they're tracked elsewhere (link issue/TODO)
-
-### If docs are affected:
-
-**Which articles need updates?**
-<!-- List specific files in docs/help-center/articles/ or docs/legal/ -->
-
-**What changed?**
-<!-- Brief description of what documentation needs to say -->
+- [ ] **Docs flagged** — This needs doc updates but they're tracked elsewhere
 
 ## Checklist
 
 - [ ] My code follows the project's style guidelines
 - [ ] I have performed a self-review of my code
-- [ ] I have commented my code where necessary
 - [ ] My changes generate no new warnings
-- [ ] Any dependent changes have been merged and published
 
 ---
 
-*Remember: Documentation accuracy is a feature. If this PR changes behavior, update the docs.*
+<!--
+## For AI Agents
+
+When creating a PR, you MUST:
+
+1. **Write a descriptive PR title** using conventional commits format:
+   - `feat: Add dark mode toggle to settings`
+   - `fix: Correct timezone handling in scheduler`
+   - `refactor: Extract validation into shared utility`
+
+2. **Fill in the Summary** with actual content (not placeholders):
+   - What problem does this solve?
+   - What was the approach?
+   - Any important context?
+
+3. **List specific Changes** as bullet points:
+   - Be specific: "Add `validateEmail()` function to auth module"
+   - Not vague: "Update files"
+
+4. **Check the appropriate Type of Change** checkbox
+
+5. **Describe Testing** - what did you do to verify this works?
+
+DO NOT leave HTML comments as placeholders. Replace ALL template text with actual content.
+-->

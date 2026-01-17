@@ -157,6 +157,8 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 
 ### Git Workflow Essentials
 
+> **⚠️ IMPORTANT:** Before making commits or PRs, invoke the `git-workflows` skill for full guidance.
+
 **After completing major changes, you MUST commit your work.**
 
 **Conventional Commits Format:**
@@ -176,6 +178,51 @@ docs: Update README
 ```
 
 **For complete details:** See `AgentUsage/git_guide.md`
+
+### Pull Request Requirements
+
+**When creating PRs, you MUST write descriptive titles and descriptions.**
+
+**PR Title Format:** Use conventional commits format
+```
+feat: Add dark mode toggle to settings
+fix: Correct timezone handling in scheduler
+refactor: Extract validation into shared utility
+```
+
+**PR Description Requirements:**
+1. **Summary** — 2-4 sentences explaining WHAT and WHY (not placeholders)
+2. **Changes** — Specific bullet points of what changed
+3. **Type of Change** — Check the appropriate checkbox
+4. **Testing** — Describe how you verified it works
+
+**Example good PR description:**
+```markdown
+## Summary
+Adds a dark mode toggle to the settings page, allowing users to switch
+between light and dark themes. This addresses user feedback about eye
+strain during nighttime use.
+
+## Changes
+- Add `ThemeToggle` component to settings page
+- Create `useTheme` hook for theme state management
+- Update CSS variables for dark mode colors
+- Add theme preference to user settings storage
+
+## Type of Change
+- [x] New feature
+
+## Testing
+- Manually tested toggle in Chrome and Firefox
+- Verified theme persists across page reloads
+- Checked accessibility contrast ratios in both modes
+```
+
+**DO NOT:**
+- Leave template placeholders like `<!-- Brief description -->`
+- Use vague descriptions like "Update files" or "Fix things"
+- Skip the summary section
+- Create PRs with empty descriptions
 
 ---
 
@@ -290,6 +337,7 @@ cat packages/engine/package.json | grep -A2 '"\./'
 
 ### Version Control
 - **Before making a git commit** → Use skill: `git-workflows`
+- **Before creating a pull request** → Use skill: `git-workflows`
 - **When initializing a new repo** → Use skill: `git-workflows`
 - **For git workflow and branching** → Use skill: `git-workflows`
 - **When setting up git hooks** → Use skill: `git-hooks`
@@ -505,5 +553,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-15*
+*Last updated: 2026-01-17*
 *Model: Claude Opus 4.5*
