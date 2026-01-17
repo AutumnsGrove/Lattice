@@ -4,7 +4,7 @@ slug: groves-manifesto
 category: philosophy
 order: 2
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
-related: [groves-vision, what-is-grove, what-is-solarpunk, centennial-status, why-i-built-the-grove]
+related: [groves-vision, what-is-grove, what-is-solarpunk, centennial-status, why-i-built-the-grove, why-grove-is-different]
 last_verified: 2026-01-17
 verified_by: claude
 ---
@@ -24,6 +24,8 @@ Grove is everything that isn't.
 Dopamine slot machines designed to exploit how our minds work. Algorithms that show you 40,000 strangers instead of your friends. Reels, shorts, infinite scroll—engineered to hijack attention, especially neurodivergent attention.
 
 Platforms that built their empires on our words, then loosened protections for people like us the moment it became profitable.
+
+I think that's disgusting. *[Here's how Grove is different.](/knowledge/help/why-grove-is-different)*
 
 ### The harvesting
 
