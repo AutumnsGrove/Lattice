@@ -73,15 +73,20 @@
 	}
 
 	// Calculate percentages for the language bar
+	// Colors from Grove seasonal palettes:
+	// - Svelte: autumnReds.crimson (deep maple red)
+	// - TypeScript: accents.water.deep (water blue)
+	// - JavaScript: winter.glacier (frosty ice)
+	// - CSS: cherryBlossoms.light (blossom pink)
 	const languageBreakdown = $derived(() => {
 		if (!data.latest) return [];
 		const total = data.latest.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-orange-500', pct: Math.round((data.latest.svelteLines / total) * 100) },
-			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-blue-500', pct: Math.round((data.latest.tsLines / total) * 100) },
-			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-yellow-500', pct: Math.round((data.latest.jsLines / total) * 100) },
-			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-pink-500', pct: Math.round((data.latest.cssLines / total) * 100) }
+			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#be123c]', pct: Math.round((data.latest.svelteLines / total) * 100) },
+			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-[#0284c7]', pct: Math.round((data.latest.tsLines / total) * 100) },
+			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-[#94a3b8]', pct: Math.round((data.latest.jsLines / total) * 100) },
+			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-[#f472b6]', pct: Math.round((data.latest.cssLines / total) * 100) }
 		];
 	});
 
@@ -98,14 +103,15 @@
 	);
 
 	// Calculate language breakdown for a given snapshot
+	// Uses same Grove palette colors as languageBreakdown
 	function getSnapshotBreakdown(snapshot: any) {
 		const total = snapshot.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-orange-500' },
-			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-blue-500' },
-			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-yellow-500' },
-			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-pink-500' }
+			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#be123c]' },
+			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-[#0284c7]' },
+			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-[#94a3b8]' },
+			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-[#f472b6]' }
 		];
 	}
 
@@ -469,7 +475,7 @@
 					<!-- Summary stats -->
 					<div class="flex justify-between items-center mb-4 md:mb-6">
 						<div class="text-center">
-							<div class="text-xl md:text-2xl font-mono text-yellow-500">{tsProgression()?.startPct}%</div>
+							<div class="text-xl md:text-2xl font-mono text-[#94a3b8]">{tsProgression()?.startPct}%</div>
 							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
 						</div>
 						<div class="flex-1 mx-3 md:mx-6 flex items-center gap-1.5 md:gap-2">
@@ -478,7 +484,7 @@
 							<div class="flex-1 h-px bg-divider"></div>
 						</div>
 						<div class="text-center">
-							<div class="text-xl md:text-2xl font-mono text-blue-500">{tsProgression()?.currentPct}%</div>
+							<div class="text-xl md:text-2xl font-mono text-[#0284c7]">{tsProgression()?.currentPct}%</div>
 							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.currentLabel}</div>
 						</div>
 					</div>
@@ -493,18 +499,18 @@
 								</div>
 								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden flex min-w-0">
 									<div
-										class="h-full bg-blue-500 transition-all duration-500"
+										class="h-full bg-[#0284c7] transition-all duration-500"
 										style="width: {tsPct}%"
 										title="TypeScript: {tsPct}%"
 									></div>
 									<div
-										class="h-full bg-yellow-500 transition-all duration-500"
+										class="h-full bg-[#94a3b8] transition-all duration-500"
 										style="width: {100 - tsPct}%"
 										title="JavaScript: {100 - tsPct}%"
 									></div>
 								</div>
 								<div class="w-9 md:w-12 text-left shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-blue-400">{tsPct}%</span>
+									<span class="text-[10px] md:text-xs font-mono text-[#0284c7]">{tsPct}%</span>
 								</div>
 							</div>
 						{/each}
@@ -513,11 +519,11 @@
 					<!-- Legend -->
 					<div class="flex justify-center gap-6 mt-4 pt-4 border-t border-default">
 						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 rounded-full bg-blue-500"></div>
+							<div class="w-3 h-3 rounded-full bg-[#0284c7]"></div>
 							<span class="text-xs font-sans text-foreground-muted">TypeScript</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+							<div class="w-3 h-3 rounded-full bg-[#94a3b8]"></div>
 							<span class="text-xs font-sans text-foreground-muted">JavaScript</span>
 						</div>
 					</div>
