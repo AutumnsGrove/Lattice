@@ -19,6 +19,7 @@ Here's what each Grove plan includes—and what happens when you approach your l
 | **Posts** | 50 | 250 | Unlimited | Unlimited |
 | **Storage** | 1 GB | 5 GB | 20 GB | 100 GB |
 | **Fonts** | All 10 | All 10 | All 10 | All 10 + custom uploads |
+| **Themes** | 3 curated | All 10 | All 10 + customizer | All 10 + customizer |
 | **Custom domain** | — | — | BYOD | Included |
 | **Email** | — | Forwarding | Full mailbox | Full mailbox |
 | **Centennial** | — | ✓ | ✓ | ✓ |
@@ -83,6 +84,7 @@ Regardless of which plan you choose:
 The essentials for starting a blog:
 - 50 posts, 1 GB storage
 - All 10 fonts plus accent color customization
+- 3 curated themes (coming in Foliage)
 - Community support via help documentation
 
 Good for: Trying blogging out, personal journals, occasional posting.
@@ -92,6 +94,7 @@ Good for: Trying blogging out, personal journals, occasional posting.
 Room to grow:
 - 250 posts, 5 GB storage
 - All 10 fonts plus accent color
+- All 10 curated themes (coming in Foliage Full Bloom)
 - Email forwarding to `you@grove.place`
 - Email support
 - Centennial eligible
@@ -103,6 +106,7 @@ Good for: Regular bloggers, building an archive, hobbyist writers.
 Full control:
 - Unlimited posts, 20 GB storage
 - All 10 fonts plus accent color
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Bring your own domain
 - Full @grove.place email (send and receive)
 - Analytics
@@ -116,6 +120,7 @@ Good for: Serious bloggers, professionals, anyone who wants a custom domain.
 Everything:
 - Unlimited posts, 100 GB storage
 - All 10 fonts plus custom font uploads
+- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
 - Domain registration included (we find and register it for you)
 - 8 hours/month dedicated support time
 - Analytics
