@@ -37,8 +37,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Get script directory and project root
+# Script is at scripts/repo/repo-snapshot.sh, so go up two directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 SNAPSHOTS_DIR="$PROJECT_ROOT/snapshots"
 
 # Create snapshots directory if it doesn't exist

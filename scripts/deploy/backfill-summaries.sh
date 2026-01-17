@@ -16,8 +16,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Get script directory and project root
+# Script is at scripts/deploy/backfill-summaries.sh, so go up two directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CSV_FILE="$PROJECT_ROOT/snapshots/history.csv"
 
 echo -e "${CYAN}🌲 Backfilling Release Summaries${NC}"
