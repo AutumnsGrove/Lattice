@@ -165,7 +165,10 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
   };
 }
 
-// Categories that should recursively include subdirectories
+// Categories that should recursively include subdirectories.
+// - specs: includes completed specs in specs/completed/
+// - Other categories (philosophy, design, etc.) may contain internal
+//   scratch/draft folders that shouldn't be exposed publicly.
 const RECURSIVE_CATEGORIES: DocCategory[] = ["specs"];
 
 function loadDocsFromDir(
@@ -181,7 +184,15 @@ function loadDocsFromDir(
 
     for (const item of items) {
       const fullPath = join(currentPath, item);
-      const stat = statSync(fullPath);
+
+      // Gracefully handle broken symlinks or inaccessible files
+      let stat;
+      try {
+        stat = statSync(fullPath);
+      } catch {
+        console.warn(`Skipping inaccessible file: ${fullPath}`);
+        continue;
+      }
 
       // Only recurse into subdirectories for certain categories (e.g., specs/completed)
       // Other categories like philosophy have internal scratch folders that shouldn't be public
