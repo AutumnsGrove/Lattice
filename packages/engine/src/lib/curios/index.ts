@@ -6,7 +6,7 @@
  *
  * Developer Curios:
  * - Timeline: AI-powered daily summaries of GitHub activity
- * - Journey: Visualize your repo's growth over time (coming soon)
+ * - Journey: Visualize your repo's growth over time
  *
  * Visitor Curios (coming soon):
  * - Guestbooks, hit counters, shrines, link gardens, etc.

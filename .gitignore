@@ -46,3 +46,6 @@ yarn-debug.log*
 .baseproject-backup-*/
 baseproject-update-summary.md
 .npmrc
+
+# Generated backfill output
+scripts/journey/output/
