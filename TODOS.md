@@ -31,6 +31,15 @@
 - [x] **Phase 7:** Updated all GitHub workflows for new paths
 - [x] Unified `@cloudflare/workers-types` to `^4.20260116.0` across 10 packages
 
+### 🛡️ Security Remediation Audit — COMPLETE!
+> **30 issues across 9 agents, all verified/fixed**
+
+- [x] **Phase 1:** Content Security (XSS), Storage Security (tenant isolation), Analytics Privacy, Build & CI
+- [x] **Phase 2:** Authentication (rate limiting added), Core Infrastructure, Social & Federation
+- [x] **Phase 3:** UI Accessibility (all 7 ARIA/keyboard issues verified)
+- [x] Added KV-based rate limiting to landing auth callback (10 attempts/15 min)
+- [x] Wrapped verbose error logging in DEV flag to prevent config leakage
+
 ### 📝 Other
 - [x] Consolidated TODOS.md — moved historical completed items to COMPLETED.md
 - [x] Created formal Amber ZIP export integration plan (`docs/plans/amber-zip-export-integration.md`)
@@ -39,21 +48,24 @@
 
 # 🚀 V1 RELEASE BLOCKERS
 
-## 🛡️ Security Remediation — ~21 hours remaining
+## 🛡️ Security Remediation — ✅ COMPLETE
 
-> **Plan:** `docs/plans/1.0-critical-high-remediation.md`
-> **Priority:** P0 Critical (9 issues) + P1 High (26 issues)
+> **Plan:** `docs/plans/planned/1.0-critical-high-remediation.md`
+> **Completed:** January 2026
 
-### Critical (P0) — Must fix before launch
-- [ ] **Content Security:** SSR sanitization bypass, blog posts not sanitized, recursive XSS
-- [ ] **Storage Security:** No tenant isolation in R2 paths, no ownership verification on delete
-- [ ] **Analytics Privacy:** PII (emails) logged in auth callback
+### Phase 1 ✅
+- [x] **Content Security:** SSR sanitization (`sanitizeServerSafe()`), blog posts sanitized, recursive XSS fixed
+- [x] **Storage Security:** Tenant isolation via `${tenantId}/` prefix, ownership verification on delete
+- [x] **Analytics Privacy:** Logs `userInfo.sub` (not email) in auth callback
+- [x] **Build & CI:** Tests run before deploy, wrangler versions unified, .nvmrc exists, qs patched
 
-### High (P1) — Should fix before launch
-- [ ] Auth: Hardcoded domain in cookies, weak Turnstile signing, no server-side rate limiting
-- [ ] Infrastructure: Type mismatches, unvalidated API responses
-- [ ] Social: RSS feed hardcoded URL, CSRF allows cross-tenant
-- [ ] UI Accessibility: Missing labels, keyboard navigation gaps
+### Phase 2 ✅
+- [x] **Auth:** Dynamic cookie domains, HMAC-SHA256 Turnstile signing, KV-based rate limiting added
+- [x] **Infrastructure:** Type definitions fixed, API responses validated
+- [x] **Social:** RSS URLs dynamic per tenant, CSRF strict same-origin
+
+### Phase 3 ✅
+- [x] **UI Accessibility:** All 7 issues verified (aria-labels, keyboard nav, proper ARIA roles)
 
 ## 💳 Lemon Squeezy Verification — BLOCKED
 
@@ -384,4 +396,4 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-16 (testing infrastructure + docs reorg complete!)*
+*Last updated: 2026-01-16 (security remediation audit complete!)*
