@@ -21,10 +21,10 @@
     {
       id: "journey",
       name: "Journey",
-      description: "Visualize your repo's growth over time with beautiful charts",
+      description: "Visualize your repo's growth with line-based metrics and beautiful charts",
       icon: GitBranch,
-      status: "coming-soon",
-      href: null,
+      status: "active",
+      href: "/admin/curios/journey",
       features: [
         "Version milestones",
         "Code composition",

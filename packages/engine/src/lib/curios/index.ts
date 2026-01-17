@@ -17,6 +17,4 @@
 // =============================================================================
 
 export * from "./timeline";
-
-// Future exports:
-// export * from "./journey";
+export * from "./journey";
