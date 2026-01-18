@@ -252,6 +252,20 @@ gft() {
     fi
 }
 
+# gfj - Find JavaScript files
+# Usage: gfj [pattern]
+gfj() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}🔍 JavaScript files${pattern:+ matching: $pattern}${NC}"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_FD" -e js "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js'
+    else
+        "$GROVE_FD" -e js . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js' | head -50
+        echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
+    fi
+}
+
 # =============================================================================
 # Domain-Specific Searches
 # =============================================================================
@@ -371,6 +385,7 @@ gfhelp() {
     echo -e "${CYAN}File Type Searches:${NC}"
     echo "  gfs [pattern]     - Find Svelte components"
     echo "  gft [pattern]     - Find TypeScript files"
+    echo "  gfj [pattern]     - Find JavaScript files"
     echo ""
     echo -e "${CYAN}Domain Searches:${NC}"
     echo "  gfr [route]       - Find SvelteKit routes"
