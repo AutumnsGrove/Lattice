@@ -1,23 +1,16 @@
 ## Summary
 
-<!-- 2-4 sentences: What does this PR do and why? -->
+<!-- What does this PR do and why? -->
 
-## Changes
+## Type of Change
 
-<!-- List specific changes as bullet points -->
--
-
-## Type
-
-<!-- Delete all except one: -->
-- feature
-- fix
-- refactor
-- docs
-- test
-- chore
-- infra
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+- [ ] Refactoring
+- [ ] Infrastructure
 
 ## Testing
 
-<!-- How was this verified? What did you test? -->
+<!-- How was this tested? -->

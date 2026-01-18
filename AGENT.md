@@ -179,61 +179,15 @@ docs: Update README
 
 **For complete details:** See `AgentUsage/git_guide.md`
 
-### Pull Request Requirements
+### Pull Requests
 
-**PR Title:** Use conventional commits format
+Use conventional commits format for PR titles:
 ```
-feat: Add dark mode toggle to settings
-fix: Correct timezone handling in scheduler
-```
-
-**PR Body:** Copy this template and fill in ALL sections:
-
-```markdown
-## Summary
-
-[2-4 sentences: What does this PR do and why?]
-
-## Changes
-
-- [Specific change 1]
-- [Specific change 2]
-
-## Type
-
-[One of: feature | fix | refactor | docs | test | chore | infra]
-
-## Testing
-
-[How was this verified?]
+feat: Add dark mode toggle
+fix: Correct timezone bug
 ```
 
-**Example:**
-```markdown
-## Summary
-
-Adds dark mode toggle to settings, allowing theme switching. Addresses
-user feedback about eye strain during nighttime use.
-
-## Changes
-
-- Add `ThemeToggle` component to settings page
-- Create `useTheme` hook for theme state management
-- Update CSS variables for dark mode colors
-
-## Type
-
-feature
-
-## Testing
-
-Manually tested toggle in Chrome/Firefox. Verified theme persists across reloads.
-```
-
-**Rules:**
-- Fill in ALL four sections (Summary, Changes, Type, Testing)
-- Be specific in Changes ("Add X to Y" not "Update files")
-- Never leave placeholders or HTML comments in the final PR
+Write a brief description of what the PR does and why. No specific format required.
 
 ---
 
