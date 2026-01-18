@@ -1,6 +1,6 @@
 ---
 name: git-workflows
-description: Execute git operations using Conventional Commits format with proper branching strategies and safe workflows. Use when making commits, managing branches, or performing git operations.
+description: Execute git operations using Conventional Commits format with proper branching strategies and safe workflows. Use when making commits, creating pull requests, managing branches, or performing git operations.
 ---
 
 # Git Workflows Skill
@@ -9,6 +9,7 @@ description: Execute git operations using Conventional Commits format with prope
 
 Activate this skill when:
 - Making git commits
+- **Creating pull requests**
 - Creating or merging branches
 - Initializing repositories
 - Resolving merge conflicts
@@ -219,6 +220,65 @@ git reflog  # Find lost commit
 git checkout abc1234
 git checkout -b recovery-branch
 ```
+
+## Pull Request Creation
+
+When creating PRs, use this exact format:
+
+**Title:** Conventional commits format
+```
+feat: Add dark mode toggle
+fix: Correct timezone bug
+```
+
+**Body:** Use this template (fill in ALL sections):
+```markdown
+## Summary
+
+[2-4 sentences: What and why]
+
+## Changes
+
+- [Specific change 1]
+- [Specific change 2]
+
+## Type
+
+[One of: feature | fix | refactor | docs | test | chore | infra]
+
+## Testing
+
+[How was this verified?]
+```
+
+**Creating the PR:**
+```bash
+gh pr create --title "feat: Add dark mode toggle" --body "$(cat <<'EOF'
+## Summary
+
+Adds dark mode toggle to settings page. Addresses user feedback about eye strain.
+
+## Changes
+
+- Add ThemeToggle component to settings
+- Create useTheme hook for state management
+- Update CSS variables for dark mode
+
+## Type
+
+feature
+
+## Testing
+
+Manually tested in Chrome/Firefox. Theme persists across reloads.
+EOF
+)"
+```
+
+**Rules:**
+- Fill in ALL four sections
+- Be specific ("Add X to Y" not "Update files")
+- Never leave placeholders
 
 ## Related Resources
 

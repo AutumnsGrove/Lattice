@@ -181,48 +181,59 @@ docs: Update README
 
 ### Pull Request Requirements
 
-**When creating PRs, you MUST write descriptive titles and descriptions.**
-
-**PR Title Format:** Use conventional commits format
+**PR Title:** Use conventional commits format
 ```
 feat: Add dark mode toggle to settings
 fix: Correct timezone handling in scheduler
-refactor: Extract validation into shared utility
 ```
 
-**PR Description Requirements:**
-1. **Summary** — 2-4 sentences explaining WHAT and WHY (not placeholders)
-2. **Changes** — Specific bullet points of what changed
-3. **Type of Change** — Check the appropriate checkbox
-4. **Testing** — Describe how you verified it works
+**PR Body:** Copy this template and fill in ALL sections:
 
-**Example good PR description:**
 ```markdown
 ## Summary
-Adds a dark mode toggle to the settings page, allowing users to switch
-between light and dark themes. This addresses user feedback about eye
-strain during nighttime use.
+
+[2-4 sentences: What does this PR do and why?]
 
 ## Changes
+
+- [Specific change 1]
+- [Specific change 2]
+
+## Type
+
+[One of: feature | fix | refactor | docs | test | chore | infra]
+
+## Testing
+
+[How was this verified?]
+```
+
+**Example:**
+```markdown
+## Summary
+
+Adds dark mode toggle to settings, allowing theme switching. Addresses
+user feedback about eye strain during nighttime use.
+
+## Changes
+
 - Add `ThemeToggle` component to settings page
 - Create `useTheme` hook for theme state management
 - Update CSS variables for dark mode colors
-- Add theme preference to user settings storage
 
-## Type of Change
-- [x] New feature
+## Type
+
+feature
 
 ## Testing
-- Manually tested toggle in Chrome and Firefox
-- Verified theme persists across page reloads
-- Checked accessibility contrast ratios in both modes
+
+Manually tested toggle in Chrome/Firefox. Verified theme persists across reloads.
 ```
 
-**DO NOT:**
-- Leave template placeholders like `<!-- Brief description -->`
-- Use vague descriptions like "Update files" or "Fix things"
-- Skip the summary section
-- Create PRs with empty descriptions
+**Rules:**
+- Fill in ALL four sections (Summary, Changes, Type, Testing)
+- Be specific in Changes ("Add X to Y" not "Update files")
+- Never leave placeholders or HTML comments in the final PR
 
 ---
 
