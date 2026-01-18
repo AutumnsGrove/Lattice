@@ -1,0 +1,313 @@
+name: Component Inventory Check
+
+on:
+  # Run on PRs that touch component directories
+  pull_request:
+    paths:
+      - 'packages/engine/src/lib/ui/components/**/*.svelte'
+
+  # Run weekly on Tuesday mornings
+  schedule:
+    - cron: '0 9 * * 2'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-component-inventory:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Count components and compare to inventory
+        id: count-components
+        run: |
+          #!/bin/bash
+          set -e
+
+          echo "🔍 Counting Svelte components in engine..."
+          echo ""
+
+          # Read expected count from inventory
+          EXPECTED_TOTAL=$(jq -r '.components.total' .github/component-inventory.json)
+          LAST_UPDATED=$(jq -r '.lastUpdated' .github/component-inventory.json)
+
+          # Count actual components
+          COMPONENT_DIR="packages/engine/src/lib/ui/components"
+          ACTUAL_TOTAL=$(find "$COMPONENT_DIR" -name "*.svelte" -type f | wc -l | tr -d ' ')
+
+          echo "📊 Component Count Results"
+          echo "=========================="
+          echo "Expected (from inventory): $EXPECTED_TOTAL"
+          echo "Actual (from codebase):    $ACTUAL_TOTAL"
+          echo "Inventory last updated:    $LAST_UPDATED"
+          echo ""
+
+          # Calculate difference
+          DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
+
+          # Generate per-category breakdown
+          BREAKDOWN=""
+          for category in primitives nature ui typography chrome terrarium gallery charts content states forms indicators icons; do
+            EXPECTED=$(jq -r ".components.breakdown.$category // 0" .github/component-inventory.json)
+            PATH_DIR=$(jq -r ".components.paths.$category // \"\"" .github/component-inventory.json)
+
+            if [ -n "$PATH_DIR" ] && [ -d "$PATH_DIR" ]; then
+              ACTUAL=$(find "$PATH_DIR" -name "*.svelte" -type f | wc -l | tr -d ' ')
+              CAT_DIFF=$((ACTUAL - EXPECTED))
+
+              if [ "$CAT_DIFF" -ne 0 ]; then
+                SIGN="+"
+                [ "$CAT_DIFF" -lt 0 ] && SIGN=""
+                BREAKDOWN="${BREAKDOWN}| $category | $EXPECTED | $ACTUAL | ${SIGN}${CAT_DIFF} |\n"
+              fi
+            fi
+          done
+
+          # Determine status
+          if [ "$DIFF" -eq 0 ]; then
+            echo "✅ Component count matches inventory"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "diff=0" >> $GITHUB_OUTPUT
+          elif [ "$DIFF" -gt 0 ]; then
+            echo "📦 Found $DIFF NEW component(s) not in inventory"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=added" >> $GITHUB_OUTPUT
+
+            # List new files if this is a PR
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              echo ""
+              echo "New .svelte files in this PR:"
+              git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- '*.svelte' | head -20 || true
+            fi
+          else
+            echo "⚠️ Found $((DIFF * -1)) FEWER component(s) than inventory (possible deletion)"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=removed" >> $GITHUB_OUTPUT
+          fi
+
+          # Export values for later steps
+          echo "expected=$EXPECTED_TOTAL" >> $GITHUB_OUTPUT
+          echo "actual=$ACTUAL_TOTAL" >> $GITHUB_OUTPUT
+          echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+
+          if [ -n "$BREAKDOWN" ]; then
+            echo "breakdown<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$BREAKDOWN" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find new component files in PR
+        if: github.event_name == 'pull_request' && steps.count-components.outputs.has_changes == 'true'
+        id: find-new-files
+        run: |
+          # Get list of new .svelte files in this PR
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- 'packages/engine/src/lib/ui/components/**/*.svelte' 2>/dev/null || echo "")
+
+          if [ -n "$NEW_FILES" ]; then
+            echo "new_files<<EOF" >> $GITHUB_OUTPUT
+            echo "$NEW_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "has_new_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_new_files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if components changed)
+        if: github.event_name == 'pull_request' && steps.count-components.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-components.outputs.expected }}
+          ACTUAL: ${{ steps.count-components.outputs.actual }}
+          DIFF: ${{ steps.count-components.outputs.diff }}
+          CHANGE_TYPE: ${{ steps.count-components.outputs.change_type }}
+          BREAKDOWN: ${{ steps.count-components.outputs.breakdown }}
+          NEW_FILES: ${{ steps.find-new-files.outputs.new_files }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const changeType = process.env.CHANGE_TYPE;
+            const breakdown = process.env.BREAKDOWN || '';
+            const newFiles = process.env.NEW_FILES || '';
+
+            const emoji = changeType === 'added' ? '📦' : '⚠️';
+            const verb = changeType === 'added' ? 'added' : 'removed';
+            const absDiff = Math.abs(diff);
+
+            let newFilesList = '';
+            if (newFiles) {
+              const files = newFiles.trim().split('\n').map(f => `- \`${f}\``).join('\n');
+              newFilesList = `
+
+            ### New Component Files
+            ${files}`;
+            }
+
+            let breakdownTable = '';
+            if (breakdown) {
+              breakdownTable = `
+
+            ### Category Breakdown
+            | Category | Expected | Actual | Diff |
+            |----------|----------|--------|------|
+            ${breakdown}`;
+            }
+
+            const body = `## ${emoji} Component Inventory Change Detected
+
+            This PR appears to have **${verb} ${absDiff} component(s)**.
+
+            | Metric | Count |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (codebase) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |
+            ${breakdownTable}${newFilesList}
+
+            ### Action Required
+
+            If this PR adds new components, please:
+            1. Update \`.github/component-inventory.json\` with the new count
+            2. Consider adding the component to the documentation plan
+            3. If significant, add to \`docs/design-system/COMPONENT-REFERENCE.md\` (when created)
+
+            ---
+            *This check helps keep our component documentation accurate. See \`docs/plans/planned/documentation-plan.md\` for the full component cataloging plan.*`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue for inventory drift (scheduled run only)
+        if: github.event_name == 'schedule' && steps.count-components.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-components.outputs.expected }}
+          ACTUAL: ${{ steps.count-components.outputs.actual }}
+          DIFF: ${{ steps.count-components.outputs.diff }}
+          LAST_UPDATED: ${{ steps.count-components.outputs.last_updated }}
+          BREAKDOWN: ${{ steps.count-components.outputs.breakdown }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const lastUpdated = process.env.LAST_UPDATED;
+            const breakdown = process.env.BREAKDOWN || '';
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if there's already an open issue for this
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,components'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Component Inventory')
+            );
+
+            if (hasExisting) {
+              console.log('Existing component inventory issue found, skipping creation');
+              return;
+            }
+
+            const absDiff = Math.abs(diff);
+            const changeType = diff > 0 ? 'added' : 'removed';
+            const emoji = diff > 0 ? '📦' : '⚠️';
+
+            let breakdownTable = '';
+            if (breakdown) {
+              breakdownTable = `
+
+            ### Category Breakdown
+            | Category | Expected | Actual | Diff |
+            |----------|----------|--------|------|
+            ${breakdown}`;
+            }
+
+            const body = `## ${emoji} Component Inventory Drift Detected
+
+            The automated component count found a **${absDiff} component difference** since the last inventory update.
+
+            | Metric | Value |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (codebase) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |
+            | Inventory Last Updated | ${lastUpdated} |
+            ${breakdownTable}
+
+            ### Action Required
+
+            1. Review which components were ${changeType}
+            2. Update \`.github/component-inventory.json\` with accurate counts
+            3. Update \`TODOS.md\` if the "185 components" reference is now stale
+            4. Consider documenting new components in the component reference (when created)
+
+            ### Files to Update
+
+            - \`.github/component-inventory.json\` - Update counts and \`lastUpdated\`
+            - \`TODOS.md\` - Update component count reference if changed
+            - \`docs/plans/planned/documentation-plan.md\` - Review if scope changed
+
+            ### How to Get Current Counts
+
+            \`\`\`bash
+            # Total count
+            find packages/engine/src/lib/ui/components -name "*.svelte" | wc -l
+
+            # Per-category counts
+            for dir in primitives nature ui typography chrome terrarium gallery charts content states forms indicators icons; do
+              echo "$dir: $(find packages/engine/src/lib/ui/components/$dir -name '*.svelte' 2>/dev/null | wc -l)"
+            done
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the component-inventory workflow.*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${emoji} Component Inventory Update Needed - ${today}`,
+              body: body,
+              labels: ['documentation', 'components']
+            });
+
+      - name: Summary
+        env:
+          HAS_CHANGES: ${{ steps.count-components.outputs.has_changes }}
+          EXPECTED: ${{ steps.count-components.outputs.expected }}
+          ACTUAL: ${{ steps.count-components.outputs.actual }}
+          DIFF: ${{ steps.count-components.outputs.diff }}
+        run: |
+          echo "## Component Inventory Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Expected (inventory) | $EXPECTED |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actual (codebase) | $ACTUAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Difference | $DIFF |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "⚠️ **Component count has drifted from inventory**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Update \`.github/component-inventory.json\` to match current state." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Component count matches inventory" >> $GITHUB_STEP_SUMMARY
+          fi
