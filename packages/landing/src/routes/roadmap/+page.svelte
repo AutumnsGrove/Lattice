@@ -105,7 +105,7 @@
 			features: [
 				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
-				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true },
+				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true },
 				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true },
 				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' },
@@ -124,7 +124,7 @@
 				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true, icon: 'penline' },
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
-				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
+				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download', major: true },
 				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' },
 				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true }
 			]
@@ -138,7 +138,7 @@
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree', major: true },
 				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests', major: true },
 				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true },
-				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook' },
+				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook', major: true },
 				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true },
 				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
 				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
@@ -158,11 +158,11 @@
 				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message' },
 				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending' },
 				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' },
-				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown' },
+				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown', major: true },
 				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
 				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, major: true, icon: 'terrarium' },
-				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios' },
+				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios', major: true },
 				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave' },
 				{ name: 'Outpost', description: 'Community Minecraft — a server that waits for you', done: false, icon: 'outpost' }
 			]
@@ -453,7 +453,8 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
+							{feature.major ? 'ring-2 ring-slate-400/50 dark:ring-slate-500/40' : ''}">
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div>
 								<span class="font-medium text-slate-800 dark:text-slate-100">{feature.name}</span>
@@ -526,7 +527,8 @@
 					{#each phases.thaw.features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
-							{feature.internal ? 'opacity-75' : ''}">
+							{feature.internal ? 'opacity-75' : ''}
+							{feature.major ? 'ring-2 ring-teal-400/50 dark:ring-teal-500/40' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
 							<IconComponent
 								class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"
@@ -646,7 +648,8 @@
 							centennial: 'border-l-4 border-indigo-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
+							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}
+							{feature.major ? 'ring-2 ring-rose-400/50 dark:ring-rose-500/40' : ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
@@ -965,7 +968,8 @@
 							bookopen: 'text-pink-300',
 							home: 'text-amber-300'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30
+							{feature.major ? 'ring-2 ring-amber-400/40' : ''}">
 							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-400'} mt-0.5 flex-shrink-0"
