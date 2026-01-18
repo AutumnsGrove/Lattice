@@ -122,9 +122,10 @@ await db.prepare(
 -- Add expires_at column for TTL
 ALTER TABLE webhook_events ADD COLUMN expires_at INTEGER;
 
--- Set 90-day expiration for existing records
+-- Set 120-day expiration for existing records
+-- (120 days aligns with payment processor chargeback windows)
 UPDATE webhook_events
-SET expires_at = created_at + (90 * 24 * 60 * 60)
+SET expires_at = created_at + (120 * 24 * 60 * 60)
 WHERE expires_at IS NULL;
 
 -- Create index for cleanup queries
@@ -166,8 +167,8 @@ Use Cloudflare Queues for batched deletion if volume is high.
 ### Task 1.5: Update Insert Logic for Expiration
 
 ```typescript
-// Set expires_at to 90 days from now
-const expiresAt = Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60);
+// Set expires_at to 120 days from now (aligns with chargeback windows)
+const expiresAt = Math.floor(Date.now() / 1000) + (120 * 24 * 60 * 60);
 
 await db.prepare(`
   INSERT INTO webhook_events (id, provider, event_type, payload, created_at, expires_at)
@@ -177,14 +178,53 @@ await db.prepare(`
 
 ---
 
+## Test Specification (Webhooks)
+
+**File**: `packages/engine/src/lib/utils/webhook-sanitizer.test.ts`
+
+```typescript
+describe('sanitizeLemonSqueezyPayload', () => {
+  it('should strip user_email from payload', () => {
+    const input = { data: { attributes: { user_email: 'test@example.com', status: 'active' } } };
+    const result = sanitizeLemonSqueezyPayload(input);
+    expect(result.user_email).toBeUndefined();
+    expect(result.status).toBe('active');
+  });
+
+  it('should strip user_name from payload', () => {});
+  it('should strip card_brand and card_last_four', () => {});
+  it('should strip billing_address fields', () => {});
+  it('should strip city, region, country', () => {});
+
+  it('should preserve customer_id for reconciliation', () => {});
+  it('should preserve subscription_id for debugging', () => {});
+  it('should preserve product_id and variant_id', () => {});
+  it('should preserve status and timestamps', () => {});
+  it('should preserve event metadata (event_name, event_id)', () => {});
+
+  it('should handle missing optional fields gracefully', () => {});
+  it('should handle malformed payload without throwing', () => {});
+  it('should return empty object for null/undefined input', () => {});
+});
+
+describe('Webhook Retention', () => {
+  it('should set expires_at to 120 days from created_at', () => {});
+  it('should cleanup expired webhooks on cron run', () => {});
+  it('should respect LIMIT to avoid long-running queries', () => {});
+});
+```
+
+---
+
 ## Acceptance Criteria (Webhooks)
 
 - [ ] PII fields stripped before storage (email, name, full card, address)
 - [ ] `expires_at` column added to `webhook_events` table
-- [ ] Cleanup job deletes records older than 90 days
+- [ ] Cleanup job deletes records older than 120 days
 - [ ] Cron trigger configured in wrangler.toml
 - [ ] Existing TODOs at lines 79-80 resolved
-- [ ] Unit tests for sanitization function
+- [ ] Unit tests for sanitization function (see spec above)
+- [ ] Retention tests verify 120-day TTL calculation
 
 ---
 

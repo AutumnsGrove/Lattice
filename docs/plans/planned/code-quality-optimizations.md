@@ -280,13 +280,45 @@ grep -rn "try.*{" packages/engine/src --include="*.ts" | \
 
 #### Task 3.2: Audit High-Risk Files
 
-Priority files to audit:
+**Automated search command**:
+```bash
+# Find files with multiple db.prepare in same try block
+for f in $(find packages -name "*.ts" -type f); do
+  if grep -q "try" "$f" && grep -q "db.prepare" "$f"; then
+    count=$(grep -A30 "try {" "$f" | grep -c "db.prepare" 2>/dev/null || echo 0)
+    if [ "$count" -gt 1 ]; then
+      echo "$f: $count db.prepare calls in try block"
+    fi
+  fi
+done
+```
 
-| File | Risk | Reason |
-|------|------|--------|
-| `hooks.server.ts` | High | Runs on every request |
-| `+page.server.ts` | High | Page loaders |
-| `+server.ts` | Medium | API endpoints |
+**Priority files to audit**:
+
+| File | Risk | Reason | Expected Queries |
+|------|------|--------|------------------|
+| `packages/engine/src/hooks.server.ts` | High | Runs on every request | Tenant, user, settings |
+| `packages/engine/src/routes/+page.server.ts` | High | Homepage loader | Posts, pages |
+| `packages/engine/src/routes/blog/+page.server.ts` | High | Blog listing | Posts, categories |
+| `packages/engine/src/routes/admin/+layout.server.ts` | High | Admin shell | User, tenant, perms |
+| `packages/plant/src/routes/+layout.server.ts` | High | Plant shell | User, onboarding |
+| `packages/engine/src/routes/api/curios/*/+server.ts` | Medium | Curio APIs | Config, data |
+
+**Specific patterns to find**:
+```typescript
+// Pattern 1: Sequential queries in same try
+try {
+  const a = await db.prepare(...).first();
+  const b = await db.prepare(...).all();  // ❌ Blocked if first fails
+}
+
+// Pattern 2: Queries with dependent data
+try {
+  const tenant = await db.prepare('SELECT ...').first();
+  const settings = await db.prepare('SELECT ... WHERE tenant_id = ?')
+    .bind(tenant.id).all();  // ❌ Throws if tenant is null
+}
+```
 
 #### Task 3.3: Fix Identified Violations
 

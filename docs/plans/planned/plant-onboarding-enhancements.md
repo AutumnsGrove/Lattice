@@ -140,6 +140,15 @@ export const actions = {
 
   resend: async ({ locals, platform }) => {
     // Rate limit: max 3 resends per hour
+    // Use KV for rate limiting (faster than D1, built-in TTL)
+    const key = `email_resend:${locals.user.id}`;
+    const attempts = await platform.env.RATE_LIMIT_KV.get(key);
+    if (parseInt(attempts || '0') >= 3) {
+      return fail(429, { error: 'Too many attempts. Please try again later.' });
+    }
+    await platform.env.RATE_LIMIT_KV.put(key, String((parseInt(attempts || '0') + 1)), {
+      expirationTtl: 3600 // 1 hour TTL, auto-cleanup
+    });
     // Generate new code, send via Resend
   }
 };

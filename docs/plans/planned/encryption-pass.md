@@ -174,6 +174,50 @@ When adding new integrations, apply the same pattern:
 
 ---
 
+## Test Specification
+
+### Migration Tests (New)
+
+**File**: `packages/engine/src/lib/server/encryption.test.ts` (extend)
+
+```typescript
+describe('Migration Scenarios', () => {
+  it('should handle mixed plaintext and encrypted tokens in same table', async () => {
+    // Simulate gradual migration state
+  });
+
+  it('should gracefully handle corrupted/invalid encrypted data', async () => {
+    // Return null, don't throw
+  });
+
+  it('should handle missing encryption key gracefully', async () => {
+    // safeDecryptToken with undefined key returns null
+  });
+});
+```
+
+### Backward Compatibility Tests
+
+```typescript
+describe('Backward Compatibility', () => {
+  it('should decrypt tokens encrypted with current format', async () => {});
+  it('should return plaintext unchanged when not encrypted', async () => {});
+  it('should detect encrypted vs plaintext via isEncryptedToken()', async () => {});
+});
+```
+
+### Integration Tests
+
+```typescript
+describe('Journey Config Integration', () => {
+  it('should encrypt token on POST and decrypt on GET', async () => {});
+  it('should validate token before encryption', async () => {});
+  it('should handle token deletion (__CLEAR__ value)', async () => {});
+});
+```
+
+---
+
 ## Acceptance Criteria
 
 - [ ] GitHub tokens encrypted before D1 storage
@@ -183,18 +227,73 @@ When adding new integrations, apply the same pattern:
 - [ ] Token validation happens on plaintext before encryption
 - [ ] No tokens appear in logs (already verified in security audit)
 - [ ] Tests pass for encrypt/decrypt round-trip
+- [ ] Migration tests added for mixed plaintext/encrypted scenarios
+- [ ] Backward compatibility tests verify graceful degradation
+- [ ] Integration tests verify end-to-end flow
 
 ---
 
 ## Security Notes
 
-1. **Key Rotation**: Not implemented in v1. Key rotation would require re-encrypting all tokens with new key. Consider for v2.
+### 1. Single-Key Architecture (Multi-Tenant Decision)
 
-2. **Key Storage**: Use Cloudflare Secrets (wrangler secret put), never environment variables in wrangler.toml.
+**Decision**: Use a single `TOKEN_ENCRYPTION_KEY` for all tenants.
 
-3. **Backup Considerations**: D1 backups will contain encrypted blobs, which is safe. Restore requires the same encryption key.
+**Rationale**:
+- Simplifies key management and rotation
+- D1 already provides tenant isolation at the row level
+- Per-tenant keys would require key-per-tenant storage, complicating backup/restore
+- Tokens are already scoped to tenant via foreign keys
 
-4. **Alternative Approach**: Cloudflare Workers Secrets could store tokens directly (`JOURNEY_TOKEN_tenant123`), but has 1MB limit and per-tenant naming complexity.
+**Trade-offs**:
+- Single point of compromise (mitigated by Cloudflare Secrets security)
+- Key rotation affects all tenants simultaneously
+
+**Alternative considered**: Per-tenant keys stored in KV (`TENANT_KEY_{id}`). Rejected due to complexity and limited benefit given existing tenant isolation.
+
+### 2. Key Storage
+
+Use Cloudflare Secrets (`wrangler secret put`), never environment variables in wrangler.toml.
+
+### 3. Key Rotation Procedure (Manual)
+
+When key rotation is needed (compromise suspected, compliance requirement):
+
+```bash
+# 1. Generate new key
+NEW_KEY=$(openssl rand -hex 32)
+
+# 2. Create rotation script
+cat > rotate-keys.ts << 'EOF'
+// Decrypt with old key, re-encrypt with new key
+const rows = await db.prepare('SELECT id, github_token, openrouter_key FROM journey_config').all();
+for (const row of rows.results) {
+  const github = await safeDecryptToken(row.github_token, OLD_KEY);
+  const openrouter = await safeDecryptToken(row.openrouter_key, OLD_KEY);
+
+  const newGithub = github ? await encryptToken(github, NEW_KEY) : null;
+  const newOpenrouter = openrouter ? await encryptToken(openrouter, NEW_KEY) : null;
+
+  await db.prepare('UPDATE journey_config SET github_token = ?, openrouter_key = ? WHERE id = ?')
+    .bind(newGithub, newOpenrouter, row.id).run();
+}
+EOF
+
+# 3. Run rotation during maintenance window
+# 4. Update secret: wrangler secret put TOKEN_ENCRYPTION_KEY
+# 5. Verify decryption works with new key
+# 6. Securely delete old key from any backups/notes
+```
+
+**Estimated downtime**: < 5 minutes for typical dataset.
+
+### 4. Backup Considerations
+
+D1 backups will contain encrypted blobs, which is safe. Restore requires the same encryption key. Document which key version was active at backup time.
+
+### 5. IV Security
+
+The module uses `crypto.getRandomValues()` for IV generation (12 bytes per encryption). Test coverage verifies same plaintext produces different ciphertext.
 
 ---
 
