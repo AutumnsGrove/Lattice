@@ -10,21 +10,39 @@
 
 ## Completed Today ✅
 
+> **16 commits, 7 PRs merged** — absolute sprint day! 🔥
+
 ### 🛡️ Security Hardening — COMPLETE! (PR #391)
-> **Plan:** `docs/plans/planned/security-hardening.md`
-> **Effort:** ~4-5 hours (under the 6-8h estimate!)
+> **Plan:** `docs/plans/completed/security-hardening.md` | **Effort:** ~1 hour (way under 6-8h estimate!)
 
-- [x] **Webhook PII Sanitization** — Whitelist-based stripping of sensitive fields (email, name, card details, addresses)
-- [x] **120-day Retention Policy** — Added `expires_at` column + dedicated cleanup Worker with daily cron
-- [x] **Safe JSON Parsing** — Wrapped ~16 unsafe `JSON.parse()` calls with `safeJsonParse()` across:
-  - `shop.ts` (4 instances)
-  - `PostContentDO.ts`, `PostMetaDO.ts` (2 instances)
-  - `timeline/context.ts` (2 instances)
-- [x] **Enhanced `safeJsonParse()`** — Added `silent` option, `context` logging, and `tryJsonParse()` Result variant
-- [x] **Documentation** — Created `docs/security/webhook-data-protection.md` and `docs/infrastructure/webhook-cleanup-operations.md`
-- [x] **25 new tests** for webhook sanitizer covering edge cases
+- [x] **Webhook PII Sanitization** — Whitelist-based stripping of sensitive fields
+- [x] **120-day Retention Policy** — `expires_at` column + dedicated cleanup Worker with daily cron
+- [x] **Safe JSON Parsing** — Wrapped 16 unsafe `JSON.parse()` calls with `safeJsonParse()`
+- [x] **Documentation** — `docs/security/webhook-data-protection.md` + `docs/infrastructure/webhook-cleanup-operations.md`
+- [x] **25 new tests** for webhook sanitizer
 
-### 📋 Comprehensive Codebase Audit Planning — PLANNING COMPLETE!
+### 🏗️ Code Quality & Infrastructure (PR #387, #389, #390)
+> **Plan:** `docs/plans/completed/code-quality-optimizations.md` | **Multiple items shipped!**
+
+- [x] **Centralized Rate Limiting** — Consolidated to `$lib/server/rate-limits/config.ts` (PR #387)
+- [x] **DB Query Isolation Audit** — Wrapped cascading queries in isolated try/catch blocks (PR #387)
+- [x] **Safari Reader Mode Fallback** — `@supports not (backdrop-filter)` fallback for glass components (PR #389)
+- [x] **Focus Management** — GlassConfirmDialog now saves/restores focus + focus trapping (PR #390)
+
+### 📋 Comprehensive Codebase Audit Planning (PR #385)
+> **7 planning documents created** — roadmap for post-v1 improvements
+
+### 🗺️ Roadmap & Documentation
+- [x] **Roadmap Reorganization** — Reordered items, highlighted key features across all phases (PR #386)
+- [x] **Marketing Docs** — Social media strategy, refreshed HN post (PR #57057d4)
+- [x] **PR Template Simplification** — Streamlined for better agent compliance
+- [x] **Journey Curio Architecture** — Added composable sub-curio plan (PR #382)
+
+### 🔧 Developer Experience
+- [x] **grove-find fixes** — Explicit binary discovery for shell compatibility
+- [x] **gfj command** — New JavaScript-specific file search
+
+### 📋 Planning Documents Created
 > **7 planning documents created** covering security, testing, UI, onboarding, documentation, and code quality
 > **Status:** Plans ready for implementation (see individual docs for effort estimates)
 
@@ -33,10 +51,10 @@ Created detailed implementation plans in `docs/plans/planned/`:
 | Plan | Priority | Est. Effort | Summary |
 |------|----------|-------------|---------|
 | [`encryption-pass.md`](docs/plans/planned/encryption-pass.md) | P1 | 4-6h | Wire AES-256-GCM encryption for GitHub/OpenRouter tokens in Journey Curio |
-| ~~[`security-hardening.md`](docs/plans/planned/security-hardening.md)~~ | ~~P1~~ | ~~6-8h~~ | ✅ **COMPLETE** (PR #391) — Webhook PII sanitization + 120-day TTL + `safeJsonParse()` |
-| [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs, focus management |
+| ~~[`security-hardening.md`](docs/plans/completed/security-hardening.md)~~ | ~~P1~~ | ~~6-8h~~ | ✅ **COMPLETE** (PR #391) |
+| ~~[`code-quality-optimizations.md`](docs/plans/completed/code-quality-optimizations.md)~~ | ~~P2~~ | ~~8-12h~~ | ✅ **COMPLETE** (PR #387, #389, #390) |
+| [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs |
 | [`documentation-plan.md`](docs/plans/planned/documentation-plan.md) | P2 | 12-16h | Component reference (185 components), dark mode guide, colors, spacing, animation |
-| [`code-quality-optimizations.md`](docs/plans/planned/code-quality-optimizations.md) | P2 | 8-12h | Safari Reader fallback, CSP standardization, DB query isolation audit |
 | [`ui-placeholders.md`](docs/plans/planned/ui-placeholders.md) | P2 | 4-6h | Enhanced placeholders for Monitor (Vista) and Domains (Forage) pages |
 | [`testing-fixes.md`](docs/plans/planned/testing-fixes.md) | P2 | 4-6h | Fix 7 skipped tests related to Svelte 5 reactivity timing |
 
@@ -503,4 +521,4 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-18 (security hardening complete — PR #391 merged!)*
+*Last updated: 2026-01-18 (sprint day in progress — 16+ commits, 7+ PRs and counting!)*
