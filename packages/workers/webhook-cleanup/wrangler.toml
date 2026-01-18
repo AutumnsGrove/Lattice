@@ -1,0 +1,20 @@
+# Webhook Cleanup Worker
+# Runs daily to delete expired webhook events (120-day retention policy)
+
+name = "grove-webhook-cleanup"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Cron Trigger - Daily at 3:00 AM UTC
+# =============================================================================
+[triggers]
+crons = ["0 3 * * *"]
+
+# =============================================================================
+# D1 Database - Same database as engine
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"

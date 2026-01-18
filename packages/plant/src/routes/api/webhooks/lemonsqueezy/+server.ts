@@ -3,6 +3,9 @@
  *
  * Handles Lemon Squeezy events for checkout completion and subscription updates.
  * Creates tenant on successful payment.
+ *
+ * Security: Webhook payloads are sanitized before storage to remove PII.
+ * Retention: Webhooks auto-expire after 120 days via scheduled cleanup.
  */
 
 import { json } from "@sveltejs/kit";
@@ -19,6 +22,10 @@ import {
   getPaymentFailedEmail,
   getPaymentReceivedEmail,
 } from "$lib/server/email-templates";
+import {
+  sanitizeWebhookPayload,
+  calculateWebhookExpiry,
+} from "@autumnsgrove/groveengine/utils";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
@@ -73,18 +80,35 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   // Store the event or reuse existing failed event
+  // Sanitize payload to remove PII before storing (GDPR/PCI DSS compliance)
+  const sanitizedPayload = sanitizeWebhookPayload(event);
+  const payloadToStore = sanitizedPayload
+    ? JSON.stringify(sanitizedPayload)
+    : JSON.stringify({
+        meta: { event_name: eventName },
+        error: "sanitization_failed",
+      });
+
   let webhookEventId: string;
   if (existingEvent) {
     webhookEventId = existingEvent.id as string;
     console.log(`[Webhook] Retrying event ${eventId}`);
   } else {
     webhookEventId = crypto.randomUUID();
+    const expiresAt = calculateWebhookExpiry(); // 120 days from now
+
     await db
       .prepare(
-        `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
-         VALUES (?, 'lemonsqueezy', ?, ?, ?, unixepoch())`,
+        `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at, expires_at)
+         VALUES (?, 'lemonsqueezy', ?, ?, ?, unixepoch(), ?)`,
       )
-      .bind(webhookEventId, `ls_${eventId}_${eventName}`, eventName, payload)
+      .bind(
+        webhookEventId,
+        `ls_${eventId}_${eventName}`,
+        eventName,
+        payloadToStore,
+        expiresAt,
+      )
       .run();
   }
 

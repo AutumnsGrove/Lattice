@@ -4,6 +4,7 @@
  * Utilities for managing products, orders, and customers in D1.
  */
 
+import { safeJsonParse } from "../utils/json.js";
 import type {
   Product,
   ProductBase,
@@ -15,6 +16,7 @@ import type {
   PaymentStatus,
   LineItem,
   Customer,
+  Address,
   Money,
   PricingType,
   BillingInterval,
@@ -1216,8 +1218,14 @@ function mapProductRow(row: ProductRow): ProductBase {
     description: row.description || undefined,
     type: row.type as ProductType,
     status: row.status as ProductStatus,
-    images: JSON.parse(row.images || "[]"),
-    metadata: JSON.parse(row.metadata || "{}"),
+    images: safeJsonParse<string[]>(row.images, [], {
+      context: "product.images",
+    }),
+    metadata: safeJsonParse<Record<string, string>>(
+      row.metadata,
+      {},
+      { context: "product.metadata" },
+    ),
     createdAt: new Date(row.created_at * 1000),
     updatedAt: new Date(row.updated_at * 1000),
   };
@@ -1273,10 +1281,14 @@ function mapOrderRow(row: OrderRow, lineItemRows: LineItemRow[]): Order {
     providerOrderId: row.provider_payment_id || undefined,
     providerSessionId: row.provider_session_id || undefined,
     shippingAddress: row.shipping_address
-      ? JSON.parse(row.shipping_address)
+      ? safeJsonParse<Address | undefined>(row.shipping_address, undefined, {
+          context: "order.shippingAddress",
+        })
       : undefined,
     billingAddress: row.billing_address
-      ? JSON.parse(row.billing_address)
+      ? safeJsonParse<Address | undefined>(row.billing_address, undefined, {
+          context: "order.billingAddress",
+        })
       : undefined,
     fulfilledAt: row.fulfilled_at
       ? new Date(row.fulfilled_at * 1000)
@@ -1303,7 +1315,11 @@ function mapLineItemRow(row: LineItemRow): LineItem {
     taxAmount: row.tax_amount
       ? { amount: row.tax_amount, currency: "usd" }
       : undefined,
-    metadata: JSON.parse(row.metadata || "{}"),
+    metadata: safeJsonParse<Record<string, string>>(
+      row.metadata,
+      {},
+      { context: "lineItem.metadata" },
+    ),
   };
 }
 
@@ -1315,13 +1331,25 @@ function mapCustomerRow(row: CustomerRow): Customer {
     name: row.name || undefined,
     phone: row.phone || undefined,
     defaultShippingAddress: row.default_shipping_address
-      ? JSON.parse(row.default_shipping_address)
+      ? safeJsonParse<Address | undefined>(
+          row.default_shipping_address,
+          undefined,
+          { context: "customer.shippingAddress" },
+        )
       : undefined,
     defaultBillingAddress: row.default_billing_address
-      ? JSON.parse(row.default_billing_address)
+      ? safeJsonParse<Address | undefined>(
+          row.default_billing_address,
+          undefined,
+          { context: "customer.billingAddress" },
+        )
       : undefined,
     providerCustomerId: row.provider_customer_id || undefined,
-    metadata: JSON.parse(row.metadata || "{}"),
+    metadata: safeJsonParse<Record<string, string>>(
+      row.metadata,
+      {},
+      { context: "customer.metadata" },
+    ),
     createdAt: new Date(row.created_at * 1000),
     updatedAt: new Date(row.updated_at * 1000),
   };
