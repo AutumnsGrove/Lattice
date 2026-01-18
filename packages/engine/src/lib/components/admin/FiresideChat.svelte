@@ -344,6 +344,11 @@
           <Sparkles size={16} />
           {isDrafting ? "Drafting..." : "Ready to draft"}
         </button>
+      {:else if messages.length > 0}
+        <p class="draft-hint" title="Share a few more thoughts and I'll be able to help shape them into a draft">
+          <Sparkles size={14} />
+          <span>Keep chatting - drafting unlocks after a few exchanges</span>
+        </p>
       {/if}
 
       <div class="input-row">
@@ -563,6 +568,23 @@
   .draft-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+  }
+
+  .draft-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--grove-text-secondary, #a0a0a0);
+    font-style: italic;
+    cursor: help;
+  }
+
+  .draft-hint:hover {
+    color: var(--grove-text-primary, #e8e8e8);
   }
 
   .input-row {

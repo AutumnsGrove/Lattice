@@ -25,17 +25,24 @@ import { checkRateLimit } from "$lib/server/rate-limits/index.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
 import { queryOne, execute, DatabaseError } from "$lib/server/services/database.js";
 
+// Import pure functions from separate module (enables testing)
+import {
+  type FiresideMessage,
+  MAX_MESSAGE_LENGTH,
+  RESPONSE_MAX_TOKENS,
+  DRAFT_MAX_TOKENS,
+  selectStarterPrompt,
+  estimateTokens,
+  isConversationTooLong,
+  canDraft,
+  generateConversationId,
+} from "./fireside.js";
+
 export const prerender = false;
 
 // ============================================================================
 // Types
 // ============================================================================
-
-interface FiresideMessage {
-  role: "wisp" | "user";
-  content: string;
-  timestamp: string;
-}
 
 interface FiresideRequest {
   action: "start" | "respond" | "draft";
@@ -43,107 +50,6 @@ interface FiresideRequest {
   conversation?: FiresideMessage[];
   starterPrompt?: string;
   conversationId?: string;
-}
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-/** Maximum length of a single user message */
-const MAX_MESSAGE_LENGTH = 2000;
-
-/** Minimum number of user messages before drafting is allowed */
-const MIN_MESSAGES_FOR_DRAFT = 3;
-
-/** Minimum estimated tokens from user before drafting is allowed */
-const MIN_TOKENS_FOR_DRAFT = 150;
-
-/** Average characters per token (rough estimate) */
-const CHARS_PER_TOKEN = 4;
-
-/** Max tokens for Wisp's response in conversation */
-const RESPONSE_MAX_TOKENS = 150;
-
-/** Max tokens for draft generation */
-const DRAFT_MAX_TOKENS = 2000;
-
-// ============================================================================
-// Starter Prompts
-// ============================================================================
-
-const STARTER_PROMPTS = [
-  // Open & Warm
-  "What's been living in your head lately?",
-  "What surprised you this week?",
-  "What are you excited about right now?",
-  "What's something small that made you smile recently?",
-  // Reflective
-  "What's something you've been meaning to write about but haven't found the words for?",
-  "What would you tell a friend who asked how you're *really* doing?",
-  "What's a thought you keep turning over?",
-  // Creative & Playful
-  "If you could ramble about anything right now, what would it be?",
-  "What's something you wish more people understood?",
-  "What did you learn recently that you can't stop thinking about?",
-  // Returning Writers
-  "It's been a while. What's been happening in your world?",
-  "What are you working on that you'd love to talk about?",
-];
-
-/**
- * Select a starter prompt using pseudorandom rotation
- * Same user sees same prompt on same day, different prompt each day
- */
-function selectStarterPrompt(userId: string): string {
-  const today = new Date().toISOString().slice(0, 10);
-  const seed = hashString(`${userId}:${today}`);
-  return STARTER_PROMPTS[seed % STARTER_PROMPTS.length];
-}
-
-/**
- * Simple string hash for pseudorandom selection
- */
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
-}
-
-// ============================================================================
-// Conversation Logic
-// ============================================================================
-
-/**
- * Check if enough substance exists to generate a draft
- */
-function canDraft(conversation: FiresideMessage[]): boolean {
-  const userMessages = conversation.filter((m) => m.role === "user");
-  const totalUserTokens = userMessages.reduce(
-    (sum, m) => sum + estimateTokens(m.content),
-    0
-  );
-
-  return userMessages.length >= MIN_MESSAGES_FOR_DRAFT && totalUserTokens >= MIN_TOKENS_FOR_DRAFT;
-}
-
-/**
- * Rough token estimation
- */
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
-}
-
-/**
- * Generate a conversation ID
- */
-function generateConversationId(): string {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${random}`;
 }
 
 // ============================================================================
@@ -352,8 +258,19 @@ async function handleRespond(
     );
   }
 
-  // Build conversation context for the model with proper delimiters for user content
+  // Check conversation length to prevent unbounded growth
   const history = conversation || [];
+  if (isConversationTooLong(history)) {
+    return json(
+      {
+        error: "We've been chatting a while! This is a good time to draft what you have, or start fresh.",
+        shouldDraft: true,
+      },
+      { status: 400 }
+    );
+  }
+
+  // Build conversation context for the model with proper delimiters for user content
   const conversationText = history
     .map((m) => {
       if (m.role === "user") {
