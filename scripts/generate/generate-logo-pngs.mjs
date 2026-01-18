@@ -235,6 +235,96 @@ async function generateCombinedLogo(logoSize = 512, overlap = 0) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// COMBINED LOGO WITH GLASS CARD BACKGROUND
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function generateCombinedLogoWithGlassCard(logoSize = 512, overlap = 0) {
+  console.log("🪟 Generating combined seasonal logo with glass card...");
+
+  // Generate SVG buffers for each season (upright, no windswept rotation)
+  const logoBuffers = await Promise.all(
+    SEASONS.map(async (season) => {
+      const svg = generateSvg(season, { rotation: 0 });
+      return sharp(Buffer.from(svg))
+        .resize(logoSize, logoSize)
+        .png()
+        .toBuffer();
+    }),
+  );
+
+  // Calculate canvas dimensions with padding for glass card
+  const effectiveWidth = logoSize - overlap;
+  const logosWidth = logoSize + effectiveWidth * (SEASONS.length - 1);
+  const padding = Math.round(logoSize * 0.08); // 8% padding around logos
+  const canvasWidth = logosWidth + padding * 2;
+  const canvasHeight = logoSize + padding * 2;
+  const borderRadius = Math.round(logoSize * 0.06); // 6% corner radius
+
+  // Create the glass card SVG background
+  const glassCardSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">
+  <defs>
+    <!-- Subtle gradient for glass depth -->
+    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:0.25" />
+      <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0.12" />
+    </linearGradient>
+    <!-- Inner highlight for glass effect -->
+    <linearGradient id="innerHighlight" x1="0%" y1="0%" x2="0%" y2="50%">
+      <stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  <!-- Main glass card -->
+  <rect x="1" y="1" width="${canvasWidth - 2}" height="${canvasHeight - 2}"
+        rx="${borderRadius}" ry="${borderRadius}"
+        fill="url(#glassGradient)"
+        stroke="rgba(255,255,255,0.3)"
+        stroke-width="1" />
+  <!-- Inner highlight bar at top -->
+  <rect x="2" y="2" width="${canvasWidth - 4}" height="${Math.round(canvasHeight * 0.4)}"
+        rx="${borderRadius - 1}" ry="${borderRadius - 1}"
+        fill="url(#innerHighlight)" />
+</svg>`;
+
+  const glassCardBuffer = await sharp(Buffer.from(glassCardSvg))
+    .png()
+    .toBuffer();
+
+  // Create composite inputs: glass card first, then logos on top
+  const compositeInputs = [
+    { input: glassCardBuffer, left: 0, top: 0 },
+    ...logoBuffers.map((buffer, index) => ({
+      input: buffer,
+      left: padding + index * effectiveWidth,
+      top: padding,
+    })),
+  ];
+
+  // Create transparent canvas and composite all layers
+  const combinedBuffer = await sharp({
+    create: {
+      width: canvasWidth,
+      height: canvasHeight,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite(compositeInputs)
+    .png()
+    .toBuffer();
+
+  // Save the combined logo with glass card
+  const overlapSuffix = overlap > 0 ? `-overlap${overlap}` : "";
+  const filename = `logo-seasons-combined-${logoSize}${overlapSuffix}-glass.png`;
+  const filepath = join(OUTPUT_DIR, filename);
+
+  await writeFile(filepath, combinedBuffer);
+  console.log(`  ✓ ${filename} (${canvasWidth}x${canvasHeight}px)`);
+
+  return filepath;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -254,12 +344,19 @@ async function main() {
   await generateCombinedLogo(512, Math.round(512 * 0.65));
   console.log("");
 
+  // Generate combined seasonal logos with glass card background
+  // Same overlap values but with glass card behind
+  await generateCombinedLogoWithGlassCard(512, Math.round(512 * 0.55));
+  await generateCombinedLogoWithGlassCard(512, Math.round(512 * 0.65));
+  console.log("");
+
   // Summary
   const faviconCount = PACKAGES.length * Object.keys(FAVICON_SIZES).length;
   const emailCount = SEASONS.length * EMAIL_SIZES.length;
   console.log(`✅ Generated ${faviconCount} package favicon PNGs`);
   console.log(`✅ Generated ${emailCount} seasonal email PNGs`);
   console.log(`✅ Generated 2 combined seasonal logos`);
+  console.log(`✅ Generated 2 combined seasonal logos with glass card`);
 }
 
 main().catch(console.error);
