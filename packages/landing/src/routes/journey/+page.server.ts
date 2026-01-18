@@ -1,12 +1,17 @@
 import historyData from "../../../static/data/history.csv?raw";
+import { safeParseInt, parseTimestampToDate } from "$lib/utils/journey";
 
 /**
- * CSV Schema (17 columns):
+ * CSV Schema (18 columns):
  * timestamp, label, git_hash, total_code_lines, svelte_lines, ts_lines,
  * js_lines, css_lines, doc_words, doc_lines, total_files, directories,
- * estimated_tokens, commits, test_files, test_lines, bundle_size_kb
+ * estimated_tokens, commits, test_files, test_lines, bundle_size_kb, npm_unpacked_size
+ *
+ * IMPORTANT: This schema uses hardcoded column indexes (0-17) in parseCSV().
+ * New columns MUST be added at the end to maintain backward compatibility.
+ * If you add a column in the middle, all subsequent indexes will break.
  */
-const EXPECTED_COLUMNS = 17;
+const EXPECTED_COLUMNS = 18;
 
 interface VersionSummary {
   version: string;
@@ -46,40 +51,8 @@ interface SnapshotData {
   testFiles: number;
   testLines: number;
   bundleSizeKb: number;
+  npmUnpackedSize: number;
   date: string;
-}
-
-function safeParseInt(value: string | undefined): number {
-  if (!value) return 0;
-  const parsed = parseInt(value, 10);
-  return isNaN(parsed) ? 0 : parsed;
-}
-
-function parseTimestampToDate(timestamp: string): string {
-  if (!timestamp || !timestamp.includes("_")) {
-    return "Unknown date";
-  }
-
-  const datePart = timestamp.split("_")[0];
-  const dateParts = datePart.split("-");
-
-  if (dateParts.length !== 3) {
-    return "Unknown date";
-  }
-
-  const year = safeParseInt(dateParts[0]);
-  const month = safeParseInt(dateParts[1]);
-  const day = safeParseInt(dateParts[2]);
-
-  if (year < 2000 || month < 1 || month > 12 || day < 1 || day > 31) {
-    return "Unknown date";
-  }
-
-  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function parseCSV(csv: string): SnapshotData[] {
@@ -129,6 +102,7 @@ function parseCSV(csv: string): SnapshotData[] {
       testFiles: safeParseInt(values[14]),
       testLines: safeParseInt(values[15]),
       bundleSizeKb: safeParseInt(values[16]),
+      npmUnpackedSize: safeParseInt(values[17]),
       date: parseTimestampToDate(values[0]),
     });
   }

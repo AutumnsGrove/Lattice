@@ -2,6 +2,7 @@
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Tag, Sprout, ChevronDown, Sparkles, Wrench, List } from 'lucide-svelte';
+	import { formatNumber, formatBytes, getGrowthIcon } from '$lib/utils/journey';
 
 	// Floating TOC state
 	let tocOpen = $state(false);
@@ -15,7 +16,7 @@
 		{ id: 'documentation', text: 'Documentation' },
 		{ id: 'milestones', text: 'Milestones' },
 		{ id: 'typescript-migration', text: 'TypeScript Migration' },
-		{ id: 'total-size', text: 'Total Project Size' }
+		{ id: 'package-size', text: 'Package Size' }
 	];
 
 	function scrollToSection(id: string) {
@@ -60,16 +61,6 @@
 	// Get summary for a version label
 	function getSummary(label: string) {
 		return data.summaries[label] || null;
-	}
-
-	function formatNumber(num: number): string {
-		return num.toLocaleString();
-	}
-
-	function getGrowthIcon(value: number): string {
-		if (value > 0) return '↑';
-		if (value < 0) return '↓';
-		return '→';
 	}
 
 	// Calculate percentages for the language bar
@@ -531,17 +522,24 @@
 			</section>
 			{/if}
 
-			<!-- Total Project Size -->
-			<section id="total-size" class="mb-16 scroll-mt-24">
+			<!-- Package Size -->
+			<section id="package-size" class="mb-16 scroll-mt-24">
 				<div class="card p-8 text-center bg-accent border-accent">
-					<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">Total Project Size</div>
+					<div class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-2">NPM Package Size</div>
 					<div class="text-4xl md:text-5xl font-serif text-accent-muted mb-2">
-						~{formatNumber(data.latest.estimatedTokens)}
+						{formatBytes(data.latest.npmUnpackedSize)}
 					</div>
-					<div class="text-foreground-muted font-sans">estimated tokens</div>
-					<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-						That's roughly {Math.round(data.latest.estimatedTokens / 100000) * 100}k tokens — enough context for an AI to understand the entire codebase.
-					</p>
+					{#if data.latest.npmUnpackedSize > 0}
+						<div class="text-foreground-muted font-sans">unpacked size</div>
+						<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
+							That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with Lattice.
+						</p>
+					{:else}
+						<div class="text-foreground-muted font-sans">package data unavailable</div>
+						<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
+							This version's package size data isn't available yet. Check back after it's published to NPM.
+						</p>
+					{/if}
 				</div>
 			</section>
 			{:else}
