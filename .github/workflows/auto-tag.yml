@@ -120,16 +120,34 @@ jobs:
       - name: Calculate package size
         if: steps.snapshot.outcome == 'success'
         run: |
+          set -e  # Exit on any error
+
           TAG="${{ steps.snapshot.outputs.tag_name }}"
           echo "Calculating package size for: $TAG"
 
+          # Sanitize TAG to prevent injection (allow only valid semver chars)
+          TAG_SAFE=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]//g')
+          if [[ "$TAG" != "$TAG_SAFE" ]]; then
+            echo "Error: TAG contains invalid characters"
+            exit 1
+          fi
+
           # Install dependencies and build the package
-          pnpm install
+          echo "Installing dependencies..."
+          pnpm install || { echo "Failed to install dependencies"; exit 1; }
+
           cd packages/engine
-          pnpm run package
+          echo "Building package..."
+          pnpm run package || { echo "Failed to build package"; exit 1; }
 
           # Create tarball and measure its size
+          echo "Creating tarball..."
           TARBALL=$(pnpm pack 2>/dev/null | tail -1)
+          if [[ -z "$TARBALL" || ! -f "$TARBALL" ]]; then
+            echo "Error: Failed to create tarball"
+            exit 1
+          fi
+
           TARBALL_SIZE=$(stat -c%s "$TARBALL" 2>/dev/null || stat -f%z "$TARBALL")
 
           # Get unpacked size by extracting and measuring
@@ -148,17 +166,22 @@ jobs:
           # Check if npm_unpacked_size column exists, add if not
           HEADER=$(head -1 "$CSV_FILE")
           if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
+            echo "Adding npm_unpacked_size column to CSV..."
             # Add column header
             sed -i "1s/$/,npm_unpacked_size/" "$CSV_FILE"
             # Add 0 to all existing rows
             sed -i "2,\$s/$/,0/" "$CSV_FILE"
           fi
 
-          # Update the size for this specific version
-          sed -i "s/^\\([^,]*,$TAG,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*\\),.*$/\\1,$UNPACKED_SIZE/" "$CSV_FILE"
+          # Update the size for this specific version using awk (safer than sed for CSV)
+          # This matches on column 2 (label/tag) and updates the last column
+          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" \
+            'BEGIN {OFS=","} NR==1 {print; next} $2==tag {$NF=size} {print}' \
+            "$CSV_FILE" > "$CSV_FILE.tmp" && mv "$CSV_FILE.tmp" "$CSV_FILE"
 
           # Verify the update
-          grep "$TAG" "$CSV_FILE"
+          echo "Verifying update..."
+          grep "$TAG" "$CSV_FILE" || { echo "Warning: Could not verify update"; }
           echo "Package size updated in $CSV_FILE"
 
           # Cleanup

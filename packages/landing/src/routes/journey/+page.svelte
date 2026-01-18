@@ -67,7 +67,7 @@
 	}
 
 	function formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 B';
+		if (!bytes || bytes === 0) return 'Not Published';
 		if (bytes < 1024) return `${bytes} B`;
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 		return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -545,10 +545,17 @@
 					<div class="text-4xl md:text-5xl font-serif text-accent-muted mb-2">
 						{formatBytes(data.latest.npmUnpackedSize)}
 					</div>
-					<div class="text-foreground-muted font-sans">unpacked size</div>
-					<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
-						That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with Lattice.
-					</p>
+					{#if data.latest.npmUnpackedSize > 0}
+						<div class="text-foreground-muted font-sans">unpacked size</div>
+						<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
+							That's what you get when you <code class="bg-background/50 px-1.5 py-0.5 rounded text-xs">npm install @autumnsgrove/groveengine</code> — components, utilities, and everything you need to build with Lattice.
+						</p>
+					{:else}
+						<div class="text-foreground-muted font-sans">package data unavailable</div>
+						<p class="text-foreground-faint font-sans text-sm mt-4 max-w-md mx-auto">
+							This version's package size data isn't available yet. Check back after it's published to NPM.
+						</p>
+					{/if}
 				</div>
 			</section>
 			{:else}
