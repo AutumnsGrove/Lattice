@@ -217,6 +217,12 @@ export function sanitizeWebhookPayload(
   if (typeof meta.event_name !== "string") {
     return null; // Invalid payload structure - event_name must be string
   }
+  if (!data.id || typeof data.id !== "string") {
+    return null; // Invalid payload structure - data.id must be string
+  }
+  if (!data.type || typeof data.type !== "string") {
+    return null; // Invalid payload structure - data.type must be string
+  }
 
   // Sanitize meta
   const sanitizedMeta: Record<string, unknown> = {};
