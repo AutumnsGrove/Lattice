@@ -1,6 +1,6 @@
 # Component Reference
 
-> 167 components organized by category, ready to help you build something beautiful.
+> 185 components organized by category, ready to help you build something beautiful.
 > Import from `@autumnsgrove/groveengine/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
@@ -45,8 +45,8 @@ Import from specific subpaths when you need several components from the same fam
   // Layout chrome
   import { Header, Footer, ThemeToggle } from '@autumnsgrove/groveengine/ui/chrome';
 
-  // Headless primitives for custom styling
-  import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@autumnsgrove/groveengine/ui/primitives/accordion';
+  // Wrapper components (simplified APIs over primitives)
+  import { Accordion, Select, Tabs, Sheet } from '@autumnsgrove/groveengine/ui';
 </script>
 ```
 
@@ -66,7 +66,6 @@ Import from specific subpaths when you need several components from the same fam
 | `@autumnsgrove/groveengine/ui/indicators` | StatusBadge, ScoreBar, CreditBalance |
 | `@autumnsgrove/groveengine/ui/icons` | Icon components and Lucide icon registries |
 | `@autumnsgrove/groveengine/ui/terrarium` | Canvas editor for nature scene composition |
-| `@autumnsgrove/groveengine/ui/primitives/*` | Headless primitives (accordion, dialog, select, etc.) |
 | `@autumnsgrove/groveengine/ui/utils` | Utilities like `cn()` for class merging |
 | `@autumnsgrove/groveengine/ui/stores` | `seasonStore`, `themeStore` for reactive state |
 
@@ -238,82 +237,64 @@ These wrap the primitives with Grove styling, ready to use out of the box.
 
 ## primitives/ - Headless Primitives (45)
 
-Built on [bits-ui](https://bits-ui.com), these are unstyled, accessible building blocks. Use them when you need complete control over appearance while keeping all the accessibility and interaction patterns handled for you.
+Built on [bits-ui](https://bits-ui.com), primitives are unstyled, accessible building blocks that power Grove's wrapper components. The primitives themselves are internal—you'll use the simplified wrapper components exported from `@autumnsgrove/groveengine/ui`.
+
+### Wrapper Components
+
+Grove provides wrapper components with sensible defaults and Grove styling. Import these from the main UI path:
+
+```svelte
+<script>
+  import { Accordion, Dialog, Select, Sheet, Tabs, Table } from '@autumnsgrove/groveengine/ui';
+</script>
+```
 
 ### Accordion
 
 ```svelte
 <script>
-  import {
-    Accordion,
-    AccordionItem,
-    AccordionTrigger,
-    AccordionContent
-  } from '@autumnsgrove/groveengine/ui/primitives/accordion';
+  import { Accordion } from '@autumnsgrove/groveengine/ui';
 </script>
 
-<Accordion>
-  <AccordionItem value="intro">
-    <AccordionTrigger>What is Grove?</AccordionTrigger>
-    <AccordionContent>
-      A cozy corner of the web where you can be yourself.
-    </AccordionContent>
-  </AccordionItem>
-</Accordion>
+<Accordion items={[
+  { value: 'intro', title: 'What is Grove?', content: 'A cozy corner of the web.' },
+  { value: 'features', title: 'Features', content: 'Markdown editing, themes, and more.' }
+]} />
 ```
 
 ### Select
 
 ```svelte
 <script>
-  import {
-    Select,
-    SelectTrigger,
-    SelectContent,
-    SelectItem
-  } from '@autumnsgrove/groveengine/ui/primitives/select';
+  import { Select } from '@autumnsgrove/groveengine/ui';
+
+  let season = $state('autumn');
 </script>
 
-<Select>
-  <SelectTrigger>Choose a season</SelectTrigger>
-  <SelectContent>
-    <SelectItem value="spring">Spring</SelectItem>
-    <SelectItem value="summer">Summer</SelectItem>
-    <SelectItem value="autumn">Autumn</SelectItem>
-    <SelectItem value="winter">Winter</SelectItem>
-  </SelectContent>
-</Select>
+<Select
+  bind:value={season}
+  options={[
+    { value: 'spring', label: 'Spring' },
+    { value: 'summer', label: 'Summer' },
+    { value: 'autumn', label: 'Autumn' },
+    { value: 'winter', label: 'Winter' }
+  ]}
+  placeholder="Choose a season"
+/>
 ```
 
 ### Dialog
 
 ```svelte
 <script>
-  import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-    DialogClose
-  } from '@autumnsgrove/groveengine/ui/primitives/dialog';
+  import { Dialog } from '@autumnsgrove/groveengine/ui';
+
+  let open = $state(false);
 </script>
 
-<Dialog>
-  <DialogTrigger>Open Settings</DialogTrigger>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Settings</DialogTitle>
-      <DialogDescription>Make this space yours.</DialogDescription>
-    </DialogHeader>
-    <!-- form content -->
-    <DialogFooter>
-      <DialogClose>Cancel</DialogClose>
-      <button>Save</button>
-    </DialogFooter>
-  </DialogContent>
+<Dialog bind:open title="Settings" description="Make this space yours.">
+  <!-- form content -->
+  <button onclick={() => open = false}>Save</button>
 </Dialog>
 ```
 
@@ -323,26 +304,13 @@ Slide-out panels from any edge.
 
 ```svelte
 <script>
-  import {
-    Sheet,
-    SheetTrigger,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetDescription,
-    SheetFooter,
-    SheetClose
-  } from '@autumnsgrove/groveengine/ui/primitives/sheet';
+  import { Sheet } from '@autumnsgrove/groveengine/ui';
+
+  let open = $state(false);
 </script>
 
-<Sheet>
-  <SheetTrigger>Open Menu</SheetTrigger>
-  <SheetContent side="left">
-    <SheetHeader>
-      <SheetTitle>Navigation</SheetTitle>
-    </SheetHeader>
-    <!-- menu items -->
-  </SheetContent>
+<Sheet bind:open side="left" title="Navigation">
+  <!-- menu items -->
 </Sheet>
 ```
 
@@ -350,25 +318,21 @@ Slide-out panels from any edge.
 
 ```svelte
 <script>
-  import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent
-  } from '@autumnsgrove/groveengine/ui/primitives/tabs';
+  import { Tabs } from '@autumnsgrove/groveengine/ui';
 </script>
 
-<Tabs defaultValue="posts">
-  <TabsList>
-    <TabsTrigger value="posts">Posts</TabsTrigger>
-    <TabsTrigger value="drafts">Drafts</TabsTrigger>
-  </TabsList>
-  <TabsContent value="posts">Published content</TabsContent>
-  <TabsContent value="drafts">Work in progress</TabsContent>
-</Tabs>
+<Tabs
+  defaultValue="posts"
+  tabs={[
+    { value: 'posts', label: 'Posts', content: 'Published content' },
+    { value: 'drafts', label: 'Drafts', content: 'Work in progress' }
+  ]}
+/>
 ```
 
 ### Table
+
+Table subcomponents are exported for flexible table composition:
 
 ```svelte
 <script>
@@ -379,7 +343,7 @@ Slide-out panels from any edge.
     TableRow,
     TableHead,
     TableCell
-  } from '@autumnsgrove/groveengine/ui/primitives/table';
+  } from '@autumnsgrove/groveengine/ui';
 </script>
 
 <Table>
@@ -398,23 +362,20 @@ Slide-out panels from any edge.
 </Table>
 ```
 
-### All Primitive Components
+### Available Wrapper Components
 
-| Module | Components |
-|--------|------------|
-| **accordion/** | `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionContent` |
-| **badge/** | `Badge`, `badgeVariants` |
-| **button/** | `Button`, `buttonVariants` |
-| **card/** | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` |
-| **dialog/** | `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`, `DialogClose`, `DialogPortal`, `DialogOverlay` |
-| **input/** | `Input` |
-| **select/** | `Select`, `SelectTrigger`, `SelectContent`, `SelectItem`, `SelectGroup`, `SelectGroupHeading`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton` |
-| **separator/** | `Separator` |
-| **sheet/** | `Sheet`, `SheetTrigger`, `SheetContent`, `SheetHeader`, `SheetTitle`, `SheetDescription`, `SheetFooter`, `SheetClose`, `SheetPortal`, `SheetOverlay` |
-| **skeleton/** | `Skeleton` |
-| **table/** | `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`, `TableFooter`, `TableCaption` |
-| **tabs/** | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` |
-| **textarea/** | `Textarea` |
+| Component | What It Wraps | Exported From |
+|-----------|---------------|---------------|
+| `Accordion` | Collapsible content panels | `@autumnsgrove/groveengine/ui` |
+| `Dialog` | Modal dialogs | `@autumnsgrove/groveengine/ui` |
+| `Select` | Dropdown selection | `@autumnsgrove/groveengine/ui` |
+| `Sheet` | Slide-out panels | `@autumnsgrove/groveengine/ui` |
+| `Tabs` | Tabbed content | `@autumnsgrove/groveengine/ui` |
+| `Table` + subcomponents | Data tables | `@autumnsgrove/groveengine/ui` |
+| `Input` | Text input | `@autumnsgrove/groveengine/ui` |
+| `Textarea` | Multi-line input | `@autumnsgrove/groveengine/ui` |
+| `Badge` | Labels and tags | `@autumnsgrove/groveengine/ui` |
+| `Skeleton` | Loading placeholders | `@autumnsgrove/groveengine/ui` |
 
 ---
 
@@ -426,10 +387,30 @@ This is where Grove comes alive. These SVG components create atmospheric forest 
 
 Most nature components accept a `season` prop that adapts their appearance:
 - **spring** - Fresh yellow-greens, cherry blossoms at peak bloom
-- **summer** - Lush greens, full foliage (default)
-- **autumn** - Warm oranges, golds, and russet tones
+- **summer** - Lush greens, full foliage
+- **autumn** - Warm oranges, golds, and russet tones (default)
 - **winter** - Frosted evergreens, snow accents, bare deciduous trees
 - **midnight** - Special deep plum and amber palette
+
+**Season prop vs seasonStore:** Components automatically subscribe to `seasonStore` for their default season. The `season` prop is an *override*—use it when you want a component to stay fixed regardless of the global season. Internally, components use: `const activeSeason = $derived(season ?? $seasonStore)`.
+
+```svelte
+<script>
+  import { TreePine } from '@autumnsgrove/groveengine/ui/nature';
+  import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+</script>
+
+<!-- This tree follows the global season -->
+<TreePine />
+
+<!-- This tree is always wintery, even in summer -->
+<TreePine season="winter" />
+
+<!-- Change the global season for all components -->
+<button onclick={() => seasonStore.set('spring')}>
+  Switch to Spring
+</button>
+```
 
 ### Trees (4)
 
