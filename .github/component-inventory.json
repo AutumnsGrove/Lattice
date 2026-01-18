@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Tracks engine component counts for documentation freshness checks",
+  "lastUpdated": "2026-01-18",
+  "lastAuditedBy": "claude/codebase-audit-planning",
+  "components": {
+    "total": 185,
+    "breakdown": {
+      "primitives": 45,
+      "nature": 64,
+      "ui": 28,
+      "typography": 11,
+      "chrome": 6,
+      "terrarium": 7,
+      "gallery": 4,
+      "charts": 4,
+      "content": 4,
+      "states": 4,
+      "forms": 3,
+      "indicators": 3,
+      "icons": 2
+    },
+    "paths": {
+      "primitives": "packages/engine/src/lib/ui/components/primitives",
+      "nature": "packages/engine/src/lib/ui/components/nature",
+      "ui": "packages/engine/src/lib/ui/components/ui",
+      "typography": "packages/engine/src/lib/ui/components/typography",
+      "chrome": "packages/engine/src/lib/ui/components/chrome",
+      "terrarium": "packages/engine/src/lib/ui/components/terrarium",
+      "gallery": "packages/engine/src/lib/ui/components/gallery",
+      "charts": "packages/engine/src/lib/ui/components/charts",
+      "content": "packages/engine/src/lib/ui/components/content",
+      "states": "packages/engine/src/lib/ui/components/states",
+      "forms": "packages/engine/src/lib/ui/components/forms",
+      "indicators": "packages/engine/src/lib/ui/components/indicators",
+      "icons": "packages/engine/src/lib/ui/components/icons"
+    }
+  },
+  "documentation": {
+    "componentReference": "docs/design-system/COMPONENT-REFERENCE.md",
+    "plan": "docs/plans/planned/documentation-plan.md",
+    "status": "planned"
+  }
+}

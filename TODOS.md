@@ -6,9 +6,39 @@
 
 ---
 
-# 🔄 CURRENT SESSION (Jan 16, 2026)
+# 🔄 CURRENT SESSION (Jan 18, 2026)
 
 ## Completed Today ✅
+
+### 📋 Comprehensive Codebase Audit Planning — PLANNING COMPLETE!
+> **7 planning documents created** covering security, testing, UI, onboarding, documentation, and code quality
+> **Status:** Plans ready for implementation (see individual docs for effort estimates)
+
+Created detailed implementation plans in `docs/plans/planned/`:
+
+| Plan | Priority | Est. Effort | Summary |
+|------|----------|-------------|---------|
+| [`encryption-pass.md`](docs/plans/planned/encryption-pass.md) | P1 | 4-6h | Wire AES-256-GCM encryption for GitHub/OpenRouter tokens in Journey Curio |
+| [`security-hardening.md`](docs/plans/planned/security-hardening.md) | P1 | 6-8h | Webhook payload sanitization + 120-day TTL; standardize `safeJsonParse()` usage |
+| [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs, focus management |
+| [`documentation-plan.md`](docs/plans/planned/documentation-plan.md) | P2 | 12-16h | Component reference (185 components), dark mode guide, colors, spacing, animation |
+| [`code-quality-optimizations.md`](docs/plans/planned/code-quality-optimizations.md) | P2 | 8-12h | Safari Reader fallback, CSP standardization, DB query isolation audit |
+| [`ui-placeholders.md`](docs/plans/planned/ui-placeholders.md) | P2 | 4-6h | Enhanced placeholders for Monitor (Vista) and Domains (Forage) pages |
+| [`testing-fixes.md`](docs/plans/planned/testing-fixes.md) | P2 | 4-6h | Fix 7 skipped tests related to Svelte 5 reactivity timing |
+
+**Key Findings from Audit:**
+- ✅ Encryption module exists and is tested (31 test cases) — just needs wiring
+- ✅ Reserved usernames system is **90% complete** (450+ entries, API exists, tests pass)
+- ❌ LemonSqueezy webhooks store full PII with no cleanup mechanism
+- ❌ ~30 unsafe `JSON.parse()` calls need wrapping
+- ❌ Safari Reader fallback exists in `domains/` but not in `engine/`
+- ⚠️ 7 skipped tests due to Svelte 5 reactivity + Vitest timing issues
+
+---
+
+# 🔄 PREVIOUS SESSION (Jan 16, 2026)
+
+## Completed ✅
 
 ### 🧪 Testing Infrastructure — COMPLETE!
 > **178 test files, ~2,500+ test cases across the engine package**
@@ -124,7 +154,8 @@
 # 🌱 PLANT WALKTHROUGH IMPROVEMENTS
 
 > **Spec:** `docs/specs/plant-spec.md`
-> **Location:** `plant/src/routes/`
+> **Plan:** `docs/plans/planned/plant-onboarding-enhancements.md`
+> **Location:** `packages/plant/src/routes/`
 
 ## Partially Implemented 🚧
 
@@ -158,10 +189,16 @@
 - [ ] Add WebAuthn passkey registration flow
 - [ ] Store passkey credentials in Heartwood
 
-**Reserved Usernames Seed Data**
-- [ ] Create `reserved_usernames` table seed file
-- [ ] Add common reserved names: admin, support, help, api, www, etc.
-- [ ] Add Grove service names: heartwood, ivy, meadow, porch, etc.
+**Reserved Usernames Seed Data** — ✅ 90% COMPLETE
+> **See:** `docs/plans/planned/plant-onboarding-enhancements.md` (Item 5)
+> **Existing work:** Migrations 012 & 017 seed 450+ entries; API at `/api/check-username` works
+
+- [x] Create `reserved_usernames` table seed file — **DONE** (migration 012)
+- [x] Add common reserved names — **DONE** (migration 017: 450+ entries)
+- [x] Add Grove service names — **DONE** (all services included)
+- [ ] Create admin UI for managing reserved usernames
+- [ ] Add audit logging for changes
+- [ ] Create tests for `offensive-blocklist.ts`
 
 **Analytics / Funnel Tracking**
 - [ ] Track funnel: OAuth → Profile → Plans → Checkout → Success
@@ -253,8 +290,10 @@
 
 ## Safari Reader Mode & Glass Cards
 > **Issue:** Safari Reader Mode strips `backdrop-blur`, making glass card content invisible
+> **Plan:** `docs/plans/planned/code-quality-optimizations.md` (§1)
+> **Status:** Fallback exists in `domains/src/app.css` but NOT in engine
 
-- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback
+- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback to engine
 - [ ] Wrap glass card content in semantic `<article>` or `<section>` elements
 - [ ] Test fix in Safari iOS and macOS
 
@@ -386,17 +425,21 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 # 📚 DOCUMENTATION (Remaining)
 
+> **Plan:** `docs/plans/planned/documentation-plan.md`
+> **185 components need cataloging** — excellent code-level docs exist, missing narrative guides
+
 - [ ] Add usage examples for tenants
 - [ ] Write testing documentation
 - [ ] Write AI Development Process Guide
 
 ## Design Documentation Gaps
-| Document | Priority |
-|----------|----------|
-| `COMPONENT-REFERENCE.md` | High |
-| `DARK-MODE-GUIDE.md` | High |
-| `SPACING-SYSTEM.md` | Medium |
-| `ANIMATION-GUIDE.md` | Medium |
+| Document | Priority | Plan Section |
+|----------|----------|--------------|
+| `COMPONENT-REFERENCE.md` | High | §1 (4-6h) |
+| `DARK-MODE-GUIDE.md` | High | §2 (2-3h) |
+| `COLORS.md` | Medium | §4 (2-3h) |
+| `SPACING-SYSTEM.md` | Medium | §3 (1-2h) |
+| `ANIMATION-GUIDE.md` | Medium | §5 (2-3h) |
 
 ---
 
@@ -430,4 +473,4 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-16 (security remediation audit complete!)*
+*Last updated: 2026-01-18 (comprehensive planning session complete!)*
