@@ -148,6 +148,21 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 # Cloudflare Pages Notes
 # =============================================================================
 # - Cron triggers are NOT supported in Pages mode
-# - Use Cloudflare Workers for scheduled tasks if needed
+# - Scheduled tasks use dedicated Workers (see below)
 # - Assets are handled automatically by Pages
 # - Custom domains configured in Cloudflare Dashboard
+#
+# =============================================================================
+# Scheduled Tasks (Webhook Cleanup)
+# =============================================================================
+# Webhook cleanup runs via a dedicated Worker with cron trigger:
+#
+#   Worker: packages/workers/webhook-cleanup/
+#   Schedule: Daily at 3:00 AM UTC (crons = ["0 3 * * *"])
+#
+# Deploy with:
+#   cd packages/workers/webhook-cleanup && pnpm install && pnpm deploy
+#
+# The worker deletes webhook_events where expires_at < now()
+# Retention period: 120 days (set by calculateWebhookExpiry in engine)
+# =============================================================================

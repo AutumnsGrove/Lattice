@@ -16,6 +16,7 @@
  */
 
 import { DEFAULT_TIER, type TierKey } from "../config/tiers.js";
+import { safeJsonParse } from "../utils/json.js";
 
 // ============================================================================
 // Types
@@ -152,7 +153,17 @@ export class PostMetaDO implements DurableObject {
       .one();
 
     if (stored?.value) {
-      this.meta = JSON.parse(stored.value as string);
+      const parsed = safeJsonParse<PostMeta | null>(
+        stored.value as string,
+        null,
+        {
+          context: "PostMetaDO.meta",
+        },
+      );
+      // Only assign if parsing succeeded
+      if (parsed) {
+        this.meta = parsed;
+      }
     }
 
     this.initialized = true;
