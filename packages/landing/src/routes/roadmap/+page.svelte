@@ -103,13 +103,13 @@
 			season: 'winter' as Season,
 			description: 'The groundwork has been laid. Foundations built in stillness.',
 			features: [
-				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true },
-				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true },
+				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
-				{ name: 'Email Waitlist', description: '59 seeds, waiting to sprout', done: true },
+				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true },
 				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
+				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true },
 				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' },
-			{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true }
+				{ name: 'Email Waitlist', description: '70 seeds, waiting to sprout', done: true }
 			]
 		},
 		thaw: {
@@ -118,15 +118,15 @@
 			season: 'winter' as Season,
 			description: 'Grove opens its doors. The first trees take root.',
 			features: [
+				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true, icon: 'sprout', major: true },
 				{ name: 'Sign Up', description: 'Google, email, or Hub account', done: true, icon: 'userplus' },
-				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true, icon: 'sprout' },
 				{ name: 'Your Blog', description: 'username.grove.place', done: true, icon: 'globe' },
 				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true, icon: 'penline' },
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
-				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download' },
-				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' }
+				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' },
+				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true }
 			]
 		},
 		'first-buds': {
@@ -135,16 +135,15 @@
 			season: 'spring' as Season,
 			description: 'New growth appears. The grove finds its voice.',
 			features: [
-				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
-				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber' },
-				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
-				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree' },
+				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree', major: true },
+				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests', major: true },
+				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true },
 				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook' },
-				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp' },
-				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests' },
+				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true },
+				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
+				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
 				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch' },
-				{ name: 'Bloom', description: 'Remote coding infrastructure — ephemeral, autonomous', done: false, icon: 'terminal', internal: true },
-				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial' }
+				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial', major: true }
 			]
 		},
 		'full-bloom': {
@@ -175,7 +174,7 @@
 			description: 'The grove settles into itself. A time for refinement.',
 			features: [
 				{ name: 'Wander', description: 'Immersive discovery — walk through the forest', done: false, major: true, icon: 'wander' },
-				{ name: 'Polish', description: 'Attention to every detail', done: false, icon: 'gem' },
+				{ name: 'Polish', description: 'Attention to every detail', done: false, icon: 'gem', major: true },
 				{ name: 'Performance', description: 'Fast everywhere, always', done: false, icon: 'zap' },
 				{ name: 'Accessibility', description: 'Grove for everyone', done: false, icon: 'accessibility' },
 				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false, icon: 'smartphone' },
@@ -191,7 +190,7 @@
 				{ name: 'The Café', description: 'A late-night tea shop for the sleepless and searching', done: false, dream: true, icon: 'coffee' },
 				{ name: 'Community Boards', description: 'QR codes linking physical to digital', done: false, dream: true, icon: 'qrcode' },
 				{ name: 'Local Zines', description: 'Grove blogs printed and shared', done: false, dream: true, icon: 'bookopen' },
-				{ name: 'A Third Place', description: 'That becomes a first home', done: false, dream: true, icon: 'home' }
+				{ name: 'A Third Place', description: 'That becomes a first home', done: false, dream: true, icon: 'home', major: true }
 			]
 		}
 	};
