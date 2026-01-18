@@ -14,9 +14,9 @@ describe("journey.ts", () => {
     });
 
     it("should format large numbers with locale separators", () => {
-      // Note: locale may vary, but should have separators
+      // Note: locale may vary (comma vs period), but should have separators
       const result = formatNumber(1234567);
-      expect(result).toMatch(/1.?234.?567/);
+      expect(result).toMatch(/1[,.]?234[,.]?567/);
     });
 
     it("should handle zero", () => {
@@ -38,6 +38,12 @@ describe("journey.ts", () => {
     it('should return "Not Published" for falsy values', () => {
       expect(formatBytes(null as unknown as number)).toBe("Not Published");
       expect(formatBytes(undefined as unknown as number)).toBe("Not Published");
+    });
+
+    it('should return "Not Published" for negative values', () => {
+      expect(formatBytes(-1)).toBe("Not Published");
+      expect(formatBytes(-1000)).toBe("Not Published");
+      expect(formatBytes(-1048576)).toBe("Not Published");
     });
 
     it("should format bytes under 1KB", () => {

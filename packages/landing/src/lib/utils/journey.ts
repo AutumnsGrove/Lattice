@@ -15,11 +15,11 @@ export function formatNumber(num: number): string {
 /**
  * Formats bytes into human-readable size string
  *
- * @param bytes - Size in bytes (0 or falsy returns "Not Published")
+ * @param bytes - Size in bytes (0, negative, or falsy returns "Not Published")
  * @returns Human-readable size string (e.g., "1.5 KB", "2.34 MB")
  */
 export function formatBytes(bytes: number): string {
-  if (!bytes || bytes === 0) return "Not Published";
+  if (!bytes || bytes <= 0) return "Not Published";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;

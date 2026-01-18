@@ -170,14 +170,18 @@ jobs:
           fi
 
           echo "Tarball: $TARBALL"
-          echo "Compressed size: $TARBALL_SIZE bytes ($(numfmt --to=iec $TARBALL_SIZE 2>/dev/null || echo "$TARBALL_SIZE"))"
-          echo "Unpacked size: $UNPACKED_SIZE bytes ($(numfmt --to=iec $UNPACKED_SIZE 2>/dev/null || echo "$UNPACKED_SIZE"))"
+          echo "Compressed size: $TARBALL_SIZE bytes ($(numfmt --to=iec "$TARBALL_SIZE" 2>/dev/null || echo "$TARBALL_SIZE"))"
+          echo "Unpacked size: $UNPACKED_SIZE bytes ($(numfmt --to=iec "$UNPACKED_SIZE" 2>/dev/null || echo "$UNPACKED_SIZE"))"
 
           # Update history.csv with the package size for this version
+          # NOTE: This workflow calculates package size at tag time (pre-publish verification)
+          # The backfill-npm-sizes.ts script fetches published versions (historical data recovery)
           cd ../..
           CSV_FILE="snapshots/history.csv"
 
           # Check if npm_unpacked_size column exists, add if not
+          # IMPORTANT: New columns MUST be added at the end to maintain backward compatibility
+          # with hardcoded column indexes in the CSV parsing code
           HEADER=$(head -1 "$CSV_FILE")
           if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
             echo "Adding npm_unpacked_size column to CSV..."

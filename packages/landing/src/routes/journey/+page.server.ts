@@ -6,6 +6,10 @@ import { safeParseInt, parseTimestampToDate } from "$lib/utils/journey";
  * timestamp, label, git_hash, total_code_lines, svelte_lines, ts_lines,
  * js_lines, css_lines, doc_words, doc_lines, total_files, directories,
  * estimated_tokens, commits, test_files, test_lines, bundle_size_kb, npm_unpacked_size
+ *
+ * IMPORTANT: This schema uses hardcoded column indexes (0-17) in parseCSV().
+ * New columns MUST be added at the end to maintain backward compatibility.
+ * If you add a column in the middle, all subsequent indexes will break.
  */
 const EXPECTED_COLUMNS = 18;
 
