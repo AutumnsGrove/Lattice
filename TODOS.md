@@ -206,9 +206,9 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Track drop-off points for optimization
 
 ## Quick Wins
-- [ ] **Custom confirmation dialogs** — Replace browser `confirm()` with glassmorphic modals
+- [x] **Custom confirmation dialogs** — Already using `GlassConfirmDialog` throughout ✅ (verified Jan 18, 2026)
 - [x] **Rate limit config** — Consolidated to `$lib/server/rate-limits/config.ts` ✅ (Jan 18, 2026)
-- [ ] **Focus management** — Return focus to button after actions complete
+- [x] **Focus management** — PR #390 adds save/restore focus + focus trapping ✅ (Jan 18, 2026)
 
 ## Deployment Checklist
 - [ ] `audit_log` table migration ready for production D1
