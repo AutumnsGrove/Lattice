@@ -10,6 +10,20 @@
 
 ## Completed Today ✅
 
+### 🛡️ Security Hardening — COMPLETE! (PR #391)
+> **Plan:** `docs/plans/planned/security-hardening.md`
+> **Effort:** ~4-5 hours (under the 6-8h estimate!)
+
+- [x] **Webhook PII Sanitization** — Whitelist-based stripping of sensitive fields (email, name, card details, addresses)
+- [x] **120-day Retention Policy** — Added `expires_at` column + dedicated cleanup Worker with daily cron
+- [x] **Safe JSON Parsing** — Wrapped ~16 unsafe `JSON.parse()` calls with `safeJsonParse()` across:
+  - `shop.ts` (4 instances)
+  - `PostContentDO.ts`, `PostMetaDO.ts` (2 instances)
+  - `timeline/context.ts` (2 instances)
+- [x] **Enhanced `safeJsonParse()`** — Added `silent` option, `context` logging, and `tryJsonParse()` Result variant
+- [x] **Documentation** — Created `docs/security/webhook-data-protection.md` and `docs/infrastructure/webhook-cleanup-operations.md`
+- [x] **25 new tests** for webhook sanitizer covering edge cases
+
 ### 📋 Comprehensive Codebase Audit Planning — PLANNING COMPLETE!
 > **7 planning documents created** covering security, testing, UI, onboarding, documentation, and code quality
 > **Status:** Plans ready for implementation (see individual docs for effort estimates)
@@ -19,7 +33,7 @@ Created detailed implementation plans in `docs/plans/planned/`:
 | Plan | Priority | Est. Effort | Summary |
 |------|----------|-------------|---------|
 | [`encryption-pass.md`](docs/plans/planned/encryption-pass.md) | P1 | 4-6h | Wire AES-256-GCM encryption for GitHub/OpenRouter tokens in Journey Curio |
-| [`security-hardening.md`](docs/plans/planned/security-hardening.md) | P1 | 6-8h | Webhook payload sanitization + 120-day TTL; standardize `safeJsonParse()` usage |
+| ~~[`security-hardening.md`](docs/plans/planned/security-hardening.md)~~ | ~~P1~~ | ~~6-8h~~ | ✅ **COMPLETE** (PR #391) — Webhook PII sanitization + 120-day TTL + `safeJsonParse()` |
 | [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs, focus management |
 | [`documentation-plan.md`](docs/plans/planned/documentation-plan.md) | P2 | 12-16h | Component reference (185 components), dark mode guide, colors, spacing, animation |
 | [`code-quality-optimizations.md`](docs/plans/planned/code-quality-optimizations.md) | P2 | 8-12h | Safari Reader fallback, CSP standardization, DB query isolation audit |
@@ -30,8 +44,8 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - ✅ Encryption module exists and is tested (31 test cases) — just needs wiring
 - ✅ Reserved usernames system is **90% complete** (450+ entries, API exists, tests pass)
 - ✅ Safari Reader fallback — ported to `engine/` in PR #389 (Jan 18, 2026)
-- ❌ LemonSqueezy webhooks store full PII with no cleanup mechanism
-- ❌ ~30 unsafe `JSON.parse()` calls need wrapping
+- ✅ LemonSqueezy webhooks now sanitize PII + auto-expire after 120 days (PR #391)
+- ✅ Unsafe `JSON.parse()` calls wrapped with `safeJsonParse()` (PR #391)
 - ⚠️ 7 skipped tests due to Svelte 5 reactivity + Vitest timing issues
 
 ---
@@ -489,4 +503,4 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-18 (comprehensive planning session complete!)*
+*Last updated: 2026-01-18 (security hardening complete — PR #391 merged!)*
