@@ -38,14 +38,18 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     throw error(500, "R2 bucket not configured");
   }
 
+  // NOTE: Each data source is in its own try/catch to prevent cascading failures.
+  // See AGENT.md for the isolated query pattern rationale.
+  // If one source fails, we return partial data with sensible defaults.
+
+  const categories = new Set<string>();
+  const years = new Set<string>();
+
+  // CRITICAL: Force tenant isolation
+  const tenantPrefix = `${locals.tenantId}/`;
+
+  // Source 1: Scan R2 images for categories and dates
   try {
-    const categories = new Set<string>();
-    const years = new Set<string>();
-
-    // CRITICAL: Force tenant isolation
-    const tenantPrefix = `${locals.tenantId}/`;
-
-    // Scan R2 images for categories and dates
     let cursor: string | undefined = undefined;
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"];
 
@@ -56,7 +60,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     do {
       if (++iterations > MAX_ITERATIONS) {
         console.warn(
-          `R2 list scan reached maximum iterations (${MAX_ITERATIONS}), stopping early`,
+          `[Filters] R2 list scan reached maximum iterations (${MAX_ITERATIONS}), stopping early`,
         );
         break;
       }
@@ -86,18 +90,28 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
       cursor = listResult.truncated ? listResult.cursor : undefined;
     } while (cursor);
+  } catch (err) {
+    console.error("[Filters] Failed to scan R2 images:", err);
+    // Continue - we can still return tags and collections from D1
+  }
 
-    // Fetch tags from D1
-    let tags: TagRecord[] = [];
+  // Source 2: Fetch tags from D1
+  let tags: TagRecord[] = [];
+  try {
     if (platform?.env?.DB) {
       const tagResults = await platform.env.DB.prepare(
         "SELECT slug, name, color FROM gallery_tags ORDER BY name ASC",
       ).all();
       tags = (tagResults.results as unknown as TagRecord[]) || [];
     }
+  } catch (err) {
+    console.error("[Filters] Failed to fetch tags:", err);
+    // Continue - we can still return categories, years, and collections
+  }
 
-    // Fetch collections from D1
-    let collections: CollectionRecord[] = [];
+  // Source 3: Fetch collections from D1
+  let collections: CollectionRecord[] = [];
+  try {
     if (platform?.env?.DB) {
       const collectionResults = await platform.env.DB.prepare(
         "SELECT slug, name, description FROM gallery_collections ORDER BY display_order ASC, name ASC",
@@ -105,18 +119,18 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       collections =
         (collectionResults.results as unknown as CollectionRecord[]) || [];
     }
-
-    return json({
-      success: true,
-      filters: {
-        categories: Array.from(categories).sort(),
-        years: Array.from(years).sort((a, b) => b.localeCompare(a)),
-        tags,
-        collections,
-      },
-    });
   } catch (err) {
-    console.error("Filters error:", err);
-    throw error(500, "Failed to load filter options");
+    console.error("[Filters] Failed to fetch collections:", err);
+    // Continue - we can still return categories, years, and tags
   }
+
+  return json({
+    success: true,
+    filters: {
+      categories: Array.from(categories).sort(),
+      years: Array.from(years).sort((a, b) => b.localeCompare(a)),
+      tags,
+      collections,
+    },
+  });
 };

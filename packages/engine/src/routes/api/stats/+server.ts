@@ -44,20 +44,22 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     throw error(401, "Tenant ID not found");
   }
 
-  try {
-    const db = platform.env.DB;
-    const tenantId = locals.tenantId;
+  // NOTE: Each database query is in its own try/catch to prevent cascading failures.
+  // See AGENT.md for the isolated query pattern rationale.
+  // If one query fails, we return partial data with sensible defaults.
 
-    // Get post count and approximate word count using SQL
-    //
-    // NOTE: Word count is an APPROXIMATION using space counting.
-    // Limitations:
-    // - Multiple consecutive spaces are counted as multiple words
-    // - Markdown syntax (**bold**, [links], etc.) is counted as text
-    // - Code blocks and frontmatter are included
-    //
-    // For accurate counts, consider caching word_count on the posts table
-    // calculated during save (future optimization).
+  const db = platform.env.DB;
+  const tenantId = locals.tenantId;
+
+  // Query 1: Get post count and approximate word count
+  // NOTE: Word count is an APPROXIMATION using space counting.
+  // Limitations:
+  // - Multiple consecutive spaces are counted as multiple words
+  // - Markdown syntax (**bold**, [links], etc.) is counted as text
+  // - Code blocks and frontmatter are included
+  let postCount = 0;
+  let totalWords = 0;
+  try {
     const statsQuery = `
       SELECT
         COUNT(*) as post_count,
@@ -67,11 +69,21 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       FROM posts
       WHERE tenant_id = ?
     `;
+    const statsResult = await db
+      .prepare(statsQuery)
+      .bind(tenantId)
+      .first<PostStatsRow>();
+    postCount = statsResult?.post_count || 0;
+    totalWords = statsResult?.total_words || 0;
+  } catch (err) {
+    console.error("[Stats] Failed to fetch post stats:", err);
+    // Continue with defaults - we can still show tags and account age
+  }
 
-    const statsResult = await db.prepare(statsQuery).bind(tenantId).first<PostStatsRow>();
-
-    // Get top 5 tags with counts
-    // Tags are stored as JSON arrays, so we need to parse them
+  // Query 2: Get top 5 tags with counts
+  // Tags are stored as JSON arrays, so we need to parse them
+  let topTags: string[] = [];
+  try {
     const postsQuery = `
       SELECT tags FROM posts WHERE tenant_id = ? AND tags IS NOT NULL AND tags != '[]'
     `;
@@ -81,51 +93,62 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     const tagCounts: Record<string, number> = {};
     for (const row of postsResult.results || []) {
       try {
-        const tags = JSON.parse((row as { tags: string }).tags || '[]') as string[];
+        const tags = JSON.parse(
+          (row as { tags: string }).tags || "[]",
+        ) as string[];
         for (const tag of tags) {
           tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         }
-      } catch (err) {
+      } catch (parseErr) {
         // Log invalid JSON for debugging data issues
-        console.warn('Invalid tags JSON in post:', (row as { id?: string }).id, err);
+        console.warn(
+          "[Stats] Invalid tags JSON in post:",
+          (row as { id?: string }).id,
+          parseErr,
+        );
       }
     }
 
     // Sort by count and take top 5
-    const topTags = Object.entries(tagCounts)
+    topTags = Object.entries(tagCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([tag]) => tag);
-
-    // Get account creation date from users table
-    let accountAgeDays = 0;
-    try {
-      const userQuery = `
-        SELECT created_at FROM users WHERE id = ? LIMIT 1
-      `;
-      const userResult = await db.prepare(userQuery).bind(locals.user.id).first<UserRow>();
-
-      if (userResult?.created_at) {
-        const createdAt = new Date(userResult.created_at);
-        const now = new Date();
-        accountAgeDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-      }
-    } catch {
-      // User table might not have created_at, use fallback
-      accountAgeDays = 30;
-    }
-
-    const stats: StatsResult = {
-      postCount: statsResult?.post_count || 0,
-      totalWords: statsResult?.total_words || 0,
-      draftCount: 0, // TODO: implement when drafts are added
-      topTags,
-      accountAgeDays
-    };
-
-    return json(stats);
   } catch (err) {
-    console.error("Error fetching stats:", err);
-    throw error(500, "Failed to fetch stats");
+    console.error("[Stats] Failed to fetch tags:", err);
+    // Continue with empty tags - we can still show post stats and account age
   }
+
+  // Query 3: Get account creation date from users table
+  let accountAgeDays = 0;
+  try {
+    const userQuery = `
+      SELECT created_at FROM users WHERE id = ? LIMIT 1
+    `;
+    const userResult = await db
+      .prepare(userQuery)
+      .bind(locals.user.id)
+      .first<UserRow>();
+
+    if (userResult?.created_at) {
+      const createdAt = new Date(userResult.created_at);
+      const now = new Date();
+      accountAgeDays = Math.floor(
+        (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+      );
+    }
+  } catch {
+    // User table might not have created_at, use fallback
+    accountAgeDays = 30;
+  }
+
+  const stats: StatsResult = {
+    postCount,
+    totalWords,
+    draftCount: 0, // TODO: implement when drafts are added
+    topTags,
+    accountAgeDays,
+  };
+
+  return json(stats);
 };

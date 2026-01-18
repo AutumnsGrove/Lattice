@@ -109,62 +109,70 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     });
 
     // Join with D1 metadata if available
+    // NOTE: Isolated in its own try/catch - if D1 fails, we still return R2 images
+    // See AGENT.md for the isolated query pattern rationale.
     if (platform?.env?.DB && images.length > 0) {
-      const r2Keys = images.map((img) => img.key);
+      try {
+        const r2Keys = images.map((img) => img.key);
 
-      // Build parameterized query (D1 has limits, so batch if needed)
-      if (r2Keys.length <= 100) {
-        const placeholders = r2Keys.map(() => "?").join(",");
-        const metadataQuery = `
-          SELECT
-            gi.r2_key,
-            gi.custom_title,
-            gi.custom_description,
-            gi.custom_date,
-            GROUP_CONCAT(gt.slug, ',') as tag_slugs,
-            GROUP_CONCAT(gt.name, ',') as tag_names,
-            GROUP_CONCAT(gt.color, ',') as tag_colors
-          FROM gallery_images gi
-          LEFT JOIN gallery_image_tags git ON gi.id = git.image_id
-          LEFT JOIN gallery_tags gt ON git.tag_id = gt.id
-          WHERE gi.r2_key IN (${placeholders})
-          GROUP BY gi.r2_key
-        `;
+        // Build parameterized query (D1 has limits, so batch if needed)
+        if (r2Keys.length <= 100) {
+          const placeholders = r2Keys.map(() => "?").join(",");
+          const metadataQuery = `
+            SELECT
+              gi.r2_key,
+              gi.custom_title,
+              gi.custom_description,
+              gi.custom_date,
+              GROUP_CONCAT(gt.slug, ',') as tag_slugs,
+              GROUP_CONCAT(gt.name, ',') as tag_names,
+              GROUP_CONCAT(gt.color, ',') as tag_colors
+            FROM gallery_images gi
+            LEFT JOIN gallery_image_tags git ON gi.id = git.image_id
+            LEFT JOIN gallery_tags gt ON git.tag_id = gt.id
+            WHERE gi.r2_key IN (${placeholders})
+            GROUP BY gi.r2_key
+          `;
 
-        const metadata = await platform.env.DB.prepare(metadataQuery)
-          .bind(...r2Keys)
-          .all();
+          const metadata = await platform.env.DB.prepare(metadataQuery)
+            .bind(...r2Keys)
+            .all();
 
-        // Merge metadata into images
-        const metadataMap = new Map(
-          (metadata.results as unknown as MetadataRow[]).map((m) => [
-            m.r2_key,
-            m,
-          ]),
-        );
+          // Merge metadata into images
+          const metadataMap = new Map(
+            (metadata.results as unknown as MetadataRow[]).map((m) => [
+              m.r2_key,
+              m,
+            ]),
+          );
 
-        images = images.map((img) => {
-          const meta = metadataMap.get(img.key);
-          if (meta) {
-            img.custom_title = meta.custom_title;
-            img.custom_description = meta.custom_description;
-            img.custom_date = meta.custom_date;
+          images = images.map((img) => {
+            const meta = metadataMap.get(img.key);
+            if (meta) {
+              img.custom_title = meta.custom_title;
+              img.custom_description = meta.custom_description;
+              img.custom_date = meta.custom_date;
 
-            // Parse tags
-            if (meta.tag_slugs) {
-              const slugs = meta.tag_slugs.split(",");
-              const names = (meta.tag_names || "").split(",");
-              const colors = (meta.tag_colors || "").split(",");
+              // Parse tags
+              if (meta.tag_slugs) {
+                const slugs = meta.tag_slugs.split(",");
+                const names = (meta.tag_names || "").split(",");
+                const colors = (meta.tag_colors || "").split(",");
 
-              img.tags = slugs.map((slug, i) => ({
-                slug,
-                name: names[i] || "",
-                color: colors[i] || "",
-              }));
+                img.tags = slugs.map((slug, i) => ({
+                  slug,
+                  name: names[i] || "",
+                  color: colors[i] || "",
+                }));
+              }
             }
-          }
-          return img;
-        });
+            return img;
+          });
+        }
+      } catch (metadataErr) {
+        // D1 metadata join failed - continue with R2 images only
+        console.error("[ImageList] Failed to fetch D1 metadata:", metadataErr);
+        // Images will have null custom_title/description/date and empty tags
       }
     }
 
