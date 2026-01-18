@@ -196,7 +196,7 @@ When we register a domain for you, **you own it**. If you ever leave Grove:
 - We provide authorization codes within 48 hours
 - No transfer fees, no hostage situations
 
-See our [Data Portability & Separation Policy](https://grove.place/legal/data-portability) for full details.
+See our [Data Portability & Separation Policy](https://grove.place/knowledge/legal/data-portability-separation) for full details.
 
 ---
 
