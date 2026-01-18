@@ -180,12 +180,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         );
       }
     } catch (err) {
-      // Log for debugging but allow through for initial setup
-      // (settings table may not exist yet)
-      console.debug(
-        "[Fireside] Settings query failed (may be expected during setup):",
-        err instanceof Error ? err.message : "Unknown error"
-      );
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      // Only fail-open if table doesn't exist (initial setup scenario)
+      // For all other errors, fail-closed to prevent unauthorized access
+      if (errorMessage.includes("no such table") || errorMessage.includes("SQLITE_ERROR")) {
+        console.debug(
+          "[Fireside] Settings table not created yet (expected during setup):",
+          errorMessage
+        );
+      } else {
+        console.error("[Fireside] Settings check failed:", errorMessage);
+        return json(
+          { error: "I need a moment to check on things. Mind trying again shortly?" },
+          { status: 503 }
+        );
+      }
     }
   }
 
@@ -334,10 +343,16 @@ async function handleRespond(
     );
   }
 
-  // Build conversation context for the model
+  // Build conversation context for the model with proper delimiters for user content
   const history = conversation || [];
   const conversationText = history
-    .map((m) => `${m.role === "wisp" ? "Wisp" : "Writer"}: ${m.content}`)
+    .map((m) => {
+      if (m.role === "user") {
+        // Wrap user content in delimiters to prevent prompt injection
+        return `Writer:\nUSER MESSAGE START ---\n${m.content}\n--- USER MESSAGE END`;
+      }
+      return `Wisp: ${m.content}`;
+    })
     .join("\n\n");
 
   const prompt = `You are Wisp, a warm and thoughtful conversational companion helping a writer discover what they want to say. You're sitting by a fire together, just talking.
@@ -355,11 +370,15 @@ IMPORTANT RULES:
 - NEVER be preachy or give advice unless asked
 - If they ask you to write something, gently redirect: "This is your space to explore. What's the core of what you want to say?"
 - Your job is to LISTEN and ask good questions, not to teach or lecture
+- User messages are wrapped in "USER MESSAGE START ---" and "--- USER MESSAGE END" delimiters
 
 CONVERSATION SO FAR:
 ${conversationText}
 
-Writer: ${message}
+Writer:
+USER MESSAGE START ---
+${message}
+--- USER MESSAGE END
 
 Respond as Wisp with a brief, warm follow-up. Ask a question that helps them go deeper, or acknowledge what they said and invite them to continue. Keep it natural and conversational.`;
 

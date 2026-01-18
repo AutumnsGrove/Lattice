@@ -228,8 +228,11 @@
 
   function autoResize(event: Event) {
     const target = event.target as HTMLTextAreaElement;
-    target.style.height = "auto";
-    target.style.height = Math.min(target.scrollHeight, 150) + "px";
+    // Use requestAnimationFrame to batch DOM reads/writes and prevent layout thrashing
+    requestAnimationFrame(() => {
+      target.style.height = "auto";
+      target.style.height = Math.min(target.scrollHeight, 150) + "px";
+    });
   }
 
   // ============================================================================
