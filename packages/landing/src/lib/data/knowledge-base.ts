@@ -1393,6 +1393,56 @@ export const designDocs: Doc[] = [
     lastUpdated: "2026-01-12",
     readingTime: 12,
   },
+  {
+    slug: "COMPONENT-REFERENCE",
+    title: "Component Reference",
+    description: "Complete catalog of Grove's 185 UI components",
+    excerpt:
+      "Your field guide to Grove's component library. 185 components across 13 categories—from Glass surfaces to nature elements—each designed to feel warm, organic, and genuinely helpful.",
+    category: "design",
+    lastUpdated: "2026-01-18",
+    readingTime: 18,
+  },
+  {
+    slug: "DARK-MODE-GUIDE",
+    title: "Dark Mode Guide",
+    description: "Nature at night—dark mode philosophy and implementation",
+    excerpt:
+      "Dark mode in Grove isn't just inverted colors. It's nature at night: warm bark browns, cream highlights, maintained contrast, and preserved glassmorphism. A forest at twilight.",
+    category: "design",
+    lastUpdated: "2026-01-18",
+    readingTime: 7,
+  },
+  {
+    slug: "COLORS",
+    title: "Color System",
+    description: "Grove's nature-inspired color palette and semantic tokens",
+    excerpt:
+      "Colors that evoke a forest clearing: Grove greens for growth, cream neutrals like natural paper, bark browns that avoid harsh blacks. Complete palette with semantic tokens.",
+    category: "design",
+    lastUpdated: "2026-01-18",
+    readingTime: 5,
+  },
+  {
+    slug: "SPACING-SYSTEM",
+    title: "Spacing System",
+    description: "4px base unit system and component spacing patterns",
+    excerpt:
+      "Consistent spacing creates visual rhythm. Grove uses a 4px base unit with organic variations for nature elements. Spacing conventions for cards, sections, forms, and responsive layouts.",
+    category: "design",
+    lastUpdated: "2026-01-18",
+    readingTime: 7,
+  },
+  {
+    slug: "ANIMATION-GUIDE",
+    title: "Animation Guide",
+    description: "Subtle animations that create a living world",
+    excerpt:
+      "Alive but not distracting. 16+ animations from gentle fades to leaf swaying, all respecting prefers-reduced-motion. Organic timing inspired by nature, never flashy.",
+    category: "design",
+    lastUpdated: "2026-01-18",
+    readingTime: 9,
+  },
 ];
 
 // Developer Documents
