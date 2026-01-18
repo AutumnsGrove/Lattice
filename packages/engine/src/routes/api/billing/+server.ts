@@ -7,25 +7,42 @@ import { TIERS, PAID_TIERS, type TierKey } from "$lib/config/tiers";
 import {
   checkRateLimit,
   getEndpointLimitByKey,
+  rateLimitHeaders,
+  type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
 const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
 
+/** Result from billing rate limit check */
+interface BillingRateLimitCheckResult {
+  /** If set, return this 429 response immediately */
+  response?: Response;
+  /** Rate limit result for adding headers to successful responses */
+  result: RateLimitResult;
+}
+
 /**
  * Check billing rate limit using centralized infrastructure.
- * Returns a 429 response if rate limited, undefined otherwise.
+ * Returns a 429 response if rate limited, or the result for adding headers.
  */
-async function checkBillingRateLimitOrError(
+async function checkBillingRateLimit(
   kv: KVNamespace | undefined,
   tenantId: string,
-): Promise<Response | undefined> {
+): Promise<BillingRateLimitCheckResult> {
+  // Default result when KV not available
+  const defaultResult: RateLimitResult = {
+    allowed: true,
+    remaining: BILLING_RATE_LIMIT.limit,
+    resetAt: 0,
+  };
+
   if (!kv) {
     console.warn("[Billing] KV not configured, rate limiting disabled");
-    return undefined;
+    return { result: defaultResult };
   }
 
-  const { response } = await checkRateLimit({
+  const { result, response } = await checkRateLimit({
     kv,
     key: `billing:${tenantId}`,
     limit: BILLING_RATE_LIMIT.limit,
@@ -33,7 +50,7 @@ async function checkBillingRateLimitOrError(
     namespace: "billing",
   });
 
-  return response;
+  return { result, response };
 }
 
 /**
@@ -262,10 +279,8 @@ export const POST: RequestHandler = async ({
     );
 
     // Check rate limit before processing (centralized in $lib/server/rate-limits)
-    const rateLimitResponse = await checkBillingRateLimitOrError(
-      platform.env.CACHE_KV,
-      tenantId,
-    );
+    const { result: rateLimitResult, response: rateLimitResponse } =
+      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -381,11 +396,16 @@ export const POST: RequestHandler = async ({
         .run();
     }
 
-    return json({
-      success: true,
-      checkoutUrl: session.url,
-      sessionId: session.id,
-    });
+    return json(
+      {
+        success: true,
+        checkoutUrl: session.url,
+        sessionId: session.id,
+      },
+      {
+        headers: rateLimitHeaders(rateLimitResult, BILLING_RATE_LIMIT.limit),
+      },
+    );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error creating billing checkout:", err);
@@ -429,10 +449,8 @@ export const PATCH: RequestHandler = async ({
     );
 
     // Check rate limit before processing (centralized in $lib/server/rate-limits)
-    const rateLimitResponse = await checkBillingRateLimitOrError(
-      platform.env.CACHE_KV,
-      tenantId,
-    );
+    const { result: rateLimitResult, response: rateLimitResponse } =
+      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -497,12 +515,20 @@ export const PATCH: RequestHandler = async ({
           userEmail: locals.user.email,
         });
 
-        return json({
-          success: true,
-          message: data.cancelImmediately
-            ? "Subscription canceled immediately"
-            : "Subscription will cancel at period end",
-        });
+        return json(
+          {
+            success: true,
+            message: data.cancelImmediately
+              ? "Subscription canceled immediately"
+              : "Subscription will cancel at period end",
+          },
+          {
+            headers: rateLimitHeaders(
+              rateLimitResult,
+              BILLING_RATE_LIMIT.limit,
+            ),
+          },
+        );
 
       case "resume":
         await (
@@ -526,10 +552,18 @@ export const PATCH: RequestHandler = async ({
           userEmail: locals.user.email,
         });
 
-        return json({
-          success: true,
-          message: "Subscription resumed",
-        });
+        return json(
+          {
+            success: true,
+            message: "Subscription resumed",
+          },
+          {
+            headers: rateLimitHeaders(
+              rateLimitResult,
+              BILLING_RATE_LIMIT.limit,
+            ),
+          },
+        );
 
       case "change_plan":
         if (!data.plan || !PLANS[data.plan]) {
@@ -609,10 +643,18 @@ export const PATCH: RequestHandler = async ({
           userEmail: locals.user.email,
         });
 
-        return json({
-          success: true,
-          message: `Plan changed to ${PLANS[data.plan].name}`,
-        });
+        return json(
+          {
+            success: true,
+            message: `Plan changed to ${PLANS[data.plan].name}`,
+          },
+          {
+            headers: rateLimitHeaders(
+              rateLimitResult,
+              BILLING_RATE_LIMIT.limit,
+            ),
+          },
+        );
 
       default:
         throw error(400, "Invalid action");
@@ -688,10 +730,8 @@ export const PUT: RequestHandler = async ({
     );
 
     // Check rate limit before processing (centralized in $lib/server/rate-limits)
-    const rateLimitResponse = await checkBillingRateLimitOrError(
-      platform.env.CACHE_KV,
-      tenantId,
-    );
+    const { result: rateLimitResult, response: rateLimitResponse } =
+      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -719,10 +759,15 @@ export const PUT: RequestHandler = async ({
       }
     ).createBillingPortalSession(billing.provider_customer_id, returnUrl);
 
-    return json({
-      success: true,
-      portalUrl,
-    });
+    return json(
+      {
+        success: true,
+        portalUrl,
+      },
+      {
+        headers: rateLimitHeaders(rateLimitResult, BILLING_RATE_LIMIT.limit),
+      },
+    );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error creating billing portal:", err);
