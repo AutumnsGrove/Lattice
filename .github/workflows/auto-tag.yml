@@ -148,12 +148,26 @@ jobs:
             exit 1
           fi
 
-          TARBALL_SIZE=$(stat -c%s "$TARBALL" 2>/dev/null || stat -f%z "$TARBALL")
+          # Get tarball size (cross-platform: try GNU stat, then BSD stat)
+          TARBALL_SIZE=$(stat -c%s "$TARBALL" 2>/dev/null || stat -f%z "$TARBALL" 2>/dev/null)
+          if [[ -z "$TARBALL_SIZE" ]]; then
+            echo "Error: Failed to get tarball size"
+            exit 1
+          fi
 
           # Get unpacked size by extracting and measuring
           mkdir -p /tmp/pkg-measure
           tar -xzf "$TARBALL" -C /tmp/pkg-measure
-          UNPACKED_SIZE=$(du -sb /tmp/pkg-measure/package | cut -f1)
+
+          # Cross-platform size measurement (GNU du -sb, or BSD du -sk * 1024)
+          if UNPACKED_SIZE=$(du -sb /tmp/pkg-measure/package 2>/dev/null | cut -f1); then
+            :  # GNU du worked
+          elif UNPACKED_SIZE_KB=$(du -sk /tmp/pkg-measure/package 2>/dev/null | cut -f1); then
+            UNPACKED_SIZE=$((UNPACKED_SIZE_KB * 1024))
+          else
+            echo "Error: Failed to measure unpacked size"
+            exit 1
+          fi
 
           echo "Tarball: $TARBALL"
           echo "Compressed size: $TARBALL_SIZE bytes ($(numfmt --to=iec $TARBALL_SIZE 2>/dev/null || echo "$TARBALL_SIZE"))"
@@ -167,16 +181,25 @@ jobs:
           HEADER=$(head -1 "$CSV_FILE")
           if [[ "$HEADER" != *"npm_unpacked_size"* ]]; then
             echo "Adding npm_unpacked_size column to CSV..."
-            # Add column header
+            # Add column header (MUST be added as the last column)
             sed -i "1s/$/,npm_unpacked_size/" "$CSV_FILE"
             # Add 0 to all existing rows
             sed -i "2,\$s/$/,0/" "$CSV_FILE"
           fi
 
-          # Update the size for this specific version using awk (safer than sed for CSV)
-          # This matches on column 2 (label/tag) and updates the last column
-          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" \
-            'BEGIN {OFS=","} NR==1 {print; next} $2==tag {$NF=size} {print}' \
+          # Find the column index for npm_unpacked_size from header
+          # This makes the script resilient to column additions before npm_unpacked_size
+          SIZE_COL=$(head -1 "$CSV_FILE" | tr ',' '\n' | grep -n "npm_unpacked_size" | cut -d: -f1)
+          if [[ -z "$SIZE_COL" ]]; then
+            echo "Error: npm_unpacked_size column not found in CSV header"
+            exit 1
+          fi
+          echo "Found npm_unpacked_size at column $SIZE_COL"
+
+          # Update the size for this specific version using awk
+          # Matches on column 2 (label/tag) and updates the size column by index
+          awk -F, -v tag="$TAG" -v size="$UNPACKED_SIZE" -v col="$SIZE_COL" \
+            'BEGIN {OFS=","} NR==1 {print; next} $2==tag {$col=size} {print}' \
             "$CSV_FILE" > "$CSV_FILE.tmp" && mv "$CSV_FILE.tmp" "$CSV_FILE"
 
           # Verify the update

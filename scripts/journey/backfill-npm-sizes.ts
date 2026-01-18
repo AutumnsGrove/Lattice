@@ -13,6 +13,7 @@
  * Usage:
  *   npx tsx scripts/journey/backfill-npm-sizes.ts           # Run the backfill
  *   npx tsx scripts/journey/backfill-npm-sizes.ts --dry-run # Preview changes only
+ *   npx tsx scripts/journey/backfill-npm-sizes.ts --no-cache # Force fresh fetch from NPM
  *   npx tsx scripts/journey/backfill-npm-sizes.ts --csv path/to/history.csv  # Custom CSV path
  *
  * CSV Path Resolution:
@@ -48,6 +49,7 @@ const NPM_CACHE_PATH = path.join(GROVE_ROOT, "scripts/journey/npm-metadata.json"
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run") || args.includes("-n");
 const VERBOSE = args.includes("--verbose") || args.includes("-v");
+const NO_CACHE = args.includes("--no-cache");
 
 // Allow custom CSV path via --csv argument
 const csvArgIndex = args.findIndex(a => a === "--csv");
@@ -103,10 +105,17 @@ interface NPMPackageMetadata {
 function fetchNPMMetadata(): Promise<NPMPackageMetadata> {
   // Try loading from local cache first (useful if network is unavailable)
   // Cache can be created with: curl -s "https://registry.npmjs.org/@autumnsgrove/groveengine" > scripts/journey/npm-metadata.json
-  if (fs.existsSync(NPM_CACHE_PATH)) {
+  // Use --no-cache to force a fresh fetch
+  if (!NO_CACHE && fs.existsSync(NPM_CACHE_PATH)) {
     console.log(`      Loading from cache: ${NPM_CACHE_PATH}`);
+    console.log(`      (use --no-cache to force fresh fetch)`);
     const cacheData = fs.readFileSync(NPM_CACHE_PATH, "utf-8");
     return Promise.resolve(JSON.parse(cacheData) as NPMPackageMetadata);
+  }
+
+  if (NO_CACHE && fs.existsSync(NPM_CACHE_PATH)) {
+    console.log(`      Removing stale cache...`);
+    fs.unlinkSync(NPM_CACHE_PATH);
   }
 
   console.log(`      Fetching: ${NPM_REGISTRY_URL}`);

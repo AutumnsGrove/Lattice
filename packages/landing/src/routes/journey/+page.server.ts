@@ -1,4 +1,5 @@
 import historyData from "../../../static/data/history.csv?raw";
+import { safeParseInt, parseTimestampToDate } from "$lib/utils/journey";
 
 /**
  * CSV Schema (18 columns):
@@ -48,39 +49,6 @@ interface SnapshotData {
   bundleSizeKb: number;
   npmUnpackedSize: number;
   date: string;
-}
-
-function safeParseInt(value: string | undefined): number {
-  if (!value) return 0;
-  const parsed = parseInt(value, 10);
-  return isNaN(parsed) ? 0 : parsed;
-}
-
-function parseTimestampToDate(timestamp: string): string {
-  if (!timestamp || !timestamp.includes("_")) {
-    return "Unknown date";
-  }
-
-  const datePart = timestamp.split("_")[0];
-  const dateParts = datePart.split("-");
-
-  if (dateParts.length !== 3) {
-    return "Unknown date";
-  }
-
-  const year = safeParseInt(dateParts[0]);
-  const month = safeParseInt(dateParts[1]);
-  const day = safeParseInt(dateParts[2]);
-
-  if (year < 2000 || month < 1 || month > 12 || day < 1 || day > 31) {
-    return "Unknown date";
-  }
-
-  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function parseCSV(csv: string): SnapshotData[] {

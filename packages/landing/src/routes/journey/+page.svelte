@@ -2,6 +2,7 @@
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Tag, Sprout, ChevronDown, Sparkles, Wrench, List } from 'lucide-svelte';
+	import { formatNumber, formatBytes, getGrowthIcon } from '$lib/utils/journey';
 
 	// Floating TOC state
 	let tocOpen = $state(false);
@@ -60,23 +61,6 @@
 	// Get summary for a version label
 	function getSummary(label: string) {
 		return data.summaries[label] || null;
-	}
-
-	function formatNumber(num: number): string {
-		return num.toLocaleString();
-	}
-
-	function formatBytes(bytes: number): string {
-		if (!bytes || bytes === 0) return 'Not Published';
-		if (bytes < 1024) return `${bytes} B`;
-		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-		return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-	}
-
-	function getGrowthIcon(value: number): string {
-		if (value > 0) return '↑';
-		if (value < 0) return '↓';
-		return '→';
 	}
 
 	// Calculate percentages for the language bar
