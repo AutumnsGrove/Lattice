@@ -505,7 +505,7 @@
               Grove is designed around portability. Export everything at any
               time. If we ever register a domain for you, you own it — transfer
               it whenever you want, no fees, no questions. See our <a
-                href="/legal/data-portability"
+                href="/knowledge/legal/data-portability-separation"
                 class="text-accent-muted hover:text-primary underline"
                 >Data Portability Policy</a
               > for details.
