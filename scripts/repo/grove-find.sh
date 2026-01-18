@@ -28,29 +28,57 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # =============================================================================
-# PATH Setup (ensure Homebrew and common tool paths are available)
+# Binary Discovery (find tools even if not in PATH)
 # =============================================================================
 
-# Add common Homebrew and tool paths if they exist
-# This handles the common case where tools are installed but PATH isn't set in sourced scripts
-_grove_setup_path() {
-    local paths_to_add=(
+# Search for a binary in common locations, returning the full path
+# This is more robust than relying on PATH, which can be unreliable in sourced scripts
+_grove_find_binary() {
+    local name="$1"
+    local search_paths=(
         "/opt/homebrew/bin"           # Apple Silicon Homebrew
         "/usr/local/bin"              # Intel Mac Homebrew / Linux
         "$HOME/.local/bin"            # User-local installs
         "$HOME/bin"                   # User bin
-        "$HOME/.cargo/bin"            # Rust/cargo installs
+        "$HOME/.cargo/bin"            # Rust/cargo installs (common for rg)
+        "/usr/bin"                    # System binaries
     )
 
-    for p in "${paths_to_add[@]}"; do
-        if [ -d "$p" ] && [[ ":$PATH:" != *":$p:"* ]]; then
-            export PATH="$p:$PATH"
+    # First try command -v (works if already in PATH)
+    local found
+    found=$(command -v "$name" 2>/dev/null)
+    if [ -n "$found" ] && [ -x "$found" ]; then
+        echo "$found"
+        return 0
+    fi
+
+    # Search known locations
+    for p in "${search_paths[@]}"; do
+        if [ -x "$p/$name" ]; then
+            echo "$p/$name"
+            return 0
         fi
     done
+
+    return 1
 }
 
-# Setup PATH before checking dependencies
-_grove_setup_path
+# Discover and store binary paths (these are used by all functions)
+GROVE_RG=""
+GROVE_FD=""
+
+_grove_discover_tools() {
+    GROVE_RG=$(_grove_find_binary "rg")
+    GROVE_FD=$(_grove_find_binary "fd")
+
+    # On Ubuntu, fd might be called fdfind
+    if [ -z "$GROVE_FD" ]; then
+        GROVE_FD=$(_grove_find_binary "fdfind")
+    fi
+}
+
+# Run discovery
+_grove_discover_tools
 
 # =============================================================================
 # Dependency Checks
@@ -59,25 +87,26 @@ _grove_setup_path
 _grove_check_deps() {
     local missing=0
 
-    if ! command -v rg &> /dev/null; then
-        echo -e "${RED}Error: ripgrep (rg) is not installed or not in PATH.${NC}"
+    if [ -z "$GROVE_RG" ]; then
+        echo -e "${RED}Error: ripgrep (rg) is not installed.${NC}"
         echo -e "  ${CYAN}macOS:${NC}     brew install ripgrep"
         echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install ripgrep"
         echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S ripgrep"
         echo -e "  ${CYAN}Windows:${NC}   scoop install ripgrep  ${YELLOW}(or winget/choco)${NC}"
-        echo -e ""
-        echo -e "  ${YELLOW}If already installed, check your shell config (~/.zshrc or ~/.bashrc)${NC}"
-        echo -e "  ${YELLOW}Make sure Homebrew is in PATH: eval \"\$(${CYAN}/opt/homebrew/bin/brew${YELLOW} shellenv)\"${NC}"
         missing=1
+    else
+        echo -e "${GREEN}✓${NC} Found rg at: ${CYAN}$GROVE_RG${NC}"
     fi
 
-    if ! command -v fd &> /dev/null; then
-        echo -e "${RED}Error: fd is not installed or not in PATH.${NC}"
+    if [ -z "$GROVE_FD" ]; then
+        echo -e "${RED}Error: fd is not installed.${NC}"
         echo -e "  ${CYAN}macOS:${NC}     brew install fd"
         echo -e "  ${CYAN}Ubuntu:${NC}    sudo apt install fd-find  ${YELLOW}(may need: ln -s \$(which fdfind) ~/.local/bin/fd)${NC}"
         echo -e "  ${CYAN}Arch:${NC}      sudo pacman -S fd"
         echo -e "  ${CYAN}Windows:${NC}   scoop install fd  ${YELLOW}(or winget/choco)${NC}"
         missing=1
+    else
+        echo -e "${GREEN}✓${NC} Found fd at: ${CYAN}$GROVE_FD${NC}"
     fi
 
     if [ $missing -eq 1 ]; then
@@ -116,7 +145,7 @@ gf() {
         return 1
     fi
 
-    rg --color=always \
+    "$GROVE_RG" --color=always \
        --line-number \
        --no-heading \
        --smart-case \
@@ -142,16 +171,16 @@ gfc() {
 
     # Search for Svelte component files
     echo -e "\n${GREEN}Svelte Components:${NC}"
-    fd -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
+    "$GROVE_FD" -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
 
     # Search for class definitions
     echo -e "\n${GREEN}Class Definitions:${NC}"
-    rg --color=always -n "class\s+$name" "$GROVE_ROOT" \
+    "$GROVE_RG" --color=always -n "class\s+$name" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' --type ts --type js
 
     # Search for interface/type definitions
     echo -e "\n${GREEN}Type/Interface Definitions:${NC}"
-    rg --color=always -n "(interface|type)\s+$name" "$GROVE_ROOT" \
+    "$GROVE_RG" --color=always -n "(interface|type)\s+$name" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' --type ts
 }
 
@@ -166,7 +195,7 @@ gff() {
 
     echo -e "${CYAN}🔍 Searching for function: ${name}${NC}"
 
-    rg --color=always -n \
+    "$GROVE_RG" --color=always -n \
        "(function\s+$name|const\s+$name\s*=|let\s+$name\s*=|export\s+(async\s+)?function\s+$name|$name\s*[:=]\s*(async\s+)?\()" \
        "$GROVE_ROOT" \
        --glob '!node_modules' \
@@ -185,7 +214,7 @@ gfi() {
 
     echo -e "${CYAN}🔍 Searching for imports of: ${name}${NC}"
 
-    rg --color=always -n "import.*['\"].*$name" "$GROVE_ROOT" \
+    "$GROVE_RG" --color=always -n "import.*['\"].*$name" "$GROVE_ROOT" \
        --glob '!node_modules' \
        --glob '!dist' \
        --type ts --type js --type svelte
@@ -202,9 +231,9 @@ gfs() {
     echo -e "${CYAN}🔍 Svelte components${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        fd -e svelte "$pattern" "$GROVE_ROOT" --exclude node_modules
+        "$GROVE_FD" -e svelte "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
-        fd -e svelte . "$GROVE_ROOT" --exclude node_modules | head -50
+        "$GROVE_FD" -e svelte . "$GROVE_ROOT" --exclude node_modules | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -216,9 +245,9 @@ gft() {
     echo -e "${CYAN}🔍 TypeScript files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        fd -e ts "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts'
+        "$GROVE_FD" -e ts "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts'
     else
-        fd -e ts . "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts' | head -50
+        "$GROVE_FD" -e ts . "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts' | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -234,13 +263,13 @@ gfr() {
     echo -e "${CYAN}🔍 SvelteKit routes${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        fd "+page" "$GROVE_ROOT" --exclude node_modules | rg -i "$pattern"
-        fd "+server" "$GROVE_ROOT" --exclude node_modules | rg -i "$pattern"
+        "$GROVE_FD" "+page" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "$pattern"
+        "$GROVE_FD" "+server" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "$pattern"
     else
         echo -e "\n${GREEN}Page Routes:${NC}"
-        fd "+page.svelte" "$GROVE_ROOT" --exclude node_modules | head -30
+        "$GROVE_FD" "+page.svelte" "$GROVE_ROOT" --exclude node_modules | head -30
         echo -e "\n${GREEN}API Routes:${NC}"
-        fd "+server.ts" "$GROVE_ROOT" --exclude node_modules | head -30
+        "$GROVE_FD" "+server.ts" "$GROVE_ROOT" --exclude node_modules | head -30
     fi
 }
 
@@ -251,11 +280,11 @@ gfd() {
     echo -e "${CYAN}🔍 Database queries${table:+ for table: $table}${NC}"
 
     if [ -n "$table" ]; then
-        rg --color=always -n "(SELECT|INSERT|UPDATE|DELETE).*$table" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "(SELECT|INSERT|UPDATE|DELETE).*$table" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type ts --type js
     else
-        rg --color=always -n "db\.(prepare|exec|batch)" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "db\.(prepare|exec|batch)" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type ts --type js | head -50
     fi
@@ -268,11 +297,11 @@ gfg() {
     echo -e "${CYAN}🔍 Glass component usage${variant:+ with variant: $variant}${NC}"
 
     if [ -n "$variant" ]; then
-        rg --color=always -n "Glass.*variant.*['\"]$variant" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "Glass.*variant.*['\"]$variant" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type svelte --type ts
     else
-        rg --color=always -n "<Glass" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "<Glass" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
            --type svelte | head -50
     fi
@@ -285,9 +314,9 @@ gfspec() {
     echo -e "${CYAN}🔍 Spec files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        fd "spec" "$GROVE_ROOT/docs" | rg -i "$name"
+        "$GROVE_FD" "spec" "$GROVE_ROOT/docs" | "$GROVE_RG" -i "$name"
     else
-        fd "spec.md" "$GROVE_ROOT/docs" | head -30
+        "$GROVE_FD" "spec.md" "$GROVE_ROOT/docs" | head -30
     fi
 }
 
@@ -298,9 +327,9 @@ gftest() {
     echo -e "${CYAN}🔍 Test files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | rg -i "$name"
+        "$GROVE_FD" "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | "$GROVE_RG" -i "$name"
     else
-        fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -30
+        "$GROVE_FD" "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -30
     fi
 }
 
@@ -316,7 +345,7 @@ gfzf() {
     fi
 
     local file
-    file=$(fd . "$GROVE_ROOT" --exclude node_modules --exclude dist --exclude .git \
+    file=$("$GROVE_FD" . "$GROVE_ROOT" --exclude node_modules --exclude dist --exclude .git \
            | fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' \
                  --preview-window=right:60%)
 
