@@ -240,6 +240,22 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Add email notifications on job completion
 - [ ] Dashboard widget for job status/history
 
+## Composable Curio Architecture
+> **Goal:** Journey Curio should be modular—use all components together or just the pieces you need
+> **Context:** Curios can render as pages OR as vines (gutter content), so flexibility is key
+
+- [ ] Split Journey Curio into independent sub-curios:
+  - **Milestones Curio** — Version releases with dates and summaries
+  - **Code Stats Curio** — Lines of code, language breakdown, test coverage
+  - **Timeline Curio** — Full project history visualization
+- [ ] Create composable API that supports:
+  - Fetching all journey data (current behavior)
+  - Fetching just milestones
+  - Fetching just code stats
+  - Fetching just timeline events
+- [ ] Ensure each sub-curio works standalone as a page or vine
+- [ ] Document component composition patterns for other curios
+
 ## Landing Site Migration (Post-Curio Launch)
 > **Current:** grove.place/journey reads from `history.csv` at build time
 > **Future:** Migrate to use Journey Curio API for consistency
