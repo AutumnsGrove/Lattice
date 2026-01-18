@@ -862,4 +862,61 @@
       backdrop-filter: none;
     }
   }
+
+  /* Safari Reader Mode & older browser fallback
+     When backdrop-filter isn't supported, glass elements become invisible.
+     This provides solid backgrounds as a fallback for readability. */
+  @supports not (backdrop-filter: blur(4px)) {
+    /* Light mode fallbacks */
+    .glass {
+      background-color: rgb(255 255 255 / 0.95);
+    }
+    .glass-surface {
+      background-color: rgb(255 255 255 / 0.98);
+    }
+    .glass-overlay {
+      background-color: rgb(0 0 0 / 0.7);
+    }
+    .glass-accent {
+      background-color: rgb(34 197 94 / 0.25); /* grove-500 approximation */
+    }
+    .glass-muted {
+      background-color: rgb(255 255 255 / 0.85);
+    }
+    .glass-tint {
+      background-color: rgb(255 255 255 / 0.90);
+    }
+    .glass-dark {
+      background-color: rgb(15 23 42 / 0.95);
+    }
+    .glass-frosted {
+      background-color: rgb(255 255 255 / 0.97);
+    }
+
+    /* Dark mode fallbacks */
+    :is(.dark .glass) {
+      background-color: rgb(30 41 59 / 0.95);
+    }
+    :is(.dark .glass-surface) {
+      background-color: rgb(30 41 59 / 0.98);
+    }
+    :is(.dark .glass-overlay) {
+      background-color: rgb(0 0 0 / 0.8);
+    }
+    :is(.dark .glass-accent) {
+      background-color: rgb(34 197 94 / 0.20);
+    }
+    :is(.dark .glass-muted) {
+      background-color: rgb(15 23 42 / 0.85);
+    }
+    :is(.dark .glass-tint) {
+      background-color: rgb(15 23 42 / 0.90);
+    }
+    :is(.dark .glass-dark) {
+      background-color: rgb(2 6 23 / 0.95);
+    }
+    :is(.dark .glass-frosted) {
+      background-color: rgb(30 41 59 / 0.97);
+    }
+  }
 }

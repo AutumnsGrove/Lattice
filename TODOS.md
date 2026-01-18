@@ -307,9 +307,9 @@ Created detailed implementation plans in `docs/plans/planned/`:
 ## Safari Reader Mode & Glass Cards
 > **Issue:** Safari Reader Mode strips `backdrop-blur`, making glass card content invisible
 > **Plan:** `docs/plans/planned/code-quality-optimizations.md` (§1)
-> **Status:** Fallback exists in `domains/src/app.css` but NOT in engine
+> **Status:** Fallback added to engine ✅
 
-- [ ] Add `@supports not (backdrop-filter: blur(1px))` fallback to engine
+- [x] Add `@supports not (backdrop-filter: blur(4px))` fallback to engine ✅ (Jan 18, 2026)
 - [ ] Wrap glass card content in semantic `<article>` or `<section>` elements
 - [ ] Test fix in Safari iOS and macOS
 
