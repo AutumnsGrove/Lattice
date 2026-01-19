@@ -172,6 +172,67 @@ else
 fi
 
 # =============================================================================
+# Helper Functions
+# =============================================================================
+
+# _grove_fd - Wrapper around fd with fallback to find
+# Usage: _grove_fd [fd-args...]
+# Falls back to find if fd is not installed
+_grove_fd() {
+    if [ -n "$GROVE_FD" ]; then
+        "$GROVE_FD" "$@"
+    else
+        # Basic fallback using find - won't support all fd options but handles common cases
+        echo -e "${YELLOW}(fd not installed, using find fallback - results may vary)${NC}" >&2
+        # Extract extension and glob pattern if flags are used
+        local ext=""
+        local glob_pattern=""
+        local pattern="."
+        local search_path="$GROVE_ROOT"
+        local args=("$@")
+        local i=0
+        while [ $i -lt ${#args[@]} ]; do
+            case "${args[$i]}" in
+                -e)
+                    i=$((i + 1))
+                    ext="${args[$i]}"
+                    ;;
+                -g)
+                    i=$((i + 1))
+                    glob_pattern="${args[$i]}"
+                    ;;
+                --exclude)
+                    i=$((i + 1))
+                    # Skip exclude patterns in fallback
+                    ;;
+                -t)
+                    i=$((i + 1))
+                    # Skip type flags in fallback
+                    ;;
+                --hidden)
+                    # Skip hidden flag
+                    ;;
+                *)
+                    if [ -d "${args[$i]}" ]; then
+                        search_path="${args[$i]}"
+                    else
+                        pattern="${args[$i]}"
+                    fi
+                    ;;
+            esac
+            i=$((i + 1))
+        done
+        if [ -n "$glob_pattern" ]; then
+            find "$search_path" -type f -name "$glob_pattern" 2>/dev/null | grep -v node_modules | grep -v "\.git/" | grep -v dist || true
+        elif [ -n "$ext" ]; then
+            find "$search_path" -type f -name "*.$ext" 2>/dev/null | grep -v node_modules | grep -v "\.git/" | grep -v dist | grep -i "$pattern" || true
+        else
+            find "$search_path" -type f -name "*$pattern*" 2>/dev/null | grep -v node_modules | grep -v "\.git/" | grep -v dist || true
+        fi
+    fi
+}
+
+# =============================================================================
 # Core Search Functions
 # =============================================================================
 
@@ -212,7 +273,7 @@ gfc() {
 
     # Search for Svelte component files
     echo -e "\n${GREEN}Svelte Components:${NC}"
-    "$GROVE_FD" -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
+    _grove_fd -e svelte "$name" "$GROVE_ROOT" --exclude node_modules 2>/dev/null
 
     # Search for class definitions
     echo -e "\n${GREEN}Class Definitions:${NC}"
@@ -241,7 +302,7 @@ gff() {
        "$GROVE_ROOT" \
        --glob '!node_modules' \
        --glob '!dist' \
-       --type ts --type js --type svelte
+       --glob "*.{ts,js,svelte}"
 }
 
 # gfi - Find imports of a module
@@ -258,7 +319,7 @@ gfi() {
     "$GROVE_RG" --color=always -n "import.*['\"].*$name" "$GROVE_ROOT" \
        --glob '!node_modules' \
        --glob '!dist' \
-       --type ts --type js --type svelte
+       --glob "*.{ts,js,svelte}"
 }
 
 # =============================================================================
@@ -272,9 +333,9 @@ gfs() {
     echo -e "${CYAN}🔍 Svelte components${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e svelte "$pattern" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd -e svelte "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
-        "$GROVE_FD" -e svelte . "$GROVE_ROOT" --exclude node_modules | head -50
+        _grove_fd -e svelte . "$GROVE_ROOT" --exclude node_modules | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -286,9 +347,9 @@ gft() {
     echo -e "${CYAN}🔍 TypeScript files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e ts "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts'
+        _grove_fd -e ts "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts'
     else
-        "$GROVE_FD" -e ts . "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts' | head -50
+        _grove_fd -e ts . "$GROVE_ROOT" --exclude node_modules --exclude '*.d.ts' | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -300,9 +361,9 @@ gfj() {
     echo -e "${CYAN}🔍 JavaScript files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e js "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js'
+        _grove_fd -e js "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js'
     else
-        "$GROVE_FD" -e js . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js' | head -50
+        _grove_fd -e js . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.js' | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -314,9 +375,9 @@ gfcss() {
     echo -e "${CYAN}🔍 CSS files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e css "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css'
+        _grove_fd -e css "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css'
     else
-        "$GROVE_FD" -e css . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css' | head -50
+        _grove_fd -e css . "$GROVE_ROOT" --exclude node_modules --exclude '*.min.css' | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -328,9 +389,9 @@ gfmd() {
     echo -e "${CYAN}🔍 Markdown files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e md "$pattern" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd -e md "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
-        "$GROVE_FD" -e md . "$GROVE_ROOT" --exclude node_modules | head -50
+        _grove_fd -e md . "$GROVE_ROOT" --exclude node_modules | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -342,9 +403,9 @@ gfjson() {
     echo -e "${CYAN}🔍 JSON files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e json "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json'
+        _grove_fd -e json "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json'
     else
-        "$GROVE_FD" -e json . "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json' | head -50
+        _grove_fd -e json . "$GROVE_ROOT" --exclude node_modules --exclude 'package-lock.json' | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -356,9 +417,9 @@ gftoml() {
     echo -e "${CYAN}🔍 TOML files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e toml "$pattern" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd -e toml "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
-        "$GROVE_FD" -e toml . "$GROVE_ROOT" --exclude node_modules | head -50
+        _grove_fd -e toml . "$GROVE_ROOT" --exclude node_modules | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -370,9 +431,9 @@ gfh() {
     echo -e "${CYAN}🔍 HTML files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e html "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude dist
+        _grove_fd -e html "$pattern" "$GROVE_ROOT" --exclude node_modules --exclude dist
     else
-        "$GROVE_FD" -e html . "$GROVE_ROOT" --exclude node_modules --exclude dist | head -50
+        _grove_fd -e html . "$GROVE_ROOT" --exclude node_modules --exclude dist | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -388,13 +449,14 @@ gfr() {
     echo -e "${CYAN}🔍 SvelteKit routes${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" "+page" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "$pattern"
-        "$GROVE_FD" "+server" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "$pattern"
+        # Use glob pattern (-g) to avoid regex interpretation of +
+        _grove_fd -g "*+page*" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -iF "$pattern"
+        _grove_fd -g "*+server*" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -iF "$pattern"
     else
         echo -e "\n${GREEN}Page Routes:${NC}"
-        "$GROVE_FD" "+page.svelte" "$GROVE_ROOT" --exclude node_modules | head -30
+        _grove_fd -g "*+page.svelte" "$GROVE_ROOT" --exclude node_modules | head -30
         echo -e "\n${GREEN}API Routes:${NC}"
-        "$GROVE_FD" "+server.ts" "$GROVE_ROOT" --exclude node_modules | head -30
+        _grove_fd -g "*+server.ts" "$GROVE_ROOT" --exclude node_modules | head -30
     fi
 }
 
@@ -424,11 +486,11 @@ gfg() {
     if [ -n "$variant" ]; then
         "$GROVE_RG" --color=always -n "Glass.*variant.*['\"]$variant" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type svelte --type ts
+           --glob "*.{svelte,ts}"
     else
         "$GROVE_RG" --color=always -n "<Glass" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type svelte | head -50
+           --glob "*.svelte" | head -50
     fi
 }
 
@@ -439,9 +501,9 @@ gfspec() {
     echo -e "${CYAN}🔍 Spec files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        "$GROVE_FD" "spec" "$GROVE_ROOT/docs" | "$GROVE_RG" -i "$name"
+        _grove_fd "spec" "$GROVE_ROOT/docs" | "$GROVE_RG" -i "$name"
     else
-        "$GROVE_FD" "spec.md" "$GROVE_ROOT/docs" | head -30
+        _grove_fd "spec.md" "$GROVE_ROOT/docs" | head -30
     fi
 }
 
@@ -452,12 +514,12 @@ gftest() {
     echo -e "${CYAN}🔍 Test files${name:+ matching: $name}${NC}"
 
     if [ -n "$name" ]; then
-        "$GROVE_FD" "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | "$GROVE_RG" -i "$name"
+        _grove_fd "test|spec" "$GROVE_ROOT" -e ts -e js --exclude node_modules | "$GROVE_RG" -i "$name"
     else
         echo -e "\n${GREEN}Test Files (.test.ts, .spec.ts):${NC}"
-        "$GROVE_FD" "\.(test|spec)\.(ts|js)$" "$GROVE_ROOT" --exclude node_modules | head -30
+        _grove_fd "\.(test|spec)\.(ts|js)$" "$GROVE_ROOT" --exclude node_modules | head -30
         echo -e "\n${GREEN}Test Directories:${NC}"
-        "$GROVE_FD" -t d "test|tests|__tests__" "$GROVE_ROOT" --exclude node_modules | head -20
+        _grove_fd -t d "test|tests|__tests__" "$GROVE_ROOT" --exclude node_modules | head -20
     fi
 }
 
@@ -471,24 +533,24 @@ gftodo() {
         echo -e "${CYAN}🔍 Finding ${type} comments${NC}"
         "$GROVE_RG" --color=always -n "\b${type}\b:?" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!.git' \
-           --type ts --type js --type svelte
+           --glob "*.{ts,js,svelte}"
     else
         echo -e "${CYAN}🔍 Finding TODO/FIXME/HACK comments${NC}\n"
 
         echo -e "${YELLOW}TODOs:${NC}"
         "$GROVE_RG" --color=always -n "\bTODO\b:?" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!.git' \
-           --type ts --type js --type svelte | head -20
+           --glob "*.{ts,js,svelte}" | head -20
 
         echo -e "\n${RED}FIXMEs:${NC}"
         "$GROVE_RG" --color=always -n "\bFIXME\b:?" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!.git' \
-           --type ts --type js --type svelte | head -20
+           --glob "*.{ts,js,svelte}" | head -20
 
         echo -e "\n${PURPLE}HACKs:${NC}"
         "$GROVE_RG" --color=always -n "\bHACK\b:?" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!.git' \
-           --type ts --type js --type svelte | head -10
+           --glob "*.{ts,js,svelte}" | head -10
     fi
 }
 
@@ -499,22 +561,22 @@ gfconfig() {
     echo -e "${CYAN}🔍 Configuration files${name:+ matching: $name}${NC}\n"
 
     if [ -n "$name" ]; then
-        "$GROVE_FD" "$name" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "config|rc|\.toml|\.json|\.yaml|\.yml"
+        _grove_fd "$name" "$GROVE_ROOT" --exclude node_modules | "$GROVE_RG" -i "config|rc|\.toml|\.json|\.yaml|\.yml"
     else
         echo -e "${GREEN}Build & Bundler Configs:${NC}"
-        "$GROVE_FD" "(vite|svelte|tailwind|postcss|tsconfig|jsconfig)\.config\.(js|ts|mjs)" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd "(vite|svelte|tailwind|postcss|tsconfig|jsconfig)\.config\.(js|ts|mjs)" "$GROVE_ROOT" --exclude node_modules
 
         echo -e "\n${GREEN}Cloudflare/Wrangler:${NC}"
-        "$GROVE_FD" "wrangler" "$GROVE_ROOT" -e toml --exclude node_modules
+        _grove_fd "wrangler" "$GROVE_ROOT" -e toml --exclude node_modules
 
         echo -e "\n${GREEN}Package Configs:${NC}"
-        "$GROVE_FD" "package\.json" "$GROVE_ROOT" --exclude node_modules | head -20
+        _grove_fd "package\.json" "$GROVE_ROOT" --exclude node_modules | head -20
 
         echo -e "\n${GREEN}TypeScript Configs:${NC}"
-        "$GROVE_FD" "tsconfig" "$GROVE_ROOT" -e json --exclude node_modules
+        _grove_fd "tsconfig" "$GROVE_ROOT" -e json --exclude node_modules
 
         echo -e "\n${GREEN}Other Configs (.rc, .config.*):${NC}"
-        "$GROVE_FD" "\.(eslintrc|prettierrc|npmrc)" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd "\.(eslintrc|prettierrc|npmrc)" "$GROVE_ROOT" --exclude node_modules
     fi
 }
 
@@ -525,13 +587,13 @@ gfyaml() {
     echo -e "${CYAN}🔍 YAML files${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e yml -e yaml "$pattern" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd -e yml -e yaml "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
         echo -e "\n${GREEN}GitHub Actions:${NC}"
-        "$GROVE_FD" -e yml -e yaml . "$GROVE_ROOT/.github" 2>/dev/null | head -20
+        _grove_fd -e yml -e yaml . "$GROVE_ROOT/.github" 2>/dev/null | head -20
 
         echo -e "\n${GREEN}Other YAML files:${NC}"
-        "$GROVE_FD" -e yml -e yaml . "$GROVE_ROOT" --exclude node_modules --exclude .github | head -30
+        _grove_fd -e yml -e yaml . "$GROVE_ROOT" --exclude node_modules --exclude .github | head -30
     fi
 }
 
@@ -542,9 +604,9 @@ gfsh() {
     echo -e "${CYAN}🔍 Shell scripts${pattern:+ matching: $pattern}${NC}"
 
     if [ -n "$pattern" ]; then
-        "$GROVE_FD" -e sh -e bash -e zsh "$pattern" "$GROVE_ROOT" --exclude node_modules
+        _grove_fd -e sh -e bash -e zsh "$pattern" "$GROVE_ROOT" --exclude node_modules
     else
-        "$GROVE_FD" -e sh -e bash -e zsh . "$GROVE_ROOT" --exclude node_modules | head -50
+        _grove_fd -e sh -e bash -e zsh . "$GROVE_ROOT" --exclude node_modules | head -50
         echo -e "\n${YELLOW}(Showing first 50 results. Add a pattern to filter.)${NC}"
     fi
 }
@@ -558,10 +620,10 @@ gfstore() {
     if [ -n "$name" ]; then
         "$GROVE_RG" --color=always -n "(writable|readable|derived).*$name|$name.*(writable|readable|derived)" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type ts --type js --type svelte
+           --glob "*.{ts,js,svelte}"
     else
         echo -e "${GREEN}Store Files:${NC}"
-        "$GROVE_FD" "store" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -20
+        _grove_fd "store" "$GROVE_ROOT" -e ts -e js --exclude node_modules | head -20
 
         echo -e "\n${GREEN}Store Definitions (writable/readable/derived):${NC}"
         "$GROVE_RG" --color=always -n "export\s+(const|let).*=\s*(writable|readable|derived)" "$GROVE_ROOT" \
@@ -584,7 +646,7 @@ gfgrove() {
         echo -e "${GREEN}In Code:${NC}"
         "$GROVE_RG" --color=always -n "\bGrove\b" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!.git' --glob '!*.lock' --glob '!*.md' \
-           --type ts --type js --type svelte | head -30
+           --glob "*.{ts,js,svelte}" | head -30
 
         echo -e "\n${GREEN}In Documentation:${NC}"
         "$GROVE_RG" --color=always -n "\bGrove\b" "$GROVE_ROOT" \
@@ -658,7 +720,7 @@ gfdo() {
            --glob '!node_modules' --glob '!dist' --type ts
 
         echo -e "\n${GREEN}DO Files (by naming convention):${NC}"
-        "$GROVE_FD" -i "do\.|durable" "$GROVE_ROOT" -e ts --exclude node_modules | head -20
+        _grove_fd -i "do\.|durable" "$GROVE_ROOT" -e ts --exclude node_modules | head -20
 
         echo -e "\n${GREEN}DO Stub Usage:${NC}"
         "$GROVE_RG" --color=always -n "\.idFromName\(|\.idFromString\(|\.get\(.*DurableObjectId" "$GROVE_ROOT" \
@@ -695,7 +757,7 @@ gfd1() {
            --glob '!node_modules' --glob '!dist' --type ts --type js | head -30
 
         echo -e "\n${GREEN}SQL Files:${NC}"
-        "$GROVE_FD" -e sql . "$GROVE_ROOT" --exclude node_modules | head -20
+        _grove_fd -e sql . "$GROVE_ROOT" --exclude node_modules | head -20
 
         echo -e "\n${GREEN}Wrangler D1 Config:${NC}"
         "$GROVE_RG" --color=always -n "\[\[d1_databases\]\]" -A 5 "$GROVE_ROOT" \
@@ -776,17 +838,17 @@ gfused() {
     echo -e "${GREEN}Imports:${NC}"
     "$GROVE_RG" --color=always -n "import.*\{[^}]*\b$name\b[^}]*\}|import\s+$name\s+from|import\s+\*\s+as\s+$name" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' \
-       --type ts --type js --type svelte | head -25
+       --glob "*.{ts,js,svelte}" | head -25
 
     echo -e "\n${GREEN}JSX/Svelte Usage (<$name):${NC}"
     "$GROVE_RG" --color=always -n "<$name[\s/>]" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' \
-       --type svelte | head -25
+       --glob "*.svelte" | head -25
 
     echo -e "\n${GREEN}Function Calls ($name()):${NC}"
     "$GROVE_RG" --color=always -n "\b$name\s*\(" "$GROVE_ROOT" \
        --glob '!node_modules' --glob '!dist' \
-       --type ts --type js --type svelte | \
+       --glob "*.{ts,js,svelte}" | \
        "$GROVE_RG" -v "(function|const|let|var|import|export)\s+$name" | head -25
 }
 
@@ -804,27 +866,27 @@ gflog() {
     if [ -n "$level" ]; then
         "$GROVE_RG" --color=always -n "console\.$level\(" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
-           --type ts --type js --type svelte
+           --glob "*.{ts,js,svelte}"
     else
         echo -e "${YELLOW}console.log:${NC}"
         "$GROVE_RG" --color=always -n "console\.log\(" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
-           --type ts --type js --type svelte | head -20
+           --glob "*.{ts,js,svelte}" | head -20
 
         echo -e "\n${RED}console.error:${NC}"
         "$GROVE_RG" --color=always -n "console\.error\(" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
-           --type ts --type js --type svelte | head -15
+           --glob "*.{ts,js,svelte}" | head -15
 
         echo -e "\n${PURPLE}console.warn:${NC}"
         "$GROVE_RG" --color=always -n "console\.warn\(" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
-           --type ts --type js --type svelte | head -10
+           --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${CYAN}debugger statements:${NC}"
         "$GROVE_RG" --color=always -n "\bdebugger\b" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type ts --type js --type svelte
+           --glob "*.{ts,js,svelte}"
     fi
 }
 
@@ -837,16 +899,16 @@ gfenv() {
     if [ -n "$var" ]; then
         "$GROVE_RG" --color=always -n "$var" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type ts --type js --type svelte | \
+           --glob "*.{ts,js,svelte}" | \
            "$GROVE_RG" -i "env|process|import\.meta"
     else
         echo -e "${GREEN}.env Files:${NC}"
-        "$GROVE_FD" "^\.env" "$GROVE_ROOT" --hidden --exclude node_modules 2>/dev/null
+        _grove_fd "^\.env" "$GROVE_ROOT" --hidden --exclude node_modules 2>/dev/null
 
         echo -e "\n${GREEN}import.meta.env usage:${NC}"
         "$GROVE_RG" --color=always -n "import\.meta\.env\.\w+" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type ts --type js --type svelte | head -20
+           --glob "*.{ts,js,svelte}" | head -20
 
         echo -e "\n${GREEN}process.env usage:${NC}"
         "$GROVE_RG" --color=always -n "process\.env\.\w+" "$GROVE_ROOT" \
@@ -1182,7 +1244,7 @@ gfbriefing() {
     # Find TODOs and get their blame info, sort by date
     "$GROVE_RG" -n "\bTODO\b" "$GROVE_ROOT" \
         --glob '!node_modules' --glob '!dist' --glob '!*.md' \
-        --type ts --type js --type svelte 2>/dev/null | \
+        --glob "*.{ts,js,svelte}" 2>/dev/null | \
         head -20 | while read -r line; do
             local file
             file=$(echo "$line" | cut -d: -f1)
@@ -1466,7 +1528,7 @@ gftype() {
            --glob '!node_modules' --glob '!dist' --type ts | head -15
 
         echo -e "\n${GREEN}Type Files (*.types.ts, types/*.ts):${NC}"
-        "$GROVE_FD" "types?" "$GROVE_ROOT" -e ts --exclude node_modules --exclude '*.d.ts' | head -20
+        _grove_fd "types?" "$GROVE_ROOT" -e ts --exclude node_modules --exclude '*.d.ts' | head -20
     fi
 }
 
@@ -1486,14 +1548,14 @@ gfexport() {
     else
         echo -e "${GREEN}Default Exports:${NC}"
         "$GROVE_RG" --color=always -n "export\s+default" "$GROVE_ROOT" \
-           --glob '!node_modules' --glob '!dist' --type ts --type js --type svelte | head -20
+           --glob '!node_modules' --glob '!dist' --glob "*.{ts,js,svelte}" | head -20
 
         echo -e "\n${GREEN}Named Exports:${NC}"
         "$GROVE_RG" --color=always -n "^export\s+(const|let|function|class|async function)" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --type ts --type js | head -25
 
         echo -e "\n${GREEN}Barrel Exports (index.ts):${NC}"
-        "$GROVE_FD" "index.ts" "$GROVE_ROOT" --exclude node_modules | head -20
+        _grove_fd "index.ts" "$GROVE_ROOT" --exclude node_modules | head -20
     fi
 }
 
@@ -1511,11 +1573,11 @@ gfauth() {
     if [ -n "$aspect" ]; then
         "$GROVE_RG" --color=always -n "$aspect" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' \
-           --type ts --type js --type svelte | \
+           --glob "*.{ts,js,svelte}" | \
            "$GROVE_RG" -i "auth|session|token|login|logout|user|credential|oauth|jwt"
     else
         echo -e "${GREEN}Auth Files:${NC}"
-        "$GROVE_FD" -i "auth|login|session" "$GROVE_ROOT" -e ts -e js -e svelte --exclude node_modules | head -20
+        _grove_fd -i "auth|login|session" "$GROVE_ROOT" -e ts -e js -e svelte --exclude node_modules | head -20
 
         echo -e "\n${GREEN}Session Handling:${NC}"
         "$GROVE_RG" --color=always -n "(session|getSession|createSession|destroySession)" "$GROVE_ROOT" \
@@ -1530,7 +1592,7 @@ gfauth() {
         echo -e "\n${GREEN}OAuth/Login:${NC}"
         "$GROVE_RG" --color=always -n "(oauth|login|logout|signIn|signOut|authenticate)" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' -i \
-           --type ts --type js --type svelte | head -15
+           --glob "*.{ts,js,svelte}" | head -15
 
         echo -e "\n${GREEN}Heartwood/GroveAuth:${NC}"
         "$GROVE_RG" --color=always -n "(heartwood|groveauth|GroveAuth)" "$GROVE_ROOT" \
@@ -1549,34 +1611,34 @@ gfengine() {
     if [ -n "$module" ]; then
         "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/$module" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte
+           --glob "*.{ts,js,svelte}"
     else
         echo -e "${GREEN}Engine Imports by Module:${NC}"
 
         echo -e "\n${PURPLE}UI Components:${NC}"
         "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte | head -15
+           --glob "*.{ts,js,svelte}" | head -15
 
         echo -e "\n${PURPLE}Utilities:${NC}"
         "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/utils" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte | head -10
+           --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${PURPLE}Stores:${NC}"
         "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui/stores" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte | head -10
+           --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${PURPLE}Auth:${NC}"
         "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/auth" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte | head -10
+           --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${YELLOW}Apps using the engine:${NC}"
         "$GROVE_RG" -l "@autumnsgrove/groveengine" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
-           --type ts --type js --type svelte | \
+           --glob "*.{ts,js,svelte}" | \
            sed 's|.*/||; s|/.*||' | sort -u
     fi
 }
@@ -2057,7 +2119,7 @@ gfzf() {
     fi
 
     local file
-    file=$("$GROVE_FD" . "$GROVE_ROOT" --exclude node_modules --exclude dist --exclude .git \
+    file=$(_grove_fd . "$GROVE_ROOT" --exclude node_modules --exclude dist --exclude .git \
            | fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}' \
                  --preview-window=right:60%)
 
