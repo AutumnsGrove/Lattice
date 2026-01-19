@@ -13,8 +13,10 @@ The `AGENT.md` file contains all project-specific instructions, workflows, and g
 **After reading AGENT.md**, run this command to load the codebase search toolkit:
 
 ```bash
-source scripts/repo/grove-find.sh && gfagent
+GF_AGENT=1 source scripts/repo/grove-find.sh && gfagent
 ```
+
+The `GF_AGENT=1` flag enables agent mode: no colors, no emoji, no box-drawing characters—just clean output.
 
 This gives you 45+ blazing-fast search commands for navigating the codebase. Key commands:
 - `gf "pattern"` — Search entire codebase
