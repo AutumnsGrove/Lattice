@@ -65,7 +65,7 @@
 
 			<!-- Email -->
 			<a
-				href="mailto:autumnbrown23@pm.me"
+				href="mailto:autumn@grove.place"
 				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
 			>
 				<div class="p-3 rounded-lg bg-accent-subtle/20">
@@ -73,7 +73,7 @@
 				</div>
 				<div class="flex-1">
 					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Email me</p>
-					<p class="text-sm text-foreground-subtle">autumnbrown23@pm.me</p>
+					<p class="text-sm text-foreground-subtle">autumn@grove.place</p>
 				</div>
 			</a>
 

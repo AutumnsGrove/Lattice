@@ -15,7 +15,7 @@ When you need help with something the documentation doesn't cover, here's how to
 
 ## How to contact us
 
-**Email:** [autumnbrown23@pm.me](mailto:autumnbrown23@pm.me)
+**Email:** [hello@grove.place](mailto:hello@grove.place)
 
 That's it. No ticket system, no chatbot maze, no "press 1 for billing". Just send an email and a human will read it.
 
@@ -89,7 +89,7 @@ That said, don't hesitate to reach out if you're stuck. "I tried searching but c
 
 Want to suggest a feature or share feedback about Grove? Same email address:
 
-**[autumnbrown23@pm.me](mailto:autumnbrown23@pm.me)**
+**[hello@grove.place](mailto:hello@grove.place)**
 
 Feature requests are always welcome. Can't promise everything gets built, but everything gets read and considered.
 

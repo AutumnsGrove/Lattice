@@ -522,7 +522,7 @@
         </p>
         <p class="font-sans">
           <a
-            href="mailto:autumnbrown23@pm.me"
+            href="mailto:hello@grove.place"
             class="text-accent-muted hover:text-primary underline"
           >
             Let's talk.

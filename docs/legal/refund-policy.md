@@ -32,7 +32,7 @@ After the 14-day period, you may still request a refund. We will provide a **pro
 
 To request a refund, email us at:
 
-**Email:** autumnbrown23@pm.me
+**Email:** hello@grove.place
 **Subject:** Refund Request
 
 Please include:
@@ -50,7 +50,7 @@ We will process your request within **3 business days**.
 You can cancel your subscription at any time:
 
 1. **Through your account settings** - Go to Settings → Billing → Cancel Subscription
-2. **By contacting us** - Email autumnbrown23@pm.me
+2. **By contacting us** - Email hello@grove.place
 
 ### 2.2 What Happens When You Cancel
 
@@ -166,7 +166,7 @@ When you downgrade to a lower plan:
 
 If you have questions about refunds, cancellations, or billing:
 
-**Email:** autumnbrown23@pm.me
+**Email:** hello@grove.place
 
 We respond to all billing inquiries within **24 hours**.
 

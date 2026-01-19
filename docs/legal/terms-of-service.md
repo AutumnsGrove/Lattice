@@ -234,7 +234,7 @@ Upon termination:
 These Terms are governed by the laws of the State of Georgia, United States, without regard to conflict of law principles.
 
 ### 17.2 Informal Resolution
-Before filing any legal claim, you agree to contact us at autumnbrown23@pm.me to attempt to resolve the dispute informally. We will work in good faith to resolve issues within 30 days.
+Before filing any legal claim, you agree to contact us at hello@grove.place to attempt to resolve the dispute informally. We will work in good faith to resolve issues within 30 days.
 
 ### 17.3 Jurisdiction
 Any legal action arising from these Terms shall be brought exclusively in the state or federal courts located in Georgia, and you consent to the jurisdiction of such courts.
@@ -271,7 +271,7 @@ You may not assign your rights under these Terms without our consent. We may ass
 
 If you have questions about these Terms, please contact us at:
 
-**Email:** autumnbrown23@pm.me
+**Email:** hello@grove.place
 
 ---
 

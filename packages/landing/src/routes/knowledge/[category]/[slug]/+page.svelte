@@ -175,7 +175,7 @@
 
             <div class="flex gap-4">
               <a
-                href="mailto:autumnbrown23@pm.me"
+                href="mailto:hello@grove.place"
                 class="text-foreground-muted hover:text-foreground transition-colors"
                 aria-label="Contact support via email"
               >

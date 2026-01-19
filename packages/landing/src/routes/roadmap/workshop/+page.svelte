@@ -882,7 +882,7 @@
 					More tools are always being dreamed up in the workshop.
 				</p>
 				<p class="text-sm text-foreground-faint mt-2">
-					Have an idea? <a href="mailto:autumnbrown23@pm.me" class="text-accent hover:underline">Let's talk</a>
+					Have an idea? <a href="mailto:hello@grove.place" class="text-accent hover:underline">Let's talk</a>
 				</p>
 			</div>
 		</div>

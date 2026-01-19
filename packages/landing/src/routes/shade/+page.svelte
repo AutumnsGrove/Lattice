@@ -139,8 +139,8 @@
 					Questions or concerns?
 				</p>
 				<p>
-					<a href="mailto:autumnbrown23@pm.me" class="text-accent-muted hover:text-accent transition-colors">
-						autumnbrown23@pm.me
+					<a href="mailto:hello@grove.place" class="text-accent-muted hover:text-accent transition-colors">
+						hello@grove.place
 					</a>
 				</p>
 				<p class="text-foreground-faint text-sm mt-4">

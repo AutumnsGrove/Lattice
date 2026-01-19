@@ -25,7 +25,7 @@ export const GET: RequestHandler = (event) => {
     siteConfig.site?.description ||
     "A personal website for blogging, demonstrating projects, and sharing articles";
   const feedAuthor = siteConfig.owner?.name || "Autumn";
-  const feedEmail = siteConfig.owner?.email || "autumnbrown23@pm.me";
+  const feedEmail = siteConfig.owner?.email || "autumn@grove.place";
 
   const items = sortedPosts
     .map((post) => {

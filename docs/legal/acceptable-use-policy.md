@@ -236,7 +236,7 @@ When we remove content:
 
 ### 5.4 Reporting Violations
 
-If you see content that violates this policy, please report it by emailing autumnbrown23@pm.me with:
+If you see content that violates this policy, please report it by emailing hello@grove.place with:
 - A link to the content
 - The specific rule you believe was violated
 - Any additional context
@@ -283,7 +283,7 @@ We may update this policy as our community grows and evolves. Significant change
 
 If you have questions about what's allowed, please ask before posting. We're happy to clarify.
 
-**Email:** autumnbrown23@pm.me
+**Email:** hello@grove.place
 
 ---
 

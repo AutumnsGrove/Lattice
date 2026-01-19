@@ -6,10 +6,10 @@
 
 export const CONTACT = {
   /** Support email for billing, account issues, and general inquiries */
-  supportEmail: "autumnbrown23@pm.me",
+  supportEmail: "hello@grove.place",
 
   /** Display-friendly support email (same as above, but explicitly for UI display) */
-  supportEmailDisplay: "autumnbrown23@pm.me",
+  supportEmailDisplay: "hello@grove.place",
 } as const;
 
 export type ContactConfig = typeof CONTACT;

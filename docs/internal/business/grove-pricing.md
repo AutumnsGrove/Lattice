@@ -277,7 +277,7 @@ A professional email address for your blog—no extra cost, no separate service 
 
 Need something beyond Evergreen? Multiple domains, white-label options, team collaboration, dedicated support. Let's talk.
 
-**Contact:** autumnbrown23@pm.me
+**Contact:** hello@grove.place
 
 ---
 

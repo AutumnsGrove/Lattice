@@ -91,8 +91,8 @@
 					Questions about our policies?
 				</p>
 				<p class="font-sans">
-					<a href="mailto:autumnbrown23@pm.me" class="text-accent-muted hover:text-primary underline">
-						autumnbrown23@pm.me
+					<a href="mailto:hello@grove.place" class="text-accent-muted hover:text-primary underline">
+						hello@grove.place
 					</a>
 				</p>
 			</div>

@@ -207,7 +207,7 @@ You can update your account information at any time through your settings.
 
 ### 5.4 Delete Your Data
 
-You can request deletion of your account and all associated data by contacting us at autumnbrown23@pm.me. Deletion will be processed within 30 days.
+You can request deletion of your account and all associated data by contacting us at hello@grove.place. Deletion will be processed within 30 days.
 
 ### 5.5 Opt Out of Communications
 
@@ -235,7 +235,7 @@ We take security seriously and implement industry-standard measures to protect y
 - Minimal data access on a need-to-know basis
 - No third-party access to raw user data
 
-While we implement strong security measures, no system is 100% secure. If you discover a security vulnerability, please report it to autumnbrown23@pm.me.
+While we implement strong security measures, no system is 100% secure. If you discover a security vulnerability, please report it to hello@grove.place.
 
 ---
 
@@ -265,7 +265,7 @@ You can configure your browser to block cookies, but this may prevent you from u
 
 Grove is not intended for users under 18 years of age. We do not knowingly collect personal information from anyone under 18. If we learn that we have collected data from someone under 18, we will delete it promptly.
 
-If you believe a child under 18 has provided us with personal information, please contact us at autumnbrown23@pm.me.
+If you believe a child under 18 has provided us with personal information, please contact us at hello@grove.place.
 
 ---
 
@@ -298,7 +298,7 @@ We encourage you to review this policy periodically.
 
 If you have questions about this Privacy Policy or your personal data, please contact us:
 
-**Email:** autumnbrown23@pm.me
+**Email:** hello@grove.place
 
 We will respond to privacy-related inquiries within 30 days.
 
