@@ -228,6 +228,21 @@ CREATE INDEX IF NOT EXISTS idx_sentinel_schedules_active ON sentinel_schedules(i
 CREATE INDEX IF NOT EXISTS idx_sentinel_schedules_next ON sentinel_schedules(next_run_at);
 
 -- =============================================================================
+-- SENTINEL TEST DATA
+-- =============================================================================
+-- Temporary table for test operations (created on-demand but defined here for completeness)
+-- This table holds synthetic data created during stress tests and is cleaned up after
+
+CREATE TABLE IF NOT EXISTS sentinel_test_data (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  data TEXT,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentinel_test_data_tenant ON sentinel_test_data(tenant_id);
+
+-- =============================================================================
 -- NOTE: Status page tables (status_components, status_incidents, etc.)
 -- are managed by The Clearing service in its own D1 database.
 -- Sentinel results are pushed to Clearing via API calls.
