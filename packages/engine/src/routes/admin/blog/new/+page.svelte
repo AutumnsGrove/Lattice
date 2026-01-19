@@ -18,6 +18,7 @@
   let content = $state("");
   /** @type {any[]} */
   let gutterItems = $state([]);
+  let firesideAssisted = $state(false);
 
   // Editor reference for anchor insertion
   /** @type {any} */
@@ -114,6 +115,7 @@
         font,
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
+        fireside_assisted: firesideAssisted ? 1 : 0,
       });
 
       // Clear draft on successful save
@@ -302,10 +304,11 @@
           <MarkdownEditor
             bind:this={editorRef}
             bind:content
+            bind:firesideAssisted
             {saving}
             onSave={handleSave}
             draftKey="new-post"
-            previewTitle={title}
+            bind:previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}
           />

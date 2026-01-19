@@ -8,7 +8,8 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import FloatingToolbar from "./FloatingToolbar.svelte";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2 } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame } from "lucide-svelte";
+  import FiresideChat from "./FiresideChat.svelte";
   import { browser } from "$app/environment";
 
   // Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
@@ -44,10 +45,11 @@
     readonly = false,
     draftKey = /** @type {string | null} */ (null),
     onDraftRestored = /** @type {(draft: StoredDraft) => void} */ (() => {}),
-    previewTitle = "",
+    previewTitle = $bindable(""),
     previewDate = "",
     previewTags = /** @type {string[]} */ ([]),
     gutterItems = /** @type {GutterItemProp[]} */ ([]),
+    firesideAssisted = $bindable(false),
   } = $props();
 
   // Core refs and state
@@ -87,6 +89,9 @@
 
   // Zen mode
   let isZenMode = $state(false);
+
+  // Fireside mode (conversational writing)
+  let isFiresideMode = $state(false);
 
   // Initialize composables
   const editorTheme = useEditorTheme();
@@ -230,12 +235,24 @@
       e.preventDefault();
       cycleEditorMode();
     }
+
+    // Cmd/Ctrl + Shift + F for Fireside mode
+    if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+      e.preventDefault();
+      toggleFiresideMode();
+    }
   }
 
   /** @param {KeyboardEvent} e */
   function handleGlobalKeydown(e) {
     if (e.key === "Escape") {
-      // Exit zen mode first (higher priority)
+      // Exit Fireside mode first (highest priority)
+      if (isFiresideMode) {
+        isFiresideMode = false;
+        e.preventDefault();
+        return;
+      }
+      // Exit zen mode second
       if (isZenMode) {
         isZenMode = false;
         e.preventDefault();
@@ -255,6 +272,46 @@
     if (isZenMode) {
       editorSettings.typewriterMode = true;
     }
+  }
+
+  // Fireside mode toggle
+  function toggleFiresideMode() {
+    // Can't use Fireside if there's already content (it's for starting fresh)
+    if (!isFiresideMode && content.trim()) {
+      // Could show a warning here, but for now just don't toggle
+      return;
+    }
+    isFiresideMode = !isFiresideMode;
+  }
+
+  /**
+   * Handle accepting a draft from Fireside mode
+   * @param {{ title: string, content: string, marker: string }} draft
+   */
+  function handleFiresideDraft(draft) {
+    // Set the content (with the marker appended)
+    content = draft.content + "\n\n" + draft.marker;
+
+    // Set the title if the prop is bindable
+    if (draft.title) {
+      previewTitle = draft.title;
+    }
+
+    // Mark as fireside-assisted
+    firesideAssisted = true;
+
+    // Exit Fireside mode
+    isFiresideMode = false;
+
+    // Focus the textarea after a tick
+    tick().then(() => {
+      textareaRef?.focus();
+    });
+  }
+
+  // Handle closing Fireside without a draft
+  function handleFiresideClose() {
+    isFiresideMode = false;
   }
 
   // Editor mode switching
@@ -589,9 +646,23 @@
     </div>
   {/if}
 
-  <!-- Mode-based Toolbar -->
+  <!-- Mode-based Toolbar (hidden in Fireside mode) -->
+  {#if !isFiresideMode}
   <div class="toolbar">
     <div class="toolbar-left">
+      {#if !content.trim()}
+        <button
+          type="button"
+          class="fireside-btn"
+          onclick={toggleFiresideMode}
+          title="Fireside Mode (⌘⇧F) - Start with a conversation"
+          aria-label="Enter Fireside mode for conversational writing"
+        >
+          <Flame class="toolbar-icon fireside-icon" />
+          <span>Fireside</span>
+        </button>
+        <span class="toolbar-divider">|</span>
+      {/if}
       <span class="toolbar-hint">{editorMode === "preview" ? "Preview mode (read-only)" : "Select text to format"}</span>
     </div>
 
@@ -658,60 +729,72 @@
       </button>
     </div>
   </div>
+  {/if}
 
-  <!-- Editor Area -->
-  <div class="editor-area" class:split={editorMode === "split"} class:preview-only={editorMode === "preview"}>
-    <!-- Editor Panel (hidden in preview mode) -->
-    {#if editorMode !== "preview"}
-      <div class="editor-panel">
-        <div class="editor-wrapper">
-          <div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
-            {#each lineNumbers as num}
-              <span class:current={num === cursorLine}>{num}</span>
-            {/each}
+  <!-- Fireside Mode (replaces editor) -->
+  {#if isFiresideMode}
+    <div class="fireside-area">
+      <FiresideChat
+        onDraft={handleFiresideDraft}
+        onClose={handleFiresideClose}
+      />
+    </div>
+  {:else}
+    <!-- Editor Area -->
+    <div class="editor-area" class:split={editorMode === "split"} class:preview-only={editorMode === "preview"}>
+      <!-- Editor Panel (hidden in preview mode) -->
+      {#if editorMode !== "preview"}
+        <div class="editor-panel">
+          <div class="editor-wrapper">
+            <div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
+              {#each lineNumbers as num}
+                <span class:current={num === cursorLine}>{num}</span>
+              {/each}
+            </div>
+            <textarea
+              aria-label="Markdown editor content"
+              bind:this={textareaRef}
+              bind:value={content}
+              oninput={updateCursorPosition}
+              onclick={updateCursorPosition}
+              onkeyup={updateCursorPosition}
+              onkeydown={handleKeydown}
+              onscroll={handleScroll}
+              onpaste={handlePaste}
+              placeholder="Start writing your post... (Drag & drop or paste images)"
+              spellcheck="true"
+              disabled={readonly}
+              class="editor-textarea"
+            ></textarea>
           </div>
-          <textarea
-            aria-label="Markdown editor content"
-            bind:this={textareaRef}
-            bind:value={content}
-            oninput={updateCursorPosition}
-            onclick={updateCursorPosition}
-            onkeyup={updateCursorPosition}
-            onkeydown={handleKeydown}
-            onscroll={handleScroll}
-            onpaste={handlePaste}
-            placeholder="Start writing your post... (Drag & drop or paste images)"
-            spellcheck="true"
-            disabled={readonly}
-            class="editor-textarea"
-          ></textarea>
         </div>
-      </div>
-    {/if}
+      {/if}
 
-    <!-- Preview Panel (shown in split and preview modes) -->
-    {#if editorMode === "split" || editorMode === "preview"}
-      <div class="preview-panel" class:full-width={editorMode === "preview"}>
-        <div class="preview-header">
-          <span class="preview-label">:: {editorMode === "preview" ? "preview (read-only)" : "live preview"}</span>
-          <Logo class="preview-logo" />
+      <!-- Preview Panel (shown in split and preview modes) -->
+      {#if editorMode === "split" || editorMode === "preview"}
+        <div class="preview-panel" class:full-width={editorMode === "preview"}>
+          <div class="preview-header">
+            <span class="preview-label">:: {editorMode === "preview" ? "preview (read-only)" : "live preview"}</span>
+            <Logo class="preview-logo" />
+          </div>
+          <div class="preview-content" bind:this={previewRef}>
+            {#if previewHtml}
+              {#key previewHtml}
+                <div class="rendered-content">{@html previewHtml}</div>
+              {/key}
+            {:else}
+              <p class="preview-placeholder">
+                {editorMode === "preview" ? "No content to preview..." : "Start typing to see your rendered markdown..."}
+              </p>
+            {/if}
+          </div>
         </div>
-        <div class="preview-content" bind:this={previewRef}>
-          {#if previewHtml}
-            {#key previewHtml}
-              <div class="rendered-content">{@html previewHtml}</div>
-            {/key}
-          {:else}
-            <p class="preview-placeholder">
-              {editorMode === "preview" ? "No content to preview..." : "Start typing to see your rendered markdown..."}
-            </p>
-          {/if}
-        </div>
-      </div>
-    {/if}
-  </div>
+      {/if}
+    </div>
+  {/if}
 
-  <!-- Status Bar -->
+  <!-- Status Bar (hidden in Fireside mode) -->
+  {#if !isFiresideMode}
   <div class="status-bar">
     <div class="status-left">
       <span class="status-item">Ln {cursorLine}, Col {cursorCol}</span>
@@ -744,6 +827,7 @@
       {/if}
     </div>
   </div>
+  {/if}
 </div>
 
 <!-- Floating Toolbar for text formatting (Medium-style) -->
@@ -1113,6 +1197,37 @@
   :global(.toolbar-icon) {
     width: 1rem;
     height: 1rem;
+  }
+  /* Fireside button - warm orange/amber styling */
+  .fireside-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3rem 0.6rem;
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.15) 0%, rgba(255, 100, 30, 0.1) 100%);
+    border: 1px solid rgba(255, 140, 50, 0.3);
+    border-radius: 6px;
+    color: #ff9d5c;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .fireside-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.25) 0%, rgba(255, 100, 30, 0.2) 100%);
+    border-color: rgba(255, 140, 50, 0.5);
+    color: #ffb88c;
+  }
+  :global(.fireside-icon) {
+    width: 0.875rem;
+    height: 0.875rem;
+    color: #ff8c32;
+  }
+  .fireside-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
   /* svelte-ignore css-unused-selector */
   .toolbar-divider {

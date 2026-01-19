@@ -32,6 +32,7 @@ interface PostInput {
   description?: string;
   gutter_content?: string;
   font?: string;
+  fireside_assisted?: number;
 }
 
 /**
@@ -244,6 +245,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       status: "draft",
       word_count: wordCount,
       reading_time: readingTime,
+      fireside_assisted: data.fireside_assisted || 0,
     });
 
     // Invalidate post list cache so the new post appears in listings
