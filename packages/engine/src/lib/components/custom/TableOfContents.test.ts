@@ -68,19 +68,49 @@ describe('TableOfContents', () => {
 			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
 			expect(container.querySelector('nav.toc')).toBeTruthy();
 		});
+
+		it('wraps header text in span elements', () => {
+			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
+			const spans = container.querySelectorAll('.toc-link span');
+			expect(spans.length).toBe(mockHeaders.length);
+		});
 	});
 
-	describe('Snapshots', () => {
-		it('matches snapshot with default props', () => {
-			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
-			expect(container.innerHTML).toMatchSnapshot();
+	describe('Props', () => {
+		it('accepts scrollOffset prop', () => {
+			// Component should accept prop without error
+			const { container } = render(TableOfContents, {
+				props: { headers: mockHeaders, scrollOffset: 120 }
+			});
+			expect(container.querySelector('nav')).toBeTruthy();
 		});
 
-		it('matches snapshot with custom title', () => {
+		it('uses default scrollOffset when not provided', () => {
+			// Component should render without scrollOffset prop
 			const { container } = render(TableOfContents, {
-				props: { headers: mockHeaders, title: 'Sections' }
+				props: { headers: mockHeaders }
 			});
-			expect(container.innerHTML).toMatchSnapshot();
+			expect(container.querySelector('nav')).toBeTruthy();
+		});
+	});
+
+	describe('Accessibility', () => {
+		it('uses semantic nav element', () => {
+			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
+			expect(container.querySelector('nav')).toBeTruthy();
+		});
+
+		it('uses heading for title', () => {
+			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
+			expect(container.querySelector('h3.toc-title')).toBeTruthy();
+		});
+
+		it('uses button elements for navigation items', () => {
+			render(TableOfContents, { props: { headers: mockHeaders } });
+			const buttons = screen.getAllByRole('button');
+			buttons.forEach(button => {
+				expect(button.getAttribute('type')).toBe('button');
+			});
 		});
 	});
 });

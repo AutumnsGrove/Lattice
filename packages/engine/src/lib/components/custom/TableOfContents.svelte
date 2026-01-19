@@ -1,11 +1,30 @@
-<script>
-	/**
-	 * @typedef {import('svelte').Component} SvelteComponent
-	 * @typedef {{ id: string; text: string; level: number; icon?: SvelteComponent }} Header
-	 */
+<script lang="ts">
+	import type { Component } from 'svelte';
 
-	/** @type {{ headers?: Header[], title?: string }} */
-	let { headers = [], title = 'Table of Contents' } = $props();
+	/**
+	 * Header item for the table of contents
+	 */
+	export interface TOCHeader {
+		/** Unique ID matching the section's id attribute */
+		id: string;
+		/** Display text for the TOC item */
+		text: string;
+		/** Header level (1-6) for indentation */
+		level: number;
+		/** Optional Svelte component to render as an icon */
+		icon?: Component<{ class?: string }>;
+	}
+
+	interface Props {
+		/** Array of headers to display in the TOC */
+		headers?: TOCHeader[];
+		/** Title displayed at the top of the TOC */
+		title?: string;
+		/** Scroll offset in pixels to account for sticky headers (default: 80) */
+		scrollOffset?: number;
+	}
+
+	let { headers = [], title = 'Table of Contents', scrollOffset = 80 }: Props = $props();
 
 	let activeId = $state('');
 
@@ -44,25 +63,29 @@
 		return cleanup;
 	});
 
-	/** @param {string} id */
-	function scrollToHeader(id) {
+	function scrollToHeader(id: string) {
 		const element = document.getElementById(id);
 		if (element) {
-			// Calculate offset for sticky headers
-			const offset = 80; // Account for any fixed headers
 			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-			const offsetPosition = elementPosition - offset;
+			const offsetPosition = elementPosition - scrollOffset;
 
 			window.scrollTo({
 				top: offsetPosition,
 				behavior: 'smooth'
 			});
-			
+
 			// Update URL hash without jumping
 			history.pushState(null, '', `#${id}`);
 		} else {
 			console.warn(`TableOfContents: Header element not found for ID: ${id}`);
 		}
+	}
+
+	/**
+	 * Check if icon is a valid Svelte component (has render capabilities)
+	 */
+	function isValidIcon(icon: unknown): icon is Component<{ class?: string }> {
+		return typeof icon === 'function' || (typeof icon === 'object' && icon !== null);
 	}
 </script>
 
@@ -71,11 +94,11 @@
 		<h3 class="toc-title">{title}</h3>
 		<ul class="toc-list">
 			{#each headers as header (header.id)}
-				{@const IconComponent = header.icon}
+				{@const IconComponent = header.icon && isValidIcon(header.icon) ? header.icon : null}
 				<li
 					class="toc-item level-{header.level}"
 					class:active={activeId === header.id}
-					class:has-icon={!!header.icon}
+					class:has-icon={!!IconComponent}
 				>
 					<button
 						type="button"
@@ -128,15 +151,11 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #666;
+		color: var(--color-foreground-muted, #666);
 		margin: 0 0 1rem 0;
 		padding-bottom: 0.5rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		border-bottom: 1px solid var(--color-divider, rgba(0, 0, 0, 0.1));
 		transition: color 0.3s ease, border-color 0.3s ease;
-	}
-	:global(.dark) .toc-title {
-		color: rgba(255, 255, 255, 0.6);
-		border-bottom-color: rgba(255, 255, 255, 0.1);
 	}
 	.toc-list {
 		list-style: none;
@@ -156,7 +175,7 @@
 		padding: 0.375rem 0;
 		background: none;
 		border: none;
-		color: #666;
+		color: var(--color-foreground-muted, #666);
 		cursor: pointer;
 		transition: color 0.2s ease;
 		font-size: inherit;
@@ -176,24 +195,20 @@
 		opacity: 1;
 	}
 	.toc-link:hover {
-		color: #2c5f2d;
+		color: var(--accent-success, #2c5f2d);
 		padding-left: 0.5rem;
 	}
-	:global(.dark) .toc-link:hover {
-		color: var(--accent-success);
-	}
 	.toc-item.active .toc-link {
-		color: #2c5f2d;
+		color: var(--accent-success, #2c5f2d);
 		font-weight: 600;
 		/* Active indicator */
-		background: rgba(44, 95, 45, 0.1);
+		background: var(--accent-success-faint, rgba(44, 95, 45, 0.1));
 		padding: 0.375rem 0.75rem;
 		margin-left: -0.75rem;
 		margin-right: -0.75rem;
 		border-radius: 8px;
 	}
 	:global(.dark) .toc-item.active .toc-link {
-		color: var(--accent-success);
 		background: rgba(74, 222, 128, 0.1);
 	}
 	/* Indentation based on header level */
@@ -224,10 +239,7 @@
 		background: transparent;
 	}
 	.toc::-webkit-scrollbar-thumb {
-		background: var(--light-text-secondary);
+		background: var(--color-foreground-subtle, #ccc);
 		border-radius: 2px;
-	}
-	:global(.dark) .toc::-webkit-scrollbar-thumb {
-		background: var(--light-border-light);
 	}
 </style>

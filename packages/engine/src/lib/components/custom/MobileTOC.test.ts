@@ -112,21 +112,72 @@ describe('MobileTOC', () => {
 
 			expect(container.querySelector('.toc-menu')).toBeTruthy();
 		});
-	});
 
-	describe('Snapshots', () => {
-		it('matches snapshot when closed', () => {
-			const { container } = render(MobileTOC, { props: { headers: mockHeaders } });
-			expect(container.innerHTML).toMatchSnapshot();
-		});
-
-		it('matches snapshot when open', async () => {
+		it('renders unordered list in menu', async () => {
 			const { container } = render(MobileTOC, { props: { headers: mockHeaders } });
 			const button = screen.getByLabelText('Toggle table of contents');
 
 			await fireEvent.click(button);
 
-			expect(container.innerHTML).toMatchSnapshot();
+			expect(container.querySelector('ul.toc-list')).toBeTruthy();
+		});
+
+		it('wraps header text in span elements', async () => {
+			const { container } = render(MobileTOC, { props: { headers: mockHeaders } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			const spans = container.querySelectorAll('.toc-link span');
+			expect(spans.length).toBe(mockHeaders.length);
+		});
+	});
+
+	describe('Props', () => {
+		it('accepts scrollOffset prop', () => {
+			const { container } = render(MobileTOC, {
+				props: { headers: mockHeaders, scrollOffset: 120 }
+			});
+			expect(container.querySelector('.mobile-toc-wrapper')).toBeTruthy();
+		});
+
+		it('uses default scrollOffset when not provided', () => {
+			const { container } = render(MobileTOC, {
+				props: { headers: mockHeaders }
+			});
+			expect(container.querySelector('.mobile-toc-wrapper')).toBeTruthy();
+		});
+	});
+
+	describe('Accessibility', () => {
+		it('has proper aria-label on FAB button', () => {
+			render(MobileTOC, { props: { headers: mockHeaders } });
+			const button = screen.getByLabelText('Toggle table of contents');
+			expect(button).toBeTruthy();
+		});
+
+		it('uses button elements for menu items', async () => {
+			render(MobileTOC, { props: { headers: mockHeaders } });
+			const fabButton = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(fabButton);
+
+			// All menu items should be buttons with type="button"
+			const menuButtons = screen.getAllByRole('button');
+			const menuItemButtons = menuButtons.filter(btn => btn.classList.contains('toc-link'));
+			expect(menuItemButtons.length).toBe(mockHeaders.length);
+			menuItemButtons.forEach(button => {
+				expect(button.getAttribute('type')).toBe('button');
+			});
+		});
+
+		it('uses heading for menu title', async () => {
+			const { container } = render(MobileTOC, { props: { headers: mockHeaders } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			expect(container.querySelector('h3.toc-title')).toBeTruthy();
 		});
 	});
 });

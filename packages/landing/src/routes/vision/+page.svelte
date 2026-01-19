@@ -270,7 +270,19 @@
 		</div>
 	</article>
 
-	<!-- Floating TOC Icon Navigation (desktop) - custom icon-only design -->
+	<!--
+		Floating TOC Icon Navigation (desktop)
+
+		This is a specialized "icon-only" TOC pattern with hover tooltips,
+		distinct from the standard text-based TableOfContents component.
+		Used for pages with few sections where icons provide quick visual navigation.
+
+		Z-INDEX: z-grove-fab (40) - sits above page content but below:
+		- Mobile menu overlay (9990)
+		- Mobile menu (9999)
+		- Modals (50+)
+		See tailwind.preset.js for the full z-index scale.
+	-->
 	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-2" aria-label="Section navigation">
 		{#each tocHeaders as header}
 			{@const SectionIcon = header.icon}
