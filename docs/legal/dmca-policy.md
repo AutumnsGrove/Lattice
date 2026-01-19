@@ -2,7 +2,7 @@
 
 **Grove Platform**
 **Effective Date:** December 10, 2025
-**Last Updated:** December 10, 2025
+**Last Updated:** January 19, 2026
 
 ---
 
@@ -42,10 +42,12 @@ Your notice must include **all** of the following:
 
 Send your DMCA takedown notice to:
 
-**Email:** autumnbrown23@pm.me
+**Designated Agent:** Grove Legal
+**Organization:** Grove
+**Email:** dmca@grove.place
 **Subject Line:** DMCA Takedown Notice
 
-**Note:** We are in the process of registering a designated DMCA agent with the U.S. Copyright Office. This page will be updated with agent information once registration is complete.
+Our designated agent is registered with the U.S. Copyright Office DMCA Designated Agent Directory.
 
 ### 1.3 What Happens Next
 
@@ -79,7 +81,8 @@ Your counter-notification must include **all** of the following:
 
 Send your counter-notification to:
 
-**Email:** autumnbrown23@pm.me
+**Designated Agent:** Grove Legal
+**Email:** dmca@grove.place
 **Subject Line:** DMCA Counter-Notification
 
 ### 2.3 What Happens Next
@@ -131,11 +134,11 @@ Grove does not interfere with standard technical measures used by copyright owne
 
 For all DMCA-related inquiries:
 
-**Email:** autumnbrown23@pm.me
+**Designated Agent:** Grove Legal
+**Organization:** Grove
+**Email:** dmca@grove.place
 
-**Designated Agent:** *Registration pending with U.S. Copyright Office*
-
-This policy will be updated once our designated agent registration is complete.
+Our designated agent is registered with the [U.S. Copyright Office DMCA Designated Agent Directory](https://www.copyright.gov/dmca-directory/).
 
 ---
 

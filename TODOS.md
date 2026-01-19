@@ -147,9 +147,10 @@
 
 ## 📋 Legal Pre-Launch
 
-- [ ] Register DMCA designated agent with US Copyright Office ($6 fee)
-  - Required for DMCA safe harbor protection
-  - Register at: https://www.copyright.gov/dmca-directory/
+- [x] Register DMCA designated agent with US Copyright Office ($6 fee) ✅ **DONE Jan 19, 2026**
+  - Registered as "Grove Legal" under "Grove"
+  - Email: dmca@grove.place
+  - Pay.gov Tracking ID: 27US0OE7
 
 ---
 
