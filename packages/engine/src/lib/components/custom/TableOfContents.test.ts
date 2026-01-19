@@ -113,4 +113,46 @@ describe('TableOfContents', () => {
 			});
 		});
 	});
+
+	describe('Icon Rendering', () => {
+		// Create a simple mock Svelte component
+		const MockIcon = function MockIcon() {
+			return { $$: {}, $destroy: () => {}, $set: () => {} };
+		};
+
+		const headersWithIcons = [
+			{ id: 'with-icon', text: 'With Icon', level: 2, icon: MockIcon },
+			{ id: 'without-icon', text: 'Without Icon', level: 2 },
+		];
+
+		it('adds has-icon class when icon is provided', () => {
+			const { container } = render(TableOfContents, { props: { headers: headersWithIcons } });
+			const itemsWithIcon = container.querySelectorAll('.has-icon');
+			expect(itemsWithIcon.length).toBe(1);
+		});
+
+		it('does not add has-icon class when icon is not provided', () => {
+			const { container } = render(TableOfContents, { props: { headers: mockHeaders } });
+			const itemsWithIcon = container.querySelectorAll('.has-icon');
+			expect(itemsWithIcon.length).toBe(0);
+		});
+
+		it('handles invalid icon gracefully', () => {
+			const headersWithInvalidIcon = [
+				{ id: 'invalid', text: 'Invalid Icon', level: 2, icon: {} as any },
+			];
+			// Should not throw, empty object fails isValidIcon
+			const { container } = render(TableOfContents, { props: { headers: headersWithInvalidIcon } });
+			expect(container.querySelector('nav')).toBeTruthy();
+		});
+
+		it('handles null icon gracefully', () => {
+			const headersWithNullIcon = [
+				{ id: 'null-icon', text: 'Null Icon', level: 2, icon: null as any },
+			];
+			const { container } = render(TableOfContents, { props: { headers: headersWithNullIcon } });
+			expect(container.querySelector('nav')).toBeTruthy();
+			expect(container.querySelectorAll('.has-icon').length).toBe(0);
+		});
+	});
 });

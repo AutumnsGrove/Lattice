@@ -180,4 +180,62 @@ describe('MobileTOC', () => {
 			expect(container.querySelector('h3.toc-title')).toBeTruthy();
 		});
 	});
+
+	describe('Icon Rendering', () => {
+		// Create a simple mock Svelte component
+		const MockIcon = function MockIcon() {
+			return { $$: {}, $destroy: () => {}, $set: () => {} };
+		};
+
+		const headersWithIcons = [
+			{ id: 'with-icon', text: 'With Icon', level: 2, icon: MockIcon },
+			{ id: 'without-icon', text: 'Without Icon', level: 2 },
+		];
+
+		it('adds has-icon class when icon is provided', async () => {
+			const { container } = render(MobileTOC, { props: { headers: headersWithIcons } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			const itemsWithIcon = container.querySelectorAll('.has-icon');
+			expect(itemsWithIcon.length).toBe(1);
+		});
+
+		it('does not add has-icon class when icon is not provided', async () => {
+			const { container } = render(MobileTOC, { props: { headers: mockHeaders } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			const itemsWithIcon = container.querySelectorAll('.has-icon');
+			expect(itemsWithIcon.length).toBe(0);
+		});
+
+		it('handles invalid icon gracefully', async () => {
+			const headersWithInvalidIcon = [
+				{ id: 'invalid', text: 'Invalid Icon', level: 2, icon: {} as any },
+			];
+			const { container } = render(MobileTOC, { props: { headers: headersWithInvalidIcon } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			// Should not throw, empty object fails isValidIcon
+			expect(container.querySelector('.toc-menu')).toBeTruthy();
+		});
+
+		it('handles null icon gracefully', async () => {
+			const headersWithNullIcon = [
+				{ id: 'null-icon', text: 'Null Icon', level: 2, icon: null as any },
+			];
+			const { container } = render(MobileTOC, { props: { headers: headersWithNullIcon } });
+			const button = screen.getByLabelText('Toggle table of contents');
+
+			await fireEvent.click(button);
+
+			expect(container.querySelector('.toc-menu')).toBeTruthy();
+			expect(container.querySelectorAll('.has-icon').length).toBe(0);
+		});
+	});
 });

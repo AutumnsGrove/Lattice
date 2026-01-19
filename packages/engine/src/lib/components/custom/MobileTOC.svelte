@@ -1,31 +1,19 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
+	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from './types.js';
 
-	/**
-	 * Header item for the mobile table of contents
-	 * Re-exports TOCHeader from TableOfContents for consistency
-	 */
-	export interface TOCHeader {
-		/** Unique ID matching the section's id attribute */
-		id: string;
-		/** Display text for the TOC item */
-		text: string;
-		/** Header level (1-6) for indentation */
-		level: number;
-		/** Optional Svelte component to render as an icon */
-		icon?: Component<{ class?: string }>;
-	}
+	// Re-export for consumers who import from this component
+	export type { TOCHeader };
 
 	interface Props {
 		/** Array of headers to display in the TOC */
 		headers?: TOCHeader[];
 		/** Title displayed at the top of the menu */
 		title?: string;
-		/** Scroll offset in pixels to account for sticky headers (default: 100) */
+		/** Scroll offset in pixels to account for sticky headers */
 		scrollOffset?: number;
 	}
 
-	let { headers = [], title = 'Table of Contents', scrollOffset = 100 }: Props = $props();
+	let { headers = [], title = 'Table of Contents', scrollOffset = DEFAULT_SCROLL_OFFSET }: Props = $props();
 
 	let isOpen = $state(false);
 	let menuRef = $state<HTMLDivElement>();
@@ -100,13 +88,6 @@
 		});
 
 		return () => observer.disconnect();
-	}
-
-	/**
-	 * Check if icon is a valid Svelte component (has render capabilities)
-	 */
-	function isValidIcon(icon: unknown): icon is Component<{ class?: string }> {
-		return typeof icon === 'function' || (typeof icon === 'object' && icon !== null);
 	}
 
 	$effect(() => {
