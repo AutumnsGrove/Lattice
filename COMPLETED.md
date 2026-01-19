@@ -579,4 +579,68 @@ Full spring mode implemented:
 
 ---
 
-*Last updated: 2026-01-16*
+### Jan 18-19, 2026 — Major Sprint (8 PRs Merged!)
+
+> **Massive productivity sprint** — All 7 original planning documents COMPLETE!
+
+#### 🛡️ Security Hardening (PR #391)
+| Task | Status |
+|------|--------|
+| Webhook PII Sanitization | ✓ Whitelist-based stripping of sensitive fields |
+| 120-day Retention Policy | ✓ `expires_at` column + cleanup Worker with daily cron |
+| Safe JSON Parsing | ✓ Wrapped 16 unsafe `JSON.parse()` calls |
+| Documentation | ✓ `docs/security/webhook-data-protection.md` |
+| Tests | ✓ 25 new tests for webhook sanitizer |
+
+#### 🏗️ Code Quality & Infrastructure (PR #387, #389, #390)
+| Task | Status |
+|------|--------|
+| Centralized Rate Limiting | ✓ Consolidated to `$lib/server/rate-limits/config.ts` |
+| DB Query Isolation Audit | ✓ Wrapped cascading queries in isolated try/catch |
+| Safari Reader Mode Fallback | ✓ `@supports not (backdrop-filter)` fallback |
+| Focus Management | ✓ GlassConfirmDialog saves/restores focus + trapping |
+
+#### 🔐 Encryption Pass (PR #400)
+| Task | Status |
+|------|--------|
+| Wire AES-256-GCM encryption | ✓ GitHub/OpenRouter tokens encrypted in Journey Curio |
+| Admin UI for token management | ✓ Clear token value support |
+| Hex validation tests | ✓ Added validation tests |
+
+#### 🌱 Plant Onboarding Enhancements (PR #401)
+| Task | Status |
+|------|--------|
+| Email Verification Flow | ✓ 6-digit codes, 15-min expiry, 5 max attempts |
+| Rate Limiting | ✓ 3 resends/hour via KV |
+| OAuth Auto-Verification | ✓ Users with `email_verified=true` skip verification |
+| Onboarding Checklist UI | ✓ GlassCard widget with Grove voice |
+| Reserved Usernames Admin | ✓ `/admin/reserved-usernames` with audit logging |
+| Tests | ✓ 57 test cases for email verification |
+| Accessibility | ✓ ARIA labels, improved color contrast |
+
+#### 📚 Documentation (PR #397, #398)
+| Task | Status |
+|------|--------|
+| Component Reference | ✓ 185 components cataloged |
+| UI Placeholders | ✓ Vista/Forage placeholder pages |
+| Testing Fixes | ✓ Svelte 5 reactivity test fixes |
+
+#### Planning Documents Completed
+All 7 original plans moved to `docs/plans/completed/`:
+- `encryption-pass.md`
+- `security-hardening.md`
+- `code-quality-optimizations.md`
+- `plant-onboarding-enhancements.md`
+- `documentation-plan.md`
+- `ui-placeholders.md`
+- `testing-fixes.md`
+
+**Stats:**
+- 20+ commits
+- 8 PRs merged
+- 3,315 tests passing
+- 0 TypeScript errors
+
+---
+
+*Last updated: 2026-01-19*

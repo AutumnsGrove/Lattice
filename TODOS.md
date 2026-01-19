@@ -6,11 +6,11 @@
 
 ---
 
-# 🔄 CURRENT SESSION (Jan 18, 2026)
+# 🔄 CURRENT SESSION (Jan 18-19, 2026)
 
-## Completed Today ✅
+## Completed ✅
 
-> **16 commits, 7 PRs merged** — absolute sprint day! 🔥
+> **20+ commits, 8 PRs merged** — massive sprint! 🔥
 
 ### 🛡️ Security Hardening — COMPLETE! (PR #391)
 > **Plan:** `docs/plans/completed/security-hardening.md` | **Effort:** ~1 hour (way under 6-8h estimate!)
@@ -32,6 +32,16 @@
 ### 📋 Comprehensive Codebase Audit Planning (PR #385)
 > **7 planning documents created** — roadmap for post-v1 improvements
 
+### 🌱 Plant Onboarding Enhancements — COMPLETE! (PR #401)
+> **Plan:** `docs/plans/completed/plant-onboarding-enhancements.md` | **Effort:** ~10h (under 16-24h estimate!)
+
+- [x] **Email Verification Flow** — 6-digit codes, 15-min expiry, 5 max attempts, rate-limited resends
+- [x] **OAuth Auto-Verification** — Users with `email_verified=true` from Google skip verification
+- [x] **Onboarding Checklist UI** — Glassy progress widget with Grove voice ("Wanderer" terminology)
+- [x] **Reserved Usernames Admin** — Admin page at `/admin/reserved-usernames` with full audit logging
+- [x] **57 tests** for email verification service
+- [x] **Accessibility** — ARIA labels, improved color contrast for email template
+
 ### 🗺️ Roadmap & Documentation
 - [x] **Roadmap Reorganization** — Reordered items, highlighted key features across all phases (PR #386)
 - [x] **Marketing Docs** — Social media strategy, refreshed HN post (PR #57057d4)
@@ -42,21 +52,18 @@
 - [x] **grove-find fixes** — Explicit binary discovery for shell compatibility
 - [x] **gfj command** — New JavaScript-specific file search
 
-### 📋 Planning Documents Created
-> **7 planning documents created** covering security, testing, UI, onboarding, documentation, and code quality
-> **Status:** Plans ready for implementation (see individual docs for effort estimates)
+### 📋 Planning Documents Status
+> **All 7 original plans COMPLETE!** See `docs/plans/completed/` for details.
 
-Created detailed implementation plans in `docs/plans/planned/`:
-
-| Plan | Priority | Est. Effort | Summary |
-|------|----------|-------------|---------|
-| [`encryption-pass.md`](docs/plans/planned/encryption-pass.md) | P1 | 4-6h | Wire AES-256-GCM encryption for GitHub/OpenRouter tokens in Journey Curio |
-| ~~[`security-hardening.md`](docs/plans/completed/security-hardening.md)~~ | ~~P1~~ | ~~6-8h~~ | ✅ **COMPLETE** (PR #391) |
-| ~~[`code-quality-optimizations.md`](docs/plans/completed/code-quality-optimizations.md)~~ | ~~P2~~ | ~~8-12h~~ | ✅ **COMPLETE** (PR #387, #389, #390) |
-| [`plant-onboarding-enhancements.md`](docs/plans/planned/plant-onboarding-enhancements.md) | P1-P2 | 16-24h | Email verification, onboarding checklist, custom dialogs |
-| [`documentation-plan.md`](docs/plans/planned/documentation-plan.md) | P2 | 12-16h | Component reference (185 components), dark mode guide, colors, spacing, animation |
-| [`ui-placeholders.md`](docs/plans/planned/ui-placeholders.md) | P2 | 4-6h | Enhanced placeholders for Monitor (Vista) and Domains (Forage) pages |
-| [`testing-fixes.md`](docs/plans/planned/testing-fixes.md) | P2 | 4-6h | Fix 7 skipped tests related to Svelte 5 reactivity timing |
+| Plan | Status | Notes |
+|------|--------|-------|
+| ~~[`encryption-pass.md`](docs/plans/completed/encryption-pass.md)~~ | ✅ **COMPLETE** | PR #400 |
+| ~~[`security-hardening.md`](docs/plans/completed/security-hardening.md)~~ | ✅ **COMPLETE** | PR #391 |
+| ~~[`code-quality-optimizations.md`](docs/plans/completed/code-quality-optimizations.md)~~ | ✅ **COMPLETE** | PR #387, #389, #390 |
+| ~~[`plant-onboarding-enhancements.md`](docs/plans/completed/plant-onboarding-enhancements.md)~~ | ✅ **COMPLETE** | PR #401 |
+| ~~[`documentation-plan.md`](docs/plans/completed/documentation-plan.md)~~ | ✅ **COMPLETE** | Component docs |
+| ~~[`ui-placeholders.md`](docs/plans/completed/ui-placeholders.md)~~ | ✅ **COMPLETE** | Vista/Forage placeholders |
+| ~~[`testing-fixes.md`](docs/plans/completed/testing-fixes.md)~~ | ✅ **COMPLETE** | Svelte 5 test fixes |
 
 **Key Findings from Audit:**
 - ✅ Encryption module exists and is tested (31 test cases) — just needs wiring
@@ -186,23 +193,32 @@ Created detailed implementation plans in `docs/plans/planned/`:
 # 🌱 PLANT WALKTHROUGH IMPROVEMENTS
 
 > **Spec:** `docs/specs/plant-spec.md`
-> **Plan:** `docs/plans/planned/plant-onboarding-enhancements.md`
+> **Plan:** `docs/plans/completed/plant-onboarding-enhancements.md`
 > **Location:** `packages/plant/src/routes/`
 
-## Partially Implemented 🚧
+## Completed ✅ (PR #401)
 
-**Email Verification Flow**
-- [ ] Add email verification gate before plan selection
-- [ ] Send verification code via Resend
-- [ ] Create `/verify-email` page with code input
+**Email Verification Flow** — DONE!
+- [x] Add email verification gate before plan selection
+- [x] Send verification code via Resend
+- [x] Create `/verify-email` page with code input
+- [x] Rate limiting (3 resends/hour via KV)
+- [x] OAuth auto-verification for trusted providers
 
-**Onboarding Checklist**
-- [ ] Add `onboarding_checklist` table to track completion
-- [ ] Create migration: `020_onboarding_checklist.sql`
-- [ ] Show checklist progress in success page
-- [ ] Add checklist widget to admin dashboard
+**Onboarding Checklist** — DONE!
+- [x] Track completion via `user_onboarding` table
+- [x] Create migration: `028_email_verification.sql`
+- [x] Show checklist progress with GlassCard widget
+- [x] Grove voice messaging ("Wanderer" terminology)
 
-**Follow-up Email Scheduling**
+**Reserved Usernames Admin** — DONE!
+- [x] Admin UI at `/admin/reserved-usernames`
+- [x] Full audit logging for all changes
+- [x] Search/filter/pagination support
+
+## Not Yet Implemented ❌
+
+**Follow-up Email Scheduling** (Future)
 - [ ] Wire up Resend scheduled sends (day 1, 3, 7, 30)
 - [ ] Add email_queue table or use Resend scheduling API
 - [ ] Track email sent status per user
@@ -221,16 +237,15 @@ Created detailed implementation plans in `docs/plans/planned/`:
 - [ ] Add WebAuthn passkey registration flow
 - [ ] Store passkey credentials in Heartwood
 
-**Reserved Usernames Seed Data** — ✅ 90% COMPLETE
-> **See:** `docs/plans/planned/plant-onboarding-enhancements.md` (Item 5)
-> **Existing work:** Migrations 012 & 017 seed 450+ entries; API at `/api/check-username` works
+**Reserved Usernames** — ✅ 100% COMPLETE (PR #401)
+> **Admin UI:** `/admin/reserved-usernames` with full CRUD + audit logging
 
 - [x] Create `reserved_usernames` table seed file — **DONE** (migration 012)
 - [x] Add common reserved names — **DONE** (migration 017: 450+ entries)
 - [x] Add Grove service names — **DONE** (all services included)
-- [ ] Create admin UI for managing reserved usernames
-- [ ] Add audit logging for changes
-- [ ] Create tests for `offensive-blocklist.ts`
+- [x] Create admin UI for managing reserved usernames — **DONE** (PR #401)
+- [x] Add audit logging for changes — **DONE** (PR #401)
+- [x] Create tests for `offensive-blocklist.ts` — **DONE** (65+ tests)
 
 **Analytics / Funnel Tracking**
 - [ ] Track funnel: OAuth → Profile → Plans → Checkout → Success
@@ -521,4 +536,17 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-18 (sprint day in progress — 16+ commits, 7+ PRs and counting!)*
+*Last updated: 2026-01-19 (Jan 18-19 sprint complete — 20+ commits, 8 PRs merged!)*
+
+---
+
+# 📋 REMAINING PLANS (6 items in `/planned`)
+
+| Plan | Priority | Summary |
+|------|----------|---------|
+| `1.1-medium-low-remediation.md` | P2-P3 | 52 medium/low issues for post-1.0 cleanup sprint |
+| `amber-zip-export-integration.md` | Medium | ZIP export feature for blogs (8-12h) |
+| `dependency-update-strategy.md` | Medium | Security maintenance strategy |
+| `feature-flags-expansion-roadmap.md` | High | Enable safe deployment of 10+ features |
+| `grove-security-audit-plan.md` | High | Multi-pass AI security audit (~$3-8) |
+| `help-center-article-roadmap.md` | High | v1 launch documentation (4-6 sessions) |
