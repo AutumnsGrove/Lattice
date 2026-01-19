@@ -22,9 +22,9 @@ import type {
   D1Database,
   KVNamespace,
   R2Bucket,
-} from './types.js';
-import { getOpsPerSecondAt, selectWeightedSystem } from './profiles.js';
-import { executeOperation } from './operations.js';
+} from "./types.js";
+import { getOpsPerSecondAt, selectWeightedSystem } from "./profiles.js";
+import { executeOperation } from "./operations.js";
 
 // =============================================================================
 // TYPES
@@ -40,7 +40,7 @@ interface SentinelDOState {
   runId: string;
   tenantId: string;
   profile: LoadProfile;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
 
   // Progress tracking
   startedAt: number | null;
@@ -81,20 +81,20 @@ export class SentinelDO {
     const url = new URL(request.url);
 
     // WebSocket upgrade
-    if (request.headers.get('Upgrade') === 'websocket') {
+    if (request.headers.get("Upgrade") === "websocket") {
       return this.handleWebSocket(request);
     }
 
     // REST endpoints
     switch (url.pathname) {
-      case '/start':
+      case "/start":
         return this.handleStart(request);
-      case '/cancel':
+      case "/cancel":
         return this.handleCancel();
-      case '/status':
+      case "/status":
         return this.handleStatus();
       default:
-        return new Response('Not found', { status: 404 });
+        return new Response("Not found", { status: 404 });
     }
   }
 
@@ -102,7 +102,7 @@ export class SentinelDO {
    * Handle alarm - used for periodic operations during test
    */
   async alarm(): Promise<void> {
-    if (!this.runState || this.runState.status !== 'running') {
+    if (!this.runState || this.runState.status !== "running") {
       return;
     }
 
@@ -110,8 +110,12 @@ export class SentinelDO {
     await this.executeBatch();
 
     // Check if test should continue
-    const elapsed = (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
-    if (elapsed < this.runState.profile.durationSeconds && this.runState.status === 'running') {
+    const elapsed =
+      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
+    if (
+      elapsed < this.runState.profile.durationSeconds &&
+      this.runState.status === "running"
+    ) {
       // Schedule next batch
       await this.state.storage.setAlarm(Date.now() + 1000); // 1 second intervals
     } else {
@@ -125,7 +129,7 @@ export class SentinelDO {
   // ===========================================================================
 
   private async handleStart(request: Request): Promise<Response> {
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       runId: string;
       tenantId: string;
       profile: LoadProfile;
@@ -136,7 +140,7 @@ export class SentinelDO {
       runId: body.runId,
       tenantId: body.tenantId,
       profile: body.profile,
-      status: 'running',
+      status: "running",
       startedAt: Date.now(),
       completedOps: 0,
       failedOps: 0,
@@ -147,48 +151,58 @@ export class SentinelDO {
     };
 
     // Persist initial state
-    await this.state.storage.put('runState', this.runState);
+    await this.state.storage.put("runState", this.runState);
 
     // Update run status in D1
-    await this.env.DB
-      .prepare('UPDATE sentinel_runs SET status = ?, started_at = ?, updated_at = ? WHERE id = ?')
-      .bind('running', Math.floor(Date.now() / 1000), Math.floor(Date.now() / 1000), body.runId)
+    await this.env.DB.prepare(
+      "UPDATE sentinel_runs SET status = ?, started_at = ?, updated_at = ? WHERE id = ?",
+    )
+      .bind(
+        "running",
+        Math.floor(Date.now() / 1000),
+        Math.floor(Date.now() / 1000),
+        body.runId,
+      )
       .run();
 
     // Schedule first batch
     await this.state.storage.setAlarm(Date.now() + 100);
 
-    this.log('Test started', { runId: body.runId });
+    this.log("Test started", { runId: body.runId });
 
-    return Response.json({ success: true, status: 'running' });
+    return Response.json({ success: true, status: "running" });
   }
 
   private async handleCancel(): Promise<Response> {
     if (!this.runState) {
-      return Response.json({ success: false, error: 'No active test' }, { status: 400 });
+      return Response.json(
+        { success: false, error: "No active test" },
+        { status: 400 },
+      );
     }
 
-    this.runState.status = 'cancelled';
-    await this.state.storage.put('runState', this.runState);
+    this.runState.status = "cancelled";
+    await this.state.storage.put("runState", this.runState);
     await this.state.storage.deleteAlarm();
 
     // Update D1
-    await this.env.DB
-      .prepare('UPDATE sentinel_runs SET status = ?, updated_at = ? WHERE id = ?')
-      .bind('cancelled', Math.floor(Date.now() / 1000), this.runState.runId)
+    await this.env.DB.prepare(
+      "UPDATE sentinel_runs SET status = ?, updated_at = ? WHERE id = ?",
+    )
+      .bind("cancelled", Math.floor(Date.now() / 1000), this.runState.runId)
       .run();
 
-    this.broadcast({ type: 'cancelled' });
-    this.log('Test cancelled');
+    this.broadcast({ type: "cancelled" });
+    this.log("Test cancelled");
 
-    return Response.json({ success: true, status: 'cancelled' });
+    return Response.json({ success: true, status: "cancelled" });
   }
 
   private async handleStatus(): Promise<Response> {
     await this.loadState();
 
     if (!this.runState) {
-      return Response.json({ status: 'idle' });
+      return Response.json({ status: "idle" });
     }
 
     const elapsed = this.runState.startedAt
@@ -201,7 +215,10 @@ export class SentinelDO {
       elapsed,
       completedOps: this.runState.completedOps,
       failedOps: this.runState.failedOps,
-      progress: Math.min(100, (elapsed / this.runState.profile.durationSeconds) * 100),
+      progress: Math.min(
+        100,
+        (elapsed / this.runState.profile.durationSeconds) * 100,
+      ),
     });
   }
 
@@ -221,13 +238,24 @@ export class SentinelDO {
   // HIBERNATION-AWARE WEBSOCKET (Loom Pattern)
   // ===========================================================================
 
-  async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
+  async webSocketMessage(
+    ws: WebSocket,
+    message: string | ArrayBuffer,
+  ): Promise<void> {
     // Handle client messages (e.g., subscription preferences)
-    const data = JSON.parse(message as string);
-    this.log('WebSocket message', data);
+    try {
+      const data = JSON.parse(message as string);
+      this.log("WebSocket message", data);
+    } catch (error) {
+      this.log("Invalid WebSocket message", { error: String(error) });
+    }
   }
 
-  async webSocketClose(ws: WebSocket, code: number, reason: string): Promise<void> {
+  async webSocketClose(
+    ws: WebSocket,
+    code: number,
+    reason: string,
+  ): Promise<void> {
     // Connection closed
     ws.close(code, reason);
   }
@@ -237,13 +265,17 @@ export class SentinelDO {
   // ===========================================================================
 
   private async executeBatch(): Promise<void> {
-    if (!this.runState || this.runState.status !== 'running') return;
+    if (!this.runState || this.runState.status !== "running") return;
 
     await this.loadState();
 
-    const elapsed = (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
+    const elapsed =
+      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
     const targetOps = getOpsPerSecondAt(this.runState.profile, elapsed);
-    const batchSize = Math.min(Math.ceil(targetOps), this.runState.profile.concurrency);
+    const batchSize = Math.min(
+      Math.ceil(targetOps),
+      this.runState.profile.concurrency,
+    );
 
     const { tenantId, profile } = this.runState;
     const promises: Promise<void>[] = [];
@@ -253,7 +285,14 @@ export class SentinelDO {
       const index = this.runState.completedOps + this.runState.failedOps + i;
 
       promises.push(
-        executeOperation(system, this.env.DB, this.env.KV, this.env.IMAGES, tenantId, index)
+        executeOperation(
+          system,
+          this.env.DB,
+          this.env.KV,
+          this.env.IMAGES,
+          tenantId,
+          index,
+        )
           .then((result) => {
             if (result.success) {
               this.runState!.completedOps++;
@@ -284,7 +323,7 @@ export class SentinelDO {
           })
           .catch(() => {
             this.runState!.failedOps++;
-          })
+          }),
       );
     }
 
@@ -302,11 +341,11 @@ export class SentinelDO {
     }
 
     // Persist state
-    await this.state.storage.put('runState', this.runState);
+    await this.state.storage.put("runState", this.runState);
 
     // Broadcast progress
     this.broadcast({
-      type: 'progress',
+      type: "progress",
       elapsed,
       completedOps: this.runState.completedOps,
       failedOps: this.runState.failedOps,
@@ -324,27 +363,36 @@ export class SentinelDO {
     this.runState.metricsBuffer = [];
 
     // Batch insert using D1 batch()
-    const statements = metrics.map(m =>
+    const statements = metrics.map((m) =>
       this.env.DB.prepare(
         `INSERT INTO sentinel_metrics (
           id, run_id, tenant_id, operation_type, operation_name, batch_index,
           started_at, completed_at, latency_ms, success, error_message, error_code,
           rows_affected, bytes_transferred
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
-        m.id, m.runId, m.tenantId, m.operationType, m.operationName ?? null, m.batchIndex,
+        m.id,
+        m.runId,
+        m.tenantId,
+        m.operationType,
+        m.operationName ?? null,
+        m.batchIndex,
         Math.floor(m.startedAt.getTime() / 1000),
         m.completedAt ? Math.floor(m.completedAt.getTime() / 1000) : null,
-        m.latencyMs ?? null, m.success ? 1 : 0, m.errorMessage ?? null, m.errorCode ?? null,
-        m.rowsAffected ?? null, m.bytesTransferred ?? null
-      )
+        m.latencyMs ?? null,
+        m.success ? 1 : 0,
+        m.errorMessage ?? null,
+        m.errorCode ?? null,
+        m.rowsAffected ?? null,
+        m.bytesTransferred ?? null,
+      ),
     );
 
     try {
       await this.env.DB.batch(statements);
-      this.log('Flushed metrics', { count: metrics.length });
+      this.log("Flushed metrics", { count: metrics.length });
     } catch (error) {
-      this.log('Failed to flush metrics', { error: String(error) });
+      this.log("Failed to flush metrics", { error: String(error) });
       // Re-add to buffer for retry
       this.runState.metricsBuffer.push(...metrics);
     }
@@ -354,9 +402,10 @@ export class SentinelDO {
     if (!this.runState) return;
 
     const latencies = this.runState.latencies.sort((a, b) => a - b);
-    const avgLatency = latencies.length > 0
-      ? latencies.reduce((a, b) => a + b, 0) / latencies.length
-      : 0;
+    const avgLatency =
+      latencies.length > 0
+        ? latencies.reduce((a, b) => a + b, 0) / latencies.length
+        : 0;
 
     const checkpoint: SentinelCheckpoint = {
       id: crypto.randomUUID(),
@@ -367,23 +416,32 @@ export class SentinelDO {
       elapsedSeconds: Math.floor(elapsedSeconds),
       operationsCompleted: this.runState.completedOps,
       operationsFailed: this.runState.failedOps,
-      currentThroughput: this.runState.completedOps / Math.max(elapsedSeconds, 1),
+      currentThroughput:
+        this.runState.completedOps / Math.max(elapsedSeconds, 1),
       avgLatencyMs: avgLatency,
-      errorRate: this.runState.failedOps / Math.max(this.runState.completedOps + this.runState.failedOps, 1),
+      errorRate:
+        this.runState.failedOps /
+        Math.max(this.runState.completedOps + this.runState.failedOps, 1),
     };
 
-    await this.env.DB
-      .prepare(
-        `INSERT INTO sentinel_checkpoints (
+    await this.env.DB.prepare(
+      `INSERT INTO sentinel_checkpoints (
           id, run_id, tenant_id, checkpoint_index, recorded_at, elapsed_seconds,
           operations_completed, operations_failed, current_throughput, avg_latency_ms, error_rate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      )
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
       .bind(
-        checkpoint.id, checkpoint.runId, checkpoint.tenantId, checkpoint.checkpointIndex,
-        Math.floor(checkpoint.recordedAt.getTime() / 1000), checkpoint.elapsedSeconds,
-        checkpoint.operationsCompleted, checkpoint.operationsFailed,
-        checkpoint.currentThroughput, checkpoint.avgLatencyMs, checkpoint.errorRate
+        checkpoint.id,
+        checkpoint.runId,
+        checkpoint.tenantId,
+        checkpoint.checkpointIndex,
+        Math.floor(checkpoint.recordedAt.getTime() / 1000),
+        checkpoint.elapsedSeconds,
+        checkpoint.operationsCompleted,
+        checkpoint.operationsFailed,
+        checkpoint.currentThroughput,
+        checkpoint.avgLatencyMs,
+        checkpoint.errorRate,
       )
       .run();
   }
@@ -397,15 +455,17 @@ export class SentinelDO {
     // Calculate final results
     const latencies = this.runState.latencies.sort((a, b) => a - b);
     const totalOps = this.runState.completedOps + this.runState.failedOps;
-    const elapsed = (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
+    const elapsed =
+      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
 
     const results: RunResults = {
       totalOperations: totalOps,
       successfulOperations: this.runState.completedOps,
       failedOperations: this.runState.failedOps,
-      avgLatencyMs: latencies.length > 0
-        ? latencies.reduce((a, b) => a + b, 0) / latencies.length
-        : 0,
+      avgLatencyMs:
+        latencies.length > 0
+          ? latencies.reduce((a, b) => a + b, 0) / latencies.length
+          : 0,
       p50LatencyMs: latencies[Math.floor(latencies.length * 0.5)] ?? 0,
       p95LatencyMs: latencies[Math.floor(latencies.length * 0.95)] ?? 0,
       p99LatencyMs: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
@@ -417,32 +477,40 @@ export class SentinelDO {
     };
 
     // Update D1 with results
-    await this.env.DB
-      .prepare(
-        `UPDATE sentinel_runs SET
+    await this.env.DB.prepare(
+      `UPDATE sentinel_runs SET
           status = ?, completed_at = ?, total_operations = ?, successful_operations = ?,
           failed_operations = ?, avg_latency_ms = ?, p50_latency_ms = ?, p95_latency_ms = ?,
           p99_latency_ms = ?, max_latency_ms = ?, min_latency_ms = ?, throughput_ops_sec = ?,
           error_count = ?, updated_at = ?
-        WHERE id = ?`
-      )
+        WHERE id = ?`,
+    )
       .bind(
-        'completed', Math.floor(Date.now() / 1000),
-        results.totalOperations, results.successfulOperations, results.failedOperations,
-        results.avgLatencyMs, results.p50LatencyMs, results.p95LatencyMs, results.p99LatencyMs,
-        results.maxLatencyMs, results.minLatencyMs, results.throughputOpsPerSec,
-        results.errorCount, Math.floor(Date.now() / 1000),
-        this.runState.runId
+        "completed",
+        Math.floor(Date.now() / 1000),
+        results.totalOperations,
+        results.successfulOperations,
+        results.failedOperations,
+        results.avgLatencyMs,
+        results.p50LatencyMs,
+        results.p95LatencyMs,
+        results.p99LatencyMs,
+        results.maxLatencyMs,
+        results.minLatencyMs,
+        results.throughputOpsPerSec,
+        results.errorCount,
+        Math.floor(Date.now() / 1000),
+        this.runState.runId,
       )
       .run();
 
-    this.runState.status = 'completed';
-    await this.state.storage.put('runState', this.runState);
+    this.runState.status = "completed";
+    await this.state.storage.put("runState", this.runState);
 
     // Broadcast completion
-    this.broadcast({ type: 'completed', results });
+    this.broadcast({ type: "completed", results });
 
-    this.log('Test completed', {
+    this.log("Test completed", {
       runId: this.runState.runId,
       totalOps,
       successRate: ((this.runState.completedOps / totalOps) * 100).toFixed(1),
@@ -456,7 +524,9 @@ export class SentinelDO {
 
   private async loadState(): Promise<void> {
     if (!this.runState) {
-      this.runState = await this.state.storage.get('runState') as SentinelDOState | null;
+      this.runState = (await this.state.storage.get(
+        "runState",
+      )) as SentinelDOState | null;
       if (this.runState) {
         this.runState.connections = new Set();
       }
@@ -475,13 +545,15 @@ export class SentinelDO {
   }
 
   private log(message: string, data?: object): void {
-    console.log(JSON.stringify({
-      do: 'SentinelDO',
-      id: this.state.id.toString(),
-      message,
-      ...data,
-      timestamp: new Date().toISOString(),
-    }));
+    console.log(
+      JSON.stringify({
+        do: "SentinelDO",
+        id: this.state.id.toString(),
+        message,
+        ...data,
+        timestamp: new Date().toISOString(),
+      }),
+    );
   }
 }
 
