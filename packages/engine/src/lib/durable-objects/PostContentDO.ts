@@ -16,7 +16,20 @@
  * Part of the Loom pattern - Grove's coordination layer.
  */
 
-import { safeParseJson } from "../utils/json.js";
+/**
+ * Local JSON parsing helper to avoid bundling conflicts.
+ * When DOs are bundled and concatenated into _worker.js, importing from
+ * utils/json causes duplicate function declarations. This inline version
+ * uses a unique name scoped to this DO.
+ */
+function parseJsonForPostContent<T>(str: string | null | undefined, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 // ============================================================================
 // Types
@@ -84,12 +97,9 @@ export class PostContentDO implements DurableObject {
       .one();
 
     if (stored?.value) {
-      const parsed = safeParseJson<PostContent | null>(
+      const parsed = parseJsonForPostContent<PostContent | null>(
         stored.value as string,
         null,
-        {
-          context: "PostContentDO.content",
-        },
       );
       // Only assign if parsing succeeded
       if (parsed) {
@@ -340,11 +350,11 @@ export class PostContentDO implements DurableObject {
       if (!object) return null;
 
       const text = await object.text();
-      return safeParseJson<{
+      return parseJsonForPostContent<{
         markdownContent: string;
         htmlContent: string;
         gutterContent: string;
-      } | null>(text, null, { context: "PostContentDO.r2Content" });
+      } | null>(text, null);
     } catch (err) {
       console.error("[PostContentDO] R2 fetch error:", err);
       return null;

@@ -16,7 +16,21 @@
  */
 
 import { DEFAULT_TIER, type TierKey } from "../config/tiers.js";
-import { safeParseJson } from "../utils/json.js";
+
+/**
+ * Local JSON parsing helper to avoid bundling conflicts.
+ * When DOs are bundled and concatenated into _worker.js, importing from
+ * utils/json causes duplicate function declarations. This inline version
+ * uses a unique name scoped to this DO.
+ */
+function parseJsonForMeta<T>(str: string | null | undefined, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 // ============================================================================
 // Types
@@ -153,12 +167,9 @@ export class PostMetaDO implements DurableObject {
       .one();
 
     if (stored?.value) {
-      const parsed = safeParseJson<PostMeta | null>(
+      const parsed = parseJsonForMeta<PostMeta | null>(
         stored.value as string,
         null,
-        {
-          context: "PostMetaDO.meta",
-        },
       );
       // Only assign if parsing succeeded
       if (parsed) {
