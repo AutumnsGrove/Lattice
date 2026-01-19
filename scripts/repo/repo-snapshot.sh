@@ -45,6 +45,14 @@ SNAPSHOTS_DIR="$PROJECT_ROOT/snapshots"
 # Create snapshots directory if it doesn't exist
 mkdir -p "$SNAPSHOTS_DIR"
 
+# Source grove-find for shared counting functions
+# This consolidates counting logic in one place
+GROVE_FIND_SCRIPT="$SCRIPT_DIR/grove-find.sh"
+if [ -f "$GROVE_FIND_SCRIPT" ]; then
+    # Source silently (suppress the "Grove Find loaded!" message)
+    source "$GROVE_FIND_SCRIPT" 2>/dev/null | grep -v "Grove Find loaded" || true
+fi
+
 # Timestamp and optional label
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 DATE_HUMAN=$(date +"%B %d, %Y at %H:%M")
@@ -80,19 +88,28 @@ echo -e "Gathering statistics..."
 # HELPER FUNCTIONS
 # ============================================================================
 
-# Paths to exclude from searches
-EXCLUDE_PATHS="! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*' ! -path '*/.svelte-kit/*'"
-
 # Count lines of code for a given file pattern
+# Uses shared grove-find functions to consolidate counting logic
 count_lines() {
     local pattern="$1"
-    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+    if type _grove_count_lines_pattern &>/dev/null; then
+        _grove_count_lines_pattern "$pattern" "."
+    else
+        # Fallback if grove-find not sourced
+        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+    fi
 }
 
 # Count number of files matching a pattern
+# Uses shared grove-find functions to consolidate counting logic
 count_files() {
     local pattern="$1"
-    find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f 2>/dev/null | wc -l | tr -d ' '
+    if type _grove_count_files_pattern &>/dev/null; then
+        _grove_count_files_pattern "$pattern" "."
+    else
+        # Fallback if grove-find not sourced
+        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f 2>/dev/null | wc -l | tr -d ' '
+    fi
 }
 
 # ============================================================================

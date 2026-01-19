@@ -350,6 +350,41 @@ gftest() {
 # =============================================================================
 # Counting & Metrics Functions
 # =============================================================================
+#
+# These functions provide both interactive (formatted output) and scriptable
+# (raw numbers) modes. The scriptable versions (prefixed with _) are used by
+# repo-snapshot.sh to consolidate counting logic in one place.
+#
+# =============================================================================
+
+# Internal helper: Count lines for a specific pattern (scriptable/quiet mode)
+# Returns just the number, no formatting
+# Used by repo-snapshot.sh for repository metrics
+_grove_count_lines_pattern() {
+    local pattern="$1"
+    local path="${2:-$GROVE_ROOT}"
+
+    find "$path" -name "$pattern" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+}
+
+# Internal helper: Count files for a specific pattern (scriptable/quiet mode)
+# Returns just the number, no formatting
+_grove_count_files_pattern() {
+    local pattern="$1"
+    local path="${2:-$GROVE_ROOT}"
+
+    find "$path" -name "$pattern" \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        -type f 2>/dev/null | wc -l | tr -d ' '
+}
 
 # gf-count-lines - Count lines in files
 # Usage: gf-count-lines [path]
