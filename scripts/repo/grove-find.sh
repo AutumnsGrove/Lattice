@@ -32,6 +32,16 @@
 #   gfr2                           # Find R2 storage usage
 #   gfkv                           # Find KV namespace usage
 #   gfused "Name"                  # Find where a component is used
+#   gflog                          # Find console.log/warn/error
+#   gfenv                          # Find environment variables
+#   gfrecent [days]                # Find recently modified files
+#   gfchanged                      # Find files changed on branch
+#   gftag                          # Find changes between git tags
+#   gftype                         # Find TypeScript types
+#   gfexport                       # Find module exports
+#   gfauth                         # Find authentication code
+#   gfengine                       # Find engine imports
+#   gfagent                        # Quick reference for AI agents
 #
 # Pro tip: Add to your ~/.bashrc or ~/.zshrc:
 #   source /path/to/GroveEngine/scripts/grove-find.sh
@@ -769,6 +779,382 @@ gfused() {
 }
 
 # =============================================================================
+# Debugging & Environment
+# =============================================================================
+
+# gflog - Find console.log/warn/error statements (cleanup before prod!)
+# Usage: gflog [level]
+# Examples: gflog, gflog error, gflog warn
+gflog() {
+    local level="${1:-}"
+    echo -e "${CYAN}🔍 Finding console statements${level:+ of type: $level}${NC}\n"
+
+    if [ -n "$level" ]; then
+        "$GROVE_RG" --color=always -n "console\.$level\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
+           --type ts --type js --type svelte
+    else
+        echo -e "${YELLOW}console.log:${NC}"
+        "$GROVE_RG" --color=always -n "console\.log\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
+           --type ts --type js --type svelte | head -20
+
+        echo -e "\n${RED}console.error:${NC}"
+        "$GROVE_RG" --color=always -n "console\.error\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
+           --type ts --type js --type svelte | head -15
+
+        echo -e "\n${PURPLE}console.warn:${NC}"
+        "$GROVE_RG" --color=always -n "console\.warn\(" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!*.test.*' --glob '!*.spec.*' \
+           --type ts --type js --type svelte | head -10
+
+        echo -e "\n${CYAN}debugger statements:${NC}"
+        "$GROVE_RG" --color=always -n "\bdebugger\b" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js --type svelte
+    fi
+}
+
+# gfenv - Find environment variable usage
+# Usage: gfenv [var-name]
+gfenv() {
+    local var="${1:-}"
+    echo -e "${CYAN}🔐 Finding environment variables${var:+ matching: $var}${NC}\n"
+
+    if [ -n "$var" ]; then
+        "$GROVE_RG" --color=always -n "$var" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js --type svelte | \
+           "$GROVE_RG" -i "env|process|import\.meta"
+    else
+        echo -e "${GREEN}.env Files:${NC}"
+        "$GROVE_FD" "^\.env" "$GROVE_ROOT" --hidden --exclude node_modules 2>/dev/null
+
+        echo -e "\n${GREEN}import.meta.env usage:${NC}"
+        "$GROVE_RG" --color=always -n "import\.meta\.env\.\w+" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js --type svelte | head -20
+
+        echo -e "\n${GREEN}process.env usage:${NC}"
+        "$GROVE_RG" --color=always -n "process\.env\.\w+" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js | head -15
+
+        echo -e "\n${GREEN}platform.env usage (Cloudflare):${NC}"
+        "$GROVE_RG" --color=always -n "platform\.env\.\w+" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js | head -15
+
+        echo -e "\n${GREEN}Env vars in wrangler.toml:${NC}"
+        "$GROVE_RG" --color=always -n "\[vars\]" -A 10 "$GROVE_ROOT" \
+           --glob 'wrangler*.toml' 2>/dev/null | head -20
+    fi
+}
+
+# =============================================================================
+# Git & Recent Changes
+# =============================================================================
+
+# gfrecent - Find recently modified files
+# Usage: gfrecent [days]
+# Default: 7 days
+gfrecent() {
+    local days="${1:-7}"
+    echo -e "${CYAN}📅 Files modified in the last ${days} day(s)${NC}\n"
+
+    # Use git log for tracked files (more reliable than mtime)
+    echo -e "${GREEN}Recently Modified (via git):${NC}"
+    git -C "$GROVE_ROOT" log --since="${days} days ago" --name-only --pretty=format: | \
+        sort -u | \
+        grep -v '^$' | \
+        grep -v 'node_modules\|dist\|\.svelte-kit\|pnpm-lock' | \
+        head -50
+
+    echo -e "\n${YELLOW}Summary by directory:${NC}"
+    git -C "$GROVE_ROOT" log --since="${days} days ago" --name-only --pretty=format: | \
+        sort -u | \
+        grep -v '^$' | \
+        grep -v 'node_modules\|dist\|\.svelte-kit\|pnpm-lock' | \
+        sed 's|/[^/]*$||' | \
+        sort | uniq -c | sort -rn | head -15
+}
+
+# gfchanged - Find files changed on current branch vs main
+# Usage: gfchanged [base-branch]
+gfchanged() {
+    local base="${1:-main}"
+    local current
+    current=$(git -C "$GROVE_ROOT" branch --show-current)
+
+    echo -e "${CYAN}📝 Files changed on ${current} vs ${base}${NC}\n"
+
+    echo -e "${GREEN}Changed Files:${NC}"
+    git -C "$GROVE_ROOT" diff --name-only "${base}...HEAD" 2>/dev/null | \
+        grep -v 'node_modules\|pnpm-lock' | head -50
+
+    echo -e "\n${YELLOW}Change Summary:${NC}"
+    git -C "$GROVE_ROOT" diff --stat "${base}...HEAD" 2>/dev/null | tail -1
+
+    echo -e "\n${GREEN}By Type:${NC}"
+    git -C "$GROVE_ROOT" diff --name-only "${base}...HEAD" 2>/dev/null | \
+        grep -v 'node_modules\|pnpm-lock' | \
+        sed -n 's/.*\.//p' | \
+        sort | uniq -c | sort -rn
+
+    echo -e "\n${PURPLE}Commits on this branch:${NC}"
+    git -C "$GROVE_ROOT" log --oneline "${base}..HEAD" 2>/dev/null | head -15
+}
+
+# gftag - Find changes between git tags
+# Usage: gftag [from-tag] [to-tag]
+# Examples: gftag v1.0.0 v1.1.0, gftag v1.0.0 (compares to HEAD)
+gftag() {
+    local from_tag="$1"
+    local to_tag="${2:-HEAD}"
+
+    if [ -z "$from_tag" ]; then
+        echo -e "${CYAN}🏷️  Available tags:${NC}\n"
+        git -C "$GROVE_ROOT" tag --sort=-version:refname | head -20
+        echo -e "\n${YELLOW}Usage: gftag <from-tag> [to-tag]${NC}"
+        echo "Example: gftag v1.0.0 v1.1.0"
+        return 0
+    fi
+
+    echo -e "${CYAN}🏷️  Changes from ${from_tag} to ${to_tag}${NC}\n"
+
+    echo -e "${GREEN}Changed Files:${NC}"
+    git -C "$GROVE_ROOT" diff --name-only "${from_tag}..${to_tag}" 2>/dev/null | \
+        grep -v 'node_modules\|pnpm-lock' | head -50
+
+    echo -e "\n${YELLOW}Change Summary:${NC}"
+    git -C "$GROVE_ROOT" diff --stat "${from_tag}..${to_tag}" 2>/dev/null | tail -3
+
+    echo -e "\n${GREEN}By Type:${NC}"
+    git -C "$GROVE_ROOT" diff --name-only "${from_tag}..${to_tag}" 2>/dev/null | \
+        grep -v 'node_modules\|pnpm-lock' | \
+        sed -n 's/.*\.//p' | \
+        sort | uniq -c | sort -rn
+
+    echo -e "\n${PURPLE}Commits between tags:${NC}"
+    git -C "$GROVE_ROOT" log --oneline "${from_tag}..${to_tag}" 2>/dev/null | head -20
+}
+
+# =============================================================================
+# Type System & Exports
+# =============================================================================
+
+# gftype - Find TypeScript type/interface definitions
+# Usage: gftype [name]
+gftype() {
+    local name="${1:-}"
+    echo -e "${CYAN}📐 Finding TypeScript types${name:+ matching: $name}${NC}\n"
+
+    if [ -n "$name" ]; then
+        "$GROVE_RG" --color=always -n "(type|interface|enum)\s+$name" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts
+
+        echo -e "\n${GREEN}Usage of $name:${NC}"
+        "$GROVE_RG" --color=always -n ":\s*$name\b|<$name>|as\s+$name" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts | head -20
+    else
+        echo -e "${GREEN}Type Definitions:${NC}"
+        "$GROVE_RG" --color=always -n "^export\s+(type|interface)\s+\w+" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!*.d.ts' --type ts | head -30
+
+        echo -e "\n${GREEN}Enums:${NC}"
+        "$GROVE_RG" --color=always -n "^export\s+enum\s+\w+" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts | head -15
+
+        echo -e "\n${GREEN}Type Files (*.types.ts, types/*.ts):${NC}"
+        "$GROVE_FD" "types?" "$GROVE_ROOT" -e ts --exclude node_modules --exclude '*.d.ts' | head -20
+    fi
+}
+
+# gfexport - Find exports from modules
+# Usage: gfexport [pattern]
+gfexport() {
+    local pattern="${1:-}"
+    echo -e "${CYAN}📤 Finding exports${pattern:+ matching: $pattern}${NC}\n"
+
+    if [ -n "$pattern" ]; then
+        "$GROVE_RG" --color=always -n "export\s+(default\s+)?(const|let|function|class|type|interface|enum)\s+.*$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js
+
+        echo -e "\n${GREEN}Re-exports:${NC}"
+        "$GROVE_RG" --color=always -n "export\s+\{[^}]*$pattern" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -15
+    else
+        echo -e "${GREEN}Default Exports:${NC}"
+        "$GROVE_RG" --color=always -n "export\s+default" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js --type svelte | head -20
+
+        echo -e "\n${GREEN}Named Exports:${NC}"
+        "$GROVE_RG" --color=always -n "^export\s+(const|let|function|class|async function)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --type ts --type js | head -25
+
+        echo -e "\n${GREEN}Barrel Exports (index.ts):${NC}"
+        "$GROVE_FD" "index.ts" "$GROVE_ROOT" --exclude node_modules | head -20
+    fi
+}
+
+# =============================================================================
+# Authentication & Engine
+# =============================================================================
+
+# gfauth - Find authentication-related code
+# Usage: gfauth [aspect]
+# Examples: gfauth, gfauth session, gfauth token, gfauth login
+gfauth() {
+    local aspect="${1:-}"
+    echo -e "${CYAN}🔐 Finding authentication code${aspect:+ related to: $aspect}${NC}\n"
+
+    if [ -n "$aspect" ]; then
+        "$GROVE_RG" --color=always -n "$aspect" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js --type svelte | \
+           "$GROVE_RG" -i "auth|session|token|login|logout|user|credential|oauth|jwt"
+    else
+        echo -e "${GREEN}Auth Files:${NC}"
+        "$GROVE_FD" -i "auth|login|session" "$GROVE_ROOT" -e ts -e js -e svelte --exclude node_modules | head -20
+
+        echo -e "\n${GREEN}Session Handling:${NC}"
+        "$GROVE_RG" --color=always -n "(session|getSession|createSession|destroySession)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' \
+           --type ts --type js | head -20
+
+        echo -e "\n${GREEN}Token Operations:${NC}"
+        "$GROVE_RG" --color=always -n "(token|jwt|accessToken|refreshToken|bearer)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' -i \
+           --type ts --type js | head -15
+
+        echo -e "\n${GREEN}OAuth/Login:${NC}"
+        "$GROVE_RG" --color=always -n "(oauth|login|logout|signIn|signOut|authenticate)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' -i \
+           --type ts --type js --type svelte | head -15
+
+        echo -e "\n${GREEN}Heartwood/GroveAuth:${NC}"
+        "$GROVE_RG" --color=always -n "(heartwood|groveauth|GroveAuth)" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' -i \
+           --type ts --type js | head -15
+    fi
+}
+
+# gfengine - Find @autumnsgrove/groveengine imports and usage
+# Usage: gfengine [module]
+# Examples: gfengine, gfengine ui, gfengine stores, gfengine utils
+gfengine() {
+    local module="${1:-}"
+    echo -e "${CYAN}🌲 Finding engine imports${module:+ from: $module}${NC}\n"
+
+    if [ -n "$module" ]; then
+        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/$module" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte
+    else
+        echo -e "${GREEN}Engine Imports by Module:${NC}"
+
+        echo -e "\n${PURPLE}UI Components:${NC}"
+        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte | head -15
+
+        echo -e "\n${PURPLE}Utilities:${NC}"
+        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/utils" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte | head -10
+
+        echo -e "\n${PURPLE}Stores:${NC}"
+        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui/stores" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte | head -10
+
+        echo -e "\n${PURPLE}Auth:${NC}"
+        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/auth" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte | head -10
+
+        echo -e "\n${YELLOW}Apps using the engine:${NC}"
+        "$GROVE_RG" -l "@autumnsgrove/groveengine" "$GROVE_ROOT" \
+           --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
+           --type ts --type js --type svelte | \
+           sed 's|.*/||; s|/.*||' | sort -u
+    fi
+}
+
+# =============================================================================
+# Agent-Friendly Quick Reference
+# =============================================================================
+
+# gfagent - Condensed command reference for AI agents
+# Usage: gfagent
+# This outputs a compact, copy-paste friendly reference
+gfagent() {
+    cat << 'AGENT_HELP'
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    GROVE-FIND: Agent Quick Reference                          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+CORE SEARCH
+  gf "pattern"        Search entire codebase
+  gfc "Name"          Find class/component definition
+  gff "func"          Find function definition
+  gfi "module"        Find imports of module
+  gfused "Name"       Find where component/function is used (imports + JSX + calls)
+
+FILE TYPES
+  gfs/gft/gfj         Svelte / TypeScript / JavaScript
+  gfcss/gfmd/gfjson   CSS / Markdown / JSON
+  gftoml/gfh/gfyaml   TOML / HTML / YAML
+  gfsh                Shell scripts
+
+SVELTEKIT & DOMAIN
+  gfr [route]         Find routes (+page, +server)
+  gfd [table]         Find database queries
+  gfg [variant]       Find Glass components
+  gftest [name]       Find test files
+  gfconfig            Find all config files
+  gfstore [name]      Find Svelte stores
+
+DEVELOPMENT WORKFLOW
+  gftodo              Find TODO/FIXME/HACK (gftodo FIXME for just FIXMEs)
+  gflog               Find console.log/warn/error (cleanup!)
+  gfenv [var]         Find .env files and env var usage
+  gfgrove [ctx]       Find "Grove" references
+
+GIT & RECENT CHANGES
+  gfrecent [days]     Files modified in last N days (default: 7)
+  gfchanged [base]    Files changed on current branch vs main
+  gftag [from] [to]   Changes between git tags
+
+CLOUDFLARE
+  gfbind [type]       All CF bindings overview
+  gfd1 [table]        D1 database usage
+  gfr2 [pattern]      R2 storage operations
+  gfkv [key]          KV namespace usage
+  gfdo [name]         Durable Objects
+
+CODE QUALITY
+  gftype [name]       Find TypeScript types/interfaces
+  gfexport [pattern]  Find module exports
+  gfauth [aspect]     Find authentication code
+  gfengine [module]   Find @autumnsgrove/groveengine imports
+
+METRICS
+  gf-stats [path]     Full statistics summary
+  gf-count-lines      Lines of code by language
+  gf-count-files      Files by extension
+
+PRO TIPS
+  • All commands accept optional pattern/filter arguments
+  • Pipe to `| less` for paging, `| wc -l` for counts
+  • gfrecent 1 → files changed today
+  • gfchanged → great for PR scope review
+  • gfengine → verify engine-first pattern compliance
+AGENT_HELP
+}
+
+# =============================================================================
 # Counting & Metrics Functions
 # =============================================================================
 #
@@ -1203,7 +1589,14 @@ gfhelp() {
     echo ""
     echo -e "${CYAN}Development Workflow:${NC}"
     echo "  gftodo [type]     - Find TODO/FIXME/HACK comments"
+    echo "  gflog [level]     - Find console.log/warn/error (cleanup!)"
+    echo "  gfenv [var]       - Find .env files and env var usage"
     echo "  gfgrove [context] - Find Grove references in codebase"
+    echo ""
+    echo -e "${CYAN}Git & Recent Changes:${NC}"
+    echo "  gfrecent [days]   - Files modified in last N days (default: 7)"
+    echo "  gfchanged [base]  - Files changed on branch vs main"
+    echo "  gftag [from] [to] - Changes between git tags"
     echo ""
     echo -e "${CYAN}Cloudflare/Infrastructure:${NC}"
     echo "  gfbind [type]     - Find CF bindings (D1, KV, R2, DO)"
@@ -1212,22 +1605,29 @@ gfhelp() {
     echo "  gfr2 [pattern]    - Find R2 storage/upload operations"
     echo "  gfkv [key]        - Find KV namespace usage"
     echo ""
+    echo -e "${CYAN}Code Quality:${NC}"
+    echo "  gftype [name]     - Find TypeScript types/interfaces"
+    echo "  gfexport [name]   - Find module exports"
+    echo "  gfauth [aspect]   - Find authentication code"
+    echo "  gfengine [module] - Find @autumnsgrove/groveengine imports"
+    echo ""
     echo -e "${CYAN}Counting & Metrics:${NC}"
     echo "  gf-count-lines [path]  - Count lines of code"
     echo "  gf-count-files [path]  - Count files by extension"
     echo "  gf-count-langs [path]  - Count files by language"
     echo "  gf-stats [path]        - Combined statistics summary"
     echo ""
-    echo -e "${CYAN}Interactive:${NC}"
+    echo -e "${CYAN}Interactive & Agent:${NC}"
     echo "  gfzf              - Interactive file finder (requires fzf)"
+    echo "  gfagent           - Compact reference for AI agents"
     echo ""
     echo -e "${CYAN}Pro Tips:${NC}"
     echo "  - All searches exclude node_modules, dist, and .git"
     echo "  - Use quotes for patterns with spaces"
     echo "  - Combine with | less for paging through results"
-    echo "  - gftodo FIXME → show only FIXMEs"
-    echo "  - gfbind D1 → show only D1 database usage"
-    echo "  - gfused GlassCard → find everywhere GlassCard is imported/used"
+    echo "  - gfrecent 1 → files changed today"
+    echo "  - gfchanged → great for PR scope review"
+    echo "  - gfengine → verify engine-first pattern compliance"
 }
 
 # Let user know functions are loaded
