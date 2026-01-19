@@ -1,5 +1,19 @@
-<script>
-	let { headers = [] } = $props();
+<script lang="ts">
+	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from './types.js';
+
+	// Re-export for consumers who import from this component
+	export type { TOCHeader };
+
+	interface Props {
+		/** Array of headers to display in the TOC */
+		headers?: TOCHeader[];
+		/** Title displayed at the top of the TOC */
+		title?: string;
+		/** Scroll offset in pixels to account for sticky headers */
+		scrollOffset?: number;
+	}
+
+	let { headers = [], title = 'Table of Contents', scrollOffset = DEFAULT_SCROLL_OFFSET }: Props = $props();
 
 	let activeId = $state('');
 
@@ -38,43 +52,46 @@
 		return cleanup;
 	});
 
-	/** @param {string} id */
-	function scrollToHeader(id) {
+	function scrollToHeader(id: string) {
 		const element = document.getElementById(id);
 		if (element) {
-			// Calculate offset for sticky headers
-			const offset = 80; // Account for any fixed headers
 			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-			const offsetPosition = elementPosition - offset;
+			const offsetPosition = elementPosition - scrollOffset;
 
 			window.scrollTo({
 				top: offsetPosition,
 				behavior: 'smooth'
 			});
-			
+
 			// Update URL hash without jumping
 			history.pushState(null, '', `#${id}`);
 		} else {
 			console.warn(`TableOfContents: Header element not found for ID: ${id}`);
 		}
 	}
+
 </script>
 
 {#if headers.length > 0}
 	<nav class="toc">
-		<h3 class="toc-title">Table of Contents</h3>
+		<h3 class="toc-title">{title}</h3>
 		<ul class="toc-list">
 			{#each headers as header (header.id)}
+				{@const IconComponent = header.icon && isValidIcon(header.icon) ? header.icon : null}
 				<li
 					class="toc-item level-{header.level}"
 					class:active={activeId === header.id}
+					class:has-icon={!!IconComponent}
 				>
 					<button
 						type="button"
 						onclick={() => scrollToHeader(header.id)}
 						class="toc-link"
 					>
-						{header.text}
+						{#if IconComponent}
+							<IconComponent class="toc-icon" />
+						{/if}
+						<span>{header.text}</span>
 					</button>
 				</li>
 			{/each}
@@ -117,15 +134,11 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #666;
+		color: var(--color-foreground-muted, #666);
 		margin: 0 0 1rem 0;
 		padding-bottom: 0.5rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		border-bottom: 1px solid var(--color-divider, rgba(0, 0, 0, 0.1));
 		transition: color 0.3s ease, border-color 0.3s ease;
-	}
-	:global(.dark) .toc-title {
-		color: rgba(255, 255, 255, 0.6);
-		border-bottom-color: rgba(255, 255, 255, 0.1);
 	}
 	.toc-list {
 		list-style: none;
@@ -137,38 +150,48 @@
 		padding: 0;
 	}
 	.toc-link {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		width: 100%;
 		text-align: left;
 		padding: 0.375rem 0;
 		background: none;
 		border: none;
-		color: #666;
+		color: var(--color-foreground-muted, #666);
 		cursor: pointer;
 		transition: color 0.2s ease;
 		font-size: inherit;
 		font-family: inherit;
 		line-height: 1.4;
 	}
+	/* Icon styling */
+	.toc-link :global(.toc-icon) {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+		opacity: 0.7;
+		transition: opacity 0.2s ease;
+	}
+	.toc-item.active .toc-link :global(.toc-icon),
+	.toc-link:hover :global(.toc-icon) {
+		opacity: 1;
+	}
 	.toc-link:hover {
-		color: #2c5f2d;
+		color: var(--accent-success, #2c5f2d);
 		padding-left: 0.5rem;
 	}
-	:global(.dark) .toc-link:hover {
-		color: var(--accent-success);
-	}
 	.toc-item.active .toc-link {
-		color: #2c5f2d;
+		color: var(--accent-success, #2c5f2d);
 		font-weight: 600;
 		/* Active indicator */
-		background: rgba(44, 95, 45, 0.1);
+		background: var(--accent-success-faint, rgba(44, 95, 45, 0.1));
 		padding: 0.375rem 0.75rem;
 		margin-left: -0.75rem;
 		margin-right: -0.75rem;
 		border-radius: 8px;
 	}
 	:global(.dark) .toc-item.active .toc-link {
-		color: var(--accent-success);
 		background: rgba(74, 222, 128, 0.1);
 	}
 	/* Indentation based on header level */
@@ -199,10 +222,7 @@
 		background: transparent;
 	}
 	.toc::-webkit-scrollbar-thumb {
-		background: var(--light-text-secondary);
+		background: var(--color-foreground-subtle, #ccc);
 		border-radius: 2px;
-	}
-	:global(.dark) .toc::-webkit-scrollbar-thumb {
-		background: var(--light-border-light);
 	}
 </style>

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
-	import TableOfContents from '$lib/components/TableOfContents.svelte';
+	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
 
 	// Centralized icon registry - single source of truth for all icons
 	import {
@@ -1004,7 +1004,8 @@
 		</section>
 	</div>
 
-	<TableOfContents headers={tocHeaders} />
+	<!-- Mobile TOC (nav pills handle desktop) -->
+	<MobileTOC headers={tocHeaders} title="Phases" />
 
 	<Footer />
 </main>

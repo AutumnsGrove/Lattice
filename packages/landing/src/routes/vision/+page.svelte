@@ -2,6 +2,7 @@
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { MobileTOC } from '@autumnsgrove/groveengine';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Centralized icon registry
@@ -25,6 +26,14 @@
 	const PrivateEncouragementIcon = toolIcons.messagessquare;
 	const FullControlIcon = actionIcons.settings;
 	const OpenStandardsIcon = toolIcons.signpost;
+
+	// TOC headers with icons (using engine TOC format)
+	const tocHeaders = [
+		{ id: 'the-vision', text: 'The Vision', level: 2, icon: VisionIcon },
+		{ id: 'core-values', text: 'Core Values', level: 2, icon: CommunityIcon },
+		{ id: 'on-community-meadow', text: 'On Community — Meadow', level: 2, icon: TreesIcon },
+		{ id: 'where-this-comes-from', text: 'Where This Comes From', level: 2, icon: contentIcons.heart }
+	];
 </script>
 
 <SEO
@@ -65,7 +74,7 @@
 				</p>
 
 				<!-- The Vision -->
-				<section class="mb-12">
+				<section id="the-vision" class="mb-12 scroll-mt-28">
 					<h2 class="text-2xl font-serif text-foreground mb-4 flex items-center gap-2">
 						<VisionIcon class="w-6 h-6 text-accent-subtle" />
 						The Vision
@@ -81,7 +90,7 @@
 				</section>
 
 				<!-- Core Values -->
-				<section class="mb-12">
+				<section id="core-values" class="mb-12 scroll-mt-28">
 					<h2 class="text-2xl font-serif text-foreground mb-6">Core Values</h2>
 
 					<div class="grid gap-6">
@@ -164,7 +173,7 @@
 				</section>
 
 				<!-- Meadow Section -->
-				<section class="mb-12">
+				<section id="on-community-meadow" class="mb-12 scroll-mt-28">
 					<h2 class="text-2xl font-serif text-foreground mb-4 flex items-center gap-2">
 						<TreesIcon class="w-6 h-6 text-accent-subtle" />
 						On Community — Meadow
@@ -213,7 +222,7 @@
 				</section>
 
 				<!-- Where This Comes From -->
-				<section class="mb-12">
+				<section id="where-this-comes-from" class="mb-12 scroll-mt-28">
 					<h2 class="text-2xl font-serif text-foreground mb-4">Where This Comes From</h2>
 					<p class="text-foreground-muted font-sans leading-relaxed mb-4">
 						These aren't abstract principles. They come from somewhere real.
@@ -260,6 +269,47 @@
 			</div>
 		</div>
 	</article>
+
+	<!--
+		Floating TOC Icon Navigation (desktop)
+
+		This is a specialized "icon-only" TOC pattern with hover tooltips,
+		distinct from the standard text-based TableOfContents component.
+		Used for pages with few sections where icons provide quick visual navigation.
+
+		Z-INDEX: z-grove-fab (40) - sits above page content but below:
+		- Mobile menu overlay (9990)
+		- Mobile menu (9999)
+		- Modals (50+)
+		See tailwind.preset.js for the full z-index scale.
+	-->
+	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-2" aria-label="Section navigation">
+		{#each tocHeaders as header}
+			{@const SectionIcon = header.icon}
+			<div class="relative group">
+				<a
+					href="#{header.id}"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-accent/30 dark:border-accent/20 hover:bg-accent/10 dark:hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-all duration-200"
+					aria-label="Jump to {header.text}"
+					title={header.text}
+				>
+					{#if SectionIcon}
+						<SectionIcon class="w-5 h-5 text-accent dark:text-accent-muted group-hover:scale-110 transition-transform" />
+					{/if}
+				</a>
+
+				<!-- Section name tooltip on hover -->
+				<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
+					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
+						{header.text}
+					</div>
+				</div>
+			</div>
+		{/each}
+	</nav>
+
+	<!-- Mobile TOC (using engine component with icons) -->
+	<MobileTOC headers={tocHeaders} title="On this page" />
 
 	<Footer />
 </main>

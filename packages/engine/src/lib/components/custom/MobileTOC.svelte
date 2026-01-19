@@ -1,9 +1,23 @@
-<script>
-	let { headers = [] } = $props();
+<script lang="ts">
+	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from './types.js';
+
+	// Re-export for consumers who import from this component
+	export type { TOCHeader };
+
+	interface Props {
+		/** Array of headers to display in the TOC */
+		headers?: TOCHeader[];
+		/** Title displayed at the top of the menu */
+		title?: string;
+		/** Scroll offset in pixels to account for sticky headers */
+		scrollOffset?: number;
+	}
+
+	let { headers = [], title = 'Table of Contents', scrollOffset = DEFAULT_SCROLL_OFFSET }: Props = $props();
 
 	let isOpen = $state(false);
-	let menuRef = $state();
-	let buttonRef = $state();
+	let menuRef = $state<HTMLDivElement>();
+	let buttonRef = $state<HTMLButtonElement>();
 	let activeId = $state('');
 
 	function toggleMenu() {
@@ -14,11 +28,17 @@
 		isOpen = false;
 	}
 
-	/** @param {string} id */
-	function scrollToHeader(id) {
+	function scrollToHeader(id: string) {
 		const element = document.getElementById(id);
 		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+			const offsetPosition = elementPosition - scrollOffset;
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			});
+
 			// Update URL hash without jumping
 			history.pushState(null, '', `#${id}`);
 		}
@@ -26,18 +46,17 @@
 	}
 
 	// Handle click outside
-	/** @param {MouseEvent} event */
-	function handleClickOutside(event) {
+	function handleClickOutside(event: MouseEvent) {
 		if (isOpen && menuRef && buttonRef) {
-			if (!menuRef.contains(/** @type {Node} */ (event.target)) && !buttonRef.contains(/** @type {Node} */ (event.target))) {
+			const target = event.target as Node;
+			if (!menuRef.contains(target) && !buttonRef.contains(target)) {
 				closeMenu();
 			}
 		}
 	}
 
 	// Handle escape key
-	/** @param {KeyboardEvent} event */
-	function handleKeydown(event) {
+	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && isOpen) {
 			closeMenu();
 		}
@@ -106,19 +125,24 @@
 		<!-- Floating Menu -->
 		{#if isOpen}
 			<div class="toc-menu" bind:this={menuRef}>
-				<h3 class="toc-title">Table of Contents</h3>
+				<h3 class="toc-title">{title}</h3>
 				<ul class="toc-list">
 					{#each headers as header (header.id)}
+						{@const IconComponent = header.icon && isValidIcon(header.icon) ? header.icon : null}
 						<li
 							class="toc-item level-{header.level}"
 							class:active={activeId === header.id}
+							class:has-icon={!!IconComponent}
 						>
 							<button
 								type="button"
 								onclick={() => scrollToHeader(header.id)}
 								class="toc-link"
 							>
-								{header.text}
+								{#if IconComponent}
+									<IconComponent class="toc-icon" />
+								{/if}
+								<span>{header.text}</span>
 							</button>
 						</li>
 					{/each}
@@ -134,8 +158,14 @@
 		position: fixed;
 		bottom: 1rem;
 		right: 1rem;
-		/* grove-fab level (40) - stays below mobile menu (9990+) */
-		/* See tailwind.preset.js for the full z-index scale */
+		/*
+		 * Z-INDEX: grove-fab level (40)
+		 * This sits above page content but below:
+		 * - Mobile menu overlay (9990)
+		 * - Mobile menu (9999)
+		 * - Modals (50+)
+		 * See tailwind.preset.js for the full z-index scale
+		 */
 		z-index: 40;
 	}
 	/* Show only on mobile (tablet and desktop have sidebar TOC) */
@@ -148,7 +178,8 @@
 		width: 44px;
 		height: 44px;
 		border-radius: 50%;
-		background: #7c4dab;
+		/* Uses accent color for consistency with Grove theme */
+		background: var(--accent-success, #2c5f2d);
 		border: none;
 		color: white;
 		cursor: pointer;
@@ -159,7 +190,7 @@
 		transition: background-color 0.2s ease, transform 0.2s ease;
 	}
 	.toc-button:hover {
-		background: #6a3d9a;
+		background: var(--accent-success-dark, #234a24);
 	}
 	.toc-button:active {
 		transform: scale(0.95);
@@ -175,7 +206,7 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border-radius: 12px;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--color-divider, rgba(0, 0, 0, 0.08));
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 		padding: 1rem;
 		animation: slideIn 0.2s ease;
@@ -200,14 +231,10 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #666;
+		color: var(--color-foreground-muted, #666);
 		margin: 0 0 0.75rem 0;
 		padding-bottom: 0.5rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-	}
-	:global(.dark) .toc-title {
-		color: rgba(255, 255, 255, 0.6);
-		border-bottom-color: rgba(255, 255, 255, 0.1);
+		border-bottom: 1px solid var(--color-divider, rgba(0, 0, 0, 0.1));
 	}
 	.toc-list {
 		list-style: none;
@@ -219,34 +246,39 @@
 		padding: 0;
 	}
 	.toc-link {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 		width: 100%;
 		text-align: left;
 		padding: 0.5rem 0;
 		background: none;
 		border: none;
-		color: #555;
+		color: var(--color-foreground-muted, #555);
 		cursor: pointer;
 		transition: color 0.2s ease;
 		font-size: 0.875rem;
 		font-family: inherit;
 		line-height: 1.4;
 	}
-	:global(.dark) .toc-link {
-		color: rgba(255, 255, 255, 0.7);
+	/* Icon styling */
+	.toc-link :global(.toc-icon) {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+		opacity: 0.7;
+		transition: opacity 0.2s ease;
+	}
+	.toc-item.active .toc-link :global(.toc-icon),
+	.toc-link:hover :global(.toc-icon) {
+		opacity: 1;
 	}
 	.toc-link:hover {
-		color: #7c4dab;
-	}
-	:global(.dark) .toc-link:hover {
-		color: #c9a0e8;
+		color: var(--accent-success, #2c5f2d);
 	}
 	.toc-item.active .toc-link {
-		color: #7c4dab;
+		color: var(--accent-success, #2c5f2d);
 		font-weight: 600;
-	}
-	:global(.dark) .toc-item.active .toc-link {
-		color: #c9a0e8;
 	}
 	/* Indentation based on header level */
 	.level-1 .toc-link {
@@ -276,10 +308,7 @@
 		background: transparent;
 	}
 	.toc-menu::-webkit-scrollbar-thumb {
-		background: var(--light-text-secondary);
+		background: var(--color-foreground-subtle, #ccc);
 		border-radius: 2px;
-	}
-	:global(.dark) .toc-menu::-webkit-scrollbar-thumb {
-		background: var(--light-text-secondary);
 	}
 </style>

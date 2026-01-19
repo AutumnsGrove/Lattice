@@ -4,7 +4,7 @@
   import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
-  import TableOfContents from '$lib/components/TableOfContents.svelte';
+  import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
   import RelatedArticles from '$lib/components/RelatedArticles.svelte';
   import { kbCategoryColors, categoryLabels } from '$lib/utils/kb-colors';
   import type { DocCategory } from '$lib/types/docs';
@@ -194,9 +194,7 @@
       </div>
 
       <!-- Mobile TOC (floating button) -->
-      <div class="lg:hidden">
-        <TableOfContents {headers} />
-      </div>
+      <MobileTOC {headers} />
     {:else}
       <!-- 404 -->
       <div class="text-center py-12 max-w-4xl mx-auto">

@@ -8,6 +8,10 @@ export { default as TableOfContents } from "./components/custom/TableOfContents.
 export { default as MobileTOC } from "./components/custom/MobileTOC.svelte";
 export { default as CollapsibleSection } from "./components/custom/CollapsibleSection.svelte";
 
+// TOC types and constants
+export type { TOCHeader } from "./components/custom/types.js";
+export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./components/custom/types.js";
+
 // Admin components
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
 export { default as GutterManager } from "./components/admin/GutterManager.svelte";
