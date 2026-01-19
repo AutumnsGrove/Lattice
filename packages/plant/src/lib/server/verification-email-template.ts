@@ -63,7 +63,7 @@ export function getVerificationEmail(params: VerificationEmailParams): {
   const codeBoxes = codeDigits
     .map(
       (digit) =>
-        `<td style="width: 40px; height: 48px; background-color: rgba(22, 163, 74, 0.1); border-radius: 8px; text-align: center; font-size: 24px; font-weight: 600; color: #16a34a; font-family: 'SF Mono', 'Menlo', monospace;">${digit}</td>`,
+        `<td style="width: 40px; height: 48px; background-color: rgba(22, 163, 74, 0.1); border-radius: 8px; text-align: center; font-size: 24px; font-weight: 600; color: #15803d; font-family: 'SF Mono', 'Menlo', monospace;">${digit}</td>`,
     )
     .join('<td style="width: 8px;"></td>');
 
