@@ -10,6 +10,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { DEFAULT_TIMELINE_CONFIG } from "$lib/curios/timeline";
+import { encryptToken } from "$lib/server/encryption";
 
 interface ConfigRow {
   enabled: number;
@@ -181,9 +182,32 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       : null;
 
   try {
-    // Note: In production, encrypt tokens before storing
-    const githubTokenEncrypted = githubToken?.trim() || null;
-    const openrouterKeyEncrypted = openrouterKey?.trim() || null;
+    // Encrypt tokens before storing
+    const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+    const rawGithubToken = githubToken?.trim() || null;
+    const rawOpenrouterKey = openrouterKey?.trim() || null;
+
+    let githubTokenEncrypted = rawGithubToken;
+    let openrouterKeyEncrypted = rawOpenrouterKey;
+
+    if (encryptionKey) {
+      if (rawGithubToken) {
+        githubTokenEncrypted = await encryptToken(
+          rawGithubToken,
+          encryptionKey,
+        );
+      }
+      if (rawOpenrouterKey) {
+        openrouterKeyEncrypted = await encryptToken(
+          rawOpenrouterKey,
+          encryptionKey,
+        );
+      }
+    } else if (rawGithubToken || rawOpenrouterKey) {
+      console.warn(
+        "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
+      );
+    }
 
     await db
       .prepare(

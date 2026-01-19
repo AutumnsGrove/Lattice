@@ -25,6 +25,7 @@ import {
   type CustomVoiceConfig,
   type PromptContextInput,
 } from "$lib/curios/timeline";
+import { safeDecryptToken } from "$lib/server/encryption";
 
 interface GenerateRequest {
   date?: string;
@@ -122,11 +123,30 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "OpenRouter API key not configured");
   }
 
+  // Decrypt tokens for API calls (safeDecryptToken handles both encrypted and plaintext)
+  const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+  const githubToken = await safeDecryptToken(
+    config.github_token_encrypted,
+    encryptionKey,
+  );
+  const openrouterKey = await safeDecryptToken(
+    config.openrouter_key_encrypted,
+    encryptionKey,
+  );
+
+  if (!githubToken) {
+    throw error(500, "Failed to decrypt GitHub token");
+  }
+
+  if (!openrouterKey) {
+    throw error(500, "Failed to decrypt OpenRouter API key");
+  }
+
   try {
     // Fetch commits from GitHub
     const commits = await fetchGitHubCommits(
       config.github_username,
-      config.github_token_encrypted,
+      githubToken,
       targetDate,
       config.repos_include ? JSON.parse(config.repos_include) : null,
       config.repos_exclude ? JSON.parse(config.repos_exclude) : null,
@@ -207,7 +227,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Call OpenRouter
     const aiResponse = await callOpenRouter(
-      config.openrouter_key_encrypted,
+      openrouterKey,
       config.openrouter_model,
       promptResult.systemPrompt,
       promptResult.userPrompt,

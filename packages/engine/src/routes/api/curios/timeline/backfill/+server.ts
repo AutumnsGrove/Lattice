@@ -16,6 +16,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Commit } from "$lib/curios/timeline";
+import { safeDecryptToken } from "$lib/server/encryption";
 
 interface ConfigRow {
   github_username: string;
@@ -99,6 +100,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "GitHub token not configured");
   }
 
+  // Decrypt token for API calls (safeDecryptToken handles both encrypted and plaintext)
+  const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+  const githubToken = await safeDecryptToken(
+    config.github_token_encrypted,
+    encryptionKey,
+  );
+
+  if (!githubToken) {
+    throw error(500, "Failed to decrypt GitHub token");
+  }
+
   const includeRepos = config.repos_include
     ? JSON.parse(config.repos_include)
     : null;
@@ -111,7 +123,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Step 1: Get user's repos
     const repos = await fetchUserRepos(
       config.github_username,
-      config.github_token_encrypted,
+      githubToken,
       includeRepos,
       excludeRepos,
       repoLimit,
@@ -126,7 +138,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       const repoCommits = await fetchRepoCommits(
         repo.full_name,
         config.github_username,
-        config.github_token_encrypted,
+        githubToken,
         startDate,
         end,
       );

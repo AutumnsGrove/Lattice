@@ -15,6 +15,7 @@ import {
   toSqliteBoolean,
   CLEAR_TOKEN_VALUE,
 } from "$lib/curios/journey";
+import { encryptToken } from "$lib/server/encryption";
 
 interface ConfigRow {
   enabled: number;
@@ -165,19 +166,40 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
-    // TODO: Encrypt tokens before storing (use Cloudflare Workers secrets or app-layer encryption)
     // Handle token values:
     // - CLEAR_TOKEN_VALUE ("__CLEAR__") explicitly deletes the token
     // - Empty string or whitespace preserves existing token (COALESCE)
-    // - Any other value sets the new token
-    const githubTokenValue =
+    // - Any other value sets the new token (encrypted)
+    const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+
+    // Determine raw token values first
+    const rawGithubToken =
       githubToken === CLEAR_TOKEN_VALUE
         ? "" // Empty string will be stored, clearing the token
         : githubToken?.trim() || null; // null preserves existing via COALESCE
-    const openrouterKeyValue =
-      openrouterKey === CLEAR_TOKEN_VALUE
-        ? ""
-        : openrouterKey?.trim() || null;
+    const rawOpenrouterKey =
+      openrouterKey === CLEAR_TOKEN_VALUE ? "" : openrouterKey?.trim() || null;
+
+    // Encrypt non-empty tokens if encryption key is available
+    let githubTokenValue = rawGithubToken;
+    let openrouterKeyValue = rawOpenrouterKey;
+
+    if (encryptionKey) {
+      if (rawGithubToken && rawGithubToken !== "") {
+        githubTokenValue = await encryptToken(rawGithubToken, encryptionKey);
+      }
+      if (rawOpenrouterKey && rawOpenrouterKey !== "") {
+        openrouterKeyValue = await encryptToken(
+          rawOpenrouterKey,
+          encryptionKey,
+        );
+      }
+    } else if (rawGithubToken || rawOpenrouterKey) {
+      // Log warning if trying to save tokens without encryption key
+      console.warn(
+        "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
+      );
+    }
 
     // Use CASE expression to handle token clearing vs preservation
     // When value is empty string -> clear the token (set to NULL)
@@ -226,8 +248,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         openrouterKeyValue,
         openrouterModel || DEFAULT_JOURNEY_CONFIG.openrouterModel,
         snapshotFrequency || DEFAULT_JOURNEY_CONFIG.snapshotFrequency,
-        toSqliteBoolean(showLanguageChart, DEFAULT_JOURNEY_CONFIG.showLanguageChart),
-        toSqliteBoolean(showGrowthChart, DEFAULT_JOURNEY_CONFIG.showGrowthChart),
+        toSqliteBoolean(
+          showLanguageChart,
+          DEFAULT_JOURNEY_CONFIG.showLanguageChart,
+        ),
+        toSqliteBoolean(
+          showGrowthChart,
+          DEFAULT_JOURNEY_CONFIG.showGrowthChart,
+        ),
         toSqliteBoolean(showMilestones, DEFAULT_JOURNEY_CONFIG.showMilestones),
         timezone || DEFAULT_JOURNEY_CONFIG.timezone,
       )

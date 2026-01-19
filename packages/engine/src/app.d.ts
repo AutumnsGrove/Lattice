@@ -66,6 +66,7 @@ declare global {
         SESSION_SECRET?: string; // Deprecated: was used for magic code auth
         RESEND_API_KEY?: string; // Optional: for transactional emails
         ALLOWED_ADMIN_EMAILS?: string;
+        TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
         // Wisp AI providers (optional inference APIs)
         FIREWORKS_API_KEY?: string;
