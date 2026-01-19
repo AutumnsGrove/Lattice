@@ -64,6 +64,15 @@ describe("encryptToken", () => {
       "TOKEN_ENCRYPTION_KEY must be 64 hex characters",
     );
   });
+
+  it("should reject non-hex characters in key", async () => {
+    // Valid length but contains non-hex characters (g, h, etc.)
+    const invalidHexKey =
+      "ghijklmnopqrstuv0123456789abcdef0123456789abcdef0123456789abcdef";
+    await expect(encryptToken("test", invalidHexKey)).rejects.toThrow(
+      "TOKEN_ENCRYPTION_KEY must contain only hex characters",
+    );
+  });
 });
 
 describe("decryptToken", () => {

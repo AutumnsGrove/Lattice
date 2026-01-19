@@ -178,6 +178,13 @@ async function importKey(keyHex: string): Promise<CryptoKey> {
 }
 
 function hexToArrayBuffer(hex: string): ArrayBuffer {
+  // Validate hex characters before parsing
+  if (!/^[0-9a-fA-F]+$/.test(hex)) {
+    throw new Error(
+      "TOKEN_ENCRYPTION_KEY must contain only hex characters (0-9, a-f)",
+    );
+  }
+
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
