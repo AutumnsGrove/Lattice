@@ -8,6 +8,25 @@
 
 The `AGENT.md` file contains all project-specific instructions, workflows, and guidelines. Read it first to keep the full context in memory for this session.
 
+## Codebase Navigation (grove-find)
+
+**After reading AGENT.md**, run this command to load the codebase search toolkit:
+
+```bash
+source scripts/repo/grove-find.sh && gfagent
+```
+
+This gives you 45+ blazing-fast search commands for navigating the codebase. Key commands:
+- `gf "pattern"` — Search entire codebase
+- `gfused "Name"` — Find where a component is used
+- `gfrecent 1` — Files changed today
+- `gfchanged` — Files changed on current branch
+- `gfengine` — Verify engine-first pattern compliance
+
+Run `gfhelp` for full documentation or `gfagent` for a compact reference.
+
+---
+
 All project instructions, tech stack details, architecture notes, and workflow guidelines are in:
 - **`AGENT.md`** - Main project instructions (read this first)
 - **`AgentUsage/`** - Detailed workflow guides and best practices
