@@ -5,6 +5,7 @@ import {
   getOpenRouterModels,
   DEFAULT_TIMELINE_CONFIG,
 } from "$lib/curios/timeline";
+import { encryptToken } from "$lib/server/encryption";
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
@@ -19,12 +20,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     };
   }
 
-  // Fetch existing config
+  // Fetch existing config (include token columns to check presence, not values)
   const config = await db
     .prepare(
       `SELECT
         enabled,
         github_username,
+        github_token_encrypted,
+        openrouter_key_encrypted,
         openrouter_model,
         voice_preset,
         custom_system_prompt,
@@ -63,9 +66,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       timezone: config.timezone as string,
       ownerName: config.owner_name as string | null,
       updatedAt: config.updated_at as number,
-      // Note: We don't return encrypted tokens to the client
-      hasGithubToken: false, // Would check if github_token_encrypted is set
-      hasOpenrouterKey: false, // Would check if openrouter_key_encrypted is set
+      // Indicate if tokens are configured (without exposing values)
+      hasGithubToken: Boolean(config.github_token_encrypted),
+      hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
     };
   }
 
@@ -147,10 +150,32 @@ export const actions: Actions = {
       : null;
 
     try {
-      // Upsert config
-      // Note: In production, encrypt tokens before storing
-      const githubTokenEncrypted = githubToken?.trim() || null;
-      const openrouterKeyEncrypted = openrouterKey?.trim() || null;
+      // Encrypt tokens before storing (if encryption key is available)
+      const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+      const rawGithubToken = githubToken?.trim() || null;
+      const rawOpenrouterKey = openrouterKey?.trim() || null;
+
+      let githubTokenEncrypted = rawGithubToken;
+      let openrouterKeyEncrypted = rawOpenrouterKey;
+
+      if (encryptionKey) {
+        if (rawGithubToken) {
+          githubTokenEncrypted = await encryptToken(
+            rawGithubToken,
+            encryptionKey,
+          );
+        }
+        if (rawOpenrouterKey) {
+          openrouterKeyEncrypted = await encryptToken(
+            rawOpenrouterKey,
+            encryptionKey,
+          );
+        }
+      } else if (rawGithubToken || rawOpenrouterKey) {
+        console.warn(
+          "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
+        );
+      }
 
       await db
         .prepare(
