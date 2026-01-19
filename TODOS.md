@@ -541,11 +541,12 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-# 📋 REMAINING PLANS (7 items in `/planned`)
+# 📋 REMAINING PLANS (8 items in `/planned`)
 
 | Plan | Priority | Summary |
 |------|----------|---------|
 | `cdn-domain-migration.md` | **V1 BLOCKER** | Migrate CDN from autumnsgrove.com to cdn.grove.place (~1h) |
+| `username-change-feature.md` | Low | Allow users to change subdomain/username (4-6h) |
 | `1.1-medium-low-remediation.md` | P2-P3 | 52 medium/low issues for post-1.0 cleanup sprint |
 | `amber-zip-export-integration.md` | Medium | ZIP export feature for blogs (8-12h) |
 | `dependency-update-strategy.md` | Medium | Security maintenance strategy |
