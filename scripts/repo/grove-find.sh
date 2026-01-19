@@ -357,19 +357,37 @@ gftest() {
 #
 # =============================================================================
 
+# Shared helper: Build find command with standard exclusions
+# Returns a find command string (use with eval)
+_grove_build_find_cmd() {
+    local path="$1"
+    local pattern="$2"
+
+    echo "find \"$path\" -name \"$pattern\" ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/dist/*' ! -path '*/.svelte-kit/*' -type f"
+}
+
+# Shared helper: Format number with thousand separators
+# Used by all counting functions for consistent output
+_grove_format_num() {
+    echo "$1" | sed ':a;s/\B[0-9]\{3\}\>$/,&/;ta'
+}
+
 # Internal helper: Count lines for a specific pattern (scriptable/quiet mode)
 # Returns just the number, no formatting
 # Used by repo-snapshot.sh for repository metrics
+# Performance: Uses find with xargs wc -l for better performance than cat
 _grove_count_lines_pattern() {
     local pattern="$1"
     local path="${2:-$GROVE_ROOT}"
 
-    find "$path" -name "$pattern" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+    local cmd
+    cmd=$(_grove_build_find_cmd "$path" "$pattern")
+
+    # Use xargs with wc -l, then take the total from the last line
+    # wc -l outputs a "total" line when processing multiple files
+    local result
+    result=$(eval "$cmd" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    echo "${result:-0}"
 }
 
 # Internal helper: Count files for a specific pattern (scriptable/quiet mode)
@@ -378,16 +396,16 @@ _grove_count_files_pattern() {
     local pattern="$1"
     local path="${2:-$GROVE_ROOT}"
 
-    find "$path" -name "$pattern" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f 2>/dev/null | wc -l | tr -d ' '
+    local cmd
+    cmd=$(_grove_build_find_cmd "$path" "$pattern")
+    eval "$cmd" 2>/dev/null | wc -l | tr -d ' '
 }
 
 # gf-count-lines - Count lines in files
 # Usage: gf-count-lines [path]
+#
+# Note: TypeScript counts exclude .d.ts declaration files by design, as these
+# are typically auto-generated type definitions rather than authored code.
 gf-count-lines() {
     local path="${1:-$GROVE_ROOT}"
 
@@ -409,61 +427,27 @@ gf-count-lines() {
     # For directories, count by file type
     local ts_lines svelte_lines js_lines css_lines md_lines total_lines
 
-    # Count TypeScript lines
-    ts_lines=$(find "$path" -name "*.ts" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        ! -name "*.d.ts" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+    # Count TypeScript lines (excluding .d.ts declaration files)
+    ts_lines=$(find "$path" -name "*.ts" ! -name "*.d.ts" \
+        ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" \
+        -type f 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    ts_lines=${ts_lines:-0}
 
-    # Count Svelte lines
-    svelte_lines=$(find "$path" -name "*.svelte" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-
-    # Count JavaScript lines
-    js_lines=$(find "$path" -name "*.js" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-
-    # Count CSS lines
-    css_lines=$(find "$path" -name "*.css" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
-
-    # Count Markdown lines
-    md_lines=$(find "$path" -name "*.md" \
-        ! -path "*/node_modules/*" \
-        ! -path "*/.git/*" \
-        ! -path "*/dist/*" \
-        ! -path "*/.svelte-kit/*" \
-        -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' ')
+    # Use shared helper for other file types
+    svelte_lines=$(_grove_count_lines_pattern "*.svelte" "$path")
+    js_lines=$(_grove_count_lines_pattern "*.js" "$path")
+    css_lines=$(_grove_count_lines_pattern "*.css" "$path")
+    md_lines=$(_grove_count_lines_pattern "*.md" "$path")
 
     total_lines=$((ts_lines + svelte_lines + js_lines + css_lines + md_lines))
 
-    # Format with thousand separators
-    _format_num() {
-        echo "$1" | sed ':a;s/\B[0-9]\{3\}\>$/,&/;ta'
-    }
-
-    echo -e "  ${GREEN}TypeScript:${NC}  $(_format_num $ts_lines) lines"
-    echo -e "  ${GREEN}Svelte:${NC}      $(_format_num $svelte_lines) lines"
-    echo -e "  ${GREEN}JavaScript:${NC}  $(_format_num $js_lines) lines"
-    echo -e "  ${GREEN}CSS:${NC}         $(_format_num $css_lines) lines"
-    echo -e "  ${GREEN}Markdown:${NC}    $(_format_num $md_lines) lines"
+    echo -e "  ${GREEN}TypeScript:${NC}  $(_grove_format_num $ts_lines) lines"
+    echo -e "  ${GREEN}Svelte:${NC}      $(_grove_format_num $svelte_lines) lines"
+    echo -e "  ${GREEN}JavaScript:${NC}  $(_grove_format_num $js_lines) lines"
+    echo -e "  ${GREEN}CSS:${NC}         $(_grove_format_num $css_lines) lines"
+    echo -e "  ${GREEN}Markdown:${NC}    $(_grove_format_num $md_lines) lines"
     echo -e "  ${CYAN}────────────────────────${NC}"
-    echo -e "  ${YELLOW}Total:${NC}       $(_format_num $total_lines) lines"
+    echo -e "  ${YELLOW}Total:${NC}       $(_grove_format_num $total_lines) lines"
 }
 
 # gf-count-files - Count files by extension
@@ -503,6 +487,9 @@ gf-count-files() {
 
 # gf-count-langs - Count files by language/type
 # Usage: gf-count-langs [path]
+#
+# Performance optimized: Uses a single find command with case matching
+# instead of 10 separate find operations
 gf-count-langs() {
     local path="${1:-$GROVE_ROOT}"
 
@@ -513,29 +500,33 @@ gf-count-langs() {
 
     echo -e "${CYAN}🔤 Counting files by language in: ${path}${NC}\n"
 
-    _count_files() {
-        local pattern="$1"
-        find "$path" -name "$pattern" \
-            ! -path "*/node_modules/*" \
-            ! -path "*/.git/*" \
-            ! -path "*/dist/*" \
-            ! -path "*/.svelte-kit/*" \
-            -type f 2>/dev/null | wc -l | tr -d ' '
-    }
+    # Single find command with case matching for better performance
+    # Counts each file type in one pass through the directory tree
+    local counts
+    counts=$(find "$path" -type f \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/dist/*" \
+        ! -path "*/.svelte-kit/*" \
+        2>/dev/null | awk '
+        /\.ts$/ {ts++}
+        /\.svelte$/ {svelte++}
+        /\.js$/ {js++}
+        /\.css$/ {css++}
+        /\.md$/ {md++}
+        /\.json$/ {json++}
+        /\.toml$/ {toml++}
+        /\.yml$/ {yaml++}
+        /\.yaml$/ {yaml++}
+        /\.sql$/ {sql++}
+        /\.sh$/ {sh++}
+        END {
+            print ts+0, svelte+0, js+0, css+0, md+0, json+0, toml+0, yaml+0, sql+0, sh+0
+        }
+    ')
 
-    local ts_files svelte_files js_files css_files md_files json_files toml_files
-    local yaml_files sql_files sh_files total_files
-
-    ts_files=$(_count_files "*.ts")
-    svelte_files=$(_count_files "*.svelte")
-    js_files=$(_count_files "*.js")
-    css_files=$(_count_files "*.css")
-    md_files=$(_count_files "*.md")
-    json_files=$(_count_files "*.json")
-    toml_files=$(_count_files "*.toml")
-    yaml_files=$(_count_files "*.y*ml")
-    sql_files=$(_count_files "*.sql")
-    sh_files=$(_count_files "*.sh")
+    # Parse the counts
+    read -r ts_files svelte_files js_files css_files md_files json_files toml_files yaml_files sql_files sh_files <<< "$counts"
 
     total_files=$((ts_files + svelte_files + js_files + css_files + md_files + json_files + toml_files + yaml_files + sql_files + sh_files))
 
