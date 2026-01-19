@@ -30,6 +30,7 @@
   // ============================================================================
 
   interface Message {
+    id: string; // Unique ID for message identification (prevents race conditions)
     role: "wisp" | "user";
     content: string;
     timestamp: string;
@@ -83,6 +84,7 @@
 
       messages = [
         {
+          id: crypto.randomUUID(),
           role: "wisp",
           content: data.reply,
           timestamp: new Date().toISOString(),
@@ -102,8 +104,9 @@
     inputValue = "";
     error = null;
 
-    // Create the message with a unique timestamp for identification
+    // Create the message with a unique ID for identification (avoids timestamp collision)
     const newMessage: Message = {
+      id: crypto.randomUUID(),
       role: "user",
       content: userMessage,
       timestamp: new Date().toISOString(),
@@ -141,6 +144,7 @@
       messages = [
         ...messages,
         {
+          id: crypto.randomUUID(),
           role: "wisp",
           content: data.reply,
           timestamp: new Date().toISOString(),
@@ -152,7 +156,7 @@
     } catch (err) {
       error = err instanceof Error ? err.message : "Something went wrong";
       // Remove the specific user message that failed (safer than slice)
-      messages = messages.filter((m) => m.timestamp !== newMessage.timestamp);
+      messages = messages.filter((m) => m.id !== newMessage.id);
     } finally {
       isLoading = false;
       inputElement?.focus();

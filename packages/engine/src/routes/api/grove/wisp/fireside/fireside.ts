@@ -93,7 +93,18 @@ export function selectStarterPrompt(userId: string, date?: string): string {
 
 /**
  * Rough token estimation based on character count
- * Uses ~4 characters per token as a reasonable approximation
+ *
+ * LIMITATIONS:
+ * - Uses ~4 characters per token as a conservative approximation
+ * - Actual token counts vary by content type:
+ *   - English prose: ~3.7 chars/token
+ *   - Code: ~2.5 chars/token
+ *   - Unicode/emoji: higher ratios
+ * - May underestimate by 10-25% in some cases
+ *
+ * This is intentionally conservative for conversation limits (better to
+ * stop slightly early than hit context limits). For billing accuracy,
+ * use actual token counts from the inference response.
  */
 export function estimateTokens(text: string): number {
   return Math.ceil(text.length / CHARS_PER_TOKEN);
@@ -129,10 +140,33 @@ export function canDraft(conversation: FiresideMessage[]): boolean {
 
 /**
  * Generate a conversation ID
- * Format: timestamp-random
+ * Format: timestamp-random (e.g., "1704067200000-abc123xyz")
  */
 export function generateConversationId(): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 15);
   return `${timestamp}-${random}`;
+}
+
+/**
+ * Validate that a conversation ID matches expected format
+ * Returns true if valid, false if potentially malicious
+ *
+ * Valid format: timestamp-alphanumeric (e.g., "1704067200000-abc123xyz")
+ */
+export function isValidConversationId(id: string | undefined): boolean {
+  if (!id || typeof id !== "string") return false;
+
+  // Format: 13-digit timestamp, dash, 11-13 alphanumeric chars
+  // Be lenient on random part length but strict on characters
+  const pattern = /^\d{13}-[a-z0-9]{8,15}$/;
+  return pattern.test(id);
+}
+
+/**
+ * Generate a unique message ID using crypto.randomUUID
+ * Used to identify messages for removal on error (avoids timestamp collision)
+ */
+export function generateMessageId(): string {
+  return crypto.randomUUID();
 }

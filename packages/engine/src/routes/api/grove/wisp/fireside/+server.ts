@@ -36,6 +36,7 @@ import {
   isConversationTooLong,
   canDraft,
   generateConversationId,
+  isValidConversationId,
 } from "./fireside.js";
 
 export const prerender = false;
@@ -69,6 +70,28 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
+
+  // ==========================================================================
+  // FAIL-OPEN/FAIL-CLOSED DECISION TREE
+  // ==========================================================================
+  // Each check has an explicit failure strategy:
+  //
+  // 1. Wisp enabled check (site_settings):
+  //    - FAIL-OPEN only if table doesn't exist (initial setup before first migration)
+  //    - FAIL-CLOSED for all other database errors (security)
+  //
+  // 2. Feature access check (billing/subscription):
+  //    - FAIL-OPEN if billing check fails (don't block users due to billing bugs)
+  //    - FAIL-CLOSED if billing says "not allowed" (subscription limits)
+  //
+  // 3. Rate limiting (KV store):
+  //    - FAIL-CLOSED if KV not available (prevent abuse)
+  //    - FAIL-CLOSED if over limit
+  //
+  // 4. Usage logging (database insert):
+  //    - FAIL-OPEN (don't lose user's draft due to logging failure)
+  //    - Log warning for monitoring
+  // ==========================================================================
 
   // Check if Wisp is enabled (isolated query with explicit error handling)
   if (db) {
@@ -341,11 +364,17 @@ async function handleDraft(
   secrets: { FIREWORKS_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string },
   db: D1Database | undefined,
   userId: string,
-  conversationId?: string
+  clientConversationId?: string
 ) {
   if (!conversation || !Array.isArray(conversation) || conversation.length === 0) {
     return json({ error: "I seem to have lost our conversation. Shall we start fresh?" }, { status: 400 });
   }
+
+  // Validate or regenerate conversation ID for security
+  // Client-provided IDs are only used if they match expected format
+  const conversationId = isValidConversationId(clientConversationId)
+    ? clientConversationId
+    : generateConversationId();
 
   if (!canDraft(conversation)) {
     return json(
@@ -407,9 +436,16 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
       jsonStr = jsonStr.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     }
     draft = JSON.parse(jsonStr);
-  } catch {
+  } catch (parseError) {
     // Fallback: Use the raw response as content instead of losing the conversation
-    console.warn("[Fireside] JSON parse failed, using raw response as fallback");
+    // Log with details to track parse failure rate (if >5%, investigate prompt engineering)
+    console.warn("[Fireside] JSON parse failed, using raw response as fallback", {
+      error: parseError instanceof Error ? parseError.message : "Unknown parse error",
+      model: response.model,
+      provider: response.provider,
+      responseLength: response.content.length,
+      responsePreview: response.content.slice(0, 100),
+    });
     draft = {
       title: "Untitled",
       content: response.content.trim(),
