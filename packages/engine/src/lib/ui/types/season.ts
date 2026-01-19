@@ -41,7 +41,7 @@ export const ALL_SEASONS: readonly Season[] = [
 ] as const;
 
 /** Default season for first-time visitors */
-export const DEFAULT_SEASON: RegularSeason = "autumn";
+export const DEFAULT_SEASON: RegularSeason = "summer";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DISPLAY LABELS

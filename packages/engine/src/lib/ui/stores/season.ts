@@ -1,7 +1,7 @@
 /**
  * Season Store for Grove Engine
  * Manages seasonal theme preferences (spring, summer, autumn, winter + midnight)
- * Defaults to autumn on first visit, remembers user choice thereafter
+ * Defaults to summer on first visit, remembers user choice thereafter
  *
  * The logo and other nature components react to season changes.
  *
@@ -43,7 +43,7 @@ function getInitialSeason(): Season {
     // localStorage unavailable (private browsing, etc.) - use default
   }
 
-  // First visit (or invalid value): default to autumn (Grove's signature season)
+  // First visit (or invalid value): use default season
   return DEFAULT_SEASON;
 }
 
