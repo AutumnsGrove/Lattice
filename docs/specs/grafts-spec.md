@@ -340,32 +340,45 @@ return {
 
 ### Percentage Rollout (Deterministic)
 
+Uses Web Crypto API (Cloudflare Workers compatible):
+
 ```typescript
 // Same identifier always gets same bucket
-import { createHash } from 'crypto';
+async function hashToBucket(input: string): Promise<number> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = new Uint8Array(hashBuffer);
 
-function evaluatePercentage(
+  // Use first 4 bytes as uint32, mod 100 for percentage
+  const view = new DataView(hashArray.buffer);
+  const uint32 = view.getUint32(0, false); // big-endian
+  return uint32 % 100;
+}
+
+async function evaluatePercentage(
   condition: { percentage: number; salt?: string },
-  context: EvaluationContext
-): boolean {
+  context: EvaluationContext,
+  flagId: string
+): Promise<boolean> {
   const { percentage, salt = '' } = condition;
 
+  // Edge cases
+  if (percentage <= 0) return false;
+  if (percentage >= 100) return true;
+
   // Priority: userId > tenantId > sessionId
-  const identifier = context.userId
-    ?? context.tenantId
-    ?? context.sessionId
-    ?? '';
+  const identifier = context.userId ?? context.tenantId ?? context.sessionId;
 
   if (!identifier) {
-    return Math.random() * 100 < percentage;
+    // No identifier - fail safe, don't randomly assign
+    console.warn(`No identifier for percentage rollout of "${flagId}"`);
+    return false;
   }
 
-  // Hash for deterministic bucketing
-  const hash = createHash('sha256')
-    .update(`${salt}:${identifier}`)
-    .digest();
-
-  const bucket = hash.readUInt32BE(0) % 100;
+  // Hash with flag-specific salt for independence between flags
+  const hashInput = `${flagId}:${salt}:${identifier}`;
+  const bucket = await hashToBucket(hashInput);
   return bucket < percentage;
 }
 ```
@@ -464,16 +477,18 @@ When a graft causes problems:
 
 ---
 
-## Current Grafts
+## Example Grafts
 
-Grafts currently active in the Grove:
+Example configurations showing common graft patterns:
 
-| Graft ID | Type | Purpose | Status |
-|----------|------|---------|--------|
-| `jxl_encoding` | percentage | JPEG XL image encoding | Propagating (25%) |
-| `jxl_kill_switch` | boolean | Emergency disable for JXL | Ready (blight) |
-| `meadow_access` | tier | Gate Meadow social features | Planned |
-| `dark_mode_default` | percentage | Dark mode preference rollout | Testing |
+| Graft ID | Type | Purpose | Example Use |
+|----------|------|---------|-------------|
+| `jxl_encoding` | percentage | JPEG XL image encoding | Propagate to 25% of grove |
+| `jxl_kill_switch` | boolean | Emergency disable for JXL | Blight switch (instant off) |
+| `meadow_access` | tier | Gate Meadow social features | Oak and Evergreen only |
+| `dark_mode_default` | percentage | Dark mode preference rollout | Gradual propagation |
+
+*Check the database for actual current graft states.*
 
 ---
 
