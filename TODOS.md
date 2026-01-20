@@ -52,6 +52,9 @@
 - [x] **grove-find fixes** — Explicit binary discovery for shell compatibility
 - [x] **gfj command** — New JavaScript-specific file search
 
+### 🎨 Quick Backlog
+- [ ] **Gossamer icon** — Choose a better icon (sparkles is buggy/inconsistent)
+
 ### 📋 Planning Documents Status
 > **All 7 original plans COMPLETE!** See `docs/plans/completed/` for details.
 
