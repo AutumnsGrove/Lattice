@@ -55,6 +55,15 @@ The groundwork laid in stillness. Foundations built when no one was watching.
   - Vista (GroveMonitor): Infrastructure observability dashboard
   - See `docs/specs/bloom-spec.md`, `docs/specs/mycelium-spec.md`, `docs/specs/vineyard-spec.md`, `docs/specs/vista-spec.md`, and `docs/grove-mcp-guide.md`
 
+- [ ] **Petal:** Image content moderation
+  - Privacy-first four-layer protection
+  - CSAM detection (Layer 1)
+  - Content classification (Layer 2)
+  - Sanity check (Layer 3)
+  - Output verification (Layer 4)
+  - Zero data retention for all user images
+  - See `docs/specs/petal-spec.md`
+
 ---
 
 ## Phase 2: Thaw (Current)
