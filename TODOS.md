@@ -183,6 +183,19 @@
   - Email: dmca@grove.place
   - Pay.gov Tracking ID: 27US0OE7
 
+## 🌸 Petal — Image Content Moderation — IN PROGRESS
+
+> **Spec:** `docs/specs/petal-spec.md` (in progress)
+> **Builds on:** Thorn (text content moderation)
+> **Status:** Spec being written
+
+Image uploads need moderation before v1 launch. Petal extends Grove's content moderation infrastructure (Thorn handles text) to cover images.
+
+- [ ] Complete Petal spec
+- [ ] Implement image scanning integration
+- [ ] Wire into image upload pipeline
+- [ ] Add admin review UI for flagged content
+
 ---
 
 # 📅 V1 LAUNCH TASKS
