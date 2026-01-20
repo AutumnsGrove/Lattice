@@ -141,6 +141,19 @@ export const specs: Doc[] = [
     lastUpdated: "2025-11-15",
     readingTime: 12,
   },
+  {
+    slug: "grafts-spec",
+    title: "Grafts — Feature Customization",
+    description:
+      "Per-tenant feature customization with boolean flags, percentage rollouts, and A/B variants",
+    excerpt:
+      "A graft makes your tree bear fruit no other can. Grove's Cloudflare-native feature flag system for per-tenant customization. Boolean flags, percentage rollouts, tier-gated features, and A/B variants—trusted configurations the Wayfinder enables for specific groves.",
+    category: "specs",
+    specCategory: "core-infrastructure",
+    icon: "flag",
+    lastUpdated: "2026-01-20",
+    readingTime: 15,
+  },
 
   // ============================================================================
   // PLATFORM SERVICES
