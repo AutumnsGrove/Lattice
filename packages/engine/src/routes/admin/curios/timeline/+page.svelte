@@ -40,6 +40,10 @@
   let showOpenrouterKey = $state(false);
   let isSubmitting = $state(false);
 
+  // Explicit feedback state (more reliable than relying on form prop in Svelte 5)
+  let successMessage = $state("");
+  let errorMessage = $state("");
+
   // Common timezones
   const timezones = [
     { value: "America/New_York", label: "Eastern Time (US)" },
@@ -86,17 +90,17 @@
     </div>
   </header>
 
-  {#if form?.error}
+  {#if errorMessage || form?.error}
     <div class="alert alert-error">
       <AlertCircle class="alert-icon" />
-      <span>{form.error}</span>
+      <span>{errorMessage || form?.error}</span>
     </div>
   {/if}
 
-  {#if form?.success}
+  {#if successMessage || form?.success}
     <div class="alert alert-success">
       <CheckCircle2 class="alert-icon" />
-      <span>Configuration saved successfully!</span>
+      <span>{successMessage || "Configuration saved successfully!"}</span>
     </div>
   {/if}
 
@@ -105,9 +109,21 @@
     action="?/save"
     use:enhance={() => {
       isSubmitting = true;
-      return async ({ update }) => {
-        await update();
+      successMessage = "";
+      errorMessage = "";
+      return async ({ result, update }) => {
         isSubmitting = false;
+        if (result.type === "success") {
+          successMessage = "Configuration saved successfully!";
+          // Clear token fields after successful save (they're now stored encrypted)
+          githubToken = "";
+          openrouterKey = "";
+        } else if (result.type === "failure" && result.data) {
+          errorMessage = (result.data as { error?: string }).error || "Failed to save configuration";
+        } else if (result.type === "error") {
+          errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        await update({ reset: false }); // Don't reset form, preserve our state
       };
     }}
   >
