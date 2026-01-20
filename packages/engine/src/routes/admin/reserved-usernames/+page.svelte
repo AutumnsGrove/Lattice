@@ -23,7 +23,7 @@
 		X,
 		Loader2
 	} from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '$lib/ui';
 
 	let { data, form } = $props();
 
