@@ -194,7 +194,6 @@
 					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
 					status: 'complete',
 					icon: 'swatchbook',
-					domain: 'foliage.grove.place',
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
 					spec: '/knowledge/specs/foliage-project-spec',
@@ -210,7 +209,6 @@
 					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
 					status: 'building',
 					icon: 'amphora',
-					domain: 'curios.grove.place',
 					integration: 'Visitor experience features for all Grove blogs',
 					spec: '/knowledge/specs/curios-spec',
 					subComponents: [
@@ -476,7 +474,6 @@
 					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
 					status: 'planned',
 					icon: 'projector',
-					domain: 'nook.grove.place',
 					integration: 'Intimate video sharing for close connections',
 					github: 'https://github.com/AutumnsGrove/Nook',
 					spec: '/knowledge/specs/nook-spec',
@@ -496,6 +493,7 @@
 					description: 'Writers own their words. Shade is Grove\'s seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.',
 					status: 'live',
 					icon: 'blinds',
+					domain: 'grove.place/shade',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
 					subComponents: [
