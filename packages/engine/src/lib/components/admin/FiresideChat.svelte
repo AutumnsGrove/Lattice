@@ -36,6 +36,28 @@
     timestamp: string;
   }
 
+  // API response types
+  interface ApiErrorResponse {
+    error?: string;
+  }
+
+  interface StartResponse {
+    conversationId: string;
+    reply: string;
+  }
+
+  interface RespondResponse {
+    reply: string;
+    canDraft: boolean;
+  }
+
+  interface DraftResponse {
+    title: string;
+    content: string;
+    marker: string;
+    warning?: string;
+  }
+
   let messages = $state<Message[]>([]);
   let inputValue = $state("");
   let isLoading = $state(false);
@@ -85,11 +107,11 @@
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as ApiErrorResponse;
         throw new Error(data.error || "Failed to start conversation");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as StartResponse;
       conversationId = data.conversationId;
 
       messages = [
@@ -143,11 +165,11 @@
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as ApiErrorResponse;
         throw new Error(data.error || "Failed to send message");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as RespondResponse;
       canDraft = data.canDraft;
 
       // Add Wisp's response
@@ -191,11 +213,11 @@
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as ApiErrorResponse;
         throw new Error(data.error || "Failed to generate draft");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as DraftResponse;
       draft = {
         title: data.title,
         content: data.content,
