@@ -69,6 +69,20 @@
 
 **Future improvement:** Consider wildcard redirect URI support (`https://*.grove.place/auth/callback`) to avoid per-tenant OAuth registration. See `docs/specs/heartwood-spec.md` for implementation notes.
 
+### 🌿 UI GRAFTS: PricingGraft Migration — ✅ COMPLETE (Jan 20, 2026, PR #408)
+> **Goal:** Consolidate duplicated pricing logic into shared graft system
+> **Result:** -633 lines removed, +413 added (net -220 lines), 24 new tests
+
+**Completed:**
+- [x] **Migrated Plant to PricingGraft** — Replaced local `plans.ts` and `pricing.ts` with graft imports
+- [x] **Added price display helpers** — `getMonthlyEquivalentPrice()`, `getYearlySavingsAmount()`
+- [x] **Added billing period converters** — `billingPeriodToDbFormat()` / `dbFormatToBillingPeriod()` for annual↔yearly mapping
+- [x] **Extracted shared icon mapping** — `$lib/ui/tier-icons.ts` used by home page and plans page
+- [x] **Comprehensive test suite** — 24 tests for all new utilities with round-trip conversion verification
+- [x] **Type safety improvements** — Proper `PageData`/`ActionData` types in Svelte components
+
+**Pattern established:** Share data transformation (graft), keep UI context-specific (app). PricingFineprint accordion sections now render consistently across properties.
+
 ### 📋 Planning Documents Status
 > **All 7 original plans COMPLETE!** See `docs/plans/completed/` for details.
 
@@ -334,6 +348,10 @@
 
 # 📦 DEFERRED FEATURES
 
+## PricingFineprint Additions (When Features Launch)
+- [ ] **AI Features fine print** — Add accordion section explaining AI capabilities per tier (when AI features release)
+- [ ] **API Access fine print** — Add accordion section explaining API limits/access per tier (when API releases)
+
 ## Cover Images for Blog Posts
 > **Found during:** Help center documentation review (Phase 2)
 > **Status:** Not implemented, docs updated to say "coming soon"
@@ -554,7 +572,7 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 
 ---
 
-*Last updated: 2026-01-19 (Jan 18-19 sprint complete — 20+ commits, 8 PRs merged!)*
+*Last updated: 2026-01-20 (Jan 18-20 sprint — PricingGraft migration complete, PR #408 merged)*
 
 ---
 
