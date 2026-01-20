@@ -202,6 +202,13 @@ import {
   GitBranch,
   ChevronsLeftRightEllipsis,
   BookUser,
+  // Grafts - feature customization
+  Flag,
+  FlagOff,
+  FileStack,
+  TriangleAlert,
+  Unplug,
+  Gamepad,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -453,6 +460,13 @@ export const toolIcons = {
   "git-branch": GitBranch, // Forests/Stroll - random discovery (branching paths)
   "chevrons-left-right-ellipsis": ChevronsLeftRightEllipsis, // Wander/Active - WASD exploration
   "book-user": BookUser, // Forests/Directory - member listings
+  // Grafts - feature customization
+  flag: Flag, // Grafts - Graft (enable)
+  "flag-off": FlagOff, // Grafts - Prune (disable)
+  "file-stack": FileStack, // Grafts - Propagate (rollout)
+  "triangle-alert": TriangleAlert, // Grafts - Blight (kill switch)
+  unplug: Unplug, // Grafts - Cultivate (full rollout)
+  gamepad: Gamepad, // Grafts - Cultivars (A/B variants)
 } as const;
 
 // ============================================================================
