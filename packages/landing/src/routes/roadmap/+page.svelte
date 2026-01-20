@@ -104,10 +104,11 @@
 			description: 'The groundwork has been laid. Foundations built in stillness.',
 			features: [
 				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true },
-				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
 				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true },
+				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
 				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true },
+				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true },
 				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' },
 				{ name: 'Email Waitlist', description: '70 seeds, waiting to sprout', done: true }
 			]
@@ -138,7 +139,6 @@
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree', major: true },
 				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests', major: true },
 				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true },
-				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true },
 				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook', major: true },
 				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true },
 				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
