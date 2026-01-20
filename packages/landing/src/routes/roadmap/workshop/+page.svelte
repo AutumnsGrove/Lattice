@@ -74,8 +74,8 @@
 			]
 		},
 		{
-			name: 'Platform Services',
-			description: 'Essential services that power every Grove blog',
+			name: 'Core Services',
+			description: 'Essential services powering every Grove blog',
 			tools: [
 				{
 					name: 'Heartwood',
@@ -122,6 +122,22 @@
 					]
 				},
 				{
+					name: 'Grafts',
+					tagline: 'Feature Customization',
+					description: 'A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.',
+					status: 'live',
+					icon: 'goal',
+					integration: 'Operator-configured feature customization',
+					subComponents: [
+						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
+						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },
+						{ name: 'Propagate', icon: 'file-stack', description: 'Percentage rollout' },
+						{ name: 'Cultivate', icon: 'unplug', description: 'Full rollout' },
+						{ name: 'Cultivars', icon: 'gamepad', description: 'A/B test variants' },
+						{ name: 'Blight', icon: 'triangle-alert', description: 'Emergency kill switch' }
+					]
+				},
+				{
 					name: 'Amber',
 					tagline: 'Storage Management',
 					description: 'Your Grove storage, made visible. See what\'s using your space, download and export your data, clean up what you don\'t need, and buy more when you need it. Every file you upload, from blog images to email attachments, organized in one place.',
@@ -133,6 +149,17 @@
 					spec: '/knowledge/specs/amber-spec'
 				},
 				{
+					name: 'Clearing',
+					tagline: 'Status Page',
+					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
+					status: 'planned',
+					icon: 'activity',
+					domain: 'status.grove.place',
+					integration: 'Public platform status for all Wanderers',
+					github: 'https://github.com/AutumnsGrove/Clearing',
+					spec: '/knowledge/specs/clearing-spec'
+				},
+				{
 					name: 'Pantry',
 					tagline: 'Shop & Provisioning',
 					description: 'A pantry is where you keep what sustains you. Pantry is Grove\'s shop—subscriptions, merchandise, credits, gift cards. Not a storefront with bright lights and sales pressure, just a cupboard in a warm kitchen, stocked and waiting.',
@@ -142,6 +169,24 @@
 					integration: 'Shop and provisioning for Wanderers',
 					spec: '/knowledge/specs/pantry-spec'
 				},
+				{
+					name: 'Centennial',
+					tagline: 'Domain Preservation',
+					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
+					status: 'planned',
+					icon: 'squares-exclude',
+					integration: 'Automatic unlock after 12 months of Sapling+ membership',
+					spec: '/knowledge/specs/centennial-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
+					]
+				},
+			]
+		},
+		{
+			name: 'Creative Studio',
+			description: 'Tools for making your grove uniquely yours',
+			tools: [
 				{
 					name: 'Foliage',
 					tagline: 'Theming Engine',
@@ -201,48 +246,12 @@
 						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
 					]
 				},
-				{
-					name: 'Grafts',
-					tagline: 'Feature Customization',
-					description: 'A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.',
-					status: 'live',
-					icon: 'goal',
-					integration: 'Operator-configured feature customization',
-					subComponents: [
-						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
-						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },
-						{ name: 'Propagate', icon: 'file-stack', description: 'Percentage rollout' },
-						{ name: 'Cultivate', icon: 'unplug', description: 'Full rollout' },
-						{ name: 'Cultivars', icon: 'gamepad', description: 'A/B test variants' },
-						{ name: 'Blight', icon: 'triangle-alert', description: 'Emergency kill switch' }
-					]
-				},
-				{
-					name: 'Rings',
-					tagline: 'Private Analytics',
-					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
-					status: 'planned',
-					icon: 'barchart',
-					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
-					spec: '/knowledge/specs/rings-spec',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
-						{ name: 'Views', icon: 'eye', description: 'Page views' },
-						{ name: 'Readers', icon: 'bookopencheck', description: 'Engaged readers' },
-						{ name: 'Resonance', icon: 'goal', description: 'Content signals' }
-					]
-				},
-				{
-					name: 'Clearing',
-					tagline: 'Status Page',
-					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
-					status: 'planned',
-					icon: 'activity',
-					domain: 'status.grove.place',
-					integration: 'Public platform status for all Wanderers',
-					github: 'https://github.com/AutumnsGrove/Clearing',
-					spec: '/knowledge/specs/clearing-spec'
-				},
+			]
+		},
+		{
+			name: 'Support & Insights',
+			description: 'Help, conversations, and understanding your readers',
+			tools: [
 				{
 					name: 'Waystone',
 					tagline: 'Help Center',
@@ -263,23 +272,64 @@
 					spec: '/knowledge/specs/porch-spec'
 				},
 				{
-					name: 'Centennial',
-					tagline: 'Domain Preservation',
-					description: 'Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you\'re gone. Your words can have the longevity of an oak.',
+					name: 'Rings',
+					tagline: 'Private Analytics',
+					description: 'Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.',
 					status: 'planned',
-					icon: 'squares-exclude',
-					integration: 'Automatic unlock after 12 months of Sapling+ membership',
-					spec: '/knowledge/specs/centennial-spec',
+					icon: 'barchart',
+					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
+					spec: '/knowledge/specs/rings-spec',
 					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Views', icon: 'eye', description: 'Page views' },
+						{ name: 'Readers', icon: 'bookopencheck', description: 'Engaged readers' },
+						{ name: 'Resonance', icon: 'goal', description: 'Content signals' }
 					]
 				},
 			]
 		},
 		{
 			name: 'Content & Community',
-			description: 'Writing, moderation, and social features',
+			description: 'Writing, social features, and community tools',
 			tools: [
+				{
+					name: 'Trails',
+					tagline: 'Personal Roadmaps',
+					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
+					status: 'live',
+					icon: 'mapplus',
+					integration: 'Available for all Grove blogs',
+					spec: '/knowledge/specs/trails-spec'
+				},
+				{
+					name: 'Meadow',
+					tagline: 'Social Feed',
+					description: 'Where voices gather. Meadow is Grove\'s opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.',
+					status: 'building',
+					icon: 'users',
+					domain: 'meadow.grove.place',
+					integration: 'Optional social layer for Grove blogs',
+					spec: '/knowledge/specs/meadow-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
+						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first sharing' }
+					]
+				},
+				{
+					name: 'Thorn',
+					tagline: 'Content Moderation',
+					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
+					status: 'building',
+					icon: 'file-warning',
+					integration: 'Automated moderation for comments and community content',
+					spec: '/knowledge/specs/thorn-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+					]
+				},
 				{
 					name: 'Wisp',
 					tagline: 'Writing Assistant',
@@ -306,35 +356,6 @@
 					subComponents: [
 						{ name: 'Replies', icon: 'reply', description: 'Private to author' },
 						{ name: 'Comments', icon: 'messagecircle', description: 'Public discussion' }
-					]
-				},
-				{
-					name: 'Thorn',
-					tagline: 'Content Moderation',
-					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
-					status: 'planned',
-					icon: 'file-warning',
-					integration: 'Automated moderation for comments and community content',
-					spec: '/knowledge/specs/thorn-spec',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
-						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
-						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
-					]
-				},
-				{
-					name: 'Meadow',
-					tagline: 'Social Feed',
-					description: 'Where voices gather. Meadow is Grove\'s opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.',
-					status: 'building',
-					icon: 'users',
-					domain: 'meadow.grove.place',
-					integration: 'Optional social layer for Grove blogs',
-					spec: '/knowledge/specs/meadow-spec',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
-						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
-						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first sharing' }
 					]
 				},
 				{
@@ -366,21 +387,42 @@
 						{ name: 'Drift', icon: 'line-squiggle', description: 'Passive wandering' }
 					]
 				},
-				{
-					name: 'Trails',
-					tagline: 'Personal Roadmaps',
-					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
-					status: 'live',
-					icon: 'mapplus',
-					integration: 'Available for all Grove blogs',
-					spec: '/knowledge/specs/trails-spec'
-				},
 			]
 		},
 		{
 			name: 'Standalone Tools',
 			description: 'Independent tools that integrate with Grove',
 			tools: [
+				{
+					name: 'Forage',
+					tagline: 'Domain Discovery',
+					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.',
+					status: 'live',
+					icon: 'searchcode',
+					domain: 'forage.grove.place',
+					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
+					github: 'https://github.com/AutumnsGrove/Forage',
+					spec: '/knowledge/specs/forage-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
+						{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
+					]
+				},
+				{
+					name: 'Outpost',
+					tagline: 'On-Demand Minecraft',
+					description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
+					status: 'live',
+					icon: 'telescope',
+					domain: 'mc.grove.place',
+					integration: 'For Wanderers in the Grove',
+					github: 'https://github.com/AutumnsGrove/GroveMC',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
+					]
+				},
 				{
 					name: 'Ivy',
 					tagline: 'Privacy-First Email',
@@ -413,22 +455,6 @@
 					]
 				},
 				{
-					name: 'Forage',
-					tagline: 'Domain Discovery',
-					description: 'An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.',
-					status: 'live',
-					icon: 'searchcode',
-					domain: 'forage.grove.place',
-					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
-					github: 'https://github.com/AutumnsGrove/Forage',
-					spec: '/knowledge/specs/forage-spec',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
-						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
-						{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
-					]
-				},
-				{
 					name: 'Nook',
 					tagline: 'Private Video Sharing',
 					description: 'Where you share moments with the people who matter. Not a YouTube channel, not a public archive. Just a tucked-away space where your closest friends can watch the videos you\'ve been meaning to share for over a year.',
@@ -439,20 +465,6 @@
 					github: 'https://github.com/AutumnsGrove/Nook',
 					spec: '/knowledge/specs/nook-spec',
 					subComponents: [
-						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
-					]
-				},
-				{
-					name: 'Outpost',
-					tagline: 'On-Demand Minecraft',
-					description: 'A Minecraft server that spins up when someone wants to play and shuts down when the world goes quiet. No 24/7 hosting fees for a server that sits empty. Just a place that\'s there when you need it.',
-					status: 'live',
-					icon: 'telescope',
-					domain: 'mc.grove.place',
-					integration: 'For Wanderers in the Grove',
-					github: 'https://github.com/AutumnsGrove/GroveMC',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
@@ -488,22 +500,6 @@
 					spec: '/knowledge/specs/press-spec'
 				},
 				{
-					name: 'Vista',
-					tagline: 'Infrastructure Observability',
-					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',
-					status: 'planned',
-					icon: 'binoculars',
-					domain: 'vista.grove.place',
-					integration: 'Internal infrastructure monitoring for Grove operators',
-					github: 'https://github.com/AutumnsGrove/GroveMonitor',
-					spec: '/knowledge/specs/vista-spec',
-					subComponents: [
-						{ name: 'Workers', icon: 'cpu', description: 'Cloudflare Workers' },
-						{ name: 'Database', icon: 'database', description: 'D1 databases' },
-						{ name: 'Storage', icon: 'refrigerator', description: 'R2 & KV' }
-					]
-				},
-				{
 					name: 'Patina',
 					tagline: 'Automated Backups',
 					description: 'A patina forms on copper over time: not decay, but protection. Patina runs nightly automated backups of every Grove database to cold storage. Weekly archives compress the daily layers, and twelve weeks of history remain quietly preserved. Age as armor. Recent backup activity is visible at status.grove.place.',
@@ -512,17 +508,6 @@
 					integration: 'Internal service protecting all Grove data',
 					github: 'https://github.com/AutumnsGrove/Patina',
 					spec: '/knowledge/specs/patina-spec'
-				},
-				{
-					name: 'Mycelium',
-					tagline: 'MCP Server',
-					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
-					status: 'building',
-					icon: 'circuitboard',
-					domain: 'mycelium.grove.place',
-					integration: 'MCP server for AI agent integration',
-					github: 'https://github.com/AutumnsGrove/GroveMCP',
-					spec: '/knowledge/specs/mycelium-spec'
 				},
 				{
 					name: 'Shade',
@@ -537,6 +522,33 @@
 						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
 						{ name: 'Scraper', icon: 'bug', description: 'Scraper blocking' },
 						{ name: 'Protection', icon: 'brickwallfire', description: 'Complete protection' }
+					]
+				},
+				{
+					name: 'Mycelium',
+					tagline: 'MCP Server',
+					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
+					status: 'building',
+					icon: 'circuitboard',
+					domain: 'mycelium.grove.place',
+					integration: 'MCP server for AI agent integration',
+					github: 'https://github.com/AutumnsGrove/GroveMCP',
+					spec: '/knowledge/specs/mycelium-spec'
+				},
+				{
+					name: 'Vista',
+					tagline: 'Infrastructure Observability',
+					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',
+					status: 'planned',
+					icon: 'binoculars',
+					domain: 'vista.grove.place',
+					integration: 'Internal infrastructure monitoring for Grove operators',
+					github: 'https://github.com/AutumnsGrove/GroveMonitor',
+					spec: '/knowledge/specs/vista-spec',
+					subComponents: [
+						{ name: 'Workers', icon: 'cpu', description: 'Cloudflare Workers' },
+						{ name: 'Database', icon: 'database', description: 'D1 databases' },
+						{ name: 'Storage', icon: 'refrigerator', description: 'R2 & KV' }
 					]
 				},
 			]
@@ -569,18 +581,15 @@
 					]
 				},
 				{
-					name: 'Threshold',
-					tagline: 'Rate Limiting & Abuse Prevention',
-					description: 'The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.',
-					status: 'planned',
-					icon: 'gauge',
-					integration: 'Protection layer for all Grove endpoints',
-					spec: '/knowledge/patterns/threshold-pattern',
+					name: 'Firefly',
+					tagline: 'Ephemeral Server Pattern',
+					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
+					status: 'applied',
+					icon: 'webhook',
+					integration: 'Powers Bloom and Outpost infrastructure',
+					spec: '/knowledge/patterns/firefly-pattern',
 					subComponents: [
-						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
-						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
-						{ name: 'User', icon: 'users', description: 'Per-user limits' },
-						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
 				},
 				{
@@ -599,25 +608,28 @@
 					]
 				},
 				{
+					name: 'Threshold',
+					tagline: 'Rate Limiting & Abuse Prevention',
+					description: 'The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.',
+					status: 'live',
+					icon: 'gauge',
+					integration: 'Protection layer for all Grove endpoints',
+					spec: '/knowledge/patterns/threshold-pattern',
+					subComponents: [
+						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
+						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
+						{ name: 'User', icon: 'users', description: 'Per-user limits' },
+						{ name: 'Endpoint', icon: 'shieldoff', description: 'Operation limits' }
+					]
+				},
+				{
 					name: 'Sentinel',
 					tagline: 'Load Testing & Scale Validation',
 					description: 'The watchful guardian who tests the forest\'s defenses before the storm. Sentinel doesn\'t just ask "can it handle 500 users?"—it asks what happens to p95 latency during ramp-up, and which Durable Object becomes the bottleneck first.',
-					status: 'planned',
+					status: 'building',
 					icon: 'radar',
 					integration: 'Testing pattern for Vista and infrastructure validation',
 					spec: '/knowledge/patterns/sentinel-pattern'
-				},
-				{
-					name: 'Firefly',
-					tagline: 'Ephemeral Server Pattern',
-					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
-					status: 'applied',
-					icon: 'webhook',
-					integration: 'Powers Bloom and Outpost infrastructure',
-					spec: '/knowledge/patterns/firefly-pattern',
-					subComponents: [
-						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
-					]
 				},
 				{
 					name: 'Vineyard',
@@ -654,11 +666,13 @@
 	// Icons must exist in toolIcons (icons.ts) - using valid icons for each category
 	const tocItems = [
 		{ id: categoryIds[0], text: 'Core Infrastructure', icon: 'pyramid' },
-		{ id: categoryIds[1], text: 'Platform Services', icon: 'circuitboard' },
-		{ id: categoryIds[2], text: 'Content & Community', icon: 'id-card-lanyard' },
-		{ id: categoryIds[3], text: 'Standalone Tools', icon: 'toolbox' },
-		{ id: categoryIds[4], text: 'Operations', icon: 'dock' },
-		{ id: categoryIds[5], text: 'Patterns', icon: 'regex' }
+		{ id: categoryIds[1], text: 'Core Services', icon: 'circuitboard' },
+		{ id: categoryIds[2], text: 'Creative Studio', icon: 'paintbrush' },
+		{ id: categoryIds[3], text: 'Support & Insights', icon: 'signpost' },
+		{ id: categoryIds[4], text: 'Content & Community', icon: 'id-card-lanyard' },
+		{ id: categoryIds[5], text: 'Standalone Tools', icon: 'toolbox' },
+		{ id: categoryIds[6], text: 'Operations', icon: 'dock' },
+		{ id: categoryIds[7], text: 'Patterns', icon: 'regex' }
 	];
 
 	// Helper to generate tool ID for navigation
