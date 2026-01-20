@@ -193,6 +193,16 @@
     "./curios/timeline/voices": {
       "types": "./dist/curios/timeline/voices/index.d.ts",
       "default": "./dist/curios/timeline/voices/index.js"
+    },
+    "./grafts": {
+      "types": "./dist/grafts/index.d.ts",
+      "svelte": "./dist/grafts/index.js",
+      "default": "./dist/grafts/index.js"
+    },
+    "./grafts/pricing": {
+      "types": "./dist/grafts/pricing/index.d.ts",
+      "svelte": "./dist/grafts/pricing/index.js",
+      "default": "./dist/grafts/pricing/index.js"
     }
   },
   "files": [

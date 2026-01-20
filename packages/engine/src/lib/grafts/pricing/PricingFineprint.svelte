@@ -1,0 +1,169 @@
+<script lang="ts">
+	/**
+	 * PricingFineprint
+	 *
+	 * Expandable fine print sections explaining pricing details.
+	 * Glassmorphism styled with collapsible sections.
+	 */
+
+	import type { PricingFineprintProps, FineprintSection } from "./types.js";
+
+	let {
+		sections,
+		defaultExpanded = false,
+		class: className = "",
+	}: PricingFineprintProps = $props();
+
+	// All available sections with their content
+	const SECTIONS: Record<
+		FineprintSection,
+		{ title: string; content: string; detail?: string }
+	> = {
+		reading: {
+			title: "Reading Blogs",
+			content:
+				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. Meadow (the community feed) requires a free account to browse. Only Rooted Evergreens can choose to make their blog require login to view.",
+			detail:
+				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
+		},
+		free: {
+			title: "Free Accounts",
+			content:
+				"Free accounts get full Meadow access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No blog, no storage. When you're ready to write, upgrade to Seedling.",
+		},
+		themes: {
+			title: "Themes",
+			content:
+				"Seedling: Choose from 3 hand-curated themes plus a custom accent color. Sapling: All 10 themes plus accent color. Oak+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. Evergreen: Everything Oak gets, plus upload your own custom fonts.",
+		},
+		curios: {
+			title: "Curios",
+			content:
+				"Every blog includes Home, Blog, and About in the navigation. Curios let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. Sapling: 3 curios. Oak: 5 curios. Evergreen: 8 curios.",
+			detail:
+				"Those on Seedling can still create unlimited pages—they just won't appear in the navigation bar. Link to them from posts or your About page.",
+		},
+		comments: {
+			title: "Comments",
+			content:
+				"Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the Rooted get unlimited. Private replies are rate-limited for free accounts to reduce spam.",
+		},
+		domains: {
+			title: "Custom Domains",
+			content:
+				"Oak (BYOD): Bring a domain you already own at no extra cost. Evergreen: We find and register the perfect domain for you. Registration included for domains up to $100/year.",
+		},
+		email: {
+			title: "@grove.place Email",
+			content:
+				"Forward: Emails to you@grove.place forward to your personal inbox. Full: Send and receive as you@grove.place — a professional email address included with your blog.",
+		},
+		support: {
+			title: "Support Hours (Evergreen)",
+			content:
+				"Evergreen includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
+		},
+		centennial: {
+			title: "Centennial (Sapling+)",
+			content:
+				"Your grove can outlive you. After 12 cumulative months on Sapling or above, your site earns Centennial status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
+			detail:
+				"A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.",
+		},
+		included: {
+			title: "What's Included in Every Paid Tier",
+			content:
+				"Markdown blog posts with live preview, image hosting with automatic WebP compression, Vines (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.",
+		},
+		ownership: {
+			title: "Your Data, Your Ownership",
+			content:
+				"Grove is designed around portability. Export everything at any time. If we ever register a domain for you, you own it — transfer it whenever you want, no fees, no questions.",
+		},
+	};
+
+	// Which sections to display
+	let displaySections = $derived(
+		sections ?? (Object.keys(SECTIONS) as FineprintSection[]),
+	);
+
+	// Track expanded state for each section
+	let expandedSections = $state<Set<FineprintSection>>(
+		defaultExpanded
+			? new Set(displaySections)
+			: new Set<FineprintSection>(),
+	);
+
+	function toggleSection(section: FineprintSection) {
+		if (expandedSections.has(section)) {
+			expandedSections.delete(section);
+			expandedSections = new Set(expandedSections);
+		} else {
+			expandedSections.add(section);
+			expandedSections = new Set(expandedSections);
+		}
+	}
+</script>
+
+<div
+	class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
+>
+	<h2 class="text-xl font-serif text-foreground mb-6">The Fine Print</h2>
+
+	<div class="space-y-4 text-sm font-sans text-foreground-muted">
+		{#each displaySections as sectionKey}
+			{@const section = SECTIONS[sectionKey]}
+			{@const isExpanded = expandedSections.has(sectionKey)}
+
+			<div class="border-b border-subtle last:border-0 pb-4 last:pb-0">
+				<button
+					type="button"
+					onclick={() => toggleSection(sectionKey)}
+					class="w-full flex items-center justify-between text-left group"
+				>
+					<h3
+						class="font-medium text-foreground group-hover:text-accent transition-colors"
+					>
+						{section.title}
+					</h3>
+					<svg
+						class="w-4 h-4 text-foreground-faint transition-transform duration-200 {isExpanded
+							? 'rotate-180'
+							: ''}"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 9l-7 7-7-7"
+						/>
+					</svg>
+				</button>
+
+				{#if isExpanded}
+					<div class="mt-3 space-y-2">
+						<p>{section.content}</p>
+						{#if section.detail}
+							<p class="text-xs text-foreground-faint">{section.detail}</p>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{/each}
+
+		<!-- Data portability link -->
+		<div class="pt-4 border-t border-default">
+			<p>
+				See our <a
+					href="/knowledge/legal/data-portability-separation"
+					class="text-accent-muted hover:text-accent underline"
+				>
+					Data Portability Policy
+				</a> for details on data ownership.
+			</p>
+		</div>
+	</div>
+</div>
