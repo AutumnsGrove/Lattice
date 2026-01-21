@@ -93,14 +93,21 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 export const actions: Actions = {
   save: async ({ request, platform, locals }) => {
+    console.log("[Timeline Config] Save action called");
     const db = platform?.env?.DB;
     const tenantId = locals.tenantId;
+    console.log("[Timeline Config] tenantId:", tenantId, "db:", !!db);
 
     if (!db || !tenantId) {
+      console.log("[Timeline Config] Missing db or tenantId");
       return fail(500, { error: "Database not available" });
     }
 
     const formData = await request.formData();
+    console.log(
+      "[Timeline Config] Form data received, enabled:",
+      formData.get("enabled"),
+    );
 
     const enabled = formData.get("enabled") === "true";
     const githubUsername = formData.get("githubUsername") as string | null;
@@ -247,9 +254,10 @@ export const actions: Actions = {
         )
         .run();
 
+      console.log("[Timeline Config] Save successful!");
       return { success: true };
     } catch (error) {
-      console.error("Failed to save Timeline config:", error);
+      console.error("[Timeline Config] Failed to save:", error);
       return fail(500, { error: "Failed to save configuration" });
     }
   },

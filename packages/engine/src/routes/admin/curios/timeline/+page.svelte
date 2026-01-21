@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from "./$types";
   import { enhance } from "$app/forms";
   import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
+  import { toast } from "$lib/ui/components/ui/toast";
   import {
     Calendar,
     Github,
@@ -111,16 +112,22 @@
       isSubmitting = true;
       successMessage = "";
       errorMessage = "";
+      console.log("[Timeline Config] Form submitting...");
       return async ({ result, update }) => {
+        console.log("[Timeline Config] Got result:", result.type);
         isSubmitting = false;
         if (result.type === "success") {
+          toast.success("Configuration saved!", { description: "Your Timeline settings have been updated." });
           successMessage = "Configuration saved successfully!";
           // Clear token fields after successful save (they're now stored encrypted)
           githubToken = "";
           openrouterKey = "";
         } else if (result.type === "failure" && result.data) {
-          errorMessage = (result.data as { error?: string }).error || "Failed to save configuration";
+          const errorMsg = (result.data as { error?: string }).error || "Failed to save configuration";
+          toast.error("Failed to save", { description: errorMsg });
+          errorMessage = errorMsg;
         } else if (result.type === "error") {
+          toast.error("Unexpected error", { description: "Please try again." });
           errorMessage = "An unexpected error occurred. Please try again.";
         }
         await update({ reset: false }); // Don't reset form, preserve our state
