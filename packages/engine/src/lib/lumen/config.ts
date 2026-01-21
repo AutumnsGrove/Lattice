@@ -53,33 +53,57 @@ export const PROVIDERS: Record<LumenProviderName, LumenProviderConfig> = {
  */
 export const MODELS = {
   // ─────────────────────────────────────────────────────────────────────────────
-  // OpenRouter Models (for generation, chat, summary, image, code)
+  // OpenRouter Models - Generation, Chat, Summary
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Default model for text generation - DeepSeek v3 (fast, cheap, great quality) */
-  DEEPSEEK_CHAT: "deepseek/deepseek-chat",
+  /** Primary model - DeepSeek v3.2 (fast, cheap, excellent quality) */
+  DEEPSEEK_V3: "deepseek/deepseek-v3.2",
 
-  /** Fallback for generation - Llama 3.3 70B (reliable open source) */
+  /** Secondary fallback - Kimi K2 (great reasoning, huge context) */
+  KIMI_K2: "moonshotai/kimi-k2-0905",
+
+  /** Tertiary fallback - Llama 3.3 70B (reliable open source) */
   LLAMA_70B: "meta-llama/llama-3.3-70b-instruct",
 
-  /** Premium model for image/code tasks - Claude Sonnet via OpenRouter */
-  CLAUDE_SONNET: "anthropic/claude-sonnet-4",
-
-  /** Budget fallback - Qwen (good quality, very cheap) */
-  QWEN: "qwen/qwen-2.5-72b-instruct",
-
   // ─────────────────────────────────────────────────────────────────────────────
-  // Cloudflare Workers AI Models (for moderation, embeddings)
+  // OpenRouter Models - Image & Code
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Content moderation - LlamaGuard 3 */
-  LLAMAGUARD: "@cf/meta/llama-guard-3-8b",
+  /** Image analysis & code fallback - Claude Haiku 4.5 (fast, vision-capable) */
+  CLAUDE_HAIKU: "anthropic/claude-haiku-4.5",
 
-  /** Embedding model - BGE Base (768 dimensions) */
-  BGE_BASE: "@cf/baai/bge-base-en-v1.5",
+  /** Image fallback - Gemini 2.5 Flash (fast, vision-capable) */
+  GEMINI_FLASH: "google/gemini-2.5-flash",
 
-  /** Fallback moderation - ShieldGemma */
-  SHIELDGEMMA: "@hf/google/shieldgemma-2b",
+  // ─────────────────────────────────────────────────────────────────────────────
+  // OpenRouter Models - Moderation
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Content moderation - LlamaGuard 4 12B (latest, most accurate) */
+  LLAMAGUARD_4: "meta-llama/llama-guard-4-12b",
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // OpenRouter Models - Embeddings
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** Primary embeddings - BGE-M3 (multilingual, high quality) */
+  BGE_M3: "baai/bge-m3",
+
+  /** Fallback embeddings - Qwen3 8B */
+  QWEN3_EMBED: "qwen/qwen3-embedding-8b",
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Cloudflare Workers AI Models (last-resort fallbacks)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** CF fallback moderation - ShieldGemma 2 (4B, can self-host on RunPod) */
+  CF_SHIELDGEMMA: "@hf/google/shieldgemma-2b",
+
+  /** CF fallback embeddings - BGE Base (768 dimensions) */
+  CF_BGE_BASE: "@cf/baai/bge-base-en-v1.5",
+
+  /** CF legacy moderation - LlamaGuard 3 (only v3 available on CF) */
+  CF_LLAMAGUARD_3: "@cf/meta/llama-guard-3-8b",
 } as const;
 
 // =============================================================================
@@ -89,16 +113,29 @@ export const MODELS = {
 /**
  * Cost per million tokens for each model.
  * Update these when model pricing changes.
+ * Prices from: https://openrouter.ai/models
  */
 export const MODEL_COSTS: Record<string, { input: number; output: number }> = {
-  [MODELS.DEEPSEEK_CHAT]: { input: 0.14, output: 0.28 },
+  // Generation models
+  [MODELS.DEEPSEEK_V3]: { input: 0.25, output: 0.38 },
+  [MODELS.KIMI_K2]: { input: 0.39, output: 1.9 },
   [MODELS.LLAMA_70B]: { input: 0.1, output: 0.32 },
-  [MODELS.CLAUDE_SONNET]: { input: 3.0, output: 15.0 },
-  [MODELS.QWEN]: { input: 0.15, output: 0.4 },
+
+  // Image/Code models
+  [MODELS.CLAUDE_HAIKU]: { input: 1.0, output: 5.0 },
+  [MODELS.GEMINI_FLASH]: { input: 0.15, output: 0.6 },
+
+  // Moderation (OpenRouter)
+  [MODELS.LLAMAGUARD_4]: { input: 0.1, output: 0.1 },
+
+  // Embeddings (OpenRouter)
+  [MODELS.BGE_M3]: { input: 0.02, output: 0 },
+  [MODELS.QWEN3_EMBED]: { input: 0.02, output: 0 },
+
   // Cloudflare AI models are included in Workers pricing (effectively free)
-  [MODELS.LLAMAGUARD]: { input: 0, output: 0 },
-  [MODELS.BGE_BASE]: { input: 0, output: 0 },
-  [MODELS.SHIELDGEMMA]: { input: 0, output: 0 },
+  [MODELS.CF_SHIELDGEMMA]: { input: 0, output: 0 },
+  [MODELS.CF_BGE_BASE]: { input: 0, output: 0 },
+  [MODELS.CF_LLAMAGUARD_3]: { input: 0, output: 0 },
 };
 
 // =============================================================================
@@ -131,29 +168,41 @@ export interface TaskConfig {
 /**
  * Task registry mapping task types to provider/model configurations.
  * Each task has optimal defaults and a fallback chain.
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────────┐
+ * │  FALLBACK STRATEGY                                                          │
+ * │                                                                             │
+ * │  Primary: OpenRouter (best quality, most options)                           │
+ * │  Fallback: Cloudflare Workers AI (fast, local, free as last resort)        │
+ * │                                                                             │
+ * │  Each task tries models in order until one succeeds.                        │
+ * └─────────────────────────────────────────────────────────────────────────────┘
  */
 export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
   // ─────────────────────────────────────────────────────────────────────────────
-  // Content Moderation (Cloudflare AI - fast, local, free)
+  // Content Moderation (OpenRouter primary, CF Workers fallback)
   // ─────────────────────────────────────────────────────────────────────────────
   moderation: {
-    primaryModel: MODELS.LLAMAGUARD,
-    primaryProvider: "cloudflare-ai",
-    fallbackChain: [{ provider: "cloudflare-ai", model: MODELS.SHIELDGEMMA }],
+    primaryModel: MODELS.LLAMAGUARD_4,
+    primaryProvider: "openrouter",
+    fallbackChain: [
+      { provider: "cloudflare-ai", model: MODELS.CF_LLAMAGUARD_3 },
+      { provider: "cloudflare-ai", model: MODELS.CF_SHIELDGEMMA },
+    ],
     defaultMaxTokens: 256,
     defaultTemperature: 0,
     description: "Content safety classification",
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Text Generation (OpenRouter - DeepSeek primary)
+  // Text Generation (DeepSeek → Kimi K2 → Llama 70B)
   // ─────────────────────────────────────────────────────────────────────────────
   generation: {
-    primaryModel: MODELS.DEEPSEEK_CHAT,
+    primaryModel: MODELS.DEEPSEEK_V3,
     primaryProvider: "openrouter",
     fallbackChain: [
+      { provider: "openrouter", model: MODELS.KIMI_K2 },
       { provider: "openrouter", model: MODELS.LLAMA_70B },
-      { provider: "openrouter", model: MODELS.QWEN },
     ],
     defaultMaxTokens: 2048,
     defaultTemperature: 0.7,
@@ -161,61 +210,71 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Summarization (OpenRouter - DeepSeek primary)
+  // Summarization (DeepSeek → Kimi K2 → Llama 70B)
   // ─────────────────────────────────────────────────────────────────────────────
   summary: {
-    primaryModel: MODELS.DEEPSEEK_CHAT,
+    primaryModel: MODELS.DEEPSEEK_V3,
     primaryProvider: "openrouter",
-    fallbackChain: [{ provider: "openrouter", model: MODELS.LLAMA_70B }],
+    fallbackChain: [
+      { provider: "openrouter", model: MODELS.KIMI_K2 },
+      { provider: "openrouter", model: MODELS.LLAMA_70B },
+    ],
     defaultMaxTokens: 1024,
     defaultTemperature: 0.3,
     description: "Content summarization",
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Embeddings (Cloudflare AI - local, fast)
+  // Embeddings (OpenRouter BGE-M3 → Qwen3 → CF BGE Base)
   // ─────────────────────────────────────────────────────────────────────────────
   embedding: {
-    primaryModel: MODELS.BGE_BASE,
-    primaryProvider: "cloudflare-ai",
-    fallbackChain: [], // No fallback for embeddings - CF AI is very reliable
+    primaryModel: MODELS.BGE_M3,
+    primaryProvider: "openrouter",
+    fallbackChain: [
+      { provider: "openrouter", model: MODELS.QWEN3_EMBED },
+      { provider: "cloudflare-ai", model: MODELS.CF_BGE_BASE },
+    ],
     defaultMaxTokens: 0, // Not applicable for embeddings
     defaultTemperature: 0,
     description: "Text embeddings for semantic search",
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Chat/Conversational (OpenRouter - DeepSeek primary)
+  // Chat/Conversational (DeepSeek → Kimi K2 → Llama 70B)
   // ─────────────────────────────────────────────────────────────────────────────
   chat: {
-    primaryModel: MODELS.DEEPSEEK_CHAT,
+    primaryModel: MODELS.DEEPSEEK_V3,
     primaryProvider: "openrouter",
-    fallbackChain: [{ provider: "openrouter", model: MODELS.LLAMA_70B }],
+    fallbackChain: [
+      { provider: "openrouter", model: MODELS.KIMI_K2 },
+      { provider: "openrouter", model: MODELS.LLAMA_70B },
+    ],
     defaultMaxTokens: 4096,
     defaultTemperature: 0.8,
     description: "Conversational AI",
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Image Analysis (OpenRouter - Claude for vision)
+  // Image Analysis (Gemini Flash → Claude Haiku)
   // ─────────────────────────────────────────────────────────────────────────────
   image: {
-    primaryModel: MODELS.CLAUDE_SONNET,
+    primaryModel: MODELS.GEMINI_FLASH,
     primaryProvider: "openrouter",
-    fallbackChain: [], // Claude is best for vision, no good fallback
+    fallbackChain: [{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU }],
     defaultMaxTokens: 1024,
     defaultTemperature: 0.2,
     description: "Image analysis and description",
   },
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Code Tasks (OpenRouter - Claude for code)
+  // Code Tasks (DeepSeek → Claude Haiku → Kimi K2)
   // ─────────────────────────────────────────────────────────────────────────────
   code: {
-    primaryModel: MODELS.CLAUDE_SONNET,
+    primaryModel: MODELS.DEEPSEEK_V3,
     primaryProvider: "openrouter",
     fallbackChain: [
-      { provider: "openrouter", model: MODELS.DEEPSEEK_CHAT }, // DeepSeek is great at code too
+      { provider: "openrouter", model: MODELS.CLAUDE_HAIKU },
+      { provider: "openrouter", model: MODELS.KIMI_K2 },
     ],
     defaultMaxTokens: 4096,
     defaultTemperature: 0.1,
