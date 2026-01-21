@@ -549,6 +549,19 @@
 					spec: '/knowledge/specs/mycelium-spec'
 				},
 				{
+					name: 'Lumen',
+					tagline: 'AI Gateway',
+					description: 'In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove\'s unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.',
+					status: 'planned',
+					icon: 'lamp-ceiling',
+					integration: 'Internal AI routing for all Grove services',
+					spec: '/knowledge/specs/lumen-spec',
+					subComponents: [
+						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
+						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
+					]
+				},
+				{
 					name: 'Vista',
 					tagline: 'Infrastructure Observability',
 					description: 'A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.',

@@ -211,6 +211,8 @@ import {
   Gamepad,
   // Petal - image content moderation
   Fan,
+  // Lumen - AI gateway
+  LampCeiling,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -471,6 +473,8 @@ export const toolIcons = {
   "triangle-alert": TriangleAlert, // Grafts - Blight (kill switch)
   unplug: Unplug, // Grafts - Cultivate (full rollout)
   gamepad: Gamepad, // Grafts - Cultivars (A/B variants)
+  // Lumen - AI gateway
+  "lamp-ceiling": LampCeiling, // Lumen - unified AI routing
 } as const;
 
 // ============================================================================

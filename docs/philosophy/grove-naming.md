@@ -395,6 +395,17 @@ It's the invisible network beneath everything. You don't see it. You don't think
 
 *The forest speaks through its roots.*
 
+### Lumen
+**AI Gateway** · *Internal service*
+
+In anatomy, a lumen is the hollow center of a tube: the empty space inside blood vessels, intestines, airways. It's not the wall. It's not the tissue. It's the void through which everything flows. But lumen also means light. The same word for darkness and illumination.
+
+Lumen is Grove's unified AI gateway. Every AI request in the ecosystem passes through this hollow center: Wisp's writing assistance, Thorn's content moderation, Timeline's summaries, Fireside's conversations. Lumen routes each request to the appropriate model, handles authentication and rate limiting, scrubs sensitive data, normalizes responses, and logs usage. You call one function. Lumen decides whether you need LlamaGuard for safety checks or DeepSeek for generation, Cloudflare Workers AI for speed or OpenRouter for capability.
+
+The paradox is the point. The hollow that carries light. The void through which intelligence flows. The darkness that contains illumination.
+
+*Light from the void.*
+
 ### Shade
 **AI Content Protection** · `grove.place/shade`
 
@@ -446,6 +457,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Vista** | Ops | Infrastructure observability | vista.grove.place |
 | **Patina** | Ops | Backup system | *(internal)* |
 | **Mycelium** | Ops | MCP server | mycelium.grove.place |
+| **Lumen** | Ops | AI gateway | *(internal)* |
 | **Shade** | Ops | AI content protection | grove.place/shade |
 | **Wanderer** | Identity | Everyone who enters | — |
 | **Rooted** | Identity | Subscribers | — |
@@ -495,6 +507,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Vista | GroveMonitor |
 | Patina | GrovePatina |
 | Mycelium | GroveMCP |
+| Lumen | GroveLumen |
 | Shade | GroveShade |
 | Vineyard | GroveShowcase |
 
@@ -559,5 +572,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 15, 2026 — Added User Identity, Curios, Forests, Wander*
+*Last updated: January 21, 2026 — Added Lumen (AI Gateway)*
 *Status: Placeholder names, pending launch*
