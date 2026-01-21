@@ -503,7 +503,7 @@
           type="text"
           id="item-url"
           bind:value={itemUrl}
-          placeholder="https://cdn.autumnsgrove.com/..."
+          placeholder="https://cdn.grove.place/..."
         />
         <Button
           variant="outline"

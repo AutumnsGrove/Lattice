@@ -318,7 +318,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
 
     // Build CDN URL
-    const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
+    const cdnUrl = `https://cdn.grove.place/${key}`;
 
     // Store hash for future duplicate detection with format metadata
     if (hash && db) {

@@ -91,7 +91,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 
       return {
         key: obj.key,
-        url: `https://cdn.autumnsgrove.com/${obj.key}`,
+        url: `https://cdn.grove.place/${obj.key}`,
         size: obj.size,
         uploaded: obj.uploaded,
 
