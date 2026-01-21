@@ -18,6 +18,7 @@ import {
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
+import { isFeatureEnabled } from "$lib/feature-flags/index.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -96,6 +97,35 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // CSRF check
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
+  }
+
+  // ========================================================================
+  // Feature Flag Gate: Image Uploads
+  // ========================================================================
+  // Image uploads are DISABLED by default until PhotoDNA hash-based CSAM
+  // detection is integrated. Can be enabled per-tenant for trusted beta users.
+  //
+  // @see migrations/031_petal_upload_gate.sql
+  // @see TODOS.md "NCMEC CyberTipline Integration" section
+  const uploadsEnabled = await isFeatureEnabled(
+    "image_uploads_enabled",
+    {
+      tenantId: locals.tenantId,
+      userId: locals.user.id,
+    },
+    platform?.env as Parameters<typeof isFeatureEnabled>[2],
+  );
+
+  if (!uploadsEnabled) {
+    return json(
+      {
+        error: true,
+        code: "feature_disabled",
+        message:
+          "Image uploads are currently in limited beta. This feature will be available soon!",
+      },
+      { status: 403 },
+    );
   }
 
   // Validate required environment variables (fail-fast with actionable errors)
