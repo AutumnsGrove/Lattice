@@ -53,8 +53,9 @@ const PII_PATTERNS: Array<{
   },
 
   // Phone numbers (various formats)
+  // Matches: 555-123-4567, (555) 123-4567, +1-555-123-4567, 555.123.4567
   {
-    pattern: /\b(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b/g,
+    pattern: /(?:\+1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}/g,
     replacement: "[PHONE]",
     name: "phone",
   },
