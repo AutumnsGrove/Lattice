@@ -481,9 +481,13 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isAuthEndpoint = event.url.pathname.includes("/auth/");
     // Turnstile verification is like auth - new visitors don't have CSRF tokens
     const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";
+    // SvelteKit form actions (e.g., ?/save) have built-in CSRF protection via origin validation
+    // They don't send the x-csrf-token header, so use origin-based validation instead
+    const isFormAction =
+      event.url.search.includes("?/") || event.url.search.startsWith("/?/");
 
-    if (isAuthEndpoint || isTurnstileEndpoint) {
-      // Auth and verification endpoints use origin-based validation (users don't have CSRF tokens yet)
+    if (isAuthEndpoint || isTurnstileEndpoint || isFormAction) {
+      // Auth, verification, and form action endpoints use origin-based validation
       if (!validateCSRF(event.request)) {
         throw error(403, "Invalid origin");
       }
