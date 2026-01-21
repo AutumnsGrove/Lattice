@@ -95,7 +95,7 @@
 									<span class="supporter-name">Jonas Delva</span>
 								</div>
 								<p class="supporter-note">
-									Always telling me how blessed he feels, radiating positivity. He said to me: <em>"You are worth so much more than this place. You are needed elsewhere."</em> Made me cry.
+									Always telling me how blessed he feels, radiating positivity. He said to me: <em>"You are worth so much more than this place. You are needed elsewhere."</em>
 								</p>
 							</div>
 							<div class="supporter-item">
