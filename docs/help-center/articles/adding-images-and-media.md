@@ -58,7 +58,7 @@ Once uploaded, images appear inline with your text. You can add multiple images 
 Images are inserted as Markdown:
 
 ```markdown
-![Alt text description](https://cdn.autumnsgrove.com/your-image.jpg)
+![Alt text description](https://cdn.grove.place/your-image.jpg)
 ```
 
 You don't need to write this yourself—the editor handles it when you upload.
