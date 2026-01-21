@@ -170,6 +170,14 @@ query($username: String!) {
 }
 `;
 
+/**
+ * GraphQL query to fetch a user's recent commit history.
+ *
+ * Note: We don't filter by author because:
+ * 1. We're already limiting to OWNER/COLLABORATOR repos
+ * 2. Filtering by author.id requires fetching the user's ID first
+ * 3. For a personal dashboard, all commits in their repos are relevant
+ */
 export const USER_COMMITS_QUERY = `
 query($username: String!, $limit: Int!) {
   user(login: $username) {
@@ -179,7 +187,7 @@ query($username: String!, $limit: Int!) {
         defaultBranchRef {
           target {
             ... on Commit {
-              history(first: 100, author: {id: null}) {
+              history(first: 100) {
                 nodes {
                   oid
                   message
@@ -216,12 +224,26 @@ export async function fetchUser(
 
   if (!response.ok) {
     if (response.status === 404) {
+      // Include "not found" in message for upstream detection
       throw new Error(`GitHub user not found: ${username}`);
     }
-    throw new Error(`GitHub API error: ${response.status}`);
+    // Don't expose status codes to end users
+    console.error(`GitHub API error for user ${username}: ${response.status}`);
+    throw new Error("Unable to fetch user data from GitHub");
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    login: string;
+    name: string | null;
+    avatar_url: string;
+    bio: string | null;
+    public_repos: number;
+    followers: number;
+    following: number;
+    location: string | null;
+    blog: string | null;
+    company: string | null;
+  };
 
   return {
     login: data.login,
@@ -256,16 +278,48 @@ export async function fetchContributions(
   });
 
   if (!response.ok) {
-    throw new Error(`GitHub GraphQL error: ${response.status}`);
+    console.error(
+      `GitHub GraphQL error for contributions ${username}: ${response.status}`,
+    );
+    throw new Error("Unable to fetch contributions from GitHub");
   }
 
-  const data = await response.json();
+  interface GraphQLResponse {
+    data?: {
+      user?: {
+        contributionsCollection?: {
+          contributionCalendar?: {
+            totalContributions: number;
+            weeks: Array<{
+              contributionDays: Array<{
+                contributionCount: number;
+                date: string;
+                weekday: number;
+              }>;
+            }>;
+          };
+        };
+      };
+    };
+    errors?: Array<{ message: string }>;
+  }
+
+  const data = (await response.json()) as GraphQLResponse;
 
   if (data.errors) {
-    throw new Error(`GitHub GraphQL error: ${data.errors[0].message}`);
+    console.error(
+      `GitHub GraphQL error for ${username}:`,
+      data.errors[0].message,
+    );
+    throw new Error("Unable to fetch contributions from GitHub");
   }
 
-  const calendar = data.data.user.contributionsCollection.contributionCalendar;
+  const calendar =
+    data.data?.user?.contributionsCollection?.contributionCalendar;
+
+  if (!calendar) {
+    throw new Error(`GitHub user not found: ${username}`);
+  }
 
   return {
     totalContributions: calendar.totalContributions,

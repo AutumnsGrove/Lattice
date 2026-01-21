@@ -14,8 +14,21 @@ import {
   getCacheKey,
   DEFAULT_GIT_CONFIG,
 } from "$lib/git";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  getClientIP,
+} from "$lib/server/rate-limits/index.js";
 
-export const GET: RequestHandler = async ({ params, platform, url }) => {
+// Rate limit: 60 requests per minute (external API, expensive)
+const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
+
+export const GET: RequestHandler = async ({
+  params,
+  platform,
+  url,
+  request,
+}) => {
   const { username } = params;
   const kv = platform?.env?.CACHE_KV;
   const token = platform?.env?.GITHUB_TOKEN;
@@ -25,7 +38,18 @@ export const GET: RequestHandler = async ({ params, platform, url }) => {
   }
 
   if (!token) {
-    throw error(503, "GitHub token not configured");
+    throw error(503, "Service temporarily unavailable");
+  }
+
+  // Rate limiting by IP (public endpoint)
+  if (kv) {
+    const clientIP = getClientIP(request);
+    const { response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("git/contributions", clientIP),
+      ...RATE_LIMIT,
+    });
+    if (response) return response;
   }
 
   // Check if client wants activity format (for heatmap)
@@ -34,9 +58,13 @@ export const GET: RequestHandler = async ({ params, platform, url }) => {
   // Check cache first
   const cacheKey = getCacheKey("contributions", username, { format });
   if (kv) {
-    const cached = await kv.get(cacheKey, "json");
-    if (cached) {
-      return json({ ...cached, cached: true });
+    try {
+      const cached = await kv.get(cacheKey, "json");
+      if (cached) {
+        return json({ ...cached, cached: true });
+      }
+    } catch {
+      // Cache read failed, continue with fresh fetch
     }
   }
 
@@ -57,14 +85,18 @@ export const GET: RequestHandler = async ({ params, platform, url }) => {
 
     // Cache the result
     if (kv) {
-      await kv.put(cacheKey, JSON.stringify(responseData), {
-        expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
-      });
+      try {
+        await kv.put(cacheKey, JSON.stringify(responseData), {
+          expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
+        });
+      } catch {
+        // Cache write failed, continue
+      }
     }
 
     return json({ ...responseData, cached: false });
   } catch (err) {
     console.error("Failed to fetch GitHub contributions:", err);
-    throw error(502, "Failed to fetch contributions from GitHub");
+    throw error(502, "Unable to fetch contributions. Please try again later.");
   }
 };

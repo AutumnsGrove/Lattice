@@ -13,8 +13,16 @@ import {
   getCacheKey,
   DEFAULT_GIT_CONFIG,
 } from "$lib/git";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+  getClientIP,
+} from "$lib/server/rate-limits/index.js";
 
-export const GET: RequestHandler = async ({ params, platform }) => {
+// Rate limit: 60 requests per minute (external API)
+const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
+
+export const GET: RequestHandler = async ({ params, platform, request }) => {
   const { username } = params;
   const kv = platform?.env?.CACHE_KV;
 
@@ -22,12 +30,27 @@ export const GET: RequestHandler = async ({ params, platform }) => {
     throw error(400, "Invalid username");
   }
 
+  // Rate limiting by IP (public endpoint)
+  if (kv) {
+    const clientIP = getClientIP(request);
+    const { response } = await checkRateLimit({
+      kv,
+      key: buildRateLimitKey("git/user", clientIP),
+      ...RATE_LIMIT,
+    });
+    if (response) return response;
+  }
+
   // Check cache first
   if (kv) {
-    const cacheKey = getCacheKey("user", username);
-    const cached = await kv.get(cacheKey, "json");
-    if (cached) {
-      return json({ user: cached, cached: true });
+    try {
+      const cacheKey = getCacheKey("user", username);
+      const cached = await kv.get(cacheKey, "json");
+      if (cached) {
+        return json({ user: cached, cached: true });
+      }
+    } catch {
+      // Cache read failed, continue with fresh fetch
     }
   }
 
@@ -37,10 +60,14 @@ export const GET: RequestHandler = async ({ params, platform }) => {
 
     // Cache the result
     if (kv) {
-      const cacheKey = getCacheKey("user", username);
-      await kv.put(cacheKey, JSON.stringify(user), {
-        expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
-      });
+      try {
+        const cacheKey = getCacheKey("user", username);
+        await kv.put(cacheKey, JSON.stringify(user), {
+          expirationTtl: DEFAULT_GIT_CONFIG.cacheTtlSeconds,
+        });
+      } catch {
+        // Cache write failed, continue
+      }
     }
 
     return json({ user, cached: false });
@@ -49,6 +76,6 @@ export const GET: RequestHandler = async ({ params, platform }) => {
       throw error(404, "User not found");
     }
     console.error("Failed to fetch GitHub user:", err);
-    throw error(502, "Failed to fetch user from GitHub");
+    throw error(502, "Unable to fetch user data. Please try again later.");
   }
 };
