@@ -243,8 +243,8 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Featured Journeys:**
 - **Porch** - The origin story. Support isn't a ticket system. It's a porch conversation. This journey created the naming ritual.
-- **Loom** - A retroactive walk that confirmed the name was right. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
-- **Heartwood** - The dense core of a tree. Where trust lives.
+- **Lumen** - A difficult journey. Light vs. dark. The hollow center where everything flows, yet also illumination. Close between Lumen and Umbra—decided by trying names in sentences.
+- **Loom** - A walk that returned home. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
 
 **Emotional Goal:** Visitors should feel how naming shapes the entire experience. Words create worlds.
 
@@ -312,9 +312,9 @@ docs/museum/
 │   ├── WING.md                  # The philosophy of naming
 │   ├── the-walk.md              # The naming ritual
 │   ├── journeys/                # Individual naming journeys
-│   │   ├── loom.md              # Featured: Loom journey
-│   │   ├── porch.md             # Featured: Porch journey
-│   │   └── heartwood.md         # Featured: Heartwood journey
+│   │   ├── porch.md             # Featured: Origin story
+│   │   ├── lumen.md             # Featured: A difficult journey
+│   │   └── loom.md              # Featured: Returning home
 │   └── ecosystem.md             # The full naming map
 └── glossary.md                  # Grove vocabulary
 ```

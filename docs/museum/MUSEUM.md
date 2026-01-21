@@ -173,7 +173,7 @@ Start with [The Seasons](./nature/seasons.md). It shows how five color palettes 
 Start with [The Engine Room](./architecture/engine-room.md). It explains the pattern that prevented 11,925 lines of duplicate code.
 
 **If you care about words:**
-Start with [The Naming Wing](./naming/WING.md). See how "Porch" created the naming ritual and why 30 retroactive walks confirmed the names were right.
+Start with [The Naming Wing](./naming/WING.md). See how "Porch" created the naming ritual and how "Lumen" emerged from staring into the void.
 
 **If you just want to wander:**
 Pick any wing. They're all connected. You'll find your way.
