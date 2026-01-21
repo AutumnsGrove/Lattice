@@ -194,6 +194,10 @@
       "types": "./dist/curios/timeline/voices/index.d.ts",
       "default": "./dist/curios/timeline/voices/index.js"
     },
+    "./curios/gallery": {
+      "types": "./dist/curios/gallery/index.d.ts",
+      "default": "./dist/curios/gallery/index.js"
+    },
     "./grafts": {
       "types": "./dist/grafts/index.d.ts",
       "svelte": "./dist/grafts/index.js",
@@ -268,7 +272,7 @@
     "vitest": "^4.0.14"
   },
   "dependencies": {
-        "@autumnsgrove/gossamer": "^0.1.1",
+    "@autumnsgrove/gossamer": "^0.1.1",
     "@jsquash/jxl": "^1.3.0",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "chart.js": "^4.5.1",

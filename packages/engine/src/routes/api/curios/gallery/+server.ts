@@ -6,7 +6,6 @@
 
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getImageTitle, getImageDate } from "$lib/curios/gallery";
 
 interface ConfigRow {
   enabled: number;
@@ -93,6 +92,15 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     params.push(searchPattern, searchPattern, searchPattern);
   }
 
+  if (tag) {
+    whereClause += ` AND id IN (
+      SELECT git.image_id FROM gallery_image_tags git
+      JOIN gallery_tags gt ON git.tag_id = gt.id
+      WHERE gt.tenant_id = ? AND gt.slug = ?
+    )`;
+    params.push(tenantId, tag);
+  }
+
   // Fetch images
   const imagesResult = await db
     .prepare(
@@ -151,8 +159,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     }
   }
 
-  // Filter by tag if specified (post-query filter)
-  let images = imagesResult.results.map((row) => ({
+  // Transform results
+  const images = imagesResult.results.map((row) => ({
     id: row.id,
     r2_key: row.r2_key,
     url: row.cdn_url || `${cdnBaseUrl}/${row.r2_key}`,
@@ -174,10 +182,6 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     is_featured: Boolean(row.is_featured),
     tags: tagsByImageId.get(row.id) || [],
   }));
-
-  if (tag) {
-    images = images.filter((img) => img.tags.some((t) => t.slug === tag));
-  }
 
   return json({
     images,

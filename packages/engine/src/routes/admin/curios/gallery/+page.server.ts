@@ -75,23 +75,44 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     .bind(tenantId)
     .first<ConfigRow>();
 
-  // Fetch gallery stats
-  const imageCount = await db
-    .prepare(`SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?`)
-    .bind(tenantId)
-    .first<{ count: number }>();
+  // Fetch gallery stats with isolated error handling
+  // Each query has its own try/catch to gracefully handle missing tables
+  let imageCount = 0;
+  try {
+    const result = await db
+      .prepare(
+        `SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?`,
+      )
+      .bind(tenantId)
+      .first<{ count: number }>();
+    imageCount = result?.count ?? 0;
+  } catch (err) {
+    console.warn("Failed to fetch image count:", err);
+  }
 
-  const tagCount = await db
-    .prepare(`SELECT COUNT(*) as count FROM gallery_tags WHERE tenant_id = ?`)
-    .bind(tenantId)
-    .first<{ count: number }>();
+  let tagCount = 0;
+  try {
+    const result = await db
+      .prepare(`SELECT COUNT(*) as count FROM gallery_tags WHERE tenant_id = ?`)
+      .bind(tenantId)
+      .first<{ count: number }>();
+    tagCount = result?.count ?? 0;
+  } catch (err) {
+    console.warn("Failed to fetch tag count:", err);
+  }
 
-  const collectionCount = await db
-    .prepare(
-      `SELECT COUNT(*) as count FROM gallery_collections WHERE tenant_id = ?`,
-    )
-    .bind(tenantId)
-    .first<{ count: number }>();
+  let collectionCount = 0;
+  try {
+    const result = await db
+      .prepare(
+        `SELECT COUNT(*) as count FROM gallery_collections WHERE tenant_id = ?`,
+      )
+      .bind(tenantId)
+      .first<{ count: number }>();
+    collectionCount = result?.count ?? 0;
+  } catch (err) {
+    console.warn("Failed to fetch collection count:", err);
+  }
 
   // Parse config if exists
   let parsedConfig = null;
@@ -127,9 +148,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       customCss: null,
     },
     stats: {
-      imageCount: imageCount?.count ?? 0,
-      tagCount: tagCount?.count ?? 0,
-      collectionCount: collectionCount?.count ?? 0,
+      imageCount,
+      tagCount,
+      collectionCount,
     },
     gridStyles: GRID_STYLE_OPTIONS,
     sortOrders: SORT_ORDER_OPTIONS,
