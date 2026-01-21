@@ -248,6 +248,7 @@ export class SentinelRunner {
       // Round-robin through target systems
       const system = systems[i % systems.length];
       const index = baseIndex + i;
+      const operationStartedAt = new Date();
 
       promises.push(
         executeOperation(system, db, kv, r2, tenantId, index)
@@ -259,7 +260,7 @@ export class SentinelRunner {
               operationType: system,
               operationName: result.operationName,
               batchIndex: Math.floor(baseIndex / (this.config.maxBatchSize ?? 50)),
-              startedAt: new Date(Date.now() - (result.latencyMs ?? 0)),
+              startedAt: operationStartedAt,
               completedAt: new Date(),
               latencyMs: result.latencyMs,
               success: result.success,
@@ -587,7 +588,7 @@ export async function createSentinelRun(
       profile.durationSeconds,
       profile.concurrency,
       JSON.stringify(profile.targetSystems),
-      options?.scheduledAt ? 'pending' : 'pending',
+      'pending',
       options?.scheduledAt ? Math.floor(options.scheduledAt.getTime() / 1000) : null,
       options?.triggeredBy ?? 'manual',
       options?.notes ?? null,

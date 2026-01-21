@@ -283,6 +283,7 @@ export class SentinelDO {
     for (let i = 0; i < batchSize; i++) {
       const system = selectWeightedSystem(profile.targetSystems);
       const index = this.runState.completedOps + this.runState.failedOps + i;
+      const operationStartedAt = new Date();
 
       promises.push(
         executeOperation(
@@ -311,7 +312,7 @@ export class SentinelDO {
               operationType: system,
               operationName: result.operationName,
               batchIndex: Math.floor(index / batchSize),
-              startedAt: new Date(Date.now() - (result.latencyMs ?? 0)),
+              startedAt: operationStartedAt,
               completedAt: new Date(),
               latencyMs: result.latencyMs,
               success: result.success,
@@ -513,7 +514,7 @@ export class SentinelDO {
     this.log("Test completed", {
       runId: this.runState.runId,
       totalOps,
-      successRate: ((this.runState.completedOps / totalOps) * 100).toFixed(1),
+      successRate: totalOps > 0 ? ((this.runState.completedOps / totalOps) * 100).toFixed(1) : '0.0',
       throughput: results.throughputOpsPerSec.toFixed(1),
     });
   }
@@ -528,6 +529,8 @@ export class SentinelDO {
         "runState",
       )) as SentinelDOState | null;
       if (this.runState) {
+        // Re-initialize connections Set after hibernation - Sets cannot be serialized
+        // to storage. Active WebSockets are tracked via state.getWebSockets() instead.
         this.runState.connections = new Set();
       }
     }

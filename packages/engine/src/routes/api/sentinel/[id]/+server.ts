@@ -113,6 +113,12 @@ export const POST: RequestHandler = async ({ params, request, platform, locals }
         throw error(400, `Cannot start run with status: ${run.status}`);
       }
 
+      // Update database status to 'running' before returning response
+      await db
+        .prepare('UPDATE sentinel_runs SET status = ?, started_at = ?, updated_at = ? WHERE id = ?')
+        .bind('running', Math.floor(Date.now() / 1000), Math.floor(Date.now() / 1000), id)
+        .run();
+
       const runner = new SentinelRunner({
         db,
         kv,

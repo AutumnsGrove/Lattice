@@ -300,9 +300,14 @@ export async function handleScheduledEvent(
           // Update clearing status with results
           await updateClearingFromResults(db, schedule.tenantId, run.id, results);
 
-          // Send alert if failed and configured
-          if (schedule.alertOnFailure && results.failedOperations > results.successfulOperations * 0.1) {
-            console.log(`[Sentinel Scheduler] Alert: High failure rate for schedule ${schedule.id}`);
+          // Send alert if failure rate exceeds threshold
+          // TODO: Make threshold configurable per-schedule (currently hardcoded at 10%)
+          const errorRateThreshold = 0.1;
+          const totalOps = results.failedOperations + results.successfulOperations;
+          const errorRate = totalOps > 0 ? results.failedOperations / totalOps : 0;
+
+          if (schedule.alertOnFailure && errorRate > errorRateThreshold) {
+            console.log(`[Sentinel Scheduler] Alert: High failure rate (${(errorRate * 100).toFixed(1)}%) for schedule ${schedule.id}`);
             // TODO: Implement email alerting via Resend
           }
         },
@@ -380,22 +385,37 @@ async function updateClearingFromResults(
 
 /**
  * Calculate the next run time from a cron expression
- * Simple implementation - for production, consider using a library
+ *
+ * LIMITATIONS: This is a basic implementation that only handles:
+ * - Specific values: "0", "30", "12"
+ * - Wildcards: "*"
+ * - Day of week: "0" (Sunday) through "6" (Saturday)
+ *
+ * NOT SUPPORTED (TODO: Consider using cron-parser library):
+ * - Ranges: "1-5" (Monday through Friday)
+ * - Lists: "1,3,5" (Monday, Wednesday, Friday)
+ * - Step values: "*/5" (every 5 minutes)
+ * - Month constraints
+ * - Day of month constraints
+ *
+ * For complex scheduling requirements, migrate to a production cron library.
  */
-function calculateNextRun(cronExpression: string, timezone: string): Date | null {
+function calculateNextRun(cronExpression: string, _timezone: string): Date | null {
   try {
     // Parse cron: minute hour day month dayOfWeek
     const parts = cronExpression.trim().split(/\s+/);
     if (parts.length !== 5) return null;
 
-    const [minute, hour, day, month, dayOfWeek] = parts;
+    const [minute, hour, _day, _month, dayOfWeek] = parts;
 
-    // For simplicity, just calculate next occurrence
-    // This is a basic implementation - consider using cron-parser library
     const now = new Date();
     const next = new Date(now);
 
-    // If specific hour/minute, set them
+    // Reset seconds and milliseconds
+    next.setSeconds(0);
+    next.setMilliseconds(0);
+
+    // Set specific hour/minute if provided
     if (minute !== '*') {
       next.setMinutes(parseInt(minute, 10));
     }
@@ -403,20 +423,22 @@ function calculateNextRun(cronExpression: string, timezone: string): Date | null
       next.setHours(parseInt(hour, 10));
     }
 
-    // If the calculated time is in the past, move to next day
-    if (next <= now) {
-      next.setDate(next.getDate() + 1);
-    }
-
-    // Handle day of week (0 = Sunday)
+    // Handle day of week first (0 = Sunday)
     if (dayOfWeek !== '*') {
       const targetDay = parseInt(dayOfWeek, 10);
       const currentDay = next.getDay();
-      const daysUntil = (targetDay - currentDay + 7) % 7;
+      let daysUntil = (targetDay - currentDay + 7) % 7;
+
+      // If we're on the target day but time has passed, move to next week
       if (daysUntil === 0 && next <= now) {
-        next.setDate(next.getDate() + 7);
-      } else {
-        next.setDate(next.getDate() + daysUntil);
+        daysUntil = 7;
+      }
+
+      next.setDate(next.getDate() + daysUntil);
+    } else {
+      // No day constraint - if time has passed today, move to tomorrow
+      if (next <= now) {
+        next.setDate(next.getDate() + 1);
       }
     }
 

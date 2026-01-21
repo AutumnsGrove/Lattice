@@ -1,4 +1,4 @@
--- Migration 021: Sentinel Stress Testing System
+-- Migration 032: Sentinel Stress Testing System
 -- Infrastructure validation and load testing for Grove
 -- Results feed into The Clearing (separate service) via API
 
@@ -180,6 +180,11 @@ CREATE TABLE IF NOT EXISTS sentinel_baselines (
 
 CREATE INDEX IF NOT EXISTS idx_sentinel_baselines_tenant ON sentinel_baselines(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_sentinel_baselines_profile ON sentinel_baselines(profile_type);
+
+-- Ensure only one active baseline per tenant/profile combination
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sentinel_baselines_unique_active
+  ON sentinel_baselines(tenant_id, profile_type)
+  WHERE is_active = 1;
 
 -- =============================================================================
 -- SENTINEL SCHEDULES
