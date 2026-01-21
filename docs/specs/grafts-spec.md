@@ -1065,9 +1065,67 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 
 - **UI Grafts** are granular: individual components spliced onto pages
 - **Feature Grafts** are specific: individual feature flags for individual tenants
-- **Greenhouse mode** is holistic: tenant-wide early access classification
+- **Greenhouse mode** is holistic: tenant-wide classification that unlocks self-serve control
 
 A tenant in greenhouse mode doesn't need individual Feature Grafts for each experimental feature—they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on *tenant classification*, not feature configuration.
+
+---
+
+## The Dev Mode Revelation
+
+Greenhouse mode solves a fundamental architectural question: **where do graft controls live?**
+
+The original plan was to abstract graft controls into a separate admin panel (Arbor). But this creates friction—tenants who want to experiment with their own trees would need operator intervention for every toggle. That's not how a grove should work.
+
+**The insight:** Greenhouse mode *is* dev mode.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    The Two Modes of Operation                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   PRODUCTION MODE (Default)                                         │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Grafts are operator-configured                             │   │
+│   │  ├── Wayfinder decides what's enabled                       │   │
+│   │  ├── Tenant sees the result, not the controls               │   │
+│   │  └── Safe, stable, curated experience                       │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   GREENHOUSE MODE (Dev Mode)                                        │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Grafts are self-serve                                      │   │
+│   │  ├── Tenant sees AND controls the graft toggles             │   │
+│   │  ├── Can freely graft/prune features on their own tree      │   │
+│   │  ├── Access to experimental features before general release │   │
+│   │  └── More tweakability, tuning, and control                 │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│   The greenhouse isn't just for testing new features—              │
+│   it's where power users cultivate their own gardens.              │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**What greenhouse mode enables:**
+
+| Capability | Production | Greenhouse |
+|------------|------------|------------|
+| View active grafts | ✗ | ✓ |
+| Toggle feature grafts | ✗ | ✓ |
+| Access experimental features | ✗ | ✓ |
+| Adjust graft parameters | ✗ | ✓ |
+| See graft admin UI | ✗ | ✓ |
+| Reset to defaults | ✗ | ✓ |
+
+**Why this matters architecturally:**
+
+1. **No separate admin panel needed** — Graft controls live in the tenant's own dashboard, visible only in greenhouse mode
+2. **Progressive disclosure** — Most tenants never see the complexity; power users opt into it
+3. **Self-serve experimentation** — Tenants can try features without waiting for operator approval
+4. **Clean separation** — Production tenants get a curated experience; greenhouse tenants get full control
+
+*The greenhouse isn't a testing environment. It's a tinkerer's workshop.*
 
 ---
 
@@ -1426,8 +1484,17 @@ packages/engine/src/lib/
 - [ ] `isInGreenhouse()` API function
 - [ ] Greenhouse context in feature evaluation
 - [ ] Greenhouse rule type support
-- [ ] Admin UI for greenhouse tenant management
+- [ ] Wayfinder UI for enrolling tenants in greenhouse mode
 - [ ] Transplant workflow (greenhouse → production)
+
+### Phase 9: Self-Serve Graft Controls (Planned)
+- [ ] Graft control panel in tenant dashboard (greenhouse-only visibility)
+- [ ] Toggle UI for feature grafts
+- [ ] Parameter adjustment UI for configurable grafts
+- [ ] "Active grafts" overview showing what's enabled
+- [ ] Reset to defaults functionality
+- [ ] Graft discovery UI (browse available grafts to enable)
+- [ ] Experimental features badge/indicator
 
 ---
 
