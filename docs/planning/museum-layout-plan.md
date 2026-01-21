@@ -338,6 +338,107 @@ Each exhibit should follow the museum-documentation skill structure:
 
 ---
 
+## Agent Orchestration
+
+The museum will be written by a swarm of agents, each responsible for one exhibit. An orchestrating agent guides the swarm, keeping threads from tangling.
+
+### Required Reading
+
+**Before drafting any exhibit, every agent MUST read:**
+
+```
+docs/philosophy/why-i-built-the-grove.md
+```
+
+This document explains why texture matters. Grove isn't just a platform—it's a reconstruction of a sanctuary that was lost. The forest is a backyard. Songbird is the robins at dawn. Wander mode is the freedom to pick a direction and walk. Every feature maps to something real.
+
+Without understanding this, agents will write documentation. With it, they'll preserve texture.
+
+### The Model
+
+```
+                    ┌─────────────────┐
+                    │  ORCHESTRATOR   │
+                    │                 │
+                    │  Guides the     │
+                    │  swarm, tracks  │
+                    │  progress,      │
+                    │  resolves       │
+                    │  conflicts      │
+                    └────────┬────────┘
+                             │
+         ┌───────────────────┼───────────────────┐
+         │                   │                   │
+         ▼                   ▼                   ▼
+    ┌─────────┐        ┌─────────┐        ┌─────────┐
+    │ Agent A │        │ Agent B │        │ Agent C │
+    │         │        │         │        │         │
+    │ Owns:   │        │ Owns:   │        │ Owns:   │
+    │ seasons │        │ loom    │        │ grafts  │
+    │ .md     │        │ .md     │        │ .md     │
+    └─────────┘        └─────────┘        └─────────┘
+         │                   │                   │
+         └───────────────────┴───────────────────┘
+                             │
+                    Explore elsewhere to
+                    understand connections
+```
+
+### Principles
+
+1. **One exhibit, one agent.** Each agent owns exactly one exhibit file. This reduces context drift and keeps focus sharp.
+
+2. **Explore broadly before writing.** Agents are strongly encouraged to wander the codebase, read related specs, understand how their exhibit connects to others. The goal is complete narrative understanding before writing a single line.
+
+3. **The orchestrator doesn't write.** It coordinates. It tracks which exhibits are complete, identifies conflicts or overlaps, and ensures the museum tells a coherent story.
+
+4. **Texture over thoroughness.** An exhibit that captures *why* something matters is better than one that explains every implementation detail. We're preserving the feeling of building something you're proud of.
+
+### Agent Checklist
+
+Before writing, each agent should:
+
+- [ ] Read `docs/philosophy/why-i-built-the-grove.md`
+- [ ] Read `docs/philosophy/grove-naming.md` (understand the vocabulary)
+- [ ] Read the museum-documentation skill (`.claude/skills/museum-documentation/SKILL.md`)
+- [ ] Explore the code/specs relevant to their exhibit
+- [ ] Understand how their exhibit connects to at least two others
+- [ ] Identify what makes their subject *textured*, not just functional
+
+### Exhibit Assignments
+
+| Exhibit | Wing | Key Sources |
+|---------|------|-------------|
+| foundation.md | Architecture | `docs/developer/architecture/multi-tenant-architecture.md` |
+| engine-room.md | Architecture | `packages/engine/`, engine-first pattern |
+| loom.md | Architecture | `docs/patterns/loom-durable-objects-pattern.md` |
+| cloud-garden.md | Architecture | `wrangler.toml` files, Cloudflare docs |
+| forest.md | Nature | `packages/engine/src/lib/ui/components/nature/` |
+| seasons.md | Nature | `packages/engine/src/lib/ui/stores/season.ts` |
+| glass-garden.md | Nature | `packages/engine/src/lib/ui/components/ui/Glass*` |
+| typography.md | Nature | `packages/engine/src/lib/ui/components/typography/` |
+| heartwood.md | Trust | `docs/specs/heartwood-spec.md` |
+| sessions.md | Trust | `packages/engine/src/lib/groveauth/` |
+| security.md | Trust | `packages/engine/src/lib/server/services/` |
+| filing-cabinet.md | Data | `packages/engine/src/lib/server/services/database.ts` |
+| quick-lookup.md | Data | `packages/engine/src/lib/server/services/cache.ts` |
+| media-vault.md | Data | `packages/engine/src/lib/server/services/storage.ts` |
+| query-builders.md | Data | Database helpers, typed queries |
+| grafts.md | Personalization | `docs/specs/grafts-spec.md` |
+| curios.md | Personalization | `docs/specs/curios-spec.md` |
+| themes.md | Personalization | Settings system, Foliage |
+| meadow.md | Community | `packages/meadow/` |
+| landing.md | Community | `packages/landing/` |
+| clearing.md | Community | `packages/clearing/` |
+| WING.md (naming) | Naming | `docs/philosophy/grove-naming.md` |
+| the-walk.md | Naming | `docs/philosophy/walking-through-the-grove.md` |
+| porch.md | Naming | `docs/philosophy/naming-research/grove-journey.md` |
+| lumen.md | Naming | `docs/philosophy/naming-research/ai-gateway-naming-journey.md` |
+| loom.md (naming) | Naming | `docs/philosophy/naming-research/loom-grove-journey.md` |
+| ecosystem.md | Naming | `docs/philosophy/grove-naming.md` ecosystem table |
+
+---
+
 ## Priority Order
 
 **Phase 1: Core Understanding**
