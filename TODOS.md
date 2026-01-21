@@ -88,9 +88,9 @@
 - [x] Required reading: "Why I Built the Grove" for texture understanding
 - [x] Featured naming journeys: Porch (origin), Lumen (difficult), Loom (returning home)
 
-**PR Feedback to Address (follow-up):**
-- [ ] Greptile generated sequence diagram for visitor flow — consider adding to docs
-- [ ] Review tier terminology once pricing is finalized (Seedling/Sapling/Oak/Evergreen)
+**Follow-up (no rush, it's gotta look good after all):**
+- [ ] Greptile generated a beautiful sequence diagram for visitor flow — would look great in the plan!
+- [ ] Tier terminology (Seedling/Sapling/Oak/Evergreen) — revisit once pricing is finalized
 
 ## In Progress 🚧
 
