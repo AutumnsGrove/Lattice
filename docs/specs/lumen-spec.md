@@ -6,6 +6,7 @@ tags:
   - ai-integration
   - infrastructure
   - cloudflare-workers
+  - openrouter
 type: tech-spec
 ---
 
@@ -33,13 +34,13 @@ type: tech-spec
             The darkness that contains illumination.
 ```
 
-> *Light from the void.*
+> _Light from the void._
 
 Grove's unified AI gateway. Every AI request passes through this hollow center: Wisp's writing assistance, Thorn's content moderation, Timeline's summaries, Fireside's conversations. One interface. Intelligent routing. The void through which intelligence flows.
 
 **Public Name:** Lumen
 **Internal Name:** GroveLumen
-**Domain:** *(internal service)*
+**Domain:** _(internal service)_
 **Last Updated:** January 2026
 
 In anatomy, a lumen is the hollow center of a tube: the empty space inside blood vessels, intestines, airways. It's not the wall. It's not the tissue. It's the void through which everything flows. But lumen also means light. The same word for darkness and illumination.
@@ -53,6 +54,7 @@ The paradox is the point. The hollow that carries light.
 Lumen is Grove's unified AI gateway: a single interface that routes all AI requests to the appropriate models, handles authentication and rate limiting, scrubs sensitive data, normalizes responses, and logs usage.
 
 **The problem it solves:**
+
 - AI integration scattered across services (Wisp, Thorn, Timeline, Fireside)
 - Hardcoded model choices that can't adapt
 - No unified rate limiting or quota management
@@ -60,22 +62,23 @@ Lumen is Grove's unified AI gateway: a single interface that routes all AI reque
 - Overkill models for simple tasks (DeepSeek v3 for basic moderation)
 
 **The solution:**
+
 ```typescript
 // Before: Scattered, hardcoded
 const response = await fetch("https://openrouter.ai/api/v1/chat", {
-  headers: { "Authorization": `Bearer ${OPENROUTER_KEY}` },
-  body: JSON.stringify({ model: "deepseek/deepseek-chat", messages })
+  headers: { Authorization: `Bearer ${OPENROUTER_KEY}` },
+  body: JSON.stringify({ model: "deepseek/deepseek-chat", messages }),
 });
 
 // After: One call, intelligent routing
 const response = await Lumen.inference({
   task: "moderation",
   input: userContent,
-  tenant: tenantId
+  tenant: tenantId,
 });
 ```
 
-**One sentence:** *"Grove talks to AI through Lumen."*
+**One sentence:** _"Grove talks to AI through Lumen."_
 
 ---
 
@@ -107,12 +110,13 @@ const response = await Lumen.inference({
 │  ┌────────────────────────────────┴───────────────────────────────────────┐  │
 │  │                          Task Router                                   │  │
 │  │                                                                        │  │
-│  │   task: "moderation"  → LlamaGuard 3 (CF Workers AI)                   │  │
-│  │   task: "generation"  → DeepSeek v3 (OpenRouter)                       │  │
-│  │   task: "summary"     → DeepSeek v3 (OpenRouter)                       │  │
-│  │   task: "embedding"   → bge-base (CF Workers AI)                       │  │
-│  │   task: "chat"        → Claude/DeepSeek (OpenRouter)                   │  │
-│  │   task: "image"       → Claude Sonnet (Anthropic)                      │  │
+│  │   task: "moderation"  → LlamaGuard 4 (OpenRouter)                      │  │
+│  │   task: "generation"  → DeepSeek v3.2 (OpenRouter)                     │  │
+│  │   task: "summary"     → DeepSeek v3.2 (OpenRouter)                     │  │
+│  │   task: "embedding"   → BGE-M3 (OpenRouter)                            │  │
+│  │   task: "chat"        → DeepSeek v3.2 (OpenRouter)                     │  │
+│  │   task: "image"       → Gemini 2.5 Flash (OpenRouter)                  │  │
+│  │   task: "code"        → DeepSeek v3.2 (OpenRouter)                     │  │
 │  │                                                                        │  │
 │  └────────────────────────────────┬───────────────────────────────────────┘  │
 │                                   │                                          │
@@ -134,13 +138,17 @@ const response = await Lumen.inference({
                                     │
 ┌───────────────────────────────────┴─────────────────────────────────────────┐
 │                            AI PROVIDERS                                      │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │  Cloudflare │  │ OpenRouter  │  │  Anthropic  │  │  Fireworks  │         │
-│  │ Workers AI  │  │             │  │   Direct    │  │             │         │
-│  │             │  │             │  │             │  │             │         │
-│  │ LlamaGuard  │  │ DeepSeek v3 │  │Claude Sonnet│  │   Llama 3   │         │
-│  │ bge-base    │  │ Claude      │  │             │  │             │         │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                                                                              │
+│  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐  │
+│  │           OpenRouter             │  │      Cloudflare Workers AI       │  │
+│  │          (Primary)               │  │          (Fallback)              │  │
+│  │                                  │  │                                  │  │
+│  │  DeepSeek v3.2    Kimi K2        │  │  LlamaGuard 3    ShieldGemma     │  │
+│  │  Gemini Flash     Claude Haiku   │  │  BGE Base                        │  │
+│  │  LlamaGuard 4     Llama 3.3 70B  │  │                                  │  │
+│  │  BGE-M3           Qwen3 Embed    │  │                                  │  │
+│  └──────────────────────────────────┘  └──────────────────────────────────┘  │
+│                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -152,26 +160,32 @@ Lumen routes requests based on task type, selecting the optimal model for each j
 
 ### Task Registry
 
-| Task | Primary Model | Provider | Fallback | Use Case |
-|------|--------------|----------|----------|----------|
-| `moderation` | LlamaGuard 3 8B | CF Workers AI | ShieldGemma2 | Content safety checks |
-| `generation` | DeepSeek v3 | OpenRouter | Claude Sonnet | Long-form writing |
-| `summary` | DeepSeek v3 | OpenRouter | Llama 3.3 70B | Summarization |
-| `embedding` | bge-base-en-v1.5 | CF Workers AI | - | Vector embeddings |
-| `chat` | DeepSeek v3 | OpenRouter | Claude Sonnet | Conversational |
-| `image` | Claude Sonnet 4 | Anthropic | - | Image analysis |
-| `code` | Claude Sonnet 4 | Anthropic | DeepSeek v3 | Code generation |
+| Task         | Primary Model    | Provider   | Fallback Chain                       | Use Case              |
+| ------------ | ---------------- | ---------- | ------------------------------------ | --------------------- |
+| `moderation` | LlamaGuard 4 12B | OpenRouter | LlamaGuard 3 (CF) → ShieldGemma (CF) | Content safety checks |
+| `generation` | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Long-form writing     |
+| `summary`    | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Summarization         |
+| `embedding`  | BGE-M3           | OpenRouter | Qwen3 Embed → BGE Base (CF)          | Vector embeddings     |
+| `chat`       | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Conversational        |
+| `image`      | Gemini 2.5 Flash | OpenRouter | Claude Haiku 4.5                     | Image analysis        |
+| `code`       | DeepSeek v3.2    | OpenRouter | Claude Haiku 4.5 → Kimi K2           | Code generation       |
 
 ### Why This Routing?
 
-**Moderation (LlamaGuard):**
-Using DeepSeek v3 for moderation is like hiring a PhD to check IDs at the door. LlamaGuard 3 is purpose-built for content safety, runs on CF Workers AI (fast, cheap), and returns structured safety decisions.
+**Moderation (LlamaGuard 4):**
+LlamaGuard 4 is the latest purpose-built content safety model, now available on OpenRouter. Using a general model like DeepSeek for moderation is like hiring a PhD to check IDs at the door. LlamaGuard returns structured safety decisions with high accuracy. CF Workers AI provides LlamaGuard 3 as a reliable fallback.
 
-**Generation (DeepSeek v3):**
-For long-form writing assistance (Wisp, Fireside), DeepSeek v3 offers excellent quality at a fraction of Claude's cost. OpenRouter provides unified access with automatic failover.
+**Generation/Chat/Summary (DeepSeek v3.2):**
+DeepSeek v3.2 offers excellent quality at $0.25/$0.38 per million tokens. Kimi K2 provides strong reasoning as first fallback, with Llama 3.3 70B as a reliable tertiary option. All via OpenRouter for unified access.
 
-**Image Analysis (Claude):**
-Claude Sonnet 4 has best-in-class vision capabilities. For image analysis (descriptions, alt text), it's worth the premium.
+**Embeddings (BGE-M3):**
+BGE-M3 on OpenRouter provides high-quality multilingual embeddings at $0.02/M tokens. Qwen3 Embed offers a solid fallback, with CF Workers AI's BGE Base as a free last resort.
+
+**Image Analysis (Gemini 2.5 Flash):**
+Gemini 2.5 Flash offers excellent vision capabilities at just $0.15/$0.60 per million tokens. That's ~6x cheaper than Claude Haiku while delivering comparable quality. Claude Haiku 4.5 serves as premium fallback if needed.
+
+**Code (DeepSeek v3.2):**
+DeepSeek excels at code generation. Claude Haiku provides a quality fallback for complex cases, with Kimi K2's reasoning capabilities as tertiary.
 
 ---
 
@@ -185,7 +199,7 @@ interface LumenRequest {
   input: string | Message[];
   tenant?: string;
   options?: {
-    model?: string;        // Override default model
+    model?: string; // Override default model
     maxTokens?: number;
     temperature?: number;
     stream?: boolean;
@@ -224,7 +238,7 @@ import { Lumen } from "@autumnsgrove/groveengine/lumen";
 const safety = await Lumen.inference({
   task: "moderation",
   input: userSubmittedContent,
-  tenant: "autumn"
+  tenant: "autumn",
 });
 
 if (!safety.content.includes("safe")) {
@@ -235,24 +249,27 @@ if (!safety.content.includes("safe")) {
 const suggestions = await Lumen.inference({
   task: "generation",
   input: [
-    { role: "system", content: "You are a writing assistant. Suggest improvements." },
-    { role: "user", content: draftText }
+    {
+      role: "system",
+      content: "You are a writing assistant. Suggest improvements.",
+    },
+    { role: "user", content: draftText },
   ],
   tenant: "autumn",
-  options: { maxTokens: 500 }
+  options: { maxTokens: 500 },
 });
 
 // Timeline summary
 const summary = await Lumen.inference({
   task: "summary",
   input: `Summarize these commits:\n${commitMessages.join("\n")}`,
-  tenant: "autumn"
+  tenant: "autumn",
 });
 
 // Embedding for search
 const embedding = await Lumen.inference({
   task: "embedding",
-  input: "How do I customize my theme?"
+  input: "How do I customize my theme?",
 });
 ```
 
@@ -262,7 +279,7 @@ const embedding = await Lumen.inference({
 const stream = await Lumen.inference({
   task: "chat",
   input: messages,
-  options: { stream: true }
+  options: { stream: true },
 });
 
 for await (const chunk of stream) {
@@ -281,13 +298,13 @@ Before any request leaves Grove:
 ```typescript
 const scrubbed = await scrubPII(input, {
   patterns: [
-    "email",      // user@domain.com → [EMAIL]
-    "phone",      // +1-555-123-4567 → [PHONE]
-    "ssn",        // 123-45-6789 → [SSN]
+    "email", // user@domain.com → [EMAIL]
+    "phone", // +1-555-123-4567 → [PHONE]
+    "ssn", // 123-45-6789 → [SSN]
     "creditCard", // 4111... → [CARD]
-    "ipAddress",  // 192.168.1.1 → [IP]
+    "ipAddress", // 192.168.1.1 → [IP]
   ],
-  customPatterns: tenant.piiPatterns // Per-tenant rules
+  customPatterns: tenant.piiPatterns, // Per-tenant rules
 });
 ```
 
@@ -300,7 +317,7 @@ const limits = {
   moderation: { rpm: 1000, daily: 50000 },
   generation: { rpm: 100, daily: 5000 },
   chat: { rpm: 60, daily: 2000 },
-  image: { rpm: 10, daily: 100 }
+  image: { rpm: 10, daily: 100 },
 };
 
 // Checked before routing
@@ -311,13 +328,13 @@ await rateLimiter.check(tenant, task);
 
 Integrated with Grove's tier system:
 
-| Tier | Moderation | Generation | Chat | Image |
-|------|------------|------------|------|-------|
-| Free | 100/day | 10/day | 5/day | 0 |
-| Seedling | 1,000/day | 100/day | 50/day | 10/day |
-| Sapling | 5,000/day | 500/day | 200/day | 50/day |
-| Oak | 20,000/day | 2,000/day | 1,000/day | 200/day |
-| Evergreen | Unlimited | 10,000/day | 5,000/day | 1,000/day |
+| Tier      | Moderation | Generation | Chat      | Image     |
+| --------- | ---------- | ---------- | --------- | --------- |
+| Free      | 100/day    | 10/day     | 5/day     | 0         |
+| Seedling  | 1,000/day  | 100/day    | 50/day    | 10/day    |
+| Sapling   | 5,000/day  | 500/day    | 200/day   | 50/day    |
+| Oak       | 20,000/day | 2,000/day  | 1,000/day | 200/day   |
+| Evergreen | Unlimited  | 10,000/day | 5,000/day | 1,000/day |
 
 ---
 
@@ -344,6 +361,7 @@ All responses follow a consistent format regardless of provider:
 ### Usage Logging
 
 Every request is logged (without content) for:
+
 - Tenant usage tracking
 - Cost attribution
 - Rate limit enforcement
@@ -358,7 +376,7 @@ await logUsage({
   outputTokens: response.metadata.outputTokens,
   latencyMs: response.metadata.latencyMs,
   cached: response.metadata.cached,
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 
@@ -386,6 +404,7 @@ Lumen uses Cloudflare AI Gateway as its underlying infrastructure:
 ```
 
 **Benefits:**
+
 - **Caching:** Semantic caching reduces redundant calls
 - **Logging:** Full request/response logging (redacted)
 - **Analytics:** Cost tracking per gateway
@@ -397,46 +416,49 @@ Lumen uses Cloudflare AI Gateway as its underlying infrastructure:
 
 ## Provider Configuration
 
-### Workers AI (Moderation, Embeddings)
+Lumen uses just two providers: OpenRouter as the universal gateway for all primary inference, and Cloudflare Workers AI as a fast, free fallback layer.
 
-```typescript
-const workersAI = {
-  binding: env.AI, // Cloudflare Workers AI binding
-  models: {
-    moderation: "@cf/meta/llama-guard-3-8b",
-    embedding: "@cf/baai/bge-base-en-v1.5"
-  }
-};
-```
-
-### OpenRouter (Generation, Chat)
+### OpenRouter (Primary Provider)
 
 ```typescript
 const openRouter = {
   baseUrl: "https://openrouter.ai/api/v1",
   apiKey: env.OPENROUTER_API_KEY,
   models: {
-    generation: "deepseek/deepseek-chat",
-    chat: "deepseek/deepseek-chat",
-    summary: "deepseek/deepseek-chat"
+    // Generation/Chat/Summary
+    generation: "deepseek/deepseek-v3.2",
+    chat: "deepseek/deepseek-v3.2",
+    summary: "deepseek/deepseek-v3.2",
+    // Moderation
+    moderation: "meta-llama/llama-guard-4-12b",
+    // Image
+    image: "google/gemini-2.5-flash",
+    // Code
+    code: "deepseek/deepseek-v3.2",
+    // Embeddings
+    embedding: "baai/bge-m3",
+    // Fallback models
+    fallback_chat: "moonshotai/kimi-k2-0905",
+    fallback_vision: "anthropic/claude-haiku-4.5",
+    fallback_embed: "qwen/qwen3-embedding-8b",
   },
   headers: {
     "HTTP-Referer": "https://grove.place",
-    "X-Title": "Grove"
-  }
+    "X-Title": "Grove",
+  },
 };
 ```
 
-### Anthropic Direct (Image, Code)
+### Workers AI (Fallback Provider)
 
 ```typescript
-const anthropic = {
-  baseUrl: "https://api.anthropic.com/v1",
-  apiKey: env.ANTHROPIC_API_KEY,
+const workersAI = {
+  binding: env.AI, // Cloudflare Workers AI binding
   models: {
-    image: "claude-sonnet-4-20250514",
-    code: "claude-sonnet-4-20250514"
-  }
+    moderation: "@cf/meta/llama-guard-3-8b", // Fallback moderation
+    moderation_alt: "@hf/google/shieldgemma-2b", // Tertiary moderation
+    embedding: "@cf/baai/bge-base-en-v1.5", // Fallback embeddings
+  },
 };
 ```
 
@@ -460,15 +482,31 @@ type LumenError =
 
 ```typescript
 const fallbackChains = {
-  generation: ["deepseek/deepseek-chat", "anthropic/claude-sonnet-4", "meta-llama/llama-3.3-70b"],
-  moderation: ["@cf/meta/llama-guard-3-8b", "google/shieldgemma-2-2b"],
-  chat: ["deepseek/deepseek-chat", "anthropic/claude-sonnet-4"]
+  generation: [
+    { provider: "openrouter", model: "deepseek/deepseek-v3.2" },
+    { provider: "openrouter", model: "moonshotai/kimi-k2-0905" },
+    { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct" },
+  ],
+  moderation: [
+    { provider: "openrouter", model: "meta-llama/llama-guard-4-12b" },
+    { provider: "cloudflare-ai", model: "@cf/meta/llama-guard-3-8b" },
+    { provider: "cloudflare-ai", model: "@hf/google/shieldgemma-2b" },
+  ],
+  image: [
+    { provider: "openrouter", model: "google/gemini-2.5-flash" },
+    { provider: "openrouter", model: "anthropic/claude-haiku-4.5" },
+  ],
+  embedding: [
+    { provider: "openrouter", model: "baai/bge-m3" },
+    { provider: "openrouter", model: "qwen/qwen3-embedding-8b" },
+    { provider: "cloudflare-ai", model: "@cf/baai/bge-base-en-v1.5" },
+  ],
 };
 
 // If primary fails, try fallbacks in order
-for (const model of fallbackChains[task]) {
+for (const { provider, model } of fallbackChains[task]) {
   try {
-    return await callProvider(model, input);
+    return await callProvider(provider, model, input);
   } catch (e) {
     if (isRetryable(e)) continue;
     throw e;
@@ -484,26 +522,23 @@ for (const model of fallbackChains[task]) {
 
 ```
 packages/engine/src/lib/lumen/
-├── index.ts              # Public exports
+├── index.ts              # Public exports & factory
 ├── types.ts              # Type definitions
+├── client.ts             # LumenClient class
 ├── router.ts             # Task → model routing
+├── config.ts             # Task registry & model configs
+├── errors.ts             # Custom error types
 ├── providers/
-│   ├── index.ts          # Provider registry
-│   ├── workers-ai.ts     # CF Workers AI
-│   ├── openrouter.ts     # OpenRouter
-│   ├── anthropic.ts      # Anthropic Direct
-│   └── fireworks.ts      # Fireworks AI
+│   ├── index.ts          # Provider factory & registry
+│   ├── types.ts          # Provider interface
+│   ├── cloudflare-ai.ts  # CF Workers AI (fallback)
+│   └── openrouter.ts     # OpenRouter (primary)
 ├── pipeline/
-│   ├── pre-process.ts    # PII scrubbing, rate limiting
-│   ├── post-process.ts   # Normalization, logging
-│   └── scrubber.ts       # PII detection patterns
-├── config/
-│   ├── tasks.ts          # Task definitions
-│   ├── models.ts         # Model configurations
-│   └── limits.ts         # Rate/quota limits
-└── utils/
-    ├── tokens.ts         # Token counting
-    └── cache.ts          # Cache key generation
+│   ├── preprocessor.ts   # PII scrubbing, input validation
+│   └── postprocessor.ts  # Response normalization, usage logging
+└── quota/
+    ├── tracker.ts        # D1-backed usage tracking
+    └── limits.ts         # Tier-based daily limits
 ```
 
 ### Package Exports
@@ -534,30 +569,42 @@ packages/engine/src/lib/lumen/
 
 ## Cost Analysis
 
-### Per-Request Costs (Estimated)
+### Per-Million Token Costs (USD)
 
-| Task | Model | Input (1K tokens) | Output (1K tokens) |
-|------|-------|-------------------|-------------------|
-| Moderation | LlamaGuard 3 | ~$0.0001 | ~$0.0001 |
-| Generation | DeepSeek v3 | ~$0.0003 | ~$0.001 |
-| Summary | DeepSeek v3 | ~$0.0003 | ~$0.001 |
-| Embedding | bge-base | ~$0.00001 | - |
-| Chat | DeepSeek v3 | ~$0.0003 | ~$0.001 |
-| Image | Claude Sonnet | ~$0.003 | ~$0.015 |
+| Task                    | Model            | Input | Output |
+| ----------------------- | ---------------- | ----- | ------ |
+| Generation/Chat/Summary | DeepSeek v3.2    | $0.25 | $0.38  |
+| Fallback                | Kimi K2          | $0.39 | $1.90  |
+| Tertiary                | Llama 3.3 70B    | $0.10 | $0.32  |
+| Image                   | Gemini 2.5 Flash | $0.15 | $0.60  |
+| Image Fallback          | Claude Haiku 4.5 | $1.00 | $5.00  |
+| Moderation              | LlamaGuard 4     | $0.10 | $0.10  |
+| Embedding               | BGE-M3           | $0.02 | -      |
+| Embedding Fallback      | Qwen3 Embed      | $0.02 | -      |
+| CF Workers AI           | All models       | Free  | Free   |
+
+### Cost Comparison: Old vs New
+
+| Task            | Old (Claude Sonnet) | New (Primary) | Savings |
+| --------------- | ------------------- | ------------- | ------- |
+| Image Analysis  | $3.00/$15.00        | $0.15/$0.60   | ~95%    |
+| Code Generation | $3.00/$15.00        | $0.25/$0.38   | ~97%    |
+| Generation      | $0.30/$1.00         | $0.25/$0.38   | ~60%    |
 
 ### Monthly Estimates (Per Active User)
 
-| Usage Level | Moderation | Generation | Chat | Total |
-|-------------|------------|------------|------|-------|
-| Light | 100 calls | 20 calls | 10 calls | ~$0.05 |
-| Medium | 500 calls | 100 calls | 50 calls | ~$0.25 |
-| Heavy | 2000 calls | 500 calls | 200 calls | ~$1.00 |
+| Usage Level | Moderation | Generation | Chat      | Image    | Total  |
+| ----------- | ---------- | ---------- | --------- | -------- | ------ |
+| Light       | 100 calls  | 20 calls   | 10 calls  | 5 calls  | ~$0.02 |
+| Medium      | 500 calls  | 100 calls  | 50 calls  | 20 calls | ~$0.10 |
+| Heavy       | 2000 calls | 500 calls  | 200 calls | 50 calls | ~$0.40 |
 
 ---
 
 ## Implementation Checklist
 
 ### Phase 1: Foundation
+
 - [ ] Create `packages/engine/src/lib/lumen/` structure
 - [ ] Define types and interfaces
 - [ ] Implement task router
@@ -566,6 +613,7 @@ packages/engine/src/lib/lumen/
 - [ ] Basic pre-processing (rate limiting)
 
 ### Phase 2: Integration
+
 - [ ] Migrate Thorn to use Lumen for moderation
 - [ ] Migrate Wisp to use Lumen for generation
 - [ ] Migrate Timeline curio to use Lumen for summaries
@@ -573,6 +621,7 @@ packages/engine/src/lib/lumen/
 - [ ] Add quota management
 
 ### Phase 3: Production
+
 - [ ] Add Cloudflare AI Gateway integration
 - [ ] Implement fallback chains
 - [ ] Add comprehensive error handling
@@ -580,6 +629,7 @@ packages/engine/src/lib/lumen/
 - [ ] Performance monitoring via Vista
 
 ### Phase 4: Advanced
+
 - [ ] Streaming support
 - [ ] Semantic caching
 - [ ] A/B testing for models
@@ -598,8 +648,8 @@ packages/engine/src/lib/lumen/
 
 ---
 
-*Light from the void.*
+_Light from the void._
 
 **Last updated:** January 2026
-**Status:** Specification Draft
+**Status:** Implementation Complete (PR #415)
 **Author:** Autumn Brown

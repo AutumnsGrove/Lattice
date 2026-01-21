@@ -139,32 +139,47 @@ We share limited data with trusted service providers who help us operate Grove:
 | **LemonSqueezy** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
-| **Fireworks AI / Cerebras / Groq** | Text content moderation (Thorn) | Post content (zero data retention) |
-| **Together.ai / FAL.ai** | Image content moderation (Petal) | Uploaded images (zero data retention) |
+| **Lumen AI Gateway** | All AI processing (see below) | Content for moderation, writing assistance (zero data retention) |
 
 These providers are contractually bound to protect your data and use it only for the services they provide to us.
 
 **Changes to Providers:** If we add new categories of service providers that process your data, we will notify you via email before the change takes effect.
 
-**Content Moderation Privacy:**
+**AI Processing Privacy (Lumen AI Gateway):**
 
-Grove operates two automated content moderation systems to enforce our Acceptable Use Policy:
+Grove uses Lumen, our unified AI gateway, to process AI-related features including content moderation, writing assistance, and other AI-powered functionality. Lumen routes requests to appropriate providers while maintaining our strict privacy commitments.
+
+**How Lumen Works:**
+- All AI requests are routed through Lumen, Grove's unified gateway
+- Lumen uses task-based routing to select the most appropriate provider for each request
+- Providers include: **Cloudflare Workers AI** (local processing) and **OpenRouter** (which routes to various AI models)
+- Personal identifiable information (PII) is automatically scrubbed before processing
+- **Zero Data Retention (ZDR)** enabled on all providers—your content is never stored
+- Your content is never used to train AI models
+- Usage metadata (token counts, not content) is tracked for quota management
+
+**Content Moderation Systems:**
 
 **Thorn (Text Content Moderation)**
 - Reviews blog posts and written content
-- Processed through privacy-respecting LLM inference providers
-- **Zero Data Retention (ZDR)** enabled—your text is never stored by the provider
+- Processed through Lumen with ZDR-compliant providers
 - Your writing is never used to train AI models
 - Only the moderation decision is retained (pass, flag, or escalate), not your content
 - No human reviews your content unless the automated system cannot reach a confident decision
 
 **Petal (Image Content Moderation)**
 - Reviews uploaded images (user photos, blog images)
-- Processed through privacy-respecting vision AI providers
-- **Zero Data Retention (ZDR)** enabled—your images are deleted immediately after processing
+- Processed through Lumen with ZDR-compliant vision providers
+- Your images are deleted immediately after processing
 - Your images are never used to train AI models
 - Images are encrypted in transit (TLS 1.2+)
 - Only the moderation decision is retained, not the image itself
+
+**Writing Assistance (Wisp)**
+- Helps with grammar, tone, and style suggestions
+- Processed through Lumen with ZDR-compliant providers
+- Your text is never stored after processing
+- Your writing is never used to train AI models
 
 **CSAM Detection and Legal Reporting (Petal Layer 1)**
 
@@ -223,6 +238,7 @@ When you delete your account:
 | Rate limiting data | 1 minute |
 | Text moderation (Thorn) | Immediate deletion after review; decision retained 90 days |
 | Image moderation (Petal) | Immediate deletion after review; decision retained 90 days |
+| AI usage metadata (Lumen) | Token counts and task types retained 90 days; content never stored |
 | CSAM hash (if match detected) | Permanent (legal requirement for NCMEC reporting) |
 | Email signup list | Until you unsubscribe |
 | Payment records | As required by law (typically 7 years) |
