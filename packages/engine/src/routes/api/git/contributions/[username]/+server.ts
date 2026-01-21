@@ -22,7 +22,10 @@ import {
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 
-// Rate limit: 60 requests per minute (external API, expensive)
+// Rate limit: 60 requests per minute per IP
+// Calls GitHub GraphQL API (5000 points/hour, each query ~1-2 points)
+// This endpoint is expensive as it fetches full contribution calendar
+// KV caching is essential here to avoid hitting GitHub limits
 const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
 
 export const GET: RequestHandler = async ({

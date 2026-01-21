@@ -56,7 +56,11 @@ interface GitStatsResponse {
   errors?: string[];
 }
 
-// Rate limit: 60 requests per minute (external API, expensive)
+// Rate limit: 60 requests per minute per IP
+// This endpoint calls GitHub's REST and GraphQL APIs which have their own limits:
+// - REST API: 60 req/hour unauthenticated, 5000 req/hour with token
+// - GraphQL API: 5000 points/hour (each query ~1-2 points)
+// We cache responses in KV to reduce actual API calls, so 60/min is safe.
 const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
 
 /**

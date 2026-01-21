@@ -12,7 +12,6 @@ import {
   checkRateLimit,
   rateLimitHeaders,
   buildRateLimitKey,
-  getClientIP,
 } from "$lib/server/rate-limits/index.js";
 
 interface ConfigRow {
@@ -24,13 +23,57 @@ interface ConfigRow {
   settings: string | null;
 }
 
-// Rate limit: 30 requests per minute for config reads
+interface ParsedConfig {
+  enabled: boolean;
+  githubUsername: string | null;
+  showOnHomepage: boolean;
+  cacheTtlSeconds: number;
+  settings: Record<string, unknown>;
+}
+
+// Rate limits chosen to balance usability with API protection:
+// - Config reads are cheap (local DB) but we limit to prevent abuse
+// - Config writes are more expensive (DB write + potential cache invalidation)
 const READ_LIMIT = { limit: 30, windowSeconds: 60 };
-// Rate limit: 10 requests per minute for config writes
 const WRITE_LIMIT = { limit: 10, windowSeconds: 60 };
 
+/**
+ * Fetch and transform tenant config from database.
+ * Returns default config if table doesn't exist or no config found.
+ */
+async function getConfigForTenant(
+  db: D1Database,
+  tenantId: string,
+): Promise<ParsedConfig> {
+  try {
+    const config = await queryOne<ConfigRow>(
+      db,
+      `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
+       FROM git_dashboard_config
+       WHERE tenant_id = ?`,
+      [tenantId],
+    );
+
+    if (!config) {
+      return { ...DEFAULT_GIT_CONFIG, githubUsername: null, settings: {} };
+    }
+
+    return {
+      enabled: Boolean(config.enabled),
+      githubUsername: config.github_username,
+      showOnHomepage: Boolean(config.show_on_homepage),
+      cacheTtlSeconds: config.cache_ttl_seconds,
+      settings: config.settings ? JSON.parse(config.settings) : {},
+    };
+  } catch (err) {
+    // Table may not exist if migration hasn't run yet - return defaults
+    console.warn("git_dashboard_config query failed, returning defaults:", err);
+    return { ...DEFAULT_GIT_CONFIG, githubUsername: null, settings: {} };
+  }
+}
+
 // GET - Get git dashboard config
-export const GET: RequestHandler = async ({ platform, locals, request }) => {
+export const GET: RequestHandler = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
   const kv = platform?.env?.CACHE_KV;
   const tenantId = locals.tenantId;
@@ -43,7 +86,8 @@ export const GET: RequestHandler = async ({ platform, locals, request }) => {
     throw error(400, "Tenant context required");
   }
 
-  // Rate limiting
+  // Rate limiting (only if KV available)
+  let rateLimitResult = null;
   if (kv) {
     const { result, response } = await checkRateLimit({
       kv,
@@ -51,99 +95,20 @@ export const GET: RequestHandler = async ({ platform, locals, request }) => {
       ...READ_LIMIT,
     });
     if (response) return response;
-
-    // Continue with rate limit headers on success
-    let config: ConfigRow | null = null;
-    try {
-      config = await queryOne<ConfigRow>(
-        db,
-        `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
-         FROM git_dashboard_config
-         WHERE tenant_id = ?`,
-        [tenantId],
-      );
-    } catch (err) {
-      // Table may not exist if migration hasn't run yet - return defaults
-      console.warn(
-        "git_dashboard_config query failed, returning defaults:",
-        err,
-      );
-      return json(
-        {
-          config: {
-            ...DEFAULT_GIT_CONFIG,
-            githubUsername: null,
-          },
-        },
-        { headers: rateLimitHeaders(result, READ_LIMIT.limit) },
-      );
-    }
-
-    if (!config) {
-      return json(
-        {
-          config: {
-            ...DEFAULT_GIT_CONFIG,
-            githubUsername: null,
-          },
-        },
-        { headers: rateLimitHeaders(result, READ_LIMIT.limit) },
-      );
-    }
-
-    return json(
-      {
-        config: {
-          enabled: Boolean(config.enabled),
-          githubUsername: config.github_username,
-          showOnHomepage: Boolean(config.show_on_homepage),
-          cacheTtlSeconds: config.cache_ttl_seconds,
-          settings: config.settings ? JSON.parse(config.settings) : {},
-        },
-      },
-      { headers: rateLimitHeaders(result, READ_LIMIT.limit) },
-    );
+    rateLimitResult = result;
   }
 
-  // No KV: proceed without rate limiting
-  let config: ConfigRow | null = null;
-  try {
-    config = await queryOne<ConfigRow>(
-      db,
-      `SELECT tenant_id, enabled, github_username, show_on_homepage, cache_ttl_seconds, settings
-       FROM git_dashboard_config
-       WHERE tenant_id = ?`,
-      [tenantId],
-    );
-  } catch (err) {
-    // Table may not exist if migration hasn't run yet - return defaults
-    console.warn("git_dashboard_config query failed, returning defaults:", err);
-    return json({
-      config: {
-        ...DEFAULT_GIT_CONFIG,
-        githubUsername: null,
-      },
-    });
-  }
+  // Fetch config (helper handles missing table gracefully)
+  const config = await getConfigForTenant(db, tenantId);
 
-  if (!config) {
-    return json({
-      config: {
-        ...DEFAULT_GIT_CONFIG,
-        githubUsername: null,
-      },
-    });
-  }
-
-  return json({
-    config: {
-      enabled: Boolean(config.enabled),
-      githubUsername: config.github_username,
-      showOnHomepage: Boolean(config.show_on_homepage),
-      cacheTtlSeconds: config.cache_ttl_seconds,
-      settings: config.settings ? JSON.parse(config.settings) : {},
+  return json(
+    { config },
+    {
+      headers: rateLimitResult
+        ? rateLimitHeaders(rateLimitResult, READ_LIMIT.limit)
+        : undefined,
     },
-  });
+  );
 };
 
 // PUT - Update git dashboard config

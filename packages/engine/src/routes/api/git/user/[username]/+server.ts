@@ -21,7 +21,9 @@ import {
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 
-// Rate limit: 60 requests per minute (external API)
+// Rate limit: 60 requests per minute per IP
+// Calls GitHub REST API (60 req/hour unauthenticated, 5000 with token)
+// KV caching reduces actual API calls significantly
 const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
 
 export const GET: RequestHandler = async ({ params, platform, request }) => {
