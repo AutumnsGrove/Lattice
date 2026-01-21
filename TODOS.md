@@ -578,6 +578,53 @@ See full spec for Content Coordination, Meadow Social, and Analytics phases.
 - [ ] Write testing documentation
 - [ ] Write AI Development Process Guide
 
+## Museum Documentation for Knowledge Base
+> **Vision:** Documentation so elegant that anyone could read it, not just developers
+> **Reference:** [AutumnsGrove Museum](https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md)
+> **Skill:** `museum-documentation` — narrative-driven documentation as guided exhibits
+
+The AutumnsGrove Museum transforms archived code into educational exhibits with:
+- **ASCII art headers** that visualize each concept
+- **Narrative voice** written "for Ariana" (personalized learner)
+- **Guided tours** through architecture, not just API references
+- **"Patterns Worth Stealing"** sections for practical takeaways
+- **Flow diagrams** showing request lifecycles and data movement
+- **"Lessons Learned"** reflecting real development insights
+
+**Goal:** Deploy Museum-style documentation to Grove's public Knowledge Base
+
+**Core exhibits to create:**
+- [ ] Create `docs/museum/` directory structure for exhibit files
+- [ ] Write Museum entrance (MUSEUM.md) introducing GroveEngine architecture
+- [ ] Create exhibits for key systems:
+  - [ ] **The Roots** — Multi-tenant architecture and tenant isolation
+  - [ ] **The Canopy** — UI component system and design tokens
+  - [ ] **The Heartwood** — Authentication and Heartwood integration
+  - [ ] **The Sap** — Data flow, D1/KV/R2 storage patterns
+  - [ ] **The Seasons** — Theming system and seasonal decorations
+  - [ ] **The Grafts** — Feature flags and UI grafts system
+  - [ ] **The Curios** — Curio architecture (Journey, Timeline, Gallery)
+- [ ] Add Museum section to landing Knowledge Base (publicly accessible)
+
+**🌿 VINES ON EXHIBITS — Curator's Notes**
+> Use the Gutter system on documentation! Personal annotations alongside the exhibits.
+
+- [ ] Enable gutter content rendering on Museum exhibit pages
+- [ ] Write curator notes for each exhibit:
+  - Personal stories ("This pattern saved us during the HN launch")
+  - Historical context ("Originally this was 3 separate services")
+  - Lessons learned the hard way ("Don't skip this step. Trust me.")
+  - Links to related commits/PRs that tell the story
+  - Dedications (exhibits written for specific people, like Ariana)
+- [ ] Consider different vine types for Museum context:
+  - `curator-note` — Personal commentary from the grove keeper
+  - `historical` — "This was added in v0.3 after..."
+  - `warning` — "If you skip this, you'll hit the same bug we did"
+  - `story` — Longer narratives about why something exists
+- [ ] Add "last walked" dates (when an exhibit was last verified/updated)
+
+**Why this matters:** Technical documentation that reads like a storybook invites exploration. Non-developers can understand Grove's philosophy. Developers can learn patterns without digging through code. And the gutter notes make it feel *inhabited* — someone cared enough to leave their thoughts in the margins.
+
 ## Design Documentation Gaps
 | Document | Priority | Plan Section |
 |----------|----------|--------------|

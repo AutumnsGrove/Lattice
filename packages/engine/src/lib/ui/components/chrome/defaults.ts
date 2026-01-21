@@ -19,6 +19,7 @@ import {
   HeartHandshake,
   Activity,
   Blinds,
+  Coffee,
 } from "lucide-svelte";
 
 // =============================================================================
@@ -56,7 +57,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
   {
-    href: "https://autumnsgrove.com/blog",
+    href: "https://autumn.grove.place/blog",
     label: "Blog",
     icon: PenLine,
     external: true,
@@ -73,7 +74,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
   { href: "/forest", label: "Forest", icon: Trees },
   {
-    href: "https://autumnsgrove.com/blog",
+    href: "https://autumn.grove.place/blog",
     label: "Blog",
     icon: PenLine,
     external: true,
@@ -105,6 +106,7 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
 export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
     label: "GitHub",
@@ -137,6 +139,7 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
     label: "GitHub",

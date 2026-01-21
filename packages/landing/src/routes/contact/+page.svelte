@@ -79,7 +79,7 @@
 
 			<!-- Blog -->
 			<a
-				href="https://autumnsgrove.com/blog"
+				href="https://autumn.grove.place/blog"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
@@ -90,6 +90,20 @@
 				<div class="flex-1">
 					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Read my blog</p>
 					<p class="text-sm text-foreground-subtle">Development updates, thoughts, and stories</p>
+				</div>
+			</a>
+
+			<!-- Support -->
+			<a
+				href="/support"
+				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
+			>
+				<div class="p-3 rounded-lg bg-accent-subtle/20">
+					<Heart class="w-5 h-5 text-accent-muted" />
+				</div>
+				<div class="flex-1">
+					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Support Grove</p>
+					<p class="text-sm text-foreground-subtle">Help keep the forest growing</p>
 				</div>
 			</a>
 		</div>
