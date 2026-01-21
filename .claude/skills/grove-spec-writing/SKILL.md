@@ -415,6 +415,22 @@ A porch is where you sit and talk. You come up the steps, have a seat, and the g
 4. **grove-spec-writing** (this skill) — Run validation checklist
 5. Review with fresh eyes: Does it feel like a storybook entry?
 
+### When to Use museum-documentation Instead
+
+This skill (grove-spec-writing) is for **internal technical specifications**: architecture decisions, system design, implementation plans. Documentation for developers.
+
+Use **museum-documentation** when writing for **Wanderers who want to understand**:
+
+| Use grove-spec-writing | Use museum-documentation |
+|-----------------------|-------------------------|
+| Technical specifications | "How it works" for curious visitors |
+| Architecture decisions | Codebase guided tours |
+| Implementation plans | Knowledge base exhibits |
+| Internal system docs | Narrative technical explanations |
+
+If the reader is a **developer implementing something**, use this skill.
+If the reader is a **Wanderer exploring the forest**, use museum-documentation.
+
 ---
 
 ## Quick Reference

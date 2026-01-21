@@ -372,6 +372,23 @@ When **grove-ui-design** or **walking-through-the-grove** need written content, 
 3. Write the content following these principles
 4. Return to design/naming work
 
+### When to Use museum-documentation Instead
+
+This skill (grove-documentation) is for **quick, functional text**: help articles, error messages, tooltips, onboarding copy. Content that's read in passing.
+
+Use **museum-documentation** when you need **narrative, explorable documentation**:
+
+| Use grove-documentation | Use museum-documentation |
+|------------------------|-------------------------|
+| Help center articles | Knowledge base "how it works" |
+| Tooltips and labels | Codebase guided tours |
+| Error messages | System architecture explains |
+| Onboarding flows | Technical deep-dives for curious Wanderers |
+| Quick-reference guides | Exhibit-style documentation |
+
+If the reader should **skim and act**, use this skill.
+If the reader should **explore and understand**, use museum-documentation.
+
 ---
 
 ## Examples

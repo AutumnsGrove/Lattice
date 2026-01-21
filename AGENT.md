@@ -419,6 +419,12 @@ const posts = await tenantDb.queryMany<Post>('posts', 'status = ?', ['published'
 - **When reviewing specs for completeness** → Use skill: `grove-spec-writing`
 - **When standardizing spec formatting** → Use skill: `grove-spec-writing`
 
+### Museum Documentation
+- **When writing documentation meant to be read by Wanderers** → Use skill: `museum-documentation`
+- **When creating "how it works" content for knowledge base** → Use skill: `museum-documentation`
+- **When documenting a codebase or system for curious visitors** → Use skill: `museum-documentation`
+- **When writing elegant, narrative-driven technical explanations** → Use skill: `museum-documentation`
+
 ### Grove Naming
 - **When naming a new service or feature** → Use skill: `walking-through-the-grove`
 - **When finding a Grove-themed name** → Use skill: `walking-through-the-grove`
@@ -472,6 +478,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `grove-ui-design` | Glassmorphism, seasons, forests, warm UI |
 | `grove-documentation` | Grove voice, help articles, user-facing text |
 | `grove-spec-writing` | Technical specifications with Grove formatting |
+| `museum-documentation` | Elegant, narrative documentation for Wanderers |
 | `walking-through-the-grove` | Finding Grove-themed names for new services |
 | `npm-publish` | npm package publishing workflow |
 | `research-strategy` | Systematic research |
