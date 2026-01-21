@@ -9,6 +9,29 @@
 # 🚨 LEGAL COMPLIANCE — BLOCKING FOR PRODUCTION
 
 > **CRITICAL:** These items MUST be completed before launching image uploads to real users.
+> **Current Strategy:** Image uploads disabled by default via `image_uploads_enabled` feature flag.
+> Can be enabled per-tenant for trusted beta users via grafts.
+
+## PhotoDNA Integration (Layer 1 Hash-Based Detection)
+> **Spec Requirement:** Layer 1 should use hash-based detection (PhotoDNA) as primary CSAM detection
+> **Current State:** Vision-based interim solution, waiting for PhotoDNA approval
+> **Location:** `packages/engine/src/lib/server/petal/layer1-csam.ts`
+
+### Application Status
+- [x] **Created Microsoft account** for PhotoDNA application (autumn@grove.place) ✅ Jan 21, 2026
+- [ ] **Complete PhotoDNA application** at https://myphotodna.microsoftmoderator.com/Profile
+  - Use legal name on application (it's a legal vetting process)
+  - Company: Grove / Autumn's Grove LLC
+  - Website: grove.place
+  - Email: autumn@grove.place
+- [ ] Await approval (~1-2 weeks via direct application, ~1 week via Tech Coalition)
+- [ ] Receive API credentials from Microsoft
+- [ ] Integrate PhotoDNA API into Layer 1 (replace vision-based detection as primary)
+- [ ] Enable `image_uploads_enabled` flag globally once integrated
+
+### Alternative Path (if needed)
+- Tech Coalition: tech@technologycoalition.org (~1 week response time)
+- Thorn Safer: https://www.thorn.org/safer/
 
 ## NCMEC CyberTipline Integration
 > **Requirement:** 18 U.S.C. § 2258A mandates reporting CSAM to NCMEC within 24 hours
@@ -27,6 +50,17 @@
 - Cloudflare CSAM Scanning: https://developers.cloudflare.com/images/csam-scanning/
 - PhotoDNA (Microsoft): https://www.microsoft.com/en-us/photodna
 
+## Pre-Deployment Checklist (Before Enabling Uploads)
+> **From PR #412 reviews** — complete before enabling `image_uploads_enabled` for any tenant
+
+- [ ] **Enable Cloudflare CSAM Scanning Tool** in dashboard (Zone → Security → CSAM Scanning)
+  - Enable for `grove.place` and `cdn.autumnsgrove.com`
+- [ ] **Verify Workers AI binding** in `wrangler.toml`: `[ai]\nbinding = "AI"`
+- [ ] **Set TOGETHER_API_KEY** in Cloudflare secrets (fallback provider)
+- [ ] **Run migrations** on production D1: `030_petal.sql`, `031_petal_upload_gate.sql`
+- [ ] **Test failover** - verify Together.ai fallback works if Workers AI fails
+- [ ] **Document manual review process** for flagged accounts
+
 ## Production Monitoring for Petal
 > **Current State:** Basic logging implemented, needs production monitoring
 
@@ -35,6 +69,7 @@
 - [ ] Track high block rates (potential attack or false positives)
 - [ ] Alert on classification parse failures
 - [ ] Dashboard for Petal security events
+- [ ] Add log retention cleanup (90-day TTL for `petal_security_log`)
 
 ---
 
