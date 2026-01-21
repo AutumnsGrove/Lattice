@@ -35,12 +35,13 @@ type: tech-spec
 
 Grove's per-tenant customization system. Grafts are the deliberate act of joining new capabilities onto existing trees. Not plugins users upload, but trusted configurations the Wayfinder enables for specific groves.
 
-There are two types of Grafts:
+There are three types of Grafts:
 
 - **Feature Grafts** control *what* capabilities a tenant receives (flags, rollouts, tier-gating)
 - **UI Grafts** provide *how* those capabilities render (reusable components)
+- **Greenhouse mode** determines *who* gets early access (tenant classification for internal testing)
 
-Want JXL encoding? Feature Graft it on. Need a pricing page? Splice in the PricingGraft.
+Want JXL encoding? Feature Graft it on. Need a pricing page? Splice in the PricingGraft. Testing a feature before rollout? Put the tenant in the greenhouse.
 
 **Public Name:** Grafts
 **Internal Name:** GroveGrafts
@@ -982,7 +983,279 @@ import {
 
 ---
 
-# Part III: Configuration & Operations
+# Part III: Greenhouse Mode
+
+Greenhouse mode is Grove's approach to internal testing and early access—an entire abstraction layer above Feature Grafts and UI Grafts. Where Feature Grafts ask "is X enabled?" and UI Grafts answer "render X," Greenhouse mode asks a more fundamental question: "is this tenant in the greenhouse?"
+
+```
+                              🌱
+                    ┌─────────────────────┐
+                    │                     │
+                    │    THE GREENHOUSE   │
+                    │                     │
+                    │   ╭───────────────╮ │
+                    │   │ 🧪 Seedlings  │ │
+                    │   │  under glass  │ │
+                    │   ╰───────────────╯ │
+                    │                     │
+                    └─────────────────────┘
+                              ↓
+           Features mature, then propagate to...
+                              ↓
+                    ┌─────────────────────┐
+                    │                     │
+                    │      THE GROVE      │
+                    │                     │
+                    │   🌳  🌲  🌳  🌲    │
+                    │   Production trees  │
+                    │                     │
+                    └─────────────────────┘
+
+        The greenhouse shelters experiments
+           before they're ready for the grove.
+```
+
+> *In gardening, a greenhouse shelters seedlings from harsh conditions until they're strong enough to transplant. Features grown under glass can be observed, adjusted, and hardened before facing the wild.*
+
+**Public Name:** Greenhouse mode
+**Internal Name:** Dave mode[^1]
+
+[^1]: Named after the first test tenant in Grove. "Dave" was chosen as the most wonderfully mundane, generic example name imaginable during early development. When it came time to name the internal testing mode, "Dave mode" felt perfect: unpretentious, memorable, and a small tribute to Grove's earliest days.
+
+---
+
+## The Abstraction Layers
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     The Three Layers of Grafts                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Layer 3: GREENHOUSE MODE                                          │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  "Who gets early access?"                                   │   │
+│   │  ├── Tenant classification (greenhouse vs. production)      │   │
+│   │  ├── Automatic feature inheritance                          │   │
+│   │  └── Testing isolation                                      │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│              ↓ Greenhouse tenants automatically receive...          │
+│                                                                     │
+│   Layer 2: FEATURE GRAFTS                                           │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  "What capabilities are enabled?"                           │   │
+│   │  ├── Boolean flags                                          │   │
+│   │  ├── Percentage rollouts                                    │   │
+│   │  ├── Tier-gated features                                    │   │
+│   │  └── A/B variants (cultivars)                               │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│              ↓ Enabled features can use...                          │
+│                                                                     │
+│   Layer 1: UI GRAFTS                                                │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  "How do features render?"                                  │   │
+│   │  ├── PricingGraft                                           │   │
+│   │  ├── NavGraft (planned)                                     │   │
+│   │  └── FooterGraft (planned)                                  │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Why three layers?**
+
+- **UI Grafts** are granular: individual components spliced onto pages
+- **Feature Grafts** are specific: individual feature flags for individual tenants
+- **Greenhouse mode** is holistic: tenant-wide early access classification
+
+A tenant in greenhouse mode doesn't need individual Feature Grafts for each experimental feature—they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on *tenant classification*, not feature configuration.
+
+---
+
+## Greenhouse Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Greenhouse Mode Evaluation                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Request arrives with tenant context                               │
+│              ↓                                                      │
+│   ┌─────────────────────────┐                                       │
+│   │  Is tenant in           │                                       │
+│   │  greenhouse mode?       │                                       │
+│   └─────────────────────────┘                                       │
+│         │                                                           │
+│         ├── YES → All greenhouse_only features enabled              │
+│         │         ┌─────────────────────────────────────────────┐   │
+│         │         │  Feature Graft evaluation includes:         │   │
+│         │         │  • Standard rules (tier, percentage, etc.)  │   │
+│         │         │  • PLUS greenhouse_only features            │   │
+│         │         │  • PLUS experimental UI components          │   │
+│         │         └─────────────────────────────────────────────┘   │
+│         │                                                           │
+│         └── NO → Standard Feature Graft evaluation                  │
+│                  (greenhouse_only features excluded)                │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Database Schema (Greenhouse Extension)
+
+```sql
+-- Greenhouse tenants table
+CREATE TABLE greenhouse_tenants (
+  tenant_id TEXT PRIMARY KEY,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  enrolled_at TEXT NOT NULL DEFAULT (datetime('now')),
+  enrolled_by TEXT,               -- Who added this tenant to the greenhouse
+  notes TEXT,                     -- Why this tenant is in the greenhouse
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+);
+
+-- Feature flags can be marked as greenhouse-only
+-- Add to existing feature_flags table
+ALTER TABLE feature_flags ADD COLUMN greenhouse_only INTEGER NOT NULL DEFAULT 0;
+
+-- Index for efficient greenhouse lookups
+CREATE INDEX idx_greenhouse_tenants_enabled ON greenhouse_tenants(enabled);
+CREATE INDEX idx_flags_greenhouse ON feature_flags(greenhouse_only) WHERE greenhouse_only = 1;
+```
+
+---
+
+## Greenhouse API
+
+### Check if Tenant is in Greenhouse
+
+```typescript
+import { isInGreenhouse } from '@autumnsgrove/groveengine/feature-flags';
+
+// Is this tenant part of the greenhouse?
+const inGreenhouse = await isInGreenhouse(locals.tenantId, platform.env);
+
+if (inGreenhouse) {
+  // Show experimental UI, enable bleeding-edge features
+  console.log('🌱 Greenhouse tenant detected');
+}
+```
+
+### Evaluate with Greenhouse Context
+
+```typescript
+import { isFeatureEnabled } from '@autumnsgrove/groveengine/feature-flags';
+
+// Greenhouse context is automatically included
+const useExperimentalEditor = await isFeatureEnabled('experimental_editor', {
+  tenantId: locals.tenantId,
+  // No need to specify greenhouse mode—it's inferred from tenant
+}, platform.env);
+
+// For greenhouse tenants, this returns true even if the feature
+// is marked greenhouse_only and has no other rules
+```
+
+### Mark a Feature as Greenhouse-Only
+
+```typescript
+// In admin UI or migration
+await db.prepare(`
+  INSERT INTO feature_flags (id, name, flag_type, default_value, greenhouse_only)
+  VALUES ('experimental_editor', 'Experimental Editor', 'boolean', 'false', 1)
+`).run();
+```
+
+---
+
+## The Greenhouse Lexicon
+
+Building on the established Graft vocabulary:
+
+| Term | Action | Description |
+|------|--------|-------------|
+| **Greenhouse** | Tenant state | A tenant enrolled in early access testing |
+| **Under glass** | Feature state | A feature only available in the greenhouse |
+| **Transplant** | Promotion | Move a feature from greenhouse to general availability |
+| **Harden off** | Gradual rollout | Slowly expose a greenhouse feature to production |
+| **Nursery** | Group | Collection of greenhouse tenants for coordinated testing |
+
+*"Dave's tree is in the greenhouse—they'll see the new editor first."*
+*"We're hardening off the JXL encoder this week—25% propagation."*
+
+---
+
+## Implementation Patterns
+
+### Pattern 1: Greenhouse-Only Features
+
+For features that should only exist in the greenhouse until ready:
+
+```typescript
+// Create a greenhouse-only feature
+const experimentalFeature = {
+  id: 'voice_posts',
+  name: 'Voice Posts',
+  description: 'Record posts as audio',
+  flag_type: 'boolean',
+  default_value: 'false',
+  greenhouse_only: true,  // Only visible to greenhouse tenants
+};
+```
+
+### Pattern 2: Greenhouse Priority Rules
+
+Greenhouse tenants can have dedicated rules that override standard rules:
+
+```typescript
+// Greenhouse tenants get 100% rollout of beta features
+{
+  ruleType: 'greenhouse',
+  priority: 95,  // High priority, just below explicit tenant rules
+  resultValue: true
+}
+```
+
+### Pattern 3: Gradual Transplant
+
+Moving a feature from greenhouse to production:
+
+```typescript
+// Week 1: Greenhouse only
+await setGreenhouseOnly('voice_posts', true);
+
+// Week 2: Add 10% propagation to production
+await addRule('voice_posts', {
+  ruleType: 'percentage',
+  ruleValue: { percentage: 10 },
+  resultValue: true
+});
+
+// Week 3: Increase to 50%
+await updateRule('voice_posts', 'percentage', { percentage: 50 });
+
+// Week 4: Full cultivation, remove greenhouse restriction
+await setGreenhouseOnly('voice_posts', false);
+await updateRule('voice_posts', 'always', true);
+```
+
+---
+
+## Why "Dave Mode"?
+
+The very first test tenant created in Grove was named "Dave."
+
+It was chosen for the most practical of reasons: Dave is wonderfully generic. When you need a placeholder name that won't distract from what you're testing, Dave is perfect. Not creative. Not memorable. Just... Dave.
+
+Months later, when designing the internal testing mode, the obvious question arose: what do we call tenants that are part of our testing pool? "Beta tenants" felt corporate. "Test tenants" felt clinical. And then someone remembered: we already have a name for the first tenant to test anything. Dave.
+
+The internal codename stuck. In commit messages and Slack channels, it's "Dave mode." In documentation and user-facing text, it's "greenhouse mode." Both names honor the same idea: a place where things are tested before they're ready for the world.
+
+*Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized.*
+
+---
+
+# Part IV: Configuration & Operations
 
 ## wrangler.toml Bindings
 
@@ -1147,6 +1420,15 @@ packages/engine/src/lib/
 - [ ] HeroGraft (customizable hero sections)
 - [ ] TestimonialGraft (social proof components)
 
+### Phase 8: Greenhouse Mode (Planned)
+- [ ] Database schema extension (`greenhouse_tenants` table)
+- [ ] `greenhouse_only` column on `feature_flags` table
+- [ ] `isInGreenhouse()` API function
+- [ ] Greenhouse context in feature evaluation
+- [ ] Greenhouse rule type support
+- [ ] Admin UI for greenhouse tenant management
+- [ ] Transplant workflow (greenhouse → production)
+
 ---
 
 ## Related Documents
@@ -1155,6 +1437,22 @@ packages/engine/src/lib/
 - [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for Feature Grafts
 - [Loom Pattern](../patterns/loom-durable-objects-pattern.md) — DO coordination
 - [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses Feature Grafts for configuration)
+
+---
+
+## Museum Exhibit Notes
+
+> **For future inclusion in The Grafts Exhibit, Wing 5: The Personalization Wing**
+> *See [docs/museum/MUSEUM.md](/docs/museum/MUSEUM.md) for museum structure*
+
+When The Grafts Exhibit is created, include this origin story for Dave Mode:
+
+> **On "Dave Mode"**: When Grafts needed a third mode for internal testing, the obvious choice emerged from Grove's history. The very first test tenant created during early development was named "Dave"—chosen as the most wonderfully mundane, generic example name imaginable. When it came time to name the internal testing mode, "Dave mode" felt perfect: unpretentious, memorable, and a small tribute to Grove's earliest days. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode. Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized.
+
+**Exhibit placement suggestions:**
+- Display alongside the Graft Lexicon interactive
+- Include in the "Names That Found Us" subsection of the Naming Wing (Wing 7) cross-reference
+- Consider a "Dave's Corner" Easter egg that reveals this story when visitors click on a hidden greenhouse icon
 
 ---
 

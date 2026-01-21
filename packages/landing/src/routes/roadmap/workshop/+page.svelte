@@ -135,7 +135,8 @@
 						{ name: 'Propagate', icon: 'file-stack', description: 'Percentage rollout' },
 						{ name: 'Cultivate', icon: 'unplug', description: 'Full rollout' },
 						{ name: 'Cultivars', icon: 'gamepad', description: 'A/B test variants' },
-						{ name: 'Blight', icon: 'triangle-alert', description: 'Emergency kill switch' }
+						{ name: 'Blight', icon: 'triangle-alert', description: 'Emergency kill switch' },
+						{ name: 'Greenhouse', icon: 'warehouse', description: 'Early access testing' }
 					]
 				},
 				{

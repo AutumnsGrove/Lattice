@@ -126,6 +126,11 @@ A graft is a branch joined onto rootstock—a deliberate act that makes one tree
 
 Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
 
+**The Three Layers:**
+- **Feature Grafts** — What capabilities a tenant receives (flags, rollouts, tier-gating)
+- **UI Grafts** — How capabilities render (reusable components like PricingGraft)
+- **Greenhouse mode** — Who gets early access (tenant classification for internal testing)
+
 **The Graft Lexicon:**
 - **Graft** — Enable a feature for a tenant
 - **Prune** — Disable a feature
@@ -134,8 +139,13 @@ Grafts are per-tenant features that operators enable for specific trees. Not plu
 - **Cultivars** — A/B test variants
 - **Blight** — Emergency kill switch
 - **Took** — The graft is active and working
+- **Greenhouse** — Tenant enrolled in early access testing
+- **Under glass** — Feature only available in the greenhouse
+- **Transplant** — Promote a feature from greenhouse to general availability
+- **Harden off** — Gradually expose a greenhouse feature to production
 
 *"I'll graft it onto your tree at dusk."*
+*"Dave's tree is in the greenhouse—they'll see the new editor first."*
 
 *A graft makes your tree bear fruit no other can.*
 
@@ -483,6 +493,8 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Terrarium | GroveTerrarium |
 | Weave | GroveWeave |
 | Curios | GroveCurios |
+| Grafts | GroveGrafts |
+| Greenhouse mode | Dave mode[^1] |
 | Gossamer | gossamer (npm) |
 | Rings | GroveAnalytics |
 | Clearing | GroveClear |
@@ -572,5 +584,9 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 21, 2026 — Added Lumen (AI Gateway)*
+[^1]: Named after the first test tenant in Grove. "Dave" was chosen as the most wonderfully mundane, generic example name imaginable during early development. The internal codename "Dave mode" honors this humble beginning. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode.
+
+---
+
+*Last updated: January 21, 2026 — Added Greenhouse mode / Dave mode*
 *Status: Placeholder names, pending launch*

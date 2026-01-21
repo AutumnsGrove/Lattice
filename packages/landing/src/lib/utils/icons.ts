@@ -213,6 +213,8 @@ import {
   Fan,
   // Lumen - AI gateway
   LampCeiling,
+  // Greenhouse mode - internal testing
+  Warehouse,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -475,6 +477,8 @@ export const toolIcons = {
   gamepad: Gamepad, // Grafts - Cultivars (A/B variants)
   // Lumen - AI gateway
   "lamp-ceiling": LampCeiling, // Lumen - unified AI routing
+  // Greenhouse mode - internal testing (Dave mode)
+  warehouse: Warehouse, // Grafts - Greenhouse (early access testing)
 } as const;
 
 // ============================================================================
