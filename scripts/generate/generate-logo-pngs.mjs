@@ -325,6 +325,93 @@ async function generateCombinedLogoWithGlassCard(logoSize = 512, overlap = 0) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SOCIAL MEDIA LOGOS (WITH DARK BACKGROUND)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Grove-themed dark background - forest at night
+const DARK_BG_COLOR = "#0d1a12";
+// Grove green with very light opacity for frosted glass effect
+const GROVE_GREEN_RGB = "34, 197, 94";
+
+const SOCIAL_SIZES = [512, 1024];
+
+async function generateSocialLogos() {
+  console.log("🌙 Generating social media logos with dark background...\n");
+
+  await mkdir(OUTPUT_DIR, { recursive: true });
+
+  for (const season of SEASONS) {
+    console.log(`  ${season}:`);
+    const svg = generateSvg(season);
+    const svgBuffer = Buffer.from(svg);
+
+    for (const size of SOCIAL_SIZES) {
+      // Calculate dimensions - logo centered in a circle with padding
+      const padding = Math.round(size * 0.15); // 15% padding around logo
+      const logoSize = size - padding * 2;
+      const circleRadius = Math.round(size * 0.42); // Circle slightly smaller than canvas
+      const centerX = size / 2;
+      const centerY = size / 2;
+
+      // Create the background with frosted grove-green circle
+      const backgroundSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+  <defs>
+    <!-- Radial gradient for the frosted circle - grove green, very subtle -->
+    <radialGradient id="frostGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.12)" />
+      <stop offset="70%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.08)" />
+      <stop offset="100%" style="stop-color:rgba(${GROVE_GREEN_RGB}, 0.04)" />
+    </radialGradient>
+    <!-- Inner highlight for glass depth -->
+    <radialGradient id="glassHighlight" cx="35%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:rgba(255, 255, 255, 0.08)" />
+      <stop offset="100%" style="stop-color:rgba(255, 255, 255, 0)" />
+    </radialGradient>
+  </defs>
+  <!-- Dark background -->
+  <rect width="${size}" height="${size}" fill="${DARK_BG_COLOR}" />
+  <!-- Frosted grove-green circle -->
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#frostGradient)" />
+  <!-- Glass highlight overlay -->
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="url(#glassHighlight)" />
+  <!-- Subtle border -->
+  <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}"
+          fill="none"
+          stroke="rgba(${GROVE_GREEN_RGB}, 0.15)"
+          stroke-width="1" />
+</svg>`;
+
+      const backgroundBuffer = await sharp(Buffer.from(backgroundSvg))
+        .png()
+        .toBuffer();
+
+      // Resize the logo
+      const logoBuffer = await sharp(svgBuffer)
+        .resize(logoSize, logoSize)
+        .png()
+        .toBuffer();
+
+      // Composite: background + logo centered
+      const finalBuffer = await sharp(backgroundBuffer)
+        .composite([
+          {
+            input: logoBuffer,
+            left: padding,
+            top: padding,
+          },
+        ])
+        .png()
+        .toBuffer();
+
+      const filename = `logo-${season}-${size}-social.png`;
+      await writeFile(join(OUTPUT_DIR, filename), finalBuffer);
+      console.log(`    ✓ ${filename}`);
+    }
+    console.log("");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -336,6 +423,9 @@ async function main() {
 
   // Generate seasonal email assets
   await generateEmailAssets();
+
+  // Generate social media logos with dark background
+  await generateSocialLogos();
 
   // Generate combined seasonal logos (upright trees, tightly packed)
   // Moderate overlap (55%) - trees close together
@@ -353,8 +443,10 @@ async function main() {
   // Summary
   const faviconCount = PACKAGES.length * Object.keys(FAVICON_SIZES).length;
   const emailCount = SEASONS.length * EMAIL_SIZES.length;
+  const socialCount = SEASONS.length * SOCIAL_SIZES.length;
   console.log(`✅ Generated ${faviconCount} package favicon PNGs`);
   console.log(`✅ Generated ${emailCount} seasonal email PNGs`);
+  console.log(`✅ Generated ${socialCount} social media PNGs (dark background)`);
   console.log(`✅ Generated 2 combined seasonal logos`);
   console.log(`✅ Generated 2 combined seasonal logos with glass card`);
 }
