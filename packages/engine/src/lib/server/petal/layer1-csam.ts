@@ -133,6 +133,11 @@ export async function flagAccountForCSAM(
 ): Promise<void> {
   const id = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CRITICAL OPERATION: Flag the account
+  // This MUST succeed - if it fails, we log loudly but don't throw
+  // (the upload is already blocked at this point)
+  // ─────────────────────────────────────────────────────────────────────────────
   try {
     await db
       .prepare(
@@ -146,8 +151,19 @@ export async function flagAccountForCSAM(
       )
       .bind(id, userId)
       .run();
+  } catch (err) {
+    // CRITICAL: Account flagging failed - log loudly
+    // The upload is still blocked, but we failed to persist the flag
+    console.error("[Petal] CRITICAL: Failed to flag account for CSAM:", err);
+    // Don't throw - upload is already blocked, but this needs monitoring/alerting
+    return; // Exit early - don't attempt logging if flagging failed
+  }
 
-    // Log the flagging (hash only, never image)
+  // ─────────────────────────────────────────────────────────────────────────────
+  // NON-CRITICAL: Log the security event
+  // Best-effort - failure here doesn't affect the block
+  // ─────────────────────────────────────────────────────────────────────────────
+  try {
     await logSecurityEvent(db, {
       timestamp: new Date().toISOString(),
       layer: "layer1",
@@ -158,8 +174,8 @@ export async function flagAccountForCSAM(
       userId,
     });
   } catch (err) {
-    // Log error but don't fail - the upload is already blocked
-    console.error("[Petal] Failed to flag account:", err);
+    // Non-critical: Logging failed, but account is already flagged
+    console.error("[Petal] Failed to log CSAM flagging event:", err);
   }
 }
 

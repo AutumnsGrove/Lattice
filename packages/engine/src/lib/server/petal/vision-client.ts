@@ -204,18 +204,20 @@ async function callWorkersAI(
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       throw new PetalError(
-        `Workers AI timed out after ${timeoutMs}ms`,
+        "Vision provider request timed out",
         "TIMEOUT",
         undefined,
         "workers_ai",
       );
     }
+    // Log full error server-side for debugging
+    console.error("[Petal] Workers AI error:", err);
     throw new PetalError(
-      `Workers AI error: ${err instanceof Error ? err.message : "Unknown"}`,
+      "Vision provider temporarily unavailable",
       "PROVIDER_ERROR",
       undefined,
       "workers_ai",
-      err,
+      // Don't include error details to prevent information disclosure
     );
   } finally {
     clearTimeout(timeoutId);
@@ -277,11 +279,11 @@ async function callTogetherAI(
         error: errorText.substring(0, 500),
       });
       throw new PetalError(
-        `Together.ai API error: ${response.status}`,
+        "Vision provider temporarily unavailable",
         "PROVIDER_ERROR",
         undefined,
         "together_ai",
-        // Don't include provider error details in thrown error
+        // Don't include status code or error details to prevent information disclosure
       );
     }
 
@@ -299,7 +301,7 @@ async function callTogetherAI(
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       throw new PetalError(
-        `Together.ai timed out after ${timeoutMs}ms`,
+        "Vision provider request timed out",
         "TIMEOUT",
         undefined,
         "together_ai",

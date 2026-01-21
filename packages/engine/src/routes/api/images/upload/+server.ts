@@ -270,6 +270,33 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     await validateImageDimensions(file, buffer);
 
     // ========================================================================
+    // Pre-Scan Abuse Detection
+    // ========================================================================
+    // Check if user has too many recent rejected uploads BEFORE running
+    // expensive AI scans. This prevents cost abuse from malicious users
+    // repeatedly uploading violating content.
+    const rejectedKey = buildRateLimitKey("upload/rejected", locals.user.id);
+    const rejectedCheck = await checkRateLimit({
+      kv,
+      key: rejectedKey,
+      limit: 5, // Max 5 rejected uploads per hour before temporary block
+      windowSeconds: 3600,
+      namespace: "upload-abuse",
+    });
+
+    if (rejectedCheck.response) {
+      return json(
+        {
+          error: true,
+          code: "upload_restricted",
+          message:
+            "Upload access temporarily restricted. Please try again later or contact support.",
+        },
+        { status: 429 },
+      );
+    }
+
+    // ========================================================================
     // Petal Content Moderation (Layer 1-3)
     // ========================================================================
     // Run Petal scan before storing in R2. This checks:
@@ -309,6 +336,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       );
 
       if (!petalResult.allowed) {
+        // Increment rejected uploads counter for abuse detection
+        // This is best-effort - don't block the rejection if it fails
+        try {
+          await checkRateLimit({
+            kv,
+            key: rejectedKey,
+            limit: 5,
+            windowSeconds: 3600,
+            namespace: "upload-abuse",
+          });
+        } catch {
+          // Non-critical - continue with rejection
+        }
+
         // Return user-friendly rejection
         // IMPORTANT: Never reveal CSAM detection reason
         return json(

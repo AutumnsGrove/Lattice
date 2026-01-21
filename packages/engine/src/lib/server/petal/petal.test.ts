@@ -500,4 +500,48 @@ describe("Error Handling", () => {
     expect(result.code).toBe("CSAM_SCAN_FAILED");
     expect(result.message).toContain("technical difficulties");
   });
+
+  it("should block upload when all vision providers fail", async () => {
+    // Test total provider failure - no AI binding, no fallback API key
+    const env: PetalEnv = {
+      AI: undefined,
+      DB: createMockDB(),
+      CACHE_KV: {} as KVNamespace,
+      TOGETHER_API_KEY: undefined,
+    };
+    const image = createMockImage();
+
+    // When no providers are available, Petal should fail-closed (block)
+    // because CSAM scanning is mandatory
+    const result = await scanImage(
+      { imageData: image, mimeType: "image/png", context: "general" },
+      env,
+    );
+
+    expect(result.allowed).toBe(false);
+    expect(result.code).toBe("CSAM_SCAN_FAILED");
+    expect(result.message).toContain("technical difficulties");
+  });
+
+  it("should fail-closed when primary provider fails and no fallback available", async () => {
+    const env: PetalEnv = {
+      AI: {
+        run: vi.fn().mockRejectedValue(new Error("Workers AI unavailable")),
+      } as unknown as Ai,
+      DB: createMockDB(),
+      CACHE_KV: {} as KVNamespace,
+      TOGETHER_API_KEY: undefined, // No fallback
+    };
+    const image = createMockImage();
+
+    const result = await scanImage(
+      { imageData: image, mimeType: "image/png", context: "general" },
+      env,
+    );
+
+    // Must fail-closed - cannot allow uploads without CSAM scanning
+    // Decision is "block" because CSAM scanning is mandatory
+    expect(result.allowed).toBe(false);
+    expect(result.decision).toBe("block");
+  });
 });

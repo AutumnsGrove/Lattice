@@ -4,6 +4,10 @@
 -- Gates image uploads behind a feature flag until PhotoDNA hash-based
 -- CSAM detection is integrated.
 --
+-- DEPENDENCIES:
+-- - 030_petal.sql (Petal tables must exist)
+-- - feature_flags table (created in earlier migration)
+--
 -- CONTEXT:
 -- The Petal spec requires hash-based CSAM detection (PhotoDNA) for Layer 1,
 -- but this requires vetting/approval from Microsoft (~1 week via Tech Coalition).
