@@ -116,11 +116,19 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     .bind(...params, limit, offset)
     .all<ImageRow>();
 
-  // Get total count
-  const countResult = await db
-    .prepare(`SELECT COUNT(*) as total FROM gallery_images ${whereClause}`)
-    .bind(...params)
-    .first<{ total: number }>();
+  // Get total count (isolated so images still return if count fails)
+  let total = 0;
+  try {
+    const countResult = await db
+      .prepare(`SELECT COUNT(*) as total FROM gallery_images ${whereClause}`)
+      .bind(...params)
+      .first<{ total: number }>();
+    total = countResult?.total ?? 0;
+  } catch (e) {
+    // Count failed but we can still return images
+    console.warn("[Gallery] Count query failed:", e);
+    total = imagesResult.results.length; // Fallback to current batch size
+  }
 
   // Fetch tags for images
   const imageIds = imagesResult.results.map((img) => img.id);
@@ -186,10 +194,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   return json({
     images,
     pagination: {
-      total: countResult?.total ?? 0,
+      total,
       limit,
       offset,
-      hasMore: offset + images.length < (countResult?.total ?? 0),
+      hasMore: offset + images.length < total,
     },
   });
 };
