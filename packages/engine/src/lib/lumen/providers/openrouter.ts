@@ -304,6 +304,145 @@ export class OpenRouterProvider implements LumenProvider {
   }
 
   // ===========================================================================
+  // EMBEDDINGS
+  // ===========================================================================
+
+  /**
+   * Generate embeddings via OpenRouter
+   * Uses the /api/v1/embeddings endpoint
+   */
+  async embed(
+    model: string,
+    input: string | string[],
+  ): Promise<{ embeddings: number[][]; tokens: number }> {
+    const timeoutMs = PROVIDERS.openrouter.timeoutMs;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(`${this.baseUrl}/embeddings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+          "HTTP-Referer": this.siteUrl,
+          "X-Title": this.siteName,
+        },
+        body: JSON.stringify({
+          model,
+          input: Array.isArray(input) ? input : [input],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new ProviderError(
+          this.name,
+          errorText.slice(0, 200),
+          response.status,
+        );
+      }
+
+      const data = (await response.json()) as {
+        data?: Array<{ embedding: number[]; index: number }>;
+        usage?: { prompt_tokens?: number; total_tokens?: number };
+      };
+
+      const embeddings = (data.data ?? [])
+        .sort((a, b) => a.index - b.index)
+        .map((item) => item.embedding);
+
+      return {
+        embeddings,
+        tokens: data.usage?.total_tokens ?? data.usage?.prompt_tokens ?? 0,
+      };
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new ProviderTimeoutError(this.name, timeoutMs);
+      }
+      if (err instanceof ProviderError) throw err;
+      throw new ProviderError(
+        this.name,
+        err instanceof Error ? err.message : "Unknown error",
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  // ===========================================================================
+  // MODERATION
+  // ===========================================================================
+
+  /**
+   * Run content moderation via OpenRouter using LlamaGuard
+   * Uses the chat completion API with LlamaGuard model
+   */
+  async moderate(
+    model: string,
+    content: string,
+  ): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
+    // LlamaGuard uses a specific prompt format
+    const moderationPrompt = `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+
+Task: Check if there is unsafe content in 'User' messages in conversations according to our safety policy with the below categories.
+
+<BEGIN UNSAFE CONTENT CATEGORIES>
+S1: Violent Crimes
+S2: Non-Violent Crimes
+S3: Sex-Related Crimes
+S4: Child Sexual Exploitation
+S5: Defamation
+S6: Specialized Advice
+S7: Privacy
+S8: Intellectual Property
+S9: Indiscriminate Weapons
+S10: Hate
+S11: Suicide & Self-Harm
+S12: Sexual Content
+S13: Elections
+<END UNSAFE CONTENT CATEGORIES>
+
+<BEGIN CONVERSATION>
+
+User: ${content}
+
+<END CONVERSATION>
+
+Provide your safety assessment for User in the above conversation:
+- First line must read 'safe' or 'unsafe'.
+- If unsafe, a second line must include a comma-separated list of violated categories.<|eot_id|><|start_header_id|>assistant<|end_header_id|>`;
+
+    const response = await this.inference(
+      model,
+      [{ role: "user", content: moderationPrompt }],
+      { maxTokens: 100, temperature: 0 },
+    );
+
+    // Parse LlamaGuard response
+    const responseText = response.content.trim().toLowerCase();
+    const lines = responseText.split("\n").map((l) => l.trim());
+    const isSafe = lines[0] === "safe";
+
+    const categories: string[] = [];
+    if (!isSafe && lines.length > 1) {
+      // Parse categories like "S1, S10" or "S1,S10"
+      const categoryLine = lines[1];
+      const matches = categoryLine.match(/s\d+/gi);
+      if (matches) {
+        categories.push(...matches.map((m) => m.toUpperCase()));
+      }
+    }
+
+    return {
+      safe: isSafe,
+      categories,
+      confidence: 1.0, // LlamaGuard doesn't provide confidence scores
+    };
+  }
+
+  // ===========================================================================
   // HEALTH CHECK
   // ===========================================================================
 

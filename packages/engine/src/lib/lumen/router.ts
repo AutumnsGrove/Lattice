@@ -193,43 +193,85 @@ export async function executeWithFallback(
 // =============================================================================
 
 /**
- * Execute an embedding request (Cloudflare AI only)
+ * Execute an embedding request with fallback chain
+ * Tries OpenRouter first (BGE-M3), falls back to Cloudflare AI
  */
 export async function executeEmbedding(
   input: string | string[],
   providers: ProviderRegistry,
   model?: string,
-): Promise<{ embeddings: number[][]; tokens: number; model: string }> {
+): Promise<{
+  embeddings: number[][];
+  tokens: number;
+  model: string;
+  provider: LumenProviderName;
+}> {
   const config = getTaskConfig("embedding");
-  const cfProvider = providers["cloudflare-ai"];
+  const attempts: Array<{
+    provider: LumenProviderName;
+    model: string;
+    error: string;
+  }> = [];
 
-  if (!cfProvider) {
-    throw new LumenError(
-      "Cloudflare AI provider required for embeddings",
-      "ALL_PROVIDERS_FAILED",
-      { task: "embedding" },
-    );
+  // Build the execution chain from config
+  const chain: Array<{ provider: LumenProviderName; model: string }> = [];
+
+  // Add primary if available
+  if (providers[config.primaryProvider]) {
+    chain.push({
+      provider: config.primaryProvider,
+      model: model ?? config.primaryModel,
+    });
   }
 
-  if (!cfProvider.embed) {
-    throw new LumenError(
-      "Cloudflare AI provider does not support embeddings",
-      "INVALID_TASK",
-      { task: "embedding" },
-    );
+  // Add fallbacks
+  for (const fallback of config.fallbackChain) {
+    if (providers[fallback.provider]) {
+      chain.push({
+        provider: fallback.provider,
+        model: model ?? fallback.model,
+      });
+    }
   }
 
-  const result = await cfProvider.embed(model ?? config.primaryModel, input);
+  if (chain.length === 0) {
+    throw new AllProvidersFailedError("embedding", [
+      {
+        provider: config.primaryProvider,
+        model: config.primaryModel,
+        error: "No embedding providers configured",
+      },
+    ]);
+  }
 
-  return {
-    embeddings: result.embeddings,
-    tokens: result.tokens,
-    model: model ?? config.primaryModel,
-  };
+  // Try each provider in the chain
+  for (const { provider: providerName, model: embedModel } of chain) {
+    const provider = providers[providerName];
+    if (!provider?.embed) continue;
+
+    try {
+      const result = await provider.embed(embedModel, input);
+      return {
+        embeddings: result.embeddings,
+        tokens: result.tokens,
+        model: embedModel,
+        provider: providerName,
+      };
+    } catch (err) {
+      attempts.push({
+        provider: providerName,
+        model: embedModel,
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  }
+
+  throw new AllProvidersFailedError("embedding", attempts);
 }
 
 /**
- * Execute a moderation request (Cloudflare AI only)
+ * Execute a moderation request with fallback chain
+ * Tries OpenRouter (LlamaGuard 4) first, falls back to Cloudflare AI
  */
 export async function executeModeration(
   content: string,
@@ -240,35 +282,68 @@ export async function executeModeration(
   categories: string[];
   confidence: number;
   model: string;
+  provider: LumenProviderName;
 }> {
   const config = getTaskConfig("moderation");
-  const cfProvider = providers["cloudflare-ai"];
+  const attempts: Array<{
+    provider: LumenProviderName;
+    model: string;
+    error: string;
+  }> = [];
 
-  if (!cfProvider) {
-    throw new LumenError(
-      "Cloudflare AI provider required for moderation",
-      "ALL_PROVIDERS_FAILED",
-      { task: "moderation" },
-    );
+  // Build the execution chain from config
+  const chain: Array<{ provider: LumenProviderName; model: string }> = [];
+
+  // Add primary if available
+  if (providers[config.primaryProvider]) {
+    chain.push({
+      provider: config.primaryProvider,
+      model: model ?? config.primaryModel,
+    });
   }
 
-  if (!cfProvider.moderate) {
-    throw new LumenError(
-      "Cloudflare AI provider does not support moderation",
-      "INVALID_TASK",
-      { task: "moderation" },
-    );
+  // Add fallbacks
+  for (const fallback of config.fallbackChain) {
+    if (providers[fallback.provider]) {
+      chain.push({
+        provider: fallback.provider,
+        model: model ?? fallback.model,
+      });
+    }
   }
 
-  const result = await cfProvider.moderate(
-    model ?? config.primaryModel,
-    content,
-  );
+  if (chain.length === 0) {
+    throw new AllProvidersFailedError("moderation", [
+      {
+        provider: config.primaryProvider,
+        model: config.primaryModel,
+        error: "No moderation providers configured",
+      },
+    ]);
+  }
 
-  return {
-    safe: result.safe,
-    categories: result.categories,
-    confidence: result.confidence,
-    model: model ?? config.primaryModel,
-  };
+  // Try each provider in the chain
+  for (const { provider: providerName, model: modModel } of chain) {
+    const provider = providers[providerName];
+    if (!provider?.moderate) continue;
+
+    try {
+      const result = await provider.moderate(modModel, content);
+      return {
+        safe: result.safe,
+        categories: result.categories,
+        confidence: result.confidence,
+        model: modModel,
+        provider: providerName,
+      };
+    } catch (err) {
+      attempts.push({
+        provider: providerName,
+        model: modModel,
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  }
+
+  throw new AllProvidersFailedError("moderation", attempts);
 }
