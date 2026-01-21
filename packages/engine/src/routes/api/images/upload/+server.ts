@@ -113,7 +113,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       tenantId: locals.tenantId,
       userId: locals.user.id,
     },
-    platform?.env as Parameters<typeof isFeatureEnabled>[2],
+    platform?.env as unknown as Parameters<typeof isFeatureEnabled>[2],
   );
 
   if (!uploadsEnabled) {

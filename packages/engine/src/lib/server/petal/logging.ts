@@ -94,7 +94,7 @@ export async function getRecentUserEvents(
       .prepare(query)
       .bind(...params)
       .all();
-    return (result.results || []) as PetalSecurityLog[];
+    return (result.results || []) as unknown as PetalSecurityLog[];
   } catch (err) {
     console.error("[Petal] Failed to query user events:", err);
     return [];
@@ -206,7 +206,15 @@ export async function cleanupOldLogs(
 export async function computeContentHash(
   content: Uint8Array | ArrayBuffer,
 ): Promise<string> {
-  const buffer = content instanceof Uint8Array ? content.buffer : content;
+  // Ensure we have an ArrayBuffer for crypto.subtle.digest
+  // We slice the buffer to handle Uint8Array views into larger buffers
+  const buffer: ArrayBuffer =
+    content instanceof Uint8Array
+      ? (content.buffer.slice(
+          content.byteOffset,
+          content.byteOffset + content.byteLength,
+        ) as ArrayBuffer)
+      : content;
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = new Uint8Array(hashBuffer);
   return Array.from(hashArray)
