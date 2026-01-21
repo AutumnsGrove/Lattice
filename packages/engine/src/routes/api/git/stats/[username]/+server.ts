@@ -17,6 +17,8 @@ import {
   getActivityLevel,
   isValidUsername,
   getCacheKey,
+  calculateStreak,
+  calculatePeriodContributions,
   DEFAULT_GIT_CONFIG,
   type GitUser,
   type GitContributions,
@@ -62,96 +64,6 @@ interface GitStatsResponse {
 // - GraphQL API: 5000 points/hour (each query ~1-2 points)
 // We cache responses in KV to reduce actual API calls, so 60/min is safe.
 const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
-
-/**
- * Get today's date in YYYY-MM-DD format.
- * Uses UTC to match GitHub's contribution calendar (which is UTC-based).
- */
-function getTodayUTC(): string {
-  return new Date().toISOString().split("T")[0];
-}
-
-/**
- * Calculate streak from activity data.
- * Uses UTC dates to match GitHub's contribution calendar.
- */
-function calculateStreak(activity: Array<{ date: string; commits: number }>): {
-  current: number;
-  longest: number;
-} {
-  if (activity.length === 0) {
-    return { current: 0, longest: 0 };
-  }
-
-  let current = 0;
-  let longest = 0;
-  let tempStreak = 0;
-
-  // Sort by date descending to calculate current streak
-  const sorted = [...activity].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
-
-  // Calculate current streak (from today backwards)
-  // GitHub contribution calendar uses UTC, so we use UTC here too
-  const today = getTodayUTC();
-  let checkDate = new Date(today + "T00:00:00Z");
-
-  for (const day of sorted) {
-    const dayDate = day.date;
-    const expectedDate = checkDate.toISOString().split("T")[0];
-
-    if (dayDate === expectedDate && day.commits > 0) {
-      current++;
-      checkDate.setUTCDate(checkDate.getUTCDate() - 1);
-    } else if (dayDate === expectedDate && day.commits === 0) {
-      break;
-    } else if (dayDate < expectedDate) {
-      // Skip days not in data (weekends or missing data)
-      checkDate = new Date(dayDate + "T00:00:00Z");
-      if (day.commits > 0) {
-        current++;
-        checkDate.setUTCDate(checkDate.getUTCDate() - 1);
-      } else {
-        break;
-      }
-    }
-  }
-
-  // Calculate longest streak
-  const chronological = [...activity].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
-
-  for (const day of chronological) {
-    if (day.commits > 0) {
-      tempStreak++;
-      longest = Math.max(longest, tempStreak);
-    } else {
-      tempStreak = 0;
-    }
-  }
-
-  return { current, longest };
-}
-
-/**
- * Calculate contributions within a time period.
- * Uses UTC to match GitHub's contribution calendar.
- */
-function calculatePeriodContributions(
-  activity: Array<{ date: string; commits: number }>,
-  days: number,
-): number {
-  const now = new Date();
-  const cutoff = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days),
-  );
-
-  return activity
-    .filter((day) => new Date(day.date + "T00:00:00Z") >= cutoff)
-    .reduce((sum, day) => sum + day.commits, 0);
-}
 
 export const GET: RequestHandler = async ({ params, platform, request }) => {
   const { username } = params;

@@ -357,3 +357,110 @@ export function getActivityLevel(commits: number): 0 | 1 | 2 | 3 | 4 {
   if (commits <= 10) return 3;
   return 4;
 }
+
+// =============================================================================
+// Streak Calculations
+// =============================================================================
+
+/**
+ * Get today's date in YYYY-MM-DD format (UTC).
+ * Uses UTC to match GitHub's contribution calendar.
+ */
+export function getTodayUTC(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+/**
+ * Calculate current and longest streak from activity data.
+ * Uses UTC dates to match GitHub's contribution calendar.
+ *
+ * Current streak: Consecutive days with commits from today backwards.
+ * Longest streak: Maximum consecutive days with commits in the dataset.
+ *
+ * @param activity - Array of { date, commits } objects
+ * @param today - Override today's date for testing (YYYY-MM-DD format)
+ */
+export function calculateStreak(
+  activity: Array<{ date: string; commits: number }>,
+  today?: string,
+): { current: number; longest: number } {
+  if (activity.length === 0) {
+    return { current: 0, longest: 0 };
+  }
+
+  let current = 0;
+  let longest = 0;
+  let tempStreak = 0;
+
+  // Sort by date descending to calculate current streak
+  const sorted = [...activity].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
+  // Calculate current streak (from today backwards)
+  const todayDate = today ?? getTodayUTC();
+  let checkDate = new Date(todayDate + "T00:00:00Z");
+
+  for (const day of sorted) {
+    const dayDate = day.date;
+    const expectedDate = checkDate.toISOString().split("T")[0];
+
+    if (dayDate === expectedDate && day.commits > 0) {
+      current++;
+      checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+    } else if (dayDate === expectedDate && day.commits === 0) {
+      break;
+    } else if (dayDate < expectedDate) {
+      // Skip days not in data (weekends or missing data)
+      checkDate = new Date(dayDate + "T00:00:00Z");
+      if (day.commits > 0) {
+        current++;
+        checkDate.setUTCDate(checkDate.getUTCDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Calculate longest streak
+  const chronological = [...activity].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+
+  for (const day of chronological) {
+    if (day.commits > 0) {
+      tempStreak++;
+      longest = Math.max(longest, tempStreak);
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  return { current, longest };
+}
+
+/**
+ * Calculate total contributions within a time period.
+ *
+ * @param activity - Array of { date, commits } objects
+ * @param days - Number of days to look back
+ * @param today - Override today's date for testing (YYYY-MM-DD format)
+ */
+export function calculatePeriodContributions(
+  activity: Array<{ date: string; commits: number }>,
+  days: number,
+  today?: string,
+): number {
+  const todayDate = today ? new Date(today) : new Date();
+  const cutoff = new Date(
+    Date.UTC(
+      todayDate.getUTCFullYear(),
+      todayDate.getUTCMonth(),
+      todayDate.getUTCDate() - days,
+    ),
+  );
+
+  return activity
+    .filter((day) => new Date(day.date + "T00:00:00Z") >= cutoff)
+    .reduce((sum, day) => sum + day.commits, 0);
+}
