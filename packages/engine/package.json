@@ -207,6 +207,10 @@
       "types": "./dist/grafts/pricing/index.d.ts",
       "svelte": "./dist/grafts/pricing/index.js",
       "default": "./dist/grafts/pricing/index.js"
+    },
+    "./lumen": {
+      "types": "./dist/lumen/index.d.ts",
+      "default": "./dist/lumen/index.js"
     }
   },
   "files": [
