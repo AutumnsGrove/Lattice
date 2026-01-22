@@ -92,11 +92,32 @@
 > **Status:** BLOCKING - LS requested a walkthrough video explaining the website and concepts
 > **Priority:** HIGH - Payments are gated behind this verification
 
-- [ ] Film walkthrough video of Grove platform
-  - Explain the blog hosting service concept
-  - Show the Workshop (tools being built)
-  - Demonstrate the admin panel / Arbor
-  - Explain pricing tiers (Seedling, Sapling, Oak, Evergreen)
+**Pre-recording setup:**
+- [ ] Enable signups temporarily (`SIGNUPS_ENABLED = "true"` in Cloudflare)
+- [ ] Verify Plant flow works end-to-end (LS is in test mode, no real charges)
+
+**Walkthrough script (keep it simple!):**
+1. [ ] **grove.place** — "This is Grove, a blog hosting platform" (30 sec)
+   - Brief landing page tour, click "Get Started"
+2. [ ] **plant.grove.place** — Sign up flow (2-3 min)
+   - Sign in with Google
+   - Choose username (show Loam validation working)
+   - Select Seedling tier ("We're launching with our starter tier")
+   - Complete checkout (test mode)
+3. [ ] **{username}.grove.place/admin** — Arbor panel (2-3 min)
+   - Quick tour of the admin dashboard
+   - Create a simple blog post
+   - Publish it
+4. [ ] **{username}.grove.place** — Show the live blog (30 sec)
+   - "And here's their published blog"
+
+**What to narrate around (don't dwell on):**
+- Pricing page shows 4 tiers → "We're launching with Seedling, additional tiers planned"
+- Skip Workshop/Roadmap entirely — not relevant to "what do you sell"
+- Skip Forage mention — not part of phase 1
+
+**Post-recording:**
+- [ ] Disable signups again until LS verified
 - [ ] Reply to LemonSqueezy email with video
 - [ ] **Pantry temporarily hidden** from Workshop to simplify "what we sell" narrative
   - LS was curious about "domain selling" — Pantry's shop/provisioning concept might complicate things
