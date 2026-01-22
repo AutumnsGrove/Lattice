@@ -1,4 +1,4 @@
-import { marked, type Tokens } from "marked";
+import MarkdownIt from "markdown-it";
 import matter from "gray-matter";
 import { sanitizeMarkdown } from "./sanitize.js";
 
@@ -181,46 +181,52 @@ export interface ContentLoaderConfig {
 }
 
 // ============================================================================
-// Marked Configuration
+// Markdown-it Configuration
 // ============================================================================
 
-// Configure marked renderer for GitHub-style code blocks and heading IDs
-const renderer = new marked.Renderer();
+/**
+ * Escape HTML special characters for safe embedding in attributes
+ */
+function escapeHtmlForAttr(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Per-instance markdown-it with GFM-like defaults
+// html: true is required because anchor comments (<!-- anchor:tagname -->)
+// must pass through rendering for processAnchorTags() to work.
+// Security is handled by sanitizeMarkdown() which strips dangerous elements.
+const md = new MarkdownIt({ html: true, linkify: true, breaks: false });
 
 // Add IDs to headings for table of contents linking
-// Note: marked v5+ removed headerIds option, so we use a custom renderer instead
-renderer.heading = function (token: Tokens.Heading): string {
-  const level = token.depth;
-  const id = generateHeadingId(token.text);
-  // Parse inline tokens to render links, bold, code, etc. within headings
-  const content = this.parser.parseInline(token.tokens);
-  return `<h${level} id="${id}">${content}</h${level}>`;
+// In markdown-it, heading_open/heading_close are separate tokens.
+// The inline content between them is rendered independently — inline
+// elements (links, bold, code) are structurally impossible to skip.
+md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
+  const token = tokens[idx];
+  // The next token (idx+1) is always the inline content
+  const inlineToken = tokens[idx + 1];
+  const headingText = inlineToken?.content || "";
+  const id = generateHeadingId(headingText);
+  token.attrSet("id", id);
+  return self.renderToken(tokens, idx, options);
 };
 
-renderer.code = function (token: Tokens.Code | string): string {
-  // Handle both old (code, language) and new (token) API signatures
-  const code = typeof token === "string" ? token : token.text;
-  const language =
-    typeof token === "string"
-      ? (arguments as unknown as [string, string])[1]
-      : token.lang;
-
-  const lang = language || "text";
+// Custom fence (code block) renderer with copy button and language label
+md.renderer.rules.fence = function (tokens, idx) {
+  const token = tokens[idx];
+  const code = token.content;
+  const lang = (token.info || "").trim() || "text";
 
   // Render markdown/md code blocks as formatted HTML (like GitHub)
   if (lang === "markdown" || lang === "md") {
-    // Parse the markdown content and render it
     // SECURITY: Sanitize recursively-rendered markdown to prevent XSS
-    const renderedContent = sanitizeMarkdown(
-      marked.parse(code, { async: false }) as string,
-    );
-    // Escape the raw markdown for the copy button
-    const escapedCode = code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+    const renderedContent = sanitizeMarkdown(md.render(code));
+    const escapedCode = escapeHtmlForAttr(code);
 
     return `<div class="rendered-markdown-block">
   <div class="rendered-markdown-header">
@@ -236,15 +242,10 @@ renderer.code = function (token: Tokens.Code | string): string {
   <div class="rendered-markdown-content">
     ${renderedContent}
   </div>
-</div>`;
+</div>\n`;
   }
 
-  const escapedCode = code
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  const escapedCode = escapeHtmlForAttr(code);
 
   return `<div class="code-block-wrapper">
   <div class="code-block-header">
@@ -258,14 +259,17 @@ renderer.code = function (token: Tokens.Code | string): string {
     </button>
   </div>
   <pre><code class="language-${lang}">${escapedCode}</code></pre>
-</div>`;
+</div>\n`;
 };
 
-marked.setOptions({
-  renderer: renderer,
-  gfm: true,
-  breaks: false,
-});
+/**
+ * Render markdown to HTML with sanitization.
+ * This is the primary export for route files — replaces the old
+ * `sanitizeMarkdown(marked.parse(X, { async: false }) as string)` pattern.
+ */
+export function renderMarkdown(content: string): string {
+  return sanitizeMarkdown(md.render(content));
+}
 
 // ============================================================================
 // Utility Functions
@@ -333,7 +337,7 @@ export function processAnchorTags(html: string): string {
 export function parseMarkdownContent(markdownContent: string): ParsedContent {
   const { data, content: markdown } = matter(markdownContent);
 
-  let htmlContent = marked.parse(markdown, { async: false }) as string;
+  let htmlContent = md.render(markdown);
 
   // Process anchor tags in the HTML content
   htmlContent = processAnchorTags(htmlContent);
@@ -360,9 +364,7 @@ export function parseMarkdownContentSanitized(
   markdownContent: string,
 ): ParsedContent {
   const { data, content: markdown } = matter(markdownContent);
-  const htmlContent = sanitizeMarkdown(
-    marked.parse(markdown, { async: false }) as string,
-  );
+  const htmlContent = sanitizeMarkdown(md.render(markdown));
   const headers = extractHeaders(markdown);
 
   return {
@@ -417,11 +419,7 @@ export function processGutterContent(
         if (mdEntry) {
           const markdownContent = mdEntry[1];
           // SECURITY: Sanitize gutter markdown content to prevent XSS
-          const htmlContent = sanitizeMarkdown(
-            marked.parse(markdownContent, {
-              async: false,
-            }) as string,
-          );
+          const htmlContent = renderMarkdown(markdownContent);
 
           return {
             ...baseItem,

@@ -1,4 +1,4 @@
-import { marked, Renderer } from "marked";
+import MarkdownIt from "markdown-it";
 import type { PageServerLoad } from "./$types";
 
 // Prerender at build time - fetch from GitHub during build
@@ -13,12 +13,36 @@ const GITHUB_RAW_URL =
  * to prevent issues if the source is ever compromised.
  */
 const ALLOWED_TAGS = new Set([
-  "h1", "h2", "h3", "h4", "h5", "h6",
-  "p", "br", "hr",
-  "ul", "ol", "li",
-  "a", "strong", "em", "b", "i", "code", "pre",
-  "blockquote", "table", "thead", "tbody", "tr", "th", "td",
-  "img", "del", "sup", "sub",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "br",
+  "hr",
+  "ul",
+  "ol",
+  "li",
+  "a",
+  "strong",
+  "em",
+  "b",
+  "i",
+  "code",
+  "pre",
+  "blockquote",
+  "table",
+  "thead",
+  "tbody",
+  "tr",
+  "th",
+  "td",
+  "img",
+  "del",
+  "sup",
+  "sub",
 ]);
 
 const ALLOWED_ATTRS: Record<string, Set<string>> = {
@@ -31,7 +55,10 @@ const ALLOWED_ATTRS: Record<string, Set<string>> = {
 
 function sanitizeHtml(html: string): string {
   // Remove script tags and their contents
-  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  html = html.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
 
   // Remove event handlers (onclick, onerror, etc.)
   html = html.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
@@ -70,11 +97,14 @@ function generateHeadingId(text: string): string {
     .trim();
 }
 
+// Create markdown-it instance with custom renderers
+const md = new MarkdownIt({ html: false, linkify: true });
+
 /**
  * Extract headers from markdown content for table of contents
  */
 function extractHeaders(
-  markdown: string
+  markdown: string,
 ): { level: number; text: string; id: string }[] {
   const headers: { level: number; text: string; id: string }[] = [];
 
@@ -95,26 +125,29 @@ function extractHeaders(
   return headers;
 }
 
-// Custom renderer that adds IDs to headings
-const renderer = new Renderer();
-
-renderer.heading = function ({ text, depth }) {
-  const plainText = stripHtmlTags(text);
-  const id = generateHeadingId(plainText);
-  return `<h${depth} id="${id}">${text}</h${depth}>\n`;
+// Heading renderer - adds IDs for TOC navigation
+md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
+  const token = tokens[idx];
+  const inlineToken = tokens[idx + 1];
+  const headingText = inlineToken?.content || "";
+  const id = generateHeadingId(headingText);
+  token.attrSet("id", id);
+  return self.renderToken(tokens, idx, options);
 };
 
-// Rewrite relative links to point to the GitHub repo
-renderer.link = function ({ href, title, text }) {
+// Link renderer - rewrites relative URLs to GitHub and adds target="_blank"
+md.renderer.rules.link_open = function (tokens, idx, options, _env, self) {
+  const token = tokens[idx];
+  let href = token.attrGet("href") || "";
   // Convert relative paths to GitHub URLs
   if (href && !href.startsWith("http") && !href.startsWith("#")) {
     href = `https://github.com/AutumnsGrove/AutumnsGrove/blob/main${href.startsWith("/") ? "" : "/"}${href}`;
+    token.attrSet("href", href);
   }
-  const titleAttr = title ? ` title="${title}"` : "";
-  return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+  token.attrSet("target", "_blank");
+  token.attrSet("rel", "noopener noreferrer");
+  return self.renderToken(tokens, idx, options);
 };
-
-marked.use({ renderer });
 
 export const load: PageServerLoad = async ({ fetch }) => {
   try {
@@ -126,7 +159,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
     const markdown = await response.text();
     const headers = extractHeaders(markdown);
-    const rawHtml = marked(markdown) as string;
+    const rawHtml = md.render(markdown);
     const html = sanitizeHtml(rawHtml);
 
     return {
@@ -146,7 +179,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
         html,
         headers,
       },
-      sourceUrl: "https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md",
+      sourceUrl:
+        "https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md",
     };
   } catch (error) {
     console.error("Failed to fetch sister museum content:", error);
@@ -163,11 +197,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
         icon: "github",
         lastUpdated: new Date().toISOString().split("T")[0],
         readingTime: 1,
-        content: "# Content Unavailable\n\nThe sister museum content could not be loaded from GitHub.",
+        content:
+          "# Content Unavailable\n\nThe sister museum content could not be loaded from GitHub.",
         html: "<h1>Content Unavailable</h1><p>The sister museum content could not be loaded from GitHub.</p>",
         headers: [],
       },
-      sourceUrl: "https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md",
+      sourceUrl:
+        "https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md",
     };
   }
 };

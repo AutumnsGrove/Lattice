@@ -2,10 +2,9 @@ import {
   getHomePage,
   getLatestPost,
   processAnchorTags,
+  renderMarkdown,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
-import { marked } from "marked";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - latest post is fetched from D1 at runtime
@@ -101,9 +100,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           pageData.markdown_content &&
           typeof pageData.markdown_content === "string"
         ) {
-          htmlContent = sanitizeMarkdown(
-            marked.parse(pageData.markdown_content, { async: false }) as string,
-          );
+          htmlContent = renderMarkdown(pageData.markdown_content);
         }
 
         // Extract headers from HTML for table of contents
@@ -125,9 +122,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
               ) {
                 return {
                   ...item,
-                  content: sanitizeMarkdown(
-                    marked.parse(item.content, { async: false }) as string,
-                  ),
+                  content: renderMarkdown(item.content),
                 };
               }
               return item;
@@ -247,9 +242,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
               ) {
                 return {
                   ...item,
-                  content: sanitizeMarkdown(
-                    marked.parse(item.content, { async: false }) as string,
-                  ),
+                  content: renderMarkdown(item.content),
                 };
               }
               return item;

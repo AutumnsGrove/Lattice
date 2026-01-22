@@ -2,12 +2,10 @@ import {
   getPostBySlug,
   processAnchorTags,
   extractHeaders,
-  generateHeadingId,
+  renderMarkdown,
   type GutterItem,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
-import { marked, type Tokens } from "marked";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import * as cache from "$lib/server/services/cache.js";
 import type { PageServerLoad } from "./$types.js";
@@ -19,15 +17,6 @@ interface Header {
   level: number;
   id: string;
   text: string;
-}
-
-/**
- * Strip HTML tags from text to get plain text content.
- * In marked v5+, the heading renderer receives `text` with rendered HTML
- * (e.g., `Hello <strong>World</strong>` instead of `Hello **World**`).
- */
-function stripHtmlTags(html: string): string {
-  return html.replace(/<[^>]*>/g, "");
 }
 
 interface PostRecord {
@@ -175,20 +164,8 @@ async function fetchAndProcessPost(
   // Generate HTML from markdown if not stored
   let htmlContent = post.html_content;
   if (!htmlContent && post.markdown_content) {
-    // Create a custom renderer that adds IDs to headings
-    const renderer = new marked.Renderer();
-    renderer.heading = function (token: Tokens.Heading): string {
-      const text = token.text;
-      const level = token.depth;
-      // Strip HTML tags and generate ID to match extractHeaders
-      const plainText = stripHtmlTags(text);
-      const id = generateHeadingId(plainText);
-      return `<h${level} id="${id}">${text}</h${level}>`;
-    };
-
-    htmlContent = sanitizeMarkdown(
-      marked.parse(post.markdown_content, { async: false, renderer }) as string,
-    );
+    // renderMarkdown handles heading IDs and sanitization
+    htmlContent = renderMarkdown(post.markdown_content);
   }
 
   // Process anchor tags
@@ -216,9 +193,7 @@ async function fetchAndProcessPost(
         ) {
           return {
             ...item,
-            content: sanitizeMarkdown(
-              marked.parse(item.content, { async: false }) as string,
-            ),
+            content: renderMarkdown(item.content),
           };
         }
         return item;

@@ -1,10 +1,9 @@
 import { error } from "@sveltejs/kit";
-import { marked } from "marked";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import {
   extractHeaders,
   type GutterItem,
   type Header,
+  renderMarkdown,
 } from "$lib/utils/markdown.js";
 import type { PageServerLoad } from "./$types.js";
 
@@ -85,9 +84,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     let htmlContent = pageData.html_content;
     const rawMarkdown = pageData.markdown_content || "";
     if (!htmlContent && rawMarkdown && typeof rawMarkdown === "string") {
-      htmlContent = sanitizeMarkdown(
-        marked.parse(rawMarkdown, { async: false }) as string,
-      );
+      htmlContent = renderMarkdown(rawMarkdown);
     }
 
     // Extract headers from raw markdown for table of contents
@@ -112,9 +109,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
           ) {
             return {
               ...item,
-              content: sanitizeMarkdown(
-                marked.parse(item.content, { async: false }) as string,
-              ),
+              content: renderMarkdown(item.content),
             };
           }
           return item;

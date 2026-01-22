@@ -1,7 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import matter from "gray-matter";
-import { marked } from "marked";
+import MarkdownIt from "markdown-it";
+
+const md = new MarkdownIt({ html: false, linkify: true });
 
 export interface MarkdownDoc {
   slug: string;
@@ -24,9 +26,7 @@ export function parseMarkdownFile(filePath: string): ParsedDoc {
   const content = readFileSync(filePath, "utf-8");
   const { data, content: markdownContent } = matter(content);
 
-  const htmlPromise = marked(markdownContent);
-  const htmlResult =
-    typeof htmlPromise === "string" ? htmlPromise : htmlPromise.toString();
+  const htmlResult = md.render(markdownContent);
   const slug = filePath.split("/").pop()?.replace(".md", "") || "";
 
   // Generate excerpt (first paragraph or first 200 chars)

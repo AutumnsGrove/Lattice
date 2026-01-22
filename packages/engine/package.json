@@ -273,6 +273,7 @@
     "typescript": "^5.6.0",
     "vibe-kanban-web-companion": "^0.0.5",
     "vite": "^5.4.10",
+    "@types/markdown-it": "^14.1.2",
     "vitest": "^4.0.14"
   },
   "dependencies": {
@@ -287,7 +288,7 @@
     "esm-env": "^1.2.2",
     "gray-matter": "^4.0.3",
     "lucide-svelte": "^0.554.0",
-    "marked": "^17.0.1",
+    "markdown-it": "^14.1.0",
     "svelte-sonner": "^1.0.7",
     "tailwind-merge": "^3.4.0"
   }

@@ -1,5 +1,4 @@
 <script>
-  import { marked } from "marked";
   import { Input, Button } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
