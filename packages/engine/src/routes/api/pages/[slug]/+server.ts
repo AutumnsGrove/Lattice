@@ -1,8 +1,7 @@
 import { json, error } from "@sveltejs/kit";
-import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 
@@ -99,10 +98,8 @@ export const PUT: RequestHandler = async ({
       throw error(404, "Page not found");
     }
 
-    // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string,
-    );
+    // Generate HTML from markdown (renderMarkdown handles sanitization)
+    const html_content = renderMarkdown(data.markdown_content);
 
     const now = new Date().toISOString();
 

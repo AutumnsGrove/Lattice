@@ -1,9 +1,7 @@
 import { json, error } from "@sveltejs/kit";
-import { marked } from "marked";
-import { getPostBySlug } from "$lib/utils/markdown.js";
+import { getPostBySlug, renderMarkdown } from "$lib/utils/markdown.js";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import * as cache from "$lib/server/services/cache.js";
@@ -269,10 +267,8 @@ export const PUT: RequestHandler = async ({
       throw error(404, "Post not found");
     }
 
-    // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string,
-    );
+    // Generate HTML from markdown (renderMarkdown handles sanitization)
+    const html_content = renderMarkdown(data.markdown_content);
 
     // Generate a simple hash of the content
     const encoder = new TextEncoder();
