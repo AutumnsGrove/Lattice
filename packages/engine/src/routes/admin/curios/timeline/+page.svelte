@@ -113,15 +113,19 @@
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json() as Record<string, unknown>;
 
       if (response.ok) {
-        backfillResult = result;
+        backfillResult = {
+          success: true,
+          message: (result.message as string) || "Backfill complete",
+          stats: result.stats,
+        };
         toast.success("Backfill complete!", {
-          description: result.message,
+          description: backfillResult.message,
         });
       } else {
-        const errorMsg = result?.message || `Backfill failed (${response.status})`;
+        const errorMsg = (result.message as string) || `Backfill failed (${response.status})`;
         backfillResult = { success: false, message: errorMsg };
         toast.error("Backfill failed", { description: errorMsg });
       }
