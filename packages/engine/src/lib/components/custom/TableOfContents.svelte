@@ -102,9 +102,9 @@
 <style>
 	.toc {
 		position: sticky;
-		/* Account for sticky navbar height (~64px + some breathing room) */
-		top: 5rem;
-		max-height: calc(100vh - 6rem);
+		/* Account for sticky navbar height + divider line + breathing room */
+		top: 6.5rem;
+		max-height: calc(100vh - 7.5rem);
 		overflow-y: auto;
 		padding: 1.25rem;
 		font-size: 0.875rem;
