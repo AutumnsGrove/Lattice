@@ -6,19 +6,13 @@
  */
 
 import { COMPONENTS, STATUS_PRIORITY } from "./config";
+import { generateUUID } from "./utils";
 
 /**
  * Environment bindings required by daily history
  */
 export interface DailyHistoryEnv {
   DB: D1Database;
-}
-
-/**
- * Generate a UUID v4
- */
-function generateUUID(): string {
-  return crypto.randomUUID();
 }
 
 /**
@@ -117,33 +111,17 @@ async function recordDailyStatusForComponent(
     date,
   );
 
-  // Upsert into status_daily_history
-  // SQLite doesn't have UPSERT syntax, so we use INSERT OR REPLACE
   const id = generateUUID();
   const now = new Date().toISOString();
 
   await db
     .prepare(
-      `INSERT OR REPLACE INTO status_daily_history
-			 (id, component_id, date, status, incident_count, created_at)
-			 VALUES (
-			   COALESCE(
-			     (SELECT id FROM status_daily_history WHERE component_id = ? AND date = ?),
-			     ?
-			   ),
-			   ?, ?, ?, ?, ?
-			 )`,
+      `INSERT INTO status_daily_history (id, component_id, date, status, incident_count, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(component_id, date)
+       DO UPDATE SET status = excluded.status, incident_count = excluded.incident_count`,
     )
-    .bind(
-      componentId,
-      date,
-      id,
-      componentId,
-      date,
-      worstStatus,
-      incidentCount,
-      now,
-    )
+    .bind(id, componentId, date, worstStatus, incidentCount, now)
     .run();
 }
 
@@ -155,16 +133,22 @@ export async function recordDailyHistory(env: DailyHistoryEnv): Promise<void> {
   const yesterday = getYesterdayDate();
   console.log(`[Clearing Monitor] Recording daily history for ${yesterday}`);
 
-  for (const component of COMPONENTS) {
-    try {
-      await recordDailyStatusForComponent(env.DB, component.id, yesterday);
+  const results = await Promise.allSettled(
+    COMPONENTS.map((component) =>
+      recordDailyStatusForComponent(env.DB, component.id, yesterday),
+    ),
+  );
+
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result.status === "fulfilled") {
       console.log(
-        `[Clearing Monitor] Recorded history for ${component.name} on ${yesterday}`,
+        `[Clearing Monitor] Recorded history for ${COMPONENTS[i].name}`,
       );
-    } catch (err) {
+    } else {
       console.error(
-        `[Clearing Monitor] Failed to record history for ${component.name}:`,
-        err instanceof Error ? err.message : String(err),
+        `[Clearing Monitor] Failed for ${COMPONENTS[i].name}:`,
+        result.reason,
       );
     }
   }

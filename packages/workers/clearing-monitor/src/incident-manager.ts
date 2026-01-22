@@ -7,6 +7,7 @@
 
 import type { HealthCheckResult } from "./health-checks";
 import { INCIDENT_THRESHOLDS } from "./config";
+import { generateUUID } from "./utils";
 
 /**
  * State tracked in KV for each component
@@ -26,6 +27,7 @@ export interface IncidentEnv {
   DB: D1Database;
   MONITOR_KV: KVNamespace;
   RESEND_API_KEY?: string;
+  ALERT_EMAIL?: string;
 }
 
 /**
@@ -39,13 +41,6 @@ function generateSlug(title: string, timestamp: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 50);
   return `${dateStr}-${slugifiedTitle}`;
-}
-
-/**
- * Generate a UUID v4
- */
-function generateUUID(): string {
-  return crypto.randomUUID();
 }
 
 /**
@@ -96,7 +91,7 @@ async function sendEmailAlert(
       },
       body: JSON.stringify({
         from: "Grove Status <status@grove.place>",
-        to: ["alerts@grove.place"],
+        to: [env.ALERT_EMAIL || "alerts@grove.place"],
         subject,
         text: body,
       }),
@@ -167,37 +162,31 @@ async function createIncident(
   const fullTitle = `${componentName} - ${title}`;
   const slug = generateSlug(fullTitle, now);
 
-  // Create incident
-  await db
-    .prepare(
-      `INSERT INTO status_incidents (id, title, slug, status, impact, type, started_at, created_at, updated_at)
-			 VALUES (?, ?, ?, 'investigating', ?, ?, ?, ?, ?)`,
-    )
-    .bind(incidentId, fullTitle, slug, impact, type, now, now, now)
-    .run();
-
-  // Link to component
-  await db
-    .prepare(
-      `INSERT INTO status_incident_components (incident_id, component_id)
-			 VALUES (?, ?)`,
-    )
-    .bind(incidentId, componentId)
-    .run();
-
-  // Add initial update
   const updateId = generateUUID();
   const message = result.error
     ? `Automated monitoring detected an issue: ${result.error}`
     : `Automated monitoring detected ${result.status.replace("_", " ")}. Investigating.`;
 
-  await db
-    .prepare(
-      `INSERT INTO status_updates (id, incident_id, status, message, created_at)
-			 VALUES (?, ?, 'investigating', ?, ?)`,
-    )
-    .bind(updateId, incidentId, message, now)
-    .run();
+  await db.batch([
+    db
+      .prepare(
+        `INSERT INTO status_incidents (id, title, slug, status, impact, type, started_at, created_at, updated_at)
+         VALUES (?, ?, ?, 'investigating', ?, ?, ?, ?, ?)`,
+      )
+      .bind(incidentId, fullTitle, slug, impact, type, now, now, now),
+    db
+      .prepare(
+        `INSERT INTO status_incident_components (incident_id, component_id)
+         VALUES (?, ?)`,
+      )
+      .bind(incidentId, componentId),
+    db
+      .prepare(
+        `INSERT INTO status_updates (id, incident_id, status, message, created_at)
+         VALUES (?, ?, 'investigating', ?, ?)`,
+      )
+      .bind(updateId, incidentId, message, now),
+  ]);
 
   return incidentId;
 }
@@ -210,26 +199,23 @@ async function resolveIncident(
   incidentId: string,
 ): Promise<void> {
   const now = new Date().toISOString();
-
-  // Update incident status
-  await db
-    .prepare(
-      `UPDATE status_incidents
-			 SET status = 'resolved', resolved_at = ?, updated_at = ?
-			 WHERE id = ?`,
-    )
-    .bind(now, now, incidentId)
-    .run();
-
-  // Add resolution update
   const updateId = generateUUID();
-  await db
-    .prepare(
-      `INSERT INTO status_updates (id, incident_id, status, message, created_at)
-			 VALUES (?, ?, 'resolved', 'Service has recovered and is operating normally.', ?)`,
-    )
-    .bind(updateId, incidentId, now)
-    .run();
+
+  await db.batch([
+    db
+      .prepare(
+        `UPDATE status_incidents
+         SET status = 'resolved', resolved_at = ?, updated_at = ?
+         WHERE id = ?`,
+      )
+      .bind(now, now, incidentId),
+    db
+      .prepare(
+        `INSERT INTO status_updates (id, incident_id, status, message, created_at)
+         VALUES (?, ?, 'resolved', 'Service has recovered and is operating normally.', ?)`,
+      )
+      .bind(updateId, incidentId, now),
+  ]);
 }
 
 /**
@@ -278,8 +264,8 @@ export async function processHealthCheckResult(
       await resolveIncident(env.DB, state.activeIncidentId);
       await updateComponentStatus(env.DB, result.componentId, "operational");
 
-      // Send resolution email
-      await sendEmailAlert(
+      // Fire-and-forget resolution email
+      void sendEmailAlert(
         env,
         `[Grove] Resolved: ${result.componentName} back to operational`,
         `Service: ${result.componentName}\n` +
@@ -287,6 +273,8 @@ export async function processHealthCheckResult(
           `Time: ${result.timestamp}\n` +
           `Latency: ${result.latencyMs}ms\n\n` +
           `The service has recovered and is operating normally.`,
+      ).catch((err) =>
+        console.error("[Clearing Monitor] Email send failed:", err),
       );
 
       state.activeIncidentId = null;
@@ -315,8 +303,8 @@ export async function processHealthCheckResult(
         result,
       );
 
-      // Send incident email
-      await sendEmailAlert(
+      // Fire-and-forget incident email
+      void sendEmailAlert(
         env,
         `[Grove] Incident: ${result.componentName} - ${result.status.replace("_", " ")}`,
         `Service: ${result.componentName}\n` +
@@ -325,6 +313,8 @@ export async function processHealthCheckResult(
           `Latency: ${result.latencyMs}ms\n` +
           `Error: ${result.error || "N/A"}\n\n` +
           `Automated monitoring has detected an issue and created an incident.`,
+      ).catch((err) =>
+        console.error("[Clearing Monitor] Email send failed:", err),
       );
 
       state.activeIncidentId = incidentId;

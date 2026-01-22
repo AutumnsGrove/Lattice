@@ -28,6 +28,8 @@ export interface Env {
   MONITOR_KV: KVNamespace;
   /** Resend API key for email notifications */
   RESEND_API_KEY?: string;
+  /** Email address for alert notifications */
+  ALERT_EMAIL?: string;
 }
 
 export default {

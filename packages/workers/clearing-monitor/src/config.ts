@@ -28,7 +28,7 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_blog",
     name: "Blog Engine",
-    url: "https://example.grove.place/api/health",
+    url: "https://grove.place/api/health",
     checkType: "deep",
     method: "GET",
   },
@@ -56,7 +56,7 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_payments",
     name: "Payments",
-    url: "https://example.grove.place/api/health/payments",
+    url: "https://grove.place/api/health/payments",
     checkType: "deep",
     method: "GET",
   },
@@ -76,11 +76,8 @@ export const COMPONENTS: ComponentConfig[] = [
 export const LATENCY_THRESHOLDS = {
   /** < 500ms = operational */
   OPERATIONAL: 500,
-  /** 500-1500ms = degraded */
-  DEGRADED: 1500,
-  /** 1500-3000ms = partial_outage */
-  PARTIAL_OUTAGE: 3000,
-  /** > 3000ms or error = major_outage */
+  /** >= 500ms = degraded, >= 1500ms = partial_outage */
+  SLOW: 1500,
 } as const;
 
 /**

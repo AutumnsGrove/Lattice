@@ -6,6 +6,7 @@
 
 import type { ComponentConfig } from "./config";
 import { LATENCY_THRESHOLDS, REQUEST_TIMEOUT } from "./config";
+import { ComponentStatus } from "./utils";
 
 /**
  * Result of a health check
@@ -120,7 +121,20 @@ async function evaluateDeepCheck(
   }
 
   try {
-    const data = (await response.json()) as DeepHealthResponse;
+    const data = (await response.json()) as Record<string, unknown> | null;
+
+    // Validate response shape
+    if (!data || typeof data.status !== "string") {
+      return {
+        componentId: config.id,
+        componentName: config.name,
+        status: ComponentStatus.DEGRADED,
+        latencyMs,
+        httpStatus: response.status,
+        error: "Invalid health response format",
+        timestamp,
+      };
+    }
 
     // Map service-reported status to component status
     if (data.status === "unhealthy") {
@@ -198,14 +212,12 @@ function classifyByLatency(
   httpStatus: number,
   timestamp: string,
 ): HealthCheckResult {
-  let status: HealthCheckResult["status"] = "operational";
+  let status: HealthCheckResult["status"] = ComponentStatus.OPERATIONAL;
 
-  if (latencyMs >= LATENCY_THRESHOLDS.PARTIAL_OUTAGE) {
-    status = "partial_outage";
-  } else if (latencyMs >= LATENCY_THRESHOLDS.DEGRADED) {
-    status = "partial_outage";
+  if (latencyMs >= LATENCY_THRESHOLDS.SLOW) {
+    status = ComponentStatus.PARTIAL_OUTAGE;
   } else if (latencyMs >= LATENCY_THRESHOLDS.OPERATIONAL) {
-    status = "degraded";
+    status = ComponentStatus.DEGRADED;
   }
 
   return {
