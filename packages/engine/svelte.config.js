@@ -19,7 +19,7 @@ const config = {
     // it doesn't understand X-Forwarded-Host. Our hooks.server.ts handles CSRF
     // validation for ALL requests (including form actions) using proxy-aware logic.
     csrf: {
-      checkOrigin: false,
+      trustedOrigins: ["*"],
     },
     prerender: {
       // In CI, skip prerendering - the AI binding requires remote auth
