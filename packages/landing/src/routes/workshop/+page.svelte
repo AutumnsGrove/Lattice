@@ -140,20 +140,6 @@
 					]
 				},
 				{
-					name: 'Burrow',
-					tagline: 'Cross-Property Access',
-					description: 'A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role—Pathfinders get admin, Rooted Wanderers can contribute.',
-					status: 'planned',
-					icon: 'network',
-					integration: 'Integrated into Arbor for greenhouse properties',
-					spec: '/knowledge/specs/burrow-spec',
-					subComponents: [
-						{ name: 'Dig', icon: 'key', description: 'Open a burrow' },
-						{ name: 'Fill', icon: 'shieldoff', description: 'Revoke access' },
-						{ name: 'Receiving', icon: 'warehouse', description: 'Property accepting burrows' }
-					]
-				},
-				{
 					name: 'Clearing',
 					tagline: 'Status Page',
 					description: 'A clearing in the forest where you can see what\'s happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what\'s happening.',
@@ -200,6 +186,20 @@
 				// 	integration: 'Shop and provisioning for Wanderers',
 				// 	spec: '/knowledge/specs/pantry-spec'
 				// },
+				{
+					name: 'Burrow',
+					tagline: 'Cross-Property Access',
+					description: 'A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role—Pathfinders get admin, Rooted Wanderers can contribute.',
+					status: 'planned',
+					icon: 'network',
+					integration: 'Integrated into Arbor for greenhouse properties',
+					spec: '/knowledge/specs/burrow-spec',
+					subComponents: [
+						{ name: 'Dig', icon: 'key', description: 'Open a burrow' },
+						{ name: 'Fill', icon: 'shieldoff', description: 'Revoke access' },
+						{ name: 'Receiving', icon: 'warehouse', description: 'Property accepting burrows' }
+					]
+				},
 			]
 		},
 		{
