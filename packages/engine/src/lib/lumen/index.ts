@@ -95,6 +95,14 @@ export type {
   ShutterResult,
   ShutterExtraction,
   ShutterInjectionResult,
+  LumenMcpOptions,
+  LumenMcpToolRef,
+  McpInjectMode,
+  LumenMcpServerConfig,
+  McpTransportType,
+  LumenMcpToolDefinition,
+  LumenMcpResult,
+  LumenMcpToolResult,
 } from "./types.js";
 
 // =============================================================================
@@ -108,6 +116,12 @@ export { runSongbird } from "./songbird.js";
 // =============================================================================
 
 export { runShutter, injectShutterContext } from "./shutter.js";
+
+// =============================================================================
+// MCP (STUB)
+// =============================================================================
+
+export { McpServerRegistry, runMcpTools, injectMcpContext } from "./mcp.js";
 
 // =============================================================================
 // ERRORS

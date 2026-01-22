@@ -95,6 +95,9 @@ export interface LumenRequestOptions {
   /** Enrich request with distilled web content via Shutter (not yet implemented) */
   shutter?: ShutterOptions;
 
+  /** Augment request with MCP tool results (not yet implemented) */
+  mcp?: LumenMcpOptions;
+
   /** Additional metadata for logging (no content!) */
   metadata?: Record<string, unknown>;
 }
@@ -387,4 +390,127 @@ export interface ShutterInjectionResult {
 
   /** Contributing detection signals */
   signals: string[];
+}
+
+// =============================================================================
+// MCP TYPES (STUB — not yet implemented)
+// =============================================================================
+
+/**
+ * Options for MCP (Model Context Protocol) tool augmentation.
+ *
+ * MCP allows Lumen to invoke external tools (Tavily search, Context7 docs,
+ * custom MCP servers) and inject their results as context before the main
+ * inference call. Clients get richer responses without managing tool APIs.
+ *
+ * @see https://modelcontextprotocol.io
+ */
+export interface LumenMcpOptions {
+  /** Which tools to invoke (or "auto" to let Lumen decide based on task) */
+  tools?: LumenMcpToolRef[] | "auto";
+
+  /** Maximum total tokens to inject from tool results (default: 2000) */
+  maxContextTokens?: number;
+
+  /** Timeout for all tool calls combined (default: 15000ms) */
+  timeoutMs?: number;
+
+  /** How to inject tool results into the request */
+  inject?: McpInjectMode;
+
+  /** Per-tool API key overrides (BYOK for tool providers) */
+  toolKeys?: Record<string, string>;
+}
+
+/** Reference to an MCP tool to invoke */
+export interface LumenMcpToolRef {
+  /** Tool server identifier (e.g., "tavily", "context7", "custom") */
+  server: string;
+
+  /** Tool name within the server (e.g., "search", "query-docs") */
+  tool: string;
+
+  /** Arguments to pass to the tool */
+  args?: Record<string, unknown>;
+}
+
+/** How tool results get injected into the Lumen request */
+export type McpInjectMode =
+  | "system" // Add as system message context (default)
+  | "prepend" // Prepend to user message
+  | "append"; // Append after user message
+
+/** Configuration for a registered MCP server */
+export interface LumenMcpServerConfig {
+  /** Unique server identifier */
+  id: string;
+
+  /** Human-readable name */
+  name: string;
+
+  /** Server transport type */
+  transport: McpTransportType;
+
+  /** Connection URL (for HTTP/SSE transports) */
+  url?: string;
+
+  /** Available tools on this server */
+  tools: LumenMcpToolDefinition[];
+
+  /** Whether this server requires authentication */
+  requiresAuth: boolean;
+}
+
+/** MCP transport types supported */
+export type McpTransportType = "stdio" | "sse" | "http";
+
+/** Definition of a tool available on an MCP server */
+export interface LumenMcpToolDefinition {
+  /** Tool name */
+  name: string;
+
+  /** Human-readable description */
+  description: string;
+
+  /** JSON Schema for tool arguments */
+  inputSchema: Record<string, unknown>;
+
+  /** Which Lumen tasks this tool is relevant for (for "auto" mode) */
+  relevantTasks?: LumenTask[];
+}
+
+/** Result from running MCP tools */
+export interface LumenMcpResult {
+  /** Results from each tool invocation */
+  toolResults: LumenMcpToolResult[];
+
+  /** Total tokens used by injected context */
+  totalTokens: number;
+
+  /** Total time for all tool calls */
+  totalMs: number;
+}
+
+/** Result from a single MCP tool call */
+export interface LumenMcpToolResult {
+  /** Server that provided this result */
+  server: string;
+
+  /** Tool that was called */
+  tool: string;
+
+  /** Extracted/formatted content to inject */
+  content: string;
+
+  /** Token count for this result */
+  tokens: number;
+
+  /** Latency for this tool call */
+  latencyMs: number;
+
+  /** Whether the call succeeded */
+  success: boolean;
+
+  /** Error message (if failed) */
+  error?: string;
 }
