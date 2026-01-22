@@ -34,10 +34,10 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
         // If we have a tenant context, load tenant-specific settings
         if (tenantId) {
           // PERFORMANCE: Run independent queries in parallel to reduce latency
-          // Settings, nav pages, and timeline curio are independent - execute concurrently
+          // Settings, nav pages, and curio configs are independent - execute concurrently
           // Each query still has its own error handling to prevent cascading failures
-          const [settingsResult, navResult, timelineResult] = await Promise.all(
-            [
+          const [settingsResult, navResult, timelineResult, galleryResult] =
+            await Promise.all([
               // Site settings query
               db
                 .prepare(
@@ -70,8 +70,16 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
                 .bind(tenantId)
                 .first<{ enabled: number }>()
                 .catch(() => null), // Timeline table might not exist - that's OK
-            ],
-          );
+
+              // Gallery curio config query
+              db
+                .prepare(
+                  `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`,
+                )
+                .bind(tenantId)
+                .first<{ enabled: number }>()
+                .catch(() => null), // Gallery table might not exist - that's OK
+            ]);
 
           // Process settings results
           if (settingsResult?.results) {
@@ -97,21 +105,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .map((p) => ({ slug: p.slug, title: p.title }));
           }
 
-          // Add timeline to nav if enabled
+          // Add curio pages to nav if enabled
           if (timelineResult?.enabled) {
             navPages.push({ slug: "timeline", title: "Timeline" });
           }
-
-          // Future: Add more curios here as they get public routes
-          // try {
-          //   const journeyResult = await db
-          //     .prepare(`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`)
-          //     .bind(tenantId)
-          //     .first<{ enabled: number }>();
-          //   if (journeyResult?.enabled) {
-          //     navPages.push({ slug: "journey", title: "Journey" });
-          //   }
-          // } catch { /* Journey curio table might not exist */ }
+          if (galleryResult?.enabled) {
+            navPages.push({ slug: "gallery", title: "Gallery" });
+          }
         } else {
           // Fallback to global settings (for landing page or legacy)
           try {
