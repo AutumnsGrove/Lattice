@@ -153,34 +153,57 @@
 
 ## In Progress 🚧
 
-### Timeline Curio Config Save — 403 CSRF Issue
-> **Problem:** Saving Timeline curio config at `/admin/curios/timeline` returns 403 Forbidden
-> **Status:** CSRF fix deployed but still failing — needs deeper investigation
+### Timeline Curio — 403 Upload Error + Backfilling
+> **Problem:** Cannot add new Timeline entries on autumn.grove.place — upload button returns 403 to console
+> **Status:** Partially working (viewing works), upload/save broken — needs investigation
+> **Last checked:** Jan 22, 2026
 
-**Attempted fixes (all deployed to production):**
+**What currently works:**
+- [x] Timeline settings page visible at `/admin/curios/timeline`
+- [x] Page appears in admin navbar
+- [x] Old entries display correctly
+- [x] Heat map renders properly
+
+**What's broken:**
+- [ ] **Upload button does nothing** — sends 403 error to console
+- [ ] Cannot add new timeline entries
+
+**Investigation history:**
 - [x] Added toast notifications for feedback (svelte-sonner)
 - [x] Added `x-sveltekit-action` header detection in hooks.server.ts
-- [x] Skipped custom CSRF validation entirely for SvelteKit form actions
-- [ ] **STILL GETTING 403** — Form action not reaching server properly
+- [x] Removed custom CSRF validation code — SvelteKit handles this automatically
+- [ ] **STILL GETTING 403** — Likely a conflict between our custom validation and SvelteKit's built-in CSRF handling
 
-**Investigation notes:**
-- Network tab shows POST to `?/save` returns 403
-- Cloudflare logs show request reaching grove-example-site.pages.dev internal URL
-- `x-sveltekit-action: "true"` header IS present
-- `origin: https://autumn.grove.place` matches host
-- Custom CSRF middleware should be skipped for form actions
+**Root cause hypothesis:**
+- SvelteKit does CSRF validation automatically for form actions
+- We had wrapped code with custom CSRF validation that conflicted
+- Removed that code but something is still blocking the request
+- May need to verify the token is actually being saved from the Timeline panel settings
 
-**Next steps to investigate:**
-- [ ] Check if there's ANOTHER CSRF validation layer we missed (route-level?)
+**Next steps:**
+- [ ] Verify token is saved correctly in Timeline panel settings
+- [ ] Check if there's another CSRF validation layer we missed (route-level?)
 - [ ] Verify hooks.server.ts changes actually deployed (check worker bundle)
 - [ ] Check Cloudflare Access or WAF rules that might be blocking POST
-- [ ] Try adding explicit `?/save` to form action attribute
 - [ ] Check if the route's +page.server.ts has its own CSRF check
 
 **Files involved:**
 - `packages/engine/src/hooks.server.ts` — Custom CSRF middleware
 - `packages/engine/src/routes/admin/curios/timeline/+page.svelte` — Form UI
 - `packages/engine/src/routes/admin/curios/timeline/+page.server.ts` — Form action
+
+### Timeline Curio — Backfilling Feature
+> **Goal:** Add proper backfilling support via admin panel
+> **Priority:** After fixing the 403 upload issue
+
+**Current state:**
+- Backfilling requires manual API calls to the worker
+- Need to construct the call with token + tenant ID
+
+**Desired state:**
+- [ ] Add backfill UI in admin panel (`/admin/curios/timeline/backfill` or similar)
+- [ ] Build the API call to worker using stored token + tenant ID
+- [ ] Should be straightforward once we have all the pieces (token, tenant ID, worker endpoint)
 
 ## Completed ✅
 
@@ -909,7 +932,7 @@ The AutumnsGrove Museum transforms archived code into educational exhibits with:
 
 ---
 
-*Last updated: 2026-01-21 (Added Greenhouse Mode / Dave mode development todo)*
+*Last updated: 2026-01-22 (Updated Timeline Curio status + added backfilling todo)*
 
 ---
 
