@@ -9,8 +9,6 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
-  callOpenRouter,
-  calculateOpenRouterCost,
   buildVoicedPrompt,
   parseAIResponse,
   // Long-horizon context
@@ -25,6 +23,7 @@ import {
   type CustomVoiceConfig,
   type PromptContextInput,
 } from "$lib/curios/timeline";
+import { createLumenClient } from "$lib/lumen/index.js";
 import { safeDecryptToken } from "$lib/server/encryption";
 
 interface GenerateRequest {
@@ -225,14 +224,29 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       promptContext,
     );
 
-    // Call OpenRouter
-    const aiResponse = await callOpenRouter(
-      openrouterKey,
-      config.openrouter_model,
-      promptResult.systemPrompt,
-      promptResult.userPrompt,
-      { maxTokens: 2000 },
-    );
+    // Call AI via Lumen (uses tenant's own OpenRouter key)
+    const globalKey = platform?.env?.OPENROUTER_API_KEY || openrouterKey;
+    const lumen = createLumenClient({
+      openrouterApiKey: globalKey,
+      ai: platform?.env?.AI,
+      db,
+    });
+
+    const aiResponse = await lumen.run({
+      task: "summary",
+      input: [
+        { role: "system", content: promptResult.systemPrompt },
+        { role: "user", content: promptResult.userPrompt },
+      ],
+      tenant: tenantId,
+      options: {
+        model: config.openrouter_model,
+        tenantApiKey: openrouterKey,
+        maxTokens: 2048,
+        temperature: 0.5,
+        skipQuota: true, // User pays via their own key
+      },
+    });
 
     // Parse AI response
     const parsed = parseAIResponse(aiResponse.content);
@@ -366,14 +380,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       )
       .bind(
         tenantId,
-        config.openrouter_model,
-        aiResponse.inputTokens,
-        aiResponse.outputTokens,
-        calculateOpenRouterCost(
-          config.openrouter_model,
-          aiResponse.inputTokens,
-          aiResponse.outputTokens,
-        ),
+        aiResponse.model,
+        aiResponse.usage.input,
+        aiResponse.usage.output,
+        aiResponse.usage.cost,
       )
       .run();
 
@@ -400,14 +410,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       message: `Generated summary for ${targetDate}`,
       summary,
       usage: {
-        model: config.openrouter_model,
-        inputTokens: aiResponse.inputTokens,
-        outputTokens: aiResponse.outputTokens,
-        cost: calculateOpenRouterCost(
-          config.openrouter_model,
-          aiResponse.inputTokens,
-          aiResponse.outputTokens,
-        ),
+        model: aiResponse.model,
+        inputTokens: aiResponse.usage.input,
+        outputTokens: aiResponse.usage.output,
+        cost: aiResponse.usage.cost,
       },
       context: {
         historicalDays: historicalContext.length,

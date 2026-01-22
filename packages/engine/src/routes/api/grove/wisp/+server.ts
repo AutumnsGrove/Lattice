@@ -14,15 +14,14 @@ import {
   RATE_LIMIT,
   COST_CAP,
   PROMPT_MODES,
-  calculateCost,
   getMaxTokens,
 } from "$lib/config/wisp.js";
 import {
-  callInference,
   secureUserContent,
   stripMarkdown,
   smartTruncate,
 } from "$lib/server/inference-client.js";
+import { createLumenClient } from "$lib/lumen/index.js";
 import { calculateReadability } from "$lib/utils/readability.js";
 import { checkRateLimit } from "$lib/server/rate-limits/index.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
@@ -204,30 +203,22 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
   }
 
-  // Get API secrets (validate they are strings, not undefined)
-  const secrets = {
-    FIREWORKS_API_KEY:
-      typeof platform?.env?.FIREWORKS_API_KEY === "string"
-        ? platform.env.FIREWORKS_API_KEY
-        : undefined,
-    CEREBRAS_API_KEY:
-      typeof platform?.env?.CEREBRAS_API_KEY === "string"
-        ? platform.env.CEREBRAS_API_KEY
-        : undefined,
-    GROQ_API_KEY:
-      typeof platform?.env?.GROQ_API_KEY === "string"
-        ? platform.env.GROQ_API_KEY
-        : undefined,
-  };
-
-  // Check if any inference provider is configured
-  const hasProvider = Object.values(secrets).some(Boolean);
+  // Create Lumen client for AI inference
+  const openrouterApiKey = platform?.env?.OPENROUTER_API_KEY;
   if (
-    !hasProvider &&
+    !openrouterApiKey &&
     (action === "grammar" || action === "tone" || action === "all")
   ) {
     return json({ error: "AI service not configured" }, { status: 503 });
   }
+
+  const lumen = openrouterApiKey
+    ? createLumenClient({
+        openrouterApiKey,
+        ai: platform?.env?.AI,
+        db,
+      })
+    : null;
 
   const result: {
     grammar?: unknown;
@@ -235,6 +226,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     readability?: unknown;
   } = {};
   let totalTokens = { input: 0, output: 0 };
+  let totalCost = 0;
   let modelUsed: string | null = null;
   let providerUsed: string | null = null;
 
@@ -243,31 +235,29 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const cleanContent = stripMarkdown(content);
     const truncatedContent = smartTruncate(cleanContent);
 
-    // Grammar analysis (AI-powered)
-    if (action === "grammar" || action === "all") {
-      const grammarResult = await analyzeGrammar(
-        truncatedContent,
-        mode,
-        secrets,
-      );
+    // Grammar analysis (AI-powered via Lumen)
+    if ((action === "grammar" || action === "all") && lumen) {
+      const grammarResult = await analyzeGrammar(truncatedContent, mode, lumen);
       result.grammar = grammarResult.result;
       totalTokens.input += grammarResult.usage.input;
       totalTokens.output += grammarResult.usage.output;
+      totalCost += grammarResult.usage.cost;
       modelUsed = grammarResult.model;
       providerUsed = grammarResult.provider;
     }
 
-    // Tone analysis (AI-powered)
-    if (action === "tone" || action === "all") {
+    // Tone analysis (AI-powered via Lumen)
+    if ((action === "tone" || action === "all") && lumen) {
       const toneResult = await analyzeTone(
         truncatedContent,
         mode,
-        secrets,
+        lumen,
         context,
       );
       result.tone = toneResult.result;
       totalTokens.input += toneResult.usage.input;
       totalTokens.output += toneResult.usage.output;
+      totalCost += toneResult.usage.cost;
       modelUsed = modelUsed || toneResult.model;
       providerUsed = providerUsed || toneResult.provider;
     }
@@ -277,10 +267,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       result.readability = calculateReadability(content);
     }
 
-    // Calculate cost
-    const cost = modelUsed
-      ? calculateCost(modelUsed, totalTokens.input, totalTokens.output)
-      : 0;
+    const cost = totalCost;
 
     // Log usage to database
     if (db) {
@@ -382,22 +369,18 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 };
 
 // ============================================================================
-// Analysis Functions
+// Analysis Functions (Lumen-powered)
 // ============================================================================
 
-type WispSecrets = {
-  FIREWORKS_API_KEY?: string;
-  CEREBRAS_API_KEY?: string;
-  GROQ_API_KEY?: string;
-};
+import type { LumenClient } from "$lib/lumen/index.js";
 
 /**
- * Analyze text for grammar and spelling issues
+ * Analyze text for grammar and spelling issues via Lumen generation task
  */
 async function analyzeGrammar(
   content: string,
   mode: "quick" | "thorough",
-  secrets: WispSecrets,
+  lumen: LumenClient,
 ) {
   const modeConfig = PROMPT_MODES[mode];
   const maxTokens = getMaxTokens("grammar", mode);
@@ -434,14 +417,14 @@ Use these severity levels:
 
 Return ONLY valid JSON. No explanation or markdown.`;
 
-  const response = await callInference(
-    {
-      prompt,
+  const response = await lumen.run({
+    task: "generation",
+    input: prompt,
+    options: {
       maxTokens,
       temperature: modeConfig.temperature,
     },
-    secrets,
-  );
+  });
 
   try {
     const result = JSON.parse(response.content);
@@ -473,12 +456,12 @@ Return ONLY valid JSON. No explanation or markdown.`;
 }
 
 /**
- * Analyze text tone and style
+ * Analyze text tone and style via Lumen generation task
  */
 async function analyzeTone(
   content: string,
   mode: "quick" | "thorough",
-  secrets: WispSecrets,
+  lumen: LumenClient,
   context?: { slug?: string; title?: string; audience?: string } | null,
 ) {
   const modeConfig = PROMPT_MODES[mode];
@@ -515,14 +498,14 @@ Common traits to evaluate (pick 4-6 most relevant):
 
 Return ONLY valid JSON. No explanation or markdown.`;
 
-  const response = await callInference(
-    {
-      prompt,
+  const response = await lumen.run({
+    task: "generation",
+    input: prompt,
+    options: {
       maxTokens,
       temperature: modeConfig.temperature,
     },
-    secrets,
-  );
+  });
 
   try {
     const result = JSON.parse(response.content);

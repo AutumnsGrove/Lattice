@@ -104,6 +104,9 @@ export const MODELS = {
 
   /** CF legacy moderation - LlamaGuard 3 (only v3 available on CF) */
   CF_LLAMAGUARD_3: "@cf/meta/llama-guard-3-8b",
+
+  /** CF vision - Llama 4 Scout (vision-capable, for image classification) */
+  CF_LLAMA4_SCOUT: "@cf/meta/llama-4-scout-17b-16e-instruct",
 } as const;
 
 // =============================================================================
@@ -136,6 +139,7 @@ export const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   [MODELS.CF_SHIELDGEMMA]: { input: 0, output: 0 },
   [MODELS.CF_BGE_BASE]: { input: 0, output: 0 },
   [MODELS.CF_LLAMAGUARD_3]: { input: 0, output: 0 },
+  [MODELS.CF_LLAMA4_SCOUT]: { input: 0, output: 0 },
 };
 
 // =============================================================================
@@ -260,7 +264,10 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
   image: {
     primaryModel: MODELS.GEMINI_FLASH,
     primaryProvider: "openrouter",
-    fallbackChain: [{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU }],
+    fallbackChain: [
+      { provider: "openrouter", model: MODELS.CLAUDE_HAIKU },
+      { provider: "cloudflare-ai", model: MODELS.CF_LLAMA4_SCOUT },
+    ],
     defaultMaxTokens: 1024,
     defaultTemperature: 0.2,
     description: "Image analysis and description",

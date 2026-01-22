@@ -71,15 +71,13 @@ declare global {
         ALLOWED_ADMIN_EMAILS?: string;
         TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
-        // Workers AI binding (for Petal image moderation)
+        // Workers AI binding (for Lumen/Petal image moderation)
         AI?: Ai;
 
-        // Wisp AI providers (optional inference APIs)
-        FIREWORKS_API_KEY?: string;
-        CEREBRAS_API_KEY?: string;
-        GROQ_API_KEY?: string;
+        // Lumen AI Gateway (unified AI inference)
+        OPENROUTER_API_KEY?: string;
 
-        // Petal fallback provider (when Workers AI unavailable)
+        // Petal CSAM fallback provider (when Workers AI unavailable)
         TOGETHER_API_KEY?: string;
 
         // GroveAuth (Heartwood OAuth)

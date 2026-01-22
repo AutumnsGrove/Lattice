@@ -13,17 +13,16 @@
 
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
-import {
-  RATE_LIMIT,
-  calculateCost,
-} from "$lib/config/wisp.js";
-import {
-  callInference,
-  secureUserContent,
-} from "$lib/server/inference-client.js";
+import { RATE_LIMIT } from "$lib/config/wisp.js";
+import { secureUserContent } from "$lib/server/inference-client.js";
+import { createLumenClient, type LumenClient } from "$lib/lumen/index.js";
 import { checkRateLimit } from "$lib/server/rate-limits/index.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
-import { queryOne, execute, DatabaseError } from "$lib/server/services/database.js";
+import {
+  queryOne,
+  execute,
+  DatabaseError,
+} from "$lib/server/services/database.js";
 
 // Import pure functions from separate module (enables testing)
 import {
@@ -60,12 +59,24 @@ interface FiresideRequest {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    return json({ error: "Looks like you're not signed in. Pop back in when you're ready." }, { status: 401 });
+    return json(
+      {
+        error:
+          "Looks like you're not signed in. Pop back in when you're ready.",
+      },
+      { status: 401 },
+    );
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    return json({ error: "Something seems off with your request. Mind refreshing the page?" }, { status: 403 });
+    return json(
+      {
+        error:
+          "Something seems off with your request. Mind refreshing the page?",
+      },
+      { status: 403 },
+    );
   }
 
   const db = platform?.env?.DB;
@@ -99,21 +110,25 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       const settings = await queryOne<{ setting_value: string }>(
         db,
         "SELECT setting_value FROM site_settings WHERE setting_key = ?",
-        ["wisp_enabled"]
+        ["wisp_enabled"],
       );
 
       if (!settings || settings.setting_value !== "true") {
         return json(
-          { error: "Wisp is resting right now. You can wake them in Settings when you're ready." },
-          { status: 403 }
+          {
+            error:
+              "Wisp is resting right now. You can wake them in Settings when you're ready.",
+          },
+          { status: 403 },
         );
       }
     } catch (err) {
       // DatabaseError from queryOne wraps the original error
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      const causeMessage = err instanceof DatabaseError && err.cause instanceof Error
-        ? err.cause.message
-        : "";
+      const causeMessage =
+        err instanceof DatabaseError && err.cause instanceof Error
+          ? err.cause.message
+          : "";
 
       // Only fail-open if table doesn't exist (initial setup scenario)
       // For all other errors, fail-closed to prevent unauthorized access
@@ -124,13 +139,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       ) {
         console.debug(
           "[Fireside] Settings table not created yet (expected during setup):",
-          errorMessage
+          errorMessage,
         );
       } else {
         console.error("[Fireside] Settings check failed:", errorMessage);
         return json(
-          { error: "I need a moment to check on things. Mind trying again shortly?" },
-          { status: 503 }
+          {
+            error:
+              "I need a moment to check on things. Mind trying again shortly?",
+          },
+          { status: 503 },
         );
       }
     }
@@ -144,9 +162,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         return json(
           {
             error:
-              featureCheck.reason || "AI features require an active subscription",
+              featureCheck.reason ||
+              "AI features require an active subscription",
           },
-          { status: 403 }
+          { status: 403 },
         );
       }
     } catch (err) {
@@ -154,7 +173,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       // (billing issues shouldn't completely block the feature)
       console.warn(
         "[Fireside] Feature access check failed:",
-        err instanceof Error ? err.message : "Unknown error"
+        err instanceof Error ? err.message : "Unknown error",
       );
     }
   }
@@ -164,7 +183,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   try {
     body = await request.json();
   } catch {
-    return json({ error: "Hmm, I couldn't quite understand that. Mind trying again?" }, { status: 400 });
+    return json(
+      { error: "Hmm, I couldn't quite understand that. Mind trying again?" },
+      { status: 400 },
+    );
   }
 
   const { action, message, conversation, starterPrompt, conversationId } = body;
@@ -172,8 +194,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Validate action
   if (!["start", "respond", "draft"].includes(action)) {
     return json(
-      { error: "That's not something I know how to do yet. Try starting a conversation?" },
-      { status: 400 }
+      {
+        error:
+          "That's not something I know how to do yet. Try starting a conversation?",
+      },
+      { status: 400 },
     );
   }
 
@@ -181,8 +206,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!kv) {
     console.error("[Fireside] Rate limiting failed: CACHE_KV not configured");
     return json(
-      { error: "I need a moment to gather myself. Mind waiting a bit and trying again?" },
-      { status: 503 }
+      {
+        error:
+          "I need a moment to gather myself. Mind waiting a bit and trying again?",
+      },
+      { status: 503 },
     );
   }
 
@@ -196,26 +224,23 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (rateLimitResponse) return rateLimitResponse;
 
-  // Get API secrets
-  const secrets = {
-    FIREWORKS_API_KEY:
-      typeof platform?.env?.FIREWORKS_API_KEY === "string"
-        ? platform.env.FIREWORKS_API_KEY
-        : undefined,
-    CEREBRAS_API_KEY:
-      typeof platform?.env?.CEREBRAS_API_KEY === "string"
-        ? platform.env.CEREBRAS_API_KEY
-        : undefined,
-    GROQ_API_KEY:
-      typeof platform?.env?.GROQ_API_KEY === "string"
-        ? platform.env.GROQ_API_KEY
-        : undefined,
-  };
-
-  const hasProvider = Object.values(secrets).some(Boolean);
-  if (!hasProvider) {
-    return json({ error: "I'm not quite set up yet. Ask the site owner to configure the AI settings." }, { status: 503 });
+  // Create Lumen client
+  const openrouterApiKey = platform?.env?.OPENROUTER_API_KEY;
+  if (!openrouterApiKey) {
+    return json(
+      {
+        error:
+          "I'm not quite set up yet. Ask the site owner to configure the AI settings.",
+      },
+      { status: 503 },
+    );
   }
+
+  const lumen = createLumenClient({
+    openrouterApiKey,
+    ai: platform?.env?.AI,
+    db,
+  });
 
   try {
     // Handle each action
@@ -224,10 +249,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         return handleStart(locals.user.id, starterPrompt);
 
       case "respond":
-        return await handleRespond(message, conversation, secrets);
+        return await handleRespond(message, conversation, lumen);
 
       case "draft":
-        return await handleDraft(conversation, secrets, db, locals.user.id, conversationId);
+        return await handleDraft(
+          conversation,
+          lumen,
+          db,
+          locals.user.id,
+          conversationId,
+        );
 
       default:
         return json({ error: "Invalid action" }, { status: 400 });
@@ -235,11 +266,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   } catch (err) {
     console.error(
       "[Fireside] Error:",
-      err instanceof Error ? err.message : "Unknown error"
+      err instanceof Error ? err.message : "Unknown error",
     );
     return json(
       { error: "Oh dear, something got tangled up. Mind trying that again?" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };
@@ -268,16 +299,25 @@ function handleStart(userId: string, customPrompt?: string) {
 async function handleRespond(
   message: string | undefined,
   conversation: FiresideMessage[] | undefined,
-  secrets: { FIREWORKS_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string }
+  lumen: LumenClient,
 ) {
   if (!message || typeof message !== "string" || !message.trim()) {
-    return json({ error: "I'm listening... but I didn't catch anything. What's on your mind?" }, { status: 400 });
+    return json(
+      {
+        error:
+          "I'm listening... but I didn't catch anything. What's on your mind?",
+      },
+      { status: 400 },
+    );
   }
 
   if (message.length > MAX_MESSAGE_LENGTH) {
     return json(
-      { error: "That's a lot to hold at once. Mind breaking it into a shorter message?" },
-      { status: 400 }
+      {
+        error:
+          "That's a lot to hold at once. Mind breaking it into a shorter message?",
+      },
+      { status: 400 },
     );
   }
 
@@ -286,10 +326,11 @@ async function handleRespond(
   if (isConversationTooLong(history)) {
     return json(
       {
-        error: "We've been chatting a while! This is a good time to draft what you have, or start fresh.",
+        error:
+          "We've been chatting a while! This is a good time to draft what you have, or start fresh.",
         shouldDraft: true,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -331,14 +372,14 @@ ${message}
 
 Respond as Wisp with a brief, warm follow-up. Ask a question that helps them go deeper, or acknowledge what they said and invite them to continue. Keep it natural and conversational.`;
 
-  const response = await callInference(
-    {
-      prompt,
+  const response = await lumen.run({
+    task: "chat",
+    input: prompt,
+    options: {
       maxTokens: RESPONSE_MAX_TOKENS,
       temperature: 0.7,
     },
-    secrets
-  );
+  });
 
   // Add the new messages to conversation for canDraft check
   const updatedConversation: FiresideMessage[] = [
@@ -361,13 +402,20 @@ Respond as Wisp with a brief, warm follow-up. Ask a question that helps them go 
  */
 async function handleDraft(
   conversation: FiresideMessage[] | undefined,
-  secrets: { FIREWORKS_API_KEY?: string; CEREBRAS_API_KEY?: string; GROQ_API_KEY?: string },
+  lumen: LumenClient,
   db: D1Database | undefined,
   userId: string,
-  clientConversationId?: string
+  clientConversationId?: string,
 ) {
-  if (!conversation || !Array.isArray(conversation) || conversation.length === 0) {
-    return json({ error: "I seem to have lost our conversation. Shall we start fresh?" }, { status: 400 });
+  if (
+    !conversation ||
+    !Array.isArray(conversation) ||
+    conversation.length === 0
+  ) {
+    return json(
+      { error: "I seem to have lost our conversation. Shall we start fresh?" },
+      { status: 400 },
+    );
   }
 
   // Validate or regenerate conversation ID for security
@@ -379,10 +427,11 @@ async function handleDraft(
   if (!canDraft(conversation)) {
     return json(
       {
-        error: "We're just getting started! Tell me a bit more before we shape it into words.",
+        error:
+          "We're just getting started! Tell me a bit more before we shape it into words.",
         canDraft: false,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -417,14 +466,14 @@ Return your response in this exact JSON format:
 
 Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON object.`;
 
-  const response = await callInference(
-    {
-      prompt,
+  const response = await lumen.run({
+    task: "generation",
+    input: prompt,
+    options: {
       maxTokens: DRAFT_MAX_TOKENS,
       temperature: 0.3,
     },
-    secrets
-  );
+  });
 
   // Parse the response
   let draft: { title: string; content: string };
@@ -439,26 +488,29 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
   } catch (parseError) {
     // Fallback: Use the raw response as content instead of losing the conversation
     // Log with details to track parse failure rate (if >5%, investigate prompt engineering)
-    console.warn("[Fireside] JSON parse failed, using raw response as fallback", {
-      error: parseError instanceof Error ? parseError.message : "Unknown parse error",
-      model: response.model,
-      provider: response.provider,
-      responseLength: response.content.length,
-      responsePreview: response.content.slice(0, 100),
-    });
+    console.warn(
+      "[Fireside] JSON parse failed, using raw response as fallback",
+      {
+        error:
+          parseError instanceof Error
+            ? parseError.message
+            : "Unknown parse error",
+        model: response.model,
+        provider: response.provider,
+        responseLength: response.content.length,
+        responsePreview: response.content.slice(0, 100),
+      },
+    );
     draft = {
       title: "Untitled",
       content: response.content.trim(),
     };
-    formatWarning = "The draft formatting may be a bit rough. Feel free to tidy it up.";
+    formatWarning =
+      "The draft formatting may be a bit rough. Feel free to tidy it up.";
   }
 
-  // Calculate cost
-  const cost = calculateCost(
-    response.model,
-    response.usage.input,
-    response.usage.output
-  );
+  // Cost comes from Lumen's usage tracking
+  const cost = response.usage.cost;
 
   // Log usage to database using typed execute helper
   if (db) {
@@ -476,13 +528,13 @@ Return ONLY valid JSON. No explanation, no markdown code blocks, just the JSON o
           response.usage.input,
           response.usage.output,
           cost,
-          conversationId || null
-        ]
+          conversationId || null,
+        ],
       );
     } catch (err) {
       console.warn(
         "[Fireside] Could not log usage:",
-        err instanceof Error ? err.message : "Unknown error"
+        err instanceof Error ? err.message : "Unknown error",
       );
     }
   }

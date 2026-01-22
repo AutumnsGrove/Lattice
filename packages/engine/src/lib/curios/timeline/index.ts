@@ -38,8 +38,6 @@ export { default as Heatmap } from "./Heatmap.svelte";
 // =============================================================================
 
 export {
-  callOpenRouter,
-  calculateOpenRouterCost,
   getOpenRouterModels,
   validateOpenRouterKey,
   OPENROUTER_MODELS,

@@ -119,6 +119,7 @@ export class LumenClient {
         maxTokens: request.options?.maxTokens ?? taskConfig.defaultMaxTokens,
         temperature:
           request.options?.temperature ?? taskConfig.defaultTemperature,
+        apiKeyOverride: request.options?.tenantApiKey,
       },
     );
 
@@ -202,6 +203,7 @@ export class LumenClient {
       maxTokens: request.options?.maxTokens ?? taskConfig.defaultMaxTokens,
       temperature:
         request.options?.temperature ?? taskConfig.defaultTemperature,
+      apiKeyOverride: request.options?.tenantApiKey,
     });
 
     // 6. Yield chunks and record usage on completion

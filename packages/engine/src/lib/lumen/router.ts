@@ -101,6 +101,10 @@ export function routeTask(
 /**
  * Execute a request with automatic fallback on failure.
  * Tries primary provider first, then falls back through the chain.
+ *
+ * When `model` is explicitly specified, fallbacks are skipped — the user
+ * chose a specific model (e.g., BYOK Timeline users), so trying other
+ * models on failure would be unexpected.
  */
 export async function executeWithFallback(
   task: LumenTask,
@@ -111,6 +115,7 @@ export async function executeWithFallback(
     maxTokens?: number;
     temperature?: number;
     timeoutMs?: number;
+    apiKeyOverride?: string;
   } = {},
 ): Promise<ExecuteResult> {
   const config = getTaskConfig(task);
@@ -123,6 +128,10 @@ export async function executeWithFallback(
   // Build execution chain: primary + fallbacks
   const chain: Array<{ provider: LumenProviderName; model: string }> = [];
 
+  // When model is explicitly specified, skip fallback chain entirely.
+  // The user chose this model — don't silently switch to another.
+  const skipFallbacks = !!options.model;
+
   // Add primary if available
   if (providers[config.primaryProvider]) {
     chain.push({
@@ -131,13 +140,15 @@ export async function executeWithFallback(
     });
   }
 
-  // Add fallbacks
-  for (const fallback of config.fallbackChain) {
-    if (providers[fallback.provider]) {
-      chain.push({
-        provider: fallback.provider,
-        model: options.model ?? fallback.model,
-      });
+  // Add fallbacks (unless model override was specified)
+  if (!skipFallbacks) {
+    for (const fallback of config.fallbackChain) {
+      if (providers[fallback.provider]) {
+        chain.push({
+          provider: fallback.provider,
+          model: fallback.model,
+        });
+      }
     }
   }
 
@@ -161,6 +172,7 @@ export async function executeWithFallback(
         maxTokens: options.maxTokens ?? config.defaultMaxTokens,
         temperature: options.temperature ?? config.defaultTemperature,
         timeoutMs: options.timeoutMs,
+        apiKeyOverride: options.apiKeyOverride,
       };
 
       const response = await provider.inference(

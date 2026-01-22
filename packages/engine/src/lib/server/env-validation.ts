@@ -12,9 +12,7 @@ export interface CloudflareEnv {
   DB?: D1Database;
   CACHE_KV?: KVNamespace;
   ANTHROPIC_API_KEY?: string;
-  FIREWORKS_API_KEY?: string;
-  CEREBRAS_API_KEY?: string;
-  GROQ_API_KEY?: string;
+  OPENROUTER_API_KEY?: string;
   TOGETHER_API_KEY?: string;
   TURNSTILE_SECRET_KEY?: string;
   AUTH?: Fetcher;
@@ -115,9 +113,7 @@ export function requireEnv(
  * @example
  * ```typescript
  * const hasAI = hasAnyEnv(platform?.env, [
- *   'ANTHROPIC_API_KEY',
- *   'FIREWORKS_API_KEY',
- *   'GROQ_API_KEY'
+ *   'OPENROUTER_API_KEY',
  * ]);
  * if (!hasAI) {
  *   throw error(503, "No AI provider configured");

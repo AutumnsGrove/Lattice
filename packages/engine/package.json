@@ -211,6 +211,10 @@
     "./lumen": {
       "types": "./dist/lumen/index.d.ts",
       "default": "./dist/lumen/index.js"
+    },
+    "./thorn": {
+      "types": "./dist/thorn/index.d.ts",
+      "default": "./dist/thorn/index.js"
     }
   },
   "files": [

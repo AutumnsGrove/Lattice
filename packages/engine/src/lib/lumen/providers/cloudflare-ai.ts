@@ -49,7 +49,16 @@ import type {
  */
 type AiTextGenerationInput = {
   prompt?: string;
-  messages?: Array<{ role: string; content: string }>;
+  messages?: Array<{
+    role: string;
+    content:
+      | string
+      | Array<{
+          type: string;
+          text?: string;
+          image_url?: { url: string };
+        }>;
+  }>;
   max_tokens?: number;
   temperature?: number;
   stream?: boolean;
@@ -105,14 +114,37 @@ export class CloudflareAIProvider implements LumenProvider {
     const timeoutMs = options.timeoutMs ?? PROVIDERS["cloudflare-ai"].timeoutMs;
 
     try {
-      // For LlamaGuard/moderation, format as conversation
-      const formattedMessages = messages.map((m) => ({
-        role: m.role,
-        content:
-          typeof m.content === "string"
-            ? m.content
-            : m.content.map((p) => p.text ?? "").join("\n"),
-      }));
+      // Format messages, preserving multimodal content for vision models
+      const formattedMessages = messages.map((m) => {
+        if (typeof m.content === "string") {
+          return { role: m.role, content: m.content };
+        }
+
+        // Check if this message has image content parts
+        const hasImages = m.content.some((p) => p.type === "image_url");
+
+        if (hasImages) {
+          // Vision model: preserve multimodal content parts
+          return {
+            role: m.role,
+            content: m.content.map((p) => {
+              if (p.type === "text") {
+                return { type: "text" as const, text: p.text ?? "" };
+              }
+              return {
+                type: "image_url" as const,
+                image_url: { url: p.image_url?.url ?? "" },
+              };
+            }),
+          };
+        }
+
+        // Text-only multipart: collapse to string
+        return {
+          role: m.role,
+          content: m.content.map((p) => p.text ?? "").join("\n"),
+        };
+      });
 
       const startTime = Date.now();
 

@@ -10,7 +10,10 @@ export { default as CollapsibleSection } from "./components/custom/CollapsibleSe
 
 // TOC types and constants
 export type { TOCHeader } from "./components/custom/types.js";
-export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./components/custom/types.js";
+export {
+  DEFAULT_SCROLL_OFFSET,
+  isValidIcon,
+} from "./components/custom/types.js";
 
 // Admin components
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
@@ -101,9 +104,7 @@ export type { StatusColor as GroveAuthStatusColor } from "./groveauth/index";
 
 // Timeline Curio - AI-powered daily summaries
 export {
-  // OpenRouter provider
-  callOpenRouter,
-  calculateOpenRouterCost,
+  // OpenRouter provider (model list + key validation for UI)
   getOpenRouterModels,
   validateOpenRouterKey,
   OPENROUTER_MODELS,

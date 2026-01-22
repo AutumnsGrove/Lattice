@@ -75,11 +75,19 @@ export interface LumenRequestOptions {
   /** Enable streaming response */
   stream?: boolean;
 
-  /** Skip quota check (for internal/system calls) */
+  /** Skip quota check (for internal/system calls or BYOK users) */
   skipQuota?: boolean;
 
   /** Skip PII scrubbing (for already-sanitized content) */
   skipPiiScrub?: boolean;
+
+  /**
+   * Per-tenant API key override (for BYOK features like Timeline).
+   * When provided, this key is used for the actual API call instead of
+   * the global key. The request still goes through Lumen's pipeline
+   * (routing, logging, normalization) but bills to the tenant's account.
+   */
+  tenantApiKey?: string;
 
   /** Additional metadata for logging (no content!) */
   metadata?: Record<string, unknown>;

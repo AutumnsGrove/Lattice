@@ -29,6 +29,9 @@ export interface LumenInferenceOptions {
   /** Request timeout in milliseconds */
   timeoutMs?: number;
 
+  /** API key override for BYOK (uses this instead of the provider's default key) */
+  apiKeyOverride?: string;
+
   /** Additional provider-specific options */
   providerOptions?: Record<string, unknown>;
 }

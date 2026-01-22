@@ -97,6 +97,7 @@ export class OpenRouterProvider implements LumenProvider {
     options: LumenInferenceOptions,
   ): Promise<LumenProviderResponse> {
     const timeoutMs = options.timeoutMs ?? PROVIDERS.openrouter.timeoutMs;
+    const apiKey = options.apiKeyOverride ?? this.apiKey;
 
     // Create abort controller for timeout
     const controller = new AbortController();
@@ -107,7 +108,7 @@ export class OpenRouterProvider implements LumenProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "HTTP-Referer": this.siteUrl,
           "X-Title": this.siteName,
         },
@@ -200,6 +201,7 @@ export class OpenRouterProvider implements LumenProvider {
     options: LumenInferenceOptions,
   ): AsyncGenerator<LumenStreamChunk> {
     const timeoutMs = options.timeoutMs ?? PROVIDERS.openrouter.timeoutMs;
+    const apiKey = options.apiKeyOverride ?? this.apiKey;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -209,7 +211,7 @@ export class OpenRouterProvider implements LumenProvider {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "HTTP-Referer": this.siteUrl,
           "X-Title": this.siteName,
         },
