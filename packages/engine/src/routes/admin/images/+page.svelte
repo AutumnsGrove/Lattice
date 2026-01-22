@@ -25,19 +25,28 @@
   /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean } } }} */
   let { data } = $props();
 
-  // Feature flags from server
-  const jxlFeatureEnabled = data.jxl?.jxlEnabled ?? false;
-  const jxlKillSwitchActive = data.jxl?.jxlKillSwitchActive ?? false;
+  // Feature flags from server (reactive to data changes)
+  const jxlFeatureEnabled = $derived(data.jxl?.jxlEnabled ?? false);
+  const jxlKillSwitchActive = $derived(data.jxl?.jxlKillSwitchActive ?? false);
 
   // Upload options (defaults with AI analysis enabled)
   let quality = $state(80);
   /** @type {'auto' | 'jxl' | 'webp' | 'original'} */
   // Default to 'auto' if JXL feature is enabled, otherwise 'webp'
-  let imageFormat = $state(/** @type {'auto' | 'jxl' | 'webp' | 'original'} */ (jxlFeatureEnabled ? 'auto' : 'webp'));
+  let imageFormat = $state(/** @type {'auto' | 'jxl' | 'webp' | 'original'} */ ('webp'));
   let fullResolution = $state(false);
   let jxlSupported = $state(false);
   let useAiAnalysis = $state(true);
   let showAdvanced = $state(false);
+
+  // Set initial format based on feature flag (only on first render)
+  let formatInitialized = false;
+  $effect(() => {
+    if (!formatInitialized && jxlFeatureEnabled) {
+      imageFormat = 'auto';
+      formatInitialized = true;
+    }
+  });
 
   // Upload state
   let isDragging = $state(false);
@@ -1102,13 +1111,6 @@
   .format-badge.unsupported {
     background: rgba(255, 193, 7, 0.15);
     color: #b8860b;
-  }
-
-  .toggle-options {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
   }
 
   .options-info {

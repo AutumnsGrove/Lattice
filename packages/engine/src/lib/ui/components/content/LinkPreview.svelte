@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
 	import Icons from "../icons/Icons.svelte";
+	import { AlertCircle } from "lucide-svelte";
 	import type { OGMetadata } from "$lib/types/og.js";
 
 	/**
@@ -99,14 +100,7 @@
 	let error = $state<string | null>(null);
 	let fetchedData = $state<OGMetadata | null>(null);
 
-	// Derived values (prefer props over fetched data)
-	const displayTitle = $derived(initialTitle || fetchedData?.title || domain);
-	const displayDescription = $derived(initialDescription || fetchedData?.description);
-	const displayImage = $derived(initialImage || fetchedData?.image);
-	const displaySiteName = $derived(initialSiteName || fetchedData?.siteName);
-	const displayFavicon = $derived(initialFavicon || fetchedData?.favicon);
-
-	// Extract domain from URL
+	// Extract domain from URL (must be defined before displayTitle uses it)
 	const domain = $derived.by(() => {
 		try {
 			return new URL(url).hostname.replace(/^www\./, "");
@@ -114,6 +108,13 @@
 			return url;
 		}
 	});
+
+	// Derived values (prefer props over fetched data)
+	const displayTitle = $derived(initialTitle || fetchedData?.title || domain);
+	const displayDescription = $derived(initialDescription || fetchedData?.description);
+	const displayImage = $derived(initialImage || fetchedData?.image);
+	const displaySiteName = $derived(initialSiteName || fetchedData?.siteName);
+	const displayFavicon = $derived(initialFavicon || fetchedData?.favicon);
 
 	// Determine if we should fetch (has endpoint and missing required data)
 	const shouldFetch = $derived(
@@ -141,7 +142,11 @@
 				throw new Error(`Failed to fetch: ${response.statusText}`);
 			}
 
-			const result = await response.json();
+			const result = (await response.json()) as {
+				success: boolean;
+				data?: OGMetadata;
+				error?: string;
+			};
 
 			if (result.success && result.data) {
 				fetchedData = result.data;
@@ -303,7 +308,7 @@
 			<!-- Error state -->
 			{#if error}
 				<div class="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
-					<Icons name="alert" size="sm" />
+					<AlertCircle class="w-4 h-4" />
 					<span>Preview unavailable</span>
 				</div>
 			{/if}

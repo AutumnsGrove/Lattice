@@ -36,9 +36,15 @@
 	let removeNotes = $state('');
 	let isRemoving = $state(false);
 
-	// Search state
-	let searchQuery = $state(data.filters.search);
-	let reasonFilter = $state(data.filters.reason);
+	// Search state - synced with data.filters
+	let searchQuery = $state('');
+	let reasonFilter = $state('');
+
+	// Sync search state with URL filters when data changes
+	$effect(() => {
+		searchQuery = data.filters.search ?? '';
+		reasonFilter = data.filters.reason ?? '';
+	});
 
 	// Reason labels for display
 	const reasonLabels: Record<string, string> = {

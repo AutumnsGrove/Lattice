@@ -573,13 +573,6 @@
     color: var(--color-text-subtle);
     transition: color 0.3s ease;
   }
-  .note code {
-    background: var(--color-bg-secondary);
-    padding: 0.125rem 0.25rem;
-    border-radius: var(--border-radius-small);
-    font-size: 0.85em;
-    transition: background-color 0.3s ease;
-  }
   .env-info {
     display: grid;
     gap: 0.75rem;

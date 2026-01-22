@@ -254,7 +254,7 @@ export class CloudflareAIProvider implements LumenProvider {
     try {
       // Simple embedding test
       await this.ai.run(
-        MODELS.BGE_BASE as Parameters<Ai["run"]>[0],
+        MODELS.CF_BGE_BASE as Parameters<Ai["run"]>[0],
         {
           text: ["health check"],
         } as AiTextEmbeddingsInput,

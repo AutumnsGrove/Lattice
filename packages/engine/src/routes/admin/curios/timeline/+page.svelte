@@ -21,20 +21,37 @@
 
   const { data, form }: { data: PageData; form: ActionData } = $props();
 
-  // Form state
-  let enabled = $state(data.config?.enabled ?? false);
-  let githubUsername = $state(data.config?.githubUsername ?? "");
+  // Form state - initialized and synced with data via $effect
+  let enabled = $state(false);
+  let githubUsername = $state("");
   let githubToken = $state("");
   let openrouterKey = $state("");
-  let openrouterModel = $state(data.config?.openrouterModel ?? "deepseek/deepseek-v3.2");
-  let voicePreset = $state(data.config?.voicePreset ?? "professional");
-  let customSystemPrompt = $state(data.config?.customSystemPrompt ?? "");
-  let customSummaryInstructions = $state(data.config?.customSummaryInstructions ?? "");
-  let customGutterStyle = $state(data.config?.customGutterStyle ?? "");
-  let reposInclude = $state(data.config?.reposInclude?.join(", ") ?? "");
-  let reposExclude = $state(data.config?.reposExclude?.join(", ") ?? "");
-  let timezone = $state(data.config?.timezone ?? "America/New_York");
-  let ownerName = $state(data.config?.ownerName ?? "");
+  let openrouterModel = $state("deepseek/deepseek-v3.2");
+  let voicePreset = $state("professional");
+  let customSystemPrompt = $state("");
+  let customSummaryInstructions = $state("");
+  let customGutterStyle = $state("");
+  let reposInclude = $state("");
+  let reposExclude = $state("");
+  let timezone = $state("America/New_York");
+  let ownerName = $state("");
+
+  // Sync form state when data changes (e.g., after form submission)
+  $effect(() => {
+    if (data.config) {
+      enabled = data.config.enabled ?? false;
+      githubUsername = data.config.githubUsername ?? "";
+      openrouterModel = data.config.openrouterModel ?? "deepseek/deepseek-v3.2";
+      voicePreset = data.config.voicePreset ?? "professional";
+      customSystemPrompt = data.config.customSystemPrompt ?? "";
+      customSummaryInstructions = data.config.customSummaryInstructions ?? "";
+      customGutterStyle = data.config.customGutterStyle ?? "";
+      reposInclude = data.config.reposInclude?.join(", ") ?? "";
+      reposExclude = data.config.reposExclude?.join(", ") ?? "";
+      timezone = data.config.timezone ?? "America/New_York";
+      ownerName = data.config.ownerName ?? "";
+    }
+  });
 
   // UI state
   let showGithubToken = $state(false);

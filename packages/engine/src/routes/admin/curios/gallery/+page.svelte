@@ -19,23 +19,45 @@
 
   const { data, form }: { data: PageData; form: ActionData } = $props();
 
-  // Form state
-  let enabled = $state(data.config?.enabled ?? false);
-  let r2Bucket = $state(data.config?.r2Bucket ?? "");
-  let cdnBaseUrl = $state(data.config?.cdnBaseUrl ?? "");
-  let galleryTitle = $state(data.config?.galleryTitle ?? "");
-  let galleryDescription = $state(data.config?.galleryDescription ?? "");
-  let itemsPerPage = $state(data.config?.itemsPerPage ?? 30);
-  let sortOrder = $state(data.config?.sortOrder ?? "date-desc");
-  let showDescriptions = $state(data.config?.showDescriptions ?? true);
-  let showDates = $state(data.config?.showDates ?? true);
-  let showTags = $state(data.config?.showTags ?? true);
-  let enableLightbox = $state(data.config?.enableLightbox ?? true);
-  let enableSearch = $state(data.config?.enableSearch ?? true);
-  let enableFilters = $state(data.config?.enableFilters ?? true);
-  let gridStyle = $state(data.config?.gridStyle ?? "masonry");
-  let thumbnailSize = $state(data.config?.thumbnailSize ?? "medium");
-  let customCss = $state(data.config?.customCss ?? "");
+  // Form state - initialized and synced with data via $effect
+  let enabled = $state(false);
+  let r2Bucket = $state("");
+  let cdnBaseUrl = $state("");
+  let galleryTitle = $state("");
+  let galleryDescription = $state("");
+  let itemsPerPage = $state(30);
+  let sortOrder = $state("date-desc");
+  let showDescriptions = $state(true);
+  let showDates = $state(true);
+  let showTags = $state(true);
+  let enableLightbox = $state(true);
+  let enableSearch = $state(true);
+  let enableFilters = $state(true);
+  let gridStyle = $state("masonry");
+  let thumbnailSize = $state("medium");
+  let customCss = $state("");
+
+  // Sync form state when data changes (e.g., after form submission)
+  $effect(() => {
+    if (data.config) {
+      enabled = data.config.enabled ?? false;
+      r2Bucket = data.config.r2Bucket ?? "";
+      cdnBaseUrl = data.config.cdnBaseUrl ?? "";
+      galleryTitle = data.config.galleryTitle ?? "";
+      galleryDescription = data.config.galleryDescription ?? "";
+      itemsPerPage = data.config.itemsPerPage ?? 30;
+      sortOrder = data.config.sortOrder ?? "date-desc";
+      showDescriptions = data.config.showDescriptions ?? true;
+      showDates = data.config.showDates ?? true;
+      showTags = data.config.showTags ?? true;
+      enableLightbox = data.config.enableLightbox ?? true;
+      enableSearch = data.config.enableSearch ?? true;
+      enableFilters = data.config.enableFilters ?? true;
+      gridStyle = data.config.gridStyle ?? "masonry";
+      thumbnailSize = data.config.thumbnailSize ?? "medium";
+      customCss = data.config.customCss ?? "";
+    }
+  });
 
   // UI state
   let isSubmitting = $state(false);
