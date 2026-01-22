@@ -1,11 +1,8 @@
 /**
- * Vineyard Components (Stub)
+ * Vineyard Components
  *
- * @autumnsgrove/vineyard is not currently published to npm.
- * This module is a placeholder until the package is available.
- *
- * TODO: Re-enable exports when @autumnsgrove/vineyard is published to npm
+ * Re-exports from @autumnsgrove/vineyard
+ * Vineyard provides showcase/documentation components for the Grove ecosystem
  */
 
-// Placeholder exports - re-enable when package is published
-export const VineyardPlaceholder = "Vineyard components coming soon";
+export * from '@autumnsgrove/vineyard/vineyard';
