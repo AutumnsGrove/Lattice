@@ -158,6 +158,25 @@
 
 ## In Progress 🚧
 
+### Gallery CDN Migration — Move Images to grove-media
+> **Goal:** Migrate images from `autumnsgrove-images` bucket (cdn.autumnsgrove.com) to `grove-media` (cdn.grove.place)
+> **Status:** Code was written and deployed but CSRF token issue blocked running the migration endpoint from browser. Reverted for now.
+> **Plan commit:** `0aa38497` — has the full implementation (revert: `bfc9761f`)
+
+**What needs to happen:**
+- [ ] Re-apply migration endpoint (see commit `0aa38497` for full code)
+- [ ] Fix CSRF issue — either exempt admin migration endpoints from token validation, or use curl with proper headers
+- [ ] Run migration: `POST /api/admin/migrate-images?dryRun=true` then without dryRun
+- [ ] Update gallery sync to use tenant prefix (`tenantId/`) when listing R2 objects
+- [ ] Run sync: `POST /api/curios/gallery/sync`
+- [ ] Verify gallery loads from cdn.grove.place
+- [ ] Cleanup: remove migration endpoint + IMAGES_SOURCE binding after verification
+
+**Key normalization format:** `{tenantId}/{category}/{date}_{slug}.{ext}`
+**Example:** `autumn-primary/food/ramen.jpg`, `autumn-primary/uncategorized/img-1234.jpg`
+
+**Workaround for now:** Upload new photos directly to `grove-media` bucket under `autumn-primary/` prefix.
+
 ### Timeline Curio — 403 Upload Error + Backfilling
 > **Problem:** Cannot add new Timeline entries on autumn.grove.place — upload button returns 403 to console
 > **Status:** Partially working (viewing works), upload/save broken — needs investigation
