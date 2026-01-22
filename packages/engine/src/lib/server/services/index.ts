@@ -196,3 +196,23 @@ export {
 	validateVerificationCookie,
 	getVerificationCookieOptions
 } from './turnstile.js';
+
+// ============================================================================
+// Open Graph Fetcher Service
+// ============================================================================
+
+export * as ogFetcher from './og-fetcher.js';
+export {
+	// Types (re-exported from types/og.ts)
+	type OGMetadata,
+	type OGFetchResult,
+	type OGFetchOptions,
+	type OGFetchErrorCode,
+	type OGFetchOptionsWithCache,
+	// Errors
+	OGFetchError,
+	// Operations
+	fetchOGMetadata,
+	fetchOGMetadataBatch,
+	clearOGCache
+} from './og-fetcher.js';
