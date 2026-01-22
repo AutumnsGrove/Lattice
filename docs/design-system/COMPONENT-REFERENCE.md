@@ -6,7 +6,7 @@ lastUpdated: '2026-01-18'
 ---
 # Component Reference
 
-> 185 components organized by category, ready to help you build something beautiful.
+> 186 components organized by category, ready to help you build something beautiful.
 > Import from `@autumnsgrove/groveengine/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
@@ -16,7 +16,7 @@ This is your field guide to Grove's component library. Each component is designe
 ## Quick Links
 
 - [Import Patterns](#import-patterns)
-- [ui/ - Core UI Components](#ui---core-ui-components-28)
+- [ui/ - Core UI Components](#ui---core-ui-components-29)
 - [primitives/ - Headless Primitives](#primitives---headless-primitives-45)
 - [nature/ - Decorative Nature](#nature---decorative-nature-62)
 - [typography/ - Font Providers](#typography---font-providers-11)
@@ -77,7 +77,7 @@ Import from specific subpaths when you need several components from the same fam
 
 ---
 
-## ui/ - Core UI Components (28)
+## ui/ - Core UI Components (29)
 
 The heart of Grove's visual language. These components implement our glassmorphism design system—translucent surfaces with gentle blur that let the forest peek through.
 
@@ -213,6 +213,7 @@ For moments that need a pause—destructive actions, important decisions.
 | `GlassLegend` | Legend/key component with glass background |
 | `GlassLogo` | Logo with glass container |
 | `GlassLogoArchive` | Archived logo variant |
+| `GlassStatusWidget` | Real-time status widget with auto-refresh—displays system health from The Clearing |
 
 ### Standard Components
 
@@ -1023,4 +1024,4 @@ When you're building with Grove components, you're creating spaces where people 
 
 ---
 
-*Last updated: 2026-01-18*
+*Last updated: 2026-01-21*

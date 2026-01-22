@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-01-22",
-  "lastAuditedBy": "claude/og-image-preview-3esXR",
+  "lastUpdated": "2026-01-24",
+  "lastAuditedBy": "claude/greptile-pr-feedback",
   "components": {
     "total": 186,
     "breakdown": {
       "primitives": 45,
       "nature": 64,
-      "ui": 28,
+      "ui": 29,
       "typography": 11,
       "chrome": 6,
       "terrarium": 7,
