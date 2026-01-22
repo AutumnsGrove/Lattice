@@ -374,16 +374,30 @@ interface OGFetchResult {
   cached?: boolean;
 }
 
-// Blocked URL patterns for external fetch (security)
+// Blocked URL patterns for external fetch (security - SSRF protection)
 const BLOCKED_EXTERNAL_PATTERNS = [
+  // Localhost variations
   /^https?:\/\/localhost/i,
   /^https?:\/\/127\./,
   /^https?:\/\/0\./,
+  // Private IP ranges (RFC 1918)
   /^https?:\/\/10\./,
   /^https?:\/\/172\.(1[6-9]|2\d|3[01])\./,
   /^https?:\/\/192\.168\./,
+  // Link-local addresses (RFC 3927)
+  /^https?:\/\/169\.254\./,
+  // Cloud metadata endpoints (AWS, GCP, Azure, DigitalOcean, etc.)
+  /^https?:\/\/169\.254\.169\.254/,
+  /^https?:\/\/metadata\./i,
+  /^https?:\/\/metadata-/i,
+  // IPv6 localhost
   /^https?:\/\/\[::1\]/,
+  // IPv6 link-local
   /^https?:\/\/\[fe80:/i,
+  // IPv6 unique local addresses (fc00::/7)
+  /^https?:\/\/\[fc/i,
+  /^https?:\/\/\[fd/i,
+  // Dangerous protocols
   /^file:/i,
   /^data:/i,
 ];

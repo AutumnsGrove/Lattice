@@ -14,7 +14,6 @@ routes = [
 ENVIRONMENT = "production"
 
 # KV namespace for caching OG metadata
-# Create with: wrangler kv:namespace create "OG_CACHE"
 [[kv_namespaces]]
 binding = "OG_CACHE"
-id = "og_cache_namespace_id"  # Replace with actual ID after creation
+id = "77f9be07d0084992ab1318bea97f3ca2"

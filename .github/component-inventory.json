@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-01-18",
-  "lastAuditedBy": "claude/codebase-audit-planning",
+  "lastUpdated": "2026-01-22",
+  "lastAuditedBy": "claude/og-image-preview-3esXR",
   "components": {
-    "total": 185,
+    "total": 186,
     "breakdown": {
       "primitives": 45,
       "nature": 64,
@@ -15,7 +15,7 @@
       "terrarium": 7,
       "gallery": 4,
       "charts": 4,
-      "content": 4,
+      "content": 5,
       "states": 4,
       "forms": 3,
       "indicators": 3,
