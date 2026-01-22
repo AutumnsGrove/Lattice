@@ -36,6 +36,9 @@ const CATEGORY_PATHS = {
 // Required frontmatter fields
 const REQUIRED_FIELDS = ["title", "description", "category"];
 
+// Recommended fields (will warn if missing)
+const RECOMMENDED_FIELDS = ["lastUpdated"];
+
 // Category-specific required fields
 const CATEGORY_REQUIRED_FIELDS = {
   specs: ["specCategory"],
@@ -99,6 +102,13 @@ function validateFile(filePath, expectedCategory) {
         if (!fm[field]) {
           fileWarnings.push(`Missing category-specific field: ${field}`);
         }
+      }
+    }
+
+    // Check recommended fields
+    for (const field of RECOMMENDED_FIELDS) {
+      if (!fm[field]) {
+        fileWarnings.push(`Missing recommended field: ${field}`);
       }
     }
 

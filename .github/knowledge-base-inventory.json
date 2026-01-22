@@ -1,0 +1,32 @@
+{
+  "lastUpdated": "2026-01-22",
+  "docs": {
+    "total": 202,
+    "breakdown": {
+      "specs": 50,
+      "help": 42,
+      "legal": 6,
+      "marketing": 19,
+      "patterns": 8,
+      "philosophy": 65,
+      "design": 9,
+      "exhibit": 3
+    },
+    "paths": {
+      "specs": "docs/specs",
+      "help": "docs/help-center/articles",
+      "legal": "docs/legal",
+      "marketing": "docs/marketing",
+      "patterns": "docs/patterns",
+      "philosophy": "docs/philosophy",
+      "design": "docs/design-system",
+      "exhibit": "docs/museum"
+    }
+  },
+  "freshnessThreshold": {
+    "staleDays": 90,
+    "warnDays": 60
+  },
+  "requiredFields": ["title", "description", "category", "lastUpdated"],
+  "notes": "Tracks knowledge base document inventory and freshness. Used by docs-freshness.yml workflow."
+}
