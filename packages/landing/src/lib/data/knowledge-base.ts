@@ -1,4 +1,5 @@
 import type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
+import { scanDocsCategory } from "$lib/utils/docs-scanner";
 
 // Re-export for convenience
 export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
@@ -1400,56 +1401,9 @@ export const designDocs: Doc[] = [
 ];
 
 // Art Exhibit Documents (Museum)
-export const exhibitDocs: Doc[] = [
-  {
-    slug: "MUSEUM",
-    title: "Welcome to the Lattice Museum",
-    description: "A guided tour through how this forest grows",
-    excerpt:
-      "This is the story of Grove, told through the systems that make it work. You're standing at the entrance to a museum—not the dusty kind with ropes and \"do not touch\" signs. This is the kind where you can peek behind every curtain.",
-    category: "exhibit",
-    exhibitWing: "entrance",
-    icon: "signpost",
-    lastUpdated: "2026-01-22",
-    readingTime: 8,
-  },
-  {
-    slug: "glossary",
-    title: "The Glossary Alcove",
-    description: "Grove speaks its own language. Here's the phrasebook.",
-    excerpt:
-      "Every community develops its own vocabulary. Grove's terminology isn't arbitrary. Each word was chosen to evoke feeling, not function. This glossary explains the terms you'll encounter throughout the museum.",
-    category: "exhibit",
-    exhibitWing: "entrance",
-    icon: "book",
-    lastUpdated: "2026-01-22",
-    readingTime: 6,
-  },
-  {
-    slug: "museum-layout-plan",
-    title: "Museum Layout Plan",
-    description: "The blueprint for the Lattice Museum",
-    excerpt:
-      "Traditional documentation answers \"how does this work?\" Museum documentation answers \"why does this exist, and why should I care?\" This document outlines the museum structure, exhibits, and agent orchestration model.",
-    category: "exhibit",
-    exhibitWing: "entrance",
-    icon: "layout",
-    lastUpdated: "2026-01-22",
-    readingTime: 15,
-  },
-  {
-    slug: "sister-museum",
-    title: "The Original AutumnsGrove Museum",
-    description: "A living archive of the original AutumnsGrove website",
-    excerpt:
-      "Walk through the source code of what was once a fully functional personal website. See how a real website gets built—not a tutorial's sanitized example, but actual working code that served real pages to real people.",
-    category: "exhibit",
-    exhibitWing: "entrance",
-    icon: "github",
-    lastUpdated: "2026-01-22",
-    readingTime: 10,
-  },
-];
+// Loaded from filesystem via docs-scanner.ts - no manual registry needed.
+// Just add .md files with proper frontmatter to docs/museum/ and they appear automatically.
+export const exhibitDocs: Doc[] = scanDocsCategory("exhibit");
 
 // Combined export for convenience
 export const allDocs = [

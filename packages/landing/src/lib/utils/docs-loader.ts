@@ -167,9 +167,10 @@ function parseDoc(filePath: string, category: DocCategory): DocInternal {
 
 // Categories that should recursively include subdirectories.
 // - specs: includes completed specs in specs/completed/
+// - exhibit: museum wings organized in subdirectories (architecture/, nature/, etc.)
 // - Other categories (philosophy, design, etc.) may contain internal
 //   scratch/draft folders that shouldn't be exposed publicly.
-const RECURSIVE_CATEGORIES: DocCategory[] = ["specs"];
+const RECURSIVE_CATEGORIES: DocCategory[] = ["specs", "exhibit"];
 
 function loadDocsFromDir(
   dirPath: string,
@@ -234,6 +235,7 @@ export function loadAllDocs(): {
   legalDocs: Doc[];
   marketingDocs: Doc[];
   patterns: Doc[];
+  exhibitDocs: Doc[];
 } {
   const specs = loadDocsFromDir(join(DOCS_ROOT, "specs"), "specs");
   const helpArticles = loadDocsFromDir(
@@ -246,8 +248,9 @@ export function loadAllDocs(): {
     "marketing",
   );
   const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
+  const exhibitDocs = loadDocsFromDir(join(DOCS_ROOT, "museum"), "exhibit");
 
-  return { specs, helpArticles, legalDocs, marketingDocs, patterns };
+  return { specs, helpArticles, legalDocs, marketingDocs, patterns, exhibitDocs };
 }
 
 export function loadDocBySlug(
