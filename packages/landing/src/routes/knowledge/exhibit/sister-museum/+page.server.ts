@@ -8,6 +8,50 @@ const GITHUB_RAW_URL =
   "https://raw.githubusercontent.com/AutumnsGrove/AutumnsGrove/main/MUSEUM.md";
 
 /**
+ * Simple allowlist-based HTML sanitizer for defense-in-depth.
+ * Even though content comes from our own GitHub repo, we sanitize
+ * to prevent issues if the source is ever compromised.
+ */
+const ALLOWED_TAGS = new Set([
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "p", "br", "hr",
+  "ul", "ol", "li",
+  "a", "strong", "em", "b", "i", "code", "pre",
+  "blockquote", "table", "thead", "tbody", "tr", "th", "td",
+  "img", "del", "sup", "sub",
+]);
+
+const ALLOWED_ATTRS: Record<string, Set<string>> = {
+  a: new Set(["href", "title", "target", "rel"]),
+  img: new Set(["src", "alt", "title"]),
+  th: new Set(["align"]),
+  td: new Set(["align"]),
+  "*": new Set(["id", "class"]),
+};
+
+function sanitizeHtml(html: string): string {
+  // Remove script tags and their contents
+  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+  // Remove event handlers (onclick, onerror, etc.)
+  html = html.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
+  html = html.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, "");
+
+  // Remove javascript: and data: URLs in href/src
+  html = html.replace(/\b(href|src)\s*=\s*["']?\s*javascript:/gi, '$1="');
+  html = html.replace(/\b(href|src)\s*=\s*["']?\s*data:/gi, '$1="');
+
+  // Remove style tags
+  html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
+
+  // Remove iframe, object, embed tags
+  html = html.replace(/<(iframe|object|embed|form|input|button)\b[^>]*>/gi, "");
+  html = html.replace(/<\/(iframe|object|embed|form|input|button)>/gi, "");
+
+  return html;
+}
+
+/**
  * Strip HTML tags from text to get plain text content.
  */
 function stripHtmlTags(html: string): string {
@@ -82,7 +126,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
     const markdown = await response.text();
     const headers = extractHeaders(markdown);
-    const html = marked(markdown) as string;
+    const rawHtml = marked(markdown) as string;
+    const html = sanitizeHtml(rawHtml);
 
     return {
       doc: {
