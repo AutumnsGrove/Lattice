@@ -1,13 +1,16 @@
 ---
+title: Forage — Domain Discovery
+description: AI-powered domain hunting that reduces weeks of searching to hours
+category: specs
+specCategory: standalone-tools
+icon: searchcode
+lastUpdated: '2026-01-04'
 aliases: []
-date created: Friday, May 28th 2025
-date modified: Saturday, January 4th 2026
 tags:
   - domain-search
   - ai-orchestration
   - cloudflare-workers
   - rdap
-type: tech-spec
 ---
 
 # Forage — Domain Discovery

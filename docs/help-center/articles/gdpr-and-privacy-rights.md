@@ -1,12 +1,21 @@
 ---
-title: "GDPR and Privacy Rights"
-slug: gdpr-and-privacy-rights
-category: data
+title: GDPR and Privacy Rights
+description: 'Your data rights under GDPR, CCPA, and similar laws'
+category: help
+section: privacy-security
+lastUpdated: '2026-01-03'
+keywords:
+  - gdpr
+  - privacy
+  - rights
+  - data protection
+  - ccpa
+  - personal data
+  - deletion
+  - access
+  - europe
+  - california
 order: 3
-keywords: [gdpr, privacy, rights, data protection, ccpa, personal data, deletion, access, europe, california]
-related: [understanding-your-privacy, exporting-your-content, account-deletion, data-portability]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # GDPR and Privacy Rights

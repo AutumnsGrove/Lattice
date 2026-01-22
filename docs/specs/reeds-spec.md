@@ -1,12 +1,15 @@
 ---
+title: Reeds — Comment System
+description: Dual-mode comment system with private replies and public comments
+category: specs
+specCategory: content-community
+icon: messagessquare
+lastUpdated: '2025-12-05'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Thursday, January 2nd 2026
 tags:
   - comments
   - social
   - user-interaction
-type: tech-spec
 ---
 
 # Reeds — Comments System

@@ -1,12 +1,15 @@
 ---
+title: Waystone — Help Center
+description: Integrated help system with contextual assistance
+category: specs
+specCategory: platform-services
+icon: signpost
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Thursday, January 2nd 2026
 tags:
   - documentation
   - help-center
   - user-experience
-type: tech-spec
 ---
 
 # Waystone — Help Center

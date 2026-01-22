@@ -1,3 +1,9 @@
+---
+title: Launch Email Template
+description: Direct email to waitlist members
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Launch Email — Personal Waitlist
 
 > **Purpose**: Direct email to waitlist (friends & early supporters)

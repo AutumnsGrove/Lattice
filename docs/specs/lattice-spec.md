@@ -1,13 +1,16 @@
 ---
+title: Lattice — Core Framework
+description: Core engine architecture and implementation details
+category: specs
+specCategory: core-infrastructure
+icon: codesandbox
+lastUpdated: '2025-11-15'
 aliases: []
-date created: Wednesday, January 1st 2026
-date modified: Wednesday, January 15th 2026
 tags:
   - core
   - sveltekit
   - npm
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Lattice — Core Platform

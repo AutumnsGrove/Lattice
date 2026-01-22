@@ -1,3 +1,9 @@
+---
+title: Refund Policy
+description: Our policy on refunds for paid plans
+category: legal
+lastUpdated: '2026-01-16'
+---
 # Refund & Cancellation Policy
 
 **Grove Platform**

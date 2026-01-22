@@ -1,12 +1,15 @@
 ---
+title: Meadow — Social Feed
+description: 'Community feed, sharing, voting, and reactions system'
+category: specs
+specCategory: content-community
+icon: users
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Wednesday, January 1st 2026
-date modified: Saturday, January 4th 2026
 tags:
   - social
   - community
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Meadow — Social Connection

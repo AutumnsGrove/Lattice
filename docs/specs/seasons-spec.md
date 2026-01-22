@@ -1,13 +1,16 @@
 ---
+title: Seasons — Versioning System
+description: Semantic versioning strategy and release workflow
+category: specs
+specCategory: reference
+icon: tag
+lastUpdated: '2025-11-26'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - versioning
   - npm
   - releases
   - semver
-type: tech-spec
 ---
 
 # Seasons — Versioning System

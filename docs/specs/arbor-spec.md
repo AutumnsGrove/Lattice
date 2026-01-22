@@ -1,12 +1,15 @@
 ---
+title: Arbor — Admin Panel
+description: Content management and site administration interface
+category: specs
+specCategory: platform-services
+icon: dashboard
+lastUpdated: '2025-12-24'
 aliases: []
-date created: Tuesday, December 24th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - admin-panel
   - ui
   - user-experience
-type: tech-spec
 ---
 
 # Arbor — Admin Panel

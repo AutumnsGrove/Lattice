@@ -1,12 +1,19 @@
 ---
-title: "Drafts and Scheduling"
-slug: drafts-and-scheduling
-category: writing
+title: Drafts and Scheduling
+description: How to save drafts and schedule posts for later
+category: help
+section: writing-publishing
+lastUpdated: '2025-12-01'
+keywords:
+  - draft
+  - drafts
+  - save
+  - auto-save
+  - schedule
+  - scheduling
+  - publish later
+  - unpublish
 order: 6
-keywords: [draft, drafts, save, auto-save, schedule, scheduling, publish later, unpublish]
-related: [writing-your-first-post]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Drafts and Scheduling

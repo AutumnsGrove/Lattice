@@ -1,12 +1,19 @@
 ---
-title: "Checking Grove Status"
-slug: checking-grove-status
-category: troubleshooting
+title: Checking Grove Status
+description: How to check if Grove is experiencing issues
+category: help
+section: support-resources
+lastUpdated: '2025-12-24'
+keywords:
+  - status
+  - outage
+  - down
+  - maintenance
+  - incident
+  - issues
+  - problems
+  - not working
 order: 9
-keywords: [status, outage, down, maintenance, incident, issues, problems, not working]
-related: [my-site-isnt-loading, contact-support]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Checking Grove Status

@@ -1,12 +1,18 @@
 ---
-title: "What is Loom?"
-slug: what-is-loom
-category: philosophy-vision
+title: What is Loom?
+description: The coordination layer that makes Grove fast and private
+category: help
+section: philosophy-vision
+lastUpdated: '2026-01-16'
+keywords:
+  - loom
+  - durable objects
+  - architecture
+  - infrastructure
+  - technical
+  - how grove works
+  - cloudflare
 order: 4
-keywords: [loom, durable objects, architecture, infrastructure, technical, how grove works, cloudflare]
-related: [what-is-grove, understanding-your-privacy, how-grove-backs-up-your-data]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # What is Loom?

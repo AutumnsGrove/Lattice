@@ -1,12 +1,15 @@
 ---
+title: Fiction House Publishing
+description: Project specification for the first Grove customer site
+category: specs
+specCategory: reference
+icon: book
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - customer-site
   - publishing
   - sveltekit
-type: tech-spec
 ---
 
 ```

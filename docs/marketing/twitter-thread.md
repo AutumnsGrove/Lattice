@@ -1,3 +1,9 @@
+---
+title: Social Media Thread
+description: Bluesky/Twitter/Mastodon thread template
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Social Media Thread
 
 > **Purpose**: Bluesky/Twitter/Mastodon thread for social sharing

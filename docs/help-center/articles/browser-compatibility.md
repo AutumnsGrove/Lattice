@@ -1,12 +1,20 @@
 ---
-title: "Browser Compatibility"
-slug: browser-compatibility
-category: troubleshooting
+title: Browser Compatibility
+description: Supported browsers and troubleshooting tips
+category: help
+section: support-resources
+lastUpdated: '2025-12-24'
+keywords:
+  - browser
+  - chrome
+  - firefox
+  - safari
+  - edge
+  - mobile
+  - compatibility
+  - supported
+  - not working
 order: 7
-keywords: [browser, chrome, firefox, safari, edge, mobile, compatibility, supported, not working]
-related: [my-site-isnt-loading, known-limitations]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Browser Compatibility

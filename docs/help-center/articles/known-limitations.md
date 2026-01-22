@@ -1,12 +1,18 @@
 ---
-title: "Known Limitations"
-slug: known-limitations
-category: troubleshooting
+title: Known Limitations
+description: What Grove intentionally doesn't do
+category: help
+section: support-resources
+lastUpdated: '2025-12-24'
+keywords:
+  - limitations
+  - features
+  - missing
+  - not supported
+  - ecommerce
+  - analytics
+  - plugins
 order: 8
-keywords: [limitations, features, missing, not supported, ecommerce, analytics, plugins]
-related: [choosing-your-plan, contact-support, what-is-meadow]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Known Limitations

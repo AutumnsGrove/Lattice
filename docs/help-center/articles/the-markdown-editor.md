@@ -1,12 +1,21 @@
 ---
-title: "The Markdown Editor"
-slug: the-markdown-editor
-category: writing-and-publishing
+title: The Markdown Editor
+description: >-
+  A guide to Grove's writing environment with preview, ambient sounds, and zen
+  mode
+category: help
+section: writing-publishing
+lastUpdated: '2026-01-03'
+keywords:
+  - editor
+  - markdown
+  - writing
+  - interface
+  - toolbar
+  - preview
+  - zen mode
+  - keyboard shortcuts
 order: 2
-keywords: [editor, markdown, writing, interface, toolbar, preview, zen mode, keyboard shortcuts]
-related: [writing-your-first-post, formatting-your-posts, drafts-and-scheduling]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # The Markdown Editor

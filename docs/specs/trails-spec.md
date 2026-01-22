@@ -1,12 +1,15 @@
 ---
+title: Trails — Personal Roadmaps
+description: Build in public with beautiful project roadmaps
+category: specs
+specCategory: content-community
+icon: mapplus
+lastUpdated: '2025-12-29'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - roadmaps
   - content-planning
   - user-experience
-type: tech-spec
 ---
 
 # Trails — Personal Roadmaps

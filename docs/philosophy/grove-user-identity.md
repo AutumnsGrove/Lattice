@@ -1,3 +1,9 @@
+---
+title: Grove User Identity System
+description: The layered identity system that describes who you are in the grove
+category: philosophy
+lastUpdated: '2026-01-15'
+---
 # Grove User Identity System
 
 > *A forest of voices. Every Wanderer walks their own path.*

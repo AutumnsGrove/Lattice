@@ -1,12 +1,22 @@
 ---
-title: "Data Portability"
-slug: data-portability
-category: data
+title: Data Portability
+description: 'Taking your Grove content to WordPress, Ghost, Hugo, or anywhere else'
+category: help
+section: privacy-security
+lastUpdated: '2026-01-03'
+keywords:
+  - export
+  - migrate
+  - move
+  - transfer
+  - wordpress
+  - ghost
+  - hugo
+  - markdown
+  - portable
+  - leaving
+  - import
 order: 2
-keywords: [export, migrate, move, transfer, wordpress, ghost, hugo, markdown, portable, leaving, import]
-related: [exporting-your-content, account-deletion, understanding-your-privacy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Data Portability

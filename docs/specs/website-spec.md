@@ -1,12 +1,15 @@
 ---
+title: Grove Website Specification
+description: Marketing site and client management platform
+category: specs
+specCategory: reference
+icon: globe
+lastUpdated: '2025-11-21'
 aliases: []
-date created: Friday, November 21st 2025
-date modified: Saturday, January 4th 2026
 tags:
   - marketing
   - billing
   - client-management
-type: tech-spec
 ---
 
 ```

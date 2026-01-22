@@ -1,12 +1,20 @@
 ---
-title: "Exporting Your Content"
-slug: exporting-your-content
-category: data
+title: Exporting Your Content
+description: How to export your blog content from Grove
+category: help
+section: writing-publishing
+lastUpdated: '2025-12-01'
+keywords:
+  - export
+  - download
+  - backup
+  - data
+  - portability
+  - markdown
+  - json
+  - leaving
+  - migrate
 order: 1
-keywords: [export, download, backup, data, portability, markdown, json, leaving, migrate]
-related: [understanding-your-privacy, account-deletion]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Exporting Your Content

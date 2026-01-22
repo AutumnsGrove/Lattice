@@ -1,15 +1,17 @@
 ---
-aliases:
-date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Tuesday, November 26th 2025
-tags:
-type: help-article
-category: getting-started
+title: What is Grove?
+description: An introduction to Grove and what makes it different
+category: help
+section: getting-started
+lastUpdated: '2025-12-01'
+keywords:
+  - grove
+  - about
+  - introduction
+  - what is
+  - blogging
+  - platform
 order: 1
-keywords: [grove, about, introduction, what is, blogging, platform]
-related: [writing-your-first-post, understanding-your-privacy, what-is-loom]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # What is Grove?

@@ -1,12 +1,15 @@
 ---
+title: Customer Repository Specification
+description: Template structure for customer blog repositories
+category: specs
+specCategory: reference
+icon: filecode
+lastUpdated: '2025-11-26'
 aliases: []
-date created: Tuesday, November 26th 2025
-date modified: Saturday, January 4th 2026
 tags:
   - templates
   - deployment
   - cloudflare-workers
-type: tech-spec
 ---
 
 ```

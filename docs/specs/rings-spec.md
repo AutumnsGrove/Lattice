@@ -1,13 +1,16 @@
 ---
+title: Rings — Private Analytics
+description: Privacy-respecting analytics system for Grove platform
+category: specs
+specCategory: platform-services
+icon: barchart
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - analytics
   - privacy
   - writer-wellness
   - cloudflare-workers
-type: tech-spec
 ---
 
 ```

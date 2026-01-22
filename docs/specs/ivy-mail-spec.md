@@ -1,12 +1,15 @@
 ---
+title: Ivy — Mail Client
+description: First-party mail client for @grove.place email addresses
+category: specs
+specCategory: standalone-tools
+icon: mailbox
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Wednesday, January 1st 2026
-date modified: Saturday, January 4th 2026
 tags:
   - email
   - mail-client
   - privacy
-type: tech-spec
 ---
 
 # Ivy — Grove Mail Client

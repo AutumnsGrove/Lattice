@@ -1,12 +1,15 @@
 ---
+title: Amber — Storage Management
+description: Unified storage management system for Grove
+category: specs
+specCategory: platform-services
+icon: harddrive
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - storage
   - cloudflare-r2
   - file-management
-type: tech-spec
 ---
 
 # Amber: Grove Storage Management Specification

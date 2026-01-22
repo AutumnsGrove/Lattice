@@ -1,12 +1,19 @@
 ---
-title: "Grove's Vision"
-slug: groves-vision
-category: legal
+title: Grove
+description: The philosophy and values behind Grove
+category: help
+section: philosophy-vision
+lastUpdated: '2026-01-03'
+keywords:
+  - vision
+  - philosophy
+  - values
+  - why
+  - mission
+  - purpose
+  - about
+  - story
 order: 1
-keywords: [vision, philosophy, values, why, mission, purpose, about, story]
-related: [what-is-grove, understanding-your-privacy, how-grove-protects-your-content, why-i-built-the-grove]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Grove's Vision

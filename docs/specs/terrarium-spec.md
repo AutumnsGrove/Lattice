@@ -1,9 +1,12 @@
 ---
+title: Terrarium — Creative Canvas
+description: Visual scene composition tool for blog decorations
+category: specs
+specCategory: platform-services
+icon: pencilruler
+lastUpdated: '2026-01-05'
 aliases: []
-date created: Saturday, January 4th 2026
-date modified: Saturday, January 4th 2026
 tags: []
-type: tech-spec
 ---
 
 # Terrarium — Creative Canvas

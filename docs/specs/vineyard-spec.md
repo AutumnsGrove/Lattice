@@ -1,12 +1,15 @@
 ---
+title: Vineyard — Tool Showcase Pattern
+description: Consistent documentation and demo pattern for Grove tools
+category: specs
+specCategory: reference
+icon: grape
+lastUpdated: '2025-12-30'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - documentation
   - showcase
   - ui-patterns
-type: tech-spec
 ---
 
 # Vineyard — Tool Showcase Pattern

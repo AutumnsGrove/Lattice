@@ -1,12 +1,18 @@
 ---
-title: "Understanding Your Privacy"
-slug: understanding-your-privacy
-category: data-and-privacy
+title: Understanding Your Privacy
+description: How Grove handles your data and privacy
+category: help
+section: privacy-security
+lastUpdated: '2025-12-01'
+keywords:
+  - privacy
+  - data
+  - tracking
+  - analytics
+  - gdpr
+  - security
+  - personal information
 order: 1
-keywords: [privacy, data, tracking, analytics, gdpr, security, personal information]
-related: [how-grove-protects-your-content, exporting-your-content, account-deletion, what-is-grove]
-last_verified: 2026-01-20
-verified_by: claude
 ---
 
 # Understanding Your Privacy

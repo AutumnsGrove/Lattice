@@ -1,12 +1,15 @@
 ---
+title: Mycelium — MCP Server
+description: Model Context Protocol server for Grove ecosystem
+category: specs
+specCategory: operations
+icon: circuitboard
+lastUpdated: '2025-12-30'
 aliases: []
-date created: Thursday, January 2nd 2026
-date modified: Saturday, January 4th 2026
 tags:
   - mcp
   - ai-integration
   - api
-type: tech-spec
 ---
 
 # Mycelium — MCP Server

@@ -1,12 +1,20 @@
 ---
-title: "What is Solarpunk?"
-slug: what-is-solarpunk
-category: philosophy
+title: What is Solarpunk?
+description: The philosophy behind Grove's approach to technology and community
+category: help
+section: philosophy-vision
+lastUpdated: '2026-01-07'
+keywords:
+  - solarpunk
+  - philosophy
+  - values
+  - decentralized
+  - community
+  - sustainable
+  - ethics
+  - principles
+  - vision
 order: 1
-keywords: [solarpunk, philosophy, values, decentralized, community, sustainable, ethics, principles, vision]
-related: [groves-vision, understanding-your-privacy, data-portability]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # What is Solarpunk?

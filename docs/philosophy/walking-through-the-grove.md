@@ -1,3 +1,9 @@
+---
+title: Walking Through the Grove
+description: A naming ritual for new Grove services and features
+category: philosophy
+lastUpdated: '2026-01-12'
+---
 # Walking Through the Grove
 
 > *A naming ritual for the Grove ecosystem.*

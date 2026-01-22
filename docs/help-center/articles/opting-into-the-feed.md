@@ -1,12 +1,19 @@
 ---
-title: "Sharing Posts to Meadow"
-slug: opting-into-the-feed
-category: meadow
+title: Opting Into the Feed
+description: How to share your posts on the Grove community feed
+category: help
+section: community-social
+lastUpdated: '2025-12-01'
+keywords:
+  - meadow
+  - feed
+  - community
+  - share
+  - opt-in
+  - social
+  - public
+  - sharing
 order: 2
-keywords: [meadow, feed, community, share, opt-in, social, public, sharing]
-related: [what-is-grove, what-is-meadow, reactions-and-voting]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Sharing Posts to Meadow

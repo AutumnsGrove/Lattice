@@ -4,6 +4,18 @@ import type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/doc
 export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
 
 /**
+ * Feature flag to use frontmatter-based document scanning.
+ *
+ * When true, document metadata is read from frontmatter in each .md file
+ * via docs-scanner.ts, making the filesystem the single source of truth.
+ *
+ * When false (default), uses the hardcoded arrays below for backwards compatibility.
+ *
+ * Set USE_FRONTMATTER=true in your environment to enable.
+ */
+export const USE_FRONTMATTER = process.env.USE_FRONTMATTER === "true";
+
+/**
  * Spec category metadata (mirrors workshop page organization)
  * Icons use keys from $lib/utils/icons.ts toolIcons map
  */
@@ -1623,3 +1635,24 @@ export const allDocs = [
   ...designDocs,
   ...exhibitDocs,
 ];
+
+// ============================================================================
+// FRONTMATTER-BASED SCANNING (when USE_FRONTMATTER is enabled)
+// ============================================================================
+// When USE_FRONTMATTER is true, consumers should import from docs-scanner.ts
+// instead of using the hardcoded arrays above.
+//
+// Example usage in page.server.ts:
+//
+//   import { USE_FRONTMATTER } from "$lib/data/knowledge-base";
+//   import { scanAllDocs } from "$lib/utils/docs-scanner";
+//   import { specs as hardcodedSpecs } from "$lib/data/knowledge-base";
+//
+//   export async function load() {
+//     const specs = USE_FRONTMATTER ? scanAllDocs().specs : hardcodedSpecs;
+//     return { specs };
+//   }
+//
+// This allows gradual migration: flip USE_FRONTMATTER=true to test, then
+// roll back to false if issues arise.
+// ============================================================================

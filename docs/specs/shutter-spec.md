@@ -1,14 +1,17 @@
 ---
+title: Shutter — Web Content Distillation
+description: Token-efficient web fetching with built-in prompt injection defense
+category: specs
+specCategory: standalone-tools
+icon: aperture
+lastUpdated: '2026-01-13'
 aliases: []
-date created: Monday, January 13th 2026
-date modified: Monday, January 13th 2026
 tags:
   - web-content
   - token-efficiency
   - prompt-injection-defense
   - cloudflare-workers
   - openrouter
-type: tech-spec
 ---
 
 # Shutter — Web Content Distillation

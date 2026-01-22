@@ -1,12 +1,19 @@
 ---
-title: "Why Some Usernames Aren't Available"
-slug: why-some-usernames-arent-available
-category: account-setup
+title: Why Some Usernames Aren
+description: How Grove protects the community through username validation
+category: help
+section: account-billing
+lastUpdated: '2026-01-07'
+keywords:
+  - username
+  - subdomain
+  - blocked
+  - unavailable
+  - reserved
+  - validation
+  - loam
+  - registration
 order: 5
-keywords: [username, subdomain, blocked, unavailable, reserved, validation, loam, registration]
-related: [creating-your-account, what-is-grove, understanding-your-privacy, acceptable-use-policy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Why Some Usernames Aren't Available

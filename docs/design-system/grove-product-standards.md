@@ -1,3 +1,9 @@
+---
+title: Product Standards
+description: Design principles and product philosophy for Grove
+category: design
+lastUpdated: '2026-01-12'
+---
 # Grove Product Standards
 
 > *How we build things in the Grove.*

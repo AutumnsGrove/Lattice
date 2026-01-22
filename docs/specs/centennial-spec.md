@@ -1,12 +1,15 @@
 ---
+title: Centennial — Domain Preservation
+description: 100-year domain preservation for long-term Grove members
+category: specs
+specCategory: platform-services
+icon: squares-exclude
+lastUpdated: '2026-01-04'
 aliases: []
-date created: Saturday, January 4th 2026
-date modified: Saturday, January 4th 2026
 tags:
   - domain-preservation
   - longevity
   - membership
-type: tech-spec
 ---
 
 # Centennial — Domain Preservation

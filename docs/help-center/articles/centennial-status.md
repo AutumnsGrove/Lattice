@@ -1,12 +1,19 @@
 ---
-title: "Centennial Status: Your Grove for 100 Years"
-slug: centennial-status
-category: billing
+title: 'Centennial Status: Your Grove for 100 Years'
+description: How to earn 100-year domain preservation and what it means for your writing
+category: help
+section: philosophy-vision
+lastUpdated: '2026-01-06'
+keywords:
+  - centennial
+  - 100 years
+  - preservation
+  - legacy
+  - archive
+  - permanent
+  - domain
+  - longevity
 order: 5
-keywords: [centennial, 100 years, preservation, legacy, archive, permanent, domain, longevity]
-related: [choosing-your-plan, understanding-your-plan, how-grove-protects-your-content]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Centennial Status

@@ -1,14 +1,16 @@
 ---
+title: Nook — Private Video Sharing
+description: 'Cozy corner for sharing videos with close friends, not the world'
+category: specs
+specCategory: standalone-tools
+icon: projector
+lastUpdated: '2026-01-04'
 aliases: []
-date created: Saturday, January 4th 2026
-date modified: Saturday, January 4th 2026
-source: https://github.com/AutumnsGrove/Nook/blob/main/nook-spec.md
 tags:
   - video-sharing
   - privacy
   - ai-processing
   - friends
-type: tech-spec
 ---
 
 # Nook — Private Video Sharing

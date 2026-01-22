@@ -1,12 +1,20 @@
 ---
-title: "How Grove Backs Up Your Data"
-slug: how-grove-backs-up-your-data
-category: data-and-privacy
+title: How Grove Backs Up Your Data
+description: 'Patina: Automated nightly backups with 12-week retention'
+category: help
+section: privacy-security
+lastUpdated: '2025-12-31'
+keywords:
+  - backup
+  - backups
+  - data
+  - protection
+  - patina
+  - recovery
+  - restore
+  - disaster
+  - safety
 order: 3
-keywords: [backup, backups, data, protection, patina, recovery, restore, disaster, safety]
-related: [exporting-your-content, understanding-your-privacy, what-is-grove]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # How Grove Backs Up Your Data

@@ -1,13 +1,16 @@
 ---
+title: Shade — AI Content Protection System
+description: Layered defense against AI crawlers and scrapers
+category: specs
+specCategory: operations
+icon: blinds
+lastUpdated: '2025-12-26'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - ai-protection
   - privacy
   - security
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Shade — AI Content Protection

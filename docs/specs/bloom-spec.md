@@ -1,13 +1,16 @@
 ---
+title: Bloom — Remote Coding Infrastructure
+description: Serverless autonomous coding agent on transient VPS
+category: specs
+specCategory: standalone-tools
+icon: loader
+lastUpdated: '2025-12-30'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - remote-coding
   - infrastructure
   - ai-agents
   - hetzner
-type: tech-spec
 ---
 
 # Bloom — Remote Coding Infrastructure

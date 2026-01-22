@@ -1,12 +1,15 @@
 ---
+title: Patina — Automated Backup System
+description: Nightly database backups with weekly archives and 12-week retention
+category: specs
+specCategory: operations
+icon: database
+lastUpdated: '2025-12-31'
 aliases: []
-date created: Saturday, January 4th 2026
-date modified: Saturday, January 4th 2026
 tags:
   - backups
   - disaster-recovery
   - cloudflare-r2
-type: tech-spec
 ---
 
 # Patina — Automated Backups

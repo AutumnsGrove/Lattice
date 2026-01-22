@@ -1,13 +1,16 @@
 ---
+title: Pantry — Shop & Provisioning
+description: 'Grove''s shop for subscriptions, merchandise, gift cards, and credits'
+category: specs
+specCategory: platform-services
+icon: store
+lastUpdated: '2026-01-06'
 aliases: []
-date created: Monday, January 6th 2026
-date modified: Monday, January 6th 2026
 tags:
   - shop
   - e-commerce
   - merchandise
   - provisioning
-type: tech-spec
 ---
 
 # Pantry: Grove Shop & Provisioning Specification

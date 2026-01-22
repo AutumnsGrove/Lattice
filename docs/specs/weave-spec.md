@@ -1,13 +1,16 @@
 ---
+title: Weave — Visual Composition Studio
+description: Node-graph editor for animations and diagrams within Terrarium
+category: specs
+specCategory: platform-services
+icon: splinepointer
+lastUpdated: '2026-01-06'
 aliases: []
-date created: Tuesday, January 6th 2026
-date modified: Tuesday, January 6th 2026
 tags:
   - animation
   - diagrams
   - node-graph
   - terrarium
-type: tech-spec
 ---
 
 # Weave — Visual Composition Studio

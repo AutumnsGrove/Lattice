@@ -1,12 +1,15 @@
 ---
+title: Tenant Onboarding Implementation Plan
+description: Detailed implementation guide for the onboarding flow
+category: specs
+specCategory: reference
+icon: layout
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Sunday, December 14th 2025
-date modified: Monday, January 13th 2026
 tags:
   - onboarding
   - implementation-plan
   - architecture
-type: implementation-plan
 ---
 
 ```

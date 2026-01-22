@@ -1,12 +1,15 @@
 ---
+title: Porch — Front Porch Conversations
+description: 'Warm, accessible support where you chat with the grove keeper'
+category: specs
+specCategory: platform-services
+icon: rocking-chair
+lastUpdated: '2026-01-06'
 aliases: []
-date created: Monday, January 6th 2026
-date modified: Monday, January 13th 2026
 tags:
   - support
   - user-communication
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Porch — Support System

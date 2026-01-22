@@ -1,12 +1,18 @@
 ---
-title: "Tags and Organization"
-slug: tags-and-organization
-category: writing
+title: Tags and Organization
+description: Using tags to organize your blog posts
+category: help
+section: writing-publishing
+lastUpdated: '2025-12-01'
+keywords:
+  - tags
+  - categories
+  - organize
+  - organization
+  - label
+  - filter
+  - sort
 order: 4
-keywords: [tags, categories, organize, organization, label, filter, sort]
-related: [writing-your-first-post, your-rss-feed]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Tags and Organization

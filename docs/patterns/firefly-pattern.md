@@ -1,3 +1,10 @@
+---
+title: Firefly — Ephemeral Server Pattern
+description: 'On-demand infrastructure that ignites, illuminates, and fades away'
+category: patterns
+icon: webhook
+lastUpdated: '2026-01-01'
+---
 # Firefly — Ephemeral Server Pattern
 
 > *A brief light in the darkness. It appears, does its work, and fades away.*

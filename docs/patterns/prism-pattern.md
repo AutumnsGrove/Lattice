@@ -1,3 +1,10 @@
+---
+title: Prism — Grove Design System
+description: 'Glassmorphism, seasonal theming, and organic UI patterns'
+category: patterns
+icon: triangle
+lastUpdated: '2026-01-02'
+---
 # Prism: Grove Design System
 
 > *Light enters plain and emerges transformed.*

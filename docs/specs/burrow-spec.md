@@ -1,13 +1,16 @@
 ---
+title: Burrow — Cross-Property Access
+description: Trusted cross-property access between greenhouse-mode Grove properties
+category: specs
+specCategory: platform-services
+icon: network
+lastUpdated: '2026-01-21'
 aliases: []
-date created: Tuesday, January 21st 2026
-date modified: Tuesday, January 21st 2026
 tags:
   - cross-property-access
   - authentication
   - greenhouse-mode
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Burrow — Cross-Property Access

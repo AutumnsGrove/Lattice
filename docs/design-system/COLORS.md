@@ -1,3 +1,9 @@
+---
+title: Color System
+description: Grove's nature-inspired color palette and semantic tokens
+category: design
+lastUpdated: '2026-01-18'
+---
 # Color System
 
 > Nature-inspired palette: Grove greens, warm bark browns, soft cream neutrals.

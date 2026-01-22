@@ -1,3 +1,9 @@
+---
+title: Advertising & Marketing Strategy
+description: 'How Grove markets itself to the world — channels, messaging, and principles'
+category: marketing
+lastUpdated: '2026-01-02'
+---
 # Grove Advertising & Marketing Strategy
 
 *Created: January 2026*

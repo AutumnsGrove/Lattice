@@ -1,13 +1,16 @@
 ---
+title: Lumen — AI Gateway
+description: Unified AI routing layer with task-based provider selection and observability
+category: specs
+specCategory: operations
+icon: lamp-ceiling
+lastUpdated: '2026-01-21'
 aliases: []
-date created: Tuesday, January 21st 2026
-date modified: Tuesday, January 21st 2026
 tags:
   - ai-integration
   - infrastructure
   - cloudflare-workers
   - openrouter
-type: tech-spec
 ---
 
 # Lumen — AI Gateway

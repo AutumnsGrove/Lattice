@@ -1,3 +1,9 @@
+---
+title: Terms of Service
+description: Terms and conditions for using Grove
+category: legal
+lastUpdated: '2026-01-16'
+---
 # Terms of Service
 
 **Grove Platform**

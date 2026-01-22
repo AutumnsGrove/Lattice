@@ -1,3 +1,9 @@
+---
+title: Shade Demo Video Script
+description: Video script for demonstrating AI crawler protection
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Video Concept — Shade Protection Demo
 
 > **Purpose**: Script/outline for Shade protection demo video

@@ -1,13 +1,16 @@
 ---
+title: Wisp — Writing Assistant
+description: Ethical AI writing tool that polishes without replacing
+category: specs
+specCategory: content-community
+icon: wind
+lastUpdated: '2025-12-30'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - writing-assistant
   - ai
   - privacy
   - cloudflare-workers
-type: tech-spec
 ---
 
 ```
