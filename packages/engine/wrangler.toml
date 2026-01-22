@@ -95,6 +95,12 @@ name = "POST_CONTENT"
 class_name = "PostContentDO"
 script_name = "grove-durable-objects"
 
+# SentinelDO: Stress test coordination (long-running tests, WebSocket updates)
+[[durable_objects.bindings]]
+name = "SENTINEL"
+class_name = "SentinelDO"
+script_name = "grove-durable-objects"
+
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.
 # Pages projects reference external DOs via script_name.
 
@@ -104,6 +110,8 @@ script_name = "grove-durable-objects"
 [vars]
 CACHE_TTL_SECONDS = "3600"
 GROVEAUTH_URL = "https://auth.grove.place"
+# The Clearing (Status Page) - for Sentinel integration
+CLEARING_API_URL = "https://status.grove.place"
 # Turnstile (Shade) - human verification
 # Get from: Cloudflare Dashboard → Turnstile → Your Widget
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"

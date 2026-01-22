@@ -12,6 +12,8 @@ declare global {
         DB: D1Database;
         BACKUPS_DB: D1Database;
         CDN_URL?: string;
+        /** API key for Sentinel to report status updates */
+        SENTINEL_API_KEY?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

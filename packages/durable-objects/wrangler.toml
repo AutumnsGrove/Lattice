@@ -30,6 +30,11 @@ class_name = "PostMetaDO"
 name = "POST_CONTENT"
 class_name = "PostContentDO"
 
+# SentinelDO: Stress test coordination (long-running tests, WebSocket updates)
+[[durable_objects.bindings]]
+name = "SENTINEL"
+class_name = "SentinelDO"
+
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
 # =============================================================================
@@ -40,6 +45,17 @@ new_sqlite_classes = ["TenantDO"]
 [[migrations]]
 tag = "v2"
 new_sqlite_classes = ["PostMetaDO", "PostContentDO"]
+
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["SentinelDO"]
+
+# =============================================================================
+# KV Namespace - For caching and rate limiting (used by SentinelDO)
+# =============================================================================
+[[kv_namespaces]]
+binding = "KV"
+id = "514e91e81cc44d128a82ec6f668303e4"
 
 # =============================================================================
 # D1 Database - For DO fallback queries

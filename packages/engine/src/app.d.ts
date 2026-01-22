@@ -63,6 +63,9 @@ declare global {
         /** PostContentDO - Per-post content caching */
         POST_CONTENT: DurableObjectNamespace;
 
+        /** SentinelDO - Stress test coordination (long-running tests, WebSocket updates) */
+        SENTINEL: DurableObjectNamespace;
+
         // Secrets
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
@@ -79,6 +82,10 @@ declare global {
 
         // Petal CSAM fallback provider (when Workers AI unavailable)
         TOGETHER_API_KEY?: string;
+
+        // The Clearing (Status Page) API
+        CLEARING_API_URL?: string;
+        CLEARING_API_KEY?: string;
 
         // GroveAuth (Heartwood OAuth)
         GROVEAUTH_URL?: string;

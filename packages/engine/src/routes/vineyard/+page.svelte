@@ -10,6 +10,7 @@
 		GlassOverlay,
 		GlassLogo,
 		GlassLogoArchive,
+		GlassStatusWidget,
 		// Logo components
 		Logo,
 		LogoArchive,
@@ -473,6 +474,28 @@
 					<p class="text-xs text-bark-500">Try swiping, dragging, arrow keys, or click the navigation!</p>
 				</div>
 			</GlassCard>
+
+			<!-- GlassStatusWidget -->
+			<GlassCard title="GlassStatusWidget" variant="frosted">
+				<p class="text-sm text-bark-600 mb-4">Live status indicator from The Clearing — auto-refreshes every 60 seconds</p>
+				<div class="space-y-6">
+					<!-- Compact Mode -->
+					<div>
+						<p class="text-xs text-bark-500 mb-3">Compact mode (inline pill)</p>
+						<GlassStatusWidget compact />
+					</div>
+					<!-- Full Widget -->
+					<div>
+						<p class="text-xs text-bark-500 mb-3">Full widget with details</p>
+						<div class="max-w-sm">
+							<GlassStatusWidget showComponents showIncidents />
+						</div>
+					</div>
+					<p class="text-xs text-bark-500">
+						Widget fetches live data from The Clearing status API. Click to view the full status page.
+					</p>
+				</div>
+			</GlassCard>
 		</div>
 	</section>
 
@@ -929,7 +952,7 @@ $ npm run dev
 						Built
 					</h4>
 					<ul class="space-y-2 text-sm text-bark-600">
-						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (8 components)</li>
+						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (9 components)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Core UI components (15+ components)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Typography components (11 fonts)</li>
 						<li class="flex items-center gap-2"><ChevronRight class="w-3 h-3 text-grove-500" /> Nature color palettes (12 palettes)</li>
