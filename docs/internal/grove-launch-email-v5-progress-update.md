@@ -26,7 +26,7 @@ On the platform side: I rebuilt how sign-in works, and it's so much better now. 
 
 Still building. Every single day.
 
-I've also been sketching out what comes next. If you're curious, there's a workshop page: [grove.place/roadmap/workshop](https://grove.place/roadmap/workshop)
+I've also been sketching out what comes next. If you're curious, there's a workshop page: [grove.place/workshop](https://grove.place/workshop)
 
 But first, let's get you in the door.
 

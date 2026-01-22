@@ -728,7 +728,7 @@
 <SEO
 	title="The Workshop — Grove Roadmap"
 	description="Tools being built in the Grove workshop. Domain discovery, Minecraft servers, and more."
-	url="/roadmap/workshop"
+	url="/workshop"
 	accentColor="f59e0b"
 />
 
@@ -968,7 +968,7 @@
 			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground transition-colors">
 				← Main Roadmap
 			</a>
-			<a href="/roadmap/beyond" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground transition-colors">
+			<a href="/beyond" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground transition-colors">
 				Beyond the Grove →
 			</a>
 		</div>

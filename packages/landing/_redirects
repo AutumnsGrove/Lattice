@@ -6,3 +6,7 @@
 /legal/acceptable-use /knowledge/legal/acceptable-use-policy 301
 /legal/dmca           /knowledge/legal/dmca-policy 301
 /legal/data-portability /knowledge/legal/data-portability-separation 301
+
+# Route restructuring (Jan 2026)
+/roadmap/workshop     /workshop               301
+/roadmap/beyond       /beyond                 301

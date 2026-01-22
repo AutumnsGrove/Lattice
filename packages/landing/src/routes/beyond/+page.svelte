@@ -114,7 +114,7 @@
 <SEO
 	title="Beyond the Grove — Roadmap"
 	description="Standalone tools built alongside Grove. Music curation, book discovery, curated news, and more."
-	url="/roadmap/beyond"
+	url="/beyond"
 	accentColor="8b5cf6"
 />
 
@@ -248,7 +248,7 @@
 			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors">
 				← Main Roadmap
 			</a>
-			<a href="/roadmap/workshop" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors">
+			<a href="/workshop" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors">
 				← The Workshop
 			</a>
 		</div>

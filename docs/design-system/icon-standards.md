@@ -507,7 +507,7 @@ When updating a component to use centralized icons:
 - **Icon Utility:** `landing/src/lib/utils/icons.ts`
 - **Affected Pages:**
   - `landing/src/routes/roadmap/+page.svelte`
-  - `landing/src/routes/roadmap/workshop/+page.svelte`
+  - `landing/src/routes/workshop/+page.svelte`
   - `landing/src/routes/pricing/+page.svelte`
   - `landing/src/routes/header/+page.svelte`
   - All other Grove properties

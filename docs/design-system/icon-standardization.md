@@ -2,7 +2,7 @@
 
 ## Source of Truth
 
-**Workshop Page** (`landing/src/routes/roadmap/workshop/+page.svelte`) is the authoritative source for all Grove project icons.
+**Workshop Page** (`landing/src/routes/workshop/+page.svelte`) is the authoritative source for all Grove project icons.
 
 ## Changes Made
 
@@ -137,7 +137,7 @@ Icons are colored semantically by phase and project:
    - Fixed `toolIcons.database` mapping
    - Updated `roadmapFeatureIcons` to match Workshop
 
-2. `landing/src/routes/roadmap/workshop/+page.svelte`
+2. `landing/src/routes/workshop/+page.svelte`
    - No changes (source of truth preserved)
 
 3. `landing/src/routes/roadmap/+page.svelte`

@@ -988,13 +988,13 @@
 					<p class="text-purple-400 mb-4">There's more growing in the grove...</p>
 					<div class="flex flex-wrap justify-center gap-4">
 						<a
-							href="/roadmap/workshop"
+							href="/workshop"
 							class="px-4 py-2 rounded-lg bg-purple-800/50 text-purple-200 hover:bg-purple-700/50 transition-colors"
 						>
 							The Workshop →
 						</a>
 						<a
-							href="/roadmap/beyond"
+							href="/beyond"
 							class="px-4 py-2 rounded-lg bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 transition-colors"
 						>
 							Beyond the Grove →

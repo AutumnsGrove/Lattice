@@ -280,8 +280,8 @@
 - `landing/package.json` - Added @lucide/lab dependency
 - `landing/src/lib/components/icons/BeeIcon.svelte` - New wrapper component
 - `landing/src/lib/utils/icons.ts` - Added bee to toolIcons
-- `landing/src/routes/roadmap/beyond/+page.svelte` - Added subComponents support
-- `landing/src/routes/roadmap/workshop/+page.svelte` - Added Swarm to Forage
+- `landing/src/routes/beyond/+page.svelte` - Added subComponents support
+- `landing/src/routes/workshop/+page.svelte` - Added Swarm to Forage
 - `landing/src/lib/data/knowledge-base.ts` - Registered help article
 - `docs/help-center/articles/what-is-swarm.md` - New help article
 
