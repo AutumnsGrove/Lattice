@@ -48,6 +48,9 @@ declare global {
         /** R2 Bucket for images and media */
         IMAGES: R2Bucket;
 
+        /** R2 Bucket - source for migration from autumnsgrove-images (TEMPORARY) */
+        IMAGES_SOURCE?: R2Bucket;
+
         /** GroveAuth Service Binding (Heartwood - fast session validation) */
         AUTH: Fetcher;
 

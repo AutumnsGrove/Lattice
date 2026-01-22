@@ -66,6 +66,9 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 
   const cdnBaseUrl = config.cdn_base_url || "";
 
+  // Tenant prefix for R2 key scoping (each tenant's images live under their ID)
+  const tenantPrefix = `${tenantId}/`;
+
   try {
     let added = 0;
     let updated = 0;
@@ -83,9 +86,10 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
       existingByKey.set(row.r2_key, row.id);
     }
 
-    // List all objects in R2
+    // List objects in R2 scoped to this tenant's prefix
     do {
       const listResult = await r2Bucket.list({
+        prefix: tenantPrefix,
         cursor,
         limit: 500,
       });
@@ -97,8 +101,16 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
           continue;
         }
 
-        // Parse metadata from filename
-        const parsed = parseImageFilename(obj.key);
+        // Strip tenant prefix before parsing metadata
+        // e.g., "autumn-primary/food/ramen.jpg" → "food/ramen.jpg"
+        const keyWithoutPrefix = obj.key.startsWith(tenantPrefix)
+          ? obj.key.slice(tenantPrefix.length)
+          : obj.key;
+
+        // Parse metadata from the path after tenant prefix
+        const parsed = parseImageFilename(keyWithoutPrefix);
+
+        // Store the FULL r2_key (including tenant prefix) for CDN URL construction
         const existingId = existingByKey.get(obj.key);
 
         if (existingId) {

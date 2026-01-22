@@ -39,6 +39,14 @@ binding = "IMAGES"
 bucket_name = "grove-media"
 
 # =============================================================================
+# R2 Bucket - Source bucket for image migration (TEMPORARY)
+# =============================================================================
+# Remove this binding after migration from autumnsgrove-images is complete
+[[r2_buckets]]
+binding = "IMAGES_SOURCE"
+bucket_name = "autumnsgrove-images"
+
+# =============================================================================
 # D1 Database - Main shared database for multi-tenant platform
 # =============================================================================
 # Uses the shared grove-engine-db for tenants, users, content, and auth
