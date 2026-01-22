@@ -6,7 +6,7 @@ import {
   patterns,
   philosophyDocs,
   designDocs,
-  developerDocs,
+  exhibitDocs,
 } from "$lib/data/knowledge-base";
 
 export async function load() {
@@ -18,6 +18,6 @@ export async function load() {
     patterns,
     philosophyDocs,
     designDocs,
-    developerDocs,
+    exhibitDocs,
   };
 }

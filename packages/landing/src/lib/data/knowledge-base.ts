@@ -1,7 +1,7 @@
-import type { Doc, SpecCategory, HelpSection } from "$lib/types/docs";
+import type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
 
 // Re-export for convenience
-export type { Doc, SpecCategory, HelpSection } from "$lib/types/docs";
+export type { Doc, SpecCategory, HelpSection, ExhibitWing } from "$lib/types/docs";
 
 /**
  * Spec category metadata (mirrors workshop page organization)
@@ -1533,6 +1533,106 @@ export const developerDocs: Doc[] = [
   },
 ];
 
+/**
+ * Exhibit wing metadata (museum organization)
+ * Icons use keys from $lib/utils/icons.ts toolIcons map
+ */
+export const exhibitWings: {
+  id: ExhibitWing;
+  name: string;
+  description: string;
+  icon: string;
+}[] = [
+  {
+    id: "entrance",
+    name: "The Entrance",
+    description: "Welcome to the Lattice Museum",
+    icon: "signpost",
+  },
+  {
+    id: "architecture",
+    name: "Architecture Wing",
+    description: "How Grove is built at the infrastructure level",
+    icon: "pyramid",
+  },
+  {
+    id: "nature",
+    name: "Nature Wing",
+    description: "The visual and emotional language of Grove",
+    icon: "trees",
+  },
+  {
+    id: "trust",
+    name: "Trust Wing",
+    description: "Authentication, security, and identity",
+    icon: "shieldcheck",
+  },
+  {
+    id: "data",
+    name: "Data Wing",
+    description: "How information flows and persists",
+    icon: "database",
+  },
+  {
+    id: "personalization",
+    name: "Personalization Wing",
+    description: "Making each blog feel like home",
+    icon: "palette",
+  },
+  {
+    id: "community",
+    name: "Community Wing",
+    description: "The social layer and shared spaces",
+    icon: "users",
+  },
+  {
+    id: "naming",
+    name: "Naming Wing",
+    description: "How Grove names things, and why it matters",
+    icon: "feather",
+  },
+];
+
+// Art Exhibit Documents (Museum)
+export const exhibitDocs: Doc[] = [
+  {
+    slug: "MUSEUM",
+    title: "Welcome to the Lattice Museum",
+    description: "A guided tour through how this forest grows",
+    excerpt:
+      "This is the story of Grove, told through the systems that make it work. You're standing at the entrance to a museum—not the dusty kind with ropes and \"do not touch\" signs. This is the kind where you can peek behind every curtain.",
+    category: "exhibit",
+    exhibitWing: "entrance",
+    icon: "signpost",
+    lastUpdated: "2026-01-22",
+    readingTime: 8,
+  },
+  {
+    slug: "glossary",
+    title: "The Glossary Alcove",
+    description: "Grove speaks its own language. Here's the phrasebook.",
+    excerpt:
+      "Every community develops its own vocabulary. Grove's terminology isn't arbitrary. Each word was chosen to evoke feeling, not function. This glossary explains the terms you'll encounter throughout the museum.",
+    category: "exhibit",
+    exhibitWing: "entrance",
+    icon: "book",
+    lastUpdated: "2026-01-22",
+    readingTime: 6,
+  },
+  {
+    slug: "museum-layout-plan",
+    title: "Museum Layout Plan",
+    description: "The blueprint for the Lattice Museum",
+    excerpt:
+      "Traditional documentation answers \"how does this work?\" Museum documentation answers \"why does this exist, and why should I care?\" This document outlines the museum structure, exhibits, and agent orchestration model.",
+    category: "exhibit",
+    exhibitWing: "entrance",
+    icon: "layout",
+    lastUpdated: "2026-01-22",
+    readingTime: 15,
+  },
+];
+
 // Combined export for convenience
 export const allDocs = [
   ...specs,
@@ -1543,4 +1643,5 @@ export const allDocs = [
   ...philosophyDocs,
   ...designDocs,
   ...developerDocs,
+  ...exhibitDocs,
 ];

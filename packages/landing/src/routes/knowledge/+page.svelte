@@ -13,11 +13,11 @@
   const patterns = $derived(data.patterns);
   const philosophyDocs = $derived(data.philosophyDocs);
   const designDocs = $derived(data.designDocs);
-  const developerDocs = $derived(data.developerDocs);
+  const exhibitDocs = $derived(data.exhibitDocs);
 
   const PhilosophyIcon = knowledgeCategoryIcons.philosophy;
   const DesignIcon = knowledgeCategoryIcons.design;
-  const DeveloperIcon = knowledgeCategoryIcons.developer;
+  const ExhibitIcon = knowledgeCategoryIcons.exhibit;
 
   // Seasonal color references for cleaner templates
   const colors = {
@@ -25,7 +25,7 @@
     legal: kbCategoryColors.legal,
     philosophy: kbCategoryColors.philosophy,
     design: kbCategoryColors.design,
-    developer: kbCategoryColors.developer,
+    exhibit: kbCategoryColors.exhibit,
     marketing: kbCategoryColors.marketing,
     specs: kbCategoryColors.specs,
     patterns: kbCategoryColors.patterns,
@@ -213,32 +213,32 @@
         </a>
       </div>
 
-      <!-- Developer Guides - Winter (slate) -->
+      <!-- Art Exhibit - Gallery (teal) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
         <div class="flex items-center mb-4">
-          <div class="w-12 h-12 {colors.developer.iconBg} {colors.developer.iconBgDark} rounded-lg flex items-center justify-center mr-4">
-            <DeveloperIcon class="w-6 h-6 {colors.developer.text} {colors.developer.textDark}" />
+          <div class="w-12 h-12 {colors.exhibit.iconBg} {colors.exhibit.iconBgDark} rounded-lg flex items-center justify-center mr-4">
+            <ExhibitIcon class="w-6 h-6 {colors.exhibit.text} {colors.exhibit.textDark}" />
           </div>
           <div>
-            <h2 class="text-xl font-semibold text-foreground">Developer Guides</h2>
-            <p class="text-sm text-foreground-subtle">{developerDocs.length} guides</p>
+            <h2 class="text-xl font-semibold text-foreground">Art Exhibit</h2>
+            <p class="text-sm text-foreground-subtle">{exhibitDocs.length} exhibits</p>
           </div>
         </div>
         <p class="text-foreground-muted mb-4">
-          Technical deep-dives into Grove's architecture. Multi-tenant systems, Cloudflare infrastructure, AI integration.
+          The Lattice Museum. A guided tour through how this forest grows, with curator commentary in the margins.
         </p>
         <div class="grid md:grid-cols-3 gap-4 mb-4">
-          {#each developerDocs as doc}
-            <div class="text-sm p-3 {colors.developer.cardBg} {colors.developer.cardBgDark} rounded-lg">
-              <a href="/knowledge/developer/{doc.slug}" class="{colors.developer.text} {colors.developer.textDark} {colors.developer.textHover} {colors.developer.textHoverDark} font-medium transition-colors">
+          {#each exhibitDocs as doc}
+            <div class="text-sm p-3 {colors.exhibit.cardBg} {colors.exhibit.cardBgDark} rounded-lg">
+              <a href="/knowledge/exhibit/{doc.slug}" class="{colors.exhibit.text} {colors.exhibit.textDark} {colors.exhibit.textHover} {colors.exhibit.textHoverDark} font-medium transition-colors">
                 {doc.title}
               </a>
               <p class="text-foreground-subtle text-xs mt-1">{doc.description}</p>
             </div>
           {/each}
         </div>
-        <a href="/knowledge/developer" class="inline-flex items-center {colors.developer.text} {colors.developer.textDark} {colors.developer.textHover} {colors.developer.textHoverDark} font-medium transition-colors">
-          View all guides
+        <a href="/knowledge/exhibit" class="inline-flex items-center {colors.exhibit.text} {colors.exhibit.textDark} {colors.exhibit.textHover} {colors.exhibit.textHoverDark} font-medium transition-colors">
+          Enter the museum
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>

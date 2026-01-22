@@ -14,6 +14,7 @@
  * - Design: Spring (cherry blossoms, fresh creativity) - rose
  * - Patterns: Amber (golden architecture) - amber
  * - Marketing: Summer (growth, outreach) - emerald
+ * - Art Exhibit: Gallery (museum warmth, curated) - teal
  */
 
 import type { DocCategory } from '$lib/types/docs';
@@ -252,6 +253,30 @@ export const kbCategoryColors: Record<DocCategory, CategoryColors> = {
     cardBgDark: 'dark:bg-emerald-900/20',
     season: 'Summer',
   },
+
+  // Art Exhibit - Warm Teal (museum gallery, curated collections)
+  // Using teal/cyan for a distinctive gallery feel - evokes museum lighting and curated spaces
+  exhibit: {
+    iconBg: 'bg-teal-100',
+    iconBgDark: 'dark:bg-teal-900/30',
+    text: 'text-teal-700',
+    textDark: 'dark:text-teal-400',
+    textHover: 'hover:text-teal-800',
+    textHoverDark: 'dark:hover:text-teal-300',
+    badgeBg: 'bg-teal-100',
+    badgeBgDark: 'dark:bg-teal-900/30',
+    badgeText: 'text-teal-800',
+    badgeTextDark: 'dark:text-teal-300',
+    ctaBg: 'bg-teal-50',
+    ctaBgDark: 'dark:bg-teal-900/20',
+    ctaBorder: 'border-teal-200',
+    ctaBorderDark: 'dark:border-teal-800',
+    buttonBg: 'bg-teal-600 dark:bg-teal-500',
+    buttonHover: 'hover:bg-teal-700 dark:hover:bg-teal-600',
+    cardBg: 'bg-teal-50',
+    cardBgDark: 'dark:bg-teal-900/20',
+    season: 'Gallery',
+  },
 };
 
 /**
@@ -266,5 +291,6 @@ export const categoryLabels: Record<DocCategory, string> = {
   design: 'Design',
   patterns: 'Architecture Patterns',
   marketing: 'Marketing & Launch',
+  exhibit: 'Art Exhibit',
 };
 

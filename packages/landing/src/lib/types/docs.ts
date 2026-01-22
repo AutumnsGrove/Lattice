@@ -15,7 +15,19 @@ export type DocCategory =
   | "patterns"
   | "philosophy"
   | "design"
-  | "developer";
+  | "developer"
+  | "exhibit";
+
+/** Exhibit wing categories (museum organization) */
+export type ExhibitWing =
+  | "entrance"
+  | "architecture"
+  | "nature"
+  | "trust"
+  | "data"
+  | "personalization"
+  | "community"
+  | "naming";
 
 /** Spec subcategories (mirrors workshop page organization) */
 export type SpecCategory =
@@ -54,6 +66,8 @@ export interface Doc extends Record<string, unknown> {
   specCategory?: SpecCategory;
   /** Optional help section for grouping help articles */
   section?: HelpSection;
+  /** Optional exhibit wing for museum organization */
+  exhibitWing?: ExhibitWing;
   /** Optional array of related article slugs */
   related?: string[];
 }
