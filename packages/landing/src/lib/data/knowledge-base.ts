@@ -333,6 +333,19 @@ export const specs: Doc[] = [
     lastUpdated: "2026-01-04",
     readingTime: 8,
   },
+  {
+    slug: "burrow-spec",
+    title: "Burrow — Cross-Property Access",
+    description:
+      "Trusted cross-property access between greenhouse-mode Grove properties",
+    excerpt:
+      "A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role.",
+    category: "specs",
+    specCategory: "platform-services",
+    icon: "network",
+    lastUpdated: "2026-01-21",
+    readingTime: 12,
+  },
 
   // ============================================================================
   // CONTENT & COMMUNITY
