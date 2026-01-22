@@ -20,7 +20,8 @@ export type LumenErrorCode =
   | "INVALID_INPUT" // Malformed input
   | "RATE_LIMITED" // Rate limit hit
   | "UNAUTHORIZED" // Missing/invalid API key
-  | "DISABLED"; // Lumen is disabled for this tenant
+  | "DISABLED" // Lumen is disabled for this tenant
+  | "SONGBIRD_REJECTED"; // Content failed Songbird security validation
 
 // =============================================================================
 // BASE ERROR
@@ -69,6 +70,8 @@ export class LumenError extends Error {
         return "AI service authentication failed. Please contact support.";
       case "DISABLED":
         return "AI features are not available for your account.";
+      case "SONGBIRD_REJECTED":
+        return "Your request could not be processed due to security validation.";
       default:
         return "Something went wrong with the AI service. Please try again.";
     }

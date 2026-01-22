@@ -89,6 +89,9 @@ export interface LumenRequestOptions {
    */
   tenantApiKey?: string;
 
+  /** Enable Songbird prompt injection protection (3-layer pipeline) */
+  songbird?: boolean | SongbirdOptions;
+
   /** Additional metadata for logging (no content!) */
   metadata?: Record<string, unknown>;
 }
@@ -246,4 +249,53 @@ export interface LumenClientConfig {
 
   /** Feature flag to enable/disable Lumen */
   enabled?: boolean;
+}
+
+// =============================================================================
+// SONGBIRD TYPES
+// =============================================================================
+
+export interface SongbirdOptions {
+  /** Custom Kestrel context (overrides task-based defaults) */
+  context?: KestrelContext;
+
+  /** Skip canary check (only run Kestrel + Robin) */
+  skipCanary?: boolean;
+
+  /** Custom confidence threshold (default: 0.85) */
+  confidenceThreshold?: number;
+}
+
+export interface KestrelContext {
+  /** What kind of system this is */
+  contextType: string;
+
+  /** What the user is expected to be doing */
+  expectedUseCase: string;
+
+  /** Bullet points of expected input characteristics */
+  expectedPatterns: string;
+
+  /** Policy rules for validation */
+  relevantPolicies: string;
+}
+
+export interface SongbirdResult {
+  /** Whether the input passed all checks */
+  passed: boolean;
+
+  /** Which layer failed (if any) */
+  failedLayer?: "canary" | "kestrel";
+
+  /** Kestrel confidence score (if Kestrel ran) */
+  confidence?: number;
+
+  /** Kestrel reason (if Kestrel ran) */
+  reason?: string;
+
+  /** Timing metrics */
+  metrics: {
+    canaryMs?: number;
+    kestrelMs?: number;
+  };
 }

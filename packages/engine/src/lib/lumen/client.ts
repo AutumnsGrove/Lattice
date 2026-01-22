@@ -30,6 +30,7 @@ import { safeDecryptToken, isEncryptedToken } from "$lib/server/encryption.js";
 
 import { getTaskConfig } from "./config.js";
 import { LumenError } from "./errors.js";
+import { runSongbird } from "./songbird.js";
 import { preprocess, type PreprocessResult } from "./pipeline/preprocessor.js";
 import { normalizeResponse, createUsageLog } from "./pipeline/postprocessor.js";
 import {
@@ -47,11 +48,13 @@ import type {
   LumenClientConfig,
   LumenEmbeddingRequest,
   LumenEmbeddingResponse,
+  LumenMessage,
   LumenModerationRequest,
   LumenModerationResponse,
   LumenRequest,
   LumenResponse,
   LumenStreamChunk,
+  SongbirdOptions,
 } from "./types.js";
 
 // =============================================================================
@@ -106,10 +109,35 @@ export class LumenClient {
       await this.quotaTracker.enforceQuota(request.tenant, tier, request.task);
     }
 
-    // 3. Get task config for defaults
+    // 3. Songbird protection (if enabled)
+    if (request.options?.songbird) {
+      const songbirdOpts =
+        typeof request.options.songbird === "object"
+          ? request.options.songbird
+          : undefined;
+
+      const songbirdResult = await runSongbird(
+        extractUserContent(preprocessResult.messages),
+        request.task,
+        this.providers,
+        songbirdOpts,
+      );
+
+      if (!songbirdResult.passed) {
+        throw new LumenError(
+          "Content failed security validation",
+          "SONGBIRD_REJECTED",
+          {
+            task: request.task,
+          },
+        );
+      }
+    }
+
+    // 4. Get task config for defaults
     const taskConfig = getTaskConfig(request.task);
 
-    // 4. Execute with fallback
+    // 5. Execute with fallback
     const result = await executeWithFallback(
       request.task,
       preprocessResult.messages,
@@ -123,7 +151,7 @@ export class LumenClient {
       },
     );
 
-    // 5. Normalize response
+    // 6. Normalize response
     const response = normalizeResponse({
       providerResponse: result.response,
       provider: result.provider,
@@ -133,7 +161,7 @@ export class LumenClient {
       cached: false,
     });
 
-    // 6. Record usage (if tenant provided)
+    // 7. Record usage (if tenant provided)
     if (request.tenant && this.quotaTracker) {
       await this.quotaTracker.recordUsage(
         request.tenant,
@@ -404,6 +432,28 @@ export class LumenClient {
 
     return results;
   }
+}
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+/**
+ * Extract user-role content from preprocessed messages.
+ * Handles both string and multi-part content formats.
+ */
+function extractUserContent(messages: LumenMessage[]): string {
+  return messages
+    .filter((m) => m.role === "user")
+    .map((m) =>
+      typeof m.content === "string"
+        ? m.content
+        : m.content
+            .filter((p) => p.type === "text")
+            .map((p) => p.text)
+            .join(" "),
+    )
+    .join("\n");
 }
 
 // =============================================================================

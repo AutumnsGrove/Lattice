@@ -86,7 +86,16 @@ export type {
   LumenModerationResponse,
   LumenModerationCategory,
   LumenClientConfig,
+  SongbirdOptions,
+  KestrelContext,
+  SongbirdResult,
 } from "./types.js";
+
+// =============================================================================
+// SONGBIRD
+// =============================================================================
+
+export { runSongbird } from "./songbird.js";
 
 // =============================================================================
 // ERRORS
