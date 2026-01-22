@@ -160,22 +160,18 @@
 
 ### Gallery CDN Migration — Move Images to grove-media
 > **Goal:** Migrate images from `autumnsgrove-images` bucket (cdn.autumnsgrove.com) to `grove-media` (cdn.grove.place)
-> **Status:** Code was written and deployed but CSRF token issue blocked running the migration endpoint from browser. Reverted for now.
-> **Plan commit:** `0aa38497` — has the full implementation (revert: `bfc9761f`)
+> **Status:** Migration endpoint deployed, CSRF fixed. Ready to run.
+> **Endpoint:** `POST /api/admin/migrate-images`
 
-**What needs to happen:**
-- [ ] Re-apply migration endpoint (see commit `0aa38497` for full code)
-- [ ] Fix CSRF issue — either exempt admin migration endpoints from token validation, or use curl with proper headers
-- [ ] Run migration: `POST /api/admin/migrate-images?dryRun=true` then without dryRun
-- [ ] Update gallery sync to use tenant prefix (`tenantId/`) when listing R2 objects
-- [ ] Run sync: `POST /api/curios/gallery/sync`
+**To run the migration:**
+- [ ] `POST /api/admin/migrate-images?dryRun=true` — preview transformations
+- [ ] `POST /api/admin/migrate-images` — run for real (repeat with `?cursor=xxx` if needed)
+- [ ] `POST /api/curios/gallery/sync` — populate DB from new keys
 - [ ] Verify gallery loads from cdn.grove.place
-- [ ] Cleanup: remove migration endpoint + IMAGES_SOURCE binding after verification
 
 **Key normalization format:** `{tenantId}/{category}/{date}_{slug}.{ext}`
-**Example:** `autumn-primary/food/ramen.jpg`, `autumn-primary/uncategorized/img-1234.jpg`
 
-**Workaround for now:** Upload new photos directly to `grove-media` bucket under `autumn-primary/` prefix.
+**Future:** Generalize endpoint so any tenant can migrate from any R2/S3 bucket.
 
 ### Timeline Curio — 403 Upload Error + Backfilling
 > **Problem:** Cannot add new Timeline entries on autumn.grove.place — upload button returns 403 to console
