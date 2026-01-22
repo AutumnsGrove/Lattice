@@ -1,9 +1,9 @@
 <script lang="ts">
 	/**
-	 * Pricing Page
+	 * Full Pricing Page
 	 *
-	 * Uses the PricingGraft from the engine for a consistent,
-	 * reusable pricing experience across Grove properties.
+	 * Shows all 4 tiers - the complete vision.
+	 * Linked from /pricing for those who want to see the roadmap.
 	 */
 
 	import { Header, Footer } from "@autumnsgrove/groveengine/ui/chrome";
@@ -14,9 +14,9 @@
 </script>
 
 <SEO
-	title="Pricing — Grove"
-	description="Simple, accessible pricing for writers at every level. From curious newcomers to professionals who need a polished presence."
-	url="/pricing"
+	title="All Plans — Grove"
+	description="The complete Grove pricing picture. Four tiers for writers at every level, from curious newcomers to professionals."
+	url="/pricing/full"
 />
 
 <main class="min-h-screen flex flex-col">
@@ -33,10 +33,13 @@
 			>
 				{#snippet header()}
 					<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
-						Pricing
+						All Plans
 					</h1>
 					<p class="text-lg text-foreground-subtle font-sans">
-						Simple and honest. One plan to get started.
+						The complete picture. A home for writers at every level.
+					</p>
+					<p class="text-sm text-foreground-muted font-sans mt-2">
+						<a href="/pricing" class="text-primary hover:underline">← Back to current pricing</a>
 					</p>
 					<div class="flex items-center justify-center gap-4 mt-6">
 						<div class="w-12 h-px bg-divider"></div>
@@ -52,16 +55,17 @@
 				{/snippet}
 
 				{#snippet footer()}
-					<div class="text-center space-y-4">
-						<p class="text-foreground-subtle font-sans text-sm">
-							We're launching with Seedling. More plans are on the way.
+					<div class="text-center">
+						<p class="text-foreground-subtle font-sans text-sm mb-2">
+							Need something beyond Evergreen? Multiple domains, team
+							collaboration, white-label options?
 						</p>
-						<p class="font-sans text-sm">
+						<p class="font-sans">
 							<a
-								href="/pricing/full"
-								class="text-primary hover:underline"
+								href="mailto:hello@grove.place"
+								class="text-accent-muted hover:text-primary underline"
 							>
-								See future plans →
+								Let's talk.
 							</a>
 						</p>
 					</div>

@@ -36,8 +36,9 @@
 	// Shared icon mapping
 	import { tierIcons } from '$lib/ui/tier-icons';
 
-	// Get plan previews from graft (paid tiers only, first 3 features as highlights)
-	const allTiers = transformAllTiers({ excludeTiers: ['free'] });
+	// Phase 1: Only Seedling available at launch
+	// Shows just Seedling - keeps onboarding focused and simple
+	const allTiers = transformAllTiers({ includeTiers: ['seedling'] });
 	const planPreviews = allTiers.map((tier) => ({
 		key: tier.key,
 		name: tier.name,
@@ -240,7 +241,8 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<div class="grid grid-cols-2 gap-6 stagger-children">
+		<!-- Phase 1: Single tier centered. When more tiers launch, use grid-cols-2 -->
+		<div class="flex justify-center gap-6 stagger-children">
 			{#each planPreviews as plan (plan.key)}
 				{@const PlanIcon = tierIcons[plan.icon]}
 				{@const isAvailable = plan.status === 'available'}
@@ -328,10 +330,10 @@
 
 		<div class="text-center mt-6">
 			<a
-				href="/plans"
+				href="https://grove.place/pricing/full"
 				class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 			>
-				See all plans
+				See future plans
 				<ArrowRight class="w-4 h-4" />
 			</a>
 		</div>

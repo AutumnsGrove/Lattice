@@ -1,19 +1,20 @@
 /**
  * Pricing Page Server Load
  *
- * Loads tier data using the grafts system for the pricing page.
+ * Phase 1: Shows only Seedling tier.
+ * See /pricing/full for the complete 4-tier view.
  */
 
 import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
 
 export function load() {
-  // Transform all tiers for display
-  // In the future, checkout URLs would be added here from environment
+  // Phase 1: Only Seedling available at launch
+  // See /pricing/full for the complete pricing picture
   const tiers = transformAllTiers({
-    // Highlight the entry-level paid tier
+    includeTiers: ["seedling"],
     highlightTier: "seedling",
     badges: {
-      seedling: "Start Here",
+      seedling: "Available Now",
     },
     // No checkout URLs yet - they'll be added when LemonSqueezy is configured
     // checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),

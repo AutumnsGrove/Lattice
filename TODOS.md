@@ -112,7 +112,7 @@
    - "And here's their published blog"
 
 **What to narrate around (don't dwell on):**
-- Pricing page shows 4 tiers → "We're launching with Seedling, additional tiers planned"
+- Pricing page now shows only Seedling (simplified for phase 1)
 - Skip Workshop/Roadmap entirely — not relevant to "what do you sell"
 - Skip Forage mention — not part of phase 1
 
@@ -123,6 +123,11 @@
   - LS was curious about "domain selling" — Pantry's shop/provisioning concept might complicate things
   - Pantry spec and code remain, just not visible on public Workshop page
   - Re-enable after LS verification complete
+- [ ] **Pricing simplified to Seedling-only for phase 1** (PR #427)
+  - `/pricing` shows only Seedling tier
+  - `/pricing/full` has complete 4-tier view
+  - Plant page shows only Seedling
+  - **REVERT when ready to launch Sapling/Oak/Evergreen tiers**
 
 ### 📢 Bluesky Communications Pivot
 > **Status:** Grove Bluesky account created: @groveplace.bsky.social
