@@ -1,23 +1,13 @@
 import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve } from "path";
 import matter from "gray-matter";
-import { marked, Renderer, type Tokens } from "marked";
+import MarkdownIt from "markdown-it";
 import type {
   Doc,
   DocCategory,
   DocWithContent,
   DocHeader,
 } from "$lib/types/docs";
-
-/**
- * Strip HTML tags from text to get plain text content.
- * In marked v17+, the heading renderer receives `text` with rendered HTML
- * (e.g., `Hello <strong>World</strong>` instead of `Hello **World**`).
- * This ensures IDs match between extractHeaders (raw markdown) and the renderer.
- */
-function stripHtmlTags(html: string): string {
-  return html.replace(/<[^>]*>/g, "");
-}
 
 /**
  * Generate a URL-safe ID from text.
@@ -32,36 +22,37 @@ function generateHeadingId(text: string): string {
     .trim();
 }
 
-// Custom renderer that adds IDs to headings and wraps code blocks
-const renderer = new Renderer();
-
-// Heading renderer - adds IDs for TOC navigation
-renderer.heading = function ({ text, depth }) {
-  // Strip HTML tags to get plain text, then generate ID
-  // This ensures IDs match what extractHeaders produces from raw markdown
-  const plainText = stripHtmlTags(text);
-  const id = generateHeadingId(plainText);
-  return `<h${depth} id="${id}">${text}</h${depth}>\n`;
-};
-
-// Code renderer - wraps code blocks with GitHub-style header and copy button
-renderer.code = function (token: Tokens.Code | string): string {
-  // Handle both old (code, language) and new (token) API signatures
-  const code = typeof token === "string" ? token : token.text;
-  const language =
-    typeof token === "string"
-      ? (arguments as unknown as [string, string])[1]
-      : token.lang;
-
-  const lang = language || "text";
-
-  // Escape the code for safe HTML embedding
-  const escapedCode = code
+/**
+ * Escape HTML special characters for safe embedding in HTML attributes.
+ */
+function escapeHtml(text: string): string {
+  return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+// Create markdown-it instance with custom renderers
+const md = new MarkdownIt({ html: false, linkify: true });
+
+// Heading renderer - adds IDs for TOC navigation
+md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
+  const token = tokens[idx];
+  const inlineToken = tokens[idx + 1];
+  const headingText = inlineToken?.content || "";
+  const id = generateHeadingId(headingText);
+  token.attrSet("id", id);
+  return self.renderToken(tokens, idx, options);
+};
+
+// Code block renderer - wraps code blocks with GitHub-style header and copy button
+md.renderer.rules.fence = function (tokens, idx) {
+  const token = tokens[idx];
+  const code = token.content;
+  const lang = token.info || "text";
+  const escapedCode = escapeHtml(code);
 
   return `<div class="code-block-wrapper">
   <div class="code-block-header">
@@ -75,10 +66,8 @@ renderer.code = function (token: Tokens.Code | string): string {
     </button>
   </div>
   <pre><code class="language-${lang}">${escapedCode}</code></pre>
-</div>`;
+</div>\n`;
 };
-
-marked.use({ renderer });
 
 // Re-export types for convenience
 export type { Doc, DocWithContent } from "$lib/types/docs";
@@ -250,7 +239,14 @@ export function loadAllDocs(): {
   const patterns = loadDocsFromDir(join(DOCS_ROOT, "patterns"), "patterns");
   const exhibitDocs = loadDocsFromDir(join(DOCS_ROOT, "museum"), "exhibit");
 
-  return { specs, helpArticles, legalDocs, marketingDocs, patterns, exhibitDocs };
+  return {
+    specs,
+    helpArticles,
+    legalDocs,
+    marketingDocs,
+    patterns,
+    exhibitDocs,
+  };
 }
 
 export function loadDocBySlug(
@@ -300,7 +296,7 @@ export function loadDocBySlug(
     return {
       ...docWithoutPath,
       content: markdownContent,
-      html: marked(markdownContent) as string,
+      html: md.render(markdownContent),
       headers,
     };
   } catch (error) {

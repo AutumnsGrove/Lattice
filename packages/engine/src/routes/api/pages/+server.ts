@@ -1,8 +1,7 @@
 import { json, error } from "@sveltejs/kit";
-import { marked } from "marked";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import { sanitizeMarkdown } from "$lib/utils/sanitize.js";
+import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import {
@@ -134,10 +133,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       } as any);
     }
 
-    // Generate HTML from markdown and sanitize to prevent XSS
-    const html_content = sanitizeMarkdown(
-      marked.parse(data.markdown_content, { async: false }) as string,
-    );
+    // Generate HTML from markdown (renderMarkdown handles sanitization)
+    const html_content = renderMarkdown(data.markdown_content);
 
     const timestamp = now();
 

@@ -1,7 +1,10 @@
 <script>
-  import { marked } from "marked";
+  import MarkdownIt from "markdown-it";
   import { onMount, tick } from "svelte";
   import { sanitizeMarkdown } from "$lib/utils/sanitize";
+
+  // Local instance for admin editor preview
+  const editorMd = new MarkdownIt({ html: false, linkify: true });
   import { extractHeaders } from "$lib/utils/markdown";
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
@@ -111,7 +114,7 @@
   let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-  let previewHtml = $derived(content ? sanitizeMarkdown(/** @type {string} */ (marked.parse(content, { async: false }))) : "");
+  let previewHtml = $derived(content ? sanitizeMarkdown(editorMd.render(content)) : "");
   let previewHeaders = $derived(content ? extractHeaders(content) : []);
 
   let readingTime = $derived.by(() => {

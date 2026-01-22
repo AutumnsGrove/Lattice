@@ -329,10 +329,10 @@
 				</p>
 
 				<div class="grid gap-3">
-					<a href="https://github.com/markedjs/marked" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+					<a href="https://github.com/markdown-it/markdown-it" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
 						<div class="flex items-center justify-between">
 							<div>
-								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Marked</span>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">markdown-it</span>
 								<span class="text-foreground-subtle font-sans text-sm ml-2">— Markdown parser</span>
 							</div>
 							<span class="text-foreground-faint text-xs font-sans">MIT</span>
