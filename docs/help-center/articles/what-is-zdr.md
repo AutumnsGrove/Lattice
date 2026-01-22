@@ -1,12 +1,24 @@
 ---
-title: "What is ZDR and Why Does It Matter?"
-slug: what-is-zdr
-category: data-and-privacy
+title: What is ZDR and Why Does It Matter?
+description: >-
+  Zero Data Retention: how Grove's AI features process your content without
+  storing it
+category: help
+section: ai-features
+lastUpdated: '2026-01-07'
+keywords:
+  - zdr
+  - zero data retention
+  - privacy
+  - ai
+  - wisp
+  - thorn
+  - petal
+  - forage
+  - inference
+  - data protection
+  - image moderation
 order: 3
-keywords: [zdr, zero data retention, privacy, ai, wisp, thorn, petal, forage, inference, data protection, image moderation]
-related: [understanding-your-privacy, how-grove-protects-your-content, what-is-grove]
-last_verified: 2026-01-20
-verified_by: claude
 ---
 
 # What is ZDR and Why Does It Matter?

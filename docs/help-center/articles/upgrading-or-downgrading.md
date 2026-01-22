@@ -1,12 +1,18 @@
 ---
-title: "Upgrading or Downgrading Your Plan"
-slug: upgrading-or-downgrading
-category: billing
+title: Upgrading or Downgrading Your Plan
+description: How to change your Grove subscription plan
+category: help
+section: account-billing
+lastUpdated: '2025-12-24'
+keywords:
+  - upgrade
+  - downgrade
+  - change plan
+  - switch plan
+  - subscription
+  - billing
+  - tier
 order: 2
-keywords: [upgrade, downgrade, change plan, switch plan, subscription, billing, tier]
-related: [choosing-your-plan]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Upgrading or Downgrading Your Plan

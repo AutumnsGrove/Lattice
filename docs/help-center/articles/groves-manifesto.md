@@ -1,7 +1,11 @@
 ---
 title: "Grove's Manifesto"
+description: "The core beliefs and values behind Grove: ownership, simplicity, queer-friendly infrastructure, and building slowly."
+category: help
+section: "philosophy-vision"
+icon: helpcircle
+lastUpdated: "2026-01-22"
 slug: groves-manifesto
-category: philosophy
 order: 2
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
 related: [groves-vision, what-is-grove, what-is-solarpunk, centennial-status, why-i-built-the-grove, why-grove-is-different]

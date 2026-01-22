@@ -1,3 +1,11 @@
+---
+title: "Social Media Accounts — Source of Truth"
+description: "Canonical reference for all Grove social media accounts, branding, handles, and profile setup."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Social Media Accounts — Source of Truth
 
 > **Purpose**: Single canonical reference for all Grove social media accounts

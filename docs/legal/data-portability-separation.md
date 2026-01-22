@@ -1,3 +1,9 @@
+---
+title: Data Portability & Account Separation Policy
+description: 'Your data export rights, domain ownership, and account cancellation terms'
+category: legal
+lastUpdated: '2026-01-16'
+---
 # Data Portability & Account Separation Policy
 
 Grove.place

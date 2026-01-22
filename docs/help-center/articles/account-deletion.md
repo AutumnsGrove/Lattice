@@ -1,12 +1,20 @@
 ---
-title: "Deleting Your Account"
-slug: account-deletion
-category: data
+title: Deleting Your Account
+description: How to close your Grove account and delete your data
+category: help
+section: account-billing
+lastUpdated: '2025-12-24'
+keywords:
+  - delete
+  - close
+  - cancel
+  - remove
+  - account
+  - data
+  - gdpr
+  - leave
+  - goodbye
 order: 3
-keywords: [delete, close, cancel, remove, account, data, gdpr, leave, goodbye]
-related: [exporting-your-content, understanding-your-privacy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Deleting Your Account

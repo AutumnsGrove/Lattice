@@ -1,3 +1,10 @@
+---
+title: Sentinel — Load Testing & Scale Validation
+description: Realistic traffic profiles and ramp-up testing for Durable Objects and D1
+category: patterns
+icon: radar
+lastUpdated: '2026-01-01'
+---
 # Sentinel Pattern
 
 # Sentinel: Load Testing & Scale Validation

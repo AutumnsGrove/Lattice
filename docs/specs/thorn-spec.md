@@ -1,13 +1,18 @@
 ---
+title: Thorn — Content Moderation
+description: >-
+  Privacy-first automated content moderation using AI models with zero data
+  retention
+category: specs
+specCategory: content-community
+icon: file-warning
+lastUpdated: '2026-01-01'
 aliases: []
-date created: Monday, December 29th 2025
-date modified: Friday, January 3rd 2026
 tags:
   - content-moderation
   - privacy
   - cloudflare-workers
   - ai
-type: tech-spec
 ---
 
 # Thorn — Content Moderation

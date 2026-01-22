@@ -1,3 +1,11 @@
+---
+title: "Bluesky Launch Strategy"
+description: "Strategy for leveraging Bluesky's queer community and starter packs for Grove's launch and ongoing marketing."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Bluesky Launch Strategy
 
 *How to leverage Bluesky's queer community for Grove's launch*

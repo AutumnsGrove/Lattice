@@ -1,12 +1,18 @@
 ---
-title: "Creating Your Account"
-slug: creating-your-account
-category: getting-started
+title: Creating Your Account
+description: How to sign up for Grove using Google authentication
+category: help
+section: account-billing
+lastUpdated: '2025-12-24'
+keywords:
+  - account
+  - sign up
+  - register
+  - create account
+  - google
+  - login
+  - authentication
 order: 1
-keywords: [account, sign up, register, create account, google, login, authentication]
-related: [what-is-grove, choosing-your-plan, writing-your-first-post]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Creating Your Account

@@ -1,12 +1,21 @@
 ---
-title: "What is Swarm and How Does It Work?"
-slug: what-is-swarm
-category: features
+title: What is Swarm and How Does It Work?
+description: >-
+  How Grove uses multiple AI agents working in parallel to deliver better
+  results faster
+category: help
+section: ai-features
+lastUpdated: '2026-01-07'
+keywords:
+  - swarm
+  - agentic
+  - ai
+  - agents
+  - parallel
+  - scout
+  - forage
+  - daily clearing
 order: 4
-keywords: [swarm, agentic, ai, agents, parallel, scout, forage, daily clearing]
-related: [what-is-zdr, what-is-grove, understanding-your-privacy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # What is Swarm and How Does It Work?

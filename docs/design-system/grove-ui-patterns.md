@@ -1,3 +1,9 @@
+---
+title: Grove UI Patterns
+description: 'Glassmorphism, seasonal themes, and the visual language of Grove'
+category: design
+lastUpdated: '2026-01-12'
+---
 # Grove UI Patterns
 
 > *Every design choice should feel welcoming, organic, readable, and alive.*

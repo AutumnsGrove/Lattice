@@ -1,3 +1,9 @@
+---
+title: Sustainability
+description: Grove's approach to environmental and social sustainability
+category: philosophy
+lastUpdated: '2026-01-12'
+---
 # How Grove Lasts: A Sustainability Promise
 
 > *Some trees outlive the people who planted them.*

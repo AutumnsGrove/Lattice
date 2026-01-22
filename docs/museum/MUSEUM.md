@@ -1,3 +1,11 @@
+---
+title: Welcome to the Lattice Museum
+description: A guided tour through how this forest grows
+category: exhibit
+exhibitWing: entrance
+icon: signpost
+lastUpdated: '2026-01-22'
+---
 # Welcome to the Lattice Museum
 
 > *A guided tour through how this forest grows.*

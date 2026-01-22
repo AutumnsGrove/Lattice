@@ -1,3 +1,11 @@
+---
+title: The Glossary Alcove
+description: Grove speaks its own language. Here's the phrasebook.
+category: exhibit
+exhibitWing: entrance
+icon: book
+lastUpdated: '2026-01-22'
+---
 # The Glossary Alcove
 
 > *Grove speaks its own language. Here's the phrasebook.*

@@ -1,3 +1,12 @@
+---
+title: "Amber Sync"
+description: "A future extension to Amber that adds reliable cross-device synchronization for vaults, notes, and mixed media."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
+---
+
 # Amber Sync
 
 A future extension to Amber that adds reliable cross-device synchronization for vaults, notes, and mixed media.

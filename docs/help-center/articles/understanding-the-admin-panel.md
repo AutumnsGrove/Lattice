@@ -1,15 +1,19 @@
 ---
-aliases:
-date created: Friday, November 21st 2025, 3:01:54 pm
-date modified: Tuesday, November 26th 2025
-tags:
-type: help-article
-category: getting-started
+title: Understanding the Admin Panel
+description: A tour of your Grove admin dashboard
+category: help
+section: customization
+lastUpdated: '2025-12-24'
+keywords:
+  - admin
+  - dashboard
+  - panel
+  - navigation
+  - settings
+  - posts
+  - pages
+  - uploader
 order: 3
-keywords: [admin, dashboard, panel, navigation, settings, posts, pages, uploader]
-related: [creating-your-account, writing-your-first-post]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Understanding the Admin Panel

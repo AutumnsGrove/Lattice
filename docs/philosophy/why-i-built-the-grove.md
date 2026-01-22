@@ -6,6 +6,7 @@ order: 1
 description: The personal story behind Grove - loss, sanctuary, texture, and transformation
 keywords: [philosophy, origin, story, sanctuary, texture, personal, why, mission, backyard, birds, nature]
 related: [groves-vision, wanderers-and-pathfinders, centennial-status]
+lastUpdated: "2026-01-22"
 ---
 
 # Why I Built the Grove

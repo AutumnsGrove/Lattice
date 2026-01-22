@@ -1,3 +1,11 @@
+---
+title: "The Midnight Bloom"
+description: "A vision for Grove's ultimate destination: a physical tea shop where digital and physical community intertwine."
+category: philosophy
+icon: trees
+lastUpdated: "2026-01-22"
+---
+
 # The Midnight Bloom
 
 *A vision for the far horizon*

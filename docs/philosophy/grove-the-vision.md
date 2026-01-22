@@ -1,3 +1,10 @@
+---
+title: "A Vision Document"
+description: "Grove's founding vision for a return to personal expression on the web, free from algorithms and engagement metrics."
+category: philosophy
+icon: trees
+lastUpdated: "2026-01-22"
+---
 
 # *A Vision Document*
 

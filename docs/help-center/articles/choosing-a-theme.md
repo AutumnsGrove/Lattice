@@ -1,12 +1,19 @@
 ---
-title: "Choosing a Theme"
-slug: choosing-a-theme
-category: customization
+title: Choosing a Theme
+description: Customize your blog's appearance with themes and colors
+category: help
+section: customization
+lastUpdated: '2025-12-24'
+keywords:
+  - theme
+  - dark mode
+  - light mode
+  - fonts
+  - appearance
+  - customization
+  - colors
+  - accent
 order: 1
-keywords: [theme, dark mode, light mode, fonts, appearance, customization, colors, accent]
-related: [understanding-the-admin-panel, choosing-your-plan]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Choosing a Theme

@@ -1,3 +1,11 @@
+---
+title: "Competitor Talking Points"
+description: "Ready-made responses for differentiating Grove from competitors like Substack, Ghost, WordPress, Medium, and others."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Competitor Talking Points
 
 *Ready-made responses for "How is Grove different from X?"*

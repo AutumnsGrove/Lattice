@@ -1,14 +1,17 @@
 ---
+title: Press — Image Processing CLI
+description: 'CLI tool for WebP conversion, AI descriptions, and CDN upload'
+category: specs
+specCategory: operations
+icon: stamp
+lastUpdated: '2026-01-06'
 aliases: []
-date created: Monday, January 6th 2026
-date modified: Monday, January 6th 2026
 tags:
   - cli
   - images
   - cdn
   - ai
   - cloudflare-r2
-type: tech-spec
 ---
 
 # Press — Image Processing CLI

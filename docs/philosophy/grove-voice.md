@@ -1,3 +1,9 @@
+---
+title: The Grove Voice
+description: 'Writing guidelines for authentic, warm, human-sounding documentation'
+category: philosophy
+lastUpdated: '2026-01-12'
+---
 # The Grove Voice
 
 > *Write with the warmth of a midnight tea shop and the clarity of good documentation.*

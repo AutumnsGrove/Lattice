@@ -1,12 +1,21 @@
 ---
-title: "Adding Images and Media"
-slug: adding-images-and-media
-category: writing
+title: Adding Images and Media
+description: How to upload and use images in your posts
+category: help
+section: customization
+lastUpdated: '2025-12-24'
+keywords:
+  - images
+  - photos
+  - upload
+  - media
+  - pictures
+  - gif
+  - png
+  - jpeg
+  - webp
+  - cover image
 order: 3
-keywords: [images, photos, upload, media, pictures, gif, png, jpeg, webp, cover image]
-related: [writing-your-first-post, formatting-your-posts]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Adding Images and Media

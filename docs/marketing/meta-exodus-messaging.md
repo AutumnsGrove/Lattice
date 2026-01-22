@@ -1,3 +1,11 @@
+---
+title: "Meta Exodus Messaging"
+description: "Marketing messaging and outreach strategies for LGBTQ+ users leaving Meta platforms after January 2025 policy changes."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Meta Exodus Messaging
 
 *Reaching LGBTQ+ users fleeing Instagram and Facebook after January 2025 policy changes*

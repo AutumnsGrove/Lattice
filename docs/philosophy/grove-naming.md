@@ -1,3 +1,9 @@
+---
+title: The Grove Naming System
+description: The complete philosophy and naming system for the Grove ecosystem
+category: philosophy
+lastUpdated: '2026-01-13'
+---
 # The Grove Naming System
 
 > *A forest of voices. Every Wanderer is a tree in the grove.*

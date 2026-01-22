@@ -1,4 +1,10 @@
 ---
+title: "Gossamer — ASCII Visual Effects"
+description: "A system of 2D ASCII visual effects for Grove's Glass UI, providing warmth and whimsy through character-based ambient backgrounds and image transformations."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Tuesday, January 14th 2026
 date modified: Tuesday, January 14th 2026

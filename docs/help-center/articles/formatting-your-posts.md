@@ -1,12 +1,20 @@
 ---
-title: "Formatting Your Posts"
-slug: formatting-your-posts
-category: writing
+title: Formatting Your Posts
+description: Markdown syntax and formatting options for your writing
+category: help
+section: customization
+lastUpdated: '2025-12-24'
+keywords:
+  - markdown
+  - formatting
+  - bold
+  - italic
+  - links
+  - lists
+  - headers
+  - code
+  - blockquotes
 order: 2
-keywords: [markdown, formatting, bold, italic, links, lists, headers, code, blockquotes]
-related: [writing-your-first-post, adding-images-and-media]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Formatting Your Posts

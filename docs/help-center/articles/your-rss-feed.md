@@ -1,12 +1,19 @@
 ---
-title: "Your RSS Feed"
-slug: your-rss-feed
-category: writing
+title: Your RSS Feed
+description: How to access and use your blog's RSS feed
+category: help
+section: support-resources
+lastUpdated: '2025-12-01'
+keywords:
+  - rss
+  - feed
+  - subscribe
+  - readers
+  - syndication
+  - atom
+  - feedly
+  - rss reader
 order: 7
-keywords: [rss, feed, subscribe, readers, syndication, atom, feedly, rss reader]
-related: [what-is-grove, writing-your-first-post]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Your RSS Feed

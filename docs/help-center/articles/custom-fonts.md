@@ -1,12 +1,20 @@
 ---
-title: "Custom Fonts"
-slug: custom-fonts
-category: customization
+title: Custom Fonts
+description: >-
+  20 curated fonts including accessibility options, with custom upload for
+  Evergreen
+category: help
+section: customization
+lastUpdated: '2026-01-03'
+keywords:
+  - fonts
+  - typography
+  - accessibility
+  - dyslexia
+  - readability
+  - customize
+  - appearance
 order: 4
-keywords: [fonts, typography, accessibility, dyslexia, readability, customize, appearance]
-related: [choosing-a-theme, the-markdown-editor]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Custom Fonts

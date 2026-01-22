@@ -1,3 +1,9 @@
+---
+title: Animation Guide
+description: Subtle animations that create a living world
+category: design
+lastUpdated: '2026-01-18'
+---
 # Animation Guide
 
 > Alive but not distracting — subtle animations that create a living world.

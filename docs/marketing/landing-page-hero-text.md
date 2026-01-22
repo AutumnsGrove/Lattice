@@ -1,3 +1,9 @@
+---
+title: Landing Page Hero Copy
+description: Main headline and body copy for grove.place
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Landing Page Hero Text
 
 > **Purpose**: Main headline/subhead on grove.place

@@ -1,12 +1,22 @@
 ---
-title: "How Grove Protects Your Content from AI Scraping and Archiving"
-slug: how-grove-protects-your-content
-category: data-and-privacy
+title: How Grove Protects Your Content from AI Scraping
+description: 'Shade: Grove''s seven-layer defense against AI crawlers and scrapers'
+category: help
+section: privacy-security
+lastUpdated: '2025-12-25'
+keywords:
+  - ai
+  - scraping
+  - protection
+  - bots
+  - crawlers
+  - privacy
+  - shade
+  - content
+  - training data
+  - archive
+  - wayback machine
 order: 2
-keywords: [ai, scraping, protection, bots, crawlers, privacy, shade, content, training data, archive, wayback machine]
-related: [understanding-your-privacy, what-is-grove, exporting-your-content, centennial-status]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # How Grove Protects Your Content from AI Scraping and Archiving

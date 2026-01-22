@@ -1,3 +1,11 @@
+---
+title: "What the Hell is Autumn Building? (A Non-Coder's Guide)"
+description: "A plain-language explanation of Grove's architecture and technology for non-technical audiences."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # What the Hell is Autumn Building? (A Non-Coder's Guide)
 
 ## The One-Sentence Version

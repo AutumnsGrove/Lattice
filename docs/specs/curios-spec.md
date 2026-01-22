@@ -1,4 +1,10 @@
 ---
+title: "Curios — Cabinet of Wonders"
+description: "Interactive decorations and old-web elements like guestbooks, hit counters, shrines, and custom cursors for personal sites."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Monday, January 13th 2026
 date modified: Monday, January 13th 2026

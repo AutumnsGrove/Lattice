@@ -1,3 +1,11 @@
+---
+title: "Competitive Landscape Analysis"
+description: "Internal analysis of the indie web and alternative blogging market, comparing Grove's positioning against competitors."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Competitive Landscape Analysis
 
 *Internal document for Grove development and positioning*

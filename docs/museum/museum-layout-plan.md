@@ -1,3 +1,11 @@
+---
+title: Museum Layout Plan
+description: The blueprint for the Lattice Museum
+category: exhibit
+exhibitWing: entrance
+icon: layout
+lastUpdated: '2026-01-22'
+---
 # The Lattice Museum: Layout Plan
 
 > *A guided tour through how this forest grows.*

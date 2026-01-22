@@ -1,4 +1,10 @@
 ---
+title: "Wander — First-Person Grove Discovery"
+description: "A first-person immersive walking experience through the Grove forest where users discover other groves as floating terrariums among the trees."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Monday, January 13th 2026
 date modified: Monday, January 13th 2026

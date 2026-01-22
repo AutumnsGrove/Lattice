@@ -1,3 +1,10 @@
+---
+title: Vineyard — Tool Showcase Pattern
+description: Consistent documentation and demo pattern for Grove tools
+category: patterns
+icon: grape
+lastUpdated: '2025-12-30'
+---
 # Vineyard — Tool Showcase Pattern
 
 > *Every vine starts somewhere.*

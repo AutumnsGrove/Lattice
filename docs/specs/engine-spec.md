@@ -1,4 +1,10 @@
 ---
+title: "GroveEngine — Technical Specification (ARCHIVED)"
+description: "Deprecated specification for the original GroveEngine package, now superseded by lattice-spec.md."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Friday, November 21st 2025
 date modified: Wednesday, January 15th 2026

@@ -1,12 +1,23 @@
 ---
-title: "Why Grove is Different: The Algorithm-Free Alternative"
-slug: why-grove-is-different
-category: about
+title: Why Grove is Different
+description: How Grove inverts every manipulation pattern used by algorithmic platforms
+category: help
+section: philosophy-vision
+icon: shield
+lastUpdated: '2026-01-14'
+keywords:
+  - algorithm
+  - twitter
+  - social media
+  - engagement
+  - tracking
+  - privacy
+  - difference
+  - alternative
+  - comparison
+  - manipulation
+  - attention
 order: 2
-keywords: [algorithm, twitter, social media, engagement, tracking, privacy, difference, alternative, comparison, manipulation, attention]
-related: [groves-vision, what-is-grove, how-grove-protects-your-content, understanding-your-privacy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Why Grove is Different

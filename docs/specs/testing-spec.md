@@ -1,4 +1,10 @@
 ---
+title: "Testing Infrastructure Specification"
+description: "Grove's testing strategy, infrastructure, and subagent-optimized patterns for achieving comprehensive test coverage before v1 launch."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Wednesday, January 15th 2026
 date modified: Wednesday, January 15th 2026

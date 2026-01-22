@@ -50,6 +50,48 @@ export type HelpSection =
   | "support-resources"
   | "troubleshooting";
 
+/**
+ * Frontmatter schema for markdown documents.
+ * This is the source of truth for document metadata - lives in each .md file.
+ */
+export interface DocFrontmatter {
+  // === REQUIRED ===
+  /** Document title (e.g., "Heartwood — Centralized Authentication") */
+  title: string;
+  /** Brief description for listings and SEO */
+  description: string;
+  /** Document category */
+  category: DocCategory;
+
+  // === CATEGORY-SPECIFIC (required for that category) ===
+  /** Spec subcategory - required for specs only */
+  specCategory?: SpecCategory;
+  /** Help section - required for help articles only */
+  section?: HelpSection;
+  /** Exhibit wing - required for exhibit docs only */
+  exhibitWing?: ExhibitWing;
+
+  // === OPTIONAL ===
+  /** Lucide icon key (matches keys in toolIcons) */
+  icon?: string;
+  /** Last updated date in ISO format (YYYY-MM-DD) */
+  lastUpdated?: string;
+  /** Related document slugs */
+  related?: string[];
+  /** Search keywords */
+  keywords?: string[];
+  /** Manual sort order (lower = first) */
+  order?: number;
+  /** Set false to hide from listings (default: true) */
+  published?: boolean;
+
+  // === LEGACY (preserved for Obsidian compatibility) ===
+  /** Obsidian aliases */
+  aliases?: string[];
+  /** Obsidian tags */
+  tags?: string[];
+}
+
 /** Base document metadata (used for listings and static data) */
 export interface Doc extends Record<string, unknown> {
   slug: string;
@@ -69,6 +111,10 @@ export interface Doc extends Record<string, unknown> {
   exhibitWing?: ExhibitWing;
   /** Optional array of related article slugs */
   related?: string[];
+  /** Search keywords from frontmatter */
+  keywords?: string[];
+  /** Sort order from frontmatter */
+  order?: number;
 }
 
 /** Header extracted from markdown for table of contents */

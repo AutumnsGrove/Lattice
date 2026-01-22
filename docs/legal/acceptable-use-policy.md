@@ -1,3 +1,9 @@
+---
+title: Acceptable Use Policy
+description: Rules for what content and behavior is allowed on Grove
+category: legal
+lastUpdated: '2026-01-16'
+---
 # Acceptable Use Policy
 
 **Grove Platform**

@@ -1,3 +1,11 @@
+---
+title: "The Journey"
+description: "How Grove evolved from a simple blog idea to a full SaaS platform in under three weeks."
+category: philosophy
+icon: trees
+lastUpdated: "2026-01-22"
+---
+
 # *The Journey*
 
 From 'I Want a Blog' to SaaS Platform

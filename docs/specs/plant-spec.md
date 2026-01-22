@@ -1,12 +1,15 @@
 ---
+title: Plant — Tenant Onboarding
+description: Multi-step onboarding flow for new Grove users
+category: specs
+specCategory: platform-services
+icon: landplot
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Wednesday, January 1st 2026
-date modified: Saturday, January 4th 2026
 tags:
   - onboarding
   - signup
   - user-experience
-type: tech-spec
 ---
 
 ```

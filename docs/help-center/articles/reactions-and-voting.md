@@ -1,12 +1,19 @@
 ---
-title: "Reactions and Voting in Meadow"
-slug: reactions-and-voting
-category: meadow
+title: Reactions and Voting
+description: Understanding emoji reactions and voting on posts
+category: help
+section: community-social
+lastUpdated: '2025-12-01'
+keywords:
+  - meadow
+  - reactions
+  - voting
+  - upvote
+  - downvote
+  - emoji
+  - engagement
+  - community
 order: 3
-keywords: [meadow, reactions, voting, upvote, downvote, emoji, engagement, community]
-related: [what-is-meadow, opting-into-the-feed]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Reactions and Voting in Meadow

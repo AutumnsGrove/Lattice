@@ -1,4 +1,10 @@
 ---
+title: "Vista LoadTest — Sentinel Integration"
+description: "Load testing capabilities for Vista implementing the Sentinel pattern with scenario-based testing, virtual user simulation, and bottleneck detection."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Saturday, January 4th 2026
 date modified: Saturday, January 4th 2026

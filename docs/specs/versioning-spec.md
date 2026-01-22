@@ -1,4 +1,10 @@
 ---
+title: "GroveEngine Versioning Specification"
+description: "Defines the semantic versioning strategy, publishing workflow, and update propagation for GroveEngine npm package releases."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Tuesday, November 26th 2025
 date modified: Saturday, January 4th 2026

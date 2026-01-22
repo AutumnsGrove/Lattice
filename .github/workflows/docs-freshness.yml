@@ -5,11 +5,17 @@ on:
   schedule:
     - cron: '0 9 * * 1'
 
-  # Run on PRs that touch docs
+  # Run on PRs that touch any knowledge base docs
   pull_request:
     paths:
+      - 'docs/specs/**'
       - 'docs/help-center/articles/**'
       - 'docs/legal/**'
+      - 'docs/marketing/**'
+      - 'docs/patterns/**'
+      - 'docs/philosophy/**'
+      - 'docs/design-system/**'
+      - 'docs/museum/**'
 
   # Allow manual trigger
   workflow_dispatch:
@@ -25,95 +31,247 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Check for stale documentation
-        id: check-stale
+      - name: Check knowledge base inventory and freshness
+        id: check-docs
         run: |
           #!/bin/bash
           set -e
 
-          # Configuration
-          STALE_DAYS=90
+          # Configuration from inventory
+          STALE_DAYS=$(jq -r '.freshnessThreshold.staleDays' .github/knowledge-base-inventory.json)
+          WARN_DAYS=$(jq -r '.freshnessThreshold.warnDays' .github/knowledge-base-inventory.json)
+          EXPECTED_TOTAL=$(jq -r '.docs.total' .github/knowledge-base-inventory.json)
+          LAST_INVENTORY=$(jq -r '.lastUpdated' .github/knowledge-base-inventory.json)
           TODAY=$(date +%s)
-          STALE_FILES=""
-          STALE_COUNT=0
+          TODAY_DATE=$(date +%Y-%m-%d)
 
-          echo "🔍 Checking documentation freshness (threshold: ${STALE_DAYS} days)"
+          echo "🔍 Knowledge Base Health Check"
+          echo "=============================="
+          echo "Freshness threshold: ${STALE_DAYS} days"
+          echo "Warning threshold: ${WARN_DAYS} days"
+          echo "Inventory last updated: ${LAST_INVENTORY}"
           echo ""
 
-          # Check all help center articles
-          for file in docs/help-center/articles/*.md; do
-            if [ -f "$file" ]; then
-              # Extract last_verified date from frontmatter
-              VERIFIED_DATE=$(grep -m1 "^last_verified:" "$file" 2>/dev/null | sed 's/last_verified: *//' || echo "")
+          STALE_FILES=""
+          STALE_COUNT=0
+          MISSING_DATE_FILES=""
+          MISSING_DATE_COUNT=0
+          ACTUAL_TOTAL=0
+          CATEGORY_BREAKDOWN=""
 
-              if [ -z "$VERIFIED_DATE" ]; then
-                echo "⚠️  Missing last_verified: $(basename "$file")"
-                STALE_FILES="${STALE_FILES}| $(basename "$file") | Missing | - |\n"
-                STALE_COUNT=$((STALE_COUNT + 1))
+          # Define category paths (matching knowledge-base-inventory.json)
+          declare -A CATEGORY_PATHS
+          CATEGORY_PATHS[specs]="docs/specs"
+          CATEGORY_PATHS[help]="docs/help-center/articles"
+          CATEGORY_PATHS[legal]="docs/legal"
+          CATEGORY_PATHS[marketing]="docs/marketing"
+          CATEGORY_PATHS[patterns]="docs/patterns"
+          CATEGORY_PATHS[philosophy]="docs/philosophy"
+          CATEGORY_PATHS[design]="docs/design-system"
+          CATEGORY_PATHS[exhibit]="docs/museum"
+
+          # Categories that should recurse into subdirectories (must match docs-scanner.ts)
+          RECURSIVE_CATEGORIES="specs"
+
+          # Check each category
+          for category in specs help legal marketing patterns philosophy design exhibit; do
+            DIR_PATH="${CATEGORY_PATHS[$category]}"
+            EXPECTED_CAT=$(jq -r ".docs.breakdown.$category // 0" .github/knowledge-base-inventory.json)
+
+            if [ ! -d "$DIR_PATH" ]; then
+              echo "⚠️  Directory not found: $DIR_PATH"
+              continue
+            fi
+
+            # Determine if this category should recurse
+            if echo "$RECURSIVE_CATEGORIES" | grep -qw "$category"; then
+              FIND_DEPTH=""
+            else
+              FIND_DEPTH="-maxdepth 1"
+            fi
+
+            # Count actual files (respecting recursion setting)
+            ACTUAL_CAT=$(find "$DIR_PATH" $FIND_DEPTH -name "*.md" -type f ! -name "index.md" ! -name "README.md" 2>/dev/null | wc -l | tr -d ' ')
+            ACTUAL_TOTAL=$((ACTUAL_TOTAL + ACTUAL_CAT))
+
+            # Track category breakdown if there's a difference
+            CAT_DIFF=$((ACTUAL_CAT - EXPECTED_CAT))
+            if [ "$CAT_DIFF" -ne 0 ]; then
+              SIGN="+"
+              [ "$CAT_DIFF" -lt 0 ] && SIGN=""
+              CATEGORY_BREAKDOWN="${CATEGORY_BREAKDOWN}| $category | $EXPECTED_CAT | $ACTUAL_CAT | ${SIGN}${CAT_DIFF} |\n"
+            fi
+
+            echo "📂 Checking $category ($ACTUAL_CAT docs)..."
+
+            # Check each file for freshness
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+
+              # Extract lastUpdated from frontmatter (handles both quoted and unquoted dates)
+              LAST_UPDATED=$(grep -m1 "^lastUpdated:" "$file" 2>/dev/null | sed "s/lastUpdated: *['\"]*//" | sed "s/['\"].*$//" || echo "")
+
+              FILENAME=$(basename "$file")
+
+              if [ -z "$LAST_UPDATED" ]; then
+                echo "  ⚠️  Missing lastUpdated: $FILENAME"
+                MISSING_DATE_FILES="${MISSING_DATE_FILES}| $FILENAME | $category | Missing lastUpdated |\n"
+                MISSING_DATE_COUNT=$((MISSING_DATE_COUNT + 1))
                 continue
               fi
 
-              # Convert date to epoch (handle YYYY-MM-DD format)
-              VERIFIED_EPOCH=$(date -d "$VERIFIED_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$VERIFIED_DATE" +%s 2>/dev/null || echo "0")
+              # Convert date to epoch
+              UPDATED_EPOCH=$(date -d "$LAST_UPDATED" +%s 2>/dev/null || echo "0")
 
-              if [ "$VERIFIED_EPOCH" = "0" ]; then
-                echo "⚠️  Invalid date format: $(basename "$file") ($VERIFIED_DATE)"
-                STALE_FILES="${STALE_FILES}| $(basename "$file") | Invalid date | $VERIFIED_DATE |\n"
-                STALE_COUNT=$((STALE_COUNT + 1))
+              if [ "$UPDATED_EPOCH" = "0" ]; then
+                echo "  ⚠️  Invalid date: $FILENAME ($LAST_UPDATED)"
+                MISSING_DATE_FILES="${MISSING_DATE_FILES}| $FILENAME | $category | Invalid: $LAST_UPDATED |\n"
+                MISSING_DATE_COUNT=$((MISSING_DATE_COUNT + 1))
                 continue
               fi
 
-              # Calculate days since verification
-              DAYS_OLD=$(( (TODAY - VERIFIED_EPOCH) / 86400 ))
+              # Calculate days since update
+              DAYS_OLD=$(( (TODAY - UPDATED_EPOCH) / 86400 ))
 
               if [ "$DAYS_OLD" -gt "$STALE_DAYS" ]; then
-                echo "📅 Stale (${DAYS_OLD} days): $(basename "$file")"
-                STALE_FILES="${STALE_FILES}| $(basename "$file") | ${DAYS_OLD} days | $VERIFIED_DATE |\n"
+                echo "  📅 Stale (${DAYS_OLD} days): $FILENAME"
+                STALE_FILES="${STALE_FILES}| $FILENAME | $category | ${DAYS_OLD} days | $LAST_UPDATED |\n"
                 STALE_COUNT=$((STALE_COUNT + 1))
+              elif [ "$DAYS_OLD" -gt "$WARN_DAYS" ]; then
+                echo "  ⏰ Aging (${DAYS_OLD} days): $FILENAME"
               fi
-            fi
+            done < <(find "$DIR_PATH" $FIND_DEPTH -name "*.md" -type f ! -name "index.md" ! -name "README.md" 2>/dev/null)
           done
 
           echo ""
           echo "================================"
+          echo "📊 Summary"
+          echo "================================"
+
+          # Calculate inventory drift
+          TOTAL_DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
+          echo "Total docs: $ACTUAL_TOTAL (expected: $EXPECTED_TOTAL, diff: $TOTAL_DIFF)"
+          echo "Stale docs (>${STALE_DAYS} days): $STALE_COUNT"
+          echo "Missing dates: $MISSING_DATE_COUNT"
+
+          # Set outputs
+          echo "actual_total=$ACTUAL_TOTAL" >> $GITHUB_OUTPUT
+          echo "expected_total=$EXPECTED_TOTAL" >> $GITHUB_OUTPUT
+          echo "total_diff=$TOTAL_DIFF" >> $GITHUB_OUTPUT
+          echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+          echo "missing_date_count=$MISSING_DATE_COUNT" >> $GITHUB_OUTPUT
 
           if [ "$STALE_COUNT" -gt 0 ]; then
-            echo "⚠️  Found $STALE_COUNT stale or problematic articles"
-            echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+            echo "has_stale=true" >> $GITHUB_OUTPUT
             echo "stale_files<<EOF" >> $GITHUB_OUTPUT
             echo -e "$STALE_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
-            echo "has_stale=true" >> $GITHUB_OUTPUT
           else
-            echo "✅ All documentation is fresh!"
             echo "has_stale=false" >> $GITHUB_OUTPUT
-            echo "stale_count=0" >> $GITHUB_OUTPUT
           fi
 
-      - name: Comment on PR (if stale docs found)
-        if: github.event_name == 'pull_request' && steps.check-stale.outputs.has_stale == 'true'
+          if [ "$MISSING_DATE_COUNT" -gt 0 ]; then
+            echo "has_missing_dates=true" >> $GITHUB_OUTPUT
+            echo "missing_date_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$MISSING_DATE_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_missing_dates=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$TOTAL_DIFF" -ne 0 ]; then
+            echo "has_inventory_drift=true" >> $GITHUB_OUTPUT
+            echo "category_breakdown<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$CATEGORY_BREAKDOWN" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_inventory_drift=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Determine if any issues found
+          if [ "$STALE_COUNT" -gt 0 ] || [ "$MISSING_DATE_COUNT" -gt 0 ] || [ "$TOTAL_DIFF" -ne 0 ]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if issues found)
+        if: github.event_name == 'pull_request' && steps.check-docs.outputs.has_issues == 'true'
         uses: actions/github-script@v7
         env:
-          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
-          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+          ACTUAL_TOTAL: ${{ steps.check-docs.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-docs.outputs.expected_total }}
+          TOTAL_DIFF: ${{ steps.check-docs.outputs.total_diff }}
+          STALE_COUNT: ${{ steps.check-docs.outputs.stale_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-docs.outputs.missing_date_count }}
+          HAS_STALE: ${{ steps.check-docs.outputs.has_stale }}
+          HAS_MISSING_DATES: ${{ steps.check-docs.outputs.has_missing_dates }}
+          HAS_INVENTORY_DRIFT: ${{ steps.check-docs.outputs.has_inventory_drift }}
+          STALE_FILES: ${{ steps.check-docs.outputs.stale_files }}
+          MISSING_DATE_FILES: ${{ steps.check-docs.outputs.missing_date_files }}
+          CATEGORY_BREAKDOWN: ${{ steps.check-docs.outputs.category_breakdown }}
         with:
           script: |
+            const actualTotal = process.env.ACTUAL_TOTAL;
+            const expectedTotal = process.env.EXPECTED_TOTAL;
+            const totalDiff = parseInt(process.env.TOTAL_DIFF);
             const staleCount = process.env.STALE_COUNT;
-            const staleFiles = process.env.STALE_FILES;
+            const missingDateCount = process.env.MISSING_DATE_COUNT;
+            const hasStale = process.env.HAS_STALE === 'true';
+            const hasMissingDates = process.env.HAS_MISSING_DATES === 'true';
+            const hasInventoryDrift = process.env.HAS_INVENTORY_DRIFT === 'true';
+            const staleFiles = process.env.STALE_FILES || '';
+            const missingDateFiles = process.env.MISSING_DATE_FILES || '';
+            const categoryBreakdown = process.env.CATEGORY_BREAKDOWN || '';
 
-            const body = `## 📅 Documentation Freshness Check
+            let body = `## 📚 Knowledge Base Health Check\n\n`;
 
-            Found **${staleCount}** article(s) that may need review:
+            // Inventory section
+            if (hasInventoryDrift) {
+              const emoji = totalDiff > 0 ? '📦' : '⚠️';
+              const verb = totalDiff > 0 ? 'added' : 'removed';
+              body += `### ${emoji} Inventory Change Detected\n\n`;
+              body += `This PR appears to have **${verb} ${Math.abs(totalDiff)} doc(s)**.\n\n`;
+              body += `| Metric | Count |\n`;
+              body += `|--------|-------|\n`;
+              body += `| Expected (inventory) | ${expectedTotal} |\n`;
+              body += `| Actual (codebase) | ${actualTotal} |\n`;
+              body += `| Difference | ${totalDiff > 0 ? '+' : ''}${totalDiff} |\n\n`;
 
-            | Article | Status | Last Verified |
-            |---------|--------|---------------|
-            ${staleFiles}
+              if (categoryBreakdown) {
+                body += `**Category Breakdown:**\n`;
+                body += `| Category | Expected | Actual | Diff |\n`;
+                body += `|----------|----------|--------|------|\n`;
+                body += `${categoryBreakdown}\n`;
+              }
 
-            These articles haven't been verified in over 90 days. Consider updating them as part of this PR or creating a follow-up task.
+              body += `Please update \`.github/knowledge-base-inventory.json\` with the new counts.\n\n`;
+            }
 
-            ---
-            *See \`docs/help-center/DOCS-MAINTENANCE.md\` for the quarterly review process.*`;
+            // Missing dates section
+            if (hasMissingDates) {
+              body += `### ⚠️ Missing \`lastUpdated\` Field\n\n`;
+              body += `Found **${missingDateCount}** doc(s) without valid \`lastUpdated\` in frontmatter:\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${missingDateFiles}\n`;
+              body += `Please add \`lastUpdated: YYYY-MM-DD\` to each file's frontmatter.\n\n`;
+            }
+
+            // Stale docs section
+            if (hasStale) {
+              body += `### 📅 Stale Documentation\n\n`;
+              body += `Found **${staleCount}** doc(s) not updated in over 90 days:\n\n`;
+              body += `| File | Category | Age | Last Updated |\n`;
+              body += `|------|----------|-----|-------------|\n`;
+              body += `${staleFiles}\n`;
+              body += `Consider reviewing these docs as part of this PR.\n\n`;
+            }
+
+            body += `---\n*See \`.github/knowledge-base-inventory.json\` for inventory configuration.*`;
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -122,16 +280,23 @@ jobs:
               body: body
             });
 
-      - name: Create issue for stale docs (scheduled run only)
-        if: github.event_name == 'schedule' && steps.check-stale.outputs.has_stale == 'true'
+      - name: Create issue for knowledge base health (scheduled run only)
+        if: github.event_name == 'schedule' && steps.check-docs.outputs.has_issues == 'true'
         uses: actions/github-script@v7
         env:
-          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
-          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+          ACTUAL_TOTAL: ${{ steps.check-docs.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-docs.outputs.expected_total }}
+          TOTAL_DIFF: ${{ steps.check-docs.outputs.total_diff }}
+          STALE_COUNT: ${{ steps.check-docs.outputs.stale_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-docs.outputs.missing_date_count }}
+          HAS_STALE: ${{ steps.check-docs.outputs.has_stale }}
+          HAS_MISSING_DATES: ${{ steps.check-docs.outputs.has_missing_dates }}
+          HAS_INVENTORY_DRIFT: ${{ steps.check-docs.outputs.has_inventory_drift }}
+          STALE_FILES: ${{ steps.check-docs.outputs.stale_files }}
+          MISSING_DATE_FILES: ${{ steps.check-docs.outputs.missing_date_files }}
+          CATEGORY_BREAKDOWN: ${{ steps.check-docs.outputs.category_breakdown }}
         with:
           script: |
-            const staleCount = process.env.STALE_COUNT;
-            const staleFiles = process.env.STALE_FILES;
             const today = new Date().toISOString().split('T')[0];
 
             // Check if there's already an open issue for this
@@ -143,60 +308,115 @@ jobs:
             });
 
             const hasExisting = existingIssues.data.some(issue =>
-              issue.title.includes('Documentation Freshness Review')
+              issue.title.includes('Knowledge Base Health')
             );
 
             if (hasExisting) {
-              console.log('Existing freshness review issue found, skipping creation');
+              console.log('Existing knowledge base health issue found, skipping creation');
               return;
             }
 
-            const body = `## 📅 Quarterly Documentation Review Needed
+            const actualTotal = process.env.ACTUAL_TOTAL;
+            const expectedTotal = process.env.EXPECTED_TOTAL;
+            const totalDiff = parseInt(process.env.TOTAL_DIFF);
+            const staleCount = process.env.STALE_COUNT;
+            const missingDateCount = process.env.MISSING_DATE_COUNT;
+            const hasStale = process.env.HAS_STALE === 'true';
+            const hasMissingDates = process.env.HAS_MISSING_DATES === 'true';
+            const hasInventoryDrift = process.env.HAS_INVENTORY_DRIFT === 'true';
+            const staleFiles = process.env.STALE_FILES || '';
+            const missingDateFiles = process.env.MISSING_DATE_FILES || '';
+            const categoryBreakdown = process.env.CATEGORY_BREAKDOWN || '';
 
-            The automated freshness check found **${staleCount}** article(s) that haven't been verified in over 90 days:
+            let body = `## 📚 Weekly Knowledge Base Health Report\n\n`;
+            body += `| Metric | Value |\n`;
+            body += `|--------|-------|\n`;
+            body += `| Total Docs | ${actualTotal} |\n`;
+            body += `| Expected (inventory) | ${expectedTotal} |\n`;
+            body += `| Stale (>90 days) | ${staleCount} |\n`;
+            body += `| Missing Dates | ${missingDateCount} |\n\n`;
 
-            | Article | Status | Last Verified |
-            |---------|--------|---------------|
-            ${staleFiles}
+            if (hasInventoryDrift) {
+              body += `### 📦 Inventory Drift\n\n`;
+              body += `| Category | Expected | Actual | Diff |\n`;
+              body += `|----------|----------|--------|------|\n`;
+              body += `${categoryBreakdown}\n`;
+              body += `Update \`.github/knowledge-base-inventory.json\` to match.\n\n`;
+            }
 
-            ### Review Process
+            if (hasMissingDates) {
+              body += `### ⚠️ Missing Dates\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${missingDateFiles}\n\n`;
+            }
 
-            1. Open each article and verify content matches current implementation
-            2. Check against source of truth files (see \`DOCS-MAINTENANCE.md\`)
-            3. Update \`last_verified\` date in frontmatter when done
-            4. Close this issue when all articles are reviewed
+            if (hasStale) {
+              body += `### 📅 Stale Documentation\n\n`;
+              body += `| File | Category | Age | Last Updated |\n`;
+              body += `|------|----------|-----|-------------|\n`;
+              body += `${staleFiles}\n\n`;
+            }
 
-            ### Source of Truth Files
-
-            - Tier limits: \`packages/engine/src/lib/config/tiers.ts\`
-            - Fonts: \`packages/engine/src/lib/config/presets.ts\`
-            - Admin navigation: \`packages/engine/src/routes/admin/+layout.svelte\`
-
-            ---
-            *This issue was automatically created by the docs-freshness workflow.*`;
+            body += `---\n*This issue was automatically created by the docs-freshness workflow.*`;
 
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `📅 Documentation Freshness Review - ${today}`,
+              title: `📚 Knowledge Base Health Check - ${today}`,
               body: body,
               labels: ['documentation', 'maintenance']
             });
 
       - name: Summary
         env:
-          HAS_STALE: ${{ steps.check-stale.outputs.has_stale }}
-          STALE_COUNT: ${{ steps.check-stale.outputs.stale_count }}
-          STALE_FILES: ${{ steps.check-stale.outputs.stale_files }}
+          HAS_ISSUES: ${{ steps.check-docs.outputs.has_issues }}
+          ACTUAL_TOTAL: ${{ steps.check-docs.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-docs.outputs.expected_total }}
+          TOTAL_DIFF: ${{ steps.check-docs.outputs.total_diff }}
+          STALE_COUNT: ${{ steps.check-docs.outputs.stale_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-docs.outputs.missing_date_count }}
+          STALE_FILES: ${{ steps.check-docs.outputs.stale_files }}
+          MISSING_DATE_FILES: ${{ steps.check-docs.outputs.missing_date_files }}
+          CATEGORY_BREAKDOWN: ${{ steps.check-docs.outputs.category_breakdown }}
         run: |
-          echo "## Documentation Freshness Check" >> $GITHUB_STEP_SUMMARY
+          echo "## 📚 Knowledge Base Health Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "$HAS_STALE" = "true" ]; then
-            echo "⚠️ Found **$STALE_COUNT** stale articles" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Article | Status | Last Verified |" >> $GITHUB_STEP_SUMMARY
-            echo "|---------|--------|---------------|" >> $GITHUB_STEP_SUMMARY
-            echo -e "$STALE_FILES" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Docs | $ACTUAL_TOTAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Expected (inventory) | $EXPECTED_TOTAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Inventory Diff | $TOTAL_DIFF |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stale (>90 days) | $STALE_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Missing Dates | $MISSING_DATE_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_ISSUES" = "true" ]; then
+            echo "⚠️ **Issues found - see details above**" >> $GITHUB_STEP_SUMMARY
+
+            if [ -n "$CATEGORY_BREAKDOWN" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Category Breakdown" >> $GITHUB_STEP_SUMMARY
+              echo "| Category | Expected | Actual | Diff |" >> $GITHUB_STEP_SUMMARY
+              echo "|----------|----------|--------|------|" >> $GITHUB_STEP_SUMMARY
+              echo -e "$CATEGORY_BREAKDOWN" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            if [ -n "$MISSING_DATE_FILES" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Missing Dates" >> $GITHUB_STEP_SUMMARY
+              echo "| File | Category | Issue |" >> $GITHUB_STEP_SUMMARY
+              echo "|------|----------|-------|" >> $GITHUB_STEP_SUMMARY
+              echo -e "$MISSING_DATE_FILES" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            if [ -n "$STALE_FILES" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Stale Documentation" >> $GITHUB_STEP_SUMMARY
+              echo "| File | Category | Age | Last Updated |" >> $GITHUB_STEP_SUMMARY
+              echo "|------|----------|-----|--------------|" >> $GITHUB_STEP_SUMMARY
+              echo -e "$STALE_FILES" >> $GITHUB_STEP_SUMMARY
+            fi
           else
-            echo "✅ All documentation is fresh (verified within 90 days)" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All documentation is healthy!" >> $GITHUB_STEP_SUMMARY
           fi

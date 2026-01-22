@@ -1,12 +1,20 @@
 ---
-title: "My Site Isn't Loading"
-slug: my-site-isnt-loading
-category: troubleshooting
+title: My Site Isn
+description: Troubleshooting steps for when your blog won't load
+category: help
+section: troubleshooting
+lastUpdated: '2025-12-01'
+keywords:
+  - not loading
+  - down
+  - broken
+  - error
+  - 404
+  - 500
+  - can't access
+  - offline
+  - site down
 order: 1
-keywords: [not loading, down, broken, error, 404, 500, can't access, offline, site down]
-related: [checking-grove-status, contact-support]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # My Site Isn't Loading

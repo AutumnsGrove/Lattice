@@ -1,16 +1,21 @@
 ---
-aliases:
-date created: Wednesday, January 15th 2026
-date modified: Wednesday, January 15th 2026
-tags:
-type: help-article
-category: getting-started
+title: Wanderers and Pathfinders
+description: >-
+  Learn about Grove's community identity system - Wanderers, Rooted,
+  Pathfinders, and the Wayfinder
+category: help
+section: community-social
+lastUpdated: '2026-01-15'
+keywords:
+  - wanderer
+  - pathfinder
+  - wayfinder
+  - rooted
+  - community
+  - identity
+  - member
+  - user
 order: 2
-description: Learn about Grove's community identity system - Wanderers, Rooted, Pathfinders, and the Wayfinder
-keywords: [wanderer, pathfinder, wayfinder, rooted, community, identity, member, user]
-related: [what-is-grove, what-is-meadow, groves-vision]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Wanderers and Pathfinders

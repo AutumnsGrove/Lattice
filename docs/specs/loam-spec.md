@@ -1,13 +1,16 @@
 ---
+title: Loam — Name Protection
+description: Username and domain validation system protecting the grove from harm
+category: specs
+specCategory: platform-services
+icon: funnel
+lastUpdated: '2026-01-07'
 aliases: []
-date created: Tuesday, January 7th 2026
-date modified: Tuesday, January 7th 2026
 tags:
   - name-protection
   - validation
   - security
   - content-moderation
-type: tech-spec
 ---
 
 # Loam — Name Protection

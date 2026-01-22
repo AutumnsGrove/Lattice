@@ -1,12 +1,17 @@
 ---
-title: "Contacting Support"
-slug: contact-support
-category: troubleshooting
+title: Contacting Support
+description: How to reach a real person when you need help
+category: help
+section: support-resources
+lastUpdated: '2025-12-24'
+keywords:
+  - support
+  - help
+  - contact
+  - email
+  - response time
+  - assistance
 order: 10
-keywords: [support, help, contact, email, response time, assistance]
-related: [my-site-isnt-loading, choosing-your-plan, understanding-your-privacy]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Contacting Support

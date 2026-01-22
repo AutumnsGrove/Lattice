@@ -1,3 +1,9 @@
+---
+title: Icon Standards
+description: Comprehensive guide to icon usage and composition in Grove
+category: design
+lastUpdated: '2026-01-12'
+---
 # Grove Icon Standards
 
 > Standards for icon usage across all Grove properties. Single source of truth for semantic icon selection and implementation patterns.

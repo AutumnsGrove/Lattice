@@ -1,3 +1,11 @@
+---
+title: "Grove Project Icon Standardization"
+description: "The definitive registry of Lucide icons used across all Grove projects, with mappings and usage patterns."
+category: design
+icon: palette
+lastUpdated: "2026-01-22"
+---
+
 # Grove Project Icon Standardization - Final Summary
 
 ## Source of Truth

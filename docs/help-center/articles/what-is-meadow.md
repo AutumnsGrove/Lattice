@@ -1,12 +1,19 @@
 ---
-title: "What is Meadow?"
-slug: what-is-meadow
-category: features
+title: What is Meadow?
+description: Grove's community feed for discovering and sharing posts
+category: help
+section: support-resources
+lastUpdated: '2025-12-24'
+keywords:
+  - meadow
+  - community
+  - feed
+  - social
+  - reactions
+  - replies
+  - sharing
+  - discovery
 order: 5
-keywords: [meadow, community, feed, social, reactions, replies, sharing, discovery]
-related: [understanding-your-privacy, choosing-your-plan, writing-your-first-post]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # What is Meadow?

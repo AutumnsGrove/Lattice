@@ -1,13 +1,16 @@
 ---
+title: Vista — Infrastructure Monitoring
+description: 'Real-time metrics, historical data, alerting, and cost tracking'
+category: specs
+specCategory: operations
+icon: binoculars
+lastUpdated: '2026-01-04'
 aliases: []
-date created: Wednesday, December 31st 2025
-date modified: Saturday, January 4th 2026
 tags:
   - monitoring
   - infrastructure
   - cloudflare-workers
   - observability
-type: tech-spec
 ---
 
 # Vista — Infrastructure Monitoring

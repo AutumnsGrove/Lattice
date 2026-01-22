@@ -1,13 +1,18 @@
 ---
+title: Grafts — Feature Customization
+description: >-
+  Per-tenant feature customization with boolean flags, percentage rollouts, and
+  A/B variants
+category: specs
+specCategory: core-infrastructure
+icon: flag
+lastUpdated: '2026-01-20'
 aliases: []
-date created: Monday, January 20th 2026
-date modified: Monday, January 20th 2026
 tags:
   - feature-flags
   - ui-components
   - configuration
   - cloudflare-workers
-type: tech-spec
 ---
 
 # Grafts — Feature Customization

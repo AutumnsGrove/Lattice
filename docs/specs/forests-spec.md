@@ -1,4 +1,10 @@
 ---
+title: "Forests — Community Groves"
+description: "Themed community aggregators inspired by GeoCities neighborhoods, enabling discovery through self-selected interest-based groups."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Monday, January 13th 2026
 date modified: Monday, January 13th 2026

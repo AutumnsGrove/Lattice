@@ -1,3 +1,9 @@
+---
+title: Hacker News Post
+description: Show HN submission draft
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Hacker News: Show HN Post
 
 > **Purpose**: Hacker News Show HN submission

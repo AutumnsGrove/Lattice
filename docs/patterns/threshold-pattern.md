@@ -1,3 +1,12 @@
+---
+title: Threshold — Rate Limiting & Abuse Prevention
+description: >-
+  Layered rate limiting with Durable Objects for precise per-user, per-tenant,
+  and per-endpoint limits
+category: patterns
+icon: gauge
+lastUpdated: '2026-01-01'
+---
 # Threshold Pattern
 
 # Threshold: Rate Limiting & Abuse Prevention

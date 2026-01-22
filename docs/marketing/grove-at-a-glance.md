@@ -1,3 +1,9 @@
+---
+title: Grove at a Glance
+description: A 30-second overview of what Grove is and why it matters
+category: marketing
+lastUpdated: '2025-12-30'
+---
 # Grove at a Glance
 
 **What is Grove?**

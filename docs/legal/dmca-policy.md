@@ -1,3 +1,9 @@
+---
+title: DMCA Policy
+description: How to report copyright infringement on Grove
+category: legal
+lastUpdated: '2026-01-16'
+---
 # DMCA Policy
 
 **Grove Platform**

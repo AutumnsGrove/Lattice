@@ -1,3 +1,9 @@
+---
+title: Privacy Policy
+description: 'How we collect, use, and protect your data'
+category: legal
+lastUpdated: '2026-01-16'
+---
 # Privacy Policy
 
 **Grove Platform**

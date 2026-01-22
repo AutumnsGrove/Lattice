@@ -1,3 +1,11 @@
+---
+title: "Social Media Strategy"
+description: "Strategic guide for establishing Grove's presence on external platforms with minimal time investment."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Social Media Strategy
 
 > **Purpose**: Guide for establishing Grove's presence on external platforms

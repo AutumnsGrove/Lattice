@@ -1,3 +1,9 @@
+---
+title: Business Card Specification
+description: Print-ready design spec for Grove business cards
+category: marketing
+lastUpdated: '2026-01-02'
+---
 # Grove Business Card Specification
 
 *Created: January 2026*

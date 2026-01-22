@@ -1,7 +1,11 @@
 ---
 title: "Sessions & Cookies: What You Need to Know"
+description: "How Grove uses session cookies to keep you logged in and what happens when you delete or block them."
+category: help
+section: "privacy-security"
+icon: helpcircle
+lastUpdated: "2026-01-22"
 slug: sessions-and-cookies
-category: data-and-privacy
 order: 2
 keywords: [cookies, session, login, privacy, logout, browser, security, devices]
 related: [understanding-your-privacy, account-deletion]

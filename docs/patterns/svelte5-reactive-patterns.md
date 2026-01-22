@@ -1,3 +1,11 @@
+---
+title: "Svelte 5 Reactive Patterns"
+description: "A guide to reactive patterns ($derived, $state, $effect, untrack) used across the GroveEngine codebase."
+category: patterns
+icon: pyramid
+lastUpdated: "2026-01-22"
+---
+
 # Svelte 5 Reactive Patterns
 
 This document explains the reactive patterns used across the GroveEngine codebase and when to use each one.

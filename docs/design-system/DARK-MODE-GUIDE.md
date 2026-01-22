@@ -1,3 +1,9 @@
+---
+title: Dark Mode Guide
+description: Nature at night—dark mode philosophy and implementation
+category: design
+lastUpdated: '2026-01-18'
+---
 # Dark Mode Guide
 
 > "Nature at night" - Dark mode that maintains warmth and character.

@@ -1,14 +1,16 @@
 ---
+title: Heartwood — Centralized Authentication
+description: One identity across all Grove properties with Google OAuth and magic links
+category: specs
+specCategory: platform-services
+icon: shieldcheck
+lastUpdated: '2026-01-04'
 aliases: []
-date created: Monday, December 15th 2025
-date modified: Saturday, January 4th 2026
-source: https://github.com/AutumnsGrove/GroveAuth/blob/main/GROVEAUTH_SPEC.md
 tags:
   - authentication
   - security
   - cloudflare-workers
   - oauth
-type: tech-spec
 ---
 
 # Heartwood (GroveAuth) - Centralized Authentication Service

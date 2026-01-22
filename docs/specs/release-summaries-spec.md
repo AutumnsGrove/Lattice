@@ -1,4 +1,10 @@
 ---
+title: "Release Summaries — Automated LLM Generation"
+description: "Automated generation of meaningful release summaries using LLM analysis of git commits for display on the public roadmap."
+category: specs
+specCategory: "reference"
+icon: filecode
+lastUpdated: "2026-01-22"
 aliases: []
 date created: Tuesday, January 7th 2026
 date modified: Tuesday, January 7th 2026

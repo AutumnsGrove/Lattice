@@ -1,3 +1,10 @@
+---
+title: Loom — Real-Time Coordination
+description: 'Cloudflare Durable Objects for auth, scaling, and real-time features'
+category: patterns
+icon: spool
+lastUpdated: '2026-01-01'
+---
 # Loom: Real-Time Coordination
 
 > *The framework where Grove's threads come together.*

@@ -1,12 +1,19 @@
 ---
-title: "Understanding Your Plan"
-slug: understanding-your-plan
-category: billing
+title: Understanding Your Plan
+description: What's included in each Grove plan and how limits work
+category: help
+section: account-billing
+lastUpdated: '2026-01-03'
+keywords:
+  - plan
+  - limits
+  - features
+  - storage
+  - posts
+  - what's included
+  - subscription
+  - tier
 order: 1
-keywords: [plan, limits, features, storage, posts, what's included, subscription, tier]
-related: [choosing-your-plan, upgrading-or-downgrading, centennial-status]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Understanding Your Plan

@@ -1,12 +1,15 @@
 ---
+title: Foliage — Theme System
+description: Customizable themes and visual customization options
+category: specs
+specCategory: platform-services
+icon: swatchbook
+lastUpdated: '2025-12-01'
 aliases: []
-date created: Saturday, January 4th 2026
-date modified: Saturday, January 4th 2026
 tags:
   - themes
   - customization
   - svelte
-type: tech-spec
 ---
 
 # Foliage — Theme System

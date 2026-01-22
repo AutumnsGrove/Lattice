@@ -1,3 +1,11 @@
+---
+title: "Personal Blog Post: Writing Prompts"
+description: "Writing prompts and structure suggestions for Autumn's personal 'Why Grove Exists' blog post."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Personal Blog Post: Writing Prompts
 
 > **Purpose**: Prompts and starting points for YOUR "Why Grove Exists" post

@@ -1,14 +1,19 @@
 ---
+title: Petal — Image Content Moderation
+description: >-
+  Privacy-first image moderation with four layers of protection and zero data
+  retention
+category: specs
+specCategory: content-community
+icon: fan
+lastUpdated: '2026-01-20'
 aliases: []
-date created: Monday, January 20th 2026
-date modified: Monday, January 20th 2026
 tags:
   - content-moderation
   - privacy
   - cloudflare-workers
   - ai
   - image-safety
-type: tech-spec
 ---
 
 # Petal — Image Content Moderation

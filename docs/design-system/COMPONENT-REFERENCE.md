@@ -1,3 +1,9 @@
+---
+title: Component Reference
+description: Complete catalog of Grove's 185 UI components
+category: design
+lastUpdated: '2026-01-18'
+---
 # Component Reference
 
 > 185 components organized by category, ready to help you build something beautiful.

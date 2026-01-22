@@ -1,3 +1,11 @@
+---
+title: "Grove Promo Video Concept"
+description: "Storyboard and creative direction for a 30-60 second promotional video using AI video generation tools."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Grove Promo Video Concept
 
 A 30-60 second teaser video for grove.place, designed to be generated with AI video tools.

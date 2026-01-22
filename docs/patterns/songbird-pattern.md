@@ -1,3 +1,10 @@
+---
+title: Songbird — Prompt Injection Protection
+description: Three-layer defense system against prompt injection attacks
+category: patterns
+icon: bird
+lastUpdated: '2026-01-01'
+---
 # Songbird: Prompt Injection Protection
 
 > *Three birds, three layers, one defense.*

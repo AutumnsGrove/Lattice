@@ -1,3 +1,11 @@
+---
+title: "Cohost Refugee Messaging"
+description: "Messaging strategy for reaching displaced Cohost users who lost their community platform in January 2025."
+category: marketing
+icon: megaphone
+lastUpdated: "2026-01-22"
+---
+
 # Cohost Refugee Messaging
 
 *Reaching the displaced community from "the last meaningful refuge of the queer internet"*

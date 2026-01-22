@@ -1,3 +1,9 @@
+---
+title: Spacing System
+description: 4px base unit system and component spacing patterns
+category: design
+lastUpdated: '2026-01-18'
+---
 # Spacing System
 
 > Consistent spacing creates visual rhythm and hierarchy—like the natural intervals between trees in a forest.

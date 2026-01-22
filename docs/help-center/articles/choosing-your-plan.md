@@ -1,12 +1,21 @@
 ---
-title: "Choosing Your Plan"
-slug: choosing-your-plan
-category: getting-started
+title: Choosing Your Plan
+description: Understanding Grove's pricing tiers and features
+category: help
+section: getting-started
+lastUpdated: '2025-12-01'
+keywords:
+  - plan
+  - pricing
+  - tier
+  - seedling
+  - sapling
+  - oak
+  - evergreen
+  - free
+  - upgrade
+  - subscription
 order: 2
-keywords: [plan, pricing, tier, seedling, sapling, oak, evergreen, free, upgrade, subscription]
-related: [what-is-grove, upgrading-or-downgrading, centennial-status]
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Choosing Your Plan

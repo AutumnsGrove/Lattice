@@ -6,6 +6,7 @@ order: 2
 description: What I believe. A personal declaration of values for the quiet corners of the internet.
 keywords: [manifesto, philosophy, values, beliefs, mission, why, solarpunk, ownership, queer, community]
 related: [groves-vision, why-i-built-the-grove, what-is-solarpunk, centennial-status]
+lastUpdated: "2026-01-22"
 ---
 
 # What I Believe

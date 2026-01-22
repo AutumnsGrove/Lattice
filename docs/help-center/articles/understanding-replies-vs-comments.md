@@ -1,12 +1,18 @@
 ---
-title: "Understanding Replies vs. Comments"
-slug: understanding-replies-vs-comments
-category: comments
+title: Understanding Replies vs Comments
+description: The difference between private replies and public comments
+category: help
+section: community-social
+lastUpdated: '2025-12-01'
+keywords:
+  - comments
+  - replies
+  - private
+  - public
+  - moderation
+  - feedback
+  - readers
 order: 1
-keywords: [comments, replies, private, public, moderation, feedback, readers]
-related: []
-last_verified: 2026-01-16
-verified_by: claude
 ---
 
 # Understanding Replies vs. Comments
