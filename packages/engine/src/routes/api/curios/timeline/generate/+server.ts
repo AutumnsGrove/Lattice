@@ -47,16 +47,22 @@ interface ConfigRow {
   owner_name: string | null;
 }
 
-interface GitHubCommit {
+interface GitHubRepo {
+  name: string;
+  full_name: string;
+  fork: boolean;
+  pushed_at: string;
+}
+
+interface GitHubCommitDetail {
   sha: string;
   commit: {
     message: string;
     author: {
       date: string;
+      name: string;
+      email: string;
     };
-  };
-  repository?: {
-    name: string;
   };
   stats?: {
     additions: number;
@@ -143,13 +149,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   try {
-    // Fetch commits from GitHub
+    // Fetch commits from GitHub (uses Commits API, with fast path from backfill data)
     const commits = await fetchGitHubCommits(
       config.github_username,
       githubToken,
       targetDate,
       config.repos_include ? JSON.parse(config.repos_include) : null,
       config.repos_exclude ? JSON.parse(config.repos_exclude) : null,
+      db,
+      tenantId,
     );
 
     if (commits.length === 0) {
@@ -426,7 +434,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 };
 
 /**
- * Fetch commits from GitHub for a specific date.
+ * Fetch commits from GitHub for a specific date using the Commits API.
+ *
+ * Uses a two-tier strategy:
+ * 1. Fast path: If timeline_activity has repos_active for this date (from backfill),
+ *    use those repos directly — skips GitHub repo discovery.
+ * 2. Slow path: Discover repos via /users/{username}/repos, then query each.
  */
 async function fetchGitHubCommits(
   username: string,
@@ -434,14 +447,86 @@ async function fetchGitHubCommits(
   date: string,
   includeRepos: string[] | null,
   excludeRepos: string[] | null,
+  db: D1Database,
+  tenantId: string,
 ): Promise<Commit[]> {
-  // Calculate date range (full day in UTC)
-  const startDate = new Date(`${date}T00:00:00Z`);
-  const endDate = new Date(`${date}T23:59:59Z`);
+  let repoFullNames: string[] = [];
 
-  // Fetch user's events from GitHub
+  // Fast path: check if backfill already recorded which repos had activity
+  try {
+    const activity = await db
+      .prepare(
+        `SELECT repos_active FROM timeline_activity
+         WHERE tenant_id = ? AND activity_date = ?`,
+      )
+      .bind(tenantId, date)
+      .first<{ repos_active: string }>();
+
+    if (activity?.repos_active) {
+      const repoNames = JSON.parse(activity.repos_active) as string[];
+      // repos_active stores short names; we need full_name (owner/repo)
+      repoFullNames = repoNames.map((name) => `${username}/${name}`);
+      console.log(
+        `Fast path: using ${repoFullNames.length} repos from backfill data`,
+      );
+    }
+  } catch {
+    // Non-fatal: fall through to slow path
+  }
+
+  // Slow path: discover repos from GitHub API
+  if (repoFullNames.length === 0) {
+    const repos = await fetchUserRepos(
+      username,
+      token,
+      includeRepos,
+      excludeRepos,
+    );
+    repoFullNames = repos.map((r) => r.full_name);
+    console.log(
+      `Slow path: discovered ${repoFullNames.length} repos from GitHub API`,
+    );
+  }
+
+  // Fetch commits from each repo for the target date
+  const allCommits: Commit[] = [];
+
+  for (const repoFullName of repoFullNames) {
+    const repoName = repoFullName.split("/")[1];
+
+    // Apply include/exclude filters (fast path repos may not be filtered yet)
+    if (includeRepos && !includeRepos.includes(repoName)) continue;
+    if (excludeRepos && excludeRepos.includes(repoName)) continue;
+
+    const repoCommits = await fetchRepoCommitsForDate(
+      repoFullName,
+      username,
+      token,
+      date,
+    );
+    allCommits.push(...repoCommits);
+
+    // Rate limit between repos
+    if (repoFullNames.length > 1) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+
+  return allCommits;
+}
+
+/**
+ * Fetch user's repositories, filtered by include/exclude lists.
+ * No repo limit since generate processes a single day only.
+ */
+async function fetchUserRepos(
+  username: string,
+  token: string,
+  includeRepos: string[] | null,
+  excludeRepos: string[] | null,
+): Promise<GitHubRepo[]> {
   const response = await fetch(
-    `https://api.github.com/users/${username}/events?per_page=100`,
+    `https://api.github.com/users/${username}/repos?per_page=100&sort=pushed&type=owner`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -452,49 +537,96 @@ async function fetchGitHubCommits(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`GitHub API error: ${response.status} - ${errorText}`);
+    throw new Error(`Failed to fetch repos: ${response.status}`);
   }
 
-  const events = (await response.json()) as Array<{
-    type: string;
-    created_at: string;
-    repo: { name: string };
-    payload: {
-      commits?: Array<{
-        sha: string;
-        message: string;
-      }>;
-    };
-  }>;
+  let repos = (await response.json()) as GitHubRepo[];
 
-  // Filter for PushEvents on the target date
+  // Filter by include/exclude
+  if (includeRepos) {
+    repos = repos.filter((r) => includeRepos.includes(r.name));
+  }
+  if (excludeRepos) {
+    repos = repos.filter((r) => !excludeRepos.includes(r.name));
+  }
+
+  // Exclude forks by default
+  repos = repos.filter((r) => !r.fork);
+
+  return repos;
+}
+
+/**
+ * Fetch commits for a specific repo on a single date.
+ * Uses the Commits API which has no 90-day limit.
+ */
+async function fetchRepoCommitsForDate(
+  repoFullName: string,
+  authorUsername: string,
+  token: string,
+  date: string,
+): Promise<Commit[]> {
   const commits: Commit[] = [];
+  let page = 1;
+  const perPage = 100;
 
-  for (const event of events) {
-    if (event.type !== "PushEvent") continue;
+  const sinceDate = `${date}T00:00:00Z`;
+  const untilDate = `${date}T23:59:59Z`;
 
-    const eventDate = new Date(event.created_at);
-    if (eventDate < startDate || eventDate > endDate) continue;
+  while (true) {
+    const url = new URL(`https://api.github.com/repos/${repoFullName}/commits`);
+    url.searchParams.set("author", authorUsername);
+    url.searchParams.set("since", sinceDate);
+    url.searchParams.set("until", untilDate);
+    url.searchParams.set("per_page", String(perPage));
+    url.searchParams.set("page", String(page));
 
-    const repoName = event.repo.name.split("/")[1]; // Remove owner prefix
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "GroveEngine-Timeline-Curio",
+      },
+    });
 
-    // Check include/exclude filters
-    if (includeRepos && !includeRepos.includes(repoName)) continue;
-    if (excludeRepos && excludeRepos.includes(repoName)) continue;
+    if (!response.ok) {
+      if (response.status === 409) {
+        // Empty repository
+        break;
+      }
+      console.warn(
+        `Failed to fetch commits for ${repoFullName}: ${response.status}`,
+      );
+      break;
+    }
 
-    // Extract commits from the push event
-    for (const commit of event.payload.commits ?? []) {
+    const pageCommits = (await response.json()) as GitHubCommitDetail[];
+
+    if (pageCommits.length === 0) {
+      break;
+    }
+
+    const repoName = repoFullName.split("/")[1];
+
+    for (const commit of pageCommits) {
       commits.push({
         sha: commit.sha,
-        message: commit.message,
+        message: commit.commit.message,
         repo: repoName,
-        timestamp: event.created_at,
-        // Note: Would need additional API calls for additions/deletions
+        timestamp: commit.commit.author.date,
         additions: 0,
         deletions: 0,
       });
     }
+
+    if (pageCommits.length < perPage) {
+      break;
+    }
+
+    page++;
+
+    // Rate limit between pages
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   return commits;
