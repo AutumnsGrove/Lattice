@@ -19,6 +19,8 @@ interface TimelineSummaryRow {
   repos_active: string | null;
   total_additions: number;
   total_deletions: number;
+  detected_focus: string | null;
+  focus_streak: number | null;
   voice_preset: string | null;
   created_at: number;
 }
@@ -63,6 +65,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       repos_active,
       total_additions,
       total_deletions,
+      detected_focus,
+      focus_streak,
       voice_preset,
       created_at
     FROM timeline_summaries
@@ -108,16 +112,16 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   // Transform results
   const summaries = results.results.map((row) => ({
     id: row.id,
-    date: row.summary_date,
-    briefSummary: row.brief_summary,
-    detailedTimeline: row.detailed_timeline,
-    gutterContent: row.gutter_content ? JSON.parse(row.gutter_content) : null,
-    commitCount: row.commit_count,
-    reposActive: row.repos_active ? JSON.parse(row.repos_active) : [],
-    totalAdditions: row.total_additions,
-    totalDeletions: row.total_deletions,
-    voicePreset: row.voice_preset,
-    createdAt: row.created_at,
+    summary_date: row.summary_date,
+    brief_summary: row.brief_summary,
+    detailed_timeline: row.detailed_timeline,
+    gutter_content: row.gutter_content ? JSON.parse(row.gutter_content) : null,
+    commit_count: row.commit_count,
+    repos_active: row.repos_active ? JSON.parse(row.repos_active) : [],
+    total_additions: row.total_additions,
+    total_deletions: row.total_deletions,
+    detected_focus: row.detected_focus ? JSON.parse(row.detected_focus) : null,
+    focus_streak: row.focus_streak,
   }));
 
   return json({
