@@ -205,7 +205,8 @@ describe("ContentSearch Component", () => {
     });
   });
 
-  // Use real timers with short delays - Svelte 5's $effect() doesn't work well with fake timers
+  // Use real timers with wide margins - Svelte 5's $effect() doesn't work with fake timers.
+  // Delays are set large enough that CI/event-loop pressure can't cause false failures.
   describe("Debouncing", () => {
     it("should debounce search input", async () => {
       const onSearchChange = vi.fn();
@@ -215,7 +216,7 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
-          debounceDelay: 20, // Short delay for testing
+          debounceDelay: 100,
         },
       });
 
@@ -229,8 +230,8 @@ describe("ContentSearch Component", () => {
       // Should not call immediately (before debounce completes)
       expect(onSearchChange).not.toHaveBeenCalled();
 
-      // Wait for debounce + buffer
-      await new Promise((r) => setTimeout(r, 50));
+      // Wait for debounce + generous buffer
+      await new Promise((r) => setTimeout(r, 200));
       await tick();
 
       expect(onSearchChange).toHaveBeenCalledWith("java", expect.any(Array));
@@ -244,7 +245,7 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
-          debounceDelay: 50, // Measurable delay
+          debounceDelay: 200,
         },
       });
 
@@ -255,12 +256,12 @@ describe("ContentSearch Component", () => {
       const input = screen.getByRole("searchbox");
       await fireEvent.input(input, { target: { value: "test" } });
 
-      // Wait less than debounce delay - should not be called yet
-      await new Promise((r) => setTimeout(r, 20));
+      // Check well before debounce fires (10ms vs 200ms delay = 190ms margin)
+      await new Promise((r) => setTimeout(r, 10));
       expect(onSearchChange).not.toHaveBeenCalled();
 
-      // Wait for full debounce + buffer
-      await new Promise((r) => setTimeout(r, 60));
+      // Wait well past debounce delay
+      await new Promise((r) => setTimeout(r, 300));
       await tick();
 
       expect(onSearchChange).toHaveBeenCalled();
@@ -274,7 +275,7 @@ describe("ContentSearch Component", () => {
           items: mockItems,
           filterFn: mockFilterFn,
           onSearchChange,
-          debounceDelay: 30,
+          debounceDelay: 150,
         },
       });
 
@@ -286,15 +287,15 @@ describe("ContentSearch Component", () => {
 
       // Rapid inputs - each should reset the debounce timer
       await fireEvent.input(input, { target: { value: "j" } });
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 30));
 
       await fireEvent.input(input, { target: { value: "ja" } });
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 30));
 
       await fireEvent.input(input, { target: { value: "jav" } });
 
-      // Wait for final debounce to complete
-      await new Promise((r) => setTimeout(r, 60));
+      // Wait well past debounce to let final timer fire
+      await new Promise((r) => setTimeout(r, 250));
       await tick();
 
       // Should only be called once with the final value
