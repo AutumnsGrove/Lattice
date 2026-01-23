@@ -65,12 +65,15 @@ export const COMPONENTS: ComponentConfig[] = [
 /**
  * Latency thresholds for determining component status
  * Based on response time in milliseconds
+ *
+ * Note: CF worker-to-CF worker calls naturally take 400-800ms cross-region,
+ * so thresholds are set generously to avoid false degradation alerts.
  */
 export const LATENCY_THRESHOLDS = {
-  /** < 500ms = operational */
-  OPERATIONAL: 500,
-  /** >= 500ms = degraded, >= 1500ms = partial_outage */
-  SLOW: 1500,
+  /** < 2000ms = operational */
+  OPERATIONAL: 2000,
+  /** >= 2000ms = degraded, >= 5000ms = partial_outage */
+  SLOW: 5000,
 } as const;
 
 /**

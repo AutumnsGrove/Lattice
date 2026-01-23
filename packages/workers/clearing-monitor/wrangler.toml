@@ -2,7 +2,7 @@
 # Automated health monitoring for The Clearing status page
 #
 # Cron schedules:
-# - Every 2 minutes: Health checks for all components
+# - Every 5 minutes: Health checks for all components
 # - Daily at midnight UTC: Record daily history for uptime visualization
 
 name = "grove-clearing-monitor"
@@ -14,7 +14,7 @@ compatibility_date = "2025-01-01"
 # =============================================================================
 [triggers]
 crons = [
-  "*/2 * * * *",   # Every 2 minutes: Health checks
+  "*/5 * * * *",   # Every 5 minutes: Health checks
   "0 0 * * *"      # Daily at midnight UTC: Daily history aggregation
 ]
 
