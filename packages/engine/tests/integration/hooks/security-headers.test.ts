@@ -53,23 +53,26 @@ function createMockEvent(
   const hostname = options.hostname || "autumn.grove.place";
   const url = new URL(`https://${hostname}${pathname}`);
 
-  const headers = new Map<string, string>([["host", hostname]]);
+  // Use Headers directly instead of new Request() to avoid
+  // Fetch spec stripping "forbidden" headers (host, cookie, origin)
+  const headers = new Headers();
+  headers.set("host", hostname);
 
   // Add cookies if provided
-  let cookieHeader = "";
   if (options.cookies) {
-    cookieHeader = Object.entries(options.cookies)
+    const cookieHeader = Object.entries(options.cookies)
       .map(([key, value]) => `${key}=${value}`)
       .join("; ");
-  }
-  if (cookieHeader) {
-    headers.set("cookie", cookieHeader);
+    if (cookieHeader) {
+      headers.set("cookie", cookieHeader);
+    }
   }
 
-  const request = new Request(url, {
+  const request = {
     method,
+    url: url.toString(),
     headers,
-  });
+  } as unknown as Request;
 
   return {
     request,
