@@ -150,6 +150,7 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 - **Use labels** to filter by component (heartwood, lattice, amber, etc.) or type (bug, feature, enhancement)
 - **Close issues** when work is complete — reference the issue number in commit messages (e.g., `fixes #123`)
 - **Create new issues** for discovered work instead of adding TODO comments in code
+- **Bulk issue creation** — When the user dumps a batch of TODOs, use skill: `grove-issues` to parse, deduplicate, and create properly structured issues
 - **Check `COMPLETED.md`** for historical context on past decisions (frozen archive, pre-Jan 2026)
 
 ### Contributing
@@ -499,6 +500,11 @@ validation doesn't use it — you must explicitly whitelist trusted origins.
 - **When naming a new service or feature** → Use skill: `walking-through-the-grove`
 - **When finding a Grove-themed name** → Use skill: `walking-through-the-grove`
 
+### Issue Management
+- **When the user provides a batch of TODOs or tasks** → Use skill: `grove-issues`
+- **When turning a brain dump into GitHub issues** → Use skill: `grove-issues`
+- **When bulk-creating issues with proper labels** → Use skill: `grove-issues`
+
 ### Package Publishing
 - **When publishing to npm** → Use skill: `npm-publish`
 - **Before npm package releases** → Use skill: `npm-publish`
@@ -550,6 +556,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `grove-spec-writing` | Technical specifications with Grove formatting |
 | `museum-documentation` | Elegant, narrative documentation for Wanderers |
 | `walking-through-the-grove` | Finding Grove-themed names for new services |
+| `grove-issues` | Parse brain dumps into structured GitHub issues |
 | `npm-publish` | npm package publishing workflow |
 | `research-strategy` | Systematic research |
 
@@ -597,5 +604,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-20*
+*Last updated: 2026-01-23*
 *Model: Claude Opus 4.5*
