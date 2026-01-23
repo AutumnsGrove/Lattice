@@ -28,7 +28,7 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_blog",
     name: "Blog Engine",
-    url: "https://grove.place/api/health",
+    url: "https://autumn.grove.place/api/health",
     checkType: "deep",
     method: "GET",
   },
@@ -56,7 +56,7 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_payments",
     name: "Payments",
-    url: "https://grove.place/api/health/payments",
+    url: "https://autumn.grove.place/api/health/payments",
     checkType: "deep",
     method: "GET",
   },
