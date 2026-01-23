@@ -63,7 +63,7 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_api",
     name: "API (DOs)",
-    url: "https://grove-durable-objects.workers.dev/health",
+    url: "https://grove-durable-objects.m7jv4v7npb.workers.dev/health",
     checkType: "shallow",
     method: "GET",
   },
