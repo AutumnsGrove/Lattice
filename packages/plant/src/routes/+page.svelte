@@ -56,7 +56,7 @@
 	const showSignupGateNotice = $derived($page.url.searchParams.get('notice') === 'coming_soon');
 
 	// Config - could be fetched from API or environment
-	const WAITLIST_COUNT = 59;
+	const WAITLIST_COUNT = 67;
 
 	// Google icon component (no Lucide equivalent with brand colors)
 	const GoogleIcon = `<svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
