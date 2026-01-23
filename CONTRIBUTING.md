@@ -113,7 +113,7 @@ Before/after if applicable.
 Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or otherwise) working on this project:
 
 1. **Read `AGENT.md` first.** It has project-specific instructions, conventions, and context you'll need.
-2. **Check `TODOS.md`** for current priorities and in-progress work.
+2. **Check [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues)** for current priorities and in-progress work.
 3. **Follow the commit format** including the co-author line:
    ```
    🤖 Generated with [Claude Code](https://claude.ai/code)

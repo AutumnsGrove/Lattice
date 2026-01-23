@@ -1,6 +1,8 @@
-# Completed Tasks - Grove Platform
+# Completed Tasks - Grove Platform (Archived)
 
-> **Note:** This file tracks completed work. For pending tasks, see `TODOS.md`.
+> **This file is frozen.** Task tracking has moved to [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues).
+> This archive preserves historical context from before the migration (Jan 2026 and earlier).
+> Close issues on GitHub when work is complete — do not add entries here.
 
 ---
 

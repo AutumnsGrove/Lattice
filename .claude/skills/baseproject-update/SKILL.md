@@ -106,7 +106,7 @@ Show:
 ## What Is NOT Touched
 
 - `README.md` - Your project README
-- `TODOS.md` - Your task list
+- `TODOS.md` - Your task tracking reference (points to GitHub Issues)
 - `secrets.json` / `secrets_template.json` - Your secrets
 - `pyproject.toml` / `package.json` / `go.mod` - Language configs
 - `src/` / `tests/` - Your source code

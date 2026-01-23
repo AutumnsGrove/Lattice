@@ -144,12 +144,13 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 - **Date-based paths**: Use skewer-case with YYYY-MM-DD (e.g., `logs-2025-01-15`, `backup-2025-12-31`)
 - **No spaces or underscores** in directory names (except date-based paths)
 
-### TODO Management
-- **Always check `TODOS.md` first** when starting a task or session
-- **Check `COMPLETED.md`** for context on past decisions and implementation details
-- **Update immediately** when tasks are completed, added, or changed
-- **Move completed tasks** from `TODOS.md` to `COMPLETED.md` to keep the TODO list focused
-- Keep both lists current and accurate
+### Task Tracking (GitHub Issues)
+- **All tasks are tracked in [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues)** — not in local files
+- **Check open issues** when starting a session to understand current priorities
+- **Use labels** to filter by component (heartwood, lattice, amber, etc.) or type (bug, feature, enhancement)
+- **Close issues** when work is complete — reference the issue number in commit messages (e.g., `fixes #123`)
+- **Create new issues** for discovered work instead of adding TODO comments in code
+- **Check `COMPLETED.md`** for historical context on past decisions (frozen archive, pre-Jan 2026)
 
 ### Contributing
 - **See `CONTRIBUTING.md`** for PR guidelines, commit conventions, and the AI agent section

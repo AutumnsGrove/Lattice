@@ -260,7 +260,7 @@ jobs:
 
             1. Review which components were ${changeType}
             2. Update \`.github/component-inventory.json\` with accurate counts
-            3. Update \`TODOS.md\` if the "185 components" reference is now stale
+            3. Create a GitHub Issue if the component count reference is stale
             4. Consider documenting new components in the component reference (when created)
 
             ### Files to Update

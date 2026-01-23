@@ -155,25 +155,15 @@ cp secrets_template.json secrets.json
 grep "secrets.json" .gitignore
 ```
 
-## TODOS.md Template
+## Task Tracking
 
-```markdown
-# Project TODOs
-
-## High Priority
-- [ ] Set up project dependencies
-- [ ] Configure secrets management
-- [ ] Create initial project structure
-
-## Medium Priority
-- [ ] Implement core business logic
-- [ ] Add unit tests
-- [ ] Set up CI/CD pipeline
-
-## Low Priority
-- [ ] Performance optimizations
-- [ ] Documentation improvements
-```
+Track tasks in **GitHub Issues** with appropriate labels. Create initial issues for:
+- Set up project dependencies
+- Configure secrets management
+- Create initial project structure
+- Implement core business logic
+- Add unit tests
+- Set up CI/CD pipeline
 
 ## Verification Checklist
 
@@ -196,7 +186,7 @@ uv run python src/projectname/main.py
 
 ## Post-Setup Tasks
 
-1. **Update TODOS.md** with project-specific tasks
+1. **Create GitHub Issues** for project-specific tasks
 2. **Create initial code** entry points
 3. **Configure IDE** settings and extensions
 4. **Review relevant guides** in AgentUsage/

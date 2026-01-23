@@ -32,7 +32,7 @@ bash setup_new_project.sh
 **The script handles:**
 - Removes old git history
 - Updates AGENT.md with project details
-- Creates fresh TODOS.md
+- Sets up task tracking (GitHub Issues)
 - Initializes new git repository
 - Prompts for project details
 - Creates initial commit
@@ -100,33 +100,14 @@ git commit -m "Initial commit: Setup YourProjectName from BaseProject
 - Initialized git repository"
 ```
 
-### Step 5: Set Up TODOS.md
+### Step 5: Create Initial Issues
 
 ```bash
-# Create or edit TODOS.md
-cat > TODOS.md << 'EOF'
-# Project TODOs
-
-## High Priority
-- [ ] Set up project dependencies (pyproject.toml / package.json)
-- [ ] Configure secrets management (secrets.json)
-- [ ] Create initial project structure (src/, tests/)
-- [ ] Set up database models/schema
-
-## Medium Priority
-- [ ] Implement core business logic
-- [ ] Add unit tests
-- [ ] Set up CI/CD pipeline
-- [ ] Write API documentation
-
-## Low Priority / Future Ideas
-- [ ] Performance optimizations
-- [ ] Admin dashboard
-- [ ] Analytics integration
-
-## Blocked
-- [ ] (None currently)
-EOF
+# Create initial project issues on GitHub
+gh issue create --title "Set up project dependencies" --body "Configure pyproject.toml / package.json"
+gh issue create --title "Configure secrets management" --body "Set up secrets.json with template"
+gh issue create --title "Create initial project structure" --body "Set up src/, tests/ directories"
+gh issue create --title "Set up database models/schema" --body "Define initial data models"
 ```
 
 ## Technology-Specific Setup
@@ -400,8 +381,8 @@ git status
 # ✅ AGENT.md customized (no [Fill in:] markers)
 grep "\[Fill in:" AGENT.md
 
-# ✅ TODOS.md exists with project tasks
-cat TODOS.md
+# ✅ GitHub Issues configured for task tracking
+gh issue list --state open
 
 # ✅ secrets.json in .gitignore
 grep "secrets.json" .gitignore
@@ -424,9 +405,9 @@ tree -L 2 src/  # or appropriate directory
 
 ## Post-Setup Tasks
 
-### 1. Update TODOS.md
+### 1. Create Initial Issues
 
-Add project-specific tasks based on requirements.
+Add project-specific tasks as GitHub Issues with appropriate labels.
 
 ### 2. Create Initial Code
 
@@ -521,4 +502,4 @@ cargo clean
 - Initialize git early and commit often
 - Choose setup method based on project complexity
 - Review technology-specific guides for detailed patterns
-- Keep TODOS.md updated throughout development
+- Track tasks in GitHub Issues throughout development

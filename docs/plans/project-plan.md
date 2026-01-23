@@ -442,7 +442,7 @@ This AI-first approach enables:
 4. Use support structure - Set boundaries
 
 ### For Future Features
-1. Check **TODOS.md** - See what's planned
+1. Check **GitHub Issues** - See what's planned
 2. Don't build future features yet - Wait for client demand
 3. Focus on Phase 1 only - Prove the concept first
 

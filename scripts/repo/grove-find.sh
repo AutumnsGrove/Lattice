@@ -42,7 +42,7 @@
 #   gfpickaxe                      # Find when string was added/removed
 #   gfcommits                      # Recent commits with stats
 #   gfgitstats                     # Project health snapshot
-#   gfbriefing                     # Daily TODO briefing
+#   gfbriefing                     # Daily briefing (issues + code TODOs)
 #   gfchurn                        # Frequently changed files (hotspots)
 #   gfbranches                     # List branches with info
 #   gfpr                           # PR preparation summary
@@ -1224,9 +1224,9 @@ gfgitstats() {
     echo -e "  Stashes: $stash_count"
 }
 
-# gfbriefing - Daily TODO briefing for agents/developers
+# gfbriefing - Daily briefing for agents/developers
 # Usage: gfbriefing
-# Shows oldest TODOs from TODOS.md + oldest TODO comments in code
+# Shows priority GitHub Issues + oldest TODO comments in code
 gfbriefing() {
     if [ -z "$GF_AGENT" ]; then
         echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════╗${NC}"
@@ -1255,19 +1255,31 @@ gfbriefing() {
         echo -e "  ${GREEN}✓ Working directory clean${NC}"
     fi
 
-    # TODOS.md items (oldest first = most neglected!)
-    echo -e "\n${PURPLE}═══ From TODOS.md (Oldest First) ═══${NC}"
-    if [ -f "$GROVE_ROOT/TODOS.md" ]; then
-        # Find unchecked items, show oldest (top of file usually = oldest)
-        grep -n "^\s*- \[ \]" "$GROVE_ROOT/TODOS.md" 2>/dev/null | head -10 | \
-            sed 's/^/  /'
-        echo ""
+    # GitHub Issues (priority items first)
+    echo -e "\n${PURPLE}═══ Priority Issues ═══${NC}"
+    if command -v gh &> /dev/null; then
+        local critical
+        critical=$(gh issue list --state open --label "priority-critical" --limit 5 2>/dev/null)
+        if [ -n "$critical" ]; then
+            echo -e "  ${RED}CRITICAL:${NC}"
+            echo "$critical" | sed 's/^/    /'
+            echo ""
+        fi
 
-        local todo_count
-        todo_count=$(grep -c "^\s*- \[ \]" "$GROVE_ROOT/TODOS.md" 2>/dev/null || echo "0")
-        echo -e "  ${YELLOW}Total open items: $todo_count${NC}"
+        local high
+        high=$(gh issue list --state open --label "priority-high" --limit 5 2>/dev/null)
+        if [ -n "$high" ]; then
+            echo -e "  ${YELLOW}HIGH:${NC}"
+            echo "$high" | sed 's/^/    /'
+            echo ""
+        fi
+
+        local open_count
+        open_count=$(gh issue list --state open --json number --jq 'length' 2>/dev/null || echo "?")
+        echo -e "  ${GREEN}Total open issues: $open_count${NC}"
+        echo -e "  ${GREEN}View all: gh issue list --state open${NC}"
     else
-        echo -e "  ${YELLOW}No TODOS.md found${NC}"
+        echo -e "  ${YELLOW}GitHub CLI (gh) not available — install for issue tracking${NC}"
     fi
 
     # Oldest TODO comments in code (by git blame date)
@@ -2203,7 +2215,7 @@ GITHUB ISSUES (TASK MANAGEMENT)
 
 PROJECT HEALTH
   gfgitstats          Full project health snapshot (commits, PRs, issues)
-  gfbriefing          Daily TODO briefing (oldest items from TODOS.md + code)
+  gfbriefing          Daily briefing (priority issues + oldest TODOs in code)
 
 CLOUDFLARE
   gfbind [type]       All CF bindings overview
@@ -2707,7 +2719,7 @@ gfhelp() {
     echo ""
     echo -e "${CYAN}Project Health:${NC}"
     echo "  gfgitstats        - Full project health snapshot"
-    echo "  gfbriefing        - Daily TODO briefing for agents"
+    echo "  gfbriefing        - Daily briefing (priority issues + code TODOs)"
     echo ""
     echo -e "${CYAN}Cloudflare/Infrastructure:${NC}"
     echo "  gfbind [type]     - Find CF bindings (D1, KV, R2, DO)"

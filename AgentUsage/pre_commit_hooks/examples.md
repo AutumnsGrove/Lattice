@@ -227,7 +227,7 @@ Project-wide summary:
   TODO comments:  12
   FIXME comments: 3
 
-💡 Consider updating TODOS.md to track these items
+💡 Consider creating GitHub Issues to track these items
 
 📤 You have 1 commit(s) ready to push
    Run: git push

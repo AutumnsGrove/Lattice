@@ -95,7 +95,7 @@ if [ "$TOTAL_TODOS" -gt 0 ] || [ "$TOTAL_FIXMES" -gt 0 ]; then
     [ "$TOTAL_TODOS" -gt 0 ] && echo -e "  ${YELLOW}TODO comments:${NC}  $TOTAL_TODOS"
     [ "$TOTAL_FIXMES" -gt 0 ] && echo -e "  ${RED}FIXME comments:${NC} $TOTAL_FIXMES"
     echo ""
-    echo -e "${YELLOW}💡 Consider updating TODOS.md to track these items${NC}"
+    echo -e "${YELLOW}💡 Consider creating GitHub Issues to track these items${NC}"
 else
     echo -e "${GREEN}✓ No TODO/FIXME comments found${NC}"
 fi

@@ -11,7 +11,7 @@ Good documentation is essential for maintainable code. This guide outlines when 
 - **Docstrings**: Explain what functions/classes do and how to use them
 - **Comments**: Explain why code does something (not what it does)
 - **README.md**: High-level project overview, setup, and usage
-- **TODOS.md**: Track tasks, priorities, and blockers
+- **GitHub Issues**: Track tasks, priorities, and blockers
 
 **Key principle**: Code should be self-documenting through clear naming and structure. Documentation should add value, not repeat what the code already says.
 
@@ -26,7 +26,7 @@ Good documentation is essential for maintainable code. This guide outlines when 
 | **Type hints** | All function signatures | Python type annotations |
 | **Comments** | Complex logic, non-obvious decisions | Inline comments |
 | **README** | Every project | Markdown file in root |
-| **TODOS** | Active development | TODOS.md in project root |
+| **Tasks** | Active development | GitHub Issues |
 
 ---
 
@@ -274,51 +274,16 @@ def get_user():
 
 ---
 
-## TODO Management
+## Task Tracking
 
-You MUST actively maintain the `TODOS.md` file in the project root. This is a critical part of the workflow.
+Tasks are tracked in **GitHub Issues**, not in local files. Use `gh issue list` or visit the repository's Issues tab.
 
-### TODO File Rules:
+### Workflow:
 
-1. **Always check TODOS.md first** when starting a new task or session
-2. **Update TODOS.md immediately** when:
-   - A task is completed (mark with ✅ or remove)
-   - A new task is identified (add it)
-   - A task's priority or status changes
-   - You discover subtasks or dependencies
-
-3. **Format for TODOS.md:**
-   ```markdown
-   # Project TODOs
-
-   ## High Priority
-   - [ ] Task description here
-   - [x] Completed task (keep for reference)
-
-   ## Medium Priority
-   - [ ] Another task
-
-   ## Low Priority / Future Ideas
-   - [ ] Nice to have feature
-
-   ## Blocked
-   - [ ] Task blocked by X (waiting on...)
-   ```
-
-4. **Use clear task descriptions** that include:
-   - What needs to be done
-   - Why it's important (if not obvious)
-   - Any dependencies or blockers
-
-5. **Keep it current**: Remove or archive completed tasks regularly to keep the list manageable
-
-### Example Workflow:
-
-1. Session starts → Check TODOS.md
-2. User asks you to do something → Check if it's already in TODOs
-3. Complete a task → Update TODOS.md to mark it complete
-4. Discover a new issue → Add it to TODOS.md
-5. Before session ends → Review and update TODOS.md
+1. Session starts → Check open issues (`gh issue list --state open`)
+2. Starting work → Reference the issue number in commits (`fixes #123`)
+3. Discover new work → Create a GitHub Issue (`gh issue create`)
+4. Complete work → Close the issue on GitHub
 
 ---
 

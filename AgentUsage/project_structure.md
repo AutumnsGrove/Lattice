@@ -138,7 +138,7 @@ VideoProcessor/
 ├── secrets_template.json
 ├── .gitignore
 ├── README.md
-└── TODOS.md
+└── COMPLETED.md          # Historical archive (frozen)
 ```
 
 ## Module Organization
