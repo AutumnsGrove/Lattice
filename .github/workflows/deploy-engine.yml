@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/engine/**'
+      - 'packages/vineyard/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
   workflow_dispatch:
@@ -34,6 +35,10 @@ jobs:
       - name: Build engine
         working-directory: packages/engine
         run: pnpm run build
+
+      - name: Build vineyard (workspace dependency)
+        run: pnpm package
+        working-directory: packages/vineyard
 
       - name: Type check
         run: pnpm check

@@ -93,6 +93,11 @@ declare global {
         STRIPE_PUBLISHABLE_KEY?: string;
         STRIPE_WEBHOOK_SECRET?: string;
 
+        // LemonSqueezy (payments provider)
+        LEMON_SQUEEZY_API_KEY?: string;
+        LEMON_SQUEEZY_STORE_ID?: string;
+        LEMON_SQUEEZY_WEBHOOK_SECRET?: string;
+
         // Cloudflare Turnstile (bot protection)
         TURNSTILE_SECRET_KEY?: string;
         TURNSTILE_SITE_KEY?: string;
