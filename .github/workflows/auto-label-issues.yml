@@ -1,0 +1,93 @@
+name: Auto-Label Issues
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: Label by Grove component
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const text = title + ' ' + body;
+            
+            // Component labels
+            const components = {
+              'heartwood': /heartwood|auth|login|session|token/,
+              'lattice': /lattice|core|engine/,
+              'amber': /amber|storage|file|upload/,
+              'foliage': /foliage|theme|style|css/,
+              'ivy': /ivy|mail/,
+              'meadow': /meadow|social/,
+              'shade': /shade|crawler|bot|ai/,
+              'curio': /curio|tweak/,
+              'plant': /plant|signup/,
+              'arbor': /arbor|admin|panel/,
+              'clearing': /clearing|status/,
+              'patina': /patina|backup/,
+              'mycelium': /mycelium|mcp/,
+              'graft': /graft|grafts|featureflag|flag/,
+              'forests': /forests|communities|community/,
+              'lumen': /lumen|gateway/
+            };
+            
+            // Type labels
+            const types = {
+              'bug': /bug|error|crash|fail|broken|issue/,
+              'feature': /feature|add|new|implement/,
+              'enhancement': /enhance|improve|better|optimize/,
+              'documentation': /docs|documentation|readme|guide/,
+              'security': /security|vulnerability|xss|csrf|exploit/
+            };
+            
+            // Priority labels
+            const priorities = {
+              'priority-critical': /critical|urgent|blocker|emergency/,
+              'priority-high': /high priority|important/,
+              'priority-low': /low priority|nice to have|eventually/
+            };
+            
+            const labelsToAdd = [];
+            
+            // Check components
+            for (const [label, pattern] of Object.entries(components)) {
+              if (pattern.test(text)) {
+                labelsToAdd.push(label);
+              }
+            }
+            
+            // Check types
+            for (const [label, pattern] of Object.entries(types)) {
+              if (pattern.test(text)) {
+                labelsToAdd.push(label);
+              }
+            }
+            
+            // Check priorities
+            for (const [label, pattern] of Object.entries(priorities)) {
+              if (pattern.test(text)) {
+                labelsToAdd.push(label);
+              }
+            }
+            
+            // Add labels if any were found
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labelsToAdd
+              });
+              
+              console.log(`Added labels: ${labelsToAdd.join(', ')}`);
+            }

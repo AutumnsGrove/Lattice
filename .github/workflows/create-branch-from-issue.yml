@@ -1,0 +1,60 @@
+name: Create Branch from Issue
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  create-branch:
+    if: github.event.label.name == 'ready'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create feature branch
+        run: |
+          # Get issue number and title
+          ISSUE_NUM=${{ github.event.issue.number }}
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          
+          # Determine branch prefix from labels
+          LABELS="${{ join(github.event.issue.labels.*.name, ' ') }}"
+          
+          if echo "$LABELS" | grep -q "bug"; then
+            PREFIX="fix"
+          elif echo "$LABELS" | grep -q "feature"; then
+            PREFIX="feature"
+          elif echo "$LABELS" | grep -q "enhancement"; then
+            PREFIX="enhance"
+          else
+            PREFIX="issue"
+          fi
+          
+          # Sanitize title for branch name (lowercase, replace spaces with hyphens, remove special chars)
+          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 -]//g' | sed 's/ /-/g' | cut -c1-50)
+          
+          # Create branch name
+          BRANCH="${PREFIX}/${ISSUE_NUM}-${CLEAN_TITLE}"
+          
+          echo "Creating branch: $BRANCH"
+          
+          # Create and push branch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git push origin "$BRANCH"
+          
+          # Comment on issue with branch name
+          gh issue comment $ISSUE_NUM --body "🌿 Branch created: \`$BRANCH\`
+
+          To start working on this:
+          \`\`\`bash
+          git fetch origin
+          git checkout $BRANCH
+          \`\`\`"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

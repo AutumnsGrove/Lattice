@@ -1,0 +1,60 @@
+name: Mark Stale Issues
+
+on:
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Issue settings
+          stale-issue-message: |
+            🍂 This issue has been automatically marked as stale because it hasn't had any activity in 60 days.
+            
+            If this is still relevant, please comment to keep it open. Otherwise it will be closed in 14 days.
+            
+            To prevent this from happening:
+            - Add the `pinned` label to keep it open indefinitely
+            - Comment with updates or context
+          
+          close-issue-message: |
+            🌙 Closing this issue due to inactivity. 
+            
+            If you still need this, feel free to reopen or create a new issue!
+          
+          stale-issue-label: 'stale'
+          days-before-stale: 60
+          days-before-close: 14
+          
+          # Don't mark as stale if these labels are present
+          exempt-issue-labels: 'pinned,security,critical,priority-critical,blocked'
+          
+          # PR settings (more aggressive since PRs should move faster)
+          stale-pr-message: |
+            🍂 This PR has been automatically marked as stale because it hasn't had any activity in 30 days.
+            
+            Please update or close if no longer needed.
+          
+          close-pr-message: |
+            🌙 Closing this PR due to inactivity. Feel free to reopen if you want to continue this work!
+          
+          stale-pr-label: 'stale'
+          days-before-pr-stale: 30
+          days-before-pr-close: 7
+          exempt-pr-labels: 'pinned,work-in-progress,blocked'
+          
+          # Operational settings
+          operations-per-run: 100
+          remove-stale-when-updated: true
+          ascending: false # Process newest first
