@@ -1001,3 +1001,74 @@ describe("markdown.ts - Comprehensive Tests", () => {
     });
   });
 });
+
+// ============================================================================
+// Inline Elements in Headings Regression Tests (commit 8264e99)
+// ============================================================================
+
+describe("Inline elements in headings (regression: commit 8264e99)", () => {
+  it("renders bold text inside heading", () => {
+    const content = `---\ntitle: Test\ndate: 2024-01-01\n---\n## **Bold** heading`;
+    const result = parseMarkdownContent(content);
+    expect(result.content).toContain("<h2");
+    expect(result.content).toContain("<strong>Bold</strong>");
+    expect(result.content).toContain("heading");
+  });
+
+  it("renders link inside heading", () => {
+    const content = `---\ntitle: Test\ndate: 2024-01-01\n---\n## [Link](https://example.com) heading`;
+    const result = parseMarkdownContent(content);
+    expect(result.content).toContain("<h2");
+    expect(result.content).toContain('<a href="https://example.com"');
+    expect(result.content).toContain("Link");
+  });
+
+  it("renders inline code inside heading", () => {
+    const content =
+      "---\ntitle: Test\ndate: 2024-01-01\n---\n## `code` heading";
+    const result = parseMarkdownContent(content);
+    expect(result.content).toContain("<h2");
+    expect(result.content).toContain("<code>");
+    expect(result.content).toContain("code");
+  });
+
+  it("renders bold italic inside heading", () => {
+    const content = `---\ntitle: Test\ndate: 2024-01-01\n---\n## ***bold italic*** heading`;
+    const result = parseMarkdownContent(content);
+    expect(result.content).toContain("<h2");
+    // Should contain both strong and em tags
+    expect(result.content).toMatch(/<(strong|em)>/);
+    expect(result.content).toContain("bold italic");
+  });
+
+  it("renders mixed inline elements in heading", () => {
+    const content =
+      "---\ntitle: Test\ndate: 2024-01-01\n---\n## Mixed **bold** and `code` heading";
+    const result = parseMarkdownContent(content);
+    expect(result.content).toContain("<h2");
+    expect(result.content).toContain("<strong>bold</strong>");
+    expect(result.content).toContain("<code>");
+  });
+
+  it("generateHeadingId strips inline markup for ID generation", () => {
+    // Bold markers should be stripped
+    expect(generateHeadingId("**Bold** heading")).toBe("bold-heading");
+    // Link markdown should be stripped (brackets/parens removed)
+    expect(generateHeadingId("[Link](url) text")).toBe("linkurl-text");
+    // Code backticks should be stripped
+    expect(generateHeadingId("`code` heading")).toBe("code-heading");
+    // Mixed markup stripped
+    expect(generateHeadingId("***bold italic*** heading")).toBe(
+      "bold-italic-heading",
+    );
+  });
+
+  it("extractHeaders handles inline elements in heading text", () => {
+    const markdown = "## **Bold** heading\n## [Link](url) heading";
+    const headers = extractHeaders(markdown);
+    expect(headers).toHaveLength(2);
+    // Text should preserve the raw markdown inline content
+    expect(headers[0].text).toContain("Bold");
+    expect(headers[1].text).toContain("Link");
+  });
+});
