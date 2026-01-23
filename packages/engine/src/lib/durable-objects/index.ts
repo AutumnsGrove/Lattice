@@ -9,7 +9,7 @@
  */
 
 // TenantDO - Per-tenant config, drafts, analytics
-export { TenantDO } from "./TenantDO.js";
+// Class implementation lives in packages/durable-objects/ (deployed as separate worker)
 export type {
   TenantConfig,
   TierLimits,

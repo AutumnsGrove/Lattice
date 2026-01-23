@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'packages/durable-objects/**'
+      - 'packages/engine/src/lib/durable-objects/**'
   workflow_dispatch:
 
 jobs:
