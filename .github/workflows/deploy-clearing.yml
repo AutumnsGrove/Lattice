@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build engine (workspace dependency)
-        run: pnpm run build
+      - name: Package engine (workspace dependency)
+        run: pnpm package
         working-directory: packages/engine
 
       - name: Run tests
