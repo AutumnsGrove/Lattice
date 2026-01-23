@@ -441,10 +441,16 @@
 		font-weight: 600;
 		color: var(--color-foreground, #333);
 	}
+	:global(.dark) .date-full {
+		color: var(--bark, #f5f2ea);
+	}
 	.date-short {
 		display: none;
 		font-weight: 600;
 		color: var(--color-foreground, #333);
+	}
+	:global(.dark) .date-short {
+		color: var(--bark, #f5f2ea);
 	}
 	:global(.today-badge) {
 		background: var(--grove-500, #4ade80);
@@ -518,12 +524,15 @@
 		font-size: 0.95rem;
 	}
 	:global(.dark) .rest-message {
-		color: #777;
+		color: var(--bark-600, #b69575);
 	}
 	.brief-summary {
 		margin: 0 0 0.75rem;
 		color: var(--color-foreground, #333);
 		line-height: 1.5;
+	}
+	:global(.dark) .brief-summary {
+		color: var(--bark, #f5f2ea);
 	}
 	.meta-info {
 		display: flex;
@@ -532,6 +541,9 @@
 		font-size: 0.85rem;
 		color: var(--color-foreground, #333);
 		margin-bottom: 0.75rem;
+	}
+	:global(.dark) .meta-info {
+		color: var(--bark-700, #ccb59c);
 	}
 	.repos, .changes {
 		display: flex;
@@ -606,6 +618,7 @@
 	}
 	:global(.dark) .detailed-timeline {
 		background: var(--cream-300, #2a2a2a);
+		color: var(--bark, #f5f2ea);
 	}
 	.markdown-content :global(h2) {
 		font-size: 1.1rem;
@@ -623,6 +636,9 @@
 		color: var(--color-foreground, #333);
 		margin: 1rem 0 0.5rem;
 		font-weight: 600;
+	}
+	:global(.dark) .markdown-content :global(h3) {
+		color: var(--bark, #f5f2ea);
 	}
 	.markdown-content :global(h3 a) {
 		color: #2c5f2d;
@@ -645,6 +661,9 @@
 	.markdown-content :global(li) {
 		margin-bottom: 0.25rem;
 		color: var(--color-foreground, #333);
+	}
+	:global(.dark) .markdown-content :global(li) {
+		color: var(--bark, #f5f2ea);
 	}
 	.markdown-content :global(code) {
 		background: var(--color-border-strong, #e0e0e0);
@@ -680,7 +699,7 @@
 	}
 	:global(.dark) .timeline-footer {
 		border-top-color: var(--color-border-strong, #444);
-		color: #666;
+		color: var(--bark-700, #ccb59c);
 	}
 
 	/* Mobile Responsiveness */
