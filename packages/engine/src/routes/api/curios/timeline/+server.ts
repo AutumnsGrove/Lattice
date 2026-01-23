@@ -70,7 +70,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       voice_preset,
       created_at
     FROM timeline_summaries
-    WHERE tenant_id = ?
+    WHERE tenant_id = ? AND summary_date IS NOT NULL
   `;
   const params: (string | number)[] = [tenantId];
 
@@ -92,7 +92,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     .all<TimelineSummaryRow>();
 
   // Get total count for pagination
-  let countQuery = `SELECT COUNT(*) as count FROM timeline_summaries WHERE tenant_id = ?`;
+  let countQuery = `SELECT COUNT(*) as count FROM timeline_summaries WHERE tenant_id = ? AND summary_date IS NOT NULL`;
   const countParams: (string | number)[] = [tenantId];
 
   if (startDate) {

@@ -79,7 +79,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
         detected_focus,
         focus_streak
       FROM timeline_summaries
-      WHERE tenant_id = ?
+      WHERE tenant_id = ? AND summary_date IS NOT NULL
       ORDER BY summary_date DESC
       LIMIT ? OFFSET ?`,
     )
@@ -89,7 +89,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   // Get total count
   const countResult = await db
     .prepare(
-      `SELECT COUNT(*) as total FROM timeline_summaries WHERE tenant_id = ?`,
+      `SELECT COUNT(*) as total FROM timeline_summaries WHERE tenant_id = ? AND summary_date IS NOT NULL`,
     )
     .bind(tenantId)
     .first<{ total: number }>();
