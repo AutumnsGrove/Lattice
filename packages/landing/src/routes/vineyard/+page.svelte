@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { VineyardLayout, FeatureCard, StatusBadge } from '@autumnsgrove/groveengine/vineyard';
 	import SEO from '$lib/components/SEO.svelte';
 
 	// Lucide Icons
@@ -9,7 +8,7 @@
 		Palette,
 		Type,
 		Eye,
-		MousePointer
+		ChevronDown
 	} from 'lucide-svelte';
 
 	// Import Glass components
@@ -20,7 +19,6 @@
 		GlassLogo,
 		GlassOverlay,
 		GlassCarousel,
-		GlassLegend
 	} from '@autumnsgrove/groveengine/ui';
 
 	// Import nature assets
@@ -41,9 +39,7 @@
 	// Import typography components
 	import {
 		FontProvider,
-		Lexend, Atkinson, OpenDyslexic,
-		Quicksand, PlusJakartaSans,
-		IBMPlexMono, Cozette,
+		IBMPlexMono,
 		Alagard, Calistoga, Caveat,
 		fonts,
 		type FontId,
@@ -55,32 +51,17 @@
 	// Glass component demos state
 	let glassVariant = $state<'surface' | 'overlay' | 'card' | 'tint' | 'accent' | 'muted'>('card');
 	let glassIntensity = $state<'none' | 'light' | 'medium' | 'strong'>('medium');
-	let buttonVariant = $state<'default' | 'accent' | 'dark' | 'ghost' | 'outline'>('default');
-	let buttonSize = $state<'sm' | 'md' | 'lg' | 'icon'>('md');
-	let cardVariant = $state<'default' | 'accent' | 'dark' | 'muted' | 'frosted'>('default');
-	let cardHoverable = $state(false);
-	let logoVariant = $state<'default' | 'accent' | 'frosted' | 'dark' | 'ethereal'>('default');
 	let logoSeason = $state<'spring' | 'summer' | 'autumn' | 'winter'>('summer');
 
 	// Gossamer state
 	type GossamerPreset = 'grove-mist' | 'grove-fireflies' | 'grove-rain' | 'grove-dew' | 'winter-snow' | 'autumn-leaves' | 'spring-petals' | 'summer-heat' | 'ambient-static' | 'ambient-waves' | 'ambient-clouds';
 	let glassGossamerEnabled = $state(false);
 	let glassGossamerPreset = $state<GossamerPreset>('grove-mist');
-	let cardGossamerEnabled = $state(false);
-	let cardGossamerPreset = $state<GossamerPreset>('grove-fireflies');
 
-	const gossamerPresets = [
-		'grove-mist',
-		'grove-fireflies',
-		'grove-rain',
-		'grove-dew',
-		'winter-snow',
-		'autumn-leaves',
-		'spring-petals',
-		'summer-heat',
-		'ambient-static',
-		'ambient-waves',
-		'ambient-clouds'
+	const gossamerPresets: GossamerPreset[] = [
+		'grove-mist', 'grove-fireflies', 'grove-rain', 'grove-dew',
+		'winter-snow', 'autumn-leaves', 'spring-petals', 'summer-heat',
+		'ambient-static', 'ambient-waves', 'ambient-clouds'
 	];
 
 	// Overlay demo state
@@ -280,126 +261,186 @@
 
 	let CurrentComponent = $derived(getCurrentAsset()?.component);
 
-	// Carousel demo images (placeholders)
+	// Carousel demo images
 	const carouselImages = [
 		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%2310b981"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 1%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 1', caption: 'First slide caption' },
 		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%23059669"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 2%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 2', caption: 'Second slide caption' },
 		{ url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" fill="%23047857"%3E%3Crect width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="white" font-size="20"%3ESlide 3%3C/text%3E%3C/svg%3E', alt: 'Placeholder slide 3', caption: 'Third slide caption' },
 	];
+
+	// Glass variants for interactive demo
+	const glassVariants = ['surface', 'overlay', 'card', 'tint', 'accent', 'muted'] as const;
+	const glassIntensities = ['none', 'light', 'medium', 'strong'] as const;
 </script>
 
 <SEO
 	title="Vineyard — Lattice Asset Showcase"
-	description="Explore the components and assets that Lattice provides. Glass UI components, nature SVGs, and everything you need to build beautiful Grove experiences."
+	description="Explore the components and assets that Lattice provides. Glass UI components, nature SVGs, typography, and everything you need to build beautiful Grove experiences."
 	url="https://grove.place/vineyard"
 />
 
-<VineyardLayout tool="lattice" tagline="Building blocks for beautiful Grove experiences" status="ready">
+<div class="max-w-6xl mx-auto px-6 py-12">
+	<!-- Hero Section -->
+	<section class="text-center mb-12">
+		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3">Lattice Vineyard</h1>
+		<p class="text-lg text-[var(--color-foreground-muted)] max-w-2xl mx-auto">
+			Every vine starts somewhere. This is where Grove's UI components grow,
+			ready to be picked and planted throughout the ecosystem.
+		</p>
+	</section>
+
+	<!-- Quick Nav (visible on mobile too) -->
+	<nav class="flex flex-wrap justify-center gap-3 mb-12 sm:hidden">
+		<a href="#glass" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-foreground-muted)] hover:text-[var(--color-primary)] text-sm transition-colors">
+			<Sparkles class="w-3.5 h-3.5" />
+			Glass
+		</a>
+		<a href="#nature" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-foreground-muted)] hover:text-[var(--color-primary)] text-sm transition-colors">
+			<TreeIcon class="w-3.5 h-3.5" />
+			Nature
+		</a>
+		<a href="#typography" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-foreground-muted)] hover:text-[var(--color-primary)] text-sm transition-colors">
+			<Type class="w-3.5 h-3.5" />
+			Type
+		</a>
+		<a href="#palettes" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-foreground-muted)] hover:text-[var(--color-primary)] text-sm transition-colors">
+			<Palette class="w-3.5 h-3.5" />
+			Palettes
+		</a>
+	</nav>
+
 	<!-- Feature Overview -->
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-		<FeatureCard
-			title="Glass Components"
-			description="9 glassmorphism UI elements with blur effects"
-			status="ready"
-			icon="Sparkles"
-		/>
-		<FeatureCard
-			title="Nature Assets"
-			description="{Object.keys(assets).length} SVG components across {categories.length} categories"
-			status="ready"
-			icon="TreePine"
-		/>
-		<FeatureCard
-			title="Typography"
-			description="10 curated font families for every mood"
-			status="ready"
-			icon="Type"
-		/>
-		<FeatureCard
-			title="Color Palettes"
-			description="12 seasonal and nature-inspired palettes"
-			status="ready"
-			icon="Palette"
-		/>
+	<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+		<div class="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-center">
+			<Sparkles class="w-5 h-5 mx-auto mb-2 text-grove-600" />
+			<p class="text-sm font-medium text-[var(--color-foreground)]">Glass Components</p>
+			<p class="text-xs text-[var(--color-foreground-subtle)]">9 glassmorphism elements</p>
+		</div>
+		<div class="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-center">
+			<TreeIcon class="w-5 h-5 mx-auto mb-2 text-grove-600" />
+			<p class="text-sm font-medium text-[var(--color-foreground)]">Nature Assets</p>
+			<p class="text-xs text-[var(--color-foreground-subtle)]">{Object.keys(assets).length} SVG components</p>
+		</div>
+		<div class="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-center">
+			<Type class="w-5 h-5 mx-auto mb-2 text-grove-600" />
+			<p class="text-sm font-medium text-[var(--color-foreground)]">Typography</p>
+			<p class="text-xs text-[var(--color-foreground-subtle)]">10 curated fonts</p>
+		</div>
+		<div class="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-center">
+			<Palette class="w-5 h-5 mx-auto mb-2 text-grove-600" />
+			<p class="text-sm font-medium text-[var(--color-foreground)]">Color Palettes</p>
+			<p class="text-xs text-[var(--color-foreground-subtle)]">12+ nature palettes</p>
+		</div>
 	</div>
 
-	<!-- Glass Components Section -->
-	<section class="mb-16">
-		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-			<Sparkles class="w-6 h-6 text-amber-600" />
-			Glass Components
-		</h2>
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<!-- GLASS COMPONENTS -->
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<details id="glass" class="vineyard-section mb-8 scroll-mt-20" open>
+		<summary class="section-header">
+			<div class="flex items-center gap-3">
+				<div class="p-2 rounded-lg bg-[var(--color-accent-bg)]">
+					<Sparkles class="w-5 h-5 text-grove-600" />
+				</div>
+				<div>
+					<h2 class="text-xl font-bold text-[var(--color-foreground)]">Glass Components</h2>
+					<p class="text-sm text-[var(--color-foreground-muted)]">Frosted glassmorphism with that cozy Grove warmth</p>
+				</div>
+			</div>
+			<ChevronDown class="w-5 h-5 text-[var(--color-foreground-subtle)] section-chevron" />
+		</summary>
 
-		<div class="grid gap-6">
+		<div class="section-content grid gap-6">
 			<!-- Glass Base -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-					<code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;Glass&gt;</code>
-					<span class="text-sm font-normal text-stone-600">Base glass container</span>
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;Glass&gt;</code>
+					<span class="text-sm font-normal text-[var(--color-foreground-muted)]">Base glass container</span>
 				</h3>
 
 				<div class="grid md:grid-cols-2 gap-6">
-					<div class="bg-gradient-to-br from-emerald-100 to-green-100 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
+					<div class="bg-gradient-to-br from-grove-100 to-grove-200 dark:from-grove-900 dark:to-grove-800 rounded-xl p-8 flex items-center justify-center min-h-[200px]">
 						<Glass
 							variant={glassVariant}
 							intensity={glassIntensity}
 							gossamer={glassGossamerEnabled ? glassGossamerPreset : false}
 							class="p-6 rounded-xl"
 						>
-							<p class="text-stone-800 font-medium">Glass content here</p>
-							<p class="text-sm text-stone-600 mt-1">With {glassVariant} variant</p>
+							<p class="text-[var(--color-foreground)] font-medium">Glass content here</p>
+							<p class="text-sm text-[var(--color-foreground-muted)] mt-1">With {glassVariant} variant</p>
 						</Glass>
 					</div>
 
 					<div class="space-y-4">
 						<div>
-							<label for="glass-variant" class="block text-sm font-medium mb-2">Variant</label>
-							<select id="glass-variant" bind:value={glassVariant} class="w-full px-3 py-2 rounded-lg border bg-white">
-								<option value="surface">surface</option>
-								<option value="overlay">overlay</option>
-								<option value="card">card</option>
-								<option value="tint">tint</option>
-								<option value="accent">accent</option>
-								<option value="muted">muted</option>
+							<label for="glass-variant" class="block text-sm font-medium mb-2 text-[var(--color-foreground)]">Variant</label>
+							<select id="glass-variant" bind:value={glassVariant} class="vine-select">
+								{#each glassVariants as v}
+									<option value={v}>{v}</option>
+								{/each}
 							</select>
 						</div>
 						<div>
-							<label for="glass-intensity" class="block text-sm font-medium mb-2">Intensity</label>
-							<select id="glass-intensity" bind:value={glassIntensity} class="w-full px-3 py-2 rounded-lg border bg-white">
-								<option value="none">none</option>
-								<option value="light">light</option>
-								<option value="medium">medium</option>
-								<option value="strong">strong</option>
+							<label for="glass-intensity" class="block text-sm font-medium mb-2 text-[var(--color-foreground)]">Intensity</label>
+							<select id="glass-intensity" bind:value={glassIntensity} class="vine-select">
+								{#each glassIntensities as i}
+									<option value={i}>{i}</option>
+								{/each}
 							</select>
+						</div>
+						<div>
+							<label class="flex items-center gap-3 cursor-pointer">
+								<input type="checkbox" bind:checked={glassGossamerEnabled} class="w-4 h-4 rounded" />
+								<span class="text-sm text-[var(--color-foreground)]">Gossamer Effect</span>
+							</label>
+							{#if glassGossamerEnabled}
+								<select bind:value={glassGossamerPreset} class="vine-select mt-2">
+									{#each gossamerPresets as preset}
+										<option value={preset}>{preset}</option>
+									{/each}
+								</select>
+							{/if}
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<!-- GlassButton -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassButton&gt;</code></h3>
-				<div class="flex flex-wrap gap-4">
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;GlassButton&gt;</code>
+				</h3>
+				<div class="flex flex-wrap gap-3">
 					<GlassButton variant="default">Default</GlassButton>
 					<GlassButton variant="accent">Accent</GlassButton>
 					<GlassButton variant="dark">Dark</GlassButton>
 					<GlassButton variant="ghost">Ghost</GlassButton>
 					<GlassButton variant="outline">Outline</GlassButton>
 				</div>
+				<div class="flex flex-wrap gap-3 mt-4">
+					<GlassButton size="sm">Small</GlassButton>
+					<GlassButton size="md">Medium</GlassButton>
+					<GlassButton size="lg">Large</GlassButton>
+					<GlassButton disabled>Disabled</GlassButton>
+				</div>
 			</div>
 
-			<!-- GlassCard, GlassLogo, GlassOverlay Demo -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassCard&gt;</code>, <code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassLogo&gt;</code>, <code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassOverlay&gt;</code></h3>
+			<!-- GlassCard + GlassOverlay -->
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;GlassCard&gt;</code>
+					&amp;
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;GlassOverlay&gt;</code>
+				</h3>
 				<div class="grid md:grid-cols-3 gap-4 mb-4">
 					<GlassCard title="Default" hoverable>
-						<p class="text-sm">A warm, inviting card.</p>
+						<p class="text-sm text-[var(--color-foreground-muted)]">A warm, inviting card.</p>
 					</GlassCard>
 					<GlassCard title="Accent" variant="accent" hoverable>
-						<p class="text-sm">With grove accent tones.</p>
+						<p class="text-sm text-[var(--color-foreground-muted)]">With grove accent tones.</p>
 					</GlassCard>
 					<GlassCard title="Frosted" variant="frosted" hoverable>
-						<p class="text-sm">Maximum frost effect.</p>
+						<p class="text-sm text-[var(--color-foreground-muted)]">Maximum frost effect.</p>
 					</GlassCard>
 				</div>
 				<GlassButton onclick={() => showOverlayDemo = true}>
@@ -409,306 +450,342 @@
 			</div>
 
 			<!-- GlassCarousel -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;GlassCarousel&gt;</code></h3>
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;GlassCarousel&gt;</code>
+				</h3>
 				<div class="max-w-md mx-auto">
 					<GlassCarousel images={carouselImages} variant="frosted" />
 				</div>
 			</div>
-		</div>
-	</section>
 
-	<!-- Nature Assets Section -->
-	<section class="mb-16">
-		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-			<TreeIcon class="w-6 h-6 text-emerald-600" />
-			Nature Assets ({Object.keys(assets).length} Components)
-		</h2>
-
-		<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-			<div class="grid md:grid-cols-2 gap-8">
-				<!-- Preview Panel -->
-				<div>
-					<div class="bg-gradient-to-b from-sky-100 to-emerald-50 rounded-xl p-8 flex items-center justify-center min-h-[300px] border">
-						{#if CurrentComponent}
-							{#key selectedAsset + JSON.stringify(propValues)}
-								<svelte:boundary onerror={(e) => { componentError = e instanceof Error ? e.message : String(e); }}>
-									<CurrentComponent class="w-32 h-32" {...propValues} />
-									{#snippet failed()}
-										<div class="text-center text-red-500">
-											<p class="text-sm font-medium">Component error</p>
-											<p class="text-xs mt-1 opacity-75">{componentError ?? 'Failed to render'}</p>
-										</div>
-									{/snippet}
-								</svelte:boundary>
-							{/key}
-						{/if}
-					</div>
-					<p class="text-center mt-4 text-stone-600 font-mono text-sm">
-						&lt;{selectedAsset} /&gt;
-					</p>
+			<!-- Logo -->
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;Logo&gt;</code>
+					&amp;
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;GlassLogo&gt;</code>
+				</h3>
+				<div class="flex flex-wrap gap-2 mb-4">
+					<span class="text-sm text-[var(--color-foreground-muted)]">Season:</span>
+					{#each ['spring', 'summer', 'autumn', 'winter'] as s}
+						<button
+							class="px-3 py-1 text-sm rounded-full transition-colors {logoSeason === s ? 'bg-grove-600 text-white' : 'bg-[var(--color-accent-bg)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'}"
+							onclick={() => logoSeason = s as typeof logoSeason}
+						>{s}</button>
+					{/each}
 				</div>
-
-				<!-- Controls Panel -->
-				<div class="space-y-6">
-					<div>
-						<label for="asset-selector" class="block text-sm font-medium mb-2">Select Asset</label>
-						<select
-							id="asset-selector"
-							bind:value={selectedAsset}
-							onchange={onAssetChange}
-							class="w-full px-4 py-2 rounded-lg border bg-white"
-						>
-							{#each categories as category}
-								<optgroup label={category}>
-									{#each getAssetsByCategory(category) as [name, _]}
-										<option value={name}>{name}</option>
-									{/each}
-								</optgroup>
-							{/each}
-						</select>
+				<div class="flex justify-center gap-8 items-end">
+					<div class="text-center">
+						<Logo size="lg" season={logoSeason} />
+						<p class="text-xs text-[var(--color-foreground-subtle)] mt-2">Logo</p>
 					</div>
-
-					<!-- Props Controls -->
-					{#if getCurrentAsset()}
-						<div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-							<h4 class="text-sm font-medium uppercase tracking-wide">Properties</h4>
-
-							{#each getCurrentAsset().props as prop}
-								<div class="space-y-2">
-									<label for="prop-{prop}" class="block text-sm font-medium">{prop}</label>
-
-									{#if isColorProp(prop)}
-										{@const colorError = getColorInputError(prop)}
-										<div class="space-y-2">
-											<div class="flex gap-2 items-center">
-												<input
-													id="prop-{prop}"
-													type="color"
-													value={propValues[prop] ?? '#16a34a'}
-													oninput={(e) => propValues[prop] = e.currentTarget.value}
-													class="w-10 h-10 rounded cursor-pointer border"
-												/>
-												<input
-													type="text"
-													value={pendingColorValues[prop] ?? propValues[prop] ?? ''}
-													oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
-													placeholder="#16a34a"
-													class="flex-1 px-3 py-2 rounded-lg border bg-white font-mono text-sm {colorError ? 'border-red-400' : ''}"
-												/>
-											</div>
-											{#if colorError}
-												<p class="text-xs text-red-500">{colorError}</p>
-											{/if}
-											<div class="flex flex-wrap gap-1">
-												{#each colorPresets as preset}
-													<button
-														type="button"
-														onclick={() => { propValues[prop] = preset.value; pendingColorValues[prop] = preset.value; }}
-														class="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
-														style="background-color: {preset.value}"
-														title={preset.name}
-													></button>
-												{/each}
-											</div>
-										</div>
-									{:else if isBooleanProp(prop)}
-										<label class="flex items-center gap-3 cursor-pointer">
-											<input type="checkbox" bind:checked={propValues[prop]} class="w-5 h-5 rounded" />
-											<span class="text-sm">{propValues[prop] !== false ? 'Enabled' : 'Disabled'}</span>
-										</label>
-									{:else if hasOptions(prop)}
-										<select
-											id="prop-{prop}"
-											bind:value={propValues[prop]}
-											class="w-full px-3 py-2 rounded-lg border bg-white text-sm"
-										>
-											<option value={undefined}>Default</option>
-											{#each getOptions(prop) as option}
-												<option value={option}>{option}</option>
-											{/each}
-										</select>
-									{:else if isNumericProp(prop)}
-										{@const range = getNumericRange(prop)}
-										<div class="space-y-1">
-											<input
-												id="prop-{prop}"
-												type="range"
-												min={range.min}
-												max={range.max}
-												step={range.step}
-												bind:value={propValues[prop]}
-												class="w-full"
-											/>
-											<div class="flex justify-between text-xs text-stone-500">
-												<span>{range.min}</span>
-												<span class="font-medium">{propValues[prop]?.toFixed(range.step < 1 ? 1 : 0) ?? 'default'}</span>
-												<span>{range.max}</span>
-											</div>
-										</div>
-									{:else}
-										<input
-											id="prop-{prop}"
-											type="text"
-											bind:value={propValues[prop]}
-											placeholder="Default"
-											class="w-full px-3 py-2 rounded-lg border bg-white text-sm"
-										/>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/if}
-
-					<button
-						type="button"
-						onclick={() => propValues = {}}
-						class="w-full px-4 py-2 rounded-lg border text-sm hover:bg-stone-50 transition-colors"
-					>
-						Reset to Defaults
-					</button>
+					<div class="text-center">
+						<GlassLogo size={64} season={logoSeason} />
+						<p class="text-xs text-[var(--color-foreground-subtle)] mt-2">Default</p>
+					</div>
+					<div class="text-center">
+						<GlassLogo size={64} season={logoSeason} variant="frosted" />
+						<p class="text-xs text-[var(--color-foreground-subtle)] mt-2">Frosted</p>
+					</div>
+					<div class="text-center">
+						<GlassLogo size={64} season={logoSeason} variant="ethereal" />
+						<p class="text-xs text-[var(--color-foreground-subtle)] mt-2">Ethereal</p>
+					</div>
 				</div>
 			</div>
 		</div>
-	</section>
+	</details>
 
-	<!-- Typography Section -->
-	<section class="mb-16">
-		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-			<Type class="w-6 h-6 text-purple-600" />
-			Typography (10 Fonts)
-		</h2>
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<!-- NATURE ASSETS -->
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<details id="nature" class="vineyard-section mb-8 scroll-mt-20" open>
+		<summary class="section-header">
+			<div class="flex items-center gap-3">
+				<div class="p-2 rounded-lg bg-[var(--color-accent-bg)]">
+					<TreeIcon class="w-5 h-5 text-grove-600" />
+				</div>
+				<div>
+					<h2 class="text-xl font-bold text-[var(--color-foreground)]">Nature Assets</h2>
+					<p class="text-sm text-[var(--color-foreground-muted)]">{Object.keys(assets).length} SVG components across {categories.length} categories</p>
+				</div>
+			</div>
+			<ChevronDown class="w-5 h-5 text-[var(--color-foreground-subtle)] section-chevron" />
+		</summary>
 
-		<div class="space-y-6">
+		<div class="section-content">
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<div class="grid md:grid-cols-2 gap-8">
+					<!-- Preview Panel -->
+					<div>
+						<div class="bg-gradient-to-b from-sky-100 to-emerald-50 dark:from-sky-900/30 dark:to-emerald-900/20 rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-[var(--color-border-subtle)]">
+							{#if CurrentComponent}
+								{#key selectedAsset + JSON.stringify(propValues)}
+									<svelte:boundary onerror={(e) => { componentError = e instanceof Error ? e.message : String(e); }}>
+										<CurrentComponent class="w-32 h-32" {...propValues} />
+										{#snippet failed()}
+											<div class="text-center text-red-500">
+												<p class="text-sm font-medium">Component error</p>
+												<p class="text-xs mt-1 opacity-75">{componentError ?? 'Failed to render'}</p>
+											</div>
+										{/snippet}
+									</svelte:boundary>
+								{/key}
+							{/if}
+						</div>
+						<p class="text-center mt-4 text-[var(--color-foreground-muted)] font-mono text-sm">
+							&lt;{selectedAsset} /&gt;
+						</p>
+					</div>
+
+					<!-- Controls Panel -->
+					<div class="space-y-6">
+						<div>
+							<label for="asset-selector" class="block text-sm font-medium mb-2 text-[var(--color-foreground)]">Select Asset</label>
+							<select
+								id="asset-selector"
+								bind:value={selectedAsset}
+								onchange={onAssetChange}
+								class="vine-select"
+							>
+								{#each categories as category}
+									<optgroup label={category}>
+										{#each getAssetsByCategory(category) as [name, _]}
+											<option value={name}>{name}</option>
+										{/each}
+									</optgroup>
+								{/each}
+							</select>
+						</div>
+
+						<!-- Props Controls -->
+						{#if getCurrentAsset()}
+							<div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+								<h4 class="text-sm font-medium uppercase tracking-wide text-[var(--color-foreground-subtle)]">Properties</h4>
+
+								{#each getCurrentAsset().props as prop}
+									<div class="space-y-2">
+										<label for="prop-{prop}" class="block text-sm font-medium text-[var(--color-foreground)]">{prop}</label>
+
+										{#if isColorProp(prop)}
+											{@const colorError = getColorInputError(prop)}
+											<div class="space-y-2">
+												<div class="flex gap-2 items-center">
+													<input
+														id="prop-{prop}"
+														type="color"
+														value={propValues[prop] ?? '#16a34a'}
+														oninput={(e) => propValues[prop] = e.currentTarget.value}
+														class="w-10 h-10 rounded cursor-pointer border border-[var(--color-border)]"
+													/>
+													<input
+														type="text"
+														value={pendingColorValues[prop] ?? propValues[prop] ?? ''}
+														oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
+														placeholder="#16a34a"
+														class="vine-input flex-1 font-mono text-sm {colorError ? 'border-red-400' : ''}"
+													/>
+												</div>
+												{#if colorError}
+													<p class="text-xs text-red-500">{colorError}</p>
+												{/if}
+												<div class="flex flex-wrap gap-1">
+													{#each colorPresets as preset}
+														<button
+															type="button"
+															onclick={() => { propValues[prop] = preset.value; pendingColorValues[prop] = preset.value; }}
+															class="w-6 h-6 rounded-full border-2 border-[var(--color-surface-elevated)] shadow-sm hover:scale-110 transition-transform"
+															style="background-color: {preset.value}"
+															title={preset.name}
+														></button>
+													{/each}
+												</div>
+											</div>
+										{:else if isBooleanProp(prop)}
+											<label class="flex items-center gap-3 cursor-pointer">
+												<input type="checkbox" bind:checked={propValues[prop]} class="w-5 h-5 rounded" />
+												<span class="text-sm text-[var(--color-foreground-muted)]">{propValues[prop] !== false ? 'Enabled' : 'Disabled'}</span>
+											</label>
+										{:else if hasOptions(prop)}
+											<select
+												id="prop-{prop}"
+												bind:value={propValues[prop]}
+												class="vine-select text-sm"
+											>
+												<option value={undefined}>Default</option>
+												{#each getOptions(prop) as option}
+													<option value={option}>{option}</option>
+												{/each}
+											</select>
+										{:else if isNumericProp(prop)}
+											{@const range = getNumericRange(prop)}
+											<div class="space-y-1">
+												<input
+													id="prop-{prop}"
+													type="range"
+													min={range.min}
+													max={range.max}
+													step={range.step}
+													bind:value={propValues[prop]}
+													class="w-full"
+												/>
+												<div class="flex justify-between text-xs text-[var(--color-foreground-subtle)]">
+													<span>{range.min}</span>
+													<span class="font-medium">{propValues[prop]?.toFixed(range.step < 1 ? 1 : 0) ?? 'default'}</span>
+													<span>{range.max}</span>
+												</div>
+											</div>
+										{:else}
+											<input
+												id="prop-{prop}"
+												type="text"
+												bind:value={propValues[prop]}
+												placeholder="Default"
+												class="vine-input text-sm"
+											/>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
+
+						<button
+							type="button"
+							onclick={() => propValues = {}}
+							class="w-full px-4 py-2 rounded-lg border border-[var(--color-border)] text-sm text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
+						>
+							Reset to Defaults
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</details>
+
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<!-- TYPOGRAPHY -->
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<details id="typography" class="vineyard-section mb-8 scroll-mt-20" open>
+		<summary class="section-header">
+			<div class="flex items-center gap-3">
+				<div class="p-2 rounded-lg bg-[var(--color-accent-bg)]">
+					<Type class="w-5 h-5 text-grove-600" />
+				</div>
+				<div>
+					<h2 class="text-xl font-bold text-[var(--color-foreground)]">Typography</h2>
+					<p class="text-sm text-[var(--color-foreground-muted)]">10 fonts for every mood, from cozy headers to crisp code</p>
+				</div>
+			</div>
+			<ChevronDown class="w-5 h-5 text-[var(--color-foreground-subtle)] section-chevron" />
+		</summary>
+
+		<div class="section-content grid gap-6">
 			<!-- FontProvider -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h3 class="text-lg font-semibold mb-4"><code class="text-sm px-2 py-1 rounded bg-stone-100">&lt;FontProvider&gt;</code></h3>
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h3 class="text-lg font-semibold mb-4 text-[var(--color-foreground)]">
+					<code class="text-sm px-2 py-1 rounded bg-[var(--color-accent-bg)] text-[var(--color-accent-text)]">&lt;FontProvider&gt;</code>
+				</h3>
 				<div class="space-y-4">
 					<div class="flex flex-wrap gap-2">
 						{#each fonts as f}
 							<button
-								class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-purple-600 text-white' : 'bg-stone-100 hover:bg-stone-200'}"
+								class="px-2 py-1 text-xs rounded transition-colors {selectedFont === f.id ? 'bg-grove-600 text-white' : 'bg-[var(--color-accent-bg)] text-[var(--color-foreground-muted)] hover:bg-[var(--color-surface-hover)]'}"
 								onclick={() => selectedFont = f.id as FontId}
 							>{f.name}</button>
 						{/each}
 					</div>
-					<div class="p-6 bg-white/60 rounded-lg border">
-						<FontProvider font={selectedFont} as="p" class="text-2xl">
+					<div class="p-6 bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border-subtle)]">
+						<FontProvider font={selectedFont} as="p" class="text-2xl text-[var(--color-foreground)]">
 							The quick brown fox jumps over the lazy dog.
 						</FontProvider>
-						<p class="text-sm text-stone-600 mt-2">
-							{fonts.find(f => f.id === selectedFont)?.description}
+						<p class="text-sm text-[var(--color-foreground-subtle)] mt-2">
+							{fonts.find((f: { id: string; description?: string }) => f.id === selectedFont)?.description}
 						</p>
 					</div>
 				</div>
 			</div>
 
 			<!-- Display Fonts -->
-			<div class="p-6 rounded-xl bg-white/50 backdrop-blur-sm border border-white/40">
-				<h4 class="font-semibold mb-4">Display Fonts</h4>
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Display Fonts</h4>
 				<div class="space-y-4">
-					<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
-						<Alagard as="h3" class="text-2xl text-purple-900 mb-2">
+					<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/20 rounded-lg">
+						<Alagard as="h3" class="text-2xl text-purple-900 dark:text-purple-200 mb-2">
 							Welcome to the Fantasy Realm
 						</Alagard>
-						<p class="text-sm text-purple-700">Alagard - pixel art medieval display font</p>
+						<p class="text-sm text-purple-700 dark:text-purple-300">Alagard - pixel art medieval display font</p>
 					</div>
-					<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
-						<Calistoga as="h3" class="text-2xl text-amber-900 mb-2">
+					<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg">
+						<Calistoga as="h3" class="text-2xl text-amber-900 dark:text-amber-200 mb-2">
 							Friendly Headlines Welcome You
 						</Calistoga>
-						<p class="text-sm text-amber-700">Calistoga - casual brush serif</p>
+						<p class="text-sm text-amber-700 dark:text-amber-300">Calistoga - casual brush serif</p>
+					</div>
+					<div class="p-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg">
+						<Caveat as="h3" class="text-2xl text-rose-900 dark:text-rose-200 mb-2">
+							A personal note just for you...
+						</Caveat>
+						<p class="text-sm text-rose-700 dark:text-rose-300">Caveat - handwritten script, personal and informal</p>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
 
-	<!-- Color Palettes Section -->
-	<section class="mb-16">
-		<h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-			<Palette class="w-6 h-6 text-pink-600" />
-			Color Palettes
-		</h2>
-
-		<div class="grid gap-6">
-			<!-- Spring Growth -->
-			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
-				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Spring Growth</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each Object.entries(spring) as [name, color]}
-						<div class="flex flex-col items-center gap-1">
-							<div
-								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-								style="background-color: {color};"
-								title={name}
-							></div>
-							<span class="text-xs text-stone-500">{name}</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- Summer Greens -->
-			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
-				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Summer Greens</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each Object.entries(greens) as [name, color]}
-						<div class="flex flex-col items-center gap-1">
-							<div
-								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-								style="background-color: {color};"
-								title={name}
-							></div>
-							<span class="text-xs text-stone-500">{name}</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- Autumn Colors -->
-			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
-				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Autumn Colors</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each Object.entries(autumn) as [name, color]}
-						<div class="flex flex-col items-center gap-1">
-							<div
-								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-								style="background-color: {color};"
-								title={name}
-							></div>
-							<span class="text-xs text-stone-500">{name}</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- More palettes... showing just a few for brevity -->
-			<div class="p-4 rounded-xl bg-white/40 backdrop-blur-sm border border-white/60">
-				<h3 class="text-sm font-medium uppercase tracking-wide mb-3">Midnight Bloom</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each Object.entries(midnightBloom) as [name, color]}
-						<div class="flex flex-col items-center gap-1">
-							<div
-								class="w-8 h-8 rounded-lg shadow-sm border border-black/10"
-								style="background-color: {color};"
-								title={name}
-							></div>
-							<span class="text-xs text-stone-500">{name}</span>
-						</div>
-					{/each}
+			<!-- Monospace -->
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Monospace Fonts</h4>
+				<div class="p-4 bg-gray-900 rounded-lg">
+					<IBMPlexMono as="code" class="text-grove-400 block mb-2">
+						// IBM Plex Mono - corporate warmth
+					</IBMPlexMono>
+					<IBMPlexMono as="pre" class="text-gray-100 text-sm">{`function greet(name: string) {
+  console.log(\`Hello, \${name}!\`);
+}
+greet("Grove");`}</IBMPlexMono>
 				</div>
 			</div>
 		</div>
-	</section>
-</VineyardLayout>
+	</details>
+
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<!-- COLOR PALETTES -->
+	<!-- ═══════════════════════════════════════════════════════ -->
+	<details id="palettes" class="vineyard-section mb-8 scroll-mt-20" open>
+		<summary class="section-header">
+			<div class="flex items-center gap-3">
+				<div class="p-2 rounded-lg bg-[var(--color-accent-bg)]">
+					<Palette class="w-5 h-5 text-grove-600" />
+				</div>
+				<div>
+					<h2 class="text-xl font-bold text-[var(--color-foreground)]">Color Palettes</h2>
+					<p class="text-sm text-[var(--color-foreground-muted)]">The rich, natural hues that bring Grove to life</p>
+				</div>
+			</div>
+			<ChevronDown class="w-5 h-5 text-[var(--color-foreground-subtle)] section-chevron" />
+		</summary>
+
+		<div class="section-content grid gap-6">
+			{@render PaletteRow({ name: "Greens", colors: greens, description: "From dark forest depths to pale spring leaves" })}
+			{@render PaletteRow({ name: "Bark", colors: bark, description: "Warm wood tones for trunks and structure" })}
+			{@render PaletteRow({ name: "Earth", colors: earth, description: "Soil, stone, and grounding elements" })}
+			{@render PaletteRow({ name: "Natural", colors: natural, description: "Cream, birch, and soft organic tones" })}
+			{@render PaletteRow({ name: "Spring", colors: spring, description: "Fresh growth and new beginnings" })}
+			{@render PaletteRow({ name: "Spring Blossoms", colors: springBlossoms, description: "Cherry blossoms in full bloom" })}
+			{@render PaletteRow({ name: "Autumn", colors: autumn, description: "Warm golds, ambers, and falling leaves" })}
+			{@render PaletteRow({ name: "Autumn Reds", colors: autumnReds, description: "Maple and cherry fall foliage" })}
+			{@render PaletteRow({ name: "Winter", colors: winter, description: "Snow, frost, and peaceful quiet" })}
+			{@render PaletteRow({ name: "Pinks", colors: pinks, description: "Blush, rose, and soft florals" })}
+			{@render PaletteRow({ name: "Midnight Bloom", colors: midnightBloom, description: "A late-night tea cafe palette" })}
+		</div>
+	</details>
+</div>
 
 <!-- Overlay Demo -->
 {#if showOverlayDemo}
 	<GlassOverlay onclick={() => showOverlayDemo = false}>
 		<div class="flex items-center justify-center h-full">
 			<GlassCard variant="frosted" class="max-w-sm mx-4" title="Overlay Demo">
-				<p>Click anywhere on the backdrop to close this overlay.</p>
+				<p class="text-[var(--color-foreground-muted)]">Click anywhere on the backdrop to close this overlay.</p>
 				<div class="mt-4">
 					<GlassButton variant="accent" onclick={() => showOverlayDemo = false}>Close</GlassButton>
 				</div>
@@ -716,3 +793,107 @@
 		</div>
 	</GlassOverlay>
 {/if}
+
+<!-- Helper Snippets -->
+{#snippet PaletteRow({ name, colors, description }: { name: string; colors: Record<string, string>; description: string })}
+	<div class="p-4 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-subtle)]">
+		<div class="flex items-center justify-between mb-3">
+			<div>
+				<h4 class="font-medium text-[var(--color-foreground)]">{name}</h4>
+				<p class="text-sm text-[var(--color-foreground-subtle)]">{description}</p>
+			</div>
+		</div>
+		<div class="flex flex-wrap gap-1.5">
+			{#each Object.entries(colors) as [key, color]}
+				<div class="group relative">
+					<button
+						class="w-10 h-10 rounded-md shadow-sm border border-black/10 dark:border-white/10 cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-grove-500"
+						style="background-color: {color}"
+						title="{key}: {color}"
+						onclick={() => navigator.clipboard.writeText(String(color))}
+					></button>
+					<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+						{key}: {color}
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+{/snippet}
+
+<style>
+	/* Collapsible section styles */
+	.vineyard-section {
+		border-radius: 1rem;
+		border: 1px solid var(--color-border-subtle);
+		overflow: hidden;
+	}
+
+	.section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1.25rem;
+		cursor: pointer;
+		background: var(--color-surface);
+		user-select: none;
+		list-style: none;
+		transition: background-color 0.15s ease;
+	}
+
+	.section-header:hover {
+		background: var(--color-surface-hover);
+	}
+
+	/* Remove default marker */
+	.section-header::-webkit-details-marker,
+	.section-header::marker {
+		display: none;
+		content: '';
+	}
+
+	/* Chevron rotation */
+	:global(.vineyard-section[open] .section-chevron) {
+		transform: rotate(180deg);
+	}
+
+	:global(.section-chevron) {
+		transition: transform 0.2s ease;
+		flex-shrink: 0;
+	}
+
+	.section-content {
+		padding: 1.25rem;
+		border-top: 1px solid var(--color-border-subtle);
+	}
+
+	/* Shared form element styles */
+	:global(.vine-select) {
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-elevated);
+		color: var(--color-foreground);
+		font-size: 0.875rem;
+	}
+
+	:global(.vine-input) {
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-elevated);
+		color: var(--color-foreground);
+	}
+
+	/* Respect reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		:global(.section-chevron) {
+			transition: none;
+		}
+		.section-header {
+			transition: none;
+		}
+	}
+</style>
