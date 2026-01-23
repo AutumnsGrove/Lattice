@@ -19,7 +19,7 @@
 	/* Text colors */
 	--color-text: hsl(var(--foreground));
 	--color-text-muted: hsl(var(--muted-foreground));
-	--color-text-subtle: hsl(0 0% 53%);
+	--color-text-subtle: hsl(var(--foreground));
 
 	/* Background colors */
 	--color-bg-secondary: hsl(var(--secondary));
@@ -78,7 +78,7 @@
 	/* Dark mode values */
 	--color-text-dark: hsl(var(--foreground));
 	--color-text-muted-dark: hsl(var(--muted-foreground));
-	--color-text-subtle-dark: hsl(0 0% 72%);
+	--color-text-subtle-dark: hsl(var(--foreground));
 	--color-bg-secondary-dark: hsl(0 0% 10%);
 	--color-bg-tertiary-dark: hsl(0 0% 16%);
 	--color-border-dark: hsl(var(--border));
@@ -101,22 +101,22 @@
 	/* Component-specific colors for standardized dark mode */
 	/* Blog header */
 	--blog-header-title: #2c5f2d;
-	--blog-header-text: #666;
+	--blog-header-text: #000000;
 
 	/* Admin actions */
 	--admin-indicator: #28a745;
-	--admin-link-text: #666;
+	--admin-link-text: #000000;
 	--admin-link-hover-bg: rgba(0, 0, 0, 0.05);
 
 	/* Post viewer */
 	--viewer-border: #e0e0e0;
 	--viewer-bg: #fafafa;
 	--viewer-hover-shadow: rgba(44, 95, 45, 0.15);
-	--viewer-date-text: #888;
-	--viewer-content-text: #555;
+	--viewer-date-text: #000000;
+	--viewer-content-text: #000000;
 	--viewer-footer-border: #e8e8e8;
 	--viewer-tag-bg: #e8f5e9;
-	--viewer-caption-text: #777;
+	--viewer-caption-text: #000000;
 	--viewer-caption-border: #ddd;
 
 	/* Light mode backgrounds and text */
@@ -124,12 +124,12 @@
 	--light-bg-secondary: #f9f9f9;
 	--light-bg-tertiary: #f5f5f5;
 	--light-bg-hover: rgba(0, 0, 0, 0.05);
-	--light-text-primary: #333;
-	--light-text-secondary: #555;
-	--light-text-tertiary: #777;
-	--light-text-muted: #888;
-	--light-text-light: #999;
-	--light-text-very-light: #aaa;
+	--light-text-primary: #000000;
+	--light-text-secondary: #000000;
+	--light-text-tertiary: #000000;
+	--light-text-muted: #000000;
+	--light-text-light: #000000;
+	--light-text-very-light: #000000;
 	--light-border-primary: #e0e0e0;
 	--light-border-secondary: #e8e8e8;
 	--light-border-light: #ddd;
@@ -197,10 +197,10 @@
 	--slate-glass-bg: rgba(30, 41, 59, 0.9);
 	--slate-glass-border: rgba(71, 85, 105, 0.3);
 
-	/* Grove sage text - dark mode muted text (WCAG AA compliant) */
-	--grove-text-muted: rgba(167, 199, 183, 0.75);
-	--grove-text-subtle: rgba(167, 199, 183, 0.6);
-	--grove-text-strong: rgba(167, 199, 183, 0.9);
+	/* Grove sage text - dark mode muted text */
+	--grove-text-muted: #ffffff;
+	--grove-text-subtle: #ffffff;
+	--grove-text-strong: #ffffff;
 
 	/* Shadow tokens - dark mode */
 	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -211,22 +211,22 @@
 	/* Dark mode component-specific overrides */
 	/* Blog header */
 	--blog-header-title: #5cb85f;
-	--blog-header-text: var(--color-text-muted-dark);
+	--blog-header-text: #ffffff;
 
 	/* Admin actions */
 	--admin-indicator: #5cb85f;
-	--admin-link-text: #a8a8a8;
+	--admin-link-text: #ffffff;
 	--admin-link-hover-bg: rgba(255, 255, 255, 0.05);
 
 	/* Post viewer */
 	--viewer-border: #3a3a3a;
 	--viewer-bg: #1a1a1a;
 	--viewer-hover-shadow: rgba(92, 184, 95, 0.2);
-	--viewer-date-text: #a8a8a8;
-	--viewer-content-text: #c8c8c8;
+	--viewer-date-text: #ffffff;
+	--viewer-content-text: #ffffff;
 	--viewer-footer-border: #333;
 	--viewer-tag-bg: #1f3a1f;
-	--viewer-caption-text: #a0a0a0;
+	--viewer-caption-text: #ffffff;
 	--viewer-caption-border: #444;
 
 	/* Dark mode backgrounds and text */
@@ -234,12 +234,12 @@
 	--light-bg-secondary: #252525;
 	--light-bg-tertiary: #2a2a2a;
 	--light-bg-hover: rgba(255, 255, 255, 0.05);
-	--light-text-primary: #f5f5f5;
-	--light-text-secondary: #d4d4d4;
-	--light-text-tertiary: #c0c0c0;
-	--light-text-muted: #a8a8a8;
-	--light-text-light: #909090;
-	--light-text-very-light: #eeeeee;
+	--light-text-primary: #ffffff;
+	--light-text-secondary: #ffffff;
+	--light-text-tertiary: #ffffff;
+	--light-text-muted: #ffffff;
+	--light-text-light: #ffffff;
+	--light-text-very-light: #ffffff;
 	--light-border-primary: #3a3a3a;
 	--light-border-secondary: #333;
 	--light-border-light: #444;

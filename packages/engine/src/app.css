@@ -12,11 +12,11 @@
 
 		/* Secondary: Light Gray (#f5f5f5) */
 		--secondary: 0 0% 96%;
-		--secondary-foreground: 0 0% 20%;
+		--secondary-foreground: 0 0% 0%;
 
 		/* Muted: Medium Gray */
 		--muted: 0 0% 96%;
-		--muted-foreground: 0 0% 40%;
+		--muted-foreground: 0 0% 0%;
 
 		/* Accent: Purple for tags (#7c4dab) */
 		--accent: 270 38% 49%;
@@ -28,15 +28,15 @@
 
 		/* Background & Foreground */
 		--background: 0 0% 98%;
-		--foreground: 0 0% 20%;
+		--foreground: 0 0% 0%;
 
 		/* Card */
 		--card: 0 0% 100%;
-		--card-foreground: 0 0% 20%;
+		--card-foreground: 0 0% 0%;
 
 		/* Popover */
 		--popover: 0 0% 100%;
-		--popover-foreground: 0 0% 20%;
+		--popover-foreground: 0 0% 0%;
 
 		/* Border & Input */
 		--border: 0 0% 88%;
@@ -56,11 +56,11 @@
 
 		/* Secondary: Dark Gray */
 		--secondary: 0 0% 10%;
-		--secondary-foreground: 0 0% 90%;
+		--secondary-foreground: 0 0% 100%;
 
 		/* Muted: Darker Gray */
 		--muted: 0 0% 15%;
-		--muted-foreground: 0 0% 65%;
+		--muted-foreground: 0 0% 100%;
 
 		/* Accent: Lighter Purple for tags */
 		--accent: 270 38% 60%;
@@ -72,15 +72,15 @@
 
 		/* Background & Foreground */
 		--background: 0 0% 10%;
-		--foreground: 0 0% 94%;
+		--foreground: 0 0% 100%;
 
 		/* Card */
 		--card: 0 0% 14%;
-		--card-foreground: 0 0% 94%;
+		--card-foreground: 0 0% 100%;
 
 		/* Popover */
 		--popover: 0 0% 14%;
-		--popover-foreground: 0 0% 94%;
+		--popover-foreground: 0 0% 100%;
 
 		/* Border & Input */
 		--border: 0 0% 20%;

@@ -55,12 +55,12 @@
   --color-secondary: var(--cream-500);
   --color-secondary-hover: var(--cream-400);
   --color-secondary-active: var(--cream-300);
-  --color-secondary-foreground: var(--bark);
+  --color-secondary-foreground: var(--color-foreground);
 
   --color-background: var(--cream);
-  --color-foreground: var(--bark);
+  --color-foreground: #000000;
   --color-muted: var(--cream-300);
-  --color-muted-foreground: var(--bark-700);
+  --color-muted-foreground: #000000;
 
   --color-accent: var(--grove-100);
   --color-accent-foreground: var(--grove-800);
@@ -264,9 +264,9 @@
   --bark-950: #f9f6f3;
 
   --color-background: var(--cream);
-  --color-foreground: var(--bark);
+  --color-foreground: #ffffff;
   --color-muted: var(--cream-300);
-  --color-muted-foreground: var(--bark-300);
+  --color-muted-foreground: #ffffff;
   --color-border: var(--cream-300);
   --color-border-strong: var(--cream-400);
   --color-input: var(--cream-300);

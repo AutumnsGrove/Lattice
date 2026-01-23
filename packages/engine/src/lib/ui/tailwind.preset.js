@@ -59,13 +59,13 @@ export default {
         },
         secondary: {
           DEFAULT: '#e2ddd0',
-          foreground: '#3d2914',
+          foreground: '#000000',
         },
         background: '#fefdfb',
-        foreground: '#3d2914',
+        foreground: '#000000',
         muted: {
           DEFAULT: '#f5f2ea',
-          foreground: '#6f4d39',
+          foreground: '#000000',
         },
         accent: {
           DEFAULT: '#dcfce7',
@@ -369,13 +369,13 @@ export default {
       addComponents({
         // Base prose styling
         '.grove-prose': {
-          color: theme('colors.bark.DEFAULT'),
+          color: 'var(--color-foreground)',
           fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.body'))[0],
           lineHeight: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.body'))[1].lineHeight,
           '& h1, & h2, & h3, & h4, & h5, & h6': {
             fontFamily: 'Georgia, Cambria, "Times New Roman", Times, serif',
             fontWeight: '400',
-            color: theme('colors.bark.DEFAULT'),
+            color: 'var(--color-foreground)',
           },
           '& h1': {
             fontSize: /** @type {[string, {lineHeight: string}]} */ (theme('fontSize.display'))[0],
@@ -413,7 +413,7 @@ export default {
             borderLeftColor: theme('colors.grove.300'),
             paddingLeft: '1.25rem',
             fontStyle: 'italic',
-            color: theme('colors.bark.700'),
+            color: 'var(--color-foreground)',
           },
           '& code': {
             backgroundColor: theme('colors.cream.300'),

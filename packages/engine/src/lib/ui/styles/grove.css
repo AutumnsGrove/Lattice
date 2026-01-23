@@ -192,7 +192,7 @@
 
   .grove-btn-secondary {
     background-color: var(--cream-300);
-    color: var(--bark);
+    color: var(--color-foreground);
     border: 1px solid var(--cream-400);
   }
 
@@ -207,7 +207,7 @@
 
   .grove-btn-ghost {
     background-color: transparent;
-    color: var(--bark);
+    color: var(--color-foreground);
     border: none;
   }
 
@@ -367,7 +367,7 @@
 
   .grove-badge-default {
     background-color: var(--cream-300);
-    color: var(--bark);
+    color: var(--color-foreground);
   }
 
   .grove-badge-primary {
