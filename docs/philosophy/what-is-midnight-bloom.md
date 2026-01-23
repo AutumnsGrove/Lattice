@@ -1,8 +1,7 @@
 ---
 title: What is the Midnight Bloom?
 description: The dream at the end of Grove's roadmap — a late-night tea shop where digital and physical community intertwine
-category: help
-section: philosophy-vision
+category: philosophy
 lastUpdated: '2026-01-23'
 keywords:
   - midnight bloom
