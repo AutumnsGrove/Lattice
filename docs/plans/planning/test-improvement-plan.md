@@ -217,6 +217,8 @@ auth-session-validation.test.ts
 
 **Location:** `packages/engine/tests/integration/hooks/`
 
+**Distinction from existing tests:** `utils/csrf.test.ts` tests the CSRF _utility functions_ (`generateCSRFToken`, `validateCSRF`). These hooks tests cover the _orchestration layer_ — how the `handle` hook uses those utilities in the context of a full SvelteKit request, including cookie extraction, origin/X-Forwarded-Host comparison, and the decision to block vs. allow.
+
 ### Tests to Write
 
 ```
@@ -225,18 +227,22 @@ hooks-session.test.ts
 hooks-security-headers.test.ts
 ```
 
-**CSRF Protection:**
-- Form actions validate origin against X-Forwarded-Host
-- API endpoints validate CSRF token header against cookie
-- GET requests skip CSRF checks
-- Localhost is allowed for development
-- Mismatched origin/host returns 403
+**CSRF Protection (hooks orchestration, not utility functions):**
+- `handle` hook extracts origin and X-Forwarded-Host from request, calls validateCSRF
+- Form actions with mismatched origin/host are rejected before reaching the action
+- API endpoints validate CSRF token header against session cookie
+- GET/HEAD/OPTIONS requests skip CSRF checks entirely
+- Localhost origin is permitted in development mode
+- Missing X-Forwarded-Host falls back to Host header correctly
 
-**Session Loading:**
-- grove_session cookie triggers SessionDO validation
+**Session Loading (SessionDO via service binding):**
+- SessionDO is a Durable Object in the external Heartwood auth service, accessed via `platform.env.AUTH` service binding
+- Valid grove_session cookie triggers service binding fetch to `/session/validate`
+- Successful SessionDO response populates `locals.user` with validated user data
+- Malformed SessionDO response (missing fields, wrong shape) is rejected safely
 - access_token fallback works when grove_session absent
-- Invalid tokens don't crash (graceful degradation to anonymous)
-- User data shape is validated before populating locals
+- Invalid/expired tokens don't crash (graceful degradation to anonymous)
+- `locals.tenantId` is resolved from subdomain context (via X-Forwarded-Host)
 
 **Security Headers:**
 - All responses include HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
@@ -337,18 +343,72 @@ Snapshots for UI components are fragile and contradict the grove-testing skill's
 ### Consolidate Redundant Tests in `session.test.ts`
 8 near-identical email case-sensitivity tests can be reduced to 2-3 with parameterized inputs.
 
-### Fix `og-fetcher.test.ts` (Priority 7 above)
-Replace inline regex with imports from the actual module.
-
 ---
 
 ## Testing Infrastructure Needed
 
 ### For grove-router tests:
-- Add `@cloudflare/vitest-pool-workers` as dev dependency
+
+**Framework:** `@cloudflare/vitest-pool-workers` (already proven in `packages/post-migrator/`)
+
+This runs tests inside the Workers runtime via Miniflare, providing real `env`, `ctx`, and `cf` objects without manual mocking.
+
+**Setup:**
+- Add `@cloudflare/vitest-pool-workers` and `vitest` as dev dependencies
 - Create `vitest.config.ts` in `packages/grove-router/`
 - Add `test:run` script to `package.json`
 - Wire into root `pnpm test` and CI
+
+**vitest.config.ts structure:**
+```ts
+import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+
+export default defineWorkersConfig({
+  test: {
+    poolOptions: {
+      workers: {
+        wrangler: { configPath: "./wrangler.toml" },
+        miniflare: {
+          bindings: {
+            // R2 bucket for CDN tests
+            CDN: { /* in-memory R2 via miniflare */ }
+          }
+        }
+      }
+    }
+  }
+});
+```
+
+**How to mock the runtime:**
+- `env` — Provided automatically by the pool. R2 bucket (`CDN`) is an in-memory miniflare instance. No manual mocking needed.
+- `ctx` — Provided automatically. `ctx.waitUntil()` calls are tracked.
+- `cf` — Properties like `cf.colo` are available on the request.
+- `fetch()` to Pages projects — Use `vi.spyOn(globalThis, 'fetch')` to intercept the proxy calls to `*.pages.dev` targets. Assert the correct URL, headers (X-Forwarded-Host), and forwarded body.
+
+**Testing proxy behavior:**
+```ts
+// The worker calls fetch(pagesUrl, { headers: { "X-Forwarded-Host": host } })
+// Mock that downstream fetch and verify the request it receives:
+const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+  new Response("OK", { status: 200 })
+);
+
+const response = await worker.fetch(
+  new Request("https://alice.grove.place/blog"),
+  env, ctx
+);
+
+expect(fetchSpy).toHaveBeenCalledWith(
+  expect.stringContaining("grove-example-site.pages.dev"),
+  expect.objectContaining({
+    headers: expect.any(Headers)
+  })
+);
+// Then check the headers on the actual call
+const calledHeaders = fetchSpy.mock.calls[0][1].headers;
+expect(calledHeaders.get("X-Forwarded-Host")).toBe("alice.grove.place");
+```
 
 ### For integration tests in engine:
 - Create `packages/engine/tests/integration/` directory structure
@@ -360,6 +420,134 @@ Replace inline regex with imports from the actual module.
 - Create `e2e/` directory at project root
 - Add `test:e2e` script
 - Consider running against local dev server or preview deployment
+
+---
+
+## Database Mocking Strategy
+
+Different test types need different database approaches:
+
+### Unit tests (pure functions, utilities):
+No database needed. If a function takes a `D1Database` parameter, pass a mock that implements the interface:
+```ts
+const mockDb = {
+  prepare: vi.fn().mockReturnValue({
+    bind: vi.fn().mockReturnThis(),
+    first: vi.fn().mockResolvedValue(null),
+    all: vi.fn().mockResolvedValue({ results: [] }),
+    run: vi.fn().mockResolvedValue({ success: true })
+  })
+} as unknown as D1Database;
+```
+This is what `database.test.ts`, `session.test.ts`, and `shop.test.ts` already do successfully.
+
+### Integration tests (API endpoints, hooks):
+Use miniflare's in-memory D1 with real SQL. This catches schema issues and query bugs that interface mocking misses:
+```ts
+import { Miniflare } from "miniflare";
+
+const mf = new Miniflare({
+  modules: true,
+  d1Databases: { DB: "test-db" },
+  script: "" // We only need the D1 binding
+});
+const db = await mf.getD1Database("DB");
+
+// Apply schema before tests
+await db.exec(readFileSync("schema.sql", "utf-8"));
+```
+Use this for Priority 2 (storage), Priority 3 (webhooks), Priority 4 (auth), Priority 5 (hooks), and Priority 6 (API endpoints).
+
+### grove-router tests:
+No D1 needed. The router doesn't touch databases — it only proxies requests and serves R2 objects.
+
+### When to use which:
+| Test Type | D1 Approach | R2 Approach | KV Approach |
+|-----------|-------------|-------------|-------------|
+| Unit (functions) | Mock interface | Mock interface | Mock interface |
+| Integration (endpoints) | Miniflare in-memory | Miniflare in-memory | Miniflare in-memory |
+| grove-router | N/A | Miniflare (via pool-workers) | N/A |
+| E2E (Playwright) | Real (preview env) | Real (preview env) | Real (preview env) |
+
+---
+
+## Test Fixtures & Factories
+
+### Factory Functions (preferred)
+
+Extend the existing `packages/engine/tests/utils/test-helpers.ts` with factories for all entity types:
+
+```ts
+// Existing (keep):
+createTestTenant(overrides?)
+createTestPost(overrides?)
+
+// New (add):
+createTestUser(overrides?)        // { id, email, name, avatar, createdAt }
+createTestSession(overrides?)     // { id, userId, token, expiresAt }
+createTestSubscription(overrides?) // { id, tenantId, status, tier, lsId }
+createTestImage(overrides?)       // { key, tenantId, contentType, size }
+createTestWebhookEvent(overrides?) // { event, data, signature, timestamp }
+```
+
+Each factory returns a complete, valid object with sensible defaults. Override individual fields as needed:
+```ts
+const user = createTestUser({ email: "alice@grove.place" });
+const expiredSession = createTestSession({ expiresAt: new Date("2020-01-01") });
+```
+
+### Database Seeding
+
+For integration tests using miniflare D1, add insert helpers:
+```ts
+async function seedTestData(db: D1Database, data: {
+  tenants?: TestTenant[];
+  users?: TestUser[];
+  posts?: TestPost[];
+}) {
+  // Insert in dependency order: tenants -> users -> posts
+}
+```
+
+### Fixture Location
+
+```
+packages/engine/tests/
+├── utils/
+│   ├── setup.ts              (existing: mock env)
+│   ├── test-helpers.ts       (existing: extend with new factories)
+│   └── request-event.ts      (new: SvelteKit RequestEvent factory)
+├── fixtures/
+│   ├── schema.sql            (D1 schema for integration tests)
+│   └── seed.sql              (optional: common seed data)
+└── integration/
+    ├── storage/
+    ├── webhooks/
+    ├── auth/
+    ├── hooks/
+    └── api/
+```
+
+### SvelteKit RequestEvent Factory
+
+For testing form actions and API endpoints, mock the full `RequestEvent`:
+```ts
+function createMockRequestEvent(overrides?: Partial<RequestEvent>): RequestEvent {
+  return {
+    request: new Request("http://localhost:3000", { method: "GET" }),
+    url: new URL("http://localhost:3000"),
+    params: {},
+    locals: { user: null, tenantId: null },
+    platform: {
+      env: { DB: mockDb, IMAGES: mockR2, KV: mockKv },
+    },
+    cookies: createMockCookies(),
+    ...overrides,
+  };
+}
+```
+
+This is the single most impactful utility for Priority 5 (hooks) and Priority 6 (form actions/API endpoints).
 
 ---
 
