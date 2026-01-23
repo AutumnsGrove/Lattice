@@ -1,0 +1,45 @@
+# Grove Clearing Monitor
+# Automated health monitoring for The Clearing status page
+#
+# Cron schedules:
+# - Every 2 minutes: Health checks for all components
+# - Daily at midnight UTC: Record daily history for uptime visualization
+
+name = "grove-clearing-monitor"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Cron Triggers
+# =============================================================================
+[triggers]
+crons = [
+  "*/2 * * * *",   # Every 2 minutes: Health checks
+  "0 0 * * *"      # Daily at midnight UTC: Daily history aggregation
+]
+
+# =============================================================================
+# D1 Database - Same database as engine and clearing
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# KV Namespace - For tracking consecutive failures
+# =============================================================================
+[[kv_namespaces]]
+binding = "MONITOR_KV"
+id = "82d6537525d345f1981924bfd082248f"
+
+# =============================================================================
+# Variables
+# =============================================================================
+[vars]
+ALERT_EMAIL = "alerts@grove.place"
+
+# =============================================================================
+# Secrets (configured via wrangler secret put)
+# =============================================================================
+# RESEND_API_KEY - For email notifications (optional)
