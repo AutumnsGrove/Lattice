@@ -248,6 +248,29 @@ hooks-security-headers.test.ts
 - All responses include HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 - CSP is set appropriately for the route type
 
+### What NOT to test here (tested elsewhere):
+
+| Don't test in hooks | Already tested in | Why |
+|---------------------|-------------------|-----|
+| UUID format of CSRF tokens | `utils/csrf.test.ts` | Token generation is a utility concern |
+| Token string comparison logic | `utils/csrf.test.ts` | `validateCSRFToken` handles this |
+| Origin URL parsing edge cases | `utils/csrf.test.ts` | `validateCSRF` handles this |
+| Session cookie attribute values | `auth/session.test.ts` | Cookie options are set by session utils |
+| Rate limit counter arithmetic | `rate-limits/middleware.test.ts` | KV-based counting is tested there |
+
+**The hooks tests verify orchestration:** "Given this request shape, does the handle hook call the right utility and act on its result correctly?" They should mock the utility return values, not re-test the utility internals.
+
+```ts
+// GOOD: Test that hooks rejects when validateCSRF returns false
+vi.mock("$lib/utils/csrf", () => ({
+  validateCSRF: vi.fn().mockReturnValue(false),
+}));
+// ... assert handle() returns 403
+
+// BAD: Test that validateCSRF rejects "https://evil.com" origin
+// (that's already in utils/csrf.test.ts)
+```
+
 ---
 
 ## Priority 6: Form Action / API Endpoint Tests
@@ -291,6 +314,13 @@ gallery-actions.test.ts
 - Items per page clamped to 10-100
 - Feature toggles saved correctly
 - Custom CSS stored without XSS injection
+
+**Rate Limit Exhaustion:**
+- Upload endpoint returns 429 after 50 requests in the rate window
+- Post creation returns 429 after limit is hit
+- 429 response includes `Retry-After` header with correct wait time
+- Rate limits are per-tenant (tenant A exhausting limit doesn't affect tenant B)
+- Rate limit counter resets after window expires
 
 ---
 
@@ -423,6 +453,80 @@ expect(calledHeaders.get("X-Forwarded-Host")).toBe("alice.grove.place");
 
 ---
 
+## CI Integration
+
+### GitHub Actions Workflow Structure
+
+Tests run in two separate jobs to keep feedback fast:
+
+```yaml
+jobs:
+  unit-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:run          # All unit + integration tests
+      - run: pnpm test:router        # grove-router tests (separate vitest config)
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: unit-tests               # Only run if unit tests pass
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:e2e
+```
+
+### Timeout Configuration
+
+| Test category | Per-test timeout | Job timeout | Rationale |
+|---------------|-----------------|-------------|-----------|
+| Unit tests | 5s (vitest default) | 5min | Pure functions, fast mocks |
+| Integration tests | 10s | 8min | Miniflare startup, D1 queries |
+| grove-router tests | 10s | 3min | Workers pool startup |
+| E2E (Playwright) | 30s per test | 15min | Real browser, network latency |
+
+Set per-test timeouts in vitest config:
+```ts
+// packages/engine/vitest.config.ts
+test: {
+  testTimeout: 10_000,  // 10s for integration tests
+}
+```
+
+### Failure Behavior
+
+- **Unit + integration:** Run all tests, don't fail fast. Report full failure list so multiple issues can be fixed in one pass.
+- **E2E:** Fail fast on first failure. E2E tests are expensive and usually one failure means the environment is broken.
+- **grove-router:** Run all tests. The suite is small enough that full results are always useful.
+
+Configure in vitest:
+```ts
+test: {
+  bail: 0,  // Run all tests (don't bail on first failure)
+}
+```
+
+### Root package.json Scripts
+
+```json
+{
+  "test": "vitest run --reporter=verbose",
+  "test:router": "vitest run --config packages/grove-router/vitest.config.ts",
+  "test:e2e": "playwright test",
+  "test:ci": "pnpm test && pnpm test:router"
+}
+```
+
+---
+
 ## Database Mocking Strategy
 
 Different test types need different database approaches:
@@ -460,6 +564,60 @@ Use this for Priority 2 (storage), Priority 3 (webhooks), Priority 4 (auth), Pri
 
 ### grove-router tests:
 No D1 needed. The router doesn't touch databases — it only proxies requests and serves R2 objects.
+
+### Test Isolation & Cleanup
+
+Each test must start with a clean state. Cross-test contamination is prevented by:
+
+**D1 (miniflare in-memory):**
+```ts
+beforeEach(async () => {
+  // Drop and recreate all tables — fast since it's in-memory
+  await db.exec("DROP TABLE IF EXISTS posts; DROP TABLE IF EXISTS tenants;");
+  await db.exec(readFileSync("tests/fixtures/schema.sql", "utf-8"));
+});
+```
+
+**R2 (miniflare in-memory):**
+```ts
+beforeEach(async () => {
+  // List and delete all objects from previous test
+  const listed = await r2.list();
+  for (const obj of listed.objects) {
+    await r2.delete(obj.key);
+  }
+});
+```
+
+**KV (miniflare in-memory):**
+```ts
+beforeEach(async () => {
+  const listed = await kv.list();
+  for (const key of listed.keys) {
+    await kv.delete(key.name);
+  }
+});
+```
+
+**Why not `afterEach`?** — If a test fails mid-execution, `afterEach` still runs but the state may be partially corrupted. Cleaning in `beforeEach` guarantees each test starts clean regardless of previous test outcomes.
+
+**Miniflare lifecycle:** Create the Miniflare instance once in `beforeAll`, get bindings, then reset state in `beforeEach`. Don't recreate Miniflare per test — startup is expensive (~200ms). The in-memory bindings survive across tests within the same `describe` block, which is why explicit cleanup is needed.
+
+```ts
+let db: D1Database;
+let r2: R2Bucket;
+
+beforeAll(async () => {
+  const mf = new Miniflare({ /* config */ });
+  db = await mf.getD1Database("DB");
+  r2 = await mf.getR2Bucket("IMAGES");
+});
+
+afterAll(async () => {
+  // Miniflare handles its own cleanup on GC, but explicit dispose is cleaner
+  await mf.dispose();
+});
+```
 
 ### When to use which:
 | Test Type | D1 Approach | R2 Approach | KV Approach |
