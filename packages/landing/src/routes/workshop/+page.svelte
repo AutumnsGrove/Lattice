@@ -570,7 +570,7 @@
 					name: 'Lumen',
 					tagline: 'AI Gateway',
 					description: 'In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove\'s unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.',
-					status: 'planned',
+					status: 'live',
 					icon: 'lamp-ceiling',
 					integration: 'Internal AI routing for all Grove services',
 					spec: '/knowledge/specs/lumen-spec',
