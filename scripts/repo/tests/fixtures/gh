@@ -1,0 +1,159 @@
+#!/bin/bash
+#
+# Mock GitHub CLI (gh) for BATS tests
+#
+# Pattern-matches on arguments to return canned responses.
+# Falls through to exit 1 for unhandled patterns.
+#
+
+args="$*"
+
+# --- gh api user ---
+if [[ "$args" == *"api user"* ]]; then
+    echo "autumn"
+    exit 0
+fi
+
+# --- gh issue view ---
+if [[ "$args" == *"issue view 42"* ]]; then
+    if [[ "$args" == *"--json"* ]]; then
+        echo '{"number":42,"title":"Auth bug in login flow","state":"OPEN","labels":[{"name":"bug"}]}'
+    else
+        cat <<'EOF'
+title:	Auth bug in login flow
+state:	OPEN
+author:	autumn
+labels:	bug
+assignees:	autumn
+milestone:	v1.2
+body:
+  Users are getting logged out unexpectedly when switching pages.
+  Steps to reproduce:
+  1. Log in
+  2. Navigate to settings
+  3. Observe redirect to login
+EOF
+    fi
+    exit 0
+fi
+
+if [[ "$args" == *"issue view 999"* ]]; then
+    echo "Could not resolve to an issue or pull request with the number of 999." >&2
+    exit 1
+fi
+
+if [[ "$args" == *"issue view"* ]]; then
+    # Generic issue view for other numbers
+    local_num=$(echo "$args" | grep -oE 'view [0-9]+' | grep -oE '[0-9]+')
+    cat <<EOF
+title:	Issue #${local_num:-0}
+state:	OPEN
+author:	autumn
+EOF
+    exit 0
+fi
+
+# --- gh issue list ---
+
+# JSON format (used by gfissueboard)
+if [[ "$args" == *"issue list"*"--json"* ]]; then
+    cat <<'EOF'
+[
+  {"number":42,"title":"Auth bug in login flow","labels":[{"name":"bug"}],"assignees":[{"login":"autumn"}],"updatedAt":"2025-01-10T00:00:00Z"},
+  {"number":15,"title":"Add dark mode support","labels":[{"name":"enhancement"}],"assignees":[],"updatedAt":"2025-01-20T00:00:00Z"},
+  {"number":8,"title":"Fix typo in README","labels":[],"assignees":[],"updatedAt":"2024-11-01T00:00:00Z"}
+]
+EOF
+    exit 0
+fi
+
+# Closed issues
+if [[ "$args" == *"issue list"*"--state closed"* ]]; then
+    cat <<'EOF'
+7	Update deps	closed	2025-01-05
+3	Initial setup	closed	2024-12-01
+EOF
+    exit 0
+fi
+
+# Assignee filter
+if [[ "$args" == *"issue list"*"--assignee"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	bug	2025-01-10
+EOF
+    exit 0
+fi
+
+# Label filter (bug)
+if [[ "$args" == *"issue list"*"--label"*"bug"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	bug	2025-01-10
+EOF
+    exit 0
+fi
+
+# Label filter (enhancement)
+if [[ "$args" == *"issue list"*"--label"*"enhancement"* ]]; then
+    cat <<'EOF'
+15	Add dark mode support	enhancement	2025-01-20
+EOF
+    exit 0
+fi
+
+# Label filter (unknown label - no results)
+if [[ "$args" == *"issue list"*"--label"* ]]; then
+    # Empty output for unknown labels
+    exit 0
+fi
+
+# Search filter
+if [[ "$args" == *"issue list"*"--search"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	bug	2025-01-10
+EOF
+    exit 0
+fi
+
+# All states
+if [[ "$args" == *"issue list"*"--state all"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	open	2025-01-10
+15	Add dark mode support	open	2025-01-20
+8	Fix typo in README	open	2024-11-01
+7	Update deps	closed	2025-01-05
+3	Initial setup	closed	2024-12-01
+EOF
+    exit 0
+fi
+
+# Default: open issues (--state open or no state flag)
+if [[ "$args" == *"issue list"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	bug	2025-01-10
+15	Add dark mode support	enhancement	2025-01-20
+8	Fix typo in README		2024-11-01
+EOF
+    exit 0
+fi
+
+# --- gh pr list ---
+if [[ "$args" == *"pr list"*"--search"* ]]; then
+    if [[ "$args" == *"#42"* ]]; then
+        echo "101	Fix auth redirect	MERGED	fix/42-auth-bug"
+    fi
+    # Empty for other searches is fine
+    exit 0
+fi
+
+# --- gh issue list with --author ---
+if [[ "$args" == *"--author"* ]]; then
+    cat <<'EOF'
+42	Auth bug in login flow	bug	2025-01-10
+15	Add dark mode support	enhancement	2025-01-20
+EOF
+    exit 0
+fi
+
+# Fallback: unhandled command
+echo "mock-gh: unhandled command: $args" >&2
+exit 1

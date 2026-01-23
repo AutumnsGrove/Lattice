@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Mock git CLI for BATS tests
+#
+# Pattern-matches on arguments to return canned responses.
+# Strips -C <path> flags since functions always pass GROVE_ROOT.
+#
+
+# Strip -C <path> from args (functions pass -C "$GROVE_ROOT")
+args=""
+skip_next=false
+for arg in "$@"; do
+    if [ "$skip_next" = true ]; then
+        skip_next=false
+        continue
+    fi
+    if [ "$arg" = "-C" ]; then
+        skip_next=true
+        continue
+    fi
+    args="$args $arg"
+done
+args="${args# }"  # trim leading space
+
+# --- git log --grep (commits mentioning an issue) ---
+if [[ "$args" == *"log"*"--grep=#42"* ]]; then
+    cat <<'EOF'
+a1b2c3d fix(auth): resolve redirect loop (#42)
+e4f5g6h feat(auth): initial login flow for #42
+EOF
+    exit 0
+fi
+
+if [[ "$args" == *"log"*"--grep="* ]]; then
+    # No commits for other issue numbers
+    exit 0
+fi
+
+# --- git log -- <file> (commits touching a file) ---
+if [[ "$args" == *"log"*"--"*"src/"* ]]; then
+    cat <<'EOF'
+a1b2c3d fix(auth): resolve redirect loop (#42)
+f7g8h9i refactor(auth): extract login helper (#7)
+j0k1l2m feat(auth): add session handling
+EOF
+    exit 0
+fi
+
+# --- git branch -a ---
+if [[ "$args" == *"branch -a"* ]] || [[ "$args" == *"branch"*"-a"* ]]; then
+    cat <<'EOF'
+  main
+  fix/42-auth-bug
+  feature/dark-mode
+  remotes/origin/main
+  remotes/origin/fix/42-auth-bug
+EOF
+    exit 0
+fi
+
+# --- git init (passthrough for setup) ---
+if [[ "$args" == *"init"* ]]; then
+    exit 0
+fi
+
+# --- git add (passthrough for setup) ---
+if [[ "$args" == *"add"* ]]; then
+    exit 0
+fi
+
+# --- git commit (passthrough for setup) ---
+if [[ "$args" == *"commit"* ]]; then
+    exit 0
+fi
+
+# Fallback: unhandled command
+echo "mock-git: unhandled command: $args" >&2
+exit 1

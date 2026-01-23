@@ -20,7 +20,8 @@
     "test:landing": "pnpm --filter grove-landing test:run",
     "test:plant": "pnpm --filter grove-plant test:run",
     "test:clearing": "pnpm --filter grove-clearing test:run",
-    "test:router": "pnpm --filter grove-router test:run"
+    "test:router": "pnpm --filter grove-router test:run",
+    "test:shell": "bats scripts/repo/tests/"
   },
   "devDependencies": {
     "sharp": "^0.34.5",
