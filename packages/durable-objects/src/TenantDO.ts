@@ -227,9 +227,11 @@ export class TenantDO implements DurableObject {
    */
   private async refreshConfig(): Promise<void> {
     // Try DO storage first (fastest)
+    // Use toArray()[0] instead of .one() because .one() throws when no rows exist
+    // (expected for new or health-check tenants that have no config yet)
     const stored = this.state.storage.sql
       .exec("SELECT value FROM config WHERE key = 'tenant_config'")
-      .one();
+      .toArray()[0];
 
     if (stored?.value) {
       try {
