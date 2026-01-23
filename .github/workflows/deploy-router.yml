@@ -41,6 +41,10 @@ jobs:
         run: npx tsc --noEmit
         working-directory: packages/grove-router
 
+      - name: Run tests
+        run: pnpm test:run
+        working-directory: packages/grove-router
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

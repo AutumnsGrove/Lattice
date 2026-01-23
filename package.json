@@ -19,7 +19,8 @@
     "test:engine": "pnpm --filter @autumnsgrove/groveengine test:run",
     "test:landing": "pnpm --filter grove-landing test:run",
     "test:plant": "pnpm --filter grove-plant test:run",
-    "test:clearing": "pnpm --filter grove-clearing test:run"
+    "test:clearing": "pnpm --filter grove-clearing test:run",
+    "test:router": "pnpm --filter grove-router test:run"
   },
   "devDependencies": {
     "sharp": "^0.34.5",
