@@ -36,6 +36,10 @@ These tests import real code, test real behavior, and would fail if features bro
 | `payments/shop.test.ts` | Real D1 product/order/customer operations |
 | `groveauth/client.test.ts` | Real PKCE helpers, OAuth flows, passkeys |
 | `tests/durable-objects/TenantDO.test.ts` | Real DO through fetch API |
+| `clearing-monitor/health-checks.test.ts` | Real `checkComponent` with mocked fetch/timers |
+| `clearing-monitor/incident-manager.test.ts` | Real `processHealthCheckResult` state machine |
+| `clearing-monitor/index.test.ts` | Real `checkAllComponents` pipeline |
+| `clearing-monitor/daily-history.test.ts` | Real aggregation and date logic |
 
 ---
 
@@ -376,7 +380,8 @@ Replace inline regex with imports from the actual module.
 
 ## Relationship to Other Work
 
-- **PR #425** (Clearing monitoring): Adds health check tests for the status page. Complementary - those tests validate the monitoring system, these tests validate what's being monitored.
+- **PR #425** (Clearing monitoring, merged): Added 4 test files in `packages/workers/clearing-monitor/` covering health checks, incident state machines, daily history, and the full monitoring pipeline. These are well-written (import real code, mock at boundaries) and serve as a good reference for the grove-testing skill's philosophy. They test the _consumer_ of the engine's health endpoints; our Priority 3 webhook tests will verify the _producer_ side (actual payment processing reliability).
+- **Engine health endpoints** (from PR #425): `/api/health` and `/api/health/payments` are new endpoints added to the engine. Low priority for unit tests since the clearing-monitor already exercises them, but could be quick wins for Priority 6 (API endpoint tests) — verify degraded/unhealthy status logic and the 503 response code.
 - **Lumen PR** (AI gateway): Will bring its own petal/AI tests. No AI testing needed in this plan.
 - **grove-testing skill**: This plan follows the skill's philosophy exactly. All new tests test behavior, not implementation.
 
@@ -388,3 +393,4 @@ Replace inline regex with imports from the actual module.
 - Visual regression testing (not worth the maintenance cost yet)
 - Load/performance testing (premature for current scale)
 - Tests for deprecated/removed features (Stripe, old auth flows)
+- Health endpoint unit tests (already exercised by clearing-monitor integration tests)
