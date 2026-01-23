@@ -26,6 +26,7 @@ jobs:
             const components = [
               { label: 'heartwood', proper: /\bheartwood\b/, titleFallback: /\b(oauth|authentication)\b/ },
               { label: 'lattice',   proper: /\blattice\b/,   titleFallback: /\bgroveengine\b/ },
+              { label: 'landing',   proper: /\blanding\b/,   titleFallback: /\b(homepage|hero section|knowledge base|grove\.place)\b/ },
               { label: 'amber',     proper: /\bamber\b/,     titleFallback: /\b(r2|cdn storage|image storage)\b/ },
               { label: 'foliage',   proper: /\bfoliage\b/,   titleFallback: /\b(theming|theme system)\b/ },
               { label: 'ivy',       proper: /\bivy\b/,       titleFallback: /\b(email notifications?|resend)\b/ },
