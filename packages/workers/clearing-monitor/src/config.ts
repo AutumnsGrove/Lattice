@@ -22,7 +22,7 @@ export interface ComponentConfig {
  * Grove components to monitor
  *
  * These IDs match the seeded components in 0001_status_tables.sql:
- * - comp_blog, comp_cdn, comp_auth, comp_meadow, comp_api
+ * - comp_blog, comp_cdn, comp_auth, comp_payments, comp_api
  */
 export const COMPONENTS: ComponentConfig[] = [
   {
@@ -47,15 +47,15 @@ export const COMPONENTS: ComponentConfig[] = [
     method: "GET",
   },
   {
-    id: "comp_meadow",
-    name: "Meadow",
-    url: "https://meadow.grove.place/api/health",
+    id: "comp_payments",
+    name: "Payments",
+    url: "https://autumn.grove.place/api/health/payments",
     checkType: "deep",
     method: "GET",
   },
   {
     id: "comp_api",
-    name: "API (DOs)",
+    name: "API",
     url: "https://grove-durable-objects.m7jv4v7npb.workers.dev/health",
     checkType: "shallow",
     method: "GET",

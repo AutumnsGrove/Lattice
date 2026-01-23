@@ -264,6 +264,16 @@ export async function processHealthCheckResult(
 ): Promise<void> {
   const state = await getComponentState(env.MONITOR_KV, result.componentId);
   const isHealthy = result.status === "operational";
+  const isMaintenance = result.status === "maintenance";
+
+  // Maintenance is intentional — just update status, no incidents
+  if (isMaintenance) {
+    await updateComponentStatus(env.DB, result.componentId, "maintenance");
+    state.lastStatus = result.status;
+    state.lastCheckAt = result.timestamp;
+    await saveComponentState(env.MONITOR_KV, result.componentId, state);
+    return;
+  }
 
   if (isHealthy) {
     // Reset failure counter, increment success counter

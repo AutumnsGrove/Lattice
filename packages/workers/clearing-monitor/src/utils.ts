@@ -10,6 +10,7 @@ export const ComponentStatus = {
   DEGRADED: "degraded",
   PARTIAL_OUTAGE: "partial_outage",
   MAJOR_OUTAGE: "major_outage",
+  MAINTENANCE: "maintenance",
 } as const;
 export type ComponentStatus =
   (typeof ComponentStatus)[keyof typeof ComponentStatus];

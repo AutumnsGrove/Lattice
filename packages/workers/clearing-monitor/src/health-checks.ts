@@ -14,7 +14,12 @@ import { ComponentStatus } from "./utils";
 export interface HealthCheckResult {
   componentId: string;
   componentName: string;
-  status: "operational" | "degraded" | "partial_outage" | "major_outage";
+  status:
+    | "operational"
+    | "degraded"
+    | "partial_outage"
+    | "major_outage"
+    | "maintenance";
   latencyMs: number;
   httpStatus: number | null;
   error: string | null;
@@ -25,11 +30,12 @@ export interface HealthCheckResult {
  * Deep health response format (JSON response from /api/health endpoints)
  */
 interface DeepHealthResponse {
-  status: "healthy" | "degraded" | "unhealthy";
+  status: "healthy" | "degraded" | "unhealthy" | "maintenance";
   service: string;
+  reason?: string;
   checks?: {
     name: string;
-    status: "pass" | "fail";
+    status: "pass" | "fail" | "skip";
     latency_ms?: number;
     error?: string;
   }[];
@@ -161,6 +167,18 @@ async function evaluateDeepCheck(
         latencyMs,
         httpStatus: response.status,
         error: "Service reports degraded",
+        timestamp,
+      };
+    }
+
+    if (data.status === "maintenance") {
+      return {
+        componentId: config.id,
+        componentName: config.name,
+        status: ComponentStatus.MAINTENANCE,
+        latencyMs,
+        httpStatus: response.status,
+        error: null,
         timestamp,
       };
     }
