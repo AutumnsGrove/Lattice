@@ -18,7 +18,7 @@
 	 * - `midnight` — Rose Bloom (purple/pink, the queer fifth season 🌙)
 	 *
 	 * Season changes only affect the tree itself—the circular background remains
-	 * consistent across all seasons.
+	 * consistent across all seasons but adapts to light/dark theme automatically.
 	 *
 	 * @example Basic usage (with glass background)
 	 * ```svelte
@@ -32,9 +32,11 @@
 	 * <Logo background={false} />
 	 * ```
 	 *
-	 * @example Light mode variant
+	 * @example Background adapts to theme automatically
 	 * ```svelte
-	 * <Logo bgVariant="light" />
+	 * <Logo />  <!-- auto-detects light/dark from theme -->
+	 * <Logo bgVariant="light" />  <!-- force light variant -->
+	 * <Logo bgVariant="dark" />  <!-- force dark variant -->
 	 * ```
 	 *
 	 * @example Size variants
@@ -70,6 +72,7 @@
 	 */
 
 	import type { Season } from '$lib/ui/types/season';
+	import { themeStore } from '$lib/ui/stores/theme';
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// TYPES
@@ -193,8 +196,9 @@
 
 		/**
 		 * Background color variant.
-		 * - 'dark': Deep grove greens (default, best on dark/colored backgrounds)
+		 * - 'dark': Deep grove greens (best on dark/colored backgrounds)
 		 * - 'light': Soft translucent greens (for light/white backgrounds)
+		 * - undefined: Auto-detects from current theme (default)
 		 */
 		bgVariant?: 'dark' | 'light';
 
@@ -252,7 +256,7 @@
 		monochromeTrunk = false,
 		monochrome = false,
 		background = true,
-		bgVariant = 'dark',
+		bgVariant,
 		bgOpacity = 1,
 		bgColor,
 		size,
@@ -285,13 +289,22 @@
 			borderColor: 'rgba(34, 197, 94, 0.12)',
 		},
 		light: {
-			center: '#dcfce7',
-			mid: '#bbf7d0',
-			edge: '#a7f3d0',
-			highlightOpacity: 0.15,
-			borderColor: 'rgba(21, 128, 61, 0.2)',
+			center: '#f0fdf4',
+			mid: '#dcfce7',
+			edge: '#d1fae5',
+			highlightOpacity: 0.2,
+			borderColor: 'rgba(21, 128, 61, 0.12)',
 		},
 	} as const;
+
+	// ─────────────────────────────────────────────────────────────────────────────
+	// THEME-AWARE BACKGROUND
+	// ─────────────────────────────────────────────────────────────────────────────
+
+	const { resolvedTheme } = themeStore;
+
+	// Auto-detect bgVariant from theme when not explicitly set
+	const effectiveBgVariant = $derived(bgVariant ?? ($resolvedTheme === 'dark' ? 'dark' : 'light'));
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// DERIVED VALUES
@@ -305,7 +318,7 @@
 	const viewBox = $derived(background ? BG_VIEWBOX : '0 0 100 100');
 
 	// Compute background gradient colors
-	const bgGradient = $derived(BG_GRADIENTS[bgVariant]);
+	const bgGradient = $derived(BG_GRADIENTS[effectiveBgVariant]);
 
 	// Get the palette for the current season
 	const palette = $derived(SEASONAL_PALETTES[season]);
