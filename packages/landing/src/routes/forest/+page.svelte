@@ -24,7 +24,7 @@
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Import glass components and color utilities
-	import { Glass } from '@autumnsgrove/groveengine/ui';
+	import { Glass, GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { generateTierColors } from '@autumnsgrove/groveengine/ui/utils';
 
 	// Path utilities
@@ -818,6 +818,68 @@
 			</Glass>
 		</div>
 	</article>
+
+	<!-- Forest content sections - glass-treated explanations of the Forests feature -->
+	<section class="relative z-10 -mt-12 px-6 pb-16 space-y-10 max-w-4xl mx-auto">
+		<!-- Community Intro -->
+		<Glass variant="tint" intensity="medium" class="p-8 rounded-2xl text-center">
+			<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-4">
+				Find your people, not an algorithm
+			</h2>
+			<p class="text-foreground-muted font-sans leading-relaxed max-w-2xl mx-auto">
+				Forests are themed communities where blogs grow together — like neighborhoods in a garden city.
+				No engagement metrics. No feeds fighting for your attention. Just shared interests and genuine discovery.
+			</p>
+		</Glass>
+
+		<!-- Feature Callout Grid -->
+		<div class="grid sm:grid-cols-2 gap-6">
+			<GlassCard>
+				<h3 class="text-lg font-serif text-accent-muted mb-2">Themed Neighborhoods</h3>
+				<p class="text-foreground-muted font-sans leading-relaxed">
+					From The Prism to The Terminal, The Kitchen to The Observatory — each forest is a gathering place for people who share a passion.
+				</p>
+			</GlassCard>
+
+			<GlassCard>
+				<h3 class="text-lg font-serif text-accent-muted mb-2">Stroll, Don't Scroll</h3>
+				<p class="text-foreground-muted font-sans leading-relaxed">
+					Go for a stroll through a forest and discover someone new. No algorithms deciding who you see — just serendipity.
+				</p>
+			</GlassCard>
+
+			<GlassCard>
+				<h3 class="text-lg font-serif text-accent-muted mb-2">Your Roots, Your Choice</h3>
+				<p class="text-foreground-muted font-sans leading-relaxed">
+					Join as many forests as you like. Show up in the directory or stay hidden. Leave anytime. No penalties, no pressure.
+				</p>
+			</GlassCard>
+
+			<GlassCard>
+				<h3 class="text-lg font-serif text-accent-muted mb-2">Community, Not Competition</h3>
+				<p class="text-foreground-muted font-sans leading-relaxed">
+					No follower counts. No viral mechanics. No engagement scores. Just people sharing what matters to them.
+				</p>
+			</GlassCard>
+		</div>
+
+		<!-- Coming Soon CTA -->
+		<Glass variant="accent" intensity="medium" class="p-8 rounded-2xl text-center">
+			<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-4">
+				The Forest is growing
+			</h2>
+			<p class="text-foreground-muted font-sans leading-relaxed max-w-2xl mx-auto mb-6">
+				We're planting the seeds for 45 themed communities. Soon you'll be able to find your people and let them find you.
+			</p>
+			<a
+				href="/pricing"
+				class="inline-block text-accent-muted hover:text-accent-foreground transition-colors font-sans font-medium py-3 px-6"
+				aria-label="See Grove pricing plans"
+			>
+				See Plans →
+			</a>
+		</Glass>
+	</section>
 
 	<div class="relative z-10">
 		<Footer />
