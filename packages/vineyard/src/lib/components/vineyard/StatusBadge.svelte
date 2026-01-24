@@ -52,8 +52,8 @@
 
   .status-badge[data-status="preview"] {
     background-color: transparent;
-    color: #d97706;
-    border: 2px dashed #f59e0b;
+    color: var(--color-accent-text-muted, #d97706);
+    border: 2px dashed var(--color-accent-text-muted, #f59e0b);
   }
 
   .status-badge[data-status="demo"] {
@@ -63,9 +63,9 @@
   }
 
   .status-badge[data-status="coming-soon"] {
-    background-color: #f5f5f4;
-    color: #6b7280;
-    border: 1px solid #e5e5e5;
+    background-color: var(--color-surface-hover, #f5f5f4);
+    color: var(--color-foreground-subtle, #6b7280);
+    border: 1px solid var(--color-border-subtle, #e5e5e5);
   }
 
   .status-badge[data-status="in-development"] {
@@ -83,6 +83,12 @@
     50% {
       opacity: 0.85;
       transform: scale(1.02);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-badge[data-status="in-development"] {
+      animation: none;
     }
   }
 </style>

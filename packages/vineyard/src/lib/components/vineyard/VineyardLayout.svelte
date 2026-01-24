@@ -76,44 +76,19 @@
 </div>
 
 <style>
-  /*
-   * Font Loading Note:
-   * This component previously loaded Lexend from Google Fonts, which blocks rendering.
-   * Consumer apps should use the engine's font system instead:
-   *
-   * import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
-   *
-   * Or configure Lexend in your app's font setup. The engine provides optimized
-   * font loading with proper preloading and fallbacks.
-   *
-   * For self-contained use outside Grove, add Lexend to your own font stack.
-   */
-
   .vineyard-layout {
-    --grove-amber-50: #fffbeb;
-    --grove-amber-100: #fef3c7;
-    --grove-amber-200: #fde68a;
-    --grove-amber-500: #f59e0b;
-    --grove-amber-600: #d97706;
-    --grove-stone-50: #fafaf9;
-    --grove-stone-100: #f5f5f4;
-    --grove-stone-800: #292524;
-    --grove-stone-900: #1c1917;
-    --grove-glass-bg: rgba(255, 251, 235, 0.7);
-    --grove-glass-border: rgba(245, 158, 11, 0.2);
-
     font-family: 'Lexend', system-ui, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--grove-amber-50) 0%, var(--grove-stone-50) 100%);
-    color: var(--grove-stone-800);
+    background: var(--color-background, #fefdfb);
+    color: var(--color-foreground, #3d2914);
   }
 
   .vineyard-hero {
     position: relative;
     padding: 4rem 2rem 3rem;
-    background: var(--grove-glass-bg);
+    background: var(--color-surface, rgba(255, 255, 255, 0.5));
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--grove-glass-border);
+    border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     overflow: hidden;
   }
 
@@ -133,23 +108,20 @@
     font-size: 3rem;
     font-weight: 700;
     margin: 0 0 0.5rem;
-    background: linear-gradient(135deg, var(--grove-amber-600) 0%, var(--grove-amber-500) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-primary, #16a34a);
   }
 
   .tagline {
     font-size: 1.5rem;
     font-weight: 400;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #3d2914);
     margin: 0 0 1rem;
   }
 
   .philosophy {
     font-size: 1rem;
     font-style: italic;
-    color: #78716c;
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
     margin: 0;
   }
 
@@ -159,7 +131,7 @@
     right: -10%;
     width: 40%;
     height: 200%;
-    background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, var(--color-accent-bg, rgba(22, 163, 74, 0.08)) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -170,8 +142,8 @@
   }
 
   .vineyard-footer {
-    background: var(--grove-stone-100);
-    border-top: 1px solid var(--grove-glass-border);
+    background: var(--color-surface-elevated, #ffffff);
+    border-top: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     padding: 2rem;
   }
 
@@ -183,7 +155,7 @@
 
   .footer-label {
     font-size: 0.875rem;
-    color: #78716c;
+    color: var(--color-foreground-subtle, rgba(61, 41, 20, 0.5));
     margin: 0 0 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -199,10 +171,10 @@
 
   .related-link {
     padding: 0.5rem 1rem;
-    background: var(--grove-glass-bg);
-    border: 1px solid var(--grove-glass-border);
+    background: var(--color-surface, rgba(255, 255, 255, 0.5));
+    border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     border-radius: 9999px;
-    color: var(--grove-amber-600);
+    color: var(--color-primary, #16a34a);
     text-decoration: none;
     font-weight: 500;
     font-size: 0.875rem;
@@ -210,26 +182,24 @@
   }
 
   .related-link:hover {
-    background: var(--grove-amber-100);
-    border-color: var(--grove-amber-500);
+    background: var(--color-accent-bg, #f0fdf4);
+    border-color: var(--color-primary, #16a34a);
     transform: translateY(-1px);
-  }
-
-  /* Respect prefers-reduced-motion */
-  @media (prefers-reduced-motion: reduce) {
-    .related-link {
-      transition: none;
-    }
-
-    .related-link:hover {
-      transform: none;
-    }
   }
 
   .footer-brand {
     font-size: 0.75rem;
-    color: #a8a29e;
+    color: var(--color-foreground-faint, rgba(61, 41, 20, 0.4));
     margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .related-link {
+      transition: none;
+    }
+    .related-link:hover {
+      transform: none;
+    }
   }
 
   @media (max-width: 640px) {
