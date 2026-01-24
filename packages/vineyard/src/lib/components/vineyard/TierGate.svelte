@@ -81,13 +81,6 @@
 </div>
 
 <style>
-  .tier-gate {
-    --grove-amber-500: #f59e0b;
-    --grove-amber-600: #d97706;
-    --grove-stone-800: #292524;
-    --grove-glass-bg: rgba(255, 251, 235, 0.95);
-  }
-
   .tier-gate-container {
     position: relative;
     border-radius: 0.75rem;
@@ -107,7 +100,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--grove-glass-bg);
+    background: var(--color-surface, rgba(255, 255, 255, 0.9));
     backdrop-filter: blur(8px);
   }
 
@@ -128,22 +121,22 @@
     justify-content: center;
     width: 3.5rem;
     height: 3.5rem;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    background: var(--color-accent-bg, #f0fdf4);
     border-radius: 50%;
-    color: var(--grove-amber-600);
+    color: var(--color-primary, #16a34a);
     margin-bottom: 1rem;
   }
 
   .fallback-title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
     margin: 0 0 0.5rem;
   }
 
   .fallback-description {
     font-size: 0.875rem;
-    color: #78716c;
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
     margin: 0 0 1.25rem;
     line-height: 1.5;
   }
@@ -153,18 +146,27 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1.25rem;
-    background: linear-gradient(135deg, var(--grove-amber-500) 0%, var(--grove-amber-600) 100%);
-    color: white;
+    background: var(--color-primary, #16a34a);
+    color: var(--color-primary-foreground, white);
     font-size: 0.875rem;
     font-weight: 600;
     border-radius: 9999px;
     text-decoration: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
   }
 
   .upgrade-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .upgrade-button {
+      transition: none;
+    }
+    .upgrade-button:hover {
+      transform: none;
+    }
   }
 </style>

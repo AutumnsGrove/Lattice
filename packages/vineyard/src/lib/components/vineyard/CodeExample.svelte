@@ -81,12 +81,10 @@
     --code-keyword: #f59e0b;
     --code-string: #22c55e;
     --code-function: #3b82f6;
-    --grove-amber-100: #fef3c7;
-    --grove-amber-600: #d97706;
 
     border-radius: 0.75rem;
     overflow: hidden;
-    border: 1px solid var(--code-border);
+    border: 1px solid var(--color-border-subtle, var(--code-border));
   }
 
   .code-header {
@@ -116,8 +114,8 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 0.125rem 0.5rem;
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--grove-amber-600);
+    background: rgba(22, 163, 74, 0.15);
+    color: #4ade80;
     border-radius: 0.25rem;
     font-weight: 600;
   }
@@ -143,10 +141,6 @@
     border-color: rgba(255, 255, 255, 0.2);
   }
 
-  .copy-btn:has(span:last-child:not(:empty)) span:last-child {
-    color: inherit;
-  }
-
   .code-content {
     margin: 0;
     padding: 1rem;
@@ -164,7 +158,7 @@
     white-space: pre;
   }
 
-  /* Basic syntax highlighting via CSS - works for plain text patterns */
+  /* Basic syntax highlighting via CSS */
   :global(.code-content .keyword) {
     color: var(--code-keyword);
   }
@@ -180,5 +174,11 @@
 
   :global(.code-content .function) {
     color: var(--code-function);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .copy-btn {
+      transition: none;
+    }
   }
 </style>

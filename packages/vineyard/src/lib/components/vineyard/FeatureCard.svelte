@@ -55,20 +55,12 @@
 
 <style>
   .feature-card {
-    --grove-amber-50: #fffbeb;
-    --grove-amber-100: #fef3c7;
-    --grove-amber-500: #f59e0b;
-    --grove-amber-600: #d97706;
-    --grove-stone-800: #292524;
-    --grove-glass-bg: rgba(255, 251, 235, 0.7);
-    --grove-glass-border: rgba(245, 158, 11, 0.2);
-
-    background: var(--grove-glass-bg);
+    background: var(--color-surface, rgba(255, 255, 255, 0.5));
     backdrop-filter: blur(12px);
-    border: 1px solid var(--grove-glass-border);
+    border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     border-radius: 1rem;
     padding: 1.5rem;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -76,8 +68,8 @@
 
   .feature-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(245, 158, 11, 0.15);
-    border-color: var(--grove-amber-500);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    border-color: var(--color-primary, #16a34a);
   }
 
   .card-header {
@@ -92,9 +84,9 @@
     justify-content: center;
     width: 3rem;
     height: 3rem;
-    background: linear-gradient(135deg, var(--grove-amber-100) 0%, var(--grove-amber-50) 100%);
+    background: var(--color-accent-bg, #f0fdf4);
     border-radius: 0.75rem;
-    color: var(--grove-amber-600);
+    color: var(--color-primary, #16a34a);
   }
 
   .feature-status {
@@ -108,13 +100,13 @@
   .feature-title {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
     margin: 0 0 0.5rem;
   }
 
   .feature-description {
     font-size: 0.9375rem;
-    color: #78716c;
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
     margin: 0;
     line-height: 1.6;
   }
@@ -122,6 +114,15 @@
   .feature-demo {
     margin-top: 0.5rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--grove-glass-border);
+    border-top: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feature-card {
+      transition: none;
+    }
+    .feature-card:hover {
+      transform: none;
+    }
   }
 </style>

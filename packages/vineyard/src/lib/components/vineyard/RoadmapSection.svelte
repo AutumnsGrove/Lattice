@@ -87,15 +87,9 @@
 
 <style>
   .roadmap-section {
-    --grove-amber-100: #fef3c7;
-    --grove-amber-500: #f59e0b;
-    --grove-amber-600: #d97706;
-    --grove-stone-100: #f5f5f4;
-    --grove-stone-800: #292524;
-    --grove-glass-border: rgba(245, 158, 11, 0.2);
     --status-ready: #22c55e;
     --status-in-progress: #f97316;
-    --status-planned: #9ca3af;
+    --status-planned: var(--color-foreground-subtle, #9ca3af);
   }
 
   .roadmap-header {
@@ -105,13 +99,13 @@
   .roadmap-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
     margin: 0 0 0.25rem;
   }
 
   .roadmap-subtitle {
     font-size: 0.9375rem;
-    color: #78716c;
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
     margin: 0;
   }
 
@@ -122,8 +116,8 @@
   }
 
   .roadmap-group {
-    background: white;
-    border: 1px solid var(--grove-glass-border);
+    background: var(--color-surface-elevated, #ffffff);
+    border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     border-radius: 0.75rem;
     overflow: hidden;
   }
@@ -133,7 +127,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--grove-glass-border);
+    border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
   }
 
   .group-icon {
@@ -156,7 +150,7 @@
   }
 
   .roadmap-planned .group-icon {
-    background: rgba(156, 163, 175, 0.1);
+    background: var(--color-surface-hover, rgba(156, 163, 175, 0.1));
     color: var(--status-planned);
   }
 
@@ -164,7 +158,7 @@
     flex: 1;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
     margin: 0;
   }
 
@@ -173,8 +167,8 @@
     font-weight: 600;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
-    background: var(--grove-stone-100);
-    color: #78716c;
+    background: var(--color-surface-hover, #f5f5f4);
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
   }
 
   .group-list {
@@ -192,7 +186,7 @@
   }
 
   .roadmap-item:hover {
-    background: var(--grove-stone-100);
+    background: var(--color-surface-hover, rgba(0, 0, 0, 0.03));
   }
 
   .item-indicator {
@@ -223,7 +217,16 @@
 
   .item-text {
     font-size: 0.9375rem;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .roadmap-item {
+      transition: none;
+    }
+    .roadmap-in-progress .item-indicator {
+      animation: none;
+    }
   }
 
   @media (min-width: 768px) {

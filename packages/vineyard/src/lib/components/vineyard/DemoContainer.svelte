@@ -48,16 +48,8 @@
 
 <style>
   .demo-container {
-    --grove-amber-100: #fef3c7;
-    --grove-amber-500: #f59e0b;
-    --grove-amber-600: #d97706;
-    --grove-stone-100: #f5f5f4;
-    --grove-stone-800: #292524;
-    --grove-glass-border: rgba(245, 158, 11, 0.2);
-    --demo-blue: #3b82f6;
-
-    background: var(--grove-stone-100);
-    border: 1px solid var(--grove-glass-border);
+    background: var(--color-surface-elevated, #f5f5f4);
+    border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
     border-radius: 0.75rem;
     overflow: hidden;
   }
@@ -67,21 +59,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    background: linear-gradient(135deg, var(--grove-amber-100) 0%, #fff 100%);
-    border-bottom: 1px solid var(--grove-glass-border);
+    background: var(--color-accent-bg, #f0fdf4);
+    border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
   }
 
   .demo-title-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--grove-amber-600);
+    color: var(--color-primary, #16a34a);
   }
 
   .demo-title {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--grove-stone-800);
+    color: var(--color-foreground, #292524);
     margin: 0;
   }
 
@@ -95,7 +87,7 @@
     border-radius: 9999px;
     font-size: 0.6875rem;
     font-weight: 600;
-    color: var(--demo-blue);
+    color: #3b82f6;
     text-transform: uppercase;
     letter-spacing: 0.025em;
   }
@@ -103,7 +95,7 @@
   .mock-dot {
     width: 0.375rem;
     height: 0.375rem;
-    background: var(--demo-blue);
+    background: #3b82f6;
     border-radius: 50%;
     animation: blink 2s ease-in-out infinite;
   }
@@ -115,7 +107,7 @@
 
   .demo-description {
     font-size: 0.8125rem;
-    color: #78716c;
+    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
     margin: 0;
     padding: 0.75rem 1rem 0;
   }
@@ -135,5 +127,11 @@
     border: 2px dashed rgba(59, 130, 246, 0.2);
     border-radius: 0.5rem;
     pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mock-dot {
+      animation: none;
+    }
   }
 </style>
