@@ -373,6 +373,15 @@ An aria is a self-contained melody, a single voice carrying emotion through song
 
 Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs. Your aria becomes a chorus. One voice finds its kindred.
 
+### Etch
+**Link Saving & Highlights** · `etch.grove.place`
+
+Water drips on limestone for a thousand years and carves a cave. A glacier scores parallel grooves into bedrock. Frost traces patterns on glass. In printmaking, you score a plate with intention—every mark deliberate, every groove holding ink for the next impression. Etching isn't violent. It's patient. And what it leaves behind is permanent.
+
+Etch is your externalized memory. Save any link, highlight any text, carve out what counts. The things you find wandering the internet—articles, tools, videos, references, thoughts—etched into your personal stone so they don't wash away. Anything can go in, but you decide what it means. Tag it, plate it, score the passages that matter. Weeks later, you reach for it and it's there. Patient, permanent, yours.
+
+*Etch is where you carve out what matters.*
+
 ### Trove
 **Library Book Discovery** · `trove.grove.place`
 **Repository:** [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove)
@@ -490,6 +499,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Shutter** | Tools | Web content distillation | shutter.grove.place |
 | **Outpost** | Tools | Minecraft server | mc.grove.place |
 | **Aria** | Tools | Music curation | aria.grove.place |
+| **Etch** | Tools | Link saving & highlights | etch.grove.place |
 | **Trove** | Tools | Library book finder | trove.grove.place |
 | **Press** | Ops | Image processing CLI | *(developer tool)* |
 | **Vista** | Ops | Infrastructure observability | vista.grove.place |
@@ -550,6 +560,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Mycelium | GroveMCP |
 | Lumen | GroveLumen |
 | Shade | GroveShade |
+| Etch | GroveEtch |
 | Vineyard | GroveShowcase |
 
 ---
@@ -617,5 +628,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 21, 2026 — Added Burrow (cross-property access)*
+*Last updated: January 24, 2026 — Added Etch (link saving & highlights)*
 *Status: Placeholder names, pending launch*
