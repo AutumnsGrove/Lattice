@@ -50,7 +50,7 @@
 		<div class="flex items-center gap-2">
 			<!-- Logo icon - clickable to cycle through seasons -->
 			<Logo
-				class="w-10 h-10"
+				size="lg"
 				season={season || $seasonStore}
 				interactive
 				onclick={handleLogoClick}
