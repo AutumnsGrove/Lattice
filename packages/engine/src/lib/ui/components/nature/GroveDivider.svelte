@@ -130,6 +130,8 @@
 					season={activeSeason}
 					{monochromeColor}
 					{monochromeTrunk}
+					background={false}
+					rotation={0}
 				/>
 			{/if}
 		</div>

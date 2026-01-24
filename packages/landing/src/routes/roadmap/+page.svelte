@@ -436,7 +436,7 @@
 
 			<!-- Single tree - the beginning (positioned at 25% to not block waitlist card) -->
 			<div class="absolute bottom-0 left-[25%] -translate-x-1/2 w-32 h-40 opacity-60" aria-hidden="true">
-				<Logo class="w-full h-full" season="winter" rotation={0} />
+				<Logo class="w-full h-full" season="winter" rotation={0} background={false} />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
@@ -494,7 +494,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="winter" rotation={0} />
+						<Logo class="w-full h-full" season="winter" rotation={0} background={false} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
 					{:else if tree.treeType === 'birch'}
@@ -576,7 +576,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="spring" rotation={0} />
+						<Logo class="w-full h-full" season="spring" rotation={0} background={false} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
 					{:else if tree.treeType === 'cherry'}
@@ -702,7 +702,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="summer" rotation={0} />
+						<Logo class="w-full h-full" season="summer" rotation={0} background={false} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
 					{:else if tree.treeType === 'cherry'}
@@ -828,7 +828,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="autumn" rotation={0} />
+						<Logo class="w-full h-full" season="autumn" rotation={0} background={false} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="autumn" animate color={autumn.gold} />
 					{:else if tree.treeType === 'cherry'}
@@ -928,7 +928,7 @@
 					aria-hidden="true"
 				>
 					{#if tree.treeType === 'logo'}
-						<Logo class="w-full h-full" season="midnight" rotation={0} />
+						<Logo class="w-full h-full" season="midnight" rotation={0} background={false} />
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" season="winter" color={nightColor} />
 					{:else if tree.treeType === 'cherry'}
