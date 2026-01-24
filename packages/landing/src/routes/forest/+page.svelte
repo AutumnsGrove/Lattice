@@ -789,6 +789,8 @@
 							trunk={tierColors.trunk}
 							season={$seasonStore}
 							monochrome
+							background={false}
+							rotation={0}
 						/>
 					{:else if tree.treeType === 'pine'}
 						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />

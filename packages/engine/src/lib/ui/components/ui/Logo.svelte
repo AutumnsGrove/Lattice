@@ -4,9 +4,11 @@
 	 *
 	 * A beautifully crafted tree logo with seasonal color palettes,
 	 * 3D depth through light/dark branch splits, and extensive customization.
+	 * Features an optional circular glass background (enabled by default) that
+	 * provides the signature Grove treatment—tree inside a frosted grove-green circle.
 	 *
-	 * The logo features three tiers of branches. By default it stands upright,
-	 * but rotation can be customized for an organic, windswept feel.
+	 * The logo features three tiers of branches with a gentle -12° windswept lean
+	 * by default for an organic feel.
 	 *
 	 * ## Seasons
 	 * - `spring` — Rose Gold (cherry blossoms)
@@ -15,11 +17,24 @@
 	 * - `winter` — Ice (cool blue)
 	 * - `midnight` — Rose Bloom (purple/pink, the queer fifth season 🌙)
 	 *
-	 * @example Basic usage
+	 * Season changes only affect the tree itself—the circular background remains
+	 * consistent across all seasons.
+	 *
+	 * @example Basic usage (with glass background)
 	 * ```svelte
 	 * <Logo />
 	 * <Logo season="autumn" />
 	 * <Logo season="midnight" size="lg" />
+	 * ```
+	 *
+	 * @example Without background (standalone tree)
+	 * ```svelte
+	 * <Logo background={false} />
+	 * ```
+	 *
+	 * @example Light mode variant
+	 * ```svelte
+	 * <Logo bgVariant="light" />
 	 * ```
 	 *
 	 * @example Size variants
@@ -36,8 +51,8 @@
 	 *
 	 * @example Custom rotation and colors
 	 * ```svelte
-	 * <Logo rotation={-12} />  <!-- Gentle windswept tilt -->
 	 * <Logo rotation={-20} />  <!-- More dramatic tilt -->
+	 * <Logo rotation={0} />  <!-- Upright (no windswept) -->
 	 * <Logo tier1={{ dark: '#ff0000', light: '#ffcccc' }} />
 	 * ```
 	 *
@@ -167,12 +182,40 @@
 		 */
 		monochrome?: boolean;
 
+		// ── Background ───────────────────────────────────────────────────────────
+
+		/**
+		 * Show the circular glass background behind the tree.
+		 * The background remains consistent regardless of season changes.
+		 * Default: true
+		 */
+		background?: boolean;
+
+		/**
+		 * Background color variant.
+		 * - 'dark': Deep grove greens (default, best on dark/colored backgrounds)
+		 * - 'light': Soft translucent greens (for light/white backgrounds)
+		 */
+		bgVariant?: 'dark' | 'light';
+
+		/**
+		 * Background opacity (0-1). Controls overall visibility of the circle.
+		 * Default: 1
+		 */
+		bgOpacity?: number;
+
+		/**
+		 * Custom background color override. Replaces the gradient with a solid fill.
+		 * When set, overrides bgVariant.
+		 */
+		bgColor?: string;
+
 		// ── Size & Geometry ──────────────────────────────────────────────────────
 
 		/** Size preset or pixel value. Overrides class-based sizing. */
 		size?: LogoSize;
 
-		/** Rotation in degrees. Negative = lean left. Default: 0 (upright) */
+		/** Rotation in degrees. Negative = lean left. Default: -12 (gentle windswept) */
 		rotation?: number;
 
 		// ── Effects & Interactivity ──────────────────────────────────────────────
@@ -208,8 +251,12 @@
 		monochromeColor,
 		monochromeTrunk = false,
 		monochrome = false,
+		background = true,
+		bgVariant = 'dark',
+		bgOpacity = 1,
+		bgColor,
 		size,
-		rotation = 0,
+		rotation = -12,
 		shadow = false,
 		interactive = false,
 		onclick,
@@ -219,12 +266,46 @@
 	}: Props = $props();
 
 	// ─────────────────────────────────────────────────────────────────────────────
+	// BACKGROUND CONFIGURATION
+	// ─────────────────────────────────────────────────────────────────────────────
+
+	// Background circle dimensions (relative to the 100-unit tree viewBox)
+	// When background is enabled, we expand the viewBox to fit the circle around the tree
+	const BG_VIEWBOX = '-28 -28 156 156'; // 156-unit canvas, tree at 0-100
+	const BG_CENTER = 50; // Circle center aligns with tree center
+	const BG_RADIUS = 70; // Circle radius within the 156-unit space
+
+	// Gradient colors for the two variants
+	const BG_GRADIENTS = {
+		dark: {
+			center: '#122a1a',
+			mid: '#0f2015',
+			edge: '#0d1a12',
+			highlightOpacity: 0.06,
+			borderColor: 'rgba(34, 197, 94, 0.12)',
+		},
+		light: {
+			center: '#dcfce7',
+			mid: '#bbf7d0',
+			edge: '#a7f3d0',
+			highlightOpacity: 0.15,
+			borderColor: 'rgba(21, 128, 61, 0.2)',
+		},
+	} as const;
+
+	// ─────────────────────────────────────────────────────────────────────────────
 	// DERIVED VALUES
 	// ─────────────────────────────────────────────────────────────────────────────
 
 	// Generate unique ID for SVG elements
 	const randomId = `grove-logo-${Math.random().toString(36).slice(2, 9)}`;
 	const uniqueId = $derived(filterId ?? randomId);
+
+	// Compute the active viewBox based on background state
+	const viewBox = $derived(background ? BG_VIEWBOX : '0 0 100 100');
+
+	// Compute background gradient colors
+	const bgGradient = $derived(BG_GRADIENTS[bgVariant]);
 
 	// Get the palette for the current season
 	const palette = $derived(SEASONAL_PALETTES[season]);
@@ -320,7 +401,7 @@
 	class={finalClass}
 	style={sizeStyles}
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 100 100"
+	viewBox={viewBox}
 	aria-label={ariaLabel}
 	role={onclick ? 'button' : 'img'}
 	tabindex={onclick ? 0 : undefined}
@@ -331,12 +412,43 @@
 		<title>{title}</title>
 	{/if}
 
-	{#if shadow}
-		<defs>
+	<defs>
+		{#if shadow}
 			<filter id="{uniqueId}-shadow" x="-20%" y="-20%" width="140%" height="140%">
 				<feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.25" />
 			</filter>
-		</defs>
+		{/if}
+
+		{#if background}
+			<!-- Background circle gradients -->
+			<radialGradient id="{uniqueId}-bg-gradient" cx="50%" cy="50%" r="50%">
+				{#if bgColor}
+					<stop offset="0%" stop-color={bgColor} />
+					<stop offset="100%" stop-color={bgColor} />
+				{:else}
+					<stop offset="0%" stop-color={bgGradient.center} />
+					<stop offset="70%" stop-color={bgGradient.mid} />
+					<stop offset="100%" stop-color={bgGradient.edge} />
+				{/if}
+			</radialGradient>
+			<radialGradient id="{uniqueId}-bg-highlight" cx="35%" cy="30%" r="50%">
+				<stop offset="0%" stop-color="rgba(255, 255, 255, {bgGradient.highlightOpacity})" />
+				<stop offset="100%" stop-color="rgba(255, 255, 255, 0)" />
+			</radialGradient>
+		{/if}
+	</defs>
+
+	{#if background}
+		<!-- Circular glass background (season-independent) -->
+		<g opacity={bgOpacity}>
+			<circle cx={BG_CENTER} cy={BG_CENTER} r={BG_RADIUS} fill="url(#{uniqueId}-bg-gradient)" />
+			<circle cx={BG_CENTER} cy={BG_CENTER} r={BG_RADIUS} fill="url(#{uniqueId}-bg-highlight)" />
+			<circle cx={BG_CENTER} cy={BG_CENTER} r={BG_RADIUS}
+				fill="none"
+				stroke={bgGradient.borderColor}
+				stroke-width="1.5"
+			/>
+		</g>
 	{/if}
 
 	<!-- Main tree group with rotation -->
