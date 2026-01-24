@@ -39,7 +39,9 @@
 	// Import typography components
 	import {
 		FontProvider,
-		IBMPlexMono,
+		Lexend, Atkinson, OpenDyslexic,
+		Quicksand, PlusJakartaSans,
+		IBMPlexMono, Cozette,
 		Alagard, Calistoga, Caveat,
 		fonts,
 		type FontId,
@@ -731,17 +733,65 @@
 				</div>
 			</div>
 
-			<!-- Monospace -->
+			<!-- Sans-Serif Fonts -->
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Sans-Serif Fonts</h4>
+				<div class="grid md:grid-cols-2 gap-4">
+					<div class="p-4 bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border-subtle)]">
+						<Lexend as="h3" class="text-xl text-[var(--color-foreground)] mb-2">Lexend (Default)</Lexend>
+						<Lexend as="p" class="text-[var(--color-foreground-muted)]">Modern, highly readable sans-serif. Grove's default font.</Lexend>
+					</div>
+					<div class="p-4 bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border-subtle)]">
+						<Quicksand as="h3" class="text-xl text-[var(--color-foreground)] mb-2">Quicksand</Quicksand>
+						<Quicksand as="p" class="text-[var(--color-foreground-muted)]">Geometric sans with rounded terminals. Light and modern.</Quicksand>
+					</div>
+					<div class="p-4 bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border-subtle)]">
+						<PlusJakartaSans as="h3" class="text-xl text-[var(--color-foreground)] mb-2">Plus Jakarta Sans</PlusJakartaSans>
+						<PlusJakartaSans as="p" class="text-[var(--color-foreground-muted)]">Contemporary geometric sans. Balanced and versatile.</PlusJakartaSans>
+					</div>
+				</div>
+			</div>
+
+			<!-- Monospace Fonts -->
 			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
 				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Monospace Fonts</h4>
-				<div class="p-4 bg-gray-900 rounded-lg">
-					<IBMPlexMono as="code" class="text-grove-400 block mb-2">
-						// IBM Plex Mono - corporate warmth
-					</IBMPlexMono>
-					<IBMPlexMono as="pre" class="text-gray-100 text-sm">{`function greet(name: string) {
+				<div class="space-y-4">
+					<div class="p-4 bg-gray-900 rounded-lg">
+						<IBMPlexMono as="code" class="text-grove-400 block mb-2">
+							// IBM Plex Mono - corporate warmth
+						</IBMPlexMono>
+						<IBMPlexMono as="pre" class="text-gray-100 text-sm">{`function greet(name: string) {
   console.log(\`Hello, \${name}!\`);
 }
 greet("Grove");`}</IBMPlexMono>
+					</div>
+					<div class="p-4 bg-purple-950 rounded-lg">
+						<Cozette as="code" class="text-purple-400 block mb-2">
+							# Cozette - retro terminal aesthetic
+						</Cozette>
+						<Cozette as="pre" class="text-purple-100 text-sm">{`$ cd ~/grove
+$ npm run dev
+> Server running at localhost:5173`}</Cozette>
+					</div>
+				</div>
+			</div>
+
+			<!-- Accessibility Fonts -->
+			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
+				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Accessibility Fonts</h4>
+				<div class="grid md:grid-cols-2 gap-4">
+					<div class="p-4 bg-grove-50 dark:bg-grove-950/30 rounded-lg border border-grove-200 dark:border-grove-800">
+						<Atkinson as="h3" class="text-lg text-grove-900 dark:text-grove-200 mb-2">Atkinson Hyperlegible</Atkinson>
+						<Atkinson as="p" class="text-grove-700 dark:text-grove-300 text-sm">
+							Designed for low vision readers. Maximum character distinction between similar letters.
+						</Atkinson>
+					</div>
+					<div class="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+						<OpenDyslexic as="h3" class="text-lg text-blue-900 dark:text-blue-200 mb-2">OpenDyslexic</OpenDyslexic>
+						<OpenDyslexic as="p" class="text-blue-700 dark:text-blue-300 text-sm">
+							Weighted bottoms reduce letter confusion for dyslexic readers.
+						</OpenDyslexic>
+					</div>
 				</div>
 			</div>
 		</div>
