@@ -512,4 +512,15 @@ Things to decide before building:
 
 ---
 
+## See Also
+
+- **[Grove Naming System](/knowledge/philosophy/grove-naming)** — Etch's naming entry and ecosystem context
+- **[Link-Saving Naming Journey](docs/scratch/link-saving-naming-journey.md)** — How we arrived at "Etch" (the walk documented)
+- **[Shutter Spec](/knowledge/specs/shutter-spec)** — Web content distillation, powers the Bite process
+- **[Lumen Spec](/knowledge/specs/lumen-spec)** — AI gateway, powers Groove suggestions
+- **[Amber Spec](/knowledge/specs/amber-spec)** — Storage management, Deep Etch quota integration
+- **[Ivy Mail Spec](/knowledge/specs/ivy-mail-spec)** — Email notifications for reminders
+
+---
+
 *Patient. Permanent. Yours.*
