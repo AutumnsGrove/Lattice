@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'packages/landing/**'
+      - 'packages/engine/**'
       - 'docs/help-center/**'
       - 'docs/legal/**'
       - 'docs/specs/**'
