@@ -874,6 +874,7 @@
 			<a
 				href="/pricing"
 				class="inline-block text-accent-muted hover:text-accent-foreground transition-colors font-sans font-medium py-3 px-6"
+				aria-label="See Grove pricing plans"
 			>
 				See Plans →
 			</a>
