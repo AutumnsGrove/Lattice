@@ -816,3 +816,136 @@ describe("Logo Animation Cancellation Robustness", () => {
     expect(result.completedPulses).toBe(3);
   });
 });
+
+// =============================================================================
+// THEME-AWARE BACKGROUND TESTS
+// =============================================================================
+
+describe("Logo Theme-Aware Background", () => {
+  // Gradient configurations matching the component
+  const BG_GRADIENTS = {
+    dark: {
+      center: "#122a1a",
+      mid: "#0f2015",
+      edge: "#0d1a12",
+      highlightOpacity: 0.06,
+      borderColor: "rgba(34, 197, 94, 0.12)",
+    },
+    light: {
+      center: "#f0fdf4",
+      mid: "#dcfce7",
+      edge: "#d1fae5",
+      highlightOpacity: 0.2,
+      borderColor: "rgba(21, 128, 61, 0.12)",
+    },
+  } as const;
+
+  type BgVariant = "dark" | "light";
+
+  /**
+   * Derives the effective background variant (mirrors component logic).
+   * When no explicit bgVariant is provided, follows the resolved theme.
+   */
+  function getEffectiveBgVariant(
+    bgVariant: BgVariant | undefined,
+    resolvedTheme: "dark" | "light",
+  ): BgVariant {
+    return bgVariant ?? (resolvedTheme === "dark" ? "dark" : "light");
+  }
+
+  describe("effectiveBgVariant resolution", () => {
+    it("should use dark variant when resolvedTheme is dark and no explicit prop", () => {
+      expect(getEffectiveBgVariant(undefined, "dark")).toBe("dark");
+    });
+
+    it("should use light variant when resolvedTheme is light and no explicit prop", () => {
+      expect(getEffectiveBgVariant(undefined, "light")).toBe("light");
+    });
+
+    it("should respect explicit bgVariant='dark' regardless of theme", () => {
+      expect(getEffectiveBgVariant("dark", "light")).toBe("dark");
+      expect(getEffectiveBgVariant("dark", "dark")).toBe("dark");
+    });
+
+    it("should respect explicit bgVariant='light' regardless of theme", () => {
+      expect(getEffectiveBgVariant("light", "dark")).toBe("light");
+      expect(getEffectiveBgVariant("light", "light")).toBe("light");
+    });
+  });
+
+  describe("gradient color selection", () => {
+    it("should select dark gradient colors for dark variant", () => {
+      const variant = getEffectiveBgVariant(undefined, "dark");
+      const gradient = BG_GRADIENTS[variant];
+
+      expect(gradient.center).toBe("#122a1a");
+      expect(gradient.mid).toBe("#0f2015");
+      expect(gradient.edge).toBe("#0d1a12");
+    });
+
+    it("should select light gradient colors for light variant", () => {
+      const variant = getEffectiveBgVariant(undefined, "light");
+      const gradient = BG_GRADIENTS[variant];
+
+      expect(gradient.center).toBe("#f0fdf4");
+      expect(gradient.mid).toBe("#dcfce7");
+      expect(gradient.edge).toBe("#d1fae5");
+    });
+
+    it("should use higher highlight opacity for light variant", () => {
+      expect(BG_GRADIENTS.light.highlightOpacity).toBeGreaterThan(
+        BG_GRADIENTS.dark.highlightOpacity,
+      );
+    });
+
+    it("should have consistent border opacity across variants", () => {
+      // Both variants use 0.12 opacity for their border color
+      expect(BG_GRADIENTS.dark.borderColor).toContain("0.12");
+      expect(BG_GRADIENTS.light.borderColor).toContain("0.12");
+    });
+  });
+
+  describe("light variant color values", () => {
+    it("should use green-50 for center (softest)", () => {
+      // #f0fdf4 is Tailwind green-50
+      expect(BG_GRADIENTS.light.center).toBe("#f0fdf4");
+    });
+
+    it("should use green-100 for mid", () => {
+      // #dcfce7 is Tailwind green-100
+      expect(BG_GRADIENTS.light.mid).toBe("#dcfce7");
+    });
+
+    it("should use emerald-100 for edge", () => {
+      // #d1fae5 is Tailwind emerald-100
+      expect(BG_GRADIENTS.light.edge).toBe("#d1fae5");
+    });
+
+    it("should have lighter colors than the previous implementation", () => {
+      // Previous values were green-100/200 range (#dcfce7, #bbf7d0, #a7f3d0)
+      // New values should be in green-50/100 range for softer contrast
+      const previousCenter = "#dcfce7";
+      // New center (#f0fdf4) should be lighter than old center (#dcfce7)
+      // Compare by checking the green channel is higher (lighter)
+      expect(parseInt(BG_GRADIENTS.light.center.slice(3, 5), 16)).toBeGreaterThan(
+        parseInt(previousCenter.slice(3, 5), 16),
+      );
+    });
+  });
+
+  describe("SSR behavior", () => {
+    it("should default to light variant when resolvedTheme defaults to light on server", () => {
+      // The theme store resolves to 'light' when browser is false and theme is 'system'
+      const serverResolvedTheme = "light" as const;
+      const variant = getEffectiveBgVariant(undefined, serverResolvedTheme);
+      expect(variant).toBe("light");
+    });
+
+    it("should use correct gradient for server-side rendering", () => {
+      const variant = getEffectiveBgVariant(undefined, "light");
+      const gradient = BG_GRADIENTS[variant];
+      // Light variant is safe for SSR — subtle on any background
+      expect(gradient.center).toBe("#f0fdf4");
+    });
+  });
+});

@@ -303,7 +303,9 @@
 
 	const { resolvedTheme } = themeStore;
 
-	// Auto-detect bgVariant from theme when not explicitly set
+	// Auto-detect bgVariant from theme when not explicitly set.
+	// SSR-safe: resolvedTheme defaults to 'light' on the server, then updates
+	// reactively on hydration — no mismatch since SVG attributes are reactive.
 	const effectiveBgVariant = $derived(bgVariant ?? ($resolvedTheme === 'dark' ? 'dark' : 'light'));
 
 	// ─────────────────────────────────────────────────────────────────────────────
