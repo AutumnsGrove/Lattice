@@ -52,7 +52,8 @@ export type {
   ClearingIncident,
   IncidentUpdate,
   OperationResult,
-} from './types.js';
+  R2Bucket,
+} from "./types.js";
 
 // Profiles & Traffic Composition (Sentinel Pattern)
 export {
@@ -76,13 +77,10 @@ export {
   createSoakTestProfile,
   // Cost estimation
   estimateCloudflareCost,
-} from './profiles.js';
+} from "./profiles.js";
 
 // Operations
-export {
-  executeOperation,
-  cleanupSentinelData,
-} from './operations.js';
+export { executeOperation, cleanupSentinelData } from "./operations.js";
 
 // Runner
 export {
@@ -90,7 +88,7 @@ export {
   createSentinelRun,
   getSentinelRun,
   listSentinelRuns,
-} from './runner.js';
+} from "./runner.js";
 
 // Scheduler (for cron-triggered tests)
 export {
@@ -102,8 +100,8 @@ export {
   handleScheduledEvent,
   getWeeklyMidnightScheduleConfig,
   getDailySmokeTestConfig,
-} from './scheduler.js';
+} from "./scheduler.js";
 
 // Durable Object (Loom pattern for long-running tests)
 // Use SentinelDO for tests longer than 30 seconds to avoid Worker CPU limits
-export { SentinelDO } from './durable-object.js';
+export { SentinelDO } from "./durable-object.js";

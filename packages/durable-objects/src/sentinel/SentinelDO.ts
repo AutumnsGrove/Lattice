@@ -298,7 +298,20 @@ export class SentinelDO implements DurableObject {
             if (result.success) {
               this.runState!.completedOps++;
               if (result.latencyMs) {
-                this.runState!.latencies.push(result.latencyMs);
+                const MAX_LATENCY_SAMPLES = 10_000;
+                const latencies = this.runState!.latencies;
+                if (latencies.length < MAX_LATENCY_SAMPLES) {
+                  latencies.push(result.latencyMs);
+                } else {
+                  // Reservoir sampling: replace a random entry to maintain representative distribution
+                  const idx = Math.floor(
+                    Math.random() *
+                      (this.runState!.completedOps + this.runState!.failedOps),
+                  );
+                  if (idx < MAX_LATENCY_SAMPLES) {
+                    latencies[idx] = result.latencyMs;
+                  }
+                }
               }
             } else {
               this.runState!.failedOps++;
@@ -570,7 +583,11 @@ export class SentinelDO implements DurableObject {
       try {
         ws.send(data);
       } catch {
-        // Connection closed
+        try {
+          ws.close();
+        } catch {
+          /* already closed */
+        }
       }
     }
   }

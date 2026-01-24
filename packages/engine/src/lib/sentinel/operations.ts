@@ -11,7 +11,7 @@ import type {
   D1Database,
   KVNamespace,
   R2Bucket,
-} from './types.js';
+} from "./types.js";
 
 // =============================================================================
 // OPERATION REGISTRY
@@ -22,7 +22,7 @@ export type OperationFn = (
   kv: KVNamespace,
   r2: R2Bucket,
   tenantId: string,
-  index: number
+  index: number,
 ) => Promise<OperationResult>;
 
 const operationRegistry: Map<TargetSystem, OperationFn[]> = new Map();
@@ -45,16 +45,16 @@ export async function executeOperation(
   kv: KVNamespace,
   r2: R2Bucket,
   tenantId: string,
-  index: number
+  index: number,
 ): Promise<OperationResult> {
   const operation = getOperation(system);
   if (!operation) {
     return {
       success: false,
       latencyMs: 0,
-      operationName: 'unknown',
+      operationName: "unknown",
       errorMessage: `No operations registered for system: ${system}`,
-      errorCode: 'NO_OPERATION',
+      errorCode: "NO_OPERATION",
     };
   }
 
@@ -71,9 +71,9 @@ export async function executeOperation(
     return {
       success: false,
       latencyMs,
-      operationName: 'unknown',
+      operationName: "unknown",
       errorMessage: error instanceof Error ? error.message : String(error),
-      errorCode: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+      errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
     };
   }
 }
@@ -83,9 +83,9 @@ export async function executeOperation(
 // =============================================================================
 
 // Sentinel test table prefix to avoid polluting production data
-const SENTINEL_PREFIX = 'sentinel_test_';
+const SENTINEL_PREFIX = "sentinel_test_";
 
-operationRegistry.set('d1_writes', [
+operationRegistry.set("d1_writes", [
   // Insert a test record
   async (db, _kv, _r2, tenantId, index): Promise<OperationResult> => {
     const id = `${SENTINEL_PREFIX}${tenantId}_${Date.now()}_${index}`;
@@ -96,44 +96,27 @@ operationRegistry.set('d1_writes', [
         .prepare(
           `INSERT INTO sentinel_test_data (id, tenant_id, data, created_at)
            VALUES (?, ?, ?, ?)
-           ON CONFLICT(id) DO UPDATE SET data = excluded.data, created_at = excluded.created_at`
+           ON CONFLICT(id) DO UPDATE SET data = excluded.data, created_at = excluded.created_at`,
         )
-        .bind(id, tenantId, JSON.stringify({ index, timestamp: Date.now() }), Math.floor(Date.now() / 1000))
+        .bind(
+          id,
+          tenantId,
+          JSON.stringify({ index, timestamp: Date.now() }),
+          Math.floor(Date.now() / 1000),
+        )
         .run();
 
       return {
         success: result.success,
         latencyMs: performance.now() - start,
-        operationName: 'insert_test_record',
+        operationName: "insert_test_record",
         rowsAffected: result.meta?.changes ?? 1,
       };
     } catch (error) {
-      // If table doesn't exist, create it and retry
-      if (error instanceof Error && error.message.includes('no such table')) {
-        await db.prepare(`
-          CREATE TABLE IF NOT EXISTS sentinel_test_data (
-            id TEXT PRIMARY KEY,
-            tenant_id TEXT NOT NULL,
-            data TEXT,
-            created_at INTEGER NOT NULL
-          )
-        `).run();
-
-        // Retry the insert
-        const result = await db
-          .prepare(
-            `INSERT INTO sentinel_test_data (id, tenant_id, data, created_at)
-             VALUES (?, ?, ?, ?)`
-          )
-          .bind(id, tenantId, JSON.stringify({ index, timestamp: Date.now() }), Math.floor(Date.now() / 1000))
-          .run();
-
-        return {
-          success: result.success,
-          latencyMs: performance.now() - start,
-          operationName: 'insert_test_record_with_create',
-          rowsAffected: result.meta?.changes ?? 1,
-        };
+      if (error instanceof Error && error.message.includes("no such table")) {
+        throw new Error(
+          "sentinel_test_data table missing — run migration 032_sentinel.sql",
+        );
       }
       throw error;
     }
@@ -149,28 +132,28 @@ operationRegistry.set('d1_writes', [
           `UPDATE sentinel_test_data
            SET data = ?, created_at = ?
            WHERE tenant_id = ?
-           LIMIT 1`
+           LIMIT 1`,
         )
         .bind(
           JSON.stringify({ index, timestamp: Date.now(), updated: true }),
           Math.floor(Date.now() / 1000),
-          tenantId
+          tenantId,
         )
         .run();
 
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'update_test_record',
+        operationName: "update_test_record",
         rowsAffected: result.meta?.changes ?? 0,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         // Table doesn't exist, but that's OK for updates
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'update_test_record_no_table',
+          operationName: "update_test_record_no_table",
           rowsAffected: 0,
         };
       }
@@ -188,40 +171,35 @@ operationRegistry.set('d1_writes', [
       for (let i = 0; i < batchSize; i++) {
         const id = `${SENTINEL_PREFIX}${tenantId}_batch_${Date.now()}_${index}_${i}`;
         statements.push(
-          db.prepare(
-            `INSERT INTO sentinel_test_data (id, tenant_id, data, created_at)
+          db
+            .prepare(
+              `INSERT INTO sentinel_test_data (id, tenant_id, data, created_at)
              VALUES (?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET data = excluded.data`
-          ).bind(id, tenantId, JSON.stringify({ batch: index, item: i }), Math.floor(Date.now() / 1000))
+             ON CONFLICT(id) DO UPDATE SET data = excluded.data`,
+            )
+            .bind(
+              id,
+              tenantId,
+              JSON.stringify({ batch: index, item: i }),
+              Math.floor(Date.now() / 1000),
+            ),
         );
       }
 
       const results = await db.batch(statements);
-      const allSuccess = results.every(r => r.success);
+      const allSuccess = results.every((r) => r.success);
 
       return {
         success: allSuccess,
         latencyMs: performance.now() - start,
-        operationName: 'batch_insert',
+        operationName: "batch_insert",
         rowsAffected: batchSize,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
-        await db.prepare(`
-          CREATE TABLE IF NOT EXISTS sentinel_test_data (
-            id TEXT PRIMARY KEY,
-            tenant_id TEXT NOT NULL,
-            data TEXT,
-            created_at INTEGER NOT NULL
-          )
-        `).run();
-
-        return {
-          success: true,
-          latencyMs: performance.now() - start,
-          operationName: 'batch_insert_created_table',
-          rowsAffected: 0,
-        };
+      if (error instanceof Error && error.message.includes("no such table")) {
+        throw new Error(
+          "sentinel_test_data table missing — run migration 032_sentinel.sql",
+        );
       }
       throw error;
     }
@@ -232,29 +210,31 @@ operationRegistry.set('d1_writes', [
 // D1 READ OPERATIONS
 // =============================================================================
 
-operationRegistry.set('d1_reads', [
+operationRegistry.set("d1_reads", [
   // Simple select
   async (db, _kv, _r2, tenantId, _index): Promise<OperationResult> => {
     const start = performance.now();
 
     try {
       const result = await db
-        .prepare(`SELECT * FROM sentinel_test_data WHERE tenant_id = ? LIMIT 10`)
+        .prepare(
+          `SELECT * FROM sentinel_test_data WHERE tenant_id = ? LIMIT 10`,
+        )
         .bind(tenantId)
         .all();
 
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'select_test_records',
+        operationName: "select_test_records",
         rowsAffected: result.results.length,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'select_test_records_no_table',
+          operationName: "select_test_records_no_table",
           rowsAffected: 0,
         };
       }
@@ -268,22 +248,24 @@ operationRegistry.set('d1_reads', [
 
     try {
       const result = await db
-        .prepare(`SELECT COUNT(*) as count FROM sentinel_test_data WHERE tenant_id = ?`)
+        .prepare(
+          `SELECT COUNT(*) as count FROM sentinel_test_data WHERE tenant_id = ?`,
+        )
         .bind(tenantId)
         .first<{ count: number }>();
 
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'count_test_records',
+        operationName: "count_test_records",
         rowsAffected: result?.count ?? 0,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'count_test_records_no_table',
+          operationName: "count_test_records_no_table",
           rowsAffected: 0,
         };
       }
@@ -303,7 +285,7 @@ operationRegistry.set('d1_reads', [
            FROM posts p
            WHERE p.tenant_id = ?
            ORDER BY p.created_at DESC
-           LIMIT 20`
+           LIMIT 20`,
         )
         .bind(tenantId)
         .all();
@@ -311,16 +293,16 @@ operationRegistry.set('d1_reads', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'select_posts_listing',
+        operationName: "select_posts_listing",
         rowsAffected: result.results.length,
       };
     } catch (error) {
       // Fall back to test table
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'select_posts_listing_fallback',
+          operationName: "select_posts_listing_fallback",
           rowsAffected: 0,
         };
       }
@@ -333,7 +315,7 @@ operationRegistry.set('d1_reads', [
 // KV GET OPERATIONS
 // =============================================================================
 
-operationRegistry.set('kv_get', [
+operationRegistry.set("kv_get", [
   // Simple get
   async (_db, kv, _r2, tenantId, index): Promise<OperationResult> => {
     const key = `${SENTINEL_PREFIX}${tenantId}_${index % 100}`;
@@ -344,8 +326,10 @@ operationRegistry.set('kv_get', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'kv_get_simple',
-        bytesTransferred: value ? new TextEncoder().encode(String(value)).length : 0,
+        operationName: "kv_get_simple",
+        bytesTransferred: value
+          ? new TextEncoder().encode(String(value)).length
+          : 0,
       };
     } catch (error) {
       throw error;
@@ -358,11 +342,11 @@ operationRegistry.set('kv_get', [
     const start = performance.now();
 
     try {
-      const value = await kv.get(key, { type: 'json' });
+      const value = await kv.get(key, { type: "json" });
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'kv_get_json',
+        operationName: "kv_get_json",
         bytesTransferred: value ? JSON.stringify(value).length : 0,
       };
     } catch (error) {
@@ -375,11 +359,14 @@ operationRegistry.set('kv_get', [
     const start = performance.now();
 
     try {
-      const result = await kv.list({ prefix: `${SENTINEL_PREFIX}${tenantId}_`, limit: 20 });
+      const result = await kv.list({
+        prefix: `${SENTINEL_PREFIX}${tenantId}_`,
+        limit: 20,
+      });
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'kv_list',
+        operationName: "kv_list",
         rowsAffected: result.keys.length,
       };
     } catch (error) {
@@ -392,11 +379,15 @@ operationRegistry.set('kv_get', [
 // KV PUT OPERATIONS
 // =============================================================================
 
-operationRegistry.set('kv_put', [
+operationRegistry.set("kv_put", [
   // Simple put
   async (_db, kv, _r2, tenantId, index): Promise<OperationResult> => {
     const key = `${SENTINEL_PREFIX}${tenantId}_${index % 100}`;
-    const value = JSON.stringify({ index, timestamp: Date.now(), random: Math.random() });
+    const value = JSON.stringify({
+      index,
+      timestamp: Date.now(),
+      random: Math.random(),
+    });
     const start = performance.now();
 
     try {
@@ -404,7 +395,7 @@ operationRegistry.set('kv_put', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'kv_put_simple',
+        operationName: "kv_put_simple",
         bytesTransferred: new TextEncoder().encode(value).length,
       };
     } catch (error) {
@@ -418,19 +409,19 @@ operationRegistry.set('kv_put', [
     const value = JSON.stringify({
       index,
       timestamp: Date.now(),
-      data: Array(100).fill('x').join(''), // ~100 bytes
+      data: Array(100).fill("x").join(""), // ~100 bytes
     });
     const start = performance.now();
 
     try {
       await kv.put(key, value, {
         expirationTtl: 3600,
-        metadata: { createdBy: 'sentinel', index: String(index) },
+        metadata: { createdBy: "sentinel", index: String(index) },
       });
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'kv_put_with_metadata',
+        operationName: "kv_put_with_metadata",
         bytesTransferred: new TextEncoder().encode(value).length,
       };
     } catch (error) {
@@ -443,22 +434,22 @@ operationRegistry.set('kv_put', [
 // R2 UPLOAD OPERATIONS
 // =============================================================================
 
-operationRegistry.set('r2_upload', [
+operationRegistry.set("r2_upload", [
   // Small file upload
   async (_db, _kv, r2, tenantId, index): Promise<OperationResult> => {
     const key = `${SENTINEL_PREFIX}${tenantId}/small_${index}.txt`;
-    const content = `Sentinel test file ${index} - ${new Date().toISOString()}\n${'x'.repeat(1000)}`;
+    const content = `Sentinel test file ${index} - ${new Date().toISOString()}\n${"x".repeat(1000)}`;
     const start = performance.now();
 
     try {
       await r2.put(key, content, {
-        httpMetadata: { contentType: 'text/plain' },
-        customMetadata: { sentinelTest: 'true', index: String(index) },
+        httpMetadata: { contentType: "text/plain" },
+        customMetadata: { sentinelTest: "true", index: String(index) },
       });
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'r2_upload_small',
+        operationName: "r2_upload_small",
         bytesTransferred: new TextEncoder().encode(content).length,
       };
     } catch (error) {
@@ -472,22 +463,24 @@ operationRegistry.set('r2_upload', [
     const content = JSON.stringify({
       index,
       timestamp: Date.now(),
-      data: Array(100).fill(null).map((_, i) => ({
-        id: i,
-        value: `item_${i}_${'x'.repeat(50)}`,
-      })),
+      data: Array(100)
+        .fill(null)
+        .map((_, i) => ({
+          id: i,
+          value: `item_${i}_${"x".repeat(50)}`,
+        })),
     });
     const start = performance.now();
 
     try {
       await r2.put(key, content, {
-        httpMetadata: { contentType: 'application/json' },
-        customMetadata: { sentinelTest: 'true', index: String(index) },
+        httpMetadata: { contentType: "application/json" },
+        customMetadata: { sentinelTest: "true", index: String(index) },
       });
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'r2_upload_medium',
+        operationName: "r2_upload_medium",
         bytesTransferred: new TextEncoder().encode(content).length,
       };
     } catch (error) {
@@ -500,7 +493,7 @@ operationRegistry.set('r2_upload', [
 // R2 DOWNLOAD OPERATIONS
 // =============================================================================
 
-operationRegistry.set('r2_download', [
+operationRegistry.set("r2_download", [
   // Download existing file
   async (_db, _kv, r2, tenantId, index): Promise<OperationResult> => {
     const key = `${SENTINEL_PREFIX}${tenantId}/small_${index % 100}.txt`;
@@ -518,7 +511,7 @@ operationRegistry.set('r2_download', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'r2_download',
+        operationName: "r2_download",
         bytesTransferred,
       };
     } catch (error) {
@@ -538,7 +531,7 @@ operationRegistry.set('r2_download', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'r2_list',
+        operationName: "r2_list",
         rowsAffected: result.objects.length,
       };
     } catch (error) {
@@ -551,7 +544,7 @@ operationRegistry.set('r2_download', [
 // AUTH FLOW OPERATIONS
 // =============================================================================
 
-operationRegistry.set('auth_flows', [
+operationRegistry.set("auth_flows", [
   // Simulate session lookup
   async (db, kv, _r2, tenantId, index): Promise<OperationResult> => {
     const sessionId = `sentinel_session_${tenantId}_${index % 50}`;
@@ -572,14 +565,14 @@ operationRegistry.set('auth_flows', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'session_lookup',
+        operationName: "session_lookup",
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'session_lookup_no_table',
+          operationName: "session_lookup_no_table",
         };
       }
       throw error;
@@ -593,14 +586,18 @@ operationRegistry.set('auth_flows', [
     const start = performance.now();
 
     try {
-      const current = await kv.get(key, { type: 'json' }) as { count: number } | null;
+      const current = (await kv.get(key, { type: "json" })) as {
+        count: number;
+      } | null;
       const count = (current?.count ?? 0) + 1;
-      await kv.put(key, JSON.stringify({ count, timestamp: Date.now() }), { expirationTtl: 60 });
+      await kv.put(key, JSON.stringify({ count, timestamp: Date.now() }), {
+        expirationTtl: 60,
+      });
 
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'rate_limit_check',
+        operationName: "rate_limit_check",
       };
     } catch (error) {
       throw error;
@@ -612,7 +609,7 @@ operationRegistry.set('auth_flows', [
 // POST CRUD OPERATIONS
 // =============================================================================
 
-operationRegistry.set('post_crud', [
+operationRegistry.set("post_crud", [
   // Simulate post creation
   async (db, _kv, _r2, tenantId, index): Promise<OperationResult> => {
     const id = `${SENTINEL_PREFIX}post_${tenantId}_${Date.now()}_${index}`;
@@ -624,7 +621,7 @@ operationRegistry.set('post_crud', [
         .prepare(
           `INSERT INTO posts (id, tenant_id, title, slug, markdown_content, html_content, status, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON CONFLICT(id) DO UPDATE SET updated_at = excluded.updated_at`
+           ON CONFLICT(id) DO UPDATE SET updated_at = excluded.updated_at`,
         )
         .bind(
           id,
@@ -633,24 +630,24 @@ operationRegistry.set('post_crud', [
           slug,
           `# Test Post\n\nThis is a sentinel test post created at ${new Date().toISOString()}`,
           `<h1>Test Post</h1><p>This is a sentinel test post.</p>`,
-          'draft',
+          "draft",
           Math.floor(Date.now() / 1000),
-          Math.floor(Date.now() / 1000)
+          Math.floor(Date.now() / 1000),
         )
         .run();
 
       return {
         success: result.success,
         latencyMs: performance.now() - start,
-        operationName: 'create_post',
+        operationName: "create_post",
         rowsAffected: result.meta?.changes ?? 1,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'create_post_no_table',
+          operationName: "create_post_no_table",
           rowsAffected: 0,
         };
       }
@@ -669,7 +666,7 @@ operationRegistry.set('post_crud', [
            FROM posts
            WHERE tenant_id = ? AND status = 'published'
            ORDER BY created_at DESC
-           LIMIT 20`
+           LIMIT 20`,
         )
         .bind(tenantId)
         .all();
@@ -677,15 +674,15 @@ operationRegistry.set('post_crud', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'list_posts',
+        operationName: "list_posts",
         rowsAffected: result.results.length,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'list_posts_no_table',
+          operationName: "list_posts_no_table",
           rowsAffected: 0,
         };
       }
@@ -698,7 +695,7 @@ operationRegistry.set('post_crud', [
 // MEDIA OPERATIONS
 // =============================================================================
 
-operationRegistry.set('media_ops', [
+operationRegistry.set("media_ops", [
   // Simulate media metadata lookup
   async (db, _kv, _r2, tenantId, _index): Promise<OperationResult> => {
     const start = performance.now();
@@ -710,7 +707,7 @@ operationRegistry.set('media_ops', [
            FROM media
            WHERE tenant_id = ?
            ORDER BY created_at DESC
-           LIMIT 50`
+           LIMIT 50`,
         )
         .bind(tenantId)
         .all();
@@ -718,15 +715,15 @@ operationRegistry.set('media_ops', [
       return {
         success: true,
         latencyMs: performance.now() - start,
-        operationName: 'list_media',
+        operationName: "list_media",
         rowsAffected: result.results.length,
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('no such table')) {
+      if (error instanceof Error && error.message.includes("no such table")) {
         return {
           success: true,
           latencyMs: performance.now() - start,
-          operationName: 'list_media_no_table',
+          operationName: "list_media_no_table",
           rowsAffected: 0,
         };
       }
@@ -747,7 +744,7 @@ export async function cleanupSentinelData(
   db: D1Database,
   kv: KVNamespace,
   r2: R2Bucket,
-  tenantId: string
+  tenantId: string,
 ): Promise<{ d1Deleted: number; kvDeleted: number; r2Deleted: number }> {
   let d1Deleted = 0;
   let kvDeleted = 0;
@@ -806,7 +803,7 @@ export async function cleanupSentinelData(
         cursor,
       });
 
-      const keys = result.objects.map(obj => obj.key);
+      const keys = result.objects.map((obj) => obj.key);
       if (keys.length > 0) {
         await r2.delete(keys);
         r2Deleted += keys.length;

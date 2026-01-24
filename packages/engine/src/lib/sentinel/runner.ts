@@ -10,6 +10,7 @@ import type {
   SentinelRun,
   RunStatus,
   RunResults,
+  SystemResult,
   SentinelMetric,
   SentinelCheckpoint,
   TargetSystem,
@@ -491,10 +492,7 @@ export class SentinelRunner {
       errorCount: failedOps,
       errorTypes,
       estimatedCostUsd: costEstimate.totalCost,
-      systemResults: systemResults as Record<
-        TargetSystem,
-        RunResults["systemResults"][TargetSystem]
-      >,
+      systemResults: systemResults as Record<TargetSystem, SystemResult>,
     };
   }
 

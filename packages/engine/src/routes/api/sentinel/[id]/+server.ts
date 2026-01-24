@@ -8,7 +8,11 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types.js";
-import { SentinelRunner, getSentinelRun } from "$lib/sentinel/index.js";
+import {
+  SentinelRunner,
+  getSentinelRun,
+  type R2Bucket as SentinelR2Bucket,
+} from "$lib/sentinel/index.js";
 
 /**
  * GET /api/sentinel/[id]
@@ -19,9 +23,12 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     throw error(500, "Database not configured");
   }
 
-  // Require authentication
+  // Require admin authentication
   if (!locals.user) {
     throw error(401, "Authentication required");
+  }
+  if (!locals.user.isAdmin) {
+    throw error(403, "Admin access required");
   }
 
   const { id } = params;
@@ -72,20 +79,27 @@ export const POST: RequestHandler = async ({
   platform,
   locals,
 }) => {
-  if (!platform?.env?.DB || !platform?.env?.KV || !platform?.env?.IMAGES) {
+  if (
+    !platform?.env?.DB ||
+    !platform?.env?.CACHE_KV ||
+    !platform?.env?.IMAGES
+  ) {
     throw error(500, "Required bindings not configured");
   }
 
-  // Require authentication
+  // Require admin authentication
   if (!locals.user) {
     throw error(401, "Authentication required");
+  }
+  if (!locals.user.isAdmin) {
+    throw error(403, "Admin access required");
   }
 
   const { id } = params;
   const tenantId = locals.tenantId ?? "default";
   const db = platform.env.DB;
-  const kv = platform.env.KV;
-  const r2 = platform.env.IMAGES;
+  const kv = platform.env.CACHE_KV;
+  const r2 = platform.env.IMAGES as unknown as SentinelR2Bucket;
 
   let body: { action: string };
 
@@ -200,9 +214,12 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
     throw error(500, "Database not configured");
   }
 
-  // Require authentication
+  // Require admin authentication
   if (!locals.user) {
     throw error(401, "Authentication required");
+  }
+  if (!locals.user.isAdmin) {
+    throw error(403, "Admin access required");
   }
 
   const { id } = params;
