@@ -215,6 +215,8 @@ import {
   Warehouse,
   // Burrow - cross-property access
   Network,
+  // Etch - link saving & highlights
+  Highlighter,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -481,6 +483,8 @@ export const toolIcons = {
   warehouse: Warehouse, // Grafts - Greenhouse (early access testing)
   // Burrow - cross-property access
   network: Network, // Burrow - trusted connections between properties
+  // Etch - link saving & highlights
+  highlighter: Highlighter, // Etch - scoring/highlighting text
 } as const;
 
 // ============================================================================

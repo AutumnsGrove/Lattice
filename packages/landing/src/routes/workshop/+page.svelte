@@ -515,6 +515,22 @@
 						{ name: 'Private', icon: 'badgecheck', description: 'Private access only' }
 					]
 				},
+				{
+					name: 'Etch',
+					tagline: 'Link Saving & Highlights',
+					description: 'Your externalized memory. Save any link, highlight any text, carve out what counts. Anything can go in, but you decide what it means. Tag it, plate it, score the passages that matter. Patient, permanent, yours.',
+					status: 'planned',
+					icon: 'highlighter',
+					domain: 'etch.grove.place',
+					integration: 'Available as a standalone tool for all Wanderers',
+					spec: '/knowledge/specs/etch-spec',
+					subComponents: [
+						{ name: 'Plates', icon: 'layers', description: 'Collections' },
+						{ name: 'Grooves', icon: 'tag', description: 'Tags' },
+						{ name: 'Scoring', icon: 'highlighter', description: 'Text highlights' },
+						{ name: 'Proofs', icon: 'share2', description: 'Public collections' }
+					]
+				},
 			]
 		},
 		{

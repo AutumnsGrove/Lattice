@@ -210,4 +210,47 @@ A trace of scent. A trace of a path. You follow traces back.
 
 ---
 
-## Still walking...
+## The Moment It Clicked
+
+The user said: "etch is actually REALLY good. I'd LOVE to etch things down.
+Especially because we REALLY NEED to have the ability to HIGHLIGHT things
+on text. Take down our etchings."
+
+It clicked because:
+1. **"Etch it down"** — natural verb phrase, like "jot it down" but more permanent
+2. **Scoring/highlighting** maps perfectly to the printmaking metaphor — you
+   score the plate, the grooves hold ink, the marks become visible
+3. The intentionality is built into the word — you don't accidentally etch
+4. It's patient, permanent, and YOURS — matches the emotional need
+5. The lexicon writes itself: Plates, Grooves, Scores, Proofs, Bites
+
+## The Name: Etch
+
+**Link Saving & Highlights** · `etch.grove.place`
+
+Water drips on limestone for a thousand years and carves a cave. A glacier
+scores parallel grooves into bedrock. In printmaking, you score a plate with
+intention—every mark deliberate, every groove holding ink. Etching isn't
+violent. It's patient. And what it leaves behind is permanent.
+
+Etch is your externalized memory. Save any link, highlight any text, carve
+out what counts. Patient, permanent, yours.
+
+*"Etch is where you carve out what matters."*
+
+---
+
+## How We Got Here
+
+1. Started with the librarian metaphor (user's instinct) — too institutional
+2. Tried grove vocabulary (Bower, Hollow, Moss, etc.) — too pretty, too passive
+3. User redirected: "think about what the forest DOES when it retains"
+4. Explored forest retention processes: imprint, grain, etch, trace, ember
+5. "Etch" resonated immediately — the verb, the intentionality, the highlighting connection
+6. Lexicon fell into place naturally from the printmaking metaphor
+
+The walk took us through the forest floor, past the pretty names, past the
+containers and creatures, all the way down to the fundamental processes of
+retention. The name was in the process, not the place.
+
+*The name you're looking for is already there. You just have to walk until you find it.*
