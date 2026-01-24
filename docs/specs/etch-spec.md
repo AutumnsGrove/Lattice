@@ -198,9 +198,13 @@ when you saved it.
 - **Lazy caching** — Content is only fetched and stored when a Wanderer
   explicitly requests deep etch (not on every save)
 - **Compression** — HTML content is gzip-compressed before R2 storage
-- **Deduplication** — Multiple etchings pointing to the same URL share one
-  R2 object (keyed by content hash). Reference counting tracks when the
-  last etching referencing an impression is deleted
+- **Deduplication** — R2 objects are keyed by content hash (SHA-256 of the
+  compressed HTML). Multiple etchings of the same URL share one R2 object
+  via matching `impression_key` values. Reference counting is implicit:
+  `SELECT COUNT(*) FROM etchings WHERE impression_key = ? AND tenant_id = ?`.
+  On etching deletion, check if other etchings still reference the same key
+  before scheduling R2 cleanup. Note: deduplication is per-tenant only —
+  cross-tenant dedup would leak information about what other users have saved
 - **TTL refresh** — Re-fetch on explicit user request ("refresh impression"),
   not automatically, to respect source servers
 - **Size limits** — Max 5MB per impression after compression; pages exceeding
@@ -331,6 +335,9 @@ CREATE TABLE etchings (
 CREATE TABLE plates (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
+  -- Self-referential nesting. Application layer MUST prevent cycles:
+  -- on update/insert, walk parent_id chain (max depth 10) and reject
+  -- if the new parent_id appears in the ancestry of this plate.
   parent_id TEXT REFERENCES plates(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   icon TEXT,
@@ -367,7 +374,6 @@ CREATE TABLE scores (
   text_after TEXT, -- ~50 chars after highlight for text-anchor matching
   position_start INTEGER, -- character offset (fallback)
   position_end INTEGER,
-  selector TEXT, -- CSS selector (MUST sanitize before storage: allow div/p/span/article/section/h1-h6/li/ul/ol, class, id; reject script/iframe/object/embed)
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -502,15 +508,20 @@ patterns involve multiple independent reads — these **must** run in parallel v
 
 ```typescript
 // ✅ Parallel — plates, grooves, and etchings are independent reads
+// D1's .all() returns D1Result<T> — destructure .results at the call site
 const [plates, grooves, etchings] = await Promise.all([
   db.prepare("SELECT * FROM plates WHERE tenant_id = ?").bind(tenantId).all()
-    .catch(err => { console.warn("Plates failed:", err); return { results: [] }; }),
+    .then(r => r.results)
+    .catch(err => { console.warn("Plates failed:", err); return []; }),
   db.prepare("SELECT * FROM grooves WHERE tenant_id = ?").bind(tenantId).all()
-    .catch(err => { console.warn("Grooves failed:", err); return { results: [] }; }),
+    .then(r => r.results)
+    .catch(err => { console.warn("Grooves failed:", err); return []; }),
   db.prepare("SELECT * FROM etchings WHERE tenant_id = ? AND plate_id = ? ORDER BY created_at DESC LIMIT 50")
     .bind(tenantId, plateId).all()
-    .catch(err => { console.warn("Etchings failed:", err); return { results: [] }; }),
+    .then(r => r.results)
+    .catch(err => { console.warn("Etchings failed:", err); return []; }),
 ]);
+// plates, grooves, etchings are now typed arrays — no .results access needed
 ```
 
 **Etching detail view:**
@@ -523,8 +534,10 @@ const [etching, scores] = await Promise.all([
     .catch(err => { console.warn("Etching fetch failed:", err); return null; }),
   db.prepare("SELECT * FROM scores WHERE etching_id = ? AND tenant_id = ? ORDER BY position_start")
     .bind(etchingId, tenantId).all()
-    .catch(err => { console.warn("Scores fetch failed:", err); return { results: [] }; }),
+    .then(r => r.results)
+    .catch(err => { console.warn("Scores fetch failed:", err); return []; }),
 ]);
+// etching is T | null, scores is T[] — clean types throughout
 ```
 
 **When NOT to parallelise:** When Query B depends on Query A's result — e.g.,
@@ -547,8 +560,9 @@ content directly creates XSS vectors.
   to isolate cookies and storage from the main app
 - Apply strict Content-Security-Policy headers:
   `default-src 'none'; img-src *; style-src 'unsafe-inline'`
-- Run HTML through a sanitizer (e.g., DOMPurify server-side equivalent)
-  during the Bite process, not at render time
+- Sanitize HTML using Cloudflare's `HTMLRewriter` API during the Bite process
+  (strip dangerous elements/attributes in a streaming pass, not at render time).
+  HTMLRewriter runs natively in Workers — no browser DOM required
 
 ### SSRF via URL Fetching
 
@@ -586,8 +600,7 @@ search results, Proofs, and export. Malicious content could inject HTML/JS.
 - Limit `note` field to 2000 characters
 - Validate `position_start` and `position_end` as non-negative integers
   within reasonable bounds (max 10,000,000 — no page is longer than this)
-- Sanitize `selector` field: allowlist alphanumeric, `.`, `#`, `>`, ` `, `-`, `_`
-  only — reject anything else
+- Validate `text_before` and `text_after` are plain text (no HTML tags)
 
 ### CSRF Protection
 
@@ -625,13 +638,14 @@ Things to decide before building:
 2. **Storage limits** — How many deep etch impressions before it counts against
    Amber storage? Or does Etch get its own R2 bucket and quota?
 
-3. **Scoring re-anchoring strategy** — The schema stores three layers for
+3. **Scoring re-anchoring strategy** — The schema stores two layers for
    relocating highlights on changed pages: (1) `text_before` + `text` +
-   `text_after` for fuzzy text-anchor matching, (2) sanitized CSS `selector`
-   for fast DOM lookup, (3) character offsets as last resort. The canonical
-   `text` field is the source of truth — if the page changes beyond recognition,
-   the Score survives as a standalone quote. Implementation must sanitize
-   selectors (allowlist tag names, classes, IDs — never execute raw input).
+   `text_after` for fuzzy text-anchor matching, (2) character offsets as
+   fallback. CSS selectors were considered but dropped — they add sanitization
+   complexity and are fragile when page structure changes. Text anchoring is
+   more resilient and eliminates an injection surface. The canonical `text`
+   field is the source of truth — if the page changes beyond recognition,
+   the Score survives as a standalone quote.
 
 4. **Mobile scoring** — Highlighting text on mobile is fiddly. Do we support it
    in v1 or focus on desktop for scoring?
