@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
 
@@ -374,7 +373,7 @@
 		lastDensity = density;
 	}
 
-	onMount(() => {
+	$effect(() => {
 		regenerateTrees();
 
 		// Regenerate on resize if density bracket changes significantly

@@ -1,6 +1,5 @@
 <script>
   import { goto } from "$app/navigation";
-  import { onMount } from "svelte";
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
@@ -34,7 +33,7 @@
   let detailsCollapsed = $state(false);
 
   // Load collapsed state from localStorage
-  onMount(() => {
+  $effect(() => {
     if (browser) {
       const savedDetails = localStorage.getItem("editor-details-collapsed");
       if (savedDetails !== null) {

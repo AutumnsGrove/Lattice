@@ -1,6 +1,6 @@
 <script>
   import { Bold, Italic, Link, Heading1, Heading2, Heading3, Code } from "lucide-svelte";
-  import { tick, onMount } from "svelte";
+  import { tick } from "svelte";
 
   /**
    * FloatingToolbar - Medium-style floating toolbar for text formatting
@@ -220,7 +220,7 @@
   }
 
   // Set up selection monitoring and keyboard shortcuts
-  onMount(() => {
+  $effect(() => {
     // Use selectionchange for more reliable selection tracking (catches programmatic changes)
     document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("mousedown", handleClickOutside);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick, untrack, onMount } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { browser } from '$app/environment';
 	import TableOfContents from './TableOfContents.svelte';
 	import MobileTOC from './MobileTOC.svelte';
@@ -159,8 +159,8 @@
 		overflowingAnchorKeys = newOverflowingAnchors;
 	}
 
-	// Setup resize listener on mount with proper cleanup
-	onMount(() => {
+	// Setup resize listener with proper cleanup
+	$effect(() => {
 		let resizeTimeoutId: ReturnType<typeof setTimeout> | undefined;
 		const handleResize = () => {
 			clearTimeout(resizeTimeoutId);
@@ -177,7 +177,7 @@
 	});
 
 	// Setup copy button functionality for code blocks
-	onMount(() => {
+	$effect(() => {
 		const handleCopyClick = async (event: Event) => {
 			const button = event.currentTarget as HTMLElement;
 			const codeText = button.getAttribute('data-code');
@@ -444,19 +444,21 @@
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
 	// Content is already sanitized server-side, so we mark ready immediately
 	// and re-sanitize once DOMPurify loads (defensive, usually a no-op)
-	onMount(async () => {
+	$effect(() => {
 		if (browser) {
 			// Mark ready immediately so we don't block rendering
 			// Content was already sanitized on the server
 			isPurifyReady = true;
 
 			// Load DOMPurify in the background for additional client-side sanitization
-			try {
-				const module = await import('dompurify');
-				DOMPurify = module.default;
-			} catch (err) {
-				console.warn('DOMPurify failed to load, using server-sanitized content:', err);
-			}
+			(async () => {
+				try {
+					const module = await import('dompurify');
+					DOMPurify = module.default;
+				} catch (err) {
+					console.warn('DOMPurify failed to load, using server-sanitized content:', err);
+				}
+			})();
 		}
 	});
 

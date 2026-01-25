@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { GlassCard, GlassButton, GlassOverlay } from "$lib/ui/components/ui";
   import { Input, Button, Badge, Select } from "$lib/ui/components/ui";
   import { getImageTitle, getImageDate, debounce } from "$lib/utils";
@@ -94,7 +93,7 @@
   ]);
 
   // Initialize with first batch
-  onMount(() => {
+  $effect(() => {
     loadMoreImages();
     setupInfiniteScroll();
   });

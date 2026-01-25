@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
@@ -38,27 +37,29 @@
 			: 0
 	);
 
-	onMount(async () => {
+	$effect(() => {
 		// Create checkout session and redirect to Lemon Squeezy
-		try {
-			const res = await fetch('/checkout', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
+		(async () => {
+			try {
+				const res = await fetch('/checkout', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
 
-			const result = (await res.json()) as { url?: string; error?: string };
+				const result = (await res.json()) as { url?: string; error?: string };
 
-			if (result.url) {
-				// Redirect to Lemon Squeezy Checkout
-				window.location.href = result.url;
-			} else if (result.error) {
-				error = result.error;
+				if (result.url) {
+					// Redirect to Lemon Squeezy Checkout
+					window.location.href = result.url;
+				} else if (result.error) {
+					error = result.error;
+					isLoading = false;
+				}
+			} catch (err) {
+				error = 'Unable to initialize checkout. Please try again.';
 				isLoading = false;
 			}
-		} catch (err) {
-			error = 'Unable to initialize checkout. Please try again.';
-			isLoading = false;
-		}
+		})();
 	});
 </script>
 

@@ -12,7 +12,6 @@
    * - ARIA attributes for screen readers
    */
 
-  import { onMount } from 'svelte';
   import type { SubscriptionStatus } from '../../groveauth/index.js';
   import { TIERS, getNextTier, formatLimit, type PaidTierKey } from '../../config/tiers.js';
 
@@ -163,12 +162,6 @@
     }
   });
 
-  // Cleanup on unmount
-  onMount(() => {
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  });
 </script>
 
 {#if open}

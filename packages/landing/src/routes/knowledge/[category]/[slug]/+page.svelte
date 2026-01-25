@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import SEO from '$lib/components/SEO.svelte';
@@ -43,7 +42,7 @@
   }
 
   // Setup copy button functionality for code blocks
-  onMount(() => {
+  $effect(() => {
     if (!browser) return;
 
     const handleCopyClick = async (event: Event) => {

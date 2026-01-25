@@ -9,7 +9,7 @@
    * @fires close - When user exits Fireside mode without a draft
    */
 
-  import { onMount, tick } from "svelte";
+  import { tick } from "svelte";
   import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame } from "lucide-svelte";
 
   // ============================================================================
@@ -282,7 +282,8 @@
   // Lifecycle
   // ============================================================================
 
-  onMount(() => {
+  // Start conversation on mount
+  $effect(() => {
     startConversation();
   });
 </script>

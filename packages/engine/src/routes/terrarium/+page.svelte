@@ -17,13 +17,13 @@
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Monitor } from 'lucide-svelte';
 	import Terrarium from '$lib/ui/components/terrarium/Terrarium.svelte';
 
 	let isMobileViewport = $state(false);
 
-	onMount(() => {
+	// Setup viewport check with resize listener
+	$effect(() => {
 		const checkViewport = () => {
 			isMobileViewport = window.innerWidth < 768;
 		};

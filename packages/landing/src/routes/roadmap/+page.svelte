@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import { FeatureStar } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
@@ -352,7 +351,7 @@
 		midnightBloomTrees = generateSectionTrees('midnight-bloom');
 	}
 
-	onMount(() => {
+	$effect(() => {
 		regenerateAllTrees();
 	});
 </script>

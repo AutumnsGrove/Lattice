@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
@@ -178,7 +177,7 @@
 		}
 	}
 
-	onMount(() => {
+	$effect(() => {
 		// Add keyboard listener
 		window.addEventListener('keydown', handleKeydown);
 		return () => window.removeEventListener('keydown', handleKeydown);

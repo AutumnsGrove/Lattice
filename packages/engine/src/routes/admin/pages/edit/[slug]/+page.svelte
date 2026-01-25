@@ -1,6 +1,5 @@
 <script>
   import { goto } from "$app/navigation";
-  import { onMount } from "svelte";
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import { Input, Textarea, Button, GlassCard } from '$lib/ui';
@@ -67,7 +66,7 @@
   let originalHeroCtaLink = $state("");
 
   // Load collapsed state from localStorage
-  onMount(() => {
+  $effect(() => {
     if (browser) {
       const saved = localStorage.getItem("editor-details-collapsed");
       if (saved !== null) {

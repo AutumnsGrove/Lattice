@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import type { FontId } from '../../tokens/fonts.js';
 	import { fontById, getFontUrl, getFontStack } from '../../tokens/fonts.js';
@@ -24,7 +23,7 @@
 	const combinedStyle = $derived(`font-family: ${fontStack};${style ? ` ${style}` : ''}`);
 
 	// Ensure the font is loaded (inject @font-face if not already present)
-	onMount(() => {
+	$effect(() => {
 		if (!fontDef) return;
 
 		const styleId = `grove-font-${font}`;

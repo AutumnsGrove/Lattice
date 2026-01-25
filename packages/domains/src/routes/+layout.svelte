@@ -1,12 +1,11 @@
 <script>
 	import '../app.css';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	// Enable dark mode by default
-	onMount(() => {
+	$effect(() => {
 		if (browser) {
 			document.documentElement.classList.add('dark');
 		}

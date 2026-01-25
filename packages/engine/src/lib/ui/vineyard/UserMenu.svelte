@@ -11,7 +11,6 @@
   import type { BetterAuthUser } from './types.js';
   import { getSession, signOut } from './auth.js';
   import { User, LogOut, ChevronDown } from 'lucide-svelte';
-  import { onMount } from 'svelte';
 
   interface Props extends UserMenuProps {}
 
@@ -21,10 +20,13 @@
   let isLoading = $state(true);
   let isMenuOpen = $state(false);
 
-  onMount(async () => {
-    const session = await getSession();
-    user = session.user;
-    isLoading = false;
+  // Fetch session on mount
+  $effect(() => {
+    (async () => {
+      const session = await getSession();
+      user = session.user;
+      isLoading = false;
+    })();
   });
 
   async function handleSignOut() {
@@ -48,7 +50,8 @@
     }
   }
 
-  onMount(() => {
+  // Setup click outside listener
+  $effect(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('click', handleClickOutside);
       return () => window.removeEventListener('click', handleClickOutside);

@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte';
   import { Button, GlassCard, Glass } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
@@ -77,10 +76,12 @@
   let imageToDelete = $state(null);
   let deleting = $state(false);
 
-  onMount(async () => {
+  // Initialize gallery and check JXL support on mount
+  $effect(() => {
     loadGallery();
-    // Check JXL support on mount
-    jxlSupported = await supportsJxlEncoding();
+    (async () => {
+      jxlSupported = await supportsJxlEncoding();
+    })();
   });
 
   async function loadGallery(append = false) {

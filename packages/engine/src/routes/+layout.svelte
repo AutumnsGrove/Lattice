@@ -13,7 +13,6 @@
 	import '$lib/styles/vine-pattern.css';
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Button, Input } from '$lib/ui';
 
@@ -162,9 +161,8 @@
 		}
 	}
 
-	onMount(() => {
-		// Sync state with pre-hydration theme (set by app.html script)
-		// This ensures the Svelte state matches the DOM
+	// Sync state with pre-hydration theme (set by app.html script)
+	$effect(() => {
 		const savedTheme = localStorage.getItem('theme');
 		if (savedTheme === 'dark') {
 			darkMode = true;

@@ -19,7 +19,6 @@
 	 * />
 	 * ```
 	 */
-	import { onMount, onDestroy } from 'svelte';
 	import { cn } from '$lib/ui/utils';
 	import {
 		CheckCircle,
@@ -78,7 +77,6 @@
 	let statusData = $state<StatusResponse | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
 	// Status configuration
 	const statusConfig: Record<OverallStatus, {
@@ -163,16 +161,15 @@
 		return `${Math.floor(diffMin / 60)}h ago`;
 	}
 
-	onMount(() => {
+	// Setup status fetching with auto-refresh
+	$effect(() => {
 		fetchStatus();
 
 		// Ensure minimum refresh interval of 10 seconds
 		const interval = Math.max(refreshInterval, 10) * 1000;
-		refreshTimer = setInterval(fetchStatus, interval);
-	});
+		const timer = setInterval(fetchStatus, interval);
 
-	onDestroy(() => {
-		if (refreshTimer) clearInterval(refreshTimer);
+		return () => clearInterval(timer);
 	});
 </script>
 

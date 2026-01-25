@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Check, Loader2, Lightbulb, ArrowRight, X } from 'lucide-svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
@@ -9,7 +8,7 @@
 	let errorMessage = $state<string | null>(null);
 	let tenant = $state<{ subdomain: string } | null>(null);
 
-	onMount(() => {
+	$effect(() => {
 		let interval: ReturnType<typeof setInterval> | null = null;
 
 		// Async initialization

@@ -6,7 +6,6 @@
 <script lang="ts">
 	import type { Season } from './palette';
 	import { autumn, winter, greens, bark, cherryBlossomsPeak } from './palette';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		class?: string;
@@ -53,7 +52,8 @@
 	// Animation state for entrance animation
 	let mounted = $state(false);
 
-	onMount(() => {
+	// Trigger entrance animation after mount
+	$effect(() => {
 		if (animateEntrance) {
 			// Small delay to ensure CSS transition triggers
 			requestAnimationFrame(() => {

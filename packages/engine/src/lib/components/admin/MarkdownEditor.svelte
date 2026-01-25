@@ -1,6 +1,6 @@
 <script>
   import MarkdownIt from "markdown-it";
-  import { onMount, tick } from "svelte";
+  import { tick } from "svelte";
   import { sanitizeMarkdown } from "$lib/utils/sanitize";
 
   // Local instance for admin editor preview
@@ -578,7 +578,8 @@
     }
   }
 
-  onMount(() => {
+  // Initialize editor on mount
+  $effect(() => {
     updateCursorPosition();
     editorTheme.loadTheme();
     draftManager.init(content);
