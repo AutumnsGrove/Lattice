@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import SEO from '$lib/components/SEO.svelte';
+	import FeatureStar from '$lib/components/FeatureStar.svelte';
 	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
 
 	// Centralized icon registry - single source of truth for all icons
@@ -386,7 +387,7 @@
 
 			<!-- Legend -->
 			<p class="mt-4 text-sm text-foreground-muted flex items-center justify-center gap-1.5">
-				<Star class="w-4 h-4 text-amber-500 fill-amber-500" />
+				<Star class="w-4 h-4 text-amber-500 fill-amber-500" aria-hidden="true" />
 				<span>marks key features</span>
 			</p>
 		</div>
@@ -466,7 +467,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+										<FeatureStar />
 									{/if}
 								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
@@ -547,7 +548,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+										<FeatureStar />
 									{/if}
 									{#if feature.internal}
 										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-400">Internal</span>
@@ -671,7 +672,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+										<FeatureStar />
 									{/if}
 								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
@@ -782,7 +783,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+										<FeatureStar />
 									{/if}
 								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
@@ -893,7 +894,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+										<FeatureStar />
 									{/if}
 								</div>
 								<p class="text-sm text-amber-800/70 dark:text-amber-200/70">{feature.description}</p>
@@ -1000,7 +1001,7 @@
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-white">{feature.name}</span>
 									{#if feature.major}
-										<Star class="w-4 h-4 text-amber-400 fill-amber-400" title="Key feature" />
+										<FeatureStar variant="midnight" />
 									{/if}
 								</div>
 								<p class="text-sm text-purple-300">{feature.description}</p>

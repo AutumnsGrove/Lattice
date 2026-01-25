@@ -210,10 +210,13 @@
 		<div
 			class="absolute -top-2 -right-2 z-20 flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-amber-700"
 			title="Featured"
+			role="img"
+			aria-label="Featured item"
 		>
 			<Star
 				class="w-3.5 h-3.5 fill-current"
 				style={featuredColor ? `color: ${featuredColor}` : 'color: #f59e0b'}
+				aria-hidden="true"
 			/>
 		</div>
 	{/if}
