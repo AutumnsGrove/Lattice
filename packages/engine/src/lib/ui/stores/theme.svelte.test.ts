@@ -171,6 +171,9 @@ describe("themeStore", () => {
 
       themeStore.setTheme("dark");
 
+      // Give $effect time to run (persistence now handled reactively)
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(localStorageMock.getItem("theme")).toBe("dark");
     });
 
@@ -255,6 +258,109 @@ describe("themeStore", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(document.documentElement.classList.contains("dark")).toBe(false);
+    });
+  });
+
+  describe("system preference reactivity", () => {
+    it("should update resolvedTheme when system preference changes", async () => {
+      // Start with system theme and light system preference
+      matchMediaMock = createMatchMediaMock(false);
+      Object.defineProperty(globalThis, "matchMedia", {
+        value: () => matchMediaMock,
+        writable: true,
+      });
+
+      const { themeStore } = await import("./theme.svelte");
+
+      // Initial state: system theme, light preference
+      expect(themeStore.theme).toBe("system");
+      expect(themeStore.resolvedTheme).toBe("light");
+
+      // Simulate system preference change to dark
+      matchMediaMock._simulateChange(true);
+
+      // Give $effect time to run
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // resolvedTheme should now be dark
+      expect(themeStore.theme).toBe("system"); // theme unchanged
+      expect(themeStore.resolvedTheme).toBe("dark"); // resolved changed
+    });
+
+    it("should update resolvedTheme when system changes from dark to light", async () => {
+      // Start with system theme and dark system preference
+      matchMediaMock = createMatchMediaMock(true);
+      Object.defineProperty(globalThis, "matchMedia", {
+        value: () => matchMediaMock,
+        writable: true,
+      });
+
+      const { themeStore } = await import("./theme.svelte");
+
+      expect(themeStore.resolvedTheme).toBe("dark");
+
+      // Simulate system preference change to light
+      matchMediaMock._simulateChange(false);
+
+      // Give $effect time to run
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(themeStore.resolvedTheme).toBe("light");
+    });
+
+    it("should update DOM class when system preference changes", async () => {
+      // Start with system theme and light system preference
+      matchMediaMock = createMatchMediaMock(false);
+      Object.defineProperty(globalThis, "matchMedia", {
+        value: () => matchMediaMock,
+        writable: true,
+      });
+
+      await import("./theme.svelte");
+
+      // Give initial $effect time to run
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(document.documentElement.classList.contains("dark")).toBe(false);
+
+      // Simulate system preference change to dark
+      matchMediaMock._simulateChange(true);
+
+      // Give $effect time to run
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+    });
+
+    it("should not react to system changes when theme is explicitly set", async () => {
+      matchMediaMock = createMatchMediaMock(false);
+      Object.defineProperty(globalThis, "matchMedia", {
+        value: () => matchMediaMock,
+        writable: true,
+      });
+
+      const { themeStore } = await import("./theme.svelte");
+
+      // Explicitly set theme to dark
+      themeStore.setTheme("dark");
+      expect(themeStore.resolvedTheme).toBe("dark");
+
+      // System preference changes (but should be ignored)
+      matchMediaMock._simulateChange(true); // system now prefers dark too
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should still be dark (from explicit setting, not system)
+      expect(themeStore.theme).toBe("dark");
+      expect(themeStore.resolvedTheme).toBe("dark");
+
+      // Change system back to light
+      matchMediaMock._simulateChange(false);
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should still be dark (explicit setting overrides system)
+      expect(themeStore.resolvedTheme).toBe("dark");
     });
   });
 });

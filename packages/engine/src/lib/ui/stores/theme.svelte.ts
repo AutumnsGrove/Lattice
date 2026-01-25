@@ -19,6 +19,16 @@ class ThemeStore {
       // Use $effect.root() to create effects outside component context
       // This allows the store to work as a singleton module
       $effect.root(() => {
+        // Persist theme to localStorage whenever it changes
+        // This mirrors the seasonStore pattern for consistency
+        $effect(() => {
+          try {
+            localStorage.setItem("theme", this.theme);
+          } catch {
+            // localStorage unavailable (private browsing, quota exceeded, etc.)
+          }
+        });
+
         // Apply theme to DOM whenever resolvedTheme changes
         $effect(() => {
           document.documentElement.classList.toggle(
@@ -63,13 +73,10 @@ class ThemeStore {
   }
 
   /**
-   * Set the theme and persist to localStorage
+   * Set the theme (automatically persisted to localStorage via $effect)
    */
   setTheme(newTheme: Theme) {
     this.theme = newTheme;
-    if (browser) {
-      localStorage.setItem("theme", newTheme);
-    }
   }
 
   /**

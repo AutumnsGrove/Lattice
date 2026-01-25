@@ -329,5 +329,51 @@ describe("seasonStore", () => {
       const { seasonStore } = await import("./season.svelte");
       expect(seasonStore.current).toBe("summer");
     });
+
+    it("should ignore invalid season values in setSeason", async () => {
+      localStorageMock.setItem("grove-season", "autumn");
+      const { seasonStore } = await import("./season.svelte");
+
+      expect(seasonStore.current).toBe("autumn");
+
+      // Try to set an invalid season (type assertion bypass simulation)
+      seasonStore.setSeason("invalid-season" as never);
+
+      // Should remain unchanged
+      expect(seasonStore.current).toBe("autumn");
+    });
+
+    it("should ignore empty string in setSeason", async () => {
+      localStorageMock.setItem("grove-season", "winter");
+      const { seasonStore } = await import("./season.svelte");
+
+      expect(seasonStore.current).toBe("winter");
+
+      // Try to set empty string
+      seasonStore.setSeason("" as never);
+
+      // Should remain unchanged
+      expect(seasonStore.current).toBe("winter");
+    });
+
+    it("should accept valid season values in setSeason", async () => {
+      const { seasonStore } = await import("./season.svelte");
+
+      // All valid seasons should work
+      seasonStore.setSeason("spring");
+      expect(seasonStore.current).toBe("spring");
+
+      seasonStore.setSeason("summer");
+      expect(seasonStore.current).toBe("summer");
+
+      seasonStore.setSeason("autumn");
+      expect(seasonStore.current).toBe("autumn");
+
+      seasonStore.setSeason("winter");
+      expect(seasonStore.current).toBe("winter");
+
+      seasonStore.setSeason("midnight");
+      expect(seasonStore.current).toBe("midnight");
+    });
   });
 });

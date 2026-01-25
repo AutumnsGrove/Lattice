@@ -111,10 +111,13 @@ class SeasonStore {
   }
 
   /**
-   * Set a specific season
+   * Set a specific season (with validation)
+   * Invalid values are silently ignored for defensive programming
    */
   setSeason(newSeason: Season) {
-    this.current = newSeason;
+    if (ALL_SEASONS.includes(newSeason)) {
+      this.current = newSeason;
+    }
   }
 
   /**
