@@ -11,7 +11,7 @@
 
 name = "grove-lattice"
 compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
+# nodejs_compat_v2 is enabled in Cloudflare Pages dashboard
 
 # Cloudflare Pages Functions output directory
 pages_build_output_dir = ".svelte-kit/cloudflare"
