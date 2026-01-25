@@ -46,6 +46,19 @@ jobs:
               { label: 'landing',   proper: /\blanding site\b/, titleFallback: /\b(grove\.place marketing|knowledge base|forest page)\b/ },
             ];
 
+            // --- Pattern Labels ---
+            // Patterns are reusable architectural solutions. Match pattern names
+            // anywhere (title or body) since they're unique Grove terminology.
+            // Note: Uses github-script JavaScript API (safe), not shell interpolation.
+            const patterns = [
+              { label: 'pattern:firefly',   pattern: /\bfirefly\b/,   fallback: /\b(ephemeral server|ignite.*fade|on.demand.*server)\b/ },
+              { label: 'pattern:loom',      pattern: /\bloom\b/,      fallback: /\b(durable object|session.?do|tenant.?do|post.?do)\b/ },
+              { label: 'pattern:prism',     pattern: /\bprism\b/,     fallback: /\b(glassmorphism|seasonal theme|design system layer)\b/ },
+              { label: 'pattern:sentinel',  pattern: /\bsentinel\b/,  fallback: /\b(load test|scale validation|ramp.up test)\b/ },
+              { label: 'pattern:songbird',  pattern: /\bsongbird\b/,  fallback: /\b(prompt injection|canary.*kestrel|three.layer defense)\b/ },
+              { label: 'pattern:threshold', pattern: /\bthreshold\b/, fallback: /\b(rate limit|abuse prevention|graduated response)\b/ },
+            ];
+
             // Ambiguous product names — bare name only in title, specific phrases in body
             const ambiguousComponents = [
               {
@@ -129,6 +142,15 @@ jobs:
               if (proper.test(title) || proper.test(body)) {
                 labelsToAdd.add(label);
               } else if (titleFallback.test(title)) {
+                labelsToAdd.add(label);
+              }
+            }
+
+            // Check patterns: match pattern name or fallback phrases anywhere
+            for (const { label, pattern, fallback } of patterns) {
+              if (pattern.test(title) || pattern.test(body)) {
+                labelsToAdd.add(label);
+              } else if (fallback.test(title) || fallback.test(body)) {
                 labelsToAdd.add(label);
               }
             }

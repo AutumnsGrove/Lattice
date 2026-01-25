@@ -71,6 +71,19 @@ Each issue gets up to 3 labels:
 | `patina` | Backups, cold storage, data preservation |
 | `landing` | Landing site, marketing pages, knowledge base |
 
+#### Pattern Labels (pick 0-2, in addition to component labels)
+
+Patterns are reusable architectural solutions. Apply when the issue involves implementing or extending a pattern.
+
+| Label | When to Apply |
+|-------|---------------|
+| `pattern:firefly` | Ephemeral server infrastructure (ignite, illuminate, fade lifecycle) |
+| `pattern:loom` | Durable Objects coordination (SessionDO, TenantDO, PostDO) |
+| `pattern:prism` | Glassmorphism design system, seasonal theming, UI layers |
+| `pattern:sentinel` | Load testing, scale validation, ramp-up testing |
+| `pattern:songbird` | Prompt injection protection (canary, kestrel, robin layers) |
+| `pattern:threshold` | Rate limiting, abuse prevention, graduated response |
+
 #### Type Labels (pick exactly 1)
 
 | Label | When to Apply |
