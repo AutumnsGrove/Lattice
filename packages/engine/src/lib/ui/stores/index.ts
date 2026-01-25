@@ -1,7 +1,10 @@
 /**
  * UI Stores Index
  * Re-exports all shared UI stores from the engine package
+ *
+ * These stores use Svelte 5 runes ($state, $effect) for reactivity.
+ * Access reactive values directly: seasonStore.current, themeStore.theme
  */
 
-export { seasonStore } from "./season";
-export { themeStore } from "./theme";
+export { seasonStore } from "./season.svelte";
+export { themeStore } from "./theme.svelte";

@@ -24,7 +24,7 @@
 	import GlassLogo from '../ui/GlassLogo.svelte';
 	import type { GlassVariant } from '../ui/types';
 	import type { Season } from '../../types/season';
-	import { seasonStore } from '../../stores/season';
+	import { seasonStore } from '../../stores/season.svelte';
 
 	type RotationMode = 'default' | 'left-right' | 'up-down';
 
@@ -102,7 +102,7 @@
 		return 'rotate-180'; // Odd indices: upside down
 	}
 
-	const activeSeason = $derived(season ?? $seasonStore);
+	const activeSeason = $derived(season ?? seasonStore.current);
 
 	// Compute inline style for spacing (overrides gap class)
 	const containerStyle = $derived(spacing ? `gap: ${spacing}` : '');

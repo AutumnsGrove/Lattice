@@ -28,7 +28,7 @@
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Logo -->
 	<div class="mb-6">
-		<Logo class="w-20 h-20" season={$seasonStore} />
+		<Logo class="w-20 h-20" season={seasonStore.current} />
 	</div>
 
 	<!-- Welcome -->

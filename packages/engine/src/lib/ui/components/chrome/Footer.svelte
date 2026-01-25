@@ -16,7 +16,7 @@
 		Grape,
 		Trees
 	} from 'lucide-svelte';
-	import { seasonStore } from '../../stores/season';
+	import { seasonStore } from '../../stores/season.svelte';
 	import type { FooterLink, MaxWidth, Season } from './types';
 	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS, DIVIDER_VERTICAL } from './defaults';
 
@@ -63,7 +63,7 @@
 					<!-- Easter egg: click logo to cycle seasons -->
 					<Logo
 						class="w-6 h-6"
-						season={season || $seasonStore}
+						season={season || seasonStore.current}
 						interactive
 						onclick={handleLogoClick}
 						title="Click for a surprise"

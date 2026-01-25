@@ -28,7 +28,7 @@
 		<!-- Header -->
 		<div class="text-center mb-10">
 			<div class="mb-6">
-				<Logo class="w-12 h-12 mx-auto" season={$seasonStore} />
+				<Logo class="w-12 h-12 mx-auto" season={seasonStore.current} />
 			</div>
 			<h1 class="text-2xl md:text-3xl font-serif text-foreground mb-3">Email preferences</h1>
 			<p class="text-foreground-muted font-sans">

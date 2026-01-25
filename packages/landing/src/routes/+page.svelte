@@ -62,7 +62,7 @@
 			aria-label="Toggle season theme"
 			title="Click to change season"
 		>
-			<Logo class="w-32 h-32" season={$seasonStore} />
+			<Logo class="w-32 h-32" season={seasonStore.current} />
 		</button>
 	</div>
 

@@ -82,7 +82,7 @@
 					aria-label="Toggle dark or light theme"
 					title="Toggle dark/light mode"
 				>
-					<Logo class="w-7 h-7" season={$seasonStore} />
+					<Logo class="w-7 h-7" season={seasonStore.current} />
 				</button>
 
 				<!-- Brand title - hidden on mobile -->

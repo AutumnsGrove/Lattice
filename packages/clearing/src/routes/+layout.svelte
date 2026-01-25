@@ -1,15 +1,11 @@
 <script lang="ts">
 	import '../app.css';
 	import { themeStore, seasonStore } from '@autumnsgrove/groveengine/ui/stores';
-	const { resolvedTheme } = themeStore;
 
 	let { children } = $props();
 
-	// Ensure stores initialize on client
-	$effect(() => {
-		const _ = $resolvedTheme;
-		const __ = $seasonStore;
-	});
+	// With Svelte 5 runes, stores are reactive $state values that initialize automatically.
+	// Access themeStore.resolvedTheme and seasonStore.current directly - no need for $effect.
 </script>
 
 <div class="min-h-screen bg-page">

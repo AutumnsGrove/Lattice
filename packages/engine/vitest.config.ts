@@ -35,6 +35,7 @@ export default defineConfig({
       // SvelteKit virtual modules need stubs for vitest
       "$app/stores": resolve(__dirname, "tests/mocks/app-stores.ts"),
       "$app/navigation": resolve(__dirname, "tests/mocks/app-navigation.ts"),
+      "$app/environment": resolve(__dirname, "tests/mocks/app-environment.ts"),
     },
   },
 });

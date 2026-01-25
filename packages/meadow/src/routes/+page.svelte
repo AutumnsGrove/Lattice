@@ -35,7 +35,7 @@
 			aria-label="Toggle season theme"
 			title="Click to change season"
 		>
-			<Logo size={96} season={$seasonStore} />
+			<Logo size={96} season={seasonStore.current} />
 		</button>
 	</div>
 
