@@ -9,7 +9,17 @@
  * Once all components are migrated to shadcn, this file can be removed.
  */
 
+/* =============================================================================
+   COLOR SCHEME SIGNALING
+   Tells browsers and extensions that Grove handles its own dark mode natively.
+   This prevents forced dark mode transformations from browser features like
+   Chrome's Auto Dark Theme and helps extensions like Dark Reader detect that
+   we have proper dark mode support.
+   ============================================================================= */
+
 :root {
+	color-scheme: light;
+
 	/* Primary colors - map to shadcn primary */
 	--color-primary: hsl(var(--primary));
 	--color-primary-hover: hsl(121 37% 40%);
@@ -164,6 +174,8 @@
 }
 
 .dark {
+	color-scheme: dark;
+
 	/* Dark mode tag colors */
 	--tag-bg: hsl(270 38% 55%);
 	--tag-bg-hover: hsl(270 38% 49%);
