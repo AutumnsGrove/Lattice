@@ -3,7 +3,7 @@
 	import { Logo } from '../ui';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
-	import { seasonStore } from '../../stores/season';
+	import { seasonStore } from '../../stores/season.svelte';
 	import { Menu } from 'lucide-svelte';
 	import type { NavItem, MaxWidth } from './types';
 	import type { Season } from '../../types/season';
@@ -51,7 +51,7 @@
 			<!-- Logo icon - clickable to cycle through seasons -->
 			<Logo
 				size="lg"
-				season={season || $seasonStore}
+				season={season || seasonStore.current}
 				interactive
 				onclick={handleLogoClick}
 				title="Change season"

@@ -31,10 +31,10 @@
 	import { samplePathString } from '$lib/utils/pathUtils';
 
 	// Season state - using shared store so logo respects forest season
-	const isSpring = $derived($seasonStore === 'spring');
-	const isAutumn = $derived($seasonStore === 'autumn');
-	const isWinter = $derived($seasonStore === 'winter');
-	const isMidnight = $derived($seasonStore === 'midnight');
+	const isSpring = $derived(seasonStore.current === 'spring');
+	const isAutumn = $derived(seasonStore.current === 'autumn');
+	const isWinter = $derived(seasonStore.current === 'winter');
+	const isMidnight = $derived(seasonStore.current === 'midnight');
 
 	// ViewBox for hills (wider for smooth curves)
 	const hillViewBox = { width: 1200, height: 500 };
@@ -405,7 +405,7 @@
 	// Use $derived.by and read season at top level to ensure reactivity
 	let forestTrees = $derived.by(() => {
 		// Read season at top level to establish reactive dependency
-		const currentSeason = $seasonStore;
+		const currentSeason = seasonStore.current;
 		return baseTrees.map((tree) => {
 			const depthColors = getDepthColors(tree.brightness, currentSeason);
 			const depthPinks = getDepthPinks(tree.brightness, currentSeason);
@@ -656,7 +656,7 @@
 			{#if !isWinter}
 				<FallingLeavesLayer
 					trees={forestTrees}
-					season={$seasonStore}
+					season={seasonStore.current}
 					minLeavesPerTree={2}
 					maxLeavesPerTree={4}
 					zIndex={5}
@@ -787,20 +787,20 @@
 							tier2={tierColors.tier2}
 							tier3={tierColors.tier3}
 							trunk={tierColors.trunk}
-							season={$seasonStore}
+							season={seasonStore.current}
 							monochrome
 							background={false}
 							rotation={0}
 						/>
 					{:else if tree.treeType === 'pine'}
-						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
+						<TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
 					{:else if tree.treeType === 'aspen'}
-						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
+						<TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
 					{:else if tree.treeType === 'birch'}
-						<TreeBirch class="w-full h-full" color={tree.color} season={$seasonStore} animate={true} />
+						<TreeBirch class="w-full h-full" color={tree.color} season={seasonStore.current} animate={true} />
 					{:else if tree.treeType === 'cherry'}
 						<!-- TreeCherry handles winter internally: hides blossoms, shows bare branches with snow -->
-						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={$seasonStore} animate={true} />
+						<TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
 					{/if}
 				</div>
 			{/each}
