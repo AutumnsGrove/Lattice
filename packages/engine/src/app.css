@@ -29,8 +29,8 @@
 		/* Background & Foreground */
 		--background: 0 0% 98%;
 		--foreground: 0 0% 20%;
-		--foreground-muted: 0 0% 38%;
-		--foreground-subtle: 0 0% 45%;
+		--foreground-muted: 30 8% 38%;
+		--foreground-subtle: 30 6% 45%;
 
 		/* Card */
 		--card: 0 0% 100%;
@@ -75,8 +75,8 @@
 		/* Background & Foreground */
 		--background: 0 0% 10%;
 		--foreground: 0 0% 94%;
-		--foreground-muted: 0 0% 65%;
-		--foreground-subtle: 0 0% 58%;
+		--foreground-muted: 30 6% 65%;
+		--foreground-subtle: 30 5% 58%;
 
 		/* Card */
 		--card: 0 0% 14%;
