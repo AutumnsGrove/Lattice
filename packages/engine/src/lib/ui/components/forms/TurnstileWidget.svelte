@@ -71,21 +71,23 @@
 	let turnstileInitialized = false;
 
 	$effect(() => {
-		if (turnstileInitialized) return;
-		turnstileInitialized = true;
+		// Only initialize once
+		if (!turnstileInitialized) {
+			turnstileInitialized = true;
 
-		(async () => {
-			try {
-				await loadScript();
-				renderWidget();
-			} catch (err) {
-				console.error('Turnstile load error:', err);
-				onerror?.(err instanceof Error ? err.message : 'Failed to load Turnstile');
-			}
-		})();
+			(async () => {
+				try {
+					await loadScript();
+					renderWidget();
+				} catch (err) {
+					console.error('Turnstile load error:', err);
+					onerror?.(err instanceof Error ? err.message : 'Failed to load Turnstile');
+				}
+			})();
+		}
 
+		// Always return cleanup (runs on unmount or if effect re-runs)
 		return () => {
-			// Use the outer widgetId directly (not a stale closure copy)
 			if (widgetId && window.turnstile) {
 				window.turnstile.remove(widgetId);
 			}
