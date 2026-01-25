@@ -83,8 +83,7 @@
         href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-        style="background: rgba(34, 197, 94, 0.15); color: var(--color-primary);"
+        class="rooted-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
         title="You've planted your tree in the grove"
         aria-label="Learn about being Rooted in Grove"
       >
@@ -378,7 +377,11 @@
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-primary);
+    color: #166534;
+  }
+
+  :global(.dark) .roadmap-badge {
+    color: #4ade80;
   }
 
   .roadmap-content {
@@ -416,8 +419,22 @@
 
   .progress-fill {
     height: 100%;
-    background: var(--color-primary);
+    background: #16a34a;
     border-radius: 9999px;
     transition: width 0.5s ease;
+  }
+
+  :global(.dark) .progress-fill {
+    background: #22c55e;
+  }
+
+  /* Rooted badge in header */
+  .rooted-badge {
+    background: rgba(34, 197, 94, 0.15);
+    color: #166534;
+  }
+
+  :global(.dark) .rooted-badge {
+    color: #4ade80;
   }
 </style>
