@@ -78,7 +78,7 @@
 <div class="max-w-screen-xl">
   <header class="mb-8">
     <div class="flex items-center gap-3 mb-2">
-      <h1 class="m-0 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Dashboard</h1>
+      <h1 class="m-0 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">Dashboard</h1>
       <a
         href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
         target="_blank"
@@ -92,7 +92,7 @@
         <span>Rooted</span>
       </a>
     </div>
-    <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-lg transition-colors">Welcome back, {userName}.</p>
+    <p class="m-0 text-[#555] dark:text-[#b0b0b0] text-lg transition-colors">Welcome back, {userName}.</p>
   </header>
 
   <!-- Stats Cards -->
@@ -166,7 +166,7 @@
 
   <!-- Quick Actions -->
   <section class="mb-8">
-    <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Quick Actions</h2>
+    <h2 class="m-0 mb-4 text-xl text-[#333] dark:text-[#f0f0f0] transition-colors">Quick Actions</h2>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
       <a href="/admin/blog" class="action-card glass-action">
         <FileText class="w-7 h-7 text-accent-muted" />
@@ -261,15 +261,23 @@
 
   .stat-label {
     font-size: 0.75rem;
-    color: var(--color-text-muted);
+    color: #555;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  :global(.dark) .stat-label {
+    color: #b0b0b0;
   }
 
   .stat-value {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: #333;
+  }
+
+  :global(.dark) .stat-value {
+    color: #f0f0f0;
   }
 
   .stat-value.text-sm {
@@ -277,8 +285,12 @@
   }
 
   .stat-value.text-muted {
-    color: var(--color-text-muted);
+    color: #555;
     font-size: 0.875rem;
+  }
+
+  :global(.dark) .stat-value.text-muted {
+    color: #b0b0b0;
   }
 
   /* Glass action cards */
@@ -286,12 +298,16 @@
     padding: 1.25rem;
     border-radius: var(--border-radius-standard);
     text-decoration: none;
-    color: var(--color-text);
+    color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.625rem;
     transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  :global(.dark) .action-card {
+    color: #f0f0f0;
   }
 
   .glass-action {
@@ -321,8 +337,12 @@
     padding: 1.5rem;
     border-radius: var(--border-radius-standard);
     text-decoration: none;
-    color: var(--color-text);
+    color: #333;
     transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  :global(.dark) .roadmap-card {
+    color: #f0f0f0;
   }
 
   .glass-roadmap {
