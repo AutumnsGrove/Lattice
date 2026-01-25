@@ -387,7 +387,7 @@
 
 			<!-- Legend -->
 			<p class="mt-4 text-sm text-foreground-muted flex items-center justify-center gap-1.5">
-				<Star class="w-4 h-4 text-amber-500 fill-amber-500" aria-hidden="true" />
+				<FeatureStar />
 				<span>marks key features</span>
 			</p>
 		</div>
