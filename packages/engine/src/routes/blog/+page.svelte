@@ -33,7 +33,7 @@
 </script>
 
 <svelte:head>
-	<title>Blog - AutumnsGrove</title>
+	<title>Blog{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
 	<meta name="description" content="Read my latest blog posts and articles." />
 </svelte:head>
 

@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.post.title} - AutumnsGrove</title>
+	<title>{data.post.title}{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
 	<meta name="description" content={data.post.description || data.post.title} />
 
 	<!-- Open Graph metadata for better content detection -->

@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-	<title>Search Blog - AutumnsGrove</title>
+	<title>Search Blog{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
 	<meta name="description" content="Search blog posts by keyword or filter by tags." />
 </svelte:head>
 

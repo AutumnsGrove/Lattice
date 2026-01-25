@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>{page.status} - AutumnsGrove</title>
+	<title>{page.status} - The Grove</title>
 </svelte:head>
 
 <div class="error-page">

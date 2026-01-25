@@ -20,7 +20,7 @@ export const GET: RequestHandler = (event) => {
       : context?.type === "app"
         ? `https://${context.app}.grove.place`
         : "https://grove.place";
-  const feedTitle = `${siteConfig.site?.title || "AutumnsGrove"} Blog`;
+  const feedTitle = `${context?.type === "tenant" ? context.tenant.name : siteConfig.site?.title || "The Grove"} Blog`;
   const feedDescription =
     siteConfig.site?.description ||
     "A personal website for blogging, demonstrating projects, and sharing articles";

@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.title} - AutumnsGrove</title>
+	<title>{data.title}{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
 	<meta name="description" content={data.description} />
 </svelte:head>
 
