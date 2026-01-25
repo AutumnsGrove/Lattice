@@ -218,7 +218,13 @@ function splitPreviewIntoLines(
       // Current line is full, move to next line
       currentLine++;
       if (currentLine < 4) {
-        lines[currentLine] = word;
+        // Check if word fits on new line, truncate if needed
+        if (word.length <= maxCharsPerLine[currentLine]) {
+          lines[currentLine] = word;
+        } else {
+          lines[currentLine] =
+            word.slice(0, maxCharsPerLine[currentLine] - 3) + "...";
+        }
       }
     }
   }
