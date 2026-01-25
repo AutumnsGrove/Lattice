@@ -151,7 +151,7 @@
 								<a href="https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Cloudflare stands at the gate</a>, and our corner of the web becomes a black hole to external AI. Learn more about <a href="https://grove.place/knowledge/help/how-grove-protects-your-content" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">how Grove protects your content from AI scraping</a>.
 							</p>
 							<p class="text-foreground-muted font-sans leading-relaxed mt-3">
-								We do use AI internally for content moderation, but intentionally: with zero data retention, with privacy-first providers, with no training on your words.
+								We do use AI internally for content moderation, but intentionally: with <a href="/knowledge/help/what-is-zdr" class="text-accent-muted hover:underline">zero data retention</a>, with privacy-first providers, with no training on your words.
 								There's a difference between using a tool carefully and feeding a machine indiscriminately.
 							</p>
 							<p class="text-foreground-subtle font-sans italic mt-3">
@@ -163,7 +163,7 @@
 					<!-- Solarpunk Callout -->
 					<a
 						href="/knowledge/help/what-is-solarpunk"
-						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/90 dark:hover:bg-amber-900/40 rounded-lg border border-amber-200/60 dark:border-amber-800/40 transition-colors"
+						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/90 dark:hover:bg-amber-900/40 rounded-lg border border-amber-200/60 dark:border-amber-800/40 transition-colors no-underline"
 					>
 						<SolarpunkIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
 						<span class="text-sm text-foreground-muted group-hover:text-foreground transition-colors">
