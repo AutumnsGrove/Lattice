@@ -34,6 +34,16 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 **Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts: related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
 
+### Passage
+**Subdomain Routing** · *Internal infrastructure*
+**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router)
+
+A passage is a way through—a corridor connecting spaces that seem separate. In impossible architecture, passages are the secret: rotate the structure, and a passage appears where none existed. The geometry shouldn't allow it. The passage doesn't care.
+
+Passage is how the grove makes the impossible feel inevitable. One domain, infinite destinations. Type `autumn.grove.place` and Passage carries you there—navigating the river of subdomains like a kayak finding its channel. Not by traveling the distance, but by making the distance irrelevant. The architectural barriers that should block you become the corridor that welcomes you home.
+
+*The way through was always there. Passage just reveals it.*
+
 ---
 
 ## Platform Services
@@ -468,6 +478,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | Name | Category | Purpose | Domain |
 |------|----------|---------|--------|
 | **Lattice** | Core | Core platform | npm package |
+| **Passage** | Core | Subdomain routing | *(internal)* |
 | **Heartwood** | Platform | Authentication | heartwood.grove.place |
 | **Arbor** | Platform | Admin panel | {you}.grove.place/admin |
 | **Plant** | Platform | Onboarding | plant.grove.place |
@@ -521,6 +532,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Public Name | Internal Name |
 |-------------|---------------|
 | Lattice | GroveEngine |
+| Passage | GroveRouter |
 | Heartwood | GroveAuth |
 | Arbor | GroveAdmin |
 | Plant | Seedbed |
@@ -628,5 +640,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 24, 2026 — Added Etch (link saving & highlights)*
+*Last updated: January 25, 2026 — Added Passage (subdomain routing)*
 *Status: Placeholder names, pending launch*

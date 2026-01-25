@@ -71,6 +71,15 @@
 						{ name: 'Vines', icon: 'layoutlist', description: 'Gutter link system' }
 					]
 				},
+				{
+					name: 'Passage',
+					tagline: 'The Hidden Way Through',
+					description: 'A passage is a way through—a corridor connecting spaces that seem separate. Passage is the invisible layer that makes the impossible possible: one domain, infinite destinations. Type any *.grove.place address and Passage carries you through—navigating the river of subdomains to your destination like a kayak finding its channel.',
+					status: 'live',
+					icon: 'kayak',
+					integration: 'Routes all *.grove.place subdomain traffic',
+					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router'
+				},
 			]
 		},
 		{

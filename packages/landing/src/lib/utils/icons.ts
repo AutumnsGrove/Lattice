@@ -217,6 +217,8 @@ import {
   Network,
   // Etch - link saving & highlights
   Highlighter,
+  // Passage - subdomain routing
+  Kayak,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -485,6 +487,8 @@ export const toolIcons = {
   network: Network, // Burrow - trusted connections between properties
   // Etch - link saving & highlights
   highlighter: Highlighter, // Etch - scoring/highlighting text
+  // Passage - subdomain routing (the hidden way through)
+  kayak: Kayak, // Passage - navigating the river passage
 } as const;
 
 // ============================================================================
