@@ -220,7 +220,7 @@
             class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground {colors.mobileHover} focus-visible:outline-none focus-visible:text-foreground transition-colors motion-reduce:transition-none"
           >
             {#if SectionIcon}
-              <SectionIcon class="w-5 h-5 {colors.iconText.split(' ')[0]}" />
+              <SectionIcon class="w-5 h-5 {colors.iconText}" />
             {:else}
               <span class="w-5 h-5 rounded-full bg-current opacity-50"></span>
             {/if}
