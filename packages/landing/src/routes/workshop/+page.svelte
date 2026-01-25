@@ -7,6 +7,7 @@
 
 	// Use centralized registry for spec/github link icons
 	const FileText = contentIcons.filetext;
+	const BookOpen = contentIcons.bookopen;
 	const Github = featureIcons.github;
 	const Lightbulb = actionIcons.lightbulb;
 
@@ -44,6 +45,7 @@
 		github?: string;
 		spec?: string;
 		howLink?: string;
+		whatIsLink?: string;
 		subComponents?: SubComponent[];
 	}
 
@@ -69,6 +71,7 @@
 					integration: 'Powers all Grove properties',
 					github: 'https://github.com/AutumnsGrove/GroveEngine',
 					spec: '/knowledge/specs/lattice-spec',
+					whatIsLink: '/knowledge/help/what-is-lattice',
 					subComponents: [
 						{ name: 'Vines', icon: 'layoutlist', description: 'Gutter link system' }
 					]
@@ -97,7 +100,8 @@
 					icon: 'kayak',
 					integration: 'Routes all *.grove.place subdomain traffic',
 					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router',
-					spec: '/knowledge/specs/passage-spec'
+					spec: '/knowledge/specs/passage-spec',
+					whatIsLink: '/knowledge/help/what-is-passage'
 				},
 			]
 		},
@@ -354,6 +358,7 @@
 					domain: 'meadow.grove.place',
 					integration: 'Optional social layer for Grove blogs',
 					spec: '/knowledge/specs/meadow-spec',
+					whatIsLink: '/knowledge/help/what-is-meadow',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'RSS', icon: 'rss', description: 'Feed syndication' },
@@ -663,6 +668,7 @@
 					icon: 'spool',
 					integration: 'Architectural pattern for coordination and real-time',
 					spec: '/knowledge/patterns/loom-durable-objects-pattern',
+					whatIsLink: '/knowledge/help/what-is-loom',
 					subComponents: [
 						{ name: 'Session', icon: 'key', description: 'Session management' },
 						{ name: 'Tenant', icon: 'codepen', description: 'Tenant coordination' },
@@ -692,6 +698,7 @@
 					icon: 'webhook',
 					integration: 'Powers Bloom and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern',
+					whatIsLink: '/knowledge/help/what-is-firefly',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
@@ -718,7 +725,8 @@
 					status: 'building',
 					icon: 'radar',
 					integration: 'Testing pattern for Vista and infrastructure validation',
-					spec: '/knowledge/patterns/sentinel-pattern'
+					spec: '/knowledge/patterns/sentinel-pattern',
+					whatIsLink: '/knowledge/help/what-is-sentinel'
 				},
 				{
 					name: 'Vineyard',
@@ -985,6 +993,12 @@
 											<a href={tool.howLink} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
 												<Lightbulb class="w-4 h-4" />
 												<span>How we'll do it</span>
+											</a>
+										{/if}
+										{#if tool.whatIsLink}
+											<a href={tool.whatIsLink} class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors">
+												<BookOpen class="w-4 h-4" />
+												<span>Read more</span>
 											</a>
 										{/if}
 										{#if tool.github}

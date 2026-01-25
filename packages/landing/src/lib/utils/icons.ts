@@ -260,6 +260,7 @@ export const featureIcons = {
 /** Icons for content types and growth concepts */
 export const contentIcons = {
   filetext: FileText,
+  bookopen: BookOpen,
   tag: Tag,
   sprout: Sprout,
   heart: Heart,
