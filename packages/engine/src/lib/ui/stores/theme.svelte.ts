@@ -16,23 +16,27 @@ class ThemeStore {
 
   constructor() {
     if (browser) {
-      // Apply theme to DOM whenever resolvedTheme changes
-      $effect(() => {
-        document.documentElement.classList.toggle(
-          "dark",
-          this.resolvedTheme === "dark",
-        );
-      });
+      // Use $effect.root() to create effects outside component context
+      // This allows the store to work as a singleton module
+      $effect.root(() => {
+        // Apply theme to DOM whenever resolvedTheme changes
+        $effect(() => {
+          document.documentElement.classList.toggle(
+            "dark",
+            this.resolvedTheme === "dark",
+          );
+        });
 
-      // Listen for system preference changes
-      $effect(() => {
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        const handler = (e: MediaQueryListEvent) => {
-          this.#systemPrefersDark = e.matches;
-        };
-        mediaQuery.addEventListener("change", handler);
+        // Listen for system preference changes
+        $effect(() => {
+          const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+          const handler = (e: MediaQueryListEvent) => {
+            this.#systemPrefersDark = e.matches;
+          };
+          mediaQuery.addEventListener("change", handler);
 
-        return () => mediaQuery.removeEventListener("change", handler);
+          return () => mediaQuery.removeEventListener("change", handler);
+        });
       });
     }
   }

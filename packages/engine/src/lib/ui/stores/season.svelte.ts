@@ -34,18 +34,22 @@ class SeasonStore {
 
   constructor() {
     if (browser) {
-      // Persist to localStorage whenever season changes
-      $effect(() => {
-        try {
-          localStorage.setItem(STORAGE_KEY, this.current);
-          // Track the last regular season for returning from midnight
-          if (this.current !== "midnight") {
-            this.#lastRegularSeason = this.current as RegularSeason;
-            localStorage.setItem(LAST_REGULAR_KEY, this.current);
+      // Use $effect.root() to create effects outside component context
+      // This allows the store to work as a singleton module
+      $effect.root(() => {
+        // Persist to localStorage whenever season changes
+        $effect(() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, this.current);
+            // Track the last regular season for returning from midnight
+            if (this.current !== "midnight") {
+              this.#lastRegularSeason = this.current as RegularSeason;
+              localStorage.setItem(LAST_REGULAR_KEY, this.current);
+            }
+          } catch {
+            // localStorage unavailable (private browsing, etc.)
           }
-        } catch {
-          // localStorage unavailable (private browsing, etc.)
-        }
+        });
       });
     }
   }
