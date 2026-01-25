@@ -64,6 +64,48 @@
 
   // Mobile menu state
   let isMobileOpen = $state(false);
+  let dropdownRef: HTMLDivElement | null = $state(null);
+
+  // Focus first link when dropdown opens
+  $effect(() => {
+    if (isMobileOpen && dropdownRef) {
+      // Small delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const firstLink = dropdownRef?.querySelector('a');
+        firstLink?.focus();
+      });
+    }
+  });
+
+  // Handle Escape key and click-outside to close dropdown
+  $effect(() => {
+    if (!isMobileOpen) return;
+
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        isMobileOpen = false;
+      }
+    }
+
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      // Check if click is outside both the dropdown and the FAB button
+      if (dropdownRef && !dropdownRef.contains(target)) {
+        const fabButton = dropdownRef.previousElementSibling;
+        if (!fabButton?.contains(target)) {
+          isMobileOpen = false;
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
 
   // Color scheme classes
   const colorSchemes = {
@@ -192,7 +234,10 @@
   </button>
 
   {#if isMobileOpen}
-    <div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl {colors.border} overflow-hidden max-h-[70vh] overflow-y-auto">
+    <div
+      bind:this={dropdownRef}
+      class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl {colors.border} overflow-hidden max-h-[70vh] overflow-y-auto"
+    >
       <!-- Header -->
       <div class="px-4 py-3 {colors.border} border-b flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
         <span class="font-medium text-foreground">{mobileTitle}</span>
