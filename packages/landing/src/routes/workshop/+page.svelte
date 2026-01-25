@@ -72,22 +72,6 @@
 					]
 				},
 				{
-					name: 'Passage',
-					tagline: 'The Hidden Way Through',
-					description: 'A passage is a way through—a corridor connecting spaces that seem separate. Passage is the invisible layer that makes the impossible possible: one domain, infinite destinations. Type any *.grove.place address and Passage carries you through—navigating the river of subdomains to your destination like a kayak finding its channel.',
-					status: 'live',
-					icon: 'kayak',
-					integration: 'Routes all *.grove.place subdomain traffic',
-					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router',
-					spec: '/knowledge/specs/passage-spec'
-				},
-			]
-		},
-		{
-			name: 'Core Services',
-			description: 'Essential services powering every Grove blog',
-			tools: [
-				{
 					name: 'Heartwood',
 					tagline: 'Centralized Authentication',
 					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
@@ -103,6 +87,22 @@
 						{ name: 'Identity', icon: 'idcard', description: 'Verified identity' }
 					]
 				},
+				{
+					name: 'Passage',
+					tagline: 'The Hidden Way Through',
+					description: 'A passage is a way through—a corridor connecting spaces that seem separate. Passage is the invisible layer that makes the impossible possible: one domain, infinite destinations. Type any *.grove.place address and Passage carries you through—navigating the river of subdomains to your destination like a kayak finding its channel.',
+					status: 'live',
+					icon: 'kayak',
+					integration: 'Routes all *.grove.place subdomain traffic',
+					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router',
+					spec: '/knowledge/specs/passage-spec'
+				},
+			]
+		},
+		{
+			name: 'Core Services',
+			description: 'Essential services powering every Grove blog',
+			tools: [
 				{
 					name: 'Clearing',
 					tagline: 'Status Page',
