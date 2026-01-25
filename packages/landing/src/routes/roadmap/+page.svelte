@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { FeatureStar } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import FeatureStar from '$lib/components/FeatureStar.svelte';
 	import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
 
 	// Centralized icon registry - single source of truth for all icons

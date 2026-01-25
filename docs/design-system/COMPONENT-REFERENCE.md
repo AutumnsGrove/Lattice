@@ -1,12 +1,12 @@
 ---
 title: Component Reference
-description: Complete catalog of Grove's 185 UI components
+description: Complete catalog of Grove's 188 UI components
 category: design
-lastUpdated: '2026-01-18'
+lastUpdated: '2026-01-25'
 ---
 # Component Reference
 
-> 186 components organized by category, ready to help you build something beautiful.
+> 188 components organized by category, ready to help you build something beautiful.
 > Import from `@autumnsgrove/groveengine/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
@@ -16,7 +16,7 @@ This is your field guide to Grove's component library. Each component is designe
 ## Quick Links
 
 - [Import Patterns](#import-patterns)
-- [ui/ - Core UI Components](#ui---core-ui-components-29)
+- [ui/ - Core UI Components](#ui---core-ui-components-30)
 - [primitives/ - Headless Primitives](#primitives---headless-primitives-45)
 - [nature/ - Decorative Nature](#nature---decorative-nature-62)
 - [typography/ - Font Providers](#typography---font-providers-11)
@@ -77,7 +77,7 @@ Import from specific subpaths when you need several components from the same fam
 
 ---
 
-## ui/ - Core UI Components (29)
+## ui/ - Core UI Components (30)
 
 The heart of Grove's visual language. These components implement our glassmorphism design system—translucent surfaces with gentle blur that let the forest peek through.
 
@@ -224,6 +224,7 @@ These wrap the primitives with Grove styling, ready to use out of the box.
 | `Button` | Standard button with variants |
 | `Card` | Content card container |
 | `Badge` | Small status indicators |
+| `FeatureStar` | Inline star indicator for key/featured items |
 | `Dialog` | Modal dialog wrapper |
 | `Input` | Text input field |
 | `Textarea` | Multi-line text input |
@@ -1024,4 +1025,4 @@ When you're building with Grove components, you're creating spaces where people 
 
 ---
 
-*Last updated: 2026-01-21*
+*Last updated: 2026-01-25*

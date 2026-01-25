@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-01-24",
-  "lastAuditedBy": "claude/fix-issue-546-7TpRh",
+  "lastUpdated": "2026-01-25",
+  "lastAuditedBy": "claude/fix-glass-cards-outline-f79ea",
   "components": {
-    "total": 187,
+    "total": 188,
     "breakdown": {
       "primitives": 45,
       "nature": 64,
-      "ui": 29,
+      "ui": 30,
       "typography": 11,
       "chrome": 6,
       "terrarium": 7,
