@@ -32,4 +32,4 @@
 	);
 </script>
 
-<Star class="w-4 h-4 {colorClass}" aria-hidden="true" title="Key feature" />
+<Star class="w-4 h-4 {colorClass}" aria-hidden="true" />
