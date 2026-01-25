@@ -231,7 +231,7 @@
     "package": "svelte-kit sync && svelte-package -o dist",
     "prepublishOnly": "pnpm run package",
     "preview": "vite preview",
-    "deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name groveengine",
+    "deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name grove-lattice",
     "audit": "pnpm audit --audit-level=moderate",
     "audit:fix": "pnpm audit --fix",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

@@ -203,8 +203,8 @@ export default {
     // (null routes were removed - all special subdomains now have explicit targets)
 
     // Determine target hostname - default to main engine for tenant blogs
-    // Note: Project is "groveengine" but pages.dev domain is "grove-example-site"
-    const targetHostname = routeTarget || "grove-example-site.pages.dev";
+    // Note: Project is "grove-lattice"
+    const targetHostname = routeTarget || "grove-lattice.pages.dev";
 
     // Proxy to target
     const targetUrl = new URL(request.url);

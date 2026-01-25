@@ -9,8 +9,9 @@
 # 5. Update the IDs below with actual values from creation output
 # 6. Set secrets: npx wrangler secret put SESSION_SECRET (etc.)
 
-name = "groveengine"
+name = "grove-lattice"
 compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages Functions output directory
 pages_build_output_dir = ".svelte-kit/cloudflare"

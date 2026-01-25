@@ -145,15 +145,13 @@ describe("Grove Router", () => {
       );
     });
 
-    it("routes unknown subdomain to grove-example-site (main engine)", async () => {
+    it("routes unknown subdomain to grove-lattice (main engine)", async () => {
       const request = createRequest("autumn", "/blog/hello");
       await router.fetch(request, env);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: expect.stringContaining(
-            "grove-example-site.pages.dev/blog/hello",
-          ),
+          url: expect.stringContaining("grove-lattice.pages.dev/blog/hello"),
         }),
       );
     });
