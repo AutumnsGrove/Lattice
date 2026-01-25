@@ -249,6 +249,15 @@ Wisp is Grove's ethical writing assistant. It helps polish your voice without re
 
 All features off by default. Zero data retention. Your words analyzed, never stored. *A helper, not a writer, and sometimes, a good listener.*
 
+### Scribe
+**Voice Transcription** · *Integrated into editor*
+
+A scribe is a patient listener—someone who sits beside you and transforms your spoken words into written text. Before keyboards, before typewriters, scribes were how thoughts became documents. You spoke; they wrote.
+
+Scribe is voice-to-text for Grove. Press and hold, speak your thoughts, and watch them bloom into text at your cursor. Two modes: **Raw** transcribes exactly what you say; **Draft** polishes your words, adds structure, and automatically creates Vines for tangents and asides. All processing flows through Lumen—no model downloads, no device requirements. Just talk.
+
+*Speak. The grove scribes.*
+
 ### Reeds
 **Comments System** · *Integrated into blogs*
 
@@ -497,6 +506,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Waystone** | Platform | Help center | *(integrated)* |
 | **Porch** | Platform | Support conversations | porch.grove.place |
 | **Wisp** | Content | Writing assistant (+ Fireside) | *(integrated)* |
+| **Scribe** | Content | Voice transcription | *(integrated)* |
 | **Reeds** | Content | Comments system | *(integrated)* |
 | **Thorn** | Content | Content moderation | *(internal)* |
 | **Meadow** | Content | Social connection | meadow.grove.place |
@@ -552,6 +562,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Waystone | GroveWaystone |
 | Porch | GrovePorch |
 | Wisp | GroveWisp |
+| Scribe | GroveScribe |
 | Reeds | GroveReeds |
 | Thorn | GroveThorn |
 | Meadow | GroveSocial |
@@ -640,5 +651,5 @@ These are orthogonal. A Rooted Seedling is a new subscriber. A Rooted Evergreen 
 
 ---
 
-*Last updated: January 25, 2026 — Added Passage (subdomain routing)*
+*Last updated: January 25, 2026 — Added Scribe (voice transcription)*
 *Status: Placeholder names, pending launch*

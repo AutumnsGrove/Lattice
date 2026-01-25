@@ -64,27 +64,30 @@ Tools like Hex use local models (Parakeet TDT, WhisperKit) that run on-device. T
 
 ### The Solution: Edge Transcription via Lumen
 
+Scribe offers two modes:
+
+#### Raw Mode (1:1 Transcription)
 ```
-Browser (Flow mode)
-       │
-       │  MediaRecorder API → Audio blob
-       │
-       ▼
-Lumen.transcribe({ audio, tenant })
-       │
-       │  PII scrubbing (on output text)
-       │  Quota enforcement
-       │  Usage logging
-       │
-       ▼
-Cloudflare Workers AI Whisper
-       │
-       │  @cf/openai/whisper-large-v3-turbo
-       │  (or fallback to whisper-tiny-en)
-       │
-       ▼
-Transcribed text → inserted at cursor
+Voice → Whisper → Text inserted at cursor
 ```
+Fast, literal. What you say is what you get.
+
+#### Draft Mode (AI-Assisted Structuring)
+```
+Voice → Whisper → Raw transcript
+                       ↓
+              Lumen (generation task)
+                       ↓
+         ┌─────────────────────────────┐
+         │ • Clean up filler words     │
+         │ • Add headers & structure   │
+         │ • Detect asides → Vines     │
+         └─────────────────────────────┘
+                       ↓
+         Structured markdown + auto-generated Vines
+```
+
+Draft mode transforms rambling speech into a polished blog post draft with automatic Vine creation for tangents and asides.
 
 **Why Cloudflare Workers AI?**
 
@@ -142,6 +145,13 @@ export interface LumenTranscriptionOptions {
 
   /** Skip quota enforcement */
   skipQuota?: boolean;
+
+  /**
+   * Scribe mode:
+   * - "raw": 1:1 transcription, fast and literal
+   * - "draft": AI-assisted structuring with auto-Vines
+   */
+  mode?: "raw" | "draft";
 }
 
 export interface LumenTranscriptionResponse {
@@ -393,6 +403,459 @@ export class LumenClient {
     };
   }
 }
+```
+
+---
+
+## Draft Mode: AI-Assisted Structuring
+
+Draft mode transforms rambling spoken thoughts into polished blog post drafts with automatic Vine creation for tangents and asides. This is the magic that makes voice input feel like a writing superpower rather than just dictation.
+
+### How Draft Mode Works
+
+Draft mode is a two-step process:
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                         DRAFT MODE FLOW                              │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   Step 1: Transcription (Whisper)                                   │
+│   ─────────────────────────────                                     │
+│   Voice → Cloudflare Whisper → Raw transcript                       │
+│                                                                      │
+│   "So I've been thinking about how we handle auth and um            │
+│    like the token refresh is a mess right now. Oh by the            │
+│    way I should probably mention that Jake found a bug              │
+│    yesterday which is kind of related. Anyway the main              │
+│    thing is we need to implement proper token rotation..."          │
+│                                                                      │
+│   Step 2: Structuring (LLM via Lumen generation task)               │
+│   ────────────────────────────────────────────────────              │
+│   Raw transcript → Claude/LLM → Structured output                   │
+│                                                                      │
+│   Output:                                                           │
+│   ├── Cleaned markdown (filler removed, headers added)              │
+│   └── Vines array (detected asides as gutter content)               │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### Extended Types for Draft Mode
+
+```typescript
+// Extended response type for draft mode
+export interface LumenTranscriptionResponse {
+  /** Transcribed/structured text */
+  text: string;
+
+  /** Word count */
+  wordCount: number;
+
+  /** Word-level timestamps (if requested, raw mode only) */
+  words?: LumenTranscriptionWord[];
+
+  /** VTT subtitle format (if timestamps requested) */
+  vtt?: string;
+
+  /** Model used for transcription */
+  model: string;
+
+  /** Provider used */
+  provider: LumenProviderName;
+
+  /** Estimated audio duration in seconds */
+  duration: number;
+
+  /** Total latency in milliseconds */
+  latency: number;
+
+  // ── Draft mode additions ──────────────────────────────────────────
+
+  /** Auto-generated Vines from detected asides (draft mode only) */
+  gutterContent?: GutterItem[];
+
+  /** The raw transcript before structuring (draft mode only) */
+  rawTranscript?: string;
+}
+
+// GutterItem type (from gutter.ts)
+export interface GutterItem {
+  /** Vine type */
+  type: "comment" | "photo" | "gallery" | "emoji";
+
+  /**
+   * Anchor for positioning. Formats:
+   * - "## Header Text" — attach to header
+   * - "paragraph:N" — attach to Nth paragraph
+   * - "anchor:tagname" — attach to custom anchor tag
+   */
+  anchor?: string;
+
+  /** Content (markdown for comments, URL for photos) */
+  content?: string;
+}
+```
+
+### LLM Prompt Design
+
+The structuring prompt is carefully designed to:
+1. Clean up filler words without losing the author's voice
+2. Add structure (headers, paragraphs) where natural breaks occur
+3. Detect asides and convert them to Vine comments
+
+```typescript
+// prompts/scribe-draft.ts
+
+export const SCRIBE_DRAFT_SYSTEM_PROMPT = `You are a skilled editor helping transform spoken thoughts into a blog post draft.
+
+Your job is to:
+1. CLEAN the transcript: Remove filler words (um, uh, like, you know, so, basically) but preserve the author's authentic voice and tone
+2. STRUCTURE the content: Add markdown headers where topic shifts occur, break into logical paragraphs
+3. DETECT ASIDES: Identify tangents, parenthetical thoughts, and side notes—these become Vines (sidebar annotations)
+
+## Aside Detection
+
+Look for phrases like:
+- "by the way", "btw", "speaking of which"
+- "oh, I should mention", "quick tangent", "side note"
+- "this reminds me", "unrelated but", "on a different note"
+- "actually, let me back up", "I forgot to say"
+- Parenthetical thoughts that interrupt the main flow
+- Personal anecdotes that aren't core to the argument
+
+When you detect an aside:
+1. Remove it from the main text
+2. Add it as a Vine comment in the gutterContent array
+3. Anchor it to the nearest relevant header or paragraph
+
+## Output Format
+
+You MUST respond with valid JSON in this exact format:
+{
+  "text": "The cleaned, structured markdown content",
+  "gutterContent": [
+    {
+      "type": "comment",
+      "anchor": "## Header or paragraph:N",
+      "content": "The aside content as a Vine"
+    }
+  ]
+}
+
+## Guidelines
+
+- Keep the author's voice—don't make it sound generic or corporate
+- Structure should feel natural, not imposed
+- Headers should be ## level (h2) for main sections
+- Asides in Vines should feel like margin notes, not deleted content
+- If there are no clear asides, return an empty gutterContent array
+- Preserve technical terms, names, and specific details exactly
+`;
+
+export function buildScribeDraftPrompt(rawTranscript: string): string {
+  return `Transform this spoken transcript into a structured blog post draft:
+
+<transcript>
+${rawTranscript}
+</transcript>
+
+Remember: Clean up filler, add structure, extract asides as Vines. Return JSON.`;
+}
+```
+
+### Example Transformation
+
+**Raw transcript from Whisper:**
+```
+So I've been thinking about how we handle authentication in the app
+and um like the token refresh is kind of a mess right now. The thing
+is when a token expires we're just showing an error which is terrible
+UX. Oh by the way I should probably mention that Jake found a bug
+yesterday where expired tokens were causing a crash on iOS which is
+kind of related to this whole thing. Anyway the main thing is we need
+to implement proper token rotation so that users never see an auth
+error during normal use. I think the approach should be um basically
+we check the token expiry before each request and if it's within like
+five minutes of expiring we refresh it proactively.
+```
+
+**Draft mode output:**
+```json
+{
+  "text": "## Authentication Token Handling\n\nI've been thinking about how we handle authentication in the app. The token refresh is a mess right now—when a token expires, we're just showing an error, which is terrible UX.\n\nWe need to implement proper token rotation so users never see an auth error during normal use.\n\n## Proposed Approach\n\nCheck the token expiry before each request. If it's within five minutes of expiring, refresh it proactively.",
+  "gutterContent": [
+    {
+      "type": "comment",
+      "anchor": "## Authentication Token Handling",
+      "content": "Jake found a bug yesterday where expired tokens were causing a crash on iOS—related to this whole token handling issue."
+    }
+  ]
+}
+```
+
+### Implementation: Draft Mode Handler
+
+```typescript
+// client.ts additions
+
+export class LumenClient {
+  async transcribe(
+    request: LumenTranscriptionRequest,
+    tier: TierKey
+  ): Promise<LumenTranscriptionResponse> {
+    // ... quota check, routing setup ...
+
+    // Step 1: Always transcribe first
+    const transcriptionResult = await this.executeTranscription(
+      config,
+      request.audio,
+      request.options ?? {}
+    );
+
+    // Step 2: If draft mode, structure with LLM
+    if (request.options?.mode === "draft") {
+      return this.structureDraftTranscript(
+        transcriptionResult,
+        request,
+        tier
+      );
+    }
+
+    // Raw mode: return transcription as-is
+    return {
+      text: this.maybeScrubPii(transcriptionResult.text, request.options),
+      wordCount: transcriptionResult.wordCount,
+      words: transcriptionResult.words,
+      vtt: transcriptionResult.vtt,
+      model: transcriptionResult.model,
+      provider: transcriptionResult.provider,
+      duration: transcriptionResult.duration,
+      latency: Date.now() - startTime,
+    };
+  }
+
+  private async structureDraftTranscript(
+    transcription: TranscriptionResult,
+    request: LumenTranscriptionRequest,
+    tier: TierKey
+  ): Promise<LumenTranscriptionResponse> {
+    const startTime = Date.now();
+
+    // Use generation task for structuring
+    const structureResult = await this.generate({
+      prompt: buildScribeDraftPrompt(transcription.text),
+      systemPrompt: SCRIBE_DRAFT_SYSTEM_PROMPT,
+      tenant: request.tenant,
+      options: {
+        // Use a capable model for good structuring
+        temperature: 0.3, // Low temp for consistency
+        maxTokens: 4000,
+        skipQuota: false, // Draft mode uses a generation quota too
+      },
+    }, tier);
+
+    // Parse the JSON response
+    let structured: { text: string; gutterContent: GutterItem[] };
+    try {
+      structured = JSON.parse(structureResult.text);
+    } catch {
+      // Fallback: return raw transcript if JSON parsing fails
+      console.error("[Scribe] Failed to parse draft mode JSON, falling back to raw");
+      return {
+        text: transcription.text,
+        wordCount: transcription.wordCount,
+        model: transcription.model,
+        provider: transcription.provider,
+        duration: transcription.duration,
+        latency: Date.now() - startTime,
+        rawTranscript: transcription.text,
+        gutterContent: [],
+      };
+    }
+
+    // Validate and clean gutterContent
+    const validatedGutter = this.validateGutterContent(structured.gutterContent);
+
+    return {
+      text: this.maybeScrubPii(structured.text, request.options),
+      wordCount: structured.text.split(/\s+/).length,
+      model: transcription.model,
+      provider: transcription.provider,
+      duration: transcription.duration,
+      latency: Date.now() - startTime,
+      rawTranscript: transcription.text,
+      gutterContent: validatedGutter,
+    };
+  }
+
+  private validateGutterContent(items: unknown): GutterItem[] {
+    if (!Array.isArray(items)) return [];
+
+    return items.filter((item): item is GutterItem => {
+      if (typeof item !== "object" || item === null) return false;
+      const { type, content } = item as Record<string, unknown>;
+
+      // Must have valid type and content
+      if (!["comment", "photo", "gallery", "emoji"].includes(type as string)) return false;
+      if (typeof content !== "string" || !content.trim()) return false;
+
+      return true;
+    }).map(item => ({
+      type: item.type,
+      anchor: typeof item.anchor === "string" ? item.anchor : undefined,
+      content: item.content,
+    }));
+  }
+}
+```
+
+### Quota Considerations for Draft Mode
+
+Draft mode consumes **two** quotas:
+1. **transcription** — for the Whisper step
+2. **generation** — for the LLM structuring step
+
+This is transparent to users but important for tier planning:
+
+```typescript
+// Draft mode quota check
+async function checkDraftModeQuota(
+  tenant: string,
+  tier: TierKey,
+  quotaTracker: QuotaTracker
+): Promise<{ allowed: boolean; reason?: string }> {
+  const transcriptionQuota = await quotaTracker.checkQuota(tenant, "transcription", tier);
+  const generationQuota = await quotaTracker.checkQuota(tenant, "generation", tier);
+
+  if (!transcriptionQuota.allowed) {
+    return { allowed: false, reason: "transcription quota exceeded" };
+  }
+  if (!generationQuota.allowed) {
+    return { allowed: false, reason: "generation quota exceeded (needed for draft mode)" };
+  }
+
+  return { allowed: true };
+}
+```
+
+### API Endpoint Updates for Draft Mode
+
+```typescript
+// routes/api/lumen/transcribe/+server.ts
+
+export const POST: RequestHandler = async ({ request, locals, platform }) => {
+  // ... auth, validation ...
+
+  const mode = formData.get("mode") as "raw" | "draft" | null;
+
+  const result = await lumen.transcribe(
+    {
+      audio,
+      tenant: locals.user.tenantId,
+      options: {
+        language: language ?? undefined,
+        task: task ?? "transcribe",
+        mode: mode ?? "raw",
+      },
+    },
+    locals.user.tier
+  );
+
+  // Return appropriate fields based on mode
+  if (mode === "draft") {
+    return json({
+      text: result.text,
+      wordCount: result.wordCount,
+      duration: result.duration,
+      latency: result.latency,
+      gutterContent: result.gutterContent ?? [],
+      rawTranscript: result.rawTranscript,
+    });
+  }
+
+  return json({
+    text: result.text,
+    wordCount: result.wordCount,
+    duration: result.duration,
+    latency: result.latency,
+  });
+};
+```
+
+### Flow Mode: Mode Toggle UI
+
+```svelte
+<!-- components/flow/VoiceInput.svelte (updated) -->
+<script lang="ts">
+  // ... existing code ...
+
+  let mode = $state<"raw" | "draft">("raw");
+
+  async function transcribe(blob: Blob) {
+    isTranscribing = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', blob, 'recording.webm');
+      formData.append('mode', mode);
+
+      const response = await fetch('/api/lumen/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Transcription failed');
+      }
+
+      const result = await response.json();
+
+      if (mode === "draft" && result.gutterContent?.length > 0) {
+        // Insert text and attach Vines
+        onTranscription(result.text, result.gutterContent);
+      } else {
+        onTranscription(result.text);
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Transcription failed';
+    } finally {
+      isTranscribing = false;
+    }
+  }
+</script>
+
+<!-- Mode toggle -->
+<div class="mode-toggle">
+  <button
+    class:active={mode === "raw"}
+    onclick={() => mode = "raw"}
+  >
+    Raw
+  </button>
+  <button
+    class:active={mode === "draft"}
+    onclick={() => mode = "draft"}
+  >
+    Draft ✨
+  </button>
+</div>
+
+<style>
+  .mode-toggle {
+    @apply flex gap-1 rounded-lg bg-grove-glass/30 p-1;
+  }
+
+  .mode-toggle button {
+    @apply px-3 py-1 rounded-md text-sm transition-all;
+    @apply text-grove-text/70 hover:text-grove-text;
+  }
+
+  .mode-toggle button.active {
+    @apply bg-grove-glass text-grove-text;
+  }
+</style>
 ```
 
 ---
