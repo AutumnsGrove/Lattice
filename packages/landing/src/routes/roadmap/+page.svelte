@@ -383,6 +383,12 @@
 				<Tag class="w-4 h-4" />
 				View the Journey
 			</a>
+
+			<!-- Legend -->
+			<p class="mt-4 text-sm text-foreground-muted flex items-center justify-center gap-1.5">
+				<Star class="w-4 h-4 text-amber-500 fill-amber-500" />
+				<span>marks key features</span>
+			</p>
 		</div>
 
 		<!-- Decorative clouds -->
@@ -454,11 +460,15 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{feature.major ? 'ring-2 ring-slate-400/50 dark:ring-slate-500/40' : ''}">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-							<div>
-								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+									{/if}
+								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
@@ -528,8 +538,7 @@
 					{#each phases.thaw.features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
-							{feature.internal ? 'opacity-75' : ''}
-							{feature.major ? 'ring-2 ring-teal-400/50 dark:ring-teal-500/40' : ''}">
+							{feature.internal ? 'opacity-75' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
 							<IconComponent
 								class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"
@@ -537,6 +546,9 @@
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+									{/if}
 									{#if feature.internal}
 										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-400">Internal</span>
 									{/if}
@@ -649,15 +661,19 @@
 							centennial: 'border-l-4 border-indigo-500'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}
-							{feature.major ? 'ring-2 ring-rose-400/50 dark:ring-rose-500/40' : ''}"
+							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
-							<div>
-								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+									{/if}
+								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
@@ -757,15 +773,18 @@
 							weave: 'text-cyan-500',
 							outpost: 'text-purple-500'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
-							{feature.major ? 'border-2 border-green-300 dark:border-green-700' : ''}"
-						>
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
 							/>
-							<div>
-								<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+									{/if}
+								</div>
 								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
 							</div>
 						</li>
@@ -865,15 +884,18 @@
 							puzzle: 'text-purple-500',
 							wander: 'text-teal-500'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30
-							{feature.major ? 'ring-2 ring-amber-400/50 dark:ring-amber-600/30' : ''}"
-						>
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30">
 							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-500'} mt-0.5 flex-shrink-0"
 							/>
-							<div>
-								<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-500 fill-amber-500" title="Key feature" />
+									{/if}
+								</div>
 								<p class="text-sm text-amber-800/70 dark:text-amber-200/70">{feature.description}</p>
 							</div>
 						</li>
@@ -969,14 +991,18 @@
 							bookopen: 'text-pink-300',
 							home: 'text-amber-300'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30
-							{feature.major ? 'ring-2 ring-amber-400/40' : ''}">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
 							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-400'} mt-0.5 flex-shrink-0"
 							/>
-							<div>
-								<span class="font-medium text-white">{feature.name}</span>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-white">{feature.name}</span>
+									{#if feature.major}
+										<Star class="w-4 h-4 text-amber-400 fill-amber-400" title="Key feature" />
+									{/if}
+								</div>
 								<p class="text-sm text-purple-300">{feature.description}</p>
 							</div>
 						</li>

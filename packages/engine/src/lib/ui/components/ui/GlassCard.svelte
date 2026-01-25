@@ -4,6 +4,7 @@
 	import { cn } from "$lib/ui/utils";
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
 	import "@autumnsgrove/gossamer/svelte/style.css";
+	import { Star } from "lucide-svelte";
 
 	/**
 	 * GlassCard - A card component with glassmorphism styling
@@ -22,6 +23,13 @@
 	 * ```svelte
 	 * <GlassCard title="Enchanted" gossamer="grove-mist" gossamerColor="#34d399">
 	 *   <p>Content with animated ASCII clouds</p>
+	 * </GlassCard>
+	 * ```
+	 *
+	 * @example Featured card with star indicator
+	 * ```svelte
+	 * <GlassCard title="Important" featured>
+	 *   <p>This card has a star to mark it as featured</p>
 	 * </GlassCard>
 	 * ```
 	 *
@@ -87,6 +95,10 @@
 		gossamerSpeed?: number;
 		/** Disable animation (show static pattern) */
 		gossamerStatic?: boolean;
+		/** Show a star indicator to mark this card as featured/important */
+		featured?: boolean;
+		/** Custom color for the featured star (defaults to amber) */
+		featuredColor?: string;
 	}
 
 	let {
@@ -104,6 +116,8 @@
 		gossamerOpacity,
 		gossamerSpeed,
 		gossamerStatic = false,
+		featured = false,
+		featuredColor,
 		...restProps
 	}: Props = $props();
 
@@ -164,8 +178,10 @@
 	const computedClass = $derived(
 		cn(
 			"rounded-xl transition-all duration-200",
-			// Add relative positioning and overflow hidden when gossamer is enabled
-			gossamer && "relative overflow-hidden",
+			// Add relative positioning when gossamer or featured is enabled
+			(gossamer || featured) && "relative",
+			// Add overflow hidden only for gossamer
+			gossamer && "overflow-hidden",
 			variantClasses[variant],
 			border && `border ${borderClasses[variant]}`,
 			hoverable && `cursor-pointer ${hoverClasses[variant]}`,
@@ -189,6 +205,19 @@
 </script>
 
 <div class={computedClass} {...restProps}>
+	{#if featured}
+		<!-- Featured star indicator -->
+		<div
+			class="absolute -top-2 -right-2 z-20 flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-amber-700"
+			title="Featured"
+		>
+			<Star
+				class="w-3.5 h-3.5 fill-current"
+				style={featuredColor ? `color: ${featuredColor}` : 'color: #f59e0b'}
+			/>
+		</div>
+	{/if}
+
 	{#if gossamer}
 		<!-- Gossamer ASCII background layer -->
 		{#if gossamerPreset}
