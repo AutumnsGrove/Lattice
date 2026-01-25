@@ -16,7 +16,7 @@
 
 		/* Muted: Medium Gray */
 		--muted: 0 0% 96%;
-		--muted-foreground: 0 0% 40%;
+		--muted-foreground: 30 8% 30%;
 
 		/* Accent: Purple for tags (#7c4dab) */
 		--accent: 270 38% 49%;
@@ -62,7 +62,7 @@
 
 		/* Muted: Darker Gray */
 		--muted: 0 0% 15%;
-		--muted-foreground: 0 0% 65%;
+		--muted-foreground: 30 6% 75%;
 
 		/* Accent: Lighter Purple for tags */
 		--accent: 270 38% 60%;
