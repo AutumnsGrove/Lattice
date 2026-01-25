@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Centennial: A Walk Through the Grove
 
 *A naming journey for a concept that spans beyond one lifetime.*

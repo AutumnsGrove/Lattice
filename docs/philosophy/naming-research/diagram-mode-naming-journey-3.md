@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Naming Journey: Weave Diagram Sub-Mode
 *Journey 3 - January 7, 2026*
 

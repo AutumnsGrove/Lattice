@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Naming Research Archive
 
 This directory contains historical naming exploration and ideation work.

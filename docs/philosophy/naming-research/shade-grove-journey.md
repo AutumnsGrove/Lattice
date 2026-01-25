@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove
 *Scratchpad for naming the AI content protection system*
 

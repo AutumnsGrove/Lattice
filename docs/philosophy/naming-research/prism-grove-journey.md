@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Walk Through the Grove: Finding the Visual Language
 
 *Scratchpad for exploring whether "Prism" is the right name for the design system*

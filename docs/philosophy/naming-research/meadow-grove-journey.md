@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: The Social Layer
 
 *Scratchpad for exploring the name "Meadow" (or finding something better)*

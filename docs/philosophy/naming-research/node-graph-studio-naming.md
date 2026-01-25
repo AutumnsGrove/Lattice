@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Node-Graph Studio Naming Journey
 
 *January 6, 2026 — Late night walk through the grove*

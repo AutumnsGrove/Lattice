@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Real-Time Coordination
 
 *Scratchpad for naming the Durable Objects pattern*

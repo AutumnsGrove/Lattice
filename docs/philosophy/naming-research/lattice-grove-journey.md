@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: The Core Framework
 
 *Scratchpad for exploring the name of what powers everything*

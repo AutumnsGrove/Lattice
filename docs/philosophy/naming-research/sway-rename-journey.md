@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Sway Rename Journey
 
 *January 7, 2026 — A walk to find what Sway should become*

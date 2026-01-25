@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Naming Journey: Domain/Username Blocklist System
 
 > *A walk through the grove to find where this belongs.*

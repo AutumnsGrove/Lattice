@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Diagram Mode Naming Journey 5: Reaching for the Valley
 
 > "Reach for the valley."

@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Internal Names Research - Grove Ecosystem
 
 > **Research Date:** January 6, 2026

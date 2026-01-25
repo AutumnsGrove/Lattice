@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Walking Through the Grove for Rate Limiting
 
 *Scratchpad for finding the right name for the abuse prevention pattern*

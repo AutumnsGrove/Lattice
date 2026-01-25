@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Diagram Mode Naming Journey 4: The Action Word
 
 Date: 2026-01-07

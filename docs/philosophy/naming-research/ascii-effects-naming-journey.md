@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # ASCII Effects Naming Journey
 
 *Finding where light dances in the Grove*

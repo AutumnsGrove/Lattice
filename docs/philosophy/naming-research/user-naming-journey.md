@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # User Naming Journey
 
 > What do we call the people who call the Grove home?

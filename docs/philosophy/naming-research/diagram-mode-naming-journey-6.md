@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Diagram Mode Naming Journey #6: Beach Walk
 
 > Finding the coastal counterpart to **Breeze** (animation mode)

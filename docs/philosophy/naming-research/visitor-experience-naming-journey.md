@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Naming Journey: The Visitor Experience Layer
 
 *January 13, 2026*

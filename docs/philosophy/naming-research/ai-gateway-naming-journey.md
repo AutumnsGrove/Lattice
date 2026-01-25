@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # AI Gateway Naming Journey
 
 > *Finding the name for Grove's unified AI routing layer*

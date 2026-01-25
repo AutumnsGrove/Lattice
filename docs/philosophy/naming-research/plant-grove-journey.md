@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Finding the Name for Onboarding
 
 *Scratchpad for exploring what onboarding really IS in this forest*

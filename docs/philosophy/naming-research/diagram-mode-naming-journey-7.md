@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Diagram Mode Naming Journey 7
 
 **Date:** January 8, 2026

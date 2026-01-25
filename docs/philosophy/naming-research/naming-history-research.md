@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Grove Ecosystem Naming History Research
 
 > **Research Date:** January 6, 2026

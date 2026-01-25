@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Grove Logo Journey: Icon Composition Walk
 
 > A walk through the grove to find logo concepts using Lucide/Tabler icons as building blocks.

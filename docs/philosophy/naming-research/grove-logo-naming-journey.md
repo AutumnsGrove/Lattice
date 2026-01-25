@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Grove Logo Design Journey
 
 > Finding a logo that feels like coming home to the grove.

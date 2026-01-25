@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Private Messages
 
 *Scratchpad for finding the right name for the privacy-first email client*

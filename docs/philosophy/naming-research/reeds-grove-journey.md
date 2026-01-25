@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Comments
 
 *Scratchpad for finding the right name for the blog comment system*

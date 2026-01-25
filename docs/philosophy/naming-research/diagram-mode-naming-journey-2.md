@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Diagram Mode Naming Journey 2
 
 > Finding the right name for Weave's diagram sub-mode

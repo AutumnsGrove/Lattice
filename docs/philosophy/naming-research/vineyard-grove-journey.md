@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Vineyard
 
 *Scratchpad for exploring whether "Vineyard" is the right name for the tool showcase/documentation pattern*

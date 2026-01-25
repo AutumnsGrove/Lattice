@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Storage
 
 *Scratchpad for questioning whether Amber is the right name*

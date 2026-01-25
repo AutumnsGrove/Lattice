@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: Authentication
 
 *Scratchpad for questioning the Heartwood name*

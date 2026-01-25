@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: The Help Center
 
 *Scratchpad for questioning the "Waystone" name*

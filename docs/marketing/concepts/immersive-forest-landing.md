@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Immersive Forest Landing Experience
 
 A far-future vision for Grove's onboarding: walking through a forest instead of clicking through screens.

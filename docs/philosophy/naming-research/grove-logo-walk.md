@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Walking Through the Grove: A Logo Discovery Journey
 
 *A design ritual for finding what Grove looks like at its core.*

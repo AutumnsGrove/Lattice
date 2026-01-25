@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # Tenant Extensions Naming Journey
 
 > *Finding the name for operator-configured, tenant-specific features.*

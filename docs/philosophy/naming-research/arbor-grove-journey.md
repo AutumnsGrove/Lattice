@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Journey Through the Grove: The Admin Panel
 
 *Scratchpad for questioning "Arbor" and finding the right name for the blog control center*

@@ -1,3 +1,7 @@
+---
+lastUpdated: '2026-01-25'
+---
+
 # A Walk Through the Grove: Remote Coding Infrastructure
 
 *Scratchpad for finding the right name for ephemeral compute*
