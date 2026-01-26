@@ -69,16 +69,15 @@
 	</div>
 
 	<!-- 90-day bar chart -->
-	<div class="relative">
-		<div class="flex gap-0.5 h-8 items-end">
+	<div class="relative overflow-hidden">
+		<div class="flex gap-px h-8 items-end">
 			{#each days as day, i (day.date)}
 				<button
 					type="button"
 					class={cn(
-						'flex-1 min-w-[2px] max-w-[4px] rounded-sm transition-all duration-150',
+						'flex-1 rounded-sm transition-all duration-150',
 						'hover:opacity-80 hover:scale-y-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-grove-500',
-						getStatusColor(day.status),
-						day.status === 'operational' ? 'h-full' : 'h-full'
+						getStatusColor(day.status)
 					)}
 					style="height: 100%"
 					aria-label={`${formatDateShort(day.date)}: ${getStatusLabel(day.status)}`}
