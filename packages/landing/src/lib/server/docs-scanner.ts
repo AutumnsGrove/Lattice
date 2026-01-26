@@ -62,6 +62,7 @@ const VALID_SPEC_CATEGORIES: SpecCategory[] = [
 
 const VALID_HELP_SECTIONS: HelpSection[] = [
   "getting-started",
+  "how-it-works",
   "writing-publishing",
   "customization",
   "community-social",

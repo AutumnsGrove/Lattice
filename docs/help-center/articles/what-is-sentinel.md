@@ -2,7 +2,7 @@
 title: What is Sentinel?
 description: How Grove tests itself to make sure everything keeps working
 category: help
-section: philosophy-vision
+section: how-it-works
 lastUpdated: '2026-01-24'
 keywords:
   - sentinel

@@ -2,7 +2,7 @@
 title: What is Loom?
 description: The coordination layer that makes Grove fast and private
 category: help
-section: philosophy-vision
+section: how-it-works
 lastUpdated: '2026-01-16'
 keywords:
   - loom

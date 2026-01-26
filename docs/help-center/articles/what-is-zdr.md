@@ -4,7 +4,7 @@ description: >-
   Zero Data Retention: how Grove's AI features process your content without
   storing it
 category: help
-section: ai-features
+section: how-it-works
 lastUpdated: '2026-01-26'
 keywords:
   - zdr

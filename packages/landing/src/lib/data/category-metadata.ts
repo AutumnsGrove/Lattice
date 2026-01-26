@@ -75,6 +75,12 @@ export const helpSections: {
     icon: "landplot",
   },
   {
+    id: "how-it-works",
+    name: "How It Works",
+    description: "Simple explanations of Grove's technology",
+    icon: "lightbulb",
+  },
+  {
     id: "writing-publishing",
     name: "Writing & Publishing",
     description: "Create and share your content",

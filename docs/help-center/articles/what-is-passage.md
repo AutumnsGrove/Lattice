@@ -2,7 +2,7 @@
 title: What is Passage?
 description: The routing layer that makes Grove's subdomains work like magic
 category: help
-section: philosophy-vision
+section: how-it-works
 lastUpdated: '2026-01-25'
 keywords:
   - passage

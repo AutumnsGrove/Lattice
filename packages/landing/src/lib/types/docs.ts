@@ -40,6 +40,7 @@ export type SpecCategory =
 /** Help Center sections */
 export type HelpSection =
   | "getting-started"
+  | "how-it-works"
   | "writing-publishing"
   | "customization"
   | "community-social"

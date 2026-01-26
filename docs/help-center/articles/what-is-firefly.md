@@ -2,7 +2,7 @@
 title: What is Firefly?
 description: How Grove uses temporary servers that appear when needed and vanish when done
 category: help
-section: philosophy-vision
+section: how-it-works
 lastUpdated: '2026-01-23'
 keywords:
   - firefly

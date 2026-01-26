@@ -4,7 +4,7 @@ description: >-
   How Grove uses multiple AI agents working in parallel to deliver better
   results faster
 category: help
-section: ai-features
+section: how-it-works
 lastUpdated: '2026-01-07'
 keywords:
   - swarm

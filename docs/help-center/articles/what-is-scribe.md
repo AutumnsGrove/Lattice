@@ -2,7 +2,7 @@
 title: What is Scribe?
 description: Voice-to-text for your blog—speak your thoughts and watch them become posts
 category: help
-section: features
+section: how-it-works
 lastUpdated: '2026-01-25'
 keywords:
   - scribe

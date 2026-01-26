@@ -4,7 +4,7 @@ description: >-
   How Grove protects AI features from prompt injection attacks using a
   three-layer defense system
 category: help
-section: ai-features
+section: how-it-works
 lastUpdated: '2026-01-26'
 keywords:
   - songbird

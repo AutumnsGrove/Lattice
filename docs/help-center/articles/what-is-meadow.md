@@ -2,7 +2,7 @@
 title: What is Meadow?
 description: Grove's community feed for discovering and sharing posts
 category: help
-section: support-resources
+section: how-it-works
 lastUpdated: '2025-12-24'
 keywords:
   - meadow

@@ -2,7 +2,7 @@
 title: What is Lattice?
 description: The framework that powers every Grove blog
 category: help
-section: philosophy-vision
+section: how-it-works
 lastUpdated: '2026-01-25'
 keywords:
   - lattice
