@@ -40,9 +40,9 @@
 <div class="text-center mt-4 mb-16 max-md:mb-12">
 	<h1 class="blog-header-title">Blog</h1>
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>
-	{#if data.user}
+	{#if data.isOwner}
 		<div class="flex gap-2 items-center mt-4">
-			<span class="flex items-center justify-center p-1 admin-indicator" title="Logged in as {data.user.email}">
+			<span class="flex items-center justify-center p-1 admin-indicator" title="Logged in as {data.user?.email}">
 				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="20 6 9 17 4 12"></polyline>
 				</svg>

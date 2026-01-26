@@ -191,9 +191,11 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
           storageLimit: tenant.storage_limit,
           postCount: tenant.post_count,
           postLimit: tenant.post_limit,
-          accountAge: Math.floor(
-            (Date.now() / 1000 - tenant.created_at) / (24 * 60 * 60),
-          ),
+          accountAge: tenant.created_at
+            ? Math.floor(
+                (Date.now() / 1000 - tenant.created_at) / (24 * 60 * 60),
+              )
+            : 0,
         }
       : null,
     usageError,

@@ -93,8 +93,16 @@ export const load: PageServerLoad = async ({
     posts = getAllPosts();
   }
 
+  // Determine if logged-in user is the tenant owner (can access admin)
+  const isOwner =
+    locals.user &&
+    locals.context?.type === "tenant" &&
+    locals.context.tenant.ownerId?.toLowerCase() ===
+      locals.user.email.toLowerCase();
+
   return {
     posts,
     user: locals.user || null,
+    isOwner: isOwner || false,
   };
 };
