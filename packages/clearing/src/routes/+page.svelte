@@ -24,10 +24,12 @@
 		Trees
 	} from 'lucide-svelte';
 
-	// Status page navigation - just a way home
+	// Status page navigation - just a way home (no grove.place footer sections)
 	const navItems: NavItem[] = [
 		{ href: 'https://grove.place', label: 'Grove', icon: Trees, external: true }
 	];
+	const resourceLinks: never[] = [];
+	const connectLinks: never[] = [];
 
 	let { data } = $props();
 
@@ -58,7 +60,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
-	<Header {navItems} brandTitle="Status" />
+	<Header {navItems} {resourceLinks} {connectLinks} brandTitle="Status" />
 
 	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">

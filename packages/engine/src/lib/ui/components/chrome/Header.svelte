@@ -5,7 +5,7 @@
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season.svelte';
 	import { Menu } from 'lucide-svelte';
-	import type { NavItem, MaxWidth } from './types';
+	import type { NavItem, MaxWidth, FooterLink } from './types';
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
@@ -15,6 +15,8 @@
 
 	interface Props {
 		navItems?: NavItem[];
+		resourceLinks?: FooterLink[];
+		connectLinks?: FooterLink[];
 		maxWidth?: MaxWidth;
 		brandTitle?: string;
 		season?: Season;
@@ -22,6 +24,8 @@
 
 	let {
 		navItems,
+		resourceLinks,
+		connectLinks,
 		maxWidth = 'default',
 		brandTitle,
 		season
@@ -105,4 +109,4 @@
 </header>
 
 <!-- Mobile menu overlay -->
-<MobileMenu bind:open={mobileMenuOpen} onClose={() => (mobileMenuOpen = false)} {navItems} />
+<MobileMenu bind:open={mobileMenuOpen} onClose={() => (mobileMenuOpen = false)} {navItems} {resourceLinks} {connectLinks} />
