@@ -60,7 +60,7 @@ In each case: processing happens, results return, content vanishes.
 
 All AI requests flow through Lumen, Grove's AI gateway. Lumen strips personally identifiable information before content leaves our servers and routes requests only to providers that guarantee zero retention.
 
-**For text processing (Wisp, Fireside, Flow, Thorn, Forage):** Fireworks AI, Cerebras, and Groq. Each has explicit ZDR policies.
+**For text processing (Wisp, Fireside, Flow, Thorn, Forage):** OpenRouter, which enforces ZDR across all models we access through it.
 
 **For image processing (Petal):** Together.ai and FAL.ai. Both support ZDR for vision models.
 
@@ -108,12 +108,10 @@ For technically-minded users: you can verify our ZDR policies in these specs:
 
 The providers' own documentation confirms their ZDR policies:
 
-**Text processing providers:**
-- [Fireworks AI Data Handling](https://docs.fireworks.ai/guides/security_compliance/data_handling)
-- [Cerebras Trust Center](https://trust.cerebras.ai/)
-- [Groq Data Processing](https://console.groq.com/docs/your-data)
+**Text processing:**
+- [OpenRouter Data Policy](https://openrouter.ai/privacy) (our gateway for all text AI features)
 
-**Image processing providers:**
+**Image processing:**
 - [Together.ai Privacy](https://www.together.ai/privacy)
 - [FAL.ai Security](https://fal.ai/security)
 
