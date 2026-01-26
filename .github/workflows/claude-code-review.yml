@@ -37,19 +37,56 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            ## Instructions
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            1. Read AGENT.md, CLAUDE.md, and CONTRIBUTING.md for project conventions
+            2. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
+            3. Review ONLY the diff—no drive-by comments on untouched code
+            4. Post your review using `gh pr comment`
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            ## What to Check
+
+            Focus on issues that **impact correctness, security, or maintainability**:
+            - Bugs or logic errors introduced by this PR
+            - Security vulnerabilities (injection, auth bypass, secrets exposure)
+            - Breaking changes or API contract violations
+            - Performance regressions in hot paths
+            - Missing error handling that could cause crashes
+
+            **Skip:** Style nitpicks, minor refactoring suggestions, and "could also do X" ideas unless they directly impact functionality.
+
+            ## Review Format
+
+            Use this structure:
+
+            ```markdown
+            ## Code Review
+
+            ### Issues Found
+
+            🔴 **[Critical]** Brief title
+            `path/to/file.ts:42` — One-sentence explanation. Suggested fix if obvious.
+
+            🟡 **[Suggestion]** Brief title
+            `path/to/file.ts:87` — One-sentence explanation.
+
+            ### Summary
+            One paragraph overall assessment. Is this ready to merge? Any blocking concerns?
+            ```
+
+            If the PR looks good with no significant issues, say so briefly—don't manufacture feedback.
+
+            ## Grove-Specific Patterns
+
+            Watch for these project-specific concerns:
+            - **Engine-first**: New utilities should go in `packages/engine`, not duplicated in apps
+            - **Multi-tenant safety**: Queries must scope by `tenant_id`, never leak cross-tenant data
+            - **Cloudflare bindings**: D1/KV/R2 accessed correctly via `platform.env`
+            - **Isolated queries**: Independent DB queries should use `Promise.all()`, not sequential awaits
+
+            Keep the review concise. Aim for quality over quantity.
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
