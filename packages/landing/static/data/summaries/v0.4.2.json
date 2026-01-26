@@ -14,14 +14,14 @@
   },
   "highlights": {
     "features": [
-  "add live elapsed timer and loading spinners to searcher",
-  "add domain finder dashboard for domains.grove.place"
-],
+      "add live elapsed timer and loading spinners to searcher",
+      "add domain finder dashboard for domains.grove.place"
+    ],
     "fixes": [
-  "comprehensive security audit fixes",
-  "address additional security concerns",
-  "address security and robustness issues in domain finder",
-  "improve pnpm compatibility across monorepo"
-]
+      "comprehensive security audit fixes",
+      "address additional security concerns",
+      "address security and robustness issues in domain finder",
+      "improve pnpm compatibility across monorepo"
+    ]
   }
 }

@@ -15,8 +15,8 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "resolve UI bugs in MarkdownEditor and CSRF token flow",
-  "update ContentWithGutter to use dompurify instead of isomorphic-dompurify"
-]
+      "resolve UI bugs in MarkdownEditor and CSRF token flow",
+      "update ContentWithGutter to use dompurify instead of isomorphic-dompurify"
+    ]
   }
 }

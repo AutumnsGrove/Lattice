@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "restore season cycling on logo tap",
-  "improve admin sidebar and Plant onboarding flow",
-  "update tool icons and add Patina status note",
-  "add ASCII visual effects library spec and documentation",
-  "consolidate legal pages into knowledge base with TOC support (#334)",
-  "replace Stripe with Lemon Squeezy on credits page (#331)",
-  "update pricing page nav pages to curios (#330)",
-  "simplify auth to Google-only and add UX improvements",
-  "update nav slots terminology to curios (#329)",
-  "add grove-spec-writing skill for spec standardization"
-],
+      "restore season cycling on logo tap",
+      "improve admin sidebar and Plant onboarding flow",
+      "update tool icons and add Patina status note",
+      "add ASCII visual effects library spec and documentation",
+      "consolidate legal pages into knowledge base with TOC support (#334)",
+      "replace Stripe with Lemon Squeezy on credits page (#331)",
+      "update pricing page nav pages to curios (#330)",
+      "simplify auth to Google-only and add UX improvements",
+      "update nav slots terminology to curios (#329)",
+      "add grove-spec-writing skill for spec standardization"
+    ],
     "fixes": [
-  "add code block renderer and copy button functionality",
-  "update legal links to use knowledge base routes",
-  "correct import path for COLOR_PRESETS",
-  "remove outdated footer links from settings page (#333)",
-  "resolve TOC clickability by fixing heading ID mismatch (#332)",
-  "unify color presets and fix settings persistence",
-  "align posts insert with database schema",
-  "complete Lemon Squeezy migration and fix type errors",
-  "handle legacy plain-string theme values in tenant lookup",
-  "standardize header logo to toggle dark/light mode"
-]
+      "add code block renderer and copy button functionality",
+      "update legal links to use knowledge base routes",
+      "correct import path for COLOR_PRESETS",
+      "remove outdated footer links from settings page (#333)",
+      "resolve TOC clickability by fixing heading ID mismatch (#332)",
+      "unify color presets and fix settings persistence",
+      "align posts insert with database schema",
+      "complete Lemon Squeezy migration and fix type errors",
+      "handle legacy plain-string theme values in tenant lookup",
+      "standardize header logo to toggle dark/light mode"
+    ]
   }
 }

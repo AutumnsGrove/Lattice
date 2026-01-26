@@ -14,14 +14,12 @@
   },
   "highlights": {
     "features": [
-  "add Cloudflare service abstraction layer (#79)",
-  "implement Linktree-style icon with single path (#78)",
-  "fuller sapling design with 9 leaves (#76)",
-  "mature leaf design into sapling SVG (#75)",
-  "add Vibe Mode for natural language domain search (#74)"
-],
-    "fixes": [
-  "Svelte 5 compatibility and SvelteKit route fixes"
-]
+      "add Cloudflare service abstraction layer (#79)",
+      "implement Linktree-style icon with single path (#78)",
+      "fuller sapling design with 9 leaves (#76)",
+      "mature leaf design into sapling SVG (#75)",
+      "add Vibe Mode for natural language domain search (#74)"
+    ],
+    "fixes": ["Svelte 5 compatibility and SvelteKit route fixes"]
   }
 }

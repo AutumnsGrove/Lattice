@@ -15,8 +15,8 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "validate port in same-origin check",
-  "increase perf test threshold to avoid flaky failures"
-]
+      "validate port in same-origin check",
+      "increase perf test threshold to avoid flaky failures"
+    ]
   }
 }

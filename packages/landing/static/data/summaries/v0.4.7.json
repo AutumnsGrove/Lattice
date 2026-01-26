@@ -14,20 +14,20 @@
   },
   "highlights": {
     "features": [
-  "add token tracking to domain search jobs",
-  "Add follow-up quiz to history detail page",
-  "add TLD diversity UI and live history updates",
-  "sync tokens, duration, results from worker",
-  "add auto-tag workflow on version bump"
-],
+      "add token tracking to domain search jobs",
+      "Add follow-up quiz to history detail page",
+      "add TLD diversity UI and live history updates",
+      "sync tokens, duration, results from worker",
+      "add auto-tag workflow on version bump"
+    ],
     "fixes": [
-  "allow relative URLs in sanitizeMarkdown and sanitizeHTML",
-  "improve date display and update TODOs",
-  "prevent negative elapsed times",
-  "fix elapsed timer and TLD preferences display",
-  "add NODE_AUTH_TOKEN env for npm publish",
-  "add workflow_dispatch and fix checkout ref for npm publish",
-  "fix sync schema mismatch for domains_available column"
-]
+      "allow relative URLs in sanitizeMarkdown and sanitizeHTML",
+      "improve date display and update TODOs",
+      "prevent negative elapsed times",
+      "fix elapsed timer and TLD preferences display",
+      "add NODE_AUTH_TOKEN env for npm publish",
+      "add workflow_dispatch and fix checkout ref for npm publish",
+      "fix sync schema mismatch for domains_available column"
+    ]
   }
 }

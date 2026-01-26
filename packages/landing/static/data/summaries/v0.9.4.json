@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "add unified flowers palette (#316)",
-  "enhance blog glass design and vine editing UX (#306)",
-  "New tree logo and midnight mode easter egg (#312)",
-  "add accent color customization to admin settings",
-  "centralize tier configuration into single source of truth",
-  "add tier-based navigation page limits",
-  "add Philosophy, Design, and Developer categories (#310)",
-  "organize technical specs into workshop-style categories (#309)",
-  "add dynamic navigation toggle for pages",
-  "add Menu/Gallery nav links and fix page TOC extraction"
-],
+      "add unified flowers palette (#316)",
+      "enhance blog glass design and vine editing UX (#306)",
+      "New tree logo and midnight mode easter egg (#312)",
+      "add accent color customization to admin settings",
+      "centralize tier configuration into single source of truth",
+      "add tier-based navigation page limits",
+      "add Philosophy, Design, and Developer categories (#310)",
+      "organize technical specs into workshop-style categories (#309)",
+      "add dynamic navigation toggle for pages",
+      "add Menu/Gallery nav links and fix page TOC extraction"
+    ],
     "fixes": [
-  "remove deprecated logo concept sections (#315)",
-  "set tree rotation to 0 degrees (#314)",
-  "set tree rotation to 0 degrees (#313)",
-  "restore Header/Footer logo behaviors and set default rotation to 0",
-  "remove deprecated Logo props from forest and vineyard pages",
-  "use correct midnightBloom palette colors",
-  "remove deprecated animate/color props from roadmap",
-  "map monochromeColor to accentColor for GlassLogo",
-  "update GroveDivider props for new Logo API",
-  "update imports and remove deprecated breathing prop"
-]
+      "remove deprecated logo concept sections (#315)",
+      "set tree rotation to 0 degrees (#314)",
+      "set tree rotation to 0 degrees (#313)",
+      "restore Header/Footer logo behaviors and set default rotation to 0",
+      "remove deprecated Logo props from forest and vineyard pages",
+      "use correct midnightBloom palette colors",
+      "remove deprecated animate/color props from roadmap",
+      "map monochromeColor to accentColor for GlassLogo",
+      "update GroveDivider props for new Logo API",
+      "update imports and remove deprecated breathing prop"
+    ]
   }
 }

@@ -72,7 +72,7 @@ describe("docs-scanner.ts", () => {
       // it should not appear in the results
       const allDocs = scanAllDocs().allDocs;
       const unpublishedDoc = allDocs.find(
-        (d) => (d as unknown as { published: boolean }).published === false
+        (d) => (d as unknown as { published: boolean }).published === false,
       );
 
       expect(unpublishedDoc).toBeUndefined();
@@ -220,7 +220,7 @@ describe("docs-scanner.ts", () => {
         // Docs with order should appear before docs without order
         const firstDocIndex = helpArticles.indexOf(firstWithOrder);
         const docsWithoutOrder = helpArticles.filter(
-          (d) => d.order === undefined
+          (d) => d.order === undefined,
         );
 
         // All docs with order should come before docs without order

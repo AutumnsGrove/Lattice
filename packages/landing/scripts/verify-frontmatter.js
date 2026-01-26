@@ -48,10 +48,46 @@ const CATEGORY_REQUIRED_FIELDS = {
 
 // Valid values for enums
 const VALID_VALUES = {
-  category: ["specs", "help", "legal", "marketing", "patterns", "philosophy", "design", "exhibit"],
-  specCategory: ["core-infrastructure", "platform-services", "content-community", "standalone-tools", "operations", "reference"],
-  section: ["getting-started", "writing-publishing", "customization", "community-social", "account-billing", "privacy-security", "ai-features", "philosophy-vision", "support-resources", "troubleshooting"],
-  exhibitWing: ["entrance", "architecture", "nature", "trust", "data", "personalization", "community", "naming"],
+  category: [
+    "specs",
+    "help",
+    "legal",
+    "marketing",
+    "patterns",
+    "philosophy",
+    "design",
+    "exhibit",
+  ],
+  specCategory: [
+    "core-infrastructure",
+    "platform-services",
+    "content-community",
+    "standalone-tools",
+    "operations",
+    "reference",
+  ],
+  section: [
+    "getting-started",
+    "writing-publishing",
+    "customization",
+    "community-social",
+    "account-billing",
+    "privacy-security",
+    "ai-features",
+    "philosophy-vision",
+    "support-resources",
+    "troubleshooting",
+  ],
+  exhibitWing: [
+    "entrance",
+    "architecture",
+    "nature",
+    "trust",
+    "data",
+    "personalization",
+    "community",
+    "naming",
+  ],
 };
 
 let errors = [];
@@ -85,13 +121,17 @@ function validateFile(filePath, expectedCategory) {
 
     // Check category matches expected
     if (fm.category && fm.category !== expectedCategory) {
-      fileWarnings.push(`Category mismatch: frontmatter says "${fm.category}" but file is in "${expectedCategory}" directory`);
+      fileWarnings.push(
+        `Category mismatch: frontmatter says "${fm.category}" but file is in "${expectedCategory}" directory`,
+      );
     }
 
     // Validate enum values
     for (const [field, validValues] of Object.entries(VALID_VALUES)) {
       if (fm[field] && !validValues.includes(fm[field])) {
-        fileErrors.push(`Invalid ${field}: "${fm[field]}". Valid values: ${validValues.join(", ")}`);
+        fileErrors.push(
+          `Invalid ${field}: "${fm[field]}". Valid values: ${validValues.join(", ")}`,
+        );
       }
     }
 
@@ -113,8 +153,13 @@ function validateFile(filePath, expectedCategory) {
     }
 
     // Date format validation
-    if (fm.lastUpdated && !/^\d{4}-\d{2}-\d{2}$/.test(String(fm.lastUpdated).replace(/'/g, ""))) {
-      fileWarnings.push(`lastUpdated should be YYYY-MM-DD format: ${fm.lastUpdated}`);
+    if (
+      fm.lastUpdated &&
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(fm.lastUpdated).replace(/'/g, ""))
+    ) {
+      fileWarnings.push(
+        `lastUpdated should be YYYY-MM-DD format: ${fm.lastUpdated}`,
+      );
     }
 
     if (fileErrors.length > 0) {
@@ -127,9 +172,11 @@ function validateFile(filePath, expectedCategory) {
     if (fileWarnings.length > 0) {
       warnings.push({ file: filePath, issues: fileWarnings });
     }
-
   } catch (error) {
-    errors.push({ file: filePath, issues: [`Error reading file: ${error.message}`] });
+    errors.push({
+      file: filePath,
+      issues: [`Error reading file: ${error.message}`],
+    });
     stats.invalid++;
   }
 }

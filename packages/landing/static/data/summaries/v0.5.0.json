@@ -14,16 +14,16 @@
   },
   "highlights": {
     "features": [
-  "Release v0.5.0 - GroveAuth Integration Complete!",
-  "Add sign-in functionality to landing page",
-  "add posting limits and GroveAuth integration scaffolding (#45)",
-  "add Quicksand font to landing site"
-],
+      "Release v0.5.0 - GroveAuth Integration Complete!",
+      "Add sign-in functionality to landing page",
+      "add posting limits and GroveAuth integration scaffolding (#45)",
+      "add Quicksand font to landing site"
+    ],
     "fixes": [
-  "Use $derived for error state in Svelte 5 runes mode",
-  "Add error display and debug logging for auth failures",
-  "Use auth-api.grove.place for all API calls",
-  "Use auth-api.grove.place for token exchange"
-]
+      "Use $derived for error state in Svelte 5 runes mode",
+      "Add error display and debug logging for auth failures",
+      "Use auth-api.grove.place for all API calls",
+      "Use auth-api.grove.place for token exchange"
+    ]
   }
 }

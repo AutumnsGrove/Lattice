@@ -32,9 +32,7 @@ const DRY_RUN = args.includes("--dry-run");
 const VERBOSE = args.includes("--verbose");
 const FORCE = args.includes("--force");
 const CATEGORY_ARG = args.find((a) => a.startsWith("--category="));
-const TARGET_CATEGORY = CATEGORY_ARG
-  ? CATEGORY_ARG.split("=")[1]
-  : null;
+const TARGET_CATEGORY = CATEGORY_ARG ? CATEGORY_ARG.split("=")[1] : null;
 
 // Paths - adjusted for running from packages/landing/
 const PROJECT_ROOT = resolve(__dirname, "..", "..", "..", "..");
@@ -177,9 +175,9 @@ function parseDocObject(str) {
     const relatedMatch = str.match(/related:\s*\[([^\]]+)\]/);
     if (relatedMatch) {
       const relatedStr = relatedMatch[1];
-      doc.related = relatedStr.match(/["']([^"']+)["']/g)?.map((s) =>
-        s.replace(/["']/g, ""),
-      );
+      doc.related = relatedStr
+        .match(/["']([^"']+)["']/g)
+        ?.map((s) => s.replace(/["']/g, ""));
     }
 
     return doc.slug ? doc : null;
@@ -371,7 +369,9 @@ function main() {
   console.log(`Errors:           ${stats.errors}`);
 
   if (DRY_RUN) {
-    console.log("\n*** This was a DRY RUN - run without --dry-run to apply ***");
+    console.log(
+      "\n*** This was a DRY RUN - run without --dry-run to apply ***",
+    );
   }
 }
 

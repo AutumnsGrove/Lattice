@@ -229,7 +229,9 @@ function parseDocFromFile(
       return null;
     }
     if (validation.warnings.length > 0) {
-      console.warn(`Warnings in ${filePath}: ${validation.warnings.join(", ")}`);
+      console.warn(
+        `Warnings in ${filePath}: ${validation.warnings.join(", ")}`,
+      );
     }
 
     // Extract slug from filename
@@ -268,10 +270,7 @@ function parseDocFromFile(
  * Scan a directory for markdown documents.
  * Optionally recurses into subdirectories for certain categories.
  */
-function scanDirectory(
-  dirPath: string,
-  category: DocCategory,
-): ScannedDoc[] {
+function scanDirectory(dirPath: string, category: DocCategory): ScannedDoc[] {
   const docs: ScannedDoc[] = [];
   const seenSlugs = new Set<string>();
   const shouldRecurse = RECURSIVE_CATEGORIES.includes(category);
@@ -422,7 +421,10 @@ export function findDocBySlug(
  * Get the file path for a document.
  * Used by docs-loader.ts to load full content.
  */
-export function getDocFilePath(slug: string, category: DocCategory): string | null {
+export function getDocFilePath(
+  slug: string,
+  category: DocCategory,
+): string | null {
   const doc = findDocBySlug(slug, category);
   return doc?._filePath || null;
 }

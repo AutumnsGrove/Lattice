@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "add LogoSanctuary showcase to Vineyard page (#294)",
-  "redesign header with unified Grove chrome (#292)",
-  "add LogoSanctuary component from uploaded image (#293)",
-  "add 8 new Grove logo concepts for review (#272)",
-  "update workshop icons for improved visual organization",
-  "update workshop icons - breeze to send-to-back, patterns to regex",
-  "add backfill option to auto-tag workflow",
-  "update launch announcement to celebrate paperwork completion",
-  "add manual workflow to backfill historical release summaries",
-  "integrate AI release summaries into milestones timeline"
-],
+      "add LogoSanctuary showcase to Vineyard page (#294)",
+      "redesign header with unified Grove chrome (#292)",
+      "add LogoSanctuary component from uploaded image (#293)",
+      "add 8 new Grove logo concepts for review (#272)",
+      "update workshop icons for improved visual organization",
+      "update workshop icons - breeze to send-to-back, patterns to regex",
+      "add backfill option to auto-tag workflow",
+      "update launch announcement to celebrate paperwork completion",
+      "add manual workflow to backfill historical release summaries",
+      "integrate AI release summaries into milestones timeline"
+    ],
     "fixes": [
-  "skip type check for vineyard re-exports",
-  "resolve all 165 TypeScript type errors for CI",
-  "remove references to non-existent font components",
-  "convert snippet component syntax to @render",
-  "resolve TypeScript type errors for deployment",
-  "resolve TypeScript errors in auth and inference modules",
-  "resolve deployment TypeScript errors across plant and engine",
-  "comprehensive test suite fixes for landing package",
-  "update OG forest tests for redirect proxy behavior",
-  "resolve svelte-check warnings (11 → 2)"
-]
+      "skip type check for vineyard re-exports",
+      "resolve all 165 TypeScript type errors for CI",
+      "remove references to non-existent font components",
+      "convert snippet component syntax to @render",
+      "resolve TypeScript type errors for deployment",
+      "resolve TypeScript errors in auth and inference modules",
+      "resolve deployment TypeScript errors across plant and engine",
+      "comprehensive test suite fixes for landing package",
+      "update OG forest tests for redirect proxy behavior",
+      "resolve svelte-check warnings (11 → 2)"
+    ]
   }
 }

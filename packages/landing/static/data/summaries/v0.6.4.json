@@ -14,16 +14,16 @@
   },
   "highlights": {
     "features": [
-  "add /groveauth export to package",
-  "Add setup page for empty tenant blogs",
-  "add test coverage tracking to journey page",
-  "add TypeScript migration and documentation sections",
-  "add stacked language bars to growth timeline",
-  "add historical milestones and show versions in growth chart"
-],
+      "add /groveauth export to package",
+      "Add setup page for empty tenant blogs",
+      "add test coverage tracking to journey page",
+      "add TypeScript migration and documentation sections",
+      "add stacked language bars to growth timeline",
+      "add historical milestones and show versions in growth chart"
+    ],
     "fixes": [
-  "exclude .svelte-kit from code counts and correct historical data",
-  "update landing deployment to trigger on auto-tag workflow"
-]
+      "exclude .svelte-kit from code counts and correct historical data",
+      "update landing deployment to trigger on auto-tag workflow"
+    ]
   }
 }

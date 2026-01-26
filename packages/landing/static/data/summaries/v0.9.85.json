@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "Add Petal image content moderation system (#412)",
-  "add Lumen AI Gateway spec and documentation",
-  "add Git Dashboard APIs with per-tenant token encryption",
-  "add Gallery Curio for multi-tenant image galleries",
-  "add autumnsgrove posts content update script",
-  "add /support page with Ko-fi integration",
-  "add museum-documentation skill for elegant Wanderer documentation",
-  "migrate CDN from cdn.autumnsgrove.com to cdn.grove.place",
-  "move Petal to First Frost phase (#411)",
-  "add vine leaf pattern to site layout"
-],
+      "Add Petal image content moderation system (#412)",
+      "add Lumen AI Gateway spec and documentation",
+      "add Git Dashboard APIs with per-tenant token encryption",
+      "add Gallery Curio for multi-tenant image galleries",
+      "add autumnsgrove posts content update script",
+      "add /support page with Ko-fi integration",
+      "add museum-documentation skill for elegant Wanderer documentation",
+      "migrate CDN from cdn.autumnsgrove.com to cdn.grove.place",
+      "move Petal to First Frost phase (#411)",
+      "add vine leaf pattern to site layout"
+    ],
     "fixes": [
-  "Add AI binding type and fix Petal type errors",
-  "Skip prerendering in CI to avoid AI binding auth requirement",
-  "Skip custom validation for SvelteKit form actions entirely",
-  "Exempt SvelteKit form actions from custom CSRF validation",
-  "comprehensive admin panel fixes from live testing",
-  "register Lumen spec in knowledge base",
-  "correct GroveDivider vertical rotation pattern",
-  "Fix config save not showing feedback",
-  "resolve TypeScript errors blocking deployment",
-  "correct GlassCard import in reserved-usernames page"
-]
+      "Add AI binding type and fix Petal type errors",
+      "Skip prerendering in CI to avoid AI binding auth requirement",
+      "Skip custom validation for SvelteKit form actions entirely",
+      "Exempt SvelteKit form actions from custom CSRF validation",
+      "comprehensive admin panel fixes from live testing",
+      "register Lumen spec in knowledge base",
+      "correct GroveDivider vertical rotation pattern",
+      "Fix config save not showing feedback",
+      "resolve TypeScript errors blocking deployment",
+      "correct GlassCard import in reserved-usernames page"
+    ]
   }
 }

@@ -8,77 +8,77 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-	/* Primary: Grove Green */
-	--grove-50: #f0fdf4;
-	--grove-100: #dcfce7;
-	--grove-200: #bbf7d0;
-	--grove-300: #86efac;
-	--grove-400: #4ade80;
-	--grove-500: #22c55e;
-	--grove-600: #16a34a;
-	--grove-700: #15803d;
-	--grove-800: #166534;
-	--grove-900: #14532d;
-	--grove-950: #052e16;
+  /* Primary: Grove Green */
+  --grove-50: #f0fdf4;
+  --grove-100: #dcfce7;
+  --grove-200: #bbf7d0;
+  --grove-300: #86efac;
+  --grove-400: #4ade80;
+  --grove-500: #22c55e;
+  --grove-600: #16a34a;
+  --grove-700: #15803d;
+  --grove-800: #166534;
+  --grove-900: #14532d;
+  --grove-950: #052e16;
 
-	/* Neutral: Cream (Light Mode) */
-	--cream: #fefdfb;
-	--cream-50: #fefdfb;
-	--cream-100: #fdfcf8;
-	--cream-200: #faf8f3;
-	--cream-300: #f5f2ea;
-	--cream-400: #ede9de;
-	--cream-500: #e2ddd0;
+  /* Neutral: Cream (Light Mode) */
+  --cream: #fefdfb;
+  --cream-50: #fefdfb;
+  --cream-100: #fdfcf8;
+  --cream-200: #faf8f3;
+  --cream-300: #f5f2ea;
+  --cream-400: #ede9de;
+  --cream-500: #e2ddd0;
 
-	/* Neutral: Bark (Light Mode) */
-	--bark: #3d2914;
-	--bark-50: #f9f6f3;
-	--bark-100: #f0e9e1;
-	--bark-200: #e0d2c2;
-	--bark-300: #ccb59c;
-	--bark-400: #b69575;
-	--bark-500: #a57c5a;
-	--bark-600: #8a6347;
-	--bark-700: #6f4d39;
-	--bark-800: #5a3f30;
-	--bark-900: #3d2914;
-	--bark-950: #2a1b0d;
+  /* Neutral: Bark (Light Mode) */
+  --bark: #3d2914;
+  --bark-50: #f9f6f3;
+  --bark-100: #f0e9e1;
+  --bark-200: #e0d2c2;
+  --bark-300: #ccb59c;
+  --bark-400: #b69575;
+  --bark-500: #a57c5a;
+  --bark-600: #8a6347;
+  --bark-700: #6f4d39;
+  --bark-800: #5a3f30;
+  --bark-900: #3d2914;
+  --bark-950: #2a1b0d;
 
-	/* Semantic Colors */
-	--color-background: var(--cream);
-	--color-foreground: var(--bark);
-	--color-foreground-muted: rgba(61, 41, 20, 0.7);
-	--color-foreground-subtle: rgba(61, 41, 20, 0.5);
-	--color-foreground-faint: rgba(61, 41, 20, 0.4);
+  /* Semantic Colors */
+  --color-background: var(--cream);
+  --color-foreground: var(--bark);
+  --color-foreground-muted: rgba(61, 41, 20, 0.7);
+  --color-foreground-subtle: rgba(61, 41, 20, 0.5);
+  --color-foreground-faint: rgba(61, 41, 20, 0.4);
 
-	--color-primary: var(--grove-600);
-	--color-primary-hover: var(--grove-700);
-	--color-primary-foreground: #ffffff;
+  --color-primary: var(--grove-600);
+  --color-primary-hover: var(--grove-700);
+  --color-primary-foreground: #ffffff;
 
-	--color-border: var(--grove-200);
-	--color-border-subtle: var(--grove-100);
-	--color-divider: var(--grove-300);
+  --color-border: var(--grove-200);
+  --color-border-subtle: var(--grove-100);
+  --color-divider: var(--grove-300);
 
-	--color-surface: rgba(255, 255, 255, 0.5);
-	--color-surface-elevated: #ffffff;
-	--color-surface-hover: rgba(0, 0, 0, 0.05);
+  --color-surface: rgba(255, 255, 255, 0.5);
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: rgba(0, 0, 0, 0.05);
 
-	--color-accent-bg: var(--grove-50);
-	--color-accent-border: var(--grove-200);
-	--color-accent-text: var(--grove-800);
-	--color-accent-text-muted: var(--grove-600);
-	--color-accent-text-subtle: var(--grove-500);
+  --color-accent-bg: var(--grove-50);
+  --color-accent-border: var(--grove-200);
+  --color-accent-text: var(--grove-800);
+  --color-accent-text-muted: var(--grove-600);
+  --color-accent-text-subtle: var(--grove-500);
 
-	/* Status Colors */
-	--color-error: #dc2626;
-	--color-error-bg: #fee2e2;
-	--color-error-border: #fecaca;
-	--color-error-text: #991b1b;
+  /* Status Colors */
+  --color-error: #dc2626;
+  --color-error-bg: #fee2e2;
+  --color-error-border: #fecaca;
+  --color-error-text: #991b1b;
 
-	/* Shadows */
-	--shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
-	--shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
-	--shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
+  --shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -86,60 +86,60 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .dark {
-	/* Neutral: Cool gray for dark mode (bluish undertone) */
-	--cream: #171a1e;
-	--cream-50: #171a1e;
-	--cream-100: #1e2227;
-	--cream-200: #282d33;
-	--cream-300: #363c44;
-	--cream-400: #4a525c;
-	--cream-500: #636d79;
+  /* Neutral: Cool gray for dark mode (bluish undertone) */
+  --cream: #171a1e;
+  --cream-50: #171a1e;
+  --cream-100: #1e2227;
+  --cream-200: #282d33;
+  --cream-300: #363c44;
+  --cream-400: #4a525c;
+  --cream-500: #636d79;
 
-	/* Neutral: Bark inverted for dark mode */
-	--bark: #f5f2ea;
-	--bark-50: #2a1b0d;
-	--bark-100: #3d2914;
-	--bark-200: #5a3f30;
-	--bark-300: #6f4d39;
-	--bark-400: #8a6347;
-	--bark-500: #a57c5a;
-	--bark-600: #b69575;
-	--bark-700: #ccb59c;
-	--bark-800: #e0d2c2;
-	--bark-900: #f0e9e1;
-	--bark-950: #f9f6f3;
+  /* Neutral: Bark inverted for dark mode */
+  --bark: #f5f2ea;
+  --bark-50: #2a1b0d;
+  --bark-100: #3d2914;
+  --bark-200: #5a3f30;
+  --bark-300: #6f4d39;
+  --bark-400: #8a6347;
+  --bark-500: #a57c5a;
+  --bark-600: #b69575;
+  --bark-700: #ccb59c;
+  --bark-800: #e0d2c2;
+  --bark-900: #f0e9e1;
+  --bark-950: #f9f6f3;
 
-	/* Semantic Colors - Dark Mode */
-	--color-background: var(--cream);
-	--color-foreground: var(--bark);
-	--color-foreground-muted: rgba(245, 242, 234, 0.7);
-	--color-foreground-subtle: rgba(245, 242, 234, 0.5);
-	--color-foreground-faint: rgba(245, 242, 234, 0.4);
+  /* Semantic Colors - Dark Mode */
+  --color-background: var(--cream);
+  --color-foreground: var(--bark);
+  --color-foreground-muted: rgba(245, 242, 234, 0.7);
+  --color-foreground-subtle: rgba(245, 242, 234, 0.5);
+  --color-foreground-faint: rgba(245, 242, 234, 0.4);
 
-	--color-border: var(--cream-300);
-	--color-border-subtle: var(--cream-200);
-	--color-divider: var(--cream-400);
+  --color-border: var(--cream-300);
+  --color-border-subtle: var(--cream-200);
+  --color-divider: var(--cream-400);
 
-	--color-surface: rgba(37, 35, 32, 0.5);
-	--color-surface-elevated: var(--cream-100);
-	--color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-surface: rgba(37, 35, 32, 0.5);
+  --color-surface-elevated: var(--cream-100);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
 
-	--color-accent-bg: var(--grove-950);
-	--color-accent-border: var(--grove-900);
-	--color-accent-text: var(--grove-200);
-	--color-accent-text-muted: var(--grove-400);
-	--color-accent-text-subtle: var(--grove-500);
+  --color-accent-bg: var(--grove-950);
+  --color-accent-border: var(--grove-900);
+  --color-accent-text: var(--grove-200);
+  --color-accent-text-muted: var(--grove-400);
+  --color-accent-text-subtle: var(--grove-500);
 
-	/* Status Colors - Dark Mode */
-	--color-error: #f87171;
-	--color-error-bg: rgba(220, 38, 38, 0.15);
-	--color-error-border: rgba(220, 38, 38, 0.3);
-	--color-error-text: #fecaca;
+  /* Status Colors - Dark Mode */
+  --color-error: #f87171;
+  --color-error-bg: rgba(220, 38, 38, 0.15);
+  --color-error-border: rgba(220, 38, 38, 0.3);
+  --color-error-text: #fecaca;
 
-	/* Shadows - Dark Mode */
-	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-	--shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
+  /* Shadows - Dark Mode */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-focus: 0 0 0 2px var(--cream), 0 0 0 4px var(--grove-500);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -147,163 +147,180 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @font-face {
-	font-family: 'Lexend';
-	src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Lexend";
+  src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Quicksand';
-	src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Quicksand";
+  src: url("https://cdn.grove.place/fonts/Quicksand-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Atkinson Hyperlegible';
-	src: url('https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Atkinson Hyperlegible";
+  src: url("https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'OpenDyslexic';
-	src: url('https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf') format('opentype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "OpenDyslexic";
+  src: url("https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf")
+    format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Cormorant';
-	src: url('https://cdn.grove.place/fonts/Cormorant-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Cormorant";
+  src: url("https://cdn.grove.place/fonts/Cormorant-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Bodoni Moda';
-	src: url('https://cdn.grove.place/fonts/BodoniModa-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Bodoni Moda";
+  src: url("https://cdn.grove.place/fonts/BodoniModa-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'IBM Plex Mono';
-	src: url('https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "IBM Plex Mono";
+  src: url("https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Cozette';
-	src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Cozette";
+  src: url("https://cdn.grove.place/fonts/CozetteVector.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Alagard';
-	src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Alagard";
+  src: url("https://cdn.grove.place/fonts/alagard.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Calistoga';
-	src: url('https://cdn.grove.place/fonts/Calistoga-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Calistoga";
+  src: url("https://cdn.grove.place/fonts/Calistoga-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Caveat';
-	src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Caveat";
+  src: url("https://cdn.grove.place/fonts/Caveat-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Fraunces';
-	src: url('https://cdn.grove.place/fonts/Fraunces-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Fraunces";
+  src: url("https://cdn.grove.place/fonts/Fraunces-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Nunito';
-	src: url('https://cdn.grove.place/fonts/Nunito-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Nunito";
+  src: url("https://cdn.grove.place/fonts/Nunito-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Luciole';
-	src: url('https://cdn.grove.place/fonts/Luciole-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Luciole";
+  src: url("https://cdn.grove.place/fonts/Luciole-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Merriweather';
-	src: url('https://cdn.grove.place/fonts/Merriweather-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Merriweather";
+  src: url("https://cdn.grove.place/fonts/Merriweather-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'EB Garamond';
-	src: url('https://cdn.grove.place/fonts/EBGaramond-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "EB Garamond";
+  src: url("https://cdn.grove.place/fonts/EBGaramond-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Lora';
-	src: url('https://cdn.grove.place/fonts/Lora-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Lora";
+  src: url("https://cdn.grove.place/fonts/Lora-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Plus Jakarta Sans';
-	src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Plus Jakarta Sans";
+  src: url("https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Manrope';
-	src: url('https://cdn.grove.place/fonts/Manrope-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Manrope";
+  src: url("https://cdn.grove.place/fonts/Manrope-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-	font-family: 'Instrument Sans';
-	src: url('https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf') format('truetype');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
+  font-family: "Instrument Sans";
+  src: url("https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -311,21 +328,30 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @layer base {
-	html {
-		font-family: 'Lexend', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		transition: background-color 0.2s ease, color 0.2s ease;
-	}
+  html {
+    font-family:
+      "Lexend",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
 
-	body {
-		/* Fallbacks for older browsers without CSS custom property support */
-		background-color: #1a1915;
-		color: #f5f2ea;
-		/* Modern browsers use CSS variables */
-		background-color: var(--color-background);
-		color: var(--color-foreground);
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-	}
+  body {
+    /* Fallbacks for older browsers without CSS custom property support */
+    background-color: #1a1915;
+    color: #f5f2ea;
+    /* Modern browsers use CSS variables */
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -333,68 +359,73 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @layer components {
-	.btn-primary {
-		background-color: var(--color-primary);
-		color: var(--color-primary-foreground);
-		font-family: system-ui, -apple-system, sans-serif;
-		font-weight: 500;
-		padding: 0.75rem 1.5rem;
-		border-radius: 0.5rem;
-		transition: background-color 0.2s ease;
-	}
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+  }
 
-	.btn-primary:hover {
-		background-color: var(--color-primary-hover);
-	}
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+  }
 
-	.btn-primary:focus {
-		outline: none;
-		box-shadow: var(--shadow-focus);
-	}
+  .btn-primary:focus {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
 
-	.btn-primary:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-	.input-field {
-		width: 100%;
-		padding: 0.75rem 1rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--color-border);
-		background-color: var(--color-surface-elevated);
-		color: var(--color-foreground);
-		transition: border-color 0.2s ease, box-shadow 0.2s ease;
-	}
+  .input-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-elevated);
+    color: var(--color-foreground);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
 
-	.input-field::placeholder {
-		color: var(--color-foreground-faint);
-	}
+  .input-field::placeholder {
+    color: var(--color-foreground-faint);
+  }
 
-	.input-field:focus {
-		outline: none;
-		border-color: var(--color-primary);
-		box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
-	}
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  }
 
-	.card {
-		background-color: var(--color-surface-elevated);
-		border: 1px solid var(--color-border);
-		border-radius: 0.75rem;
-	}
+  .card {
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+  }
 
-	/* Frosted glass effect for content cards - universal across all Grove sites */
-	.glass-grove {
-		background: rgba(255, 255, 255, 0.7);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-	}
+  /* Frosted glass effect for content cards - universal across all Grove sites */
+  .glass-grove {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 
-	.dark .glass-grove {
-		background: rgba(30, 34, 39, 0.75);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-	}
+  .dark .glass-grove {
+    background: rgba(30, 34, 39, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -403,47 +434,89 @@
 
 /* Text color utilities using CSS variables */
 .text-foreground {
-	color: #f5f2ea; /* Fallback for older browsers */
-	color: var(--color-foreground);
+  color: #f5f2ea; /* Fallback for older browsers */
+  color: var(--color-foreground);
 }
-.text-foreground-muted { color: var(--color-foreground-muted); }
-.text-foreground-subtle { color: var(--color-foreground-subtle); }
-.text-foreground-faint { color: var(--color-foreground-faint); }
+.text-foreground-muted {
+  color: var(--color-foreground-muted);
+}
+.text-foreground-subtle {
+  color: var(--color-foreground-subtle);
+}
+.text-foreground-faint {
+  color: var(--color-foreground-faint);
+}
 
-.text-primary { color: var(--color-primary); }
-.text-primary-hover { color: var(--color-primary-hover); }
+.text-primary {
+  color: var(--color-primary);
+}
+.text-primary-hover {
+  color: var(--color-primary-hover);
+}
 
-.text-accent { color: var(--color-accent-text); }
-.text-accent-muted { color: var(--color-accent-text-muted); }
-.text-accent-subtle { color: var(--color-accent-text-subtle); }
+.text-accent {
+  color: var(--color-accent-text);
+}
+.text-accent-muted {
+  color: var(--color-accent-text-muted);
+}
+.text-accent-subtle {
+  color: var(--color-accent-text-subtle);
+}
 
-.text-error { color: var(--color-error); }
+.text-error {
+  color: var(--color-error);
+}
 
 /* Background utilities */
-.bg-page { background-color: var(--color-background); }
-.bg-surface { background-color: var(--color-surface); }
-.bg-surface-elevated { background-color: var(--color-surface-elevated); }
-.bg-surface-hover { background-color: var(--color-surface-hover); }
-.bg-accent { background-color: var(--color-accent-bg); }
-.bg-error { background-color: var(--color-error-bg); }
+.bg-page {
+  background-color: var(--color-background);
+}
+.bg-surface {
+  background-color: var(--color-surface);
+}
+.bg-surface-elevated {
+  background-color: var(--color-surface-elevated);
+}
+.bg-surface-hover {
+  background-color: var(--color-surface-hover);
+}
+.bg-accent {
+  background-color: var(--color-accent-bg);
+}
+.bg-error {
+  background-color: var(--color-error-bg);
+}
 
 /* Border utilities */
-.border-default { border-color: var(--color-border); }
-.border-subtle { border-color: var(--color-border-subtle); }
-.border-divider { border-color: var(--color-divider); }
-.border-accent { border-color: var(--color-accent-border); }
-.border-error { border-color: var(--color-error-border); }
+.border-default {
+  border-color: var(--color-border);
+}
+.border-subtle {
+  border-color: var(--color-border-subtle);
+}
+.border-divider {
+  border-color: var(--color-divider);
+}
+.border-accent {
+  border-color: var(--color-accent-border);
+}
+.border-error {
+  border-color: var(--color-error-border);
+}
 
 /* Divider color for text elements like "·" separators */
-.text-divider { color: var(--color-divider); }
+.text-divider {
+  color: var(--color-divider);
+}
 
 /* Subtle vine pattern background - organic, forest-like */
 .leaf-pattern {
-	background-image: url("data:image/svg+xml,%3Csvg width='450' height='450' viewBox='0 0 450 450' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2322c55e' stroke-linecap='round'%3E%3C!-- Long flowing vine 1 - dramatic S-curve --%3E%3Cpath d='M-30 420 C50 380 30 320 80 260 S150 180 120 120 S180 40 140 -30' stroke-width='1.5' opacity='0.12'/%3E%3C!-- Long flowing vine 2 - opposite sweep --%3E%3Cpath d='M480 380 C400 350 420 280 360 230 S280 160 310 100 S250 30 290 -20' stroke-width='1.4' opacity='0.10'/%3E%3C!-- Diagonal vine crossing --%3E%3Cpath d='M-20 280 C60 250 100 220 160 200 S250 160 320 170 S400 130 470 100' stroke-width='1.2' opacity='0.09'/%3E%3C!-- Vertical accent vine --%3E%3Cpath d='M200 480 C180 420 210 360 190 300 S220 220 200 160 S230 80 210 20' stroke-width='1.1' opacity='0.08'/%3E%3C!-- Wandering vine --%3E%3Cpath d='M350 480 C330 430 360 380 340 320 S380 260 350 200' stroke-width='1' opacity='0.08'/%3E%3C!-- Spiral tendrils scattered --%3E%3Cpath d='M80 260 Q100 250 108 238 Q115 225 105 215 Q95 208 85 215' stroke-width='0.8' opacity='0.10'/%3E%3Cpath d='M120 120 Q140 130 150 120 Q158 108 145 98 Q132 92 125 102' stroke-width='0.7' opacity='0.09'/%3E%3Cpath d='M360 230 Q340 222 330 232 Q322 245 335 255 Q348 262 358 250' stroke-width='0.7' opacity='0.09'/%3E%3Cpath d='M310 100 Q290 92 280 102 Q272 115 288 125' stroke-width='0.6' opacity='0.08'/%3E%3Cpath d='M160 200 Q180 192 188 202 Q195 215 182 225' stroke-width='0.6' opacity='0.08'/%3E%3Cpath d='M190 300 Q210 292 218 305 Q224 320 210 328' stroke-width='0.6' opacity='0.07'/%3E%3Cpath d='M340 320 Q360 328 365 342 Q368 358 352 362' stroke-width='0.6' opacity='0.07'/%3E%3Cpath d='M55 380 Q75 372 82 385 Q88 400 72 408' stroke-width='0.5' opacity='0.06'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Pointed ivy leaves --%3E%3Cpath d='M70 300 Q85 280 78 265 Q70 280 55 288 Q70 295 70 300Z' opacity='0.11'/%3E%3Cpath d='M135 145 Q150 128 143 115 Q135 128 120 135 Q135 142 135 145Z' opacity='0.10'/%3E%3Cpath d='M375 255 Q360 240 365 225 Q375 240 390 245 Q375 252 375 255Z' opacity='0.09'/%3E%3Cpath d='M220 180 Q235 165 228 152 Q220 165 205 172 Q220 178 220 180Z' opacity='0.08'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='95' cy='210' rx='9' ry='14' transform='rotate(-35 95 210)' opacity='0.10'/%3E%3Cellipse cx='335' cy='145' rx='8' ry='12' transform='rotate(28 335 145)' opacity='0.09'/%3E%3Cellipse cx='175' cy='255' rx='7' ry='11' transform='rotate(-18 175 255)' opacity='0.08'/%3E%3Cellipse cx='280' cy='195' rx='6' ry='10' transform='rotate(40 280 195)' opacity='0.08'/%3E%3Cellipse cx='405' cy='120' rx='7' ry='10' transform='rotate(-25 405 120)' opacity='0.07'/%3E%3C!-- Long slender leaves --%3E%3Cpath d='M145 175 Q152 155 145 135 Q138 155 145 175Z' opacity='0.09'/%3E%3Cpath d='M295 130 Q305 115 298 98 Q288 115 295 130Z' opacity='0.08'/%3E%3Cpath d='M210 275 Q200 258 205 240 Q218 258 210 275Z' opacity='0.08'/%3E%3Cpath d='M365 195 Q375 180 368 162 Q358 180 365 195Z' opacity='0.07'/%3E%3Cpath d='M115 365 Q125 348 118 330 Q108 348 115 365Z' opacity='0.07'/%3E%3C!-- Fern fronds scattered asymmetrically --%3E%3Cg transform='translate(45 365) rotate(-45)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-30 -5 -7)'/%3E%3Cellipse cx='5' cy='-12' rx='3.5' ry='6' transform='rotate(30 5 -12)'/%3E%3Cellipse cx='-4' cy='-17' rx='3' ry='5' transform='rotate(-30 -4 -17)'/%3E%3Cellipse cx='4' cy='-22' rx='3' ry='5' transform='rotate(30 4 -22)'/%3E%3Cellipse cx='0' cy='-28' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(390 185) rotate(40)' opacity='0.09'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(25 4 -11)'/%3E%3Cellipse cx='-3' cy='-16' rx='2.5' ry='4' transform='rotate(-25 -3 -16)'/%3E%3Cellipse cx='3' cy='-21' rx='2.5' ry='4' transform='rotate(25 3 -21)'/%3E%3Cellipse cx='0' cy='-26' rx='2' ry='3'/%3E%3C/g%3E%3Cg transform='translate(255 65) rotate(-25)' opacity='0.08'%3E%3Cpath d='M0,0 L0,-25' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='2.5' ry='4' transform='rotate(-30 -4 -6)'/%3E%3Cellipse cx='4' cy='-10' rx='2.5' ry='4' transform='rotate(30 4 -10)'/%3E%3Cellipse cx='-3' cy='-15' rx='2' ry='3.5' transform='rotate(-30 -3 -15)'/%3E%3Cellipse cx='3' cy='-20' rx='2' ry='3' transform='rotate(30 3 -20)'/%3E%3C/g%3E%3Cg transform='translate(140 420) rotate(55)' opacity='0.08'%3E%3Cpath d='M0,0 L0,-22' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-3' cy='-5' rx='2' ry='3.5' transform='rotate(-25 -3 -5)'/%3E%3Cellipse cx='3' cy='-9' rx='2' ry='3.5' transform='rotate(25 3 -9)'/%3E%3Cellipse cx='-2' cy='-14' rx='1.5' ry='3' transform='rotate(-25 -2 -14)'/%3E%3Cellipse cx='2' cy='-18' rx='1.5' ry='2.5' transform='rotate(25 2 -18)'/%3E%3C/g%3E%3C!-- Tiny floating seeds/spores --%3E%3Ccircle cx='180' cy='90' r='2' opacity='0.06'/%3E%3Ccircle cx='85' cy='175' r='1.5' opacity='0.05'/%3E%3Ccircle cx='345' cy='290' r='2' opacity='0.06'/%3E%3Ccircle cx='420' cy='200' r='1.5' opacity='0.05'/%3E%3Ccircle cx='260' cy='350' r='2' opacity='0.05'/%3E%3Ccircle cx='40' cy='120' r='1.5' opacity='0.04'/%3E%3Ccircle cx='310' cy='400' r='1.5' opacity='0.04'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='450' height='450' viewBox='0 0 450 450' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2322c55e' stroke-linecap='round'%3E%3C!-- Long flowing vine 1 - dramatic S-curve --%3E%3Cpath d='M-30 420 C50 380 30 320 80 260 S150 180 120 120 S180 40 140 -30' stroke-width='1.5' opacity='0.12'/%3E%3C!-- Long flowing vine 2 - opposite sweep --%3E%3Cpath d='M480 380 C400 350 420 280 360 230 S280 160 310 100 S250 30 290 -20' stroke-width='1.4' opacity='0.10'/%3E%3C!-- Diagonal vine crossing --%3E%3Cpath d='M-20 280 C60 250 100 220 160 200 S250 160 320 170 S400 130 470 100' stroke-width='1.2' opacity='0.09'/%3E%3C!-- Vertical accent vine --%3E%3Cpath d='M200 480 C180 420 210 360 190 300 S220 220 200 160 S230 80 210 20' stroke-width='1.1' opacity='0.08'/%3E%3C!-- Wandering vine --%3E%3Cpath d='M350 480 C330 430 360 380 340 320 S380 260 350 200' stroke-width='1' opacity='0.08'/%3E%3C!-- Spiral tendrils scattered --%3E%3Cpath d='M80 260 Q100 250 108 238 Q115 225 105 215 Q95 208 85 215' stroke-width='0.8' opacity='0.10'/%3E%3Cpath d='M120 120 Q140 130 150 120 Q158 108 145 98 Q132 92 125 102' stroke-width='0.7' opacity='0.09'/%3E%3Cpath d='M360 230 Q340 222 330 232 Q322 245 335 255 Q348 262 358 250' stroke-width='0.7' opacity='0.09'/%3E%3Cpath d='M310 100 Q290 92 280 102 Q272 115 288 125' stroke-width='0.6' opacity='0.08'/%3E%3Cpath d='M160 200 Q180 192 188 202 Q195 215 182 225' stroke-width='0.6' opacity='0.08'/%3E%3Cpath d='M190 300 Q210 292 218 305 Q224 320 210 328' stroke-width='0.6' opacity='0.07'/%3E%3Cpath d='M340 320 Q360 328 365 342 Q368 358 352 362' stroke-width='0.6' opacity='0.07'/%3E%3Cpath d='M55 380 Q75 372 82 385 Q88 400 72 408' stroke-width='0.5' opacity='0.06'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Pointed ivy leaves --%3E%3Cpath d='M70 300 Q85 280 78 265 Q70 280 55 288 Q70 295 70 300Z' opacity='0.11'/%3E%3Cpath d='M135 145 Q150 128 143 115 Q135 128 120 135 Q135 142 135 145Z' opacity='0.10'/%3E%3Cpath d='M375 255 Q360 240 365 225 Q375 240 390 245 Q375 252 375 255Z' opacity='0.09'/%3E%3Cpath d='M220 180 Q235 165 228 152 Q220 165 205 172 Q220 178 220 180Z' opacity='0.08'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='95' cy='210' rx='9' ry='14' transform='rotate(-35 95 210)' opacity='0.10'/%3E%3Cellipse cx='335' cy='145' rx='8' ry='12' transform='rotate(28 335 145)' opacity='0.09'/%3E%3Cellipse cx='175' cy='255' rx='7' ry='11' transform='rotate(-18 175 255)' opacity='0.08'/%3E%3Cellipse cx='280' cy='195' rx='6' ry='10' transform='rotate(40 280 195)' opacity='0.08'/%3E%3Cellipse cx='405' cy='120' rx='7' ry='10' transform='rotate(-25 405 120)' opacity='0.07'/%3E%3C!-- Long slender leaves --%3E%3Cpath d='M145 175 Q152 155 145 135 Q138 155 145 175Z' opacity='0.09'/%3E%3Cpath d='M295 130 Q305 115 298 98 Q288 115 295 130Z' opacity='0.08'/%3E%3Cpath d='M210 275 Q200 258 205 240 Q218 258 210 275Z' opacity='0.08'/%3E%3Cpath d='M365 195 Q375 180 368 162 Q358 180 365 195Z' opacity='0.07'/%3E%3Cpath d='M115 365 Q125 348 118 330 Q108 348 115 365Z' opacity='0.07'/%3E%3C!-- Fern fronds scattered asymmetrically --%3E%3Cg transform='translate(45 365) rotate(-45)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-30 -5 -7)'/%3E%3Cellipse cx='5' cy='-12' rx='3.5' ry='6' transform='rotate(30 5 -12)'/%3E%3Cellipse cx='-4' cy='-17' rx='3' ry='5' transform='rotate(-30 -4 -17)'/%3E%3Cellipse cx='4' cy='-22' rx='3' ry='5' transform='rotate(30 4 -22)'/%3E%3Cellipse cx='0' cy='-28' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(390 185) rotate(40)' opacity='0.09'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(25 4 -11)'/%3E%3Cellipse cx='-3' cy='-16' rx='2.5' ry='4' transform='rotate(-25 -3 -16)'/%3E%3Cellipse cx='3' cy='-21' rx='2.5' ry='4' transform='rotate(25 3 -21)'/%3E%3Cellipse cx='0' cy='-26' rx='2' ry='3'/%3E%3C/g%3E%3Cg transform='translate(255 65) rotate(-25)' opacity='0.08'%3E%3Cpath d='M0,0 L0,-25' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='2.5' ry='4' transform='rotate(-30 -4 -6)'/%3E%3Cellipse cx='4' cy='-10' rx='2.5' ry='4' transform='rotate(30 4 -10)'/%3E%3Cellipse cx='-3' cy='-15' rx='2' ry='3.5' transform='rotate(-30 -3 -15)'/%3E%3Cellipse cx='3' cy='-20' rx='2' ry='3' transform='rotate(30 3 -20)'/%3E%3C/g%3E%3Cg transform='translate(140 420) rotate(55)' opacity='0.08'%3E%3Cpath d='M0,0 L0,-22' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-3' cy='-5' rx='2' ry='3.5' transform='rotate(-25 -3 -5)'/%3E%3Cellipse cx='3' cy='-9' rx='2' ry='3.5' transform='rotate(25 3 -9)'/%3E%3Cellipse cx='-2' cy='-14' rx='1.5' ry='3' transform='rotate(-25 -2 -14)'/%3E%3Cellipse cx='2' cy='-18' rx='1.5' ry='2.5' transform='rotate(25 2 -18)'/%3E%3C/g%3E%3C!-- Tiny floating seeds/spores --%3E%3Ccircle cx='180' cy='90' r='2' opacity='0.06'/%3E%3Ccircle cx='85' cy='175' r='1.5' opacity='0.05'/%3E%3Ccircle cx='345' cy='290' r='2' opacity='0.06'/%3E%3Ccircle cx='420' cy='200' r='1.5' opacity='0.05'/%3E%3Ccircle cx='260' cy='350' r='2' opacity='0.05'/%3E%3Ccircle cx='40' cy='120' r='1.5' opacity='0.04'/%3E%3Ccircle cx='310' cy='400' r='1.5' opacity='0.04'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .dark .leaf-pattern {
-	background-image: url("data:image/svg+xml,%3Csvg width='450' height='450' viewBox='0 0 450 450' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2322c55e' stroke-linecap='round'%3E%3C!-- Long flowing vine 1 - dramatic S-curve --%3E%3Cpath d='M-30 420 C50 380 30 320 80 260 S150 180 120 120 S180 40 140 -30' stroke-width='1.5' opacity='0.14'/%3E%3C!-- Long flowing vine 2 - opposite sweep --%3E%3Cpath d='M480 380 C400 350 420 280 360 230 S280 160 310 100 S250 30 290 -20' stroke-width='1.4' opacity='0.12'/%3E%3C!-- Diagonal vine crossing --%3E%3Cpath d='M-20 280 C60 250 100 220 160 200 S250 160 320 170 S400 130 470 100' stroke-width='1.2' opacity='0.11'/%3E%3C!-- Vertical accent vine --%3E%3Cpath d='M200 480 C180 420 210 360 190 300 S220 220 200 160 S230 80 210 20' stroke-width='1.1' opacity='0.10'/%3E%3C!-- Wandering vine --%3E%3Cpath d='M350 480 C330 430 360 380 340 320 S380 260 350 200' stroke-width='1' opacity='0.10'/%3E%3C!-- Spiral tendrils scattered --%3E%3Cpath d='M80 260 Q100 250 108 238 Q115 225 105 215 Q95 208 85 215' stroke-width='0.8' opacity='0.12'/%3E%3Cpath d='M120 120 Q140 130 150 120 Q158 108 145 98 Q132 92 125 102' stroke-width='0.7' opacity='0.11'/%3E%3Cpath d='M360 230 Q340 222 330 232 Q322 245 335 255 Q348 262 358 250' stroke-width='0.7' opacity='0.11'/%3E%3Cpath d='M310 100 Q290 92 280 102 Q272 115 288 125' stroke-width='0.6' opacity='0.10'/%3E%3Cpath d='M160 200 Q180 192 188 202 Q195 215 182 225' stroke-width='0.6' opacity='0.10'/%3E%3Cpath d='M190 300 Q210 292 218 305 Q224 320 210 328' stroke-width='0.6' opacity='0.09'/%3E%3Cpath d='M340 320 Q360 328 365 342 Q368 358 352 362' stroke-width='0.6' opacity='0.09'/%3E%3Cpath d='M55 380 Q75 372 82 385 Q88 400 72 408' stroke-width='0.5' opacity='0.08'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Pointed ivy leaves --%3E%3Cpath d='M70 300 Q85 280 78 265 Q70 280 55 288 Q70 295 70 300Z' opacity='0.13'/%3E%3Cpath d='M135 145 Q150 128 143 115 Q135 128 120 135 Q135 142 135 145Z' opacity='0.12'/%3E%3Cpath d='M375 255 Q360 240 365 225 Q375 240 390 245 Q375 252 375 255Z' opacity='0.11'/%3E%3Cpath d='M220 180 Q235 165 228 152 Q220 165 205 172 Q220 178 220 180Z' opacity='0.10'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='95' cy='210' rx='9' ry='14' transform='rotate(-35 95 210)' opacity='0.12'/%3E%3Cellipse cx='335' cy='145' rx='8' ry='12' transform='rotate(28 335 145)' opacity='0.11'/%3E%3Cellipse cx='175' cy='255' rx='7' ry='11' transform='rotate(-18 175 255)' opacity='0.10'/%3E%3Cellipse cx='280' cy='195' rx='6' ry='10' transform='rotate(40 280 195)' opacity='0.10'/%3E%3Cellipse cx='405' cy='120' rx='7' ry='10' transform='rotate(-25 405 120)' opacity='0.09'/%3E%3C!-- Long slender leaves --%3E%3Cpath d='M145 175 Q152 155 145 135 Q138 155 145 175Z' opacity='0.11'/%3E%3Cpath d='M295 130 Q305 115 298 98 Q288 115 295 130Z' opacity='0.10'/%3E%3Cpath d='M210 275 Q200 258 205 240 Q218 258 210 275Z' opacity='0.10'/%3E%3Cpath d='M365 195 Q375 180 368 162 Q358 180 365 195Z' opacity='0.09'/%3E%3Cpath d='M115 365 Q125 348 118 330 Q108 348 115 365Z' opacity='0.09'/%3E%3C!-- Fern fronds scattered asymmetrically --%3E%3Cg transform='translate(45 365) rotate(-45)' opacity='0.12'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-30 -5 -7)'/%3E%3Cellipse cx='5' cy='-12' rx='3.5' ry='6' transform='rotate(30 5 -12)'/%3E%3Cellipse cx='-4' cy='-17' rx='3' ry='5' transform='rotate(-30 -4 -17)'/%3E%3Cellipse cx='4' cy='-22' rx='3' ry='5' transform='rotate(30 4 -22)'/%3E%3Cellipse cx='0' cy='-28' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(390 185) rotate(40)' opacity='0.11'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(25 4 -11)'/%3E%3Cellipse cx='-3' cy='-16' rx='2.5' ry='4' transform='rotate(-25 -3 -16)'/%3E%3Cellipse cx='3' cy='-21' rx='2.5' ry='4' transform='rotate(25 3 -21)'/%3E%3Cellipse cx='0' cy='-26' rx='2' ry='3'/%3E%3C/g%3E%3Cg transform='translate(255 65) rotate(-25)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-25' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='2.5' ry='4' transform='rotate(-30 -4 -6)'/%3E%3Cellipse cx='4' cy='-10' rx='2.5' ry='4' transform='rotate(30 4 -10)'/%3E%3Cellipse cx='-3' cy='-15' rx='2' ry='3.5' transform='rotate(-30 -3 -15)'/%3E%3Cellipse cx='3' cy='-20' rx='2' ry='3' transform='rotate(30 3 -20)'/%3E%3C/g%3E%3Cg transform='translate(140 420) rotate(55)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-22' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-3' cy='-5' rx='2' ry='3.5' transform='rotate(-25 -3 -5)'/%3E%3Cellipse cx='3' cy='-9' rx='2' ry='3.5' transform='rotate(25 3 -9)'/%3E%3Cellipse cx='-2' cy='-14' rx='1.5' ry='3' transform='rotate(-25 -2 -14)'/%3E%3Cellipse cx='2' cy='-18' rx='1.5' ry='2.5' transform='rotate(25 2 -18)'/%3E%3C/g%3E%3C!-- Tiny floating seeds/spores --%3E%3Ccircle cx='180' cy='90' r='2' opacity='0.08'/%3E%3Ccircle cx='85' cy='175' r='1.5' opacity='0.07'/%3E%3Ccircle cx='345' cy='290' r='2' opacity='0.08'/%3E%3Ccircle cx='420' cy='200' r='1.5' opacity='0.07'/%3E%3Ccircle cx='260' cy='350' r='2' opacity='0.07'/%3E%3Ccircle cx='40' cy='120' r='1.5' opacity='0.06'/%3E%3Ccircle cx='310' cy='400' r='1.5' opacity='0.06'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='450' height='450' viewBox='0 0 450 450' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2322c55e' stroke-linecap='round'%3E%3C!-- Long flowing vine 1 - dramatic S-curve --%3E%3Cpath d='M-30 420 C50 380 30 320 80 260 S150 180 120 120 S180 40 140 -30' stroke-width='1.5' opacity='0.14'/%3E%3C!-- Long flowing vine 2 - opposite sweep --%3E%3Cpath d='M480 380 C400 350 420 280 360 230 S280 160 310 100 S250 30 290 -20' stroke-width='1.4' opacity='0.12'/%3E%3C!-- Diagonal vine crossing --%3E%3Cpath d='M-20 280 C60 250 100 220 160 200 S250 160 320 170 S400 130 470 100' stroke-width='1.2' opacity='0.11'/%3E%3C!-- Vertical accent vine --%3E%3Cpath d='M200 480 C180 420 210 360 190 300 S220 220 200 160 S230 80 210 20' stroke-width='1.1' opacity='0.10'/%3E%3C!-- Wandering vine --%3E%3Cpath d='M350 480 C330 430 360 380 340 320 S380 260 350 200' stroke-width='1' opacity='0.10'/%3E%3C!-- Spiral tendrils scattered --%3E%3Cpath d='M80 260 Q100 250 108 238 Q115 225 105 215 Q95 208 85 215' stroke-width='0.8' opacity='0.12'/%3E%3Cpath d='M120 120 Q140 130 150 120 Q158 108 145 98 Q132 92 125 102' stroke-width='0.7' opacity='0.11'/%3E%3Cpath d='M360 230 Q340 222 330 232 Q322 245 335 255 Q348 262 358 250' stroke-width='0.7' opacity='0.11'/%3E%3Cpath d='M310 100 Q290 92 280 102 Q272 115 288 125' stroke-width='0.6' opacity='0.10'/%3E%3Cpath d='M160 200 Q180 192 188 202 Q195 215 182 225' stroke-width='0.6' opacity='0.10'/%3E%3Cpath d='M190 300 Q210 292 218 305 Q224 320 210 328' stroke-width='0.6' opacity='0.09'/%3E%3Cpath d='M340 320 Q360 328 365 342 Q368 358 352 362' stroke-width='0.6' opacity='0.09'/%3E%3Cpath d='M55 380 Q75 372 82 385 Q88 400 72 408' stroke-width='0.5' opacity='0.08'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3C!-- Pointed ivy leaves --%3E%3Cpath d='M70 300 Q85 280 78 265 Q70 280 55 288 Q70 295 70 300Z' opacity='0.13'/%3E%3Cpath d='M135 145 Q150 128 143 115 Q135 128 120 135 Q135 142 135 145Z' opacity='0.12'/%3E%3Cpath d='M375 255 Q360 240 365 225 Q375 240 390 245 Q375 252 375 255Z' opacity='0.11'/%3E%3Cpath d='M220 180 Q235 165 228 152 Q220 165 205 172 Q220 178 220 180Z' opacity='0.10'/%3E%3C!-- Round soft leaves --%3E%3Cellipse cx='95' cy='210' rx='9' ry='14' transform='rotate(-35 95 210)' opacity='0.12'/%3E%3Cellipse cx='335' cy='145' rx='8' ry='12' transform='rotate(28 335 145)' opacity='0.11'/%3E%3Cellipse cx='175' cy='255' rx='7' ry='11' transform='rotate(-18 175 255)' opacity='0.10'/%3E%3Cellipse cx='280' cy='195' rx='6' ry='10' transform='rotate(40 280 195)' opacity='0.10'/%3E%3Cellipse cx='405' cy='120' rx='7' ry='10' transform='rotate(-25 405 120)' opacity='0.09'/%3E%3C!-- Long slender leaves --%3E%3Cpath d='M145 175 Q152 155 145 135 Q138 155 145 175Z' opacity='0.11'/%3E%3Cpath d='M295 130 Q305 115 298 98 Q288 115 295 130Z' opacity='0.10'/%3E%3Cpath d='M210 275 Q200 258 205 240 Q218 258 210 275Z' opacity='0.10'/%3E%3Cpath d='M365 195 Q375 180 368 162 Q358 180 365 195Z' opacity='0.09'/%3E%3Cpath d='M115 365 Q125 348 118 330 Q108 348 115 365Z' opacity='0.09'/%3E%3C!-- Fern fronds scattered asymmetrically --%3E%3Cg transform='translate(45 365) rotate(-45)' opacity='0.12'%3E%3Cpath d='M0,0 L0,-30' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-5' cy='-7' rx='3.5' ry='6' transform='rotate(-30 -5 -7)'/%3E%3Cellipse cx='5' cy='-12' rx='3.5' ry='6' transform='rotate(30 5 -12)'/%3E%3Cellipse cx='-4' cy='-17' rx='3' ry='5' transform='rotate(-30 -4 -17)'/%3E%3Cellipse cx='4' cy='-22' rx='3' ry='5' transform='rotate(30 4 -22)'/%3E%3Cellipse cx='0' cy='-28' rx='2.5' ry='4'/%3E%3C/g%3E%3Cg transform='translate(390 185) rotate(40)' opacity='0.11'%3E%3Cpath d='M0,0 L0,-28' stroke='%2322c55e' stroke-width='0.6' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='3' ry='5' transform='rotate(-25 -4 -6)'/%3E%3Cellipse cx='4' cy='-11' rx='3' ry='5' transform='rotate(25 4 -11)'/%3E%3Cellipse cx='-3' cy='-16' rx='2.5' ry='4' transform='rotate(-25 -3 -16)'/%3E%3Cellipse cx='3' cy='-21' rx='2.5' ry='4' transform='rotate(25 3 -21)'/%3E%3Cellipse cx='0' cy='-26' rx='2' ry='3'/%3E%3C/g%3E%3Cg transform='translate(255 65) rotate(-25)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-25' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-4' cy='-6' rx='2.5' ry='4' transform='rotate(-30 -4 -6)'/%3E%3Cellipse cx='4' cy='-10' rx='2.5' ry='4' transform='rotate(30 4 -10)'/%3E%3Cellipse cx='-3' cy='-15' rx='2' ry='3.5' transform='rotate(-30 -3 -15)'/%3E%3Cellipse cx='3' cy='-20' rx='2' ry='3' transform='rotate(30 3 -20)'/%3E%3C/g%3E%3Cg transform='translate(140 420) rotate(55)' opacity='0.10'%3E%3Cpath d='M0,0 L0,-22' stroke='%2322c55e' stroke-width='0.5' fill='none'/%3E%3Cellipse cx='-3' cy='-5' rx='2' ry='3.5' transform='rotate(-25 -3 -5)'/%3E%3Cellipse cx='3' cy='-9' rx='2' ry='3.5' transform='rotate(25 3 -9)'/%3E%3Cellipse cx='-2' cy='-14' rx='1.5' ry='3' transform='rotate(-25 -2 -14)'/%3E%3Cellipse cx='2' cy='-18' rx='1.5' ry='2.5' transform='rotate(25 2 -18)'/%3E%3C/g%3E%3C!-- Tiny floating seeds/spores --%3E%3Ccircle cx='180' cy='90' r='2' opacity='0.08'/%3E%3Ccircle cx='85' cy='175' r='1.5' opacity='0.07'/%3E%3Ccircle cx='345' cy='290' r='2' opacity='0.08'/%3E%3Ccircle cx='420' cy='200' r='1.5' opacity='0.07'/%3E%3Ccircle cx='260' cy='350' r='2' opacity='0.07'/%3E%3Ccircle cx='40' cy='120' r='1.5' opacity='0.06'/%3E%3Ccircle cx='310' cy='400' r='1.5' opacity='0.06'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -451,87 +524,90 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .prose-legal {
-	font-family: system-ui, -apple-system, sans-serif;
-	color: var(--color-foreground-muted);
-	line-height: 1.75;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--color-foreground-muted);
+  line-height: 1.75;
 }
 
 .prose-legal section {
-	margin-bottom: 2rem;
+  margin-bottom: 2rem;
 }
 
 .prose-legal h2 {
-	font-family: 'Lexend', Georgia, serif;
-	font-size: 1.25rem;
-	color: var(--color-foreground);
-	margin-bottom: 1rem;
+  font-family: "Lexend", Georgia, serif;
+  font-size: 1.25rem;
+  color: var(--color-foreground);
+  margin-bottom: 1rem;
 }
 
 .prose-legal h3 {
-	font-family: 'Lexend', Georgia, serif;
-	font-size: 1.125rem;
-	color: var(--color-foreground-muted);
-	margin-bottom: 0.5rem;
+  font-family: "Lexend", Georgia, serif;
+  font-size: 1.125rem;
+  color: var(--color-foreground-muted);
+  margin-bottom: 0.5rem;
 }
 
 .prose-legal p {
-	margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .prose-legal ul {
-	list-style-type: disc;
-	list-style-position: inside;
-	margin-left: 1rem;
-	margin-bottom: 1rem;
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-left: 1rem;
+  margin-bottom: 1rem;
 }
 
 .prose-legal ul li {
-	margin-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .prose-legal a {
-	color: var(--color-accent-text-muted);
-	text-decoration: underline;
-	transition: color 0.2s ease;
+  color: var(--color-accent-text-muted);
+  text-decoration: underline;
+  transition: color 0.2s ease;
 }
 
 .prose-legal a:hover {
-	color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .prose-legal table {
-	width: 100%;
-	font-size: 0.875rem;
-	border-collapse: collapse;
-	margin: 1rem 0;
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+  margin: 1rem 0;
 }
 
 .prose-legal th,
 .prose-legal td {
-	padding: 0.5rem 0.75rem;
-	text-align: left;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
 }
 
 .prose-legal thead tr {
-	border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .prose-legal tbody tr {
-	border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .prose-legal .uppercase {
-	text-transform: uppercase;
-	font-size: 0.875rem;
+  text-transform: uppercase;
+  font-size: 0.875rem;
 }
 
 .prose-legal section.pt-6 {
-	padding-top: 1.5rem;
-	border-top: 1px solid var(--color-border);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .prose-legal strong {
-	color: var(--color-foreground);
+  color: var(--color-foreground);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -540,11 +616,11 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
-		animation: none !important;
-		transition: none !important;
-		scroll-behavior: auto !important;
-	}
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

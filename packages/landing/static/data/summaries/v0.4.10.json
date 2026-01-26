@@ -14,8 +14,6 @@
   },
   "highlights": {
     "features": [],
-    "fixes": [
-  "CSRF token header fallback and DOMPurify externalization"
-]
+    "fixes": ["CSRF token header fallback and DOMPurify externalization"]
   }
 }

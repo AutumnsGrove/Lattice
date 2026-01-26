@@ -14,27 +14,27 @@
   },
   "highlights": {
     "features": [
-  "add subdomain routes for internal projects",
-  "add falling leaves to forest page (#85)",
-  "add nature palette system and TreeAspen component (#83)",
-  "add trunk color customization to Logo and new tree components (#82)",
-  "add /forest page with logo-based tree visualization (#81)",
-  "add Header to homepage",
-  "add optional color prop to Logo component",
-  "add logo to header and footer",
-  "update logo and favicon to new hashtag design"
-],
+      "add subdomain routes for internal projects",
+      "add falling leaves to forest page (#85)",
+      "add nature palette system and TreeAspen component (#83)",
+      "add trunk color customization to Logo and new tree components (#82)",
+      "add /forest page with logo-based tree visualization (#81)",
+      "add Header to homepage",
+      "add optional color prop to Logo component",
+      "add logo to header and footer",
+      "update logo and favicon to new hashtag design"
+    ],
     "fixes": [
-  "convert route files to TypeScript for proper module resolution",
-  "convert utils to TypeScript and add JSDoc types to composables (#95)",
-  "add breathing animation and fix reactivity (#94)",
-  "reduce falling leaves distance and move toggle to bottom right (#93)",
-  "make season toggle icon-only and fix falling leaves visibility (#92)",
-  "make tree component colors reactive to season changes",
-  "fix forest page tree colors and layout positioning (#90)",
-  "improve forest page layout and autumn color reactivity (#88)",
-  "refine falling leaves animation and behavior (#87)",
-  "improve TreeBirch and TreeAspen leaf shapes (#86)"
-]
+      "convert route files to TypeScript for proper module resolution",
+      "convert utils to TypeScript and add JSDoc types to composables (#95)",
+      "add breathing animation and fix reactivity (#94)",
+      "reduce falling leaves distance and move toggle to bottom right (#93)",
+      "make season toggle icon-only and fix falling leaves visibility (#92)",
+      "make tree component colors reactive to season changes",
+      "fix forest page tree colors and layout positioning (#90)",
+      "improve forest page layout and autumn color reactivity (#88)",
+      "refine falling leaves animation and behavior (#87)",
+      "improve TreeBirch and TreeAspen leaf shapes (#86)"
+    ]
   }
 }

@@ -9,14 +9,14 @@
  */
 
 interface OnboardingEmailResult {
-	subject: string;
-	html: string;
-	text: string;
+  subject: string;
+  html: string;
+  text: string;
 }
 
 // Shared email wrapper with Grove styling
 function wrapEmail(content: string, unsubscribeUrl: string): string {
-	return `
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,7 +57,7 @@ function wrapEmail(content: string, unsubscribeUrl: string): string {
 // =============================================================================
 
 export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
-	return `
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,7 +140,7 @@ export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
 }
 
 export function getWelcomeEmailText(unsubscribeUrl: string): string {
-	return `
+  return `
 Welcome to Grove
 ================
 
@@ -166,10 +166,10 @@ Don't want to receive these emails? Unsubscribe: ${unsubscribeUrl}
 // =============================================================================
 
 export function getDay3Email(unsubscribeUrl: string): OnboardingEmailResult {
-	const subject = "What we're building at Grove";
+  const subject = "What we're building at Grove";
 
-	const html = wrapEmail(
-		`
+  const html = wrapEmail(
+    `
     <tr>
       <td align="center" style="padding-bottom: 20px;">
         <h1 style="margin: 0; font-size: 24px; color: #3d2914; font-weight: normal;">
@@ -211,10 +211,10 @@ export function getDay3Email(unsubscribeUrl: string): OnboardingEmailResult {
       </td>
     </tr>
   `,
-		unsubscribeUrl
-	);
+    unsubscribeUrl,
+  );
 
-	const text = `
+  const text = `
 A peek behind the curtain
 =========================
 
@@ -242,7 +242,7 @@ grove.place
 Unsubscribe: ${unsubscribeUrl}
 `.trim();
 
-	return { subject, html, text };
+  return { subject, html, text };
 }
 
 // =============================================================================
@@ -250,10 +250,10 @@ Unsubscribe: ${unsubscribeUrl}
 // =============================================================================
 
 export function getDay7Email(unsubscribeUrl: string): OnboardingEmailResult {
-	const subject = "Why we're building Grove";
+  const subject = "Why we're building Grove";
 
-	const html = wrapEmail(
-		`
+  const html = wrapEmail(
+    `
     <tr>
       <td align="center" style="padding-bottom: 20px;">
         <h1 style="margin: 0; font-size: 24px; color: #3d2914; font-weight: normal;">
@@ -294,10 +294,10 @@ export function getDay7Email(unsubscribeUrl: string): OnboardingEmailResult {
       </td>
     </tr>
   `,
-		unsubscribeUrl
-	);
+    unsubscribeUrl,
+  );
 
-	const text = `
+  const text = `
 Why Grove exists
 ================
 
@@ -323,7 +323,7 @@ grove.place
 Unsubscribe: ${unsubscribeUrl}
 `.trim();
 
-	return { subject, html, text };
+  return { subject, html, text };
 }
 
 // =============================================================================
@@ -331,10 +331,10 @@ Unsubscribe: ${unsubscribeUrl}
 // =============================================================================
 
 export function getDay14Email(unsubscribeUrl: string): OnboardingEmailResult {
-	const subject = 'Still here, still growing';
+  const subject = "Still here, still growing";
 
-	const html = wrapEmail(
-		`
+  const html = wrapEmail(
+    `
     <tr>
       <td align="center" style="padding-bottom: 20px;">
         <h1 style="margin: 0; font-size: 24px; color: #3d2914; font-weight: normal;">
@@ -372,10 +372,10 @@ export function getDay14Email(unsubscribeUrl: string): OnboardingEmailResult {
       </td>
     </tr>
   `,
-		unsubscribeUrl
-	);
+    unsubscribeUrl,
+  );
 
-	const text = `
+  const text = `
 A quick check-in
 ================
 
@@ -399,5 +399,5 @@ grove.place
 Unsubscribe: ${unsubscribeUrl}
 `.trim();
 
-	return { subject, html, text };
+  return { subject, html, text };
 }
