@@ -147,7 +147,7 @@ Names aren't branding. They're world-building. Every service has a nature metaph
 **Exhibits:**
 - The Philosophy (names as ecosystem language)
 - The Walk (the ritual of discovering names)
-- The Journeys Gallery (50+ naming journeys with rejected ideas, realizations)
+- The Walks Gallery (56 naming journeys, organized and accessible)
 - The Ecosystem Map (40+ services, each with its story)
 
 **Featured Journey:** Porch. Support isn't a ticket system. It's a porch conversation. You come up the steps, have a seat, and the grove keeper comes out to chat. This journey created the naming ritual.

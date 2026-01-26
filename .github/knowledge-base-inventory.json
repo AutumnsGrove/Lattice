@@ -1,7 +1,7 @@
 {
   "lastUpdated": "2026-01-26",
   "docs": {
-    "total": 250,
+    "total": 251,
     "breakdown": {
       "specs": 55,
       "help": 48,
@@ -10,7 +10,7 @@
       "patterns": 9,
       "philosophy": 68,
       "design": 9,
-      "exhibit": 36
+      "exhibit": 37
     },
     "paths": {
       "specs": "docs/specs",

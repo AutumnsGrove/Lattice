@@ -4,7 +4,7 @@ description: How Grove names things, and why it matters
 category: exhibit
 exhibitWing: naming
 icon: tag
-lastUpdated: '2026-01-22'
+lastUpdated: '2026-01-26'
 ---
 # The Naming Wing
 
@@ -23,8 +23,8 @@ This wing explains Grove's naming philosophy. Names aren't branding; they're wor
 ### [The Philosophy](./the-walk.md)
 The ritual of discovering names.
 
-### [The Journeys Gallery](./journeys/porch.md)
-50+ naming journeys with rejected ideas and realizations.
+### [The Walks Gallery](./walks-gallery.md)
+56 naming journeys—every walk that built Grove's vocabulary.
 
 ### [The Ecosystem Map](./ecosystem.md)
 40+ services, each with its story.

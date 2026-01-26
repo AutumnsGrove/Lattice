@@ -43,9 +43,10 @@ const CATEGORY_PATHS: Record<DocCategory, string> = {
  * Categories that should recursively include subdirectories.
  * - specs: includes completed specs in specs/completed/
  * - exhibit: museum wings organized in subdirectories (architecture/, nature/, etc.)
+ * - philosophy: naming-research journeys in subdirectory (published: false keeps them out of listings)
  * - Other categories may have internal scratch folders that shouldn't be public
  */
-const RECURSIVE_CATEGORIES: DocCategory[] = ["specs", "exhibit"];
+const RECURSIVE_CATEGORIES: DocCategory[] = ["specs", "exhibit", "philosophy"];
 
 /**
  * Valid values for category-specific fields.
