@@ -68,6 +68,7 @@ const VALID_HELP_SECTIONS: HelpSection[] = [
   "account-billing",
   "privacy-security",
   "ai-features",
+  "how-it-works",
   "philosophy-vision",
   "support-resources",
   "troubleshooting",
