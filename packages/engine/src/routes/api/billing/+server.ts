@@ -10,6 +10,7 @@ import {
   rateLimitHeaders,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
+import { getRealOrigin } from "$lib/server/origin";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
 const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
@@ -770,7 +771,9 @@ export const PUT: RequestHandler = async ({
     const isGroveDomain =
       parsedReturn.hostname === "grove.place" ||
       parsedReturn.hostname.endsWith(".grove.place");
-    const isSameOrigin = parsedReturn.origin === url.origin;
+    // Use real origin to correctly validate behind proxy
+    const realOrigin = getRealOrigin(request, url);
+    const isSameOrigin = parsedReturn.origin === realOrigin;
 
     if (!isGroveDomain && !isSameOrigin) {
       throw error(400, "Invalid return URL: must be a grove.place domain");

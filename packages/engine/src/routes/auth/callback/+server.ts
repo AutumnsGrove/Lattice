@@ -17,6 +17,7 @@ import {
   getClientIP,
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits";
+import { getRealOrigin } from "$lib/server/origin";
 
 // ============================================================================
 // Constants
@@ -217,7 +218,7 @@ export const GET: RequestHandler = async ({
   try {
     // Get typed auth configuration
     const authConfig = getAuthConfig(platform);
-    const redirectUri = `${url.origin}/auth/callback`;
+    const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
 
     // Exchange code for tokens
     const tokenResponse = await fetch(`${authConfig.apiUrl}/token`, {

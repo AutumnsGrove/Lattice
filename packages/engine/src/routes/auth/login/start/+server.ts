@@ -21,6 +21,7 @@ import {
   getClientIP,
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits";
+import { getRealOrigin } from "$lib/server/origin";
 
 /**
  * Generate a cryptographically secure random string for PKCE
@@ -82,7 +83,7 @@ export const GET: RequestHandler = async ({
   const authBaseUrl =
     platform?.env?.GROVEAUTH_URL || "https://auth.grove.place";
   const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
-  const redirectUri = `${url.origin}/auth/callback`;
+  const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
 
   // Return to admin panel after login, or use provided return_to
   const returnTo = url.searchParams.get("return_to") || "/admin";
