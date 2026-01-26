@@ -176,6 +176,18 @@
 .dark {
 	color-scheme: dark;
 
+	/* ==========================================================================
+	   BASE VARIABLE REDEFINITIONS FOR DARK MODE
+	   These redefine the same variable names used in :root so that components
+	   using var(--color-text-muted) automatically get dark mode values.
+	   The -dark suffixed variants below are kept for backward compatibility.
+	   ========================================================================== */
+	--color-text: hsl(var(--foreground));
+	--color-text-muted: hsl(var(--muted-foreground));
+	--color-text-subtle: hsl(0 0% 72%);
+	--color-bg-secondary: hsl(var(--secondary));
+	--color-border: hsl(var(--border));
+
 	/* Dark mode tag colors */
 	--tag-bg: hsl(270 38% 55%);
 	--tag-bg-hover: hsl(270 38% 49%);
