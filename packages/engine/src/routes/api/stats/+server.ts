@@ -134,9 +134,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     accountAgeDays,
   };
 
-  // PERFORMANCE: Add private cache header (authenticated endpoint)
-  // Short TTL since stats change as user creates content
+  // PERFORMANCE: Use no-cache to ensure fresh data after post changes
+  // The browser can cache but must revalidate on each request
+  // This prevents stale counts after creating/deleting posts (#623)
   return json(stats, {
-    headers: { "Cache-Control": "private, max-age=60" },
+    headers: { "Cache-Control": "private, no-cache" },
   });
 };
