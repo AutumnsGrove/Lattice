@@ -14,13 +14,13 @@
   },
   "highlights": {
     "features": [
-  "merge GroveUI into engine",
-  "Add New Post page and update blog admin UI",
-  "Add working MarkdownEditor test page"
-],
+      "merge GroveUI into engine",
+      "Add New Post page and update blog admin UI",
+      "Add working MarkdownEditor test page"
+    ],
     "fixes": [
-  "SSR compatibility and missing exports",
-  "Resolve MarkdownEditor toolbar freeze bug"
-]
+      "SSR compatibility and missing exports",
+      "Resolve MarkdownEditor toolbar freeze bug"
+    ]
   }
 }

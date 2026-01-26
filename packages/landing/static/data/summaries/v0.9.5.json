@@ -14,21 +14,21 @@
   },
   "highlights": {
     "features": [
-  "add Wander - first-person immersive grove discovery",
-  "add Forests - community aggregation inspired by GeoCities neighborhoods",
-  "add Curios - cabinet of wonders for visitor experience features",
-  "migrate payment system from Stripe to Lemon Squeezy",
-  "add grove-durable-objects worker for Pages compatibility",
-  "implement Durable Objects for caching and real-time features (#311)",
-  "add Data Protection section with backup status"
-],
+      "add Wander - first-person immersive grove discovery",
+      "add Forests - community aggregation inspired by GeoCities neighborhoods",
+      "add Curios - cabinet of wonders for visitor experience features",
+      "migrate payment system from Stripe to Lemon Squeezy",
+      "add grove-durable-objects worker for Pages compatibility",
+      "implement Durable Objects for caching and real-time features (#311)",
+      "add Data Protection section with backup status"
+    ],
     "fixes": [
-  "use correct LineSquiggle icon name for Wander drift mode",
-  "cast SDK attributes through unknown for TypeScript compatibility",
-  "add esbuild dependency for Durable Objects compilation in CI",
-  "update status page link to status.grove.place (#323)",
-  "revert ThemeToggle from season indicator to light/dark mode toggle (#319)",
-  "add type annotation to gallery image map callback"
-]
+      "use correct LineSquiggle icon name for Wander drift mode",
+      "cast SDK attributes through unknown for TypeScript compatibility",
+      "add esbuild dependency for Durable Objects compilation in CI",
+      "update status page link to status.grove.place (#323)",
+      "revert ThemeToggle from season indicator to light/dark mode toggle (#319)",
+      "add type annotation to gallery image map callback"
+    ]
   }
 }

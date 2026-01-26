@@ -14,25 +14,25 @@
   },
   "highlights": {
     "features": [
-  "add nature components library to engine package",
-  "add GlassLogo to asset viewer tool",
-  "add seasonal variations to GlassLogo component",
-  "add GlassLogo component with glassmorphism styling",
-  "add pricing tier icons to match Plant page",
-  "redesign with glass aesthetic and add GlassNavbar component",
-  "add Lucide icons to feature rows in pricing table",
-  "add micro-interactions and accessibility improvements",
-  "add expressive icons to all roadmap items and footer",
-  "redesign signup page with warm glassy sections"
-],
+      "add nature components library to engine package",
+      "add GlassLogo to asset viewer tool",
+      "add seasonal variations to GlassLogo component",
+      "add GlassLogo component with glassmorphism styling",
+      "add pricing tier icons to match Plant page",
+      "redesign with glass aesthetic and add GlassNavbar component",
+      "add Lucide icons to feature rows in pricing table",
+      "add micro-interactions and accessibility improvements",
+      "add expressive icons to all roadmap items and footer",
+      "redesign signup page with warm glassy sections"
+    ],
     "fixes": [
-  "use $derived.by for complex derived value in GlassLogo",
-  "address PR review feedback",
-  "replace class: directive with conditional class string",
-  "resolve duplicate Moon import in roadmap",
-  "address minor nitpicks",
-  "use Newspaper icon for Blog to avoid BookOpen duplication",
-  "use Sprout icon for Plant Your Blog button"
-]
+      "use $derived.by for complex derived value in GlassLogo",
+      "address PR review feedback",
+      "replace class: directive with conditional class string",
+      "resolve duplicate Moon import in roadmap",
+      "address minor nitpicks",
+      "use Newspaper icon for Blog to avoid BookOpen duplication",
+      "use Sprout icon for Plant Your Blog button"
+    ]
   }
 }

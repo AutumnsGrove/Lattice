@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "implement data-driven Help Center with section icons and TOC",
-  "add subscription management UI and data export (#341)",
-  "add monochrome prop to remove split-tone effect (#351)",
-  "connect test infrastructure to git hooks",
-  "update OG image assets to new tree logo",
-  "add Grove User Identity to knowledge base",
-  "add hover-to-expand behavior for collapsed sidebar",
-  "add direct blog link on success page",
-  "add new Grove services to blocklist",
-  "implement JPEG XL encoding with feature flag support (#336)"
-],
+      "implement data-driven Help Center with section icons and TOC",
+      "add subscription management UI and data export (#341)",
+      "add monochrome prop to remove split-tone effect (#351)",
+      "connect test infrastructure to git hooks",
+      "update OG image assets to new tree logo",
+      "add Grove User Identity to knowledge base",
+      "add hover-to-expand behavior for collapsed sidebar",
+      "add direct blog link on success page",
+      "add new Grove services to blocklist",
+      "implement JPEG XL encoding with feature flag support (#336)"
+    ],
     "fixes": [
-  "use noon UTC in formatDate test to avoid timezone boundary issues",
-  "add Contact link to mobile menu Connect section (#350)",
-  "resolve timezone failures in clearing date tests",
-  "resolve 21 test failures across the engine package",
-  "prevent HTML entities showing literally in OG images",
-  "register wanderers-and-pathfinders help article",
-  "correct GossamerPreset type in vineyard demo page",
-  "add @jsquash/jxl external config to all apps",
-  "resolve TypeScript errors for CI build",
-  "resolve CI deployment failures"
-]
+      "use noon UTC in formatDate test to avoid timezone boundary issues",
+      "add Contact link to mobile menu Connect section (#350)",
+      "resolve timezone failures in clearing date tests",
+      "resolve 21 test failures across the engine package",
+      "prevent HTML entities showing literally in OG images",
+      "register wanderers-and-pathfinders help article",
+      "correct GossamerPreset type in vineyard demo page",
+      "add @jsquash/jxl external config to all apps",
+      "resolve TypeScript errors for CI build",
+      "resolve CI deployment failures"
+    ]
   }
 }

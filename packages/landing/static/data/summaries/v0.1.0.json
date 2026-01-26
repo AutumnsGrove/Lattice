@@ -14,25 +14,25 @@
   },
   "highlights": {
     "features": [
-  "Set up GitHub Packages publishing for @autumnsgrove/groveengine",
-  "Add CDN admin upload system with R2 storage",
-  "Add Stripe payments system with provider abstraction",
-  "Add example site link to landing page and prepare workspace",
-  "Add example site showcasing all GroveEngine features",
-  "Add enhanced CDN Uploader with AI analysis to admin panel",
-  "Configure npm publishing for @groveengine packages",
-  "Complete blog engine migration from AutumnsGrove to packages/engine",
-  "Add temporary Stripe branding assets (icon + logo)",
-  "Add Grove Design System UI component library"
-],
+      "Set up GitHub Packages publishing for @autumnsgrove/groveengine",
+      "Add CDN admin upload system with R2 storage",
+      "Add Stripe payments system with provider abstraction",
+      "Add example site link to landing page and prepare workspace",
+      "Add example site showcasing all GroveEngine features",
+      "Add enhanced CDN Uploader with AI analysis to admin panel",
+      "Configure npm publishing for @groveengine packages",
+      "Complete blog engine migration from AutumnsGrove to packages/engine",
+      "Add temporary Stripe branding assets (icon + logo)",
+      "Add Grove Design System UI component library"
+    ],
     "fixes": [
-  "Update engine component imports to use main export for Rollup resolution",
-  "Add smooth scroll and URL hash update to TOC navigation",
-  "Sync package-lock.json with package.json for CI",
-  "Deploy example site and update dependencies",
-  "Use hardcoded font stacks to avoid theme() lookup issues",
-  "Update success message to mention confirmation email",
-  "Enable autofill and text expansion on email input"
-]
+      "Update engine component imports to use main export for Rollup resolution",
+      "Add smooth scroll and URL hash update to TOC navigation",
+      "Sync package-lock.json with package.json for CI",
+      "Deploy example site and update dependencies",
+      "Use hardcoded font stacks to avoid theme() lookup issues",
+      "Update success message to mention confirmation email",
+      "Enable autofill and text expansion on email input"
+    ]
   }
 }

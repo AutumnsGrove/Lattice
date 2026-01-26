@@ -15,15 +15,15 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "replace sonner with svelte-sonner for Cloudflare compatibility",
-  "pass D1 binding explicitly in wrangler pages deploy",
-  "add email_signups table migration for automatic deployment",
-  "add missing email_signups table migration",
-  "resolve TypeScript errors breaking landing page build",
-  "remove non-existent packages/ui step from deploy workflow",
-  "add cache-dependency-path to pnpm workflow caching",
-  "correct gutter item positioning to align with content anchors",
-  "prevent mobile zoom issues in admin panel"
-]
+      "replace sonner with svelte-sonner for Cloudflare compatibility",
+      "pass D1 binding explicitly in wrangler pages deploy",
+      "add email_signups table migration for automatic deployment",
+      "add missing email_signups table migration",
+      "resolve TypeScript errors breaking landing page build",
+      "remove non-existent packages/ui step from deploy workflow",
+      "add cache-dependency-path to pnpm workflow caching",
+      "correct gutter item positioning to align with content anchors",
+      "prevent mobile zoom issues in admin panel"
+    ]
   }
 }

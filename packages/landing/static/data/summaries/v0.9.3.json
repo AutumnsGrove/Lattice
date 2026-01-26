@@ -14,26 +14,26 @@
   },
   "highlights": {
     "features": [
-  "deploy Clearing status page to production",
-  "add Safari Reader mode support for blog posts",
-  "add test coverage and shared validation utilities",
-  "expand authIcons group with shieldcheck, mail, and login",
-  "improve blog editor UX and fix multi-tenant content loading",
-  "add authentication and action icons to central system",
-  "add Discord OAuth, passkey, and 2FA support",
-  "add live Stripe price IDs for all subscription tiers",
-  "implement threshold rate limiting pattern (#285)"
-],
+      "deploy Clearing status page to production",
+      "add Safari Reader mode support for blog posts",
+      "add test coverage and shared validation utilities",
+      "expand authIcons group with shieldcheck, mail, and login",
+      "improve blog editor UX and fix multi-tenant content loading",
+      "add authentication and action icons to central system",
+      "add Discord OAuth, passkey, and 2FA support",
+      "add live Stripe price IDs for all subscription tiers",
+      "implement threshold rate limiting pattern (#285)"
+    ],
     "fixes": [
-  "remove invalid rel attribute from address element",
-  "resolve deployment type errors in plant package",
-  "improve validation and error messages per PR review",
-  "resolve type errors in engine and plant packages",
-  "address PR review security and accessibility issues",
-  "hide MobileMenu on desktop and improve closed state",
-  "ensure Stripe checkout redirects to plant.grove.place",
-  "resolve TypeScript errors in auth rate limiting (#297)",
-  "prevent duplicate zero in release summary JSON"
-]
+      "remove invalid rel attribute from address element",
+      "resolve deployment type errors in plant package",
+      "improve validation and error messages per PR review",
+      "resolve type errors in engine and plant packages",
+      "address PR review security and accessibility issues",
+      "hide MobileMenu on desktop and improve closed state",
+      "ensure Stripe checkout redirects to plant.grove.place",
+      "resolve TypeScript errors in auth rate limiting (#297)",
+      "prevent duplicate zero in release summary JSON"
+    ]
   }
 }

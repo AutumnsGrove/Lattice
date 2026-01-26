@@ -43,7 +43,10 @@ describe("docs-loader.ts", () => {
       // They verify the loader works with real docs
 
       it("should return null for non-existent document", () => {
-        const result = loadDocBySlug("this-slug-definitely-does-not-exist-abc123", "help");
+        const result = loadDocBySlug(
+          "this-slug-definitely-does-not-exist-abc123",
+          "help",
+        );
         expect(result).toBeNull();
       });
 

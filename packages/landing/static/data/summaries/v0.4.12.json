@@ -15,8 +15,8 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "resolve toolbar freeze with isProgrammaticUpdate flag",
-  "Add CSRF token to state-changing requests in api utility"
-]
+      "resolve toolbar freeze with isProgrammaticUpdate flag",
+      "Add CSRF token to state-changing requests in api utility"
+    ]
   }
 }

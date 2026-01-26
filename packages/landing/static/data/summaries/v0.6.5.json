@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "add public roadmap with seasonal journey",
-  "enhance tree grounding and add dancing snowflake motion",
-  "make Grove logo tree pink in spring season",
-  "dramatically enhance petal gliding and dancing motion",
-  "unify vine background pattern across all Grove sites",
-  "Update plant site assets to align with Grove design system",
-  "update favicon to new grove logo design",
-  "add vision CTA before email signup",
-  "remove mountain layer and enhance clouds",
-  "add email subscribers admin panel"
-],
+      "add public roadmap with seasonal journey",
+      "enhance tree grounding and add dancing snowflake motion",
+      "make Grove logo tree pink in spring season",
+      "dramatically enhance petal gliding and dancing motion",
+      "unify vine background pattern across all Grove sites",
+      "Update plant site assets to align with Grove design system",
+      "update favicon to new grove logo design",
+      "add vision CTA before email signup",
+      "remove mountain layer and enhance clouds",
+      "add email subscribers admin panel"
+    ],
     "fixes": [
-  "prevent petals from appearing stuck at spawn position",
-  "separate petal fall and flutter animations to prevent conflict",
-  "correct cherry tree summer colors and particle visibility",
-  "improve petal falling motion and leaf fade-in behavior",
-  "improve particle animations for leaves, petals, and snowflakes",
-  "resolve OAuth flow and CSRF issues for signup",
-  "use canonical URL to prevent cookie domain mismatch",
-  "use /login endpoint instead of /authorize for GroveAuth",
-  "trigger landing deploy on docs changes",
-  "correct help center article links"
-]
+      "prevent petals from appearing stuck at spawn position",
+      "separate petal fall and flutter animations to prevent conflict",
+      "correct cherry tree summer colors and particle visibility",
+      "improve petal falling motion and leaf fade-in behavior",
+      "improve particle animations for leaves, petals, and snowflakes",
+      "resolve OAuth flow and CSRF issues for signup",
+      "use canonical URL to prevent cookie domain mismatch",
+      "use /login endpoint instead of /authorize for GroveAuth",
+      "trigger landing deploy on docs changes",
+      "correct help center article links"
+    ]
   }
 }

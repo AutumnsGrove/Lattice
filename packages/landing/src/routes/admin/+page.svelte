@@ -54,7 +54,27 @@
 
 	<main class="max-w-6xl mx-auto px-6 py-8">
 		<!-- Quick Links -->
-		<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<!-- Feedback Card -->
+			<a
+				href="/admin/feedback"
+				class="bg-white border border-grove-200 rounded-xl p-6 hover:border-grove-300 transition-colors group"
+			>
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-grove-100 rounded-lg flex items-center justify-center text-grove-600 group-hover:bg-grove-200 transition-colors">
+						<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<h2 class="text-lg font-serif text-bark mb-1">Wanderer Feedback</h2>
+						<p class="text-sm text-bark/60 font-sans">
+							View and respond to feedback from the community.
+						</p>
+					</div>
+				</div>
+			</a>
+
 			<!-- Subscribers Card -->
 			<a
 				href="/admin/subscribers"

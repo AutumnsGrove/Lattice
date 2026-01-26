@@ -13,9 +13,7 @@
     "performance": 0
   },
   "highlights": {
-    "features": [
-  "Migrate generic UI to @groveengine/ui package"
-],
+    "features": ["Migrate generic UI to @groveengine/ui package"],
     "fixes": []
   }
 }

@@ -15,11 +15,11 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "replace isomorphic-dompurify with client-only DOMPurify",
-  "add jsdom to adapter-cloudflare external config",
-  "mark jsdom as external in wrangler config",
-  "use npm for wrangler install in monorepo",
-  "exclude jsdom from production bundle"
-]
+      "replace isomorphic-dompurify with client-only DOMPurify",
+      "add jsdom to adapter-cloudflare external config",
+      "mark jsdom as external in wrangler config",
+      "use npm for wrangler install in monorepo",
+      "exclude jsdom from production bundle"
+    ]
   }
 }

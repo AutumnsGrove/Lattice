@@ -14,28 +14,28 @@
   },
   "highlights": {
     "features": [
-  "add backfill option to auto-tag workflow",
-  "update launch announcement to celebrate paperwork completion",
-  "add manual workflow to backfill historical release summaries",
-  "integrate AI release summaries into milestones timeline",
-  "wire up pattern icons to Architecture Patterns cards",
-  "add icon buttons and sub-component rows to workshop TOC",
-  "add ZDR badge to Kilo Code section",
-  "add heartwood-auth skill for auth integration",
-  "add automated LLM-generated release summaries",
-  "update divider layout to horizontal and Hello icon"
-],
+      "add backfill option to auto-tag workflow",
+      "update launch announcement to celebrate paperwork completion",
+      "add manual workflow to backfill historical release summaries",
+      "integrate AI release summaries into milestones timeline",
+      "wire up pattern icons to Architecture Patterns cards",
+      "add icon buttons and sub-component rows to workshop TOC",
+      "add ZDR badge to Kilo Code section",
+      "add heartwood-auth skill for auth integration",
+      "add automated LLM-generated release summaries",
+      "update divider layout to horizontal and Hello icon"
+    ],
     "fixes": [
-  "add job conditions to prevent conflicts",
-  "simplify backfill workflow to just workflow_dispatch",
-  "display tools instead of subComponents in TOC",
-  "use consistent slate border in RoadmapPreview dark mode",
-  "improve dark mode styling and fix contrast issues",
-  "resolve build errors and Svelte 5 deprecation warnings",
-  "revert workshop page regression and add TOC to main roadmap",
-  "add missing Tag icon import to roadmap page",
-  "address security and regex issues in release summaries",
-  "change dividers from horizontal to vertical orientation"
-]
+      "add job conditions to prevent conflicts",
+      "simplify backfill workflow to just workflow_dispatch",
+      "display tools instead of subComponents in TOC",
+      "use consistent slate border in RoadmapPreview dark mode",
+      "improve dark mode styling and fix contrast issues",
+      "resolve build errors and Svelte 5 deprecation warnings",
+      "revert workshop page regression and add TOC to main roadmap",
+      "add missing Tag icon import to roadmap page",
+      "address security and regex issues in release summaries",
+      "change dividers from horizontal to vertical orientation"
+    ]
   }
 }

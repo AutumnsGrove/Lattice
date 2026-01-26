@@ -15,8 +15,8 @@
   "highlights": {
     "features": [],
     "fixes": [
-  "Remove import.meta.glob from library code to fix runtime errors",
-  "Add exports to root package.json for GitHub direct installs"
-]
+      "Remove import.meta.glob from library code to fix runtime errors",
+      "Add exports to root package.json for GitHub direct installs"
+    ]
   }
 }

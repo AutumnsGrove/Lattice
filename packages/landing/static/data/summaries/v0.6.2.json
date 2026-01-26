@@ -14,10 +14,10 @@
   },
   "highlights": {
     "features": [
-  "bump engine version to 0.6.2 and publish to npm",
-  "rename Cellar to Amber across documentation",
-  "rename plan tiers and expand platform plan features"
-],
+      "bump engine version to 0.6.2 and publish to npm",
+      "rename Cellar to Amber across documentation",
+      "rename plan tiers and expand platform plan features"
+    ],
     "fixes": []
   }
 }

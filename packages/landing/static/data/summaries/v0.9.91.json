@@ -14,25 +14,25 @@
   },
   "highlights": {
     "features": [
-  "add grove-issues skill for bulk TODO-to-issue pipeline",
-  "add audit_log table migration",
-  "add BATS test suite for issue functions",
-  "add GitHub Issues task management functions",
-  "add landing component to auto-label workflow",
-  "add GitHub issue templates and automation workflows",
-  "add \"What is Firefly?\" knowledge base article (#444)"
-],
+      "add grove-issues skill for bulk TODO-to-issue pipeline",
+      "add audit_log table migration",
+      "add BATS test suite for issue functions",
+      "add GitHub Issues task management functions",
+      "add landing component to auto-label workflow",
+      "add GitHub issue templates and automation workflows",
+      "add \"What is Firefly?\" knowledge base article (#444)"
+    ],
     "fixes": [
-  "use Sparkles icon for Gossamer in toolIcons registry",
-  "reduce false positives in auto-label workflow",
-  "cap latency-only status at degraded for healthy services",
-  "debounce status flapping for blog engine health checks",
-  "update component status on recovery without active incident",
-  "use pnpm package for engine dep in clearing deploy",
-  "skip svelte-check in clearing deploy (pre-existing type issues)",
-  "exclude maintenance from overall status calculation",
-  "overhaul auto-label workflow to prevent over-tagging",
-  "use toArray instead of one() in deployed DO worker"
-]
+      "use Sparkles icon for Gossamer in toolIcons registry",
+      "reduce false positives in auto-label workflow",
+      "cap latency-only status at degraded for healthy services",
+      "debounce status flapping for blog engine health checks",
+      "update component status on recovery without active incident",
+      "use pnpm package for engine dep in clearing deploy",
+      "skip svelte-check in clearing deploy (pre-existing type issues)",
+      "exclude maintenance from overall status calculation",
+      "overhaul auto-label workflow to prevent over-tagging",
+      "use toArray instead of one() in deployed DO worker"
+    ]
   }
 }

@@ -1,45 +1,62 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<!-- Blocking script to prevent FOUC (flash of unstyled content) -->
-		<script>
-			try {
-				const stored = localStorage.getItem('grove-theme');
-				// Default to dark if no stored preference (matches theme store default)
-				if (stored === 'dark' || !stored) {
-					document.documentElement.classList.add('dark');
-				}
-			} catch (e) {
-				// localStorage unavailable, default to dark
-				document.documentElement.classList.add('dark');
-			}
-		</script>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="Grove: a place to Be. Coming soon." />
-		<meta name="theme-color" content="#16a34a" />
-		<!-- Prevent Dark Reader from interfering with Grove's native dark mode -->
-		<meta name="darkreader-lock" />
+  <head>
+    <!-- Blocking script to prevent FOUC (flash of unstyled content) -->
+    <script>
+      try {
+        const stored = localStorage.getItem("grove-theme");
+        // Default to dark if no stored preference (matches theme store default)
+        if (stored === "dark" || !stored) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {
+        // localStorage unavailable, default to dark
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Grove: a place to Be. Coming soon." />
+    <meta name="theme-color" content="#16a34a" />
+    <!-- Prevent Dark Reader from interfering with Grove's native dark mode -->
+    <meta name="darkreader-lock" />
 
-		<!-- Favicons -->
-		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
-		<link rel="icon" type="image/png" sizes="32x32" href="%sveltekit.assets%/favicon-32x32.png" />
+    <!-- Favicons -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="%sveltekit.assets%/favicon.svg"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="%sveltekit.assets%/favicon-32x32.png"
+    />
 
-		<!-- Apple Touch Icon (iOS home screen, iMessage previews) -->
-		<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
+    <!-- Apple Touch Icon (iOS home screen, iMessage previews) -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="%sveltekit.assets%/apple-touch-icon.png"
+    />
 
-		<!-- Safari Pinned Tab -->
-		<link rel="mask-icon" href="%sveltekit.assets%/safari-pinned-tab.svg" color="#16a34a" />
+    <!-- Safari Pinned Tab -->
+    <link
+      rel="mask-icon"
+      href="%sveltekit.assets%/safari-pinned-tab.svg"
+      color="#16a34a"
+    />
 
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
 
-		<!-- Windows -->
-		<meta name="msapplication-TileColor" content="#0f172a" />
-		<meta name="msapplication-config" content="none" />
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
-	</body>
+    <!-- Windows -->
+    <meta name="msapplication-TileColor" content="#0f172a" />
+    <meta name="msapplication-config" content="none" />
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
 </html>
