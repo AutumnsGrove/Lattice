@@ -41,107 +41,107 @@ These documents live in the philosophy archives. They're working documents—scr
 
 The fundamental services that make Grove work.
 
-- **[Heartwood](/docs/philosophy/naming-research/heartwood-grove-journey)** — Authentication, the core of trust
-- **[Lattice](/docs/philosophy/naming-research/lattice-grove-journey)** — The framework that powers everything
-- **[Meadow](/docs/philosophy/naming-research/meadow-grove-journey)** — The social layer, where blogs connect
-- **[Loom](/docs/philosophy/naming-research/loom-grove-journey)** — Durable Objects coordination
-- **[Passage](/docs/philosophy/naming-research/passage-naming-journey)** — The router that guides wanderers
-- **[Clearing](/docs/philosophy/naming-research/clearing-grove-journey)** — Status page, transparent health
+- **[Heartwood](/knowledge/philosophy/heartwood-grove-journey)** — Authentication, the core of trust
+- **[Lattice](/knowledge/philosophy/lattice-grove-journey)** — The framework that powers everything
+- **[Meadow](/knowledge/philosophy/meadow-grove-journey)** — The social layer, where blogs connect
+- **[Loom](/knowledge/philosophy/loom-grove-journey)** — Durable Objects coordination
+- **[Passage](/knowledge/philosophy/passage-naming-journey)** — The router that guides wanderers
+- **[Clearing](/knowledge/philosophy/clearing-grove-journey)** — Status page, transparent health
 
 ### Storage & Data
 
 Where things are kept and found.
 
-- **[Amber](/docs/philosophy/naming-research/amber-grove-journey)** — File storage, preserving moments
-- **[Pantry](/docs/philosophy/naming-research/pantry-grove-journey)** — Content storage
-- **[Rings](/docs/philosophy/naming-research/rings-grove-journey)** — Analytics, growth rings in trees
+- **[Amber](/knowledge/philosophy/amber-grove-journey)** — File storage, preserving moments
+- **[Pantry](/knowledge/philosophy/pantry-grove-journey)** — Content storage
+- **[Rings](/knowledge/philosophy/rings-grove-journey)** — Analytics, growth rings in trees
 
 ### Security & Infrastructure
 
 The protective and structural systems.
 
-- **[Sentinel](/docs/philosophy/naming-research/sentinel-grove-journey)** — Security monitoring
-- **[Thorn](/docs/philosophy/naming-research/thorn-grove-journey)** — Rate limiting, protective thorns
-- **[Domain Guard](/docs/philosophy/naming-research/domain-guard-naming-journey)** — Domain protection
-- **[AI Gateway](/docs/philosophy/naming-research/ai-gateway-naming-journey)** — AI service gateway
-- **[CDN Uploader](/docs/philosophy/naming-research/cdn-uploader-grove-journey)** — Content delivery
+- **[Sentinel](/knowledge/philosophy/sentinel-grove-journey)** — Security monitoring
+- **[Thorn](/knowledge/philosophy/thorn-grove-journey)** — Rate limiting, protective thorns
+- **[Domain Guard](/knowledge/philosophy/domain-guard-naming-journey)** — Domain protection
+- **[AI Gateway](/knowledge/philosophy/ai-gateway-naming-journey)** — AI service gateway
+- **[CDN Uploader](/knowledge/philosophy/cdn-uploader-grove-journey)** — Content delivery
 
 ### Personalization & Theming
 
 Making each space feel like home.
 
-- **[Foliage](/docs/philosophy/naming-research/foliage-grove-journey)** — Theme customization
-- **[Patina](/docs/philosophy/naming-research/patina-grove-journey)** — Age and wear aesthetics
-- **[Prism](/docs/philosophy/naming-research/prism-grove-journey)** — Color and light refraction
-- **[Shade](/docs/philosophy/naming-research/shade-grove-journey)** — Dark mode, resting under trees
+- **[Foliage](/knowledge/philosophy/foliage-grove-journey)** — Theme customization
+- **[Patina](/knowledge/philosophy/patina-grove-journey)** — Age and wear aesthetics
+- **[Prism](/knowledge/philosophy/prism-grove-journey)** — Color and light refraction
+- **[Shade](/knowledge/philosophy/shade-grove-journey)** — Dark mode, resting under trees
 
 ### Nature & Visual
 
 The living elements of the grove.
 
-- **[Bloom](/docs/philosophy/naming-research/bloom-grove-journey)** — Remote coding infrastructure
-- **[Firefly](/docs/philosophy/naming-research/firefly-grove-journey)** — Notifications, small lights
-- **[Ivy](/docs/philosophy/naming-research/ivy-grove-journey)** — Connections that grow
-- **[Mycelium](/docs/philosophy/naming-research/mycelium-grove-journey)** — Underground networks
-- **[Reeds](/docs/philosophy/naming-research/reeds-grove-journey)** — Flexible components
-- **[Wisp](/docs/philosophy/naming-research/wisp-grove-journey)** — Ephemeral elements
-- **[Songbird](/docs/philosophy/naming-research/songbird-grove-journey)** — Prompt injection protection
+- **[Bloom](/knowledge/philosophy/bloom-grove-journey)** — Remote coding infrastructure
+- **[Firefly](/knowledge/philosophy/firefly-grove-journey)** — Notifications, small lights
+- **[Ivy](/knowledge/philosophy/ivy-grove-journey)** — Connections that grow
+- **[Mycelium](/knowledge/philosophy/mycelium-grove-journey)** — Underground networks
+- **[Reeds](/knowledge/philosophy/reeds-grove-journey)** — Flexible components
+- **[Wisp](/knowledge/philosophy/wisp-grove-journey)** — Ephemeral elements
+- **[Songbird](/knowledge/philosophy/songbird-grove-journey)** — Prompt injection protection
 
 ### Places & Spaces
 
 Named locations within the grove.
 
-- **[Arbor](/docs/philosophy/naming-research/arbor-grove-journey)** — Structured spaces
-- **[Grove](/docs/philosophy/naming-research/grove-journey)** — The project itself
-- **[Nook](/docs/philosophy/naming-research/nook-grove-journey)** — Small, cozy spaces
-- **[Outpost](/docs/philosophy/naming-research/outpost-grove-journey)** — Remote locations
-- **[Terrarium](/docs/philosophy/naming-research/terrarium-grove-journey)** — Contained environments
-- **[Threshold](/docs/philosophy/naming-research/threshold-grove-journey)** — Entry points
-- **[Vista](/docs/philosophy/naming-research/vista-grove-journey)** — Overview pages
-- **[Waystone](/docs/philosophy/naming-research/waystone-grove-journey)** — Navigation markers
+- **[Arbor](/knowledge/philosophy/arbor-grove-journey)** — Structured spaces
+- **[Grove](/knowledge/philosophy/grove-journey)** — The project itself
+- **[Nook](/knowledge/philosophy/nook-grove-journey)** — Small, cozy spaces
+- **[Outpost](/knowledge/philosophy/outpost-grove-journey)** — Remote locations
+- **[Terrarium](/knowledge/philosophy/terrarium-grove-journey)** — Contained environments
+- **[Threshold](/knowledge/philosophy/threshold-grove-journey)** — Entry points
+- **[Vista](/knowledge/philosophy/vista-grove-journey)** — Overview pages
+- **[Waystone](/knowledge/philosophy/waystone-grove-journey)** — Navigation markers
 
 ### Features & Concepts
 
 Specific features and their names.
 
-- **[Centennial](/docs/philosophy/naming-research/centennial-naming-journey)** — Long-term features
-- **[Forage](/docs/philosophy/naming-research/forage-grove-journey)** — Discovery and gathering
-- **[Plant](/docs/philosophy/naming-research/plant-grove-journey)** — Creating new things
-- **[Sway](/docs/philosophy/naming-research/sway-rename-journey)** — Gentle motion, transitions
-- **[Tenant Extensions](/docs/philosophy/naming-research/tenant-extensions-naming-journey)** — Multi-tenant customization
-- **[Trails](/docs/philosophy/naming-research/trails-grove-journey)** — Navigation paths
-- **[User Naming](/docs/philosophy/naming-research/user-naming-journey)** — Wanderer, Rooted, Pathfinder
-- **[Vineyard](/docs/philosophy/naming-research/vineyard-grove-journey)** — Cultivated collections
-- **[Visitor Experience](/docs/philosophy/naming-research/visitor-experience-naming-journey)** — The wanderer's journey
+- **[Centennial](/knowledge/philosophy/centennial-naming-journey)** — Long-term features
+- **[Forage](/knowledge/philosophy/forage-grove-journey)** — Discovery and gathering
+- **[Plant](/knowledge/philosophy/plant-grove-journey)** — Creating new things
+- **[Sway](/knowledge/philosophy/sway-rename-journey)** — Gentle motion, transitions
+- **[Tenant Extensions](/knowledge/philosophy/tenant-extensions-naming-journey)** — Multi-tenant customization
+- **[Trails](/knowledge/philosophy/trails-grove-journey)** — Navigation paths
+- **[User Naming](/knowledge/philosophy/user-naming-journey)** — Wanderer, Rooted, Pathfinder
+- **[Vineyard](/knowledge/philosophy/vineyard-grove-journey)** — Cultivated collections
+- **[Visitor Experience](/knowledge/philosophy/visitor-experience-naming-journey)** — The wanderer's journey
 
 ### Visual Identity
 
 Logo and design explorations.
 
-- **[Grove Logo Walk](/docs/philosophy/naming-research/grove-logo-walk)** — The complete logo journey
-- **[Grove Logo Journey](/docs/philosophy/naming-research/grove-logo-journey)** — Logo explorations
-- **[Grove Logo Naming](/docs/philosophy/naming-research/grove-logo-naming-journey)** — Naming the visual identity
-- **[ASCII Effects](/docs/philosophy/naming-research/ascii-effects-naming-journey)** — Text-based visual effects
+- **[Grove Logo Walk](/knowledge/philosophy/grove-logo-walk)** — The complete logo journey
+- **[Grove Logo Journey](/knowledge/philosophy/grove-logo-journey)** — Logo explorations
+- **[Grove Logo Naming](/knowledge/philosophy/grove-logo-naming-journey)** — Naming the visual identity
+- **[ASCII Effects](/knowledge/philosophy/ascii-effects-naming-journey)** — Text-based visual effects
 
 ### Diagram Mode Series
 
 Seven walks exploring the node-graph editor naming.
 
-1. **[Diagram Mode 1](/docs/philosophy/naming-research/diagram-mode-naming-journey)** — Initial exploration
-2. **[Diagram Mode 2](/docs/philosophy/naming-research/diagram-mode-naming-journey-2)** — Continued refinement
-3. **[Diagram Mode 3](/docs/philosophy/naming-research/diagram-mode-naming-journey-3)** — Further iterations
-4. **[Diagram Mode 4](/docs/philosophy/naming-research/diagram-mode-naming-journey-4)** — Narrowing options
-5. **[Diagram Mode 5](/docs/philosophy/naming-research/diagram-mode-naming-journey-5)** — Testing candidates
-6. **[Diagram Mode 6](/docs/philosophy/naming-research/diagram-mode-naming-journey-6)** — Final candidates
-7. **[Diagram Mode 7](/docs/philosophy/naming-research/diagram-mode-naming-journey-7)** — Resolution
-- **[Node Graph Studio](/docs/philosophy/naming-research/node-graph-studio-naming)** — Related naming work
+1. **[Diagram Mode 1](/knowledge/philosophy/diagram-mode-naming-journey)** — Initial exploration
+2. **[Diagram Mode 2](/knowledge/philosophy/diagram-mode-naming-journey-2)** — Continued refinement
+3. **[Diagram Mode 3](/knowledge/philosophy/diagram-mode-naming-journey-3)** — Further iterations
+4. **[Diagram Mode 4](/knowledge/philosophy/diagram-mode-naming-journey-4)** — Narrowing options
+5. **[Diagram Mode 5](/knowledge/philosophy/diagram-mode-naming-journey-5)** — Testing candidates
+6. **[Diagram Mode 6](/knowledge/philosophy/diagram-mode-naming-journey-6)** — Final candidates
+7. **[Diagram Mode 7](/knowledge/philosophy/diagram-mode-naming-journey-7)** — Resolution
+- **[Node Graph Studio](/knowledge/philosophy/node-graph-studio-naming)** — Related naming work
 
 ### Research & Historical
 
 Background research and naming history.
 
-- **[Naming History Research](/docs/philosophy/naming-research/naming-history-research)** — How naming evolved
-- **[Internal Names Research](/docs/philosophy/naming-research/internal-names-research)** — Internal codenames
+- **[Naming History Research](/knowledge/philosophy/naming-history-research)** — How naming evolved
+- **[Internal Names Research](/knowledge/philosophy/internal-names-research)** — Internal codenames
 
 ---
 
