@@ -12,6 +12,7 @@ keywords:
   - privacy
   - ai
   - wisp
+  - scribe
   - flow
   - thorn
   - petal
@@ -21,6 +22,7 @@ keywords:
   - inference
   - data protection
   - image moderation
+  - voice transcription
 order: 3
 ---
 
@@ -44,7 +46,9 @@ All AI features in Grove route through **Lumen**, our unified AI gateway. Lumen 
 
 **Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
 
-**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. When you use AI features within Flow—like Wisp's grammar checks or Fireside conversations—those requests route through Lumen with full ZDR. Your drafts live in your browser until you publish; Flow never sends your writing to AI servers without your explicit action.
+**Scribe** (voice transcription) lets you speak your posts into existence. Your voice is recorded in your browser, sent to Cloudflare's Whisper models for transcription, and the audio is immediately discarded—only the text comes back. In Draft mode, an additional AI step structures your rambling into a clean draft with auto-generated Vines. PII (emails, phone numbers) is automatically scrubbed from the output. We never store your voice recordings.
+
+**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. When you use AI features within Flow—like Wisp's grammar checks, Fireside conversations, or Scribe's voice input—those requests route through Lumen with full ZDR. Your drafts live in your browser until you publish; Flow never sends your writing to AI servers without your explicit action.
 
 **Thorn** (text content moderation) reviews blog posts and written content against community guidelines. The post content is processed, a decision is made, and the content is deleted. We keep the outcome (pass, flag, or escalate) but never the words themselves.
 
@@ -61,6 +65,8 @@ In each case: processing happens, results return, content vanishes.
 All AI requests flow through Lumen, Grove's AI gateway. Lumen strips personally identifiable information before content leaves our servers and routes requests only to providers that guarantee zero retention.
 
 **For text processing (Wisp, Fireside, Flow, Thorn, Forage):** OpenRouter, which enforces ZDR across all models we access through it.
+
+**For voice transcription (Scribe):** Cloudflare Workers AI Whisper models, processed at the edge with no audio retention.
 
 **For image processing (Petal):** Together.ai and FAL.ai. Both support ZDR for vision models.
 
@@ -79,6 +85,7 @@ ZDR applies to the AI providers. Grove itself keeps minimal metadata for the fea
 
 - Wisp: request timestamp, token usage, cost
 - Fireside: only whether a post was drafted with Fireside assistance (a simple flag, not the conversation)
+- Scribe: request timestamp, audio duration, tier—never the audio or transcript content
 - Flow: request metadata only, no content
 - Thorn: moderation decision (pass/flag/escalate), timestamp
 - Petal: moderation decision (pass/block), timestamp
@@ -101,6 +108,7 @@ For technically-minded users: you can verify our ZDR policies in these specs:
 
 - [Lumen spec](/knowledge/specs/lumen-spec) (Section: Security Considerations—the AI gateway all features use)
 - [Wisp spec](/knowledge/specs/wisp-spec) (Section: Privacy First, Model Strategy, Fireside Data Handling)
+- [Scribe spec](/knowledge/specs/scribe-voice-transcription-spec) (Section: Privacy, PII Scrubbing)
 - [Flow spec](/knowledge/specs/flow-spec) (Section: Fireside Mode)
 - [Thorn spec](/knowledge/specs/thorn-spec) (Section: Inference Provider Requirements)
 - [Petal spec](/knowledge/specs/petal-spec) (Section: Data Lifecycle, Inference Provider Requirements)
@@ -111,10 +119,13 @@ The providers' own documentation confirms their ZDR policies:
 **Text processing:**
 - [OpenRouter Data Policy](https://openrouter.ai/privacy) (our gateway for all text AI features)
 
+**Voice transcription:**
+- [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/models/whisper/) (Whisper models with edge processing)
+
 **Image processing:**
 - [Together.ai Privacy](https://www.together.ai/privacy)
 - [FAL.ai Security](https://fal.ai/security)
 
 ---
 
-*Your words and images pass through. They don't stay behind.*
+*Your words, your voice, your images pass through. They don't stay behind.*
