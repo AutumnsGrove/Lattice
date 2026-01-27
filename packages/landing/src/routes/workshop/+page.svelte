@@ -71,10 +71,7 @@
 					integration: 'Powers all Grove properties',
 					github: 'https://github.com/AutumnsGrove/GroveEngine',
 					spec: '/knowledge/specs/lattice-spec',
-					whatIsLink: '/knowledge/help/what-is-lattice',
-					subComponents: [
-						{ name: 'Vines', icon: 'layoutlist', description: 'Gutter link system' }
-					]
+					whatIsLink: '/knowledge/help/what-is-lattice'
 				},
 				{
 					name: 'Heartwood',
@@ -146,7 +143,8 @@
 					subComponents: [
 						{ name: 'Zen', icon: 'focus', description: 'Distraction-free mode' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
-						{ name: 'Draft', icon: 'save', description: 'Auto-save to localStorage' }
+						{ name: 'Draft', icon: 'save', description: 'Auto-save to localStorage' },
+						{ name: 'Vines', icon: 'layoutlist', description: 'Margin notes', href: '/knowledge/help/what-are-vines' }
 					]
 				},
 				{
@@ -421,6 +419,7 @@
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Raw', icon: 'zap', description: '1:1 transcription' },
 						{ name: 'Draft', icon: 'sparkles', description: 'AI-structured output' },
+						{ name: 'Vines', icon: 'layoutlist', description: 'Auto-generated margin notes', href: '/knowledge/help/what-are-vines' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
 					]
 				},

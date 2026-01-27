@@ -35,11 +35,13 @@ Scribe is voice transcription for Grove. Press and hold a button, say what you'r
 
 ## Wait, what are Vines?
 
-Vines are sidebar annotations—little notes that live in the margin next to your post. They add context without interrupting the flow of your writing. (Think marginalia, footnotes, or that friend who whispers helpful asides.)
+[Vines](/knowledge/help/what-are-vines) are sidebar annotations—little notes that live in the margin next to your post. They add context without interrupting the flow of your writing. (Think marginalia, footnotes, or that friend who whispers helpful asides.)
 
 Creating Vines manually is tedious. You have to add them one by one, anchor them to the right spot, write the content. Most people don't bother.
 
 Draft mode changes that. When Scribe detects an aside in your speech—phrases like "by the way," "quick tangent," or "this reminds me"—it pulls that aside out of the main text and turns it into a Vine automatically. Your tangents become margin notes without any extra work.
+
+For more on Vines and how they work, see [What are Vines?](/knowledge/help/what-are-vines).
 
 ## How it works
 
