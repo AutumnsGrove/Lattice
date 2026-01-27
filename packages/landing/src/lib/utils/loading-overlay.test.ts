@@ -141,8 +141,13 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should disable segment transforms for reduced motion", () => {
-      expect(appHtml).toContain(".vine-seg");
-      // Reduced motion should disable transforms on segments
+      // Verify that reduced motion CSS disables transforms on .vine-seg
+      const reducedMotionMatch = appHtml.match(
+        /@media \(prefers-reduced-motion: reduce\)[^@]+/,
+      );
+      expect(reducedMotionMatch).not.toBeNull();
+      expect(reducedMotionMatch![0]).toContain(".vine-seg");
+      expect(reducedMotionMatch![0]).toContain("transform: none !important");
     });
 
     it("should have noscript fallback for users without JavaScript", () => {

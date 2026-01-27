@@ -24,7 +24,7 @@
 				// Trigger the parting animation
 				overlay.classList.add('grove-parting');
 				// Remove after animation completes (~3s for segmented animation)
-				setTimeout(() => overlay.remove(), 3000);
+				setTimeout(() => overlay.remove(), 3500);
 			}
 		}
 	});

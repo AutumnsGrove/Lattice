@@ -939,11 +939,11 @@
           if (o && !o.classList.contains('grove-parting')) {
             o.classList.add('grove-parting');
           }
-          // ALWAYS remove overlay after animation completes (~3s for segmented animation)
-          // This ensures cleanup even if Svelte hydration is delayed
+          // ALWAYS remove overlay after animation completes
+          // Max delay (820ms) + duration (2500ms) = 3320ms; use 3500ms for safety buffer
           setTimeout(function() {
             if (o) o.remove();
-          }, 3000);
+          }, 3500);
         }, 100);
       });
     </script>
