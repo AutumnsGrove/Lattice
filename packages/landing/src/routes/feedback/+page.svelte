@@ -2,6 +2,9 @@
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { TurnstileWidget } from '@autumnsgrove/groveengine/ui/forms';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
+	import { Smile, Meh, Frown } from 'lucide-svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -36,26 +39,17 @@
 	<meta name="description" content="Share your thoughts, ideas, or feedback about Grove. Your voice matters here." />
 </svelte:head>
 
-<div class="min-h-screen bg-cream py-12 px-4">
+<Header />
+
+<main class="min-h-screen py-12 px-4">
 	<div class="max-w-2xl mx-auto">
-		<!-- Header -->
+		<!-- Page Header -->
 		<div class="text-center mb-8">
-			<a href="/" class="inline-block mb-6 text-grove-600 hover:text-grove-700 transition-colors" aria-label="Go to home">
-				<svg class="w-12 h-12" viewBox="0 0 100 100" fill="none">
-					<path
-						d="M50 10C35 25 20 35 20 55C20 75 33 90 50 90C67 90 80 75 80 55C80 35 65 25 50 10Z"
-						fill="currentColor"
-						fill-opacity="0.3"
-					/>
-					<path
-						d="M50 32C44 40 38 46 38 55C38 64 43 70 50 70C57 70 62 64 62 55C62 46 56 40 50 32Z"
-						fill="currentColor"
-					/>
-					<path d="M50 70V85" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-				</svg>
-			</a>
-			<h1 class="text-3xl font-serif text-bark mb-3">Share Your Thoughts</h1>
-			<p class="text-lg text-bark/70 font-sans max-w-xl mx-auto">
+			<div class="inline-block mb-6">
+				<Logo class="w-16 h-16" season={seasonStore.current} />
+			</div>
+			<h1 class="text-3xl font-serif text-foreground mb-3">Share Your Thoughts</h1>
+			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
 				Grove is built for you. Whether it's a bug, an idea, or just a hello—your voice matters here. I read everything personally.
 			</p>
 		</div>
@@ -121,8 +115,8 @@
 			>
 				<!-- Name (Optional) -->
 				<div class="mb-5">
-					<label for="name" class="block text-sm font-sans font-medium text-bark mb-2">
-						Name <span class="text-bark/40 font-normal">(optional)</span>
+					<label for="name" class="block text-sm font-sans font-medium text-foreground mb-2">
+						Name <span class="text-foreground/40 font-normal">(optional)</span>
 					</label>
 					<input
 						type="text"
@@ -130,15 +124,15 @@
 						name="name"
 						bind:value={name}
 						placeholder="How should I address you?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-bark placeholder-bark/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
 
 				<!-- Email (Optional) -->
 				<div class="mb-5">
-					<label for="email" class="block text-sm font-sans font-medium text-bark mb-2">
-						Email <span class="text-bark/40 font-normal">(optional - if you'd like a reply)</span>
+					<label for="email" class="block text-sm font-sans font-medium text-foreground mb-2">
+						Email <span class="text-foreground/40 font-normal">(optional - if you'd like a reply)</span>
 					</label>
 					<input
 						type="email"
@@ -146,15 +140,15 @@
 						name="email"
 						bind:value={email}
 						placeholder="your.email@example.com"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-bark placeholder-bark/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
 
 				<!-- Subject (Optional) -->
 				<div class="mb-5">
-					<label for="subject" class="block text-sm font-sans font-medium text-bark mb-2">
-						Subject <span class="text-bark/40 font-normal">(optional)</span>
+					<label for="subject" class="block text-sm font-sans font-medium text-foreground mb-2">
+						Subject <span class="text-foreground/40 font-normal">(optional)</span>
 					</label>
 					<input
 						type="text"
@@ -162,42 +156,42 @@
 						name="subject"
 						bind:value={subject}
 						placeholder="What's this about?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-bark placeholder-bark/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
 
 				<!-- Sentiment (Optional) -->
 				<div class="mb-5">
-					<label class="block text-sm font-sans font-medium text-bark mb-3">
-						How are you feeling? <span class="text-bark/40 font-normal">(optional)</span>
+					<label class="block text-sm font-sans font-medium text-foreground mb-3">
+						How are you feeling? <span class="text-foreground/40 font-normal">(optional)</span>
 					</label>
 					<div class="flex gap-3">
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'positive' ? null : 'positive'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 text-green-700' : 'border-grove-200 bg-white/50 text-bark/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 text-green-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
 						>
-							<span class="text-xl">😊</span>
+							<Smile class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Positive</span>
 						</button>
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'neutral' ? null : 'neutral'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-grove-200 bg-white/50 text-bark/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
 						>
-							<span class="text-xl">😐</span>
+							<Meh class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Neutral</span>
 						</button>
 						<button
 							type="button"
 							onclick={() => sentiment = sentiment === 'negative' ? null : 'negative'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-grove-200 bg-white/50 text-bark/60 hover:border-grove-300'}"
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
 						>
-							<span class="text-xl">😟</span>
+							<Frown class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Concern</span>
 						</button>
 					</div>
@@ -206,7 +200,7 @@
 
 				<!-- Message (Required) -->
 				<div class="mb-5">
-					<label for="message" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="message" class="block text-sm font-sans font-medium text-foreground mb-2">
 						Your thoughts <span class="text-red-600">*</span>
 					</label>
 					<textarea
@@ -218,12 +212,12 @@
 						required
 						minlength="10"
 						maxlength="2000"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-bark placeholder-bark/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
 						disabled={submitting}
 					></textarea>
 					<div class="flex justify-between items-center mt-2 text-xs font-sans">
-						<span class="text-bark/50">At least 10 characters</span>
-						<span class="{isValidLength ? 'text-grove-600' : charCount > 2000 ? 'text-red-600' : 'text-bark/50'}">
+						<span class="text-foreground/50">At least 10 characters</span>
+						<span class="{isValidLength ? 'text-grove-600' : charCount > 2000 ? 'text-red-600' : 'text-foreground/50'}">
 							{charCount}/2000
 						</span>
 					</div>
@@ -258,8 +252,10 @@
 		</GlassCard>
 
 		<!-- Footer Note -->
-		<p class="text-center text-sm text-bark/50 font-sans mt-6">
-			You can also email <a href="mailto:feedback@grove.place" class="text-grove-600 hover:text-grove-700 underline">feedback@grove.place</a> directly.
+		<p class="text-center text-sm text-foreground-subtle font-sans mt-6">
+			You can also email <a href="mailto:feedback@grove.place" class="text-primary hover:text-primary/80 underline">feedback@grove.place</a> directly.
 		</p>
 	</div>
-</div>
+</main>
+
+<Footer />
