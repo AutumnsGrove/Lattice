@@ -62,8 +62,8 @@
 
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">Blog Posts</h1>
-      <p class="m-0 text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">{data.posts.length} posts</p>
+      <h1 class="m-0 mb-1 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">Blog Posts</h1>
+      <p class="m-0 text-[#555] dark:text-[#b0b0b0] transition-colors">{data.posts.length} posts</p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/admin/blog/new'}>
       + New Post
@@ -74,24 +74,24 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
-          <th class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-[#333] dark:text-[#f0f0f0] transition-[background-color,color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
         {#each data.posts as post (post.slug)}
           <tr>
-            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline hover:underline transition-colors">
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:px-2 max-md:py-3">
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors">
                 {post.title}
               </a>
               {#if post.description}
-                <p class="mt-1 mb-0 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">{post.description}</p>
+                <p class="mt-1 mb-0 text-xs text-[#555] dark:text-[#b0b0b0] transition-colors">{post.description}</p>
               {/if}
             </td>
-            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] text-sm transition-[border-color,color] max-md:hidden">
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-[#555] dark:text-[#b0b0b0] text-sm transition-[border-color,color] max-md:hidden">
               {#if post.status === 'published' && post.date}
                 {formatDate(post.date)}
               {:else if post.status === 'draft'}
@@ -100,7 +100,7 @@
                 <span class="text-gray-400 dark:text-gray-500">—</span>
               {/if}
             </td>
-            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] transition-[border-color] max-md:hidden">
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:hidden">
               {#if post.tags.length > 0}
                 <div class="flex flex-wrap gap-1">
                   {#each post.tags as tag (tag)}
@@ -108,12 +108,12 @@
                   {/each}
                 </div>
               {:else}
-                <span class="text-[var(--color-text-subtle)] dark:text-[var(--color-text-subtle-dark)] transition-colors">-</span>
+                <span class="text-[#666] dark:text-[#9ca3af] transition-colors">-</span>
               {/if}
             </td>
-            <td class="p-4 text-left border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
-              <a href="/admin/blog/edit/{post.slug}" class="text-[var(--color-primary)] dark:text-[var(--color-primary-light)] no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
+            <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
+              <a href="/blog/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              <a href="/admin/blog/edit/{post.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
               <button
                 onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
                 disabled={deleting}
@@ -127,7 +127,7 @@
           </tr>
         {:else}
           <tr>
-            <td colspan="4" class="text-center text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] py-12 px-4 transition-colors">
+            <td colspan="4" class="text-center text-[#555] dark:text-[#b0b0b0] py-12 px-4 transition-colors">
               No blog posts yet. Create your first post!
             </td>
           </tr>

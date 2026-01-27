@@ -158,10 +158,10 @@
 <div class="max-w-screen-2xl mx-auto">
   <header class="flex justify-between items-start mb-6 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+      <h1 class="m-0 mb-1 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">
         Create New Page
       </h1>
-      <p class="m-0 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">
+      <p class="m-0 text-sm text-[#555] dark:text-[#b0b0b0] transition-colors">
         Add a new page to your site
       </p>
     </div>
@@ -179,7 +179,7 @@
     <!-- Page Details Section -->
     <GlassCard variant="default" class="details-section">
       <div class="details-content">
-        <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+        <h2 class="m-0 mb-4 text-xl text-[#333] dark:text-[#f0f0f0] transition-colors">
           Page Details
         </h2>
 
@@ -196,7 +196,7 @@
         <div class="form-group">
           <label for="slug">
             URL Slug
-            <span class="text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] ml-2">
+            <span class="text-xs text-[#555] dark:text-[#b0b0b0] ml-2">
               (Auto-generated from title)
             </span>
           </label>
@@ -220,7 +220,7 @@
           {#if slugError}
             <p class="text-sm text-red-500 mt-1">{slugError}</p>
           {:else}
-            <p class="text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] mt-1">
+            <p class="text-xs text-[#555] dark:text-[#b0b0b0] mt-1">
               Preview: /{slug || 'your-page-slug'}
             </p>
           {/if}
@@ -295,7 +295,7 @@
 
     <!-- Markdown Editor -->
     <GlassCard variant="default" class="editor-section">
-      <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+      <h2 class="m-0 mb-4 text-xl text-[#333] dark:text-[#f0f0f0] transition-colors">
         Content <span class="text-red-500">*</span>
       </h2>
       <MarkdownEditor

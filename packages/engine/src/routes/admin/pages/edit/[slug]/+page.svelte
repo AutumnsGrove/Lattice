@@ -172,10 +172,10 @@
 <div class="max-w-screen-2xl mx-auto">
   <header class="flex justify-between items-start mb-6 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
-      <h1 class="m-0 mb-1 text-3xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+      <h1 class="m-0 mb-1 text-3xl text-[#333] dark:text-[#f0f0f0] transition-colors">
         Edit Page: {data.page.title}
       </h1>
-      <p class="m-0 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-subtle-dark)] transition-colors">
+      <p class="m-0 text-sm text-[#555] dark:text-[#b0b0b0] transition-colors">
         Slug: {slug}
         {#if hasUnsavedChanges}
           <span class="unsaved-indicator">• Unsaved changes</span>
@@ -196,7 +196,7 @@
     <!-- Page Details Section -->
     <GlassCard variant="default" class="details-section">
       <button class="details-header" onclick={toggleDetailsCollapsed}>
-        <h2 class="m-0 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+        <h2 class="m-0 text-xl text-[#333] dark:text-[#f0f0f0] transition-colors">
           Page Details
         </h2>
         <span class="collapse-icon">{detailsCollapsed ? '▼' : '▲'}</span>
@@ -284,7 +284,7 @@
 
     <!-- Markdown Editor -->
     <GlassCard variant="default" class="editor-section">
-      <h2 class="m-0 mb-4 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)] transition-colors">
+      <h2 class="m-0 mb-4 text-xl text-[#333] dark:text-[#f0f0f0] transition-colors">
         Content
       </h2>
       <MarkdownEditor
