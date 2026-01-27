@@ -1,11 +1,11 @@
 ---
 title: Custom Fonts
 description: >-
-  20 curated fonts including accessibility options, with custom upload for
+  10 curated fonts including accessibility options, with custom upload for
   Evergreen
 category: help
 section: customization
-lastUpdated: '2026-01-03'
+lastUpdated: '2026-01-27'
 keywords:
   - fonts
   - typography
