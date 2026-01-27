@@ -14,6 +14,50 @@
         document.documentElement.classList.add("dark");
       }
     </script>
+    <!-- Loading overlay styles (inline for immediate rendering) -->
+    <style id="grove-loading-styles">
+      #grove-loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #122a1a; /* Dark forest green */
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+      }
+
+      /* Light mode background (theme already detected by blocking script) */
+      html:not(.dark) #grove-loading-overlay {
+        background-color: #f0fdf4;
+      }
+
+      html:not(.dark) .grove-loader-bg {
+        fill: #f0fdf4;
+      }
+
+      #grove-loading-overlay.grove-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .grove-loader-logo {
+        width: 80px;
+        height: 80px;
+        animation: grove-breathe 2s ease-in-out infinite;
+      }
+
+      @keyframes grove-breathe {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(0.96); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .grove-loader-logo { animation: none; }
+        #grove-loading-overlay { transition: none; }
+      }
+    </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Grove: a place to Be. Coming soon." />
@@ -57,6 +101,36 @@
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
+    <!-- First Paint Loading Overlay -->
+    <div id="grove-loading-overlay" aria-hidden="true">
+      <svg class="grove-loader-logo" viewBox="-28 -28 156 156" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background circle -->
+        <circle cx="50" cy="50" r="70" fill="#122a1a" class="grove-loader-bg" />
+        <!-- Tree with -12deg rotation (summer palette) -->
+        <g transform="rotate(-12 50 50)">
+          <path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/>
+          <path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/>
+          <path fill="#166534" d="M50 20 L12 50 L50 35 Z"/>
+          <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/>
+          <path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/>
+          <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/>
+          <path fill="#3d2914" d="M50 54 L42 58 L46 100 L50 100 Z"/>
+          <path fill="#5a3f30" d="M50 54 L58 58 L54 100 L50 100 Z"/>
+        </g>
+      </svg>
+    </div>
     <div style="display: contents">%sveltekit.body%</div>
+    <!-- Fallback overlay removal (handles edge cases where Svelte doesn't hydrate) -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var o = document.getElementById('grove-loading-overlay');
+          if (o && !o.classList.contains('grove-hidden')) {
+            o.classList.add('grove-hidden');
+            setTimeout(function() { o.remove(); }, 350);
+          }
+        }, 100);
+      });
+    </script>
   </body>
 </html>
