@@ -3,12 +3,17 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 /**
- * Tests for the Grove entrance animation ("Parting the Vines").
+ * Tests for the Grove entrance animation ("Parting the Vines" v2).
  *
  * These tests verify the structural contract of app.html — ensuring all
  * required elements, classes, and CSS definitions exist for the animation
  * to function correctly. This catches accidental deletions or typos during
  * refactoring without testing implementation details.
+ *
+ * Architecture (v2):
+ * - Layer 3: Individual vine strips (z-index: 100000) with swing animation
+ * - Layer 2: Glass backdrop with blur (z-index: 99999)
+ * - Layer 1: Page content (blurred until parting)
  *
  * The actual animation behavior (timing, easing, visual appearance) is
  * best verified through manual testing or E2E tests with Playwright.
@@ -32,12 +37,19 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toMatch(/grove-loading-overlay[^>]*aria-hidden="true"/);
     });
 
-    it("should have left vine panel", () => {
-      expect(appHtml).toContain('class="grove-vine-panel grove-vine-left"');
+    it("should have glass backdrop layer", () => {
+      expect(appHtml).toContain('id="grove-glass-backdrop"');
     });
 
-    it("should have right vine panel", () => {
-      expect(appHtml).toContain('class="grove-vine-panel grove-vine-right"');
+    it("should have left vine container with strips", () => {
+      expect(appHtml).toContain('class="grove-vine-container grove-vine-left"');
+      expect(appHtml).toContain('class="grove-vine-strip"');
+    });
+
+    it("should have right vine container with strips", () => {
+      expect(appHtml).toContain(
+        'class="grove-vine-container grove-vine-right"',
+      );
     });
 
     it("should have centered logo container", () => {
@@ -54,12 +66,12 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("@keyframes grove-breathe");
     });
 
-    it("should define the left vine parting animation", () => {
-      expect(appHtml).toContain("@keyframes grove-vine-part-left");
+    it("should define the left vine swing animation", () => {
+      expect(appHtml).toContain("@keyframes grove-vine-swing-left");
     });
 
-    it("should define the right vine parting animation", () => {
-      expect(appHtml).toContain("@keyframes grove-vine-part-right");
+    it("should define the right vine swing animation", () => {
+      expect(appHtml).toContain("@keyframes grove-vine-swing-right");
     });
 
     it("should define the logo exit animation", () => {
@@ -72,6 +84,10 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain(".grove-parting .grove-vine-left");
       expect(appHtml).toContain(".grove-parting .grove-vine-right");
       expect(appHtml).toContain(".grove-parting .grove-entrance-logo");
+    });
+
+    it("should have CSS rules for glass backdrop parting", () => {
+      expect(appHtml).toContain(".grove-parting #grove-glass-backdrop");
     });
 
     it("should use forwards fill mode for animations", () => {
@@ -108,10 +124,9 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("#122a1a");
     });
 
-    it("should have gradient vine panel backgrounds with soft edges", () => {
-      // Panels use gradient: solid at outer edge, fades to transparent at inner edge
-      expect(appHtml).toContain("linear-gradient(to right");
-      expect(appHtml).toContain("transparent 100%");
+    it("should have glass backdrop with blur effect", () => {
+      expect(appHtml).toContain("backdrop-filter: blur");
+      expect(appHtml).toContain("-webkit-backdrop-filter: blur");
     });
 
     it("should have light mode styles for logo", () => {
@@ -120,6 +135,10 @@ describe("Grove Entrance Animation", () => {
 
     it("should use light green for light mode logo background", () => {
       expect(appHtml).toContain("#dcfce7");
+    });
+
+    it("should have light mode styles for glass backdrop", () => {
+      expect(appHtml).toContain("html:not(.dark) #grove-glass-backdrop");
     });
   });
 
@@ -140,20 +159,55 @@ describe("Grove Entrance Animation", () => {
     it("should remove overlay after animation completes", () => {
       expect(appHtml).toContain("o.remove()");
     });
+
+    it("should also remove glass backdrop in fallback", () => {
+      expect(appHtml).toContain("getElementById('grove-glass-backdrop')");
+      expect(appHtml).toContain("g.remove()");
+    });
   });
 
-  describe("SVG vine pattern", () => {
-    it("should have embedded SVG data URI for vine patterns", () => {
-      expect(appHtml).toContain("data:image/svg+xml");
+  describe("SVG vine graphics", () => {
+    it("should have inline SVG vine graphics in strips", () => {
+      // Individual SVGs in each vine strip
+      expect(appHtml).toContain('<svg viewBox="0 0 80 1000"');
     });
 
-    it("should use Grove green (#22c55e) in vine pattern", () => {
-      // URL-encoded as %2322c55e
-      expect(appHtml).toContain("%2322c55e");
+    it("should use Grove green (#22c55e) in vine graphics", () => {
+      expect(appHtml).toContain("#22c55e");
     });
 
     it("should have gradient for depth effect", () => {
       expect(appHtml).toContain("linearGradient");
+    });
+
+    it("should have multiple vine strips per side", () => {
+      // Count vine strips - should have 6 per side = 12 total
+      const stripMatches = appHtml.match(/class="grove-vine-strip"/g);
+      expect(stripMatches).not.toBeNull();
+      expect(stripMatches!.length).toBe(12);
+    });
+  });
+
+  describe("swing animation physics", () => {
+    it("should use transform-origin for pendulum effect", () => {
+      expect(appHtml).toContain("transform-origin: top center");
+    });
+
+    it("should use cubic-bezier for natural easing", () => {
+      expect(appHtml).toContain("cubic-bezier(0.4, 0, 0.2, 1)");
+    });
+
+    it("should have staggered animation delays", () => {
+      // Different delays create wave-like parting effect
+      expect(appHtml).toContain("350ms");
+      expect(appHtml).toContain("400ms");
+      expect(appHtml).toContain("450ms");
+    });
+  });
+
+  describe("browser compatibility", () => {
+    it("should have fallback for browsers without backdrop-filter", () => {
+      expect(appHtml).toContain("@supports not (backdrop-filter: blur");
     });
   });
 });
