@@ -10,9 +10,11 @@ import { resolve } from "path";
  * to function correctly. This catches accidental deletions or typos during
  * refactoring without testing implementation details.
  *
- * Architecture (v2):
- * - Layer 3: Individual vine strips (z-index: 100000) with swing animation
- * - Layer 2: Glass backdrop with blur (z-index: 99999)
+ * Architecture (v2.1):
+ * - All elements inside #grove-loading-overlay (z-index: 100000)
+ *   - Logo (z-index: 3) - above vines
+ *   - Vine strips (z-index: 2) - swing animation with pendulum physics
+ *   - Glass backdrop (z-index: 1) - blur effect
  * - Layer 1: Page content (blurred until parting)
  *
  * The actual animation behavior (timing, easing, visual appearance) is
@@ -37,8 +39,14 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toMatch(/grove-loading-overlay[^>]*aria-hidden="true"/);
     });
 
-    it("should have glass backdrop layer", () => {
+    it("should have glass backdrop layer inside overlay", () => {
       expect(appHtml).toContain('id="grove-glass-backdrop"');
+      // Glass backdrop must be inside overlay for CSS selector to work
+      const overlayStart = appHtml.indexOf('id="grove-loading-overlay"');
+      const glassStart = appHtml.indexOf('id="grove-glass-backdrop"');
+      const overlayEnd = appHtml.indexOf("</div>", overlayStart + 1000); // Find closing div well after start
+      expect(glassStart).toBeGreaterThan(overlayStart);
+      expect(glassStart).toBeLessThan(overlayEnd);
     });
 
     it("should have left vine container with strips", () => {
@@ -158,11 +166,7 @@ describe("Grove Entrance Animation", () => {
 
     it("should remove overlay after animation completes", () => {
       expect(appHtml).toContain("o.remove()");
-    });
-
-    it("should also remove glass backdrop in fallback", () => {
-      expect(appHtml).toContain("getElementById('grove-glass-backdrop')");
-      expect(appHtml).toContain("g.remove()");
+      // Glass backdrop is inside overlay, so removing overlay removes glass too
     });
   });
 
@@ -193,15 +197,22 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("transform-origin: top center");
     });
 
-    it("should use cubic-bezier for natural easing", () => {
-      expect(appHtml).toContain("cubic-bezier(0.4, 0, 0.2, 1)");
+    it("should use ease-out for natural easing", () => {
+      // Changed from cubic-bezier to ease-out for slower, more natural pendulum motion
+      expect(appHtml).toContain("ease-out");
     });
 
     it("should have staggered animation delays", () => {
-      // Different delays create wave-like parting effect
-      expect(appHtml).toContain("350ms");
-      expect(appHtml).toContain("400ms");
-      expect(appHtml).toContain("450ms");
+      // Different delays create wave-like parting effect (100ms to 500ms stagger)
+      expect(appHtml).toContain("100ms");
+      expect(appHtml).toContain("180ms");
+      expect(appHtml).toContain("260ms");
+    });
+
+    it("should use pendulum oscillation in keyframes", () => {
+      // Pendulum animation has multiple keyframe stops for natural damped oscillation
+      // Check for the "pullback" phase in keyframes (e.g., 35% { transform: rotate(-28deg) })
+      expect(appHtml).toMatch(/35%\s*\{[^}]*rotate\(-?28deg\)/);
     });
   });
 

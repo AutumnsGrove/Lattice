@@ -16,14 +16,15 @@
 	// in app.html's <script> also triggers removal on window.load in case hydration
 	// fails or is delayed. The fallback checks for .grove-parting before acting,
 	// so whichever fires first "wins" and the other becomes a no-op.
+	// Note: Glass backdrop is now INSIDE the overlay, so removing overlay removes glass too.
 	onMount(() => {
 		if (browser) {
 			const overlay = document.getElementById('grove-loading-overlay');
 			if (overlay) {
 				// Trigger the parting animation
 				overlay.classList.add('grove-parting');
-				// Remove after animation completes (~2s)
-				setTimeout(() => overlay.remove(), 2000);
+				// Remove after animation completes (~3.6s for slower pendulum animation)
+				setTimeout(() => overlay.remove(), 3600);
 			}
 		}
 	});
