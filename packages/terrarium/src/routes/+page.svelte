@@ -27,7 +27,7 @@
 {#if !hasChecked}
 	<!-- Loading state while checking viewport -->
 	<div class="flex items-center justify-center h-full bg-page">
-		<div class="animate-pulse text-foreground-subtle">Loading...</div>
+		<div class="animate-pulse text-foreground-subtle">Preparing canvas...</div>
 	</div>
 {:else if isMobile}
 	<!-- Mobile viewport warning -->
