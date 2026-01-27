@@ -17,16 +17,27 @@
     <!-- Loading overlay styles (inline for immediate rendering) -->
     <style id="grove-loading-styles">
       /* ══════════════════════════════════════════════════════════════
-         GROVE ENTRANCE ANIMATION - "Parting the Vines"
+         GROVE ENTRANCE ANIMATION - "Parting the Vines" v2
+         ══════════════════════════════════════════════════════════════
+
+         THREE-LAYER ARCHITECTURE:
+         ┌─────────────────────────────────────────────┐
+         │  Layer 3: Vine Strips (z-index: 100000)    │
+         │  - Individual DOM elements per vine         │
+         │  - Swing animation with gravity physics     │
+         ├─────────────────────────────────────────────┤
+         │  Layer 2: Glass Backdrop (z-index: 99999)  │
+         │  - Semi-transparent background              │
+         │  - backdrop-filter: blur(12px)              │
+         ├─────────────────────────────────────────────┤
+         │  Layer 1: Page Content (normal flow)        │
+         │  - Visible but blurred until parting        │
+         └─────────────────────────────────────────────┘
          ══════════════════════════════════════════════════════════════ */
 
       #grove-loading-overlay {
         position: fixed;
         inset: 0;
-        /* z-grove-entrance (100000): Semantic z-index from tailwind.preset.js.
-           Must appear above ALL other UI including modals, mobile menus, and
-           any future overlays. This is a first-paint blocking element that
-           MUST cover everything until the app is ready. */
         z-index: 100000;
         display: flex;
         align-items: center;
@@ -35,97 +46,88 @@
       }
 
       /* ─────────────────────────────────────────────────────────────
-         Vine Panels (the curtains that part)
+         Glass Backdrop (Layer 2) - Blurs content behind vines
          ───────────────────────────────────────────────────────────── */
 
-      /* ═══════════════════════════════════════════════════════════════════
-         VINE PATTERN SVG ANATOMY (350×900 viewport)
-         ═══════════════════════════════════════════════════════════════════
-
-         The pattern is dense on the LEFT (panel outer edge) and fades
-         toward the RIGHT (where the two panels meet in center).
-
-         ┌─────────────────────────────────────────────────────────────────┐
-         │  GRADIENTS (in <defs>)                                         │
-         │  ├─ vineGrad: left→right fade (0.85 → 0.25 opacity)            │
-         │  │  Used by main vines flowing outward                         │
-         │  └─ vineGradReverse: right→left fade                           │
-         │     Used by 2 counter-directional vines for organic variety    │
-         ├─────────────────────────────────────────────────────────────────┤
-         │  STRUCTURAL VINES (stroked paths, no fill)                     │
-         │  ├─ 5 main vines: thick (3-4px), flow top→bottom with curves   │
-         │  │  Start at y=-20, exit at y=940 for seamless vertical tile   │
-         │  ├─ 2 counter-directional: flow opposite way (breaks pattern)  │
-         │  ├─ 7 lateral tendrils: connect main vines horizontally        │
-         │  └─ 10 spiral curls: decorative flourishes at vine junctions   │
-         ├─────────────────────────────────────────────────────────────────┤
-         │  LEAVES (filled shapes)                                        │
-         │  ├─ 12 ivy leaves: pointed 3-lobe shapes (Q curves)            │
-         │  │  Signature Grove element, scattered along vine paths        │
-         │  └─ 10 round leaves: rotated ellipses for variety              │
-         ├─────────────────────────────────────────────────────────────────┤
-         │  FERNS (grouped elements with stem + leaflets)                 │
-         │  └─ 4 fern fronds: stem line + 5 alternating ellipse leaflets  │
-         │     Each at different rotation, adds texture and depth         │
-         ├─────────────────────────────────────────────────────────────────┤
-         │  FLOATING SEEDS (tiny circles, very low opacity)               │
-         │  └─ 11 seeds: r=1.5-2.2, opacity 0.22-0.35                     │
-         │     Scattered in negative space, suggests life/motion          │
-         ├─────────────────────────────────────────────────────────────────┤
-         │  FAR ELEMENTS (rightmost, lowest opacity)                      │
-         │  └─ 6 distant leaves/ellipses at 0.18-0.28 opacity             │
-         │     Creates depth illusion as pattern fades toward center      │
-         └─────────────────────────────────────────────────────────────────┘
-
-         TILING: Pattern designed to tile vertically (repeat-y).
-         Vines start above viewport (y < 0) and exit below (y > 900)
-         so seams are invisible.
-
-         COLOR: All elements use #22c55e (grove-500) or #16a34a (grove-600).
-         Depth created through opacity variation (0.18 to 0.85), not color.
-         ═══════════════════════════════════════════════════════════════════ */
-      .grove-vine-panel {
-        --vine-pattern: url("data:image/svg+xml,%3Csvg width='350' height='900' viewBox='0 0 350 900' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='vineGrad' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%2322c55e' stop-opacity='0.85'/%3E%3Cstop offset='100%25' stop-color='%2322c55e' stop-opacity='0.25'/%3E%3C/linearGradient%3E%3ClinearGradient id='vineGradReverse' x1='100%25' y1='0%25' x2='0%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%2316a34a' stop-opacity='0.7'/%3E%3Cstop offset='100%25' stop-color='%2316a34a' stop-opacity='0.3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M-15 -20 C50 60 25 150 70 240 S35 380 85 480 S45 620 95 720 S55 820 40 940' stroke='url(%23vineGrad)' stroke-width='4' opacity='0.8'/%3E%3Cpath d='M-10 80 C60 140 40 220 90 320 S50 450 100 550 S60 680 50 780 S30 860 20 940' stroke='url(%23vineGrad)' stroke-width='3.5' opacity='0.75'/%3E%3Cpath d='M-20 200 C55 260 30 350 80 450 S40 580 70 680 S35 780 25 940' stroke='url(%23vineGrad)' stroke-width='3.2' opacity='0.7'/%3E%3Cpath d='M-5 350 C65 400 45 480 95 560 S55 680 85 760 S50 850 40 940' stroke='url(%23vineGrad)' stroke-width='3' opacity='0.65'/%3E%3Cpath d='M-12 550 C70 600 50 680 100 760 S65 850 55 940' stroke='url(%23vineGrad)' stroke-width='2.8' opacity='0.6'/%3E%3Cpath d='M180 -10 C140 80 160 180 120 280 S155 400 115 500 S145 620 100 720' stroke='url(%23vineGradReverse)' stroke-width='2.5' opacity='0.5'/%3E%3Cpath d='M220 300 C170 380 190 480 140 580 S175 700 130 800 S160 880 140 940' stroke='url(%23vineGradReverse)' stroke-width='2.2' opacity='0.45'/%3E%3Cpath d='M70 240 C120 225 160 260 210 235' stroke='url(%23vineGrad)' stroke-width='2' opacity='0.5'/%3E%3Cpath d='M85 480 C140 465 185 500 240 475' stroke='url(%23vineGrad)' stroke-width='1.8' opacity='0.45'/%3E%3Cpath d='M95 720 C150 705 200 740 260 715' stroke='url(%23vineGrad)' stroke-width='1.8' opacity='0.4'/%3E%3Cpath d='M90 320 C145 340 180 305 230 325' stroke='url(%23vineGrad)' stroke-width='1.6' opacity='0.45'/%3E%3Cpath d='M100 550 C155 570 195 535 250 555' stroke='url(%23vineGrad)' stroke-width='1.5' opacity='0.4'/%3E%3Cpath d='M70 680 C125 660 165 695 220 675' stroke='url(%23vineGrad)' stroke-width='1.5' opacity='0.35'/%3E%3Cpath d='M50 780 C105 800 145 765 200 785' stroke='url(%23vineGrad)' stroke-width='1.4' opacity='0.35'/%3E%3Cpath d='M70 240 Q95 220 108 195 Q118 170 105 158 Q90 150 78 165' stroke='%2322c55e' stroke-width='1.3' opacity='0.55'/%3E%3Cpath d='M85 480 Q110 460 123 435 Q133 408 118 398 Q102 392 92 408' stroke='%2322c55e' stroke-width='1.2' opacity='0.5'/%3E%3Cpath d='M95 720 Q120 700 133 675 Q143 648 128 638 Q112 632 102 648' stroke='%2322c55e' stroke-width='1.2' opacity='0.45'/%3E%3Cpath d='M90 320 Q115 300 125 275 Q132 252 118 245 Q105 242 98 258' stroke='%2322c55e' stroke-width='1.1' opacity='0.5'/%3E%3Cpath d='M100 550 Q125 530 135 505 Q142 480 128 472 Q115 468 108 485' stroke='%2322c55e' stroke-width='1.1' opacity='0.45'/%3E%3Cpath d='M65 400 Q50 420 55 445 Q65 468 85 458' stroke='%2322c55e' stroke-width='1' opacity='0.45'/%3E%3Cpath d='M75 620 Q60 640 65 665 Q75 688 95 678' stroke='%2322c55e' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M55 820 Q40 840 45 865 Q55 888 75 878' stroke='%2322c55e' stroke-width='0.9' opacity='0.35'/%3E%3Cpath d='M120 280 Q100 260 80 265 Q62 275 72 295' stroke='%2322c55e' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M140 580 Q120 560 100 565 Q82 575 92 595' stroke='%2322c55e' stroke-width='1' opacity='0.35'/%3E%3C/g%3E%3Cg fill='%2322c55e'%3E%3Cpath d='M55 180 Q78 150 68 122 Q55 152 32 165 Q55 178 55 180Z' opacity='0.65'/%3E%3Cpath d='M75 300 Q98 270 88 242 Q75 272 52 285 Q75 298 75 300Z' opacity='0.6'/%3E%3Cpath d='M65 420 Q88 390 78 362 Q65 392 42 405 Q65 418 65 420Z' opacity='0.55'/%3E%3Cpath d='M85 540 Q108 510 98 482 Q85 512 62 525 Q85 538 85 540Z' opacity='0.55'/%3E%3Cpath d='M70 660 Q93 630 83 602 Q70 632 47 645 Q70 658 70 660Z' opacity='0.5'/%3E%3Cpath d='M80 780 Q103 750 93 722 Q80 752 57 765 Q80 778 80 780Z' opacity='0.45'/%3E%3Cpath d='M60 870 Q83 840 73 812 Q60 842 37 855 Q60 868 60 870Z' opacity='0.4'/%3E%3Cpath d='M120 260 Q140 235 132 212 Q120 238 102 248 Q120 258 120 260Z' opacity='0.45'/%3E%3Cpath d='M145 500 Q165 475 157 452 Q145 478 127 488 Q145 498 145 500Z' opacity='0.4'/%3E%3Cpath d='M130 740 Q150 715 142 692 Q130 718 112 728 Q130 738 130 740Z' opacity='0.35'/%3E%3Cpath d='M155 380 Q175 355 167 332 Q155 358 137 368 Q155 378 155 380Z' opacity='0.38'/%3E%3Cpath d='M140 620 Q160 595 152 572 Q140 598 122 608 Q140 618 140 620Z' opacity='0.35'/%3E%3Cellipse cx='40' cy='230' rx='12' ry='18' transform='rotate(-25 40 230)' opacity='0.55'/%3E%3Cellipse cx='55' cy='370' rx='11' ry='16' transform='rotate(-30 55 370)' opacity='0.5'/%3E%3Cellipse cx='50' cy='510' rx='11' ry='16' transform='rotate(-20 50 510)' opacity='0.45'/%3E%3Cellipse cx='65' cy='650' rx='10' ry='15' transform='rotate(-28 65 650)' opacity='0.45'/%3E%3Cellipse cx='45' cy='750' rx='10' ry='15' transform='rotate(-22 45 750)' opacity='0.4'/%3E%3Cellipse cx='55' cy='850' rx='9' ry='14' transform='rotate(-18 55 850)' opacity='0.35'/%3E%3Cellipse cx='110' cy='330' rx='8' ry='12' transform='rotate(-35 110 330)' opacity='0.4'/%3E%3Cellipse cx='125' cy='570' rx='8' ry='12' transform='rotate(-32 125 570)' opacity='0.35'/%3E%3Cellipse cx='115' cy='700' rx='7' ry='11' transform='rotate(-28 115 700)' opacity='0.32'/%3E%3Cellipse cx='100' cy='830' rx='7' ry='11' transform='rotate(-25 100 830)' opacity='0.3'/%3E%3Cg transform='translate(30 100) rotate(-15)' opacity='0.6'%3E%3Cpath d='M0,0 L0,-45' stroke='%2322c55e' stroke-width='0.9' fill='none'/%3E%3Cellipse cx='-6' cy='-10' rx='5' ry='8' transform='rotate(-30 -6 -10)'/%3E%3Cellipse cx='6' cy='-18' rx='5' ry='8' transform='rotate(30 6 -18)'/%3E%3Cellipse cx='-5' cy='-26' rx='4.5' ry='7' transform='rotate(-30 -5 -26)'/%3E%3Cellipse cx='5' cy='-34' rx='4.5' ry='7' transform='rotate(30 5 -34)'/%3E%3Cellipse cx='0' cy='-42' rx='4' ry='6'/%3E%3C/g%3E%3Cg transform='translate(45 340) rotate(-25)' opacity='0.5'%3E%3Cpath d='M0,0 L0,-42' stroke='%2322c55e' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='-6' cy='-9' rx='4.5' ry='7' transform='rotate(-28 -6 -9)'/%3E%3Cellipse cx='6' cy='-17' rx='4.5' ry='7' transform='rotate(28 6 -17)'/%3E%3Cellipse cx='-5' cy='-25' rx='4' ry='6' transform='rotate(-28 -5 -25)'/%3E%3Cellipse cx='5' cy='-33' rx='4' ry='6' transform='rotate(28 5 -33)'/%3E%3Cellipse cx='0' cy='-40' rx='3.5' ry='5.5'/%3E%3C/g%3E%3Cg transform='translate(60 580) rotate(-20)' opacity='0.45'%3E%3Cpath d='M0,0 L0,-40' stroke='%2322c55e' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='-5' cy='-8' rx='4' ry='6.5' transform='rotate(-25 -5 -8)'/%3E%3Cellipse cx='5' cy='-16' rx='4' ry='6.5' transform='rotate(25 5 -16)'/%3E%3Cellipse cx='-4' cy='-24' rx='3.5' ry='6' transform='rotate(-25 -4 -24)'/%3E%3Cellipse cx='4' cy='-32' rx='3.5' ry='6' transform='rotate(25 4 -32)'/%3E%3C/g%3E%3Cg transform='translate(35 800) rotate(-12)' opacity='0.4'%3E%3Cpath d='M0,0 L0,-38' stroke='%2322c55e' stroke-width='0.7' fill='none'/%3E%3Cellipse cx='-5' cy='-8' rx='4' ry='6' transform='rotate(-22 -5 -8)'/%3E%3Cellipse cx='5' cy='-15' rx='4' ry='6' transform='rotate(22 5 -15)'/%3E%3Cellipse cx='-4' cy='-23' rx='3.5' ry='5.5' transform='rotate(-22 -4 -23)'/%3E%3Cellipse cx='4' cy='-31' rx='3.5' ry='5.5' transform='rotate(22 4 -31)'/%3E%3C/g%3E%3Ccircle cx='95' cy='150' r='2' opacity='0.35'/%3E%3Ccircle cx='130' cy='220' r='1.8' opacity='0.3'/%3E%3Ccircle cx='85' cy='290' r='2.2' opacity='0.32'/%3E%3Ccircle cx='150' cy='420' r='1.5' opacity='0.28'/%3E%3Ccircle cx='105' cy='480' r='2' opacity='0.3'/%3E%3Ccircle cx='170' cy='560' r='1.8' opacity='0.25'/%3E%3Ccircle cx='90' cy='600' r='2' opacity='0.3'/%3E%3Ccircle cx='140' cy='680' r='1.5' opacity='0.25'/%3E%3Ccircle cx='75' cy='720' r='2.2' opacity='0.28'/%3E%3Ccircle cx='160' cy='800' r='1.8' opacity='0.22'/%3E%3Ccircle cx='110' cy='860' r='2' opacity='0.25'/%3E%3Cpath d='M200 250 Q220 228 212 205 Q200 228 182 240 Q200 248 200 250Z' opacity='0.28'/%3E%3Cpath d='M220 490 Q240 468 232 445 Q220 468 202 480 Q220 488 220 490Z' opacity='0.25'/%3E%3Cpath d='M190 730 Q210 708 202 685 Q190 708 172 720 Q190 728 190 730Z' opacity='0.22'/%3E%3Cellipse cx='210' cy='350' rx='6' ry='10' transform='rotate(-40 210 350)' opacity='0.22'/%3E%3Cellipse cx='230' cy='600' rx='6' ry='10' transform='rotate(-35 230 600)' opacity='0.2'/%3E%3Cellipse cx='200' cy='820' rx='5' ry='9' transform='rotate(-30 200 820)' opacity='0.18'/%3E%3C/g%3E%3C/svg%3E");
-        position: absolute;
-        top: 0;
-        height: 100%;
-        width: 60vw; /* Wider overlap creates solid wall, covers logo fully at start */
-        /* Layered backgrounds: vines ON TOP, gradient underneath.
-           The gradient provides the soft-edge fade; vines render crisp on top. */
-        background-image:
-          var(--vine-pattern),
-          linear-gradient(to right,
-            rgba(18, 42, 26, 0.92) 0%,
-            rgba(18, 42, 26, 0.92) 80%,
-            rgba(18, 42, 26, 0.5) 92%,
-            transparent 100%
-          );
-        background-size: auto 100%, 100% 100%;
-        background-repeat: repeat-y, no-repeat;
-        will-change: transform;
-        pointer-events: auto;
+      #grove-glass-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: rgba(30, 30, 30, 0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: opacity 0.8s ease-out;
+        pointer-events: none;
       }
 
-      html:not(.dark) .grove-vine-panel {
-        background-image:
-          var(--vine-pattern),
-          linear-gradient(to right,
-            rgba(220, 252, 231, 0.94) 0%,
-            rgba(220, 252, 231, 0.94) 80%,
-            rgba(220, 252, 231, 0.5) 92%,
-            transparent 100%
-          );
+      html:not(.dark) #grove-glass-backdrop {
+        background: rgba(255, 255, 255, 0.55);
+      }
+
+      .grove-parting #grove-glass-backdrop {
+        opacity: 0;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Vine Containers (hold the swinging strips)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-vine-container {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 50vw;
+        display: flex;
+        overflow: hidden;
+        pointer-events: auto;
       }
 
       .grove-vine-left {
         left: 0;
-        background-position: right center, 0 0;
+        justify-content: flex-end;
       }
 
       .grove-vine-right {
         right: 0;
-        background-position: left center, 0 0;
-        transform: scaleX(-1);
+        justify-content: flex-start;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Individual Vine Strips (the magic happens here)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-vine-strip {
+        position: relative;
+        width: 80px;
+        height: 120vh; /* Extra height for rotation overhang */
+        flex-shrink: 0;
+        transform-origin: top center;
+        will-change: transform, opacity;
+      }
+
+      /* SVG fills the strip */
+      .grove-vine-strip svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Organic variation in strip widths */
+      .grove-vine-strip:nth-child(1) { width: 85px; }
+      .grove-vine-strip:nth-child(2) { width: 75px; }
+      .grove-vine-strip:nth-child(3) { width: 90px; }
+      .grove-vine-strip:nth-child(4) { width: 70px; }
+      .grove-vine-strip:nth-child(5) { width: 80px; }
+      .grove-vine-strip:nth-child(6) { width: 75px; }
+
+      /* Slight initial rotation for organic feel */
+      .grove-vine-strip:nth-child(odd) {
+        transform: rotate(1deg);
+      }
+      .grove-vine-strip:nth-child(even) {
+        transform: rotate(-1deg);
       }
 
       /* ─────────────────────────────────────────────────────────────
@@ -134,7 +136,7 @@
 
       .grove-entrance-logo {
         position: relative;
-        z-index: 1;
+        z-index: 100001;
       }
 
       .grove-loader-logo {
@@ -153,17 +155,45 @@
       }
 
       /* ─────────────────────────────────────────────────────────────
-         Parting Animation Keyframes
+         Swing Animation Keyframes (pendulum/gravity physics)
+         ─────────────────────────────────────────────────────────────
+
+         The cubic-bezier(0.4, 0, 0.2, 1) creates "ease-out" feel:
+         - Fast initial swing (gravity pull)
+         - Gentle deceleration at the end
+
+         Rotation goes to 95deg (past 90) for slight overshoot,
+         creating more natural momentum feel.
          ───────────────────────────────────────────────────────────── */
 
-      @keyframes grove-vine-part-left {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-100%); }
+      @keyframes grove-vine-swing-left {
+        0% {
+          transform: rotate(var(--vine-start-rotation, 0deg));
+          opacity: 1;
+        }
+        70% {
+          transform: rotate(-88deg);
+          opacity: 1;
+        }
+        100% {
+          transform: rotate(-95deg);
+          opacity: 0;
+        }
       }
 
-      @keyframes grove-vine-part-right {
-        0% { transform: translateX(0) scaleX(-1); }
-        100% { transform: translateX(100%) scaleX(-1); }
+      @keyframes grove-vine-swing-right {
+        0% {
+          transform: rotate(var(--vine-start-rotation, 0deg));
+          opacity: 1;
+        }
+        70% {
+          transform: rotate(88deg);
+          opacity: 1;
+        }
+        100% {
+          transform: rotate(95deg);
+          opacity: 0;
+        }
       }
 
       @keyframes grove-logo-exit {
@@ -173,14 +203,51 @@
 
       /* ─────────────────────────────────────────────────────────────
          Parting State (triggered by adding .grove-parting class)
+         ─────────────────────────────────────────────────────────────
+
+         Staggered delays create wave-like parting effect:
+         - Center vines (higher index) start first
+         - Outer vines follow with increasing delay
          ───────────────────────────────────────────────────────────── */
 
-      .grove-parting .grove-vine-left {
-        animation: grove-vine-part-left 1000ms cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      /* Left vines swing left - center-out stagger */
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) {
+        animation: grove-vine-swing-left 1.1s cubic-bezier(0.4, 0, 0.2, 1) 350ms forwards;
+      }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) {
+        animation: grove-vine-swing-left 1.15s cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) {
+        animation: grove-vine-swing-left 1.2s cubic-bezier(0.4, 0, 0.2, 1) 450ms forwards;
+      }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) {
+        animation: grove-vine-swing-left 1.25s cubic-bezier(0.4, 0, 0.2, 1) 500ms forwards;
+      }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) {
+        animation: grove-vine-swing-left 1.3s cubic-bezier(0.4, 0, 0.2, 1) 550ms forwards;
+      }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) {
+        animation: grove-vine-swing-left 1.35s cubic-bezier(0.4, 0, 0.2, 1) 600ms forwards;
       }
 
-      .grove-parting .grove-vine-right {
-        animation: grove-vine-part-right 1000ms cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      /* Right vines swing right - center-out stagger (mirror) */
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) {
+        animation: grove-vine-swing-right 1.1s cubic-bezier(0.4, 0, 0.2, 1) 350ms forwards;
+      }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) {
+        animation: grove-vine-swing-right 1.15s cubic-bezier(0.4, 0, 0.2, 1) 400ms forwards;
+      }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) {
+        animation: grove-vine-swing-right 1.2s cubic-bezier(0.4, 0, 0.2, 1) 450ms forwards;
+      }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) {
+        animation: grove-vine-swing-right 1.25s cubic-bezier(0.4, 0, 0.2, 1) 500ms forwards;
+      }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) {
+        animation: grove-vine-swing-right 1.3s cubic-bezier(0.4, 0, 0.2, 1) 550ms forwards;
+      }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) {
+        animation: grove-vine-swing-right 1.35s cubic-bezier(0.4, 0, 0.2, 1) 600ms forwards;
       }
 
       .grove-parting .grove-entrance-logo {
@@ -194,17 +261,34 @@
       @media (prefers-reduced-motion: reduce) {
         .grove-loader-logo { animation: none; }
 
-        .grove-parting .grove-vine-left,
-        .grove-parting .grove-vine-right {
-          animation: none;
+        .grove-vine-strip {
+          transform: none !important;
+        }
+
+        .grove-parting .grove-vine-strip,
+        .grove-parting #grove-glass-backdrop {
+          animation: none !important;
           opacity: 0;
-          transition: opacity 0.15s ease-out;
+          transition: opacity 0.3s ease-out !important;
         }
 
         .grove-parting .grove-entrance-logo {
           animation: none;
           opacity: 0;
-          transition: opacity 0.15s ease-out;
+          transition: opacity 0.3s ease-out;
+        }
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Fallback for browsers without backdrop-filter
+         ───────────────────────────────────────────────────────────── */
+
+      @supports not (backdrop-filter: blur(12px)) {
+        #grove-glass-backdrop {
+          background: rgba(30, 30, 30, 0.85);
+        }
+        html:not(.dark) #grove-glass-backdrop {
+          background: rgba(255, 255, 255, 0.85);
         }
       }
     </style>
@@ -255,10 +339,107 @@
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
-    <!-- First Paint Loading Overlay - "Parting the Vines" -->
+    <!-- Glass Backdrop - blurs content behind vines -->
+    <div id="grove-glass-backdrop" aria-hidden="true"></div>
+
+    <!-- First Paint Loading Overlay - "Parting the Vines" v2 -->
     <div id="grove-loading-overlay" aria-hidden="true">
-      <!-- Left vine panel -->
-      <div class="grove-vine-panel grove-vine-left"></div>
+      <!-- Left vine container - 6 individual swinging strips -->
+      <div class="grove-vine-container grove-vine-left">
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.9"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs>
+            <path d="M40 -20 C60 80 20 180 50 280 S30 420 55 520 S25 660 45 760 S35 880 40 1020" stroke="url(#vg1)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M50 100 Q70 80 65 55 Q50 80 35 90 Q50 98 50 100Z" fill="#22c55e" opacity="0.7"/>
+            <path d="M35 280 Q55 260 50 235 Q35 260 20 270 Q35 278 35 280Z" fill="#22c55e" opacity="0.65"/>
+            <path d="M55 460 Q75 440 70 415 Q55 440 40 450 Q55 458 55 460Z" fill="#22c55e" opacity="0.6"/>
+            <path d="M30 640 Q50 620 45 595 Q30 620 15 630 Q30 638 30 640Z" fill="#22c55e" opacity="0.55"/>
+            <path d="M45 820 Q65 800 60 775 Q45 800 30 810 Q45 818 45 820Z" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="25" cy="180" rx="10" ry="15" transform="rotate(-20 25 180)" fill="#22c55e" opacity="0.55"/>
+            <ellipse cx="60" cy="380" rx="9" ry="14" transform="rotate(-25 60 380)" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="20" cy="560" rx="8" ry="13" transform="rotate(-15 20 560)" fill="#22c55e" opacity="0.45"/>
+            <ellipse cx="55" cy="740" rx="8" ry="12" transform="rotate(-22 55 740)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="30" cy="920" rx="7" ry="11" transform="rotate(-18 30 920)" fill="#22c55e" opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.35"/></linearGradient></defs>
+            <path d="M35 -40 C55 60 25 160 45 260 S35 400 50 500 S30 640 40 740 S45 860 35 1020" stroke="url(#vg2)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M45 50 C35 120 55 200 40 280" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.5"/>
+            <path d="M40 140 Q60 120 55 95 Q40 120 25 130 Q40 138 40 140Z" fill="#16a34a" opacity="0.65"/>
+            <path d="M50 340 Q70 320 65 295 Q50 320 35 330 Q50 338 50 340Z" fill="#16a34a" opacity="0.6"/>
+            <path d="M35 520 Q55 500 50 475 Q35 500 20 510 Q35 518 35 520Z" fill="#16a34a" opacity="0.55"/>
+            <path d="M45 700 Q65 680 60 655 Q45 680 30 690 Q45 698 45 700Z" fill="#16a34a" opacity="0.5"/>
+            <path d="M40 880 Q60 860 55 835 Q40 860 25 870 Q40 878 40 880Z" fill="#16a34a" opacity="0.45"/>
+            <ellipse cx="55" cy="220" rx="9" ry="14" transform="rotate(-28 55 220)" fill="#16a34a" opacity="0.5"/>
+            <ellipse cx="25" cy="420" rx="8" ry="13" transform="rotate(-18 25 420)" fill="#16a34a" opacity="0.45"/>
+            <ellipse cx="50" cy="620" rx="8" ry="12" transform="rotate(-24 50 620)" fill="#16a34a" opacity="0.4"/>
+            <ellipse cx="30" cy="800" rx="7" ry="11" transform="rotate(-20 30 800)" fill="#16a34a" opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs>
+            <path d="M45 -30 C65 70 30 170 55 270 S40 410 60 510 S35 650 50 750 S40 870 45 1020" stroke="url(#vg3)" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+            <path d="M55 80 Q75 60 70 35 Q55 60 40 70 Q55 78 55 80Z" fill="#22c55e" opacity="0.6"/>
+            <path d="M40 260 Q60 240 55 215 Q40 240 25 250 Q40 258 40 260Z" fill="#22c55e" opacity="0.55"/>
+            <path d="M60 440 Q80 420 75 395 Q60 420 45 430 Q60 438 60 440Z" fill="#22c55e" opacity="0.5"/>
+            <path d="M35 620 Q55 600 50 575 Q35 600 20 610 Q35 618 35 620Z" fill="#22c55e" opacity="0.45"/>
+            <path d="M50 800 Q70 780 65 755 Q50 780 35 790 Q50 798 50 800Z" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="30" cy="160" rx="9" ry="14" transform="rotate(-22 30 160)" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="65" cy="360" rx="8" ry="13" transform="rotate(-30 65 360)" fill="#22c55e" opacity="0.45"/>
+            <ellipse cx="25" cy="540" rx="7" ry="12" transform="rotate(-16 25 540)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="55" cy="720" rx="7" ry="11" transform="rotate(-26 55 720)" fill="#22c55e" opacity="0.35"/>
+            <ellipse cx="40" cy="900" rx="6" ry="10" transform="rotate(-20 40 900)" fill="#22c55e" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.75"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.25"/></linearGradient></defs>
+            <path d="M40 -50 C60 50 30 150 50 250 S35 390 55 490 S30 630 45 730 S50 850 40 1020" stroke="url(#vg4)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M50 120 Q70 100 65 75 Q50 100 35 110 Q50 118 50 120Z" fill="#15803d" opacity="0.55"/>
+            <path d="M35 300 Q55 280 50 255 Q35 280 20 290 Q35 298 35 300Z" fill="#15803d" opacity="0.5"/>
+            <path d="M55 480 Q75 460 70 435 Q55 460 40 470 Q55 478 55 480Z" fill="#15803d" opacity="0.45"/>
+            <path d="M40 660 Q60 640 55 615 Q40 640 25 650 Q40 658 40 660Z" fill="#15803d" opacity="0.4"/>
+            <path d="M50 840 Q70 820 65 795 Q50 820 35 830 Q50 838 50 840Z" fill="#15803d" opacity="0.35"/>
+            <ellipse cx="60" cy="200" rx="8" ry="13" transform="rotate(-25 60 200)" fill="#15803d" opacity="0.45"/>
+            <ellipse cx="25" cy="400" rx="7" ry="12" transform="rotate(-18 25 400)" fill="#15803d" opacity="0.4"/>
+            <ellipse cx="55" cy="580" rx="7" ry="11" transform="rotate(-28 55 580)" fill="#15803d" opacity="0.35"/>
+            <ellipse cx="35" cy="760" rx="6" ry="10" transform="rotate(-22 35 760)" fill="#15803d" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg5" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs>
+            <path d="M35 -20 C55 80 25 180 45 280 S40 420 55 520 S30 660 40 760 S45 880 35 1020" stroke="url(#vg5)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M45 60 Q65 40 60 15 Q45 40 30 50 Q45 58 45 60Z" fill="#22c55e" opacity="0.5"/>
+            <path d="M55 240 Q75 220 70 195 Q55 220 40 230 Q55 238 55 240Z" fill="#22c55e" opacity="0.45"/>
+            <path d="M40 420 Q60 400 55 375 Q40 400 25 410 Q40 418 40 420Z" fill="#22c55e" opacity="0.4"/>
+            <path d="M55 600 Q75 580 70 555 Q55 580 40 590 Q55 598 55 600Z" fill="#22c55e" opacity="0.35"/>
+            <path d="M40 780 Q60 760 55 735 Q40 760 25 770 Q40 778 40 780Z" fill="#22c55e" opacity="0.3"/>
+            <ellipse cx="25" cy="140" rx="7" ry="12" transform="rotate(-20 25 140)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="60" cy="340" rx="7" ry="11" transform="rotate(-28 60 340)" fill="#22c55e" opacity="0.35"/>
+            <ellipse cx="30" cy="520" rx="6" ry="10" transform="rotate(-16 30 520)" fill="#22c55e" opacity="0.3"/>
+            <ellipse cx="50" cy="700" rx="6" ry="10" transform="rotate(-24 50 700)" fill="#22c55e" opacity="0.25"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vg6" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.6"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.15"/></linearGradient></defs>
+            <path d="M40 -30 C60 70 30 170 50 270 S35 410 55 510 S30 650 45 750 S40 870 40 1020" stroke="url(#vg6)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M50 100 Q70 80 65 55 Q50 80 35 90 Q50 98 50 100Z" fill="#16a34a" opacity="0.45"/>
+            <path d="M40 280 Q60 260 55 235 Q40 260 25 270 Q40 278 40 280Z" fill="#16a34a" opacity="0.4"/>
+            <path d="M55 460 Q75 440 70 415 Q55 440 40 450 Q55 458 55 460Z" fill="#16a34a" opacity="0.35"/>
+            <path d="M35 640 Q55 620 50 595 Q35 620 20 630 Q35 638 35 640Z" fill="#16a34a" opacity="0.3"/>
+            <path d="M45 820 Q65 800 60 775 Q45 800 30 810 Q45 818 45 820Z" fill="#16a34a" opacity="0.25"/>
+            <ellipse cx="60" cy="180" rx="6" ry="10" transform="rotate(-22 60 180)" fill="#16a34a" opacity="0.35"/>
+            <ellipse cx="25" cy="380" rx="6" ry="10" transform="rotate(-18 25 380)" fill="#16a34a" opacity="0.3"/>
+            <ellipse cx="50" cy="560" rx="5" ry="9" transform="rotate(-26 50 560)" fill="#16a34a" opacity="0.25"/>
+            <ellipse cx="35" cy="740" rx="5" ry="8" transform="rotate(-20 35 740)" fill="#16a34a" opacity="0.2"/>
+          </svg>
+        </div>
+      </div>
 
       <!-- Center: breathing logo -->
       <div class="grove-entrance-logo">
@@ -279,8 +460,102 @@
         </svg>
       </div>
 
-      <!-- Right vine panel -->
-      <div class="grove-vine-panel grove-vine-right"></div>
+      <!-- Right vine container - mirrors left -->
+      <div class="grove-vine-container grove-vine-right">
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr1" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.6"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.15"/></linearGradient></defs>
+            <path d="M40 -30 C20 70 50 170 30 270 S45 410 25 510 S50 650 35 750 S40 870 40 1020" stroke="url(#vgr1)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M30 100 Q10 80 15 55 Q30 80 45 90 Q30 98 30 100Z" fill="#16a34a" opacity="0.45"/>
+            <path d="M40 280 Q20 260 25 235 Q40 260 55 270 Q40 278 40 280Z" fill="#16a34a" opacity="0.4"/>
+            <path d="M25 460 Q5 440 10 415 Q25 440 40 450 Q25 458 25 460Z" fill="#16a34a" opacity="0.35"/>
+            <path d="M45 640 Q25 620 30 595 Q45 620 60 630 Q45 638 45 640Z" fill="#16a34a" opacity="0.3"/>
+            <path d="M35 820 Q15 800 20 775 Q35 800 50 810 Q35 818 35 820Z" fill="#16a34a" opacity="0.25"/>
+            <ellipse cx="20" cy="180" rx="6" ry="10" transform="rotate(22 20 180)" fill="#16a34a" opacity="0.35"/>
+            <ellipse cx="55" cy="380" rx="6" ry="10" transform="rotate(18 55 380)" fill="#16a34a" opacity="0.3"/>
+            <ellipse cx="30" cy="560" rx="5" ry="9" transform="rotate(26 30 560)" fill="#16a34a" opacity="0.25"/>
+            <ellipse cx="45" cy="740" rx="5" ry="8" transform="rotate(20 45 740)" fill="#16a34a" opacity="0.2"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr2" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs>
+            <path d="M45 -20 C25 80 55 180 35 280 S40 420 25 520 S50 660 40 760 S35 880 45 1020" stroke="url(#vgr2)" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M35 60 Q15 40 20 15 Q35 40 50 50 Q35 58 35 60Z" fill="#22c55e" opacity="0.5"/>
+            <path d="M25 240 Q5 220 10 195 Q25 220 40 230 Q25 238 25 240Z" fill="#22c55e" opacity="0.45"/>
+            <path d="M40 420 Q20 400 25 375 Q40 400 55 410 Q40 418 40 420Z" fill="#22c55e" opacity="0.4"/>
+            <path d="M25 600 Q5 580 10 555 Q25 580 40 590 Q25 598 25 600Z" fill="#22c55e" opacity="0.35"/>
+            <path d="M40 780 Q20 760 25 735 Q40 760 55 770 Q40 778 40 780Z" fill="#22c55e" opacity="0.3"/>
+            <ellipse cx="55" cy="140" rx="7" ry="12" transform="rotate(20 55 140)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="20" cy="340" rx="7" ry="11" transform="rotate(28 20 340)" fill="#22c55e" opacity="0.35"/>
+            <ellipse cx="50" cy="520" rx="6" ry="10" transform="rotate(16 50 520)" fill="#22c55e" opacity="0.3"/>
+            <ellipse cx="30" cy="700" rx="6" ry="10" transform="rotate(24 30 700)" fill="#22c55e" opacity="0.25"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr3" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.75"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.25"/></linearGradient></defs>
+            <path d="M40 -50 C20 50 50 150 30 250 S45 390 25 490 S50 630 35 730 S30 850 40 1020" stroke="url(#vgr3)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M30 120 Q10 100 15 75 Q30 100 45 110 Q30 118 30 120Z" fill="#15803d" opacity="0.55"/>
+            <path d="M45 300 Q25 280 30 255 Q45 280 60 290 Q45 298 45 300Z" fill="#15803d" opacity="0.5"/>
+            <path d="M25 480 Q5 460 10 435 Q25 460 40 470 Q25 478 25 480Z" fill="#15803d" opacity="0.45"/>
+            <path d="M40 660 Q20 640 25 615 Q40 640 55 650 Q40 658 40 660Z" fill="#15803d" opacity="0.4"/>
+            <path d="M30 840 Q10 820 15 795 Q30 820 45 830 Q30 838 30 840Z" fill="#15803d" opacity="0.35"/>
+            <ellipse cx="20" cy="200" rx="8" ry="13" transform="rotate(25 20 200)" fill="#15803d" opacity="0.45"/>
+            <ellipse cx="55" cy="400" rx="7" ry="12" transform="rotate(18 55 400)" fill="#15803d" opacity="0.4"/>
+            <ellipse cx="25" cy="580" rx="7" ry="11" transform="rotate(28 25 580)" fill="#15803d" opacity="0.35"/>
+            <ellipse cx="45" cy="760" rx="6" ry="10" transform="rotate(22 45 760)" fill="#15803d" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr4" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs>
+            <path d="M35 -30 C15 70 50 170 25 270 S40 410 20 510 S45 650 30 750 S40 870 35 1020" stroke="url(#vgr4)" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+            <path d="M25 80 Q5 60 10 35 Q25 60 40 70 Q25 78 25 80Z" fill="#22c55e" opacity="0.6"/>
+            <path d="M40 260 Q20 240 25 215 Q40 240 55 250 Q40 258 40 260Z" fill="#22c55e" opacity="0.55"/>
+            <path d="M20 440 Q0 420 5 395 Q20 420 35 430 Q20 438 20 440Z" fill="#22c55e" opacity="0.5"/>
+            <path d="M45 620 Q25 600 30 575 Q45 600 60 610 Q45 618 45 620Z" fill="#22c55e" opacity="0.45"/>
+            <path d="M30 800 Q10 780 15 755 Q30 780 45 790 Q30 798 30 800Z" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="50" cy="160" rx="9" ry="14" transform="rotate(22 50 160)" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="15" cy="360" rx="8" ry="13" transform="rotate(30 15 360)" fill="#22c55e" opacity="0.45"/>
+            <ellipse cx="55" cy="540" rx="7" ry="12" transform="rotate(16 55 540)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="25" cy="720" rx="7" ry="11" transform="rotate(26 25 720)" fill="#22c55e" opacity="0.35"/>
+            <ellipse cx="40" cy="900" rx="6" ry="10" transform="rotate(20 40 900)" fill="#22c55e" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr5" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.35"/></linearGradient></defs>
+            <path d="M45 -40 C25 60 55 160 35 260 S45 400 30 500 S50 640 40 740 S35 860 45 1020" stroke="url(#vgr5)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M35 50 C45 120 25 200 40 280" stroke="#22c55e" stroke-width="2" fill="none" opacity="0.5"/>
+            <path d="M40 140 Q20 120 25 95 Q40 120 55 130 Q40 138 40 140Z" fill="#16a34a" opacity="0.65"/>
+            <path d="M30 340 Q10 320 15 295 Q30 320 45 330 Q30 338 30 340Z" fill="#16a34a" opacity="0.6"/>
+            <path d="M45 520 Q25 500 30 475 Q45 500 60 510 Q45 518 45 520Z" fill="#16a34a" opacity="0.55"/>
+            <path d="M35 700 Q15 680 20 655 Q35 680 50 690 Q35 698 35 700Z" fill="#16a34a" opacity="0.5"/>
+            <path d="M40 880 Q20 860 25 835 Q40 860 55 870 Q40 878 40 880Z" fill="#16a34a" opacity="0.45"/>
+            <ellipse cx="25" cy="220" rx="9" ry="14" transform="rotate(28 25 220)" fill="#16a34a" opacity="0.5"/>
+            <ellipse cx="55" cy="420" rx="8" ry="13" transform="rotate(18 55 420)" fill="#16a34a" opacity="0.45"/>
+            <ellipse cx="30" cy="620" rx="8" ry="12" transform="rotate(24 30 620)" fill="#16a34a" opacity="0.4"/>
+            <ellipse cx="50" cy="800" rx="7" ry="11" transform="rotate(20 50 800)" fill="#16a34a" opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="grove-vine-strip">
+          <svg viewBox="0 0 80 1000" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="vgr6" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.9"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs>
+            <path d="M40 -20 C20 80 60 180 30 280 S50 420 25 520 S55 660 35 760 S45 880 40 1020" stroke="url(#vgr6)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M30 100 Q10 80 15 55 Q30 80 45 90 Q30 98 30 100Z" fill="#22c55e" opacity="0.7"/>
+            <path d="M45 280 Q25 260 30 235 Q45 260 60 270 Q45 278 45 280Z" fill="#22c55e" opacity="0.65"/>
+            <path d="M25 460 Q5 440 10 415 Q25 440 40 450 Q25 458 25 460Z" fill="#22c55e" opacity="0.6"/>
+            <path d="M50 640 Q30 620 35 595 Q50 620 65 630 Q50 638 50 640Z" fill="#22c55e" opacity="0.55"/>
+            <path d="M35 820 Q15 800 20 775 Q35 800 50 810 Q35 818 35 820Z" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="55" cy="180" rx="10" ry="15" transform="rotate(20 55 180)" fill="#22c55e" opacity="0.55"/>
+            <ellipse cx="20" cy="380" rx="9" ry="14" transform="rotate(25 20 380)" fill="#22c55e" opacity="0.5"/>
+            <ellipse cx="60" cy="560" rx="8" ry="13" transform="rotate(15 60 560)" fill="#22c55e" opacity="0.45"/>
+            <ellipse cx="25" cy="740" rx="8" ry="12" transform="rotate(22 25 740)" fill="#22c55e" opacity="0.4"/>
+            <ellipse cx="50" cy="920" rx="7" ry="11" transform="rotate(18 50 920)" fill="#22c55e" opacity="0.35"/>
+          </svg>
+        </div>
+      </div>
     </div>
     <div style="display: contents">%sveltekit.body%</div>
     <!-- Fallback overlay removal (handles edge cases where Svelte doesn't hydrate) -->
@@ -288,9 +563,13 @@
       window.addEventListener('load', function() {
         setTimeout(function() {
           var o = document.getElementById('grove-loading-overlay');
+          var g = document.getElementById('grove-glass-backdrop');
           if (o && !o.classList.contains('grove-parting')) {
             o.classList.add('grove-parting');
-            setTimeout(function() { o.remove(); }, 2000);
+            setTimeout(function() {
+              o.remove();
+              if (g) g.remove();
+            }, 2000);
           }
         }, 100);
       });
