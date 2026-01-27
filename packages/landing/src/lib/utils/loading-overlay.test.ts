@@ -203,16 +203,16 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should have staggered animation delays", () => {
-      // Different delays create wave-like parting effect (100ms to 500ms stagger)
-      expect(appHtml).toContain("100ms");
-      expect(appHtml).toContain("180ms");
-      expect(appHtml).toContain("260ms");
+      // Different delays create wave-like parting effect (50ms to 250ms stagger)
+      expect(appHtml).toContain("50ms");
+      expect(appHtml).toContain("90ms");
+      expect(appHtml).toContain("130ms");
     });
 
     it("should use pendulum oscillation in keyframes", () => {
-      // Pendulum animation has multiple keyframe stops for natural damped oscillation
-      // Check for the "pullback" phase in keyframes (e.g., 35% { transform: rotate(-28deg) })
-      expect(appHtml).toMatch(/35%\s*\{[^}]*rotate\(-?28deg\)/);
+      // Pendulum animation has single pullback for snappy feel
+      // Check for the "pullback" phase in keyframes (e.g., 55% { transform: rotate(-42deg) })
+      expect(appHtml).toMatch(/55%\s*\{[^}]*rotate\(-?42deg\)/);
     });
   });
 

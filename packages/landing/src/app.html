@@ -167,27 +167,21 @@
          creating more natural momentum feel.
          ───────────────────────────────────────────────────────────── */
 
-      /* Pendulum animation with damped oscillation - swings out with natural pullback */
+      /* Pendulum animation with single pullback - fast and snappy */
       @keyframes grove-vine-swing-left {
-        0%   { transform: rotate(var(--vine-start-rotation, 0deg)); opacity: 1; }
-        20%  { transform: rotate(-35deg); }              /* Initial swing */
-        35%  { transform: rotate(-28deg); }              /* Slight pullback */
-        50%  { transform: rotate(-60deg); }              /* Second swing */
-        65%  { transform: rotate(-55deg); }              /* Slight pullback */
-        80%  { transform: rotate(-85deg); opacity: 1; }  /* Final swing */
-        90%  { transform: rotate(-82deg); opacity: 0.7; }/* Brief settle */
-        100% { transform: rotate(-95deg); opacity: 0; }  /* Fade out */
+        0%   { transform: rotate(0deg); opacity: 1; }
+        40%  { transform: rotate(-50deg); }             /* Initial swing */
+        55%  { transform: rotate(-42deg); }             /* Single pullback */
+        85%  { transform: rotate(-88deg); opacity: 1; }
+        100% { transform: rotate(-95deg); opacity: 0; } /* Fade out */
       }
 
       @keyframes grove-vine-swing-right {
-        0%   { transform: rotate(var(--vine-start-rotation, 0deg)); opacity: 1; }
-        20%  { transform: rotate(35deg); }               /* Initial swing */
-        35%  { transform: rotate(28deg); }               /* Slight pullback */
-        50%  { transform: rotate(60deg); }               /* Second swing */
-        65%  { transform: rotate(55deg); }               /* Slight pullback */
-        80%  { transform: rotate(85deg); opacity: 1; }   /* Final swing */
-        90%  { transform: rotate(82deg); opacity: 0.7; } /* Brief settle */
-        100% { transform: rotate(95deg); opacity: 0; }   /* Fade out */
+        0%   { transform: rotate(0deg); opacity: 1; }
+        40%  { transform: rotate(50deg); }              /* Initial swing */
+        55%  { transform: rotate(42deg); }              /* Single pullback */
+        85%  { transform: rotate(88deg); opacity: 1; }
+        100% { transform: rotate(95deg); opacity: 0; }  /* Fade out */
       }
 
       @keyframes grove-logo-exit {
@@ -204,44 +198,44 @@
          - Outer vines follow with increasing delay
          ───────────────────────────────────────────────────────────── */
 
-      /* Left vines swing left - center-out stagger (slower, natural timing) */
+      /* Left vines swing RIGHT (outward) - center-out stagger */
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) {
-        animation: grove-vine-swing-left 2.8s ease-out 100ms forwards;
+        animation: grove-vine-swing-right 1.4s ease-out 50ms forwards;
       }
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) {
-        animation: grove-vine-swing-left 2.85s ease-out 180ms forwards;
+        animation: grove-vine-swing-right 1.43s ease-out 90ms forwards;
       }
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) {
-        animation: grove-vine-swing-left 2.9s ease-out 260ms forwards;
+        animation: grove-vine-swing-right 1.46s ease-out 130ms forwards;
       }
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) {
-        animation: grove-vine-swing-left 2.95s ease-out 340ms forwards;
+        animation: grove-vine-swing-right 1.49s ease-out 170ms forwards;
       }
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) {
-        animation: grove-vine-swing-left 3.0s ease-out 420ms forwards;
+        animation: grove-vine-swing-right 1.52s ease-out 210ms forwards;
       }
       .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) {
-        animation: grove-vine-swing-left 3.05s ease-out 500ms forwards;
+        animation: grove-vine-swing-right 1.55s ease-out 250ms forwards;
       }
 
-      /* Right vines swing right - center-out stagger (mirror, slower timing) */
+      /* Right vines swing LEFT (outward) - center-out stagger (mirror) */
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) {
-        animation: grove-vine-swing-right 2.8s ease-out 100ms forwards;
+        animation: grove-vine-swing-left 1.4s ease-out 50ms forwards;
       }
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) {
-        animation: grove-vine-swing-right 2.85s ease-out 180ms forwards;
+        animation: grove-vine-swing-left 1.43s ease-out 90ms forwards;
       }
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) {
-        animation: grove-vine-swing-right 2.9s ease-out 260ms forwards;
+        animation: grove-vine-swing-left 1.46s ease-out 130ms forwards;
       }
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) {
-        animation: grove-vine-swing-right 2.95s ease-out 340ms forwards;
+        animation: grove-vine-swing-left 1.49s ease-out 170ms forwards;
       }
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) {
-        animation: grove-vine-swing-right 3.0s ease-out 420ms forwards;
+        animation: grove-vine-swing-left 1.52s ease-out 210ms forwards;
       }
       .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) {
-        animation: grove-vine-swing-right 3.05s ease-out 500ms forwards;
+        animation: grove-vine-swing-left 1.55s ease-out 250ms forwards;
       }
 
       .grove-parting .grove-entrance-logo {
@@ -817,11 +811,11 @@
           if (o && !o.classList.contains('grove-parting')) {
             o.classList.add('grove-parting');
           }
-          // ALWAYS remove overlay after animation completes (~3.6s for slower animation)
+          // ALWAYS remove overlay after animation completes (~2s for snappy animation)
           // This ensures cleanup even if Svelte hydration is delayed
           setTimeout(function() {
             if (o) o.remove();
-          }, 3600);
+          }, 2000);
         }, 100);
       });
     </script>

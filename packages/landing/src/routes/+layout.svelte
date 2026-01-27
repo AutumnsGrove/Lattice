@@ -23,8 +23,8 @@
 			if (overlay) {
 				// Trigger the parting animation
 				overlay.classList.add('grove-parting');
-				// Remove after animation completes (~3.6s for slower pendulum animation)
-				setTimeout(() => overlay.remove(), 3600);
+				// Remove after animation completes (~2s for snappy animation)
+				setTimeout(() => overlay.remove(), 2000);
 			}
 		}
 	});
