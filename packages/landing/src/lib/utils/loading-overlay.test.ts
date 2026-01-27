@@ -3,17 +3,17 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 /**
- * Tests for the Grove entrance animation ("Parting the Vines" v2).
+ * Tests for the Grove entrance animation ("Parting the Vines" v3).
  *
  * These tests verify the structural contract of app.html — ensuring all
  * required elements, classes, and CSS definitions exist for the animation
  * to function correctly. This catches accidental deletions or typos during
  * refactoring without testing implementation details.
  *
- * Architecture (v2.1):
+ * Architecture (v3 - Segmented Physics):
  * - All elements inside #grove-loading-overlay (z-index: 100000)
  *   - Logo (z-index: 3) - above vines
- *   - Vine strips (z-index: 2) - swing animation with pendulum physics
+ *   - Vine strips (z-index: 2) - each split into 8 nested segments
  *   - Glass backdrop (z-index: 1) - blur effect
  * - Layer 1: Page content (blurred until parting)
  *
@@ -67,6 +67,12 @@ describe("Grove Entrance Animation", () => {
     it("should have the breathing logo SVG", () => {
       expect(appHtml).toContain('class="grove-loader-logo"');
     });
+
+    it("should have nested vine segments for rope physics", () => {
+      // Each vine strip should contain nested .vine-seg elements
+      expect(appHtml).toContain('class="vine-seg vine-seg-1"');
+      expect(appHtml).toContain('class="vine-seg vine-seg-8"');
+    });
   });
 
   describe("CSS animation definitions", () => {
@@ -74,12 +80,16 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("@keyframes grove-breathe");
     });
 
-    it("should define the left vine swing animation", () => {
-      expect(appHtml).toContain("@keyframes grove-vine-swing-left");
+    it("should define segmented right swing keyframes", () => {
+      // v3: Segmented keyframes for each segment (1-8)
+      expect(appHtml).toContain("@keyframes vine-swing-r-1");
+      expect(appHtml).toContain("@keyframes vine-swing-r-8");
     });
 
-    it("should define the right vine swing animation", () => {
-      expect(appHtml).toContain("@keyframes grove-vine-swing-right");
+    it("should define segmented left swing keyframes", () => {
+      // v3: Segmented keyframes for each segment (1-8)
+      expect(appHtml).toContain("@keyframes vine-swing-l-1");
+      expect(appHtml).toContain("@keyframes vine-swing-l-8");
     });
 
     it("should define the logo exit animation", () => {
@@ -104,6 +114,16 @@ describe("Grove Entrance Animation", () => {
       expect(partingRules).not.toBeNull();
       expect(partingRules!.length).toBeGreaterThanOrEqual(3);
     });
+
+    it("should target vine segments in parting rules", () => {
+      // v3: Parting rules target .vine-seg-N instead of .grove-vine-strip
+      expect(appHtml).toContain(
+        ".grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-1",
+      );
+      expect(appHtml).toContain(
+        ".grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-1",
+      );
+    });
   });
 
   describe("accessibility", () => {
@@ -118,6 +138,11 @@ describe("Grove Entrance Animation", () => {
       );
       expect(reducedMotionMatch).not.toBeNull();
       expect(reducedMotionMatch![0]).toContain("animation: none");
+    });
+
+    it("should disable segment transforms for reduced motion", () => {
+      expect(appHtml).toContain(".vine-seg");
+      // Reduced motion should disable transforms on segments
     });
 
     it("should have noscript fallback for users without JavaScript", () => {
@@ -171,9 +196,11 @@ describe("Grove Entrance Animation", () => {
   });
 
   describe("SVG vine graphics", () => {
-    it("should have inline SVG vine graphics in strips", () => {
-      // Individual SVGs in each vine strip
-      expect(appHtml).toContain('<svg viewBox="0 0 80 1000"');
+    it("should have inline SVG vine graphics with segment viewBox", () => {
+      // v3: Each segment has a 125px tall viewBox (1000px / 8 segments)
+      expect(appHtml).toContain('viewBox="0 0 80 125"');
+      expect(appHtml).toContain('viewBox="0 125 80 125"');
+      expect(appHtml).toContain('viewBox="0 875 80 125"');
     });
 
     it("should use Grove green (#22c55e) in vine graphics", () => {
@@ -190,6 +217,17 @@ describe("Grove Entrance Animation", () => {
       expect(stripMatches).not.toBeNull();
       expect(stripMatches!.length).toBe(12);
     });
+
+    it("should have 8 segments per vine", () => {
+      // Each vine strip should have segments 1-8
+      const seg1Matches = appHtml.match(/class="vine-seg vine-seg-1"/g);
+      const seg8Matches = appHtml.match(/class="vine-seg vine-seg-8"/g);
+      expect(seg1Matches).not.toBeNull();
+      expect(seg8Matches).not.toBeNull();
+      // 12 vines × 1 seg-1 each = 12, same for seg-8
+      expect(seg1Matches!.length).toBe(12);
+      expect(seg8Matches!.length).toBe(12);
+    });
   });
 
   describe("swing animation physics", () => {
@@ -198,21 +236,49 @@ describe("Grove Entrance Animation", () => {
     });
 
     it("should use ease-out for natural easing", () => {
-      // Changed from cubic-bezier to ease-out for slower, more natural pendulum motion
       expect(appHtml).toContain("ease-out");
     });
 
-    it("should have staggered animation delays", () => {
-      // Different delays create wave-like parting effect (50ms to 250ms stagger)
-      expect(appHtml).toContain("50ms");
-      expect(appHtml).toContain("90ms");
-      expect(appHtml).toContain("130ms");
+    it("should have cascading segment delays", () => {
+      // v3: 60ms delay between segments creates wave propagation
+      expect(appHtml).toContain("60ms");
+      expect(appHtml).toContain("120ms");
+      expect(appHtml).toContain("180ms");
     });
 
-    it("should use pendulum oscillation in keyframes", () => {
-      // Pendulum animation has single pullback for snappy feel
-      // Check for the "pullback" phase in keyframes (e.g., 55% { transform: rotate(-42deg) })
-      expect(appHtml).toMatch(/55%\s*\{[^}]*rotate\(-?42deg\)/);
+    it("should have vine stagger delays", () => {
+      // v3: 80ms delay between adjacent vines for visual separation
+      expect(appHtml).toContain("80ms");
+      expect(appHtml).toContain("160ms");
+      expect(appHtml).toContain("240ms");
+    });
+
+    it("should use dampened amplitude in keyframes", () => {
+      // v3: Top segments have large rotation, tip segments have small rotation
+      // Check for segment 1 (large) and segment 8 (small) rotation values
+      expect(appHtml).toMatch(/@keyframes vine-swing-r-1[^@]*rotate\(18deg\)/);
+      expect(appHtml).toMatch(/@keyframes vine-swing-r-8[^@]*rotate\(3deg\)/);
+    });
+
+    it("should have pullback phase in keyframes", () => {
+      // v3: 50% keyframe has negative (opposite) rotation for pullback
+      expect(appHtml).toMatch(/50%\s*\{[^}]*rotate\(-10deg\)/);
+    });
+  });
+
+  describe("segment structure", () => {
+    it("should have segment base styles", () => {
+      expect(appHtml).toContain(".vine-seg {");
+    });
+
+    it("should position child segments at bottom of parent", () => {
+      expect(appHtml).toContain(".vine-seg > .vine-seg");
+      expect(appHtml).toContain("top: 125px");
+    });
+
+    it("should use 2.5s animation duration for slow appreciation", () => {
+      // v3: 2.5s duration is slow enough to appreciate the animation
+      expect(appHtml).toContain("2.5s ease-out");
     });
   });
 

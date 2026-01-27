@@ -23,8 +23,8 @@
 			if (overlay) {
 				// Trigger the parting animation
 				overlay.classList.add('grove-parting');
-				// Remove after animation completes (~2s for snappy animation)
-				setTimeout(() => overlay.remove(), 2000);
+				// Remove after animation completes (~3s for segmented animation)
+				setTimeout(() => overlay.remove(), 3000);
 			}
 		}
 	});
