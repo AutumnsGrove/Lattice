@@ -315,10 +315,15 @@ export default {
       //   toast (70)    → Toast notifications, snackbars
       //   tooltip (80)  → Tooltips (highest normal UI)
       //   mobile-menu (9990/9999) → Mobile navigation (always on top)
+      //   entrance (100000) → First-paint loading overlay (absolute top)
       //
       // Note: Mobile menu uses high values (9990+) to ensure it
       // appears above glass elements with backdrop-filter, which
       // create new stacking contexts.
+      //
+      // Note: Entrance overlay uses 100000 to guarantee it covers
+      // ALL UI during initial page load, including any dynamically
+      // rendered elements that might use high z-index values.
       // ─────────────────────────────────────────────────────────────
       zIndex: {
         "grove-base": "0",
@@ -332,6 +337,7 @@ export default {
         "grove-tooltip": "80",
         "grove-mobile-menu-backdrop": "9990",
         "grove-mobile-menu": "9999",
+        "grove-entrance": "100000",
       },
     },
   },

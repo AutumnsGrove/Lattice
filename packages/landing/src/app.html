@@ -23,10 +23,11 @@
       #grove-loading-overlay {
         position: fixed;
         inset: 0;
-        /* z-index 99999: Must appear above ALL other UI including modals (z-9000),
-           mobile menus (z-9999), and any future overlays. This is a first-paint
-           blocking element that MUST cover everything until the app is ready. */
-        z-index: 99999;
+        /* z-grove-entrance (100000): Semantic z-index from tailwind.preset.js.
+           Must appear above ALL other UI including modals, mobile menus, and
+           any future overlays. This is a first-paint blocking element that
+           MUST cover everything until the app is ready. */
+        z-index: 100000;
         display: flex;
         align-items: center;
         justify-content: center;
