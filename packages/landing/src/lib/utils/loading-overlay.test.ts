@@ -103,17 +103,21 @@ describe("Grove Entrance Animation", () => {
   });
 
   describe("theme support", () => {
-    it("should have dark mode styles (default)", () => {
-      // Dark mode uses dark forest green
+    it("should have dark mode styles for logo (default)", () => {
+      // Dark mode uses dark forest green for logo background
       expect(appHtml).toContain("#122a1a");
     });
 
-    it("should have light mode styles", () => {
-      expect(appHtml).toContain("html:not(.dark) .grove-vine-panel");
+    it("should have transparent vine panel backgrounds", () => {
+      // Panels are transparent — just vines, no green space
+      expect(appHtml).toContain("background-color: transparent");
+    });
+
+    it("should have light mode styles for logo", () => {
       expect(appHtml).toContain("html:not(.dark) .grove-loader-bg");
     });
 
-    it("should use light green for light mode panels", () => {
+    it("should use light green for light mode logo background", () => {
       expect(appHtml).toContain("#dcfce7");
     });
   });
