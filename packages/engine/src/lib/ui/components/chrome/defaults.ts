@@ -20,7 +20,7 @@ import {
   Activity,
   Blinds,
   Coffee,
-  MessageSquare,
+  Inbox,
 } from "lucide-svelte";
 
 // =============================================================================
@@ -106,7 +106,7 @@ export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
 // Excludes: Blog (already in nav)
 export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
-  { href: "/feedback", label: "Feedback", icon: MessageSquare },
+  { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/support", label: "Support", icon: Coffee },
   {
@@ -140,7 +140,7 @@ export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 // Connect section (mobile menu)
 export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
-  { href: "/feedback", label: "Feedback", icon: MessageSquare },
+  { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/support", label: "Support", icon: Coffee },
   {
