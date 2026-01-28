@@ -63,8 +63,17 @@
 				case 'ground':
 					module = await import(`../nature/ground/${name}.svelte`);
 					break;
+				case 'sky':
+					module = await import(`../nature/sky/${name}.svelte`);
+					break;
 				case 'structural':
 					module = await import(`../nature/structural/${name}.svelte`);
+					break;
+				case 'water':
+					module = await import(`../nature/water/${name}.svelte`);
+					break;
+				case 'weather':
+					module = await import(`../nature/weather/${name}.svelte`);
 					break;
 				default:
 					throw new Error(`Unknown category: ${category}`);

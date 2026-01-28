@@ -33,20 +33,35 @@
 	$effect(() => {
 		const loadComponent = async () => {
 			try {
-				// Map component name to path
-				const category = asset.category;
-				const componentPath = `/src/lib/ui/components/nature/${category}/${asset.componentName}.svelte`;
-
-				// Dynamic import - this will work with Vite's glob imports
-				const modules = import.meta.glob('/src/lib/ui/components/nature/**/*.svelte');
-				const loader = modules[componentPath];
-
-				if (!loader) {
-					console.error(`Component not found: ${componentPath}`);
-					return;
+				let module;
+				switch (asset.category) {
+					case 'trees':
+						module = await import(`../nature/trees/${asset.componentName}.svelte`);
+						break;
+					case 'creatures':
+						module = await import(`../nature/creatures/${asset.componentName}.svelte`);
+						break;
+					case 'botanical':
+						module = await import(`../nature/botanical/${asset.componentName}.svelte`);
+						break;
+					case 'ground':
+						module = await import(`../nature/ground/${asset.componentName}.svelte`);
+						break;
+					case 'sky':
+						module = await import(`../nature/sky/${asset.componentName}.svelte`);
+						break;
+					case 'structural':
+						module = await import(`../nature/structural/${asset.componentName}.svelte`);
+						break;
+					case 'water':
+						module = await import(`../nature/water/${asset.componentName}.svelte`);
+						break;
+					case 'weather':
+						module = await import(`../nature/weather/${asset.componentName}.svelte`);
+						break;
+					default:
+						throw new Error(`Unknown category: ${asset.category}`);
 				}
-
-				const module = await loader() as { default: SvelteComponent };
 				component = module.default;
 			} catch (error) {
 				console.error(`Failed to load component ${asset.componentName}:`, error);
