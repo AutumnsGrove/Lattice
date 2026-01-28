@@ -356,12 +356,17 @@ packages/engine/src/routes/help/
 
 ### 4.3 Article Renderer Component
 
-Create `HelpArticle.svelte` to render markdown with Grove styling:
+Create `HelpArticle.svelte` to render markdown with Grove styling.
+
+> **XSS Protection:** Uses `sanitizeMarkdown()` from `@autumnsgrove/groveengine/utils`, which wraps DOMPurify with Grove-safe config:
+> - Strips `<script>` tags and `javascript:` URIs
+> - Removes `on*` event handlers
+> - Allows safe markdown-to-HTML tags only (headings, lists, code, links, images, blockquotes)
 
 ```svelte
 <!-- packages/engine/src/lib/components/help/HelpArticle.svelte -->
 <script lang="ts">
-  import { sanitizeMarkdown } from '$lib/utils/sanitize';
+  import { sanitizeMarkdown } from '@autumnsgrove/groveengine/utils';
   import '$lib/styles/content.css';
 
   interface Props {
@@ -370,40 +375,51 @@ Create `HelpArticle.svelte` to render markdown with Grove styling:
     lastUpdated?: string;
     category?: string;
     related?: Array<{ slug: string; title: string }>;
+    error?: string;
   }
 
-  let { title, content, lastUpdated, category, related }: Props = $props();
+  let { title, content, lastUpdated, category, related, error }: Props = $props();
 </script>
 
-<article class="help-article">
-  <header>
-    {#if category}
-      <a href="/help/{category}" class="category-link">{category}</a>
-    {/if}
-    <h1>{title}</h1>
-  </header>
-
-  <div class="content prose">
-    {@html sanitizeMarkdown(content)}
+{#if error}
+  <div class="article-error" role="alert">
+    <h1>Article not found</h1>
+    <p>We couldn't load this article. It may have been moved or removed.</p>
+    <p>
+      <a href="/help">Browse all help articles</a> or try searching for what you need.
+    </p>
   </div>
+{:else}
+  <article class="help-article">
+    <header>
+      {#if category}
+        <a href="/help/{category}" class="category-link">{category}</a>
+      {/if}
+      <h1>{title}</h1>
+    </header>
 
-  {#if related?.length}
-    <aside class="related-articles">
-      <h2>Related Articles</h2>
-      <ul>
-        {#each related as article}
-          <li><a href="/help/{article.slug}">{article.title}</a></li>
-        {/each}
-      </ul>
-    </aside>
-  {/if}
+    <div class="content prose">
+      {@html sanitizeMarkdown(content)}
+    </div>
 
-  {#if lastUpdated}
-    <footer>
-      <p class="last-updated">Last updated: {lastUpdated}</p>
-    </footer>
-  {/if}
-</article>
+    {#if related?.length}
+      <aside class="related-articles">
+        <h2>Related Articles</h2>
+        <ul>
+          {#each related as article}
+            <li><a href="/help/{article.slug}">{article.title}</a></li>
+          {/each}
+        </ul>
+      </aside>
+    {/if}
+
+    {#if lastUpdated}
+      <footer>
+        <p class="last-updated">Last updated: {lastUpdated}</p>
+      </footer>
+    {/if}
+  </article>
+{/if}
 ```
 
 ---
@@ -519,12 +535,13 @@ const helpBaseUrl = '/help';  // Relative to current domain
 ### Bundle Size Impact
 
 Bundling all help articles at build time adds to the initial bundle:
-- ~49 articles × ~2KB avg = ~100KB markdown
-- After compression: ~30KB gzipped
+- **Measured:** ~207KB total markdown (49 articles, ~4.2KB avg)
+- **After gzip:** ~60KB compressed
 
 **Mitigation:**
 - Lazy load article content only when `/help` is accessed
-- Consider code-splitting the help section
+- Code-split the help section into its own chunk
+- Articles are text-only, so compression is highly effective
 
 ### Caching Strategy
 
@@ -550,6 +567,8 @@ Help articles should be cached aggressively:
 ## Article Feedback Component
 
 Include feedback on every article page. Simple thumbs up/down with Lucide icons (per grove-ui-design skill: **never emojis, always Lucide**).
+
+> **Security note:** SvelteKit's `use:enhance` automatically includes CSRF protection via origin checking. Ensure `csrf.checkOrigin` is properly configured in `svelte.config.js` (already set up for Grove's multi-tenant routing).
 
 ### Component: `ArticleFeedback.svelte`
 
@@ -707,13 +726,23 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // Validate slug to prevent directory traversal and injection
+// Each path segment must: start with alphanumeric, contain only [a-z0-9\-_], end with alphanumeric
 function isValidSlug(slug: string): boolean {
-  // Only allow alphanumeric, hyphens, underscores, and forward slashes
-  // No "..", no leading/trailing slashes, max 200 chars
   if (!slug || slug.length > 200) return false;
   if (slug.includes('..')) return false;
   if (slug.startsWith('/') || slug.endsWith('/')) return false;
-  return /^[a-z0-9][a-z0-9\-_\/]*[a-z0-9]$/.test(slug);
+
+  const segments = slug.split('/');
+  for (const segment of segments) {
+    // Single char segments must be alphanumeric
+    if (segment.length === 1) {
+      if (!/^[a-z0-9]$/.test(segment)) return false;
+    } else {
+      // Multi-char segments must start/end with alphanumeric, middle can have hyphens/underscores
+      if (!/^[a-z0-9][a-z0-9\-_]*[a-z0-9]$/.test(segment)) return false;
+    }
+  }
+  return true;
 }
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
