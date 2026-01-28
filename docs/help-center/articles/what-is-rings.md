@@ -1,5 +1,5 @@
 ---
-title: What is Rings?
+title: What are Rings?
 description: Grove's privacy-first analytics designed for writers, not marketers
 category: help
 section: how-it-works
@@ -13,7 +13,7 @@ keywords:
 order: 43
 ---
 
-# What is Rings?
+# What are Rings?
 
 Count the rings of a tree and you learn its story.
 
