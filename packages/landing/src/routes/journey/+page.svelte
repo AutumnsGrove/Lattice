@@ -14,6 +14,7 @@
 		{ id: 'code-composition', text: 'Code Composition' },
 		{ id: 'growth-over-time', text: 'Growth Over Time' },
 		{ id: 'documentation', text: 'Documentation' },
+		{ id: 'doc-insights', text: 'Doc Insights' },
 		{ id: 'milestones', text: 'Milestones' },
 		{ id: 'package-size', text: 'Package Size' }
 	];
@@ -324,6 +325,59 @@
 					</div>
 				</div>
 			</section>
+			{/if}
+
+			<!-- Documentation Insights (Word Frequency) -->
+			{#if data.wordFrequencies && data.latest && data.wordFrequencies[data.latest.label]}
+				{@const words = data.wordFrequencies[data.latest.label]}
+				<section id="doc-insights" class="mb-16 scroll-mt-24">
+					<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">Documentation Insights</h2>
+
+					<div class="card p-6">
+						<!-- Weighted tag list - top 15 words -->
+						<div class="flex flex-wrap justify-center gap-3 mb-6">
+							{#each words.topWords.slice(0, 15) as word, i}
+								<span
+									class="inline-block px-3 py-1.5 rounded-full bg-surface text-foreground-muted
+										   transition-all hover:bg-accent/10 hover:text-accent cursor-default"
+									style="font-size: {0.75 + (word.pct / 2)}rem"
+									title="{word.word}: {word.count} occurrences ({word.pct}%)"
+								>
+									{word.word}
+								</span>
+							{/each}
+						</div>
+
+						<!-- Fun facts grid -->
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-default">
+							<div class="text-center">
+								<div class="text-lg font-serif text-accent-muted">{formatNumber(words.totalWords)}</div>
+								<div class="text-xs text-foreground-faint font-sans">total words</div>
+							</div>
+							<div class="text-center">
+								<div class="text-lg font-serif text-accent-muted">{formatNumber(words.uniqueWords)}</div>
+								<div class="text-xs text-foreground-faint font-sans">unique words</div>
+							</div>
+							<div class="text-center">
+								<div class="text-lg font-serif text-accent-muted">{words.totalFiles}</div>
+								<div class="text-xs text-foreground-faint font-sans">doc files</div>
+							</div>
+							<div class="text-center">
+								<div class="text-lg font-serif text-accent-muted">{words.funFacts.groveCount}</div>
+								<div class="text-xs text-foreground-faint font-sans">"grove" mentions</div>
+							</div>
+						</div>
+
+						<!-- Fun fact callout -->
+						<div class="mt-4 pt-4 border-t border-default text-center">
+							<p class="text-sm text-foreground-muted font-sans">
+								<span class="font-mono text-accent-muted">"{words.funFacts.mostUsedWord}"</span>
+								is our most-used word, appearing {formatNumber(words.topWords[0]?.count || 0)} times.
+								Most documented topic: <span class="font-medium">{words.funFacts.mostDocumentedTopic}</span>
+							</p>
+						</div>
+					</div>
+				</section>
 			{/if}
 
 			<!-- Milestones Timeline -->

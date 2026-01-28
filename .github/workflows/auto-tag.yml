@@ -215,6 +215,15 @@ jobs:
           rm -f "$TARBALL"
           rm -rf /tmp/pkg-measure
 
+      - name: Analyze documentation keywords
+        if: steps.snapshot.outcome == 'success'
+        run: |
+          TAG="${{ steps.snapshot.outputs.tag_name }}"
+          echo "Analyzing documentation keywords for: $TAG"
+
+          # Run keyword analysis script
+          npx tsx scripts/generate/analyze-doc-keywords.ts "$TAG" || echo "Warning: Keyword analysis failed, continuing..."
+
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'
         run: |
@@ -228,6 +237,12 @@ jobs:
           if [ -d snapshots/summaries ]; then
             mkdir -p packages/landing/static/data/summaries
             cp -r snapshots/summaries/* packages/landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
+          fi
+
+          # Copy word frequencies so the /journey page can display them
+          if [ -d snapshots/word-frequencies ]; then
+            mkdir -p packages/landing/static/data/word-frequencies
+            cp -r snapshots/word-frequencies/* packages/landing/static/data/word-frequencies/ 2>/dev/null || echo "No word frequencies to copy"
           fi
 
       - name: Commit and push snapshot

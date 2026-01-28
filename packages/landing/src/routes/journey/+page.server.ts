@@ -33,6 +33,27 @@ interface VersionSummary {
   };
 }
 
+interface WordFrequency {
+  word: string;
+  count: number;
+  pct: number;
+}
+
+interface WordAnalysis {
+  version: string;
+  timestamp: string;
+  topWords: WordFrequency[];
+  totalWords: number;
+  uniqueWords: number;
+  totalFiles: number;
+  funFacts: {
+    mostUsedWord: string;
+    groveCount: number;
+    wandererCount: number;
+    mostDocumentedTopic: string;
+  };
+}
+
 interface SnapshotData {
   timestamp: string;
   label: string;
@@ -119,6 +140,15 @@ const summaryModules = import.meta.glob(
   },
 ) as Record<string, VersionSummary>;
 
+// Load all word frequency JSON files at build time
+const wordFrequencyModules = import.meta.glob(
+  "../../../static/data/word-frequencies/*.json",
+  {
+    eager: true,
+    import: "default",
+  },
+) as Record<string, WordAnalysis>;
+
 function loadSummaries(): Map<string, VersionSummary> {
   const summaries = new Map<string, VersionSummary>();
 
@@ -129,6 +159,18 @@ function loadSummaries(): Map<string, VersionSummary> {
   }
 
   return summaries;
+}
+
+function loadWordFrequencies(): Record<string, WordAnalysis> {
+  const frequencies: Record<string, WordAnalysis> = {};
+
+  for (const [path, data] of Object.entries(wordFrequencyModules)) {
+    if (data && data.version) {
+      frequencies[data.version] = data;
+    }
+  }
+
+  return frequencies;
 }
 
 export function load() {
@@ -143,6 +185,7 @@ export function load() {
       growth: null,
       totalSnapshots: 0,
       summaries: Object.fromEntries(summaries),
+      wordFrequencies: loadWordFrequencies(),
     };
   }
 
@@ -166,5 +209,6 @@ export function load() {
     growth,
     totalSnapshots: snapshots.length,
     summaries: Object.fromEntries(summaries),
+    wordFrequencies: loadWordFrequencies(),
   };
 }
