@@ -201,6 +201,30 @@ describe("Grove Entrance Animation", () => {
     });
   });
 
+  describe("animation cooldown", () => {
+    it("should define cooldown duration of 15 minutes", () => {
+      // 15 * 60 * 1000 = 900000ms
+      expect(appHtml).toContain("15 * 60 * 1000");
+    });
+
+    it("should use grove-vines-last-shown localStorage key", () => {
+      expect(appHtml).toContain("grove-vines-last-shown");
+    });
+
+    it("should check localStorage for last shown timestamp", () => {
+      expect(appHtml).toContain("localStorage.getItem(KEY)");
+    });
+
+    it("should record timestamp when showing animation", () => {
+      expect(appHtml).toContain("localStorage.setItem(KEY");
+    });
+
+    it("should skip animation when within cooldown period", () => {
+      // When showAnimation is false, overlay is removed immediately
+      expect(appHtml).toContain("!showAnimation");
+    });
+  });
+
   describe("SVG vine graphics", () => {
     it("should have inline SVG vine graphics with segment viewBox", () => {
       // v3: Each segment has a 125px tall viewBox (1000px / 8 segments)

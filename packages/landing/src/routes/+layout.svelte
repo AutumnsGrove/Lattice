@@ -11,6 +11,37 @@
 	// Access the store to ensure it initializes (the store auto-applies dark class via its own effects)
 	themeStore.resolvedTheme;
 
+	// Cooldown configuration for the vine parting animation
+	const VINES_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+	const VINES_STORAGE_KEY = 'grove-vines-last-shown';
+
+	/**
+	 * Check if the vine parting animation should be shown based on cooldown.
+	 * Returns true if the animation should play (cooldown elapsed or never shown).
+	 */
+	function shouldShowVinesAnimation(): boolean {
+		try {
+			const lastShown = localStorage.getItem(VINES_STORAGE_KEY);
+			if (!lastShown) return true;
+			const elapsed = Date.now() - parseInt(lastShown, 10);
+			return elapsed >= VINES_COOLDOWN_MS;
+		} catch {
+			// localStorage unavailable - show animation
+			return true;
+		}
+	}
+
+	/**
+	 * Record that the vine animation was shown.
+	 */
+	function recordVinesShown(): void {
+		try {
+			localStorage.setItem(VINES_STORAGE_KEY, Date.now().toString());
+		} catch {
+			// localStorage unavailable - silently fail
+		}
+	}
+
 	// Remove loading overlay when Svelte hydrates
 	// Defense-in-depth: This is the PRIMARY removal mechanism. A fallback handler
 	// in app.html's <script> also triggers removal on window.load in case hydration
@@ -23,10 +54,17 @@
 			if (overlay) {
 				// Immediately allow interaction through the overlay
 				overlay.style.pointerEvents = 'none';
-				// Trigger the parting animation
-				overlay.classList.add('grove-parting');
-				// Remove after animation completes (reduced from 3500ms for faster cleanup)
-				setTimeout(() => overlay.remove(), 2500);
+
+				if (shouldShowVinesAnimation()) {
+					// Show the animation and record timestamp
+					overlay.classList.add('grove-parting');
+					recordVinesShown();
+					// Remove after animation completes (reduced from 3500ms for faster cleanup)
+					setTimeout(() => overlay.remove(), 2500);
+				} else {
+					// Within cooldown - skip animation and remove immediately
+					overlay.remove();
+				}
 			}
 		}
 	});
