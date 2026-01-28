@@ -27,7 +27,7 @@
   target="_blank"
   rel="noopener noreferrer"
   class={cn('waystone', `waystone--${size}`, inline && 'waystone--inline', className)}
-  title={label}
+  title="Help: {label}"
 >
   <span class="sr-only">Help: {label}</span>
   <HelpCircle class="waystone-icon" />
