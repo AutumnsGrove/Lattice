@@ -1,5 +1,5 @@
 ---
-title: What is Reeds?
+title: What are Reeds?
 description: Grove's comment system with private replies and public conversations
 category: help
 section: how-it-works
@@ -13,7 +13,7 @@ keywords:
 order: 51
 ---
 
-# What is Reeds?
+# What are Reeds?
 
 Every blog post invites a response. Reeds is how those responses happen.
 

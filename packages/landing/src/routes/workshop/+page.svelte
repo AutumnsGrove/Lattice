@@ -450,7 +450,7 @@
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
 					spec: '/knowledge/specs/reeds-spec',
-					whatIsLink: '/knowledge/help/what-is-reeds',
+					whatIsLink: '/knowledge/help/what-are-reeds',
 					subComponents: [
 						{ name: 'Replies', icon: 'reply', description: 'Private to author' },
 						{ name: 'Comments', icon: 'messagecircle', description: 'Public discussion' }
