@@ -7,6 +7,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { getRealOrigin } from "$lib/server/origin";
 
 /**
  * Get client IP from request headers (Cloudflare provides CF-Connecting-IP)
@@ -159,7 +160,7 @@ export const GET: RequestHandler = async ({
       platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
     const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
     const clientSecret = platform?.env?.GROVEAUTH_CLIENT_SECRET || "";
-    const redirectUri = `${url.origin}/auth/callback`;
+    const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
 
     // Exchange code for tokens
     const tokenResponse = await fetch(`${authBaseUrl}/token`, {

@@ -12,6 +12,7 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createSession, getOrCreateUser } from "$lib/server/db";
+import { getRealOrigin } from "$lib/server/origin";
 
 /**
  * Map GroveAuth error codes to user-friendly messages.
@@ -40,7 +41,12 @@ function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
   if (!platform?.env?.DB) {
     throw error(500, "Database not available");
   }
@@ -98,7 +104,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       platform.env.GROVEAUTH_URL || "https://auth-api.grove.place";
 
     // Build redirect URI - URLSearchParams handles encoding automatically
-    const redirectUri = GROVEAUTH_REDIRECT_URI || `${url.origin}/auth/callback`;
+    const redirectUri =
+      GROVEAUTH_REDIRECT_URI || `${getRealOrigin(request, url)}/auth/callback`;
 
     // Exchange code for tokens
     const tokenResponse = await fetch(`${authBaseUrl}/token`, {

@@ -7,6 +7,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { getRealOrigin } from "$lib/server/origin";
 
 /**
  * Generate a cryptographically secure random string
@@ -34,11 +35,16 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
   const authBaseUrl =
     platform?.env?.GROVEAUTH_URL || "https://auth.grove.place";
   const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "groveengine";
-  const redirectUri = `${url.origin}/auth/callback`;
+  const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
 
   // Check for return_to parameter
   const returnTo =

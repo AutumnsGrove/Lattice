@@ -4,17 +4,22 @@
  * Initiates the OAuth flow by redirecting to GroveAuth with PKCE.
  */
 
-import { redirect } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import { redirect } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { getRealOrigin } from "$lib/server/origin";
 
 /**
  * Generate a cryptographically secure random string
  */
 function generateRandomString(length: number): string {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const randomValues = new Uint8Array(length);
   crypto.getRandomValues(randomValues);
-  return Array.from(randomValues, (byte) => charset[byte % charset.length]).join('');
+  return Array.from(
+    randomValues,
+    (byte) => charset[byte % charset.length],
+  ).join("");
 }
 
 /**
@@ -23,16 +28,24 @@ function generateRandomString(length: number): string {
 async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
-  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hash = await crypto.subtle.digest("SHA-256", data);
   const base64 = btoa(String.fromCharCode(...new Uint8Array(hash)));
   // URL-safe base64
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || 'https://auth.grove.place';
-  const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || 'domains';
-  const redirectUri = platform?.env?.GROVEAUTH_REDIRECT_URI || `${url.origin}/auth/callback`;
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
+  const authBaseUrl =
+    platform?.env?.GROVEAUTH_URL || "https://auth.grove.place";
+  const clientId = platform?.env?.GROVEAUTH_CLIENT_ID || "domains";
+  const redirectUri =
+    platform?.env?.GROVEAUTH_REDIRECT_URI ||
+    `${getRealOrigin(request, url)}/auth/callback`;
 
   // Generate PKCE values
   const state = crypto.randomUUID();
@@ -40,19 +53,19 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const codeChallenge = await generateCodeChallenge(codeVerifier);
 
   // Store state and code verifier in cookies
-  cookies.set('auth_state', state, {
-    path: '/',
+  cookies.set("auth_state", state, {
+    path: "/",
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: "lax",
     maxAge: 60 * 10, // 10 minutes
   });
 
-  cookies.set('auth_code_verifier', codeVerifier, {
-    path: '/',
+  cookies.set("auth_code_verifier", codeVerifier, {
+    path: "/",
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: "lax",
     maxAge: 60 * 10, // 10 minutes
   });
 
@@ -62,7 +75,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     redirect_uri: redirectUri,
     state,
     code_challenge: codeChallenge,
-    code_challenge_method: 'S256',
+    code_challenge_method: "S256",
   });
 
   throw redirect(302, `${authBaseUrl}/login?${params}`);
