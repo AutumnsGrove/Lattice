@@ -144,6 +144,17 @@ describe("evaluateDeepCheck", () => {
     expect(result.status).toBe("operational");
   });
 
+  it("should return maintenance for status 'maintenance'", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ status: "maintenance" }), { status: 203 }),
+    );
+    vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(100);
+
+    const result = await checkComponent(deepComponent);
+    expect(result.status).toBe("maintenance");
+    expect(result.error).toBeNull();
+  });
+
   it("should return degraded for invalid JSON", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("not json", { status: 200 }),

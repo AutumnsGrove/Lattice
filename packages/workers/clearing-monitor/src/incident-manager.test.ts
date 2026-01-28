@@ -259,6 +259,34 @@ describe("processHealthCheckResult - State Machine", () => {
       expect.objectContaining({ expirationTtl: 604800 }),
     );
   });
+
+  it("should handle maintenance status without creating incidents", async () => {
+    const maintenanceResult: HealthCheckResult = {
+      componentId: "comp_test",
+      componentName: "Test Service",
+      status: "maintenance",
+      latencyMs: 100,
+      httpStatus: 203,
+      error: null,
+      timestamp: "2025-01-01T00:00:00.000Z",
+    };
+
+    await processHealthCheckResult(env, maintenanceResult);
+
+    // Should update component status to maintenance
+    expect(env.DB.prepare).toHaveBeenCalledWith(
+      expect.stringContaining("UPDATE status_components"),
+    );
+
+    // Should NOT create an incident
+    expect(env.DB.batch).not.toHaveBeenCalled();
+
+    // Should save state with maintenance status
+    const savedState = JSON.parse(
+      (env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
+    );
+    expect(savedState.lastStatus).toBe("maintenance");
+  });
 });
 
 describe("sendEmailAlert", () => {
