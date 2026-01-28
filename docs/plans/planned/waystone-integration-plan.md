@@ -540,7 +540,7 @@ Help articles should be cached aggressively:
 | Question | Decision |
 |----------|----------|
 | **Mobile behavior** | Tappable button, opens article in new tab (same as desktop) |
-| **Interaction model** | Opens new tab + tooltip preview with "Read more" link, aria-labels for accessibility |
+| **Interaction model** | Opens new tab; tooltip preview with "Read more" link is a **post-v1 enhancement** (Phase 1 = simple link with aria-labels) |
 | **Search for v1** | Skip — browse by category only |
 | **"Was this helpful?"** | Include in v1 — simple thumbs up/down using Lucide icons |
 | **Article workflow** | Deploy fresh with builds; keep markdown in repo; add "Edit on GitHub" link for contributors |
@@ -574,11 +574,12 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
     <p class="feedback-prompt">Was this helpful?</p>
     <div class="feedback-buttons">
       <form method="POST" action="/help/feedback" use:enhance={() => {
-        return async ({ result }) => {
+        return async ({ result, update }) => {
           if (result.type === 'success') {
             submitted = true;
             feedback = 'helpful';
           }
+          await update({ reset: false });
         };
       }}>
         <input type="hidden" name="slug" value={articleSlug} />
@@ -593,11 +594,12 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
       </form>
 
       <form method="POST" action="/help/feedback" use:enhance={() => {
-        return async ({ result }) => {
+        return async ({ result, update }) => {
           if (result.type === 'success') {
             submitted = true;
             feedback = 'not_helpful';
           }
+          await update({ reset: false });
         };
       }}>
         <input type="hidden" name="slug" value={articleSlug} />
@@ -613,7 +615,7 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
     </div>
   </div>
 {:else}
-  <div class="article-feedback article-feedback--submitted">
+  <div class="article-feedback article-feedback--submitted" aria-live="polite">
     <p class="feedback-thanks">
       {#if feedback === 'helpful'}
         Thanks for the feedback!
@@ -704,13 +706,23 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+// Validate slug to prevent directory traversal and injection
+function isValidSlug(slug: string): boolean {
+  // Only allow alphanumeric, hyphens, underscores, and forward slashes
+  // No "..", no leading/trailing slashes, max 200 chars
+  if (!slug || slug.length > 200) return false;
+  if (slug.includes('..')) return false;
+  if (slug.startsWith('/') || slug.endsWith('/')) return false;
+  return /^[a-z0-9][a-z0-9\-_\/]*[a-z0-9]$/.test(slug);
+}
+
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const data = await request.formData();
   const slug = data.get('slug') as string;
   const helpful = data.get('helpful') === 'true';
 
-  if (!slug) {
-    return json({ error: 'Missing article slug' }, { status: 400 });
+  if (!slug || !isValidSlug(slug)) {
+    return json({ error: 'Invalid article slug' }, { status: 400 });
   }
 
   // Store feedback in D1
