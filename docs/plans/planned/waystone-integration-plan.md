@@ -726,7 +726,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // Validate slug to prevent directory traversal and injection
-// Each path segment must: start with alphanumeric, contain only [a-z0-9\-_], end with alphanumeric
+// Each path segment must: start with alphanumeric, contain only [a-z0-9\-], end with alphanumeric
+// Note: Only hyphens allowed (not underscores) to match existing article slug conventions
 function isValidSlug(slug: string): boolean {
   if (!slug || slug.length > 200) return false;
   if (slug.includes('..')) return false;
@@ -738,8 +739,8 @@ function isValidSlug(slug: string): boolean {
     if (segment.length === 1) {
       if (!/^[a-z0-9]$/.test(segment)) return false;
     } else {
-      // Multi-char segments must start/end with alphanumeric, middle can have hyphens/underscores
-      if (!/^[a-z0-9][a-z0-9\-_]*[a-z0-9]$/.test(segment)) return false;
+      // Multi-char segments must start/end with alphanumeric, middle can have hyphens only
+      if (!/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/.test(segment)) return false;
     }
   }
   return true;
@@ -789,6 +790,12 @@ CREATE INDEX idx_feedback_slug ON help_article_feedback(article_slug);
 Each article page includes an "Edit on GitHub" link for community contributions:
 
 ```svelte
+<script lang="ts">
+  // Additional imports for HelpArticle.svelte footer
+  import { Pencil } from 'lucide-svelte';
+  import ArticleFeedback from './ArticleFeedback.svelte';
+</script>
+
 <!-- In HelpArticle.svelte footer -->
 <footer class="article-footer">
   <div class="footer-meta">
