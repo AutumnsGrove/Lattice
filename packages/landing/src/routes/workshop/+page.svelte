@@ -337,6 +337,7 @@
 					icon: 'barchart',
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
 					spec: '/knowledge/specs/rings-spec',
+					whatIsLink: '/knowledge/help/what-is-rings',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Views', icon: 'eye', description: 'Page views' },
@@ -384,6 +385,7 @@
 					icon: 'file-warning',
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec',
+					whatIsLink: '/knowledge/help/what-is-thorn',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
@@ -398,6 +400,7 @@
 					icon: 'fan',
 					integration: 'Image moderation for uploads and AI-generated content',
 					spec: '/knowledge/specs/petal-spec',
+					whatIsLink: '/knowledge/help/what-is-petal',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
@@ -412,6 +415,7 @@
 					icon: 'wind',
 					integration: 'Integrated into the Grove editor, off by default',
 					spec: '/knowledge/specs/wisp-spec',
+					whatIsLink: '/knowledge/help/what-is-wisp',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
