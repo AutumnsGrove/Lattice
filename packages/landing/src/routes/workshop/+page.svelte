@@ -268,8 +268,9 @@
 					name: 'Terrarium',
 					tagline: 'Creative Canvas',
 					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
-					status: 'planned',
+					status: 'building',
 					icon: 'pencilruler',
+					domain: 'terrarium.grove.place',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec',
 					subComponents: [
