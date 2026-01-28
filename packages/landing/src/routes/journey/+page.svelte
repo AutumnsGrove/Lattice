@@ -15,7 +15,6 @@
 		{ id: 'growth-over-time', text: 'Growth Over Time' },
 		{ id: 'documentation', text: 'Documentation' },
 		{ id: 'milestones', text: 'Milestones' },
-		{ id: 'typescript-migration', text: 'TypeScript Migration' },
 		{ id: 'package-size', text: 'Package Size' }
 	];
 
@@ -106,13 +105,6 @@
 		];
 	}
 
-	// Calculate TypeScript percentage for a snapshot (TS vs JS only)
-	function getTsPercentage(snapshot: any): number {
-		const scriptLines = snapshot.tsLines + snapshot.jsLines;
-		if (scriptLines === 0) return 0;
-		return Math.round((snapshot.tsLines / scriptLines) * 100);
-	}
-
 	// Get max doc lines for chart scaling
 	const maxDocLines = $derived(
 		data.snapshots.length > 0
@@ -125,20 +117,6 @@
 		if (snapshot.docLines === 0) return 0;
 		return Math.round((snapshot.totalCodeLines / snapshot.docLines) * 100) / 100;
 	}
-
-	// Get first and latest TS percentages for migration stats
-	const tsProgression = $derived(() => {
-		if (data.snapshots.length < 2) return null;
-		const first = data.snapshots[0];
-		const latest = data.snapshots[data.snapshots.length - 1];
-		return {
-			startPct: getTsPercentage(first),
-			currentPct: getTsPercentage(latest),
-			startLabel: first.label,
-			currentLabel: latest.label,
-			growth: getTsPercentage(latest) - getTsPercentage(first)
-		};
-	});
 </script>
 
 <SEO
@@ -452,71 +430,6 @@
 								</div>
 							</div>
 						{/each}
-					</div>
-				</div>
-			</section>
-			{/if}
-
-			<!-- TypeScript Migration Progress -->
-			{#if tsProgression()}
-			<section id="typescript-migration" class="mb-16 scroll-mt-24">
-				<h2 class="text-sm font-sans text-foreground-faint uppercase tracking-wide mb-6 text-center">TypeScript Migration</h2>
-
-				<div class="card p-4 md:p-6">
-					<!-- Summary stats -->
-					<div class="flex justify-between items-center mb-4 md:mb-6">
-						<div class="text-center">
-							<div class="text-xl md:text-2xl font-mono text-[#f59e0b]">{tsProgression()?.startPct}%</div>
-							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.startLabel}</div>
-						</div>
-						<div class="flex-1 mx-3 md:mx-6 flex items-center gap-1.5 md:gap-2">
-							<div class="flex-1 h-px bg-divider"></div>
-							<div class="text-accent-muted font-mono text-xs md:text-sm">+{tsProgression()?.growth}%</div>
-							<div class="flex-1 h-px bg-divider"></div>
-						</div>
-						<div class="text-center">
-							<div class="text-xl md:text-2xl font-mono text-[#0284c7]">{tsProgression()?.currentPct}%</div>
-							<div class="text-[10px] md:text-xs text-foreground-faint font-sans">{tsProgression()?.currentLabel}</div>
-						</div>
-					</div>
-
-					<!-- Progress bar timeline -->
-					<div class="space-y-1.5 md:space-y-2">
-						{#each data.snapshots as snapshot, i}
-							{@const tsPct = getTsPercentage(snapshot)}
-							<div class="flex items-center gap-2 md:gap-3">
-								<div class="w-12 md:w-16 text-right shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-foreground-faint">{snapshot.label}</span>
-								</div>
-								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden flex min-w-0">
-									<div
-										class="h-full bg-[#0284c7] transition-all duration-500"
-										style="width: {tsPct}%"
-										title="TypeScript: {tsPct}%"
-									></div>
-									<div
-										class="h-full bg-[#f59e0b] transition-all duration-500"
-										style="width: {100 - tsPct}%"
-										title="JavaScript: {100 - tsPct}%"
-									></div>
-								</div>
-								<div class="w-9 md:w-12 text-left shrink-0">
-									<span class="text-[10px] md:text-xs font-mono text-[#0284c7]">{tsPct}%</span>
-								</div>
-							</div>
-						{/each}
-					</div>
-
-					<!-- Legend -->
-					<div class="flex justify-center gap-6 mt-4 pt-4 border-t border-default">
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 rounded-full bg-[#0284c7]"></div>
-							<span class="text-xs font-sans text-foreground-muted">TypeScript</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div>
-							<span class="text-xs font-sans text-foreground-muted">JavaScript</span>
-						</div>
 					</div>
 				</div>
 			</section>
