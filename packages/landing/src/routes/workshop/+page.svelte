@@ -83,6 +83,7 @@
 					integration: 'Powers authentication for all Grove services',
 					github: 'https://github.com/AutumnsGrove/GroveAuth',
 					spec: '/knowledge/specs/heartwood-spec',
+					whatIsLink: '/knowledge/help/what-is-heartwood',
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
@@ -115,7 +116,8 @@
 					domain: 'status.grove.place',
 					integration: 'Public platform status for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Clearing',
-					spec: '/knowledge/specs/clearing-spec'
+					spec: '/knowledge/specs/clearing-spec',
+					whatIsLink: '/knowledge/help/what-is-clearing'
 				},
 				{
 					name: 'Arbor',
@@ -126,6 +128,7 @@
 					domain: '{you}.grove.place/admin',
 					integration: 'Built into every Grove blog',
 					spec: '/knowledge/specs/arbor-spec',
+					whatIsLink: '/knowledge/help/what-is-arbor',
 					subComponents: [
 						{ name: 'Posts', icon: 'penline', description: 'Write & edit' },
 						{ name: 'Pages', icon: 'layout', description: 'Static pages' },
@@ -140,6 +143,7 @@
 					icon: 'drafting-compass',
 					integration: 'Built into Arbor',
 					spec: '/knowledge/specs/flow-spec',
+					whatIsLink: '/knowledge/help/what-is-flow',
 					subComponents: [
 						{ name: 'Zen', icon: 'focus', description: 'Distraction-free mode' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
@@ -156,6 +160,7 @@
 					domain: 'plant.grove.place',
 					integration: 'Signup and onboarding for new Wanderers',
 					spec: '/knowledge/specs/plant-spec',
+					whatIsLink: '/knowledge/help/what-is-plant',
 					subComponents: [
 						{ name: 'Loam', icon: 'funnel', description: 'Name protection & validation', href: '/knowledge/specs/loam-spec' }
 					]
@@ -168,6 +173,7 @@
 					icon: 'goal',
 					integration: 'Operator-configured feature customization',
 					spec: '/knowledge/specs/grafts-spec',
+					whatIsLink: '/knowledge/help/what-is-grafts',
 					subComponents: [
 						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
 						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },
@@ -187,7 +193,8 @@
 					domain: 'amber.grove.place',
 					integration: 'Storage dashboard for all Wanderers',
 					github: 'https://github.com/AutumnsGrove/Amber',
-					spec: '/knowledge/specs/amber-spec'
+					spec: '/knowledge/specs/amber-spec',
+					whatIsLink: '/knowledge/help/what-is-amber'
 				},
 				{
 					name: 'Centennial',
@@ -198,6 +205,7 @@
 					integration: 'Automatic unlock after 12 months of Sapling+ membership',
 					spec: '/knowledge/specs/centennial-spec',
 					howLink: '/knowledge/philosophy/grove-sustainability',
+					whatIsLink: '/knowledge/help/what-is-centennial',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
@@ -244,6 +252,7 @@
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
 					spec: '/knowledge/specs/foliage-project-spec',
+					whatIsLink: '/knowledge/help/what-is-foliage',
 					subComponents: [
 						{ name: 'Themes', icon: 'paintbrush', description: 'Curated themes' },
 						{ name: 'Customizer', icon: 'sliders', description: 'Full control' },
@@ -258,6 +267,7 @@
 					icon: 'amphora',
 					integration: 'Visitor experience features for all Grove blogs',
 					spec: '/knowledge/specs/curios-spec',
+					whatIsLink: '/knowledge/help/what-is-curios',
 					subComponents: [
 						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
 						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
@@ -273,6 +283,7 @@
 					domain: 'terrarium.grove.place',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec',
+					whatIsLink: '/knowledge/help/what-is-terrarium',
 					subComponents: [
 						{ name: 'Canvas', icon: 'frame', description: 'Design space' },
 						{ name: 'Assets', icon: 'shapes', description: 'Nature components' },
@@ -287,6 +298,7 @@
 					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
+					whatIsLink: '/knowledge/help/what-is-weave',
 					subComponents: [
 						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
 						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
@@ -306,7 +318,8 @@
 					status: 'live',
 					icon: 'signpost',
 					integration: 'Built into all Grove properties',
-					spec: '/knowledge/specs/waystone-spec'
+					spec: '/knowledge/specs/waystone-spec',
+					whatIsLink: '/knowledge/help/what-is-waystone'
 				},
 				{
 					name: 'Porch',
@@ -316,7 +329,8 @@
 					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
 					integration: 'Support and conversation for all Wanderers',
-					spec: '/knowledge/specs/porch-spec'
+					spec: '/knowledge/specs/porch-spec',
+					whatIsLink: '/knowledge/help/what-is-porch'
 				},
 				{
 					name: 'Rings',
@@ -326,6 +340,7 @@
 					icon: 'barchart',
 					integration: 'Analytics dashboard for Grove blogs (Sapling tier and up)',
 					spec: '/knowledge/specs/rings-spec',
+					whatIsLink: '/knowledge/help/what-is-rings',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Views', icon: 'eye', description: 'Page views' },
@@ -346,7 +361,8 @@
 					status: 'building',
 					icon: 'mapplus',
 					integration: 'Available for all Grove blogs',
-					spec: '/knowledge/specs/trails-spec'
+					spec: '/knowledge/specs/trails-spec',
+					whatIsLink: '/knowledge/help/what-is-trails'
 				},
 				{
 					name: 'Meadow',
@@ -372,6 +388,7 @@
 					icon: 'file-warning',
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec',
+					whatIsLink: '/knowledge/help/what-is-thorn',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
@@ -386,6 +403,7 @@
 					icon: 'fan',
 					integration: 'Image moderation for uploads and AI-generated content',
 					spec: '/knowledge/specs/petal-spec',
+					whatIsLink: '/knowledge/help/what-is-petal',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Privacy', icon: 'globelock', description: 'No data retention' },
@@ -400,6 +418,7 @@
 					icon: 'wind',
 					integration: 'Integrated into the Grove editor, off by default',
 					spec: '/knowledge/specs/wisp-spec',
+					whatIsLink: '/knowledge/help/what-is-wisp',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
@@ -432,6 +451,7 @@
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
 					spec: '/knowledge/specs/reeds-spec',
+					whatIsLink: '/knowledge/help/what-are-reeds',
 					subComponents: [
 						{ name: 'Replies', icon: 'reply', description: 'Private to author' },
 						{ name: 'Comments', icon: 'messagecircle', description: 'Public discussion' }
@@ -482,6 +502,7 @@
 					integration: 'Available as an add-on for Evergreen tier, or standalone purchase',
 					github: 'https://github.com/AutumnsGrove/Forage',
 					spec: '/knowledge/specs/forage-spec',
+					whatIsLink: '/knowledge/help/what-is-forage',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' },
@@ -513,6 +534,7 @@
 					integration: 'Included with Oak and Evergreen tiers',
 					github: 'https://github.com/AutumnsGrove/Ivy',
 					spec: '/knowledge/specs/ivy-mail-spec',
+					whatIsLink: '/knowledge/help/what-is-ivy',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Compose', icon: 'component', description: 'Write emails' },
@@ -594,6 +616,7 @@
 					domain: 'grove.place/shade',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
+					whatIsLink: '/knowledge/help/what-is-shade',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
@@ -674,7 +697,8 @@
 					status: 'live',
 					icon: 'triangle',
 					integration: 'Visual foundation for all Grove properties',
-					spec: '/knowledge/patterns/prism-pattern'
+					spec: '/knowledge/patterns/prism-pattern',
+					whatIsLink: '/knowledge/help/what-is-prism'
 				},
 				{
 					name: 'Loom',
@@ -699,6 +723,7 @@
 					icon: 'gauge',
 					integration: 'Protection layer for all Grove endpoints',
 					spec: '/knowledge/patterns/threshold-pattern',
+					whatIsLink: '/knowledge/help/what-is-threshold',
 					subComponents: [
 						{ name: 'Edge', icon: 'servercog', description: 'Cloudflare protection' },
 						{ name: 'Tenant', icon: 'codepen', description: 'Per-tenant limits' },
