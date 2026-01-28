@@ -306,9 +306,9 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("top: 125px");
     });
 
-    it("should use 1.8s animation duration for snappy effect", () => {
-      // v3 optimized: 1.8s duration is faster while still appreciable
-      expect(appHtml).toContain("1.8s ease-out");
+    it("should use 2.5s animation duration for appreciable effect", () => {
+      // Original timing (reverted from 1.8s): 2.5s is slower but more elegant
+      expect(appHtml).toContain("2.5s ease-out");
     });
   });
 });
