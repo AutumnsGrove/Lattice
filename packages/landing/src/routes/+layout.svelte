@@ -13,6 +13,7 @@
 
 	// Cooldown configuration for the vine parting animation
 	const VINES_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+	const VINES_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days - treat older timestamps as stale
 	const VINES_STORAGE_KEY = 'grove-vines-last-shown';
 
 	/**
@@ -23,7 +24,11 @@
 		try {
 			const lastShown = localStorage.getItem(VINES_STORAGE_KEY);
 			if (!lastShown) return true;
-			const elapsed = Date.now() - parseInt(lastShown, 10);
+			const timestamp = parseInt(lastShown, 10);
+			// Treat malformed or impossibly old timestamps as stale
+			if (isNaN(timestamp)) return true;
+			const elapsed = Date.now() - timestamp;
+			if (elapsed < 0 || elapsed > VINES_MAX_AGE_MS) return true;
 			return elapsed >= VINES_COOLDOWN_MS;
 		} catch {
 			// localStorage unavailable - show animation

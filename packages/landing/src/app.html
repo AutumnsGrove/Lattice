@@ -1074,12 +1074,18 @@
 
           // Cooldown check: skip animation if shown recently (15 minutes)
           var COOLDOWN = 15 * 60 * 1000;
+          var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
           var KEY = 'grove-vines-last-shown';
           var showAnimation = true;
           try {
             var last = localStorage.getItem(KEY);
-            if (last && (Date.now() - parseInt(last, 10)) < COOLDOWN) {
-              showAnimation = false;
+            if (last) {
+              var ts = parseInt(last, 10);
+              var elapsed = Date.now() - ts;
+              // Only apply cooldown if timestamp is valid and not stale
+              if (!isNaN(ts) && elapsed >= 0 && elapsed < MAX_AGE && elapsed < COOLDOWN) {
+                showAnimation = false;
+              }
             }
           } catch (e) {}
 
@@ -1088,15 +1094,14 @@
             o.classList.add('grove-parting');
             // Record that we showed the animation
             try { localStorage.setItem(KEY, Date.now().toString()); } catch (e) {}
-            // Remove after animation completes
-            // Max delay (980ms) + duration (2500ms) = 3480ms; use 3500ms for safety buffer
-            setTimeout(function() { if (o) o.remove(); }, 3500);
+            // Remove after animation completes (2500ms matches +layout.svelte)
+            setTimeout(function() { if (o) o.remove(); }, 2500);
           } else if (!showAnimation) {
             // Within cooldown - remove immediately without animation
             o.remove();
           } else {
             // Animation already triggered by Svelte, just ensure cleanup
-            setTimeout(function() { if (o) o.remove(); }, 3500);
+            setTimeout(function() { if (o) o.remove(); }, 2500);
           }
         }, 100);
       });
