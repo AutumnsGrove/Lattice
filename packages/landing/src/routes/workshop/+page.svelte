@@ -173,7 +173,7 @@
 					icon: 'goal',
 					integration: 'Operator-configured feature customization',
 					spec: '/knowledge/specs/grafts-spec',
-					whatIsLink: '/knowledge/help/what-is-grafts',
+					whatIsLink: '/knowledge/help/what-are-grafts',
 					subComponents: [
 						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
 						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },
@@ -267,7 +267,7 @@
 					icon: 'amphora',
 					integration: 'Visitor experience features for all Grove blogs',
 					spec: '/knowledge/specs/curios-spec',
-					whatIsLink: '/knowledge/help/what-is-curios',
+					whatIsLink: '/knowledge/help/what-are-curios',
 					subComponents: [
 						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
 						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },

@@ -1,5 +1,5 @@
 ---
-title: What is Grafts?
+title: What are Grafts?
 description: Grove's system for enabling and customizing features on individual blogs
 category: help
 section: how-it-works
@@ -13,7 +13,7 @@ keywords:
 order: 23
 ---
 
-# What is Grafts?
+# What are Grafts?
 
 Not every tree needs the same branches. Some need extra shade. Some need room to fruit. Some are ready for experimental growth.
 

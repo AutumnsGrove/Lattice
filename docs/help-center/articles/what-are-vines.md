@@ -43,7 +43,7 @@ Right now, Vines support:
 - **Photos** — Supporting images that don't belong in the main flow
 - **Galleries** — Multiple images grouped together
 
-More content types are coming. Eventually Vines will support components (called Cheerios in Grove)—embeddable interactive elements that bring your margins to life.
+More content types are coming. Eventually Vines will support components (called Curios in Grove)—embeddable interactive elements that bring your margins to life.
 
 ## How they work
 

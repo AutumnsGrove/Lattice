@@ -1,5 +1,5 @@
 ---
-title: What is Curios?
+title: What are Curios?
 description: Grove's cabinet of wonders for guestbooks, shrines, and personal site decorations
 category: help
 section: how-it-works
@@ -15,7 +15,7 @@ keywords:
 order: 21
 ---
 
-# What is Curios?
+# What are Curios?
 
 Remember when personal websites had guestbooks? Hit counters? Blinking "under construction" signs? Those little touches that said "someone lives here"?
 

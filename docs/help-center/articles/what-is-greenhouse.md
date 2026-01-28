@@ -29,7 +29,7 @@ This isn't just about finding bugs. It's about listening. Greenhouse members giv
 
 ## How it works
 
-Greenhouse operates through the [Grafts](/knowledge/help/what-is-grafts) system. When a feature is in greenhouse testing, it gets grafted onto specific groves rather than rolled out universally.
+Greenhouse operates through the [Grafts](/knowledge/help/what-are-grafts) system. When a feature is in greenhouse testing, it gets grafted onto specific groves rather than rolled out universally.
 
 **Who gets greenhouse access?** — A few ways:
 - Higher subscription tiers often get automatic greenhouse access
@@ -54,7 +54,7 @@ Greenhouse operates through the [Grafts](/knowledge/help/what-is-grafts) system.
 
 ## Related
 
-- [What is Grafts?](/knowledge/help/what-is-grafts) — How features get enabled
+- [What are Grafts?](/knowledge/help/what-are-grafts) — How features get enabled
 - [What is Porch?](/knowledge/help/what-is-porch) — Where to send feedback
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
 
