@@ -21,10 +21,12 @@
 		if (browser) {
 			const overlay = document.getElementById('grove-loading-overlay');
 			if (overlay) {
+				// Immediately allow interaction through the overlay
+				overlay.style.pointerEvents = 'none';
 				// Trigger the parting animation
 				overlay.classList.add('grove-parting');
-				// Remove after animation completes (~3s for segmented animation)
-				setTimeout(() => overlay.remove(), 3500);
+				// Remove after animation completes (reduced from 3500ms for faster cleanup)
+				setTimeout(() => overlay.remove(), 2500);
 			}
 		}
 	});

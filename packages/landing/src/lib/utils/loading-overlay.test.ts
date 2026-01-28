@@ -162,9 +162,10 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("#122a1a");
     });
 
-    it("should have glass backdrop with blur effect", () => {
-      expect(appHtml).toContain("backdrop-filter: blur");
-      expect(appHtml).toContain("-webkit-backdrop-filter: blur");
+    it("should have glass backdrop with semi-transparent background", () => {
+      // Note: backdrop-filter blur was removed for performance optimization
+      expect(appHtml).toContain("#grove-glass-backdrop");
+      expect(appHtml).toContain("background: rgba(30, 30, 30, 0.75)");
     });
 
     it("should have light mode styles for logo", () => {
@@ -281,15 +282,9 @@ describe("Grove Entrance Animation", () => {
       expect(appHtml).toContain("top: 125px");
     });
 
-    it("should use 2.5s animation duration for slow appreciation", () => {
-      // v3: 2.5s duration is slow enough to appreciate the animation
-      expect(appHtml).toContain("2.5s ease-out");
-    });
-  });
-
-  describe("browser compatibility", () => {
-    it("should have fallback for browsers without backdrop-filter", () => {
-      expect(appHtml).toContain("@supports not (backdrop-filter: blur");
+    it("should use 1.8s animation duration for snappy effect", () => {
+      // v3 optimized: 1.8s duration is faster while still appreciable
+      expect(appHtml).toContain("1.8s ease-out");
     });
   });
 });
