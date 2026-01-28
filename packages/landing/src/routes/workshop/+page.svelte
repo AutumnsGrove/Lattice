@@ -83,6 +83,7 @@
 					integration: 'Powers authentication for all Grove services',
 					github: 'https://github.com/AutumnsGrove/GroveAuth',
 					spec: '/knowledge/specs/heartwood-spec',
+					whatIsLink: '/knowledge/help/what-is-heartwood',
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
@@ -126,6 +127,7 @@
 					domain: '{you}.grove.place/admin',
 					integration: 'Built into every Grove blog',
 					spec: '/knowledge/specs/arbor-spec',
+					whatIsLink: '/knowledge/help/what-is-arbor',
 					subComponents: [
 						{ name: 'Posts', icon: 'penline', description: 'Write & edit' },
 						{ name: 'Pages', icon: 'layout', description: 'Static pages' },
@@ -140,6 +142,7 @@
 					icon: 'drafting-compass',
 					integration: 'Built into Arbor',
 					spec: '/knowledge/specs/flow-spec',
+					whatIsLink: '/knowledge/help/what-is-flow',
 					subComponents: [
 						{ name: 'Zen', icon: 'focus', description: 'Distraction-free mode' },
 						{ name: 'Fireside', icon: 'flamekindling', description: 'Conversational drafting' },
@@ -272,6 +275,7 @@
 					icon: 'pencilruler',
 					integration: 'Creative tool for building blog decorations',
 					spec: '/knowledge/specs/terrarium-spec',
+					whatIsLink: '/knowledge/help/what-is-terrarium',
 					subComponents: [
 						{ name: 'Canvas', icon: 'frame', description: 'Design space' },
 						{ name: 'Assets', icon: 'shapes', description: 'Nature components' },
