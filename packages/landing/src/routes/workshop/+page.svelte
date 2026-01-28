@@ -171,6 +171,7 @@
 					icon: 'goal',
 					integration: 'Operator-configured feature customization',
 					spec: '/knowledge/specs/grafts-spec',
+					whatIsLink: '/knowledge/help/what-is-grafts',
 					subComponents: [
 						{ name: 'Graft', icon: 'flag', description: 'Enable a feature' },
 						{ name: 'Prune', icon: 'flag-off', description: 'Disable a feature' },
@@ -201,6 +202,7 @@
 					integration: 'Automatic unlock after 12 months of Sapling+ membership',
 					spec: '/knowledge/specs/centennial-spec',
 					howLink: '/knowledge/philosophy/grove-sustainability',
+					whatIsLink: '/knowledge/help/what-is-centennial',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' }
 					]
@@ -247,6 +249,7 @@
 					integration: 'Theme customization for all Grove blogs',
 					github: 'https://github.com/AutumnsGrove/Foliage',
 					spec: '/knowledge/specs/foliage-project-spec',
+					whatIsLink: '/knowledge/help/what-is-foliage',
 					subComponents: [
 						{ name: 'Themes', icon: 'paintbrush', description: 'Curated themes' },
 						{ name: 'Customizer', icon: 'sliders', description: 'Full control' },
@@ -261,6 +264,7 @@
 					icon: 'amphora',
 					integration: 'Visitor experience features for all Grove blogs',
 					spec: '/knowledge/specs/curios-spec',
+					whatIsLink: '/knowledge/help/what-is-curios',
 					subComponents: [
 						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
 						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
@@ -597,6 +601,7 @@
 					domain: 'grove.place/shade',
 					integration: 'Automatic protection for all Grove blogs',
 					spec: '/knowledge/specs/shade-spec',
+					whatIsLink: '/knowledge/help/what-is-shade',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Bot', icon: 'bot', description: 'Bot detection' },
