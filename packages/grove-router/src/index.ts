@@ -32,6 +32,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | null> = {
   ivy: "ivy-3uv.pages.dev", // Ivy mail client
   // autumn subdomain now routes to groveengine (tenant in D1) — legacy autumn-website.pages.dev removed
   plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
+  terrarium: "grove-terrarium.pages.dev", // Terrarium visual composer
   vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase
   cdn: "R2", // Handled by R2 custom domain - skip Worker proxy
 
