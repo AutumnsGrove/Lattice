@@ -192,15 +192,6 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HEADER - Opaque background to prevent content bleed-through
-   Status page has high-contrast banners that show through transparent headers
-   ═══════════════════════════════════════════════════════════════ */
-
-header.sticky {
-	background-color: var(--color-surface-elevated) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
    ACCESSIBILITY - Reduced Motion
    ═══════════════════════════════════════════════════════════════ */
 
