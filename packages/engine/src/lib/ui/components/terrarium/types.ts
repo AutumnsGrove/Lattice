@@ -165,8 +165,7 @@ export const DEFAULT_SCENE: TerrariumScene = {
   canvas: {
     width: 1200,
     height: 800,
-    background:
-      "linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 50%, #A8E6CF 100%)",
+    background: "#374151", // Neutral dark gray - works in both modes
     gridEnabled: false,
     gridSize: 32,
   },
@@ -177,13 +176,14 @@ export const DEFAULT_SCENE: TerrariumScene = {
 
 // Default canvas backgrounds
 export const CANVAS_BACKGROUNDS = [
+  // Dark mode friendly
+  { name: "Dark Gray", value: "#374151" },
+  { name: "Slate", value: "#1e293b" },
+  { name: "Charcoal", value: "#18181b" },
+  // Gradients
   {
     name: "Sky Gradient",
     value: "linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 50%, #A8E6CF 100%)",
-  },
-  {
-    name: "Forest Dawn",
-    value: "linear-gradient(to bottom, #FEF3C7 0%, #FDE68A 30%, #34D399 100%)",
   },
   {
     name: "Night Sky",
@@ -193,7 +193,7 @@ export const CANVAS_BACKGROUNDS = [
     name: "Sunset",
     value: "linear-gradient(to bottom, #FDE68A 0%, #FB923C 40%, #EC4899 100%)",
   },
+  // Solids
   { name: "Transparent", value: "transparent" },
   { name: "White", value: "#FFFFFF" },
-  { name: "Cream", value: "#FFFBEB" },
 ] as const;

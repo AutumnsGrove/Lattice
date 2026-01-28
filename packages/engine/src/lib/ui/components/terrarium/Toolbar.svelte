@@ -102,25 +102,43 @@
 	const zoomPercent = $derived(Math.round(zoom * 100));
 
 	// Close background picker when clicking outside
-	function handleClickOutside(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (showBackgroundPicker && !target.closest('[data-background-picker]')) {
-			showBackgroundPicker = false;
+	let clickOutsideListener: ((e: MouseEvent) => void) | null = null;
+
+	function setupClickOutside() {
+		// Remove any existing listener first
+		if (clickOutsideListener) {
+			document.removeEventListener('mousedown', clickOutsideListener);
+		}
+
+		clickOutsideListener = (event: MouseEvent) => {
+			const target = event.target as HTMLElement;
+			if (!target.closest('[data-background-picker]')) {
+				showBackgroundPicker = false;
+			}
+		};
+
+		// Use mousedown instead of click, and add on next frame
+		requestAnimationFrame(() => {
+			if (showBackgroundPicker && clickOutsideListener) {
+				document.addEventListener('mousedown', clickOutsideListener);
+			}
+		});
+	}
+
+	function cleanupClickOutside() {
+		if (clickOutsideListener) {
+			document.removeEventListener('mousedown', clickOutsideListener);
+			clickOutsideListener = null;
 		}
 	}
 
 	$effect(() => {
 		if (showBackgroundPicker) {
-			// Use setTimeout to add listener after the current click event finishes
-			// Otherwise the same click that opened the picker will immediately close it
-			const timeoutId = setTimeout(() => {
-				document.addEventListener('click', handleClickOutside);
-			}, 0);
-			return () => {
-				clearTimeout(timeoutId);
-				document.removeEventListener('click', handleClickOutside);
-			};
+			setupClickOutside();
+		} else {
+			cleanupClickOutside();
 		}
+		return cleanupClickOutside;
 	});
 
 	// Start editing scene name
@@ -160,7 +178,7 @@
 
 	// Glass button styles
 	const buttonClass = cn(
-		'inline-flex items-center justify-center',
+		'inline-flex items-center justify-center gap-2',
 		'h-9 px-3 rounded-lg',
 		'bg-white/60 dark:bg-emerald-950/25',
 		'border border-white/40 dark:border-emerald-800/25',
@@ -171,7 +189,7 @@
 		'backdrop-blur-md shadow-sm hover:shadow-md',
 		'disabled:opacity-50 disabled:pointer-events-none',
 		'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
-		'[&_svg]:w-4 [&_svg]:h-4'
+		'[&_svg]:w-4 [&_svg]:h-4 [&_svg]:flex-shrink-0'
 	);
 
 	const iconButtonClass = cn(
@@ -491,11 +509,11 @@
 		onclick={onSave}
 		class={cn(
 			buttonClass,
-			'bg-accent/70 dark:bg-accent/60',
-			'border-accent/40 dark:border-accent/30',
-			'text-white',
-			'hover:bg-accent/85 dark:hover:bg-accent/75',
-			'hover:border-accent/60 dark:hover:border-accent/50'
+			'bg-accent dark:bg-accent/80',
+			'border-accent/60 dark:border-accent/40',
+			'text-white [&_svg]:text-white',
+			'hover:bg-accent/90 dark:hover:bg-accent/70',
+			'hover:border-accent/80 dark:hover:border-accent/60'
 		)}
 		title="Save scene (⌘S)"
 		aria-label="Save scene"
