@@ -64,8 +64,8 @@
 					// Show the animation and record timestamp
 					overlay.classList.add('grove-parting');
 					recordVinesShown();
-					// Remove after animation completes (reduced from 3500ms for faster cleanup)
-					setTimeout(() => overlay.remove(), 2500);
+					// Remove after animation completes
+					setTimeout(() => overlay.remove(), 3500);
 				} else {
 					// Within cooldown - skip animation and remove immediately
 					overlay.remove();
