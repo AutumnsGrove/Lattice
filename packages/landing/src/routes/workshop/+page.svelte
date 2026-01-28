@@ -297,6 +297,7 @@
 					icon: 'splinepointer',
 					integration: 'Animation and diagram creation within Terrarium',
 					spec: '/knowledge/specs/weave-spec',
+					whatIsLink: '/knowledge/help/what-is-weave',
 					subComponents: [
 						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
 						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
@@ -327,7 +328,8 @@
 					icon: 'rocking-chair',
 					domain: 'porch.grove.place',
 					integration: 'Support and conversation for all Wanderers',
-					spec: '/knowledge/specs/porch-spec'
+					spec: '/knowledge/specs/porch-spec',
+					whatIsLink: '/knowledge/help/what-is-porch'
 				},
 				{
 					name: 'Rings',
@@ -448,6 +450,7 @@
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
 					spec: '/knowledge/specs/reeds-spec',
+					whatIsLink: '/knowledge/help/what-is-reeds',
 					subComponents: [
 						{ name: 'Replies', icon: 'reply', description: 'Private to author' },
 						{ name: 'Comments', icon: 'messagecircle', description: 'Public discussion' }
@@ -529,6 +532,7 @@
 					integration: 'Included with Oak and Evergreen tiers',
 					github: 'https://github.com/AutumnsGrove/Ivy',
 					spec: '/knowledge/specs/ivy-mail-spec',
+					whatIsLink: '/knowledge/help/what-is-ivy',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Compose', icon: 'component', description: 'Write emails' },
