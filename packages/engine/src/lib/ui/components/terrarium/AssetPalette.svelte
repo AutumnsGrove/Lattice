@@ -38,7 +38,7 @@
 		trees: {
 			name: 'Trees',
 			icon: Trees,
-			assets: ['TreeAspen', 'TreeBirch', 'TreeCherry', 'TreePine']
+			assets: ['GroveLogo', 'TreeAspen', 'TreeBirch', 'TreeCherry', 'TreePine']
 		},
 		creatures: {
 			name: 'Creatures',
