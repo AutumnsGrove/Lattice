@@ -76,7 +76,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
         if (data.valid && data.user) {
           event.locals.user = {
+            id: data.user.id,
             email: data.user.email,
+            name: data.user.name || null,
             is_admin: data.user.isAdmin,
           };
           return resolve(event);
@@ -124,7 +126,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (user) {
       event.locals.user = {
+        id: user.id,
         email: user.email,
+        name: null, // Legacy D1 sessions don't store name
         is_admin: user.is_admin === 1,
       };
     }

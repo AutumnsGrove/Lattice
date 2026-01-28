@@ -33,6 +33,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Sync SvelteKit (generate tsconfig)
+        run: |
+          for config in packages/*/svelte.config.*; do
+            (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
+          done
+
       - name: Run all tests
         run: pnpm test
 
@@ -59,6 +65,10 @@ jobs:
 
       - name: Type check engine
         run: pnpm check
+        working-directory: packages/engine
+
+      - name: Build engine package (for types)
+        run: pnpm package
         working-directory: packages/engine
 
       - name: Type check landing

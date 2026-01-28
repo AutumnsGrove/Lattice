@@ -36,7 +36,7 @@
 				<p class="text-foreground-muted font-sans mb-6 max-w-md mx-auto">
 					Tell me what's going on. I read everything personally and respond as quickly as I can.
 				</p>
-				<GlassButton href="/porch/new" variant="primary" class="inline-flex items-center gap-2">
+				<GlassButton href="/porch/new" variant="accent" class="inline-flex items-center gap-2">
 					Start a conversation
 					<ArrowRight class="w-4 h-4" />
 				</GlassButton>
