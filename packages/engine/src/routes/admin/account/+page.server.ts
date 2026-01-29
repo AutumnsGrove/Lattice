@@ -1,6 +1,7 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
+import type { Passkey } from "$lib/groveauth";
 
 /**
  * Account & Subscription Management Page
@@ -43,7 +44,50 @@ interface TenantRecord {
   created_at: number;
 }
 
-export const load: PageServerLoad = async ({ locals, platform, parent }) => {
+/** Default GroveAuth API URL */
+const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+
+/**
+ * Fetch user passkeys from GroveAuth.
+ * Returns empty array on error to allow graceful degradation.
+ */
+async function fetchUserPasskeys(
+  accessToken: string | undefined,
+  authBaseUrl: string,
+): Promise<{ passkeys: Passkey[]; error: boolean }> {
+  if (!accessToken) {
+    return { passkeys: [], error: false };
+  }
+
+  try {
+    const response = await fetch(
+      `${authBaseUrl}/api/auth/passkey/list-user-passkeys`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.error("[Account] Failed to fetch passkeys:", response.status);
+      return { passkeys: [], error: true };
+    }
+
+    const passkeys = (await response.json()) as Passkey[];
+    return { passkeys, error: false };
+  } catch (e) {
+    console.error("[Account] Passkey fetch error:", e);
+    return { passkeys: [], error: true };
+  }
+}
+
+export const load: PageServerLoad = async ({
+  locals,
+  platform,
+  parent,
+  cookies,
+}) => {
   const parentData = await parent();
 
   if (!locals.tenantId) {
@@ -56,14 +100,24 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
     throw error(500, "Database not configured");
   }
 
-  // PERFORMANCE: Run billing and tenant queries in parallel
-  // These are independent queries that were previously sequential (~400ms savings)
-  // Each still has individual error handling to prevent cascading failures
+  // Get access token for passkey API calls
+  const accessToken = cookies.get("access_token");
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+
+  // ISOLATED QUERIES: D1 queries and external API calls are separated
+  // D1 queries (billing, tenant) are fast (~50ms) and critical for page render
+  // Passkey fetch is an external API call that can be slower and is non-critical
+  // This prevents a slow GroveAuth response from blocking billing/tenant display
   let billing: BillingRecord | null = null;
   let billingError = false;
   let tenant: TenantRecord | null = null;
   let usageError = false;
 
+  // Start passkey fetch early (runs concurrently with D1 queries)
+  // Returned as deferred data - page renders immediately, passkeys stream in
+  const passkeyPromise = fetchUserPasskeys(accessToken, authBaseUrl);
+
+  // Await critical D1 queries
   const [billingResult, tenantResult] = await Promise.all([
     // Billing query
     platform.env.DB.prepare(
@@ -210,5 +264,8 @@ export const load: PageServerLoad = async ({ locals, platform, parent }) => {
       support: tierConfig.support.displayString,
     },
     availableTiers,
+    // Deferred: passkey data streams in after initial render
+    // Use {#await data.passkeyData} in the page to handle loading state
+    passkeyData: passkeyPromise,
   };
 };

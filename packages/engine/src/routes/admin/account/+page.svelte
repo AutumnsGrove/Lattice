@@ -9,12 +9,14 @@
   import SubscriptionCard from "./SubscriptionCard.svelte";
   import UsageStatsCard from "./UsageStatsCard.svelte";
   import PaymentMethodCard from "./PaymentMethodCard.svelte";
+  import PasskeyCard from "./PasskeyCard.svelte";
   import ChangePlanCard from "./ChangePlanCard.svelte";
   import DataExportCard from "./DataExportCard.svelte";
 
   // Import types and utils
   import type { ExportType } from "./types";
   import { sanitizeErrorMessage } from "./utils";
+  import { checkPasskeySupport, registerPasskey } from "./passkey-utils";
 
   let { data } = $props();
 
@@ -31,6 +33,18 @@
   let showCancelDialog = $state(false);
   let showChangePlanDialog = $state(false);
   let pendingPlanChange = $state<{ plan: string; tierInfo: { name: string; isUpgrade: boolean } | null }>({ plan: "", tierInfo: null });
+
+  // Passkey states
+  let supportsPasskeys = $state(false);
+  let registeringPasskey = $state(false);
+  let deletingPasskeyId = $state<string | null>(null);
+
+  // Check passkey support on mount
+  $effect(() => {
+    checkPasskeySupport().then((supported) => {
+      supportsPasskeys = supported;
+    });
+  });
 
   // Reset portal state if user navigates back to this page
   beforeNavigate(() => {
@@ -181,6 +195,38 @@
   function handleExportTypeChange(type: ExportType): void {
     exportType = type;
   }
+
+  // Register a new passkey
+  async function handleRegisterPasskey(): Promise<void> {
+    registeringPasskey = true;
+    try {
+      const result = await registerPasskey();
+      if (result.success) {
+        toast.success("Passkey registered successfully!");
+        await invalidateAll();
+      } else {
+        toast.error(result.error || "Failed to register passkey");
+      }
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, "Failed to register passkey"));
+    } finally {
+      registeringPasskey = false;
+    }
+  }
+
+  // Delete a passkey
+  async function handleDeletePasskey(id: string): Promise<void> {
+    deletingPasskeyId = id;
+    try {
+      await api.delete(`/api/passkey/${id}`);
+      toast.success("Passkey removed");
+      await invalidateAll();
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, "Failed to remove passkey"));
+    } finally {
+      deletingPasskeyId = null;
+    }
+  }
 </script>
 
 <div class="account-page">
@@ -209,6 +255,39 @@
     {openingPortal}
     onOpenPortal={handleOpenBillingPortal}
   />
+
+  <!-- Passkeys (deferred data - streams in after initial render) -->
+  {#await data.passkeyData}
+    <PasskeyCard
+      passkeys={[]}
+      passkeyError={false}
+      {supportsPasskeys}
+      registering={true}
+      deletingId={null}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {:then passkeyResult}
+    <PasskeyCard
+      passkeys={passkeyResult.passkeys}
+      passkeyError={passkeyResult.error}
+      {supportsPasskeys}
+      registering={registeringPasskey}
+      deletingId={deletingPasskeyId}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {:catch}
+    <PasskeyCard
+      passkeys={[]}
+      passkeyError={true}
+      {supportsPasskeys}
+      registering={false}
+      deletingId={null}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {/await}
 
   <!-- Change Plan -->
   <ChangePlanCard

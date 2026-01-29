@@ -227,6 +227,8 @@ import {
   Save,
   // Trace - inline feedback
   Footprints,
+  // Passkeys - passwordless authentication
+  Fingerprint,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -506,6 +508,8 @@ export const toolIcons = {
   save: Save, // Flow/Draft - auto-save to localStorage
   // Trace - inline feedback
   footprints: Footprints, // Trace - the mark you leave
+  // Passkeys - passwordless authentication
+  fingerprint: Fingerprint, // Heartwood - Passkeys
 } as const;
 
 // ============================================================================

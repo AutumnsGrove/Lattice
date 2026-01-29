@@ -87,6 +87,7 @@
 					subComponents: [
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
+						{ name: 'Passkeys', icon: 'fingerprint', description: 'Passwordless login' },
 						{ name: 'Identity', icon: 'idcard', description: 'Verified identity' }
 					]
 				},
