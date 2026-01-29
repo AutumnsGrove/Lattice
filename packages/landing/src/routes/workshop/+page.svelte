@@ -76,7 +76,7 @@
 				{
 					name: 'Heartwood',
 					tagline: 'Centralized Authentication',
-					description: 'One identity, verified and protected, that works across every Grove property. Google OAuth or magic email codes, all secured with PKCE, rate limiting, and comprehensive audit logging. The authentic core of the ecosystem.',
+					description: 'One identity, verified and protected, that works across every Grove property. Passkeys are the primary method—secure, passwordless, and built into your device. Google OAuth available as a fallback when needed. The authentic core of the ecosystem.',
 					status: 'live',
 					icon: 'shieldcheck',
 					domain: 'heartwood.grove.place',
@@ -85,9 +85,9 @@
 					spec: '/knowledge/specs/heartwood-spec',
 					whatIsLink: '/knowledge/help/what-is-heartwood',
 					subComponents: [
+						{ name: 'Passkeys', icon: 'fingerprint', description: 'Passwordless login', href: '/knowledge/help/what-are-passkeys' },
 						{ name: 'Google', icon: 'chrome', description: 'Google OAuth' },
 						{ name: 'Magic', icon: 'wand2', description: 'Email magic links' },
-						{ name: 'Passkeys', icon: 'fingerprint', description: 'Passwordless login' },
 						{ name: 'Identity', icon: 'idcard', description: 'Verified identity' }
 					]
 				},
