@@ -489,7 +489,7 @@ export class LumenClient {
       }
 
       // If we still don't have a result, throw the last error
-      if (!result!) {
+      if (!result) {
         throw lastError;
       }
     }

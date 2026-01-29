@@ -64,15 +64,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const ai = platform!.env!.AI;
   const openrouterApiKey = platform!.env!.OPENROUTER_API_KEY as string;
 
-  // Verify tenant ownership
-  try {
-    await getVerifiedTenantId(db, locals.tenantId, locals.user);
-  } catch (err) {
-    throw err;
-  }
+  // Verify tenant ownership and get subscription in parallel
+  // (Independent D1 queries should use Promise.all per AGENT.md)
+  const [, subscription] = await Promise.all([
+    getVerifiedTenantId(db, locals.tenantId, locals.user),
+    getTenantSubscription(db, locals.tenantId),
+  ]);
 
-  // Get tenant subscription for tier-based quota
-  const subscription = await getTenantSubscription(db, locals.tenantId);
   if (!subscription) {
     throw error(404, "Tenant not found");
   }
