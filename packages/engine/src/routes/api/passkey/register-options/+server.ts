@@ -11,8 +11,8 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+/** GroveAuth API URL (not the frontend URL!) */
+const AUTH_API_URL = "https://auth-api.grove.place";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate CSRF (origin-based for API endpoints)
@@ -28,15 +28,13 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     throw error(401, "Not authenticated");
   }
 
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
-
   try {
     let response: Response;
 
     if (groveSession && platform?.env?.AUTH) {
       // Use service binding with grove_session (preferred for tenant subdomains)
       response = await platform.env.AUTH.fetch(
-        `${authBaseUrl}/api/auth/passkey/generate-register-options`,
+        `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
         {
           method: "POST",
           headers: {
@@ -48,7 +46,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     } else if (accessToken) {
       // Fallback to direct fetch with access_token (legacy JWT)
       response = await fetch(
-        `${authBaseUrl}/api/auth/passkey/generate-register-options`,
+        `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
         {
           method: "POST",
           headers: {
