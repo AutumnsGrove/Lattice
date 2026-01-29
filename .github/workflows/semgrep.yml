@@ -1,0 +1,87 @@
+name: Semgrep Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.svelte'
+      - '**.ts'
+      - '**.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.svelte'
+      - '**.ts'
+      - '**.js'
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config=p/security-audit \
+            --config=p/typescript \
+            --config=p/xss \
+            --config=p/jwt \
+            --config=p/secrets \
+            --config=p/svelte \
+            --include='*.svelte' \
+            --include='*.ts' \
+            --include='*.js' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='build' \
+            --exclude='.svelte-kit' \
+            --sarif --output=semgrep-results.sarif \
+            --json --output=semgrep-results.json
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-results.sarif
+        if: always()
+
+      - name: Upload JSON results
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: |
+            semgrep-results.json
+            semgrep-results.sarif
+          retention-days: 7
+        if: always()
+
+      - name: Parse and report findings
+        run: |
+          if [ -f semgrep-results.json ]; then
+            echo "=== Security Findings Summary ==="
+            cat semgrep-results.json | jq -r '
+              def severity_order: ("ERROR", "WARNING", "INFO");
+              [.results[] |
+               {severity: .extra.severity, message: .extra.message, path: .path, line: .start.line}] |
+              sort_by(severity_order | index(.severity)) |
+              group_by(.severity) |
+              .[] | "\(.[0].severity): \(length) findings"'
+
+            ERROR_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "ERROR")] | length')
+            WARNING_COUNT=$(cat semgrep-results.json | jq '[.results[] | select(.extra.severity == "WARNING")] | length')
+
+            echo ""
+            echo "Total: $((ERROR_COUNT + WARNING_COUNT)) findings"
+            echo "  - Errors (High): $ERROR_COUNT"
+            echo "  - Warnings (Medium/Low): $WARNING_COUNT"
+          else
+            echo "No results file generated"
+          fi

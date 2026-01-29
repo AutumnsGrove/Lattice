@@ -1,0 +1,68 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.svelte'
+      - '**.ts'
+      - '**.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.svelte'
+      - '**.ts'
+      - '**.js'
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: +security-extended,security-and-quality
+          config: |
+            paths-ignore:
+              - 'node_modules/**'
+              - 'dist/**'
+              - 'build/**'
+              - '.svelte-kit/**'
+              - '**/*.json'
+              - '**/*.md'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          output: codeql-results
+          upload: always
+
+      - name: Upload CodeQL results
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results
+          path: codeql-results
+          retention-days: 7
+        if: always()
