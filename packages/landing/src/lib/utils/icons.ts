@@ -225,6 +225,8 @@ import {
   DraftingCompass,
   Focus,
   Save,
+  // Trace - inline feedback
+  Footprints,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -386,7 +388,7 @@ export const toolIcons = {
   splinepointer: SplinePointer, // Weave - main icon
   "send-to-back": SendToBack, // Breeze - animation mode
   waves: Waves, // (legacy Sway reference)
-  waypoints: Waypoints, // Trace - diagram mode
+  waypoints: Waypoints, // Map - diagram mode (Weave)
   route: Route, // Thread - connections
   regex: Regex, // Patterns - design system
   // Curios - cabinet of wonders
@@ -502,6 +504,8 @@ export const toolIcons = {
   "drafting-compass": DraftingCompass, // Flow - main icon (creative arc)
   focus: Focus, // Flow/Zen - distraction-free mode
   save: Save, // Flow/Draft - auto-save to localStorage
+  // Trace - inline feedback
+  footprints: Footprints, // Trace - the mark you leave
 } as const;
 
 // ============================================================================

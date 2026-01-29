@@ -232,6 +232,15 @@ Porch is Grove's support system—but it's more than that. It's where you reach 
 
 *Have a seat on the porch. We'll figure it out together.*
 
+### Trace
+**Inline Feedback** · *(integrated component)*
+
+A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.
+
+Trace is Grove's inline feedback component. A small, warm invitation that appears wherever you want to hear from Wanderers. Not a survey. Not a metric. Just a soft way to say "this helped" or "this didn't," with room to add a few words if you want. Every trace travels back to the Wayfinder. Every voice matters.
+
+*Leave a trace.*
+
 ---
 
 ## Content & Community
@@ -505,6 +514,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Clearing** | Platform | Status page | status.grove.place |
 | **Waystone** | Platform | Help center | *(integrated)* |
 | **Porch** | Platform | Support conversations | porch.grove.place |
+| **Trace** | Platform | Inline feedback | *(integrated)* |
 | **Wisp** | Content | Writing assistant (+ Fireside) | *(integrated)* |
 | **Scribe** | Content | Voice transcription | *(integrated)* |
 | **Reeds** | Content | Comments system | *(integrated)* |
@@ -561,6 +571,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Clearing | GroveClear |
 | Waystone | GroveWaystone |
 | Porch | GrovePorch |
+| Trace | GroveTrace |
 | Wisp | GroveWisp |
 | Scribe | GroveScribe |
 | Reeds | GroveReeds |

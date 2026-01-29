@@ -301,7 +301,7 @@
 					whatIsLink: '/knowledge/help/what-is-weave',
 					subComponents: [
 						{ name: 'Breeze', icon: 'send-to-back', description: 'Animation mode' },
-						{ name: 'Trace', icon: 'waypoints', description: 'Diagram mode' },
+						{ name: 'Map', icon: 'waypoints', description: 'Diagram mode' },
 						{ name: 'Thread', icon: 'route', description: 'Connections' }
 					]
 				},
@@ -331,6 +331,16 @@
 					integration: 'Support and conversation for all Wanderers',
 					spec: '/knowledge/specs/porch-spec',
 					whatIsLink: '/knowledge/help/what-is-porch'
+				},
+				{
+					name: 'Trace',
+					tagline: 'Inline Feedback',
+					description: 'A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the Wayfinder see which paths are clear and which need tending.',
+					status: 'planned',
+					icon: 'footprints',
+					integration: 'Embedded in help articles, docs, and anywhere feedback matters',
+					spec: '/knowledge/specs/trace-spec',
+					whatIsLink: '/knowledge/help/what-are-traces'
 				},
 				{
 					name: 'Rings',
