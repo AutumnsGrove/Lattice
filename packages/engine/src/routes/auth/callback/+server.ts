@@ -238,18 +238,17 @@ export const GET: RequestHandler = async ({
 
     if (!tokenResponse.ok) {
       const errorData = (await tokenResponse.json()) as ErrorResponse;
-      // Only log sensitive debugging info in development
+      // Log full debugging info (no secrets exposed)
       console.error("[Auth Callback] Token exchange failed:", {
         status: tokenResponse.status,
         error: errorData?.error,
-        // Include detailed debugging info only in development
-        ...(import.meta.env.DEV && {
-          authApiUrl: authConfig.apiUrl,
-          clientId: authConfig.clientId,
-          hasSecret: !!authConfig.clientSecret,
-          redirectUri,
-          errorDescription: errorData?.error_description,
-        }),
+        errorDescription: errorData?.error_description,
+        authApiUrl: authConfig.apiUrl,
+        clientId: authConfig.clientId,
+        hasSecret: !!authConfig.clientSecret,
+        redirectUri,
+        codeLength: code?.length || 0,
+        hasCodeVerifier: !!codeVerifier,
       });
       const debugError =
         errorData?.error_description ||

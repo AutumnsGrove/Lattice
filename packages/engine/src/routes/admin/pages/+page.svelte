@@ -16,7 +16,10 @@
     ).length
   );
   let navLimit = $derived(data.navPageLimit || 3);
-  let atLimit = $derived(navPagesUsed >= navLimit);
+  // Curios (Gallery, Timeline, Journey) share the same limit as nav pages
+  let enabledCuriosCount = $derived(data.enabledCuriosCount ?? 0);
+  let slotsUsed = $derived(navPagesUsed + enabledCuriosCount);
+  let atLimit = $derived(slotsUsed >= navLimit);
 
   /** @param {string | number} dateValue */
   function formatDate(dateValue) {
@@ -74,7 +77,7 @@
         {data.pages.length} pages
         <span class="mx-2">·</span>
         <span class:text-amber-600={atLimit} class:dark:text-amber-400={atLimit}>
-          {navPagesUsed}/{navLimit} curios used
+          {slotsUsed}/{navLimit} slots used
         </span>
       </p>
     </div>

@@ -88,6 +88,9 @@ export const GET: RequestHandler = async ({
   // Return to admin panel after login, or use provided return_to
   const returnTo = url.searchParams.get("return_to") || "/admin";
 
+  // Get provider if specified (allows skipping Heartwood login page)
+  const provider = url.searchParams.get("provider");
+
   // Generate PKCE values
   const state = crypto.randomUUID();
   const codeVerifier = generateRandomString(64);
@@ -115,7 +118,7 @@ export const GET: RequestHandler = async ({
   // Store return URL
   cookies.set("auth_return_to", returnTo, cookieOptions);
 
-  // Build GroveAuth login URL
+  // Build GroveAuth URL params
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
@@ -124,5 +127,12 @@ export const GET: RequestHandler = async ({
     code_challenge_method: "S256",
   });
 
+  // If provider is specified, skip the Heartwood login page and go directly to OAuth
+  // This eliminates the "double-hop" UX where user clicks Google twice
+  if (provider === "google") {
+    redirect(302, `${authBaseUrl}/oauth/google?${params}`);
+  }
+
+  // No provider specified - show the Heartwood login page for provider selection
   redirect(302, `${authBaseUrl}/login?${params}`);
 };

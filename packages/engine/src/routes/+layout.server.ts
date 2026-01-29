@@ -19,6 +19,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   let siteSettings: SiteSettings = { font_family: "lexend" };
   // Navigation pages (pages with show_in_nav enabled)
   let navPages: NavPage[] = [];
+  // Count of enabled curios (for pages admin UI - curios share the nav page limit)
+  let enabledCuriosCount = 0;
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
@@ -36,50 +38,64 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           // PERFORMANCE: Run independent queries in parallel to reduce latency
           // Settings, nav pages, and curio configs are independent - execute concurrently
           // Each query still has its own error handling to prevent cascading failures
-          const [settingsResult, navResult, timelineResult, galleryResult] =
-            await Promise.all([
-              // Site settings query
-              db
-                .prepare(
-                  "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
-                )
-                .bind(tenantId)
-                .all<{ setting_key: string; setting_value: string }>()
-                .catch((err) => {
-                  console.warn("[Layout] site_settings query failed:", err);
-                  return null;
-                }),
+          const [
+            settingsResult,
+            navResult,
+            timelineResult,
+            galleryResult,
+            journeyResult,
+          ] = await Promise.all([
+            // Site settings query
+            db
+              .prepare(
+                "SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?",
+              )
+              .bind(tenantId)
+              .all<{ setting_key: string; setting_value: string }>()
+              .catch((err) => {
+                console.warn("[Layout] site_settings query failed:", err);
+                return null;
+              }),
 
-              // Navigation pages query
-              db
-                .prepare(
-                  `SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
-                )
-                .bind(tenantId)
-                .all<NavPage & { show_in_nav: number; nav_order: number }>()
-                .catch((err) => {
-                  console.warn("[Layout] navPages query failed:", err);
-                  return null;
-                }),
+            // Navigation pages query
+            db
+              .prepare(
+                `SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
+              )
+              .bind(tenantId)
+              .all<NavPage & { show_in_nav: number; nav_order: number }>()
+              .catch((err) => {
+                console.warn("[Layout] navPages query failed:", err);
+                return null;
+              }),
 
-              // Timeline curio config query
-              db
-                .prepare(
-                  `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
-                )
-                .bind(tenantId)
-                .first<{ enabled: number }>()
-                .catch(() => null), // Timeline table might not exist - that's OK
+            // Timeline curio config query
+            db
+              .prepare(
+                `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
+              )
+              .bind(tenantId)
+              .first<{ enabled: number }>()
+              .catch(() => null), // Timeline table might not exist - that's OK
 
-              // Gallery curio config query
-              db
-                .prepare(
-                  `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`,
-                )
-                .bind(tenantId)
-                .first<{ enabled: number }>()
-                .catch(() => null), // Gallery table might not exist - that's OK
-            ]);
+            // Gallery curio config query
+            db
+              .prepare(
+                `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`,
+              )
+              .bind(tenantId)
+              .first<{ enabled: number }>()
+              .catch(() => null), // Gallery table might not exist - that's OK
+
+            // Journey curio config query
+            db
+              .prepare(
+                `SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`,
+              )
+              .bind(tenantId)
+              .first<{ enabled: number }>()
+              .catch(() => null), // Journey table might not exist - that's OK
+          ]);
 
           // Process settings results
           if (settingsResult?.results) {
@@ -112,6 +128,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           if (galleryResult?.enabled) {
             navPages.push({ slug: "gallery", title: "Gallery" });
           }
+
+          // Calculate enabled curios count for the pages admin UI
+          // This count is used to show accurate "slots used" (nav pages + curios share the same limit)
+          enabledCuriosCount =
+            (timelineResult?.enabled ? 1 : 0) +
+            (galleryResult?.enabled ? 1 : 0) +
+            (journeyResult?.enabled ? 1 : 0);
         }
         // No tenant context = use hardcoded defaults only (line 19)
         // Don't query DB without tenant filter — would leak other tenants' settings
@@ -134,6 +157,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     siteSettings,
     navPages,
     navPageLimit,
+    enabledCuriosCount,
     csrfToken: locals.csrfToken,
   };
 };
