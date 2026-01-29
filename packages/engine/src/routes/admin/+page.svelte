@@ -177,7 +177,7 @@
       </a>
       <a href="/admin/analytics" class="action-card glass-action">
         <BarChart3 class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">View Analytics</span>
+        <span class="font-medium text-center text-sm">View Rings</span>
       </a>
       <a href="/admin/curios" class="action-card glass-action">
         <Calendar class="w-7 h-7 text-accent-muted" />

@@ -125,9 +125,9 @@
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
-      <a href="/admin/analytics" class="nav-item" onclick={closeSidebar} title="Analytics">
+      <a href="/admin/analytics" class="nav-item" onclick={closeSidebar} title="Rings">
         <BarChart3 class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Analytics</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Rings</span>
       </a>
       <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trails">
         <Calendar class="nav-icon" />
