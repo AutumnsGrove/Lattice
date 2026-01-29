@@ -60,26 +60,33 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     }
 
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as {
-        message?: string;
-        error?: string;
-      };
+      const responseText = await response.text();
+      let errorData: { message?: string; error?: string } = {};
+      try {
+        errorData = JSON.parse(responseText);
+      } catch {
+        // Response wasn't JSON
+      }
 
       console.error("[Passkey] Failed to get registration options:", {
         status: response.status,
-        error: errorData.error || errorData.message,
+        statusText: response.statusText,
+        errorData,
+        responseText: responseText.slice(0, 500),
+        hasGroveSession: !!cookies.get("grove_session"),
+        hasAccessToken: !!cookies.get("access_token"),
       });
 
       if (response.status === 401) {
         throw error(401, "Session expired. Please sign in again.");
       }
 
-      throw error(
-        response.status,
+      // Include status in error message for debugging
+      const errorMessage =
         errorData.message ||
-          errorData.error ||
-          "Failed to get passkey registration options",
-      );
+        errorData.error ||
+        `GroveAuth returned ${response.status}: ${response.statusText}`;
+      throw error(response.status, errorMessage);
     }
 
     const options = await response.json();
@@ -90,7 +97,16 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       throw err;
     }
 
-    console.error("[Passkey] Registration options error:", err);
-    throw error(500, "Failed to get passkey registration options");
+    console.error("[Passkey] Registration options error:", {
+      error: err,
+      message: err instanceof Error ? err.message : String(err),
+      hasGroveSession: !!cookies.get("grove_session"),
+      hasAccessToken: !!cookies.get("access_token"),
+      hasAuthBinding: !!platform?.env?.AUTH,
+    });
+    throw error(
+      500,
+      `Passkey registration failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+    );
   }
 };
