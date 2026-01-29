@@ -104,17 +104,21 @@ export const load: PageServerLoad = async ({
   const accessToken = cookies.get("access_token");
   const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
 
-  // PERFORMANCE: Run billing, tenant, and passkey queries in parallel
-  // These are independent queries that were previously sequential (~400ms savings)
-  // Each still has individual error handling to prevent cascading failures
+  // ISOLATED QUERIES: D1 queries and external API calls are separated
+  // D1 queries (billing, tenant) are fast (~50ms) and critical for page render
+  // Passkey fetch is an external API call that can be slower and is non-critical
+  // This prevents a slow GroveAuth response from blocking billing/tenant display
   let billing: BillingRecord | null = null;
   let billingError = false;
   let tenant: TenantRecord | null = null;
   let usageError = false;
-  let passkeys: Passkey[] = [];
-  let passkeyError = false;
 
-  const [billingResult, tenantResult, passkeyResult] = await Promise.all([
+  // Start passkey fetch early (runs concurrently with D1 queries)
+  // Returned as deferred data - page renders immediately, passkeys stream in
+  const passkeyPromise = fetchUserPasskeys(accessToken, authBaseUrl);
+
+  // Await critical D1 queries
+  const [billingResult, tenantResult] = await Promise.all([
     // Billing query
     platform.env.DB.prepare(
       `SELECT id, tenant_id, plan, status, provider_customer_id, provider_subscription_id,
@@ -144,15 +148,10 @@ export const load: PageServerLoad = async ({
         usageError = true;
         return null;
       }),
-
-    // Passkey query (via GroveAuth API)
-    fetchUserPasskeys(accessToken, authBaseUrl),
   ]);
 
   billing = billingResult;
   tenant = tenantResult;
-  passkeys = passkeyResult.passkeys;
-  passkeyError = passkeyResult.error;
 
   // Load export counts for size validation in frontend
   // This prevents users from wasting rate limit quota on oversized exports
@@ -265,7 +264,8 @@ export const load: PageServerLoad = async ({
       support: tierConfig.support.displayString,
     },
     availableTiers,
-    passkeys,
-    passkeyError,
+    // Deferred: passkey data streams in after initial render
+    // Use {#await data.passkeyData} in the page to handle loading state
+    passkeyData: passkeyPromise,
   };
 };

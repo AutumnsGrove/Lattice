@@ -8,11 +8,17 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { validateCSRF } from "$lib/utils/csrf.js";
 
 /** Default GroveAuth API URL */
 const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 
-export const GET: RequestHandler = async ({ cookies, platform }) => {
+export const GET: RequestHandler = async ({ request, cookies, platform }) => {
+  // Validate origin - this endpoint returns sensitive security data
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
+  }
+
   // Get access token from cookie
   const accessToken = cookies.get("access_token");
   if (!accessToken) {

@@ -256,16 +256,38 @@
     onOpenPortal={handleOpenBillingPortal}
   />
 
-  <!-- Passkeys -->
-  <PasskeyCard
-    passkeys={data.passkeys}
-    passkeyError={data.passkeyError}
-    {supportsPasskeys}
-    registering={registeringPasskey}
-    deletingId={deletingPasskeyId}
-    onRegister={handleRegisterPasskey}
-    onDelete={handleDeletePasskey}
-  />
+  <!-- Passkeys (deferred data - streams in after initial render) -->
+  {#await data.passkeyData}
+    <PasskeyCard
+      passkeys={[]}
+      passkeyError={false}
+      {supportsPasskeys}
+      registering={true}
+      deletingId={null}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {:then passkeyResult}
+    <PasskeyCard
+      passkeys={passkeyResult.passkeys}
+      passkeyError={passkeyResult.error}
+      {supportsPasskeys}
+      registering={registeringPasskey}
+      deletingId={deletingPasskeyId}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {:catch}
+    <PasskeyCard
+      passkeys={[]}
+      passkeyError={true}
+      {supportsPasskeys}
+      registering={false}
+      deletingId={null}
+      onRegister={handleRegisterPasskey}
+      onDelete={handleDeletePasskey}
+    />
+  {/await}
 
   <!-- Change Plan -->
   <ChangePlanCard
