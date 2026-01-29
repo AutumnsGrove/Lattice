@@ -1,0 +1,90 @@
+{
+  "version": "v0.9.94",
+  "timestamp": "2026-01-29T21:49:36.460Z",
+  "topWords": [
+    {
+      "word": "grove",
+      "count": 3725,
+      "pct": 1.69
+    },
+    {
+      "word": "content",
+      "count": 1088,
+      "pct": 0.49
+    },
+    {
+      "word": "blog",
+      "count": 900,
+      "pct": 0.41
+    },
+    {
+      "word": "place",
+      "count": 871,
+      "pct": 0.4
+    },
+    {
+      "word": "forest",
+      "count": 841,
+      "pct": 0.38
+    },
+    {
+      "word": "email",
+      "count": 728,
+      "pct": 0.33
+    },
+    {
+      "word": "post",
+      "count": 717,
+      "pct": 0.33
+    },
+    {
+      "word": "system",
+      "count": 658,
+      "pct": 0.3
+    },
+    {
+      "word": "posts",
+      "count": 621,
+      "pct": 0.28
+    },
+    {
+      "word": "something",
+      "count": 602,
+      "pct": 0.27
+    },
+    {
+      "word": "cloudflare",
+      "count": 593,
+      "pct": 0.27
+    },
+    {
+      "word": "storage",
+      "count": 577,
+      "pct": 0.26
+    },
+    {
+      "word": "tenant",
+      "count": 575,
+      "pct": 0.26
+    },
+    {
+      "word": "tree",
+      "count": 558,
+      "pct": 0.25
+    },
+    {
+      "word": "per",
+      "count": 555,
+      "pct": 0.25
+    }
+  ],
+  "totalWords": 220397,
+  "uniqueWords": 11404,
+  "totalFiles": 408,
+  "funFacts": {
+    "mostUsedWord": "grove",
+    "groveCount": 3725,
+    "wandererCount": 200,
+    "mostDocumentedTopic": "Content & Blogging"
+  }
+}
