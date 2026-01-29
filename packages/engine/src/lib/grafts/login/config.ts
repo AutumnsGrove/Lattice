@@ -129,6 +129,7 @@ export const AUTH_COOKIE_OPTIONS = {
   session: {
     path: "/",
     httpOnly: true,
+    secure: true,
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 30, // 30 days
   },

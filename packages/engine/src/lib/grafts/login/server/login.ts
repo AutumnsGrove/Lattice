@@ -106,7 +106,27 @@ export function createLoginHandler(config: LoginHandlerConfig): RequestHandler {
       defaultProvider;
 
     // Get return URL from query params or use default
-    const returnTo = url.searchParams.get("return_to") || defaultReturnTo;
+    // Security: Validate returnTo is a safe relative path to prevent open redirect attacks
+    const requestedReturnTo = url.searchParams.get("return_to");
+    let returnTo = defaultReturnTo;
+
+    if (requestedReturnTo) {
+      // Must start with "/" (relative path) but not "//" (protocol-relative URL)
+      // Also block paths that could be interpreted as URLs (e.g., "/\evil.com")
+      const isSafeRelativePath =
+        requestedReturnTo.startsWith("/") &&
+        !requestedReturnTo.startsWith("//") &&
+        !requestedReturnTo.startsWith("/\\");
+
+      if (isSafeRelativePath) {
+        returnTo = requestedReturnTo;
+      } else {
+        console.warn(
+          "[LoginGraft] Blocked potentially malicious return_to:",
+          requestedReturnTo,
+        );
+      }
+    }
 
     // Generate PKCE values
     const { codeVerifier, codeChallenge } = await generatePKCE();
