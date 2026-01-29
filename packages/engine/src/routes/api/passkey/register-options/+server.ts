@@ -20,26 +20,46 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     throw error(403, "Invalid origin");
   }
 
-  // Get access token from cookie
+  // Support both grove_session (SessionDO) and access_token (legacy JWT)
+  const groveSession = cookies.get("grove_session");
   const accessToken = cookies.get("access_token");
-  if (!accessToken) {
+
+  if (!groveSession && !accessToken) {
     throw error(401, "Not authenticated");
   }
 
   const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
 
   try {
-    // Forward request to GroveAuth passkey registration endpoint
-    const response = await fetch(
-      `${authBaseUrl}/api/auth/passkey/generate-register-options`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
+    let response: Response;
+
+    if (groveSession && platform?.env?.AUTH) {
+      // Use service binding with grove_session (preferred for tenant subdomains)
+      response = await platform.env.AUTH.fetch(
+        `${authBaseUrl}/api/auth/passkey/generate-register-options`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
         },
-      },
-    );
+      );
+    } else if (accessToken) {
+      // Fallback to direct fetch with access_token (legacy JWT)
+      response = await fetch(
+        `${authBaseUrl}/api/auth/passkey/generate-register-options`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    } else {
+      throw error(401, "Not authenticated");
+    }
 
     if (!response.ok) {
       const errorData = (await response.json().catch(() => ({}))) as {
