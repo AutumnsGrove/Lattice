@@ -115,22 +115,29 @@ export const AUTH_COOKIE_NAMES = {
 
 /**
  * Cookie options for OAuth flow cookies.
+ *
+ * NOTE: The `secure` flag is intentionally omitted from these defaults.
+ * It is set dynamically by the handlers based on `isProduction(url)` to allow:
+ * - localhost development (HTTP) → secure: false
+ * - production (HTTPS) → secure: true
+ *
+ * This prevents breaking local development while maintaining security in production.
  */
 export const AUTH_COOKIE_OPTIONS = {
   /** Options for temporary auth flow cookies (state, verifier, returnTo) */
   temporary: {
     path: "/",
     httpOnly: true,
-    secure: true,
     sameSite: "lax" as const,
     maxAge: 60 * 10, // 10 minutes
+    // secure: set dynamically by handler
   },
   /** Options for session cookies */
   session: {
     path: "/",
     httpOnly: true,
-    secure: true,
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 30, // 30 days
+    // secure: set dynamically by handler
   },
 } as const;

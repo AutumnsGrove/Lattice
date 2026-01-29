@@ -9,7 +9,7 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler, RequestEvent } from "@sveltejs/kit";
 import type { LoginHandlerConfig, AuthProvider } from "../types.js";
 import { generatePKCE, generateState } from "./pkce.js";
-import { getRealOrigin } from "./origin.js";
+import { getRealOrigin, isProduction } from "./origin.js";
 import {
   AUTH_COOKIE_NAMES,
   AUTH_COOKIE_OPTIONS,
@@ -21,26 +21,28 @@ import {
  *
  * Stores state, code verifier, and return URL in HTTP-only cookies
  * for retrieval during the callback phase.
+ *
+ * Note: The `secure` flag is set dynamically based on environment to allow
+ * localhost development (HTTP) while enforcing HTTPS in production.
  */
 function setAuthCookies(
   cookies: RequestEvent["cookies"],
   values: { state: string; codeVerifier: string; returnTo: string },
+  url: URL,
 ): void {
-  cookies.set(
-    AUTH_COOKIE_NAMES.state,
-    values.state,
-    AUTH_COOKIE_OPTIONS.temporary,
-  );
+  // Dynamically set secure flag - false for localhost, true for production
+  const cookieOptions = {
+    ...AUTH_COOKIE_OPTIONS.temporary,
+    secure: isProduction(url),
+  };
+
+  cookies.set(AUTH_COOKIE_NAMES.state, values.state, cookieOptions);
   cookies.set(
     AUTH_COOKIE_NAMES.codeVerifier,
     values.codeVerifier,
-    AUTH_COOKIE_OPTIONS.temporary,
+    cookieOptions,
   );
-  cookies.set(
-    AUTH_COOKIE_NAMES.returnTo,
-    values.returnTo,
-    AUTH_COOKIE_OPTIONS.temporary,
-  );
+  cookies.set(AUTH_COOKIE_NAMES.returnTo, values.returnTo, cookieOptions);
 }
 
 /**
@@ -133,7 +135,7 @@ export function createLoginHandler(config: LoginHandlerConfig): RequestHandler {
     const state = generateState();
 
     // Store in cookies for the callback handler
-    setAuthCookies(cookies, { state, codeVerifier, returnTo });
+    setAuthCookies(cookies, { state, codeVerifier, returnTo }, url);
 
     // Build the redirect URI for the callback
     const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
