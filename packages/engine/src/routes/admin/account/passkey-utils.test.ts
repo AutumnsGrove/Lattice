@@ -4,7 +4,7 @@
  * Tests device name detection and passkey support checking functionality.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { getDeviceName, checkPasskeySupport } from "./passkey-utils";
 
 describe("passkey-utils", () => {
