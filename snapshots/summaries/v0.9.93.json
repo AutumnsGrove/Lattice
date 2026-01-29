@@ -1,0 +1,41 @@
+{
+  "version": "v0.9.93",
+  "date": "2026-01-28 21:06:11 -0500",
+  "commitHash": "9cff9caa",
+  "summary": "This release brings exciting new tools to shape your blog's experience, introducing the Terrarium visual scene composer and a unified login interface. We've also added the Waystone contextual help system and refined animations for a smoother, more polished feel. Under the hood, important fixes improve reliability behind proxies and across the platform, all part of our ongoing effort to make Grove more intuitive and powerful for you.\n",
+  "stats": {
+    "totalCommits": 54,
+    "features": 14,
+    "fixes": 23,
+    "refactoring": 0,
+    "docs": 12,
+    "tests": 0,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "add LoginGraft for unified auth UI (#728)",
+  "add semantic element support to GlassCard",
+  "add 15-minute cooldown for vine parting animation (#722)",
+  "add Waystone contextual help system (#721)",
+  "add GroveLogo to trees palette",
+  "add zoom, resize, rotation, flip, and background controls",
+  "add documentation word frequency insights to Journey page",
+  "add drag-to-canvas and fix palette components",
+  "add terrarium subdomain routing",
+  "add visual scene composition package (#702)"
+],
+    "fixes": [
+  "update test for dynamic secure flag",
+  "correct timeout mismatch for 2.5s vine timing",
+  "restore optimized vine timing (1.8s)",
+  "update loading overlay test for reverted animation timing",
+  "make header opaque to prevent status banner bleed-through (#727)",
+  "correct grammar in Rings article title (#726)",
+  "ensure svelte-kit sync runs before tests and build engine types (#724)",
+  "use getRealOrigin for OAuth redirect_uri behind proxy (#705)",
+  "reorder tool links to show \"Read more\" first",
+  "migrate gray-matter to @11ty/gray-matter for Workers compatibility"
+]
+  }
+}
