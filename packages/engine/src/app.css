@@ -101,3 +101,15 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   UTILITY CLASSES
+   Explicit definitions to ensure availability in engine components
+   ───────────────────────────────────────────────────────────────── */
+
+@layer utilities {
+	/* Text color utilities using HSL CSS variables */
+	.text-foreground-subtle {
+		color: hsl(var(--foreground-subtle));
+	}
+}
