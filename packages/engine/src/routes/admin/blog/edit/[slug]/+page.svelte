@@ -558,10 +558,22 @@
     padding: 0.2rem 0.4rem;
     font-family: monospace;
     transition: all 0.15s ease;
+    flex-shrink: 0; /* Prevent button from being squeezed */
   }
   .collapse-details-btn:hover {
     background: var(--color-bg-secondary);
     color: var(--color-primary);
+  }
+  /* Mobile touch target - WCAG 2.5.5 requires 44×44px minimum */
+  @media (max-width: 900px) {
+    .collapse-details-btn {
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
   }
   .form-group {
     margin-bottom: 1.25rem;
