@@ -12,6 +12,7 @@
   import PasskeyCard from "./PasskeyCard.svelte";
   import ChangePlanCard from "./ChangePlanCard.svelte";
   import DataExportCard from "./DataExportCard.svelte";
+  import FeaturesCard from "./FeaturesCard.svelte";
 
   // Import types and utils
   import type { ExportType } from "./types";
@@ -248,6 +249,9 @@
 
   <!-- Usage Stats -->
   <UsageStatsCard usage={data.usage} usageError={data.usageError} />
+
+  <!-- Features Overview -->
+  <FeaturesCard curiosCount={data.curiosCount} />
 
   <!-- Payment Method -->
   <PaymentMethodCard

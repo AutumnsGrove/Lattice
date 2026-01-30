@@ -158,8 +158,16 @@ export const load: PageServerLoad = async ({
   const MAX_EXPORT_ITEMS = 5000;
   let exportCounts = { posts: 0, pages: 0, media: 0 };
   let exportTooLarge = false;
+  let curiosCount = 0;
   try {
-    const [postResult, pageResult, mediaResult] = await Promise.all([
+    const [
+      postResult,
+      pageResult,
+      mediaResult,
+      timelineCurio,
+      galleryCurio,
+      journeyCurio,
+    ] = await Promise.all([
       platform.env.DB.prepare(
         "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
       )
@@ -175,6 +183,25 @@ export const load: PageServerLoad = async ({
       )
         .bind(locals.tenantId)
         .first<{ count: number }>(),
+      // Curio config queries
+      platform.env.DB.prepare(
+        "SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ enabled: number }>()
+        .catch(() => null),
+      platform.env.DB.prepare(
+        "SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ enabled: number }>()
+        .catch(() => null),
+      platform.env.DB.prepare(
+        "SELECT enabled FROM journey_curio_config WHERE tenant_id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ enabled: number }>()
+        .catch(() => null),
     ]);
     exportCounts = {
       posts: postResult?.count ?? 0,
@@ -184,6 +211,11 @@ export const load: PageServerLoad = async ({
     exportTooLarge = Object.values(exportCounts).some(
       (count) => count > MAX_EXPORT_ITEMS,
     );
+    // Count enabled curios
+    curiosCount =
+      (timelineCurio?.enabled === 1 ? 1 : 0) +
+      (galleryCurio?.enabled === 1 ? 1 : 0) +
+      (journeyCurio?.enabled === 1 ? 1 : 0);
   } catch (e) {
     console.error("[Account] Failed to load export counts:", e);
     // Non-critical - continue without counts
@@ -266,6 +298,7 @@ export const load: PageServerLoad = async ({
       support: tierConfig.support.displayString,
     },
     availableTiers,
+    curiosCount,
     // Deferred: passkey data streams in after initial render
     // Use {#await data.passkeyData} in the page to handle loading state
     passkeyData: passkeyPromise,
