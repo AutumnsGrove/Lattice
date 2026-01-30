@@ -1,0 +1,90 @@
+/**
+ * Optional Font Declarations
+ *
+ * These fonts are loaded on-demand when a tenant selects them in site settings.
+ * They are NOT loaded by default to reduce initial page load time.
+ *
+ * The default font (Lexend) is declared in +layout.svelte for immediate availability.
+ * These fonts are loaded dynamically by FontProvider.svelte when needed.
+ *
+ * PERFORMANCE: Moving these out of the critical path reduces:
+ * - Initial CSS parsing time
+ * - Network requests on first paint
+ * - Total blocking time (TBT)
+ */
+
+/* Accessibility-focused fonts */
+@font-face {
+	font-family: 'Atkinson Hyperlegible';
+	src: url('https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'OpenDyslexic';
+	src: url('https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf') format('opentype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Modern sans-serif alternatives */
+@font-face {
+	font-family: 'Quicksand';
+	src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Plus Jakarta Sans';
+	src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Monospace fonts */
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Cozette';
+	src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Decorative/display fonts */
+@font-face {
+	font-family: 'Alagard';
+	src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Calistoga';
+	src: url('https://cdn.grove.place/fonts/Calistoga-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Caveat';
+	src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}

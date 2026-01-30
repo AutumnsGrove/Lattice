@@ -2,8 +2,6 @@
 	import '../app.css';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { GossamerClouds } from '@autumnsgrove/gossamer/svelte';
-	import '@autumnsgrove/gossamer/svelte/style.css';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Search } from 'lucide-svelte';
 
@@ -23,6 +21,11 @@
 			document.documentElement.classList.add('dark');
 		}
 	});
+
+	// Minimal footer for Forage - just the essentials
+	const minimalLegalLinks = [
+		{ href: 'https://grove.place/privacy', label: 'Privacy' }
+	];
 </script>
 
 <svelte:head>
@@ -33,15 +36,7 @@
 </svelte:head>
 
 <div class="min-h-screen relative overflow-hidden domain-gradient">
-	<!-- Gossamer ASCII cloud background - purple-tinted for Forage -->
-	<GossamerClouds
-		preset="ambient-clouds"
-		color="#a78bfa"
-		opacity={0.25}
-		animated={true}
-	/>
-
-	<!-- Content layer above background -->
+	<!-- Content layer -->
 	<div class="relative z-10 flex flex-col min-h-screen">
 		{#if !isAdmin}
 			<Header {navItems} brandTitle="Forage" maxWidth="wide" />
@@ -52,7 +47,12 @@
 		</main>
 
 		{#if !isAdmin}
-			<Footer maxWidth="wide" />
+			<Footer
+				maxWidth="wide"
+				resourceLinks={[]}
+				connectLinks={[]}
+				legalLinks={minimalLegalLinks}
+			/>
 		{/if}
 	</div>
 </div>

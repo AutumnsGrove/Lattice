@@ -162,10 +162,10 @@ function sanitizeServerSafe(html: string): string {
       // Check if rel already exists
       const fullAttrs = before + after;
       if (/\brel\s*=/i.test(fullAttrs)) {
-        // rel exists - add noopener noreferrer if not present
+        // rel exists - ensure noopener noreferrer are included
         return match.replace(
           /rel\s*=\s*["']([^"']*)["']/i,
-          (relMatch, relValue) => {
+          (_relMatch, relValue) => {
             const parts = new Set(relValue.split(/\s+/).filter(Boolean));
             parts.add("noopener");
             parts.add("noreferrer");
@@ -173,12 +173,12 @@ function sanitizeServerSafe(html: string): string {
           },
         );
       }
-      // No rel - add it
+      // No rel attribute - add it
       return `<a ${before}href="${href}"${after} rel="noopener noreferrer">`;
     },
   );
 
-  // Also handle target="_blank" links that might not be absolute URLs
+  // Also handle target="_blank" links that might be relative URLs
   sanitized = sanitized.replace(
     /<a\s+([^>]*?)target\s*=\s*["']_blank["']([^>]*)>/gi,
     (match, before, after) => {
@@ -187,7 +187,7 @@ function sanitizeServerSafe(html: string): string {
         // rel exists - ensure noopener noreferrer
         return match.replace(
           /rel\s*=\s*["']([^"']*)["']/i,
-          (relMatch, relValue) => {
+          (_relMatch, relValue) => {
             const parts = new Set(relValue.split(/\s+/).filter(Boolean));
             parts.add("noopener");
             parts.add("noreferrer");

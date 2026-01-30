@@ -4,13 +4,18 @@ import {
   processAnchorTags,
   renderMarkdown,
   type GutterItem,
-  type Header,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - latest post is fetched from D1 at runtime
 export const prerender = false;
+
+interface Header {
+  level: number;
+  id: string;
+  text: string;
+}
 
 interface HeroData {
   title?: string;

@@ -47,19 +47,131 @@ export interface Env {
 }
 
 // =============================================================================
+// UTILITIES
+// =============================================================================
+
+/** Simple sleep helper for retry backoff */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Structured logging for production debugging */
+function log(
+  level: "info" | "warn" | "error",
+  cat: string,
+  msg: string,
+  meta?: object,
+): void {
+  const entry = { ts: new Date().toISOString(), level, cat, msg, ...meta };
+  if (level === "error") {
+    console.error(JSON.stringify(entry));
+  } else if (level === "warn") {
+    console.warn(JSON.stringify(entry));
+  } else {
+    console.log(JSON.stringify(entry));
+  }
+}
+
+// =============================================================================
 // FONT LOADING
 // =============================================================================
 
+/** Primary CDN and Google Fonts fallback */
+const FONT_URLS = [
+  "https://cdn.grove.place/fonts/Lexend-Regular.ttf",
+  "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCwkWtLBfog.ttf",
+];
+
+/** Retry delays in milliseconds */
+const RETRY_DELAYS = [100, 500, 2000];
+
 let fontCache: ArrayBuffer | null = null;
 
-async function getFont(): Promise<ArrayBuffer> {
-  if (fontCache) return fontCache;
-  const response = await fetch(
-    "https://cdn.grove.place/fonts/Lexend-Regular.ttf",
-  );
-  if (!response.ok) throw new Error(`Font fetch failed: ${response.status}`);
-  fontCache = await response.arrayBuffer();
-  return fontCache;
+/**
+ * Get font with multi-layer caching and resilient fetching:
+ * 1. Memory cache (fastest, per-isolate)
+ * 2. KV cache (cross-worker persistence)
+ * 3. Fetch from CDN with retry and backoff
+ * 4. Fallback to Google Fonts if primary fails
+ */
+async function getFont(env: Env): Promise<ArrayBuffer> {
+  // 1. Check memory cache (fastest)
+  if (fontCache) {
+    log("info", "font", "Loaded from memory cache");
+    return fontCache;
+  }
+
+  // 2. Check KV cache (cross-worker persistence)
+  if (env.OG_CACHE) {
+    try {
+      const kvFont = await env.OG_CACHE.get("font:lexend", "arrayBuffer");
+      if (kvFont) {
+        fontCache = kvFont;
+        log("info", "font", "Loaded from KV cache");
+        return fontCache;
+      }
+    } catch (err) {
+      log("warn", "font", "KV cache read failed", {
+        error: err instanceof Error ? err.message : "Unknown",
+      });
+      // KV miss or error, continue to fetch
+    }
+  }
+
+  // 3. Fetch from CDN with retry and fallback
+  for (const url of FONT_URLS) {
+    const host = new URL(url).host;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          fontCache = await response.arrayBuffer();
+          log("info", "font", `Loaded from ${host}`, { attempt });
+
+          // Cache in KV for other workers (24h TTL)
+          if (env.OG_CACHE) {
+            // Use waitUntil to not block the response
+            env.OG_CACHE.put("font:lexend", fontCache, {
+              expirationTtl: 86400,
+            }).catch((err) => {
+              log("warn", "font", "KV cache write failed", {
+                error: err instanceof Error ? err.message : "Unknown",
+              });
+            });
+          }
+          return fontCache;
+        }
+
+        log("warn", "font", `HTTP ${response.status} from ${host}`, {
+          attempt,
+        });
+      } catch (err) {
+        const isTimeout = err instanceof Error && err.name === "AbortError";
+        log(
+          "warn",
+          "font",
+          isTimeout ? `Timeout from ${host}` : `Fetch error from ${host}`,
+          {
+            attempt,
+            error: err instanceof Error ? err.message : "Unknown",
+          },
+        );
+      }
+
+      // Backoff before next attempt (skip delay on last attempt)
+      if (attempt < 3) {
+        await sleep(RETRY_DELAYS[attempt - 1]);
+      }
+    }
+    log("warn", "font", `All attempts failed for ${host}`);
+  }
+
+  log("error", "font", "All font sources failed");
+  throw new Error("All font sources failed");
 }
 
 // =============================================================================
@@ -212,6 +324,55 @@ interface OGFetchResult {
   error?: string;
   errorCode?: string;
   cached?: boolean;
+}
+
+// =============================================================================
+// RATE LIMITING
+// =============================================================================
+
+interface RateLimitResult {
+  limited: boolean;
+  remaining: number;
+}
+
+/**
+ * IP-based rate limiting using KV storage.
+ * Returns whether the request should be blocked and remaining quota.
+ */
+async function checkRateLimit(env: Env, ip: string): Promise<RateLimitResult> {
+  // If no KV available, allow all requests (degraded mode)
+  if (!env.OG_CACHE) {
+    return { limited: false, remaining: 100 };
+  }
+
+  const key = `ratelimit:fetch:${ip}`;
+  const limit = 100; // requests per hour
+  const window = 3600; // 1 hour in seconds
+
+  try {
+    const current = await env.OG_CACHE.get(key);
+    const count = current ? parseInt(current, 10) : 0;
+
+    if (count >= limit) {
+      log("warn", "ratelimit", "Rate limit exceeded", {
+        ip: ip.slice(0, 8) + "...",
+      });
+      return { limited: true, remaining: 0 };
+    }
+
+    // Increment counter (fire-and-forget for performance)
+    env.OG_CACHE.put(key, String(count + 1), { expirationTtl: window }).catch(
+      () => {
+        // Ignore KV write errors for rate limiting
+      },
+    );
+
+    return { limited: false, remaining: limit - count - 1 };
+  } catch {
+    // On KV error, allow the request (fail open)
+    log("warn", "ratelimit", "KV error, allowing request");
+    return { limited: false, remaining: 100 };
+  }
 }
 
 async function handleOGFetch(
@@ -462,10 +623,51 @@ export default {
   ): Promise<Response> {
     const url = new URL(request.url);
 
+    // Enhanced health check with dependency verification
     if (url.pathname === "/health") {
-      return new Response(JSON.stringify({ status: "ok" }), {
-        headers: { "Content-Type": "application/json" },
+      const checks: Array<{
+        name: string;
+        status: "pass" | "cold" | "fail";
+        cached?: boolean;
+        latency_ms?: number;
+      }> = [];
+
+      // Check font cache status
+      checks.push({
+        name: "font_cache",
+        status: fontCache ? "pass" : "cold",
+        cached: fontCache !== null,
       });
+
+      // Check KV availability if configured
+      if (env.OG_CACHE) {
+        const start = Date.now();
+        try {
+          await env.OG_CACHE.get("health-check-ping");
+          checks.push({
+            name: "kv_cache",
+            status: "pass",
+            latency_ms: Date.now() - start,
+          });
+        } catch {
+          checks.push({ name: "kv_cache", status: "fail" });
+        }
+      }
+
+      const hasFailed = checks.some((c) => c.status === "fail");
+      const status = hasFailed ? "degraded" : "healthy";
+
+      return new Response(
+        JSON.stringify({
+          status,
+          checks,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const corsHeaders = {
@@ -483,7 +685,34 @@ export default {
       if (request.method !== "GET") {
         return new Response("Method not allowed", { status: 405 });
       }
-      return handleOGFetch(request, env, corsHeaders);
+
+      // Rate limiting to prevent abuse
+      const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+      const { limited, remaining } = await checkRateLimit(env, ip);
+
+      if (limited) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Rate limit exceeded",
+            errorCode: "RATE_LIMITED",
+          } satisfies OGFetchResult),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "3600",
+              "X-RateLimit-Remaining": "0",
+              ...corsHeaders,
+            },
+          },
+        );
+      }
+
+      const response = await handleOGFetch(request, env, corsHeaders);
+      // Add rate limit header to successful responses
+      response.headers.set("X-RateLimit-Remaining", String(remaining));
+      return response;
     }
 
     // Route: / or /og - OG image generation
@@ -529,7 +758,7 @@ export default {
         ? (rawVariant as Variant)
         : "default";
 
-      const fontData = await getFont();
+      const fontData = await getFont(env);
       const html = generateHtml(title, subtitle, preview, variant);
 
       const response = new ImageResponse(html, {
@@ -548,14 +777,24 @@ export default {
 
       return new Response(response.body, { status: 200, headers });
     } catch (error) {
-      console.error("OG error:", error);
+      // Determine error type for appropriate response
+      const isFontError =
+        error instanceof Error && error.message.includes("font");
+      const errorType = isFontError ? "FONT_UNAVAILABLE" : "GENERATION_FAILED";
+
+      log("error", "og", errorType, {
+        message: error instanceof Error ? error.message : "Unknown",
+      });
+
       return new Response(
         JSON.stringify({
-          error: "Failed",
-          message: error instanceof Error ? error.message : "Unknown",
+          error: errorType,
+          message: isFontError
+            ? "Font service temporarily unavailable"
+            : "Image generation failed",
         }),
         {
-          status: 500,
+          status: isFontError ? 503 : 500,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         },
       );

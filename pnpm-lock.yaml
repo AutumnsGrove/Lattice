@@ -76,9 +76,6 @@ importers:
 
   packages/domains:
     dependencies:
-      '@autumnsgrove/gossamer':
-        specifier: ^0.1.1
-        version: 0.1.1(svelte@5.46.1)
       '@autumnsgrove/groveengine':
         specifier: workspace:*
         version: link:../engine
