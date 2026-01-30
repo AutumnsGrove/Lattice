@@ -79,6 +79,7 @@
 		internal?: boolean;
 		major?: boolean;
 		dream?: boolean;
+		articleSlug?: string; // Links to /knowledge/help/{slug}
 	};
 
 	/**
@@ -103,13 +104,13 @@
 			season: 'winter' as Season,
 			description: 'The groundwork has been laid. Foundations built in stillness.',
 			features: [
-				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true },
-				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true },
+				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true, articleSlug: 'what-is-lattice' },
+				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true, articleSlug: 'what-is-heartwood' },
 				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
-				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing' },
+				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing', articleSlug: 'what-is-clearing' },
 				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true },
-				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true },
-				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage' },
+				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true, articleSlug: 'what-is-petal' },
+				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage', articleSlug: 'what-is-forage' },
 				{ name: 'Email Waitlist', description: '67 seeds, waiting to sprout', done: true }
 			]
 		},
@@ -126,8 +127,8 @@
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download', major: true },
-				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost' },
-				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true }
+				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost', articleSlug: 'what-is-waystone' },
+				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true, articleSlug: 'what-is-shade' }
 			]
 		},
 		'first-buds': {
@@ -138,13 +139,13 @@
 			features: [
 				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree', major: true },
 				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests', major: true },
-				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true },
-				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook', major: true },
-				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true },
-				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy' },
-				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails' },
-				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch' },
-				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial', major: true }
+				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true, articleSlug: 'what-is-wisp' },
+				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook', major: true, articleSlug: 'what-is-foliage' },
+				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true, articleSlug: 'what-is-amber' },
+				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy', articleSlug: 'what-is-ivy' },
+				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails', articleSlug: 'what-is-trails' },
+				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch', articleSlug: 'what-is-porch' },
+				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial', major: true, articleSlug: 'what-is-centennial' }
 			]
 		},
 		'full-bloom': {
@@ -153,18 +154,18 @@
 			season: 'summer' as Season,
 			description: 'The grove becomes a community. Roots intertwine.',
 			features: [
-				{ name: 'Meadow', description: 'Social feed — connection without competition', done: false, major: true, icon: 'meadow' },
+				{ name: 'Meadow', description: 'Social feed — connection without competition', done: false, major: true, icon: 'meadow', articleSlug: 'what-is-meadow' },
 				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
 				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
 				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message' },
-				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending' },
-				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield' },
+				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending', articleSlug: 'what-is-rings' },
+				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield', articleSlug: 'what-is-thorn' },
 				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown', major: true },
-				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush' },
+				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush', articleSlug: 'what-is-foliage' },
 				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
-				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, major: true, icon: 'terrarium' },
+				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, major: true, icon: 'terrarium', articleSlug: 'what-is-terrarium' },
 				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios', major: true },
-				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave' },
+				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave', articleSlug: 'what-is-weave' },
 				{ name: 'Outpost', description: 'Community Minecraft — a server that waits for you', done: false, icon: 'outpost' }
 			]
 		},
@@ -464,7 +465,18 @@
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar />
 									{/if}
@@ -545,7 +557,18 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar />
 									{/if}
@@ -669,7 +692,18 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar />
 									{/if}
@@ -780,7 +814,18 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">{feature.name}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar />
 									{/if}
@@ -891,7 +936,18 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-amber-900 dark:text-amber-100">{feature.name}</span>
+									<span class="font-medium text-amber-900 dark:text-amber-100">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar />
 									{/if}
@@ -998,7 +1054,18 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-white">{feature.name}</span>
+									<span class="font-medium text-white">
+										{#if feature.articleSlug}
+											<a
+												href="/knowledge/help/{feature.articleSlug}"
+												class="hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+											>
+												{feature.name}
+											</a>
+										{:else}
+											{feature.name}
+										{/if}
+									</span>
 									{#if feature.major}
 										<FeatureStar variant="midnight" />
 									{/if}
