@@ -29,6 +29,7 @@
   "dependencies": {
     "@autumnsgrove/gossamer": "^0.1.1",
     "@autumnsgrove/groveengine": "workspace:*",
+    "lucide-svelte": "^0.563.0",
     "resend": "^4.0.0"
   }
 }

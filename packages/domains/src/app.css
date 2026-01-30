@@ -158,30 +158,20 @@
    GLASS DESIGN SYSTEM (Minimal)
 
    Most glass effects now use engine GlassCard components from @autumnsgrove/groveengine/ui.
+   Navigation chrome now uses engine AdminHeader component.
    These remaining classes are for:
-   - Navigation chrome (glass-surface, glass-tabs) - not suitable for card components
    - Internal dividers (glass-divider, glass-divide)
    - Details element fallback (glass-card) - native HTML needs CSS
    ============================================================================= */
 
 /* Browser fallback for backdrop-blur (Safari < 9, older browsers) */
 @supports not (backdrop-filter: blur(12px)) {
-	.glass-surface { background-color: rgba(255, 255, 255, 0.98); }
 	.glass-card { background-color: rgba(255, 255, 255, 0.95); }
-	.glass-tabs { background-color: rgba(255, 255, 255, 0.90); }
 }
 
 /* Dark mode fallbacks */
 @supports not (backdrop-filter: blur(12px)) {
-	.dark .glass-surface { background-color: rgba(28, 25, 23, 0.98); }
 	.dark .glass-card { background-color: rgba(28, 25, 23, 0.95); }
-	.dark .glass-tabs { background-color: rgba(28, 25, 23, 0.90); }
-}
-
-/* Glass surface - for sticky headers, navbars */
-.glass-surface {
-	@apply bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md
-		border-b border-white/50 dark:border-neutral-700/50;
 }
 
 /* Glass card - fallback for native HTML elements (details, etc.) */
@@ -189,12 +179,6 @@
 	@apply bg-white/75 dark:bg-neutral-900/75 backdrop-blur-md
 		rounded-xl border border-white/50 dark:border-neutral-700/50
 		shadow-sm transition-all duration-200;
-}
-
-/* Glass tab navigation */
-.glass-tabs {
-	@apply bg-white/60 dark:bg-neutral-900/60 backdrop-blur-sm
-		border-b border-white/40 dark:border-neutral-700/50;
 }
 
 /* Glass internal dividers - lighter than card borders for subtle separation */

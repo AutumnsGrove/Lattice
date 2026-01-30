@@ -7,6 +7,7 @@ export { default as ThemeToggle } from "./ThemeToggle.svelte";
 export { default as MobileMenu } from "./MobileMenu.svelte";
 export { default as Header } from "./Header.svelte";
 export { default as HeaderMinimal } from "./HeaderMinimal.svelte";
+export { default as AdminHeader } from "./AdminHeader.svelte";
 export { default as Footer } from "./Footer.svelte";
 export { default as FooterMinimal } from "./FooterMinimal.svelte";
 

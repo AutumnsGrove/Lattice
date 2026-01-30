@@ -82,6 +82,9 @@ importers:
       '@autumnsgrove/groveengine':
         specifier: workspace:*
         version: link:../engine
+      lucide-svelte:
+        specifier: ^0.563.0
+        version: 0.563.0(svelte@5.46.1)
       resend:
         specifier: ^4.0.0
         version: 4.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2577,6 +2580,11 @@ packages:
 
   lucide-svelte@0.554.0:
     resolution: {integrity: sha512-LLcpHi3SuKup0nVD1kKqo8FDZnjXJp48uST26GGh8Jcyrxqk5gmgpnvKmHsHox674UL3cPS1DCul/wFL7ybGqg==}
+    peerDependencies:
+      svelte: ^3 || ^4 || ^5.0.0-next.42
+
+  lucide-svelte@0.563.0:
+    resolution: {integrity: sha512-pjZKw7TpQcamfQrx7YdbOHgmrcNeKiGGMD0tKZQaVktwSsbqw28CsKc2Q97ttwjytiCWkJyOa8ij2Q+Og0nPfQ==}
     peerDependencies:
       svelte: ^3 || ^4 || ^5.0.0-next.42
 
@@ -5458,6 +5466,10 @@ snapshots:
       svelte: 5.46.1
 
   lucide-svelte@0.554.0(svelte@5.46.1):
+    dependencies:
+      svelte: 5.46.1
+
+  lucide-svelte@0.563.0(svelte@5.46.1):
     dependencies:
       svelte: 5.46.1
 
