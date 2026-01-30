@@ -124,6 +124,20 @@ export async function migrateToEnvelope(
   console.log(`[Migration] Starting envelope encryption migration...`);
   console.log(`[Migration] Dry run: ${dryRun}`);
 
+  // Validate key formats (fail fast with clear errors)
+  if (kekHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(kekHex)) {
+    throw new Error(
+      "Invalid KEK format. Must be 64 hex characters (256 bits).\n" +
+        "Generate with: openssl rand -hex 32",
+    );
+  }
+  if (oldKeyHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(oldKeyHex)) {
+    throw new Error(
+      "Invalid old key format. Must be 64 hex characters (256 bits).\n" +
+        "This should be your existing TOKEN_ENCRYPTION_KEY value.",
+    );
+  }
+
   // Verify tables exist before proceeding
   console.log(`[Migration] Verifying required tables...`);
   await verifyTablesExist(db);
@@ -264,6 +278,18 @@ export async function migrateGitDashboardTokens(
   };
 
   console.log(`[Migration] Migrating git_dashboard tokens...`);
+
+  // Validate key formats (fail fast with clear errors)
+  if (kekHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(kekHex)) {
+    throw new Error(
+      "Invalid KEK format. Must be 64 hex characters (256 bits).",
+    );
+  }
+  if (oldKeyHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(oldKeyHex)) {
+    throw new Error(
+      "Invalid old key format. Must be 64 hex characters (256 bits).",
+    );
+  }
 
   // Verify tables exist before proceeding
   console.log(`[Migration] Verifying required tables...`);
