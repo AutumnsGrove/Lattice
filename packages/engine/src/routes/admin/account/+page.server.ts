@@ -248,34 +248,53 @@ export const load: PageServerLoad = async ({
       isUpgrade: config.order > (TIERS[currentPlan]?.order ?? 0),
     }));
 
+  // Build billing data - handle comped accounts (oak/evergreen without billing record)
+  const isCompedPremium =
+    !billing && ["oak", "evergreen"].includes(currentPlan);
+
+  const billingData = billing
+    ? {
+        plan: billing.plan,
+        status: billing.status,
+        hasSubscription:
+          !!billing.provider_subscription_id ||
+          ["oak", "evergreen"].includes(billing.plan),
+        currentPeriodStart: billing.current_period_start
+          ? new Date(billing.current_period_start * 1000).toISOString()
+          : null,
+        currentPeriodEnd: billing.current_period_end
+          ? new Date(billing.current_period_end * 1000).toISOString()
+          : null,
+        cancelAtPeriodEnd: billing.cancel_at_period_end === 1,
+        trialEnd: billing.trial_end
+          ? new Date(billing.trial_end * 1000).toISOString()
+          : null,
+        paymentMethod: billing.payment_method_last4
+          ? {
+              last4: billing.payment_method_last4,
+              brand: billing.payment_method_brand,
+            }
+          : null,
+        customerId: billing.provider_customer_id,
+      }
+    : isCompedPremium
+      ? {
+          // Synthetic billing for comped premium accounts (admin, invited, etc.)
+          plan: currentPlan,
+          status: "active" as const,
+          hasSubscription: true,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          trialEnd: null,
+          paymentMethod: null,
+          customerId: null,
+        }
+      : null;
+
   return {
     ...parentData,
-    billing: billing
-      ? {
-          plan: billing.plan,
-          status: billing.status,
-          hasSubscription:
-            !!billing.provider_subscription_id ||
-            ["oak", "evergreen"].includes(billing.plan),
-          currentPeriodStart: billing.current_period_start
-            ? new Date(billing.current_period_start * 1000).toISOString()
-            : null,
-          currentPeriodEnd: billing.current_period_end
-            ? new Date(billing.current_period_end * 1000).toISOString()
-            : null,
-          cancelAtPeriodEnd: billing.cancel_at_period_end === 1,
-          trialEnd: billing.trial_end
-            ? new Date(billing.trial_end * 1000).toISOString()
-            : null,
-          paymentMethod: billing.payment_method_last4
-            ? {
-                last4: billing.payment_method_last4,
-                brand: billing.payment_method_brand,
-              }
-            : null,
-          customerId: billing.provider_customer_id,
-        }
-      : null,
+    billing: billingData,
     billingError,
     usage: tenant
       ? {
