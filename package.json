@@ -27,15 +27,6 @@
     "sharp": "^0.34.5",
     "wrangler": "^4.54.0"
   },
-  "pnpm": {
-    "overrides": {
-      "hono": ">=4.10.3",
-      "@modelcontextprotocol/sdk": ">=1.24.0",
-      "cookie": ">=0.7.0",
-      "esbuild": ">=0.25.0",
-      "qs": ">=6.14.1"
-    }
-  },
   "main": "./packages/engine/dist/index.js",
   "types": "./packages/engine/dist/index.d.ts",
   "svelte": "./packages/engine/dist/index.js",
@@ -85,5 +76,16 @@
       "types": "./packages/engine/dist/groveauth/index.d.ts",
       "default": "./packages/engine/dist/groveauth/index.js"
     }
-  }
+  },
+  "overrides": {
+    "hono": ">=4.10.3",
+    "@modelcontextprotocol/sdk": ">=1.24.0",
+    "cookie": ">=0.7.0",
+    "esbuild": ">=0.25.0",
+    "qs": ">=6.14.1"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/workers/*"
+  ]
 }

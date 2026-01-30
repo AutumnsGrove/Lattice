@@ -1,0 +1,280 @@
+/**
+ * Traces Admin Page Server
+ *
+ * View and manage feedback submitted via the Trace component.
+ * Provides filtering, stats, and mark-as-read functionality.
+ */
+
+import { error, fail } from "@sveltejs/kit";
+import type { PageServerLoad, Actions } from "./$types";
+
+interface TraceFeedback {
+  id: string;
+  source_path: string;
+  vote: "up" | "down";
+  comment: string | null;
+  ip_hash: string;
+  user_agent: string | null;
+  created_at: number;
+  read_at: number | null;
+  archived_at: number | null;
+}
+
+interface TraceStats {
+  total: number;
+  upvotes: number;
+  downvotes: number;
+  withComments: number;
+  unread: number;
+}
+
+interface SourceStats {
+  source_path: string;
+  total: number;
+  upvotes: number;
+  downvotes: number;
+}
+
+// List of admin emails who can view traces
+// In production, this would come from a config or database
+const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
+
+function isAdmin(email: string | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
+export const load: PageServerLoad = async ({ locals, platform, url }) => {
+  if (!locals.user) {
+    throw error(401, "Unauthorized");
+  }
+
+  // Check if user is a Grove admin
+  if (!isAdmin(locals.user.email)) {
+    throw error(
+      403,
+      "Access denied. This page is for Grove administrators only.",
+    );
+  }
+
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not available");
+  }
+
+  const { DB } = platform.env;
+
+  // Filters from URL params
+  const voteFilter = url.searchParams.get("vote") || "";
+  const unreadOnly = url.searchParams.get("unread") === "true";
+  const sourceFilter = url.searchParams.get("source") || "";
+
+  // Pagination
+  const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+  const pageSize = 50;
+  const offset = (page - 1) * pageSize;
+
+  try {
+    // Build query with optional filters
+    let query = "SELECT * FROM trace_feedback WHERE archived_at IS NULL";
+    const params: (string | number)[] = [];
+    const conditions: string[] = [];
+
+    if (voteFilter === "up" || voteFilter === "down") {
+      conditions.push("vote = ?");
+      params.push(voteFilter);
+    }
+
+    if (unreadOnly) {
+      conditions.push("read_at IS NULL");
+    }
+
+    if (sourceFilter) {
+      conditions.push("source_path LIKE ?");
+      params.push(`%${sourceFilter}%`);
+    }
+
+    if (conditions.length > 0) {
+      query += " AND " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    params.push(pageSize, offset);
+
+    // Build count query
+    let countQuery =
+      "SELECT COUNT(*) as count FROM trace_feedback WHERE archived_at IS NULL";
+    const countParams: (string | number)[] = [];
+    if (conditions.length > 0) {
+      if (voteFilter) countParams.push(voteFilter);
+      if (sourceFilter) countParams.push(`%${sourceFilter}%`);
+      countQuery += " AND " + conditions.join(" AND ");
+    }
+
+    // Run all queries in parallel for performance
+    const [tracesResult, countResult, statsResult, sourceStatsResult] =
+      await Promise.all([
+        // Get traces with pagination
+        DB.prepare(query)
+          .bind(...params)
+          .all<TraceFeedback>(),
+
+        // Get total count for pagination
+        DB.prepare(countQuery)
+          .bind(...countParams)
+          .first<{ count: number }>(),
+
+        // Get overall stats
+        DB.prepare(
+          `
+        SELECT
+          COUNT(*) as total,
+          SUM(CASE WHEN vote = 'up' THEN 1 ELSE 0 END) as upvotes,
+          SUM(CASE WHEN vote = 'down' THEN 1 ELSE 0 END) as downvotes,
+          SUM(CASE WHEN comment IS NOT NULL THEN 1 ELSE 0 END) as withComments,
+          SUM(CASE WHEN read_at IS NULL THEN 1 ELSE 0 END) as unread
+        FROM trace_feedback
+        WHERE archived_at IS NULL
+      `,
+        ).first<TraceStats>(),
+
+        // Get stats by source
+        DB.prepare(
+          `
+        SELECT
+          source_path,
+          COUNT(*) as total,
+          SUM(CASE WHEN vote = 'up' THEN 1 ELSE 0 END) as upvotes,
+          SUM(CASE WHEN vote = 'down' THEN 1 ELSE 0 END) as downvotes
+        FROM trace_feedback
+        WHERE archived_at IS NULL
+        GROUP BY source_path
+        ORDER BY total DESC
+        LIMIT 20
+      `,
+        ).all<SourceStats>(),
+      ]);
+
+    return {
+      traces: tracesResult.results || [],
+      stats: statsResult || {
+        total: 0,
+        upvotes: 0,
+        downvotes: 0,
+        withComments: 0,
+        unread: 0,
+      },
+      sourceStats: sourceStatsResult.results || [],
+      pagination: {
+        page,
+        pageSize,
+        total: countResult?.count || 0,
+        totalPages: Math.ceil((countResult?.count || 0) / pageSize),
+      },
+      filters: {
+        vote: voteFilter,
+        unreadOnly,
+        source: sourceFilter,
+      },
+    };
+  } catch (err) {
+    console.error("[Traces Admin] Error loading data:", err);
+    throw error(500, "Failed to load traces");
+  }
+};
+
+export const actions: Actions = {
+  /**
+   * Mark a trace as read
+   */
+  markRead: async ({ request, locals, platform }) => {
+    if (!locals.user || !isAdmin(locals.user.email)) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+    const formData = await request.formData();
+    const id = formData.get("id")?.toString();
+
+    if (!id) {
+      return fail(400, { error: "Trace ID is required" });
+    }
+
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      await DB.prepare("UPDATE trace_feedback SET read_at = ? WHERE id = ?")
+        .bind(now, id)
+        .run();
+
+      return { success: true };
+    } catch (err) {
+      console.error("[Traces Admin] Error marking read:", err);
+      return fail(500, { error: "Failed to mark as read" });
+    }
+  },
+
+  /**
+   * Mark all visible traces as read
+   */
+  markAllRead: async ({ locals, platform }) => {
+    if (!locals.user || !isAdmin(locals.user.email)) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      await DB.prepare(
+        "UPDATE trace_feedback SET read_at = ? WHERE read_at IS NULL AND archived_at IS NULL",
+      )
+        .bind(now)
+        .run();
+
+      return { success: true, message: "All traces marked as read" };
+    } catch (err) {
+      console.error("[Traces Admin] Error marking all read:", err);
+      return fail(500, { error: "Failed to mark all as read" });
+    }
+  },
+
+  /**
+   * Archive a trace (soft delete)
+   */
+  archive: async ({ request, locals, platform }) => {
+    if (!locals.user || !isAdmin(locals.user.email)) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+    const formData = await request.formData();
+    const id = formData.get("id")?.toString();
+
+    if (!id) {
+      return fail(400, { error: "Trace ID is required" });
+    }
+
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      await DB.prepare("UPDATE trace_feedback SET archived_at = ? WHERE id = ?")
+        .bind(now, id)
+        .run();
+
+      return { success: true, message: "Trace archived" };
+    } catch (err) {
+      console.error("[Traces Admin] Error archiving:", err);
+      return fail(500, { error: "Failed to archive trace" });
+    }
+  },
+};

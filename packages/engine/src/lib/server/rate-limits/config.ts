@@ -73,6 +73,9 @@ export const ENDPOINT_RATE_LIMITS = {
   "export/data": { limit: 10, windowSeconds: 3600 }, // 10 exports per hour
   "billing/operations": { limit: 20, windowSeconds: 3600 }, // 20 billing actions per hour
 
+  // Feedback endpoints
+  "trace/submit": { limit: 10, windowSeconds: 86400 }, // 10 per day per IP
+
   // Default for unspecified endpoints
   default: { limit: 100, windowSeconds: 60 },
 } as const;
@@ -103,6 +106,7 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
   "POST:/api/billing": "billing/operations",
   "PATCH:/api/billing": "billing/operations",
   "PUT:/api/billing": "billing/operations",
+  "POST:/api/trace": "trace/submit",
 };
 
 // ============================================================================

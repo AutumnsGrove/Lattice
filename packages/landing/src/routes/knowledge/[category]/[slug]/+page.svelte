@@ -2,6 +2,7 @@
   import { page } from '$app/state';
   import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Trace } from '@autumnsgrove/groveengine/ui/feedback';
   import SEO from '$lib/components/SEO.svelte';
   import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
   import RelatedArticles from '$lib/components/RelatedArticles.svelte';
@@ -158,6 +159,11 @@
 
           <!-- Related Articles -->
           <RelatedArticles articles={relatedArticles} />
+
+          <!-- Feedback -->
+          <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+            <Trace prompt="Was this article helpful?" />
+          </div>
 
           <!-- Article Footer -->
           <footer class="flex items-center justify-between mt-12">

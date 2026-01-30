@@ -14,6 +14,7 @@ export * from "./components/gallery/index.js";
 // New categories (from GroveScout)
 export * from "./components/indicators/index.js";
 export * from "./components/content/index.js";
+export * from "./components/feedback/index.js";
 export * from "./components/forms/index.js";
 export * from "./components/icons/index.js";
 export * from "./components/states/index.js";
