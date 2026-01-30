@@ -37,7 +37,6 @@ interface TenantRecord {
   display_name: string;
   email: string;
   plan: string;
-  storage_used: number;
   created_at: number;
 }
 
@@ -134,7 +133,7 @@ export const load: PageServerLoad = async ({
 
     // Tenant query (limits come from tier config, not DB)
     platform.env.DB.prepare(
-      `SELECT id, subdomain, display_name, email, plan, storage_used, created_at
+      `SELECT id, subdomain, display_name, email, plan, created_at
        FROM tenants WHERE id = ?`,
     )
       .bind(locals.tenantId)
@@ -155,11 +154,13 @@ export const load: PageServerLoad = async ({
   let exportCounts = { posts: 0, pages: 0, media: 0 };
   let exportTooLarge = false;
   let curiosCount = 0;
+  let storageUsedBytes = 0;
   try {
     const [
       postResult,
       pageResult,
       mediaResult,
+      storageResult,
       timelineCurio,
       galleryCurio,
       journeyCurio,
@@ -179,6 +180,12 @@ export const load: PageServerLoad = async ({
       )
         .bind(locals.tenantId)
         .first<{ count: number }>(),
+      // Calculate actual storage from image_hashes (not stale tenants.storage_used)
+      platform.env.DB.prepare(
+        "SELECT COALESCE(SUM(COALESCE(stored_size_bytes, 0)), 0) as total_bytes FROM image_hashes WHERE tenant_id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ total_bytes: number }>(),
       // Curio config queries
       platform.env.DB.prepare(
         "SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?",
@@ -199,6 +206,7 @@ export const load: PageServerLoad = async ({
         .first<{ enabled: number }>()
         .catch(() => null),
     ]);
+    storageUsedBytes = storageResult?.total_bytes ?? 0;
     exportCounts = {
       posts: postResult?.count ?? 0,
       pages: pageResult?.count ?? 0,
@@ -271,7 +279,8 @@ export const load: PageServerLoad = async ({
     billingError,
     usage: tenant
       ? {
-          storageUsed: tenant.storage_used,
+          // Use actual storage from image_hashes, not stale tenants.storage_used
+          storageUsed: storageUsedBytes,
           storageLimit: tierConfig.limits.storage,
           // Use actual post count from posts table, not stale tenants.post_count
           postCount: exportCounts.posts,
