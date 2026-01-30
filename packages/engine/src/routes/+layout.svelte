@@ -30,11 +30,22 @@
 		'The Grove'
 	);
 
+	// Track if optional fonts CSS has been loaded
+	let optionalFontsLoaded = $state(false);
+
 	// Apply font from server-loaded settings (fontMap imported from canonical source)
+	// PERFORMANCE: Only load optional fonts CSS if tenant uses a non-default font
 	$effect(() => {
 		if (typeof document !== 'undefined' && data?.siteSettings?.font_family) {
-			const fontValue = fontMap[data.siteSettings.font_family] || fontMap[DEFAULT_FONT];
+			const selectedFont = data.siteSettings.font_family;
+			const fontValue = fontMap[selectedFont] || fontMap[DEFAULT_FONT];
 			document.documentElement.style.setProperty('--font-family-main', fontValue);
+
+			// Lazy-load optional fonts CSS only when needed (not Lexend)
+			if (selectedFont !== 'lexend' && selectedFont !== DEFAULT_FONT && !optionalFontsLoaded) {
+				import('$lib/styles/fonts-optional.css');
+				optionalFontsLoaded = true;
+			}
 		}
 	});
 
@@ -433,73 +444,13 @@
 	:global(.dark) .not-found-content a {
 		color: var(--accent-success);
 	}
-	/* @font-face declarations for custom fonts - served from CDN */
+	/* Critical font: Lexend (default across all Grove sites)
+	   Other fonts are lazy-loaded via fonts-optional.css when tenant selects them.
+	   This reduces initial CSS size and network requests for first paint.
+	   See: packages/engine/src/lib/styles/fonts-optional.css */
 	@font-face {
 		font-family: 'Lexend';
 		src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Atkinson Hyperlegible';
-		src: url('https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'OpenDyslexic';
-		src: url('https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf') format('opentype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Quicksand';
-		src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Plus Jakarta Sans';
-		src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'IBM Plex Mono';
-		src: url('https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Cozette';
-		src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Alagard';
-		src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Calistoga';
-		src: url('https://cdn.grove.place/fonts/Calistoga-Regular.ttf') format('truetype');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
-	@font-face {
-		font-family: 'Caveat';
-		src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
