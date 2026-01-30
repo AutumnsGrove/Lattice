@@ -23,7 +23,16 @@ database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
 # =============================================================================
+# Envelope Encryption - Key Encryption Key (KEK)
+# =============================================================================
+# Uses the same secrets store as the main engine for consistent encryption.
+# The KEK decrypts per-tenant DEKs which decrypt the actual API tokens.
+[[secrets_store_secrets]]
+binding = "GROVE_KEK"
+store_id = "a2f25cdc7b4d4db8a4880e9b73630e9a"
+secret_name = "GROVE_KEK"
+
+# =============================================================================
 # Secrets (configured via wrangler secret put)
 # =============================================================================
-# TOKEN_ENCRYPTION_KEY - Required for decrypting tenant API tokens
 # OPENROUTER_API_KEY   - Optional fallback if tenant key fails

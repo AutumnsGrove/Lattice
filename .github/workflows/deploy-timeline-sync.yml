@@ -42,7 +42,5 @@ jobs:
           workingDirectory: packages/workers/timeline-sync
           command: deploy
           packageManager: pnpm
-          secrets: |
-            TOKEN_ENCRYPTION_KEY
-        env:
-          TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
+        # KEK is bound via Cloudflare Secrets Store in wrangler.toml
+        # No GitHub secrets needed for encryption

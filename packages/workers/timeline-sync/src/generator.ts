@@ -14,7 +14,7 @@ import type {
   CustomVoiceConfig,
 } from "./config";
 import { DEFAULT_OPENROUTER_MODEL } from "./config";
-import { safeDecryptToken, isEncryptedToken } from "./encryption";
+import { createSecretsManager } from "./secrets-manager";
 import { fetchGitHubCommits, fetchCommitStats } from "./github";
 import { callOpenRouter, parseAIResponse } from "./openrouter";
 import { buildVoicedPrompt } from "./voices";
@@ -37,14 +37,13 @@ import {
 export async function getEnabledTenants(
   db: D1Database,
 ): Promise<TenantConfig[]> {
+  // Query enabled tenants - secrets are stored separately in tenant_secrets table
   const result = await db
     .prepare(
       `
       SELECT
         tenant_id,
         github_username,
-        github_token_encrypted,
-        openrouter_key_encrypted,
         openrouter_model,
         voice_preset,
         custom_system_prompt,
@@ -56,8 +55,6 @@ export async function getEnabledTenants(
         owner_name
       FROM timeline_curio_config
       WHERE enabled = 1
-        AND github_token_encrypted IS NOT NULL
-        AND openrouter_key_encrypted IS NOT NULL
     `,
     )
     .all<TenantConfigRow>();
@@ -97,47 +94,31 @@ export async function processTenantTimeline(
       };
     }
 
-    // 1. Decrypt tokens
-    const encryptionKey = env.TOKEN_ENCRYPTION_KEY;
+    // 1. Get API tokens from envelope encryption system
+    const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
 
-    // Pre-flight check: if tokens are encrypted but no key, fail early
-    const githubTokenIsEncrypted = isEncryptedToken(
-      config.githubTokenEncrypted,
-    );
-    const openrouterKeyIsEncrypted = isEncryptedToken(
-      config.openrouterKeyEncrypted,
-    );
-
-    if (
-      (githubTokenIsEncrypted || openrouterKeyIsEncrypted) &&
-      !encryptionKey
-    ) {
+    if (!secrets) {
       throw new Error(
-        "Tokens are encrypted but TOKEN_ENCRYPTION_KEY is not configured",
+        "GROVE_KEK not configured - cannot decrypt tenant secrets",
       );
     }
 
-    const githubToken = await safeDecryptToken(
-      config.githubTokenEncrypted,
-      encryptionKey,
-    );
-    const openrouterKey = await safeDecryptToken(
-      config.openrouterKeyEncrypted,
-      encryptionKey,
-    );
+    // Fetch tokens from tenant_secrets table
+    const [githubToken, openrouterKey] = await Promise.all([
+      secrets.safeGetSecret(config.tenantId, "github_token"),
+      secrets.safeGetSecret(config.tenantId, "openrouter_key"),
+    ]);
 
     if (!githubToken) {
-      const reason = githubTokenIsEncrypted
-        ? "decryption failed (wrong key or corrupted data)"
-        : "token is empty or null";
-      throw new Error(`GitHub token invalid: ${reason}`);
+      throw new Error(
+        "GitHub token not found in tenant_secrets (key: github_token)",
+      );
     }
 
     if (!openrouterKey) {
-      const reason = openrouterKeyIsEncrypted
-        ? "decryption failed (wrong key or corrupted data)"
-        : "key is empty or null";
-      throw new Error(`OpenRouter API key invalid: ${reason}`);
+      throw new Error(
+        "OpenRouter API key not found in tenant_secrets (key: openrouter_key)",
+      );
     }
 
     // 2. Fetch GitHub commits
@@ -404,8 +385,6 @@ function parseConfigRow(row: TenantConfigRow): TenantConfig {
   return {
     tenantId: row.tenant_id,
     githubUsername: row.github_username,
-    githubTokenEncrypted: row.github_token_encrypted,
-    openrouterKeyEncrypted: row.openrouter_key_encrypted,
     openrouterModel: row.openrouter_model,
     voicePreset: row.voice_preset,
     customSystemPrompt: row.custom_system_prompt,

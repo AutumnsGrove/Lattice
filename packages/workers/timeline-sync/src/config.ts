@@ -11,8 +11,8 @@
 export interface Env {
   /** D1 database (grove-engine-db) */
   DB: D1Database;
-  /** Encryption key for decrypting tenant API tokens (hex string) */
-  TOKEN_ENCRYPTION_KEY: string;
+  /** Key Encryption Key from Cloudflare Secrets Store (hex string) */
+  GROVE_KEK: string;
   /** Optional fallback OpenRouter key if tenant key fails */
   OPENROUTER_API_KEY?: string;
 }
@@ -25,8 +25,6 @@ export interface Env {
 export interface TenantConfigRow {
   tenant_id: string;
   github_username: string;
-  github_token_encrypted: string;
-  openrouter_key_encrypted: string;
   openrouter_model: string;
   voice_preset: string;
   custom_system_prompt: string | null;
@@ -42,8 +40,6 @@ export interface TenantConfigRow {
 export interface TenantConfig {
   tenantId: string;
   githubUsername: string;
-  githubTokenEncrypted: string;
-  openrouterKeyEncrypted: string;
   openrouterModel: string;
   voicePreset: string;
   customSystemPrompt: string | null;

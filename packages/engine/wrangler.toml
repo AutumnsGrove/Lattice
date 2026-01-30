@@ -136,13 +136,12 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 #   # Get store ID:
 #   wrangler secrets-store store list
 #
-# Uncomment and update store_id after setup:
 # NOTE: Each environment (local/staging/production) needs its own
 # secrets store and KEK. Never share KEKs across environments.
-# [[secrets_store_secrets]]
-# binding = "GROVE_KEK"
-# store_id = "<your-store-id>"  # Different for each environment!
-# secret_name = "GROVE_KEK"
+[[secrets_store_secrets]]
+binding = "GROVE_KEK"
+store_id = "a2f25cdc7b4d4db8a4880e9b73630e9a"
+secret_name = "GROVE_KEK"
 
 # =============================================================================
 # Secrets (set via CLI, not in this file!)
