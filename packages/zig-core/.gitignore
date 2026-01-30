@@ -1,0 +1,10 @@
+# Zig build artifacts
+zig-out/
+.zig-cache/
+
+# Build output (generated)
+dist/
+lib/
+
+# Node
+node_modules/

@@ -20,6 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.15.0
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -32,6 +37,14 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build zig-core WASM
+        run: pnpm run build:zig
+        working-directory: packages/zig-core
+
+      - name: Run zig-core tests
+        run: pnpm run test:zig
+        working-directory: packages/zig-core
 
       - name: Sync SvelteKit (generate tsconfig)
         run: |

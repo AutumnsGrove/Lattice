@@ -1,0 +1,57 @@
+{
+  "name": "@autumnsgrove/zig-core",
+  "version": "0.1.0",
+  "description": "High-performance WASM modules for validation and search, powered by Zig",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./validation": {
+      "types": "./lib/validation.d.ts",
+      "import": "./lib/validation.js"
+    },
+    "./search": {
+      "types": "./lib/search.d.ts",
+      "import": "./lib/search.js"
+    },
+    "./wasm": "./dist/zig-core.wasm"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "scripts": {
+    "build:zig": "zig build -Doptimize=ReleaseSmall",
+    "build:ts": "tsc",
+    "build": "pnpm run build:zig && pnpm run build:ts",
+    "test:zig": "zig build test",
+    "test:ts": "vitest run",
+    "test": "pnpm run test:zig && pnpm run test:ts",
+    "clean": "rm -rf dist lib zig-out .zig-cache"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AutumnsGrove/GroveEngine.git",
+    "directory": "packages/zig-core"
+  },
+  "keywords": [
+    "wasm",
+    "zig",
+    "validation",
+    "search",
+    "bm25"
+  ],
+  "author": "Autumn's Grove",
+  "license": "MIT"
+}

@@ -210,8 +210,8 @@
       >
         Delete
       </Button>
-      <Button variant="outline" href="/blog/{slug}" target="_blank">
-        View Live
+      <Button variant="outline" href="/blog/{slug}">
+        View Live ↗
       </Button>
       <Button onclick={handleSave} disabled={saving}>
         {saving ? "Saving..." : "Save Changes"}
