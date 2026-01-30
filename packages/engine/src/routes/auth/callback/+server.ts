@@ -10,6 +10,16 @@
  * 2. Better Auth handles OAuth with Google
  * 3. Better Auth sets session cookie and redirects here
  * 4. We verify cookie exists and redirect to /admin (or returnTo)
+ *
+ * USER PERSISTENCE NOTE:
+ * This engine callback does NOT manage user records—it only verifies the
+ * session cookie exists. User persistence is handled differently per package:
+ * - GroveAuth (Better Auth): Creates/manages users in its own database
+ * - Domains package: Fetches user from GroveAuth and syncs to local D1
+ * - Landing/Engine: No local user storage, session is validated via cookie
+ *
+ * If a tenant app needs local user records, it should implement its own
+ * callback (like domains does) that fetches from GroveAuth's session endpoint.
  */
 
 import { redirect } from "@sveltejs/kit";
