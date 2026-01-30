@@ -46,8 +46,18 @@ function generateDEKHex(): string {
  * await secrets.setSecret('tenant_123', 'github_token', 'ghp_xxx');
  * const token = await secrets.getSecret('tenant_123', 'github_token');
  * ```
+ *
+ * ## Cache Behavior
+ *
+ * The DEK cache is per-instance and lives for the lifetime of the SecretsManager.
+ * In Cloudflare Workers, each request typically gets a fresh isolate, so create
+ * a new SecretsManager per request via `createSecretsManager(env)`. This ensures:
+ * - No memory accumulation across requests
+ * - DEKs cached only for the duration of a single request
+ * - Multiple operations in one request benefit from cached DEK lookups
  */
 export class SecretsManager {
+  /** Per-instance DEK cache. Safe because instances are created per-request. */
   private dekCache: Map<string, string> = new Map();
 
   constructor(

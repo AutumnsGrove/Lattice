@@ -113,6 +113,62 @@ describe("Secrets API Authentication", () => {
 });
 
 // =============================================================================
+// TENANT ISOLATION TESTS
+// =============================================================================
+
+describe("Secrets API Tenant Isolation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockValidateCSRF.mockReturnValue(true);
+  });
+
+  it("should reject access to another user's tenant secrets", async () => {
+    // Simulate getVerifiedTenantId throwing when user doesn't own tenant
+    mockGetVerifiedTenantId.mockRejectedValueOnce(
+      Object.assign(new Error("Forbidden"), { status: 403 }),
+    );
+
+    await expect(
+      GET({
+        params: { tenantId: "someone-elses-tenant" },
+        platform: createMockPlatform(),
+        locals: { user: { id: "attacker-user" } },
+      } as Parameters<typeof GET>[0]),
+    ).rejects.toThrow("Forbidden");
+  });
+
+  it("should reject PUT to another user's tenant", async () => {
+    mockGetVerifiedTenantId.mockRejectedValueOnce(
+      Object.assign(new Error("Forbidden"), { status: 403 }),
+    );
+
+    await expect(
+      PUT({
+        params: { tenantId: "someone-elses-tenant" },
+        request: createMockRequest({ keyName: "stolen", value: "data" }),
+        platform: createMockPlatform(),
+        locals: { user: { id: "attacker-user" } },
+      } as Parameters<typeof PUT>[0]),
+    ).rejects.toThrow("Forbidden");
+  });
+
+  it("should reject DELETE on another user's tenant", async () => {
+    mockGetVerifiedTenantId.mockRejectedValueOnce(
+      Object.assign(new Error("Forbidden"), { status: 403 }),
+    );
+
+    await expect(
+      DELETE({
+        params: { tenantId: "someone-elses-tenant" },
+        request: createMockRequest({ keyName: "their-secret" }),
+        platform: createMockPlatform(),
+        locals: { user: { id: "attacker-user" } },
+      } as Parameters<typeof DELETE>[0]),
+    ).rejects.toThrow("Forbidden");
+  });
+});
+
+// =============================================================================
 // CSRF VALIDATION TESTS
 // =============================================================================
 
