@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { untrack } from 'svelte';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -462,12 +463,12 @@
 </svelte:head>
 
 {#if !job}
-	<div class="glass-card-muted p-12 text-center">
-		<p class="text-bark/60 font-sans">Job not found</p>
-		<a href="/admin/history" class="btn-primary inline-block mt-4">
+	<GlassCard variant="muted" class="p-12 text-center">
+		<p class="text-bark/60 dark:text-neutral-400 font-sans">Job not found</p>
+		<GlassButton variant="accent" href="/admin/history" class="mt-4">
 			Back to History
-		</a>
-	</div>
+		</GlassButton>
+	</GlassCard>
 {:else}
 	<div class="space-y-8">
 		<!-- Page Header -->
@@ -499,34 +500,34 @@
 
 		<!-- Job Details -->
 		<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-			<div class="glass-stat p-4">
-				<div class="text-sm font-sans text-bark/60 mb-1">Domains Checked</div>
-				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">{job.domains_checked}</div>
-			</div>
-			<div class="glass-stat p-4">
-				<div class="text-sm font-sans text-bark/60 mb-1">Available Found</div>
-				<div class="text-2xl font-serif text-grove-600">{job.good_results}</div>
-			</div>
-			<div class="glass-stat p-4">
-				<div class="text-sm font-sans text-bark/60 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
-				<div class="text-2xl font-serif {isRunning ? 'text-domain-600' : 'text-bark'}">
+			<GlassCard hoverable class="p-4">
+				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Domains Checked</div>
+				<div class="text-2xl font-serif {isRunning ? 'text-domain-600 dark:text-domain-400' : 'text-bark dark:text-neutral-100'}">{job.domains_checked}</div>
+			</GlassCard>
+			<GlassCard hoverable class="p-4">
+				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Available Found</div>
+				<div class="text-2xl font-serif text-grove-600 dark:text-grove-400">{job.good_results}</div>
+			</GlassCard>
+			<GlassCard hoverable class="p-4">
+				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">{isRunning ? 'Elapsed' : 'Duration'}</div>
+				<div class="text-2xl font-serif {isRunning ? 'text-domain-600 dark:text-domain-400' : 'text-bark dark:text-neutral-100'}">
 					{isRunning ? formatElapsed(elapsedSeconds) : formatDuration(job.duration_seconds)}
 				</div>
-			</div>
-			<div class="glass-stat p-4">
-				<div class="text-sm font-sans text-bark/60 mb-1">Batches</div>
-				<div class="text-2xl font-serif text-bark">{job.batch_num} / 6</div>
+			</GlassCard>
+			<GlassCard hoverable class="p-4">
+				<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Batches</div>
+				<div class="text-2xl font-serif text-bark dark:text-neutral-100">{job.batch_num} / 6</div>
 				{#if isRunning}
-					<div class="mt-2 h-1.5 bg-grove-100 rounded-full overflow-hidden">
+					<div class="mt-2 h-1.5 bg-grove-100 dark:bg-neutral-700 rounded-full overflow-hidden">
 						<div class="h-full bg-domain-500 transition-all" style="width: {(job.batch_num / 6) * 100}%"></div>
 					</div>
 				{/if}
-			</div>
+			</GlassCard>
 		</div>
 
 		<!-- Search Parameters -->
-		<div class="glass-card p-6">
-			<h2 class="font-serif text-lg text-bark mb-4">Search Parameters</h2>
+		<GlassCard class="p-6">
+			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-4">Search Parameters</h2>
 			<div class="grid sm:grid-cols-2 gap-4 text-sm font-sans">
 				<div>
 					<span class="text-bark/60">Vibe:</span>
@@ -582,11 +583,11 @@
 					</div>
 				{/if}
 			</div>
-		</div>
+		</GlassCard>
 
 		<!-- Follow-up Quiz -->
 		{#if job.status === 'needs_followup'}
-			<div class="glass-card p-6 border-2 border-amber-200/60 bg-gradient-to-br from-amber-50/40 to-white/60 backdrop-blur-md">
+			<GlassCard variant="accent" class="p-6 border-2 border-amber-200/60 dark:border-amber-700/40">
 				<div class="flex items-start gap-3 mb-4">
 					<div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
 						<svg class="w-5 h-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
@@ -729,12 +730,12 @@
 						</div>
 					</div>
 				{/if}
-			</div>
+			</GlassCard>
 		{/if}
 
 		<!-- Available Domains -->
 		{#if availableResults.length > 0 || isRunning}
-			<div class="card">
+			<GlassCard>
 				<div class="p-4 border-b border-grove-200 flex justify-between items-center">
 					<h2 class="font-serif text-lg text-bark">Available Domains</h2>
 					<div class="flex items-center gap-2">
@@ -805,12 +806,12 @@
 						{/if}
 					</div>
 				{/if}
-			</div>
+			</GlassCard>
 		{/if}
 
 		<!-- Checked (Unavailable) Domains - Collapsed by default -->
 		{#if unavailableResults.length > 0}
-			<details class="card">
+			<details class="glass-card overflow-hidden">
 				<summary class="p-4 cursor-pointer hover:bg-grove-50 transition-colors flex justify-between items-center">
 					<h2 class="font-serif text-lg text-bark">Checked Domains (Unavailable)</h2>
 					<span class="text-sm text-bark/50 font-sans">{unavailableResults.length} domains</span>

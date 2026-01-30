@@ -1,6 +1,8 @@
 <script>
 	import '../app.css';
 	import { browser } from '$app/environment';
+	import { GossamerClouds } from '@autumnsgrove/gossamer/svelte';
+	import '@autumnsgrove/gossamer/svelte/style.css';
 
 	let { children } = $props();
 
@@ -19,6 +21,17 @@
 	</script>
 </svelte:head>
 
-<div class="min-h-screen domain-gradient">
-	{@render children()}
+<div class="min-h-screen relative overflow-hidden domain-gradient">
+	<!-- Gossamer ASCII cloud background - purple-tinted for Forage -->
+	<GossamerClouds
+		preset="ambient-clouds"
+		color="#a78bfa"
+		opacity={0.25}
+		animated={true}
+	/>
+
+	<!-- Content layer above background -->
+	<div class="relative z-10">
+		{@render children()}
+	</div>
 </div>

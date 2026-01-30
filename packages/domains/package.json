@@ -27,6 +27,7 @@
     "wrangler": "^4.54.0"
   },
   "dependencies": {
+    "@autumnsgrove/gossamer": "^0.1.1",
     "@autumnsgrove/groveengine": "workspace:*",
     "resend": "^4.0.0"
   }

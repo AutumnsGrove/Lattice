@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { SEARCH_DEFAULTS } from '$lib/config';
 	import { untrack } from 'svelte';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -84,8 +85,8 @@
 
 	<form onsubmit={(e) => { e.preventDefault(); saveConfig(); }} class="space-y-8">
 		<!-- Search Parameters Section -->
-		<div class="glass-form-section">
-			<h2 class="font-serif text-lg text-bark mb-6">Search Parameters</h2>
+		<GlassCard class="p-6">
+			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-6">Search Parameters</h2>
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- Max Batches -->
@@ -145,11 +146,11 @@
 					</p>
 				</div>
 			</div>
-		</div>
+		</GlassCard>
 
 		<!-- Creativity & Rate Limiting -->
-		<div class="glass-form-section">
-			<h2 class="font-serif text-lg text-bark mb-6">Creativity & Rate Limiting</h2>
+		<GlassCard class="p-6">
+			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-6">Creativity & Rate Limiting</h2>
 
 			<div class="grid md:grid-cols-2 gap-6">
 				<!-- Creativity Slider -->
@@ -212,34 +213,25 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</GlassCard>
 
 		<!-- Actions -->
 		<div class="flex gap-4 justify-between">
-			<button
-				type="button"
-				onclick={resetToDefaults}
-				class="btn-ghost"
-				disabled={isSaving}
-			>
+			<GlassButton variant="ghost" type="button" onclick={resetToDefaults} disabled={isSaving}>
 				Reset to Defaults
-			</button>
-			<button
-				type="submit"
-				class="btn-primary"
-				disabled={isSaving}
-			>
+			</GlassButton>
+			<GlassButton variant="accent" type="submit" disabled={isSaving}>
 				{isSaving ? 'Saving...' : 'Save Configuration'}
-			</button>
+			</GlassButton>
 		</div>
 	</form>
 
 	<!-- Info Box -->
-	<div class="glass-card-accent p-6">
-		<h3 class="font-serif text-bark mb-2">About Configuration</h3>
-		<p class="text-sm text-bark/70 font-sans leading-relaxed">
+	<GlassCard variant="accent" class="p-6">
+		<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">About Configuration</h3>
+		<p class="text-sm text-bark/70 dark:text-neutral-300 font-sans leading-relaxed">
 			These settings control how the domain search agent operates. Changes take effect on the next search.
 			For testing, use the "Fast" RDAP delay. In production, keep it at 10 seconds to avoid rate limiting from registries.
 		</p>
-	</div>
+	</GlassCard>
 </div>

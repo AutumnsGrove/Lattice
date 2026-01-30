@@ -71,7 +71,8 @@ export default {
 				}
 			},
 			fontFamily: {
-				serif: ['Lexend', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+				// Lexend is sans-serif, so use sans-serif fallbacks (not Georgia/Times New Roman)
+			serif: ['Lexend', 'system-ui', '-apple-system', 'sans-serif'],
 				sans: ['Lexend', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
 				mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace']
 			}

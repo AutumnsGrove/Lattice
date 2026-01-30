@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -50,11 +51,11 @@
 
 	<!-- Stats Grid -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-		<div class="glass-stat p-6">
+		<GlassCard hoverable class="p-6">
 			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Total Searches</div>
 			<div class="text-3xl font-serif text-bark dark:text-neutral-100">{totalJobs}</div>
-		</div>
-		<div class="glass-stat p-6">
+		</GlassCard>
+		<GlassCard hoverable class="p-6">
 			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Currently Running</div>
 			<div class="text-3xl font-serif text-domain-600 dark:text-domain-400">{runningJobs}</div>
 			{#if runningJobs > 0}
@@ -63,29 +64,29 @@
 					<span class="text-xs text-domain-600 dark:text-domain-400 font-sans">Active</span>
 				</div>
 			{/if}
-		</div>
-		<div class="glass-stat p-6">
+		</GlassCard>
+		<GlassCard hoverable class="p-6">
 			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Completed</div>
 			<div class="text-3xl font-serif text-grove-600 dark:text-grove-400">{completedJobs}</div>
-		</div>
-		<div class="glass-stat p-6">
+		</GlassCard>
+		<GlassCard hoverable class="p-6">
 			<div class="text-sm font-sans text-bark/60 dark:text-neutral-400 mb-1">Domains Found</div>
 			<div class="text-3xl font-serif text-bark dark:text-neutral-100">{totalDomainsFound}</div>
-		</div>
+		</GlassCard>
 	</div>
 
 	<!-- Quick Actions -->
 	<div class="flex gap-4">
-		<a href="/admin/searcher" class="btn-primary">
+		<GlassButton variant="accent" href="/admin/searcher">
 			Start New Search
-		</a>
-		<a href="/admin/history" class="btn-ghost">
+		</GlassButton>
+		<GlassButton variant="ghost" href="/admin/history">
 			View All History
-		</a>
+		</GlassButton>
 	</div>
 
 	<!-- Recent Jobs -->
-	<div class="glass-card">
+	<GlassCard>
 		<div class="p-4 border-b glass-divider">
 			<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Recent Searches</h2>
 		</div>
@@ -123,5 +124,5 @@
 				{/each}
 			</div>
 		{/if}
-	</div>
+	</GlassCard>
 </div>

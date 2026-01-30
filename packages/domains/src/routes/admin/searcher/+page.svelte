@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { untrack } from 'svelte';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -871,7 +872,7 @@
 
 	<div class="grid lg:grid-cols-2 gap-8">
 		<!-- Search Form -->
-		<div class="glass-card p-4 sm:p-6">
+		<GlassCard class="p-4 sm:p-6">
 			<div class="flex items-center justify-between mb-4 sm:mb-6">
 				<h2 class="font-serif text-base sm:text-lg text-bark">New Search</h2>
 				{#if currentJob && !['running', 'pending'].includes(currentJob.status)}
@@ -1313,13 +1314,13 @@
 				</button>
 			</form>
 			{/if}
-		</div>
+		</GlassCard>
 
 		<!-- Current Job Status -->
 		<div class="space-y-6">
 			{#if currentJob}
 				<!-- Status Card -->
-				<div class="glass-card p-4 sm:p-6">
+				<GlassCard class="p-4 sm:p-6">
 					<div class="flex items-center justify-between mb-3 sm:mb-4">
 						<h2 class="font-serif text-base sm:text-lg text-bark">Search Status</h2>
 						<div class="flex items-center gap-2">
@@ -1396,11 +1397,11 @@
 							<p class="text-sm text-red-700 font-sans">{currentJob.error}</p>
 						</div>
 					{/if}
-				</div>
+				</GlassCard>
 
 				<!-- Follow-up Quiz -->
 				{#if currentJob.status === 'needs_followup' && followupQuiz}
-					<div class="glass-card-accent p-4 sm:p-6">
+					<GlassCard variant="accent" class="p-4 sm:p-6">
 						<h2 class="font-serif text-base sm:text-lg text-bark mb-2">Refine Your Search</h2>
 						<p class="text-sm text-bark/60 font-sans mb-4">
 							We found {followupQuiz.context.good_found} good domains out of {followupQuiz.context.target} target.
@@ -1475,12 +1476,12 @@
 								{/if}
 							</button>
 						</div>
-					</div>
+					</GlassCard>
 				{/if}
 
 				<!-- Pricing Summary -->
 				{#if pricingSummary && (currentJob.status === 'complete' || currentJob.status === 'needs_followup')}
-					<div class="glass-card p-4 sm:p-6">
+					<GlassCard class="p-4 sm:p-6">
 						<h2 class="font-serif text-base sm:text-lg text-bark mb-3 sm:mb-4">Pricing Summary</h2>
 						<div class="grid grid-cols-2 gap-2 sm:gap-4">
 							<div class="text-center p-2 sm:p-3 bg-grove-50 rounded-lg">
@@ -1523,12 +1524,12 @@
 								</div>
 							</div>
 						{/if}
-					</div>
+					</GlassCard>
 				{/if}
 
 				<!-- Results -->
 				{#if jobResults.length > 0}
-					<div class="card">
+					<GlassCard>
 						<div class="px-3 py-3 sm:p-4 border-b border-grove-200 flex justify-between items-center">
 							<h2 class="font-serif text-base sm:text-lg text-bark">Available Domains</h2>
 							<span class="text-xs sm:text-sm text-bark/60 font-sans">
@@ -1676,19 +1677,19 @@
 								</div>
 							{/each}
 						</div>
-					</div>
+					</GlassCard>
 				{:else if currentJob.status === 'complete' && !isLoadingResults}
-					<div class="glass-card-muted p-8 text-center">
+					<GlassCard variant="muted" class="p-8 text-center">
 						<p class="text-bark/60 font-sans">No available domains found. Try adjusting your search criteria.</p>
-					</div>
+					</GlassCard>
 				{/if}
 			{:else}
-				<div class="glass-card-muted p-8 text-center">
+				<GlassCard variant="muted" class="p-8 text-center">
 					<svg class="w-16 h-16 mx-auto text-bark/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
 					</svg>
 					<p class="text-bark/60 font-sans">No active search. Fill out the form to start finding domains.</p>
-				</div>
+				</GlassCard>
 			{/if}
 		</div>
 	</div>

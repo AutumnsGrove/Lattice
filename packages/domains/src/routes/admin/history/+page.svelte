@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { untrack } from 'svelte';
+	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -219,7 +220,7 @@
 			<p class="text-bark/60 font-sans mt-1">All previous domain searches ({data.total} total)</p>
 		</div>
 		<div class="flex gap-3">
-			<button onclick={manualSync} disabled={syncing} class="btn-secondary">
+			<GlassButton variant="default" onclick={manualSync} disabled={syncing}>
 				{#if syncing}
 					<svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
 						<circle
@@ -240,22 +241,22 @@
 				{:else}
 					Sync
 				{/if}
-			</button>
-			<a href="/admin/searcher" class="btn-primary"> New Search </a>
+			</GlassButton>
+			<GlassButton variant="accent" href="/admin/searcher">New Search</GlassButton>
 		</div>
 	</div>
 
 	<!-- Jobs List -->
 	{#if jobs.length === 0}
-		<div class="glass-card-muted p-12 text-center">
-			<svg class="w-16 h-16 mx-auto text-bark/20 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+		<GlassCard variant="muted" class="p-12 text-center">
+			<svg class="w-16 h-16 mx-auto text-bark/20 dark:text-neutral-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
 			</svg>
-			<p class="text-bark/60 font-sans mb-4">No search history yet</p>
-			<a href="/admin/searcher" class="btn-primary inline-block">
+			<p class="text-bark/60 dark:text-neutral-400 font-sans mb-4">No search history yet</p>
+			<GlassButton variant="accent" href="/admin/searcher">
 				Start Your First Search
-			</a>
-		</div>
+			</GlassButton>
+		</GlassCard>
 	{:else}
 		<div class="card overflow-hidden">
 			<table class="w-full">
