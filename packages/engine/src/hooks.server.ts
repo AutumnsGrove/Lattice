@@ -114,6 +114,19 @@ interface TenantLookupResult extends TenantConfig {
 }
 
 /**
+ * Validate subdomain format before database lookup.
+ * Prevents SQL injection and ensures subdomains follow RFC 1035 label rules.
+ *
+ * Valid: lowercase alphanumeric, hyphens (not at start/end), 1-63 chars
+ * Invalid: uppercase, underscores, dots, special chars, leading/trailing hyphens
+ */
+const SUBDOMAIN_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+function isValidSubdomain(subdomain: string): boolean {
+  return SUBDOMAIN_PATTERN.test(subdomain);
+}
+
+/**
  * Try to get tenant config from TenantDO first, fall back to D1
  *
  * TenantDO caches config in memory (including tenant ID), eliminating
@@ -126,6 +139,15 @@ async function getTenantConfig(
   subdomain: string,
   platform: App.Platform | undefined,
 ): Promise<TenantLookupResult | null> {
+  // SECURITY: Validate subdomain format before any DB operations
+  // This prevents malformed subdomains from reaching the database
+  if (!isValidSubdomain(subdomain)) {
+    console.warn(
+      `[Hooks] Invalid subdomain format rejected: ${subdomain.slice(0, 64)}`,
+    );
+    return null;
+  }
+
   const db = platform?.env?.DB;
   if (!db) return null;
 
@@ -462,13 +484,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // CSRF PROTECTION
   // =========================================================================
-  let csrfToken: string | null = null;
-  if (cookieHeader) {
-    const match = cookieHeader.match(/csrf_token=([^;]+)/);
-    if (match) {
-      csrfToken = match[1];
-    }
-  }
+  // Use the shared getCookie helper for consistent cookie parsing
+  let csrfToken: string | null = getCookie(cookieHeader, "csrf_token");
 
   if (!csrfToken) {
     csrfToken = generateCSRFToken();

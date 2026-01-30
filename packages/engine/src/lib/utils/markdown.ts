@@ -73,12 +73,21 @@ export interface GutterItemBase {
   }>;
 }
 
-/** Processed gutter item with resolved content */
+/**
+ * Processed gutter item with resolved content
+ *
+ * SECURITY NOTE: This interface is intentionally strict (no index signature)
+ * to prevent arbitrary property injection. All gutter item properties must
+ * be explicitly defined here. If you need a new property, add it explicitly
+ * rather than using a catch-all index signature.
+ */
 export interface GutterItem extends GutterItemBase {
+  /** Rendered HTML content (for markdown/comment types) */
   content?: string;
+  /** Resolved image source URL (for photo/image/emoji types) */
   src?: string;
+  /** Resolved gallery images (for gallery type) */
   images?: GalleryImage[];
-  [key: string]: unknown;
 }
 
 /** Gutter manifest structure */

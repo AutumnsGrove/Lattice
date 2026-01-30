@@ -3,7 +3,7 @@
 
 name = "grove-onboarding-emails"
 main = "worker.ts"
-compatibility_date = "2024-11-24"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Cron trigger - runs daily at 10:00 AM UTC

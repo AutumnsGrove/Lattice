@@ -187,8 +187,22 @@ const DEFAULT_CACHE_CONTROL = "public, max-age=86400";
 // Utility Functions
 // ============================================================================
 
+/**
+ * Generate a unique identifier for storage records.
+ * Uses crypto.randomUUID() with fallback for edge cases where
+ * the crypto API might be unavailable or throw.
+ */
 function generateId(): string {
-  return crypto.randomUUID();
+  try {
+    return crypto.randomUUID();
+  } catch {
+    // Fallback: timestamp + random string (still unique, just not UUID format)
+    // This handles edge cases in older runtimes or restrictive environments
+    const timestamp = Date.now().toString(36);
+    const randomPart = Math.random().toString(36).substring(2, 15);
+    const randomPart2 = Math.random().toString(36).substring(2, 15);
+    return `${timestamp}-${randomPart}-${randomPart2}`;
+  }
 }
 
 function now(): string {

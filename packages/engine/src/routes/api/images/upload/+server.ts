@@ -444,8 +444,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       customMetadata: metadata,
     });
 
-    // Build CDN URL
-    const cdnUrl = `https://cdn.grove.place/${key}`;
+    // Build CDN URL - uses environment variable for flexibility
+    // Defaults to production CDN if not configured
+    const cdnBaseUrl =
+      (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
+    const cdnUrl = `${cdnBaseUrl}/${key}`;
 
     // Store hash for future duplicate detection with format metadata
     if (hash && db) {
