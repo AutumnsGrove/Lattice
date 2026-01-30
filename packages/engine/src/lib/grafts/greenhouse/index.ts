@@ -1,0 +1,69 @@
+/**
+ * Greenhouse Graft
+ *
+ * UI components for managing the greenhouse program - a trusted-tester tier
+ * that allows selected tenants early access to experimental features.
+ *
+ * @example Tenant-facing status display
+ * ```svelte
+ * <script>
+ *   import { GreenhouseStatusCard } from '@autumnsgrove/groveengine/grafts/greenhouse';
+ *   let { data } = $props();
+ * </script>
+ *
+ * <GreenhouseStatusCard
+ *   inGreenhouse={data.isInGreenhouse}
+ *   enrolledAt={data.enrolledAt}
+ * />
+ * ```
+ *
+ * @example Operator admin UI
+ * ```svelte
+ * <script>
+ *   import {
+ *     GreenhouseEnrollTable,
+ *     GreenhouseEnrollDialog
+ *   } from '@autumnsgrove/groveengine/grafts/greenhouse';
+ *   let { data } = $props();
+ *   let showDialog = $state(false);
+ * </script>
+ *
+ * <GreenhouseEnrollTable
+ *   tenants={data.tenants}
+ *   tenantNames={data.tenantNames}
+ *   onToggle={handleToggle}
+ *   onRemove={handleRemove}
+ * />
+ *
+ * <GreenhouseEnrollDialog
+ *   open={showDialog}
+ *   availableTenants={data.availableTenants}
+ *   onClose={() => showDialog = false}
+ *   onEnroll={handleEnroll}
+ * />
+ * ```
+ */
+
+// Types
+export type {
+  GreenhouseStatusCardProps,
+  GreenhouseEnrollTableProps,
+  GreenhouseEnrollDialogProps,
+  GreenhouseToggleProps,
+  GreenhousePageData,
+  GreenhouseActionResult,
+  // Cultivate Mode types
+  FeatureFlagSummary,
+  CultivateFlagRowProps,
+  CultivateFlagTableProps,
+} from "./types.js";
+
+// Components
+export { default as GreenhouseStatusCard } from "./GreenhouseStatusCard.svelte";
+export { default as GreenhouseEnrollTable } from "./GreenhouseEnrollTable.svelte";
+export { default as GreenhouseEnrollDialog } from "./GreenhouseEnrollDialog.svelte";
+export { default as GreenhouseToggle } from "./GreenhouseToggle.svelte";
+
+// Cultivate Mode components
+export { default as CultivateFlagRow } from "./CultivateFlagRow.svelte";
+export { default as CultivateFlagTable } from "./CultivateFlagTable.svelte";

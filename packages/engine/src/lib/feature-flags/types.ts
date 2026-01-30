@@ -27,6 +27,7 @@ export type RuleType =
   | "percentage" // Gradual rollout
   | "user" // Specific user IDs
   | "time" // Time-based (start/end dates)
+  | "greenhouse" // Greenhouse program tenants
   | "always"; // Catch-all default
 
 // =============================================================================
@@ -76,6 +77,12 @@ export interface TimeRuleCondition {
 export type AlwaysRuleCondition = Record<string, never>;
 
 /**
+ * Condition for greenhouse rules.
+ * Matches any tenant enrolled in the greenhouse program.
+ */
+export type GreenhouseRuleCondition = Record<string, never>;
+
+/**
  * Union type for all rule conditions.
  */
 export type RuleCondition =
@@ -84,6 +91,7 @@ export type RuleCondition =
   | PercentageRuleCondition
   | UserRuleCondition
   | TimeRuleCondition
+  | GreenhouseRuleCondition
   | AlwaysRuleCondition;
 
 // =============================================================================
@@ -100,6 +108,7 @@ export interface FeatureFlag {
   flagType: FlagType;
   defaultValue: unknown;
   enabled: boolean;
+  greenhouseOnly?: boolean; // If true, only available to greenhouse tenants
   cacheTtl?: number; // KV cache TTL in seconds
   rules: FlagRule[];
   createdAt: Date;
@@ -132,6 +141,7 @@ export interface FeatureFlagRow {
   flag_type: string;
   default_value: string;
   enabled: number;
+  greenhouse_only: number;
   cache_ttl: number | null;
   created_at: string;
   updated_at: string;
@@ -165,6 +175,7 @@ export interface EvaluationContext {
   userId?: string;
   tier?: TierKey;
   sessionId?: string; // For anonymous percentage rollouts
+  inGreenhouse?: boolean; // Whether the tenant is in the greenhouse program
   attributes?: Record<string, unknown>; // Custom attributes for future extensibility
 }
 
@@ -238,4 +249,30 @@ export interface FlagAuditEntry {
 export interface FeatureFlagsEnv {
   DB: D1Database;
   FLAGS_KV: KVNamespace;
+}
+
+// =============================================================================
+// GREENHOUSE TYPES
+// =============================================================================
+
+/**
+ * A tenant enrolled in the greenhouse program.
+ */
+export interface GreenhouseTenant {
+  tenantId: string;
+  enabled: boolean;
+  enrolledAt: Date;
+  enrolledBy?: string;
+  notes?: string;
+}
+
+/**
+ * Database row representation of a greenhouse tenant.
+ */
+export interface GreenhouseTenantRow {
+  tenant_id: string;
+  enabled: number;
+  enrolled_at: string;
+  enrolled_by: string | null;
+  notes: string | null;
 }

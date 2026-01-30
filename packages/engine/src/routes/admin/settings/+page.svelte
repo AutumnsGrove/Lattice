@@ -1,5 +1,6 @@
 <script>
   import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
+  import { GreenhouseStatusCard } from '$lib/grafts/greenhouse';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
@@ -29,6 +30,9 @@
   // Only show system health to the Wayfinder (platform owner)
   // Regular blog owners don't need to see infrastructure status
   const isPlatformAdmin = $derived(data.isWayfinder === true);
+
+  // Greenhouse status from server
+  const greenhouseStatus = $derived(data.greenhouseStatus ?? { inGreenhouse: false });
 
   let clearingCache = $state(false);
   let cacheMessage = $state('');
@@ -216,6 +220,17 @@
         {loadingHealth ? 'Checking...' : 'Refresh Status'}
       </Button>
     </GlassCard>
+  {/if}
+
+  <!-- Greenhouse Status - Only visible to greenhouse members -->
+  {#if greenhouseStatus.inGreenhouse}
+    <div class="mb-6">
+      <GreenhouseStatusCard
+        inGreenhouse={greenhouseStatus.inGreenhouse}
+        enrolledAt={greenhouseStatus.enrolledAt}
+        notes={greenhouseStatus.notes}
+      />
+    </div>
   {/if}
 
   <GlassCard variant="frosted" class="mb-6">

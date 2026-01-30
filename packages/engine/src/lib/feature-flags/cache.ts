@@ -205,7 +205,9 @@ export async function invalidateFlag(
       const list = await env.FLAGS_KV.list({ prefix, cursor });
 
       if (list.keys.length > 0) {
-        await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+        await Promise.all(
+          list.keys.map((key) => env.FLAGS_KV.delete(key.name)),
+        );
         totalDeleted += list.keys.length;
       }
 
@@ -214,7 +216,9 @@ export async function invalidateFlag(
     } while (cursor);
 
     if (totalDeleted > 0) {
-      console.log(`Invalidated ${totalDeleted} cache entries for flag ${flagId}`);
+      console.log(
+        `Invalidated ${totalDeleted} cache entries for flag ${flagId}`,
+      );
     }
     return totalDeleted;
   } catch (error) {
@@ -229,7 +233,9 @@ export async function invalidateFlag(
  *
  * Handles pagination for >1000 total cached flags.
  */
-export async function invalidateAllFlags(env: FeatureFlagsEnv): Promise<number> {
+export async function invalidateAllFlags(
+  env: FeatureFlagsEnv,
+): Promise<number> {
   const prefix = "flag:";
   let totalDeleted = 0;
   let cursor: string | undefined;
@@ -239,7 +245,9 @@ export async function invalidateAllFlags(env: FeatureFlagsEnv): Promise<number> 
       const list = await env.FLAGS_KV.list({ prefix, cursor });
 
       if (list.keys.length > 0) {
-        await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
+        await Promise.all(
+          list.keys.map((key) => env.FLAGS_KV.delete(key.name)),
+        );
         totalDeleted += list.keys.length;
       }
 

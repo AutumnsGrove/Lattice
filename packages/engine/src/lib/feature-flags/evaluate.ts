@@ -68,7 +68,10 @@ async function loadFlagWithRules(
       .map((row) => safeRowToRule(row))
       .filter((rule): rule is FlagRule => rule !== null);
   } catch (error) {
-    console.error(`Failed to load rules for flag ${flagId}, using default:`, error);
+    console.error(
+      `Failed to load rules for flag ${flagId}, using default:`,
+      error,
+    );
     // Continue with empty rules - flag will use default value
   }
 
@@ -138,6 +141,7 @@ function safeRowToFlag(row: FeatureFlagRow, rules: FlagRule[]): FeatureFlag {
     // Fall back to false if default_value JSON is malformed
     defaultValue: defaultValue ?? false,
     enabled: row.enabled === 1,
+    greenhouseOnly: row.greenhouse_only === 1,
     cacheTtl: row.cache_ttl ?? undefined,
     rules,
     createdAt: new Date(row.created_at),
@@ -205,6 +209,24 @@ export async function evaluateFlag<T = unknown>(
     };
 
     // Cache even disabled flags (reduces D1 load)
+    const cacheKey = buildCacheKey(flagId, context);
+    await cacheResult(cacheKey, result, env, flag.cacheTtl);
+
+    return result;
+  }
+
+  // 3.5. Check greenhouse_only gate
+  // If flag is greenhouse_only and tenant is NOT in greenhouse, return false immediately
+  if (flag.greenhouseOnly && context.inGreenhouse !== true) {
+    const result: EvaluationResult<T> = {
+      value: false as T,
+      flagId,
+      matched: false,
+      evaluatedAt: new Date(),
+      cached: false,
+    };
+
+    // Cache the rejection (tenant won't suddenly join greenhouse mid-session)
     const cacheKey = buildCacheKey(flagId, context);
     await cacheResult(cacheKey, result, env, flag.cacheTtl);
 

@@ -217,6 +217,11 @@
       "types": "./dist/grafts/login/server/index.d.ts",
       "default": "./dist/grafts/login/server/index.js"
     },
+    "./grafts/greenhouse": {
+      "types": "./dist/grafts/greenhouse/index.d.ts",
+      "svelte": "./dist/grafts/greenhouse/index.js",
+      "default": "./dist/grafts/greenhouse/index.js"
+    },
     "./lumen": {
       "types": "./dist/lumen/index.d.ts",
       "default": "./dist/lumen/index.js"
