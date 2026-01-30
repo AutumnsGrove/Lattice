@@ -67,7 +67,7 @@ jobs:
         run: pnpm install
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         working-directory: ${{ matrix.path }}
 
       - name: Validate deployment (dry-run)

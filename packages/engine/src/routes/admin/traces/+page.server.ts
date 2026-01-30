@@ -35,13 +35,17 @@ interface SourceStats {
   downvotes: number;
 }
 
-// List of admin emails who can view traces
-// In production, this would come from a config or database
-const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
-
-function isAdmin(email: string | undefined): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+/**
+ * Check if a user email is in the allowed admin list.
+ * Uses ALLOWED_ADMIN_EMAILS environment variable (comma-separated).
+ */
+function isAdmin(
+  email: string | undefined,
+  allowedEmails: string | undefined,
+): boolean {
+  if (!email || !allowedEmails) return false;
+  const adminList = allowedEmails.split(",").map((e) => e.trim().toLowerCase());
+  return adminList.includes(email.toLowerCase());
 }
 
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
@@ -49,8 +53,8 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
     throw error(401, "Unauthorized");
   }
 
-  // Check if user is a Grove admin
-  if (!isAdmin(locals.user.email)) {
+  // Check if user is a Grove admin (uses ALLOWED_ADMIN_EMAILS env var)
+  if (!isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)) {
     throw error(
       403,
       "Access denied. This page is for Grove administrators only.",
@@ -187,7 +191,10 @@ export const actions: Actions = {
    * Mark a trace as read
    */
   markRead: async ({ request, locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (
+      !locals.user ||
+      !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
+    ) {
       return fail(403, { error: "Access denied" });
     }
 
@@ -220,7 +227,10 @@ export const actions: Actions = {
    * Mark all visible traces as read
    */
   markAllRead: async ({ locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (
+      !locals.user ||
+      !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
+    ) {
       return fail(403, { error: "Access denied" });
     }
 
@@ -249,7 +259,10 @@ export const actions: Actions = {
    * Archive a trace (soft delete)
    */
   archive: async ({ request, locals, platform }) => {
-    if (!locals.user || !isAdmin(locals.user.email)) {
+    if (
+      !locals.user ||
+      !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
+    ) {
       return fail(403, { error: "Access denied" });
     }
 

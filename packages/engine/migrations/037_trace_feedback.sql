@@ -1,6 +1,11 @@
 -- Trace Feedback System
 -- Universal inline 👍👎 feedback component for Grove
 -- Privacy-preserving with IP hashing, supports optional comments
+--
+-- NOTE: This table is intentionally NOT tenant-scoped.
+-- Trace collects feedback about Grove itself (documentation, help articles,
+-- landing pages) rather than tenant-specific content. This allows Grove admins
+-- to see feedback across all Grove properties in one dashboard.
 
 -- Main feedback table
 CREATE TABLE IF NOT EXISTS trace_feedback (
