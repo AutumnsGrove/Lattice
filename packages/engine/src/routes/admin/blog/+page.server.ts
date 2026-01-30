@@ -8,10 +8,10 @@ interface PostRecord {
   /** JSON string of tags array */
   tags?: string;
   description?: string;
-  /** Unix timestamp in seconds */
-  published_at?: number;
-  updated_at?: number;
-  created_at?: number;
+  /** Unix timestamp in seconds OR ISO string (D1 returns mixed formats) */
+  published_at?: number | string;
+  updated_at?: number | string;
+  created_at?: number | string;
 }
 
 interface BlogPost {
@@ -74,20 +74,33 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       // For published posts: use published_at
       // For drafts: use updated_at
       // Fallback to created_at if needed
-      let timestamp: number | undefined;
+      let rawTimestamp: number | string | undefined;
 
       if (post.status === "published" && post.published_at) {
-        timestamp = post.published_at;
+        rawTimestamp = post.published_at;
       } else if (post.updated_at) {
-        timestamp = post.updated_at;
+        rawTimestamp = post.updated_at;
       } else if (post.created_at) {
-        timestamp = post.created_at;
+        rawTimestamp = post.created_at;
       }
 
-      // Convert Unix timestamp (seconds) to ISO date string (YYYY-MM-DD)
-      const date = timestamp
-        ? new Date(timestamp * 1000).toISOString().split("T")[0]
-        : null;
+      // Convert timestamp to ISO date string (YYYY-MM-DD)
+      // Handle both Unix timestamps (numbers) and ISO strings (from D1)
+      let date: string | null = null;
+      if (rawTimestamp !== undefined) {
+        try {
+          if (typeof rawTimestamp === "number") {
+            // Unix timestamp in seconds → multiply by 1000 for milliseconds
+            date = new Date(rawTimestamp * 1000).toISOString().split("T")[0];
+          } else if (typeof rawTimestamp === "string") {
+            // ISO string from D1 → parse directly
+            date = new Date(rawTimestamp).toISOString().split("T")[0];
+          }
+        } catch {
+          // If date parsing fails, leave as null
+          date = null;
+        }
+      }
 
       return {
         slug: post.slug,
