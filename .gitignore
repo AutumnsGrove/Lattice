@@ -27,6 +27,12 @@ dist/
 .vscode/
 .idea/
 
+# Bun (local speed tools only - pnpm is source of truth for CI/deployments)
+# Use: pnpm install/add/remove for dependencies
+# Use: bun x <tool> for fast local execution (prettier, tsc, etc.)
+bun.lock
+bun.lockb
+
 # Wrangler
 .wrangler/
 .dev.vars
