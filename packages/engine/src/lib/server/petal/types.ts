@@ -61,8 +61,12 @@ export interface CSAMResult {
   mustReport?: boolean;
   /** Content hash (SHA-256, never the image itself) */
   hash?: string;
-  /** Provider that performed the scan */
+  /** Provider that performed the scan ("photodna" | "vision" | provider name) */
   provider?: string;
+  /** PhotoDNA tracking ID if scanned with PhotoDNA */
+  photodnaTrackingId?: string;
+  /** PhotoDNA match confidence (0-100) if matched */
+  photodnaConfidence?: number;
 }
 
 /**
@@ -282,6 +286,8 @@ export interface PetalEnv {
   DB?: D1Database;
   /** KV for rate limiting */
   CACHE_KV?: KVNamespace;
+  /** PhotoDNA subscription key (primary CSAM detection) */
+  PHOTODNA_SUBSCRIPTION_KEY?: string;
   /** External provider API keys (optional fallbacks) */
   TOGETHER_API_KEY?: string;
   FAL_API_KEY?: string;

@@ -243,6 +243,34 @@ export const FAILOVER_CONFIG = {
 } as const;
 
 // ============================================================================
+// PhotoDNA Configuration
+// ============================================================================
+
+/**
+ * PhotoDNA Cloud Service configuration
+ *
+ * PhotoDNA is Microsoft's industry-standard perceptual hash system for
+ * detecting known CSAM content against the NCMEC database.
+ *
+ * INTEGRATION STATUS: Awaiting Microsoft approval
+ * Once approved, add PHOTODNA_SUBSCRIPTION_KEY to Cloudflare secrets.
+ *
+ * @see https://www.microsoft.com/en-us/photodna
+ */
+export const PHOTODNA_CONFIG = {
+  /** PhotoDNA Cloud Service endpoint */
+  endpoint: "https://api.microsoftmoderator.com/photodna",
+  /** Request timeout in milliseconds */
+  timeoutMs: 5_000,
+  /** Environment variable name for subscription key */
+  subscriptionKeyEnvVar: "PHOTODNA_SUBSCRIPTION_KEY",
+  /** Whether PhotoDNA is the primary CSAM detection method */
+  isPrimary: true,
+  /** Fall back to vision model if PhotoDNA unavailable */
+  fallbackToVision: true,
+} as const;
+
+// ============================================================================
 // Pricing (for cost tracking)
 // ============================================================================
 

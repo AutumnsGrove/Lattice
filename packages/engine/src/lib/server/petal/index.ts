@@ -63,6 +63,7 @@ export async function scanImage(
   const options = {
     ai: env.AI,
     togetherApiKey: env.TOGETHER_API_KEY,
+    photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
     db: env.DB,
     userId,
     tenantId,
@@ -300,6 +301,7 @@ export async function verifyOutput(
   const options = {
     ai: env.AI,
     togetherApiKey: env.TOGETHER_API_KEY,
+    photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
     db: env.DB,
     userId,
     tenantId,
@@ -371,6 +373,17 @@ export {
   resetProviderHealth,
 } from "./vision-client.js";
 
+// PhotoDNA client
+export {
+  scanWithPhotoDNA,
+  isPhotoDNAAvailable,
+  type PhotoDNAResult,
+  type PhotoDNAMatchResponse,
+  MOCK_PHOTODNA_CLEAN,
+  MOCK_PHOTODNA_MATCH,
+  createMockPhotoDNAScan,
+} from "./photodna-client.js";
+
 // Logging
 export {
   logSecurityEvent,
@@ -389,6 +402,7 @@ export {
   REVIEW_CATEGORIES,
   CONFIDENCE_THRESHOLDS,
   PETAL_RATE_LIMITS,
+  PHOTODNA_CONFIG,
   getRejectionMessage,
   getSanityRequirements,
 } from "$lib/config/petal.js";

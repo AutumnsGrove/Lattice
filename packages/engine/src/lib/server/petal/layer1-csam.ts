@@ -4,40 +4,35 @@
  * MANDATORY layer - cannot be bypassed. Federal law requires CSAM detection
  * and NCMEC reporting within 24 hours (18 U.S.C. § 2258A).
  *
- * CURRENT DETECTION STRATEGY:
+ * DETECTION STRATEGY (in priority order):
  * ═══════════════════════════════════════════════════════════════════════════
- * 1. Cloudflare CSAM Tool (CDN-level, enabled in dashboard)
- *    - Runs asynchronously at serve time using fuzzy hashing
- *    - Must be enabled in Cloudflare Dashboard: Caching > Configuration
+ * 1. PhotoDNA (Primary) - Hash-based matching against NCMEC database
+ *    - Industry standard perceptual hash for known CSAM detection
+ *    - Catches previously-identified content with high accuracy
+ *    - Requires Microsoft approval (application submitted 2025-01-30)
  *
- * 2. Vision model classification (this file)
- *    - Upload-time detection using AI vision models
+ * 2. Vision Model Classification (Fallback)
+ *    - AI-based detection for novel content
  *    - Checks for "minor_present" category at ≥0.7 confidence
+ *    - Used when PhotoDNA unavailable or as secondary check
  *
- * ⚠️ PRODUCTION ENHANCEMENT REQUIRED:
- * ═══════════════════════════════════════════════════════════════════════════
- * For comprehensive protection, integrate hash-based detection systems:
- *
- * - PhotoDNA (Microsoft): https://www.microsoft.com/en-us/photodna
- *   Industry standard perceptual hash for CSAM detection
- *
- * - Cloudflare CSAM Scanning: https://developers.cloudflare.com/images/csam-scanning/
- *   Built-in PhotoDNA integration for Cloudflare Images
- *
- * - Thorn Safer: https://www.thorn.org/safer/
- *   Additional detection technology
- *
- * Vision-only detection may have false negatives. Hash-based detection
- * catches known CSAM content that AI classification might miss.
+ * 3. Cloudflare CSAM Tool (CDN-level, async)
+ *    - Runs asynchronously at serve time using fuzzy hashing
+ *    - Enabled in Cloudflare Dashboard: Caching > Configuration
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * @see docs/specs/petal-spec.md Section 3
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
-import { FAILOVER_CONFIG } from "$lib/config/petal.js";
+import { FAILOVER_CONFIG, PHOTODNA_CONFIG } from "$lib/config/petal.js";
 import { PetalError, type CSAMResult } from "./types.js";
 import { classifyImage } from "./vision-client.js";
+import {
+  scanWithPhotoDNA,
+  isPhotoDNAAvailable,
+  type PhotoDNAResult,
+} from "./photodna-client.js";
 import { logSecurityEvent } from "./logging.js";
 
 // ============================================================================
@@ -45,14 +40,16 @@ import { logSecurityEvent } from "./logging.js";
 // ============================================================================
 
 /**
- * Scan image for CSAM content
+ * Scan image for CSAM content using PhotoDNA (primary) with vision fallback
  *
  * This is the CRITICAL path - if CSAM scanning fails, we CANNOT process the image.
  * Federal law requires CSAM detection before storing/processing user images.
  *
- * Defense layers:
- * 1. Cloudflare CSAM Tool runs at CDN level (async at serve time)
- * 2. This function uses vision classification to catch potential CSAM at upload time
+ * Detection cascade:
+ * 1. PhotoDNA hash matching (if subscription key available)
+ * 2. Vision model classification (fallback)
+ *
+ * If both fail, the upload is blocked for safety.
  */
 export async function scanForCSAM(
   image: string | Uint8Array,
@@ -61,10 +58,114 @@ export async function scanForCSAM(
   options: {
     ai?: Ai;
     togetherApiKey?: string;
+    photodnaSubscriptionKey?: string;
   },
 ): Promise<CSAMResult> {
-  // Vision model classification checks for minor_present category
-  // which is our upload-time defense layer
+  const { photodnaSubscriptionKey, ...visionOptions } = options;
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PRIMARY: PhotoDNA hash-based detection
+  // ──────────────────────────────────────────────────────────────────────────
+  if (
+    PHOTODNA_CONFIG.isPrimary &&
+    isPhotoDNAAvailable(photodnaSubscriptionKey)
+  ) {
+    try {
+      const imageData =
+        typeof image === "string"
+          ? Uint8Array.from(atob(image), (c) => c.charCodeAt(0))
+          : image;
+
+      const photodnaResult = await scanWithPhotoDNA(imageData, mimeType, {
+        subscriptionKey: photodnaSubscriptionKey!,
+      });
+
+      if (photodnaResult.matched) {
+        // PhotoDNA match = definite CSAM detection
+        return {
+          safe: false,
+          reason: "CSAM_DETECTED",
+          mustReport: true,
+          hash: contentHash,
+          provider: "photodna",
+          photodnaTrackingId: photodnaResult.trackingId,
+          photodnaConfidence: photodnaResult.confidence,
+        };
+      }
+
+      // PhotoDNA clear - image passed hash check
+      // Continue to vision fallback for additional safety (optional)
+      if (!PHOTODNA_CONFIG.fallbackToVision) {
+        return {
+          safe: true,
+          hash: contentHash,
+          provider: "photodna",
+          photodnaTrackingId: photodnaResult.trackingId,
+        };
+      }
+
+      // PhotoDNA passed, but also run vision as secondary check
+      // This catches novel content that isn't in the hash database yet
+      try {
+        const visionResult = await scanWithVision(
+          image,
+          mimeType,
+          contentHash,
+          visionOptions,
+        );
+        if (!visionResult.safe) {
+          return visionResult;
+        }
+      } catch {
+        // Vision failed but PhotoDNA passed - allow the image
+        // PhotoDNA is authoritative for known content
+      }
+
+      return {
+        safe: true,
+        hash: contentHash,
+        provider: "photodna",
+        photodnaTrackingId: photodnaResult.trackingId,
+      };
+    } catch (err) {
+      // PhotoDNA failed - fall back to vision if configured
+      console.warn(
+        "[Petal] PhotoDNA scan failed, falling back to vision:",
+        err,
+      );
+
+      if (!PHOTODNA_CONFIG.fallbackToVision) {
+        // No fallback configured - block for safety
+        throw new PetalError(
+          "CSAM scanning unavailable - upload blocked for safety",
+          "CSAM_SCAN_FAILED",
+          "layer1",
+          "photodna",
+          err,
+        );
+      }
+      // Continue to vision fallback
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // FALLBACK: Vision model classification
+  // ──────────────────────────────────────────────────────────────────────────
+  return scanWithVision(image, mimeType, contentHash, visionOptions);
+}
+
+/**
+ * Scan image using vision model classification (fallback method)
+ */
+async function scanWithVision(
+  image: string | Uint8Array,
+  mimeType: string,
+  contentHash: string,
+  options: {
+    ai?: Ai;
+    togetherApiKey?: string;
+  },
+): Promise<CSAMResult> {
   try {
     const classification = await classifyImage(image, mimeType, options);
 
@@ -73,21 +174,6 @@ export async function scanForCSAM(
     if (
       classification.category === "minor_present" &&
       classification.confidence >= 0.7
-    ) {
-      return {
-        safe: false,
-        reason: "CSAM_DETECTED",
-        mustReport: true,
-        hash: contentHash,
-        provider: classification.provider,
-      };
-    }
-
-    // Additional high-confidence check: if confidence is very high for minor_present
-    // even without explicit sexual content, flag for review
-    if (
-      classification.category === "minor_present" &&
-      classification.confidence >= 0.9
     ) {
       return {
         safe: false,
@@ -247,12 +333,14 @@ export async function queueNCMECReport(
     timestamp: string;
     userId: string;
     tenantId?: string;
+    photodnaTrackingId?: string;
   },
 ): Promise<void> {
   // Log the report requirement
   console.error("[PETAL CRITICAL] NCMEC Report Required:", {
     hash: data.contentHash,
     timestamp: data.timestamp,
+    photodnaTrackingId: data.photodnaTrackingId,
     // Never log user-identifying info to console
     reported: false,
     deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -289,6 +377,8 @@ export async function queueNCMECReport(
 
 /**
  * Run complete Layer 1 (CSAM) processing
+ *
+ * Uses PhotoDNA as primary detection method with vision model fallback.
  */
 export async function runLayer1(
   image: string | Uint8Array,
@@ -297,12 +387,13 @@ export async function runLayer1(
   options: {
     ai?: Ai;
     togetherApiKey?: string;
+    photodnaSubscriptionKey?: string;
     db?: D1Database;
     userId?: string;
     tenantId?: string;
   },
 ): Promise<CSAMResult> {
-  const { db, userId, tenantId, ...visionOptions } = options;
+  const { db, userId, tenantId, ...scanOptions } = options;
 
   // Check if user is already blocked
   if (db && userId) {
@@ -316,8 +407,8 @@ export async function runLayer1(
     }
   }
 
-  // Run CSAM scan
-  const result = await scanForCSAM(image, mimeType, contentHash, visionOptions);
+  // Run CSAM scan (PhotoDNA primary, vision fallback)
+  const result = await scanForCSAM(image, mimeType, contentHash, scanOptions);
 
   // Handle CSAM detection
   if (!result.safe && result.mustReport) {
@@ -333,6 +424,7 @@ export async function runLayer1(
         timestamp: new Date().toISOString(),
         userId,
         tenantId,
+        photodnaTrackingId: result.photodnaTrackingId,
       });
     }
 
