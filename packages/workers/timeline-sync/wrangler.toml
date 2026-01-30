@@ -1,0 +1,29 @@
+# Grove Timeline Sync
+# Automated nightly timeline summary generation for all enabled tenants
+#
+# Cron schedule: Daily at 1 AM UTC (after midnight activity settles)
+# Each tenant generates their own summary using their own OpenRouter API key
+
+name = "grove-timeline-sync"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Cron Triggers
+# =============================================================================
+[triggers]
+crons = ["0 1 * * *"]  # Daily at 1 AM UTC
+
+# =============================================================================
+# D1 Database - Same database as engine
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# Secrets (configured via wrangler secret put)
+# =============================================================================
+# TOKEN_ENCRYPTION_KEY - Required for decrypting tenant API tokens
+# OPENROUTER_API_KEY   - Optional fallback if tenant key fails

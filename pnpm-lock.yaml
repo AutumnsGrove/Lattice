@@ -612,6 +612,21 @@ importers:
         specifier: ^4.0.0
         version: 4.58.0(@cloudflare/workers-types@4.20260116.0)
 
+  packages/workers/timeline-sync:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20251128.0
+        version: 4.20260116.0
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.3)(@vitest/ui@2.1.9)(happy-dom@20.0.11)(jsdom@27.4.0)
+      wrangler:
+        specifier: ^4.0.0
+        version: 4.58.0(@cloudflare/workers-types@4.20260116.0)
+
   packages/workers/webhook-cleanup:
     devDependencies:
       '@cloudflare/workers-types':
