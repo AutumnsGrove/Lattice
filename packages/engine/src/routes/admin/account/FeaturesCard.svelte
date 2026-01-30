@@ -26,7 +26,7 @@
       <div class="feature-content">
         <div class="feature-title">
           <span>Rings</span>
-          <Waystone slug="rings-analytics" label="Learn about Rings analytics" />
+          <Waystone slug="what-is-rings" label="Learn about Rings analytics" />
         </div>
         <p class="feature-description">
           Privacy-first analytics showing how Wanderers explore your Grove.
@@ -42,7 +42,7 @@
       <div class="feature-content">
         <div class="feature-title">
           <span>Trails</span>
-          <Waystone slug="trails" label="Learn about Trails" />
+          <Waystone slug="what-are-trails" label="Learn about Trails" />
         </div>
         <p class="feature-description">
           Track your creative journey with automated activity summaries.
@@ -58,7 +58,7 @@
       <div class="feature-content">
         <div class="feature-title">
           <span>Curios</span>
-          <Waystone slug="curios" label="Learn about Curios" />
+          <Waystone slug="what-are-curios" label="Learn about Curios" />
         </div>
         <p class="feature-description">
           Special page types like Gallery, Timeline, and Journey.
