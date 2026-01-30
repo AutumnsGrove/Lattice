@@ -2,7 +2,7 @@ import { json, error } from "@sveltejs/kit";
 import { getPostBySlug, renderMarkdown } from "$lib/utils/markdown.js";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
-import { getTenantDb, now } from "$lib/server/services/database.js";
+import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import * as cache from "$lib/server/services/cache.js";
 import type { RequestHandler } from "./$types.js";
@@ -270,37 +270,36 @@ export const PUT: RequestHandler = async ({
     // Generate HTML from markdown (renderMarkdown handles sanitization)
     const html_content = renderMarkdown(data.markdown_content);
 
-    // Generate a simple hash of the content
-    const encoder = new TextEncoder();
-    const contentData = encoder.encode(data.markdown_content);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", contentData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const file_hash = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    const timestamp = now();
     const tags = JSON.stringify(data.tags || []);
+    const unixNow = Math.floor(Date.now() / 1000);
+
+    // Convert date string to Unix timestamp for published_at
+    // Only set published_at when publishing (status changes to published)
+    let published_at: number | undefined;
+    if (data.status === "published" && data.date) {
+      published_at = Math.floor(new Date(data.date).getTime() / 1000);
+    }
+
+    // Build update object - only include published_at if we're publishing
+    const updateData: Record<string, unknown> = {
+      title: data.title,
+      tags,
+      description: data.description || "",
+      markdown_content: data.markdown_content,
+      html_content,
+      gutter_content: data.gutter_content || "[]",
+      font: data.font || "default",
+      status: data.status,
+      updated_at: unixNow,
+    };
+
+    // Set published_at when publishing
+    if (published_at !== undefined) {
+      updateData.published_at = published_at;
+    }
 
     // Update using TenantDb (automatically adds tenant_id to WHERE clause)
-    await tenantDb.update(
-      "posts",
-      {
-        title: data.title,
-        date: data.date || timestamp.split("T")[0],
-        tags,
-        description: data.description || "",
-        markdown_content: data.markdown_content,
-        html_content,
-        file_hash,
-        gutter_content: data.gutter_content || "[]",
-        font: data.font || "default",
-        status: data.status,
-        updated_at: timestamp,
-      },
-      "slug = ?",
-      [slug],
-    );
+    await tenantDb.update("posts", updateData, "slug = ?", [slug]);
 
     // Invalidate caches so readers see the updated content
     await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);
