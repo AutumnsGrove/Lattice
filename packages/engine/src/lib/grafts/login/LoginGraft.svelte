@@ -95,6 +95,7 @@
 		try {
 			const response = await fetch(GROVEAUTH_URLS.socialSignIn, {
 				method: "POST",
+				credentials: "include",  // Required for cross-origin cookies
 				headers: {
 					"Content-Type": "application/json",
 				},
