@@ -118,6 +118,33 @@ CLEARING_API_URL = "https://status.grove.place"
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
 # =============================================================================
+# Envelope Encryption - Key Encryption Key (KEK)
+# =============================================================================
+# Secrets Store binding for the master encryption key.
+# The KEK encrypts per-tenant DEKs (Data Encryption Keys).
+#
+# Setup commands (run manually):
+#   # Generate KEK: openssl rand -hex 32
+#   # Or: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+#
+#   # Create secrets store (if not exists):
+#   wrangler secrets-store store create grove-secrets --remote
+#
+#   # Add KEK to store (paste 64-char hex key when prompted):
+#   wrangler secrets-store secret put GROVE_KEK --store grove-secrets --remote
+#
+#   # Get store ID:
+#   wrangler secrets-store store list
+#
+# Uncomment and update store_id after setup:
+# NOTE: Each environment (local/staging/production) needs its own
+# secrets store and KEK. Never share KEKs across environments.
+# [[secrets_store_secrets]]
+# binding = "GROVE_KEK"
+# store_id = "<your-store-id>"  # Different for each environment!
+# secret_name = "GROVE_KEK"
+
+# =============================================================================
 # Secrets (set via CLI, not in this file!)
 # =============================================================================
 # Required secrets - set with: npx wrangler secret put SECRET_NAME

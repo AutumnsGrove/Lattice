@@ -110,6 +110,12 @@ declare global {
         // CDN Configuration
         /** Base URL for CDN (defaults to https://cdn.grove.place) */
         CDN_BASE_URL?: string;
+
+        // Envelope Encryption - Key Encryption Key
+        /** Cloudflare Secrets Store binding for KEK (envelope encryption) */
+        GROVE_KEK?: {
+          get(): Promise<string>;
+        };
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

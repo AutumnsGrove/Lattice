@@ -156,6 +156,189 @@ export async function safeDecryptToken(
   }
 }
 
+/**
+ * Diagnostic version of decryptToken that reports exactly where failures occur.
+ *
+ * ⚠️ SECURITY NOTE: This function reveals detailed failure stages which could
+ * help attackers fingerprint the encryption system. Use ONLY in development
+ * or staging environments. Do not expose in production API responses.
+ *
+ * Common issues table:
+ * | Stage       | Problem                           | Fix                                         |
+ * |-------------|-----------------------------------|---------------------------------------------|
+ * | parse       | Data truncated or corrupted       | Check DB column size, network issues        |
+ * | iv-base64   | Whitespace or URL-safe base64     | Trim input, normalize base64                |
+ * | iv-length   | Wrong IV stored                   | Check encryption code                       |
+ * | key-length  | Env var not set or partial        | Check wrangler.toml secrets                 |
+ * | key-format  | Key has non-hex chars             | Regenerate key properly                     |
+ * | decrypt     | Wrong key or tampered data        | Key mismatch between envs                   |
+ */
+export async function debugDecryptToken(
+  encrypted: string,
+  keyHex: string,
+): Promise<{
+  success: boolean;
+  value?: string;
+  error?: string;
+  stage?: string;
+  details?: Record<string, unknown>;
+}> {
+  try {
+    // Stage 1: Parse format
+    const parts = encrypted.split(":");
+    let ivBase64: string;
+    let ctBase64: string;
+    let format: string;
+
+    if (parts.length === 3 && parts[0] === "v1") {
+      format = "v1";
+      ivBase64 = parts[1];
+      ctBase64 = parts[2];
+    } else if (parts.length === 2) {
+      format = "legacy";
+      ivBase64 = parts[0];
+      ctBase64 = parts[1];
+    } else {
+      return {
+        success: false,
+        error: `Unexpected format: ${parts.length} parts, first="${parts[0]?.slice(0, 10)}"`,
+        stage: "parse",
+        details: {
+          partsCount: parts.length,
+          firstPart: parts[0]?.slice(0, 20),
+        },
+      };
+    }
+
+    // Stage 2: Validate base64 characters
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    if (!base64Regex.test(ivBase64)) {
+      return {
+        success: false,
+        error: `IV contains invalid base64 characters`,
+        stage: "iv-base64",
+        details: { ivLength: ivBase64.length, ivSample: ivBase64.slice(0, 20) },
+      };
+    }
+    if (!base64Regex.test(ctBase64)) {
+      return {
+        success: false,
+        error: `Ciphertext contains invalid base64 characters`,
+        stage: "ct-base64",
+        details: { ctLength: ctBase64.length },
+      };
+    }
+
+    // Stage 3: Check IV length (12 bytes = 16 base64 chars)
+    if (ivBase64.length !== 16) {
+      return {
+        success: false,
+        error: `IV wrong base64 length: ${ivBase64.length} (expected 16)`,
+        stage: "iv-length",
+        details: { ivBase64Length: ivBase64.length, iv: ivBase64 },
+      };
+    }
+
+    // Stage 4: Decode base64
+    let iv: ArrayBuffer;
+    let ciphertext: ArrayBuffer;
+    try {
+      iv = base64ToArrayBuffer(ivBase64);
+    } catch (e) {
+      return {
+        success: false,
+        error: `IV base64 decode failed: ${e}`,
+        stage: "iv-decode",
+      };
+    }
+    try {
+      ciphertext = base64ToArrayBuffer(ctBase64);
+    } catch (e) {
+      return {
+        success: false,
+        error: `Ciphertext base64 decode failed: ${e}`,
+        stage: "ct-decode",
+      };
+    }
+
+    // Stage 5: Verify decoded IV length
+    if (iv.byteLength !== 12) {
+      return {
+        success: false,
+        error: `Decoded IV wrong byte length: ${iv.byteLength} (expected 12)`,
+        stage: "iv-bytes",
+      };
+    }
+
+    // Stage 6: Validate key format
+    if (keyHex.length !== 64) {
+      return {
+        success: false,
+        error: `Key wrong length: ${keyHex.length} chars (expected 64)`,
+        stage: "key-length",
+      };
+    }
+    if (!/^[0-9a-fA-F]+$/.test(keyHex)) {
+      const badChar = keyHex.split("").find((c) => !/[0-9a-fA-F]/.test(c));
+      return {
+        success: false,
+        error: `Key contains non-hex character: "${badChar}"`,
+        stage: "key-format",
+      };
+    }
+
+    // Stage 7: Import key
+    let key: CryptoKey;
+    try {
+      key = await importKey(keyHex);
+    } catch (e) {
+      return {
+        success: false,
+        error: `Key import failed: ${e}`,
+        stage: "key-import",
+      };
+    }
+
+    // Stage 8: Decrypt
+    try {
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: new Uint8Array(iv) },
+        key,
+        ciphertext,
+      );
+      const value = new TextDecoder().decode(decrypted);
+      return {
+        success: true,
+        value,
+        details: {
+          format,
+          ivLength: iv.byteLength,
+          ctLength: ciphertext.byteLength,
+        },
+      };
+    } catch (e) {
+      // This is the most common failure point - wrong key or tampered data
+      return {
+        success: false,
+        error: `Decryption failed: ${e instanceof Error ? e.message : e}`,
+        stage: "decrypt",
+        details: {
+          format,
+          ivLength: iv.byteLength,
+          ctLength: ciphertext.byteLength,
+          hint: "Usually means wrong key or data was modified after encryption",
+        },
+      };
+    }
+  } catch (e) {
+    return {
+      success: false,
+      error: `Unexpected error: ${e instanceof Error ? e.message : e}`,
+      stage: "unknown",
+    };
+  }
+}
+
 // =============================================================================
 // Internal Helpers
 // =============================================================================

@@ -257,7 +257,10 @@ describe("PKCE Utilities", () => {
       const { codeVerifier, codeChallenge } = await generatePKCE();
 
       // Attacker tries to use a different verifier
-      const tamperedVerifier = codeVerifier.slice(0, -1) + "X";
+      // Use a character guaranteed to be different from the last char
+      const lastChar = codeVerifier.slice(-1);
+      const replacementChar = lastChar === "X" ? "Y" : "X";
+      const tamperedVerifier = codeVerifier.slice(0, -1) + replacementChar;
       const tamperedChallenge = await generateCodeChallenge(tamperedVerifier);
 
       // The challenges won't match - auth server would reject
