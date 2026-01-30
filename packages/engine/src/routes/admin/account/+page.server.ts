@@ -38,9 +38,7 @@ interface TenantRecord {
   email: string;
   plan: string;
   storage_used: number;
-  storage_limit: number;
   post_count: number;
-  post_limit: number | null;
   created_at: number;
 }
 
@@ -135,10 +133,10 @@ export const load: PageServerLoad = async ({
         return null;
       }),
 
-    // Tenant query
+    // Tenant query (limits come from tier config, not DB)
     platform.env.DB.prepare(
-      `SELECT id, subdomain, display_name, email, plan, storage_used, storage_limit,
-              post_count, post_limit, created_at
+      `SELECT id, subdomain, display_name, email, plan, storage_used,
+              post_count, created_at
        FROM tenants WHERE id = ?`,
     )
       .bind(locals.tenantId)
@@ -276,9 +274,12 @@ export const load: PageServerLoad = async ({
     usage: tenant
       ? {
           storageUsed: tenant.storage_used,
-          storageLimit: tenant.storage_limit,
+          storageLimit: tierConfig.limits.storage,
           postCount: tenant.post_count,
-          postLimit: tenant.post_limit,
+          postLimit:
+            tierConfig.limits.posts === Infinity
+              ? null
+              : tierConfig.limits.posts,
           accountAge: tenant.created_at
             ? Math.floor(
                 (Date.now() / 1000 - tenant.created_at) / (24 * 60 * 60),
