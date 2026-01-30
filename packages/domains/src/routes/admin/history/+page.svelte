@@ -216,7 +216,7 @@
 	<!-- Page Header -->
 	<div class="flex justify-between items-center">
 		<div>
-			<h1 class="text-2xl font-serif text-bark">Search History</h1>
+			<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Search History</h1>
 			<p class="text-foreground-muted font-sans mt-1">All previous domain searches ({data.total} total)</p>
 		</div>
 		<div class="flex gap-3">
@@ -275,7 +275,7 @@
 					{#each jobs as job (job.id)}
 						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-domain-50/30' : ''}">
 							<td class="px-4 py-4">
-								<div class="font-sans font-medium text-bark">{job.business_name}</div>
+								<div class="font-sans font-medium text-bark dark:text-neutral-100">{job.business_name}</div>
 								<div class="text-sm text-foreground-subtle font-sans">{job.client_email}</div>
 								<div class="sm:hidden mt-1">
 									<span class="badge {getStatusBadge(job.status)} {isRunning(job.status) ? 'animate-pulse' : ''}">{job.status}</span>

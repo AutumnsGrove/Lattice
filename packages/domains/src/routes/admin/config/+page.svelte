@@ -66,7 +66,7 @@
 <div class="space-y-8">
 	<!-- Page Header -->
 	<div>
-		<h1 class="text-2xl font-serif text-bark">Configuration</h1>
+		<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Configuration</h1>
 		<p class="text-foreground-muted font-sans mt-1">Configure the domain search agent settings</p>
 	</div>
 
@@ -91,7 +91,7 @@
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- Max Batches -->
 				<div>
-					<label for="max_batches" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="max_batches" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Max Batches
 					</label>
 					<input
@@ -110,7 +110,7 @@
 
 				<!-- Candidates Per Batch -->
 				<div>
-					<label for="candidates_per_batch" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="candidates_per_batch" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Candidates Per Batch
 					</label>
 					<input
@@ -129,7 +129,7 @@
 
 				<!-- Target Good Results -->
 				<div>
-					<label for="target_good_results" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="target_good_results" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Target Good Results
 					</label>
 					<input
@@ -155,7 +155,7 @@
 			<div class="grid md:grid-cols-2 gap-6">
 				<!-- Creativity Slider -->
 				<div>
-					<label for="creativity" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="creativity" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Creativity Level: {(creativity * 100).toFixed(0)}%
 					</label>
 					<input
@@ -179,7 +179,7 @@
 
 				<!-- RDAP Delay -->
 				<div>
-					<label for="rdap_delay" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="rdap_delay" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						RDAP Check Delay (seconds)
 					</label>
 					<input

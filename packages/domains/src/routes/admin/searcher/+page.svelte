@@ -866,7 +866,7 @@
 <div class="space-y-8">
 	<!-- Page Header -->
 	<div>
-		<h1 class="text-2xl font-serif text-bark">Domain Searcher</h1>
+		<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Domain Searcher</h1>
 		<p class="text-foreground-muted font-sans mt-1">AI-powered domain discovery with live pricing</p>
 	</div>
 
@@ -874,7 +874,7 @@
 		<!-- Search Form -->
 		<GlassCard class="p-4 sm:p-6">
 			<div class="flex items-center justify-between mb-4 sm:mb-6">
-				<h2 class="font-serif text-base sm:text-lg text-bark">New Search</h2>
+				<h2 class="font-serif text-base sm:text-lg text-bark dark:text-neutral-100">New Search</h2>
 				{#if currentJob && !['running', 'pending'].includes(currentJob.status)}
 					<button
 						type="button"
@@ -891,7 +891,7 @@
 				<button
 					type="button"
 					onclick={() => searchMode = 'vibe'}
-					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'vibe' ? 'bg-white text-bark shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'vibe' ? 'bg-white dark:bg-neutral-800 text-bark dark:text-neutral-100 shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
 					Vibe Mode
@@ -899,7 +899,7 @@
 				<button
 					type="button"
 					onclick={() => searchMode = 'detailed'}
-					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'detailed' ? 'bg-white text-bark shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
+					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode === 'detailed' ? 'bg-white dark:bg-neutral-800 text-bark dark:text-neutral-100 shadow-sm' : 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
 					Detailed
@@ -918,7 +918,7 @@
 					{#if !parsedVibe}
 						<!-- Vibe Input Form -->
 						<div>
-							<label for="vibe_text" class="block text-sm font-sans font-medium text-bark mb-2">
+							<label for="vibe_text" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 								Describe your business or project
 							</label>
 							<textarea
@@ -997,7 +997,7 @@
 						<!-- Parsed Results - Editable -->
 						<div class="space-y-4">
 							<div class="flex items-center justify-between">
-								<h3 class="text-sm font-sans font-medium text-bark">Here's what we understood:</h3>
+								<h3 class="text-sm font-sans font-medium text-bark dark:text-neutral-100">Here's what we understood:</h3>
 								<button
 									type="button"
 									onclick={clearVibeResults}
@@ -1090,7 +1090,7 @@
 							<!-- AI Provider Info (locked) -->
 							<div class="bg-grove-50 border border-grove-200 rounded-lg p-3">
 								<div class="text-xs font-sans text-foreground-muted mb-1">AI Model</div>
-								<div class="text-sm font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
+								<div class="text-sm font-sans text-bark dark:text-neutral-100 font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
 								<div class="text-xs font-sans text-foreground-subtle mt-1">{aiProviderInfo.description}</div>
 							</div>
 
@@ -1119,7 +1119,7 @@
 				<form onsubmit={(e) => { e.preventDefault(); startSearch(); }} class="space-y-6">
 				<!-- Business Name -->
 				<div>
-					<label for="business_name" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="business_name" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Business / Project Name *
 					</label>
 					<input
@@ -1135,7 +1135,7 @@
 
 				<!-- Domain Idea -->
 				<div>
-					<label for="domain_idea" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="domain_idea" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Domain Idea (optional)
 					</label>
 					<input
@@ -1151,7 +1151,7 @@
 
 				<!-- Vibe -->
 				<div>
-					<label class="block text-sm font-sans font-medium text-bark mb-2">
+					<label class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Brand Vibe
 					</label>
 					<select
@@ -1167,7 +1167,7 @@
 
 				<!-- TLD Preferences - Grouped -->
 				<div>
-					<label class="block text-sm font-sans font-medium text-bark mb-2">
+					<label class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Preferred TLDs
 					</label>
 					<div class="space-y-2 border border-grove-200 rounded-lg overflow-hidden">
@@ -1190,7 +1190,7 @@
 										>
 											<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
 										</svg>
-										<span class="font-sans font-medium text-bark text-sm">{group.label}</span>
+										<span class="font-sans font-medium text-bark dark:text-neutral-100 text-sm">{group.label}</span>
 										<span class="text-xs text-foreground-subtle font-sans">{group.description}</span>
 									</div>
 									{#if selectedCount > 0}
@@ -1245,7 +1245,7 @@
 					<!-- Diverse TLDs Toggle -->
 					<div class="flex items-center justify-between mt-3 pt-3 border-t border-grove-100">
 						<div>
-							<span class="text-sm font-sans font-medium text-bark">Diverse TLDs</span>
+							<span class="text-sm font-sans font-medium text-bark dark:text-neutral-100">Diverse TLDs</span>
 							<p class="text-xs text-foreground-subtle font-sans">Encourage variety in TLD suggestions</p>
 						</div>
 						<button
@@ -1264,7 +1264,7 @@
 
 				<!-- Keywords -->
 				<div>
-					<label for="keywords" class="block text-sm font-sans font-medium text-bark mb-2">
+					<label for="keywords" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						Keywords (optional)
 					</label>
 					<input
@@ -1279,11 +1279,11 @@
 
 				<!-- AI Provider Info (locked) -->
 				<div>
-					<label class="block text-sm font-sans font-medium text-bark mb-2">
+					<label class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 						AI Model
 					</label>
 					<div class="card p-4 bg-grove-50">
-						<div class="text-base font-sans text-bark font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
+						<div class="text-base font-sans text-bark dark:text-neutral-100 font-medium">{aiProviderInfo.model} via {aiProviderInfo.provider}</div>
 						<p class="mt-1 text-sm text-foreground-muted font-sans">
 							{aiProviderInfo.description}
 						</p>
@@ -1322,7 +1322,7 @@
 				<!-- Status Card -->
 				<GlassCard class="p-4 sm:p-6">
 					<div class="flex items-center justify-between mb-3 sm:mb-4">
-						<h2 class="font-serif text-base sm:text-lg text-bark">Search Status</h2>
+						<h2 class="font-serif text-base sm:text-lg text-bark dark:text-neutral-100">Search Status</h2>
 						<div class="flex items-center gap-2">
 							<div class="status-dot {getStatusDot(currentJob.status)}"></div>
 							<span class="text-sm font-sans capitalize {getStatusColor(currentJob.status)}">
@@ -1334,15 +1334,15 @@
 					<div class="space-y-3">
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-foreground-muted">Business</span>
-							<span class="text-bark font-medium">{currentJob.business_name}</span>
+							<span class="text-bark dark:text-neutral-100 font-medium">{currentJob.business_name}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-foreground-muted">Batch</span>
-							<span class="text-bark">{currentJob.batch_num} / 6</span>
+							<span class="text-bark dark:text-neutral-100">{currentJob.batch_num} / 6</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-foreground-muted">Domains Checked</span>
-							<span class="text-bark">{currentJob.domains_checked}</span>
+							<span class="text-bark dark:text-neutral-100">{currentJob.domains_checked}</span>
 						</div>
 						<div class="flex justify-between text-sm font-sans">
 							<span class="text-foreground-muted">Available Found</span>
@@ -1362,7 +1362,7 @@
 									{formatElapsed(elapsedSeconds)}
 								</span>
 							{:else if currentJob.duration_seconds}
-								<span class="text-bark font-mono tabular-nums">{formatDuration(currentJob.duration_seconds)}</span>
+								<span class="text-bark dark:text-neutral-100 font-mono tabular-nums">{formatDuration(currentJob.duration_seconds)}</span>
 							{:else}
 								<span class="text-foreground-faint">-</span>
 							{/if}
@@ -1402,7 +1402,7 @@
 				<!-- Follow-up Quiz -->
 				{#if currentJob.status === 'needs_followup' && followupQuiz}
 					<GlassCard variant="accent" class="p-4 sm:p-6">
-						<h2 class="font-serif text-base sm:text-lg text-bark mb-2">Refine Your Search</h2>
+						<h2 class="font-serif text-base sm:text-lg text-bark dark:text-neutral-100 mb-2">Refine Your Search</h2>
 						<p class="text-sm text-foreground-muted font-sans mb-4">
 							We found {followupQuiz.context.good_found} good domains out of {followupQuiz.context.target} target.
 							Answer these questions to help us find more.
@@ -1411,7 +1411,7 @@
 						<div class="space-y-4">
 							{#each followupQuiz.questions as question}
 								<div>
-									<label class="block text-sm font-sans font-medium text-bark mb-2">
+									<label class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
 										{question.prompt}
 										{#if question.required}<span class="text-red-500">*</span>{/if}
 									</label>
@@ -1482,7 +1482,7 @@
 				<!-- Pricing Summary -->
 				{#if pricingSummary && (currentJob.status === 'complete' || currentJob.status === 'needs_followup')}
 					<GlassCard class="p-4 sm:p-6">
-						<h2 class="font-serif text-base sm:text-lg text-bark mb-3 sm:mb-4">Pricing Summary</h2>
+						<h2 class="font-serif text-base sm:text-lg text-bark dark:text-neutral-100 mb-3 sm:mb-4">Pricing Summary</h2>
 						<div class="grid grid-cols-2 gap-2 sm:gap-4">
 							<div class="text-center p-2 sm:p-3 bg-grove-50 rounded-lg">
 								<div class="text-xl sm:text-2xl font-mono font-bold text-grove-600">{pricingSummary.bundled}</div>
@@ -1531,7 +1531,7 @@
 				{#if jobResults.length > 0}
 					<GlassCard>
 						<div class="px-3 py-3 sm:p-4 border-b border-grove-200 flex justify-between items-center">
-							<h2 class="font-serif text-base sm:text-lg text-bark">Available Domains</h2>
+							<h2 class="font-serif text-base sm:text-lg text-bark dark:text-neutral-100">Available Domains</h2>
 							<span class="text-xs sm:text-sm text-foreground-muted font-sans">
 								{#if isLoadingResults}
 									Loading...
@@ -1553,7 +1553,7 @@
 									>
 										<div class="flex-1 min-w-0">
 											<div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-												<span class="font-mono text-bark font-medium text-sm sm:text-base break-all">{result.domain}</span>
+												<span class="font-mono text-bark dark:text-neutral-100 font-medium text-sm sm:text-base break-all">{result.domain}</span>
 												{#if result.pricing_category || evalData?.pricing_category}
 													{@const category = result.pricing_category || evalData?.pricing_category}
 													<span class="flex-shrink-0 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-sans rounded-full
@@ -1638,19 +1638,19 @@
 														{#if evalData.renewal_cents}
 															<div class="flex items-center justify-between text-sm font-sans">
 																<span class="text-foreground-muted">Renewal</span>
-																<span class="text-bark">{formatPrice(evalData.renewal_cents)}/yr</span>
+																<span class="text-bark dark:text-neutral-100">{formatPrice(evalData.renewal_cents)}/yr</span>
 															</div>
 														{/if}
 														{#if evalData.rdap_registrar}
 															<div class="flex items-center justify-between text-sm font-sans">
 																<span class="text-foreground-muted">Registrar</span>
-																<span class="text-bark truncate max-w-[150px]" title={evalData.rdap_registrar}>{evalData.rdap_registrar}</span>
+																<span class="text-bark dark:text-neutral-100 truncate max-w-[150px]" title={evalData.rdap_registrar}>{evalData.rdap_registrar}</span>
 															</div>
 														{/if}
 														{#if evalData.rdap_expiration}
 															<div class="flex items-center justify-between text-sm font-sans">
 																<span class="text-foreground-muted">Expires</span>
-																<span class="text-bark">{formatExpiration(evalData.rdap_expiration)}</span>
+																<span class="text-bark dark:text-neutral-100">{formatExpiration(evalData.rdap_expiration)}</span>
 															</div>
 														{/if}
 													</div>

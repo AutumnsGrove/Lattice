@@ -475,12 +475,12 @@
 		<div class="flex items-start justify-between">
 			<div>
 				<div class="flex items-center gap-3 mb-2">
-					<a href="/admin/history" class="text-foreground-subtle hover:text-bark transition-colors" aria-label="Back to history">
+					<a href="/admin/history" class="text-foreground-subtle hover:text-foreground transition-colors" aria-label="Back to history">
 						<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
 							<path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
 						</svg>
 					</a>
-					<h1 class="text-2xl font-serif text-bark">{job.business_name}</h1>
+					<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">{job.business_name}</h1>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
 							<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
@@ -531,12 +531,12 @@
 			<div class="grid sm:grid-cols-2 gap-4 text-sm font-sans">
 				<div>
 					<span class="text-foreground-muted">Vibe:</span>
-					<span class="text-bark ml-2 capitalize">{job.vibe}</span>
+					<span class="text-bark dark:text-neutral-100 ml-2 capitalize">{job.vibe}</span>
 				</div>
 				{#if job.domain_idea}
 					<div class="flex items-center gap-2 flex-wrap">
 						<span class="text-foreground-muted">Domain Idea:</span>
-						<span class="text-bark font-mono">{job.domain_idea}</span>
+						<span class="text-bark dark:text-neutral-100 font-mono">{job.domain_idea}</span>
 						{#if domainIdeaStatus}
 							{#if domainIdeaStatus.checked}
 								{#if domainIdeaStatus.available}
@@ -564,22 +564,22 @@
 				{/if}
 				<div>
 					<span class="text-foreground-muted">TLD Preferences:</span>
-					<span class="text-bark ml-2">{formatTldPreferences(job.tld_preferences)}</span>
+					<span class="text-bark dark:text-neutral-100 ml-2">{formatTldPreferences(job.tld_preferences)}</span>
 				</div>
 				{#if job.keywords}
 					<div>
 						<span class="text-foreground-muted">Keywords:</span>
-						<span class="text-bark ml-2">{job.keywords}</span>
+						<span class="text-bark dark:text-neutral-100 ml-2">{job.keywords}</span>
 					</div>
 				{/if}
 				<div>
 					<span class="text-foreground-muted">Created:</span>
-					<span class="text-bark ml-2">{formatDate(job.created_at)}</span>
+					<span class="text-bark dark:text-neutral-100 ml-2">{formatDate(job.created_at)}</span>
 				</div>
 				{#if job.completed_at}
 					<div>
 						<span class="text-foreground-muted">Completed:</span>
-						<span class="text-bark ml-2">{formatDate(job.completed_at)}</span>
+						<span class="text-bark dark:text-neutral-100 ml-2">{formatDate(job.completed_at)}</span>
 					</div>
 				{/if}
 			</div>
@@ -595,7 +595,7 @@
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h2 class="font-serif text-lg text-bark">Refine Your Search</h2>
+						<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Refine Your Search</h2>
 						<p class="text-sm text-foreground-muted font-sans mt-1">We need a bit more information to find the perfect domains for you.</p>
 					</div>
 				</div>
@@ -649,7 +649,7 @@
 											{idx + 1}
 										</div>
 										<div class="flex-1">
-											<label class="block text-sm font-sans font-medium text-bark mb-1">
+											<label class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-1">
 												{question.prompt}
 												{#if question.required}<span class="text-red-500 ml-1">*</span>{/if}
 											</label>
@@ -737,7 +737,7 @@
 		{#if availableResults.length > 0 || isRunning}
 			<GlassCard>
 				<div class="p-4 border-b border-grove-200 flex justify-between items-center">
-					<h2 class="font-serif text-lg text-bark">Available Domains</h2>
+					<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Available Domains</h2>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
 							<span class="inline-flex items-center gap-1.5 text-sm text-domain-600 font-sans">
@@ -764,7 +764,7 @@
 								{#each availableResults as result (result.domain)}
 									<tr class="hover:bg-grove-50 transition-colors {newDomainIds.has(result.domain) ? 'animate-slide-in bg-grove-50/50' : ''}">
 										<td class="px-4 py-3">
-											<span class="font-mono text-bark font-medium">{result.domain}</span>
+											<span class="font-mono text-bark dark:text-neutral-100 font-medium">{result.domain}</span>
 										</td>
 										<td class="px-4 py-3 text-center">
 											<div class="w-full bg-grove-100 rounded-full h-2 max-w-[60px] mx-auto">
@@ -813,7 +813,7 @@
 		{#if unavailableResults.length > 0}
 			<details class="glass-card overflow-hidden">
 				<summary class="p-4 cursor-pointer hover:bg-grove-50 transition-colors flex justify-between items-center">
-					<h2 class="font-serif text-lg text-bark">Checked Domains (Unavailable)</h2>
+					<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Checked Domains (Unavailable)</h2>
 					<span class="text-sm text-foreground-subtle font-sans">{unavailableResults.length} domains</span>
 				</summary>
 				<div class="border-t border-grove-200 p-4">
