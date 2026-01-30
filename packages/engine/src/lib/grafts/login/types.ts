@@ -46,6 +46,10 @@ export type LoginVariant = "default" | "compact" | "fullpage";
 
 /**
  * Props for the main LoginGraft orchestrator component.
+ *
+ * With Better Auth migration, OAuth flows redirect directly to GroveAuth's
+ * Better Auth endpoints. The tenant site only needs to verify the session
+ * cookie after the callback.
  */
 export interface LoginGraftProps extends BaseGraftProps {
   /**
@@ -56,13 +60,13 @@ export interface LoginGraftProps extends BaseGraftProps {
 
   /**
    * URL to redirect after successful authentication.
-   * Defaults to '/admin' or can be configured per-package.
+   * Defaults to '/admin'.
    */
   returnTo?: string;
 
   /**
    * Client ID for OAuth (for multi-tenant scenarios).
-   * Defaults to env-configured client ID.
+   * @deprecated Better Auth uses the origin domain for client identification.
    */
   clientId?: string;
 
@@ -76,7 +80,8 @@ export interface LoginGraftProps extends BaseGraftProps {
 
   /**
    * Base URL for the login endpoint.
-   * Defaults to '/auth/login'.
+   * @deprecated Better Auth redirects directly to GROVEAUTH_URLS.socialSignIn.
+   * This prop is ignored in the Better Auth flow.
    */
   loginUrl?: string;
 
@@ -211,25 +216,31 @@ export interface LoginHandlerConfig {
 
 /**
  * Configuration for createCallbackHandler factory.
+ *
+ * With Better Auth migration, most options are no longer needed:
+ * - clientId: Better Auth uses origin for client identification
+ * - clientSecretEnvVar: No token exchange needed
+ * - authApiUrl: Better Auth handles the full flow
+ * - cookieDomain: Better Auth sets cookies with correct domain
  */
 export interface CallbackHandlerConfig {
   /**
    * OAuth client ID registered with GroveAuth.
+   * @deprecated Better Auth uses origin for client identification.
    */
-  clientId: string;
+  clientId?: string;
 
   /**
    * Environment variable name for the client secret.
-   * The handler will read this from platform.env.
-   * @default 'GROVEAUTH_CLIENT_SECRET'
+   * @deprecated No token exchange needed - Better Auth handles it.
    */
   clientSecretEnvVar?: string;
 
   /**
    * Base URL for GroveAuth token API.
-   * @example 'https://auth-api.grove.place'
+   * @deprecated Better Auth handles the full flow.
    */
-  authApiUrl: string;
+  authApiUrl?: string;
 
   /**
    * Default URL to redirect to after successful auth.
@@ -239,7 +250,7 @@ export interface CallbackHandlerConfig {
 
   /**
    * Cookie domain for cross-subdomain auth.
-   * @example '.grove.place'
+   * @deprecated Better Auth sets cookies with correct domain.
    */
   cookieDomain?: string;
 

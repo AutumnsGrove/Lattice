@@ -2,7 +2,10 @@
  * Login Graft
  *
  * Unified login UI component for all Grove properties.
- * Provides consistent authentication experience with PKCE OAuth support.
+ * Provides consistent authentication experience via Better Auth.
+ *
+ * With Better Auth, LoginGraft redirects directly to GroveAuth's
+ * /api/auth/sign-in/social endpoint—no custom login handler needed.
  *
  * @example Client-side usage
  * ```svelte
@@ -18,17 +21,6 @@
  *     <h1>Welcome back, Wanderer</h1>
  *   {/snippet}
  * </LoginGraft>
- * ```
- *
- * @example Server-side usage
- * ```typescript
- * // In routes/auth/login/+server.ts
- * import { createLoginHandler } from '@autumnsgrove/groveengine/grafts/login/server';
- *
- * export const GET = createLoginHandler({
- *   clientId: 'my-app',
- *   authUrl: 'https://auth.grove.place',
- * });
  * ```
  *
  * @example Compact variant for embedding

@@ -4,17 +4,9 @@
  * Server-side exports for the LoginGraft system.
  * Provides handler factories and utilities for OAuth authentication.
  *
- * @example
- * ```typescript
- * // In routes/auth/login/+server.ts
- * import { createLoginHandler } from '@autumnsgrove/groveengine/grafts/login/server';
- *
- * export const GET = createLoginHandler({
- *   clientId: 'my-app',
- *   authUrl: 'https://auth.grove.place',
- *   defaultReturnTo: '/dashboard'
- * });
- * ```
+ * NOTE: With Better Auth migration, createLoginHandler is removed.
+ * LoginGraft now redirects directly to Better Auth's /api/auth/sign-in/social
+ * endpoint, so no custom login handler is needed.
  *
  * @example
  * ```typescript
@@ -31,14 +23,12 @@
 
 // Types
 export type {
-  LoginHandlerConfig,
   CallbackHandlerConfig,
   PKCEValues,
   AuthCookieState,
 } from "../types.js";
 
 // Handler factories
-export { createLoginHandler } from "./login.js";
 export { createCallbackHandler } from "./callback.js";
 
 // PKCE utilities

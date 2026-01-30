@@ -3,7 +3,7 @@
 	 * Engine Admin Login Page
 	 *
 	 * Uses LoginGraft for unified authentication across Grove properties.
-	 * Supports Google OAuth + Passkey (WebAuthn) authentication.
+	 * Redirects directly to Better Auth for OAuth, supports passkeys via WebAuthn.
 	 */
 
 	import { LoginGraft } from '$lib/grafts/login';
@@ -20,7 +20,6 @@
 <LoginGraft
 	variant="fullpage"
 	providers={['google', 'passkey']}
-	loginUrl="/auth/login/start"
 	returnTo="/admin"
 >
 	{#snippet logo()}

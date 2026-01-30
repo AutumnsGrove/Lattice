@@ -82,41 +82,56 @@ export function getAvailableProviders(): AuthProvider[] {
 export const DEFAULT_PROVIDERS: AuthProvider[] = ["google"];
 
 /**
- * Default login endpoint URL.
- */
-export const DEFAULT_LOGIN_URL = "/auth/login";
-
-/**
  * Default return URL after successful auth.
  */
 export const DEFAULT_RETURN_TO = "/admin";
 
 /**
  * Default GroveAuth URLs.
+ *
+ * With Better Auth migration:
+ * - OAuth flows redirect directly to Better Auth's /api/auth/sign-in/social
+ * - No more intermediate PKCE dance - Better Auth handles everything
+ * - Session cookie (better-auth.session_token) is set by Better Auth
  */
 export const GROVEAUTH_URLS = {
-  /** Frontend login page */
+  /** Frontend login page (legacy - kept for reference) */
   auth: "https://auth.grove.place",
-  /** Backend API for token exchange */
+  /** Better Auth API endpoint for social sign-in */
   api: "https://auth-api.grove.place",
+  /** Better Auth social sign-in endpoint (direct redirect) */
+  socialSignIn: "https://auth-api.grove.place/api/auth/sign-in/social",
 } as const;
 
 /**
+ * Default login endpoint URL.
+ * @deprecated Use GROVEAUTH_URLS.socialSignIn for Better Auth direct redirect
+ */
+export const DEFAULT_LOGIN_URL = "/auth/login";
+
+/**
  * Cookie names used in OAuth flow.
+ *
+ * With Better Auth migration:
+ * - Legacy cookies (state, codeVerifier, accessToken, refreshToken) are no longer used
+ * - Better Auth sets 'better-auth.session_token' directly
+ * - We still use returnTo to know where to redirect after auth
  */
 export const AUTH_COOKIE_NAMES = {
-  /** CSRF state */
+  /** CSRF state @deprecated - Better Auth handles CSRF internally */
   state: "auth_state",
-  /** PKCE code verifier */
+  /** PKCE code verifier @deprecated - Better Auth handles PKCE internally */
   codeVerifier: "auth_code_verifier",
   /** Return URL after auth */
   returnTo: "auth_return_to",
-  /** Access token (set after successful auth) */
+  /** Access token @deprecated - Better Auth uses session tokens */
   accessToken: "access_token",
-  /** Refresh token (set after successful auth) */
+  /** Refresh token @deprecated - Better Auth handles refresh internally */
   refreshToken: "refresh_token",
-  /** Session ID (set after successful auth) */
+  /** Session ID (legacy) @deprecated */
   session: "session",
+  /** Better Auth session token (the new standard) */
+  betterAuthSession: "better-auth.session_token",
 } as const;
 
 /**

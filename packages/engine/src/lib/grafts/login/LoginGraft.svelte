@@ -3,6 +3,9 @@
 	 * LoginGraft - Unified login component for all Grove properties
 	 *
 	 * Main orchestrator component that provides consistent login UI.
+	 * Uses Better Auth for OAuth flows - redirects directly to GroveAuth's
+	 * Better Auth endpoints which handle the full OAuth dance.
+	 *
 	 * Supports three variants:
 	 * - default: Card with providers and optional header/footer
 	 * - compact: Minimal button only (for embedding)
@@ -32,10 +35,11 @@
 	 * ```
 	 */
 
+	import { browser } from "$app/environment";
 	import type { LoginGraftProps, AuthProvider } from "./types.js";
 	import {
 		DEFAULT_PROVIDERS,
-		DEFAULT_LOGIN_URL,
+		GROVEAUTH_URLS,
 		isProviderAvailable,
 		getProviderName,
 	} from "./config.js";
@@ -47,10 +51,9 @@
 
 	let {
 		providers = DEFAULT_PROVIDERS,
-		returnTo,
+		returnTo = "/admin",
 		clientId,
 		variant = "default",
-		loginUrl = DEFAULT_LOGIN_URL,
 		header,
 		footer,
 		logo,
@@ -62,17 +65,28 @@
 		providers.filter((p) => isProviderAvailable(p))
 	);
 
-	// Build the login URL for a provider
+	/**
+	 * Build the Better Auth social sign-in URL for a provider.
+	 *
+	 * Better Auth handles the full OAuth flow:
+	 * 1. User clicks → redirects to Better Auth's /api/auth/sign-in/social
+	 * 2. Better Auth redirects to Google/GitHub/etc
+	 * 3. Provider callback → Better Auth /api/auth/callback/:provider
+	 * 4. Better Auth sets session cookie and redirects to callbackURL
+	 *
+	 * The callbackURL points back to our site's /auth/callback which just
+	 * verifies the session cookie exists and redirects to the final destination.
+	 */
 	function getLoginUrl(provider: AuthProvider): string {
+		// Build the callback URL that Better Auth will redirect to after OAuth
+		const origin = browser ? window.location.origin : "";
+		const callbackUrl = `${origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+
 		const params = new URLSearchParams();
 		params.set("provider", provider);
-		if (returnTo) {
-			params.set("return_to", returnTo);
-		}
-		if (clientId) {
-			params.set("client_id", clientId);
-		}
-		return `${loginUrl}?${params.toString()}`;
+		params.set("callbackURL", callbackUrl);
+
+		return `${GROVEAUTH_URLS.socialSignIn}?${params.toString()}`;
 	}
 
 	// For compact variant, use first available provider
@@ -150,7 +164,7 @@
 					{#if footer}
 						{@render footer()}
 					{:else}
-						<p>Grove • Heartwood Auth</p>
+						<p>Grove • Better Auth</p>
 					{/if}
 				</div>
 			{/snippet}
