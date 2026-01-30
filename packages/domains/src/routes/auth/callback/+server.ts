@@ -1,172 +1,136 @@
 /**
- * GroveAuth OAuth Callback Handler
+ * OAuth Callback - Handle Better Auth authentication response
  *
- * Handles the callback from GroveAuth after user authentication.
- * Exchanges the authorization code for tokens and creates a local session.
+ * With Better Auth, the OAuth flow is handled entirely by GroveAuth.
+ * This callback:
+ * 1. Verifies the Better Auth session cookie was set
+ * 2. Fetches user info from Better Auth's session endpoint
+ * 3. Creates/updates local user in D1 (domains has its own user management)
+ * 4. Creates local session in D1
+ * 5. Redirects to the requested destination
  *
- * NOTE: This callback keeps D1 session storage (unlike other apps that use
- * cross-subdomain cookies) because domains.grove.place needs local user management.
- * Uses graft utilities for PKCE validation and origin detection.
- *
- * SECURITY NOTE: This is a +server.ts file which runs server-side only in SvelteKit.
- * Client secrets accessed here are never exposed to the browser.
- * Secrets should be set via: wrangler secret put GROVEAUTH_CLIENT_SECRET
+ * NOTE: Domains keeps local D1 session storage because it needs local user
+ * management for domain-specific features.
  */
 
 import { redirect, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { createSession, getOrCreateUser } from "$lib/server/db";
-import { getRealOrigin } from "@autumnsgrove/groveengine/grafts/login/server";
-import { AUTH_COOKIE_NAMES } from "@autumnsgrove/groveengine/grafts/login";
 
-/**
- * Map GroveAuth error codes to user-friendly messages.
- * Raw error descriptions from OAuth providers may leak implementation details.
- */
+// =============================================================================
+// Constants
+// =============================================================================
+
+const GROVEAUTH_API_URL = "https://auth-api.grove.place";
+
+/** Better Auth session cookie name (set by GroveAuth) */
+const BETTER_AUTH_SESSION_COOKIE = "better-auth.session_token";
+
+// =============================================================================
+// Error Messages
+// =============================================================================
+
 const ERROR_MESSAGES: Record<string, string> = {
   access_denied: "You cancelled the login process",
-  invalid_grant: "Login session expired, please try again",
-  server_error: "Authentication service unavailable, please try later",
-  temporarily_unavailable: "Authentication service is temporarily unavailable",
-  invalid_request: "There was a problem with the login request",
-  unauthorized_client: "This application is not authorized",
-  invalid_scope: "Invalid permissions requested",
-  invalid_state: "Login session expired, please try again",
-  missing_verifier: "Login session expired, please try again",
-  missing_code: "Login was not completed, please try again",
-  token_exchange_failed: "Unable to complete login, please try again",
+  auth_failed: "Authentication failed, please try again",
+  no_session: "Session was not created, please try again",
   userinfo_failed: "Unable to retrieve your account information",
-  callback_failed: "An error occurred during login, please try again",
 };
 
-/**
- * Get a user-friendly error message for an OAuth error code.
- */
 function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
-export const GET: RequestHandler = async ({
-  url,
-  cookies,
-  platform,
-  request,
-}) => {
+// =============================================================================
+// Handler
+// =============================================================================
+
+export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   if (!platform?.env?.DB) {
     throw error(500, "Database not available");
   }
 
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
+  // Check for error from OAuth provider
   const errorParam = url.searchParams.get("error");
-
-  // Check for error from GroveAuth
   if (errorParam) {
-    console.error("[GroveAuth Callback] Error:", errorParam);
-    const friendlyMessage = getFriendlyErrorMessage(errorParam);
-    throw redirect(302, `/login?error=${encodeURIComponent(friendlyMessage)}`);
-  }
-
-  // Validate state (CSRF protection) - using graft's cookie name
-  const savedState = cookies.get(AUTH_COOKIE_NAMES.state);
-  if (!state || state !== savedState) {
-    console.error("[GroveAuth Callback] State mismatch");
-    throw redirect(
-      302,
-      `/login?error=${encodeURIComponent(getFriendlyErrorMessage("invalid_state"))}`,
+    console.error("[Auth Callback] Error from provider:", errorParam);
+    const friendlyMessage = getFriendlyErrorMessage(
+      errorParam === "access_denied" ? "access_denied" : "auth_failed",
     );
+    redirect(302, `/admin/login?error=${encodeURIComponent(friendlyMessage)}`);
   }
 
-  // Get code verifier (PKCE) - using graft's cookie name
-  const codeVerifier = cookies.get(AUTH_COOKIE_NAMES.codeVerifier);
-  if (!codeVerifier) {
-    console.error("[GroveAuth Callback] Missing code verifier");
-    throw redirect(
-      302,
-      `/login?error=${encodeURIComponent(getFriendlyErrorMessage("missing_verifier"))}`,
-    );
-  }
+  // Get return URL from query params (set by LoginGraft) or default to /admin
+  const returnTo = url.searchParams.get("returnTo") || "/admin";
 
-  if (!code) {
-    throw redirect(
-      302,
-      `/login?error=${encodeURIComponent(getFriendlyErrorMessage("missing_code"))}`,
-    );
-  }
+  // Verify Better Auth session cookie was set
+  const sessionToken = cookies.get(BETTER_AUTH_SESSION_COOKIE);
 
-  // Clear auth cookies - using graft's cookie names
-  cookies.delete(AUTH_COOKIE_NAMES.state, { path: "/" });
-  cookies.delete(AUTH_COOKIE_NAMES.codeVerifier, { path: "/" });
-  // Also clear returnTo if set by graft's login handler
-  cookies.delete(AUTH_COOKIE_NAMES.returnTo, { path: "/" });
-
-  try {
-    const { DB, GROVEAUTH_CLIENT_SECRET } = platform.env;
-    const authBaseUrl = "https://auth-api.grove.place";
-    const clientId = "groveengine"; // Unified client ID across all Grove apps
-    const redirectUri = `${getRealOrigin(request, url)}/auth/callback`;
-
-    // Exchange code for tokens
-    const tokenResponse = await fetch(`${authBaseUrl}/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: GROVEAUTH_CLIENT_SECRET || "",
-        code_verifier: codeVerifier,
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json();
-      console.error("[GroveAuth Callback] Token exchange failed:", errorData);
-      // Use friendly message, don't expose raw error_description to users
-      throw redirect(
+  if (!sessionToken) {
+    // No session cookie - check for legacy cookies during migration
+    const legacySession = cookies.get("access_token") || cookies.get("session");
+    if (!legacySession) {
+      console.warn("[Auth Callback] No session cookie found");
+      redirect(
         302,
-        `/login?error=${encodeURIComponent(getFriendlyErrorMessage("token_exchange_failed"))}`,
+        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("no_session"))}`,
+      );
+    }
+    // Legacy session exists - allow through for now but log warning
+    console.warn("[Auth Callback] Using legacy session cookie");
+    redirect(302, returnTo);
+  }
+
+  // Fetch user info from Better Auth's session endpoint
+  // This validates the session and gives us the user's email
+  try {
+    const sessionResponse = await fetch(
+      `${GROVEAUTH_API_URL}/api/auth/session`,
+      {
+        headers: {
+          Cookie: `${BETTER_AUTH_SESSION_COOKIE}=${sessionToken}`,
+        },
+      },
+    );
+
+    if (!sessionResponse.ok) {
+      console.error(
+        "[Auth Callback] Failed to get session:",
+        sessionResponse.status,
+      );
+      redirect(
+        302,
+        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
       );
     }
 
-    const tokens = (await tokenResponse.json()) as {
-      access_token: string;
-      refresh_token?: string;
-      expires_in?: number;
+    const sessionData = (await sessionResponse.json()) as {
+      user?: {
+        email?: string;
+        id?: string;
+        name?: string;
+      };
     };
 
-    // Get user info
-    const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
-      },
-    });
-
-    if (!userInfoResponse.ok) {
-      console.error("[GroveAuth Callback] Failed to get user info");
-      throw redirect(
+    if (!sessionData.user?.email) {
+      console.error("[Auth Callback] No user email in session response");
+      redirect(
         302,
-        `/login?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
+        `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
       );
     }
 
-    const userInfo = (await userInfoResponse.json()) as { email: string };
+    const { DB } = platform.env;
+    const userEmail = sessionData.user.email;
 
-    // Create or get user in local DB
-    const user = await getOrCreateUser(DB, userInfo.email);
+    // Create or get local user in domains D1 database
+    const user = await getOrCreateUser(DB, userEmail);
 
-    // Create local session with tokens stored in D1 (not cookies)
-    // This is more secure for Cloudflare Workers as tokens aren't sent with every request
-    const session = await createSession(DB, user.id, {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresIn: tokens.expires_in,
-    });
+    // Create local session in D1
+    // Note: We don't store OAuth tokens anymore - Better Auth handles that
+    const session = await createSession(DB, user.id);
 
-    // Only store session ID in cookie - tokens stay in D1
+    // Set local session cookie (domains uses its own session management)
     cookies.set("session", session.id, {
       path: "/",
       httpOnly: true,
@@ -175,21 +139,27 @@ export const GET: RequestHandler = async ({
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });
 
-    // Redirect to admin
-    throw redirect(302, "/admin");
+    console.log(
+      "[Auth Callback] Success, user:",
+      userEmail,
+      "redirecting to:",
+      returnTo,
+    );
+    redirect(302, returnTo);
   } catch (err) {
+    // Re-throw redirects
     if (
       err &&
       typeof err === "object" &&
       "status" in err &&
       err.status === 302
     ) {
-      throw err; // Re-throw redirects
+      throw err;
     }
-    console.error("[GroveAuth Callback] Error:", err);
-    throw redirect(
+    console.error("[Auth Callback] Error:", err);
+    redirect(
       302,
-      `/login?error=${encodeURIComponent(getFriendlyErrorMessage("callback_failed"))}`,
+      `/admin/login?error=${encodeURIComponent(getFriendlyErrorMessage("auth_failed"))}`,
     );
   }
 };

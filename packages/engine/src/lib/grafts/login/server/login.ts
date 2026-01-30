@@ -1,8 +1,14 @@
 /**
  * Login Handler Factory
  *
- * Creates a SvelteKit request handler for initiating OAuth login flows.
- * Generates PKCE values, stores state in cookies, and redirects to GroveAuth.
+ * @deprecated With Better Auth migration, this handler is no longer needed.
+ * LoginGraft now redirects directly to Better Auth's /api/auth/sign-in/social
+ * endpoint, which handles the full OAuth flow including PKCE.
+ *
+ * This file is kept for backward compatibility during migration but will
+ * be removed in a future release.
+ *
+ * MIGRATION: Remove your /auth/login/start route - LoginGraft handles everything.
  */
 
 import { redirect } from "@sveltejs/kit";
