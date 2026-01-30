@@ -56,16 +56,34 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Payments:** LemonSqueezy
 - **Email:** Resend
 - **Styling:** Tailwind CSS
-- **Package Manager:** pnpm
+- **Package Manager:** pnpm (CI/deployments) + bun (local dev speed)
 
 ## Infrastructure & Deployment
 
 ### Local Development
+
+**Hybrid pnpm + bun workflow:** Use pnpm for dependency management (keeps lockfile in sync with CI), use bun for fast local execution.
+
 ```bash
+# DEPENDENCIES - Always use pnpm (syncs with CI)
+pnpm install              # Install all deps
+pnpm add <package>        # Add a package
+pnpm remove <package>     # Remove a package
+
+# LOCAL EXECUTION - Use bun for speed (10-50x faster)
+bun run dev               # Start dev server
+bun run build             # Build locally
+bun x prettier --write .  # Run prettier
+bun x tsc --noEmit        # Type check
+
 # Start any app locally (auto-creates local D1/KV/R2)
-cd landing && pnpm dev      # or wrangler dev
-cd packages/engine && pnpm dev
+cd landing && bun run dev
+cd packages/engine && bun run dev
 ```
+
+**Why this works:** Bun uses the `node_modules` that pnpm creates—no separate lockfile needed. The `bun.lock` file is gitignored since pnpm-lock.yaml is the source of truth for CI.
+
+**⚠️ Avoid:** `bun install` or `bun add` — these would update bun.lock instead of pnpm-lock.yaml, causing drift between local and CI environments.
 
 ### LemonSqueezy Configuration
 Payments are processed through LemonSqueezy. Products and prices are managed in the LemonSqueezy Dashboard.
@@ -604,5 +622,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-23*
+*Last updated: 2026-01-30*
 *Model: Claude Opus 4.5*
