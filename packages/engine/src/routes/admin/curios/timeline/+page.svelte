@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData, ActionData } from "./$types";
   import { enhance } from "$app/forms";
-  import { GlassCard, GlassButton, Badge } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import {
     Calendar,
@@ -450,6 +450,7 @@
           <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">
             Create a token →
           </a>
+          <Waystone slug="how-grove-protects-your-secrets" label="How we protect your tokens" inline />
         </p>
       </div>
 
@@ -524,6 +525,7 @@
           <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">
             Get a key →
           </a>
+          <Waystone slug="how-grove-protects-your-secrets" label="How we protect your keys" inline />
         </p>
       </div>
 
