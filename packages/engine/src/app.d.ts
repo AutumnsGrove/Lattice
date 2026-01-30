@@ -106,6 +106,9 @@ declare global {
         // Cloudflare Turnstile (bot protection)
         TURNSTILE_SECRET_KEY?: string;
         TURNSTILE_SITE_KEY?: string;
+
+        // CDN Configuration
+        CDN_BASE_URL?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

@@ -3,6 +3,7 @@ import {
   getLatestPost,
   processAnchorTags,
   renderMarkdown,
+  type GutterItem,
 } from "$lib/utils/markdown.js";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types.js";
@@ -14,12 +15,6 @@ interface Header {
   level: number;
   id: string;
   text: string;
-}
-
-interface GutterItem {
-  type?: string;
-  content?: string;
-  [key: string]: unknown;
 }
 
 interface HeroData {

@@ -6,6 +6,20 @@
  *
  * This approach avoids bundling jsdom (required by isomorphic-dompurify)
  * which doesn't work in Cloudflare Workers.
+ *
+ * TAG ALLOWLIST PHILOSOPHY:
+ * -------------------------
+ * sanitizeHTML() uses a FORBID_TAGS approach - blocking known dangerous tags.
+ * This is stricter, suitable for arbitrary user HTML input.
+ *
+ * sanitizeMarkdown() uses an ALLOWED_TAGS approach - explicitly permitting
+ * safe markdown-generated elements. This is broader because:
+ * 1. Markdown parsers generate a known, limited set of tags
+ * 2. Tables, task lists, and semantic elements are common in markdown
+ * 3. The input is already markdown (not raw HTML), reducing attack surface
+ *
+ * Both functions FORBID the same dangerous tags (script, iframe, etc.) and
+ * event handlers (onclick, onerror, etc.) for defense in depth.
  */
 
 import { BROWSER } from "esm-env";
@@ -17,6 +31,31 @@ let DOMPurify: DOMPurifyInstance | null = null;
 if (BROWSER) {
   import("dompurify").then((module) => {
     DOMPurify = module.default;
+
+    // Add hook to enforce rel="noopener noreferrer" on external links
+    // This prevents reverse tabnabbing attacks where a linked page could
+    // manipulate the opener via window.opener
+    DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+      if (node.tagName === "A") {
+        const href = node.getAttribute("href") || "";
+        const target = node.getAttribute("target");
+
+        // External links (absolute URLs or target="_blank")
+        const isExternal =
+          href.startsWith("http://") ||
+          href.startsWith("https://") ||
+          target === "_blank";
+
+        if (isExternal) {
+          // Always add noopener and noreferrer for external links
+          const existingRel = node.getAttribute("rel") || "";
+          const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
+          relParts.add("noopener");
+          relParts.add("noreferrer");
+          node.setAttribute("rel", Array.from(relParts).join(" "));
+        }
+      }
+    });
   });
 }
 
@@ -114,6 +153,49 @@ function sanitizeServerSafe(html: string): string {
     'href="#"',
   );
   sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
+
+  // Add rel="noopener noreferrer" to external links (absolute URLs)
+  // This prevents reverse tabnabbing attacks
+  sanitized = sanitized.replace(
+    /<a\s+([^>]*?)href\s*=\s*["'](https?:\/\/[^"']+)["']([^>]*)>/gi,
+    (match, before, href, after) => {
+      const fullAttrs = before + after;
+      if (/\brel\s*=/i.test(fullAttrs)) {
+        // rel exists - ensure noopener noreferrer are included
+        return match.replace(
+          /rel\s*=\s*["']([^"']*)["']/i,
+          (_relMatch, relValue) => {
+            const parts = new Set(relValue.split(/\s+/).filter(Boolean));
+            parts.add("noopener");
+            parts.add("noreferrer");
+            return `rel="${Array.from(parts).join(" ")}"`;
+          },
+        );
+      }
+      // No rel attribute - add it
+      return `<a ${before}href="${href}"${after} rel="noopener noreferrer">`;
+    },
+  );
+
+  // Also handle target="_blank" links that might be relative URLs
+  sanitized = sanitized.replace(
+    /<a\s+([^>]*?)target\s*=\s*["']_blank["']([^>]*)>/gi,
+    (match, before, after) => {
+      const fullAttrs = before + after;
+      if (/\brel\s*=/i.test(fullAttrs)) {
+        return match.replace(
+          /rel\s*=\s*["']([^"']*)["']/i,
+          (_relMatch, relValue) => {
+            const parts = new Set(relValue.split(/\s+/).filter(Boolean));
+            parts.add("noopener");
+            parts.add("noreferrer");
+            return `rel="${Array.from(parts).join(" ")}"`;
+          },
+        );
+      }
+      return `<a ${before}target="_blank"${after} rel="noopener noreferrer">`;
+    },
+  );
 
   return sanitized;
 }
