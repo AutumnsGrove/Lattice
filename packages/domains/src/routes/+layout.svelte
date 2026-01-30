@@ -21,6 +21,11 @@
 			document.documentElement.classList.add('dark');
 		}
 	});
+
+	// Minimal footer for Forage - just the essentials
+	const minimalLegalLinks = [
+		{ href: 'https://grove.place/privacy', label: 'Privacy' }
+	];
 </script>
 
 <svelte:head>
@@ -42,7 +47,12 @@
 		</main>
 
 		{#if !isAdmin}
-			<Footer maxWidth="wide" />
+			<Footer
+				maxWidth="wide"
+				resourceLinks={[]}
+				connectLinks={[]}
+				legalLinks={minimalLegalLinks}
+			/>
 		{/if}
 	</div>
 </div>
