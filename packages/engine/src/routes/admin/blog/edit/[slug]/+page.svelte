@@ -134,6 +134,59 @@
     }
   }
 
+  /**
+   * Toggle publish status and immediately save
+   * Publishing/unpublishing is a critical action that should persist immediately
+   */
+  async function handleStatusToggle() {
+    const newStatus = status === "published" ? "draft" : "published";
+    const action = newStatus === "published" ? "Publishing" : "Unpublishing";
+
+    // Validation before publish
+    if (newStatus === "published") {
+      if (!title.trim()) {
+        toast.error("Title is required before publishing");
+        return;
+      }
+      if (!content.trim()) {
+        toast.error("Content is required before publishing");
+        return;
+      }
+    }
+
+    saving = true;
+    status = newStatus; // Optimistically update UI
+
+    try {
+      await api.put(`/api/posts/${slug}`, {
+        title: title.trim(),
+        date,
+        description: description.trim(),
+        tags: parseTags(tagsInput),
+        font,
+        markdown_content: content,
+        gutter_content: JSON.stringify(gutterItems),
+        status: newStatus,
+      });
+
+      // Clear draft on successful save
+      editorRef?.clearDraft();
+
+      if (newStatus === "published") {
+        toast.success("Post published! 🎉", { description: "Your post is now live." });
+      } else {
+        toast.success("Post unpublished", { description: "Moved back to drafts." });
+      }
+      hasUnsavedChanges = false;
+    } catch (err) {
+      // Revert on failure
+      status = status === "published" ? "draft" : "published";
+      toast.error(err instanceof Error ? err.message : `Failed to ${action.toLowerCase()}`);
+    } finally {
+      saving = false;
+    }
+  }
+
   async function confirmDelete() {
     showDeleteDialog = true;
   }
@@ -185,17 +238,18 @@
       </div>
     </div>
     <div class="header-actions">
-      <!-- Prominent Publish/Draft Toggle -->
+      <!-- Prominent Publish/Draft Toggle - Auto-saves on click -->
       <button
         class="status-toggle {status === 'published' ? 'published' : 'draft'}"
-        onclick={() =>
-          (status = status === "published" ? "draft" : "published")}
+        onclick={handleStatusToggle}
         disabled={saving}
         title={status === "published"
-          ? "Click to unpublish (make draft)"
-          : "Click to publish"}
+          ? "Click to unpublish (save as draft)"
+          : "Click to publish (goes live immediately)"}
       >
-        {#if status === "published"}
+        {#if saving}
+          <span class="status-icon">⏳</span> Saving...
+        {:else if status === "published"}
           <span class="status-icon">✓</span> Published
         {:else}
           <span class="status-icon">○</span> Draft — Click to Publish
