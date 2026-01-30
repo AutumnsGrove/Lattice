@@ -46,7 +46,7 @@
 			</div>
 			<h1 class="text-3xl font-serif text-foreground mb-3">Your Visits</h1>
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
-				Your past conversations with Grove.
+				Your past conversations with the Wayfinder.
 			</p>
 		</div>
 
