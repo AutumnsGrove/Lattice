@@ -48,6 +48,14 @@ function isAdmin(
   return adminList.includes(email.toLowerCase());
 }
 
+/**
+ * Escape SQL LIKE wildcards to prevent pattern injection.
+ * Users could otherwise use % and _ to match unintended records.
+ */
+function escapeLikePattern(input: string): string {
+  return input.replace(/[%_\\]/g, "\\$&");
+}
+
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
   if (!locals.user) {
     throw error(401, "Unauthorized");
@@ -79,13 +87,14 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
 
   try {
     // Build query with optional filters
+    // We track conditions and params together to avoid ordering mismatches
     let query = "SELECT * FROM trace_feedback WHERE archived_at IS NULL";
-    const params: (string | number)[] = [];
+    const filterParams: (string | number)[] = [];
     const conditions: string[] = [];
 
     if (voteFilter === "up" || voteFilter === "down") {
       conditions.push("vote = ?");
-      params.push(voteFilter);
+      filterParams.push(voteFilter);
     }
 
     if (unreadOnly) {
@@ -93,8 +102,10 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
     }
 
     if (sourceFilter) {
-      conditions.push("source_path LIKE ?");
-      params.push(`%${sourceFilter}%`);
+      // Escape LIKE wildcards (% and _) to prevent pattern injection
+      const escapedSource = escapeLikePattern(sourceFilter);
+      conditions.push("source_path LIKE ? ESCAPE '\\'");
+      filterParams.push(`%${escapedSource}%`);
     }
 
     if (conditions.length > 0) {
@@ -102,15 +113,12 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
     }
 
     query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    params.push(pageSize, offset);
+    const params = [...filterParams, pageSize, offset];
 
-    // Build count query
+    // Build count query (reuses same conditions and filterParams for consistency)
     let countQuery =
       "SELECT COUNT(*) as count FROM trace_feedback WHERE archived_at IS NULL";
-    const countParams: (string | number)[] = [];
     if (conditions.length > 0) {
-      if (voteFilter) countParams.push(voteFilter);
-      if (sourceFilter) countParams.push(`%${sourceFilter}%`);
       countQuery += " AND " + conditions.join(" AND ");
     }
 
@@ -122,9 +130,9 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
           .bind(...params)
           .all<TraceFeedback>(),
 
-        // Get total count for pagination
+        // Get total count for pagination (uses same filterParams as main query)
         DB.prepare(countQuery)
-          .bind(...countParams)
+          .bind(...filterParams)
           .first<{ count: number }>(),
 
         // Get overall stats

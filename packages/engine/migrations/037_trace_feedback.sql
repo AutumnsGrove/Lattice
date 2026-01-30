@@ -31,3 +31,6 @@ CREATE INDEX IF NOT EXISTS idx_trace_dedup ON trace_feedback(source_path, ip_has
 
 -- Index for unread feedback (admin dashboard filter)
 CREATE INDEX IF NOT EXISTS idx_trace_unread ON trace_feedback(read_at) WHERE read_at IS NULL;
+
+-- Composite index for admin dashboard vote filtering (WHERE archived_at IS NULL AND vote = ?)
+CREATE INDEX IF NOT EXISTS idx_trace_active_vote ON trace_feedback(vote) WHERE archived_at IS NULL;

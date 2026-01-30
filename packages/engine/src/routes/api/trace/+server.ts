@@ -179,7 +179,7 @@ async function hashIP(ip: string): Promise<string> {
   const data = encoder.encode(saltedIP);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
 
-  // Convert to hex string (first 16 chars for brevity)
+  // Convert to hex string (first 32 hex chars = 16 bytes, enough for deduplication)
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray
     .map((b) => b.toString(16).padStart(2, "0"))
