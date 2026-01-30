@@ -105,8 +105,7 @@ export function getUserBucketSync(
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
     hash ^= input.charCodeAt(i);
-    hash =
-      (hash * 0x01000193) >>> 0; // FNV prime, keep as 32-bit unsigned
+    hash = (hash * 0x01000193) >>> 0; // FNV prime, keep as 32-bit unsigned
   }
 
   return hash % 100;

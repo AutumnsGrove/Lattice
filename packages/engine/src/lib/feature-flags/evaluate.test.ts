@@ -3,7 +3,12 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { isFeatureEnabled, getFeatureValue, getVariant, getFlags } from "./index.js";
+import {
+  isFeatureEnabled,
+  getFeatureValue,
+  getVariant,
+  getFlags,
+} from "./index.js";
 import { buildCacheKey } from "./cache.js";
 import { getUserBucketSync } from "./percentage.js";
 import { isTierAtLeast, getTiersAtLeast } from "./rules.js";
@@ -86,19 +91,14 @@ describe("Feature Flags Evaluation", () => {
     });
 
     it("matches tier rules", async () => {
-      setupMockFlag(
-        env,
-        "tier_flag",
-        { enabled: 1, default_value: "false" },
-        [
-          {
-            rule_type: "tier",
-            rule_value: JSON.stringify({ tiers: ["oak", "evergreen"] }),
-            result_value: "true",
-            priority: 1,
-          },
-        ],
-      );
+      setupMockFlag(env, "tier_flag", { enabled: 1, default_value: "false" }, [
+        {
+          rule_type: "tier",
+          rule_value: JSON.stringify({ tiers: ["oak", "evergreen"] }),
+          result_value: "true",
+          priority: 1,
+        },
+      ]);
 
       const oakResult = await isFeatureEnabled(
         "tier_flag",
@@ -116,19 +116,14 @@ describe("Feature Flags Evaluation", () => {
     });
 
     it("matches user rules", async () => {
-      setupMockFlag(
-        env,
-        "user_flag",
-        { enabled: 1, default_value: "false" },
-        [
-          {
-            rule_type: "user",
-            rule_value: JSON.stringify({ userIds: ["user123", "user456"] }),
-            result_value: "true",
-            priority: 1,
-          },
-        ],
-      );
+      setupMockFlag(env, "user_flag", { enabled: 1, default_value: "false" }, [
+        {
+          rule_type: "user",
+          rule_value: JSON.stringify({ userIds: ["user123", "user456"] }),
+          result_value: "true",
+          priority: 1,
+        },
+      ]);
 
       const matchResult = await isFeatureEnabled(
         "user_flag",

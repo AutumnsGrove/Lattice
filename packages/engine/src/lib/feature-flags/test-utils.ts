@@ -95,6 +95,7 @@ export function createFlagRow(
     flag_type: options.flag_type ?? "boolean",
     default_value: options.default_value ?? "false",
     enabled: options.enabled ?? 1,
+    greenhouse_only: options.greenhouse_only ?? 0,
     cache_ttl: options.cache_ttl ?? null,
     created_at: options.created_at ?? new Date().toISOString(),
     updated_at: options.updated_at ?? new Date().toISOString(),

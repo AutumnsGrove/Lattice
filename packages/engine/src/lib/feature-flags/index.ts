@@ -22,7 +22,11 @@
  */
 
 import { evaluateFlag, evaluateFlags } from "./evaluate.js";
-import type { EvaluationContext, EvaluationResult, FeatureFlagsEnv } from "./types.js";
+import type {
+  EvaluationContext,
+  EvaluationResult,
+  FeatureFlagsEnv,
+} from "./types.js";
 
 // =============================================================================
 // PUBLIC API
@@ -190,8 +194,10 @@ export type {
   PercentageRuleCondition,
   UserRuleCondition,
   TimeRuleCondition,
+  GreenhouseRuleCondition,
   AuditAction,
   FlagAuditEntry,
+  GreenhouseTenant,
 } from "./types.js";
 
 // Cache utilities (for admin operations)
@@ -202,3 +208,23 @@ export { isTierAtLeast, getTiersAtLeast } from "./rules.js";
 
 // Percentage utilities (for debugging)
 export { getUserBucket, getUserBucketSync } from "./percentage.js";
+
+// Greenhouse management
+export {
+  isInGreenhouse,
+  getGreenhouseTenants,
+  getGreenhouseTenant,
+  enrollInGreenhouse,
+  removeFromGreenhouse,
+  toggleGreenhouseStatus,
+  updateGreenhouseNotes,
+  invalidateGreenhouseCache,
+} from "./greenhouse.js";
+
+// Admin functions (Cultivate Mode)
+export {
+  getFeatureFlags,
+  getFeatureFlag,
+  setFlagEnabled,
+  type FeatureFlagSummary,
+} from "./admin.js";

@@ -36,10 +36,7 @@ export async function evaluateRule(
 
   switch (rule.ruleType as RuleType) {
     case "tenant":
-      return evaluateTenantRule(
-        rule.ruleValue as TenantRuleCondition,
-        context,
-      );
+      return evaluateTenantRule(rule.ruleValue as TenantRuleCondition, context);
     case "tier":
       return evaluateTierRule(rule.ruleValue as TierRuleCondition, context);
     case "percentage":
@@ -52,6 +49,8 @@ export async function evaluateRule(
       return evaluateUserRule(rule.ruleValue as UserRuleCondition, context);
     case "time":
       return evaluateTimeRule(rule.ruleValue as TimeRuleCondition);
+    case "greenhouse":
+      return context.inGreenhouse === true;
     case "always":
       return true;
     default:
@@ -124,7 +123,10 @@ function evaluateTimeRule(condition: TimeRuleCondition): boolean {
  * @param minimumTier - The minimum required tier
  * @returns True if userTier >= minimumTier
  */
-export function isTierAtLeast(userTier: TierKey, minimumTier: TierKey): boolean {
+export function isTierAtLeast(
+  userTier: TierKey,
+  minimumTier: TierKey,
+): boolean {
   const userIndex = TIER_ORDER.indexOf(userTier);
   const minIndex = TIER_ORDER.indexOf(minimumTier);
 
