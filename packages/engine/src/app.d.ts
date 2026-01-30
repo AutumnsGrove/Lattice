@@ -108,6 +108,7 @@ declare global {
         TURNSTILE_SITE_KEY?: string;
 
         // CDN Configuration
+        /** Base URL for CDN (defaults to https://cdn.grove.place) */
         CDN_BASE_URL?: string;
       };
       context: {

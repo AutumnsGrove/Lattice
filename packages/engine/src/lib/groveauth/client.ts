@@ -22,6 +22,7 @@ import type {
   TwoFactorEnableResponse,
   TwoFactorVerifyResponse,
   LinkedAccount,
+  AuthError,
 } from "./types.js";
 import { GroveAuthError } from "./types.js";
 
@@ -269,12 +270,14 @@ export class GroveAuthClient {
       }),
     });
 
-    const data = (await response.json()) as ApiErrorResponse;
+    // Parse response body once (streams can only be consumed once)
+    const data = await response.json();
 
     if (!response.ok) {
+      const error = data as AuthError;
       throw new GroveAuthError(
-        data.error || "token_error",
-        data.error_description || data.message || "Failed to exchange code",
+        error.error || "token_error",
+        error.error_description || error.message || "Failed to exchange code",
         response.status,
       );
     }
@@ -313,12 +316,16 @@ export class GroveAuthClient {
           },
         );
 
-        const data = (await response.json()) as ApiErrorResponse;
+        // Parse response body once (streams can only be consumed once)
+        const data = await response.json();
 
         if (!response.ok) {
+          const error = data as AuthError;
           throw new GroveAuthError(
-            data.error || "refresh_error",
-            data.error_description || data.message || "Failed to refresh token",
+            error.error || "refresh_error",
+            error.error_description ||
+              error.message ||
+              "Failed to refresh token",
             response.status,
           );
         }
@@ -360,10 +367,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as ApiErrorResponse;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "revoke_error",
-        data.error_description || data.message || "Failed to revoke token",
+        error.error || "revoke_error",
+        error.error_description || error.message || "Failed to revoke token",
         response.status,
       );
     }
@@ -403,10 +410,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as ApiErrorResponse;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "userinfo_error",
-        data.error_description || data.message || "Failed to get user info",
+        error.error || "userinfo_error",
+        error.error_description || error.message || "Failed to get user info",
         response.status,
       );
     }
@@ -429,10 +436,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as ApiErrorResponse;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "subscription_error",
-        data.message || "Failed to get subscription",
+        error.error || "subscription_error",
+        error.message || "Failed to get subscription",
         response.status,
       );
     }

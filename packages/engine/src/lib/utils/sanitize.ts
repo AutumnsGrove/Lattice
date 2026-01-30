@@ -154,11 +154,12 @@ function sanitizeServerSafe(html: string): string {
   );
   sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
 
-  // Add rel="noopener noreferrer" to external links (absolute URLs)
+  // Add rel="noopener noreferrer" to external links (target="_blank" or absolute URLs)
   // This prevents reverse tabnabbing attacks
   sanitized = sanitized.replace(
     /<a\s+([^>]*?)href\s*=\s*["'](https?:\/\/[^"']+)["']([^>]*)>/gi,
     (match, before, href, after) => {
+      // Check if rel already exists
       const fullAttrs = before + after;
       if (/\brel\s*=/i.test(fullAttrs)) {
         // rel exists - ensure noopener noreferrer are included
@@ -183,6 +184,7 @@ function sanitizeServerSafe(html: string): string {
     (match, before, after) => {
       const fullAttrs = before + after;
       if (/\brel\s*=/i.test(fullAttrs)) {
+        // rel exists - ensure noopener noreferrer
         return match.replace(
           /rel\s*=\s*["']([^"']*)["']/i,
           (_relMatch, relValue) => {
@@ -193,6 +195,7 @@ function sanitizeServerSafe(html: string): string {
           },
         );
       }
+      // No rel - add it
       return `<a ${before}target="_blank"${after} rel="noopener noreferrer">`;
     },
   );
