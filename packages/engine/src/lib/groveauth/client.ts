@@ -22,10 +22,21 @@ import type {
   TwoFactorEnableResponse,
   TwoFactorVerifyResponse,
   LinkedAccount,
+  AuthError,
 } from "./types.js";
 import { GroveAuthError } from "./types.js";
 
 const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+
+/**
+ * Standard error response shape from GroveAuth API.
+ * Used for type-safe error handling instead of `as any`.
+ */
+interface ApiErrorResponse {
+  error?: string;
+  error_description?: string;
+  message?: string;
+}
 
 // =============================================================================
 // PKCE HELPERS
@@ -259,17 +270,16 @@ export class GroveAuthClient {
       }),
     });
 
-    const data = (await response.json()) as any;
-
     if (!response.ok) {
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "token_error",
-        data.error_description || data.message || "Failed to exchange code",
+        error.error || "token_error",
+        error.error_description || error.message || "Failed to exchange code",
         response.status,
       );
     }
 
-    return data as TokenResponse;
+    return (await response.json()) as TokenResponse;
   }
 
   /**
@@ -303,17 +313,18 @@ export class GroveAuthClient {
           },
         );
 
-        const data = (await response.json()) as any;
-
         if (!response.ok) {
+          const error = (await response.json()) as AuthError;
           throw new GroveAuthError(
-            data.error || "refresh_error",
-            data.error_description || data.message || "Failed to refresh token",
+            error.error || "refresh_error",
+            error.error_description ||
+              error.message ||
+              "Failed to refresh token",
             response.status,
           );
         }
 
-        return data as TokenResponse;
+        return (await response.json()) as TokenResponse;
       },
       { maxRetries: options.maxRetries ?? 3 },
     );
@@ -350,10 +361,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "revoke_error",
-        data.error_description || data.message || "Failed to revoke token",
+        error.error || "revoke_error",
+        error.error_description || error.message || "Failed to revoke token",
         response.status,
       );
     }
@@ -393,10 +404,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "userinfo_error",
-        data.error_description || data.message || "Failed to get user info",
+        error.error || "userinfo_error",
+        error.error_description || error.message || "Failed to get user info",
         response.status,
       );
     }
@@ -419,10 +430,10 @@ export class GroveAuthClient {
     });
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const error = (await response.json()) as AuthError;
       throw new GroveAuthError(
-        data.error || "subscription_error",
-        data.message || "Failed to get subscription",
+        error.error || "subscription_error",
+        error.message || "Failed to get subscription",
         response.status,
       );
     }
@@ -501,7 +512,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "subscription_error",
         data.message || "Failed to get subscription",
@@ -538,7 +549,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "limit_check_error",
         data.message || "Failed to check post limit",
@@ -571,7 +582,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -612,7 +623,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -654,7 +665,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "count_error",
         data.message || "Failed to update post count",
@@ -696,7 +707,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "tier_error",
         data.message || "Failed to update tier",
@@ -740,7 +751,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "oauth_error",
         data.message || `Failed to initiate ${provider} sign-in`,
@@ -774,7 +785,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_error",
         data.message || "Failed to get passkey authentication options",
@@ -818,7 +829,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_verify_error",
         data.message || "Failed to verify passkey authentication",
@@ -847,7 +858,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_error",
         data.message || "Failed to get passkey registration options",
@@ -887,7 +898,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_register_error",
         data.message || "Failed to register passkey",
@@ -912,7 +923,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_list_error",
         data.message || "Failed to list passkeys",
@@ -940,7 +951,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "passkey_delete_error",
         data.message || "Failed to delete passkey",
@@ -967,7 +978,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "2fa_status_error",
         data.message || "Failed to get 2FA status",
@@ -995,7 +1006,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "2fa_enable_error",
         data.message || "Failed to enable 2FA",
@@ -1026,7 +1037,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "2fa_verify_error",
         data.message || "Failed to verify 2FA code",
@@ -1054,7 +1065,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "2fa_disable_error",
         data.message || "Failed to disable 2FA",
@@ -1079,7 +1090,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "backup_codes_error",
         data.message || "Failed to generate backup codes",
@@ -1109,7 +1120,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "linked_accounts_error",
         data.message || "Failed to get linked accounts",
@@ -1138,7 +1149,7 @@ export class GroveAuthClient {
     );
 
     if (!response.ok) {
-      const data = (await response.json()) as any;
+      const data = (await response.json()) as ApiErrorResponse;
       throw new GroveAuthError(
         data.error || "unlink_error",
         data.message || `Failed to unlink ${provider} account`,
