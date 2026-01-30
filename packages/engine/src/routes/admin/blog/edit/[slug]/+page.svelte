@@ -41,9 +41,9 @@
   // UI state
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
-  let showGutter = $state(true);
+  let showGutter = $state(false);  // Start hidden for cleaner first-time experience
   let showDeleteDialog = $state(false);
-  let detailsCollapsed = $state(false);
+  let detailsCollapsed = $state(true);  // Start collapsed for focused writing
 
   // Load collapsed state from localStorage
   $effect(() => {

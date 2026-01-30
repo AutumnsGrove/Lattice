@@ -65,8 +65,17 @@
   let lineNumbersRef = $state(null);
 
   // Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
+  // Initialize from localStorage synchronously to avoid flash of wrong mode
   /** @type {"write" | "split" | "preview"} */
-  let editorMode = $state("write");  // Default to source/raw mode for focused writing
+  let editorMode = $state((() => {
+    if (browser) {
+      const saved = localStorage.getItem("editor-mode");
+      if (saved === "write" || saved === "split" || saved === "preview") {
+        return saved;
+      }
+    }
+    return "write";  // Default to source/raw mode for focused writing
+  })());
 
   let cursorLine = $state(1);
   let cursorCol = $state(1);
@@ -403,15 +412,9 @@
     setEditorMode(modes[nextIndex]);
   }
 
-  // Load editor mode from localStorage
-  function loadEditorMode() {
-    if (browser) {
-      const saved = localStorage.getItem("editor-mode");
-      if (saved === "write" || saved === "split" || saved === "preview") {
-        editorMode = saved;
-      }
-    }
-  }
+  // Note: Editor mode is now initialized synchronously at declaration time
+  // using an IIFE that reads from localStorage. This prevents the flash of
+  // wrong mode that occurred when loadEditorMode() was called in $effect.
 
   // Typewriter scrolling
   function applyTypewriterScroll() {
@@ -649,7 +652,8 @@
     updateCursorPosition();
     editorTheme.loadTheme();
     draftManager.init(content);
-    loadEditorMode();
+    // Note: editorMode is now initialized synchronously at declaration time
+    // to avoid flash of wrong mode on initial render
 
     return () => {
       draftManager.cleanup();

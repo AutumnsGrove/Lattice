@@ -54,7 +54,7 @@
   // UI state
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
-  let detailsCollapsed = $state(false);
+  let detailsCollapsed = $state(true);  // Start collapsed for focused writing
 
   // Track original values for unsaved changes detection
   let originalTitle = $state("");
