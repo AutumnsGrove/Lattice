@@ -130,8 +130,10 @@
 }
 
 @media (min-width: 1200px) {
-	.mobile-gutter-content {
-		display: none;
+	/* Hide mobile gutter content since left gutter container is visible */
+	.mobile-gutter-content,
+	.mobile-gutter-inline {
+		display: none !important;
 	}
 }
 
