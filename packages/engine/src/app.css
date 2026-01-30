@@ -16,7 +16,7 @@
 
 		/* Muted: Medium Gray */
 		--muted: 0 0% 96%;
-		--muted-foreground: 30 8% 30%;
+		--muted-foreground: 25 32% 33%;
 
 		/* Accent: Purple for tags (#7c4dab) */
 		--accent: 270 38% 49%;
@@ -29,8 +29,8 @@
 		/* Background & Foreground */
 		--background: 0 0% 98%;
 		--foreground: 0 0% 20%;
-		--foreground-muted: 30 8% 38%;
-		--foreground-subtle: 30 6% 45%;
+		--foreground-muted: 25 30% 38%;
+		--foreground-subtle: 25 25% 45%;
 
 		/* Card */
 		--card: 0 0% 100%;
