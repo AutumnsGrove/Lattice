@@ -1,6 +1,6 @@
 <script>
   import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
-  import { GreenhouseStatusCard, GraftControlPanel } from '$lib/grafts/greenhouse';
+  import { GreenhouseStatusCard, GraftControlPanel, GreenhouseAdminPanel } from '$lib/grafts/greenhouse';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
   import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
@@ -61,6 +61,13 @@
   let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
   let resettingGrafts = $state(false);
   const tenantGrafts = $derived(data.tenantGrafts ?? []);
+
+  // Wayfinder greenhouse admin state
+  let enrollingTenant = $state(false);
+  let togglingTenantId = $state(/** @type {string | undefined} */ (undefined));
+  let loadingFlagId = $state(/** @type {string | undefined} */ (undefined));
+  /** @type {{ success?: boolean; error?: string; message?: string } | undefined} */
+  let adminFormResult = $state(undefined);
 
   async function fetchHealth() {
     loadingHealth = true;
@@ -225,6 +232,168 @@
       resettingGrafts = false;
     }
   }
+
+  // =========================================================================
+  // WAYFINDER GREENHOUSE ADMIN HANDLERS
+  // =========================================================================
+
+  /**
+   * Handle tenant enrollment (Wayfinder-only)
+   * @param {string} tenantId
+   * @param {string} notes
+   */
+  async function handleEnrollTenant(tenantId, notes) {
+    enrollingTenant = true;
+    adminFormResult = undefined;
+    try {
+      const formData = new FormData();
+      formData.append('tenantId', tenantId);
+      if (notes) formData.append('notes', notes);
+
+      const response = await fetch('?/enrollTenant', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success('🌱 Tenant enrolled in greenhouse');
+        adminFormResult = { success: true, message: result.data?.message };
+        await invalidateAll();
+      } else {
+        const errorMsg = result.data?.error || 'Failed to enroll tenant';
+        adminFormResult = { error: errorMsg };
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      adminFormResult = { error: 'Failed to enroll tenant' };
+      toast.error('Failed to enroll tenant');
+      console.error('Enroll tenant error:', error);
+    } finally {
+      enrollingTenant = false;
+    }
+  }
+
+  /**
+   * Handle tenant toggle (Wayfinder-only)
+   * @param {string} tenantId
+   * @param {boolean} enabled
+   */
+  async function handleToggleTenant(tenantId, enabled) {
+    togglingTenantId = tenantId;
+    adminFormResult = undefined;
+    try {
+      const formData = new FormData();
+      formData.append('tenantId', tenantId);
+      formData.append('enabled', String(enabled));
+
+      const response = await fetch('?/toggleTenant', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success(enabled ? '🌿 Greenhouse access enabled' : '🌱 Greenhouse access disabled');
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to toggle tenant');
+      }
+    } catch (error) {
+      toast.error('Failed to toggle tenant');
+      console.error('Toggle tenant error:', error);
+    } finally {
+      togglingTenantId = undefined;
+    }
+  }
+
+  /**
+   * Handle tenant removal (Wayfinder-only)
+   * @param {string} tenantId
+   */
+  async function handleRemoveTenant(tenantId) {
+    adminFormResult = undefined;
+    try {
+      const formData = new FormData();
+      formData.append('tenantId', tenantId);
+
+      const response = await fetch('?/removeTenant', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success('Tenant removed from greenhouse');
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to remove tenant');
+      }
+    } catch (error) {
+      toast.error('Failed to remove tenant');
+      console.error('Remove tenant error:', error);
+    }
+  }
+
+  /**
+   * Handle cultivate flag (Wayfinder-only)
+   * @param {string} flagId
+   */
+  async function handleCultivateFlag(flagId) {
+    loadingFlagId = flagId;
+    try {
+      const formData = new FormData();
+      formData.append('flagId', flagId);
+
+      const response = await fetch('?/cultivateFlag', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success(`🌿 ${flagId} is now cultivated`);
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to cultivate flag');
+      }
+    } catch (error) {
+      toast.error('Failed to cultivate flag');
+      console.error('Cultivate flag error:', error);
+    } finally {
+      loadingFlagId = undefined;
+    }
+  }
+
+  /**
+   * Handle prune flag (Wayfinder-only)
+   * @param {string} flagId
+   */
+  async function handlePruneFlag(flagId) {
+    loadingFlagId = flagId;
+    try {
+      const formData = new FormData();
+      formData.append('flagId', flagId);
+
+      const response = await fetch('?/pruneFlag', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.type === 'success') {
+        toast.success(`🍂 ${flagId} is now pruned`);
+        await invalidateAll();
+      } else {
+        toast.error(result.data?.error || 'Failed to prune flag');
+      }
+    } catch (error) {
+      toast.error('Failed to prune flag');
+      console.error('Prune flag error:', error);
+    } finally {
+      loadingFlagId = undefined;
+    }
+  }
 </script>
 
 <div class="settings">
@@ -307,6 +476,26 @@
         resetting={resettingGrafts}
       />
     </div>
+  {/if}
+
+  <!-- Greenhouse Admin Panel - Wayfinder only -->
+  {#if isPlatformAdmin}
+    <GlassCard variant="frosted" class="mb-6">
+      <GreenhouseAdminPanel
+        tenants={data.greenhouseTenants ?? []}
+        tenantNames={data.tenantNames ?? {}}
+        availableTenants={data.availableTenants ?? {}}
+        featureFlags={data.featureFlags ?? []}
+        onEnroll={handleEnrollTenant}
+        onToggle={handleToggleTenant}
+        onRemove={handleRemoveTenant}
+        onCultivate={handleCultivateFlag}
+        onPrune={handlePruneFlag}
+        enrollLoading={enrollingTenant}
+        {loadingFlagId}
+        formResult={adminFormResult}
+      />
+    </GlassCard>
   {/if}
 
   <GlassCard variant="frosted" class="mb-6">
