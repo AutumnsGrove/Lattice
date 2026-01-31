@@ -87,10 +87,9 @@ if [ -f "package.json" ]; then
     # Cleanup on exit
     trap "rm -rf '$PREPUSH_TMP'" EXIT
 
-    echo -e "${YELLOW}🔍 Type checking ${#PACKAGES[@]} packages (parallel)...${NC}"
+    echo -e "${YELLOW}🔍 Type checking ${#PACKAGES[@]} packages (sequential)...${NC}"
 
-    # Launch all type checks in parallel
-    declare -a pids
+    # Run type checks sequentially
     for pkg in "${PACKAGES[@]}"; do
         if [ -d "packages/$pkg" ] && [ -f "packages/$pkg/package.json" ]; then
             # Check if package has a 'check' script
@@ -99,15 +98,9 @@ if [ -f "package.json" ]; then
                     cd "packages/$pkg"
                     $PKG_MANAGER check > "$PREPUSH_TMP/${pkg}.out" 2>&1
                     echo $? > "$PREPUSH_TMP/${pkg}.exit"
-                ) &
-                pids+=($!)
+                )
             fi
         fi
-    done
-
-    # Wait for all to complete
-    for pid in "${pids[@]}"; do
-        wait $pid 2>/dev/null || true
     done
 
     # Collect results and report status
