@@ -9,6 +9,9 @@ import type { Snippet } from "svelte";
 import type { BaseGraftProps } from "../types.js";
 import type { GreenhouseTenant, FlagType } from "../../feature-flags/types.js";
 
+// Re-export for convenience
+export type { GreenhouseTenant };
+
 // =============================================================================
 // COMPONENT PROPS
 // =============================================================================
@@ -257,4 +260,54 @@ export interface GraftToggleRowProps extends BaseGraftProps {
 
   /** Whether the row is in a loading state */
   loading?: boolean;
+}
+
+// =============================================================================
+// GREENHOUSE ADMIN PANEL TYPES (Wayfinder-only)
+// =============================================================================
+
+/**
+ * Props for GreenhouseAdminPanel component.
+ * Wayfinder-only admin panel for managing greenhouse enrollment.
+ */
+export interface GreenhouseAdminPanelProps extends BaseGraftProps {
+  /** Array of enrolled greenhouse tenants */
+  tenants: GreenhouseTenant[];
+
+  /** Tenant names lookup (tenantId -> display name) */
+  tenantNames: Record<string, string>;
+
+  /** Available tenants to enroll (tenantId -> display name) */
+  availableTenants: Record<string, string>;
+
+  /** Array of feature flags for cultivate mode */
+  featureFlags: FeatureFlagSummary[];
+
+  /** Called when enrolling a tenant */
+  onEnroll: (tenantId: string, notes: string) => void;
+
+  /** Called when toggling a tenant's enabled status */
+  onToggle: (tenantId: string, enabled: boolean) => void;
+
+  /** Called when removing a tenant from greenhouse */
+  onRemove: (tenantId: string) => void;
+
+  /** Called when cultivating (enabling) a flag */
+  onCultivate: (flagId: string) => void;
+
+  /** Called when pruning (disabling) a flag */
+  onPrune: (flagId: string) => void;
+
+  /** Whether enrollment is in progress */
+  enrollLoading?: boolean;
+
+  /** Flag ID currently being toggled (for loading state) */
+  loadingFlagId?: string;
+
+  /** Result of the last form action */
+  formResult?: {
+    success?: boolean;
+    error?: string;
+    message?: string;
+  };
 }

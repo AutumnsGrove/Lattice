@@ -60,6 +60,8 @@ export type {
   TenantGraftInfo,
   GraftControlPanelProps,
   GraftToggleRowProps,
+  // Admin Panel types (Wayfinder-only)
+  GreenhouseAdminPanelProps,
 } from "./types.js";
 
 // Components
@@ -75,3 +77,6 @@ export { default as CultivateFlagTable } from "./CultivateFlagTable.svelte";
 // Tenant Graft Control components (self-serve)
 export { default as GraftControlPanel } from "./GraftControlPanel.svelte";
 export { default as GraftToggleRow } from "./GraftToggleRow.svelte";
+
+// Admin Panel (Wayfinder-only)
+export { default as GreenhouseAdminPanel } from "./GreenhouseAdminPanel.svelte";
