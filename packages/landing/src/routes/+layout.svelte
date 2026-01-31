@@ -82,5 +82,7 @@
 	>
 		Skip to main content
 	</a>
-	{@render children()}
+	<div id="main-content">
+		{@render children()}
+	</div>
 </div>

@@ -70,10 +70,10 @@
   <!-- Hero -->
   <section class="relative py-12 px-6 text-center bg-gradient-to-b from-violet-50 via-slate-50 to-white dark:from-violet-950/30 dark:via-slate-900 dark:to-slate-950">
     <div class="max-w-3xl mx-auto">
-      <nav class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
+      <nav aria-label="Breadcrumb" class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
         <a href="/knowledge" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
-        <span>/</span>
-        <span class="text-foreground">Art Exhibit</span>
+        <span aria-hidden="true">/</span>
+        <span class="text-foreground" aria-current="page">Art Exhibit</span>
       </nav>
       <h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
         The Lattice Museum

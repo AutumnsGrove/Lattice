@@ -70,27 +70,27 @@
 		</div>
 	{:else}
 		<div class="overflow-x-auto">
-			<table class="w-full">
+			<table class="w-full" aria-label="Greenhouse enrolled tenants">
 				<thead>
 					<tr class="border-b border-grove-200 dark:border-grove-700/50">
-						<th class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
+						<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
 							Tenant
 						</th>
-						<th class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
+						<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
 							Enrolled
 						</th>
 						{#if showToggle}
-							<th class="text-center py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
+							<th scope="col" class="text-center py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
 								Status
 							</th>
 						{/if}
 						{#if showNotes}
-							<th class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
+							<th scope="col" class="text-left py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
 								Notes
 							</th>
 						{/if}
 						{#if showRemove}
-							<th class="text-right py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
+							<th scope="col" class="text-right py-3 px-4 text-sm font-medium text-bark/60 dark:text-cream/60">
 								Actions
 							</th>
 						{/if}

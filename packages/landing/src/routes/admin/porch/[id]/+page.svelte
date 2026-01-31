@@ -96,15 +96,19 @@
 
 				<!-- Reply Form -->
 				{#if form?.replySuccess}
-					<GlassCard class="bg-green-50/80 border-green-200">
-						<p class="text-sm text-green-800 font-sans">Reply sent to {replyToEmail}!</p>
-					</GlassCard>
+					<div role="status" aria-live="polite">
+						<GlassCard class="bg-green-50/80 border-green-200">
+							<p class="text-sm text-green-800 font-sans">Reply sent to {replyToEmail}!</p>
+						</GlassCard>
+					</div>
 				{/if}
 
 				{#if form?.error}
-					<GlassCard class="bg-red-50/80 border-red-200">
-						<p class="text-sm text-red-800 font-sans">{form.error}</p>
-					</GlassCard>
+					<div role="alert">
+						<GlassCard class="bg-red-50/80 border-red-200">
+							<p class="text-sm text-red-800 font-sans">{form.error}</p>
+						</GlassCard>
+					</div>
 				{/if}
 
 				<GlassCard>
@@ -132,6 +136,7 @@
 							placeholder="Write your reply..."
 							rows="4"
 							required
+							aria-required="true"
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
 							disabled={submitting}
 						></textarea>
@@ -200,7 +205,9 @@
 						</span>
 					</div>
 					<form method="POST" action="?/updateStatus" class="flex gap-2">
+						<label for="update-status" class="sr-only">Update status</label>
 						<select
+							id="update-status"
 							name="status"
 							class="flex-1 px-3 py-2 rounded-lg border border-grove-200 bg-white/50 text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-grove-500"
 						>
@@ -253,7 +260,7 @@
 						</div>
 					</form>
 					{#if form?.notesSuccess}
-						<p class="text-xs text-green-600 mt-2">Notes saved!</p>
+						<p role="status" aria-live="polite" class="text-xs text-green-600 mt-2">Notes saved!</p>
 					{/if}
 				</GlassCard>
 			</div>

@@ -19,6 +19,7 @@
 	let menuRef = $state<HTMLDivElement>();
 	let buttonRef = $state<HTMLButtonElement>();
 	let activeId = $state('');
+	let previouslyFocusedElement: HTMLElement | null = null;
 
 	function toggleMenu() {
 		isOpen = !isOpen;
@@ -26,6 +27,29 @@
 
 	function closeMenu() {
 		isOpen = false;
+	}
+
+	// Focus trap: Tab key cycles within menu
+	function handleFocusTrap(event: KeyboardEvent) {
+		if (event.key === 'Tab' && isOpen && menuRef) {
+			const focusableElements = menuRef.querySelectorAll<HTMLElement>(
+				'button, a, [tabindex]:not([tabindex="-1"])'
+			);
+			if (focusableElements.length === 0) return;
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			if (event.shiftKey && document.activeElement === firstElement) {
+				// Shift+Tab on first element: wrap to last
+				event.preventDefault();
+				lastElement?.focus();
+			} else if (!event.shiftKey && document.activeElement === lastElement) {
+				// Tab on last element: wrap to first
+				event.preventDefault();
+				firstElement?.focus();
+			}
+		}
 	}
 
 	function scrollToHeader(id: string) {
@@ -55,11 +79,14 @@
 		}
 	}
 
-	// Handle escape key
+	// Handle escape key and focus trap
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && isOpen) {
 			closeMenu();
+			// Restore focus to button when closing
+			buttonRef?.focus();
 		}
+		handleFocusTrap(event);
 	}
 
 	// Set up intersection observer to track active section
@@ -89,6 +116,25 @@
 
 		return () => observer.disconnect();
 	}
+
+	// Handle focus management when menu opens/closes
+	$effect(() => {
+		if (isOpen) {
+			// Store the previously focused element to restore later
+			previouslyFocusedElement = document.activeElement as HTMLElement;
+			// Focus the first TOC item when menu opens
+			requestAnimationFrame(() => {
+				const firstLink = menuRef?.querySelector<HTMLButtonElement>('.toc-link');
+				firstLink?.focus();
+			});
+		} else {
+			if (previouslyFocusedElement && previouslyFocusedElement !== buttonRef) {
+				// Restore focus when menu closes (unless already on button)
+				previouslyFocusedElement.focus();
+			}
+			previouslyFocusedElement = null;
+		}
+	});
 
 	$effect(() => {
 		const cleanup = setupScrollTracking();
@@ -124,7 +170,13 @@
 
 		<!-- Floating Menu -->
 		{#if isOpen}
-			<div class="toc-menu" bind:this={menuRef}>
+			<div
+				class="toc-menu"
+				bind:this={menuRef}
+				role="dialog"
+				aria-modal="true"
+				aria-label="Table of contents"
+			>
 				<h3 class="toc-title">{title}</h3>
 				<ul class="toc-list">
 					{#each headers as header (header.id)}

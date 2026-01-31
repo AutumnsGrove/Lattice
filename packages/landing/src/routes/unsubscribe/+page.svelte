@@ -38,7 +38,7 @@
 
 		{#if form?.success}
 			<!-- Success state -->
-			<div class="glass-card rounded-2xl p-8 text-center">
+			<div role="status" aria-live="polite" class="glass-card rounded-2xl p-8 text-center">
 				<div class="w-16 h-16 mx-auto mb-6 rounded-full bg-accent-subtle/20 flex items-center justify-center">
 					<Check class="w-8 h-8 text-accent" />
 				</div>
@@ -82,6 +82,7 @@
 								name="email"
 								bind:value={email}
 								required
+								aria-required="true"
 								class="w-full px-4 py-3 rounded-lg border border-default bg-surface text-foreground font-sans placeholder:text-foreground-subtle focus:outline-none focus:ring-2 focus:ring-accent-subtle focus:border-accent"
 								placeholder="you@example.com"
 							/>
@@ -121,7 +122,7 @@
 						</div>
 
 						{#if form?.error}
-							<p class="text-sm text-red-600 dark:text-red-400 font-sans">{form.error}</p>
+							<p role="alert" class="text-sm text-red-600 dark:text-red-400 font-sans">{form.error}</p>
 						{/if}
 
 						<button

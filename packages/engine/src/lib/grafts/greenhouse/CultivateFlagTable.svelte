@@ -57,15 +57,15 @@
 
 		<!-- Flags table -->
 		<GlassCard class="overflow-hidden p-0">
-			<table class="w-full">
+			<table class="w-full" aria-label="Feature flags">
 				<thead>
 					<tr
 						class="text-left text-sm text-foreground-muted border-b border-border/50"
 					>
-						<th class="py-3 px-4 font-medium">Flag</th>
-						<th class="py-3 px-4 font-medium">Type</th>
-						<th class="py-3 px-4 font-medium">Status</th>
-						<th class="py-3 px-4 font-medium">Toggle</th>
+						<th scope="col" class="py-3 px-4 font-medium">Flag</th>
+						<th scope="col" class="py-3 px-4 font-medium">Type</th>
+						<th scope="col" class="py-3 px-4 font-medium">Status</th>
+						<th scope="col" class="py-3 px-4 font-medium">Toggle</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border/30">

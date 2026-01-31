@@ -13,4 +13,4 @@
 	let { class: className = '' }: Props = $props();
 </script>
 
-<Icon iconNode={bee} class={className} />
+<Icon iconNode={bee} class={className} aria-hidden="true" />

@@ -220,6 +220,7 @@
 						placeholder="Share what's on your mind..."
 						rows="6"
 						required
+						aria-required="true"
 						minlength="10"
 						maxlength="2000"
 						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"

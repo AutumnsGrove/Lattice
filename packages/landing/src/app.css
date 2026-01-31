@@ -376,7 +376,7 @@
     background-color: var(--color-primary-hover);
   }
 
-  .btn-primary:focus {
+  .btn-primary:focus-visible {
     outline: none;
     box-shadow: var(--shadow-focus);
   }
@@ -402,7 +402,7 @@
     color: var(--color-foreground-faint);
   }
 
-  .input-field:focus {
+  .input-field:focus-visible {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);

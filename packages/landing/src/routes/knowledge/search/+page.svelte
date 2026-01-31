@@ -46,10 +46,10 @@
   <article class="flex-1 px-6 py-12">
     <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8">
+    <nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-sm text-foreground-muted mb-8">
       <a href="/knowledge" class="hover:text-foreground transition-colors">Knowledge Base</a>
-      <span>/</span>
-      <span class="text-foreground">Search</span>
+      <span aria-hidden="true">/</span>
+      <span class="text-foreground" aria-current="page">Search</span>
     </nav>
 
     <!-- Search Header -->

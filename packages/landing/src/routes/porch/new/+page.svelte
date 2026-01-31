@@ -57,8 +57,9 @@
 
 		<!-- Success Message -->
 		{#if form?.success && form?.visitNumber}
-			<GlassCard class="mb-6 bg-green-50/80 border-green-200">
-				<div class="flex items-start gap-4">
+			<div role="status" aria-live="polite">
+				<GlassCard class="mb-6 bg-green-50/80 border-green-200">
+					<div class="flex items-start gap-4">
 					<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
 						<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 							<path
@@ -82,26 +83,29 @@
 					</div>
 				</div>
 			</GlassCard>
+			</div>
 		{/if}
 
 		<!-- Error Message -->
 		{#if form?.error}
-			<GlassCard class="mb-6 bg-red-50/80 border-red-200">
-				<div class="flex items-start gap-4">
-					<div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
-						<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-								clip-rule="evenodd"
-							/>
-						</svg>
+			<div role="alert">
+				<GlassCard class="mb-6 bg-red-50/80 border-red-200">
+					<div class="flex items-start gap-4">
+						<div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<p class="text-sm text-red-800 font-sans">{form.error}</p>
+						</div>
 					</div>
-					<div class="flex-1">
-						<p class="text-sm text-red-800 font-sans">{form.error}</p>
-					</div>
-				</div>
-			</GlassCard>
+				</GlassCard>
+			</div>
 		{/if}
 
 		<!-- Visit Form -->
@@ -171,6 +175,7 @@
 							bind:value={email}
 							placeholder="your.email@example.com"
 							required
+							aria-required="true"
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
@@ -191,6 +196,7 @@
 							bind:value={subject}
 							placeholder="Brief summary of what's going on"
 							required
+							aria-required="true"
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
@@ -208,6 +214,7 @@
 							placeholder="Share the details. The more context you give me, the better I can help."
 							rows="6"
 							required
+							aria-required="true"
 							minlength="10"
 							maxlength="5000"
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"

@@ -55,10 +55,10 @@
   <!-- Hero -->
   <section class="relative py-12 px-6 text-center bg-gradient-to-b from-emerald-50/80 via-transparent to-transparent dark:from-emerald-950/20 dark:via-transparent dark:to-transparent">
     <div class="max-w-3xl mx-auto">
-      <nav class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
+      <nav aria-label="Breadcrumb" class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
         <a href="/knowledge" class="hover:text-emerald-600 dark:hover:text-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
-        <span>/</span>
-        <span class="text-foreground">Help Center</span>
+        <span aria-hidden="true">/</span>
+        <span class="text-foreground" aria-current="page">Help Center</span>
       </nav>
       <h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
         Help Center

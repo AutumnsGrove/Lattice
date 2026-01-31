@@ -131,6 +131,13 @@
 		}
 	}
 
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.animate-in {
+			animation: none;
+		}
+	}
+
 	/*
 	 * Dark variant styles for midnight bloom aesthetic (variant="dark")
 	 *

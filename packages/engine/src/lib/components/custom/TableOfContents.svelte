@@ -73,7 +73,7 @@
 </script>
 
 {#if headers.length > 0}
-	<nav class="toc">
+	<nav class="toc" aria-label="Table of contents">
 		<h3 class="toc-title">{title}</h3>
 		<ul class="toc-list">
 			{#each headers as header (header.id)}

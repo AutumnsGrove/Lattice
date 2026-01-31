@@ -281,7 +281,7 @@
 	url="https://grove.place/vineyard"
 />
 
-<div class="max-w-6xl mx-auto px-6 py-12">
+<main class="max-w-6xl mx-auto px-6 py-12">
 	<!-- Hero Section -->
 	<section class="text-center mb-12">
 		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3">Lattice Vineyard</h1>
@@ -828,7 +828,7 @@ $ npm run dev
 			{@render PaletteRow({ name: "Midnight Bloom", colors: midnightBloom, description: "A late-night tea cafe palette" })}
 		</div>
 	</details>
-</div>
+</main>
 
 <!-- Overlay Demo -->
 {#if showOverlayDemo}

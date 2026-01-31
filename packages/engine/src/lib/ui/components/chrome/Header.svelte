@@ -78,7 +78,7 @@
 		</div>
 
 		<!-- Desktop navigation -->
-		<nav class="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-sans">
+		<nav aria-label="Main navigation" class="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-sans">
 			{#each items as item}
 				<a
 					href={item.href}

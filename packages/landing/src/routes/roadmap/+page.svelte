@@ -1121,4 +1121,11 @@
 		50% { transform: translate(-5px, -25px); }
 		75% { transform: translate(-15px, -10px); }
 	}
+
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		:global(.firefly-float) {
+			animation: none;
+		}
+	}
 </style>

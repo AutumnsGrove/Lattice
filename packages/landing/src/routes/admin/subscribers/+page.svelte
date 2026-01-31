@@ -197,19 +197,19 @@
 			{:else}
 				<div class="bg-white rounded-xl border border-grove-200 overflow-hidden">
 					<div class="overflow-x-auto">
-						<table class="w-full">
+						<table class="w-full" aria-label="Email subscribers">
 							<thead class="bg-grove-50 border-b border-grove-200">
 								<tr>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Email
 									</th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Signed Up
 									</th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Source
 									</th>
-									<th class="text-right px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-right px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Actions
 									</th>
 								</tr>

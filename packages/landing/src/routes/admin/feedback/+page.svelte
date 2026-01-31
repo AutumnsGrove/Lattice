@@ -75,6 +75,13 @@
 		expandedId = expandedId === id ? null : id;
 	}
 
+	function handleRowKeydown(event: KeyboardEvent, id: string) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			toggleExpand(id);
+		}
+	}
+
 	function startEditingNotes(id: string, currentNotes: string | null) {
 		editingNotesId = id;
 		notesText[id] = currentNotes || '';
@@ -165,27 +172,35 @@
 			{:else}
 				<div class="bg-white rounded-xl border border-grove-200 overflow-hidden">
 					<div class="overflow-x-auto">
-						<table class="w-full">
+						<table class="w-full" aria-label="Wanderer feedback">
 							<thead class="bg-grove-50 border-b border-grove-200">
 								<tr>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider w-12"></th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider w-12"><span class="sr-only">Source</span></th>
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										From
 									</th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Message
 									</th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Date
 									</th>
-									<th class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
+									<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-bark/60 uppercase tracking-wider">
 										Status
 									</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-grove-100">
 								{#each feedback as item}
-									<tr class="hover:bg-grove-50/50 transition-colors cursor-pointer" onclick={() => toggleExpand(item.id)}>
+									<tr
+										class="hover:bg-grove-50/50 transition-colors cursor-pointer"
+										tabindex="0"
+										role="button"
+										aria-expanded={expandedId === item.id}
+										aria-controls="details-{item.id}"
+										onclick={() => toggleExpand(item.id)}
+										onkeydown={(e) => handleRowKeydown(e, item.id)}
+									>
 										<td class="px-6 py-4 text-center">
 											<span class="text-lg" title={item.source === 'email' ? 'Email' : 'Web form'}>
 												{getSourceIcon(item.source)}
@@ -230,7 +245,7 @@
 										</td>
 									</tr>
 									{#if expandedId === item.id}
-										<tr class="bg-grove-50/30">
+										<tr id="details-{item.id}" class="bg-grove-50/30">
 											<td colspan="5" class="px-6 py-6">
 												<div class="max-w-3xl">
 													<!-- Full Details -->
