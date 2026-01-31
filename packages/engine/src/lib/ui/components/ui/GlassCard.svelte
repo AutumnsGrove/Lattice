@@ -7,10 +7,26 @@
 	import { Star } from "lucide-svelte";
 
 	/**
-	 * GlassCard - A card component with glassmorphism styling
+	 * GlassCard - A glassmorphism card component with seasonal theming
 	 *
-	 * Beautiful translucent cards with backdrop blur effects.
-	 * Includes optional header, footer, hoverable state, and Gossamer backgrounds.
+	 * DESIGN PHILOSOPHY: GlassCard is intentionally a custom component, NOT extending shadcn's Card.
+	 * It implements a fundamentally different design language:
+	 * - Glassmorphism with backdrop blur effects (translucent surfaces over content)
+	 * - Seasonal color variants with warm grove tones (not neutral shadows)
+	 * - Animated ASCII backgrounds via Gossamer integration
+	 * - Featured star indicators for content hierarchy
+	 * - Multiple transparency levels (40-80%) for visual layering
+	 *
+	 * This is not "Card with glass styling"—it's a completely different visual paradigm.
+	 * Extending shadcn's Card would require overriding all its styling anyway, so we built
+	 * GlassCard from scratch to stay true to Grove's aesthetic: cozy, organic, alive.
+	 *
+	 * Features:
+	 * - Beautiful translucent cards with backdrop blur effects
+	 * - Optional header, footer, and hoverable states
+	 * - Gossamer ASCII background animations (grove-mist, seasonal presets, custom configs)
+	 * - Semantic HTML elements (div, section, article, aside, etc.) for Reader Mode
+	 * - Dark mode with warm, nature-inspired palette
 	 *
 	 * @example Basic glass card
 	 * ```svelte

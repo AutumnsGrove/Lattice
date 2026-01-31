@@ -1,5 +1,4 @@
 <script lang="ts">
-	// @ts-nocheck - Select wrapper with single-select mode using string instead of string[]
 	import {
 		Select as ShadcnSelect,
 		SelectContent,
@@ -15,9 +14,12 @@
 	}
 
 	/**
-	 * Select component wrapper providing dropdown selection with options
+	 * Single-select dropdown component wrapper.
+	 * Wraps bits-ui's multi-select Select with single-value behavior.
+	 * The underlying bits-ui component expects string[], but this wrapper
+	 * uses string for simplified single-select usage.
 	 *
-	 * @prop {string} [value] - Selected value (bindable for two-way binding)
+	 * @prop {string | undefined} [value] - Selected value (bindable for two-way binding)
 	 * @prop {Option[]} options - Array of options with value, label, and optional disabled flag
 	 * @prop {string} [placeholder="Select an option"] - Placeholder text when no value selected
 	 * @prop {boolean} [disabled=false] - Whether select is disabled
@@ -56,8 +58,8 @@
 	);
 </script>
 
-<!-- @ts-expect-error ShadcnSelect expects string[] for multi-select but we use string for single-select -->
-<ShadcnSelect bind:value {disabled}>
+<!-- @ts-expect-error bits-ui Select expects type prop and string[] value, we use single-select mode with string -->
+<ShadcnSelect type="single" bind:value={value as any} {disabled}>
 	<SelectTrigger class={className}>
 		{selectedLabel}
 	</SelectTrigger>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	// @ts-nocheck - Input wrapper with file handling that conflicts with ShadcnInput's strict types
 	import { Input as ShadcnInput } from "$lib/ui/components/primitives/input";
 	import type { HTMLInputAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
@@ -27,7 +26,7 @@
 	 * @example
 	 * <Input placeholder="Search..." bind:value={searchQuery} />
 	 */
-	interface Props extends Omit<HTMLInputAttributes, "class"> {
+	interface Props extends Omit<HTMLInputAttributes, "class" | "files"> {
 		label?: string;
 		error?: string;
 		value?: string | number;

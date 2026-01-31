@@ -1,5 +1,4 @@
 <script lang="ts">
-	// @ts-nocheck - Accordion wrapper using collapsible prop that exists at runtime but not in bits-ui types
 	import {
 		Accordion as ShadcnAccordion,
 		AccordionItem,
@@ -57,10 +56,17 @@
 	}: Props = $props();
 
 	const accordionType = $derived(type === "single" ? "single" : "multiple");
+
+	// Build props object with collapsible - bits-ui types don't include it but it works at runtime
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const rootProps = $derived({
+		type: accordionType,
+		class: className,
+		...(collapsible ? { collapsible: true } : {})
+	} as any);
 </script>
 
-<!-- @ts-expect-error collapsible prop exists at runtime but not in bits-ui types -->
-<ShadcnAccordion type={accordionType} {collapsible} class={className}>
+<ShadcnAccordion {...rootProps}>
 	{#each items as item (item.value)}
 		<AccordionItem value={item.value} disabled={item.disabled ?? false}>
 			<AccordionTrigger>{item.title}</AccordionTrigger>
