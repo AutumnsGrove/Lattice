@@ -20,6 +20,7 @@ interface PostRecord {
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
   // Auth check happens in admin layout
+  // Feature flags (grafts) are loaded by admin layout and cascaded via data.grafts
   const { slug } = params;
 
   if (!slug) {

@@ -7,6 +7,9 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
 
+  // Page data from admin layout (includes grafts cascade)
+  let { data } = $props();
+
   // Form state
   let title = $state("");
   let slug = $state("");
@@ -344,6 +347,8 @@
             bind:previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}
+            firesideEnabled={data?.grafts?.fireside_mode ?? false}
+            scribeEnabled={data?.grafts?.scribe_mode ?? false}
           />
         </div>
         {#if showGutter}

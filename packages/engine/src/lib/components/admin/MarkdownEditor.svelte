@@ -54,6 +54,10 @@
     previewTags = /** @type {string[]} */ ([]),
     gutterItems = /** @type {GutterItemProp[]} */ ([]),
     firesideAssisted = $bindable(false),
+    /** Whether Fireside Mode is enabled for this tenant (gated by fireside_mode graft) */
+    firesideEnabled = false,
+    /** Whether Scribe (voice transcription) is enabled for this tenant (gated by scribe_mode graft) */
+    scribeEnabled = false,
   } = $props();
 
   // Core refs and state
@@ -254,8 +258,8 @@
       cycleEditorMode();
     }
 
-    // Cmd/Ctrl + Shift + F for Fireside mode
-    if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+    // Cmd/Ctrl + Shift + F for Fireside mode (only if graft enabled)
+    if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey && firesideEnabled) {
       e.preventDefault();
       toggleFiresideMode();
     }
@@ -724,7 +728,7 @@
   {#if !isFiresideMode}
   <div class="toolbar">
     <div class="toolbar-left">
-      {#if !content.trim()}
+      {#if firesideEnabled && !content.trim()}
         <button
           type="button"
           class="fireside-btn"
@@ -737,8 +741,8 @@
         </button>
         <span class="toolbar-divider">|</span>
       {/if}
-      <!-- Voice Input (Scribe) -->
-      {#if editorMode !== "preview"}
+      <!-- Voice Input (Scribe) - gated by scribe_mode graft -->
+      {#if scribeEnabled && editorMode !== "preview"}
         <div class="voice-wrapper" title="Voice Input (⌘⇧U) - Hold to record, release to transcribe">
           <VoiceInput
             mode={voiceMode}

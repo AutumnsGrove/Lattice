@@ -1,4 +1,9 @@
 import { redirect } from "@sveltejs/kit";
+import {
+  getEnabledGrafts,
+  isInGreenhouse,
+  type GraftsRecord,
+} from "$lib/feature-flags";
 import type { LayoutServerLoad } from "./$types";
 
 // Disable prerendering for all admin routes
@@ -73,10 +78,32 @@ export const load: LayoutServerLoad = async ({
     }
   }
 
+  // Load ALL grafts for this tenant (engine-first approach)
+  // Grafts cascade to all child pages — no per-page flag checking needed
+  let grafts: GraftsRecord = {};
+  if (platform?.env?.DB && platform?.env?.CACHE_KV && locals.tenantId) {
+    try {
+      // Check if tenant is in greenhouse (for greenhouse-only flags)
+      const inGreenhouse = await isInGreenhouse(locals.tenantId, {
+        DB: platform.env.DB,
+        FLAGS_KV: platform.env.CACHE_KV,
+      });
+
+      grafts = await getEnabledGrafts(
+        { tenantId: locals.tenantId, inGreenhouse },
+        { DB: platform.env.DB, FLAGS_KV: platform.env.CACHE_KV },
+      );
+    } catch (error) {
+      console.error("[Admin Layout] Failed to load grafts:", error);
+      // Continue with empty grafts - features will be disabled
+    }
+  }
+
   return {
     ...parentData,
     user: locals.user,
     tenant,
+    grafts,
     csrfToken: locals.csrfToken,
   };
 };

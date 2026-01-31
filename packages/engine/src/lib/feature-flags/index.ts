@@ -228,3 +228,11 @@ export {
   setFlagEnabled,
   type FeatureFlagSummary,
 } from "./admin.js";
+
+// Grafts API (Engine-first loading)
+export {
+  getEnabledGrafts,
+  isGraftEnabled,
+  type GraftsRecord,
+  type KnownGraftId,
+} from "./grafts.js";
