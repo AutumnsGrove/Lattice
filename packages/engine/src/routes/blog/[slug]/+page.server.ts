@@ -8,6 +8,7 @@ import {
 import { error } from "@sveltejs/kit";
 import { getTenantDb } from "$lib/server/services/database.js";
 import * as cache from "$lib/server/services/cache.js";
+import { emailsMatch } from "$lib/utils/user.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -69,8 +70,7 @@ export const load: PageServerLoad = async ({
   const isOwner =
     locals.user &&
     context?.type === "tenant" &&
-    context.tenant.ownerId?.toLowerCase().trim() ===
-      locals.user.email.toLowerCase().trim();
+    emailsMatch(context.tenant.ownerId, locals.user.email);
 
   // Cache key includes tenant for multi-tenant isolation
   const cacheKey = tenantId ? `blog:${tenantId}:${slug}` : `blog:_:${slug}`;

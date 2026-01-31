@@ -7,6 +7,7 @@
  */
 
 import type { D1Database } from "@cloudflare/workers-types";
+import { emailsMatch } from "$lib/utils/user.js";
 
 export interface User {
   email: string;
@@ -43,7 +44,7 @@ export async function verifyTenantOwnership(
     }
 
     // Check if user email matches tenant owner email
-    return tenant.email.toLowerCase() === userEmail.toLowerCase();
+    return emailsMatch(tenant.email, userEmail);
   } catch (error) {
     console.error("Error verifying tenant ownership:", error);
     return false;

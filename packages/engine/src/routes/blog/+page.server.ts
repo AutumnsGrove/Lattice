@@ -1,5 +1,6 @@
 import { getAllPosts } from "$lib/utils/markdown.js";
 import * as cache from "$lib/server/services/cache.js";
+import { emailsMatch } from "$lib/utils/user.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - posts are fetched from D1 at runtime
@@ -97,8 +98,7 @@ export const load: PageServerLoad = async ({
   const isOwner =
     locals.user &&
     locals.context?.type === "tenant" &&
-    locals.context.tenant.ownerId?.toLowerCase().trim() ===
-      locals.user.email.toLowerCase().trim();
+    emailsMatch(locals.context.tenant.ownerId, locals.user.email);
 
   return {
     posts,
