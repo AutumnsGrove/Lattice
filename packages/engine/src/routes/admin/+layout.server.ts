@@ -4,6 +4,7 @@ import {
   isInGreenhouse,
   type GraftsRecord,
 } from "$lib/feature-flags";
+import { emailsMatch } from "$lib/utils/user.js";
 import type { LayoutServerLoad } from "./$types";
 
 // Disable prerendering for all admin routes
@@ -59,7 +60,7 @@ export const load: LayoutServerLoad = async ({
         // Skip ownership verification for example tenant (public demo)
         if (!isExampleTenant) {
           // Verify ownership in-memory instead of separate query
-          if (result.email.toLowerCase() !== locals.user!.email.toLowerCase()) {
+          if (!emailsMatch(result.email, locals.user!.email)) {
             throw redirect(302, `/?error=access_denied`);
           }
         }

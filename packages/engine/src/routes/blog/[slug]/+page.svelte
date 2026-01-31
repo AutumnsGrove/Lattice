@@ -70,7 +70,18 @@
 		{#snippet children()}
 			<!-- Navigation outside of article header for semantic clarity -->
 			<nav class="article-nav" aria-label="Article navigation">
-				<Button variant="link" href="/blog" class="!p-0 mb-6">&larr; Back to Blog</Button>
+				<div class="nav-row">
+					<Button variant="link" href="/blog" class="!p-0">&larr; Back to Blog</Button>
+					{#if data.isOwner}
+						<a href="/admin/blog/edit/{data.post.slug}" class="edit-link" aria-label="Edit this post in Flow">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+								<path d="m15 5 4 4"/>
+							</svg>
+							<span>Edit</span>
+						</a>
+					{/if}
+				</div>
 			</nav>
 
 			<!-- Cover image -->
@@ -274,6 +285,34 @@
 
 	/* Article navigation */
 	.article-nav {
-		margin-bottom: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.nav-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	/* Edit link for post owners */
+	.edit-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--accent-success);
+		background: var(--accent-success-faint, rgba(44, 95, 45, 0.08));
+		border: 1px solid var(--accent-success-border, rgba(44, 95, 45, 0.2));
+		border-radius: 6px;
+		text-decoration: none;
+		transition: all 0.15s ease;
+	}
+
+	.edit-link:hover {
+		background: var(--accent-success-faint-hover, rgba(44, 95, 45, 0.15));
+		border-color: var(--accent-success-border-hover, rgba(44, 95, 45, 0.3));
 	}
 </style>

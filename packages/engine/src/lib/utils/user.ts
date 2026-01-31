@@ -38,3 +38,39 @@ export function hasPersonalizedName(user?: UserLike | null): boolean {
 	if (!user) return false;
 	return Boolean(user.name || user.email);
 }
+
+/**
+ * Normalize an email address for consistent comparison.
+ * Applies lowercase and trims whitespace.
+ *
+ * @example
+ * ```ts
+ * normalizeEmail('  User@Example.COM  ') // 'user@example.com'
+ * normalizeEmail(null) // null
+ * ```
+ */
+export function normalizeEmail(email: string | null | undefined): string | null {
+	if (!email) return null;
+	const normalized = email.toLowerCase().trim();
+	return normalized || null;
+}
+
+/**
+ * Compare two email addresses for equality (case-insensitive, whitespace-tolerant).
+ * Returns false if either email is null/undefined.
+ *
+ * @example
+ * ```ts
+ * emailsMatch('user@example.com', 'USER@example.com') // true
+ * emailsMatch('user@example.com', null) // false
+ * ```
+ */
+export function emailsMatch(
+	email1: string | null | undefined,
+	email2: string | null | undefined
+): boolean {
+	const normalized1 = normalizeEmail(email1);
+	const normalized2 = normalizeEmail(email2);
+	if (!normalized1 || !normalized2) return false;
+	return normalized1 === normalized2;
+}
