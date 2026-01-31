@@ -72,7 +72,7 @@
 	<circle fill={eyeHighlight} cx="41" cy="17" r="0.7" />
 
 	<!-- White crescent below eye (theme-aware) -->
-	<path fill={highlight} d="M38 22 Q40 23 42 22 Q41 24 39 24 Q38 23 38 22" />
+	<path fill={eyeHighlight} d="M38 22 Q40 23 42 22 Q41 24 39 24 Q38 23 38 22" opacity="0.6" />
 
 	<!-- Beak - yellow-orange -->
 	<path fill={beak} d="M45 20 L52 22 L45 24 Z" />

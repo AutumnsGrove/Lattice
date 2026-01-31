@@ -77,7 +77,7 @@
 	</g>
 
 	<!-- Reflection highlight -->
-	<ellipse fill={highlightColor} cx="45" cy="28" rx="12" ry="5" />
+	<ellipse fill={highlightColor} cx="45" cy="28" rx="12" ry="5" opacity="0.5" />
 
 	<!-- Edge shadow (adapts to theme) -->
 	<ellipse

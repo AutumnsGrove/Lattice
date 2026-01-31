@@ -57,7 +57,7 @@
 	<!-- Wing detail -->
 	<path fill="#4b5563" d="M10 25 Q7 30 10 35 Q15 33 17 28 Q14 24 10 25" opacity="0.8" />
 	<!-- Wing bars (subtle edges, theme-aware) -->
-	<path fill={highlight} d="M9 30 Q12 29 14 30" stroke={highlight} stroke-width="0.5" />
+	<path fill={eyeHighlight} d="M9 30 Q12 29 14 30" opacity="0.4" stroke={eyeHighlight} stroke-width="0.5" />
 
 	<!-- Buff belly -->
 	<ellipse fill={belly} cx="26" cy="32" rx="7" ry="8" />

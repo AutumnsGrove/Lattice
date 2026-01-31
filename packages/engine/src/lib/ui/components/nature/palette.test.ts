@@ -1,39 +1,9 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  beforeAll,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// =============================================================================
-// Global test setup for localStorage/matchMedia (needed before importing palette)
-// =============================================================================
+// Browser API mocks (localStorage, matchMedia) are provided by tests/utils/setup.ts
+// which runs before test files via vitest.config.ts setupFiles
 
-// Mock localStorage before any imports that might use it
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index: number) => Object.keys(store)[index] ?? null,
-  };
-})();
-
-// Mock matchMedia
+// Helper for dynamically changing matchMedia behavior in dark mode tests
 const createMatchMediaMock = (prefersDark: boolean) => ({
   matches: prefersDark,
   media: "(prefers-color-scheme: dark)",
@@ -41,18 +11,6 @@ const createMatchMediaMock = (prefersDark: boolean) => ({
   removeEventListener: vi.fn(),
 });
 
-// Set up global mocks before module imports
-Object.defineProperty(globalThis, "localStorage", {
-  value: localStorageMock,
-  writable: true,
-});
-
-Object.defineProperty(globalThis, "matchMedia", {
-  value: () => createMatchMediaMock(false),
-  writable: true,
-});
-
-// Now import palette (themeStore will use our mocked localStorage)
 import {
   greens,
   bark,
@@ -427,7 +385,7 @@ describe("palette.ts", () => {
  */
 describe("Dark mode helper functions", () => {
   beforeEach(() => {
-    localStorageMock.clear();
+    localStorage.clear();
     document.documentElement.classList.remove("dark");
     vi.resetModules();
   });
@@ -438,7 +396,7 @@ describe("Dark mode helper functions", () => {
 
   describe("isDarkMode()", () => {
     it("should return false when theme is light", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { isDarkMode } = await import("./palette");
 
@@ -446,7 +404,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should return true when theme is dark", async () => {
-      localStorageMock.setItem("theme", "dark");
+      localStorage.setItem("theme", "dark");
 
       const { isDarkMode } = await import("./palette");
 
@@ -479,7 +437,7 @@ describe("Dark mode helper functions", () => {
 
   describe("resolveThemed()", () => {
     it("should return light variant when theme is light", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { resolveThemed, themed } = await import("./palette");
 
@@ -489,7 +447,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should return dark variant when theme is dark", async () => {
-      localStorageMock.setItem("theme", "dark");
+      localStorage.setItem("theme", "dark");
 
       const { resolveThemed, themed } = await import("./palette");
 
@@ -502,13 +460,13 @@ describe("Dark mode helper functions", () => {
       const { resolveThemed, themed } = await import("./palette");
 
       // Moon stays warm yellow in both modes
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
       vi.resetModules();
       const { resolveThemed: resolveLightThemed, themed: themedLight } =
         await import("./palette");
       const moonLight = resolveLightThemed(themedLight.moon);
 
-      localStorageMock.setItem("theme", "dark");
+      localStorage.setItem("theme", "dark");
       vi.resetModules();
       const { resolveThemed: resolveDarkThemed, themed: themedDark } =
         await import("./palette");
@@ -519,7 +477,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should work with all themed color types", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { resolveThemed, themed } = await import("./palette");
 
@@ -535,7 +493,7 @@ describe("Dark mode helper functions", () => {
 
   describe("getThemeShadow()", () => {
     it("should return dark shadow in light mode", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { getThemeShadow } = await import("./palette");
 
@@ -544,7 +502,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should return light shadow in dark mode", async () => {
-      localStorageMock.setItem("theme", "dark");
+      localStorage.setItem("theme", "dark");
 
       const { getThemeShadow } = await import("./palette");
 
@@ -553,7 +511,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should use default opacity of 0.1", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { getThemeShadow } = await import("./palette");
 
@@ -562,7 +520,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should accept custom opacity parameter", async () => {
-      localStorageMock.setItem("theme", "light");
+      localStorage.setItem("theme", "light");
 
       const { getThemeShadow } = await import("./palette");
 
@@ -572,7 +530,7 @@ describe("Dark mode helper functions", () => {
     });
 
     it("should apply opacity correctly in dark mode", async () => {
-      localStorageMock.setItem("theme", "dark");
+      localStorage.setItem("theme", "dark");
 
       const { getThemeShadow } = await import("./palette");
 

@@ -25,6 +25,7 @@
 	const rippleColor = $derived(resolveThemed(themed.ripple));
 	const shadowColor = $derived(resolveThemed(themed.shadow));
 	const highlightColor = $derived(resolveThemed(themed.highlight));
+	const sparkleColor = $derived(resolveThemed(themed.eyeHighlight));
 </script>
 
 <!-- Flowing stream -->
@@ -68,9 +69,9 @@
 
 	<!-- Sparkles/highlights -->
 	<g class={animate ? 'sparkle' : ''}>
-		<circle fill={highlightColor} cx="30" cy="20" r="1.5" />
-		<circle fill={highlightColor} cx="75" cy="23" r="1" opacity="0.8" />
-		<circle fill={highlightColor} cx="115" cy="20" r="1.5" />
+		<circle fill={sparkleColor} cx="30" cy="20" r="1.5" opacity="0.4" />
+		<circle fill={sparkleColor} cx="75" cy="23" r="1" opacity="0.3" />
+		<circle fill={sparkleColor} cx="115" cy="20" r="1.5" opacity="0.35" />
 	</g>
 
 	<!-- Bank shadows (adapts to theme) -->
