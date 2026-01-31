@@ -95,7 +95,10 @@ REQUIREMENTS:
 - Escape newlines as \\n
 - Gutter anchors must EXACTLY match "### ProjectName" headers
 - Exactly ${gutterCount} gutter comments
-- Keep it genuine - find real meaning, don't force purple prose`;
+- Keep it genuine - find real meaning, don't force purple prose
+- NEVER create markdown links for section headers (no [Title](url) format)
+- Only use plain text for headings like "### ProjectName"
+- Do NOT invent URLs or link to non-existent repositories`;
   },
 };
 

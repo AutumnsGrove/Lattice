@@ -95,7 +95,10 @@ REQUIREMENTS:
 - JSON only, no markdown code blocks
 - Escape newlines as \\n
 - Gutter anchors must EXACTLY match "### ProjectName" headers
-- Exactly ${gutterCount} gutter comments`;
+- Exactly ${gutterCount} gutter comments
+- NEVER create markdown links for section headers (no [Title](url) format)
+- Only use plain text for headings like "### ProjectName"
+- Do NOT invent URLs or link to non-existent repositories`;
   },
 };
 

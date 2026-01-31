@@ -163,6 +163,37 @@ export interface TimelineActivity {
 // =============================================================================
 
 /**
+ * Strip hallucinated GitHub links from AI output.
+ *
+ * The AI sometimes invents URLs for section headers like:
+ * [Sentinel Stress Testing System](https://github.com/AutumnsGrove/Sentinel Stress Testing System)
+ *
+ * This function strips fake links while preserving real commit/PR links.
+ * Real links have patterns like /commit/abc123 or /pull/123
+ */
+function stripHallucinatedLinks(text: string): string {
+  // Match markdown links to github.com/AutumnsGrove/...
+  const githubLinkPattern =
+    /\[([^\]]+)\]\((https?:\/\/github\.com\/AutumnsGrove\/[^)]+)\)/g;
+
+  return text.replace(githubLinkPattern, (match, linkText, url) => {
+    // Real links contain: /commit/, /pull/, /issues/, /blob/, /tree/
+    const isRealLink =
+      /\/(commit|pull|issues|blob|tree|compare)\//.test(url) &&
+      // And shouldn't have spaces in the URL (hallucinated links often do)
+      !/ /.test(url);
+
+    if (isRealLink) {
+      return match; // Keep valid links
+    }
+
+    // Strip fake links, keep just the text
+    console.warn(`[Timeline] Stripped hallucinated link: ${url}`);
+    return linkText;
+  });
+}
+
+/**
  * Parse AI response into structured summary data
  */
 export function parseAIResponse(response: string): {
@@ -188,15 +219,23 @@ export function parseAIResponse(response: string): {
           item.anchor && item.content && typeof item.content === "string",
       )
       .map((item: { anchor: string; type?: string; content: string }) => ({
-        anchor: item.anchor,
+        anchor: stripHallucinatedLinks(item.anchor),
         type: item.type || "comment",
         content: item.content.trim(),
       }));
 
+    // Sanitize brief and detailed to remove any hallucinated links
+    const brief = stripHallucinatedLinks(
+      parsed.brief || "Worked on a few things today.",
+    );
+    const detailed = stripHallucinatedLinks(
+      parsed.detailed || "## Projects\n\nSome progress was made.",
+    );
+
     return {
       success: true,
-      brief: parsed.brief || "Worked on a few things today.",
-      detailed: parsed.detailed || "## Projects\n\nSome progress was made.",
+      brief,
+      detailed,
       gutter: validGutter,
     };
   } catch (error) {

@@ -94,7 +94,10 @@ REQUIREMENTS:
 - Escape newlines as \\n
 - Gutter anchors must EXACTLY match the "### [ProjectName] Expedition" headers you create
 - Exactly ${gutterCount} gutter comments
-- Keep it fun but still informative about what actually happened`;
+- Keep it fun but still informative about what actually happened
+- NEVER create markdown links for section headers (no [Title](url) format)
+- Only use plain text for headings
+- Do NOT invent URLs or link to non-existent repositories`;
   },
 };
 

@@ -95,7 +95,10 @@ REQUIREMENTS:
 - Escape newlines as \\n
 - Gutter anchors must EXACTLY match "### ProjectName" headers
 - Exactly ${gutterCount} gutter comments
-- Keep everything as short as possible`;
+- Keep everything as short as possible
+- NEVER create markdown links for section headers (no [Title](url) format)
+- Only use plain text for headings
+- Do NOT invent URLs or link to non-existent repositories`;
   },
 };
 
