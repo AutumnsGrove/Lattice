@@ -7,6 +7,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
+  import { ExternalLink } from "lucide-svelte";
 
   let { data } = $props();
 
@@ -269,7 +270,7 @@
         Delete
       </Button>
       <Button variant="outline" href="/blog/{slug}">
-        View Live ↗
+        View Live <ExternalLink size={16} class="inline-block ml-1" />
       </Button>
       <Button onclick={handleSave} disabled={saving}>
         {saving ? "Saving..." : "Save Changes"}
