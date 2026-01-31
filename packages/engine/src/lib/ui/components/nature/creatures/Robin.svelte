@@ -48,6 +48,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 60"
 	style="transform: scaleX({scaleX}); {style ?? ''}"
+	aria-hidden="true"
 >
 	<!-- Tail feathers - dark gray-brown -->
 	<path fill={body} d="M5 32 Q2 38 4 46 Q10 44 14 38 Q15 34 11 31 Q7 30 5 32" />
@@ -98,5 +99,11 @@
 
 	.hop {
 		animation: hop 1.8s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hop {
+			animation: none;
+		}
 	}
 </style>

@@ -34,6 +34,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 60 70"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<!-- Tail (fluffy!) -->
 	<g class={animate ? 'tail-flick' : ''}>
@@ -96,5 +97,11 @@
 	.tail-flick {
 		transform-origin: bottom right;
 		animation: tail-flick 3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.tail-flick {
+			animation: none;
+		}
 	}
 </style>

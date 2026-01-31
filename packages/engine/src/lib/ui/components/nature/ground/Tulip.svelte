@@ -46,7 +46,7 @@
 </script>
 
 <!-- Classic tulip - spring icon -->
-<svg class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 80" style={style}>
+<svg aria-hidden="true" class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 80" style={style}>
 	<!-- Stem -->
 	<path fill="none" stroke={stem} stroke-width="3" d="M20 80 Q18 60 20 40" />
 
@@ -78,5 +78,11 @@
 	.sway {
 		transform-origin: center bottom;
 		animation: sway 3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
 	}
 </style>

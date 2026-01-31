@@ -39,6 +39,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 20 20"
 	style="--twinkle-duration: {duration}"
+	aria-hidden="true"
 >
 	{#if variant === 'twinkle'}
 		<!-- 4-point twinkle star -->
@@ -80,5 +81,11 @@
 	.twinkle {
 		animation: twinkle var(--twinkle-duration, 2s) ease-in-out infinite;
 		animation-delay: var(--twinkle-delay, 0s);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.twinkle {
+			animation: none;
+		}
 	}
 </style>

@@ -47,6 +47,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 45 50"
 	style="transform: scaleX({scaleX}); {style ?? ''}"
+	aria-hidden="true"
 >
 	<!-- Tail - short gray -->
 	<path fill={body} d="M5 28 Q2 32 4 38 Q10 36 12 30 Q9 27 5 28" />
@@ -97,5 +98,11 @@
 
 	.bob {
 		animation: bob 1.8s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.bob {
+			animation: none;
+		}
 	}
 </style>

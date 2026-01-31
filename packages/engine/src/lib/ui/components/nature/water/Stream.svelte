@@ -29,7 +29,7 @@
 </script>
 
 <!-- Flowing stream -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40" aria-hidden="true">
 	<defs>
 		<linearGradient id="stream-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
 			<stop offset="0%" stop-color={waterColor} />
@@ -98,5 +98,15 @@
 
 	.sparkle {
 		animation: sparkle 1.5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flow {
+			animation: none;
+		}
+
+		.sparkle {
+			animation: none;
+		}
 	}
 </style>

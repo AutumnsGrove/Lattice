@@ -28,7 +28,7 @@
 </script>
 
 <!-- Round bush/shrub -->
-<svg class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60">
+<svg aria-hidden="true" class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60">
 	<!-- Base shadow/depth -->
 	<ellipse fill={shadowColor} cx="40" cy="45" rx="35" ry="15" opacity="0.5" />
 
@@ -53,5 +53,11 @@
 	.sway {
 		transform-origin: center bottom;
 		animation: sway 4s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
 	}
 </style>

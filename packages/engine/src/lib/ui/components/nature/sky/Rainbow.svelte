@@ -18,7 +18,7 @@
 </script>
 
 <!-- Rainbow arc -->
-<svg class="{className} {animate ? 'fade-in' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+<svg class="{className} {animate ? 'fade-in' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" aria-hidden="true">
 	<defs>
 		<!-- Rainbow gradient arcs -->
 		<linearGradient id="rainbow-red" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -97,5 +97,11 @@
 
 	.fade-in {
 		animation: fade-in 3s ease-out forwards;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fade-in {
+			animation: none;
+		}
 	}
 </style>

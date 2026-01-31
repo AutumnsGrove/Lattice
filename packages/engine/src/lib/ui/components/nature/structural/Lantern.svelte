@@ -27,7 +27,7 @@
 </script>
 
 <!-- Lantern -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 60">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 60">
 	{#if variant === 'hanging'}
 		<!-- Top finial (attachment point) -->
 		<circle fill={frame} cx="20" cy="3" r="2.5" />
@@ -109,5 +109,13 @@
 
 	.flicker-outer {
 		animation: flicker-outer 3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flicker,
+		.flicker-inner,
+		.flicker-outer {
+			animation: none !important;
+		}
 	}
 </style>

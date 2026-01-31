@@ -24,7 +24,7 @@
 </script>
 
 <!-- Sun with optional rays -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
 	{#if rays}
 		<!-- Sun rays -->
 		<g class={animate ? 'spin' : ''} opacity="0.8">
@@ -66,5 +66,12 @@
 	.pulse {
 		transform-origin: center center;
 		animation: pulse 4s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.spin,
+		.pulse {
+			animation: none;
+		}
 	}
 </style>

@@ -30,7 +30,7 @@
 </script>
 
 <!-- Daffodil - classic spring herald -->
-<svg class="{className} {animate ? 'nod' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80" style={style}>
+<svg aria-hidden="true" class="{className} {animate ? 'nod' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80" style={style}>
 	<!-- Stem - curved like real daffodils -->
 	<path fill="none" stroke={stem} stroke-width="2.5" d="M25 80 Q23 65 25 50 Q28 42 32 38" />
 
@@ -71,5 +71,11 @@
 	.nod {
 		transform-origin: center bottom;
 		animation: nod 3.5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.nod {
+			animation: none;
+		}
 	}
 </style>

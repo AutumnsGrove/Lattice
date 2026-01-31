@@ -24,7 +24,7 @@
 </script>
 
 <!-- Acorn -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40" aria-hidden="true">
 	<!-- Stem -->
 	<path fill={capDetail} d="M15 0 Q18 0 18 4 L15 6 L12 4 Q12 0 15 0" />
 

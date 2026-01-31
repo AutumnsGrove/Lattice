@@ -23,7 +23,7 @@
 </script>
 
 <!-- Cluster of small mushrooms -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60">
 	<!-- Large mushroom (center) -->
 	<path fill={stem} d="M36 32 Q34 45 33 60 L47 60 Q46 45 44 32 Q40 30 36 32" />
 	<ellipse fill={cap} cx="40" cy="24" rx="18" ry="14" />

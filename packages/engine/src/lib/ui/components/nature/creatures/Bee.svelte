@@ -29,7 +29,12 @@
 </script>
 
 <!-- Bumble bee -->
-<svg class="{className} {animate ? 'hover' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40">
+<svg
+	class="{className} {animate ? 'hover' : ''}"
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 50 40"
+	aria-hidden="true"
+>
 	<!-- Wings -->
 	<g class={animate ? 'buzz' : ''}>
 		<ellipse fill={wingColor} cx="20" cy="12" rx="10" ry="6" opacity="0.6" />
@@ -77,5 +82,12 @@
 	.buzz {
 		transform-origin: center bottom;
 		animation: buzz 0.05s linear infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hover,
+		.buzz {
+			animation: none;
+		}
 	}
 </style>

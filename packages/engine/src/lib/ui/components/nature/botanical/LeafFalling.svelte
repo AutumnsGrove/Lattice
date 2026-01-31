@@ -93,6 +93,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 30 35"
 	style="--fall-duration: {duration}s; --fall-delay: {delay}s; --fall-drift: {drift}px; --fall-distance: {fallDistance}vh; --spawn-offset: {SPAWN_OFFSET_PX}px;"
+	aria-hidden="true"
 >
 	<g class={animate ? 'spin' : ''}>
 		{#if variant === 'simple'}

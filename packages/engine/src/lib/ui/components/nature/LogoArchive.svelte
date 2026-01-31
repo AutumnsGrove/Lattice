@@ -72,6 +72,7 @@
 		class="{className} {animationClass}"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 417 512.238"
+		aria-hidden="true"
 	>
 		<defs>
 			<!-- Clip paths to isolate each arrow direction -->
@@ -134,6 +135,7 @@
 		class="{className} {animationClass}"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 417 512.238"
+		aria-hidden="true"
 	>
 		<!-- Trunk -->
 		<path fill={actualTrunkColor} d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
@@ -256,5 +258,21 @@
 	}
 	.arrow-left.in-position {
 		transform: translateX(0);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway,
+		.breathing {
+			animation: none;
+		}
+		.arrow {
+			transition: none;
+		}
+		.arrow-top,
+		.arrow-right,
+		.arrow-bottom,
+		.arrow-left {
+			transform: none;
+		}
 	}
 </style>

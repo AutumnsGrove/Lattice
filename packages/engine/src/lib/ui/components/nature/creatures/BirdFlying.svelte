@@ -30,6 +30,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 60 30"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<!-- Wings and body as single flowing shape -->
 	<g class={animate ? 'fly' : ''}>
@@ -79,5 +80,12 @@
 	.wing-up {
 		transform-origin: center bottom;
 		animation: flap 0.3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fly,
+		.wing-up {
+			animation: none;
+		}
 	}
 </style>

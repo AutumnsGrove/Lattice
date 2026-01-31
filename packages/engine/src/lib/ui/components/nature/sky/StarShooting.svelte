@@ -30,6 +30,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 100 40"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<defs>
 		<linearGradient id="trail-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -86,5 +87,12 @@
 
 	.trail {
 		animation: trail-shimmer 0.3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.shoot,
+		.trail {
+			animation: none;
+		}
 	}
 </style>

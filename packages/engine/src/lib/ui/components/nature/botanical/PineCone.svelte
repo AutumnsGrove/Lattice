@@ -22,7 +22,7 @@
 </script>
 
 <!-- Pine cone -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 55">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 55" aria-hidden="true">
 	<!-- Stem -->
 	<rect fill={scaleDark} x="15" y="0" width="5" height="6" rx="1" />
 

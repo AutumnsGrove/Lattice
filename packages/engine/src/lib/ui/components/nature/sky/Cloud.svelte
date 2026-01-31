@@ -46,6 +46,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 100 50"
 		style="--drift-duration: {duration}"
+		aria-hidden="true"
 	>
 		<g opacity="0.9">
 			<ellipse fill={effectiveColor} cx="50" cy="35" rx="35" ry="15" />
@@ -63,6 +64,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 120 40"
 		style="--drift-duration: {duration}"
+		aria-hidden="true"
 	>
 		<g opacity="0.7">
 			<ellipse fill={effectiveColor} cx="30" cy="20" rx="25" ry="8" />
@@ -79,6 +81,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 110 55"
 		style="--drift-duration: {duration}"
+		aria-hidden="true"
 	>
 		<g opacity="0.85">
 			<circle fill={effectiveColor} cx="25" cy="35" r="20" />
@@ -96,6 +99,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 100 45"
 		style="--drift-duration: {duration}"
+		aria-hidden="true"
 	>
 		<g opacity="0.75">
 			<ellipse fill={effectiveColor} cx="20" cy="25" rx="18" ry="12" />
@@ -124,5 +128,12 @@
 
 	.drift-left {
 		animation: drift-left var(--drift-duration, 80s) linear infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drift-right,
+		.drift-left {
+			animation: none;
+		}
 	}
 </style>

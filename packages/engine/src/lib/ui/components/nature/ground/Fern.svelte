@@ -27,7 +27,7 @@
 </script>
 
 <!-- Curled fern frond -->
-<svg class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 70">
+<svg aria-hidden="true" class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 70">
 	<!-- Main stem -->
 	<path
 		fill="none"
@@ -68,5 +68,11 @@
 	.sway {
 		transform-origin: center bottom;
 		animation: sway 3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
 	}
 </style>

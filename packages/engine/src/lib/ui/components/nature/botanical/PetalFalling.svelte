@@ -155,6 +155,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 20 20"
 		style="{animate ? `animation: ${animId}-flutter ${duration / 4}s ease-in-out ${delay}s infinite;` : ''}"
+		aria-hidden="true"
 	>
 	<defs>
 		<!-- Gradient for depth -->
@@ -262,5 +263,16 @@
 		display: block;
 		transform-style: preserve-3d;
 		will-change: transform;
+	}
+
+	/* Respect user's motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.petal-wrapper {
+			animation: none !important;
+		}
+
+		svg {
+			animation: none !important;
+		}
 	}
 </style>

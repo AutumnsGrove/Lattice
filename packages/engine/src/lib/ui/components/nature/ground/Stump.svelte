@@ -24,7 +24,7 @@
 </script>
 
 <!-- Tree stump with visible rings -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 50">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 50">
 	<!-- Bark exterior -->
 	<path fill={barkFill} d="M10 20 Q8 35 5 50 L65 50 Q62 35 60 20 Q35 15 10 20" />
 

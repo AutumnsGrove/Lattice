@@ -26,7 +26,12 @@
 </script>
 
 <!-- Butterfly with flapping wings -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40">
+<svg
+	class={className}
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 50 40"
+	aria-hidden="true"
+>
 	<!-- Left wings -->
 	<g class={animate ? 'wing-left' : ''}>
 		<!-- Upper wing -->
@@ -83,5 +88,12 @@
 	.wing-right {
 		transform-origin: left center;
 		animation: flutter-right 0.3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.wing-left,
+		.wing-right {
+			animation: none;
+		}
 	}
 </style>

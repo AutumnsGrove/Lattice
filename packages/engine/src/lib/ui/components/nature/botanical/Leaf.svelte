@@ -28,7 +28,7 @@
 </script>
 
 <!-- Leaf - various shapes -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50" aria-hidden="true">
 	{#if variant === 'simple'}
 		<!-- Simple oval leaf -->
 		<ellipse fill={leafColor} cx="20" cy="22" rx="15" ry="20" />

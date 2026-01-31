@@ -27,7 +27,7 @@
 </script>
 
 <!-- Cluster of grass blades -->
-<svg class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50">
+<svg aria-hidden="true" class="{className} {animate ? 'sway' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50">
 	<!-- Grass blades - varying heights and angles -->
 	<path fill={grassColor} d="M20 50 L18 50 Q16 30 12 10 Q14 8 16 10 Q19 28 20 50" />
 	<path fill={grassColor} d="M22 50 L24 50 Q26 25 30 5 Q28 3 26 5 Q23 22 22 50" />
@@ -45,5 +45,11 @@
 	.sway {
 		transform-origin: center bottom;
 		animation: sway 2.5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
 	}
 </style>
