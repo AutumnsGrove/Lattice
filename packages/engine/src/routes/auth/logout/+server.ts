@@ -9,7 +9,12 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+export const GET: RequestHandler = async ({
+  url,
+  cookies,
+  platform,
+  request,
+}) => {
   // Determine if we're in production
   const isProduction =
     url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
@@ -29,7 +34,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
         {
           method: "POST",
           headers: { Cookie: `grove_session=${groveSession}` },
-        }
+        },
       );
     } catch (err) {
       // Log but don't fail - we still want to clear cookies
@@ -38,10 +43,15 @@ export const GET: RequestHandler = async ({ url, cookies, platform, request }) =
   }
 
   // Clear all auth cookies
-  cookies.delete("grove_session", cookieOptions);  // SessionDO session
-  cookies.delete("access_token", cookieOptions);   // Legacy JWT
-  cookies.delete("refresh_token", cookieOptions);  // Legacy refresh
-  cookies.delete("session", cookieOptions);        // Legacy session ID
+  cookies.delete("grove_session", cookieOptions); // SessionDO session
+  cookies.delete("access_token", cookieOptions); // Legacy JWT
+  cookies.delete("refresh_token", cookieOptions); // Legacy refresh
+  cookies.delete("session", cookieOptions); // Legacy session ID
+
+  // Clear Better Auth session cookies (both prefixed and unprefixed variants)
+  // Production uses __Secure- prefix, development uses unprefixed
+  cookies.delete("__Secure-better-auth.session_token", cookieOptions);
+  cookies.delete("better-auth.session_token", cookieOptions);
 
   // Also clear the old session cookie if it exists (from magic code auth)
   cookies.delete("session_token", { path: "/" });

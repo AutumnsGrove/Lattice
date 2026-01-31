@@ -203,9 +203,10 @@ describe("POST /api/lumen/transcribe - Validation", () => {
     await expect(POST(ctx as any)).rejects.toThrow(/Invalid audio type/);
   });
 
-  it("should reject oversized audio files", async () => {
+  it("should reject oversized audio files", { timeout: 15000 }, async () => {
     const ctx = createMockContext({});
     // Create a 30MB file (over 25MB limit)
+    // Note: Large buffer allocation can be slow, hence extended timeout
     const largeBuffer = new ArrayBuffer(30 * 1024 * 1024);
     const formData = new FormData();
     formData.append(
