@@ -36,7 +36,7 @@
 		type="button"
 		onclick={() => selectPeriod("monthly")}
 		aria-pressed={billingPeriod === "monthly"}
-		class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {billingPeriod ===
+		class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
 		'monthly'
 			? 'bg-white dark:bg-emerald-800/60 text-foreground shadow-sm'
 			: 'text-foreground-muted hover:text-foreground'}"
@@ -49,7 +49,7 @@
 		type="button"
 		onclick={() => selectPeriod("annual")}
 		aria-pressed={billingPeriod === "annual"}
-		class="relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {billingPeriod ===
+		class="relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
 		'annual'
 			? 'bg-white dark:bg-emerald-800/60 text-foreground shadow-sm'
 			: 'text-foreground-muted hover:text-foreground'}"

@@ -69,8 +69,8 @@
     </div>
 
     {#if searchQuery}
-      <!-- Results Summary -->
-      <div class="mb-6">
+      <!-- Results Summary - wrapped in live region for screen reader announcements -->
+      <div aria-live="polite" aria-atomic="true" class="mb-6">
         <p class="text-foreground-muted">
           Found {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''} for "<span class="font-medium">{searchQuery}</span>"
         </p>

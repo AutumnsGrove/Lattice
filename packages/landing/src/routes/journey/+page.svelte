@@ -608,6 +608,11 @@
 		transform: scale(0.95);
 	}
 
+	.toc-button:focus-visible {
+		outline: 2px solid var(--color-grove-500, #2c5f2d);
+		outline-offset: 2px;
+	}
+
 	.toc-menu {
 		position: absolute;
 		bottom: 60px;

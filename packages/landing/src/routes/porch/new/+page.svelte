@@ -119,15 +119,16 @@
 					}}
 				>
 					<!-- Category Selection -->
-					<div class="mb-6">
-						<label class="block text-sm font-sans font-medium text-foreground mb-3">
+					<fieldset class="mb-6">
+						<legend class="block text-sm font-sans font-medium text-foreground mb-3">
 							What's this about?
-						</label>
+						</legend>
 						<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 							{#each categories as cat}
 								<button
 									type="button"
 									onclick={() => category = cat.id}
+									aria-pressed={category === cat.id}
 									class="p-3 rounded-lg border transition-all text-left {category === cat.id
 										? 'border-grove-500 bg-grove-50 text-grove-700'
 										: 'border-grove-200 bg-white/50 text-foreground/70 hover:border-grove-300'}"
@@ -140,7 +141,7 @@
 							{/each}
 						</div>
 						<input type="hidden" name="category" value={category} />
-					</div>
+					</fieldset>
 
 					<!-- Name -->
 					<div class="mb-5">

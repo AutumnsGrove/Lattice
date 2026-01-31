@@ -50,7 +50,7 @@
 </script>
 
 {#if status === 'success'}
-	<div
+	<div role="status" aria-live="polite"
 		class="{variant === 'dark' ? 'bg-purple-900/40 border-purple-600/40' : 'bg-accent border-accent'} border rounded-lg px-6 py-4 text-center max-w-md animate-in"
 	>
 		<svg class="{variant === 'dark' ? 'text-amber-400' : 'text-accent-muted'} w-8 h-8 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -62,7 +62,7 @@
 		<p class="{variant === 'dark' ? 'text-purple-300/80' : 'text-accent-subtle'} text-xs font-sans mt-2">We'll be in touch when Grove blooms.</p>
 	</div>
 {:else if status === 'already_signed_up'}
-	<div
+	<div role="status" aria-live="polite"
 		class="{variant === 'dark' ? 'bg-purple-900/40 border-purple-600/40' : 'bg-accent border-accent'} border rounded-lg px-6 py-4 text-center max-w-md animate-in"
 	>
 		<svg class="{variant === 'dark' ? 'text-pink-400' : 'text-accent-muted'} w-8 h-8 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -74,16 +74,21 @@
 	</div>
 {:else}
 	<form onsubmit={handleSubmit} class="w-full max-w-md">
+		<label for="email-signup" class="sr-only">Email address</label>
 		<div class="flex flex-col sm:flex-row gap-3">
 			<input
 				type="email"
 				name="email"
+				id="email-signup"
 				autocomplete="email"
 				bind:value={email}
 				placeholder="your@email.com"
 				class="{variant === 'dark' ? 'dark-input' : 'input-field'} flex-1"
 				disabled={status === 'loading'}
 				required
+				aria-required="true"
+				aria-invalid={status === 'error'}
+				aria-describedby={status === 'error' ? 'email-error' : undefined}
 			/>
 			<button type="submit" class="{variant === 'dark' ? 'dark-btn' : 'btn-primary'} whitespace-nowrap" disabled={status === 'loading'}>
 				{#if status === 'loading'}
@@ -101,7 +106,7 @@
 		</div>
 
 		{#if status === 'error'}
-			<p class="{variant === 'dark' ? 'text-red-400' : 'text-error'} text-sm mt-2 font-sans">{errorMessage}</p>
+			<p id="email-error" role="alert" class="{variant === 'dark' ? 'text-red-400' : 'text-error'} text-sm mt-2 font-sans">{errorMessage}</p>
 		{/if}
 
 		<p class="{variant === 'dark' ? 'text-purple-300/70' : 'text-foreground-faint'} text-xs mt-3 text-center font-sans">

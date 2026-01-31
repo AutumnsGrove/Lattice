@@ -148,10 +148,10 @@
 							</h3>
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Your words are not training data. Grove blocks every AI crawler, every scraper, every "search agent" that wants to harvest content for machine learning.
-								<a href="https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">Cloudflare stands at the gate</a>, and our corner of the web becomes a black hole to external AI. Learn more about <a href="https://grove.place/knowledge/help/how-grove-protects-your-content" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">how Grove protects your content from AI scraping</a>.
+								<a href="https://developers.cloudflare.com/bots/additional-configurations/block-ai-bots/" target="_blank" rel="noopener noreferrer" class="text-accent-muted underline decoration-1 underline-offset-2 hover:text-accent">Cloudflare stands at the gate</a>, and our corner of the web becomes a black hole to external AI. Learn more about <a href="https://grove.place/knowledge/help/how-grove-protects-your-content" target="_blank" rel="noopener noreferrer" class="text-accent-muted underline decoration-1 underline-offset-2 hover:text-accent">how Grove protects your content from AI scraping</a>.
 							</p>
 							<p class="text-foreground-muted font-sans leading-relaxed mt-3">
-								We do use AI internally for content moderation, but intentionally: with <a href="/knowledge/help/what-is-zdr" class="text-accent-muted hover:underline">zero data retention</a>, with privacy-first providers, with no training on your words.
+								We do use AI internally for content moderation, but intentionally: with <a href="/knowledge/help/what-is-zdr" class="text-accent-muted underline decoration-1 underline-offset-2 hover:text-accent">zero data retention</a>, with privacy-first providers, with no training on your words.
 								There's a difference between using a tool carefully and feeding a machine indiscriminately.
 							</p>
 							<p class="text-foreground-subtle font-sans italic mt-3">

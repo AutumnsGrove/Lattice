@@ -56,45 +56,49 @@
 
 		<!-- Success Message -->
 		{#if form?.success}
-			<GlassCard class="mb-6 bg-green-50/80 border-green-200">
-				<div class="flex items-start gap-4">
-					<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
-						<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-								clip-rule="evenodd"
-							/>
-						</svg>
+			<div role="status" aria-live="polite">
+				<GlassCard class="mb-6 bg-green-50/80 border-green-200">
+					<div class="flex items-start gap-4">
+						<div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
+							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<h2 class="text-lg font-serif text-green-900 mb-1">Thank you for sharing!</h2>
+							<p class="text-sm text-green-800 font-sans">
+								Your feedback means a lot. I read everything personally. —Autumn
+							</p>
+						</div>
 					</div>
-					<div class="flex-1">
-						<h2 class="text-lg font-serif text-green-900 mb-1">Thank you for sharing!</h2>
-						<p class="text-sm text-green-800 font-sans">
-							Your feedback means a lot. I read everything personally. —Autumn
-						</p>
-					</div>
-				</div>
-			</GlassCard>
+				</GlassCard>
+			</div>
 		{/if}
 
 		<!-- Error Message -->
 		{#if form?.error}
-			<GlassCard class="mb-6 bg-red-50/80 border-red-200">
-				<div class="flex items-start gap-4">
-					<div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
-						<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-								clip-rule="evenodd"
-							/>
-						</svg>
+			<div role="alert" aria-live="assertive">
+				<GlassCard class="mb-6 bg-red-50/80 border-red-200">
+					<div class="flex items-start gap-4">
+						<div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<p class="text-sm text-red-800 font-sans">{form.error}</p>
+						</div>
 					</div>
-					<div class="flex-1">
-						<p class="text-sm text-red-800 font-sans">{form.error}</p>
-					</div>
-				</div>
-			</GlassCard>
+				</GlassCard>
+			</div>
 		{/if}
 
 		<!-- Feedback Form -->
@@ -172,6 +176,8 @@
 							onclick={() => sentiment = sentiment === 'positive' ? null : 'positive'}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 text-green-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
+							aria-label={sentiment === 'positive' ? 'Positive feedback (selected)' : 'Positive feedback'}
+							aria-pressed={sentiment === 'positive'}
 						>
 							<Smile class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Positive</span>
@@ -181,6 +187,8 @@
 							onclick={() => sentiment = sentiment === 'neutral' ? null : 'neutral'}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
+							aria-label={sentiment === 'neutral' ? 'Neutral feedback (selected)' : 'Neutral feedback'}
+							aria-pressed={sentiment === 'neutral'}
 						>
 							<Meh class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Neutral</span>
@@ -190,6 +198,8 @@
 							onclick={() => sentiment = sentiment === 'negative' ? null : 'negative'}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-grove-200 bg-white/50 text-foreground/60 hover:border-grove-300'}"
 							disabled={submitting}
+							aria-label={sentiment === 'negative' ? 'Concern feedback (selected)' : 'Concern feedback'}
+							aria-pressed={sentiment === 'negative'}
 						>
 							<Frown class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Concern</span>
