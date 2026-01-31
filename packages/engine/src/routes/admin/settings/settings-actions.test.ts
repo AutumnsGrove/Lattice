@@ -26,7 +26,6 @@ vi.mock("$lib/feature-flags", () => ({
 }));
 
 import {
-  getGreenhouseTenant,
   enrollInGreenhouse,
   removeFromGreenhouse,
   toggleGreenhouseStatus,
