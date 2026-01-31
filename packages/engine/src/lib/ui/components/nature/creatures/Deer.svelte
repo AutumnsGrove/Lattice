@@ -35,6 +35,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 80 100"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<!-- Back legs -->
 	<path fill={fur} d="M20 65 L18 95 L24 95 L26 70 Q23 67 20 65" />
@@ -94,5 +95,11 @@
 	.ear-flick {
 		transform-origin: center bottom;
 		animation: ear-flick 5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.ear-flick {
+			animation: none;
+		}
 	}
 </style>

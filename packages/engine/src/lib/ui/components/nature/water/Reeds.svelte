@@ -32,7 +32,7 @@
 </script>
 
 <!-- Reeds/Cattails -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100" aria-hidden="true">
 	{#if variant === 'cattail'}
 		<!-- Cattail stalks with heads -->
 		<g class={animate ? 'sway sway-1' : ''}>
@@ -82,4 +82,10 @@
 	.sway-1 { animation-delay: 0s; }
 	.sway-2 { animation-delay: 0.4s; }
 	.sway-3 { animation-delay: 0.8s; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
+	}
 </style>

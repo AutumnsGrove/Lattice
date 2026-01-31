@@ -22,7 +22,7 @@
 </script>
 
 <!-- Fallen log -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 35">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 35">
 	<!-- Main log body -->
 	<path fill={barkFill} d="M15 8 L85 5 Q95 10 95 20 Q95 30 85 32 L15 30 Q5 25 5 18 Q5 12 15 8" />
 

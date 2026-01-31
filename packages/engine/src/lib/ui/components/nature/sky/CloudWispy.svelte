@@ -33,6 +33,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 120 30"
 	style="--drift-duration: {duration}"
+	aria-hidden="true"
 >
 	<!-- Main wispy cloud body - soft feathery shapes -->
 	<g opacity="0.5">
@@ -75,5 +76,11 @@
 
 	.drift {
 		animation: drift var(--drift-duration, 80s) ease-in-out infinite alternate;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.drift {
+			animation: none;
+		}
 	}
 </style>

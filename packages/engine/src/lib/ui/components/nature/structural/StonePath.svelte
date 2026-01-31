@@ -22,7 +22,7 @@
 </script>
 
 <!-- Stepping stones path -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
 	<!-- Stone 1 (left) -->
 	<ellipse fill={stone} cx="18" cy="22" rx="16" ry="10" />
 	<ellipse fill={highlight} cx="14" cy="19" rx="6" ry="4" opacity="0.2" />

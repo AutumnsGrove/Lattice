@@ -25,7 +25,7 @@
 </script>
 
 <!-- Small wooden bridge -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70">
 	<!-- Shadow under bridge (theme-aware) -->
 	<ellipse fill={groundShadow} cx="60" cy="65" rx="55" ry="8" />
 

@@ -28,7 +28,7 @@
 </script>
 
 <!-- Moon with phase options -->
-<svg class="{className} {animate ? 'glow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+<svg class="{className} {animate ? 'glow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" aria-hidden="true">
 	<!-- Outer glow -->
 	<circle fill={glowColor} cx="25" cy="25" r="24" opacity="0.15" />
 
@@ -62,5 +62,11 @@
 
 	.glow {
 		animation: glow 4s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.glow {
+			animation: none;
+		}
 	}
 </style>

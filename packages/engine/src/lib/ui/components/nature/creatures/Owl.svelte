@@ -35,6 +35,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 70"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<!-- Body -->
 	<ellipse fill={feathers} cx="25" cy="45" rx="18" ry="20" />
@@ -90,5 +91,11 @@
 	.blink {
 		transform-origin: center center;
 		animation: blink 4s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.blink {
+			animation: none;
+		}
 	}
 </style>

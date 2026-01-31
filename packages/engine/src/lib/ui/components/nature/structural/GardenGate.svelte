@@ -24,7 +24,7 @@
 </script>
 
 <!-- Garden gate with posts -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
 	<!-- Left post -->
 	<rect fill={postColor} x="5" y="10" width="10" height="90" />
 	<rect fill={bark.darkBark} x="5" y="10" width="10" height="5" />

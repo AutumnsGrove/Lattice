@@ -48,7 +48,7 @@
 </script>
 
 <!-- Cluster of twinkling stars -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
 	{#each stars as star}
 		<g
 			class={animate ? 'twinkle' : ''}
@@ -81,5 +81,11 @@
 	.twinkle {
 		animation: twinkle 3s ease-in-out infinite;
 		animation-delay: var(--twinkle-delay, 0s);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.twinkle {
+			animation: none;
+		}
 	}
 </style>

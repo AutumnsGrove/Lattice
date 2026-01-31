@@ -34,6 +34,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 60"
 	style="transform: scaleX({scaleX})"
+	aria-hidden="true"
 >
 	<!-- Back leg -->
 	<ellipse fill={fur} cx="15" cy="50" rx="10" ry="8" />
@@ -89,5 +90,12 @@
 		transform-origin: center bottom;
 		animation: ear-twitch 4s ease-in-out infinite;
 		animation-delay: 0.1s;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.ear-twitch,
+		.ear-twitch-delay {
+			animation: none;
+		}
 	}
 </style>

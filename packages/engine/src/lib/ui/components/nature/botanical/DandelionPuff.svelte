@@ -23,7 +23,7 @@
 </script>
 
 <!-- Dandelion seed head (puff) -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80" aria-hidden="true">
 	<!-- Stem -->
 	<path fill="none" stroke={stem} stroke-width="2" d="M30 80 Q28 60 30 45" />
 
@@ -95,4 +95,11 @@
 	.drift-5 { --drift-x: -4px; --drift-y: 0px; animation-delay: 0.5s; }
 	.drift-6 { --drift-x: 3px; --drift-y: 2px; animation-delay: 0.4s; }
 	.drift-7 { --drift-x: -3px; --drift-y: 2px; animation-delay: 0.7s; }
+
+	/* Respect user's motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.drift {
+			animation: none;
+		}
+	}
 </style>

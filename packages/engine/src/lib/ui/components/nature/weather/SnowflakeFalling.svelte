@@ -159,4 +159,11 @@
 		transform-style: preserve-3d;
 		will-change: transform;
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.snowflake-wrapper,
+		.snowflake-flutter {
+			animation: none !important;
+		}
+	}
 </style>

@@ -31,7 +31,7 @@
 </script>
 
 <!-- Lily pad with optional flower -->
-<svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45">
+<svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45" aria-hidden="true">
 	<!-- Pad shadow (theme-aware) -->
 	<ellipse fill={shadowColor} cx="30" cy="32" rx="25" ry="12" />
 
@@ -98,5 +98,15 @@
 	.bloom {
 		transform-origin: center bottom;
 		animation: bloom 5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.float {
+			animation: none;
+		}
+
+		.bloom {
+			animation: none;
+		}
 	}
 </style>

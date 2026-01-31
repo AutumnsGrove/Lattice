@@ -31,7 +31,7 @@
 </script>
 
 <!-- Lattice with climbing vine -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 100">
 	<!-- Trellis structure (behind vine) -->
 	<rect fill={wood} x="5" y="0" width="5" height="100" rx="1" />
 	<rect fill={wood} x="70" y="0" width="5" height="100" rx="1" />

@@ -29,7 +29,7 @@
 </script>
 
 <!-- Vine/tendril -->
-<svg class="{className} {animate ? 'grow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80">
+<svg class="{className} {animate ? 'grow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80" aria-hidden="true">
 	{#if variant === 'tendril'}
 		<!-- Simple curling tendril -->
 		<path
@@ -98,5 +98,12 @@
 
 	.grow path {
 		animation: grow 3s ease-out forwards;
+	}
+
+	/* Respect user's motion preferences */
+	@media (prefers-reduced-motion: reduce) {
+		.grow path {
+			animation: none;
+		}
 	}
 </style>

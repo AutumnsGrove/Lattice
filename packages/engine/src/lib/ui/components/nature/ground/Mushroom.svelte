@@ -26,7 +26,7 @@
 </script>
 
 <!-- Classic toadstool mushroom -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70">
 	<!-- Stem -->
 	<path fill={stem} d="M22 40 Q20 55 18 70 L42 70 Q40 55 38 40 Q30 38 22 40" />
 

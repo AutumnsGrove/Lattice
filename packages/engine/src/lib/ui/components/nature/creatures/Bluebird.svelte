@@ -46,6 +46,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 55"
 	style="transform: scaleX({scaleX}); {style ?? ''}"
+	aria-hidden="true"
 >
 	<!-- Tail feathers - bright blue -->
 	<path fill={body} d="M6 30 Q3 36 5 44 Q11 42 15 36 Q16 32 12 29 Q8 28 6 30" />
@@ -94,5 +95,11 @@
 
 	.flutter {
 		animation: flutter 2s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flutter {
+			animation: none;
+		}
 	}
 </style>

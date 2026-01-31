@@ -26,7 +26,7 @@
 </script>
 
 <!-- Birdhouse on pole -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80">
 	<!-- Pole -->
 	<rect fill={pole} x="22" y="50" width="6" height="30" />
 

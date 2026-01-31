@@ -44,6 +44,7 @@
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 50 60"
 	style="transform: scaleX({scaleX}); {style ?? ''}"
+	aria-hidden="true"
 >
 	<!-- Tail feathers - long and red -->
 	<path fill={body} d="M5 35 Q0 40 2 50 Q8 48 12 42 Q14 38 10 34 Q7 33 5 35" />
@@ -94,5 +95,11 @@
 
 	.bob {
 		animation: bob 2.5s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.bob {
+			animation: none;
+		}
 	}
 </style>

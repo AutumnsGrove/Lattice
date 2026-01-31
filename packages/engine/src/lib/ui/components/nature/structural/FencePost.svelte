@@ -23,7 +23,7 @@
 </script>
 
 <!-- Fence post -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 70">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 70">
 	{#if variant === 'pointed'}
 		<!-- Pointed top post -->
 		<polygon fill={postColor} points="5,15 12.5,0 20,15" />

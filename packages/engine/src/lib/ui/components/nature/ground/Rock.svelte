@@ -24,7 +24,7 @@
 </script>
 
 <!-- Rock/stone - matte natural appearance -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
 	{#if variant === 'round'}
 		<!-- Rounded boulder with natural matte finish -->
 		<ellipse fill={rockColor} cx="30" cy="26" rx="27" ry="14" />

@@ -43,7 +43,7 @@
 </script>
 
 <!-- Aspen tree - slender trunk with quivering round/heart-shaped leaves -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140">
 	<!-- Trunk - slender with characteristic bark marks -->
 	<rect fill={actualTrunkColor} x="46" y="60" width="8" height="80" rx="2" />
 
@@ -160,4 +160,10 @@
 	.quiver-1 { animation-delay: 0s; }
 	.quiver-2 { animation-delay: 0.4s; }
 	.quiver-3 { animation-delay: 0.8s; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.quiver {
+			animation: none;
+		}
+	}
 </style>

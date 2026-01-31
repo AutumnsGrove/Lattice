@@ -40,7 +40,7 @@
 </script>
 
 <!-- Birch tree - white bark with horizontal marks, small triangular leaves -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140">
+<svg aria-hidden="true" class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 140">
 	<!-- Main trunk - characteristic white birch bark -->
 	<rect fill={actualTrunkColor} x="45" y="55" width="10" height="85" rx="2" />
 
@@ -185,4 +185,10 @@
 	.sway-1 { animation-delay: 0s; }
 	.sway-2 { animation-delay: 0.4s; }
 	.sway-3 { animation-delay: 0.8s; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.sway {
+			animation: none;
+		}
+	}
 </style>

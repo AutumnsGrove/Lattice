@@ -26,6 +26,7 @@
 
 <!-- Snowflake - various crystalline shapes -->
 <svg
+	aria-hidden="true"
 	class={className}
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0 0 40 40"

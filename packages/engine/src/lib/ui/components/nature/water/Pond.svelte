@@ -28,7 +28,7 @@
 </script>
 
 <!-- Pond with subtle ripple effect -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" aria-hidden="true">
 	<defs>
 		<ellipse id="pond-shape" cx="60" cy="35" rx="55" ry="25" />
 		<clipPath id="pond-clip">
@@ -105,4 +105,10 @@
 	.ripple-1 { animation-delay: 0s; }
 	.ripple-2 { animation-delay: 0.5s; }
 	.ripple-3 { animation-delay: 1.5s; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.ripple {
+			animation: none;
+		}
+	}
 </style>

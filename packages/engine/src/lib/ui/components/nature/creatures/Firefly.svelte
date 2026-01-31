@@ -33,7 +33,7 @@
 </script>
 
 <!-- Firefly with glowing abdomen -->
-<svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+<svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" aria-hidden="true">
 	<!-- Outer glow -->
 	<circle
 		fill={glow}
@@ -107,5 +107,14 @@
 
 	.glow {
 		animation: glow 2s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.float,
+		.pulse,
+		.pulse-inner,
+		.glow {
+			animation: none;
+		}
 	}
 </style>

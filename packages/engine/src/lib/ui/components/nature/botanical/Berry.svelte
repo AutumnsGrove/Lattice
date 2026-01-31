@@ -24,7 +24,7 @@
 </script>
 
 <!-- Berries -->
-<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+<svg class={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" aria-hidden="true">
 	{#if variant === 'single'}
 		<!-- Single berry -->
 		<circle fill={berry} cx="25" cy="28" r="15" />
