@@ -85,6 +85,32 @@ Auth       Security
 - Spider must complete before Raccoon (needs auth to audit)
 - May iterate: Raccoon findings → Spider fixes → Raccoon re-audit
 
+**Iteration Cycle (When Vulnerabilities Found):**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   SECURITY ITERATION                     │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│   🕷️ Spider weaves auth    ─────►    🦝 Raccoon audits  │
+│         ▲                                   │            │
+│         │                                   ▼            │
+│         │                          Vulnerabilities?      │
+│         │                             /        \         │
+│         │                          Yes          No       │
+│         │                           │            │       │
+│         └───── Spider fixes ◄───────┘            │       │
+│                                                  ▼       │
+│                                            ✅ Secure     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Iteration Rules:**
+- Raccoon finds vulnerability → Spider patches → Raccoon re-audits that specific fix
+- Maximum 3 iterations per issue (if more needed, architectural review required)
+- Each iteration focuses only on newly found/fixed items
+- Document all iterations in final report
+
 ---
 
 ### Phase 3: EXECUTE

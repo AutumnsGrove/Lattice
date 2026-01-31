@@ -413,4 +413,59 @@ Use hunting metaphors:
 
 ---
 
+## Diagnosis Decision Tree
+
+When stalking a slow path, follow this tree to pinpoint the prey:
+
+```
+Is it slow on first load?
+├── YES → Check bundle size
+│   ├── Bundle > 200kb? → Code split, tree shake
+│   ├── Images > 500kb each? → Compress, lazy load
+│   └── Many HTTP requests? → Combine, preload critical
+│
+└── NO → Slow during use?
+    ├── Slow API responses?
+    │   ├── Check query times → Add indexes, reduce N+1
+    │   ├── Check external calls → Cache, parallelize
+    │   └── Check computation → Move to worker, memoize
+    │
+    ├── Janky scrolling/animations?
+    │   ├── DevTools shows repaints? → Use transform/opacity only
+    │   ├── Long frames (>16ms)? → Reduce work per frame
+    │   └── Memory climbing? → Check for leaks
+    │
+    └── Slow interactions?
+        ├── Click delay? → Check event handlers
+        ├── Input lag? → Debounce, throttle
+        └── Form submit slow? → Check validation, API
+```
+
+**Quick Diagnostic Commands:**
+
+```bash
+# Bundle analysis
+npm run build && du -sh build/
+
+# Network waterfall
+# Chrome DevTools → Network tab → Slow 3G preset
+
+# Performance profile
+# Chrome DevTools → Performance → Record page load
+
+# Memory snapshot
+# Chrome DevTools → Memory → Take heap snapshot
+```
+
+**The 80/20 Rule:**
+80% of performance problems come from:
+1. Unoptimized images
+2. Missing database indexes
+3. No caching
+4. Too much JavaScript upfront
+
+Check these first before diving deeper.
+
+---
+
 *The swift fox leaves the slow forest behind.* 🦊

@@ -239,6 +239,83 @@ Verify:
 - No overlapping elements
 ```
 
+---
+
+**Example Walkthrough Scenarios:**
+
+**Scenario 1: Testing a Form with Conditional Fields**
+
+```
+Setup: Multi-step registration form with conditional fields
+
+1. Tab to email field
+   ✓ Focus indicator visible?
+   ✓ Label announced by screen reader?
+
+2. Enter invalid email, Tab away
+   ✓ Error message announced live?
+   ✓ Error associated with field (aria-describedby)?
+
+3. Check "Business account" checkbox
+   ✓ New company name field appears
+   ✓ Focus moves to new field OR stays logical?
+   ✓ Screen reader announces new content?
+
+4. Tab through to submit
+   ✓ Skip link available to jump sections?
+   ✓ Submit button clearly labeled?
+   ✓ Can activate with Enter AND Space?
+```
+
+**Scenario 2: Testing a Data Table with Sorting**
+
+```
+Setup: Posts table with sortable columns
+
+1. Navigate to table
+   ✓ Table has caption or aria-label?
+   ✓ Column headers use <th scope="col">?
+   ✓ Row headers use <th scope="row">?
+
+2. Tab to "Sort by date" column header
+   ✓ Sort button focusable?
+   ✓ Current sort direction announced (aria-sort)?
+
+3. Activate sort with Enter
+   ✓ Table updates without losing focus?
+   ✓ Sort change announced (aria-live)?
+   ✓ New sort direction reflected?
+
+4. Navigate table with arrow keys (screen reader)
+   ✓ Can move cell-by-cell?
+   ✓ Row/column context announced?
+```
+
+**Scenario 3: Testing a Modal Dialog**
+
+```
+Setup: "Delete post" confirmation modal
+
+1. Trigger modal from button
+   ✓ Focus moves INTO modal?
+   ✓ First focusable element receives focus?
+   ✓ Modal has role="dialog" and aria-modal="true"?
+   ✓ Modal has accessible name (aria-labelledby)?
+
+2. Tab through modal
+   ✓ Focus trapped inside modal?
+   ✓ Tab wraps from last to first element?
+   ✓ Shift+Tab works backwards?
+
+3. Press Escape
+   ✓ Modal closes?
+   ✓ Focus returns to trigger button?
+
+4. Click overlay/backdrop
+   ✓ Modal closes (if intended behavior)?
+   ✓ Or click does nothing (if modal is critical)?
+```
+
 **Output:** Manual testing complete with issue log
 
 ---
