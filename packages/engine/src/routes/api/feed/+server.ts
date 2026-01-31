@@ -35,6 +35,11 @@ export const GET: RequestHandler = (event) => {
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
 
+      // Build enclosure for cover image if present
+      const enclosure = post.featured_image
+        ? `\n      <enclosure url="${escapeXml(post.featured_image)}" type="image/jpeg" length="0" />`
+        : "";
+
       return `
     <item>
       <title><![CDATA[${escapeXml(post.title)}]]></title>
@@ -42,7 +47,7 @@ export const GET: RequestHandler = (event) => {
       <guid isPermaLink="true">${siteUrl}/blog/${normalizedSlug}</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description><![CDATA[${escapeXml(post.description || "")}]]></description>
-      ${post.tags && post.tags.length > 0 ? post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("\n      ") : ""}
+      ${post.tags && post.tags.length > 0 ? post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("\n      ") : ""}${enclosure}
     </item>`;
     })
     .join("");

@@ -19,6 +19,7 @@
   let gutterItems = $state([]);
   let firesideAssisted = $state(false);
   let status = $state("draft");
+  let featuredImage = $state("");
 
   // Editor reference for anchor insertion
   /** @type {any} */
@@ -117,6 +118,7 @@
         gutter_content: JSON.stringify(gutterItems),
         fireside_assisted: firesideAssisted ? 1 : 0,
         status,
+        featured_image: featuredImage.trim() || null,
       });
 
       // Clear draft on successful save
@@ -234,6 +236,25 @@
               <span class="form-warning">Description exceeds recommended SEO length</span>
             {:else if description.length > 0 && description.length < 120}
               <span class="form-hint">Add {120 - description.length} more chars for optimal SEO</span>
+            {/if}
+          </div>
+
+          <div class="form-group">
+            <label for="featured-image">Cover Image</label>
+            <input
+              type="url"
+              id="featured-image"
+              bind:value={featuredImage}
+              placeholder="https://..."
+              class="form-input"
+            />
+            <span class="form-hint">
+              URL to a cover image. <a href="/admin/images" target="_blank">Upload one first →</a>
+            </span>
+            {#if featuredImage}
+              <div class="cover-preview">
+                <img src={featuredImage} alt="Cover preview" />
+              </div>
             {/if}
           </div>
 
@@ -565,6 +586,20 @@
     font-size: 0.75rem;
     font-weight: 500;
     border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  /* Cover image preview */
+  .cover-preview {
+    margin-top: 0.75rem;
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+  .cover-preview img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    display: block;
   }
   /* Editor Main */
   .editor-main {

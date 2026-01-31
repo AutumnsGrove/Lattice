@@ -52,6 +52,7 @@ interface PostInput {
   gutter_content?: string;
   font?: string;
   status?: "draft" | "published";
+  featured_image?: string;
 }
 
 /**
@@ -291,6 +292,7 @@ export const PUT: RequestHandler = async ({
       font: data.font || "default",
       status: data.status,
       updated_at: unixNow,
+      featured_image: data.featured_image || null,
     };
 
     // Set published_at when publishing

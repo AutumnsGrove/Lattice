@@ -30,6 +30,7 @@ interface PostRecord {
   status?: string;
   published_at?: number;
   font?: string;
+  featured_image?: string;
 }
 
 /** Cached post data - the fully processed result */
@@ -44,6 +45,7 @@ interface CachedPost {
   gutterContent: GutterItem[];
   font: string;
   author: string;
+  featured_image?: string;
 }
 
 /** Cache configuration */
@@ -216,5 +218,6 @@ async function fetchAndProcessPost(
     gutterContent,
     font: (post.font as string) || "default",
     author: authorName,
+    featured_image: (post.featured_image as string) || undefined,
   };
 }
