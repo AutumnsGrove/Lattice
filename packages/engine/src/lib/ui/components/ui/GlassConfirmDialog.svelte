@@ -1,19 +1,19 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import { Dialog as DialogPrimitive } from "bits-ui";
 	import { cn } from "$lib/ui/utils";
-	import { fade, scale } from "svelte/transition";
 	import { AlertTriangle, Trash2, HelpCircle } from "lucide-svelte";
 	import Button from "./Button.svelte";
+	import GlassCard from "./GlassCard.svelte";
+	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
 
 	/**
 	 * GlassConfirmDialog - A confirmation dialog with glassmorphism styling
 	 *
-	 * Perfect for destructive actions like delete, or any action that needs user confirmation.
-	 * Features a glass-effect card over a blurred overlay.
+	 * Built on bits-ui Dialog for accessibility (focus trap, escape-to-close, ARIA)
+	 * with GlassCard providing the visual styling.
 	 *
-	 * **Focus Management:** This component automatically saves the previously focused element
-	 * when opening and restores focus to it when closing. This ensures keyboard and screen
-	 * reader users maintain their place in the document after dismissing the dialog.
+	 * Perfect for destructive actions like delete, or any action that needs user confirmation.
 	 *
 	 * @example Basic confirmation
 	 * ```svelte
@@ -73,44 +73,6 @@
 		children
 	}: Props = $props();
 
-	// Focus management: track the element that had focus before dialog opened
-	let previouslyFocusedElement: HTMLElement | null = null;
-	let dialogRef = $state<HTMLDivElement | null>(null);
-
-	// Selector for focusable elements within the dialog (used for focus trap and initial focus)
-	const FOCUSABLE_SELECTOR =
-		'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-	// Delay before moving focus, allows CSS transitions to start (150ms scale transition)
-	// Using 50ms gives the DOM time to render while feeling instant to users
-	const FOCUS_DELAY_MS = 50;
-
-	// Save focus when dialog opens, restore when it closes
-	$effect(() => {
-		if (open) {
-			// Save the currently focused element before dialog takes focus
-			previouslyFocusedElement = document.activeElement as HTMLElement | null;
-
-			// Focus the first interactive element (Cancel button) for immediate keyboard access
-			// This is better UX than focusing the container - users can act immediately
-			setTimeout(() => {
-				const firstFocusable = dialogRef?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-				firstFocusable?.focus();
-			}, FOCUS_DELAY_MS);
-		} else if (previouslyFocusedElement) {
-			// Restore focus when dialog closes
-			// Use setTimeout to ensure this runs after any DOM updates
-			const elementToFocus = previouslyFocusedElement;
-			setTimeout(() => {
-				// Only restore if element is still in DOM and focusable
-				if (elementToFocus && document.body.contains(elementToFocus)) {
-					elementToFocus.focus();
-				}
-			}, FOCUS_DELAY_MS);
-			previouslyFocusedElement = null;
-		}
-	});
-
 	// Variant-specific styling
 	const variantConfig = {
 		default: {
@@ -147,136 +109,83 @@
 		}
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
-		// Early exit if dialog is closed - no need to process keydowns
-		if (!open) return;
-
-		if (event.key === "Escape") {
+	// Handle backdrop click and escape via bits-ui's onOpenChange
+	function handleOpenChange(isOpen: boolean) {
+		if (!isOpen && open) {
+			// Dialog is being closed (escape or backdrop click)
 			handleCancel();
 		}
-
-		// Focus trapping: keep Tab within the dialog
-		if (event.key === "Tab" && dialogRef) {
-			const focusableElements = dialogRef.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
-
-			if (event.shiftKey && document.activeElement === firstElement) {
-				// Shift+Tab from first element: wrap to last
-				event.preventDefault();
-				lastElement?.focus();
-			} else if (!event.shiftKey && document.activeElement === lastElement) {
-				// Tab from last element: wrap to first
-				event.preventDefault();
-				firstElement?.focus();
-			}
-		}
-	}
-
-	function handleBackdropClick(event: MouseEvent) {
-		// Only close if clicking the backdrop itself, not the dialog
-		if (event.target === event.currentTarget) {
-			handleCancel();
-		}
-	}
-
-	function handleBackdropKeydown(event: KeyboardEvent) {
-		// Handle Enter and Space to close, consistent with button behavior
-		if (event.key === "Enter" || event.key === " ") {
-			event.preventDefault();
-			handleCancel();
-		}
+		open = isOpen;
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<!-- bits-ui Dialog handles: focus trap, escape key, backdrop click, ARIA, focus restoration -->
+<DialogPrimitive.Root bind:open onOpenChange={handleOpenChange}>
+	<DialogPrimitive.Portal>
+		<!-- Overlay with blur effect -->
+		<DialogOverlay />
 
-{#if open}
-	<!-- Backdrop with glass effect -->
-	<div
-		class="fixed inset-0 z-grove-modal flex items-center justify-center p-4"
-		onclick={handleBackdropClick}
-		onkeydown={handleBackdropKeydown}
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby="confirm-dialog-title"
-		tabindex="0"
-		transition:fade={{ duration: 150 }}
-	>
-		<!-- Dark overlay with blur -->
-		<div
-			class="absolute inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-sm"
-			aria-hidden="true"
-		></div>
-
-		<!-- Dialog card -->
-		<div
-			bind:this={dialogRef}
-			class={cn(
-				"relative z-10 w-full max-w-md",
-				"bg-white/80 dark:bg-slate-900/80",
-				"backdrop-blur-xl",
-				"border border-white/40 dark:border-slate-700/40",
-				"rounded-2xl shadow-2xl",
-				"overflow-hidden"
-			)}
-			tabindex="-1"
-			transition:scale={{ duration: 150, start: 0.95 }}
+		<!-- Dialog content - positioned and wrapped in GlassCard -->
+		<DialogPrimitive.Content
+			class="fixed left-[50%] top-[50%] z-grove-modal w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-4 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+			aria-labelledby="confirm-dialog-title"
 		>
-			<!-- Header with icon -->
-			<div class="px-6 pt-6 pb-4 flex items-start gap-4">
-				<div class={cn(
-					"flex-shrink-0 p-3 rounded-full",
-					variant === "danger" && "bg-red-100 dark:bg-red-900/30",
-					variant === "warning" && "bg-amber-100 dark:bg-amber-900/30",
-					variant === "default" && "bg-accent/10 dark:bg-accent/20"
-				)}>
-					<config.icon class={cn("w-6 h-6", config.iconClass)} />
+			<GlassCard variant="frosted" class="overflow-hidden">
+				<!-- Header with icon -->
+				<div class="px-6 pt-6 pb-4 flex items-start gap-4">
+					<div class={cn(
+						"flex-shrink-0 p-3 rounded-full",
+						variant === "danger" && "bg-red-100 dark:bg-red-900/30",
+						variant === "warning" && "bg-amber-100 dark:bg-amber-900/30",
+						variant === "default" && "bg-accent/10 dark:bg-accent/20"
+					)}>
+						<config.icon class={cn("w-6 h-6", config.iconClass)} />
+					</div>
+					<div class="flex-1 min-w-0">
+						<DialogPrimitive.Title
+							id="confirm-dialog-title"
+							class="text-lg font-semibold text-foreground leading-tight"
+						>
+							{title}
+						</DialogPrimitive.Title>
+						{#if message && !children}
+							<DialogPrimitive.Description class="mt-2 text-sm text-muted-foreground leading-relaxed">
+								{message}
+							</DialogPrimitive.Description>
+						{/if}
+						{#if children}
+							<div class="mt-2 text-sm text-muted-foreground">
+								{@render children()}
+							</div>
+						{/if}
+					</div>
 				</div>
-				<div class="flex-1 min-w-0">
-					<h3
-						id="confirm-dialog-title"
-						class="text-lg font-semibold text-foreground leading-tight"
-					>
-						{title}
-					</h3>
-					{#if message && !children}
-						<p class="mt-2 text-sm text-muted-foreground leading-relaxed">
-							{message}
-						</p>
-					{/if}
-					{#if children}
-						<div class="mt-2 text-sm text-muted-foreground">
-							{@render children()}
-						</div>
-					{/if}
-				</div>
-			</div>
 
-			<!-- Footer with actions -->
-			<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex justify-end gap-3">
-				<Button
-					variant="ghost"
-					onclick={handleCancel}
-					disabled={loading}
-				>
-					{cancelLabel}
-				</Button>
-				<Button
-					variant={config.confirmVariant}
-					onclick={handleConfirm}
-					disabled={loading}
-				>
-					{#if loading}
-						<span class="inline-flex items-center gap-2">
-							<span class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
-							Processing...
-						</span>
-					{:else}
-						{confirmLabel}
-					{/if}
-				</Button>
-			</div>
-		</div>
-	</div>
-{/if}
+				<!-- Footer with actions -->
+				<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex justify-end gap-3">
+					<Button
+						variant="ghost"
+						onclick={handleCancel}
+						disabled={loading}
+					>
+						{cancelLabel}
+					</Button>
+					<Button
+						variant={config.confirmVariant}
+						onclick={handleConfirm}
+						disabled={loading}
+					>
+						{#if loading}
+							<span class="inline-flex items-center gap-2">
+								<span class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+								Processing...
+							</span>
+						{:else}
+							{confirmLabel}
+						{/if}
+					</Button>
+				</div>
+			</GlassCard>
+		</DialogPrimitive.Content>
+	</DialogPrimitive.Portal>
+</DialogPrimitive.Root>
