@@ -50,15 +50,21 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // AUTHENTICATION (Heartwood SessionDO)
   // =========================================================================
-  // Try grove_session cookie first (SessionDO - fast path via service binding)
+  // Try grove_session cookie first, also check Better Auth session cookies (OAuth flow)
   const groveSession = getCookie(cookieHeader, "grove_session");
-  if (groveSession && event.platform?.env?.AUTH) {
+  const betterAuthSession =
+    getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
+    getCookie(cookieHeader, "better-auth.session_token");
+  const sessionCookie = groveSession || betterAuthSession;
+
+  if (sessionCookie && event.platform?.env?.AUTH) {
     try {
+      // Pass full cookie header so GroveAuth can find whichever session cookie exists
       const response = await event.platform.env.AUTH.fetch(
         "https://auth-api.grove.place/session/validate",
         {
           method: "POST",
-          headers: { Cookie: `grove_session=${groveSession}` },
+          headers: { Cookie: cookieHeader || "" },
         },
       );
 
