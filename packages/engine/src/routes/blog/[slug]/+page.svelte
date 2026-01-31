@@ -31,10 +31,18 @@
 		<meta property="article:tag" content={tag} />
 	{/each}
 
+	<!-- Cover image for social media -->
+	{#if data.post.featured_image}
+		<meta property="og:image" content={data.post.featured_image} />
+	{/if}
+
 	<!-- Twitter Card metadata -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={data.post.title} />
 	<meta name="twitter:description" content={data.post.description || data.post.title} />
+	{#if data.post.featured_image}
+		<meta name="twitter:image" content={data.post.featured_image} />
+	{/if}
 
 	<!-- Schema.org JSON-LD structured data for articles -->
 	{@html `<script type="application/ld+json">${JSON.stringify({
@@ -48,7 +56,8 @@
 		},
 		"datePublished": data.post.date,
 		"dateModified": data.post.date,
-		"keywords": data.post.tags.join(", ")
+		"keywords": data.post.tags.join(", "),
+		...(data.post.featured_image ? { "image": data.post.featured_image } : {})
 	})}<\/script>`}
 </svelte:head>
 
@@ -63,6 +72,13 @@
 			<nav class="article-nav" aria-label="Article navigation">
 				<Button variant="link" href="/blog" class="!p-0 mb-6">&larr; Back to Blog</Button>
 			</nav>
+
+			<!-- Cover image -->
+			{#if data.post.featured_image}
+				<figure class="cover-image">
+					<img src={data.post.featured_image} alt="" />
+				</figure>
+			{/if}
 
 			<!-- Article header with title and metadata -->
 			<header class="content-header">
@@ -102,6 +118,21 @@
 	/* Post wrapper for custom font application - placeholder for future styles */
 	.post-wrapper {
 		display: contents;
+	}
+
+	/* Cover image styling */
+	.cover-image {
+		margin: 0 0 2rem 0;
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.cover-image img {
+		width: 100%;
+		height: auto;
+		max-height: 400px;
+		object-fit: cover;
+		display: block;
 	}
 
 	/* Apply custom font to body content and headings (not meta like date/tags) */

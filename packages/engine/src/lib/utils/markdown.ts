@@ -102,6 +102,7 @@ export interface PostMeta {
   date: string;
   tags: string[];
   description: string;
+  featured_image?: string;
 }
 
 /** Full post/recipe with content */

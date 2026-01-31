@@ -35,6 +35,25 @@ export const GET: RequestHandler = (event) => {
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
 
+      // Build enclosure for cover image if present
+      // Infer MIME type from URL extension, fall back to generic image type
+      let enclosure = "";
+      if (post.featured_image) {
+        const ext = post.featured_image.split(".").pop()?.toLowerCase() || "";
+        const mimeTypes: Record<string, string> = {
+          jpg: "image/jpeg",
+          jpeg: "image/jpeg",
+          png: "image/png",
+          gif: "image/gif",
+          webp: "image/webp",
+          avif: "image/avif",
+          jxl: "image/jxl",
+          svg: "image/svg+xml",
+        };
+        const mimeType = mimeTypes[ext] || "image/jpeg";
+        enclosure = `\n      <enclosure url="${escapeXml(post.featured_image)}" type="${mimeType}" length="0" />`;
+      }
+
       return `
     <item>
       <title><![CDATA[${escapeXml(post.title)}]]></title>
@@ -42,7 +61,7 @@ export const GET: RequestHandler = (event) => {
       <guid isPermaLink="true">${siteUrl}/blog/${normalizedSlug}</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description><![CDATA[${escapeXml(post.description || "")}]]></description>
-      ${post.tags && post.tags.length > 0 ? post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("\n      ") : ""}
+      ${post.tags && post.tags.length > 0 ? post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("\n      ") : ""}${enclosure}
     </item>`;
     })
     .join("");

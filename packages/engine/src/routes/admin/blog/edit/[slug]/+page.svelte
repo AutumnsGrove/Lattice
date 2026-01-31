@@ -20,6 +20,7 @@
   let content = $state("");
   let gutterItems = $state(/** @type {any[]} */ ([]));
   let status = $state("draft");
+  let featuredImage = $state("");
 
   // Sync form state when data changes (e.g., navigating to different post)
   $effect(() => {
@@ -34,6 +35,7 @@
       ? JSON.parse(/** @type {string} */ (data.post.gutter_content))
       : [];
     status = /** @type {any} */ (data.post).status || "draft";
+    featuredImage = /** @type {any} */ (data.post).featured_image || "";
   });
 
   // Editor reference for anchor insertion
@@ -120,6 +122,7 @@
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
         status,
+        featured_image: featuredImage.trim() || null,
       });
 
       // Clear draft on successful save
@@ -167,6 +170,7 @@
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
         status: newStatus,
+        featured_image: featuredImage.trim() || null,
       });
 
       // Clear draft on successful save
@@ -348,6 +352,25 @@
               <span class="form-hint"
                 >Add {120 - description.length} more chars for optimal SEO</span
               >
+            {/if}
+          </div>
+
+          <div class="form-group">
+            <label for="featured-image">Cover Image</label>
+            <input
+              type="url"
+              id="featured-image"
+              bind:value={featuredImage}
+              placeholder="https://..."
+              class="form-input"
+            />
+            <span class="form-hint">
+              URL to a cover image. <a href="/admin/images" target="_blank">Upload one first →</a>
+            </span>
+            {#if featuredImage}
+              <div class="cover-preview">
+                <img src={featuredImage} alt="Cover preview" />
+              </div>
             {/if}
           </div>
 
@@ -840,6 +863,20 @@
     font-size: 0.75rem;
     font-weight: 500;
     border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  /* Cover image preview */
+  .cover-preview {
+    margin-top: 0.75rem;
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+  .cover-preview img {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    display: block;
   }
   .metadata-info {
     margin-top: 1.5rem;
