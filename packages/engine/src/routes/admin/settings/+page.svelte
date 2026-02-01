@@ -1,5 +1,6 @@
 <script>
   import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
+  import { Smartphone, Laptop, Monitor } from 'lucide-svelte';
   import { GreenhouseStatusCard, GraftControlPanel, GreenhouseAdminPanel } from '$lib/grafts/greenhouse';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
@@ -24,6 +25,19 @@
    * @property {number} [pages]
    * @property {number} [images]
    * @property {number} [total]
+   */
+
+  /**
+   * @typedef {Object} Session
+   * @property {string} id
+   * @property {string} deviceId
+   * @property {string} deviceName
+   * @property {number} createdAt
+   * @property {number} lastActiveAt
+   * @property {number} expiresAt
+   * @property {string | null} ipAddress
+   * @property {string | null} userAgent
+   * @property {boolean} [isCurrent]
    */
 
   // Props from parent layout (user data)
@@ -73,6 +87,15 @@
   let loadingFlagId = $state(/** @type {string | undefined} */ (undefined));
   /** @type {{ success?: boolean; error?: string; message?: string } | undefined} */
   let adminFormResult = $state(undefined);
+
+  // Active sessions state
+  /** @type {Session[]} */
+  let sessions = $state([]);
+  let loadingSessions = $state(true);
+  /** @type {string | null} */
+  let revokingSessionId = $state(null);
+  let revokingAllSessions = $state(false);
+  let showRevokeAllDialog = $state(false);
 
   async function fetchHealth() {
     loadingHealth = true;
@@ -195,6 +218,119 @@
     savingLogo = false;
   }
 
+  // =========================================================================
+  // ACTIVE SESSIONS (Security)
+  // =========================================================================
+
+  /**
+   * Format timestamp to relative time (e.g., "5m ago", "2h ago")
+   * @param {number} timestamp
+   * @returns {string}
+   */
+  function formatRelativeTime(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
+  }
+
+  /**
+   * Get device icon component based on device name
+   * @param {string} deviceName
+   */
+  function getDeviceIcon(deviceName) {
+    const name = deviceName.toLowerCase();
+    if (name.includes('iphone') || name.includes('android') || name.includes('mobile')) {
+      return Smartphone;
+    }
+    if (name.includes('mac') || name.includes('windows') || name.includes('linux')) {
+      return Laptop;
+    }
+    return Monitor;
+  }
+
+  /**
+   * Fetch active sessions from Heartwood SessionDO
+   */
+  async function fetchSessions() {
+    loadingSessions = true;
+    try {
+      const response = await fetch('/api/auth/sessions');
+      if (response.ok) {
+        const result = await response.json();
+        sessions = result.sessions || [];
+      } else {
+        console.error('Failed to fetch sessions:', response.status);
+        sessions = [];
+      }
+    } catch (error) {
+      console.error('Failed to fetch sessions:', error);
+      sessions = [];
+    }
+    loadingSessions = false;
+  }
+
+  /**
+   * Revoke a specific session
+   * @param {string} sessionId
+   */
+  async function revokeSession(sessionId) {
+    revokingSessionId = sessionId;
+    try {
+      const response = await fetch(`/api/auth/sessions/${sessionId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        toast.success('Session revoked');
+        sessions = sessions.filter(s => s.id !== sessionId);
+      } else {
+        const result = await response.json();
+        toast.error(result.error || 'Failed to revoke session');
+      }
+    } catch (error) {
+      toast.error('Failed to revoke session');
+      console.error('Revoke session error:', error);
+    }
+    revokingSessionId = null;
+  }
+
+  /**
+   * Revoke all sessions except current
+   */
+  async function revokeAllSessions() {
+    revokingAllSessions = true;
+    try {
+      const response = await fetch('/api/auth/sessions/revoke-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keepCurrent: true })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(`Signed out of ${result.revokedCount || 'all other'} devices`);
+        // Refresh the list
+        await fetchSessions();
+      } else {
+        const result = await response.json();
+        toast.error(result.error || 'Failed to revoke sessions');
+      }
+    } catch (error) {
+      toast.error('Failed to revoke sessions');
+      console.error('Revoke all sessions error:', error);
+    }
+    revokingAllSessions = false;
+    showRevokeAllDialog = false;
+  }
+
   $effect(() => {
     // Only fetch health status for platform admins
     if (isPlatformAdmin) {
@@ -202,6 +338,7 @@
     }
     fetchCurrentSettings();
     fetchCacheStats();
+    fetchSessions();
   });
 
   /**
@@ -772,6 +909,71 @@
     </div>
   </GlassCard>
 
+  <!-- Active Sessions / Security -->
+  <GlassCard variant="frosted" class="mb-6">
+    <div class="section-header">
+      <h2>Active Sessions</h2>
+    </div>
+    <p class="section-description">
+      Devices where you're currently signed in to your Grove.
+    </p>
+
+    {#if loadingSessions}
+      <div class="sessions-loading">
+        <Spinner />
+      </div>
+    {:else if sessions.length === 0}
+      <p class="sessions-empty">No active sessions found</p>
+    {:else}
+      <div class="sessions-list">
+        {#each sessions as session (session.id)}
+          {@const DeviceIcon = getDeviceIcon(session.deviceName)}
+          <div class="session-card" class:current={session.isCurrent}>
+            <div class="session-icon">
+              <DeviceIcon size={24} />
+            </div>
+            <div class="session-info">
+              <div class="session-header">
+                <span class="session-name">{session.deviceName}</span>
+                {#if session.isCurrent}
+                  <span class="session-badge">This device</span>
+                {/if}
+              </div>
+              <div class="session-meta">
+                <span>Last active: {formatRelativeTime(session.lastActiveAt)}</span>
+                {#if session.ipAddress}
+                  <span class="session-ip">· {session.ipAddress}</span>
+                {/if}
+              </div>
+            </div>
+            {#if !session.isCurrent}
+              <Button
+                variant="danger"
+                size="sm"
+                onclick={() => revokeSession(session.id)}
+                disabled={revokingSessionId === session.id}
+              >
+                {revokingSessionId === session.id ? 'Revoking...' : 'Revoke'}
+              </Button>
+            {/if}
+          </div>
+        {/each}
+      </div>
+
+      {#if sessions.filter(s => !s.isCurrent).length > 0}
+        <div class="sessions-actions">
+          <Button
+            variant="danger"
+            onclick={() => showRevokeAllDialog = true}
+            disabled={revokingAllSessions}
+          >
+            {revokingAllSessions ? 'Signing out...' : 'Sign out of all other devices'}
+          </Button>
+        </div>
+      {/if}
+    {/if}
+  </GlassCard>
+
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">
       <h2>Cache Management</h2>
@@ -840,6 +1042,16 @@
   variant="warning"
   loading={clearingCache}
   onconfirm={clearCache}
+/>
+
+<GlassConfirmDialog
+  bind:open={showRevokeAllDialog}
+  title="Sign Out of All Devices"
+  message="This will sign you out of all other devices. You'll stay signed in on this device."
+  confirmLabel="Sign Out All"
+  variant="danger"
+  loading={revokingAllSessions}
+  onconfirm={revokeAllSessions}
 />
 
 <style>
@@ -1152,5 +1364,88 @@
     font-size: 0.85rem;
     color: var(--color-text-muted);
     transition: color 0.3s ease;
+  }
+  /* Active sessions styles */
+  .sessions-loading {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+  .sessions-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .session-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    transition: border-color 0.2s;
+  }
+  .session-card.current {
+    border-color: var(--color-primary);
+    background: rgba(44, 95, 45, 0.05);
+  }
+  :global(.dark) .session-card.current {
+    border-color: var(--color-primary-light);
+    background: rgba(92, 184, 95, 0.1);
+  }
+  .session-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--border-radius-button);
+    background: var(--color-surface-elevated);
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+  :global(.dark) .session-icon {
+    color: var(--color-primary-light);
+  }
+  .session-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .session-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .session-name {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .session-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: white;
+  }
+  .session-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+  }
+  .session-ip {
+    opacity: 0.7;
+  }
+  .sessions-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
   }
 </style>
