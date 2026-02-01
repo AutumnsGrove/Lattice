@@ -133,7 +133,14 @@
 			<!-- Sidebar toggle for admin pages (left hamburger) -->
 			{#if showSidebarToggle}
 				<button
-					onclick={() => sidebarStore.toggle()}
+					onclick={() => {
+						// Mobile: slide-in overlay; Desktop: collapse sidebar
+						if (window.matchMedia('(max-width: 768px)').matches) {
+							sidebarStore.toggle();
+						} else {
+							sidebarStore.toggleCollapse();
+						}
+					}}
 					class="p-2 -ml-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 					aria-label="Toggle sidebar"
 				>

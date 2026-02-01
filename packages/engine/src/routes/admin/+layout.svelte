@@ -17,7 +17,8 @@
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
   let sidebarOpen = $derived(sidebarStore.open);
-  let sidebarCollapsed = $state(false);
+  // Desktop collapse state also from shared store so Header toggle can control it
+  let sidebarCollapsed = $derived(sidebarStore.collapsed);
   let sidebarHovered = $state(false);
 
   // Computed: show expanded content when not collapsed OR when hovered
@@ -28,7 +29,7 @@
   }
 
   function toggleCollapse() {
-    sidebarCollapsed = !sidebarCollapsed;
+    sidebarStore.toggleCollapse();
   }
 
   function handleMouseEnter() {
@@ -219,11 +220,12 @@
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: calc(4rem + 0.75rem);
+    /* Chrome Header is 76px tall (py-6 = 24px*2 + content ~28px) */
+    top: calc(76px + 0.75rem);
     left: 0.75rem;
     bottom: 0.75rem;
     height: auto;
-    max-height: calc(100vh - 5.5rem);
+    max-height: calc(100vh - 76px - 1.5rem);
     z-index: 99;
     border-radius: var(--border-radius-standard);
     transition: all 0.3s ease;

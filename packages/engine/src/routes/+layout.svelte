@@ -90,7 +90,7 @@
 <div class="layout leaf-pattern" style:--user-accent={data.siteSettings?.accent_color || null}>
 	<!-- Unified Header with chrome components -->
 	<Header
-		navItems={isAdminPage ? [] : tenantNavItems}
+		navItems={tenantNavItems}
 		brandTitle={siteName}
 		searchEnabled={!isAdminPage}
 		searchPlaceholder="Search posts..."
