@@ -367,7 +367,7 @@
 	</main>
 
 	<footer class:admin-page-footer={isAdminPage}>
-		<p>Powered by <a href="https://grove.place" target="_blank" rel="noopener noreferrer">Lattice</a>, from The Grove</p>
+		<p>Powered by <a href="https://grove.place/knowledge/help/what-is-lattice" target="_blank" rel="noopener noreferrer">Lattice</a>, from The Grove</p>
 		<div class="footer-actions">
 			{#if data?.user}
 				<span class="logged-in-indicator" title="Logged in">
