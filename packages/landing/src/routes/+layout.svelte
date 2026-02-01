@@ -63,29 +63,29 @@
 	// Note: Glass backdrop is now INSIDE the overlay, so removing overlay removes glass too.
 	onMount(() => {
 		if (browser) {
-			// Signal to fallback script that vine animation is disabled
+			// Signal to fallback script whether vine animation is disabled
 			// This data attribute is checked by the fallback in app.html
-			if (!VINE_ANIMATION_ENABLED) {
-				document.documentElement.dataset.vineAnimationDisabled = 'true';
-			}
+			document.documentElement.dataset.vineAnimationDisabled = String(!VINE_ANIMATION_ENABLED);
 
 			const overlay = document.getElementById('grove-loading-overlay');
 			if (overlay) {
 				// Immediately allow interaction through the overlay
 				overlay.style.pointerEvents = 'none';
 
-				// Check both feature flag AND user cooldown
-				if (VINE_ANIMATION_ENABLED && shouldShowVinesAnimation()) {
+				if (!VINE_ANIMATION_ENABLED) {
+					// Animation disabled by feature flag
+					// Show logo breathing briefly (800ms) for branded loading feel
+					setTimeout(() => overlay.remove(), 800);
+				} else if (shouldShowVinesAnimation()) {
 					// Show the full vine parting animation
 					overlay.classList.add('grove-parting');
 					recordVinesShown();
 					// Remove after animation completes
 					setTimeout(() => overlay.remove(), 3500);
 				} else {
-					// Animation disabled or within cooldown
-					// Show logo breathing briefly (800ms) before removing overlay
-					// This gives a branded loading feel without the heavy vine animation
-					setTimeout(() => overlay.remove(), 800);
+					// Within cooldown - user has seen animation recently
+					// Remove immediately to not slow down returning visitors
+					overlay.remove();
 				}
 			}
 		}
