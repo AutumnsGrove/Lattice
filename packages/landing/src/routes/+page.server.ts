@@ -1,4 +1,5 @@
 import type { ServerLoad } from "@sveltejs/kit";
+import { buildGroveAdminUrl } from "@autumnsgrove/groveengine/utils";
 
 export const load: ServerLoad = async ({ locals, platform }) => {
   let groveUrl: string | null = null;
@@ -13,7 +14,7 @@ export const load: ServerLoad = async ({ locals, platform }) => {
         .first<{ username: string }>();
 
       if (tenant?.username) {
-        groveUrl = `https://${tenant.username}.grove.place/admin`;
+        groveUrl = buildGroveAdminUrl(tenant.username);
       }
     } catch {
       // No grove yet - that's fine
