@@ -101,7 +101,14 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
 
-    return json({ posts: formattedPosts });
+    return json(
+      { posts: formattedPosts },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        },
+      },
+    );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error fetching posts:", err);

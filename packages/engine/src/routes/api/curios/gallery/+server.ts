@@ -191,13 +191,20 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     tags: tagsByImageId.get(row.id) || [],
   }));
 
-  return json({
-    images,
-    pagination: {
-      total,
-      limit,
-      offset,
-      hasMore: offset + images.length < total,
+  return json(
+    {
+      images,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + images.length < total,
+      },
     },
-  });
+    {
+      headers: {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+      },
+    },
+  );
 };

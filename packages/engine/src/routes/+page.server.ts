@@ -63,86 +63,102 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   const tenantId = locals.tenantId;
   const db = platform?.env?.DB;
 
-  // Try D1 first for the home page
+  // Run home page and latest post queries in parallel (100-300ms savings)
+  let pageData: PageData | null = null;
+  let postData: PostData | null = null;
+
   if (db && tenantId) {
-    // Multi-tenant mode: load tenant-specific content
     try {
-      const pageData = (await db
-        .prepare(
-          `SELECT slug, title, description, markdown_content, html_content, hero, gutter_content, font
-         FROM pages
-         WHERE tenant_id = ? AND slug = ?`,
-        )
-        .bind(tenantId, "home")
-        .first()) as PageData | null;
+      [pageData, postData] = await Promise.all([
+        db
+          .prepare(
+            `SELECT slug, title, description, markdown_content, html_content, hero, gutter_content, font
+           FROM pages
+           WHERE tenant_id = ? AND slug = ?`,
+          )
+          .bind(tenantId, "home")
+          .first<PageData>(),
 
-      if (pageData) {
-        // Parse hero JSON
-        let hero: HeroData | null = null;
-        if (pageData.hero && typeof pageData.hero === "string") {
-          try {
-            hero = JSON.parse(pageData.hero);
-          } catch (e) {
-            console.warn("Failed to parse hero for home page:", e);
-            hero = null;
-          }
-        }
-
-        // Generate HTML from markdown if not stored
-        let htmlContent = pageData.html_content;
-        if (
-          !htmlContent &&
-          pageData.markdown_content &&
-          typeof pageData.markdown_content === "string"
-        ) {
-          htmlContent = renderMarkdown(pageData.markdown_content);
-        }
-
-        // Extract headers from HTML for table of contents
-        const headers = extractHeadersFromHtml(String(htmlContent || ""));
-
-        // Safe JSON parsing for gutter content
-        let gutterContent: GutterItem[] = [];
-        if (
-          pageData.gutter_content &&
-          typeof pageData.gutter_content === "string"
-        ) {
-          try {
-            gutterContent = JSON.parse(pageData.gutter_content);
-            // Process gutter items: convert markdown to HTML for comment/markdown items
-            gutterContent = gutterContent.map((item: GutterItem) => {
-              if (
-                (item.type === "comment" || item.type === "markdown") &&
-                item.content
-              ) {
-                return {
-                  ...item,
-                  content: renderMarkdown(item.content),
-                };
-              }
-              return item;
-            });
-          } catch (e) {
-            console.warn("Failed to parse gutter_content for home page:", e);
-            gutterContent = [];
-          }
-        }
-
-        page = {
-          slug: pageData.slug,
-          title: pageData.title,
-          description: pageData.description || "",
-          hero,
-          content: htmlContent || "",
-          headers,
-          gutterContent,
-          font: pageData.font || "default",
-        };
-      }
+        db
+          .prepare(
+            `SELECT slug, title, published_at as date, tags, description, html_content, gutter_content
+           FROM posts
+           WHERE tenant_id = ? AND status = 'published'
+           ORDER BY published_at DESC
+           LIMIT 1`,
+          )
+          .bind(tenantId)
+          .first<PostData>(),
+      ]);
     } catch (err) {
-      console.error("D1 fetch error for home page:", err);
+      console.error("D1 fetch error for home page data:", err);
       // Fall through to filesystem fallback
     }
+  }
+
+  // Process home page data
+  if (pageData) {
+    // Parse hero JSON
+    let hero: HeroData | null = null;
+    if (pageData.hero && typeof pageData.hero === "string") {
+      try {
+        hero = JSON.parse(pageData.hero);
+      } catch (e) {
+        console.warn("Failed to parse hero for home page:", e);
+        hero = null;
+      }
+    }
+
+    // Generate HTML from markdown if not stored
+    let htmlContent = pageData.html_content;
+    if (
+      !htmlContent &&
+      pageData.markdown_content &&
+      typeof pageData.markdown_content === "string"
+    ) {
+      htmlContent = renderMarkdown(pageData.markdown_content);
+    }
+
+    // Extract headers from HTML for table of contents
+    const headers = extractHeadersFromHtml(String(htmlContent || ""));
+
+    // Safe JSON parsing for gutter content
+    let gutterContent: GutterItem[] = [];
+    if (
+      pageData.gutter_content &&
+      typeof pageData.gutter_content === "string"
+    ) {
+      try {
+        gutterContent = JSON.parse(pageData.gutter_content);
+        // Process gutter items: convert markdown to HTML for comment/markdown items
+        gutterContent = gutterContent.map((item: GutterItem) => {
+          if (
+            (item.type === "comment" || item.type === "markdown") &&
+            item.content
+          ) {
+            return {
+              ...item,
+              content: renderMarkdown(item.content),
+            };
+          }
+          return item;
+        });
+      } catch (e) {
+        console.warn("Failed to parse gutter_content for home page:", e);
+        gutterContent = [];
+      }
+    }
+
+    page = {
+      slug: pageData.slug,
+      title: pageData.title,
+      description: pageData.description || "",
+      hero,
+      content: htmlContent || "",
+      headers,
+      gutterContent,
+      font: pageData.font || "default",
+    };
   }
 
   // If no D1 page, fall back to filesystem (for local dev or if D1 is empty)
@@ -177,6 +193,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     throw error(404, "Home page not found");
   }
 
+  // Process latest post data
   let latestPost: {
     slug: string;
     title: string;
@@ -189,84 +206,67 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     font?: string;
   } | null = null;
 
-  // Try D1 first for the latest post
-  if (db && tenantId) {
-    // Multi-tenant mode: load tenant-specific latest post
-    try {
-      const post = (await db
-        .prepare(
-          `SELECT slug, title, published_at as date, tags, description, html_content, gutter_content
-         FROM posts
-         WHERE tenant_id = ? AND status = 'published'
-         ORDER BY published_at DESC
-         LIMIT 1`,
-        )
-        .bind(tenantId)
-        .first()) as PostData | null;
+  if (postData) {
+    // Process anchor tags in HTML content (same as individual post pages)
+    const processedHtml = processAnchorTags(
+      String(postData.html_content || ""),
+    );
 
-      if (post) {
-        // Process anchor tags in HTML content (same as individual post pages)
-        const processedHtml = processAnchorTags(
-          String(post.html_content || ""),
-        );
+    // Extract headers from HTML for table of contents
+    const headers = extractHeadersFromHtml(processedHtml);
 
-        // Extract headers from HTML for table of contents
-        const headers = extractHeadersFromHtml(processedHtml);
-
-        // Safe JSON parsing for tags
-        let tags: string[] = [];
-        if (post.tags && typeof post.tags === "string") {
-          try {
-            tags = JSON.parse(post.tags);
-          } catch (e) {
-            console.warn("Failed to parse tags for latest post:", e);
-            tags = [];
-          }
-        }
-
-        // Safe JSON parsing for gutter content
-        let gutterContent: GutterItem[] = [];
-        if (post.gutter_content && typeof post.gutter_content === "string") {
-          try {
-            gutterContent = JSON.parse(post.gutter_content);
-            // Process gutter items: convert markdown to HTML for comment/markdown items
-            gutterContent = gutterContent.map((item: GutterItem) => {
-              if (
-                (item.type === "comment" || item.type === "markdown") &&
-                item.content
-              ) {
-                return {
-                  ...item,
-                  content: renderMarkdown(item.content),
-                };
-              }
-              return item;
-            });
-          } catch (e) {
-            console.warn("Failed to parse gutter_content for latest post:", e);
-            gutterContent = [];
-          }
-        }
-
-        latestPost = {
-          slug: post.slug,
-          title: post.title,
-          // Convert unix timestamp (seconds) to ISO string for frontend
-          date: post.date
-            ? new Date((post.date as unknown as number) * 1000).toISOString()
-            : "",
-          tags,
-          description: post.description || "",
-          content: processedHtml,
-          headers,
-          gutterContent,
-          font: post.font || "default",
-        };
+    // Safe JSON parsing for tags
+    let tags: string[] = [];
+    if (postData.tags && typeof postData.tags === "string") {
+      try {
+        tags = JSON.parse(postData.tags);
+      } catch (e) {
+        console.warn("Failed to parse tags for latest post:", e);
+        tags = [];
       }
-    } catch (err) {
-      console.error("D1 fetch error for latest post:", err);
-      // Fall through to filesystem fallback
     }
+
+    // Safe JSON parsing for gutter content
+    let gutterContent: GutterItem[] = [];
+    if (
+      postData.gutter_content &&
+      typeof postData.gutter_content === "string"
+    ) {
+      try {
+        gutterContent = JSON.parse(postData.gutter_content);
+        // Process gutter items: convert markdown to HTML for comment/markdown items
+        gutterContent = gutterContent.map((item: GutterItem) => {
+          if (
+            (item.type === "comment" || item.type === "markdown") &&
+            item.content
+          ) {
+            return {
+              ...item,
+              content: renderMarkdown(item.content),
+            };
+          }
+          return item;
+        });
+      } catch (e) {
+        console.warn("Failed to parse gutter_content for latest post:", e);
+        gutterContent = [];
+      }
+    }
+
+    latestPost = {
+      slug: postData.slug,
+      title: postData.title,
+      // Convert unix timestamp (seconds) to ISO string for frontend
+      date: postData.date
+        ? new Date((postData.date as unknown as number) * 1000).toISOString()
+        : "",
+      tags,
+      description: postData.description || "",
+      content: processedHtml,
+      headers,
+      gutterContent,
+      font: postData.font || "default",
+    };
   }
 
   // If no D1 post, fall back to filesystem (for local dev or if D1 is empty)

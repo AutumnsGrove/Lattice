@@ -256,7 +256,7 @@
             </span>
             {#if featuredImage}
               <div class="cover-preview">
-                <img src={featuredImage} alt="Cover preview" />
+                <img src={featuredImage} alt="Cover preview" loading="lazy" decoding="async" />
               </div>
             {/if}
           </div>

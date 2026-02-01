@@ -40,7 +40,8 @@ export const load: PageServerLoad = async ({
             `SELECT slug, title, published_at, tags, description
              FROM posts
              WHERE tenant_id = ? AND status = 'published'
-             ORDER BY published_at DESC`,
+             ORDER BY published_at DESC
+             LIMIT 100`,
           )
           .bind(tenantId)
           .all();
@@ -70,7 +71,8 @@ export const load: PageServerLoad = async ({
           `SELECT slug, title, published_at, tags, description
            FROM posts
            WHERE tenant_id = ? AND status = 'published'
-           ORDER BY published_at DESC`,
+           ORDER BY published_at DESC
+           LIMIT 100`,
         )
         .bind(tenantId)
         .all();

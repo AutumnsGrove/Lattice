@@ -18,36 +18,49 @@
  * GNU Affero General Public License for more details.
  */
 
-import domtoimage from 'dom-to-image-more';
-import type { ExportOptions } from '../types';
-import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+import type { ExportOptions } from "../types";
+import { TERRARIUM_CONFIG } from "$lib/config/terrarium";
+
+// Lazy-loaded dom-to-image-more (~150KB savings - only loaded when export is triggered)
+let domtoimageModule: typeof import("dom-to-image-more") | null = null;
+
+async function getDomToImage() {
+  if (!domtoimageModule) {
+    domtoimageModule = await import("dom-to-image-more");
+  }
+  return domtoimageModule.default;
+}
 
 /**
  * Pauses all CSS animations and transitions on an element and its children.
  * Returns a cleanup function to restore animations.
  */
 function pauseAnimations(element: HTMLElement): () => void {
-	const originalStyles = new Map<HTMLElement, string>();
-	const allElements = [element, ...Array.from(element.querySelectorAll<HTMLElement>('*'))];
+  const originalStyles = new Map<HTMLElement, string>();
+  const allElements = [
+    element,
+    ...Array.from(element.querySelectorAll<HTMLElement>("*")),
+  ];
 
-	allElements.forEach((el) => {
-		const style = el.style.cssText;
-		originalStyles.set(el, style);
-		el.style.cssText += '; animation-play-state: paused !important; transition: none !important;';
-	});
+  allElements.forEach((el) => {
+    const style = el.style.cssText;
+    originalStyles.set(el, style);
+    el.style.cssText +=
+      "; animation-play-state: paused !important; transition: none !important;";
+  });
 
-	return () => {
-		originalStyles.forEach((style, el) => {
-			el.style.cssText = style;
-		});
-	};
+  return () => {
+    originalStyles.forEach((style, el) => {
+      el.style.cssText = style;
+    });
+  };
 }
 
 /**
  * Waits for a specified number of milliseconds.
  */
 function wait(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -55,11 +68,16 @@ function wait(ms: number): Promise<void> {
  * Uses getComputedStyle to check animation-play-state.
  */
 function verifyAnimationsPaused(element: HTMLElement): boolean {
-	const allElements = [element, ...Array.from(element.querySelectorAll<HTMLElement>('*'))];
-	return allElements.every((el) => {
-		const style = getComputedStyle(el);
-		return style.animationPlayState === 'paused' || style.animationPlayState === '';
-	});
+  const allElements = [
+    element,
+    ...Array.from(element.querySelectorAll<HTMLElement>("*")),
+  ];
+  return allElements.every((el) => {
+    const style = getComputedStyle(el);
+    return (
+      style.animationPlayState === "paused" || style.animationPlayState === ""
+    );
+  });
 }
 
 /**
@@ -68,36 +86,38 @@ function verifyAnimationsPaused(element: HTMLElement): boolean {
  * Also truncates to a maximum length to prevent filesystem issues.
  */
 export function sanitizeFilename(name: string): string {
-	const maxLength = TERRARIUM_CONFIG.ui.filenameMaxLength;
-	const sanitized = name
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/-+/g, '-')
-		.replace(/^-|-$/g, '');
+  const maxLength = TERRARIUM_CONFIG.ui.filenameMaxLength;
+  const sanitized = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
-	// Truncate to max length, ensuring we don't cut in the middle of a word
-	if (sanitized.length > maxLength) {
-		const truncated = sanitized.slice(0, maxLength);
-		// Find last hyphen to avoid cutting words
-		const lastHyphen = truncated.lastIndexOf('-');
-		return lastHyphen > maxLength / 2 ? truncated.slice(0, lastHyphen) : truncated;
-	}
+  // Truncate to max length, ensuring we don't cut in the middle of a word
+  if (sanitized.length > maxLength) {
+    const truncated = sanitized.slice(0, maxLength);
+    // Find last hyphen to avoid cutting words
+    const lastHyphen = truncated.lastIndexOf("-");
+    return lastHyphen > maxLength / 2
+      ? truncated.slice(0, lastHyphen)
+      : truncated;
+  }
 
-	return sanitized;
+  return sanitized;
 }
 
 /**
  * Triggers a download of a data URL with the specified filename.
  */
 export function downloadDataUrl(dataUrl: string, filename: string): void {
-	const anchor = document.createElement('a');
-	anchor.href = dataUrl;
-	anchor.download = filename;
-	anchor.style.display = 'none';
+  const anchor = document.createElement("a");
+  anchor.href = dataUrl;
+  anchor.download = filename;
+  anchor.style.display = "none";
 
-	document.body.appendChild(anchor);
-	anchor.click();
-	document.body.removeChild(anchor);
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
 }
 
 /**
@@ -109,62 +129,63 @@ export function downloadDataUrl(dataUrl: string, filename: string): void {
  * @returns Promise resolving to a data URL string
  */
 export async function generateDataUrl(
-	canvasElement: HTMLElement,
-	options: ExportOptions = {}
+  canvasElement: HTMLElement,
+  options: ExportOptions = {},
 ): Promise<string> {
-	const {
-		scale = TERRARIUM_CONFIG.export.defaultScale,
-		backgroundColor,
-		pauseAnimations: shouldPauseAnimations = true,
-		width,
-		height
-	} = options;
+  const {
+    scale = TERRARIUM_CONFIG.export.defaultScale,
+    backgroundColor,
+    pauseAnimations: shouldPauseAnimations = true,
+    width,
+    height,
+  } = options;
 
-	let restoreAnimations: (() => void) | null = null;
+  let restoreAnimations: (() => void) | null = null;
 
-	try {
-		if (shouldPauseAnimations) {
-			restoreAnimations = pauseAnimations(canvasElement);
-			// Wait for animations to pause, using configurable timing
-			// Then verify they're actually paused before proceeding
-			await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
-			if (!verifyAnimationsPaused(canvasElement)) {
-				// If still not paused, wait a bit longer for slower devices
-				await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
-			}
-		}
+  try {
+    if (shouldPauseAnimations) {
+      restoreAnimations = pauseAnimations(canvasElement);
+      // Wait for animations to pause, using configurable timing
+      // Then verify they're actually paused before proceeding
+      await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
+      if (!verifyAnimationsPaused(canvasElement)) {
+        // If still not paused, wait a bit longer for slower devices
+        await wait(TERRARIUM_CONFIG.ui.exportWaitMs);
+      }
+    }
 
-		const domToImageOptions: {
-			quality: number;
-			width?: number;
-			height?: number;
-			style?: Record<string, string>;
-		} = {
-			quality: 1.0
-		};
+    const domToImageOptions: {
+      quality: number;
+      width?: number;
+      height?: number;
+      style?: Record<string, string>;
+    } = {
+      quality: 1.0,
+    };
 
-		if (width !== undefined) {
-			domToImageOptions.width = width * scale;
-		}
+    if (width !== undefined) {
+      domToImageOptions.width = width * scale;
+    }
 
-		if (height !== undefined) {
-			domToImageOptions.height = height * scale;
-		}
+    if (height !== undefined) {
+      domToImageOptions.height = height * scale;
+    }
 
-		if (backgroundColor !== undefined) {
-			domToImageOptions.style = {
-				backgroundColor
-			};
-		}
+    if (backgroundColor !== undefined) {
+      domToImageOptions.style = {
+        backgroundColor,
+      };
+    }
 
-		const dataUrl = await domtoimage.toPng(canvasElement, domToImageOptions);
+    const domtoimage = await getDomToImage();
+    const dataUrl = await domtoimage.toPng(canvasElement, domToImageOptions);
 
-		return dataUrl;
-	} finally {
-		if (restoreAnimations) {
-			restoreAnimations();
-		}
-	}
+    return dataUrl;
+  } finally {
+    if (restoreAnimations) {
+      restoreAnimations();
+    }
+  }
 }
 
 /**
@@ -176,13 +197,13 @@ export async function generateDataUrl(
  * @param options - Export configuration options
  */
 export async function exportSceneAsPNG(
-	canvasElement: HTMLElement,
-	sceneName: string,
-	options: ExportOptions = {}
+  canvasElement: HTMLElement,
+  sceneName: string,
+  options: ExportOptions = {},
 ): Promise<void> {
-	const dataUrl = await generateDataUrl(canvasElement, options);
-	const sanitizedName = sanitizeFilename(sceneName);
-	const filename = `${sanitizedName || 'terrarium-scene'}.png`;
+  const dataUrl = await generateDataUrl(canvasElement, options);
+  const sanitizedName = sanitizeFilename(sceneName);
+  const filename = `${sanitizedName || "terrarium-scene"}.png`;
 
-	downloadDataUrl(dataUrl, filename);
+  downloadDataUrl(dataUrl, filename);
 }

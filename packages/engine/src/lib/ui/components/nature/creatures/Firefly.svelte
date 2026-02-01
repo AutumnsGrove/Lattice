@@ -4,6 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { accents, greens } from '../palette';
 
 	interface Props {
@@ -30,10 +31,31 @@
 		normal: 0.6,
 		bright: 0.8
 	}[intensity]);
+
+	// IntersectionObserver to pause animations when off-screen (consistency with other nature components)
+	let svgRef: SVGSVGElement | null = $state(null);
+	let isVisible = $state(true);
+
+	$effect(() => {
+		if (!browser || !svgRef) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				isVisible = entries[0]?.isIntersecting ?? true;
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(svgRef);
+		return () => observer.disconnect();
+	});
+
+	// Only animate if both animate prop is true AND element is visible
+	const shouldAnimate = $derived(animate && isVisible);
 </script>
 
 <!-- Firefly with glowing abdomen -->
-<svg class="{className} {animate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" aria-hidden="true">
+<svg bind:this={svgRef} class="{className} {shouldAnimate ? 'float' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" aria-hidden="true">
 	<!-- Outer glow -->
 	<circle
 		fill={glow}
@@ -41,7 +63,7 @@
 		cy="18"
 		r="12"
 		opacity={glowOpacity}
-		class={animate ? 'pulse' : ''}
+		class={shouldAnimate ? 'pulse' : ''}
 	/>
 
 	<!-- Inner glow -->
@@ -51,14 +73,14 @@
 		cy="18"
 		r="7"
 		opacity={glowOpacity + 0.2}
-		class={animate ? 'pulse-inner' : ''}
+		class={shouldAnimate ? 'pulse-inner' : ''}
 	/>
 
 	<!-- Body -->
 	<ellipse fill={body} cx="15" cy="12" rx="3" ry="4" />
 
 	<!-- Glowing abdomen -->
-	<ellipse fill={glow} cx="15" cy="18" rx="4" ry="5" class={animate ? 'glow' : ''} />
+	<ellipse fill={glow} cx="15" cy="18" rx="4" ry="5" class={shouldAnimate ? 'glow' : ''} />
 
 	<!-- Wings (subtle) -->
 	<ellipse fill={greens.pale} cx="11" cy="10" rx="4" ry="2" opacity="0.3" transform="rotate(-20 11 10)" />
@@ -87,9 +109,10 @@
 		50% { opacity: 0.9; }
 	}
 
+	/* Use opacity instead of filter: brightness() to avoid layer repaints */
 	@keyframes glow {
-		0%, 100% { filter: brightness(1); }
-		50% { filter: brightness(1.3); }
+		0%, 100% { opacity: 0.8; }
+		50% { opacity: 1; }
 	}
 
 	.float {

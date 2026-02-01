@@ -15,6 +15,25 @@
 		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
 		: false;
 
+	// IntersectionObserver to pause animations when off-screen
+	let containerRef: HTMLDivElement | null = $state(null);
+	let isVisible = $state(true);
+
+	$effect(() => {
+		if (!browser || !containerRef) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				isVisible = entries[0]?.isIntersecting ?? true;
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(containerRef);
+
+		return () => observer.disconnect();
+	});
+
 	interface Props {
 		/** Total number of snowflakes */
 		count?: number;
@@ -144,6 +163,7 @@
 {#if enabled}
 	<!-- Snowfall layer - covers the page content area -->
 	<div
+		bind:this={containerRef}
 		class="absolute inset-0 pointer-events-none overflow-hidden"
 		style="z-index: {zIndex};"
 	>
@@ -167,7 +187,7 @@
 					fallDistance={flake.fallDistance}
 					opacity={flake.opacity}
 					seed={flake.id}
-					animate={true}
+					animate={isVisible}
 				/>
 			</div>
 		{/each}

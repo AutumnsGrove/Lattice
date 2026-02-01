@@ -14,9 +14,38 @@
 -->
 <script lang="ts">
   import type { FeatureCardProps } from './types.js';
-  import type { Snippet, Component } from 'svelte';
+  import type { Snippet } from 'svelte';
   import StatusBadge from './StatusBadge.svelte';
-  import * as icons from 'lucide-svelte';
+  // Explicit icon map to avoid bundling all 1000+ lucide icons (~300KB savings)
+  import {
+    HardDrive,
+    Layout,
+    CreditCard,
+    Sparkles,
+    Code,
+    Lock,
+    Map,
+    FolderOpen,
+    Download,
+    Palette,
+    Search,
+    type Icon,
+  } from 'lucide-svelte';
+
+  // Use lucide's Icon type for proper typing
+  const iconMap: Record<string, typeof Icon> = {
+    HardDrive,
+    Layout,
+    CreditCard,
+    Sparkles,
+    Code,
+    Lock,
+    Map,
+    FolderOpen,
+    Download,
+    Palette,
+    Search,
+  };
 
   interface Props extends FeatureCardProps {
     demo?: Snippet;
@@ -24,9 +53,7 @@
 
   let { title, description, status, icon, demo }: Props = $props();
 
-  const IconComponent = $derived(
-    icon && icon in icons ? (icons as unknown as Record<string, Component>)[icon] : null
-  );
+  const IconComponent = $derived(icon && icon in iconMap ? iconMap[icon] : null);
 </script>
 
 <article class="feature-card" data-status={status}>

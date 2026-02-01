@@ -47,12 +47,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       tenantId: locals.tenantId,
     });
 
-    // Fetch all posts for this tenant, ordered by publish date descending
+    // Fetch posts for this tenant, ordered by publish date descending
+    // Limit to 500 to prevent extremely large result sets
     const postsArray = await tenantDb.queryMany<PostRecord>(
       "posts",
       undefined, // No additional WHERE clause (tenant_id is automatic)
       [],
-      { orderBy: "published_at DESC, created_at DESC" },
+      { orderBy: "published_at DESC, created_at DESC", limit: 500 },
     );
 
     // Transform posts - parse tags from JSON string

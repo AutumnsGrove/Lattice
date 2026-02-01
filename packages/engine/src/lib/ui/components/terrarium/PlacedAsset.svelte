@@ -7,6 +7,10 @@
 	import type { PlacedAsset, Point } from './types';
 	import type { Component as SvelteComponent } from 'svelte';
 
+	// Module-level cache for dynamically imported components
+	// Prevents redundant imports when multiple PlacedAssets use the same component
+	const componentCache = new Map<string, SvelteComponent>();
+
 	interface Props {
 		asset: PlacedAsset;
 		isSelected?: boolean;
@@ -40,8 +44,17 @@
 	let rotationStart = $state(0);
 	let assetCenter: Point = $state({ x: 0, y: 0 });
 
-	// Dynamically import the nature component
+	// Dynamically import the nature component (with module-level caching)
 	$effect(() => {
+		const cacheKey = `${asset.category}/${asset.componentName}`;
+
+		// Check cache first
+		const cached = componentCache.get(cacheKey);
+		if (cached) {
+			component = cached;
+			return;
+		}
+
 		const loadComponent = async () => {
 			try {
 				let module;
@@ -73,6 +86,8 @@
 					default:
 						throw new Error(`Unknown category: ${asset.category}`);
 				}
+				// Cache the component for future use
+				componentCache.set(cacheKey, module.default);
 				component = module.default;
 			} catch (error) {
 				console.error(`Failed to load component ${asset.componentName}:`, error);

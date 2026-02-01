@@ -129,12 +129,35 @@
 
   // Note: Slash commands and command palette removed for simplified Medium-style UX
 
+  // Debounced preview HTML - avoid expensive markdown rendering on every keystroke
+  // Cache the last rendered HTML to prevent jank during typing
+  let debouncedContent = $state(content);
+  let debounceTimer = $state(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
+  let isMounted = $state(true);  // Track mount state to prevent race condition
+
+  // Update debounced content after 150ms of no typing
+  $effect(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      // Only update if component is still mounted (prevents race condition)
+      if (isMounted) {
+        debouncedContent = content;
+      }
+    }, 150);
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      isMounted = false;  // Mark as unmounted on cleanup
+    };
+  });
+
   // Computed values
   let wordCount = $derived(content.trim() ? content.trim().split(/\s+/).length : 0);
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
-  let previewHtml = $derived(content ? sanitizeMarkdown(editorMd.render(content)) : "");
-  let previewHeaders = $derived(content ? extractHeaders(content) : []);
+  // Use debounced content for expensive operations (markdown rendering)
+  let previewHtml = $derived(debouncedContent ? sanitizeMarkdown(editorMd.render(debouncedContent)) : "");
+  let previewHeaders = $derived(debouncedContent ? extractHeaders(debouncedContent) : []);
 
   let readingTime = $derived.by(() => {
     const minutes = Math.ceil(wordCount / 200);

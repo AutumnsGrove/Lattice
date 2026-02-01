@@ -187,6 +187,8 @@
 							src={user.avatarUrl}
 							alt=""
 							class="w-8 h-8 rounded-full object-cover"
+							loading="lazy"
+							decoding="async"
 						/>
 					{:else}
 						<div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">

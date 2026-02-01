@@ -37,7 +37,8 @@
   }
 
   // Ensure we have the right number of days, using local timezone
-  const filledData = $derived(() => {
+  // Use $derived.by to cache the result (not $derived with arrow function which returns the function)
+  const filledData = $derived.by(() => {
     const result = [];
     const today = new Date();
 
@@ -65,11 +66,12 @@
     return result;
   });
 
-  const commitDataArr = $derived(filledData().map(d => d.commits));
+  // These now reference the cached result, not call the function 5x
+  const commitDataArr = $derived(filledData.map(d => d.commits));
 
-  const totalCommits = $derived(filledData().reduce((sum, d) => sum + d.commits, 0));
-  const activeDays = $derived(filledData().filter(d => d.commits > 0).length);
-  const peakCommits = $derived(Math.max(...filledData().map(d => d.commits), 0));
+  const totalCommits = $derived(filledData.reduce((sum, d) => sum + d.commits, 0));
+  const activeDays = $derived(filledData.filter(d => d.commits > 0).length);
+  const peakCommits = $derived(Math.max(...filledData.map(d => d.commits), 0));
 
   // Get intensity level for heatmap (0-4)
   /** @param {number} commits */
@@ -98,7 +100,7 @@
   <div class="overview-content">
     <!-- Heatmap -->
     <div class="heatmap">
-      {#each filledData() as day}
+      {#each filledData as day}
         <div
           class="heatmap-cell level-{getIntensity(day.commits)}"
           class:today={day.isToday}

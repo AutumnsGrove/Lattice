@@ -130,44 +130,58 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Determine media type for Claude API
     const mediaType = file.type;
 
-    // Call Claude API with vision
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 300,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType,
-                  data: base64,
+    // Call Claude API with vision (30s timeout to prevent hanging requests)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    let response: Response;
+    try {
+      response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 300,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: mediaType,
+                    data: base64,
+                  },
                 },
-              },
-              {
-                type: "text",
-                text: `Analyze this image and provide:
+                {
+                  type: "text",
+                  text: `Analyze this image and provide:
 1. A short, descriptive filename (lowercase, hyphens instead of spaces, no extension, max 50 chars). Be specific and descriptive about the actual content.
 2. A brief description (1-2 sentences) suitable for a caption.
 3. Alt text for accessibility (concise but descriptive, suitable for screen readers).
 
 Respond in this exact JSON format only, no other text:
 {"filename": "example-filename", "description": "A brief description.", "altText": "Descriptive alt text for the image."}`,
-              },
-            ],
-          },
-        ],
-      }),
-    });
+                },
+              ],
+            },
+          ],
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if ((err as Error).name === "AbortError") {
+        throw error(504, "AI analysis timed out - please try again");
+      }
+      throw err;
+    }
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.text();

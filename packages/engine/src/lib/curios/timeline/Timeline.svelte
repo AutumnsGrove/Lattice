@@ -79,6 +79,19 @@
 	let loadingMore = $state(false);
 	let expandedCards = $state(new Set<string>());
 
+	// Cache rendered markdown by summary ID (prevents re-rendering on every reactive update)
+	const renderedHtmlCache = new Map<string, string>();
+
+	function getRenderedHtml(summary: Summary): string {
+		const cacheKey = summary.id;
+		if (renderedHtmlCache.has(cacheKey)) {
+			return renderedHtmlCache.get(cacheKey)!;
+		}
+		const gutterItems = summary.gutter_content ?? [];
+		const html = renderMarkdownWithGutter(summary.detailed_timeline ?? '', gutterItems);
+		renderedHtmlCache.set(cacheKey, html);
+		return html;
+	}
 
 	// Fun rest day messages
 	const REST_DAY_MESSAGES = [
@@ -320,7 +333,7 @@
 							{#if summary.detailed_timeline && isExpanded}
 								<div class="detailed-section">
 									<div class="detailed-timeline markdown-content">
-										{@html renderMarkdownWithGutter(summary.detailed_timeline, gutterItems)}
+										{@html getRenderedHtml(summary)}
 									</div>
 								</div>
 							{/if}

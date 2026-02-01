@@ -198,6 +198,8 @@
 					class:hidden={imageError}
 					onload={handleImageLoad}
 					onerror={handleImageError}
+					loading="lazy"
+					decoding="async"
 				/>
 			</button>
 
@@ -337,7 +339,7 @@
 							onclick={() => goToIndex(index)}
 							aria-label={`View image ${index + 1}`}
 						>
-							<img src={image.url} alt={image.alt || `Thumbnail ${index + 1}`} />
+							<img src={image.url} alt={image.alt || `Thumbnail ${index + 1}`} loading="lazy" decoding="async" />
 						</button>
 					{/each}
 				</div>

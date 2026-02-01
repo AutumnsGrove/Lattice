@@ -4,6 +4,7 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { themed, resolveThemed } from '../palette';
 
 	interface Props {
@@ -25,10 +26,31 @@
 
 	// Theme-aware crater color: lighter in light mode, darker in dark for contrast
 	const craterColor = $derived(resolveThemed(themed.moonCrater));
+
+	// IntersectionObserver to pause animations when off-screen (consistency with other nature components)
+	let svgRef: SVGSVGElement | null = $state(null);
+	let isVisible = $state(true);
+
+	$effect(() => {
+		if (!browser || !svgRef) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				isVisible = entries[0]?.isIntersecting ?? true;
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(svgRef);
+		return () => observer.disconnect();
+	});
+
+	// Only animate if both animate prop is true AND element is visible
+	const shouldAnimate = $derived(animate && isVisible);
 </script>
 
 <!-- Moon with phase options -->
-<svg class="{className} {animate ? 'glow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" aria-hidden="true">
+<svg bind:this={svgRef} class="{className} {shouldAnimate ? 'glow' : ''}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" aria-hidden="true">
 	<!-- Outer glow -->
 	<circle fill={glowColor} cx="25" cy="25" r="24" opacity="0.15" />
 
@@ -55,9 +77,10 @@
 </svg>
 
 <style>
+	/* Use opacity instead of filter to avoid expensive layer repaints */
 	@keyframes glow {
-		0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(254, 249, 195, 0.3)); }
-		50% { filter: brightness(1.1) drop-shadow(0 0 10px rgba(254, 249, 195, 0.5)); }
+		0%, 100% { opacity: 0.9; }
+		50% { opacity: 1; }
 	}
 
 	.glow {

@@ -76,6 +76,9 @@
 	let densityMultiplier = $state(1);
 	let treeSizeMultiplier = $state(1);
 
+	// Performance budget: max animated elements to prevent jank on lower-end devices
+	const MAX_ANIMATED_ELEMENTS = 150;
+
 	// Calculate density based on viewport width
 	function calculateDensity(): { density: number; treeSize: number } {
 		if (typeof window === 'undefined') return { density: 1, treeSize: 1 };
@@ -87,7 +90,7 @@
 		// Tablet (768-1024px): 1.3x
 		// Desktop (1024-1440px): 1.8x
 		// Large desktop (1440-2560px): 2.5x
-		// Ultrawide (2560px+): 3.5x
+		// Ultrawide (2560px+): 3.0x (capped for performance)
 		let density: number;
 		let treeSize: number;
 
@@ -104,8 +107,8 @@
 			density = 2.5;
 			treeSize = 1.25;
 		} else {
-			// Ultrawide monitors (3440px+)
-			density = 3.5;
+			// Ultrawide monitors - cap at 3.0x for performance
+			density = 3.0;
 			treeSize = 1.4;
 		}
 
@@ -368,6 +371,15 @@
 		randomizedTreeCounts = baseTreeCountRanges.map(range =>
 			getRandomTreeCount(range, density)
 		);
+
+		// Cap total trees to performance budget
+		const totalTrees = randomizedTreeCounts.reduce((a, b) => a + b, 0);
+		if (totalTrees > MAX_ANIMATED_ELEMENTS) {
+			const scaleFactor = MAX_ANIMATED_ELEMENTS / totalTrees;
+			randomizedTreeCounts = randomizedTreeCounts.map(count =>
+				Math.round(count * scaleFactor)
+			);
+		}
 
 		baseTrees = generateBaseTreePositions();
 		lastDensity = density;

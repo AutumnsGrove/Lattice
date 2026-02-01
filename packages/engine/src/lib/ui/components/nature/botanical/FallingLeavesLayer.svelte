@@ -4,8 +4,28 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import type { Season } from '../palette';
 	import LeafFalling from './LeafFalling.svelte';
+
+	// IntersectionObserver to pause animations when off-screen
+	let containerRef: HTMLDivElement | null = $state(null);
+	let isVisible = $state(true);
+
+	$effect(() => {
+		if (!browser || !containerRef) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				isVisible = entries[0]?.isIntersecting ?? true;
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(containerRef);
+
+		return () => observer.disconnect();
+	});
 
 	type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
 	type LeafVariant = 'simple' | 'maple' | 'cherry' | 'aspen' | 'pine';
@@ -140,6 +160,7 @@
 
 <!-- Falling leaves layer - positioned behind trees -->
 <div
+	bind:this={containerRef}
 	class="absolute inset-0 pointer-events-none overflow-hidden"
 	style="z-index: {zIndex};"
 >
@@ -163,7 +184,7 @@
 				drift={leaf.drift}
 				fallDistance={leaf.fallDistance}
 				seed={leaf.id}
-				animate={true}
+				animate={isVisible}
 			/>
 		</div>
 	{/each}

@@ -21,13 +21,13 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   let navPages: NavPage[] = [];
   // Count of enabled curios (for pages admin UI - curios share the nav page limit)
   let enabledCuriosCount = 0;
+  // Curio enable flags (for mobile nav - need to be accessible outside the query block)
+  // These are hoisted here so they're accessible in the return statement after Promise.all
+  let timelineEnabled = false;
+  let galleryEnabled = false;
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
-
-  // Track curio enabled states (hoisted for access in return statement)
-  let timelineEnabled = false;
-  let galleryEnabled = false;
 
   // Only fetch from database at runtime (not during prerendering)
   // The Cloudflare adapter throws when accessing platform.env during prerendering

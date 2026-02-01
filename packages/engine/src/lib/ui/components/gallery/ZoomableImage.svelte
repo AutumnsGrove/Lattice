@@ -153,6 +153,8 @@
 		class:zoomed={zoomLevel > 0}
 		class:dragging={isDragging}
 		style="transform: translate({panX}px, {panY}px) scale({scaleValue})"
+		loading="lazy"
+		decoding="async"
 	/>
 </button>
 

@@ -142,9 +142,6 @@ importers:
       '@lemonsqueezy/lemonsqueezy.js':
         specifier: ^4.0.0
         version: 4.0.0
-      chart.js:
-        specifier: ^4.5.1
-        version: 4.5.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1649,9 +1646,6 @@ packages:
   '@jsquash/jxl@1.3.0':
     resolution: {integrity: sha512-IVOPTneyOd9eBAuow+FnCYIP6wkIc7CjrCDnZGiqAPyJ63vMVxv3zoWiucGiZVh6u9vi/l40AkcS9QwkoVSAqA==}
 
-  '@kurkle/color@0.3.4':
-    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
-
   '@lemonsqueezy/lemonsqueezy.js@4.0.0':
     resolution: {integrity: sha512-xcY1/lDrY7CpIF98WKiL1ElsfoVhddP7FT0fw7ssOzrFqQsr44HgolKrQZxd9SywsCPn12OTOUieqDIokI3mFg==}
     engines: {node: '>=20'}
@@ -2239,10 +2233,6 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
-
-  chart.js@4.5.1:
-    resolution: {integrity: sha512-GIjfiT9dbmHRiYi6Nl2yFCq7kkwdkp1W/lp2J99rX0yo9tgJGn3lKQATztIjb5tVtevcBtIdICNWqlq5+E8/Pw==}
-    engines: {pnpm: '>=8'}
 
   check-error@2.1.3:
     resolution: {integrity: sha512-PAJdDJusoxnwm1VwW07VWwUN1sl7smmC3OKggvndJFadxxDRyFJBX/ggnu/KE4kQAB7a3Dp8f/YXC1FlUprWmA==}
@@ -4640,8 +4630,6 @@ snapshots:
     dependencies:
       wasm-feature-detect: 1.8.0
 
-  '@kurkle/color@0.3.4': {}
-
   '@lemonsqueezy/lemonsqueezy.js@4.0.0': {}
 
   '@lucide/lab@0.1.2': {}
@@ -5251,10 +5239,6 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
-
-  chart.js@4.5.1:
-    dependencies:
-      '@kurkle/color': 0.3.4
 
   check-error@2.1.3: {}
 

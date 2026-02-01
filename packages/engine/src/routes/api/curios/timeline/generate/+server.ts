@@ -29,6 +29,30 @@ import {
 } from "$lib/curios/timeline/secrets.server";
 import { createLumenClient } from "$lib/lumen/index.js";
 
+/** Maximum concurrent GitHub API requests to avoid rate limiting */
+const CONCURRENCY_LIMIT = 5;
+
+/**
+ * Run async functions with limited concurrency.
+ * Processes items in batches of `limit` size for controlled parallelism.
+ */
+async function runWithConcurrency<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  limit: number = CONCURRENCY_LIMIT,
+): Promise<R[]> {
+  const results: R[] = [];
+
+  // Process in batches
+  for (let i = 0; i < items.length; i += limit) {
+    const batch = items.slice(i, i + limit);
+    const batchResults = await Promise.all(batch.map(fn));
+    results.push(...batchResults);
+  }
+
+  return results;
+}
+
 interface GenerateRequest {
   date?: string;
 }
@@ -529,29 +553,19 @@ async function fetchGitHubCommits(
     );
   }
 
-  // Fetch commits from each repo for the target date
-  const allCommits: Commit[] = [];
-
-  for (const repoFullName of repoFullNames) {
+  // Filter repos by include/exclude lists
+  const filteredRepos = repoFullNames.filter((repoFullName) => {
     const repoName = repoFullName.split("/")[1];
+    if (includeRepos && !includeRepos.includes(repoName)) return false;
+    if (excludeRepos && excludeRepos.includes(repoName)) return false;
+    return true;
+  });
 
-    // Apply include/exclude filters (fast path repos may not be filtered yet)
-    if (includeRepos && !includeRepos.includes(repoName)) continue;
-    if (excludeRepos && excludeRepos.includes(repoName)) continue;
-
-    const repoCommits = await fetchRepoCommitsForDate(
-      repoFullName,
-      username,
-      token,
-      date,
-    );
-    allCommits.push(...repoCommits);
-
-    // Rate limit between repos
-    if (repoFullNames.length > 1) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    }
-  }
+  // Fetch commits from repos in parallel (5 concurrent requests - 3+ seconds savings)
+  const commitArrays = await runWithConcurrency(filteredRepos, (repoFullName) =>
+    fetchRepoCommitsForDate(repoFullName, username, token, date),
+  );
+  const allCommits = commitArrays.flat();
 
   return allCommits;
 }
@@ -676,13 +690,15 @@ async function fetchRepoCommitsForDate(
 /**
  * Enrich commits with real additions/deletions from individual commit details.
  * The Commits list API doesn't include stats — we must fetch each commit individually.
+ * Uses concurrent fetching (5 at a time) for significant speed improvement.
  */
 async function fetchCommitStats(
   commits: Commit[],
   username: string,
   token: string,
 ): Promise<void> {
-  for (const commit of commits) {
+  // Fetch commit stats in parallel batches
+  await runWithConcurrency(commits, async (commit) => {
     try {
       const response = await fetch(
         `https://api.github.com/repos/${username}/${commit.repo}/commits/${commit.sha}`,
@@ -703,8 +719,5 @@ async function fetchCommitStats(
     } catch {
       // Non-fatal: keep 0 for this commit
     }
-
-    // Rate limit: 50ms between calls
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
+  });
 }

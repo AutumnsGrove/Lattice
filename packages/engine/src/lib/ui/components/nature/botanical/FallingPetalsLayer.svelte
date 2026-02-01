@@ -14,6 +14,25 @@
 		? window.matchMedia('(prefers-reduced-motion: reduce)').matches
 		: false;
 
+	// IntersectionObserver to pause animations when off-screen
+	let containerRef: HTMLDivElement | null = $state(null);
+	let isVisible = $state(true);
+
+	$effect(() => {
+		if (!browser || !containerRef) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				isVisible = entries[0]?.isIntersecting ?? true;
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(containerRef);
+
+		return () => observer.disconnect();
+	});
+
 	interface Props {
 		/** Total number of petals */
 		count?: number;
@@ -143,6 +162,7 @@
 {#if enabled}
 	<!-- Falling petals layer - cherry blossoms drifting on spring breeze -->
 	<div
+		bind:this={containerRef}
 		class="absolute inset-0 pointer-events-none"
 		style="z-index: {zIndex};"
 		aria-hidden="true"
@@ -166,7 +186,7 @@
 					fallDistance={petal.fallDistance}
 					opacity={petal.opacity}
 					seed={petal.id}
-					animate={true}
+					animate={isVisible}
 				/>
 			</div>
 		{/each}

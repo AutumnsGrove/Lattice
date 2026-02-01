@@ -53,7 +53,7 @@
 		{@const imageSrc = item.src || item.url || item.file}
 		<figure class="gutter-photo">
 			<button class="image-button" onclick={() => openLightbox(imageSrc, item.caption || 'Gutter image', item.caption || '')}>
-				<img src={imageSrc} alt={item.caption || 'Gutter image'} />
+				<img src={imageSrc} alt={item.caption || 'Gutter image'} loading="lazy" decoding="async" />
 			</button>
 			{#if item.caption}
 				<figcaption>{item.caption}</figcaption>
@@ -76,7 +76,7 @@
 		{/if}
 	{:else if item.type === 'emoji'}
 		<div class="gutter-emoji">
-			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} />
+			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} loading="lazy" decoding="async" />
 		</div>
 	{/if}
 </div>

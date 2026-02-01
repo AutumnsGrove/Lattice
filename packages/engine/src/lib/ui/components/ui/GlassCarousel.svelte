@@ -356,6 +356,8 @@
 						alt={images[index].alt}
 						class="w-full h-full object-cover"
 						draggable="false"
+						loading="lazy"
+						decoding="async"
 					/>
 					{#if images[index].caption}
 						<div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">

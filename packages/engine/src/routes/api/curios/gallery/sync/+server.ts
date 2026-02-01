@@ -83,8 +83,20 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
       existingByKey.set(row.r2_key, row.id);
     }
 
-    // List objects scoped to this tenant's prefix
+    // Collect all image data from R2, then batch write to D1
     const tenantPrefix = `${tenantId}/`;
+    const updates: {
+      id: string;
+      obj: R2Object;
+      parsed: ReturnType<typeof parseImageFilename>;
+    }[] = [];
+    const inserts: {
+      id: string;
+      obj: R2Object;
+      parsed: ReturnType<typeof parseImageFilename>;
+    }[] = [];
+
+    // First pass: collect all objects from R2
     do {
       const listResult = await r2Bucket.list({
         prefix: tenantPrefix,
@@ -100,7 +112,6 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
         }
 
         // Strip tenant prefix before parsing metadata
-        // e.g., "autumn-primary/food/ramen.jpg" → "food/ramen.jpg"
         const keyWithoutPrefix = obj.key.startsWith(tenantPrefix)
           ? obj.key.slice(tenantPrefix.length)
           : obj.key;
@@ -108,8 +119,24 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
         const existingId = existingByKey.get(obj.key);
 
         if (existingId) {
-          // Update existing image
-          await db
+          updates.push({ id: existingId, obj, parsed });
+        } else {
+          inserts.push({ id: generateGalleryId(), obj, parsed });
+        }
+      }
+
+      cursor = listResult.truncated ? listResult.cursor : undefined;
+    } while (cursor);
+
+    // Batch write to D1 (much faster than individual writes)
+    const BATCH_SIZE = 50; // D1 batch limit
+
+    // Process updates in batches
+    for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+      const batch = updates.slice(i, i + BATCH_SIZE);
+      await db.batch(
+        batch.map(({ id, obj, parsed }) =>
+          db
             .prepare(
               `UPDATE gallery_images SET
                 file_size = ?,
@@ -128,14 +155,19 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
               parsed.date,
               parsed.category,
               parsed.slug,
-              existingId,
-            )
-            .run();
-          updated++;
-        } else {
-          // Insert new image
-          const newId = generateGalleryId();
-          await db
+              id,
+            ),
+        ),
+      );
+    }
+    updated = updates.length;
+
+    // Process inserts in batches
+    for (let i = 0; i < inserts.length; i += BATCH_SIZE) {
+      const batch = inserts.slice(i, i + BATCH_SIZE);
+      await db.batch(
+        batch.map(({ id, obj, parsed }) =>
+          db
             .prepare(
               `INSERT INTO gallery_images (
                 id, tenant_id, r2_key,
@@ -144,7 +176,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             )
             .bind(
-              newId,
+              id,
               tenantId,
               obj.key,
               parsed.date,
@@ -153,14 +185,11 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
               obj.size,
               obj.uploaded?.toISOString() || null,
               `${cdnBaseUrl}/${obj.key}`,
-            )
-            .run();
-          added++;
-        }
-      }
-
-      cursor = listResult.truncated ? listResult.cursor : undefined;
-    } while (cursor);
+            ),
+        ),
+      );
+    }
+    added = inserts.length;
 
     return json({
       success: true,

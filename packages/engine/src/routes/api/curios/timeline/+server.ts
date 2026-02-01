@@ -124,13 +124,21 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     focus_streak: row.focus_streak,
   }));
 
-  return json({
-    summaries,
-    pagination: {
-      total: countResult?.count ?? 0,
-      limit,
-      offset,
-      hasMore: offset + summaries.length < (countResult?.count ?? 0),
+  return json(
+    {
+      summaries,
+      pagination: {
+        total: countResult?.count ?? 0,
+        limit,
+        offset,
+        hasMore: offset + summaries.length < (countResult?.count ?? 0),
+      },
     },
-  });
+    {
+      headers: {
+        // Timeline data is less volatile - cache for 5 minutes
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
+      },
+    },
+  );
 };
