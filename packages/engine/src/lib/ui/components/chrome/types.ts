@@ -40,6 +40,16 @@ export interface FooterLink {
   external?: boolean;
 }
 
+/**
+ * User object for header auth display
+ */
+export interface HeaderUser {
+  id: string;
+  name?: string | null;
+  email?: string;
+  avatarUrl?: string | null;
+}
+
 export type MaxWidth = "narrow" | "default" | "wide";
 
 /**

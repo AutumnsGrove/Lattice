@@ -5,10 +5,11 @@
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season.svelte';
 	import { Menu, Search, X } from 'lucide-svelte';
-	import type { NavItem, MaxWidth, FooterLink } from './types';
+	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from './types';
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
+	import { LogIn, User } from 'lucide-svelte';
 
 	// Determine current page for highlighting
 	let currentPath = $derived(page.url.pathname);
@@ -34,6 +35,16 @@
 		showLogo?: boolean;
 		/** Logo size when shown */
 		logoSize?: 'xs' | 'sm' | 'md' | 'lg';
+
+		// Auth support
+		/** Show sign-in link when not logged in (default: true) */
+		showSignIn?: boolean;
+		/** Current user if logged in */
+		user?: HeaderUser | null;
+		/** Sign-in URL (default: https://heartwood.grove.place) */
+		signInHref?: string;
+		/** Label for sign-in link (default: "Sign in") */
+		signInLabel?: string;
 	}
 
 	let {
@@ -49,7 +60,12 @@
 		onSearch,
 		// Logo props
 		showLogo = false,
-		logoSize = 'md'
+		logoSize = 'md',
+		// Auth props
+		showSignIn = true,
+		user = null,
+		signInHref = 'https://heartwood.grove.place',
+		signInLabel = 'Sign in'
 	}: Props = $props();
 
 	const maxWidthClass = {
@@ -183,6 +199,40 @@
 				</div>
 			{/if}
 
+			<!-- Auth: Sign in or user info -->
+			{#if showSignIn}
+				{#if user}
+					<!-- Logged in: show user info -->
+					<a
+						href="/admin"
+						class="flex items-center gap-2 text-foreground-subtle hover:text-accent-muted transition-colors"
+						title="Go to your admin panel"
+					>
+						{#if user.avatarUrl}
+							<img
+								src={user.avatarUrl}
+								alt=""
+								class="w-6 h-6 rounded-full object-cover"
+							/>
+						{:else}
+							<div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
+								<User class="w-3.5 h-3.5 text-accent-muted" />
+							</div>
+						{/if}
+						<span class="text-sm hidden lg:inline">{user.name || 'Your Grove'}</span>
+					</a>
+				{:else}
+					<!-- Not logged in: show sign-in link -->
+					<a
+						href={signInHref}
+						class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-accent-muted transition-colors"
+					>
+						<LogIn class="w-4 h-4" />
+						<span>{signInLabel}</span>
+					</a>
+				{/if}
+			{/if}
+
 			<ThemeToggle />
 		</nav>
 
@@ -210,4 +260,8 @@
 	{searchEnabled}
 	{searchPlaceholder}
 	{onSearch}
+	{showSignIn}
+	{user}
+	{signInHref}
+	{signInLabel}
 />

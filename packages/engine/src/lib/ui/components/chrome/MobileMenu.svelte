@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { X, ExternalLink, Search } from 'lucide-svelte';
-	import type { NavItem, FooterLink } from './types';
+	import { X, ExternalLink, Search, LogIn, User } from 'lucide-svelte';
+	import type { NavItem, FooterLink, HeaderUser } from './types';
 	import { isActivePath } from './types';
 	import {
 		DEFAULT_MOBILE_NAV_ITEMS,
@@ -21,6 +21,11 @@
 		searchEnabled?: boolean;
 		searchPlaceholder?: string;
 		onSearch?: (query: string) => void;
+		// Auth support
+		showSignIn?: boolean;
+		user?: HeaderUser | null;
+		signInHref?: string;
+		signInLabel?: string;
 	}
 
 	let {
@@ -32,7 +37,12 @@
 		// Search props
 		searchEnabled = false,
 		searchPlaceholder = 'Search...',
-		onSearch
+		onSearch,
+		// Auth props
+		showSignIn = true,
+		user = null,
+		signInHref = 'https://heartwood.grove.place',
+		signInLabel = 'Sign in'
 	}: Props = $props();
 
 	// Search state
@@ -159,6 +169,46 @@
 			<X class="w-5 h-5" />
 		</button>
 	</div>
+
+	<!-- Auth section -->
+	{#if showSignIn}
+		<div class="p-3 border-b border-default">
+			{#if user}
+				<!-- Logged in: user info + admin link -->
+				<a
+					href="/admin"
+					onclick={handleClose}
+					class="flex items-center gap-3 px-3 py-3 rounded-lg bg-accent/10 text-foreground hover:bg-accent/20 transition-colors"
+				>
+					{#if user.avatarUrl}
+						<img
+							src={user.avatarUrl}
+							alt=""
+							class="w-8 h-8 rounded-full object-cover"
+						/>
+					{:else}
+						<div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+							<User class="w-4 h-4 text-accent-muted" />
+						</div>
+					{/if}
+					<div class="flex-1 min-w-0">
+						<p class="text-sm font-medium truncate">{user.name || 'Wanderer'}</p>
+						<p class="text-xs text-foreground-subtle">Go to your Grove →</p>
+					</div>
+				</a>
+			{:else}
+				<!-- Not logged in: sign-in link -->
+				<a
+					href={signInHref}
+					onclick={handleClose}
+					class="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors"
+				>
+					<LogIn class="w-5 h-5 text-accent-muted" />
+					<span class="text-sm font-medium">{signInLabel}</span>
+				</a>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Search form (when enabled) -->
 	{#if searchEnabled}
