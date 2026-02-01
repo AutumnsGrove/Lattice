@@ -19,6 +19,29 @@ echo ""
 
 failed=0
 
+# ============================================================================
+# LOCKFILE SYNC CHECK (catches pnpm-lock.yaml out of sync with package.json)
+# This is a common cause of CI failures that's easy to miss locally
+# ============================================================================
+if [ -f "pnpm-lock.yaml" ]; then
+    echo -e "${YELLOW}🔒 Checking lockfile sync...${NC}"
+
+    # Run pnpm install with frozen-lockfile to check sync (suppressed output)
+    if ! pnpm install --frozen-lockfile > /dev/null 2>&1; then
+        echo -e "   ${RED}✗ pnpm-lock.yaml is out of sync!${NC}"
+        echo ""
+        echo -e "${YELLOW}To fix:${NC}"
+        echo -e "${GRAY}  1. Run: pnpm install${NC}"
+        echo -e "${GRAY}  2. Commit the updated pnpm-lock.yaml${NC}"
+        echo -e "${GRAY}  3. Push again${NC}"
+        echo ""
+        failed=1
+    else
+        echo -e "   ${GREEN}✓ Lockfile in sync${NC}"
+    fi
+    echo ""
+fi
+
 # Helper function to format and display type errors
 # Usage: show_errors "package_name" "output_file"
 show_errors() {
