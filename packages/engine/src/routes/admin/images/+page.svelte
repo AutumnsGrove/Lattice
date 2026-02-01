@@ -656,8 +656,8 @@
   <GlassCard variant="default" class="gallery-section">
     <div class="section-header">
       <div class="section-title">
-        <h2>CDN Gallery</h2>
-        <span class="section-subtitle">All images in the Grove</span>
+        <h2>Gallery</h2>
+        <span class="section-subtitle">All images in your Grove</span>
       </div>
       <div class="gallery-controls">
         <select bind:value={gallerySortBy} onchange={changeSortOrder}>

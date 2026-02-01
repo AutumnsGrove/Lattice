@@ -567,7 +567,7 @@
           variant="outline"
           onclick={() => openImagePicker((url) => (itemUrl = url))}
         >
-          Browse CDN
+          Browse Images
         </Button>
       </div>
     </div>
@@ -636,7 +636,7 @@
 </Dialog>
 
 <!-- Image Picker Modal -->
-<Dialog bind:open={showImagePicker} title="Select Image from CDN">
+<Dialog bind:open={showImagePicker} title="Select Image">
   {#snippet children()}
     <div class="picker-controls">
     <Input
