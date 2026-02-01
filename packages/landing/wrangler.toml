@@ -30,6 +30,12 @@ bucket_name = "grove-cdn"
 binding = "CACHE"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
+# KV for feature flags caching (alias for CACHE, used by greenhouse admin)
+# Named CACHE_KV to match engine package conventions
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "514e91e81cc44d128a82ec6f668303e4"
+
 # Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
 # - RESEND_API_KEY (environment variable, not secret for Pages)
 # - ADMIN_EMAILS (environment variable)
