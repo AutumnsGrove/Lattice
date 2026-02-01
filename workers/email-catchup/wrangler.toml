@@ -1,0 +1,26 @@
+# Email Catch-up Worker
+#
+# Weekly cron job that handles edge cases in email delivery:
+# - Finds users who missed scheduled emails
+# - Syncs unsubscribes from Resend back to D1
+# - Marks completed sequences
+#
+# Deploy: wrangler deploy
+# Logs: wrangler tail
+
+name = "grove-email-catchup"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# Weekly on Sunday at 10:00 AM UTC
+[triggers]
+crons = ["0 10 * * 0"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Environment variables (set via wrangler secret)
+# - RESEND_API_KEY: Resend API key for sending emails
