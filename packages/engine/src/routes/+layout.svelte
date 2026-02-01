@@ -14,8 +14,9 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { Button, Input } from '$lib/ui';
+	import { Button } from '$lib/ui';
 	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
+	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
@@ -49,194 +50,31 @@
 		}
 	});
 
-	let darkMode = $state(false); // Default to light mode
-	let mobileMenuOpen = $state(false);
-	/** @type {HTMLDivElement | null} */
-	let mobileMenuRef = $state(null);
-	/** @type {HTMLButtonElement | null} */
-	let hamburgerBtnRef = $state(null);
-	let searchExpanded = $state(false);
-	let searchQuery = $state('');
-	/** @type {HTMLInputElement | null} */
-	let searchInputRef = $state(null);
-
 	// Check if we're on an admin page
 	let isAdminPage = $derived(page.url.pathname.startsWith('/admin'));
 
-	// Prevent body scroll when mobile menu is open
-	$effect(() => {
-		if (typeof document !== 'undefined') {
-			if (mobileMenuOpen) {
-				document.body.style.overflow = 'hidden';
-			} else {
-				document.body.style.overflow = '';
-			}
-		}
-		// Cleanup on unmount
-		return () => {
-			if (typeof document !== 'undefined') {
-				document.body.style.overflow = '';
-			}
-		};
-	});
+	// Build tenant navigation items from context
+	const tenantNavItems = $derived(buildTenantNavItems({
+		siteName: siteName,
+		navPages: data.navPages,
+		showTimeline: data.tenant?.showTimeline,
+		showGallery: data.tenant?.showGallery,
+	}));
 
-	// Focus management for mobile menu
-	$effect(() => {
-		if (mobileMenuOpen && mobileMenuRef) {
-			// Focus first link when menu opens
-			const firstLink = mobileMenuRef.querySelector('a');
-			if (firstLink) {
-				firstLink.focus();
-			}
-		}
-	});
-
-	// Handle keyboard shortcuts
-	/** @param {KeyboardEvent} event */
-	function handleKeydown(event) {
-		// Escape to close mobile menu
-		if (event.key === 'Escape' && mobileMenuOpen) {
-			closeMobileMenu();
-			// Return focus to hamburger button
-			if (hamburgerBtnRef) {
-				hamburgerBtnRef.focus();
-			}
-		}
-
-		// Escape to close search
-		if (event.key === 'Escape' && searchExpanded) {
-			searchExpanded = false;
-			searchQuery = '';
-		}
-
-		// Keyboard shortcut to focus search (/ or Cmd+K)
-		const activeEl = /** @type {HTMLElement} */ (document.activeElement);
-		const isTyping = activeEl?.tagName === 'INPUT' ||
-		                 activeEl?.tagName === 'TEXTAREA' ||
-		                 activeEl?.isContentEditable;
-
-		if (!isTyping) {
-			// Forward slash to open search
-			if (event.key === '/') {
-				event.preventDefault();
-				if (!searchExpanded) {
-					toggleSearch();
-				} else if (searchInputRef) {
-					searchInputRef.focus();
-				}
-			}
-
-			// Cmd+K (Mac) or Ctrl+K (Windows/Linux) to open search
-			if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
-				event.preventDefault();
-				if (!searchExpanded) {
-					toggleSearch();
-				} else if (searchInputRef) {
-					searchInputRef.focus();
-				}
-			}
-		}
-
-		// Trap focus within mobile menu
-		if (mobileMenuOpen && mobileMenuRef && event.key === 'Tab') {
-			const focusableElements = mobileMenuRef.querySelectorAll('a');
-			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
-
-			if (event.shiftKey && document.activeElement === firstElement) {
-				event.preventDefault();
-				lastElement.focus();
-			} else if (!event.shiftKey && document.activeElement === lastElement) {
-				event.preventDefault();
-				firstElement.focus();
-			}
-		}
+	// Handle search - navigate to blog search
+	/** @param {string} query */
+	function handleSearch(query) {
+		goto(`/blog/search?q=${encodeURIComponent(query)}`);
 	}
 
-	// Sync state with pre-hydration theme (set by app.html script)
-	$effect(() => {
-		const savedTheme = localStorage.getItem('theme');
-		if (savedTheme === 'dark') {
-			darkMode = true;
-		} else if (savedTheme === 'light') {
-			darkMode = false;
-		} else {
-			// Respect system preference, default to light if no preference
-			darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-		}
-		applyTheme();
-	});
+	// Theme is handled by themeStore in chrome components
+	// Just need to sync with the layout's needs for the footer toggle
+	let darkMode = $derived(themeStore.resolvedTheme === 'dark');
 
 	function toggleTheme() {
-		darkMode = !darkMode;
-		localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-		applyTheme();
-	}
-
-	function applyTheme() {
-		if (darkMode) {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
-	}
-
-	function toggleMobileMenu() {
-		mobileMenuOpen = !mobileMenuOpen;
-	}
-
-	function closeMobileMenu() {
-		mobileMenuOpen = false;
-	}
-
-	function toggleSearch() {
-		searchExpanded = !searchExpanded;
-		if (searchExpanded) {
-			// Focus input after DOM update
-			setTimeout(() => {
-				if (searchInputRef) {
-					searchInputRef.focus();
-				}
-			}, 50);
-		} else {
-			searchQuery = '';
-		}
-	}
-
-	/** @param {SubmitEvent} event */
-	function handleSearchSubmit(event) {
-		event.preventDefault();
-		if (searchQuery.trim()) {
-			goto(`/blog/search?q=${encodeURIComponent(searchQuery.trim())}`);
-			searchExpanded = false;
-			searchQuery = '';
-			closeMobileMenu();
-		}
-	}
-
-	/** @param {KeyboardEvent} event */
-	function handleSearchKeydown(event) {
-		if (event.key === 'Escape') {
-			searchExpanded = false;
-			searchQuery = '';
-		}
-	}
-
-	/** @param {FocusEvent} event */
-	function handleSearchBlur(event) {
-		// Close search if focus moves outside the search area (but not to the search button)
-		const relatedTarget = /** @type {HTMLElement | null} */ (event.relatedTarget);
-		// Check if focus moved to search button or stays within search form
-		if (relatedTarget && (relatedTarget.classList.contains('search-btn') || relatedTarget.closest('.search-form'))) {
-			return;
-		}
-		if (!searchQuery.trim()) {
-			searchExpanded = false;
-		}
+		themeStore.toggle();
 	}
 </script>
-
-<svelte:window onkeydown={handleKeydown} />
 
 <!-- Handle not_found context (invalid subdomain) -->
 {#if context?.type === 'not_found'}
@@ -249,114 +87,19 @@
 </div>
 {:else}
 <div class="layout leaf-pattern">
-	<header>
-		<nav>
-			<!-- TITLE AREA -->
-			<a href="/" class="logo">{siteName}</a>
-
-			<!-- Desktop Navigation -->
-			<div class="nav-links desktop-nav">
-				<a href="/" class:active={page.url.pathname === '/'}>Home</a>
-				<a href="/blog" class:active={page.url.pathname.startsWith('/blog')}>Blog</a>
-				{#each data.navPages || [] as navPage (navPage.slug)}
-					<a href="/{navPage.slug}" class:active={page.url.pathname === `/${navPage.slug}`}>{navPage.title}</a>
-				{/each}
-				<a href="/about" class:active={page.url.pathname.startsWith('/about')}>About</a>
-
-				<!-- Search -->
-				<div class="search-wrapper">
-					{#if searchExpanded}
-						<form class="search-form" onsubmit={handleSearchSubmit}>
-							<Input
-								bind:ref={searchInputRef}
-								type="text"
-								placeholder="Search posts..."
-								bind:value={searchQuery}
-								onkeydown={handleSearchKeydown}
-								onblur={handleSearchBlur}
-								class="nav-search-input"
-								required
-							/>
-						</form>
-					{/if}
-					<Button
-						variant="ghost"
-						size="icon"
-						onclick={toggleSearch}
-						aria-label={searchExpanded ? 'Close search' : 'Open search'}
-						class="search-btn"
-					>
-						{#if searchExpanded}
-							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M18 6 6 18"></path>
-								<path d="m6 6 12 12"></path>
-							</svg>
-						{:else}
-							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<circle cx="11" cy="11" r="8"></circle>
-								<path d="m21 21-4.3-4.3"></path>
-							</svg>
-						{/if}
-					</Button>
-				</div>
-			</div>
-
-			<!-- Mobile Hamburger Button -->
-			<Button
-				bind:ref={hamburgerBtnRef}
-				variant="ghost"
-				size="icon"
-				class={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
-				onclick={toggleMobileMenu}
-				aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-				aria-expanded={mobileMenuOpen}
-				aria-controls="mobile-menu"
-			>
-			<span class="hamburger-icon">
-				<span class="bar"></span>
-				<span class="bar"></span>
-				<span class="bar"></span>
-			</span>
-			</Button>
-		</nav>
-
-		<!-- Mobile Menu Overlay -->
-		{#if mobileMenuOpen}
-			<div class="mobile-menu-overlay" onclick={closeMobileMenu} role="presentation"></div>
-		{/if}
-
-		<!-- Mobile Navigation Menu -->
-		<div
-			bind:this={mobileMenuRef}
-			id="mobile-menu"
-			class="mobile-menu"
-			class:open={mobileMenuOpen}
-			role="navigation"
-			aria-label="Mobile navigation"
-		>
-			<form class="mobile-search-form" onsubmit={handleSearchSubmit}>
-				<Input
-					type="text"
-					placeholder="Search posts..."
-					bind:value={searchQuery}
-					class="mobile-search-input"
-					required
-				/>
-				<Button type="submit" variant="default" size="icon" class="mobile-search-btn" aria-label="Search">
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<circle cx="11" cy="11" r="8"></circle>
-						<path d="m21 21-4.3-4.3"></path>
-					</svg>
-				</Button>
-			</form>
-			<a href="/" class:active={page.url.pathname === '/'} onclick={closeMobileMenu}>Home</a>
-			<a href="/blog" class:active={page.url.pathname.startsWith('/blog')} onclick={closeMobileMenu}>Blog</a>
-			{#each data.navPages || [] as navPage (navPage.slug)}
-				<a href="/{navPage.slug}" class:active={page.url.pathname === `/${navPage.slug}`} onclick={closeMobileMenu}>{navPage.title}</a>
-			{/each}
-			<a href="/about" class:active={page.url.pathname.startsWith('/about')} onclick={closeMobileMenu}>About</a>
-		</div>
-	</header>
+	<!-- Unified Header with chrome components -->
+	<Header
+		navItems={tenantNavItems}
+		brandTitle={siteName}
+		searchEnabled={true}
+		searchPlaceholder="Search posts..."
+		onSearch={handleSearch}
+		resourceLinks={[]}
+		connectLinks={[]}
+		showLogo={data.siteSettings?.show_grove_logo ?? false}
+		logoSize="md"
+		maxWidth="wide"
+	/>
 
 	<main>
 		{#key page.url.pathname}
@@ -503,84 +246,6 @@
 		display: flex;
 		flex-direction: column;
 	}
-	header {
-		background: white;
-		border-bottom: 1px solid var(--light-border-primary);
-		padding: 1rem 2rem;
-		position: sticky;
-		top: 0;
-		z-index: 100;
-		transition: background-color 0.3s ease, border-color 0.3s ease;
-	}
-	:global(.dark) header {
-		background: #242424;
-		border-bottom: 1px solid var(--light-border-secondary);
-	}
-	nav {
-		max-width: 1200px;
-		margin: 0 auto;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 2rem;
-		position: relative;
-		z-index: 101;
-	}
-	.logo {
-		font-size: 1.5rem;
-		font-weight: bold;
-		color: var(--color-primary);
-		text-decoration: none;
-		transition: color 0.2s;
-	}
-	.logo:hover {
-		color: var(--color-primary-hover);
-	}
-	.nav-links {
-		display: flex;
-		gap: 2rem;
-	}
-	.nav-links a {
-		text-decoration: none;
-		color: var(--color-text-muted);
-		font-weight: 500;
-		transition: color 0.2s ease;
-		position: relative;
-	}
-	.nav-links a::after {
-		content: '';
-		position: absolute;
-		bottom: -4px;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: var(--color-primary);
-		transform: scaleX(0);
-		transform-origin: left;
-		transition: transform 0.25s ease;
-	}
-	.nav-links a:hover {
-		color: var(--color-primary);
-	}
-	.nav-links a:hover::after {
-		transform: scaleX(1);
-	}
-	.nav-links a.active {
-		color: var(--color-primary);
-	}
-	.nav-links a.active::after {
-		transform: scaleX(1);
-	}
-	/* Search styles */
-	.search-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-	.search-form {
-		display: flex;
-		align-items: center;
-	}
 	footer {
 		background: hsl(var(--card));
 		border-top: 1px solid var(--color-border);
@@ -636,129 +301,10 @@
 	:global(.dark) .logged-in-indicator {
 		color: var(--accent-success);
 	}
-	/* Mobile menu overlay */
-	.mobile-menu-overlay {
-		display: none;
-	}
-	/* Mobile menu - hidden on desktop */
-	.mobile-menu {
-		display: none;
-	}
+	/* Mobile-specific layout adjustments */
 	@media (max-width: 768px) {
-		header {
-			padding: 1rem;
-		}
 		main {
 			padding: 1rem;
-		}
-		/* Hide desktop nav on mobile */
-		.desktop-nav {
-			display: none;
-		}
-		/* Mobile menu overlay */
-		.mobile-menu-overlay {
-			display: block;
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			background: rgba(0, 0, 0, 0.5);
-			z-index: 99;
-		}
-		/* Mobile menu */
-		.mobile-menu {
-			display: flex;
-			flex-direction: column;
-			position: absolute;
-			top: 100%;
-			left: 0;
-			right: 0;
-			background: var(--mobile-menu-bg);
-			border-bottom: 1px solid var(--mobile-menu-border);
-			padding: 0;
-			max-height: 0;
-			overflow: hidden;
-			opacity: 0;
-			transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-			z-index: 100;
-		}
-		.mobile-menu.open {
-			max-height: 400px;
-			opacity: 1;
-			padding: 0.5rem 0;
-		}
-		/* Mobile search styles */
-		.mobile-search-form {
-			display: flex;
-			align-items: center;
-			padding: 0.75rem 1rem;
-			gap: 0.5rem;
-			border-bottom: 1px solid var(--mobile-menu-border);
-			margin-bottom: 0.5rem;
-		}
-		.mobile-search-form :global(.mobile-search-input) {
-			flex: 1;
-			padding: 0.6rem 0.75rem;
-			font-size: 0.9rem;
-			border: 1px solid var(--light-border-primary);
-			border-radius: 6px;
-			background: white;
-			color: var(--light-border-secondary);
-			transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
-		}
-		:global(.dark) .mobile-search-form :global(.mobile-search-input) {
-			background: var(--light-bg-primary);
-			border-color: var(--light-border-light);
-			color: var(--color-text-dark);
-		}
-		.mobile-search-form :global(.mobile-search-input:focus) {
-			outline: none;
-			border-color: var(--color-primary);
-		}
-		.mobile-search-form :global(.mobile-search-input::placeholder) {
-			color: var(--color-text-muted);
-		}
-		.mobile-search-form :global(.mobile-search-btn) {
-			background: var(--color-primary);
-			border: none;
-			cursor: pointer;
-			padding: 0.6rem;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: white;
-			border-radius: 6px;
-			transition: background-color 0.2s;
-		}
-		.mobile-search-form :global(.mobile-search-btn:hover) {
-			background: var(--color-primary-hover);
-		}
-		.mobile-menu a {
-			text-decoration: none;
-			color: var(--color-text-muted);
-			font-weight: 500;
-			padding: 1rem 1.5rem;
-			transition: background-color 0.2s, color 0.2s;
-			position: relative;
-		}
-		.mobile-menu a:hover {
-			background: var(--light-bg-tertiary);
-			color: var(--color-primary);
-		}
-		.mobile-menu a.active {
-			color: var(--color-primary);
-			background: var(--status-success-bg);
-		}
-		/* Active indicator bar for mobile */
-		.mobile-menu a.active::before {
-			content: '';
-			position: absolute;
-			left: 0;
-			top: 0;
-			bottom: 0;
-			width: 3px;
-			background: var(--color-primary);
 		}
 	}
 </style>

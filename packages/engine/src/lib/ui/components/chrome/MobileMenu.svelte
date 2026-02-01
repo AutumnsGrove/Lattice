@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { X, ExternalLink } from 'lucide-svelte';
+	import { X, ExternalLink, Search } from 'lucide-svelte';
 	import type { NavItem, FooterLink } from './types';
 	import { isActivePath } from './types';
 	import {
@@ -17,6 +17,10 @@
 		navItems?: NavItem[];
 		resourceLinks?: FooterLink[];
 		connectLinks?: FooterLink[];
+		// Search support
+		searchEnabled?: boolean;
+		searchPlaceholder?: string;
+		onSearch?: (query: string) => void;
 	}
 
 	let {
@@ -24,8 +28,15 @@
 		onClose,
 		navItems,
 		resourceLinks,
-		connectLinks
+		connectLinks,
+		// Search props
+		searchEnabled = false,
+		searchPlaceholder = 'Search...',
+		onSearch
 	}: Props = $props();
+
+	// Search state
+	let searchQuery = $state('');
 
 	let currentPath = $derived(page.url.pathname);
 
@@ -41,7 +52,18 @@
 	// Handle close action
 	function handleClose() {
 		open = false;
+		searchQuery = '';
 		onClose();
+	}
+
+	// Handle search submission
+	function handleSearchSubmit(event: Event) {
+		event.preventDefault();
+		if (searchQuery.trim() && onSearch) {
+			onSearch(searchQuery.trim());
+			searchQuery = '';
+			handleClose();
+		}
 	}
 
 	// Close on escape key
@@ -137,6 +159,29 @@
 			<X class="w-5 h-5" />
 		</button>
 	</div>
+
+	<!-- Search form (when enabled) -->
+	{#if searchEnabled}
+		<form onsubmit={handleSearchSubmit} class="p-3 border-b border-default">
+			<div class="flex items-center gap-2">
+				<input
+					type="text"
+					bind:value={searchQuery}
+					placeholder={searchPlaceholder}
+					class="flex-1 px-3 py-2 text-sm rounded-lg border border-default bg-surface
+						text-foreground placeholder:text-foreground-subtle
+						focus:outline-none focus:ring-2 focus:ring-accent/50"
+				/>
+				<button
+					type="submit"
+					class="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+					aria-label="Search"
+				>
+					<Search class="w-4 h-4" />
+				</button>
+			</div>
+		</form>
+	{/if}
 
 	<!-- Navigation -->
 	<nav class="p-2 overflow-y-auto flex-1">

@@ -4,7 +4,7 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import MobileMenu from './MobileMenu.svelte';
 	import { seasonStore } from '../../stores/season.svelte';
-	import { Menu } from 'lucide-svelte';
+	import { Menu, Search, X } from 'lucide-svelte';
 	import type { NavItem, MaxWidth, FooterLink } from './types';
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
@@ -20,6 +20,20 @@
 		maxWidth?: MaxWidth;
 		brandTitle?: string;
 		season?: Season;
+
+		// Search support for tenant sites
+		/** Enable search input in header */
+		searchEnabled?: boolean;
+		/** Placeholder text for search input */
+		searchPlaceholder?: string;
+		/** Callback when search is submitted */
+		onSearch?: (query: string) => void;
+
+		// Optional Grove logo for tenant sites
+		/** Show Grove logo next to brand title (enables season cycling) */
+		showLogo?: boolean;
+		/** Logo size when shown */
+		logoSize?: 'xs' | 'sm' | 'md' | 'lg';
 	}
 
 	let {
@@ -28,7 +42,14 @@
 		connectLinks,
 		maxWidth = 'default',
 		brandTitle,
-		season
+		season,
+		// Search props
+		searchEnabled = false,
+		searchPlaceholder = 'Search...',
+		onSearch,
+		// Logo props
+		showLogo = false,
+		logoSize = 'md'
 	}: Props = $props();
 
 	const maxWidthClass = {
@@ -40,9 +61,40 @@
 	// Mobile menu state
 	let mobileMenuOpen = $state(false);
 
+	// Search state
+	let searchExpanded = $state(false);
+	let searchQuery = $state('');
+	let searchInputRef = $state<HTMLInputElement | null>(null);
+
 	// Cycle through seasons on logo click (spring → summer → autumn → winter)
 	function handleLogoClick() {
 		seasonStore.cycle();
+	}
+
+	function toggleSearch() {
+		searchExpanded = !searchExpanded;
+		if (searchExpanded) {
+			// Focus input after DOM update
+			setTimeout(() => searchInputRef?.focus(), 50);
+		} else {
+			searchQuery = '';
+		}
+	}
+
+	function handleSearchSubmit(event: Event) {
+		event.preventDefault();
+		if (searchQuery.trim() && onSearch) {
+			onSearch(searchQuery.trim());
+			searchExpanded = false;
+			searchQuery = '';
+		}
+	}
+
+	function handleSearchKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			searchExpanded = false;
+			searchQuery = '';
+		}
 	}
 
 	const items = $derived(navItems || DEFAULT_NAV_ITEMS);
@@ -53,20 +105,26 @@
 		<!-- Logo area -->
 		<div class="flex items-center gap-2">
 			<!-- Logo icon - clickable to cycle through seasons -->
-			<Logo
-				size="lg"
-				season={season || seasonStore.current}
-				interactive
-				onclick={handleLogoClick}
-				title="Change season"
-				ariaLabel="Cycle through seasons"
-			/>
+			<!-- For landing: always show. For tenants: only if showLogo is true -->
+			{#if !brandTitle || showLogo}
+				<Logo
+					size={showLogo ? logoSize : 'lg'}
+					season={season || seasonStore.current}
+					interactive
+					onclick={handleLogoClick}
+					title="Change season"
+					ariaLabel="Cycle through seasons"
+				/>
+			{/if}
 
-			<!-- Brand title or "Grove" text - home link, hidden on mobile -->
+			<!-- Brand title or "Grove" text - home link -->
 			{#if brandTitle}
-				<span class="text-xl font-serif text-foreground">
+				<a
+					href="/"
+					class="text-xl font-serif text-foreground hover:text-accent-muted transition-colors"
+				>
 					{brandTitle}
-				</span>
+				</a>
 			{:else}
 				<a
 					href="/"
@@ -91,6 +149,39 @@
 					<span>{item.label}</span>
 				</a>
 			{/each}
+
+			<!-- Search (when enabled) -->
+			{#if searchEnabled}
+				<div class="flex items-center gap-2">
+					{#if searchExpanded}
+						<form onsubmit={handleSearchSubmit} class="flex items-center">
+							<input
+								bind:this={searchInputRef}
+								type="text"
+								bind:value={searchQuery}
+								placeholder={searchPlaceholder}
+								onkeydown={handleSearchKeydown}
+								class="w-40 lg:w-48 px-3 py-1.5 text-sm rounded-lg border border-default bg-surface
+									text-foreground placeholder:text-foreground-subtle
+									focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+							/>
+						</form>
+					{/if}
+					<button
+						type="button"
+						onclick={toggleSearch}
+						class="p-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
+						aria-label={searchExpanded ? 'Close search' : 'Open search'}
+					>
+						{#if searchExpanded}
+							<X class="w-4 h-4" />
+						{:else}
+							<Search class="w-4 h-4" />
+						{/if}
+					</button>
+				</div>
+			{/if}
+
 			<ThemeToggle />
 		</nav>
 
@@ -109,4 +200,13 @@
 </header>
 
 <!-- Mobile menu overlay -->
-<MobileMenu bind:open={mobileMenuOpen} onClose={() => (mobileMenuOpen = false)} {navItems} {resourceLinks} {connectLinks} />
+<MobileMenu
+	bind:open={mobileMenuOpen}
+	onClose={() => (mobileMenuOpen = false)}
+	{navItems}
+	{resourceLinks}
+	{connectLinks}
+	{searchEnabled}
+	{searchPlaceholder}
+	{onSearch}
+/>
