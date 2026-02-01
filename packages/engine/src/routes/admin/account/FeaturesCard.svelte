@@ -42,7 +42,7 @@
       <div class="feature-content">
         <div class="feature-title">
           <span>Trail</span>
-          <Waystone slug="what-is-trails" label="Learn about Trail" />
+          <Waystone slug="what-are-trails" label="Learn about Trail" />
         </div>
         <p class="feature-description">
           Track your creative journey with automated activity summaries.
