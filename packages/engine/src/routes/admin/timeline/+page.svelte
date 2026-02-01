@@ -7,7 +7,7 @@
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
 			<Calendar class="w-8 h-8 text-accent-muted" />
-			<h1 class="m-0 text-3xl text-foreground">Trails</h1>
+			<h1 class="m-0 text-3xl text-foreground">Trail</h1>
 		</div>
 		<p class="m-0 text-foreground-muted text-lg italic">The path becomes clear by walking it.</p>
 	</header>

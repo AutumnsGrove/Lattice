@@ -34,15 +34,15 @@
       </div>
     </a>
 
-    <!-- Trails -->
+    <!-- Trail -->
     <a href="/admin/timeline" class="feature-item">
       <div class="feature-icon">
         <Calendar class="icon" />
       </div>
       <div class="feature-content">
         <div class="feature-title">
-          <span>Trails</span>
-          <Waystone slug="what-are-trails" label="Learn about Trails" />
+          <span>Trail</span>
+          <Waystone slug="what-are-trails" label="Learn about Trail" />
         </div>
         <p class="feature-description">
           Track your creative journey with automated activity summaries.

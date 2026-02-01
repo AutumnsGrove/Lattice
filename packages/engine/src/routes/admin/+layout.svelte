@@ -129,9 +129,9 @@
         <BarChart3 class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Rings</span>
       </a>
-      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trails">
+      <a href="/admin/timeline" class="nav-item" onclick={closeSidebar} title="Trail">
         <Calendar class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Trails</span>
+        <span class="nav-label" class:hidden={!showExpanded}>Trail</span>
       </a>
       <a href="/admin/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
