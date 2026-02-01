@@ -82,6 +82,21 @@ export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     console.log("📧 Email catch-up cron starting...");
 
+    // Validate required environment variables
+    if (!env.EMAIL_RENDER_URL) {
+      console.error(
+        "📧 EMAIL_RENDER_URL not configured. Set it in wrangler.toml or via wrangler secret.",
+      );
+      return { error: "EMAIL_RENDER_URL not configured" };
+    }
+
+    if (!env.RESEND_API_KEY) {
+      console.error(
+        "📧 RESEND_API_KEY not configured. Run: wrangler secret put RESEND_API_KEY",
+      );
+      return { error: "RESEND_API_KEY not configured" };
+    }
+
     const results = {
       overdueFound: 0,
       emailsSent: 0,
@@ -128,6 +143,11 @@ async function processOverdueEmails(env: Env) {
   // This query finds users where:
   // - sequence_stage >= 0 (not complete)
   // - enough time has passed since last_email_at for the next stage
+  //
+  // NOTE: The day offsets here (+2 days, +7 days, etc.) must stay in sync
+  // with the SEQUENCES constant defined at the top of this file.
+  // Offsets include a 1-day buffer to account for scheduling delays.
+  // Example: stage 0→1 is 1 day, so we check +2 days to allow buffer.
   const overdueUsers = await env.DB.prepare(
     `
 		SELECT * FROM email_signups
@@ -139,7 +159,7 @@ async function processOverdueEmails(env: Env) {
 			-- Never received an email (stuck at stage 0)
 			(last_email_at IS NULL AND sequence_stage = 0 AND datetime(created_at, '+1 day') < datetime('now'))
 			OR
-			-- Overdue for next email based on current stage
+			-- Overdue for next email based on current stage (offsets from SEQUENCES + 1 day buffer)
 			(sequence_stage = 0 AND datetime(last_email_at, '+2 days') < datetime('now'))
 			OR
 			(sequence_stage = 1 AND datetime(last_email_at, '+7 days') < datetime('now'))
