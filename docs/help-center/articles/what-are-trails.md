@@ -1,5 +1,5 @@
 ---
-title: What is Trails?
+title: What are Trails?
 description: Grove's personal roadmap feature for building in public
 category: help
 section: how-it-works
@@ -13,7 +13,7 @@ keywords:
 order: 34
 ---
 
-# What is Trails?
+# What are Trails?
 
 Every project is a journey. Trails lets you share yours.
 
