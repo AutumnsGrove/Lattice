@@ -159,5 +159,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     navPageLimit,
     enabledCuriosCount,
     csrfToken: locals.csrfToken,
+    // Explicit curio enable flags for mobile nav (fixes #848 regression)
+    showTimeline: !!timelineResult?.enabled,
+    showGallery: !!galleryResult?.enabled,
   };
 };

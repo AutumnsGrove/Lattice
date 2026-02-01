@@ -54,11 +54,12 @@
 	let isAdminPage = $derived(page.url.pathname.startsWith('/admin'));
 
 	// Build tenant navigation items from context
+	// showTimeline/showGallery flags come from +layout.server.ts (curio config queries)
 	const tenantNavItems = $derived(buildTenantNavItems({
 		siteName: siteName,
 		navPages: data.navPages,
-		showTimeline: data.tenant?.showTimeline,
-		showGallery: data.tenant?.showGallery,
+		showTimeline: data.showTimeline,
+		showGallery: data.showGallery,
 	}));
 
 	// Handle search - navigate to blog search
