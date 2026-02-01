@@ -1072,22 +1072,31 @@
           var o = document.getElementById('grove-loading-overlay');
           if (!o) return;
 
+          // Check if vine animation is disabled via data attribute (set by Svelte)
+          // This allows us to disable the animation for performance while keeping
+          // all the CSS and HTML intact for future re-enablement
+          var animationDisabled = document.documentElement.dataset.vineAnimationDisabled === 'true';
+
           // Cooldown check: skip animation if shown recently (15 minutes)
           var COOLDOWN = 15 * 60 * 1000;
           var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
           var KEY = 'grove-vines-last-shown';
-          var showAnimation = true;
-          try {
-            var last = localStorage.getItem(KEY);
-            if (last) {
-              var ts = parseInt(last, 10);
-              var elapsed = Date.now() - ts;
-              // Only apply cooldown if timestamp is valid and not stale
-              if (!isNaN(ts) && elapsed >= 0 && elapsed < MAX_AGE && elapsed < COOLDOWN) {
-                showAnimation = false;
+          var showAnimation = !animationDisabled; // Start with feature flag check
+
+          // Only check cooldown if animation is enabled by feature flag
+          if (showAnimation) {
+            try {
+              var last = localStorage.getItem(KEY);
+              if (last) {
+                var ts = parseInt(last, 10);
+                var elapsed = Date.now() - ts;
+                // Only apply cooldown if timestamp is valid and not stale
+                if (!isNaN(ts) && elapsed >= 0 && elapsed < MAX_AGE && elapsed < COOLDOWN) {
+                  showAnimation = false;
+                }
               }
-            }
-          } catch (e) {}
+            } catch (e) {}
+          }
 
           // Only trigger parting if not already triggered by Svelte
           if (showAnimation && !o.classList.contains('grove-parting')) {
@@ -1097,8 +1106,9 @@
             // Remove after animation completes (3500ms allows full 2.5s + delays)
             setTimeout(function() { if (o) o.remove(); }, 3500);
           } else if (!showAnimation) {
-            // Within cooldown - remove immediately without animation
-            o.remove();
+            // Animation disabled or within cooldown
+            // Show logo breathing briefly (800ms) before removing overlay
+            setTimeout(function() { if (o) o.remove(); }, 800);
           } else {
             // Animation already triggered by Svelte, just ensure cleanup
             setTimeout(function() { if (o) o.remove(); }, 3500);

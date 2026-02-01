@@ -11,6 +11,14 @@
 	// Access the store to ensure it initializes (the store auto-applies dark class via its own effects)
 	themeStore.resolvedTheme;
 
+	// ============================================================================
+	// VINE ANIMATION FEATURE FLAG
+	// ============================================================================
+	// Set to true to re-enable the vine swinging entrance animation.
+	// Disabled for mobile performance optimization (saves ~2.5s render delay).
+	// All animation CSS and HTML remain intact in app.html for future use.
+	const VINE_ANIMATION_ENABLED = false;
+
 	// Cooldown configuration for the vine parting animation
 	const VINES_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
 	const VINES_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days - treat older timestamps as stale
@@ -55,20 +63,29 @@
 	// Note: Glass backdrop is now INSIDE the overlay, so removing overlay removes glass too.
 	onMount(() => {
 		if (browser) {
+			// Signal to fallback script that vine animation is disabled
+			// This data attribute is checked by the fallback in app.html
+			if (!VINE_ANIMATION_ENABLED) {
+				document.documentElement.dataset.vineAnimationDisabled = 'true';
+			}
+
 			const overlay = document.getElementById('grove-loading-overlay');
 			if (overlay) {
 				// Immediately allow interaction through the overlay
 				overlay.style.pointerEvents = 'none';
 
-				if (shouldShowVinesAnimation()) {
-					// Show the animation and record timestamp
+				// Check both feature flag AND user cooldown
+				if (VINE_ANIMATION_ENABLED && shouldShowVinesAnimation()) {
+					// Show the full vine parting animation
 					overlay.classList.add('grove-parting');
 					recordVinesShown();
 					// Remove after animation completes
 					setTimeout(() => overlay.remove(), 3500);
 				} else {
-					// Within cooldown - skip animation and remove immediately
-					overlay.remove();
+					// Animation disabled or within cooldown
+					// Show logo breathing briefly (800ms) before removing overlay
+					// This gives a branded loading feel without the heavy vine animation
+					setTimeout(() => overlay.remove(), 800);
 				}
 			}
 		}
