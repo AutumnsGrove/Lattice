@@ -91,7 +91,12 @@
 	url="/"
 />
 
-<Header user={data.user} userHref={data.groveUrl || 'https://plant.grove.place'} />
+<Header
+	user={data.user}
+	userHref={data.groveUrl}
+	signInHref="https://plant.grove.place"
+	signInLabel="Sign up"
+/>
 
 <main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
 	<!-- Error Banner -->
