@@ -74,11 +74,12 @@ export const load: LayoutServerLoad = async ({
           });
 
           if (!match) {
-            console.warn("[Admin Auth] Email mismatch - access denied", {
-              tenantEmailRaw: tenantEmail,
-              userEmailRaw: userEmail,
-            });
-            throw redirect(302, `/?error=access_denied`);
+            // DEBUG for #866: Include email info in error so it's visible on the page
+            // Format: "Tenant email: X | Session email: Y"
+            // This shows up in the error banner on the landing page
+            const debugInfo = `Email mismatch! Tenant: ${normalizeEmail(tenantEmail) || "(none)"} vs Session: ${normalizeEmail(userEmail) || "(none)"}`;
+            console.warn("[Admin Auth]", debugInfo);
+            throw redirect(302, `/?error=${encodeURIComponent(debugInfo)}`);
           }
         }
 
