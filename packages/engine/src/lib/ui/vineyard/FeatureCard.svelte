@@ -14,7 +14,7 @@
 -->
 <script lang="ts">
   import type { FeatureCardProps } from './types.js';
-  import type { Snippet, Component } from 'svelte';
+  import type { Snippet } from 'svelte';
   import StatusBadge from './StatusBadge.svelte';
   // Explicit icon map to avoid bundling all 1000+ lucide icons (~300KB savings)
   import {
@@ -29,9 +29,11 @@
     Download,
     Palette,
     Search,
+    type Icon,
   } from 'lucide-svelte';
 
-  const iconMap: Record<string, Component> = {
+  // Use lucide's Icon type for proper typing
+  const iconMap: Record<string, typeof Icon> = {
     HardDrive,
     Layout,
     CreditCard,

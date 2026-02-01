@@ -21,6 +21,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   let navPages: NavPage[] = [];
   // Count of enabled curios (for pages admin UI - curios share the nav page limit)
   let enabledCuriosCount = 0;
+  // Curio enable flags (for mobile nav - need to be accessible outside the query block)
+  let timelineEnabled = false;
+  let galleryEnabled = false;
 
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
@@ -124,9 +127,11 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
           // Add curio pages to nav if enabled
           if (timelineResult?.enabled) {
             navPages.push({ slug: "timeline", title: "Timeline" });
+            timelineEnabled = true;
           }
           if (galleryResult?.enabled) {
             navPages.push({ slug: "gallery", title: "Gallery" });
+            galleryEnabled = true;
           }
 
           // Calculate enabled curios count for the pages admin UI
@@ -160,7 +165,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     enabledCuriosCount,
     csrfToken: locals.csrfToken,
     // Explicit curio enable flags for mobile nav (fixes #848 regression)
-    showTimeline: !!timelineResult?.enabled,
-    showGallery: !!galleryResult?.enabled,
+    showTimeline: timelineEnabled,
+    showGallery: galleryEnabled,
   };
 };
