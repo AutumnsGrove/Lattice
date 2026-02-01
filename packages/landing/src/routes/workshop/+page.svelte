@@ -38,7 +38,7 @@
 		name: string;
 		tagline: string;
 		description: string;
-		status: 'live' | 'building' | 'planned' | 'complete' | 'applied' | 'being implemented';
+		status: 'live' | 'greenhouse' | 'building' | 'planned' | 'complete' | 'applied' | 'being implemented';
 		icon: string;
 		domain?: string;
 		integration: string;
@@ -264,7 +264,7 @@
 					name: 'Curios',
 					tagline: 'Cabinet of Wonders',
 					description: 'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'amphora',
 					integration: 'Visitor experience features for all Grove blogs',
 					spec: '/knowledge/specs/curios-spec',
@@ -279,7 +279,7 @@
 					name: 'Terrarium',
 					tagline: 'Creative Canvas',
 					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'pencilruler',
 					domain: 'terrarium.grove.place',
 					integration: 'Creative tool for building blog decorations',
@@ -369,7 +369,7 @@
 					name: 'Trails',
 					tagline: 'Personal Roadmaps',
 					description: 'Build in public with beautiful project roadmaps. Show your journey, track your progress, celebrate milestones. A visual way to share where you\'ve been and where you\'re headed.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'mapplus',
 					integration: 'Available for all Grove blogs',
 					spec: '/knowledge/specs/trails-spec',
@@ -395,7 +395,7 @@
 					name: 'Thorn',
 					tagline: 'Content Moderation',
 					description: 'Every rose has thorns for protection. Thorn is Grove\'s automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'file-warning',
 					integration: 'Automated moderation for comments and community content',
 					spec: '/knowledge/specs/thorn-spec',
@@ -410,7 +410,7 @@
 					name: 'Petal',
 					tagline: 'Image Content Moderation',
 					description: 'Petals close to protect what\'s precious. Petal is Grove\'s image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'fan',
 					integration: 'Image moderation for uploads and AI-generated content',
 					spec: '/knowledge/specs/petal-spec',
@@ -425,7 +425,7 @@
 					name: 'Wisp',
 					tagline: 'Writing Assistant',
 					description: 'A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'wind',
 					integration: 'Integrated into the Grove editor, off by default',
 					spec: '/knowledge/specs/wisp-spec',
@@ -441,7 +441,7 @@
 					name: 'Scribe',
 					tagline: 'Voice Transcription',
 					description: 'Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you\'re thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.',
-					status: 'building',
+					status: 'greenhouse',
 					icon: 'mic',
 					integration: 'Built into Flow mode in Arbor',
 					spec: '/knowledge/specs/scribe-voice-transcription-spec',
@@ -796,6 +796,7 @@
 	function getStatusBadge(status: string) {
 		switch (status) {
 			case 'live': return { text: 'Live', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
+			case 'greenhouse': return { text: 'Greenhouse', class: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' };
 			case 'complete': return { text: 'Complete', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
 			case 'applied': return { text: 'Applied', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
 			case 'building': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
