@@ -116,7 +116,7 @@
 		},
 		thaw: {
 			title: 'Thaw',
-			subtitle: 'January 2025 — The ice begins to crack',
+			subtitle: 'February 2026 — The ice begins to crack',
 			season: 'winter' as Season,
 			description: 'Grove opens its doors. The first trees take root.',
 			features: [
