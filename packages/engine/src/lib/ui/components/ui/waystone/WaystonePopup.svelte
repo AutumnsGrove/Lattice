@@ -67,9 +67,10 @@
 		<DialogOverlay />
 
 		<!-- Popup content - centered modal on desktop, bottom sheet concept for future mobile -->
+		<!-- Centered in viewport on mobile, offset for sidebar on desktop (sidebar is 256px, so offset by 128px) -->
 		<DialogPrimitive.Content
 			class={cn(
-				'fixed left-[50%] top-[50%] z-grove-modal w-full max-w-lg translate-x-[-50%] translate-y-[-50%] p-4 outline-none',
+				'fixed left-[50%] md:left-[calc(50%+128px)] top-[50%] z-grove-modal w-full max-w-lg translate-x-[-50%] translate-y-[-50%] p-4 outline-none',
 				'data-[state=open]:animate-in data-[state=closed]:animate-out',
 				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 				'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',

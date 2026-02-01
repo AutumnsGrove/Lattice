@@ -590,7 +590,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' https://cdn.grove.place data:",
     "font-src 'self' https://cdn.grove.place",
-    "connect-src 'self' https://api.github.com https://*.grove.place https://challenges.cloudflare.com",
+    "connect-src 'self' https://api.github.com https://grove.place https://*.grove.place https://challenges.cloudflare.com",
     "frame-src https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
   ].join("; ");
