@@ -61,12 +61,16 @@
 		return null;
 	}
 
+	// API base URL - excerpts are served from grove.place (landing site)
+	// This is absolute because Waystones may render on tenant subdomains
+	const EXCERPT_API_BASE = 'https://grove.place/api/kb/excerpt';
+
 	/**
 	 * Fetch excerpt from API
 	 */
 	async function fetchExcerpt(): Promise<WaystoneExcerpt | null> {
 		try {
-			const response = await fetch(`/api/kb/excerpt/${slug}`);
+			const response = await fetch(`${EXCERPT_API_BASE}/${slug}`);
 			if (!response.ok) {
 				throw new Error('Article not found');
 			}
