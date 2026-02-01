@@ -57,9 +57,16 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Whitelist allowed settings to prevent arbitrary data injection
-    const allowedSettings = ["font_family", "accent_color"];
+    const allowedSettings = ["font_family", "accent_color", "show_grove_logo"];
     if (!allowedSettings.includes(setting_key)) {
       throw error(400, "Invalid setting key");
+    }
+
+    // Validate show_grove_logo (boolean string)
+    if (setting_key === "show_grove_logo") {
+      if (setting_value !== "true" && setting_value !== "false") {
+        throw error(400, "Invalid value for show_grove_logo");
+      }
     }
 
     // Validate accent_color (hex format)

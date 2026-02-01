@@ -121,7 +121,8 @@
 			{#if brandTitle}
 				<a
 					href="/"
-					class="text-xl font-serif text-foreground hover:text-accent-muted transition-colors"
+					class="text-xl text-foreground hover:text-accent-muted transition-colors"
+					style="font-family: var(--font-family-main, inherit);"
 				>
 					{brandTitle}
 				</a>
