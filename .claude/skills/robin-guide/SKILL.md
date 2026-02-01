@@ -138,6 +138,12 @@ What do you need to do?
 ├─ Design system architecture? ──→ 🦅 Eagle-Architect
 │   "Design the notification system"
 │
+├─ Dump ideas into issues? ─────→ 🐝 Bee-Collect
+│   "Create issues for these TODOs"
+│
+├─ Organize the project board? ─→ 🦡 Badger-Triage
+│   "Size and prioritize my backlog"
+│
 └─ Complex multi-step work? ─────→ 🌲 Use a Gathering
 ```
 
@@ -338,6 +344,14 @@ Use guiding metaphors:
 │     Guide wanderers to the right animal (that's me!)               │
 │     Use: Choosing skills, discovering capabilities                 │
 │                                                                    │
+│  🐝 bee-collect                                                    │
+│     Gather scattered ideas into organized GitHub issues            │
+│     Use: Brain dumps, batch TODO → issue creation                  │
+│                                                                    │
+│  🦡 badger-triage                                                  │
+│     Organize the hive—size, prioritize, plan milestones            │
+│     Use: Project board triage, sprint planning, timelines          │
+│                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -361,6 +375,9 @@ When the drum sounds, animals gather:
 
 🌲 /gathering-migration   Bear → Bloodhound
                            (Safe data movement)
+
+🌲 /gathering-planning    Bee → Badger
+                           (Ideas → issues → organized backlog)
 ```
 
 ---
