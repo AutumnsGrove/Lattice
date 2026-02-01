@@ -1,12 +1,28 @@
 <script>
-  import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone } from '$lib/ui';
-  import { Smartphone, Laptop, Monitor } from 'lucide-svelte';
-  import { GreenhouseStatusCard, GraftControlPanel, GreenhouseAdminPanel } from '$lib/grafts/greenhouse';
+  import {
+    Button,
+    Spinner,
+    GlassCard,
+    GlassConfirmDialog,
+    Waystone,
+  } from "$lib/ui";
+  import { Smartphone, Laptop, Monitor } from "lucide-svelte";
+  import {
+    GreenhouseStatusCard,
+    GraftControlPanel,
+    GreenhouseAdminPanel,
+  } from "$lib/grafts/greenhouse";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
-  import { COLOR_PRESETS, FONT_PRESETS, getFontFamily, DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from '$lib/config/presets';
-  import { enhance } from '$app/forms';
-  import { invalidateAll } from '$app/navigation';
+  import {
+    COLOR_PRESETS,
+    FONT_PRESETS,
+    getFontFamily,
+    DEFAULT_ACCENT_COLOR,
+    DEFAULT_FONT,
+  } from "$lib/config/presets";
+  import { enhance } from "$app/forms";
+  import { invalidateAll } from "$app/navigation";
 
   /**
    * @typedef {Object} HealthStatus
@@ -48,10 +64,12 @@
   const isPlatformAdmin = $derived(data.isWayfinder === true);
 
   // Greenhouse status from server
-  const greenhouseStatus = $derived(data.greenhouseStatus ?? { inGreenhouse: false });
+  const greenhouseStatus = $derived(
+    data.greenhouseStatus ?? { inGreenhouse: false },
+  );
 
   let clearingCache = $state(false);
-  let cacheMessage = $state('');
+  let cacheMessage = $state("");
   let showClearCacheDialog = $state(false);
   /** @type {CacheStats | null} */
   let cacheStats = $state(null);
@@ -63,18 +81,18 @@
   // Font settings state
   let currentFont = $state(DEFAULT_FONT);
   let savingFont = $state(false);
-  let fontMessage = $state('');
+  let fontMessage = $state("");
   let loadingFont = $state(true);
 
   // Accent color settings state
   let currentAccentColor = $state(DEFAULT_ACCENT_COLOR);
   let savingColor = $state(false);
-  let colorMessage = $state('');
+  let colorMessage = $state("");
 
   // Header branding state
   let showGroveLogo = $state(false);
   let savingLogo = $state(false);
-  let logoMessage = $state('');
+  let logoMessage = $state("");
 
   // Graft control state (for greenhouse members)
   let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
@@ -100,11 +118,14 @@
   async function fetchHealth() {
     loadingHealth = true;
     try {
-      healthStatus = await api.get('/api/git/health');
+      healthStatus = await api.get("/api/git/health");
     } catch (error) {
-      toast.error('Failed to check system health');
-      console.error('Failed to fetch health:', error);
-      healthStatus = { status: 'error', error: error instanceof Error ? error.message : String(error) };
+      toast.error("Failed to check system health");
+      console.error("Failed to fetch health:", error);
+      healthStatus = {
+        status: "error",
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
     loadingHealth = false;
   }
@@ -116,9 +137,9 @@
   async function fetchCacheStats() {
     loadingCacheStats = true;
     try {
-      cacheStats = await api.get('/api/admin/cache/stats');
+      cacheStats = await api.get("/api/admin/cache/stats");
     } catch (error) {
-      console.error('Failed to fetch cache stats:', error);
+      console.error("Failed to fetch cache stats:", error);
       cacheStats = null;
     }
     loadingCacheStats = false;
@@ -126,14 +147,15 @@
 
   async function clearCache() {
     clearingCache = true;
-    cacheMessage = '';
+    cacheMessage = "";
 
     try {
-      await api.post('/api/admin/cache/clear', {});
-      cacheMessage = 'Cache cleared successfully!';
+      await api.post("/api/admin/cache/clear", {});
+      cacheMessage = "Cache cleared successfully!";
       cacheStats = null; // Reset stats after clearing
     } catch (error) {
-      cacheMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+      cacheMessage =
+        "Error: " + (error instanceof Error ? error.message : String(error));
     }
 
     clearingCache = false;
@@ -143,13 +165,14 @@
   async function fetchCurrentSettings() {
     loadingFont = true;
     try {
-      const data = await api.get('/api/settings');
+      const data = await api.get("/api/settings");
       currentFont = data.font_family || DEFAULT_FONT;
       currentAccentColor = data.accent_color || DEFAULT_ACCENT_COLOR;
-      showGroveLogo = data.show_grove_logo === true || data.show_grove_logo === 'true';
+      showGroveLogo =
+        data.show_grove_logo === true || data.show_grove_logo === "true";
     } catch (error) {
-      toast.error('Failed to load settings');
-      console.error('Failed to fetch settings:', error);
+      toast.error("Failed to load settings");
+      console.error("Failed to fetch settings:", error);
       currentFont = DEFAULT_FONT;
       currentAccentColor = DEFAULT_ACCENT_COLOR;
       showGroveLogo = false;
@@ -160,19 +183,23 @@
   // Save font setting
   async function saveFont() {
     savingFont = true;
-    fontMessage = '';
+    fontMessage = "";
 
     try {
-      await api.put('/api/admin/settings', {
-        setting_key: 'font_family',
-        setting_value: currentFont
+      await api.put("/api/admin/settings", {
+        setting_key: "font_family",
+        setting_value: currentFont,
       });
 
-      fontMessage = 'Font setting saved! Refresh to see changes site-wide.';
+      fontMessage = "Font setting saved! Refresh to see changes site-wide.";
       // Apply immediately for preview using shared font config
-      document.documentElement.style.setProperty('--font-family-main', getFontFamily(currentFont));
+      document.documentElement.style.setProperty(
+        "--font-family-main",
+        getFontFamily(currentFont),
+      );
     } catch (error) {
-      fontMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+      fontMessage =
+        "Error: " + (error instanceof Error ? error.message : String(error));
     }
 
     savingFont = false;
@@ -181,17 +208,19 @@
   // Save accent color setting
   async function saveAccentColor() {
     savingColor = true;
-    colorMessage = '';
+    colorMessage = "";
 
     try {
-      await api.put('/api/admin/settings', {
-        setting_key: 'accent_color',
-        setting_value: currentAccentColor
+      await api.put("/api/admin/settings", {
+        setting_key: "accent_color",
+        setting_value: currentAccentColor,
       });
 
-      colorMessage = 'Accent color saved! Refresh to see changes across your blog.';
+      colorMessage =
+        "Accent color saved! Refresh to see changes across your blog.";
     } catch (error) {
-      colorMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+      colorMessage =
+        "Error: " + (error instanceof Error ? error.message : String(error));
     }
 
     savingColor = false;
@@ -200,19 +229,20 @@
   // Save Grove logo setting
   async function saveGroveLogo() {
     savingLogo = true;
-    logoMessage = '';
+    logoMessage = "";
 
     try {
-      await api.put('/api/admin/settings', {
-        setting_key: 'show_grove_logo',
-        setting_value: showGroveLogo ? 'true' : 'false'
+      await api.put("/api/admin/settings", {
+        setting_key: "show_grove_logo",
+        setting_value: showGroveLogo ? "true" : "false",
       });
 
       logoMessage = showGroveLogo
-        ? 'Grove logo enabled! Tap it to cycle through seasons. 🌲'
-        : 'Grove logo hidden from header.';
+        ? "Grove logo enabled! Tap it to cycle through seasons. 🌲"
+        : "Grove logo hidden from header.";
     } catch (error) {
-      logoMessage = 'Error: ' + (error instanceof Error ? error.message : String(error));
+      logoMessage =
+        "Error: " + (error instanceof Error ? error.message : String(error));
     }
 
     savingLogo = false;
@@ -234,7 +264,7 @@
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
+    if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
@@ -247,10 +277,18 @@
    */
   function getDeviceIcon(deviceName) {
     const name = deviceName.toLowerCase();
-    if (name.includes('iphone') || name.includes('android') || name.includes('mobile')) {
+    if (
+      name.includes("iphone") ||
+      name.includes("android") ||
+      name.includes("mobile")
+    ) {
       return Smartphone;
     }
-    if (name.includes('mac') || name.includes('windows') || name.includes('linux')) {
+    if (
+      name.includes("mac") ||
+      name.includes("windows") ||
+      name.includes("linux")
+    ) {
       return Laptop;
     }
     return Monitor;
@@ -262,16 +300,16 @@
   async function fetchSessions() {
     loadingSessions = true;
     try {
-      const response = await fetch('/api/auth/sessions');
+      const response = await fetch("/api/auth/sessions");
       if (response.ok) {
         const result = await response.json();
         sessions = result.sessions || [];
       } else {
-        console.error('Failed to fetch sessions:', response.status);
+        console.error("Failed to fetch sessions:", response.status);
         sessions = [];
       }
     } catch (error) {
-      console.error('Failed to fetch sessions:', error);
+      console.error("Failed to fetch sessions:", error);
       sessions = [];
     }
     loadingSessions = false;
@@ -285,19 +323,19 @@
     revokingSessionId = sessionId;
     try {
       const response = await fetch(`/api/auth/sessions/${sessionId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       if (response.ok) {
-        toast.success('Session revoked');
-        sessions = sessions.filter(s => s.id !== sessionId);
+        toast.success("Session revoked");
+        sessions = sessions.filter((s) => s.id !== sessionId);
       } else {
         const result = await response.json();
-        toast.error(result.error || 'Failed to revoke session');
+        toast.error(result.error || "Failed to revoke session");
       }
     } catch (error) {
-      toast.error('Failed to revoke session');
-      console.error('Revoke session error:', error);
+      toast.error("Failed to revoke session");
+      console.error("Revoke session error:", error);
     }
     revokingSessionId = null;
   }
@@ -308,24 +346,26 @@
   async function revokeAllSessions() {
     revokingAllSessions = true;
     try {
-      const response = await fetch('/api/auth/sessions/revoke-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keepCurrent: true })
+      const response = await fetch("/api/auth/sessions/revoke-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keepCurrent: true }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        toast.success(`Signed out of ${result.revokedCount || 'all other'} devices`);
+        toast.success(
+          `Signed out of ${result.revokedCount || "all other"} devices`,
+        );
         // Refresh the list
         await fetchSessions();
       } else {
         const result = await response.json();
-        toast.error(result.error || 'Failed to revoke sessions');
+        toast.error(result.error || "Failed to revoke sessions");
       }
     } catch (error) {
-      toast.error('Failed to revoke sessions');
-      console.error('Revoke all sessions error:', error);
+      toast.error("Failed to revoke sessions");
+      console.error("Revoke all sessions error:", error);
     }
     revokingAllSessions = false;
     showRevokeAllDialog = false;
@@ -350,24 +390,28 @@
     togglingGraftId = graftId;
     try {
       const formData = new FormData();
-      formData.append('graftId', graftId);
-      formData.append('enabled', String(enabled));
+      formData.append("graftId", graftId);
+      formData.append("enabled", String(enabled));
 
-      const response = await fetch('?/toggleGraft', {
-        method: 'POST',
+      const response = await fetch("?/toggleGraft", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
-        toast.success(enabled ? `🌿 ${graftId.replace(/_/g, ' ')} enabled!` : `🌱 ${graftId.replace(/_/g, ' ')} disabled`);
+      if (result.type === "success") {
+        toast.success(
+          enabled
+            ? `🌿 ${graftId.replace(/_/g, " ")} enabled!`
+            : `🌱 ${graftId.replace(/_/g, " ")} disabled`,
+        );
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to update preference');
+        toast.error(result.data?.error || "Failed to update preference");
       }
     } catch (error) {
-      toast.error('Failed to update preference');
-      console.error('Graft toggle error:', error);
+      toast.error("Failed to update preference");
+      console.error("Graft toggle error:", error);
     } finally {
       togglingGraftId = undefined;
     }
@@ -379,20 +423,20 @@
   async function handleResetGrafts() {
     resettingGrafts = true;
     try {
-      const response = await fetch('?/resetGrafts', {
-        method: 'POST',
+      const response = await fetch("?/resetGrafts", {
+        method: "POST",
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
-        toast.success('🌱 Reset to default settings');
+      if (result.type === "success") {
+        toast.success("🌱 Reset to default settings");
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to reset preferences');
+        toast.error(result.data?.error || "Failed to reset preferences");
       }
     } catch (error) {
-      toast.error('Failed to reset preferences');
-      console.error('Reset grafts error:', error);
+      toast.error("Failed to reset preferences");
+      console.error("Reset grafts error:", error);
     } finally {
       resettingGrafts = false;
     }
@@ -412,28 +456,28 @@
     adminFormResult = undefined;
     try {
       const formData = new FormData();
-      formData.append('tenantId', tenantId);
-      if (notes) formData.append('notes', notes);
+      formData.append("tenantId", tenantId);
+      if (notes) formData.append("notes", notes);
 
-      const response = await fetch('?/enrollTenant', {
-        method: 'POST',
+      const response = await fetch("?/enrollTenant", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
-        toast.success('🌱 Tenant enrolled in greenhouse');
+      if (result.type === "success") {
+        toast.success("🌱 Tenant enrolled in greenhouse");
         adminFormResult = { success: true, message: result.data?.message };
         await invalidateAll();
       } else {
-        const errorMsg = result.data?.error || 'Failed to enroll tenant';
+        const errorMsg = result.data?.error || "Failed to enroll tenant";
         adminFormResult = { error: errorMsg };
         toast.error(errorMsg);
       }
     } catch (error) {
-      adminFormResult = { error: 'Failed to enroll tenant' };
-      toast.error('Failed to enroll tenant');
-      console.error('Enroll tenant error:', error);
+      adminFormResult = { error: "Failed to enroll tenant" };
+      toast.error("Failed to enroll tenant");
+      console.error("Enroll tenant error:", error);
     } finally {
       enrollingTenant = false;
     }
@@ -449,24 +493,28 @@
     adminFormResult = undefined;
     try {
       const formData = new FormData();
-      formData.append('tenantId', tenantId);
-      formData.append('enabled', String(enabled));
+      formData.append("tenantId", tenantId);
+      formData.append("enabled", String(enabled));
 
-      const response = await fetch('?/toggleTenant', {
-        method: 'POST',
+      const response = await fetch("?/toggleTenant", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
-        toast.success(enabled ? '🌿 Greenhouse access enabled' : '🌱 Greenhouse access disabled');
+      if (result.type === "success") {
+        toast.success(
+          enabled
+            ? "🌿 Greenhouse access enabled"
+            : "🌱 Greenhouse access disabled",
+        );
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to toggle tenant');
+        toast.error(result.data?.error || "Failed to toggle tenant");
       }
     } catch (error) {
-      toast.error('Failed to toggle tenant');
-      console.error('Toggle tenant error:', error);
+      toast.error("Failed to toggle tenant");
+      console.error("Toggle tenant error:", error);
     } finally {
       togglingTenantId = undefined;
     }
@@ -480,23 +528,23 @@
     adminFormResult = undefined;
     try {
       const formData = new FormData();
-      formData.append('tenantId', tenantId);
+      formData.append("tenantId", tenantId);
 
-      const response = await fetch('?/removeTenant', {
-        method: 'POST',
+      const response = await fetch("?/removeTenant", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
-        toast.success('Tenant removed from greenhouse');
+      if (result.type === "success") {
+        toast.success("Tenant removed from greenhouse");
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to remove tenant');
+        toast.error(result.data?.error || "Failed to remove tenant");
       }
     } catch (error) {
-      toast.error('Failed to remove tenant');
-      console.error('Remove tenant error:', error);
+      toast.error("Failed to remove tenant");
+      console.error("Remove tenant error:", error);
     }
   }
 
@@ -508,23 +556,23 @@
     loadingFlagId = flagId;
     try {
       const formData = new FormData();
-      formData.append('flagId', flagId);
+      formData.append("flagId", flagId);
 
-      const response = await fetch('?/cultivateFlag', {
-        method: 'POST',
+      const response = await fetch("?/cultivateFlag", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
+      if (result.type === "success") {
         toast.success(`🌿 ${flagId} is now cultivated`);
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to cultivate flag');
+        toast.error(result.data?.error || "Failed to cultivate flag");
       }
     } catch (error) {
-      toast.error('Failed to cultivate flag');
-      console.error('Cultivate flag error:', error);
+      toast.error("Failed to cultivate flag");
+      console.error("Cultivate flag error:", error);
     } finally {
       loadingFlagId = undefined;
     }
@@ -538,23 +586,23 @@
     loadingFlagId = flagId;
     try {
       const formData = new FormData();
-      formData.append('flagId', flagId);
+      formData.append("flagId", flagId);
 
-      const response = await fetch('?/pruneFlag', {
-        method: 'POST',
+      const response = await fetch("?/pruneFlag", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
-      if (result.type === 'success') {
+      if (result.type === "success") {
         toast.success(`🍂 ${flagId} is now pruned`);
         await invalidateAll();
       } else {
-        toast.error(result.data?.error || 'Failed to prune flag');
+        toast.error(result.data?.error || "Failed to prune flag");
       }
     } catch (error) {
-      toast.error('Failed to prune flag');
-      console.error('Prune flag error:', error);
+      toast.error("Failed to prune flag");
+      console.error("Prune flag error:", error);
     } finally {
       loadingFlagId = undefined;
     }
@@ -579,43 +627,67 @@
         <div class="health-grid">
           <div class="health-item">
             <span class="health-label">Overall Status</span>
-            <span class="health-value" class:healthy={healthStatus?.status === 'healthy'} class:error={healthStatus?.status !== 'healthy'}>
-              {healthStatus?.status === 'healthy' ? 'Healthy' : 'Issues Detected'}
+            <span
+              class="health-value"
+              class:healthy={healthStatus?.status === "healthy"}
+              class:error={healthStatus?.status !== "healthy"}
+            >
+              {healthStatus?.status === "healthy"
+                ? "Healthy"
+                : "Issues Detected"}
             </span>
           </div>
 
           <div class="health-item">
             <span class="health-label">GitHub Token</span>
-            <span class="health-value" class:healthy={healthStatus?.github_token_configured} class:error={!healthStatus?.github_token_configured}>
-              {healthStatus?.github_token_configured ? 'Configured' : 'Missing'}
+            <span
+              class="health-value"
+              class:healthy={healthStatus?.github_token_configured}
+              class:error={!healthStatus?.github_token_configured}
+            >
+              {healthStatus?.github_token_configured ? "Configured" : "Missing"}
             </span>
           </div>
 
           <div class="health-item">
             <span class="health-label">KV Cache</span>
-            <span class="health-value" class:healthy={healthStatus?.kv_configured} class:error={!healthStatus?.kv_configured}>
-              {healthStatus?.kv_configured ? 'Connected' : 'Not Configured'}
+            <span
+              class="health-value"
+              class:healthy={healthStatus?.kv_configured}
+              class:error={!healthStatus?.kv_configured}
+            >
+              {healthStatus?.kv_configured ? "Connected" : "Not Configured"}
             </span>
           </div>
 
           <div class="health-item">
             <span class="health-label">D1 Database</span>
-            <span class="health-value" class:healthy={healthStatus?.d1_configured} class:error={!healthStatus?.d1_configured}>
-              {healthStatus?.d1_configured ? 'Connected' : 'Not Configured'}
+            <span
+              class="health-value"
+              class:healthy={healthStatus?.d1_configured}
+              class:error={!healthStatus?.d1_configured}
+            >
+              {healthStatus?.d1_configured ? "Connected" : "Not Configured"}
             </span>
           </div>
 
           {#if healthStatus?.timestamp}
             <div class="health-item full-width">
               <span class="health-label">Last Check</span>
-              <span class="health-value">{new Date(healthStatus.timestamp).toLocaleString()}</span>
+              <span class="health-value"
+                >{new Date(healthStatus.timestamp).toLocaleString()}</span
+              >
             </div>
           {/if}
         </div>
       {/if}
 
-      <Button onclick={fetchHealth} variant="secondary" disabled={loadingHealth}>
-        {loadingHealth ? 'Checking...' : 'Refresh Status'}
+      <Button
+        onclick={fetchHealth}
+        variant="secondary"
+        disabled={loadingHealth}
+      >
+        {loadingHealth ? "Checking..." : "Refresh Status"}
       </Button>
     </GlassCard>
   {/if}
@@ -669,14 +741,15 @@
       <Waystone slug="custom-fonts" label="Learn about fonts" />
     </div>
     <p class="section-description">
-      Choose the font family used across the entire site. Changes take effect immediately.
+      Choose the font family used across the entire site. Changes take effect
+      immediately.
     </p>
 
     {#if loadingFont}
       <Spinner />
     {:else}
       <div class="font-selector">
-        <label class="font-option" class:selected={currentFont === 'lexend'}>
+        <label class="font-option" class:selected={currentFont === "lexend"}>
           <input
             type="radio"
             name="font"
@@ -684,12 +757,16 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Lexend', sans-serif;">Lexend</span>
-            <span class="font-description">Modern accessibility font for reading fluency (default)</span>
+            <span class="font-name" style="font-family: 'Lexend', sans-serif;"
+              >Lexend</span
+            >
+            <span class="font-description"
+              >Modern accessibility font for reading fluency (default)</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'atkinson'}>
+        <label class="font-option" class:selected={currentFont === "atkinson"}>
           <input
             type="radio"
             name="font"
@@ -697,12 +774,21 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Atkinson Hyperlegible', sans-serif;">Atkinson Hyperlegible</span>
-            <span class="font-description">Accessibility font for low vision readers</span>
+            <span
+              class="font-name"
+              style="font-family: 'Atkinson Hyperlegible', sans-serif;"
+              >Atkinson Hyperlegible</span
+            >
+            <span class="font-description"
+              >Accessibility font for low vision readers</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'opendyslexic'}>
+        <label
+          class="font-option"
+          class:selected={currentFont === "opendyslexic"}
+        >
           <input
             type="radio"
             name="font"
@@ -710,12 +796,17 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'OpenDyslexic', sans-serif;">OpenDyslexic</span>
-            <span class="font-description">Accessibility font for dyslexia</span>
+            <span
+              class="font-name"
+              style="font-family: 'OpenDyslexic', sans-serif;"
+              >OpenDyslexic</span
+            >
+            <span class="font-description">Accessibility font for dyslexia</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'quicksand'}>
+        <label class="font-option" class:selected={currentFont === "quicksand"}>
           <input
             type="radio"
             name="font"
@@ -723,12 +814,20 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Quicksand', sans-serif;">Quicksand</span>
-            <span class="font-description">Rounded, friendly geometric sans-serif</span>
+            <span
+              class="font-name"
+              style="font-family: 'Quicksand', sans-serif;">Quicksand</span
+            >
+            <span class="font-description"
+              >Rounded, friendly geometric sans-serif</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'plus-jakarta-sans'}>
+        <label
+          class="font-option"
+          class:selected={currentFont === "plus-jakarta-sans"}
+        >
           <input
             type="radio"
             name="font"
@@ -736,12 +835,21 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Plus Jakarta Sans', sans-serif;">Plus Jakarta Sans</span>
-            <span class="font-description">Contemporary geometric sans, balanced and versatile</span>
+            <span
+              class="font-name"
+              style="font-family: 'Plus Jakarta Sans', sans-serif;"
+              >Plus Jakarta Sans</span
+            >
+            <span class="font-description"
+              >Contemporary geometric sans, balanced and versatile</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'ibm-plex-mono'}>
+        <label
+          class="font-option"
+          class:selected={currentFont === "ibm-plex-mono"}
+        >
           <input
             type="radio"
             name="font"
@@ -749,12 +857,18 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'IBM Plex Mono', monospace;">IBM Plex Mono</span>
-            <span class="font-description">Clean, highly readable code font</span>
+            <span
+              class="font-name"
+              style="font-family: 'IBM Plex Mono', monospace;"
+              >IBM Plex Mono</span
+            >
+            <span class="font-description"
+              >Clean, highly readable code font</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'cozette'}>
+        <label class="font-option" class:selected={currentFont === "cozette"}>
           <input
             type="radio"
             name="font"
@@ -762,12 +876,16 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Cozette', monospace;">Cozette</span>
-            <span class="font-description">Bitmap-style programming font, retro aesthetic</span>
+            <span class="font-name" style="font-family: 'Cozette', monospace;"
+              >Cozette</span
+            >
+            <span class="font-description"
+              >Bitmap-style programming font, retro aesthetic</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'alagard'}>
+        <label class="font-option" class:selected={currentFont === "alagard"}>
           <input
             type="radio"
             name="font"
@@ -775,12 +893,16 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Alagard', fantasy;">Alagard</span>
-            <span class="font-description">Medieval pixel font for fantasy vibes</span>
+            <span class="font-name" style="font-family: 'Alagard', fantasy;"
+              >Alagard</span
+            >
+            <span class="font-description"
+              >Medieval pixel font for fantasy vibes</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'calistoga'}>
+        <label class="font-option" class:selected={currentFont === "calistoga"}>
           <input
             type="radio"
             name="font"
@@ -788,12 +910,16 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Calistoga', serif;">Calistoga</span>
-            <span class="font-description">Casual brush serif, warm and friendly</span>
+            <span class="font-name" style="font-family: 'Calistoga', serif;"
+              >Calistoga</span
+            >
+            <span class="font-description"
+              >Casual brush serif, warm and friendly</span
+            >
           </div>
         </label>
 
-        <label class="font-option" class:selected={currentFont === 'caveat'}>
+        <label class="font-option" class:selected={currentFont === "caveat"}>
           <input
             type="radio"
             name="font"
@@ -801,21 +927,29 @@
             bind:group={currentFont}
           />
           <div class="font-info">
-            <span class="font-name" style="font-family: 'Caveat', cursive;">Caveat</span>
-            <span class="font-description">Handwritten script, personal and informal</span>
+            <span class="font-name" style="font-family: 'Caveat', cursive;"
+              >Caveat</span
+            >
+            <span class="font-description"
+              >Handwritten script, personal and informal</span
+            >
           </div>
         </label>
       </div>
 
       {#if fontMessage}
-        <div class="message" class:success={fontMessage.includes('saved')} class:error={!fontMessage.includes('saved')}>
+        <div
+          class="message"
+          class:success={fontMessage.includes("saved")}
+          class:error={!fontMessage.includes("saved")}
+        >
           {fontMessage}
         </div>
       {/if}
 
       <div class="button-row">
         <Button onclick={saveFont} variant="primary" disabled={savingFont}>
-          {savingFont ? 'Saving...' : 'Save Font Setting'}
+          {savingFont ? "Saving..." : "Save Font Setting"}
         </Button>
       </div>
 
@@ -831,7 +965,8 @@
       <Waystone slug="choosing-a-theme" label="Learn about themes" />
     </div>
     <p class="section-description">
-      Customize the accent color used for tags and interactive elements on your blog.
+      Customize the accent color used for tags and interactive elements on your
+      blog.
     </p>
 
     <div class="color-picker-section">
@@ -856,21 +991,29 @@
             class:selected={currentAccentColor === color.hex}
             style:background={color.hex}
             title={color.name}
-            onclick={() => currentAccentColor = color.hex}
+            onclick={() => (currentAccentColor = color.hex)}
           ></button>
         {/each}
       </div>
     </div>
 
     {#if colorMessage}
-      <div class="message" class:success={colorMessage.includes('saved')} class:error={!colorMessage.includes('saved')}>
+      <div
+        class="message"
+        class:success={colorMessage.includes("saved")}
+        class:error={!colorMessage.includes("saved")}
+      >
         {colorMessage}
       </div>
     {/if}
 
     <div class="button-row">
-      <Button onclick={saveAccentColor} variant="primary" disabled={savingColor}>
-        {savingColor ? 'Saving...' : 'Save Accent Color'}
+      <Button
+        onclick={saveAccentColor}
+        variant="primary"
+        disabled={savingColor}
+      >
+        {savingColor ? "Saving..." : "Save Accent Color"}
       </Button>
     </div>
   </GlassCard>
@@ -880,14 +1023,12 @@
       <h2>Header Branding</h2>
     </div>
     <p class="section-description">
-      Show the Grove logo next to your site title. Visitors can tap it to cycle through seasonal themes!
+      Show the Grove logo next to your site title. Visitors can tap it to cycle
+      through seasonal themes!
     </p>
 
     <label class="logo-toggle">
-      <input
-        type="checkbox"
-        bind:checked={showGroveLogo}
-      />
+      <input type="checkbox" bind:checked={showGroveLogo} />
       <span class="toggle-label">
         <span class="toggle-title">Show Grove Logo</span>
         <span class="toggle-description">
@@ -897,14 +1038,18 @@
     </label>
 
     {#if logoMessage}
-      <div class="message" class:success={!logoMessage.includes('Error')} class:error={logoMessage.includes('Error')}>
+      <div
+        class="message"
+        class:success={!logoMessage.includes("Error")}
+        class:error={logoMessage.includes("Error")}
+      >
         {logoMessage}
       </div>
     {/if}
 
     <div class="button-row">
       <Button onclick={saveGroveLogo} variant="primary" disabled={savingLogo}>
-        {savingLogo ? 'Saving...' : 'Save Header Setting'}
+        {savingLogo ? "Saving..." : "Save Header Setting"}
       </Button>
     </div>
   </GlassCard>
@@ -928,7 +1073,11 @@
       <div class="sessions-list">
         {#each sessions as session (session.id)}
           {@const DeviceIcon = getDeviceIcon(session.deviceName)}
-          <div class="session-card" class:current={session.isCurrent}>
+          <div
+            class="session-card"
+            class:current={session.isCurrent}
+            class:revoking={revokingSessionId === session.id}
+          >
             <div class="session-icon">
               <DeviceIcon size={24} />
             </div>
@@ -940,7 +1089,9 @@
                 {/if}
               </div>
               <div class="session-meta">
-                <span>Last active: {formatRelativeTime(session.lastActiveAt)}</span>
+                <span
+                  >Last active: {formatRelativeTime(session.lastActiveAt)}</span
+                >
                 {#if session.ipAddress}
                   <span class="session-ip">· {session.ipAddress}</span>
                 {/if}
@@ -953,21 +1104,23 @@
                 onclick={() => revokeSession(session.id)}
                 disabled={revokingSessionId === session.id}
               >
-                {revokingSessionId === session.id ? 'Revoking...' : 'Revoke'}
+                {revokingSessionId === session.id ? "Revoking..." : "Revoke"}
               </Button>
             {/if}
           </div>
         {/each}
       </div>
 
-      {#if sessions.filter(s => !s.isCurrent).length > 0}
+      {#if sessions.filter((s) => !s.isCurrent).length > 0}
         <div class="sessions-actions">
           <Button
             variant="danger"
-            onclick={() => showRevokeAllDialog = true}
+            onclick={() => (showRevokeAllDialog = true)}
             disabled={revokingAllSessions}
           >
-            {revokingAllSessions ? 'Signing out...' : 'Sign out of all other devices'}
+            {revokingAllSessions
+              ? "Signing out..."
+              : "Sign out of all other devices"}
           </Button>
         </div>
       {/if}
@@ -979,7 +1132,8 @@
       <h2>Cache Management</h2>
     </div>
     <p class="section-description">
-      The site uses KV for caching API responses. Clearing resets all cached data.
+      The site uses KV for caching API responses. Clearing resets all cached
+      data.
     </p>
 
     {#if loadingCacheStats}
@@ -1004,16 +1158,28 @@
     {/if}
 
     {#if cacheMessage}
-      <div class="message" class:success={cacheMessage.includes('success')} class:error={!cacheMessage.includes('success')}>
+      <div
+        class="message"
+        class:success={cacheMessage.includes("success")}
+        class:error={!cacheMessage.includes("success")}
+      >
         {cacheMessage}
       </div>
     {/if}
 
     <div class="cache-actions">
-      <Button onclick={handleClearCacheClick} variant="danger" disabled={clearingCache}>
-        {clearingCache ? 'Clearing...' : 'Clear Cache'}
+      <Button
+        onclick={handleClearCacheClick}
+        variant="danger"
+        disabled={clearingCache}
+      >
+        {clearingCache ? "Clearing..." : "Clear Cache"}
       </Button>
-      <Button onclick={fetchCacheStats} variant="secondary" disabled={loadingCacheStats}>
+      <Button
+        onclick={fetchCacheStats}
+        variant="secondary"
+        disabled={loadingCacheStats}
+      >
         Refresh Stats
       </Button>
     </div>
@@ -1182,7 +1348,9 @@
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-standard);
     cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition:
+      border-color 0.2s,
+      background-color 0.2s;
   }
   .font-option:hover {
     border-color: var(--color-primary);
@@ -1259,7 +1427,7 @@
     transition: background-color 0.2s;
   }
   .color-hex {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: "IBM Plex Mono", monospace;
     font-size: 1.1rem;
     font-weight: 600;
     color: white;
@@ -1283,7 +1451,9 @@
     border: 2px solid transparent;
     border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.15s, border-color 0.15s;
+    transition:
+      transform 0.15s,
+      border-color 0.15s;
   }
   .preset-btn:hover {
     transform: scale(1.15);
@@ -1291,7 +1461,9 @@
   }
   .preset-btn.selected {
     border-color: var(--color-text);
-    box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text);
+    box-shadow:
+      0 0 0 2px var(--color-surface),
+      0 0 0 4px var(--color-text);
   }
   .preset-btn:focus-visible {
     outline: 2px solid var(--color-primary);
@@ -1328,7 +1500,9 @@
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-standard);
     cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition:
+      border-color 0.2s,
+      background-color 0.2s;
     margin-bottom: 1rem;
   }
   .logo-toggle:hover {
@@ -1366,16 +1540,18 @@
     transition: color 0.3s ease;
   }
   /* Active sessions styles */
+  /* Active sessions styles - Enhanced with Grove polish */
   .sessions-loading {
     padding: 2rem;
     display: flex;
     justify-content: center;
   }
   .sessions-empty {
-    padding: 1rem;
+    padding: 1.5rem;
     text-align: center;
     color: var(--color-text-muted);
     font-size: 0.9rem;
+    font-style: italic;
   }
   .sessions-list {
     display: flex;
@@ -1390,16 +1566,79 @@
     padding: 1rem;
     border: 2px solid var(--color-border);
     border-radius: var(--border-radius-standard);
-    transition: border-color 0.2s;
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.3s ease;
   }
+  .session-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  :global(.dark) .session-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  /* Current device - soft breathing glow */
   .session-card.current {
     border-color: var(--color-primary);
-    background: rgba(44, 95, 45, 0.05);
+    background: linear-gradient(
+      135deg,
+      rgba(44, 95, 45, 0.08) 0%,
+      rgba(44, 95, 45, 0.03) 100%
+    );
+    box-shadow:
+      0 0 0 1px rgba(44, 95, 45, 0.1),
+      0 0 20px rgba(44, 95, 45, 0.1);
+    animation: session-glow 3s ease-in-out infinite;
   }
   :global(.dark) .session-card.current {
     border-color: var(--color-primary-light);
-    background: rgba(92, 184, 95, 0.1);
+    background: linear-gradient(
+      135deg,
+      rgba(92, 184, 95, 0.12) 0%,
+      rgba(92, 184, 95, 0.05) 100%
+    );
+    box-shadow:
+      0 0 0 1px rgba(92, 184, 95, 0.15),
+      0 0 20px rgba(92, 184, 95, 0.15);
   }
+  @keyframes session-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgba(44, 95, 45, 0.1),
+        0 0 20px rgba(44, 95, 45, 0.1);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px rgba(44, 95, 45, 0.15),
+        0 0 25px rgba(44, 95, 45, 0.15);
+    }
+  }
+  :global(.dark) .session-card.current {
+    animation-name: session-glow-dark;
+  }
+  @keyframes session-glow-dark {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgba(92, 184, 95, 0.15),
+        0 0 20px rgba(92, 184, 95, 0.15);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px rgba(92, 184, 95, 0.2),
+        0 0 25px rgba(92, 184, 95, 0.2);
+    }
+  }
+  /* Revoking animation - fade and slide */
+  .session-card.revoking {
+    opacity: 0.5;
+    transform: translateX(10px);
+    pointer-events: none;
+  }
+  /* Device icon - enhanced with gradient */
   .session-icon {
     display: flex;
     align-items: center;
@@ -1407,12 +1646,39 @@
     width: 48px;
     height: 48px;
     border-radius: var(--border-radius-button);
-    background: var(--color-surface-elevated);
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-elevated) 0%,
+      rgba(44, 95, 45, 0.08) 100%
+    );
     color: var(--color-primary);
     flex-shrink: 0;
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease;
+  }
+  .session-card:hover .session-icon {
+    transform: scale(1.05);
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-elevated) 0%,
+      rgba(44, 95, 45, 0.12) 100%
+    );
   }
   :global(.dark) .session-icon {
     color: var(--color-primary-light);
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-elevated) 0%,
+      rgba(92, 184, 95, 0.1) 100%
+    );
+  }
+  :global(.dark) .session-card:hover .session-icon {
+    background: linear-gradient(
+      135deg,
+      var(--color-surface-elevated) 0%,
+      rgba(92, 184, 95, 0.15) 100%
+    );
   }
   .session-info {
     flex: 1;
@@ -1427,18 +1693,34 @@
   .session-name {
     font-weight: 600;
     color: var(--color-text);
+    transition: color 0.2s ease;
   }
+  /* Badge with subtle shimmer */
   .session-badge {
-    font-size: 0.75rem;
-    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
     border-radius: 9999px;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2d7a32 100%);
     color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    box-shadow: 0 2px 4px rgba(44, 95, 45, 0.2);
+  }
+  :global(.dark) .session-badge {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-light) 0%,
+      #4ade80 100%
+    );
+    color: #0d4a1c;
+    box-shadow: 0 2px 4px rgba(92, 184, 95, 0.3);
   }
   .session-meta {
     font-size: 0.85rem;
     color: var(--color-text-muted);
     margin-top: 0.25rem;
+    transition: color 0.2s ease;
   }
   .session-ip {
     opacity: 0.7;
@@ -1447,5 +1729,20 @@
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--color-border);
+  }
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .session-card {
+      transition: none;
+    }
+    .session-card.current {
+      animation: none;
+    }
+    .session-card:hover {
+      transform: none;
+    }
+    .session-card:hover .session-icon {
+      transform: none;
+    }
   }
 </style>
