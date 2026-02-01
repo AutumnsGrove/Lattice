@@ -4,7 +4,7 @@ import {
   isInGreenhouse,
   type GraftsRecord,
 } from "$lib/feature-flags";
-import { emailsMatch } from "$lib/utils/user.js";
+import { emailsMatch, normalizeEmail } from "$lib/utils/user.js";
 import type { LayoutServerLoad } from "./$types";
 
 // Disable prerendering for all admin routes
@@ -60,7 +60,24 @@ export const load: LayoutServerLoad = async ({
         // Skip ownership verification for example tenant (public demo)
         if (!isExampleTenant) {
           // Verify ownership in-memory instead of separate query
-          if (!emailsMatch(result.email, locals.user!.email)) {
+          const tenantEmail = result.email;
+          const userEmail = locals.user?.email;
+          const match = emailsMatch(tenantEmail, userEmail);
+
+          // Debug logging for #866 - remove after issue is resolved
+          console.log("[Admin Auth]", {
+            tenantId: locals.tenantId,
+            tenantEmail: normalizeEmail(tenantEmail),
+            userEmail: normalizeEmail(userEmail),
+            match,
+            userExists: !!locals.user,
+          });
+
+          if (!match) {
+            console.warn("[Admin Auth] Email mismatch - access denied", {
+              tenantEmailRaw: tenantEmail,
+              userEmailRaw: userEmail,
+            });
             throw redirect(302, `/?error=access_denied`);
           }
         }
