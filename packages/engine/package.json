@@ -254,6 +254,10 @@
     "./email/types": {
       "types": "./dist/email/types.d.ts",
       "default": "./dist/email/types.js"
+    },
+    "./email/updates": {
+      "types": "./dist/email/updates/index.d.ts",
+      "default": "./dist/email/updates/index.js"
     }
   },
   "files": [
