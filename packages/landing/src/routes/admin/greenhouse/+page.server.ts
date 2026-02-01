@@ -19,10 +19,11 @@ interface Tenant {
   display_name: string | null;
 }
 
-export const load: PageServerLoad = async ({ locals, platform }) => {
-  // Only Autumn (Wayfinder) can access greenhouse admin
-  if (!locals.user || locals.user.email !== "autumn@grove.place") {
-    throw redirect(302, "/admin/login");
+export const load: PageServerLoad = async ({ parent, platform }) => {
+  // Auth is handled by parent layout - just check Wayfinder access
+  const parentData = await parent();
+  if (!parentData.isWayfinder) {
+    throw redirect(302, "/admin");
   }
 
   const env = platform?.env;

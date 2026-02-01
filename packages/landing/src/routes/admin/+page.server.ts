@@ -1,15 +1,11 @@
-import { error, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    throw redirect(302, "/admin/login");
-  }
-  if (!locals.user.is_admin) {
-    throw error(403, "Admin access required");
-  }
+export const load: PageServerLoad = async ({ parent }) => {
+  // Auth is handled by the parent /admin layout
+  const parentData = await parent();
 
   return {
-    user: locals.user,
+    user: parentData.user,
+    isWayfinder: parentData.isWayfinder,
   };
 };

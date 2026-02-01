@@ -1,14 +1,11 @@
-import { error, redirect } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { storage } from "@autumnsgrove/groveengine/services";
 
-export const load: PageServerLoad = async ({ locals, platform }) => {
-  if (!locals.user) {
-    throw redirect(302, "/admin/login");
-  }
-  if (!locals.user.is_admin) {
-    throw error(403, "Admin access required");
-  }
+export const load: PageServerLoad = async ({ parent, platform }) => {
+  // Auth is handled by parent /admin layout
+  const parentData = await parent();
+
   if (!platform) {
     throw error(500, "Platform not available");
   }
@@ -39,6 +36,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     total: filesData.total,
     folders,
     cdnUrl: CDN_URL,
-    user: locals.user,
+    user: parentData.user,
   };
 };
