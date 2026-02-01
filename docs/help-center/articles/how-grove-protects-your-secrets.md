@@ -1,7 +1,8 @@
 ---
 title: How Grove Protects Your Secrets
 description: Learn how Grove uses envelope encryption to protect your API keys, tokens, and credentials with bank-level security.
-category: security
+category: help
+section: privacy-security
 lastUpdated: 2026-01-31
 ---
 
