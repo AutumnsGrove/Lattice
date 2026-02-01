@@ -25,3 +25,6 @@
 
 // Re-export everything from components for convenience
 export * from "./components";
+
+// Re-export types
+export * from "./types";

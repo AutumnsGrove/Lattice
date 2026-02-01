@@ -250,6 +250,10 @@
     "./email/sequences": {
       "types": "./dist/email/sequences/index.d.ts",
       "default": "./dist/email/sequences/index.js"
+    },
+    "./email/types": {
+      "types": "./dist/email/types.d.ts",
+      "default": "./dist/email/types.js"
     }
   },
   "files": [
