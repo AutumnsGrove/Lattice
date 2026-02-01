@@ -19,6 +19,14 @@ interface Tenant {
   display_name: string | null;
 }
 
+// Wayfinder emails (platform owner - same person, multiple accounts)
+const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+
+function isWayfinder(email: string | undefined): boolean {
+  if (!email) return false;
+  return WAYFINDER_EMAILS.includes(email.toLowerCase());
+}
+
 export const load: PageServerLoad = async ({ parent, platform }) => {
   // Auth is handled by parent layout - just check Wayfinder access
   const parentData = await parent();
@@ -85,7 +93,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 export const actions: Actions = {
   enroll: async ({ request, locals, platform }) => {
     // Only Autumn can enroll tenants
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, { error: "Unauthorized" });
     }
 
@@ -118,7 +126,7 @@ export const actions: Actions = {
 
   remove: async ({ request, locals, platform }) => {
     // Only Autumn can remove tenants
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, { error: "Unauthorized" });
     }
 
@@ -148,7 +156,7 @@ export const actions: Actions = {
 
   toggle: async ({ request, locals, platform }) => {
     // Only Autumn can toggle tenants
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, { error: "Unauthorized" });
     }
 
@@ -184,7 +192,7 @@ export const actions: Actions = {
 
   cultivate: async ({ request, locals, platform }) => {
     // Only Autumn can cultivate flags
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, { error: "Unauthorized" });
     }
 
@@ -214,7 +222,7 @@ export const actions: Actions = {
 
   prune: async ({ request, locals, platform }) => {
     // Only Autumn can prune flags
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       return fail(403, { error: "Unauthorized" });
     }
 

@@ -12,7 +12,8 @@ import type { LayoutServerLoad } from "./$types";
  */
 
 // The Wayfinder (platform owner) has access to all admin features
-const WAYFINDER_EMAIL = "autumn@grove.place";
+// Multiple emails for the same person (work + personal)
+const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
 export const load: LayoutServerLoad = async ({ locals }) => {
   // Auth check - redirect to login if not authenticated
@@ -26,7 +27,9 @@ export const load: LayoutServerLoad = async ({ locals }) => {
   }
 
   // Determine if user is the Wayfinder (has access to greenhouse, porch, etc.)
-  const isWayfinder = locals.user.email.toLowerCase() === WAYFINDER_EMAIL;
+  const isWayfinder = WAYFINDER_EMAILS.includes(
+    locals.user.email.toLowerCase(),
+  );
 
   return {
     user: locals.user,

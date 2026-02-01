@@ -32,6 +32,14 @@ interface User {
   name: string | null;
 }
 
+// Wayfinder emails (platform owner - same person, multiple accounts)
+const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
+
+function isWayfinder(email: string | undefined): boolean {
+  if (!email) return false;
+  return WAYFINDER_EMAILS.includes(email.toLowerCase());
+}
+
 function escapeHtml(unsafe: string | null): string {
   if (!unsafe) return "";
   return unsafe
@@ -115,7 +123,7 @@ export const load: PageServerLoad = async ({ params, parent, platform }) => {
 
 export const actions: Actions = {
   reply: async ({ params, request, locals, platform }) => {
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       throw redirect(302, "/admin/login");
     }
 
@@ -222,7 +230,7 @@ Grove`;
   },
 
   updateStatus: async ({ params, request, locals, platform }) => {
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       throw redirect(302, "/admin/login");
     }
 
@@ -262,7 +270,7 @@ Grove`;
   },
 
   saveNotes: async ({ params, request, locals, platform }) => {
-    if (!locals.user || locals.user.email !== "autumn@grove.place") {
+    if (!locals.user || !isWayfinder(locals.user.email)) {
       throw redirect(302, "/admin/login");
     }
 
