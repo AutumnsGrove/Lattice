@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
-  import { Calendar, Sparkles, GitBranch, Construction, Image } from "lucide-svelte";
+  import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse } from "lucide-svelte";
 
   // Available curios with their status
   const curios = [
@@ -23,7 +23,7 @@
       name: "Timeline",
       description: "AI-powered daily summaries of your GitHub activity",
       icon: Calendar,
-      status: "available",
+      status: "greenhouse",
       href: "/admin/curios/timeline",
       features: [
         "Daily commit summaries",
@@ -37,7 +37,7 @@
       name: "Journey",
       description: "Visualize your repo's growth with line-based metrics and beautiful charts",
       icon: GitBranch,
-      status: "active",
+      status: "greenhouse",
       href: "/admin/curios/journey",
       features: [
         "Version milestones",
@@ -81,6 +81,11 @@
               <Badge variant="secondary">
                 <Construction class="badge-icon" />
                 Coming Soon
+              </Badge>
+            {:else if curio.status === "greenhouse"}
+              <Badge variant="default" class="greenhouse-badge">
+                <Warehouse class="badge-icon" />
+                Greenhouse
               </Badge>
             {:else}
               <Badge variant="default">Available</Badge>
@@ -206,6 +211,16 @@
     width: 0.875rem;
     height: 0.875rem;
     margin-right: 0.25rem;
+  }
+
+  :global(.greenhouse-badge) {
+    background-color: rgb(209 250 229) !important; /* emerald-100 */
+    color: rgb(5 150 105) !important; /* emerald-600 */
+  }
+
+  :global(.dark .greenhouse-badge) {
+    background-color: rgb(6 78 59 / 0.2) !important; /* emerald-900/20 */
+    color: rgb(52 211 153) !important; /* emerald-400 */
   }
 
   .curio-description {
