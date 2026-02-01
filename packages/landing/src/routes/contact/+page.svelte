@@ -18,7 +18,7 @@
 		<!-- Header -->
 		<div class="text-center mb-12">
 			<div class="mb-6">
-				<Logo class="w-16 h-16 mx-auto" season={seasonStore.current} />
+				<Logo size="xl" season={seasonStore.current} class="mx-auto" />
 			</div>
 			<h1 class="text-3xl md:text-4xl font-serif text-foreground mb-3">Hello there</h1>
 			<p class="text-lg text-foreground-muted font-sans mb-4">

@@ -38,7 +38,7 @@
 				aria-label="Toggle dark or light theme"
 				title="Toggle dark/light mode"
 			>
-				<Logo class="w-7 h-7" season={seasonStore.current} />
+				<Logo size="lg" season={seasonStore.current} />
 			</button>
 		</div>
 
