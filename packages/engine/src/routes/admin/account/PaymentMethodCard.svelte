@@ -32,12 +32,16 @@
         },
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        isComped?: boolean;
+        message?: string;
+        portalUrl?: string;
+      };
 
       // Handle comped accounts gracefully
       if (data.isComped) {
         isComped = true;
-        compedMessage = data.message;
+        compedMessage = data.message || "Your account is complimentary.";
         isLoading = false;
         return;
       }

@@ -57,7 +57,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   if (!verification.valid || !verification.event) {
     console.error("[Webhook] Invalid signature:", verification.error);
-    return json({ error: verification.error || "Invalid signature" }, { status: 401 });
+    return json(
+      { error: verification.error || "Invalid signature" },
+      { status: 401 },
+    );
   }
 
   const event = verification.event;
@@ -357,6 +360,17 @@ async function handleInvoicePaid(
     .bind(subscriptionId)
     .run();
 
+  // Only send welcome email for initial subscription payment, not renewals
+  // billing_reason: subscription_create = first payment, subscription_cycle = renewal
+  const isFirstPayment = invoice.billing_reason === "subscription_create";
+  if (!isFirstPayment) {
+    console.log(`[Webhook] Skipping email for renewal payment`, {
+      subscriptionId,
+      billingReason: invoice.billing_reason,
+    });
+    return;
+  }
+
   // Get tenant info for the email
   const billing = await db
     .prepare(
@@ -383,6 +397,10 @@ async function handleInvoicePaid(
     currency: invoice.currency.toUpperCase(),
   }).format(invoice.amount_paid / 100);
 
+  // Detect billing interval from invoice lines (first subscription item)
+  const interval =
+    invoice.lines?.data[0]?.price?.recurring?.interval || "month";
+
   // Send payment received email
   const email = getPaymentReceivedEmail({
     name: billing.display_name as string,
@@ -394,9 +412,11 @@ async function handleInvoicePaid(
       day: "numeric",
     }),
     planName: billing.plan as string,
-    interval: "month", // TODO: detect from subscription
+    interval: interval,
     nextPaymentDate: billing.current_period_end
-      ? new Date((billing.current_period_end as number) * 1000).toLocaleDateString("en-US", {
+      ? new Date(
+          (billing.current_period_end as number) * 1000,
+        ).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",

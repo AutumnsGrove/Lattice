@@ -28,9 +28,11 @@ export type TierIcon = "user" | "sprout" | "tree-deciduous" | "trees" | "crown";
 export interface TierLimits {
   posts: number; // Infinity = unlimited, 0 = none
   storage: number; // bytes (0 = none)
+  storageDisplay: string; // Human-readable storage (e.g., "1 GB")
   themes: number;
   navPages: number;
   commentsPerWeek: number; // Infinity = unlimited
+  aiWordsPerMonth: number; // 0 = no AI, Infinity = unlimited
 }
 
 export interface TierFeatures {
@@ -113,9 +115,11 @@ export const TIERS: Record<TierKey, TierConfig> = {
     limits: {
       posts: 0,
       storage: 0,
+      storageDisplay: "0 MB",
       themes: 0,
       navPages: 0,
       commentsPerWeek: 20,
+      aiWordsPerMonth: 0,
     },
     features: {
       blog: false,
@@ -166,9 +170,11 @@ export const TIERS: Record<TierKey, TierConfig> = {
     limits: {
       posts: 50,
       storage: 1 * 1024 * 1024 * 1024, // 1 GB
+      storageDisplay: "1 GB",
       themes: 3,
       navPages: 0,
       commentsPerWeek: Infinity,
+      aiWordsPerMonth: 750, // ~25/day * 30 days
     },
     features: {
       blog: true,
@@ -222,9 +228,11 @@ export const TIERS: Record<TierKey, TierConfig> = {
     limits: {
       posts: 250,
       storage: 5 * 1024 * 1024 * 1024, // 5 GB
+      storageDisplay: "5 GB",
       themes: 10,
       navPages: 3,
       commentsPerWeek: Infinity,
+      aiWordsPerMonth: 3000, // ~100/day * 30 days
     },
     features: {
       blog: true,
@@ -278,9 +286,11 @@ export const TIERS: Record<TierKey, TierConfig> = {
     limits: {
       posts: Infinity,
       storage: 20 * 1024 * 1024 * 1024, // 20 GB
+      storageDisplay: "20 GB",
       themes: Infinity,
       navPages: 5,
       commentsPerWeek: Infinity,
+      aiWordsPerMonth: 15000, // ~500/day * 30 days
     },
     features: {
       blog: true,
@@ -334,9 +344,11 @@ export const TIERS: Record<TierKey, TierConfig> = {
     limits: {
       posts: Infinity,
       storage: 100 * 1024 * 1024 * 1024, // 100 GB
+      storageDisplay: "100 GB",
       themes: Infinity,
       navPages: 8,
       commentsPerWeek: Infinity,
+      aiWordsPerMonth: 75000, // ~2500/day * 30 days
     },
     features: {
       blog: true,

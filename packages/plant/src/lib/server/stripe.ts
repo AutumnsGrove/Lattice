@@ -16,10 +16,7 @@
  * ONLY 2 SECRETS NEEDED! Price IDs are hardcoded below (not secrets).
  */
 
-import {
-  PAID_TIERS,
-  type PaidTierKey,
-} from "@autumnsgrove/groveengine/config";
+import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/groveengine/config";
 
 // =============================================================================
 // STRIPE PRICE IDS
@@ -39,23 +36,23 @@ import {
 export const STRIPE_PRICES = {
   seedling: {
     // Seedling tier: $8/month, ~$81/year (15% off)
-    monthly: "price_SEEDLING_MONTHLY_REPLACE_ME",
-    yearly: "price_SEEDLING_YEARLY_REPLACE_ME",
+    monthly: "price_1ShXzXRpJ6WVdxl3dwuzZX90",
+    yearly: "price_1ShXzXRpJ6WVdxl38ZgKg4Wk",
   },
   sapling: {
     // Sapling tier: $12/month, ~$122/year
-    monthly: "price_SAPLING_MONTHLY_REPLACE_ME",
-    yearly: "price_SAPLING_YEARLY_REPLACE_ME",
+    monthly: "price_1ShY0MRpJ6WVdxl33inwSBKH",
+    yearly: "price_1ShY0MRpJ6WVdxl3RI7YAUBK",
   },
   oak: {
     // Oak tier: $25/month, ~$255/year
-    monthly: "price_OAK_MONTHLY_REPLACE_ME",
-    yearly: "price_OAK_YEARLY_REPLACE_ME",
+    monthly: "price_1ShY0yRpJ6WVdxl3GRhURSI8",
+    yearly: "price_1ShY0yRpJ6WVdxl38u1qm3EX",
   },
   evergreen: {
     // Evergreen tier: $35/month, ~$357/year
-    monthly: "price_EVERGREEN_MONTHLY_REPLACE_ME",
-    yearly: "price_EVERGREEN_YEARLY_REPLACE_ME",
+    monthly: "price_1ShY1fRpJ6WVdxl3IiVhJ7BQ",
+    yearly: "price_1ShY1fRpJ6WVdxl3rOJXhOkP",
   },
 } as const;
 
@@ -460,4 +457,24 @@ export interface StripeInvoice {
   amount_due: number;
   currency: string;
   hosted_invoice_url?: string;
+  billing_reason?:
+    | "subscription_create"
+    | "subscription_cycle"
+    | "subscription_update"
+    | "subscription_threshold"
+    | "manual"
+    | "upcoming"
+    | string;
+  lines?: {
+    data: Array<{
+      id: string;
+      price?: {
+        id: string;
+        recurring?: {
+          interval: "day" | "week" | "month" | "year";
+          interval_count: number;
+        };
+      };
+    }>;
+  };
 }

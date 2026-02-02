@@ -440,10 +440,8 @@ export const POST: RequestHandler = async ({
       secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
-    const priceId = (platform.env as unknown as Record<string, string>)[
-      `STRIPE_PRICE_${data.plan.toUpperCase()}`
-    ];
-
+    // Note: This endpoint is for legacy/internal use. Plant handles new signups
+    // with hardcoded Stripe price IDs. This creates dynamic pricing as fallback.
     const checkoutParams = {
       mode: "subscription",
       success_url: `${data.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
@@ -467,15 +465,9 @@ export const POST: RequestHandler = async ({
       },
     };
 
-    const lineItems: Array<{
-      price?: string;
-      quantity: number;
-      price_data?: object;
-    }> = [];
-    if (priceId) {
-      lineItems.push({ price: priceId, quantity: 1 });
-    } else {
-      lineItems.push({
+    // Create dynamic price data (Plant uses hardcoded Stripe price IDs for new signups)
+    const lineItems = [
+      {
         price_data: {
           currency: "usd",
           unit_amount: plan.price,
@@ -488,8 +480,8 @@ export const POST: RequestHandler = async ({
           },
         },
         quantity: 1,
-      });
-    }
+      },
+    ];
 
     const stripeClient = (stripe as { client?: unknown }).client || stripe;
     const session = await (
@@ -764,10 +756,16 @@ export const PATCH: RequestHandler = async ({
       ) {
         errorMessage =
           "Subscription not found. Please try refreshing your billing page.";
-      } else if (err.message.includes("Unauthorized") || err.message.includes("Invalid API")) {
+      } else if (
+        err.message.includes("Unauthorized") ||
+        err.message.includes("Invalid API")
+      ) {
         errorMessage = "Payment system error. Please try again later.";
         errorDetails.severity = "critical";
-      } else if (err.message.includes("cannot be resumed") || err.message.includes("already canceled")) {
+      } else if (
+        err.message.includes("cannot be resumed") ||
+        err.message.includes("already canceled")
+      ) {
         errorMessage =
           "This subscription cannot be resumed. Please contact support.";
       }
@@ -891,7 +889,10 @@ export const PUT: RequestHandler = async ({
 
     if (!response.ok || data.error) {
       console.error("[Billing] Portal creation failed:", data.error);
-      throw error(500, data.error?.message || "Failed to create portal session");
+      throw error(
+        500,
+        data.error?.message || "Failed to create portal session",
+      );
     }
 
     if (!data.url) {

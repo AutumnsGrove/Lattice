@@ -54,6 +54,10 @@ declare global {
         LEMON_SQUEEZY_EVERGREEN_VARIANT_MONTHLY?: string;
         LEMON_SQUEEZY_EVERGREEN_VARIANT_YEARLY?: string;
 
+        // Stripe payment processing
+        STRIPE_SECRET_KEY?: string;
+        STRIPE_WEBHOOK_SECRET?: string;
+
         RESEND_API_KEY: string;
         /** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
         PUBLIC_APP_URL?: string;
