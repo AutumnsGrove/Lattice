@@ -79,6 +79,28 @@ gw bindings -p engine  # Filter by package name
 gw --json bindings     # Machine-readable JSON output
 ```
 
+### Database Commands
+
+```bash
+gw db list                              # List all databases
+gw db tables                            # List tables in default database
+gw db tables --db groveauth             # List tables in specific database
+gw db schema tenants                    # Show table schema
+gw db query "SELECT * FROM tenants"     # Execute read-only query
+gw db query "..." --write               # Execute write query (with safety checks)
+```
+
+### Tenant Commands
+
+```bash
+gw tenant lookup autumn                 # Look up by subdomain
+gw tenant lookup --email user@example.com
+gw tenant lookup --id abc-123
+gw tenant stats autumn                  # Show tenant statistics
+gw tenant list                          # List all tenants
+gw tenant list --plan oak               # Filter by plan
+```
+
 ### Authentication
 
 ```bash
@@ -173,26 +195,32 @@ tools/gw/
 │   └── commands/
 │       ├── status.py       # gw status
 │       ├── health.py       # gw health
-│       └── auth.py         # gw auth check/login
+│       ├── auth.py         # gw auth check/login
+│       ├── bindings.py     # gw bindings
+│       ├── db.py           # gw db list/tables/schema/query
+│       └── tenant.py       # gw tenant lookup/stats/list
 └── tests/
     └── test_safety.py      # Safety layer tests
 ```
 
 ## Roadmap
 
-### Phase 1 ✅ (Current)
+### Phase 1 ✅
 - [x] Project scaffolding
 - [x] Configuration system
 - [x] Safety layer
-- [x] `gw status`, `gw health`, `gw auth`
+- [x] `gw status`, `gw health`, `gw auth`, `gw bindings`
 
-### Phase 2 (Next)
-- [ ] `gw db query` — Safe SQL queries
-- [ ] `gw db tables` — List tables
-- [ ] `gw db schema` — Show table schema
-- [ ] `gw tenant` — Tenant lookup
+### Phase 2 ✅ (Current)
+- [x] `gw db list` — List databases
+- [x] `gw db tables` — List tables
+- [x] `gw db schema` — Show table schema
+- [x] `gw db query` — Safe SQL queries
+- [x] `gw tenant lookup` — Tenant lookup
+- [x] `gw tenant stats` — Tenant statistics
+- [x] `gw tenant list` — List tenants
 
-### Phase 3
+### Phase 3 (Next)
 - [ ] `gw secret` — Agent-safe secrets management
 - [ ] `gw cache` — Cache operations
 

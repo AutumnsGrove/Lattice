@@ -2,7 +2,7 @@
 
 import click
 
-from .commands import auth, bindings, health, status
+from .commands import auth, bindings, db, health, status, tenant
 from .config import GWConfig
 
 
@@ -40,6 +40,8 @@ main.add_command(status.status)
 main.add_command(health.health)
 main.add_command(auth.auth)
 main.add_command(bindings.bindings)
+main.add_command(db.db)
+main.add_command(tenant.tenant)
 
 
 if __name__ == "__main__":
