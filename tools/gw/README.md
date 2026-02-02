@@ -85,7 +85,7 @@ alias gw="uv run --project ~/path/to/tools/gw gw"
 | `gw deploy --write` | Deploy to Cloudflare | ⚠️ Needs `--write` |
 | `gw git commit --write` | Commit changes | ⚠️ Needs `--write` |
 | `gw git push --write` | Push to remote | ⚠️ Needs `--write` |
-| `gw db query --write` | Write to database | ⚠️ Needs `--write` |
+| `gw d1 query --write` | Write to database | ⚠️ Needs `--write` |
 | `gw git push --write --force` | Force push | 🔴 Needs `--write --force` |
 
 ---
@@ -371,12 +371,12 @@ gw gh rate-limit
 ### Databases (D1)
 
 ```bash
-gw db list                              # List all databases
-gw db tables                            # List tables
-gw db tables --db groveauth             # Specific database
-gw db schema tenants                    # Show table schema
-gw db query "SELECT * FROM tenants"     # Read-only query
-gw db query "UPDATE..." --write         # Write query
+gw d1 list                              # List all databases
+gw d1 tables                            # List tables
+gw d1 tables --db groveauth             # Specific database
+gw d1 schema tenants                    # Show table schema
+gw d1 query "SELECT * FROM tenants"     # Read-only query
+gw d1 query "UPDATE..." --write         # Write query
 ```
 
 ### KV Storage
@@ -674,7 +674,7 @@ tools/gw/
 │       ├── health.py            # gw health
 │       ├── auth.py              # gw auth (+ client management)
 │       ├── bindings.py          # gw bindings
-│       ├── db.py                # gw db
+│       ├── db.py                # gw d1
 │       ├── tenant.py            # gw tenant
 │       ├── secret.py            # gw secret
 │       ├── cache.py             # gw cache

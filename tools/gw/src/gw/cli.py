@@ -21,9 +21,37 @@ from .commands.dev.ci import ci
 from .commands.publish import publish
 from .config import GWConfig
 from .tracking import TrackedGroup
+from .help_formatter import show_categorized_help
 
 
-@click.group(cls=TrackedGroup)
+class GWGroup(TrackedGroup):
+    """Custom Click group that overrides help display."""
+
+    def get_help(self, ctx: click.Context) -> str:
+        """Override to show our custom categorized help."""
+        # Return a minimal string to avoid duplicate output
+        # Our invoke_without_command will show the real help
+        return ""
+
+    def main(self, args=None, prog_name=None, complete_var=None, **extra):
+        """Override main to handle --help specially."""
+        # Check if --help is in args
+        if args and "--help" in args:
+            show_categorized_help()
+            return 0
+
+        # Otherwise use normal Click behavior
+        return super().main(args, prog_name, complete_var, **extra)
+
+    def add_command(self, cmd, name=None):
+        """Override to prevent Click from adding its own help command."""
+        # Don't add if it's Click's default help
+        if name == "help" and hasattr(cmd, "_original_help"):
+            return self
+        return super().add_command(cmd, name)
+
+
+@click.group(cls=GWGroup, invoke_without_command=True)
 @click.option(
     "--json",
     "output_json",
@@ -34,6 +62,15 @@ from .tracking import TrackedGroup
     "--verbose",
     is_flag=True,
     help="Enable verbose debug output",
+)
+@click.option(
+    "--help",
+    "show_help",
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=lambda ctx, param, value: show_categorized_help() or ctx.exit(0) if value else None,
+    help="Show this message and exit",
 )
 @click.pass_context
 def main(ctx: click.Context, output_json: bool, verbose: bool) -> None:
@@ -51,13 +88,36 @@ def main(ctx: click.Context, output_json: bool, verbose: bool) -> None:
     ctx.obj["output_json"] = output_json
     ctx.obj["verbose"] = verbose
 
+    # If no command is specified, show our custom help
+    if ctx.invoked_subcommand is None:
+        show_categorized_help()
+
+
+# Custom help command
+@main.command(name="help")
+@click.argument("command_name", required=False)
+@click.pass_context
+def help_cmd(ctx: click.Context, command_name: str) -> None:
+    """Show help for gw or a specific command."""
+    if command_name:
+        # Get the command and show its help
+        cmd = main.get_command(ctx, command_name)
+        if cmd:
+            click.echo(click.Context(cmd).get_help())
+        else:
+            click.echo(f"Unknown command: {command_name}")
+            click.echo()
+            show_categorized_help()
+    else:
+        show_categorized_help()
+
 
 # Register command groups
 main.add_command(status.status)
 main.add_command(health.health)
 main.add_command(auth.auth)
 main.add_command(bindings.bindings)
-main.add_command(db.db)
+main.add_command(db.d1)
 main.add_command(tenant.tenant)
 main.add_command(secret.secret)
 main.add_command(cache.cache)

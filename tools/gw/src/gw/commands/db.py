@@ -25,8 +25,8 @@ def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
 
 @click.group()
 @click.pass_context
-def db(ctx: click.Context) -> None:
-    """Database operations for D1.
+def d1(ctx: click.Context) -> None:
+    """D1 database operations.
 
     Query databases, list tables, and inspect schemas with safety guards.
     All queries are read-only by default.
@@ -34,9 +34,9 @@ def db(ctx: click.Context) -> None:
     pass
 
 
-@db.command("list")
+@d1.command("list")
 @click.pass_context
-def db_list(ctx: click.Context) -> None:
+def d1_list(ctx: click.Context) -> None:
     """List all available databases.
 
     Shows both configured database aliases and all databases in your
@@ -109,7 +109,7 @@ def db_list(ctx: click.Context) -> None:
         console.print(remote_table)
 
 
-@db.command("tables")
+@d1.command("tables")
 @click.option(
     "--db",
     "-d",
@@ -118,14 +118,14 @@ def db_list(ctx: click.Context) -> None:
     help="Database alias or name (default: lattice)",
 )
 @click.pass_context
-def db_tables(ctx: click.Context, database: str) -> None:
+def d1_tables(ctx: click.Context, database: str) -> None:
     """List tables in a database.
 
     Examples:
 
-        gw db tables                 # List tables in default database
+        gw d1 tables                 # List tables in default database
 
-        gw db tables --db groveauth  # List tables in groveauth
+        gw d1 tables --db groveauth  # List tables in groveauth
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)
@@ -173,7 +173,7 @@ def db_tables(ctx: click.Context, database: str) -> None:
         warning("No tables found")
 
 
-@db.command("schema")
+@d1.command("schema")
 @click.argument("table_name")
 @click.option(
     "--db",
@@ -183,14 +183,14 @@ def db_tables(ctx: click.Context, database: str) -> None:
     help="Database alias or name (default: lattice)",
 )
 @click.pass_context
-def db_schema(ctx: click.Context, table_name: str, database: str) -> None:
+def d1_schema(ctx: click.Context, table_name: str, database: str) -> None:
     """Show schema for a table.
 
     Examples:
 
-        gw db schema tenants             # Show tenants table schema
+        gw d1 schema tenants             # Show tenants table schema
 
-        gw db schema posts --db lattice  # Specify database
+        gw d1 schema posts --db lattice  # Specify database
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)
@@ -256,7 +256,7 @@ def db_schema(ctx: click.Context, table_name: str, database: str) -> None:
     console.print(schema_table)
 
 
-@db.command("query")
+@d1.command("query")
 @click.argument("sql")
 @click.option(
     "--db",
@@ -277,7 +277,7 @@ def db_schema(ctx: click.Context, table_name: str, database: str) -> None:
     help="Maximum rows to return (default: 100)",
 )
 @click.pass_context
-def db_query(
+def d1_query(
     ctx: click.Context, sql: str, database: str, write: bool, limit: int
 ) -> None:
     """Execute a SQL query.
@@ -286,11 +286,11 @@ def db_query(
 
     Examples:
 
-        gw db query "SELECT * FROM tenants LIMIT 5"
+        gw d1 query "SELECT * FROM tenants LIMIT 5"
 
-        gw db query "SELECT subdomain, plan FROM tenants WHERE plan = 'oak'"
+        gw d1 query "SELECT subdomain, plan FROM tenants WHERE plan = 'oak'"
 
-        gw db query --db groveauth "SELECT * FROM clients"
+        gw d1 query --db groveauth "SELECT * FROM clients"
     """
     config: GWConfig = ctx.obj["config"]
     output_json: bool = ctx.obj.get("output_json", False)

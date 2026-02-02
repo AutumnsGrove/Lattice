@@ -84,7 +84,7 @@ def grove_db_query(sql: str, database: str = "lattice") -> str:
     if any(sql_upper.startswith(kw) for kw in ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"]):
         return json.dumps({
             "error": "Write operations blocked in MCP mode",
-            "hint": "Use gw db query --write from the terminal for write operations"
+            "hint": "Use gw d1 query --write from the terminal for write operations"
         })
 
     try:
