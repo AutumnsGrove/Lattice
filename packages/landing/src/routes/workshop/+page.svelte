@@ -102,6 +102,39 @@
 					spec: '/knowledge/specs/passage-spec',
 					whatIsLink: '/knowledge/help/what-is-passage'
 				},
+				{
+					name: 'Your Grove',
+					tagline: 'Your Personal Space',
+					description: 'A grove is a small group of trees growing together—intimate, sheltered, yours. The platform is called Grove. Your space within it is your grove. When someone visits autumn.grove.place, they\'re visiting Autumn\'s grove. The possessive makes it personal. The word makes it home.',
+					status: 'live',
+					icon: 'trees',
+					domain: '{you}.grove.place',
+					integration: 'Every Wanderer who takes root gets their own grove',
+					spec: '/knowledge/specs/grove-garden-bloom-spec',
+					whatIsLink: '/knowledge/help/what-is-my-grove'
+				},
+				{
+					name: 'Garden',
+					tagline: 'Your Collection of Blooms',
+					description: 'A garden is where you tend what grows. It\'s the cultivated space within your grove where your blooms are planted, arranged, and displayed for visitors to wander through. Not a feed. Not a list. A garden you\'ve tended, ready for someone to stroll through.',
+					status: 'live',
+					icon: 'flower',
+					domain: '{you}.grove.place/garden',
+					integration: 'The home for all your writing',
+					spec: '/knowledge/specs/grove-garden-bloom-spec',
+					whatIsLink: '/knowledge/help/what-is-my-garden'
+				},
+				{
+					name: 'Blooms',
+					tagline: 'Your Writing',
+					description: 'A bloom is a flower opening—a moment of expression, color, and beauty. It\'s what your grove produces. Every piece you write is a bloom. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.',
+					status: 'live',
+					icon: 'cherry',
+					domain: '{you}.grove.place/garden/{slug}',
+					integration: 'Individual pieces of writing in your garden',
+					spec: '/knowledge/specs/grove-garden-bloom-spec',
+					whatIsLink: '/knowledge/help/what-are-blooms'
+				},
 			]
 		},
 		{
@@ -554,15 +587,16 @@
 					]
 				},
 				{
-					name: 'Bloom',
+					name: 'Verge',
 					tagline: 'Remote AI Coding',
-					description: 'Text it and forget it. Send development tasks from your phone, and an AI coding agent handles them on a temporary server that self-destructs when done. Your code syncs to cloud storage before shutdown. Autonomous coding from anywhere.',
+					description: 'Send code through the Verge—into ephemeral compute spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes and your code returns more beautiful than you expected. Brief, brilliant, gone.',
 					status: 'building',
-					icon: 'loader',
-					domain: 'bloom.grove.place',
+					icon: 'zap',
+					domain: 'verge.grove.place',
 					integration: 'Personal serverless development infrastructure',
-					github: 'https://github.com/AutumnsGrove/GroveBloom',
-					spec: '/knowledge/specs/bloom-spec',
+					github: 'https://github.com/AutumnsGrove/GroveVerge',
+					spec: '/knowledge/specs/verge-spec',
+					whatIsLink: '/knowledge/help/what-is-verge',
 					subComponents: [
 						{ name: 'Solarpunk', icon: 'solarpanel', description: 'Solarpunk aligned', href: '/knowledge/help/what-is-solarpunk' },
 						{ name: 'Firefly', icon: 'webhook', description: 'Ephemeral server pattern', href: '/knowledge/help/what-is-firefly' }
@@ -703,7 +737,7 @@
 				{
 					name: 'Mycelium',
 					tagline: 'MCP Server',
-					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blog posts, start Bloom sessions, manage files in Amber, and tap into every Grove service.',
+					description: 'Grove\'s Model Context Protocol (MCP) server—the invisible fungal network connecting AI agents to the entire Grove ecosystem. Through Mycelium, Claude can read your blooms, start Verge sessions, manage files in Amber, and tap into every Grove service.',
 					status: 'building',
 					icon: 'circuitboard',
 					domain: 'mycelium.grove.place',
@@ -780,7 +814,7 @@
 					description: 'A brief light in the darkness. Firefly defines Grove\'s pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.',
 					status: 'applied',
 					icon: 'webhook',
-					integration: 'Powers Bloom and Outpost infrastructure',
+					integration: 'Powers Verge and Outpost infrastructure',
 					spec: '/knowledge/patterns/firefly-pattern',
 					whatIsLink: '/knowledge/help/what-is-firefly',
 					subComponents: [
