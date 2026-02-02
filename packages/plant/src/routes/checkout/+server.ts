@@ -7,6 +7,13 @@ import {
   type BillingCycle,
 } from "$lib/server/stripe";
 
+interface CompedInvite {
+  id: string;
+  email: string;
+  tier: string;
+  custom_message: string | null;
+}
+
 export const POST: RequestHandler = async ({ cookies, platform, url }) => {
   const onboardingId = cookies.get("onboarding_id");
   if (!onboardingId) {
@@ -28,17 +35,6 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
     return json({ error: "Database not configured" }, { status: 503 });
   }
 
-  if (!stripeSecretKey) {
-    console.error("[Checkout] Stripe not configured");
-    return json(
-      {
-        error:
-          "Stripe not configured. Please set STRIPE_SECRET_KEY in Cloudflare Dashboard.",
-      },
-      { status: 503 },
-    );
-  }
-
   try {
     // Get onboarding data
     const onboarding = await db
@@ -53,6 +49,36 @@ export const POST: RequestHandler = async ({ cookies, platform, url }) => {
       return json(
         { error: "Session not found. Please start over." },
         { status: 404 },
+      );
+    }
+
+    // Check if this email has a comped invite
+    const compedInvite = await db
+      .prepare(
+        `SELECT id, email, tier, custom_message
+         FROM comped_invites
+         WHERE email = ? AND used_at IS NULL`,
+      )
+      .bind((onboarding.email as string).toLowerCase())
+      .first<CompedInvite>();
+
+    if (compedInvite) {
+      // User has a comped invite - redirect to comped welcome page
+      return json({
+        comped: true,
+        redirectUrl: `${baseUrl}/comped`,
+      });
+    }
+
+    // Not comped - proceed with Stripe checkout
+    if (!stripeSecretKey) {
+      console.error("[Checkout] Stripe not configured");
+      return json(
+        {
+          error:
+            "Stripe not configured. Please set STRIPE_SECRET_KEY in Cloudflare Dashboard.",
+        },
+        { status: 503 },
       );
     }
 
