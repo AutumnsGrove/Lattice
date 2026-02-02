@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { X, ExternalLink, Search, LogIn, User } from 'lucide-svelte';
+	import { X, ExternalLink, Search, LogIn, LogOut, User } from 'lucide-svelte';
 	import type { NavItem, FooterLink, HeaderUser } from './types';
 	import { isActivePath } from './types';
 	import {
@@ -27,6 +27,8 @@
 		signInHref?: string;
 		signInLabel?: string;
 		userHref?: string;
+		signOutHref?: string;
+		signOutLabel?: string;
 	}
 
 	let {
@@ -44,7 +46,9 @@
 		user = null,
 		signInHref = 'https://heartwood.grove.place',
 		signInLabel = 'Sign in',
-		userHref = '/admin'
+		userHref = '/admin',
+		signOutHref = '/logout',
+		signOutLabel = 'Sign out'
 	}: Props = $props();
 
 	// Search state
@@ -199,6 +203,15 @@
 						<p class="text-sm font-medium truncate">{user.name || 'Wanderer'}</p>
 						<p class="text-xs text-foreground-subtle">Go to your Grove →</p>
 					</div>
+				</a>
+				<!-- Sign out link -->
+				<a
+					href={signOutHref}
+					onclick={handleClose}
+					class="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors mt-2"
+				>
+					<LogOut class="w-5 h-5 text-accent-muted" />
+					<span class="text-sm font-medium">{signOutLabel}</span>
 				</a>
 			{:else}
 				<!-- Not logged in: sign-in link -->

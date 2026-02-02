@@ -9,7 +9,7 @@
 	import type { Season } from '../../types/season';
 	import { isActivePath } from './types';
 	import { DEFAULT_NAV_ITEMS } from './defaults';
-	import { LogIn, User } from 'lucide-svelte';
+	import { LogIn, LogOut, User } from 'lucide-svelte';
 	import { sidebarStore } from '../../stores/sidebar.svelte';
 
 	// Determine current page for highlighting
@@ -48,6 +48,10 @@
 		signInLabel?: string;
 		/** Where logged-in user goes when clicking avatar (default: /admin) */
 		userHref?: string;
+		/** Sign-out URL (default: /logout) */
+		signOutHref?: string;
+		/** Label for sign-out link (default: "Sign out") */
+		signOutLabel?: string;
 
 		// Admin sidebar support
 		/** Show left-side hamburger for sidebar toggle (admin pages) */
@@ -74,6 +78,8 @@
 		signInHref = 'https://heartwood.grove.place',
 		signInLabel = 'Sign in',
 		userHref = '/admin',
+		signOutHref = '/logout',
+		signOutLabel = 'Sign out',
 		// Admin sidebar props
 		showSidebarToggle = false
 	}: Props = $props();
@@ -250,6 +256,15 @@
 						{/if}
 						<span class="text-sm hidden lg:inline">{user.name || 'Your Grove'}</span>
 					</a>
+					<!-- Sign out button -->
+					<a
+						href={signOutHref}
+						class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-accent-muted transition-colors"
+						title={signOutLabel}
+					>
+						<LogOut class="w-4 h-4" />
+						<span class="hidden lg:inline">{signOutLabel}</span>
+					</a>
 				{:else}
 					<!-- Not logged in: show sign-in link -->
 					<a
@@ -294,4 +309,6 @@
 	{signInHref}
 	{signInLabel}
 	{userHref}
+	{signOutHref}
+	{signOutLabel}
 />
