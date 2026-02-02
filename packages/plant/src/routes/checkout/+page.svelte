@@ -50,10 +50,18 @@
 					headers: { 'Content-Type': 'application/json' }
 				});
 
-				const result = (await res.json()) as { url?: string; error?: string };
+				const result = (await res.json()) as {
+					url?: string;
+					error?: string;
+					comped?: boolean;
+					redirectUrl?: string;
+				};
 
-				if (result.url) {
-					// Redirect to Lemon Squeezy Checkout
+				if (result.comped && result.redirectUrl) {
+					// User has a comped invite - redirect to comped welcome page
+					window.location.href = result.redirectUrl;
+				} else if (result.url) {
+					// Redirect to Stripe Checkout
 					window.location.href = result.url;
 				} else if (result.error) {
 					error = result.error;
@@ -148,7 +156,7 @@
 		</div>
 		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
 			<CreditCard size={18} />
-			<span>Powered by Lemon Squeezy</span>
+			<span>Powered by Stripe</span>
 		</div>
 	</div>
 </div>

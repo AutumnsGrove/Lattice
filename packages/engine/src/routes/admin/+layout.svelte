@@ -11,6 +11,9 @@
     CreditCard,
     HelpCircle,
     MessageCircle,
+    Shield,
+    Gift,
+    Eye,
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
 
@@ -23,6 +26,12 @@
 
   // Computed: show expanded content when not collapsed OR when hovered
   let showExpanded = $derived(!sidebarCollapsed || sidebarHovered);
+
+  // Grove admin emails who can see Vista section
+  const ADMIN_EMAILS = ["autumn@grove.place", "admin@grove.place"];
+  let isGroveAdmin = $derived(
+    data.user?.email ? ADMIN_EMAILS.includes(data.user.email.toLowerCase()) : false
+  );
 
   function closeSidebar() {
     sidebarStore.close();
@@ -116,6 +125,23 @@
         <Settings class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Settings</span>
       </a>
+
+      {#if isGroveAdmin}
+        <!-- Vista: Grove Admin Section -->
+        <div class="nav-divider" class:hidden={!showExpanded}></div>
+        <div class="nav-section-label" class:hidden={!showExpanded}>
+          <Eye class="section-icon" />
+          <span>Vista</span>
+        </div>
+        <a href="/admin/comped-invites" class="nav-item" onclick={closeSidebar} title="Comped Invites">
+          <Gift class="nav-icon" />
+          <span class="nav-label" class:hidden={!showExpanded}>Comped Invites</span>
+        </a>
+        <a href="/admin/reserved-usernames" class="nav-item" onclick={closeSidebar} title="Reserved Usernames">
+          <Shield class="nav-icon" />
+          <span class="nav-label" class:hidden={!showExpanded}>Reserved Names</span>
+        </a>
+      {/if}
     </nav>
 
     {#if showExpanded}
@@ -422,6 +448,30 @@
 
   .hidden {
     display: none;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--grove-border-subtle);
+    margin: 0.75rem 1rem;
+  }
+
+  .nav-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 1.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  :global(.section-icon) {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .sidebar-footer {
