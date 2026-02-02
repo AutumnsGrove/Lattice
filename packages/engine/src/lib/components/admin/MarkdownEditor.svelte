@@ -585,7 +585,10 @@
   $effect(() => {
     if (showFullPreview) {
       // Store the currently focused element to restore on close
-      previouslyFocusedBeforePreview = /** @type {HTMLElement} */ (document.activeElement);
+      const activeEl = document.activeElement;
+      if (activeEl instanceof HTMLElement) {
+        previouslyFocusedBeforePreview = activeEl;
+      }
       // Focus the modal for keyboard accessibility
       setTimeout(() => {
         fullPreviewModalRef?.focus();

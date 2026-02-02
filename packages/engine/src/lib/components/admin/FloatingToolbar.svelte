@@ -227,14 +227,14 @@
     isTextareaFocused = true;
   }
 
-  function handleTextareaBlur() {
-    // Small delay to allow click events on toolbar buttons to complete
-    setTimeout(() => {
-      if (document.activeElement !== textareaRef && !toolbarRef?.contains(document.activeElement)) {
-        isTextareaFocused = false;
-        isVisible = false;
-      }
-    }, 100);
+  /** @param {FocusEvent} e */
+  function handleTextareaBlur(e) {
+    // If focus moved to toolbar, keep it open
+    if (e.relatedTarget && toolbarRef?.contains(/** @type {Node} */ (e.relatedTarget))) {
+      return;
+    }
+    isTextareaFocused = false;
+    isVisible = false;
   }
 
   // Set up focus tracking on the textarea
