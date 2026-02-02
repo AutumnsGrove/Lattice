@@ -1,12 +1,13 @@
 /**
- * Token Bridge CSS Variables
+ * Grove Design Token System
  *
- * This file provides backward compatibility by mapping the original AutumnsGrove
- * CSS variable names to the new shadcn HSL system. This allows existing components
- * to continue working during the migration process.
+ * Flattened CSS variables that work reliably in Svelte scoped styles.
+ * All values use direct HSL notation to eliminate cascade failures.
  *
- * Usage: Import this file after app.css in +layout.svelte during migration.
- * Once all components are migrated to shadcn, this file can be removed.
+ * Light mode values are defined in :root
+ * Dark mode values are defined in .dark
+ *
+ * This is the single source of truth for semantic color tokens.
  */
 
 /* =============================================================================
@@ -20,20 +21,20 @@
 :root {
 	color-scheme: light;
 
-	/* Primary colors - map to shadcn primary */
-	--color-primary: hsl(var(--primary));
+	/* Primary colors - flattened HSL values */
+	--color-primary: hsl(121 37% 27%);
 	--color-primary-hover: hsl(121 37% 40%);
 	--color-primary-light: hsl(121 37% 45%);
 	--color-primary-light-hover: hsl(121 37% 52%);
 
-	/* Text colors */
-	--color-text: hsl(var(--foreground));
-	--color-text-muted: hsl(var(--muted-foreground));
+	/* Text colors - flattened HSL values */
+	--color-text: hsl(0 0% 20%);
+	--color-text-muted: hsl(25 32% 33%);
 	--color-text-subtle: hsl(0 0% 53%);
 
-	/* Background colors */
-	--color-bg-secondary: hsl(var(--secondary));
-	--color-border: hsl(var(--border));
+	/* Background colors - flattened HSL values */
+	--color-bg-secondary: hsl(0 0% 96%);
+	--color-border: hsl(0 0% 88%);
 
 	/* Grove overlay tokens - centralized green overlays for glassmorphism */
 	/* Base RGB values for color mixing */
@@ -85,28 +86,28 @@
 	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 	--shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
 
-	/* Dark mode values */
-	--color-text-dark: hsl(var(--foreground));
-	--color-text-muted-dark: hsl(var(--muted-foreground));
+	/* Dark mode values - flattened HSL values */
+	--color-text-dark: hsl(0 0% 94%);
+	--color-text-muted-dark: hsl(30 6% 75%);
 	--color-text-subtle-dark: hsl(0 0% 72%);
 	--color-bg-secondary-dark: hsl(0 0% 10%);
 	--color-bg-tertiary-dark: hsl(0 0% 16%);
-	--color-border-dark: hsl(var(--border));
+	--color-border-dark: hsl(0 0% 20%);
 
-	/* Danger/Error colors */
-	--color-danger: hsl(var(--destructive));
+	/* Danger/Error colors - flattened HSL values */
+	--color-danger: hsl(354 66% 54%);
 	--color-danger-hover: hsl(354 75% 45%);
 
-	/* Component-specific */
-	--mobile-menu-bg: hsl(var(--card));
-	--mobile-menu-border: hsl(var(--border));
-	--tag-bg: hsl(var(--accent));
+	/* Component-specific - flattened HSL values */
+	--mobile-menu-bg: hsl(0 0% 100%);
+	--mobile-menu-border: hsl(0 0% 88%);
+	--tag-bg: hsl(270 38% 49%);
 	--tag-bg-hover: hsl(270 45% 45%);
 
-	/* Border radius - map to shadcn system */
-	--border-radius-standard: var(--radius);
-	--border-radius-small: calc(var(--radius) - 4px);
-	--border-radius-button: calc(var(--radius) - 2px);
+	/* Border radius - flattened values */
+	--border-radius-standard: 0.5rem;
+	--border-radius-small: calc(0.5rem - 4px);
+	--border-radius-button: calc(0.5rem - 2px);
 
 	/* Component-specific colors for standardized dark mode */
 	/* Blog header */
@@ -182,15 +183,15 @@
 	   using var(--color-text-muted) automatically get dark mode values.
 	   The -dark suffixed variants below are kept for backward compatibility.
 	   ========================================================================== */
-	--color-text: hsl(var(--foreground));
-	--color-text-muted: hsl(var(--muted-foreground));
+	--color-text: hsl(0 0% 94%);
+	--color-text-muted: hsl(30 6% 75%);
 	--color-text-subtle: hsl(0 0% 72%);
-	--color-bg-secondary: hsl(var(--secondary));
-	--color-border: hsl(var(--border));
+	--color-bg-secondary: hsl(0 0% 10%);
+	--color-border: hsl(0 0% 20%);
 
-	/* Dark mode tag colors */
-	--tag-bg: hsl(270 38% 55%);
-	--tag-bg-hover: hsl(270 38% 49%);
+	/* Dark mode tag colors - flattened HSL values */
+	--tag-bg: hsl(270 38% 60%);
+	--tag-bg-hover: hsl(270 38% 55%);
 
 	/* Grove overlays - dark mode (use lighter grove green) */
 	--grove-overlay-5: rgba(74, 222, 128, 0.05);
