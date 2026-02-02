@@ -67,6 +67,16 @@ uv run gw auth login
 gw status              # Show configuration and Cloudflare account
 gw --json status       # Machine-readable JSON output
 gw health              # Health check for all components
+gw bindings            # Show all Cloudflare bindings from wrangler.toml
+```
+
+### Bindings
+
+```bash
+gw bindings            # Show all bindings (D1, KV, R2, DOs, Services)
+gw bindings -t d1      # Filter by type: d1, kv, r2, do, services, ai
+gw bindings -p engine  # Filter by package name
+gw --json bindings     # Machine-readable JSON output
 ```
 
 ### Authentication

@@ -2,7 +2,7 @@
 
 import click
 
-from .commands import auth, health, status
+from .commands import auth, bindings, health, status
 from .config import GWConfig
 
 
@@ -39,6 +39,7 @@ def main(ctx: click.Context, output_json: bool, verbose: bool) -> None:
 main.add_command(status.status)
 main.add_command(health.health)
 main.add_command(auth.auth)
+main.add_command(bindings.bindings)
 
 
 if __name__ == "__main__":
