@@ -54,8 +54,19 @@
   let uploads = $state([]);
   let uploading = $state(false);
 
-  // Copy format preference
-  let copyFormat = $state('markdown');
+  // Copy format preference - load from localStorage or default to 'url'
+  const COPY_FORMAT_STORAGE_KEY = 'grove-copy-format';
+  let copyFormat = $state(
+    (typeof localStorage !== 'undefined' && localStorage.getItem(COPY_FORMAT_STORAGE_KEY)) ||
+    'url'
+  );
+
+  // Persist copy format preference to localStorage when it changes
+  $effect(() => {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(COPY_FORMAT_STORAGE_KEY, copyFormat);
+    }
+  });
 
   // Gallery state
   /** @type {any[]} */
