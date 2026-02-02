@@ -73,6 +73,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Terrarium](terrarium-spec.md)** | Creative canvas for scene composition | **New** | Foliage, Engine |
 | **[Weave](weave-spec.md)** | Visual composition studio (node-graph) | **New** | Terrarium |
 | **[Curios](curios-spec.md)** | Cabinet of wonders & personal touches | **New** | Engine, Foliage |
+| **[Reverie](reverie-spec.md)** | AI-powered composition layer | **New** | Terrarium, Foliage, Mycelium |
 
 ### Tools & Services
 

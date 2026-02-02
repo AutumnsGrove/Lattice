@@ -353,12 +353,118 @@ Possible verbs:
 
 ---
 
+## Round 2 Decision (Rejected)
+
+**Name:** Bower — felt too much like old Bower.js package manager. Moving on.
+
+---
+
+## Round 3: The Morning Walk
+
+*Instruction from the Wayfinder: Focus on the PROCESS and the RESULT. The FEELING. Bring in the serenity of dew on a fresh morning after light rain. Sunlight streaming through branches.*
+
+Walking deeper into the forest. Morning after rain. Dew on leaves. Light streaming through branches. You're not commanding anything. You're feeling what wants to exist, and it... appears. Like mist clearing to reveal what was always there.
+
+---
+
+## Final Candidates
+
+### Dewfall
+The moment dew forms—not rain falling, but moisture appearing silently overnight. By morning, every leaf glistens. You didn't make it happen. It just appeared.
+
+*Appearing without effort. Glistening by morning.*
+
+### Reverie
+A reverie is that state between waking and dreaming—when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
+
+*Half-dream, half-real. Yours.*
+
+### Dapple
+Dappled light through leaves—not uniform brightness, but a living pattern of light and shadow. Composition without a composer.
+
+*Light through leaves. Pattern without plan.*
+
+### Idyll
+A scene of rural peace. A poem about shepherds at rest. A moment outside of time. Serene.
+
+*A scene worth staying in.*
+
+### Gleam
+Light catching something—dew on a leaf, a beetle's wing. Brief, beautiful, surprising.
+
+*Light catching. Worth a closer look.*
+
+---
+
+## The Choice: Reverie
+
+Reverie captures everything:
+
+1. **The process** — You drift into a vision, not engineer a spec
+2. **The feeling** — Dreamy, serene, contemplative
+3. **The result** — A half-dream made real
+4. **The mystery** — You don't know exactly how it happened, but there it is
+5. **The warmth** — Like gazing at morning light through branches
+
+**Testing Reverie:**
+
+| Context | Test |
+|---------|------|
+| As a state | "I had a reverie about fireflies" ✓ |
+| As a system | "Reverie found matching components" ✓ |
+| As output | "A reverie of butterflies and flowers" ✓ |
+| Domain | "reverie.grove.place" ✓ |
+| Agent use | "The agent uses Reverie to compose" ✓ |
+| Human feel | Warm, dreamy, magical ✓ |
+
+**The Tagline Test:**
+
+> "Reverie is where your vision takes shape."
+> "Reverie turns feeling into form."
+> "You describe the dream. Reverie makes it real."
+
+---
+
 ## Decision
 
-**Name:** Bower
-**Internal Name:** GroveBower
-**Domain:** bower.grove.place
-**Package:** @autumnsgrove/bower
-**Icon:** Suggestion: `Gem` or `Sparkles` (the collected treasures)
+**Name:** Reverie
+**Internal Name:** GroveReverie
+**Domain:** reverie.grove.place
+**Package:** @autumnsgrove/reverie
+**Icon:** `sparkles` — the magical, ethereal quality of dreams made real
 
-*Found, selected, arranged.*
+*Half-dream, half-real. Yours.*
+
+---
+
+## The Entry (for grove-naming.md)
+
+### Reverie
+**Composition Layer** · `reverie.grove.place`
+
+A reverie is that state between waking and dreaming—when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
+
+Reverie is how you compose your grove. You don't design; you *see*. "Fireflies around my guestbook" isn't a specification—it's a reverie. The system takes your half-formed dream and gives it shape. The manifest knows what exists. The DSL knows how things arrange. But you just... drift into what you want.
+
+Behind every "make it cozy" or "add something that glows," there's a translation layer: your intent becomes a query, the query finds components in the manifest, and the components arrange into a composition. You describe the feeling. Reverie finds the pieces. The result appears in Terrarium or Foliage, ready to become part of your space.
+
+You might never interact with Reverie directly. Like the moment between waking and sleeping, it happens in the background—half-conscious, half-automatic. All you see is what emerges: a scene that captures what you meant.
+
+*Half-dream, half-real. Yours.*
+
+---
+
+## Reverie Lexicon
+
+| Term | Meaning |
+|------|---------|
+| **Manifest** | The catalog of all components with semantic metadata |
+| **Vision** | A composition described in the DSL |
+| **Dream** | The user's intent before it takes shape |
+| **Form** | The final output (scene, decoration, curio template) |
+
+Possible expressions:
+- "A reverie of fireflies" — a composed scene
+- "Enter a reverie" — begin composing
+- "The reverie manifest" — the component catalog
+- "Drift into your design" — the process of composing

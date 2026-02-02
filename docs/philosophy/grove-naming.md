@@ -135,6 +135,19 @@ Curios is your personal cabinet of wonders. Guestbooks, shrines, hit counters, c
 
 *What curiosities will they find?*
 
+### Reverie
+**Composition Layer** · `reverie.grove.place`
+
+A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
+
+Reverie is how you compose your grove. You don't design; you *see*. "Fireflies around my guestbook" isn't a specification—it's a reverie. The system takes your half-formed dream and gives it shape. The manifest knows what exists. The DSL knows how things arrange. But you just... drift into what you want.
+
+Behind every "make it cozy" or "add something that glows," there's a translation layer: your intent becomes a query, the query finds components in the manifest, and the components arrange into a composition. You describe the feeling. Reverie finds the pieces. The result appears in Terrarium or Foliage, ready to become part of your space.
+
+You might never interact with Reverie directly. Like the moment between waking and sleeping, it happens in the background—half-conscious, half-automatic. All you see is what emerges: a scene that captures what you meant.
+
+*Half-dream, half-real. Yours.*
+
 ### Grafts
 **Feature Customization** · *Operator-configured*
 
@@ -518,6 +531,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Terrarium** | Platform | Creative canvas | grove.place/terrarium |
 | **Weave** | Platform | Visual composition | *(part of Terrarium)* |
 | **Curios** | Platform | Cabinet of wonders | curios.grove.place |
+| **Reverie** | Platform | AI composition layer | reverie.grove.place |
 | **Grafts** | Platform | Feature customization | *(operator-configured)* |
 | **Burrow** | Platform | Cross-property access | *(integrated into Arbor)* |
 | **Gossamer** | Tools | ASCII visual effects | npm: gossamer |
@@ -575,6 +589,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Terrarium | GroveTerrarium |
 | Weave | GroveWeave |
 | Curios | GroveCurios |
+| Reverie | GroveReverie |
 | Grafts | GroveGrafts |
 | Burrow | GroveBurrow |
 | Greenhouse mode | Dave mode[^1] |

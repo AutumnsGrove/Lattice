@@ -1,12 +1,12 @@
-# Bower: Malleable Software for the Grove
+# Reverie: Malleable Software for the Grove
 
-> *Found, selected, arranged.*
+> *Half-dream, half-real. Yours.*
 
 ---
 
 ## Inspiration
 
-This exploration is inspired by [Ink & Switch's essay on Malleable Software](https://www.inkandswitch.com/essay/malleable-software/)—a vision for computing where "anyone can adapt their tools to their needs with minimal friction."
+This exploration is inspired by [Ink & Switch's essay on Malleable Software](https://www.inkandswitch.com/essay/malleable-software/), a vision for computing where "anyone can adapt their tools to their needs with minimal friction."
 
 The essay identifies a fundamental problem: modern software treats users as passive consumers of locked-down applications. When computerized systems replaced physical tools, we gained power but lost agency. The development team becomes a bottleneck; the long tail of niche requirements goes unserved.
 
@@ -18,7 +18,7 @@ The underlying system must be designed for malleability.
 
 ## Why Grove Is Positioned for This
 
-Ink & Switch says further research is needed. But they're thinking about *general* software—any application, any domain. That's hard.
+Ink & Switch says further research is needed. But they're thinking about *general* software. That's hard.
 
 Grove is different. We have:
 
@@ -55,13 +55,15 @@ The gap is between:
 
 There's a cliff. No gentle slope.
 
-**Bower is the bridge.**
+**Reverie is the bridge.**
 
 ---
 
-## What Is Bower?
+## What Is Reverie?
 
-Bower is the composition layer that makes Grove malleable. It has three parts:
+A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
+
+Reverie is the composition layer that makes Grove malleable. It has three parts:
 
 ### 1. The Manifest
 A machine-readable catalog of all components with semantic metadata:
@@ -71,11 +73,11 @@ A machine-readable catalog of all components with semantic metadata:
 - Composition hints (what it pairs well with, what to avoid)
 - Constraints (tier requirements, performance cost)
 
-### 2. The DSL
+### 2. The Vision DSL
 A composition language simpler than Svelte but richer than drag-and-drop:
 ```yaml
 name: Firefly Garden
-description: "Glowing fireflies dancing around flowers"
+mood: "glowing, peaceful, evening"
 elements:
   - component: firefly
     count: 5-8
@@ -90,14 +92,63 @@ elements:
       color: vary(palette.flowers.*)
 ```
 
-Humans can read and edit this. Agents can generate it.
+Humans can read and edit this. Agents can generate it. It reads like a dream taking shape.
 
 ### 3. The Agent Interface
-How AI agents interact with Bower:
-- **Query**: "Find components that fly and glow"
-- **Compose**: "Arrange fireflies around a guestbook"
-- **Constrain**: "Must work in sidebar, respect Oak tier limits"
-- **Preview**: Generate a visual preview before committing
+How AI agents interact with Reverie:
+- **Dream**: "I want fireflies around my guestbook"
+- **Discover**: Find components matching fuzzy criteria
+- **Compose**: Arrange elements into a vision
+- **Form**: Generate the final output for Terrarium or Foliage
+
+---
+
+## The Reverie Metaphor
+
+You don't *design* your grove. You *see* it.
+
+"Fireflies around my guestbook" isn't a specification. It's a reverie. The system takes your half-formed dream and gives it shape:
+
+1. Your **dream** enters ("something that glows, peaceful, evening vibes")
+2. The **manifest** reveals what could be (fireflies, lanterns, moonlight, stars)
+3. The **vision** takes shape (elements arrange themselves)
+4. The **form** emerges (a composition, ready for Terrarium)
+
+Like the moment between waking and sleeping, it happens in the background. All you see is what emerges: a scene that captures what you meant.
+
+---
+
+## Integration with Existing Systems
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         DREAM                               │
+│              "Add fireflies around my guestbook"            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                        REVERIE                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  Manifest   │  │   Vision    │  │  Agent Interface    │  │
+│  │  (catalog)  │→ │   (DSL)     │→ │  (dream→form)       │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                          FORM                               │
+│  ┌───────────────┐  ┌───────────────┐  ┌────────────────┐   │
+│  │   Terrarium   │  │    Foliage    │  │     Curios     │   │
+│  │   (scenes)    │  │   (themes)    │  │  (templates)   │   │
+│  └───────────────┘  └───────────────┘  └────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Reverie doesn't replace anything.** It's a layer that makes existing systems more accessible:
+- Terrarium consumes Reverie visions as importable scenes
+- Foliage consumes Reverie visions as decoration presets
+- Curios could consume Reverie visions as configurable templates
 
 ---
 
@@ -109,11 +160,11 @@ How AI agents interact with Bower:
 |-------|------------|----------------|
 | 1 | Pick a theme (Foliage) | None |
 | 2 | Drag-drop in Terrarium | Minimal |
-| **3** | **Describe intent → Agent composes via Bower** | **Natural language** |
-| **3.5** | **Edit Bower DSL directly** | **Reading YAML** |
+| **3** | **Describe a dream → Agent composes via Reverie** | **Natural language** |
+| **3.5** | **Edit the Vision DSL directly** | **Reading YAML** |
 | 4 | Write custom Svelte | Developer skills |
 
-Bower creates **Level 3 and 3.5**—the missing middle ground.
+Reverie creates **Level 3 and 3.5**, the missing middle ground.
 
 ### Pattern 2: Tools, Not Apps
 
@@ -122,66 +173,14 @@ Grove components are already tools, not monolithic apps:
 - They use CSS variables for theming
 - They have typed interfaces
 
-Bower makes them *discoverable* and *composable* without code.
+Reverie makes them *discoverable* and *composable* without code.
 
 ### Pattern 3: Communal Creation
 
-**Phase 1 (Personal):** Wanderers create compositions for their own sites.
-**Phase 2 (Templates):** Wanderers publish compositions as templates others can use.
+**Phase 1 (Personal):** Wanderers create visions for their own sites.
+**Phase 2 (Templates):** Wanderers publish visions as templates others can use.
 
-Not full collaboration—that's overkill. But sharing what you've created? That's the Grove way.
-
----
-
-## The Bowerbird Metaphor
-
-A bowerbird creates an architectural display from found objects:
-1. **DISCOVERS** objects in the environment
-2. **SELECTS** based on criteria (color, shininess)
-3. **ARRANGES** them into a coherent structure
-4. **PRESENTS** the result
-
-Bower does the same:
-1. Manifest enables **discovery**
-2. Semantic tags enable **selection**
-3. DSL enables **arrangement**
-4. Output is a **composition** (scene, decoration, curio template)
-
-*The bird's selection process is invisible. What you see is the bower itself—the arranged beauty.*
-
----
-
-## Integration with Existing Systems
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        USER INTENT                          │
-│              "Add fireflies around my guestbook"            │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                          BOWER                              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Manifest   │  │    DSL      │  │  Agent Interface    │  │
-│  │  (catalog)  │→ │ (compose)   │→ │  (query/generate)   │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                         OUTPUT                              │
-│  ┌───────────────┐  ┌───────────────┐  ┌────────────────┐   │
-│  │   Terrarium   │  │    Foliage    │  │     Curios     │   │
-│  │   (scenes)    │  │   (themes)    │  │  (templates)   │   │
-│  └───────────────┘  └───────────────┘  └────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Bower doesn't replace anything.** It's a layer that makes existing systems more accessible:
-- Terrarium consumes Bower compositions as importable scenes
-- Foliage consumes Bower compositions as decoration presets
-- Curios could consume Bower compositions as configurable curio templates
+Not full collaboration. But sharing what you've dreamed? That's the Grove way.
 
 ---
 
@@ -192,42 +191,40 @@ Composition power should scale with tier:
 | Tier | What They Can Do |
 |------|------------------|
 | **Seedling** | Use pre-made templates, basic customization |
-| **Sapling** | Full agent composition, save personal templates |
+| **Sapling** | Full agent composition, save personal visions |
 | **Oak** | Share templates publicly, advanced composition features |
 | **Evergreen** | Everything, priority agent access |
 
-Complexity budgets (like Terrarium's 200 points) should apply to Bower compositions too.
+Complexity budgets (like Terrarium's 200 points) should apply to Reverie visions too.
 
 ---
 
 ## Open Questions
 
 ### Technical
-1. **Manifest generation**: Auto-generate from TypeScript types? Or hand-curated? Probably hybrid—auto-generate props, hand-curate semantic tags.
+1. **Manifest generation**: Auto-generate from TypeScript types? Hand-curated? Probably hybrid.
 
-2. **DSL format**: YAML? JSON? Something custom? YAML is human-readable and well-understood.
+2. **DSL format**: YAML? JSON? YAML is human-readable and dreamlike.
 
 3. **Preview rendering**: How do we show a preview before committing? Probably a headless Terrarium render.
 
-4. **Validation**: How do we ensure compositions are valid, accessible, performant? Lint rules? Runtime checks?
+4. **Validation**: How do we ensure visions are valid, accessible, performant?
 
-5. **Storage**: Where do compositions live? User's site? Central catalog? Probably both—personal storage + shareable catalog.
+5. **Storage**: Where do visions live? Personal storage + shareable catalog.
 
 ### Product
-1. **Entry point**: Where does the user access this? Chat with Wisp? A "Compose" button in Terrarium? Mycelium integration?
+1. **Entry point**: Where does the user access this? Chat with Wisp? Mycelium integration? Both?
 
-2. **Failure modes**: What happens when the agent can't find matching components? Graceful fallbacks? Suggestions?
+2. **Failure modes**: What happens when the agent can't find matching components? Graceful suggestions?
 
-3. **Template curation**: If templates can be shared, who curates? Quality control?
-
-4. **Naming templates**: Do users name their compositions? Grove-style names?
+3. **Template curation**: If visions can be shared, who curates? Quality control?
 
 ### Philosophical
-1. **How much magic?** Should the user see the Bower DSL at all, or is it purely internal?
+1. **How much magic?** Should the user see the Vision DSL at all, or is it purely internal?
 
-2. **Ownership**: When you create a composition, is it "yours"? What does sharing mean?
+2. **Ownership**: When you create a vision, is it "yours"? What does sharing mean?
 
-3. **Evolution**: As we add components, how do compositions stay compatible?
+3. **Evolution**: As we add components, how do visions stay compatible?
 
 ---
 
@@ -235,7 +232,7 @@ Complexity budgets (like Terrarium's 200 points) should apply to Bower compositi
 
 ### Phase 0: Research & Design (Now)
 - Define manifest schema
-- Define DSL schema
+- Define Vision DSL schema
 - Prototype agent interface
 - Identify integration points
 
@@ -244,10 +241,10 @@ Complexity budgets (like Terrarium's 200 points) should apply to Bower compositi
 - Add semantic tags to key components
 - Create manifest validation tooling
 
-### Phase 2: DSL
+### Phase 2: Vision DSL
 - Define composition format
 - Build parser/validator
-- Create manual compositions for testing
+- Create manual visions for testing
 
 ### Phase 3: Agent Interface
 - Integrate with Mycelium (MCP)
@@ -268,13 +265,13 @@ Complexity budgets (like Terrarium's 200 points) should apply to Bower compositi
 
 ## Success Criteria
 
-**We'll know Bower works when:**
+**We'll know Reverie works when:**
 
 1. A user can say "make my site feel cozy with glowing things" and get a composed scene without touching code
 2. The agent can discover components matching fuzzy criteria
 3. The output is valid, accessible, and performs well
-4. A technically-curious user can read and tweak the DSL
-5. Templates can be shared and reused
+4. A technically-curious user can read and tweak the Vision DSL
+5. Visions can be shared and reused
 
 ---
 
@@ -288,4 +285,6 @@ Complexity budgets (like Terrarium's 200 points) should apply to Bower compositi
 
 ---
 
-*This is an exploration, not a commitment. We're asking: could Grove become malleable? What would that take? Bower is the hypothesis.*
+*This is an exploration, not a commitment. We're asking: could Grove become malleable? What would that take? Reverie is the hypothesis.*
+
+*Half-dream, half-real. Yours.*
