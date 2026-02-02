@@ -151,6 +151,127 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 
 ## Essential Instructions (Always Follow)
 
+### 🌲 Grove Wrap (gw) — MANDATORY CLI
+
+> **STOP. Before running ANY git, gh, wrangler, or dev command, use `gw` instead.**
+
+Grove Wrap (`gw`) is the **required CLI** for all infrastructure operations. It wraps Wrangler, git, and GitHub CLI with agent-safe defaults, database protection, and audit logging.
+
+**First thing when starting a session:**
+```bash
+cd tools/gw && uv run gw --help
+```
+
+#### Why gw is Mandatory
+
+| Raw Command | Problem | gw Equivalent |
+|-------------|---------|---------------|
+| `git push --force` | Can destroy remote history | `gw git push --write` (force blocked) |
+| `git commit -m "x"` | No conventional commits enforcement | `gw git commit --write -m "feat: x"` |
+| `wrangler d1 execute` | Requires UUIDs, no safety | `gw db query "SELECT..."` |
+| `gh pr create` | No safety tier | `gw gh pr create --write` |
+| `pnpm test` | Manual package detection | `gw test` (auto-detects package) |
+
+#### Command Categories
+
+```bash
+# DATABASE (D1, KV, R2) — Read-only by default
+gw db query "SELECT * FROM tenants"     # Safe read
+gw db query --write "UPDATE..."         # Requires --write flag
+gw db tables                            # List tables
+gw db schema tenants                    # Show schema
+gw tenant lookup autumn                 # Tenant info
+gw cache list                           # Cache keys
+gw cache purge --tenant autumn          # Purge (write op)
+
+# GIT — Safety tiers enforced
+gw git status                           # Always safe
+gw git log                              # Always safe
+gw git diff                             # Always safe
+gw git commit --write -m "feat: ..."    # Requires --write
+gw git push --write                     # Requires --write
+gw git save --write                     # Quick add + WIP commit
+gw git sync --write                     # Fetch + rebase + push
+
+# GITHUB — Rate-limit aware
+gw gh pr list                           # Always safe
+gw gh pr view 123                       # Always safe
+gw gh pr create --write                 # Requires --write
+gw gh issue list                        # Always safe
+gw gh run list                          # CI status
+
+# DEV TOOLS — Auto-detects package from cwd
+gw test                                 # Run tests
+gw build                                # Build package
+gw check                                # Type check
+gw lint                                 # Lint
+gw ci                                   # Full CI pipeline locally
+
+# DIAGNOSTICS
+gw status                               # Infrastructure overview
+gw health                               # Service health
+gw doctor                               # Diagnose issues
+gw whoami                               # Current context
+```
+
+#### Blocked Operations (Agent Mode)
+
+When running as an MCP server or with `GW_AGENT_MODE=1`, these are **completely blocked**:
+
+```bash
+# ❌ BLOCKED — Cannot run these in agent mode
+gw git push --write --force             # Force push
+gw git reset --write --force            # Hard reset
+gw db query --write "DROP TABLE..."     # DDL operations
+gw db query --write "DELETE FROM users" # Protected tables
+```
+
+#### MCP Server Integration
+
+gw runs as an MCP server for Claude Code, exposing 26 tools directly:
+
+```json
+{
+  "mcpServers": {
+    "grove-wrap": {
+      "command": "gw",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
+
+When using the MCP server, all safety restrictions apply automatically.
+
+#### ⚠️ NEVER Use Raw Commands
+
+```bash
+# ❌ WRONG — Raw commands bypass safety
+git commit -m "whatever"
+git push origin main
+wrangler d1 execute grove-engine-db --command "DELETE FROM posts"
+gh pr create
+
+# ✅ CORRECT — gw commands with safety
+gw git commit --write -m "feat(auth): add session refresh"
+gw git push --write
+gw db query --write "DELETE FROM posts WHERE id = 'abc'"
+gw gh pr create --write --title "feat: add feature"
+```
+
+#### Quick Reference
+
+| Task | Command |
+|------|---------|
+| See all commands | `gw --help` |
+| Database help | `gw db --help` |
+| Git help | `gw git --help` |
+| GitHub help | `gw gh --help` |
+| MCP tools list | `gw mcp tools` |
+| Check health | `gw doctor` |
+
+---
+
 ### Core Behavior
 - Do what has been asked; nothing more, nothing less
 - NEVER create files unless absolutely necessary for achieving your goal
@@ -177,27 +298,63 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 
 ### Git Workflow Essentials
 
-> **⚠️ IMPORTANT:** Before making commits or PRs, invoke the `git-workflows` skill for full guidance.
+> **⚠️ MANDATORY:** Use `gw git` commands, not raw git. See the gw section above.
 
-**After completing major changes, you MUST commit your work.**
+**After completing major changes, you MUST commit your work using gw:**
 
-**Conventional Commits Format:**
 ```bash
-<type>: <brief description>
+# Stage and commit with conventional commits (enforced by gw)
+gw git add --write src/lib/auth.ts
+gw git commit --write -m "feat(auth): add session refresh"
+gw git push --write
+```
 
-<optional body>
+**Conventional Commits Format (enforced by gw):**
+```bash
+<type>(<scope>): <brief description>
 ```
 
 **Common Types:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
-**Examples:**
+**Examples using gw:**
 ```bash
-feat: Add user authentication
-fix: Correct timezone bug
-docs: Update README
+gw git commit --write -m "feat: add user authentication"
+gw git commit --write -m "fix(ui): correct timezone bug"
+gw git commit --write -m "docs: update README"
 ```
 
-**For complete details:** See `AgentUsage/git_guide.md`
+**Quick shortcuts:**
+```bash
+gw git save --write              # Stage all + WIP commit
+gw git sync --write              # Fetch + rebase + push
+gw git wip --write               # WIP commit (skips hooks)
+```
+
+**For complete details:** See `AgentUsage/git_guide.md` and `gw git --help`
+
+#### Claude Code Hooks (Optional Enforcement)
+
+To **block raw git/gh commands** and force gw usage, add to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '^(git|gh|wrangler)\\s' && echo 'BLOCKED: Use gw commands instead (gw git, gw gh, gw db)' && exit 1 || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+This hook intercepts Bash calls and blocks raw git/gh/wrangler commands, forcing use of gw.
 
 ### Pull Requests
 
@@ -311,8 +468,11 @@ cat packages/engine/package.json | grep -A2 '"\./'
 - **When integrating external APIs** → Use skill: `api-integration`
 
 ### Cloudflare Development
-- **When deploying to Cloudflare** → Use skill: `cloudflare-deployment`
-- **Before using Cloudflare Workers, KV, R2, or D1** → Use skill: `cloudflare-deployment`
+- **For D1 database queries** → Use `gw db` commands (see gw section above)
+- **For KV operations** → Use `gw kv` commands
+- **For R2 operations** → Use `gw r2` commands
+- **For cache operations** → Use `gw cache` commands
+- **When deploying to Cloudflare** → Use `gw deploy --write` or skill: `cloudflare-deployment`
 - **When setting up Cloudflare MCP server** → Use skill: `cloudflare-deployment`
 
 ### Package Management
@@ -321,10 +481,10 @@ cat packages/engine/package.json | grep -A2 '"\./'
 - **When managing Python dependencies** → Use skill: `uv-package-manager`
 
 ### Version Control
-- **Before making a git commit** → Use skill: `git-workflows`
-- **Before creating a pull request** → Use skill: `git-workflows`
-- **When initializing a new repo** → Use skill: `git-workflows`
-- **For git workflow and branching** → Use skill: `git-workflows`
+- **For all git operations** → Use `gw git` commands (see gw section above)
+- **Before making a git commit** → `gw git commit --write -m "type: message"`
+- **Before creating a pull request** → `gw gh pr create --write`
+- **For git workflow and branching** → Use skill: `git-workflows` for guidance
 - **When setting up git hooks** → Use skill: `git-hooks`
 
 ### Database Management
@@ -469,6 +629,8 @@ validation doesn't use it — you must explicitly whitelist trusted origins.
 - **For systematic investigation** → Use skill: `research-strategy`
 
 ### Testing
+- **To run tests** → Use `gw test` (auto-detects package from cwd)
+- **To run full CI locally** → Use `gw ci`
 - **When deciding what to test or reviewing test quality** → Use skill: `grove-testing`
 - **Before writing JavaScript/TypeScript tests** → Use skill: `javascript-testing`
 - **Before writing Python tests** → Use skill: `python-testing`
@@ -660,5 +822,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-*Last updated: 2026-01-30*
+*Last updated: 2026-02-01*
 *Model: Claude Opus 4.5*
