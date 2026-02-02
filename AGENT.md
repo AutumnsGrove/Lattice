@@ -157,10 +157,30 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 
 Grove Wrap (`gw`) is the **required CLI** for all infrastructure operations. It wraps Wrangler, git, and GitHub CLI with agent-safe defaults, database protection, and audit logging.
 
-**First thing when starting a session:**
+#### Installation (REQUIRED for Remote Agents)
+
+If you're running in a remote/cloud environment without gw installed:
+
+```bash
+# 1. Navigate to the gw tool directory
+cd tools/gw
+
+# 2. Install dependencies (requires uv)
+uv sync
+
+# 3. Verify installation
+uv run gw --help
+
+# 4. (Optional) See available commands
+uv run gw doctor
+```
+
+**For local development**, gw should already be available. Just run:
 ```bash
 cd tools/gw && uv run gw --help
 ```
+
+> ⚠️ **DO NOT proceed with git/gh/wrangler commands until gw is installed and working.**
 
 #### Why gw is Mandatory
 

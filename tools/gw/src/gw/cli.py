@@ -9,6 +9,7 @@ from .commands.whoami import whoami
 from .commands.history import history
 from .commands.completion import completion
 from .commands.mcp import mcp
+from .commands.metrics import metrics
 from .commands.git import git
 from .commands.gh import gh
 from .commands.dev import dev
@@ -88,6 +89,9 @@ main.add_command(completion)
 
 # Phase 7 MCP Server
 main.add_command(mcp)
+
+# Metrics
+main.add_command(metrics)
 
 
 if __name__ == "__main__":
