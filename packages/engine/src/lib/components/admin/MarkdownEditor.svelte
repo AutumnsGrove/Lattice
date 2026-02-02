@@ -576,6 +576,27 @@
     }
   });
 
+  // Full preview modal focus management
+  /** @type {HTMLElement | null} */
+  let previouslyFocusedBeforePreview = null;
+  /** @type {HTMLDivElement | null} */
+  let fullPreviewModalRef = $state(null);
+
+  $effect(() => {
+    if (showFullPreview) {
+      // Store the currently focused element to restore on close
+      previouslyFocusedBeforePreview = /** @type {HTMLElement} */ (document.activeElement);
+      // Focus the modal for keyboard accessibility
+      setTimeout(() => {
+        fullPreviewModalRef?.focus();
+      }, 50);
+    } else if (previouslyFocusedBeforePreview) {
+      // Restore focus when modal closes
+      previouslyFocusedBeforePreview.focus();
+      previouslyFocusedBeforePreview = null;
+    }
+  });
+
   // Drag and drop handlers
   /** @param {DragEvent} e */
   function handleDragEnter(e) {
@@ -964,7 +985,7 @@
 
 <!-- Full Preview Modal -->
 {#if showFullPreview}
-  <div class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview" tabindex="-1" onkeydown={(e) => e.key === 'Escape' && (showFullPreview = false)}>
+  <div bind:this={fullPreviewModalRef} class="full-preview-modal" role="dialog" aria-modal="true" aria-label="Full article preview" tabindex="-1" onkeydown={(e) => e.key === 'Escape' && (showFullPreview = false)}>
     <button type="button" class="full-preview-backdrop" onclick={() => (showFullPreview = false)} aria-label="Close preview"></button>
     <div class="full-preview-container" class:has-vines={gutterItems.length > 0}>
       <header class="full-preview-header">
