@@ -266,6 +266,15 @@
     "./email/urls": {
       "types": "./dist/email/urls.d.ts",
       "default": "./dist/email/urls.js"
+    },
+    "./email/porch": {
+      "types": "./dist/email/porch/index.d.ts",
+      "default": "./dist/email/porch/index.js"
+    },
+    "./zephyr": {
+      "types": "./dist/lib/zephyr/index.d.ts",
+      "import": "./dist/lib/zephyr/index.js",
+      "default": "./dist/lib/zephyr/index.js"
     }
   },
   "files": [

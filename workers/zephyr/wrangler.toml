@@ -1,0 +1,25 @@
+name = "grove-zephyr"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# D1 Database for logs and rate limiting
+[[d1_databases]]
+binding = "DB"
+database_name = "zephyr-logs"
+database_id = "[TO BE SET]"
+
+# Environment variables
+[vars]
+EMAIL_RENDER_URL = "https://grove-email-render.pages.dev"
+DEFAULT_FROM_EMAIL = "autumn@grove.place"
+DEFAULT_FROM_NAME = "Autumn"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+# Secrets (set via wrangler secret put)
+# RESEND_API_KEY - Resend API key for sending emails
+# ZEPHYR_API_KEY - API key for authenticating requests to this service
