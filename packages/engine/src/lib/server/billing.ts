@@ -124,3 +124,54 @@ export async function requireActiveSubscription(
     throw new Error("Subscription inactive");
   }
 }
+
+/**
+ * Premium tiers that would normally require payment
+ */
+const PAID_TIERS: PlanTier[] = ["seedling", "sapling", "oak", "evergreen"];
+
+/**
+ * Check if a tenant account is comped (has premium tier without payment on file)
+ *
+ * Comped accounts are premium tier users who don't have a payment provider customer ID.
+ * This includes:
+ * - Admin/staff accounts
+ * - Friends & family accounts
+ * - Beta testers
+ * - Promotional accounts
+ *
+ * These accounts have full access to their tier's features but cannot access
+ * the billing portal since there's no Stripe customer record.
+ */
+export async function isCompedAccount(
+  db: D1Database,
+  tenantId: string,
+): Promise<{ isComped: boolean; tier: PlanTier | null }> {
+  // Get tenant plan
+  const tenant = await db
+    .prepare("SELECT plan FROM tenants WHERE id = ?")
+    .bind(tenantId)
+    .first<{ plan: string }>();
+
+  if (!tenant) {
+    return { isComped: false, tier: null };
+  }
+
+  const tier = (tenant.plan || "free") as PlanTier;
+
+  // Free tier is not "comped" - it's just free
+  if (!PAID_TIERS.includes(tier)) {
+    return { isComped: false, tier };
+  }
+
+  // Check if there's a payment provider customer ID
+  const billing = await db
+    .prepare("SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?")
+    .bind(tenantId)
+    .first<{ provider_customer_id: string | null }>();
+
+  // Comped = has paid tier but no provider customer ID
+  const isComped = !billing?.provider_customer_id;
+
+  return { isComped, tier };
+}

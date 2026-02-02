@@ -10,6 +10,7 @@ import {
   rateLimitHeaders,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
+import { isCompedAccount } from "$lib/server/billing.js";
 import { Resend } from "resend";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
@@ -825,6 +826,21 @@ export const PUT: RequestHandler = async ({
       locals.user,
     );
 
+    // Check if this is a comped account first
+    const compedStatus = await isCompedAccount(platform.env.DB, tenantId);
+    if (compedStatus.isComped) {
+      // Comped accounts don't have Stripe customer records
+      // Return a friendly message instead of an error
+      return json({
+        success: false,
+        isComped: true,
+        tier: compedStatus.tier,
+        message:
+          "Your account is complimentary and doesn't require payment management. " +
+          "If you have questions about your account, contact hello@grove.place.",
+      });
+    }
+
     // Get the Stripe customer ID
     const billing = (await platform.env.DB.prepare(
       `SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?`,
@@ -833,8 +849,7 @@ export const PUT: RequestHandler = async ({
       .first()) as { provider_customer_id: string | null } | null;
 
     if (!billing?.provider_customer_id) {
-      // This can happen for tenants created before Stripe migration
-      // or for comped accounts without payment records
+      // Not comped but no customer ID - might be pre-migration or data issue
       throw error(
         404,
         "No payment method on file. If you recently signed up, please contact support.",

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard } from "$lib/ui";
-  import { CreditCard, ExternalLink, Loader2 } from "lucide-svelte";
+  import { CreditCard, ExternalLink, Loader2, Gift } from "lucide-svelte";
   import type { BillingData } from "./types";
 
   interface Props {
@@ -11,6 +11,8 @@
 
   let isLoading = $state(false);
   let errorMessage = $state<string | null>(null);
+  let isComped = $state(false);
+  let compedMessage = $state<string | null>(null);
 
   /**
    * Open Stripe Billing Portal
@@ -19,6 +21,8 @@
   async function openBillingPortal() {
     isLoading = true;
     errorMessage = null;
+    isComped = false;
+    compedMessage = null;
 
     try {
       const response = await fetch("/api/billing", {
@@ -29,6 +33,14 @@
       });
 
       const data = await response.json();
+
+      // Handle comped accounts gracefully
+      if (data.isComped) {
+        isComped = true;
+        compedMessage = data.message;
+        isLoading = false;
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Failed to open billing portal");
@@ -51,7 +63,18 @@
 <GlassCard variant="default" class="mb-6">
   <h2>Payment Method</h2>
 
-  {#if billing?.paymentMethod}
+  {#if isComped}
+    <!-- Comped account - show friendly message -->
+    <div class="comped-notice">
+      <div class="comped-icon">
+        <Gift class="gift-icon" aria-hidden="true" />
+      </div>
+      <div class="comped-content">
+        <p class="comped-title">Complimentary Account</p>
+        <p class="comped-description">{compedMessage}</p>
+      </div>
+    </div>
+  {:else if billing?.paymentMethod}
     <div class="payment-info">
       <div class="card-display">
         <CreditCard class="card-icon" aria-hidden="true" />
@@ -71,22 +94,24 @@
     <p class="error-message">{errorMessage}</p>
   {/if}
 
-  <p class="payment-note">
-    <button
-      type="button"
-      onclick={openBillingPortal}
-      disabled={isLoading}
-      class="portal-button"
-    >
-      {#if isLoading}
-        <Loader2 class="spinner" aria-hidden="true" />
-        Opening portal...
-      {:else}
-        Manage Payment Method
-        <ExternalLink class="external-icon" aria-hidden="true" />
-      {/if}
-    </button>
-  </p>
+  {#if !isComped}
+    <p class="payment-note">
+      <button
+        type="button"
+        onclick={openBillingPortal}
+        disabled={isLoading}
+        class="portal-button"
+      >
+        {#if isLoading}
+          <Loader2 class="spinner" aria-hidden="true" />
+          Opening portal...
+        {:else}
+          Manage Payment Method
+          <ExternalLink class="external-icon" aria-hidden="true" />
+        {/if}
+      </button>
+    </p>
+  {/if}
 </GlassCard>
 
 <style>
@@ -198,5 +223,48 @@
       flex-direction: column;
       align-items: flex-start;
     }
+  }
+
+  /* Comped account styles */
+  .comped-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-success-bg, rgba(34, 197, 94, 0.1));
+    border: 1px solid var(--color-success-border, rgba(34, 197, 94, 0.3));
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .comped-icon {
+    flex-shrink: 0;
+    padding: 0.5rem;
+    background: var(--color-success-icon-bg, rgba(34, 197, 94, 0.2));
+    border-radius: 0.375rem;
+  }
+
+  :global(.gift-icon) {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-success, #22c55e);
+  }
+
+  .comped-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .comped-title {
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .comped-description {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin: 0;
   }
 </style>
