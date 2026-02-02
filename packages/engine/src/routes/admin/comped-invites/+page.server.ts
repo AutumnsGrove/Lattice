@@ -177,7 +177,8 @@ export const actions: Actions = {
     const formData = await request.formData();
     const email = formData.get("email")?.toString().toLowerCase().trim();
     const tier = formData.get("tier")?.toString() as CompedTier;
-    const customMessage = formData.get("custom_message")?.toString().trim() || null;
+    const customMessage =
+      formData.get("custom_message")?.toString().trim() || null;
     const notes = formData.get("notes")?.toString().trim() || null;
 
     // Validate email
@@ -302,7 +303,14 @@ export const actions: Actions = {
         `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, actor_email, notes, created_at)
          VALUES (?, 'revoke', ?, ?, ?, ?, ?, unixepoch())`,
       )
-        .bind(auditId, inviteId, invite.email, invite.tier, locals.user.email, notes)
+        .bind(
+          auditId,
+          inviteId,
+          invite.email,
+          invite.tier,
+          locals.user.email,
+          notes,
+        )
         .run();
 
       return {

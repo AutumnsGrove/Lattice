@@ -17,11 +17,7 @@ interface CompedInvite {
   invited_by: string;
 }
 
-export const load: PageServerLoad = async ({
-  parent,
-  cookies,
-  platform,
-}) => {
+export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
   const { user, onboarding } = await parent();
 
   // Redirect if not authenticated

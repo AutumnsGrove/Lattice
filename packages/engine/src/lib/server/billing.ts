@@ -166,7 +166,9 @@ export async function isCompedAccount(
 
   // Check if there's a payment provider customer ID
   const billing = await db
-    .prepare("SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?")
+    .prepare(
+      "SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?",
+    )
     .bind(tenantId)
     .first<{ provider_customer_id: string | null }>();
 
