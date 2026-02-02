@@ -1,8 +1,9 @@
 ---
 title: Blog & Post Naming Journey
-description: Finding Grove names for the two biggest concepts
+description: Finding Grove names for the two biggest concepts — concluded with Grove, Garden, and Bloom
 category: philosophy
 lastUpdated: '2026-02-02'
+status: concluded
 ---
 # Blog & Post Naming Journey
 
@@ -406,14 +407,42 @@ What feels more like home?
 
 ---
 
-## Open Questions
+## The Conclusion
 
-1. Does "tree" feel too abstract for "blog"? Should we find something more tangible?
-2. Is "leaf" too ephemeral? Posts are meant to last.
-3. How does this affect the URL structure?
-4. What about the verb? "Post a leaf" → "Grow a leaf"? "Write a leaf"?
-5. Should internal code keep "post" (like GroveEngine) or commit to "leaf"?
+*February 2, 2026 — The walk found its end.*
+
+After exploring leaves, whispers, hollows, and dens... Autumn felt it:
+
+**Grove** for your space. Not overlap with the platform—*resonance*. The platform is the Grove. Your space is *your* grove. The possessive makes it personal. And the original URL was autumnsgrove.com. The name was trying to come home.
+
+**Garden** for the collection. Where your blooms grow together. Not a feed, not a list—a garden you've tended.
+
+**Bloom** for your writing. What your grove produces. Moments of expression, color, beauty. "Read my latest bloom."
+
+The old "Bloom" (remote coding infrastructure) becomes **Tendril**—reaching out, doing work, letting go.
+
+### The Final Chain
+
+> You **wander** into the Grove → You **take root** → Your **tree** grows → Your **grove** flourishes → It **blooms**
+
+### Implementation Pattern
+
+Like "step away (unsubscribe)" in emails:
+- **UI text:** "Your Garden" / "New Bloom"
+- **Aria labels:** "blog posts" / "write new post"
+- **URLs:** `/garden` / `/garden/hello-world`
 
 ---
 
-*The walk continues. The name is out there, waiting to be found.*
+## What Changed
+
+| Old Term | New Term | Notes |
+|----------|----------|-------|
+| blog | grove | Your space, your corner of the forest |
+| blog index | garden | The collection, where blooms grow together |
+| post | bloom | What your grove produces |
+| Bloom (remote coding) | Tendril | Reaching out, doing work, letting go |
+
+---
+
+*The name was always there. We just had to walk until we found it.*

@@ -2,7 +2,7 @@
 title: The Grove Naming System
 description: The complete philosophy and naming system for the Grove ecosystem
 category: philosophy
-lastUpdated: '2026-01-13'
+lastUpdated: '2026-02-02'
 ---
 # The Grove Naming System
 
@@ -17,6 +17,64 @@ The internet used to be a place of personal expression. Somewhere along the way,
 These names aren't just branding. They're the language of an ecosystem. Each one draws from the same soil: forests, growth, shelter, connection. Beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks. The oldest trees nurture the saplings.
 
 This is how we build.
+
+---
+
+## The Heart of It All
+
+*What you call things matters. These three words are the foundation.*
+
+### Your Grove
+**Your Space** · `{you}.grove.place`
+
+A grove is a small group of trees growing together—intimate, sheltered, yours. The platform is called Grove. Your space within it is *your* grove. Not a blog. Not a site. A grove.
+
+When someone visits `autumn.grove.place`, they're visiting Autumn's grove. A corner of the forest that belongs to them. The possessive makes it personal. The word makes it home.
+
+> "Welcome to my grove."
+> "Come visit Autumn's grove."
+
+*Your corner of the forest.*
+
+### Your Garden
+**The Collection** · `{you}.grove.place/garden`
+
+A garden is where you tend what grows. It's the cultivated space within your grove where your blooms are planted, arranged, and displayed for visitors to wander through.
+
+The garden is your blog index—the page where all your blooms live together. Not a feed. Not a list. A garden you've tended, organized by season or by hand, ready for someone to stroll through.
+
+> "Browse my garden."
+> "New blooms in the garden."
+
+*Where your words grow together.*
+
+### Blooms
+**Your Writing** · `{you}.grove.place/garden/{slug}`
+
+A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. It's why visitors come.
+
+Every piece you write is a bloom. Not a post. Not an article. A bloom. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.
+
+> "Read my latest bloom."
+> "I wrote a new bloom this morning."
+> "Their garden has beautiful blooms."
+
+*What your grove grows.*
+
+### The Metaphor Chain
+
+> You **wander** into the Grove → You **take root** → Your **tree** grows → Your **grove** flourishes → It **blooms**
+
+### Implementation Pattern
+
+Like "step away (unsubscribe)" in emails, Grove terms appear prominently with standard terms available for accessibility:
+
+- **UI text:** "Your Garden" / "New Bloom"
+- **Aria labels:** "blog posts" / "write new post"
+- **URLs:** `/garden` / `/garden/hello-world`
+- **Database:** Internal tables may keep standard names (like `GroveEngine` vs `Lattice`)
+
+The Grove language is what users see and feel. The standard terms remain for screen readers, search engines, and anyone who needs the familiar.
 
 ---
 
@@ -358,17 +416,17 @@ Ivy is email for Grove. Not a Gmail replacement, but a focused, privacy-first ma
 
 *Connected and concealed.*
 
-### Bloom
-**Remote Coding Infrastructure** · `bloom.grove.place`
-**Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
+### Tendril
+**Remote Coding Infrastructure** · `tendril.grove.place`
+**Repository:** [AutumnsGrove/GroveTendril](https://github.com/AutumnsGrove/GroveTendril)
 
-A bloom is the brief, brilliant moment when a flower opens: ephemeral, purposeful, then gone. It appears when conditions are right, does its work, and doesn't linger.
+A tendril is a slender, reaching thread that vines send out to grab onto something distant. It extends from the plant, finds what it needs, does its work, and either holds fast or lets go. The vine stays rooted. The tendril does the reaching.
 
-Bloom is Grove's serverless remote coding infrastructure. It spins up temporary VPS instances on-demand, runs AI coding agents autonomously to complete development tasks, syncs your code to storage, then vanishes. Send a task from your phone during lunch. Check back later: Bloom worked through it, saved the results, and cleaned up after itself. Infrastructure that exists only when needed, costs almost nothing, and never overstays its welcome.
+Tendril is Grove's serverless remote coding infrastructure. It sends out ephemeral compute—temporary VPS instances that spin up on-demand, run AI coding agents autonomously to complete development tasks, sync your code to storage, then vanish. Send a task from your phone during lunch. Check back later: the tendril reached out, did its work, and retracted. Infrastructure that extends only when needed, costs almost nothing, and never overstays its welcome.
 
-It blooms, does its work, and fades away. By morning, there's only the code it left behind.
+You stay rooted. The tendril reaches for you.
 
-*Brief, brilliant, gone.*
+*Reaching out, doing the work, letting go.*
 
 ### Forage
 **Domain Discovery** · `forage.grove.place`
@@ -519,6 +577,9 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 
 | Name | Category | Purpose | Domain |
 |------|----------|---------|--------|
+| **Your Grove** | Foundational | Your personal space | {you}.grove.place |
+| **Garden** | Foundational | Collection of blooms | {you}.grove.place/garden |
+| **Blooms** | Foundational | Your writing | {you}.grove.place/garden/{slug} |
 | **Lattice** | Core | Core platform | npm package |
 | **Passage** | Core | Subdomain routing | *(internal)* |
 | **Heartwood** | Platform | Authentication | heartwood.grove.place |
@@ -549,7 +610,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Wander** | Content | Immersive discovery | wander.grove.place |
 | **Trails** | Content | Personal roadmaps | username.grove.place/trail |
 | **Ivy** | Tools | Email | ivy.grove.place |
-| **Bloom** | Tools | Remote coding | bloom.grove.place |
+| **Tendril** | Tools | Remote coding | tendril.grove.place |
 | **Forage** | Tools | Domain discovery | forage.grove.place |
 | **Nook** | Tools | Private video sharing | nook.grove.place |
 | **Shutter** | Tools | Web content distillation | shutter.grove.place |
@@ -608,7 +669,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Wander | GroveWander |
 | Trails | GroveTrails |
 | Ivy | GroveMail |
-| Bloom | GroveBloom |
+| Tendril | GroveTendril |
 | Forage | GroveDomainTool |
 | Nook | GroveNook |
 | Shutter | GroveShutter |
