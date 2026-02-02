@@ -53,7 +53,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
 - **Infrastructure:** Wrangler (app deployment)
 - **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
-- **Payments:** LemonSqueezy
+- **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
 - **Package Manager:** pnpm (CI/deployments) + bun (local dev speed)
@@ -85,15 +85,15 @@ cd packages/engine && bun run dev
 
 **⚠️ Avoid:** `bun install` or `bun add` — these would update bun.lock instead of pnpm-lock.yaml, causing drift between local and CI environments.
 
-### LemonSqueezy Configuration
-Payments are processed through LemonSqueezy. Products and prices are managed in the LemonSqueezy Dashboard.
+### Stripe Configuration
+Payments are processed through Stripe. Products and prices are managed in the Stripe Dashboard.
 
 **Setup:**
-1. Create products in [LemonSqueezy Dashboard](https://app.lemonsqueezy.com/)
-2. Configure variants and pricing for each tier
-3. Set secrets in Cloudflare Dashboard (LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_WEBHOOK_SECRET)
+1. Products already exist in [Stripe Dashboard](https://dashboard.stripe.com/products)
+2. Price IDs are hardcoded in `packages/plant/src/lib/server/stripe.ts`
+3. Set 2 secrets in Cloudflare Dashboard: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 
-**Full instructions:** `docs/setup/lemonsqueezy-setup.md`
+**Full instructions:** `docs/setup/stripe-setup.md`
 
 ### Production Deployment
 Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded in each app's `wrangler.toml`.

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard } from "$lib/ui";
-  import { CreditCard, ExternalLink } from "lucide-svelte";
+  import { CreditCard, ExternalLink, Loader2 } from "lucide-svelte";
   import type { BillingData } from "./types";
 
   interface Props {
@@ -9,8 +9,43 @@
 
   let { billing }: Props = $props();
 
-  // LemonSqueezy customer portal URL
-  const LEMON_SQUEEZY_PORTAL = "https://app.lemonsqueezy.com/my-orders";
+  let isLoading = $state(false);
+  let errorMessage = $state<string | null>(null);
+
+  /**
+   * Open Stripe Billing Portal
+   * Creates a portal session and redirects the user
+   */
+  async function openBillingPortal() {
+    isLoading = true;
+    errorMessage = null;
+
+    try {
+      const response = await fetch("/api/billing", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to open billing portal");
+      }
+
+      if (data.portalUrl) {
+        window.location.href = data.portalUrl;
+      } else {
+        throw new Error("No portal URL returned");
+      }
+    } catch (err) {
+      console.error("Failed to open billing portal:", err);
+      errorMessage =
+        err instanceof Error ? err.message : "Failed to open billing portal";
+      isLoading = false;
+    }
+  }
 </script>
 
 <GlassCard variant="default" class="mb-6">
@@ -28,22 +63,29 @@
     </div>
   {:else}
     <div class="no-payment">
-      <p class="muted">Payment method on file with our billing provider.</p>
+      <p class="muted">Payment method on file with Stripe.</p>
     </div>
   {/if}
 
+  {#if errorMessage}
+    <p class="error-message">{errorMessage}</p>
+  {/if}
+
   <p class="payment-note">
-    To update your payment method, visit your
-    <a
-      href={LEMON_SQUEEZY_PORTAL}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="portal-link"
+    <button
+      type="button"
+      onclick={openBillingPortal}
+      disabled={isLoading}
+      class="portal-button"
     >
-      billing portal
-      <ExternalLink class="external-icon" aria-hidden="true" />
-    </a>
-    or check your email for a link from LemonSqueezy.
+      {#if isLoading}
+        <Loader2 class="spinner" aria-hidden="true" />
+        Opening portal...
+      {:else}
+        Manage Payment Method
+        <ExternalLink class="external-icon" aria-hidden="true" />
+      {/if}
+    </button>
   </p>
 </GlassCard>
 
@@ -95,26 +137,56 @@
 
   .payment-note {
     margin: 0;
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    line-height: 1.5;
   }
 
-  .portal-link {
-    color: var(--color-primary);
-    text-decoration: none;
+  .portal-button {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
 
-  .portal-link:hover {
-    text-decoration: underline;
+  .portal-button:hover:not(:disabled) {
+    background: var(--color-primary-dark, #15803d);
+  }
+
+  .portal-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 
   :global(.external-icon) {
     width: 0.875rem;
     height: 0.875rem;
+  }
+
+  :global(.spinner) {
+    width: 1rem;
+    height: 1rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .error-message {
+    color: var(--color-error, #ef4444);
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
   }
 
   .muted {

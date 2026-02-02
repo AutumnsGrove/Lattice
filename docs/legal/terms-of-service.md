@@ -78,7 +78,7 @@ Yearly plans save 15% — pay for 10 months, get 12.
 
 ### 5.2 Billing
 - Subscriptions are billed monthly in advance
-- Payment is processed through LemonSqueezy
+- Payment is processed through Stripe
 - You authorize us to charge your payment method on a recurring basis
 - Prices may change with 30 days' notice
 
@@ -167,7 +167,7 @@ We respect intellectual property rights and respond to valid copyright complaint
 
 The Service integrates with third-party services including:
 - **Cloudflare** - Infrastructure and content delivery
-- **LemonSqueezy** - Payment processing
+- **Stripe** - Payment processing
 - **Resend** - Email delivery
 - **Google** - Authentication (via GroveAuth)
 

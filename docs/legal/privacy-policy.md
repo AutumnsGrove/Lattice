@@ -47,7 +47,7 @@ All Grove blogs are publicly accessible by default. This means:
 Only Evergreen tier users can choose to make their blog require login. For everyone else, **publishing a post makes it publicly accessible**. You should not publish content you want to keep private unless you are on the Evergreen tier and have enabled privacy controls.
 
 **Payment Information**
-- Billing details are processed by LemonSqueezy
+- Billing details are processed by Stripe
 - We do not store your credit card numbers
 - We retain transaction records for accounting purposes
 
@@ -142,7 +142,7 @@ We share limited data with trusted service providers who help us operate Grove:
 | Provider | Purpose | Data Shared |
 |----------|---------|-------------|
 | **Cloudflare** | Infrastructure, CDN, security | IP addresses, request data |
-| **LemonSqueezy** | Payment processing | Billing information |
+| **Stripe** | Payment processing | Billing information |
 | **Resend** | Email delivery | Email address, email content |
 | **Google** | Authentication (optional) | Email address (if you use Google Sign-In) |
 | **Lumen AI Gateway** | All AI processing (see below) | Content for moderation, writing assistance (zero data retention) |

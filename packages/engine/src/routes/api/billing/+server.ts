@@ -595,7 +595,7 @@ export const PATCH: RequestHandler = async ({
     throw error(500, "Database not configured");
   }
 
-  if (!platform?.env?.LEMON_SQUEEZY_API_KEY) {
+  if (!platform?.env?.STRIPE_SECRET_KEY) {
     throw error(500, "Payment provider not configured");
   }
 
@@ -635,17 +635,16 @@ export const PATCH: RequestHandler = async ({
       throw error(404, "No active subscription found");
     }
 
-    const payments = createPaymentProvider("lemonsqueezy", {
-      secretKey: platform.env.LEMON_SQUEEZY_API_KEY,
-      storeId: platform.env.LEMON_SQUEEZY_STORE_ID,
+    const payments = createPaymentProvider("stripe", {
+      secretKey: platform.env.STRIPE_SECRET_KEY,
     });
 
     switch (data.action) {
       case "cancel":
-        // LemonSqueezy always cancels at period end (immediate not supported via API)
+        // Cancel at period end (Stripe supports both immediate and end-of-period)
         await payments.cancelSubscription(
           billing.provider_subscription_id,
-          false,
+          data.cancelImmediately || false,
         );
 
         await platform.env.DB.prepare(
@@ -682,7 +681,7 @@ export const PATCH: RequestHandler = async ({
           action: "subscription_cancelled",
           details: {
             plan: billing.plan,
-            immediate: false, // LemonSqueezy always cancels at period end
+            immediate: data.cancelImmediately || false,
             subscriptionId: billing.provider_subscription_id,
           },
           userEmail: locals.user.email,
@@ -735,11 +734,11 @@ export const PATCH: RequestHandler = async ({
         );
 
       case "change_plan":
-        // Plan changes are handled through LemonSqueezy's customer portal
-        // Users receive portal links in their LemonSqueezy emails
+        // Plan changes are handled through Stripe's billing portal
+        // Use PUT /api/billing to get a portal URL
         throw error(
           400,
-          "Plan changes are managed through your billing portal. Check your email for a link, or contact support.",
+          "Plan changes are managed through your billing portal. Use the 'Manage Payment' button to access it.",
         );
 
       default:
@@ -756,17 +755,18 @@ export const PATCH: RequestHandler = async ({
       errorMessage = err.message;
       errorDetails.message = err.message;
 
-      // Handle specific LemonSqueezy error codes
+      // Handle specific Stripe error codes
       if (
         err.message.includes("not found") ||
-        err.message.includes("Not Found")
+        err.message.includes("Not Found") ||
+        err.message.includes("No such subscription")
       ) {
         errorMessage =
           "Subscription not found. Please try refreshing your billing page.";
-      } else if (err.message.includes("Unauthorized")) {
+      } else if (err.message.includes("Unauthorized") || err.message.includes("Invalid API")) {
         errorMessage = "Payment system error. Please try again later.";
         errorDetails.severity = "critical";
-      } else if (err.message.includes("cannot be resumed")) {
+      } else if (err.message.includes("cannot be resumed") || err.message.includes("already canceled")) {
         errorMessage =
           "This subscription cannot be resumed. Please contact support.";
       }
@@ -784,7 +784,107 @@ export const PATCH: RequestHandler = async ({
   }
 };
 
-// NOTE: PUT /api/billing (billing portal) was removed.
-// LemonSqueezy handles billing portal differently - customers receive portal
-// links in their LemonSqueezy transactional emails. For manual access, direct
-// users to app.lemonsqueezy.com/my-orders or contact support.
+/**
+ * PUT /api/billing - Create Stripe Billing Portal session
+ *
+ * Returns a URL to Stripe's hosted billing portal where users can:
+ * - Update payment method
+ * - View invoices
+ * - Cancel subscription
+ * - Change plan
+ */
+export const PUT: RequestHandler = async ({
+  request,
+  url,
+  platform,
+  locals,
+}) => {
+  if (!locals.user) {
+    throw error(401, "Unauthorized");
+  }
+
+  if (!validateCSRF(request)) {
+    throw error(403, "Invalid origin");
+  }
+
+  if (!platform?.env?.DB) {
+    throw error(500, "Database not configured");
+  }
+
+  if (!platform?.env?.STRIPE_SECRET_KEY) {
+    throw error(500, "Payment provider not configured");
+  }
+
+  const requestedTenantId =
+    url.searchParams.get("tenant_id") || locals.tenantId;
+
+  try {
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      requestedTenantId,
+      locals.user,
+    );
+
+    // Get the Stripe customer ID
+    const billing = (await platform.env.DB.prepare(
+      `SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?`,
+    )
+      .bind(tenantId)
+      .first()) as { provider_customer_id: string | null } | null;
+
+    if (!billing?.provider_customer_id) {
+      throw error(404, "No billing record found");
+    }
+
+    // Get subdomain for return URL
+    const tenant = (await platform.env.DB.prepare(
+      `SELECT subdomain FROM tenants WHERE id = ?`,
+    )
+      .bind(tenantId)
+      .first()) as { subdomain: string } | null;
+
+    const returnUrl = tenant
+      ? `https://${tenant.subdomain}.grove.place/admin/account`
+      : url.origin + "/admin/account";
+
+    // Create Stripe Billing Portal session
+    const response = await fetch(
+      "https://api.stripe.com/v1/billing_portal/sessions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${platform.env.STRIPE_SECRET_KEY}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Stripe-Version": "2024-11-20.acacia",
+        },
+        body: new URLSearchParams({
+          customer: billing.provider_customer_id,
+          return_url: returnUrl,
+        }).toString(),
+      },
+    );
+
+    const data = (await response.json()) as {
+      url?: string;
+      error?: { message: string };
+    };
+
+    if (!response.ok || data.error) {
+      console.error("[Billing] Portal creation failed:", data.error);
+      throw error(500, data.error?.message || "Failed to create portal session");
+    }
+
+    if (!data.url) {
+      throw error(500, "No portal URL returned");
+    }
+
+    return json({
+      success: true,
+      portalUrl: data.url,
+    });
+  } catch (err) {
+    if ((err as { status?: number }).status) throw err;
+    console.error("[Billing] Portal creation error:", err);
+    throw error(500, "Failed to create billing portal session");
+  }
+};
