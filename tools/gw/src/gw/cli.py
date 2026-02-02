@@ -8,6 +8,7 @@ from .commands.doctor import doctor
 from .commands.whoami import whoami
 from .commands.history import history
 from .commands.completion import completion
+from .commands.mcp import mcp
 from .commands.git import git
 from .commands.gh import gh
 from .commands.dev import dev
@@ -84,6 +85,9 @@ main.add_command(doctor)
 main.add_command(whoami)
 main.add_command(history)
 main.add_command(completion)
+
+# Phase 7 MCP Server
+main.add_command(mcp)
 
 
 if __name__ == "__main__":

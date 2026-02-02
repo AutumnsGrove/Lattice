@@ -643,11 +643,16 @@ tools/gw/
 │   ├── gh_wrapper.py            # GitHub CLI wrapper
 │   ├── packages.py              # Monorepo package detection
 │   ├── secrets_vault.py         # Encrypted vault
+│   ├── mcp_server.py            # MCP server for Claude Code
 │   ├── ui.py                    # Rich terminal helpers
 │   ├── safety/
 │   │   ├── database.py          # SQL safety validation
 │   │   ├── git.py               # Git safety tiers
 │   │   └── github.py            # GitHub safety + rate limits
+│   ├── completions/             # Shell completions
+│   │   ├── bash.py
+│   │   ├── zsh.py
+│   │   └── fish.py
 │   └── commands/
 │       ├── status.py            # gw status
 │       ├── health.py            # gw health
@@ -666,6 +671,11 @@ tools/gw/
 │       ├── do.py                # gw do
 │       ├── email.py             # gw email
 │       ├── packages.py          # gw packages
+│       ├── mcp.py               # gw mcp
+│       ├── doctor.py            # gw doctor
+│       ├── whoami.py            # gw whoami
+│       ├── history.py           # gw history
+│       ├── completion.py        # gw completion
 │       ├── git/                 # gw git *
 │       │   ├── read.py
 │       │   ├── write.py
@@ -675,6 +685,7 @@ tools/gw/
 │       │   ├── pr.py
 │       │   ├── issue.py
 │       │   ├── run.py
+│       │   ├── project.py
 │       │   └── api.py
 │       └── dev/                 # gw dev * / gw test / gw build / etc.
 │           ├── server.py
@@ -687,7 +698,150 @@ tools/gw/
     ├── test_safety.py           # Database safety tests
     ├── test_git.py              # Git safety tests
     ├── test_gh.py               # GitHub safety tests
+    ├── test_mcp.py              # MCP server tests
     └── test_packages.py         # Package detection tests
+```
+
+---
+
+## 🤖 MCP Server (Claude Code Integration)
+
+Grove Wrap can run as an MCP server, exposing all commands as tools that Claude Code can call directly.
+
+### Setup
+
+Add to your Claude Code settings:
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "grove-wrap": {
+      "command": "gw",
+      "args": ["mcp", "serve"]
+    }
+  }
+}
+```
+
+Or generate the config automatically:
+```bash
+gw mcp config
+```
+
+### Available MCP Tools
+
+| Tool | Category | Safety | Description |
+|------|----------|--------|-------------|
+| `grove_db_query` | Database | READ | Execute read-only SQL query |
+| `grove_db_tables` | Database | READ | List tables in database |
+| `grove_db_schema` | Database | READ | Get table schema |
+| `grove_tenant_lookup` | Database | READ | Look up tenant info |
+| `grove_cache_list` | Cache | READ | List cache keys |
+| `grove_cache_purge` | Cache | WRITE | Purge cache keys |
+| `grove_kv_get` | KV | READ | Get KV value |
+| `grove_r2_list` | R2 | READ | List R2 objects |
+| `grove_status` | Status | READ | Infrastructure status |
+| `grove_health` | Status | READ | Health check |
+| `grove_git_status` | Git | READ | Repository status |
+| `grove_git_log` | Git | READ | Commit history |
+| `grove_git_diff` | Git | READ | Show changes |
+| `grove_git_commit` | Git | WRITE | Create commit |
+| `grove_git_push` | Git | WRITE | Push to remote |
+| `grove_gh_pr_list` | GitHub | READ | List pull requests |
+| `grove_gh_pr_view` | GitHub | READ | View PR details |
+| `grove_gh_issue_list` | GitHub | READ | List issues |
+| `grove_gh_issue_view` | GitHub | READ | View issue details |
+| `grove_gh_run_list` | GitHub | READ | List workflow runs |
+| `grove_gh_pr_create` | GitHub | WRITE | Create pull request |
+| `grove_packages_list` | Dev | READ | List monorepo packages |
+| `grove_dev_status` | Dev | READ | Dev server status |
+| `grove_test_run` | Dev | WRITE | Run package tests |
+| `grove_build` | Dev | WRITE | Build package |
+| `grove_ci` | Dev | WRITE | Run CI pipeline |
+
+### MCP Commands
+
+```bash
+# Start MCP server (runs in stdio mode for Claude Code)
+gw mcp serve
+
+# List available tools
+gw mcp tools
+
+# Show setup configuration
+gw mcp config
+```
+
+### Safety in MCP Mode
+
+When running as an MCP server:
+- **Agent mode** is automatically enabled (`GW_AGENT_MODE=1`)
+- **Write operations** (INSERT, UPDATE, DELETE) are blocked in SQL queries
+- **Force operations** (force-push, hard reset) are completely blocked
+- **Protected branches** cannot be modified
+- All tools return JSON for easy parsing
+
+---
+
+## 🩺 Quality of Life Commands
+
+### Doctor
+
+Diagnose common setup issues:
+
+```bash
+gw doctor
+```
+
+Checks: Wrangler installation, authentication, git config, GitHub CLI, Node.js, Python/uv, config file, secrets vault, and more.
+
+### Whoami
+
+Show current identity context:
+
+```bash
+gw whoami
+```
+
+Shows: Cloudflare account, GitHub user, project info, vault status.
+
+### History
+
+View command history:
+
+```bash
+# Recent commands
+gw history list
+
+# Search history
+gw history search "deploy"
+
+# Show specific command
+gw history show 42
+
+# Re-run a command
+gw history run 42
+
+# Clear history
+gw history clear --write
+```
+
+### Shell Completions
+
+Enable tab completion:
+
+```bash
+# Bash
+gw completion bash >> ~/.bashrc
+
+# Zsh
+gw completion zsh >> ~/.zshrc
+
+# Fish
+gw completion fish > ~/.config/fish/completions/gw.fish
 ```
 
 ---
@@ -700,16 +854,13 @@ tools/gw/
 - [x] **Phase 2** — Database & Tenant (`db`, `tenant`)
 - [x] **Phase 3** — Secrets & Cache (`secret`, `cache`)
 - [x] **Phase 4-6** — Cloudflare (`kv`, `r2`, `logs`, `deploy`, `do`, `flag`, `backup`, `email`)
+- [x] **Phase 7** — MCP Server (`gw mcp serve` for Claude Code)
+- [x] **Phase 7.5** — Quality of Life (`doctor`, `whoami`, `history`, `completion`)
 - [x] **Phase 9-11** — Git Integration (`git status/commit/push/...`, shortcuts)
 - [x] **Phase 12-14** — GitHub Integration (`gh pr/issue/run/api`)
 - [x] **Phase 15-18** — Dev Tools (`dev`, `test`, `build`, `check`, `lint`, `ci`, `packages`)
 
-### Upcoming
-
-- [ ] **Phase 7** — MCP Server (`gw mcp serve` for Claude Code)
-- [ ] Shell completions (bash, zsh, fish)
-- [ ] `gw doctor` — Diagnose common issues
-- [ ] `gw whoami` — Show current user/account
+### 🎉 All Phases Complete!
 
 ---
 

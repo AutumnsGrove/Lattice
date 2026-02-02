@@ -9,6 +9,7 @@ dependencies = [
     "tomli>=2.0.0",
     "tomli-w>=1.0.0",
     "cryptography>=42.0.0",
+    "mcp>=1.0.0",
 ]
 
 [project.optional-dependencies]
