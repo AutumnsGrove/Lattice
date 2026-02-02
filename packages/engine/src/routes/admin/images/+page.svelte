@@ -18,7 +18,8 @@
     ALLOWED_IMAGE_TYPES,
     ALLOWED_EXTENSIONS,
     ALLOWED_TYPES_DISPLAY,
-    validateImageFile
+    validateImageFile,
+    getUploadStrategy
   } from "$lib/utils/upload-validation";
 
   /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean } } }} */
@@ -241,16 +242,31 @@
     };
 
     try {
-      // Step 1: Calculate hash for duplicate detection
-      const hash = await calculateFileHash(file);
-      updateUpload({ progress: 10, stage: 'Processing image...' });
+      // Step 1: Determine upload strategy (handles TIFF/HEIC/RAW etc.)
+      const strategy = getUploadStrategy(file);
 
-      // Step 2: Process image (JXL/WebP conversion, quality, EXIF strip)
+      if (strategy.warning) {
+        toast.info(strategy.warning);
+      }
+
+      // Step 2: Calculate hash for duplicate detection
+      const hash = await calculateFileHash(file);
+      updateUpload({ progress: 10, stage: strategy.skipProcessing ? 'Preparing upload...' : 'Processing image...' });
+
+      // Step 3: Process image (JXL/WebP conversion, quality, EXIF strip)
+      // Skip processing for non-renderable formats (TIFF, HEIC, RAW) and GIFs
       let processedBlob = file;
       /** @type {any} */
-      let processResult = { originalSize: file.size, processedSize: file.size, format: 'gif', skipped: true };
+      let processResult = {
+        originalSize: file.size,
+        processedSize: file.size,
+        format: (file.name.split('.').pop()?.toLowerCase() || 'original'),
+        skipped: true,
+        reason: strategy.reason || 'Original format preserved'
+      };
 
-      if (!file.type.includes('gif')) { // Don't process GIFs
+      if (!strategy.skipProcessing) {
+        // Browser-renderable image - process normally
         processResult = await processImage(file, {
           quality,
           format: imageFormat,

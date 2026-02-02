@@ -78,15 +78,83 @@ export async function calculateFileHash(file: File | Blob): Promise<string> {
 function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
     img.onload = () => {
-      URL.revokeObjectURL(img.src);
+      URL.revokeObjectURL(objectUrl);
       resolve(img);
     };
+
     img.onerror = () => {
-      URL.revokeObjectURL(img.src);
-      reject(new Error("Failed to load image"));
+      URL.revokeObjectURL(objectUrl);
+
+      // Provide specific error messages based on file type
+      const ext = file.name.split(".").pop()?.toLowerCase() || "";
+      const fileType = file.type || "unknown";
+
+      // Known problematic formats
+      if (["tiff", "tif"].includes(ext)) {
+        reject(
+          new Error(
+            `TIFF files cannot be processed in-browser. Please upload as original format or convert to JPG/PNG first.`,
+          ),
+        );
+        return;
+      }
+      if (["heic", "heif"].includes(ext)) {
+        reject(
+          new Error(
+            `HEIC/HEIF files (iPhone photos) have limited browser support. Please upload as original format or convert to JPG first.`,
+          ),
+        );
+        return;
+      }
+      if (["raw", "cr2", "nef", "arw", "dng"].includes(ext)) {
+        reject(
+          new Error(
+            `RAW camera files cannot be processed in-browser. Please upload as original format or convert to JPG first.`,
+          ),
+        );
+        return;
+      }
+      if (["psd", "ai", "eps"].includes(ext)) {
+        reject(
+          new Error(
+            `${ext.toUpperCase()} files cannot be processed in-browser. Please convert to JPG/PNG/WebP first.`,
+          ),
+        );
+        return;
+      }
+
+      // BMP is renderable but often problematic
+      if (ext === "bmp" || fileType === "image/bmp") {
+        reject(
+          new Error(
+            `BMP files may fail to load in browsers. Try converting to PNG or JPG first.`,
+          ),
+        );
+        return;
+      }
+
+      // Very large files
+      if (file.size > 50 * 1024 * 1024) {
+        reject(
+          new Error(
+            `File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum for processing is 50MB. Try uploading as original format or resize first.`,
+          ),
+        );
+        return;
+      }
+
+      // Generic error with helpful context
+      reject(
+        new Error(
+          `Failed to load image "${file.name}" (${fileType}). The file may be corrupted or in an unsupported format.`,
+        ),
+      );
     };
-    img.src = URL.createObjectURL(file);
+
+    img.src = objectUrl;
   });
 }
 
