@@ -1,6 +1,7 @@
 """Package discovery commands - inspect the monorepo structure."""
 
 import json
+import tomllib
 from typing import Optional
 
 import click
@@ -58,21 +59,32 @@ def packages_list(ctx: click.Context, pkg_type: Optional[str]) -> None:
     if pkg_type:
         try:
             filter_type = PackageType(pkg_type.lower())
-            packages_to_show = [p for p in packages_to_show if p.package_type == filter_type]
+            packages_to_show = [
+                p for p in packages_to_show if p.package_type == filter_type
+            ]
         except ValueError:
-            valid_types = ", ".join(t.value for t in PackageType if t != PackageType.UNKNOWN)
+            valid_types = ", ".join(
+                t.value for t in PackageType if t != PackageType.UNKNOWN
+            )
             if output_json:
-                console.print(json.dumps({"error": f"Invalid type. Valid: {valid_types}"}))
+                console.print(
+                    json.dumps({"error": f"Invalid type. Valid: {valid_types}"})
+                )
             else:
                 error(f"Invalid package type. Valid types: {valid_types}")
             raise SystemExit(1)
 
     if output_json:
-        console.print(json.dumps({
-            "root": str(monorepo.root),
-            "package_manager": monorepo.package_manager,
-            "packages": [p.to_dict() for p in packages_to_show],
-        }, indent=2))
+        console.print(
+            json.dumps(
+                {
+                    "root": str(monorepo.root),
+                    "package_manager": monorepo.package_manager,
+                    "packages": [p.to_dict() for p in packages_to_show],
+                },
+                indent=2,
+            )
+        )
         return
 
     console.print(f"\n[bold green]Monorepo: {monorepo.root.name}[/bold green]")
@@ -165,7 +177,9 @@ def packages_info(ctx: click.Context, name: Optional[str]) -> None:
         console.print("[bold]Scripts:[/bold]")
         for script_name, script_cmd in sorted(pkg.scripts.items()):
             # Truncate long commands
-            cmd_display = script_cmd if len(script_cmd) < 50 else script_cmd[:47] + "..."
+            cmd_display = (
+                script_cmd if len(script_cmd) < 50 else script_cmd[:47] + "..."
+            )
             console.print(f"  [cyan]{script_name}[/cyan]: [dim]{cmd_display}[/dim]")
         console.print()
 
@@ -196,9 +210,143 @@ def packages_current(ctx: click.Context) -> None:
         return
 
     if output_json:
-        console.print(json.dumps({
-            "in_package": True,
-            "package": pkg.to_dict(),
-        }, indent=2))
+        console.print(
+            json.dumps(
+                {
+                    "in_package": True,
+                    "package": pkg.to_dict(),
+                },
+                indent=2,
+            )
+        )
     else:
-        console.print(f"Current package: [cyan]{pkg.name}[/cyan] ({pkg.package_type.value})")
+        console.print(
+            f"Current package: [cyan]{pkg.name}[/cyan] ({pkg.package_type.value})"
+        )
+
+
+@packages.command("deps")
+@click.argument("name", required=False)
+@click.option("--dev", is_flag=True, help="Include devDependencies")
+@click.option("--peer", is_flag=True, help="Include peerDependencies")
+@click.pass_context
+def packages_deps(
+    ctx: click.Context, name: Optional[str], dev: bool, peer: bool
+) -> None:
+    """List dependencies for a package.
+
+    Replaces the need for: cat package.json | jq '.dependencies'
+
+    If no name is provided, shows deps for the current package.
+
+    \b
+    Examples:
+        gw packages deps                # Current package deps
+        gw packages deps engine         # Engine package deps
+        gw packages deps engine --dev   # Include devDependencies
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    if name:
+        monorepo = load_monorepo()
+        if not monorepo:
+            if output_json:
+                console.print(json.dumps({"error": "Not in a monorepo"}))
+            else:
+                error("Not in a monorepo")
+            raise SystemExit(1)
+        pkg = monorepo.find_package(name)
+    else:
+        pkg = detect_current_package()
+
+    if not pkg:
+        if output_json:
+            console.print(json.dumps({"error": "Package not found"}))
+        else:
+            error("Package not found")
+            info("Run from a package directory or specify a package name")
+        raise SystemExit(1)
+
+    # Read the package.json to get dependencies
+    package_json_path = pkg.path / "package.json"
+    pyproject_path = pkg.path / "pyproject.toml"
+
+    deps_data = {
+        "package": pkg.name,
+        "dependencies": {},
+        "devDependencies": {},
+        "peerDependencies": {},
+    }
+
+    if package_json_path.exists():
+        with open(package_json_path) as f:
+            pkg_json = json.load(f)
+        deps_data["dependencies"] = pkg_json.get("dependencies", {})
+        if dev:
+            deps_data["devDependencies"] = pkg_json.get("devDependencies", {})
+        if peer:
+            deps_data["peerDependencies"] = pkg_json.get("peerDependencies", {})
+    elif pyproject_path.exists():
+        # For Python packages, try to parse pyproject.toml
+        try:
+            with open(pyproject_path, "rb") as f:
+                pyproject = tomllib.load(f)
+            deps_data["dependencies"] = {
+                d: "*" for d in pyproject.get("project", {}).get("dependencies", [])
+            }
+            if dev:
+                dev_deps = (
+                    pyproject.get("project", {})
+                    .get("optional-dependencies", {})
+                    .get("dev", [])
+                )
+                deps_data["devDependencies"] = {d: "*" for d in dev_deps}
+        except Exception:
+            pass
+    else:
+        if output_json:
+            console.print(
+                json.dumps({"error": "No package.json or pyproject.toml found"})
+            )
+        else:
+            error("No package.json or pyproject.toml found")
+        raise SystemExit(1)
+
+    if output_json:
+        console.print(json.dumps(deps_data, indent=2))
+        return
+
+    console.print(f"\n[bold green]{pkg.name}[/bold green] dependencies\n")
+
+    if deps_data["dependencies"]:
+        dep_table = create_table(title="Dependencies")
+        dep_table.add_column("Package", style="cyan")
+        dep_table.add_column("Version", style="dim")
+        for dep_name, version in sorted(deps_data["dependencies"].items()):
+            dep_table.add_row(dep_name, version)
+        console.print(dep_table)
+        console.print()
+
+    if dev and deps_data["devDependencies"]:
+        dev_table = create_table(title="Dev Dependencies")
+        dev_table.add_column("Package", style="cyan")
+        dev_table.add_column("Version", style="dim")
+        for dep_name, version in sorted(deps_data["devDependencies"].items()):
+            dev_table.add_row(dep_name, version)
+        console.print(dev_table)
+        console.print()
+
+    if peer and deps_data["peerDependencies"]:
+        peer_table = create_table(title="Peer Dependencies")
+        peer_table.add_column("Package", style="cyan")
+        peer_table.add_column("Version", style="dim")
+        for dep_name, version in sorted(deps_data["peerDependencies"].items()):
+            peer_table.add_row(dep_name, version)
+        console.print(peer_table)
+
+    if (
+        not deps_data["dependencies"]
+        and not (dev and deps_data["devDependencies"])
+        and not (peer and deps_data["peerDependencies"])
+    ):
+        info("No dependencies found")

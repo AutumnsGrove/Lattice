@@ -1,6 +1,7 @@
 """Issue commands for GitHub integration."""
 
 import json
+from datetime import datetime
 from typing import Optional
 
 import click
@@ -40,6 +41,7 @@ def issue() -> None:
 @click.option("--assignee", help="Filter by assignee")
 @click.option("--label", help="Filter by label")
 @click.option("--milestone", help="Filter by milestone")
+@click.option("--since", help="Filter issues created after date (YYYY-MM-DD)")
 @click.option("--limit", default=30, help="Maximum number to return")
 @click.pass_context
 def issue_list(
@@ -49,6 +51,7 @@ def issue_list(
     assignee: Optional[str],
     label: Optional[str],
     milestone: Optional[str],
+    since: Optional[str],
     limit: int,
 ) -> None:
     """List issues.
@@ -61,6 +64,7 @@ def issue_list(
         gw gh issue list --label bug
         gw gh issue list --assignee @me
         gw gh issue list --milestone "February 2026"
+        gw gh issue list --since 2026-01-01
     """
     output_json = ctx.obj.get("output_json", False)
 
@@ -82,6 +86,21 @@ def issue_list(
             milestone=milestone,
             limit=limit,
         )
+
+        # Filter by date if --since provided
+        if since:
+            try:
+                since_date = datetime.strptime(since, "%Y-%m-%d")
+                issues = [
+                    i for i in issues
+                    if i.created_at and datetime.fromisoformat(i.created_at.replace("Z", "+00:00")).replace(tzinfo=None) >= since_date
+                ]
+            except ValueError:
+                if output_json:
+                    console.print(json.dumps({"error": "Invalid date format. Use YYYY-MM-DD"}))
+                else:
+                    console.print("[red]Invalid date format. Use YYYY-MM-DD[/red]")
+                raise SystemExit(1)
 
         if output_json:
             data = [
@@ -407,6 +426,78 @@ def issue_reopen(
             console.print(json.dumps({"reopened": number}))
         else:
             console.print(f"[green]Reopened issue #{number}[/green]")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@issue.command("milestones")
+@click.option("--state", default="open", help="Filter by state (open, closed, all)")
+@click.pass_context
+def issue_milestones(ctx: click.Context, state: str) -> None:
+    """List milestones.
+
+    Always safe - no --write flag required.
+
+    \b
+    Examples:
+        gw gh issue milestones
+        gw gh issue milestones --state closed
+        gw gh issue milestones --state all
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        gh = GitHub()
+
+        # Use gh API directly for milestones
+        state_param = "all" if state == "all" else state
+        data = gh.execute_json([
+            "api", f"repos/{gh.repo}/milestones",
+            "--jq", f'[.[] | select(.state == "{state_param}" or "{state_param}" == "all")]'
+        ])
+
+        if output_json:
+            milestones = [
+                {
+                    "number": m["number"],
+                    "title": m["title"],
+                    "state": m["state"],
+                    "due_on": m.get("due_on"),
+                    "open_issues": m.get("open_issues", 0),
+                    "closed_issues": m.get("closed_issues", 0),
+                }
+                for m in data
+            ]
+            console.print(json.dumps(milestones, indent=2))
+            return
+
+        if not data:
+            console.print("[dim]No milestones found[/dim]")
+            return
+
+        table = Table(title=f"Milestones ({state})", border_style="green")
+        table.add_column("#", style="cyan", width=4)
+        table.add_column("Title")
+        table.add_column("Due", style="dim")
+        table.add_column("Progress", style="green")
+
+        for m in data:
+            due = m.get("due_on", "")[:10] if m.get("due_on") else "-"
+            open_count = m.get("open_issues", 0)
+            closed_count = m.get("closed_issues", 0)
+            total = open_count + closed_count
+            progress = f"{closed_count}/{total}" if total > 0 else "-"
+
+            table.add_row(
+                str(m["number"]),
+                m["title"],
+                due,
+                progress,
+            )
+
+        console.print(table)
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")
