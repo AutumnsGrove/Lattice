@@ -230,7 +230,7 @@
           The Lattice Museum. A guided tour through how this forest grows, with curator commentary in the margins.
         </p>
         <div class="grid md:grid-cols-3 gap-4 mb-4">
-          {#each exhibitDocs as doc}
+          {#each exhibitDocs.slice(0, 9) as doc}
             <div class="text-sm p-3 {colors.exhibit.cardBg} {colors.exhibit.cardBgDark} rounded-lg">
               <a href="/knowledge/exhibit/{doc.slug}" class="{colors.exhibit.text} {colors.exhibit.textDark} {colors.exhibit.textHover} {colors.exhibit.textHoverDark} font-medium transition-colors">
                 {doc.title}
