@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
-  import { Input, Textarea, Button, GlassCard } from '$lib/ui';
+  import { Input, Textarea, Button, GlassCard, GlassConfirmDialog } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
 
@@ -55,6 +55,7 @@
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
   let detailsCollapsed = $state(true);  // Start collapsed for focused writing
+  let showDiscardDialog = $state(false);
 
   // Track original values for unsaved changes detection
   let originalTitle = $state("");
@@ -105,6 +106,18 @@
       heroCtaLink !== originalHeroCtaLink;
     hasUnsavedChanges = hasChanges;
   });
+
+  function handleCancel() {
+    if (hasUnsavedChanges) {
+      showDiscardDialog = true;
+    } else {
+      goto('/admin/pages');
+    }
+  }
+
+  function handleDiscardConfirm() {
+    goto('/admin/pages');
+  }
 
   async function handleSave() {
     // Validation
@@ -183,7 +196,7 @@
       </p>
     </div>
     <div class="flex gap-2 max-md:flex-col">
-      <Button variant="outline" onclick={() => goto('/admin/pages')}>
+      <Button variant="outline" onclick={handleCancel}>
         Cancel
       </Button>
       <Button variant="primary" onclick={handleSave} disabled={saving || !hasUnsavedChanges}>
@@ -295,6 +308,15 @@
     </GlassCard>
   </div>
 </div>
+
+<GlassConfirmDialog
+  bind:open={showDiscardDialog}
+  title="Discard Changes?"
+  message="You have unsaved changes. Are you sure you want to discard them and return to the pages list?"
+  confirmLabel="Discard"
+  variant="warning"
+  onconfirm={handleDiscardConfirm}
+/>
 
 <style>
   .editor-container {
