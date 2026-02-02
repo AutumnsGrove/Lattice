@@ -23,10 +23,14 @@ class GitHubError(Exception):
             returncode: Command return code
             stderr: Standard error output
         """
-        self.message = message
         self.returncode = returncode
         self.stderr = stderr
-        super().__init__(message)
+        # Include stderr in message if available (the actual useful error!)
+        if stderr and stderr.strip():
+            self.message = f"{message}\n{stderr.strip()}"
+        else:
+            self.message = message
+        super().__init__(self.message)
 
 
 @dataclass
