@@ -629,6 +629,22 @@ uv sync --extra dev
 uv run pytest tests/ -v
 ```
 
+### Updating the Global Tool
+
+When developing gw locally, `uv run gw` uses the local source. But the global `gw` command (installed via `uv tool install`) is a separate copy that won't see your changes!
+
+**After adding new commands or making changes:**
+
+```bash
+# Reinstall the global tool from local source
+uv tool install /path/to/tools/gw --force
+
+# Verify your changes are there
+gw --help
+```
+
+**Why this happens:** UV tools are installed to `~/.local/bin/` as standalone executables. Running `uv run gw` from the project uses the local `src/` directly, but `gw` alone uses the installed copy.
+
 ### Project Structure
 
 ```
