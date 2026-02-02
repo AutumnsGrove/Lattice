@@ -6,6 +6,7 @@ from .read import diff, log, show, status, blame
 from .write import add, branch, commit, push, stash, switch, unstage
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
+from .worktree import worktree
 
 
 @click.group()
@@ -61,3 +62,6 @@ git.add_command(wip)
 git.add_command(undo)
 git.add_command(amend)
 git.add_command(fast)
+
+# Register worktree commands
+git.add_command(worktree)

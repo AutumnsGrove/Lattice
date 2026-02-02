@@ -122,6 +122,12 @@ OPERATION_TIERS: dict[str, GitSafetyTier] = {
     "undo": GitSafetyTier.WRITE,  # Grove shortcut
     "amend": GitSafetyTier.WRITE,  # Grove shortcut
     "sync": GitSafetyTier.WRITE,  # Grove shortcut
+    # Worktree operations
+    "worktree_list": GitSafetyTier.READ,
+    "worktree_create": GitSafetyTier.WRITE,
+    "worktree_remove": GitSafetyTier.WRITE,
+    "worktree_prune": GitSafetyTier.WRITE,
+    "worktree_clean": GitSafetyTier.DANGEROUS,  # Removes ALL worktrees
     # Tier 3: Dangerous operations (require --write --force, blocked in agent mode)
     "push_force": GitSafetyTier.DANGEROUS,
     "reset_hard": GitSafetyTier.DANGEROUS,
