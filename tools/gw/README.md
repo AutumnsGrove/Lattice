@@ -20,7 +20,7 @@
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
-> *A friendly fence around dangerous tools. Safe enough for agents, fast enough for 2am deploys.*
+> *One CLI to tend them all — Wrangler, git, and gh wrapped with agent-safe defaults.*
 
 ---
 

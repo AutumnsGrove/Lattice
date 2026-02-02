@@ -34,10 +34,10 @@ from .config import GWConfig
 )
 @click.pass_context
 def main(ctx: click.Context, output_json: bool, verbose: bool) -> None:
-    """Grove Wrap - A friendly fence around Wrangler's garden.
+    """Grove Wrap - One CLI to tend them all.
 
-    A safety layer for Cloudflare operations with database protection,
-    configuration management, and helpful terminal output.
+    A safety layer wrapping Wrangler, git, and GitHub CLI with agent-safe
+    defaults, database protection, and helpful terminal output.
     """
     # Ensure we have a context object
     if ctx.obj is None:
