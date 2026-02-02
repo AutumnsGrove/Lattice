@@ -163,7 +163,8 @@ export type ZephyrErrorCode =
   | "PROVIDER_ERROR" // Resend/SES returned an error
   | "TEMPLATE_ERROR" // Template rendering failed
   | "CIRCUIT_OPEN" // Circuit breaker is open
-  | "IDEMPOTENCY_CONFLICT"; // Duplicate idempotency key
+  | "IDEMPOTENCY_CONFLICT" // Duplicate idempotency key
+  | "NETWORK_ERROR"; // Client-side network/timeout failure
 
 /**
  * Processing metadata included in responses.
@@ -277,6 +278,7 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
 export const RETRYABLE_ERRORS: ZephyrErrorCode[] = [
   "PROVIDER_ERROR",
   "CIRCUIT_OPEN",
+  "NETWORK_ERROR",
 ];
 
 /**

@@ -6,7 +6,7 @@
  * but are implemented as plain HTML for Worker compatibility.
  */
 
-import { wrapEmail, paragraph, button, escapeHtml, COLORS } from "./base";
+import { wrapEmail, paragraph, button, escapeHtml } from "./base";
 import type { RenderResult } from "./index";
 
 export type AudienceType = "wanderer" | "promo" | "rooted";

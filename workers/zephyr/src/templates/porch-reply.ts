@@ -5,14 +5,7 @@
  * This is THE template that fixes the silent failure bug.
  */
 
-import {
-  wrapEmail,
-  paragraph,
-  divider,
-  link,
-  escapeHtml,
-  htmlToText,
-} from "./base";
+import { wrapEmail, paragraph, divider, link, escapeHtml } from "./base";
 import type { RenderResult } from "./index";
 
 export interface PorchReplyData {
@@ -32,7 +25,8 @@ export interface PorchReplyData {
  * Render the Porch reply email.
  */
 export function porchReplyTemplate(data: PorchReplyData): RenderResult {
-  const { content, visitId, visitNumber, subject, visitorName } = data;
+  // Note: visitNumber and subject are used in subject line generation (templates/index.ts)
+  const { content, visitId, visitorName } = data;
 
   const greeting = visitorName ? `Hi ${escapeHtml(visitorName)},` : "Hi there,";
   const conversationUrl = `https://grove.place/porch/visits/${visitId}`;

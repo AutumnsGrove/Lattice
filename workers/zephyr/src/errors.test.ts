@@ -46,10 +46,12 @@ describe("createError", () => {
   it("should mark retryable errors correctly", () => {
     const providerErr = createError("PROVIDER_ERROR", "Server error");
     const circuitErr = createError("CIRCUIT_OPEN", "Circuit open");
+    const networkErr = createError("NETWORK_ERROR", "Connection failed");
     const invalidErr = createError("INVALID_REQUEST", "Bad data");
 
     expect(providerErr.retryable).toBe(true);
     expect(circuitErr.retryable).toBe(true);
+    expect(networkErr.retryable).toBe(true);
     expect(invalidErr.retryable).toBe(false);
   });
 });
@@ -58,6 +60,7 @@ describe("isRetryable", () => {
   it("should return true for retryable error codes", () => {
     expect(isRetryable("PROVIDER_ERROR")).toBe(true);
     expect(isRetryable("CIRCUIT_OPEN")).toBe(true);
+    expect(isRetryable("NETWORK_ERROR")).toBe(true);
   });
 
   it("should return false for non-retryable error codes", () => {

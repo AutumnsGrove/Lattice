@@ -119,14 +119,11 @@ export function validateRequest(request: ZephyrRequest): ZephyrError | null {
       return invalidRequest("scheduledAt cannot be in the past", "scheduledAt");
     }
 
-    // Resend limits scheduling to 72 hours in advance
-    const maxSchedule = Date.now() + 72 * 60 * 60 * 1000;
-    if (date.getTime() > maxSchedule) {
-      return invalidRequest(
-        "scheduledAt cannot be more than 72 hours in the future",
-        "scheduledAt",
-      );
-    }
+    // Note: We don't enforce Resend's 72-hour limit here.
+    // If the date is too far out, Resend will reject it and we'll
+    // surface that error to the caller. This allows the caller to
+    // handle scheduling appropriately (e.g., use email-catchup worker
+    // for long-term sequences instead of Resend's scheduledAt).
   }
 
   // Idempotency key validation

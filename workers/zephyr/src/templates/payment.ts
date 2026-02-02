@@ -7,16 +7,7 @@
  * - Trial ending (reminder)
  */
 
-import {
-  wrapEmail,
-  paragraph,
-  heading,
-  button,
-  divider,
-  highlight,
-  link,
-  escapeHtml,
-} from "./base";
+import { wrapEmail, paragraph, button, highlight, escapeHtml } from "./base";
 import type { RenderResult } from "./index";
 
 export interface PaymentData {

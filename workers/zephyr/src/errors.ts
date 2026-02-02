@@ -26,7 +26,11 @@ export function createError(
  * Check if an error code is retryable.
  */
 export function isRetryable(code: ZephyrErrorCode): boolean {
-  return code === "PROVIDER_ERROR" || code === "CIRCUIT_OPEN";
+  return (
+    code === "PROVIDER_ERROR" ||
+    code === "CIRCUIT_OPEN" ||
+    code === "NETWORK_ERROR"
+  );
 }
 
 /**

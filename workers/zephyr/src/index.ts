@@ -42,7 +42,52 @@ import {
 import { getPrimaryProvider } from "./providers";
 import { logEmailSend, checkIdempotency, getEmailStats } from "./logging/d1";
 import { renderTemplate, getTemplateSubject } from "./templates";
-import { invalidRequest, providerError, idempotencyConflict } from "./errors";
+import {
+  invalidRequest,
+  providerError,
+  idempotencyConflict,
+  templateError,
+} from "./errors";
+import type { ZephyrErrorCode } from "./types";
+
+/**
+ * Map error codes to appropriate HTTP status codes.
+ *
+ * 4xx = Client errors (bad request, won't succeed on retry)
+ * 5xx = Server errors (transient, may succeed on retry)
+ */
+function getHttpStatus(response: ZephyrResponse): number {
+  if (response.success) {
+    return 200;
+  }
+
+  const code = response.error?.code as ZephyrErrorCode | undefined;
+
+  switch (code) {
+    // Client errors (4xx)
+    case "INVALID_REQUEST":
+    case "INVALID_TEMPLATE":
+    case "INVALID_RECIPIENT":
+      return 400;
+    case "UNSUBSCRIBED":
+      return 403; // Forbidden - recipient opted out
+    case "RATE_LIMITED":
+      return 429;
+    case "IDEMPOTENCY_CONFLICT":
+      return 409; // Conflict
+
+    // Server/infrastructure errors (5xx)
+    case "PROVIDER_ERROR":
+    case "TEMPLATE_ERROR":
+    case "NETWORK_ERROR":
+      return 502; // Bad Gateway - upstream provider failed
+    case "CIRCUIT_OPEN":
+      return 503; // Service Unavailable - circuit breaker open
+
+    default:
+      return 500; // Unknown error
+  }
+}
 
 /**
  * Generate a unique request ID for tracing.
@@ -98,14 +143,23 @@ async function handleSend(
   if (request.idempotencyKey) {
     const existing = await checkIdempotency(env, request.idempotencyKey);
     if (existing) {
-      // Return the previous result
+      // Return the previous result (including original error if it failed)
+      // This allows callers to see what actually happened, not just "conflict"
       return createResponse(
         existing.success === 1,
         {
           messageId: existing.message_id || undefined,
           error:
             existing.success === 0
-              ? idempotencyConflict(request.idempotencyKey)
+              ? {
+                  // Reconstruct original error from stored fields
+                  code: existing.error_code || "PROVIDER_ERROR",
+                  message:
+                    existing.error_message ||
+                    "Previous send attempt failed (idempotent replay)",
+                  retryable: false, // Don't retry idempotent requests
+                  details: { idempotencyKey: request.idempotencyKey },
+                }
               : undefined,
         },
         {
@@ -300,7 +354,7 @@ export default {
         const response = await handleSend(body, env, requestId);
 
         return Response.json(response, {
-          status: response.success ? 200 : 400,
+          status: getHttpStatus(response),
           headers: {
             ...corsHeaders,
             "X-Zephyr-Request-Id": requestId,

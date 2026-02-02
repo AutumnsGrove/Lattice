@@ -245,14 +245,17 @@ describe("validateRequest: scheduledAt", () => {
     expect(error?.message).toContain("past");
   });
 
-  it("should reject date more than 72 hours in the future", () => {
-    const farFuture = new Date(Date.now() + 73 * 60 * 60 * 1000).toISOString(); // 73 hours
+  it("should accept date far in the future (let Resend enforce limits)", () => {
+    // We don't enforce the 72h limit - Resend will reject and we surface the error
+    // This allows callers to handle long-term scheduling appropriately
+    const farFuture = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
+    ).toISOString(); // 7 days
     const request = validRequest({ scheduledAt: farFuture });
 
     const error = validateRequest(request);
 
-    expect(error).not.toBeNull();
-    expect(error?.message).toContain("72 hours");
+    expect(error).toBeNull(); // Let it through, Resend will reject if needed
   });
 });
 

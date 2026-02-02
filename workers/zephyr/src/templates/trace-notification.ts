@@ -24,7 +24,7 @@ export interface TraceNotificationData {
 export function traceNotificationTemplate(
   data: TraceNotificationData,
 ): RenderResult {
-  const { sourcePath, vote, comment, traceId } = data;
+  const { sourcePath, vote, comment } = data;
 
   const emoji = vote === "up" ? "👍" : "👎";
   const voteText = vote === "up" ? "positive" : "negative";

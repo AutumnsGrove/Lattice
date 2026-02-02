@@ -4,7 +4,7 @@
  * Sent during email verification flow in Plant.
  */
 
-import { wrapEmail, paragraph, heading, codeBox, htmlToText } from "./base";
+import { wrapEmail, paragraph, codeBox } from "./base";
 import type { RenderResult } from "./index";
 
 export interface VerificationCodeData {
