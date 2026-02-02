@@ -3,6 +3,15 @@
 import click
 
 from .commands import auth, bindings, cache, db, health, secret, status, tenant
+from .commands import backup, deploy, do, email, flag, kv, logs, r2, packages
+from .commands.git import git
+from .commands.gh import gh
+from .commands.dev import dev
+from .commands.dev.test import test
+from .commands.dev.build import build
+from .commands.dev.check import check
+from .commands.dev.lint import lint
+from .commands.dev.ci import ci
 from .config import GWConfig
 
 
@@ -44,6 +53,27 @@ main.add_command(db.db)
 main.add_command(tenant.tenant)
 main.add_command(secret.secret)
 main.add_command(cache.cache)
+main.add_command(git)
+main.add_command(gh)
+
+# Cloudflare Phase 4-6.5 commands
+main.add_command(kv.kv)
+main.add_command(r2.r2)
+main.add_command(logs.logs)
+main.add_command(deploy.deploy)
+main.add_command(do.do)
+main.add_command(flag.flag)
+main.add_command(backup.backup)
+main.add_command(email.email)
+
+# Dev Tools Phase 15-18 commands
+main.add_command(dev)
+main.add_command(test)
+main.add_command(build)
+main.add_command(check)
+main.add_command(lint)
+main.add_command(ci)
+main.add_command(packages.packages)
 
 
 if __name__ == "__main__":

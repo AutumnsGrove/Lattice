@@ -1,137 +1,509 @@
 # Grove Wrap (gw)
 
 ```
-╭──────────────────────────────────╮
-│     🌿  G R O V E W R A P  🌿    │
-│                                  │
-│   ┌────┐  ┌────┐  ┌────┐        │
-│   │ D1 │──│ KV │──│ R2 │        │
-│   └──┬─┘  └──┬─┘  └──┬─┘        │
-│      │       │       │          │
-│      └───────┼───────┘          │
-│              │                  │
-│         ╭────┴────╮             │
-│         │   gw    │             │
-│         ╰────┬────╯             │
-│              │                  │
-│    ┌─────────┴─────────┐        │
-│    ▼                   ▼        │
-│  Human              Agent       │
-│  (safe)            (safer)      │
-╰──────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────╮
+│              🌿  G R O V E   W R A P  🌿                     │
+│                                                              │
+│      ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐            │
+│      │ D1  │  │ KV  │  │ R2  │  │ Git │  │ GH  │            │
+│      └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘  └──┬──┘            │
+│         └────────┴───┬────┴────────┴────────┘               │
+│                      │                                       │
+│                 ╭────┴────╮                                  │
+│                 │   gw    │                                  │
+│                 ╰────┬────╯                                  │
+│                      │                                       │
+│         ┌────────────┼────────────┐                         │
+│         ▼            ▼            ▼                         │
+│      Human        Agent        CI/CD                        │
+│      (safe)      (safer)      (safest)                      │
+╰──────────────────────────────────────────────────────────────╯
 ```
 
-> *A friendly fence around Wrangler's garden. Safe enough for agents, fast enough for humans.*
+> *A friendly fence around dangerous tools. Safe enough for agents, fast enough for 2am deploys.*
 
-Grove Wrap (`gw`) is a CLI abstraction over Wrangler that provides:
+---
 
-- **Safety guards** for database operations (read-only by default)
-- **Grove-aware shortcuts** (knows database IDs, table names, common queries)
-- **Agent integration** (MCP server mode for Claude Code)
-- **Human-friendly output** (Rich terminal UI)
+## 🚀 Quick Start (I Just Want to Deploy!)
 
-## Installation
+```bash
+# Install
+cd tools/gw && uv sync
+
+# Check everything is working
+uv run gw health
+
+# Run tests before deploying
+uv run gw test --all
+
+# Type check everything
+uv run gw check --all
+
+# Deploy!
+uv run gw deploy --write
+```
+
+**Tired? Just want to commit and push?**
+
+```bash
+uv run gw git fast --write -m "fix: finally done"
+```
+
+---
+
+## 📦 Installation
 
 ```bash
 cd tools/gw
 uv sync
 ```
 
-The `gw` command is now available via UV:
+The `gw` command is now available:
 
 ```bash
 uv run gw --help
 ```
 
-## Quick Start
-
+**Pro tip:** Add an alias to your shell:
 ```bash
-# Check status
-uv run gw status
-
-# Check health
-uv run gw health
-
-# Check authentication
-uv run gw auth check
-
-# Login to Cloudflare
-uv run gw auth login
+alias gw="uv run --project ~/path/to/tools/gw gw"
 ```
 
-## Commands
+---
 
-### Status Commands
+## 🎯 Command Overview
+
+| Command | What it does | Safe? |
+|---------|--------------|-------|
+| `gw status` | Show config and account info | ✅ Always |
+| `gw health` | Health check all components | ✅ Always |
+| `gw test` | Run tests | ✅ Always |
+| `gw build` | Build packages | ✅ Always |
+| `gw check` | Type check | ✅ Always |
+| `gw lint` | Lint code | ✅ Always |
+| `gw ci` | Run full CI pipeline | ✅ Always |
+| `gw deploy --write` | Deploy to Cloudflare | ⚠️ Needs `--write` |
+| `gw git commit --write` | Commit changes | ⚠️ Needs `--write` |
+| `gw git push --write` | Push to remote | ⚠️ Needs `--write` |
+| `gw db query --write` | Write to database | ⚠️ Needs `--write` |
+| `gw git push --write --force` | Force push | 🔴 Needs `--write --force` |
+
+---
+
+## 🛠️ Dev Tools
+
+### Running Tests
 
 ```bash
-gw status              # Show configuration and Cloudflare account
-gw --json status       # Machine-readable JSON output
-gw health              # Health check for all components
-gw bindings            # Show all Cloudflare bindings from wrangler.toml
+# Test current package (auto-detected from cwd)
+gw test
+
+# Test all packages
+gw test --all
+
+# Watch mode (re-run on changes)
+gw test --watch
+
+# With coverage
+gw test --coverage
+
+# Filter by test name
+gw test -k "auth"
+
+# See what would run without running it
+gw test --dry-run
 ```
 
-### Bindings
+### Building
 
 ```bash
-gw bindings            # Show all bindings (D1, KV, R2, DOs, Services)
-gw bindings -t d1      # Filter by type: d1, kv, r2, do, services, ai
-gw bindings -p engine  # Filter by package name
-gw --json bindings     # Machine-readable JSON output
+# Build current package
+gw build
+
+# Build all packages
+gw build --all
+
+# Production build
+gw build --prod
+
+# Clean build
+gw build --clean
+
+# Preview the command
+gw build --dry-run
 ```
 
-### Database Commands
+### Type Checking
+
+```bash
+# Check current package
+gw check
+
+# Check all packages
+gw check --all
+
+# Watch mode
+gw check --watch
+
+# Strict mode (fail on warnings)
+gw check --strict
+```
+
+### Linting
+
+```bash
+# Lint current package
+gw lint
+
+# Lint all packages
+gw lint --all
+
+# Auto-fix issues
+gw lint --fix
+```
+
+### Full CI Pipeline
+
+```bash
+# Run everything: lint → check → test → build
+gw ci
+
+# Stop on first failure
+gw ci --fail-fast
+
+# Skip specific steps
+gw ci --skip-lint --skip-build
+
+# Preview all steps
+gw ci --dry-run
+```
+
+### Dev Server
+
+```bash
+# Start dev server for current package
+gw dev start
+
+# Start in background
+gw dev start -b
+
+# Stop background server
+gw dev stop
+
+# Restart
+gw dev restart
+
+# View logs
+gw dev logs
+gw dev logs -f  # follow
+```
+
+### Package Discovery
+
+```bash
+# List all packages in monorepo
+gw packages list
+
+# Filter by type
+gw packages list --type sveltekit
+gw packages list --type python
+
+# Info about current package
+gw packages current
+
+# Info about specific package
+gw packages info engine
+```
+
+---
+
+## 🌿 Git Commands
+
+All git commands have safety guards. Write operations need `--write`. Dangerous operations need `--write --force`.
+
+### Reading (Always Safe)
+
+```bash
+gw git status              # Enhanced git status
+gw git log                 # Formatted commit history
+gw git log --limit 20      # Last 20 commits
+gw git diff                # Show changes
+gw git diff --staged       # Show staged changes
+gw git blame file.ts       # Blame with context
+gw git show abc123         # Show commit details
+```
+
+### Writing (Needs `--write`)
+
+```bash
+gw git add --write .                    # Stage files
+gw git commit --write -m "feat: thing"  # Commit (validates conventional commits!)
+gw git push --write                     # Push to remote
+gw git branch --write feature/new       # Create branch
+gw git stash --write                    # Stash changes
+gw git stash --write pop                # Pop stash
+```
+
+### Grove Shortcuts
+
+```bash
+# Quick save: stage all + WIP commit
+gw git save --write
+
+# Quick sync: fetch + rebase + push
+gw git sync --write
+
+# WIP commit that skips hooks
+gw git wip --write
+
+# Undo last commit (keeps changes)
+gw git undo --write
+
+# Amend last commit message
+gw git amend --write -m "better message"
+
+# FAST MODE: skip ALL hooks, just commit and push
+gw git fast --write -m "fix: emergency hotfix"
+```
+
+### Dangerous Operations (Needs `--write --force`)
+
+```bash
+# Force push (blocked to protected branches!)
+gw git push --write --force
+
+# Hard reset
+gw git reset --write --force HEAD~1
+
+# Interactive rebase
+gw git rebase --write --force main
+```
+
+**Protected branches:** `main`, `master`, `production`, `staging` cannot be force-pushed, even with `--force`.
+
+---
+
+## 🐙 GitHub Commands
+
+Interact with GitHub without leaving the terminal. Read operations are always safe.
+
+### Pull Requests
+
+```bash
+# List open PRs
+gw gh pr list
+
+# View PR details
+gw gh pr view 123
+
+# Check PR status (CI, reviews, etc.)
+gw gh pr status
+
+# Create PR (needs --write)
+gw gh pr create --write --title "feat: new thing" --body "Description"
+
+# Add comment (needs --write)
+gw gh pr comment --write 123 "LGTM!"
+
+# Merge PR (needs --write, will prompt for confirmation)
+gw gh pr merge --write 123
+```
+
+### Issues
+
+```bash
+# List open issues
+gw gh issue list
+
+# View issue
+gw gh issue view 456
+
+# Create issue (needs --write)
+gw gh issue create --write --title "Bug: thing broke"
+
+# Close issue (needs --write)
+gw gh issue close --write 456
+```
+
+### Workflow Runs (CI)
+
+```bash
+# List recent runs
+gw gh run list
+
+# View run details
+gw gh run view 12345678
+
+# Watch a running workflow
+gw gh run watch 12345678
+
+# Rerun failed jobs (needs --write)
+gw gh run rerun --write 12345678 --failed
+
+# Cancel a run (needs --write)
+gw gh run cancel --write 12345678
+```
+
+### Raw API Access
+
+```bash
+# GET requests (always safe)
+gw gh api repos/AutumnsGrove/GroveEngine
+
+# POST/PATCH (needs --write)
+gw gh api --write repos/{owner}/{repo}/labels -X POST -f name="bug"
+
+# DELETE (needs --write --force)
+gw gh api --write --force repos/{owner}/{repo}/labels/old -X DELETE
+```
+
+### Rate Limits
+
+```bash
+# Check your rate limit status
+gw gh rate-limit
+```
+
+---
+
+## ☁️ Cloudflare Commands
+
+### Databases (D1)
 
 ```bash
 gw db list                              # List all databases
-gw db tables                            # List tables in default database
-gw db tables --db groveauth             # List tables in specific database
+gw db tables                            # List tables
+gw db tables --db groveauth             # Specific database
 gw db schema tenants                    # Show table schema
-gw db query "SELECT * FROM tenants"     # Execute read-only query
-gw db query "..." --write               # Execute write query (with safety checks)
+gw db query "SELECT * FROM tenants"     # Read-only query
+gw db query "UPDATE..." --write         # Write query
 ```
 
-### Tenant Commands
+### KV Storage
 
 ```bash
-gw tenant lookup autumn                 # Look up by subdomain
-gw tenant lookup --email user@example.com
-gw tenant lookup --id abc-123
-gw tenant stats autumn                  # Show tenant statistics
-gw tenant list                          # List all tenants
-gw tenant list --plan oak               # Filter by plan
+gw kv list                              # List namespaces
+gw kv keys cache                        # List keys in namespace
+gw kv get cache session:123             # Get a value
+gw kv put --write cache key "value"     # Set a value
+gw kv delete --write cache old-key      # Delete a key
 ```
 
-### Secrets Management (Agent-Safe) 🔐
+### R2 Object Storage
 
 ```bash
-gw secret init                       # Create encrypted vault
-gw secret set STRIPE_KEY             # Store a secret (prompts for value)
-gw secret list                       # List secret names (never values)
-gw secret exists STRIPE_KEY          # Check if secret exists
-gw secret apply STRIPE_KEY -w worker # Apply to worker (agent-safe!)
-gw secret sync -w grove-lattice      # Sync all secrets to worker
-gw secret delete OLD_KEY             # Delete a secret
+gw r2 list                              # List buckets
+gw r2 ls grove-media                    # List objects
+gw r2 get grove-media path/to/file      # Download
+gw r2 put --write grove-media ./file    # Upload
+gw r2 rm --write --force grove-media x  # Delete
 ```
 
-### Cache Management
+### Feature Flags
 
 ```bash
-gw cache list autumn                 # List cache keys for tenant
-gw cache list --all                  # List all cache keys
-gw cache purge "cache:autumn:home"   # Purge specific key
-gw cache purge --tenant autumn       # Purge all tenant keys
-gw cache purge --cdn url             # Purge CDN (requires CF_API_TOKEN)
-gw cache stats                       # Show cache statistics
+gw flag list                            # List all flags
+gw flag get dark_mode                   # Get flag value
+gw flag enable --write dark_mode        # Enable flag
+gw flag disable --write dark_mode       # Disable flag
+gw flag delete --write --force old_flag # Delete flag
 ```
 
-### Authentication
+### Backups
 
 ```bash
-gw auth check          # Check if authenticated
-gw auth login          # Login via Wrangler
+gw backup list                          # List backups
+gw backup create --write                # Create backup
+gw backup download abc123               # Download backup
+gw backup restore --write --force abc   # Restore (destructive!)
 ```
 
-## Global Flags
+### Logs
+
+```bash
+gw logs                                 # Stream worker logs
+gw logs --status error                  # Only errors
+gw logs --method POST                   # Only POST requests
+gw logs --search "tenant"               # Search in logs
+```
+
+### Deploy
+
+```bash
+gw deploy --dry-run                     # Preview deployment
+gw deploy --write                       # Deploy!
+gw deploy --write --env staging         # Deploy to staging
+```
+
+### Durable Objects
+
+```bash
+gw do list                              # List DO namespaces
+gw do info TENANT_SESSIONS              # Show namespace info
+```
+
+### Email
+
+```bash
+gw email status                         # Check email routing
+gw email rules                          # List routing rules
+```
+
+---
+
+## 🔐 Secrets Management
+
+Secrets are stored in an encrypted vault. Only humans can set secrets; agents can only apply them.
+
+```bash
+# Initialize vault (creates ~/.grove/secrets.enc)
+gw secret init
+
+# Store a secret (prompts for value - never in CLI history!)
+gw secret set STRIPE_KEY
+
+# List secret names (never shows values)
+gw secret list
+
+# Check if secret exists
+gw secret exists STRIPE_KEY
+
+# Apply to a worker (agent-safe!)
+gw secret apply STRIPE_KEY -w grove-lattice
+
+# Sync all secrets to a worker
+gw secret sync -w grove-lattice
+
+# Delete a secret
+gw secret delete OLD_KEY
+```
+
+---
+
+## 🔐 OAuth Client Management
+
+Manage OAuth clients for Heartwood (GroveAuth):
+
+```bash
+# List clients
+gw auth client list
+
+# View client details
+gw auth client info abc123
+
+# Create new client
+gw auth client create --write --name "My App" --redirect-uri "http://localhost:3000/callback"
+
+# Rotate client secret
+gw auth client rotate --write abc123
+
+# Delete client
+gw auth client delete --write --force abc123
+```
+
+---
+
+## 🏷️ Global Flags
 
 | Flag | Description |
 |------|-------------|
@@ -139,21 +511,78 @@ gw auth login          # Login via Wrangler
 | `--verbose` | Enable debug output |
 | `--help` | Show help message |
 
-**Note:** Global flags come BEFORE the subcommand:
+**Important:** Global flags come BEFORE the command:
 
 ```bash
 gw --json status    # ✓ Correct
 gw status --json    # ✗ Wrong
 ```
 
-## Configuration
+---
 
-Configuration is stored at `~/.grove/gw.toml`:
+## 🛡️ Safety System
+
+### The `--write` Flag
+
+By default, gw runs in read-only mode. To modify anything, you need `--write`:
+
+```bash
+gw git push                # ✗ Blocked
+gw git push --write        # ✓ Allowed
+```
+
+### The `--force` Flag
+
+Destructive operations need both `--write` and `--force`:
+
+```bash
+gw git push --force              # ✗ Blocked (no --write)
+gw git push --write --force      # ✓ Allowed (but not to protected branches!)
+```
+
+### The `--dry-run` Flag
+
+Preview what would happen without doing it:
+
+```bash
+gw test --dry-run
+# DRY RUN - Would execute:
+#   Package: @autumnsgrove/groveengine
+#   Directory: /path/to/packages/engine
+#   Command: pnpm run test:run
+```
+
+### Protected Branches
+
+These branches can NEVER be force-pushed:
+- `main`
+- `master`
+- `production`
+- `staging`
+
+### Agent Mode
+
+When running with `GW_AGENT_MODE=1` or detected as Claude Code:
+- Stricter row limits (50 delete, 200 update)
+- Force operations are completely blocked
+- All operations are audit-logged
+
+### SQL Safety
+
+The database safety layer blocks:
+- **DDL** — CREATE, DROP, ALTER, TRUNCATE
+- **SQL injection patterns** — Stacked queries, comments
+- **Missing WHERE** — DELETE/UPDATE without WHERE
+- **Protected tables** — users, tenants, subscriptions, payments, sessions
+- **Row limits** — DELETE capped at 100, UPDATE at 500
+
+---
+
+## ⚙️ Configuration
+
+Configuration lives at `~/.grove/gw.toml`:
 
 ```toml
-[databases]
-default = "lattice"
-
 [databases.lattice]
 name = "grove-engine-db"
 id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
@@ -166,36 +595,32 @@ id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 name = "CACHE_KV"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
-[r2_buckets]
-default = "grove-media"
+[kv_namespaces.flags]
+name = "FLAGS_KV"
+id = "65a600876aa14e9cbec8f8acd7d53b5f"
+
+[[r2_buckets]]
+name = "grove-media"
 
 [safety]
 max_delete_rows = 100
 max_update_rows = 500
 protected_tables = ["users", "tenants", "subscriptions", "payments", "sessions"]
+
+[git]
+commit_format = "conventional"
+protected_branches = ["main", "master", "production", "staging"]
+auto_link_issues = true
+
+[github]
+owner = "AutumnsGrove"
+repo = "GroveEngine"
+rate_limit_warn_threshold = 100
 ```
 
-## Safety Layer
+---
 
-The built-in safety layer protects against accidental data loss:
-
-### Blocked Operations
-
-- **DDL** — CREATE, DROP, ALTER, TRUNCATE are blocked
-- **Dangerous patterns** — Stacked queries (`;DROP`) and SQL comments (`--`, `/*`)
-- **Missing WHERE** — DELETE/UPDATE without WHERE clause
-- **Protected tables** — users, tenants, subscriptions, payments, sessions
-- **Row limits** — DELETE limited to 100 rows, UPDATE to 500
-
-### Agent Mode
-
-When running with `GW_AGENT_MODE=1`, stricter limits apply:
-
-- DELETE limited to 50 rows (not 100)
-- UPDATE limited to 200 rows (not 500)
-- All operations are audit-logged
-
-## Development
+## 🧪 Development
 
 ### Running Tests
 
@@ -208,60 +633,125 @@ uv run pytest tests/ -v
 
 ```
 tools/gw/
-├── pyproject.toml          # UV project config
+├── pyproject.toml
+├── README.md                    # You are here!
 ├── src/gw/
-│   ├── cli.py              # Main Click CLI
-│   ├── config.py           # Configuration loading
-│   ├── wrangler.py         # Wrangler subprocess wrapper
-│   ├── safety.py           # SQL safety validation
-│   ├── ui.py               # Rich terminal helpers
+│   ├── cli.py                   # Main CLI entry point
+│   ├── config.py                # Configuration loading
+│   ├── wrangler.py              # Wrangler subprocess wrapper
+│   ├── git_wrapper.py           # Git subprocess wrapper
+│   ├── gh_wrapper.py            # GitHub CLI wrapper
+│   ├── packages.py              # Monorepo package detection
+│   ├── secrets_vault.py         # Encrypted vault
+│   ├── ui.py                    # Rich terminal helpers
+│   ├── safety/
+│   │   ├── database.py          # SQL safety validation
+│   │   ├── git.py               # Git safety tiers
+│   │   └── github.py            # GitHub safety + rate limits
 │   └── commands/
-│       ├── status.py       # gw status
-│       ├── health.py       # gw health
-│       ├── auth.py         # gw auth check/login
-│       ├── bindings.py     # gw bindings
-│       ├── db.py           # gw db list/tables/schema/query
-│       ├── tenant.py       # gw tenant lookup/stats/list
-│       ├── secret.py       # gw secret set/apply/sync
-│       └── cache.py        # gw cache list/purge/stats
-├── secrets_vault.py        # Encrypted vault implementation
+│       ├── status.py            # gw status
+│       ├── health.py            # gw health
+│       ├── auth.py              # gw auth (+ client management)
+│       ├── bindings.py          # gw bindings
+│       ├── db.py                # gw db
+│       ├── tenant.py            # gw tenant
+│       ├── secret.py            # gw secret
+│       ├── cache.py             # gw cache
+│       ├── kv.py                # gw kv
+│       ├── r2.py                # gw r2
+│       ├── flag.py              # gw flag
+│       ├── backup.py            # gw backup
+│       ├── logs.py              # gw logs
+│       ├── deploy.py            # gw deploy
+│       ├── do.py                # gw do
+│       ├── email.py             # gw email
+│       ├── packages.py          # gw packages
+│       ├── git/                 # gw git *
+│       │   ├── read.py
+│       │   ├── write.py
+│       │   ├── danger.py
+│       │   └── shortcuts.py
+│       ├── gh/                  # gw gh *
+│       │   ├── pr.py
+│       │   ├── issue.py
+│       │   ├── run.py
+│       │   └── api.py
+│       └── dev/                 # gw dev * / gw test / gw build / etc.
+│           ├── server.py
+│           ├── test.py
+│           ├── build.py
+│           ├── check.py
+│           ├── lint.py
+│           └── ci.py
 └── tests/
-    └── test_safety.py      # Safety layer tests
+    ├── test_safety.py           # Database safety tests
+    ├── test_git.py              # Git safety tests
+    ├── test_gh.py               # GitHub safety tests
+    └── test_packages.py         # Package detection tests
 ```
 
-## Roadmap
+---
 
-### Phase 1 ✅
-- [x] Project scaffolding
-- [x] Configuration system
-- [x] Safety layer
-- [x] `gw status`, `gw health`, `gw auth`, `gw bindings`
+## ✅ Roadmap
 
-### Phase 2 ✅
-- [x] `gw db list` — List databases
-- [x] `gw db tables` — List tables
-- [x] `gw db schema` — Show table schema
-- [x] `gw db query` — Safe SQL queries
-- [x] `gw tenant lookup` — Tenant lookup
-- [x] `gw tenant stats` — Tenant statistics
-- [x] `gw tenant list` — List tenants
+### Complete ✅
 
-### Phase 3 ✅ (Current)
-- [x] `gw secret init/set/list/delete` — Human-only secrets
-- [x] `gw secret apply/sync/exists` — Agent-safe secrets
-- [x] `gw cache list/purge/stats` — Cache management
-- [x] Encrypted vault at `~/.grove/secrets.enc`
+- [x] **Phase 1** — Foundation (`status`, `health`, `auth`, `bindings`)
+- [x] **Phase 2** — Database & Tenant (`db`, `tenant`)
+- [x] **Phase 3** — Secrets & Cache (`secret`, `cache`)
+- [x] **Phase 4-6** — Cloudflare (`kv`, `r2`, `logs`, `deploy`, `do`, `flag`, `backup`, `email`)
+- [x] **Phase 9-11** — Git Integration (`git status/commit/push/...`, shortcuts)
+- [x] **Phase 12-14** — GitHub Integration (`gh pr/issue/run/api`)
+- [x] **Phase 15-18** — Dev Tools (`dev`, `test`, `build`, `check`, `lint`, `ci`, `packages`)
 
-### Phase 4 (Next)
-- [ ] `gw kv`, `gw r2`, `gw do` — Full Cloudflare bindings
-- [ ] `gw mcp serve` — MCP server for Claude Code
-- [ ] Shell completions
+### Upcoming
 
-## Related
+- [ ] **Phase 7** — MCP Server (`gw mcp serve` for Claude Code)
+- [ ] Shell completions (bash, zsh, fish)
+- [ ] `gw doctor` — Diagnose common issues
+- [ ] `gw whoami` — Show current user/account
+
+---
+
+## 📚 Related
 
 - **Spec:** `docs/specs/gw-cli-spec.md`
 - **Issue:** [#348](https://github.com/AutumnsGrove/GroveEngine/issues/348)
-- **TypeScript safety layer:** `packages/engine/src/lib/server/services/database-safety.ts`
+
+---
+
+## 🆘 Common Issues
+
+### "No package found"
+
+You're not in a package directory. Either:
+- `cd` into a package (e.g., `cd packages/engine`)
+- Use `--package engine` to specify
+
+### "groveauth database not configured"
+
+Add it to `~/.grove/gw.toml`:
+```toml
+[databases.groveauth]
+name = "groveauth"
+id = "your-database-id"
+```
+
+### "Rate limit exhausted"
+
+GitHub has rate limits. Check with:
+```bash
+gw gh rate-limit
+```
+
+Wait for reset or authenticate with a token.
+
+### "Protected branch"
+
+You tried to force-push to `main`. Don't do that. Create a PR instead:
+```bash
+gw gh pr create --write --title "My changes"
+```
 
 ---
 

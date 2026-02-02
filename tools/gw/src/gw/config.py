@@ -1,6 +1,6 @@
 """Configuration loading and management for Grove Wrap."""
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 import tomli
@@ -51,6 +51,67 @@ class SafetyConfig:
 
 
 @dataclass
+class GitConfig:
+    """Git integration configuration."""
+
+    # Commit format enforcement
+    commit_format: str = "conventional"  # conventional, simple, or none
+    conventional_types: list[str] = field(
+        default_factory=lambda: [
+            "feat",
+            "fix",
+            "docs",
+            "style",
+            "refactor",
+            "test",
+            "chore",
+            "perf",
+            "ci",
+            "build",
+            "revert",
+        ]
+    )
+
+    # Protected branches (cannot force-push)
+    protected_branches: list[str] = field(
+        default_factory=lambda: ["main", "master", "production", "staging"]
+    )
+
+    # Issue auto-linking
+    auto_link_issues: bool = True
+    issue_pattern: str = r"(?:^|/)(?P<num>\d+)[-_]"
+
+    # Pre-commit behavior
+    skip_hooks_on_wip: bool = True
+
+
+@dataclass
+class GitHubConfig:
+    """GitHub integration configuration."""
+
+    # Repository context (auto-detected, but can override)
+    owner: str = "AutumnsGrove"
+    repo: str = "GroveEngine"
+
+    # Default labels for new PRs/issues
+    default_pr_labels: list[str] = field(default_factory=list)
+    default_issue_labels: list[str] = field(default_factory=list)
+
+    # Rate limit thresholds
+    rate_limit_warn_threshold: int = 100
+    rate_limit_block_threshold: int = 10
+
+    # Project board configuration (for badger-triage)
+    project_number: Optional[int] = None
+
+    # Project field IDs
+    project_fields: dict[str, str] = field(default_factory=dict)
+
+    # Project field value IDs
+    project_values: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
 class GWConfig:
     """Grove Wrap configuration."""
 
@@ -58,6 +119,8 @@ class GWConfig:
     kv_namespaces: dict[str, KVNamespace]
     r2_buckets: list[R2Bucket]
     safety: SafetyConfig
+    git: GitConfig = field(default_factory=GitConfig)
+    github: GitHubConfig = field(default_factory=GitHubConfig)
 
     @classmethod
     def load(cls) -> "GWConfig":
@@ -94,6 +157,8 @@ class GWConfig:
             },
             r2_buckets=[R2Bucket("grove-media")],
             safety=SafetyConfig(),
+            git=GitConfig(),
+            github=GitHubConfig(),
         )
 
     @classmethod
@@ -125,11 +190,44 @@ class GWConfig:
             ),
         )
 
+        # Parse git configuration
+        git_data = data.get("git", {})
+        git = GitConfig(
+            commit_format=git_data.get("commit_format", "conventional"),
+            conventional_types=git_data.get(
+                "conventional_types",
+                ["feat", "fix", "docs", "style", "refactor", "test", "chore", "perf", "ci", "build", "revert"],
+            ),
+            protected_branches=git_data.get(
+                "protected_branches",
+                ["main", "master", "production", "staging"],
+            ),
+            auto_link_issues=git_data.get("auto_link_issues", True),
+            issue_pattern=git_data.get("issue_pattern", r"(?:^|/)(?P<num>\d+)[-_]"),
+            skip_hooks_on_wip=git_data.get("skip_hooks_on_wip", True),
+        )
+
+        # Parse github configuration
+        github_data = data.get("github", {})
+        github = GitHubConfig(
+            owner=github_data.get("owner", "AutumnsGrove"),
+            repo=github_data.get("repo", "GroveEngine"),
+            default_pr_labels=github_data.get("default_pr_labels", []),
+            default_issue_labels=github_data.get("default_issue_labels", []),
+            rate_limit_warn_threshold=github_data.get("rate_limit_warn_threshold", 100),
+            rate_limit_block_threshold=github_data.get("rate_limit_block_threshold", 10),
+            project_number=github_data.get("project_number"),
+            project_fields=github_data.get("project_fields", {}),
+            project_values=github_data.get("project_values", {}),
+        )
+
         return cls(
             databases=databases,
             kv_namespaces=kv_namespaces,
             r2_buckets=r2_buckets,
             safety=safety,
+            git=git,
+            github=github,
         )
 
     def save(self) -> None:
@@ -153,6 +251,25 @@ class GWConfig:
                 "max_delete_rows": self.safety.max_delete_rows,
                 "max_update_rows": self.safety.max_update_rows,
                 "protected_tables": self.safety.protected_tables,
+            },
+            "git": {
+                "commit_format": self.git.commit_format,
+                "conventional_types": self.git.conventional_types,
+                "protected_branches": self.git.protected_branches,
+                "auto_link_issues": self.git.auto_link_issues,
+                "issue_pattern": self.git.issue_pattern,
+                "skip_hooks_on_wip": self.git.skip_hooks_on_wip,
+            },
+            "github": {
+                "owner": self.github.owner,
+                "repo": self.github.repo,
+                "default_pr_labels": self.github.default_pr_labels,
+                "default_issue_labels": self.github.default_issue_labels,
+                "rate_limit_warn_threshold": self.github.rate_limit_warn_threshold,
+                "rate_limit_block_threshold": self.github.rate_limit_block_threshold,
+                "project_number": self.github.project_number,
+                "project_fields": self.github.project_fields,
+                "project_values": self.github.project_values,
             },
         }
 
