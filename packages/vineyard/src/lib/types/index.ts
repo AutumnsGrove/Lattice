@@ -6,25 +6,30 @@
 /**
  * Status badge values used across Vineyard components
  */
-export type VineyardStatus = 'ready' | 'preview' | 'demo' | 'coming-soon' | 'in-development';
+export type VineyardStatus =
+  | "ready"
+  | "preview"
+  | "demo"
+  | "coming-soon"
+  | "in-development";
 
 /**
  * Grove tool identifiers
  */
 export type GroveTool =
-  | 'amber'
-  | 'ivy'
-  | 'foliage'
-  | 'meadow'
-  | 'rings'
-  | 'trails'
-  | 'heartwood'
-  | 'forage';
+  | "amber"
+  | "ivy"
+  | "foliage"
+  | "meadow"
+  | "rings"
+  | "trails"
+  | "heartwood"
+  | "forage";
 
 /**
  * Tier levels for TierGate component
  */
-export type GroveTier = 'seedling' | 'sapling' | 'oak' | 'grove';
+export type GroveTier = "seedling" | "sapling" | "oak" | "grove";
 
 /**
  * Props for VineyardLayout component
@@ -147,7 +152,7 @@ export interface BetterAuthSessionResponse {
 }
 
 /** OAuth provider types supported by Better Auth */
-export type BetterAuthProvider = 'google' | 'github';
+export type BetterAuthProvider = "google" | "github";
 
 /**
  * Props for AuthButton component

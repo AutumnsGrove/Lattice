@@ -60,15 +60,15 @@ import {
   DemoContainer,
   CodeExample,
   TierGate,
-  RoadmapSection
-} from '@autumnsgrove/vineyard/vineyard';
+  RoadmapSection,
+} from "@autumnsgrove/vineyard/vineyard";
 
 // Types are also available
 import type {
   VineyardStatus,
   GroveTool,
-  GroveTier
-} from '@autumnsgrove/vineyard/vineyard';
+  GroveTier,
+} from "@autumnsgrove/vineyard/vineyard";
 ```
 
 ---
@@ -81,8 +81,8 @@ If your project already depends on GroveEngine, you can import from there instea
 import {
   VineyardLayout,
   FeatureCard,
-  StatusBadge
-} from '@autumnsgrove/groveengine/vineyard';
+  StatusBadge,
+} from "@autumnsgrove/groveengine/vineyard";
 ```
 
 This is the recommended approach for Grove tools that already use GroveEngine.
@@ -196,33 +196,34 @@ console.log(stats.usedBytes, stats.totalBytes);`}
 
 Main wrapper with hero section and footer.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `tool` | `GroveTool` | Tool identifier (amber, ivy, foliage, etc.) |
-| `tagline` | `string` | Short tagline displayed in hero |
-| `status` | `VineyardStatus` | Current tool status |
+| Prop      | Type             | Description                                 |
+| --------- | ---------------- | ------------------------------------------- |
+| `tool`    | `GroveTool`      | Tool identifier (amber, ivy, foliage, etc.) |
+| `tagline` | `string`         | Short tagline displayed in hero             |
+| `status`  | `VineyardStatus` | Current tool status                         |
 
 ### FeatureCard
 
 Card for showcasing individual features.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `title` | `string` | Feature title |
-| `description` | `string` | Feature description |
-| `status` | `VineyardStatus` | Feature status |
-| `icon` | `string` | Lucide icon name (optional) |
-| `demo` | `Snippet` | Demo slot content (optional) |
+| Prop          | Type             | Description                  |
+| ------------- | ---------------- | ---------------------------- |
+| `title`       | `string`         | Feature title                |
+| `description` | `string`         | Feature description          |
+| `status`      | `VineyardStatus` | Feature status               |
+| `icon`        | `string`         | Lucide icon name (optional)  |
+| `demo`        | `Snippet`        | Demo slot content (optional) |
 
 ### StatusBadge
 
 Status indicator pill.
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop     | Type             | Description       |
+| -------- | ---------------- | ----------------- |
 | `status` | `VineyardStatus` | Status to display |
 
 Status values:
+
 - `ready` - Green, solid
 - `preview` - Amber, dashed border
 - `demo` - Blue
@@ -233,41 +234,41 @@ Status values:
 
 Wrapper for interactive demos.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `title` | `string` | Demo title |
-| `description` | `string` | Description (optional) |
-| `mockData` | `boolean` | Show "Mock Data" indicator |
+| Prop          | Type      | Description                |
+| ------------- | --------- | -------------------------- |
+| `title`       | `string`  | Demo title                 |
+| `description` | `string`  | Description (optional)     |
+| `mockData`    | `boolean` | Show "Mock Data" indicator |
 
 ### CodeExample
 
 Code block with copy button.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `language` | `string` | Programming language |
+| Prop       | Type     | Description                    |
+| ---------- | -------- | ------------------------------ |
+| `language` | `string` | Programming language           |
 | `filename` | `string` | Filename to display (optional) |
 
 ### TierGate
 
 Tier-based access control.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `required` | `GroveTier` | Required tier (seedling/sapling/oak/grove) |
-| `current` | `GroveTier` | User's current tier |
-| `showPreview` | `boolean` | Show blurred preview of gated content |
-| `fallback` | `Snippet` | Custom fallback content (optional) |
+| Prop          | Type        | Description                                |
+| ------------- | ----------- | ------------------------------------------ |
+| `required`    | `GroveTier` | Required tier (seedling/sapling/oak/grove) |
+| `current`     | `GroveTier` | User's current tier                        |
+| `showPreview` | `boolean`   | Show blurred preview of gated content      |
+| `fallback`    | `Snippet`   | Custom fallback content (optional)         |
 
 ### RoadmapSection
 
 Visual timeline of built/in-progress/planned features.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `built` | `string[]` | Completed features |
+| Prop         | Type       | Description              |
+| ------------ | ---------- | ------------------------ |
+| `built`      | `string[]` | Completed features       |
 | `inProgress` | `string[]` | Features being worked on |
-| `planned` | `string[]` | Future features |
+| `planned`    | `string[]` | Future features          |
 
 ---
 
@@ -276,6 +277,7 @@ Visual timeline of built/in-progress/planned features.
 ### Grove Aesthetic
 
 All components follow the Grove design system:
+
 - **Glassmorphism**: Semi-transparent backgrounds with blur
 - **Warm palette**: Amber/earth tones (`#f59e0b`, `#d97706`)
 - **Lexend font**: Clean, readable typography
@@ -284,6 +286,7 @@ All components follow the Grove design system:
 ### Responsive Design
 
 Components are mobile-first and responsive:
+
 - VineyardLayout adjusts padding for mobile
 - RoadmapSection stacks vertically on mobile
 - FeatureCards in grid auto-fit
@@ -306,6 +309,7 @@ When Vineyard components are updated:
 ### "Module not found" errors
 
 Ensure Vineyard package is built:
+
 ```bash
 cd /path/to/Vineyard
 pnpm package
@@ -314,6 +318,7 @@ pnpm package
 ### Type errors with lucide icons
 
 Icons use dynamic import. If TypeScript complains, ensure `lucide-svelte` is installed:
+
 ```bash
 pnpm add lucide-svelte
 ```
@@ -324,4 +329,4 @@ VineyardLayout uses scoped CSS with CSS variables. The Lexend font is loaded via
 
 ---
 
-*Last updated: December 2025*
+_Last updated: December 2025_

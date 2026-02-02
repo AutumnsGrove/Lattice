@@ -40,6 +40,7 @@ A simple authentication button that shows "Sign In" when not authenticated and "
 ```
 
 **Props:**
+
 - `provider?: 'google' | 'github'` - OAuth provider (default: 'google')
 - `signInText?: string` - Custom sign in button text
 - `signOutText?: string` - Custom sign out button text
@@ -64,6 +65,7 @@ Displays user information with a dropdown menu for account actions.
 ```
 
 **Props:**
+
 - `showAvatar?: boolean` - Show user's avatar (default: true)
 - `showEmail?: boolean` - Show user's email (default: true)
 
@@ -74,19 +76,20 @@ Displays user information with a dropdown menu for account actions.
 Start OAuth sign-in flow and redirect to Better Auth.
 
 ```typescript
-import { signIn } from '@autumnsgrove/vineyard';
+import { signIn } from "@autumnsgrove/vineyard";
 
 // Sign in with Google
-signIn('google');
+signIn("google");
 
 // Sign in with GitHub
-signIn('github');
+signIn("github");
 
 // Sign in with custom callback
-signIn('google', 'https://myapp.grove.place/dashboard');
+signIn("google", "https://myapp.grove.place/dashboard");
 ```
 
 **Parameters:**
+
 - `provider: 'google' | 'github'` - OAuth provider (default: 'google')
 - `callbackURL?: string` - Optional callback URL (default: current page)
 
@@ -95,18 +98,19 @@ signIn('google', 'https://myapp.grove.place/dashboard');
 Get current session data from Better Auth.
 
 ```typescript
-import { getSession } from '@autumnsgrove/vineyard';
+import { getSession } from "@autumnsgrove/vineyard";
 
 const sessionData = await getSession();
 if (sessionData.user) {
-  console.log('Logged in as:', sessionData.user.name);
-  console.log('Email:', sessionData.user.email);
+  console.log("Logged in as:", sessionData.user.name);
+  console.log("Email:", sessionData.user.email);
 } else {
-  console.log('Not authenticated');
+  console.log("Not authenticated");
 }
 ```
 
 **Returns:** `Promise<BetterAuthSessionResponse>`
+
 ```typescript
 {
   user: BetterAuthUser | null;
@@ -119,16 +123,17 @@ if (sessionData.user) {
 Sign out current user and optionally redirect.
 
 ```typescript
-import { signOut } from '@autumnsgrove/vineyard';
+import { signOut } from "@autumnsgrove/vineyard";
 
 // Sign out and redirect to home
 await signOut();
 
 // Sign out and redirect to login page
-await signOut('/login');
+await signOut("/login");
 ```
 
 **Parameters:**
+
 - `redirectTo?: string` - Redirect URL after sign out (default: '/')
 
 ### isAuthenticated()
@@ -136,7 +141,7 @@ await signOut('/login');
 Check if user is currently authenticated.
 
 ```typescript
-import { isAuthenticated } from '@autumnsgrove/vineyard';
+import { isAuthenticated } from "@autumnsgrove/vineyard";
 
 if (await isAuthenticated()) {
   // Show authenticated content
@@ -173,15 +178,18 @@ Protect routes on the server side using hooks:
 
 ```typescript
 // src/hooks.server.ts
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Forward cookies to Better Auth
-  const sessionRes = await fetch('https://auth-api.grove.place/api/auth/session', {
-    headers: {
-      cookie: event.request.headers.get('cookie') || ''
-    }
-  });
+  const sessionRes = await fetch(
+    "https://auth-api.grove.place/api/auth/session",
+    {
+      headers: {
+        cookie: event.request.headers.get("cookie") || "",
+      },
+    },
+  );
 
   if (sessionRes.ok) {
     const { user, session } = await sessionRes.json();
@@ -190,10 +198,10 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // Protect /dashboard routes
-  if (event.url.pathname.startsWith('/dashboard') && !event.locals.user) {
-    return new Response('Redirect', {
+  if (event.url.pathname.startsWith("/dashboard") && !event.locals.user) {
+    return new Response("Redirect", {
       status: 303,
-      headers: { Location: '/login' }
+      headers: { Location: "/login" },
     });
   }
 
@@ -206,7 +214,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 Add to `src/app.d.ts`:
 
 ```typescript
-import type { BetterAuthUser, BetterAuthSession } from '@autumnsgrove/vineyard';
+import type { BetterAuthUser, BetterAuthSession } from "@autumnsgrove/vineyard";
 
 declare global {
   namespace App {
@@ -271,8 +279,8 @@ Here's a complete example of a protected Vineyard page:
 Always use `credentials: 'include'` when making requests to Better Auth:
 
 ```typescript
-fetch('https://auth-api.grove.place/api/auth/session', {
-  credentials: 'include' // Required for cross-origin cookies
+fetch("https://auth-api.grove.place/api/auth/session", {
+  credentials: "include", // Required for cross-origin cookies
 });
 ```
 
@@ -298,9 +306,9 @@ If you're migrating from legacy Heartwood token auth:
 
 ```typescript
 // ❌ Don't use this anymore
-const token = localStorage.getItem('access_token');
-const response = await fetch('https://auth-api.grove.place/verify', {
-  headers: { Authorization: `Bearer ${token}` }
+const token = localStorage.getItem("access_token");
+const response = await fetch("https://auth-api.grove.place/verify", {
+  headers: { Authorization: `Bearer ${token}` },
 });
 ```
 
@@ -340,12 +348,12 @@ if (session.user) {
 
 All endpoints are on `https://auth-api.grove.place`:
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/auth/sign-in/google` | GET | Start Google OAuth |
-| `/api/auth/sign-in/github` | GET | Start GitHub OAuth |
-| `/api/auth/session` | GET | Get current session + user |
-| `/api/auth/sign-out` | POST | End session |
+| Endpoint                   | Method | Purpose                    |
+| -------------------------- | ------ | -------------------------- |
+| `/api/auth/sign-in/google` | GET    | Start Google OAuth         |
+| `/api/auth/sign-in/github` | GET    | Start GitHub OAuth         |
+| `/api/auth/session`        | GET    | Get current session + user |
+| `/api/auth/sign-out`       | POST   | End session                |
 
 ## Learn More
 

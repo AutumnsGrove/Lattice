@@ -3,10 +3,13 @@
  * Client-side functions for Better Auth session management
  */
 
-import type { BetterAuthSessionResponse, BetterAuthProvider } from '../types/index.js';
+import type {
+  BetterAuthSessionResponse,
+  BetterAuthProvider,
+} from "../types/index.js";
 
 /** Better Auth API base URL */
-const BETTER_AUTH_BASE_URL = 'https://auth-api.grove.place';
+const BETTER_AUTH_BASE_URL = "https://auth-api.grove.place";
 
 /**
  * Start OAuth sign in flow
@@ -28,15 +31,20 @@ const BETTER_AUTH_BASE_URL = 'https://auth-api.grove.place';
  * signIn('github', 'https://myapp.grove.place/dashboard');
  * ```
  */
-export function signIn(provider: BetterAuthProvider = 'google', callbackURL?: string): void {
-  if (typeof window === 'undefined') {
-    throw new Error('signIn can only be called in the browser');
+export function signIn(
+  provider: BetterAuthProvider = "google",
+  callbackURL?: string,
+): void {
+  if (typeof window === "undefined") {
+    throw new Error("signIn can only be called in the browser");
   }
 
   // Validate provider at runtime (defense in depth)
-  const validProviders: BetterAuthProvider[] = ['google', 'github'];
+  const validProviders: BetterAuthProvider[] = ["google", "github"];
   if (!validProviders.includes(provider)) {
-    throw new Error(`Invalid provider: ${provider}. Must be one of: ${validProviders.join(', ')}`);
+    throw new Error(
+      `Invalid provider: ${provider}. Must be one of: ${validProviders.join(", ")}`,
+    );
   }
 
   const redirectUrl = callbackURL || window.location.href;
@@ -67,10 +75,10 @@ export function signIn(provider: BetterAuthProvider = 'google', callbackURL?: st
 export async function getSession(): Promise<BetterAuthSessionResponse> {
   try {
     const response = await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/session`, {
-      credentials: 'include', // Required for cross-origin cookies
+      credentials: "include", // Required for cross-origin cookies
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -80,7 +88,7 @@ export async function getSession(): Promise<BetterAuthSessionResponse> {
     const data = await response.json();
     return data as BetterAuthSessionResponse;
   } catch (error) {
-    console.error('Failed to fetch session:', error);
+    console.error("Failed to fetch session:", error);
     return { user: null, session: null };
   }
 }
@@ -102,21 +110,21 @@ export async function getSession(): Promise<BetterAuthSessionResponse> {
  * await signOut('/login');
  * ```
  */
-export async function signOut(redirectTo: string = '/'): Promise<void> {
-  if (typeof window === 'undefined') {
-    throw new Error('signOut can only be called in the browser');
+export async function signOut(redirectTo: string = "/"): Promise<void> {
+  if (typeof window === "undefined") {
+    throw new Error("signOut can only be called in the browser");
   }
 
   try {
     await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/sign-out`, {
-      method: 'POST',
-      credentials: 'include', // Required for cross-origin cookies
+      method: "POST",
+      credentials: "include", // Required for cross-origin cookies
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: "application/json",
+      },
     });
   } catch (error) {
-    console.error('Failed to sign out:', error);
+    console.error("Failed to sign out:", error);
   }
 
   // Redirect regardless of fetch result

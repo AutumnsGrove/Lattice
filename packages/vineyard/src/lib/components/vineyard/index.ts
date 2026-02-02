@@ -7,25 +7,25 @@
  */
 
 // Layout
-export { default as VineyardLayout } from './VineyardLayout.svelte';
+export { default as VineyardLayout } from "./VineyardLayout.svelte";
 
 // Feature Display
-export { default as FeatureCard } from './FeatureCard.svelte';
-export { default as StatusBadge } from './StatusBadge.svelte';
+export { default as FeatureCard } from "./FeatureCard.svelte";
+export { default as StatusBadge } from "./StatusBadge.svelte";
 
 // Demo & Code
-export { default as DemoContainer } from './DemoContainer.svelte';
-export { default as CodeExample } from './CodeExample.svelte';
+export { default as DemoContainer } from "./DemoContainer.svelte";
+export { default as CodeExample } from "./CodeExample.svelte";
 
 // Access Control
-export { default as TierGate } from './TierGate.svelte';
+export { default as TierGate } from "./TierGate.svelte";
 
 // Roadmap
-export { default as RoadmapSection } from './RoadmapSection.svelte';
+export { default as RoadmapSection } from "./RoadmapSection.svelte";
 
 // Authentication
-export { default as AuthButton } from './AuthButton.svelte';
-export { default as UserMenu } from './UserMenu.svelte';
+export { default as AuthButton } from "./AuthButton.svelte";
+export { default as UserMenu } from "./UserMenu.svelte";
 
 // Re-export types
 export type {
@@ -44,8 +44,13 @@ export type {
   BetterAuthSessionResponse,
   BetterAuthProvider,
   AuthButtonProps,
-  UserMenuProps
-} from '../../types/index.js';
+  UserMenuProps,
+} from "../../types/index.js";
 
 // Re-export auth utilities
-export { signIn, signOut, getSession, isAuthenticated } from '../../auth/index.js';
+export {
+  signIn,
+  signOut,
+  getSession,
+  isAuthenticated,
+} from "../../auth/index.js";

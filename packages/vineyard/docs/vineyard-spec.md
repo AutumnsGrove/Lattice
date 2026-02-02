@@ -1,6 +1,6 @@
 # Vineyard — Asset & Tool Showcase Pattern
 
-> *Every vine starts somewhere.*
+> _Every vine starts somewhere._
 
 **Status:** Spec Draft
 **Target Phase:** Ongoing (each tool implements as ready)
@@ -55,44 +55,52 @@ Each Vineyard is self-contained within its tool's deployment. No central aggrega
 Every Vineyard page should include these sections (in order):
 
 ### 1. Hero / Overview
+
 - Tool name and tagline
 - One-sentence description
 - Current status badge: `Ready` | `Preview` | `Coming Soon` | `In Development`
 - Philosophy quote from grove-naming.md
 
 ### 2. Feature Tour
+
 - Visual walkthrough of key features
 - Interactive demos where possible
 - Mockups/screenshots for planned features
 - Clear labels: `Live`, `Demo`, `Coming Soon`
 
 ### 3. How It Works
+
 - Technical overview (for users who want depth)
 - Architecture diagrams where relevant
 - Integration points with other Grove tools
 
 ### 4. Getting Started
+
 - Quick start guide for users
 - Prerequisites (tier requirements, etc.)
 - First steps walkthrough
 
 ### 5. API Reference (if applicable)
+
 - Endpoint documentation
 - Request/response examples
 - Rate limits and constraints
 
 ### 6. Configuration
+
 - Settings and options
 - Tier-gated features explained
 - Customization possibilities
 
 ### 7. Roadmap
+
 - What's built and working
 - What's in progress
 - What's planned
 - Link to full spec if available
 
 ### 8. Related Tools
+
 - Links to other Grove tools that integrate
 - "Works well with..." suggestions
 
@@ -102,13 +110,13 @@ Every Vineyard page should include these sections (in order):
 
 Use consistent status indicators across all Vineyards:
 
-| Badge | Meaning | Visual |
-|-------|---------|--------|
-| `Ready` | Production-ready, available now | Green, solid |
-| `Preview` | Functional but may change | Yellow, dashed border |
-| `Demo` | Working example, not real data | Blue, labeled |
-| `Coming Soon` | Designed, not yet built | Gray, subtle |
-| `In Development` | Actively being built | Orange, pulsing |
+| Badge            | Meaning                         | Visual                |
+| ---------------- | ------------------------------- | --------------------- |
+| `Ready`          | Production-ready, available now | Green, solid          |
+| `Preview`        | Functional but may change       | Yellow, dashed border |
+| `Demo`           | Working example, not real data  | Blue, labeled         |
+| `Coming Soon`    | Designed, not yet built         | Gray, subtle          |
+| `In Development` | Actively being built            | Orange, pulsing       |
 
 ---
 
@@ -117,6 +125,7 @@ Use consistent status indicators across all Vineyards:
 These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse across all Vineyards:
 
 ### VineyardLayout
+
 ```svelte
 <VineyardLayout
   tool="amber"
@@ -128,6 +137,7 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 ```
 
 ### FeatureCard
+
 ```svelte
 <FeatureCard
   title="Storage Overview"
@@ -140,11 +150,13 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 ```
 
 ### StatusBadge
+
 ```svelte
 <StatusBadge status="coming-soon" />
 ```
 
 ### DemoContainer
+
 ```svelte
 <DemoContainer
   title="Theme Picker Demo"
@@ -156,6 +168,7 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 ```
 
 ### CodeExample
+
 ```svelte
 <CodeExample
   language="typescript"
@@ -166,6 +179,7 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 ```
 
 ### TierGate
+
 ```svelte
 <TierGate required="oak" current={userTier}>
   <AdvancedFeature />
@@ -174,6 +188,7 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 ```
 
 ### RoadmapSection
+
 ```svelte
 <RoadmapSection
   built={['Core storage view', 'Usage breakdown']}
@@ -210,16 +225,16 @@ These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse 
 
 ## Implementation Status
 
-| Tool | Domain | Vineyard Status | Notes |
-|------|--------|-----------------|-------|
-| **Amber** | amber.grove.place | Not Started | Spec exists, product routing exists |
-| **Ivy** | ivy.grove.place | Not Started | Full spec exists at `docs/specs/completed/ivy-mail-spec.md` |
-| **Foliage** | foliage.grove.place | Not Started | External package, needs dedicated site |
-| **Meadow** | meadow.grove.place | Not Started | Spec exists at `docs/specs/social-spec.md` |
-| **Rings** | *(integrated)* | Not Started | Integrated into admin, may not need standalone |
-| **Trails** | *(integrated)* | Not Started | Spec exists at `docs/specs/trails-spec.md` |
-| **Heartwood** | heartwood.grove.place | Not Started | Auth system, may need limited Vineyard |
-| **Forage** | forage.grove.place | Not Started | Domain discovery tool |
+| Tool          | Domain                | Vineyard Status | Notes                                                       |
+| ------------- | --------------------- | --------------- | ----------------------------------------------------------- |
+| **Amber**     | amber.grove.place     | Not Started     | Spec exists, product routing exists                         |
+| **Ivy**       | ivy.grove.place       | Not Started     | Full spec exists at `docs/specs/completed/ivy-mail-spec.md` |
+| **Foliage**   | foliage.grove.place   | Not Started     | External package, needs dedicated site                      |
+| **Meadow**    | meadow.grove.place    | Not Started     | Spec exists at `docs/specs/social-spec.md`                  |
+| **Rings**     | _(integrated)_        | Not Started     | Integrated into admin, may not need standalone              |
+| **Trails**    | _(integrated)_        | Not Started     | Spec exists at `docs/specs/trails-spec.md`                  |
+| **Heartwood** | heartwood.grove.place | Not Started     | Auth system, may need limited Vineyard                      |
+| **Forage**    | forage.grove.place    | Not Started     | Domain discovery tool                                       |
 
 ### Priority Order (Suggested)
 
@@ -292,8 +307,8 @@ export {
   DemoContainer,
   CodeExample,
   TierGate,
-  RoadmapSection
-} from './components/vineyard';
+  RoadmapSection,
+} from "./components/vineyard";
 ```
 
 ---
@@ -303,6 +318,7 @@ export {
 ### For Ready Tools
 
 Full Vineyard with:
+
 - Working demos using real (or realistic mock) data
 - Complete documentation
 - Getting started guides
@@ -311,6 +327,7 @@ Full Vineyard with:
 ### For Preview/Development Tools
 
 Vineyard with:
+
 - Mockups and design previews
 - Spec highlights
 - Roadmap with progress indicators
@@ -319,6 +336,7 @@ Vineyard with:
 ### For Coming Soon Tools
 
 Minimal Vineyard with:
+
 - Philosophy and vision
 - Mockups or concept art
 - Expected timeline (if known)
@@ -387,5 +405,5 @@ Roadmap:
 
 ---
 
-*Last updated: December 2025*
-*Author: Claude (with Autumn)*
+_Last updated: December 2025_
+_Author: Claude (with Autumn)_

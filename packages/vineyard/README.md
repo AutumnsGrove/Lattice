@@ -14,17 +14,17 @@ pnpm add @autumnsgrove/vineyard
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| **VineyardLayout** | Main page wrapper with hero section, tool branding, and related tools footer |
-| **FeatureCard** | Showcase individual features with icons, status badges, and optional demo slots |
-| **StatusBadge** | Consistent status indicators: Ready, Preview, Demo, Coming Soon, In Development |
-| **DemoContainer** | Wrapper for interactive demos with mock data indicator and visual styling |
-| **CodeExample** | Syntax-highlighted code blocks with copy-to-clipboard functionality |
-| **TierGate** | Tier-based access control with blur preview and upgrade prompts |
-| **RoadmapSection** | Visual timeline showing built, in-progress, and planned features |
-| **AuthButton** | Authentication button with Better Auth integration for sign in/out |
-| **UserMenu** | User profile menu with avatar, email, and sign out functionality |
+| Component          | Description                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- |
+| **VineyardLayout** | Main page wrapper with hero section, tool branding, and related tools footer    |
+| **FeatureCard**    | Showcase individual features with icons, status badges, and optional demo slots |
+| **StatusBadge**    | Consistent status indicators: Ready, Preview, Demo, Coming Soon, In Development |
+| **DemoContainer**  | Wrapper for interactive demos with mock data indicator and visual styling       |
+| **CodeExample**    | Syntax-highlighted code blocks with copy-to-clipboard functionality             |
+| **TierGate**       | Tier-based access control with blur preview and upgrade prompts                 |
+| **RoadmapSection** | Visual timeline showing built, in-progress, and planned features                |
+| **AuthButton**     | Authentication button with Better Auth integration for sign in/out              |
+| **UserMenu**       | User profile menu with avatar, email, and sign out functionality                |
 
 ## Usage
 
@@ -130,7 +130,7 @@ Vineyard is designed to be consumed by Grove tools through the `@autumnsgrove/gr
 
 ```javascript
 // In your Grove tool
-import { VineyardLayout } from '@autumnsgrove/groveengine/vineyard';
+import { VineyardLayout } from "@autumnsgrove/groveengine/vineyard";
 ```
 
 ## Architecture Decisions
@@ -153,7 +153,7 @@ Vineyard components use scoped `<style>` blocks with CSS custom properties inste
 Vineyard components previously loaded Lexend from Google Fonts (blocking render). This has been removed. Consumer apps should:
 
 ```typescript
-import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
+import { Lexend } from "@autumnsgrove/groveengine/ui/typography";
 ```
 
 The engine provides optimized font loading with preloading and proper fallbacks.
