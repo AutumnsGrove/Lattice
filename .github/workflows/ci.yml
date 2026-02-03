@@ -39,6 +39,10 @@ jobs:
             (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
           done
 
+      - name: Build engine package (for workspace imports)
+        run: pnpm package
+        working-directory: packages/engine
+
       - name: Run all tests
         run: pnpm test
 
