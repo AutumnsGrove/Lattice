@@ -87,7 +87,7 @@
 	</div>
 </div>
 {:else}
-<div class="layout leaf-pattern" style:--user-accent={data.siteSettings?.accent_color || null}>
+<div class="layout leaf-pattern" style:--user-accent={data.siteSettings?.accent_color || null} style:--color-primary={data.siteSettings?.accent_color || null}>
 	<!-- Unified Header with chrome components -->
 	<Header
 		navItems={tenantNavItems}
