@@ -494,7 +494,10 @@ export function tierHasFeature(
 /**
  * Get a specific limit for a tier.
  */
-export function getTierLimit(tier: TierKey, limit: keyof TierLimits): number {
+export function getTierLimit(
+  tier: TierKey,
+  limit: keyof TierLimits,
+): number | string {
   return TIERS[tier].limits[limit];
 }
 
