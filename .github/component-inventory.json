@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-02-01",
-  "lastAuditedBy": "claude/feat-waystone-popup-architecture",
+  "lastUpdated": "2026-02-04",
+  "lastAuditedBy": "claude/feat-grove-term-component",
   "components": {
-    "total": 194,
+    "total": 196,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
-      "ui": 33,
+      "ui": 35,
       "typography": 11,
       "chrome": 7,
       "terrarium": 7,

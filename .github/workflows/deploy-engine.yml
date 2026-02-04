@@ -8,6 +8,8 @@ on:
       - 'packages/vineyard/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'docs/philosophy/grove-naming.md'  # Regenerates grove-term-manifest.json
+      - 'scripts/generate/grove-term-manifest.ts'
   workflow_dispatch:
 
 jobs:

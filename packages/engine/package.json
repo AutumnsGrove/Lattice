@@ -288,6 +288,7 @@
     "build": "vite build",
     "build:sveltekit": "vite build",
     "build:package": "svelte-kit sync && svelte-package -o dist",
+    "prepackage": "npx tsx ../../scripts/generate/grove-term-manifest.ts",
     "package": "svelte-kit sync && svelte-package -o dist",
     "prepublishOnly": "pnpm run package",
     "preview": "vite preview",
