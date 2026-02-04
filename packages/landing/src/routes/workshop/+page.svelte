@@ -1087,16 +1087,16 @@
 
 								<div class="pt-4 border-t border-divider space-y-2">
 									{#if tool.domain}
-										<div class="flex items-center gap-2 text-sm">
-											<span class="text-foreground-faint">Domain:</span>
+										<div class="flex items-start gap-2 text-sm min-w-0">
+											<span class="text-foreground-faint shrink-0">Domain:</span>
 											{#if tool.domain.includes('{you}')}
-												<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted">{tool.domain}</code>
+												<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted break-all">{tool.domain}</code>
 											{:else}
 												<a
 													href="https://{tool.domain}"
 													target="_blank"
 													rel="noopener noreferrer"
-													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors font-mono text-sm"
+													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors font-mono text-sm break-all"
 												>{tool.domain}</a>
 											{/if}
 										</div>
