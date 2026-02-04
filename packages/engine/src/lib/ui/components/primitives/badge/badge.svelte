@@ -10,16 +10,23 @@
 		class: className,
 		variant = "default",
 		children,
+		onclick,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		variant?: BadgeVariant;
+		onclick?: (e: MouseEvent) => void;
 	} = $props();
+
+	// Determine element type: button for interactive, anchor for links, span for static
+	const elementType = $derived(onclick ? "button" : href ? "a" : "span");
 </script>
 
 <svelte:element
-	this={href ? "a" : "span"}
+	this={elementType}
 	bind:this={ref}
 	{href}
+	{onclick}
+	type={elementType === "button" ? "button" : undefined}
 	class={cn(badgeVariants({ variant }), className)}
 	{...restProps}
 >

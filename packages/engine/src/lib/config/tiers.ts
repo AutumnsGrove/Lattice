@@ -157,7 +157,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "Meadow access",
         "20 comments/week",
         "Follow blogs",
-        "React to posts",
+        "React to blooms",
       ],
     },
     support: { level: "help_center", displayString: "Help Center" },
@@ -210,7 +210,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "sprout",
       bestFor: "Curious",
       featureStrings: [
-        "50 posts",
+        "50 blooms",
         "1 GB storage",
         "3 curated themes",
         "Meadow access",
@@ -267,7 +267,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "tree-deciduous",
       bestFor: "Hobbyists",
       featureStrings: [
-        "250 posts",
+        "250 blooms",
         "5 GB storage",
         "10 themes",
         "3 nav pages",
@@ -325,7 +325,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "trees",
       bestFor: "Serious Bloggers",
       featureStrings: [
-        "Unlimited posts",
+        "Unlimited blooms",
         "20 GB storage",
         "Theme customizer",
         "5 nav pages",

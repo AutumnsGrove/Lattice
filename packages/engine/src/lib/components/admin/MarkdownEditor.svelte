@@ -909,7 +909,7 @@
               onkeydown={handleKeydown}
               onscroll={handleScroll}
               onpaste={handlePaste}
-              placeholder="Start writing your post... (Drag & drop or paste images)"
+              placeholder="Start writing your bloom... (Drag & drop or paste images)"
               spellcheck="true"
               disabled={readonly}
               class="editor-textarea"

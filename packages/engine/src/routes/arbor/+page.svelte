@@ -102,7 +102,7 @@
           <FileText class="w-5 h-5" />
         </div>
         <div class="stat-content">
-          <span class="stat-label">Blog Posts</span>
+          <span class="stat-label">Blooms</span>
           {#if loading}
             <Spinner />
           {:else}

@@ -6,7 +6,7 @@
   let { data } = $props();
 
   /** @type {{ slug: string, title: string } | null} */
-  let postToDelete = $state(null);
+  let bloomToDelete = $state(null);
   let showDeleteDialog = $state(false);
   let deleting = $state(false);
 
@@ -19,25 +19,25 @@
     });
   }
 
-  /** @param {{ slug: string, title: string }} post */
-  function confirmDelete(post) {
-    postToDelete = post;
+  /** @param {{ slug: string, title: string }} bloom */
+  function confirmDelete(bloom) {
+    bloomToDelete = bloom;
     showDeleteDialog = true;
   }
 
   async function handleDelete() {
-    if (!postToDelete) return;
+    if (!bloomToDelete) return;
 
     deleting = true;
     try {
-      await api.delete(`/api/posts/${postToDelete.slug}`);
+      await api.delete(`/api/blooms/${bloomToDelete.slug}`);
       // Remove from local list
-      data.posts = data.posts.filter((/** @type {{ slug: string }} */ p) => p.slug !== postToDelete?.slug);
+      data.posts = data.posts.filter((/** @type {{ slug: string }} */ p) => p.slug !== bloomToDelete?.slug);
       showDeleteDialog = false;
-      postToDelete = null;
+      bloomToDelete = null;
     } catch (error) {
-      console.error('Failed to delete post:', error);
-      toast.error('Failed to delete post', { description: 'Please try again.' });
+      console.error('Failed to delete bloom:', error);
+      toast.error('Failed to delete bloom', { description: 'Please try again.' });
     } finally {
       deleting = false;
     }
@@ -45,7 +45,7 @@
 
   function handleCancelDelete() {
     showDeleteDialog = false;
-    postToDelete = null;
+    bloomToDelete = null;
   }
 </script>
 
@@ -63,10 +63,10 @@
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
       <h1 class="m-0 mb-1 text-3xl text-foreground">Garden</h1>
-      <p class="m-0 text-foreground-muted">{data.posts.length} posts</p>
+      <p class="m-0 text-foreground-muted">{data.posts.length} blooms</p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/arbor/garden/new'}>
-      + New Post
+      + New Bloom
     </Button>
   </header>
 
@@ -74,10 +74,10 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -139,12 +139,12 @@
   <GlassCard variant="muted">
     <h3>How the Garden Works</h3>
     <p>
-      Create and edit posts directly in the built-in markdown editor. Posts are saved to the database
+      Create and edit blooms directly in the built-in markdown editor. Blooms are saved to the database
       and available immediately.
     </p>
     <ul>
-      <li>Use <strong>+ New Post</strong> to create a new post with the markdown editor</li>
-      <li>Use <strong>Edit</strong> links to modify existing posts</li>
+      <li>Use <strong>+ New Bloom</strong> to create a new bloom with the markdown editor</li>
+      <li>Use <strong>Edit</strong> links to modify existing blooms</li>
     </ul>
   </GlassCard>
 </div>
@@ -152,9 +152,9 @@
 <!-- Delete Confirmation Dialog -->
 <GlassConfirmDialog
   bind:open={showDeleteDialog}
-  title="Delete Post"
-  message={`Are you sure you want to delete "${postToDelete?.title}"? This action cannot be undone.`}
-  confirmLabel="Delete Post"
+  title="Delete Bloom"
+  message={`Are you sure you want to delete "${bloomToDelete?.title}"? This action cannot be undone.`}
+  confirmLabel="Delete Bloom"
   cancelLabel="Cancel"
   variant="danger"
   loading={deleting}

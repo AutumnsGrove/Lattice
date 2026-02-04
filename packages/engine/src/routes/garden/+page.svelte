@@ -59,7 +59,7 @@
 
 {#if data.posts.length === 0}
 	<div class="text-center py-12 text-gray-500">
-		<p>No posts yet. Check back soon!</p>
+		<p>No blooms yet. Check back soon!</p>
 	</div>
 {:else}
 	<div class="grid gap-8 max-w-3xl mx-auto">
@@ -83,7 +83,7 @@
 					{#if post.tags.length > 0}
 						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}
-								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
+								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter blooms by tag: {tag}">
 									<Badge variant="tag" class="accent-tag">{tag}</Badge>
 								</a>
 							{/each}

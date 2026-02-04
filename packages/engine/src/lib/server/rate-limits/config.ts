@@ -92,6 +92,10 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
   "POST:/api/auth/login": "auth/login",
   "POST:/api/auth/token": "auth/token",
   "POST:/api/auth/password-reset": "auth/password-reset",
+  "POST:/api/blooms": "posts/create",
+  "PUT:/api/blooms": "posts/update",
+  "PATCH:/api/blooms": "posts/update",
+  // Legacy redirects (in case rate limit check happens before redirect)
   "POST:/api/posts": "posts/create",
   "PUT:/api/posts": "posts/update",
   "PATCH:/api/posts": "posts/update",

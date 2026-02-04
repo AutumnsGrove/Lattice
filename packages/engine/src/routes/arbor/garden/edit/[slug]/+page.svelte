@@ -114,7 +114,7 @@
     saving = true;
 
     try {
-      await api.put(`/api/posts/${slug}`, {
+      await api.put(`/api/blooms/${slug}`, {
         title: title.trim(),
         date,
         description: description.trim(),
@@ -129,10 +129,10 @@
       // Clear draft on successful save
       editorRef?.clearDraft();
 
-      toast.success("Post saved successfully!");
+      toast.success("Bloom saved successfully!");
       hasUnsavedChanges = false;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update post");
+      toast.error(err instanceof Error ? err.message : "Failed to update bloom");
     } finally {
       saving = false;
     }
@@ -162,7 +162,7 @@
     status = newStatus; // Optimistically update UI
 
     try {
-      await api.put(`/api/posts/${slug}`, {
+      await api.put(`/api/blooms/${slug}`, {
         title: title.trim(),
         date,
         description: description.trim(),
@@ -178,9 +178,9 @@
       editorRef?.clearDraft();
 
       if (newStatus === "published") {
-        toast.success("Post published! 🎉", { description: "Your post is now live." });
+        toast.success("Bloom published! 🎉", { description: "Your bloom is now live." });
       } else {
-        toast.success("Post unpublished", { description: "Moved back to drafts." });
+        toast.success("Bloom unpublished", { description: "Moved back to drafts." });
       }
       hasUnsavedChanges = false;
     } catch (err) {
@@ -201,13 +201,13 @@
     saving = true;
 
     try {
-      await api.delete(`/api/posts/${slug}`);
+      await api.delete(`/api/blooms/${slug}`);
 
-      toast.success("Post deleted successfully");
+      toast.success("Bloom deleted successfully");
       // Redirect to blog admin
       goto("/arbor/garden");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete post");
+      toast.error(err instanceof Error ? err.message : "Failed to delete bloom");
     } finally {
       saving = false;
     }
@@ -231,7 +231,7 @@
     <div class="header-content">
       <a href="/arbor/garden" class="back-link">&larr; Back to Garden</a>
       <div class="title-row">
-        <h1>Edit Post</h1>
+        <h1>Edit Bloom</h1>
         {#if data.source === "filesystem"}
           <span class="source-badge filesystem">From UserContent</span>
         {:else}
@@ -265,7 +265,7 @@
         variant="danger"
         onclick={confirmDelete}
         disabled={saving}
-        title="Delete this post"
+        title="Delete this bloom"
       >
         Delete
       </Button>
@@ -286,7 +286,7 @@
     >
       <div class="panel-header">
         <h2 class="panel-title">
-          {#if detailsCollapsed}Details{:else}Post Details{/if}
+          {#if detailsCollapsed}Details{:else}Bloom Details{/if}
         </h2>
         <button
           class="collapse-details-btn"
@@ -306,7 +306,7 @@
               type="text"
               id="title"
               bind:value={title}
-              placeholder="Your Post Title"
+              placeholder="Your Bloom Title"
               class="form-input"
             />
           </div>
@@ -340,7 +340,7 @@
             <textarea
               id="description"
               bind:value={description}
-              placeholder="A brief summary of your post (120-160 chars for SEO)..."
+              placeholder="A brief summary of your bloom (120-160 chars for SEO)..."
               rows="3"
               class="form-input form-textarea"
               class:char-warning={description.length > 160}
@@ -430,7 +430,7 @@
                 <option value="caveat">Caveat</option>
               </optgroup>
             </select>
-            <span class="form-hint">Choose a font for this post's content</span>
+            <span class="form-hint">Choose a font for this bloom's content</span>
           </div>
 
           <div class="form-group">
@@ -441,8 +441,8 @@
             </select>
             <span class="form-hint">
               {status === "draft"
-                ? "This post will be hidden from public view"
-                : "This post will be visible to all visitors"}
+                ? "This bloom will be hidden from public view"
+                : "This bloom will be visible to all visitors"}
             </span>
           </div>
 
@@ -512,7 +512,7 @@
 </div>
 
 <!-- Delete Confirmation Dialog -->
-<Dialog bind:open={showDeleteDialog} title="Delete Post">
+<Dialog bind:open={showDeleteDialog} title="Delete Bloom">
   <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
   {#snippet footer()}
     <Button variant="outline" onclick={() => (showDeleteDialog = false)}

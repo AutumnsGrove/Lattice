@@ -110,7 +110,7 @@
     saving = true;
 
     try {
-      const result = await api.post("/api/posts", {
+      const result = await api.post("/api/blooms", {
         title: title.trim(),
         slug: slug.trim(),
         date,
@@ -128,7 +128,7 @@
       editorRef?.clearDraft();
 
       // Show success toast
-      toast.success("Post created!", {
+      toast.success("Bloom created!", {
         description: `"${result.title}" has been saved.`,
       });
 
@@ -137,7 +137,7 @@
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       error = errorMessage;
-      toast.error("Failed to create post", { description: errorMessage });
+      toast.error("Failed to create bloom", { description: errorMessage });
     } finally {
       saving = false;
     }
@@ -148,14 +148,14 @@
   <header class="page-header">
     <div class="header-content">
       <a href="/arbor/garden" class="back-link">&larr; Back to Garden</a>
-      <h1>New Post</h1>
+      <h1>New Bloom</h1>
     </div>
     <button
       class="save-btn"
       onclick={handleSave}
       disabled={saving}
     >
-      {saving ? "Saving..." : "Save Post"}
+      {saving ? "Saving..." : "Save Bloom"}
     </button>
   </header>
 
@@ -163,7 +163,7 @@
     <Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg mb-4 flex items-center gap-3">
       <span class="flex items-center justify-center w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold">!</span>
       <span class="flex-1 text-red-600 dark:text-red-400">{error}</span>
-      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl leading-none" onclick={() => (error = null)}>&times;</button>
+      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl leading-none" onclick={() => (error = null)} aria-label="Dismiss error">&times;</button>
     </Glass>
   {/if}
 
@@ -171,7 +171,7 @@
     <!-- Metadata Panel -->
     <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
       <div class="panel-header">
-        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Post Details{/if}</h2>
+        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Bloom Details{/if}</h2>
         <button
           class="collapse-details-btn"
           onclick={toggleDetailsCollapsed}
@@ -190,7 +190,7 @@
               type="text"
               id="title"
               bind:value={title}
-              placeholder="Your Post Title"
+              placeholder="Your Bloom Title"
               class="form-input"
             />
           </div>
@@ -204,7 +204,7 @@
                 id="slug"
                 bind:value={slug}
                 oninput={handleSlugInput}
-                placeholder="your-post-slug"
+                placeholder="your-bloom-slug"
                 class="form-input slug-input"
               />
             </div>
@@ -230,7 +230,7 @@
             <textarea
               id="description"
               bind:value={description}
-              placeholder="A brief summary of your post (120-160 chars for SEO)..."
+              placeholder="A brief summary of your bloom (120-160 chars for SEO)..."
               rows="3"
               class="form-input form-textarea"
               class:char-warning={description.length > 160}
@@ -316,7 +316,7 @@
                 <option value="caveat">Caveat</option>
               </optgroup>
             </select>
-            <span class="form-hint">Choose a font for this post's content</span>
+            <span class="form-hint">Choose a font for this bloom's content</span>
           </div>
 
           <div class="form-group">
@@ -326,7 +326,7 @@
               <option value="published">Published</option>
             </select>
             <span class="form-hint">
-              {status === "draft" ? "This post will be hidden from public view" : "This post will be visible to all visitors"}
+              {status === "draft" ? "This bloom will be hidden from public view" : "This bloom will be visible to all visitors"}
             </span>
           </div>
         </div>
@@ -343,7 +343,7 @@
             bind:firesideAssisted
             {saving}
             onSave={handleSave}
-            draftKey="new-post"
+            draftKey="new-bloom"
             bind:previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}
