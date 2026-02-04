@@ -46,6 +46,11 @@ export { default as Waystone } from "./Waystone.svelte";
 export { default as WaystonePopup } from "./waystone/WaystonePopup.svelte";
 export * from "./waystone/types";
 
+// GroveTerm - interactive terminology with popup definitions
+export { default as GroveTerm } from "./groveterm/GroveTerm.svelte";
+export { default as GroveTermPopup } from "./groveterm/GroveTermPopup.svelte";
+export * from "./groveterm/types";
+
 // Table sub-components (from primitives)
 export {
   TableHeader,
