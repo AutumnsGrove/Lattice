@@ -69,49 +69,30 @@ Lines 160-170: Update the mock data for local development:
 
 ### Health Check Logic
 
+**Key distinction:** Configuration issues ≠ outages. Missing secrets means *we* haven't configured things, not that Stripe is down.
+
+| Condition | Status | HTTP | Meaning |
+|-----------|--------|------|---------|
+| All configured + Stripe reachable | `healthy` | 200 | Payments fully operational |
+| Stripe works, webhook secret missing | `degraded` | 200 | Payments work, webhooks won't |
+| Secrets not configured | `maintenance` | 203 | Config issue, not an outage |
+| Stripe API unreachable | `unhealthy` | 503 | Actual Stripe outage |
+
 ```typescript
 // Pseudo-code for the health check
-const checks = [];
-
-// 1. Check STRIPE_SECRET_KEY exists
-if (!env.STRIPE_SECRET_KEY) {
-  checks.push({ name: "stripe_secret_key", status: "fail" });
+if (!hasSecretKey) {
+  // No API key = config issue, not outage
+  return { status: "maintenance", httpStatus: 203 };
+} else if (!apiReachable) {
+  // Have key but Stripe down = real outage
+  return { status: "unhealthy", httpStatus: 503 };
+} else if (!hasWebhookSecret) {
+  // Stripe works but webhooks won't
+  return { status: "degraded", httpStatus: 200 };
 } else {
-  checks.push({ name: "stripe_secret_key", status: "pass" });
-
-  // 2. Test Stripe API connectivity (lightweight call)
-  try {
-    const response = await fetch("https://api.stripe.com/v1/balance", {
-      headers: {
-        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
-        "Stripe-Version": "2024-11-20.acacia"
-      }
-    });
-    if (response.ok) {
-      checks.push({ name: "stripe_api", status: "pass" });
-    } else {
-      checks.push({ name: "stripe_api", status: "fail", error: response.statusText });
-    }
-  } catch (e) {
-    checks.push({ name: "stripe_api", status: "fail", error: "Unreachable" });
-  }
+  // Everything good!
+  return { status: "healthy", httpStatus: 200 };
 }
-
-// 3. Check STRIPE_WEBHOOK_SECRET exists
-if (env.STRIPE_WEBHOOK_SECRET) {
-  checks.push({ name: "stripe_webhook_secret", status: "pass" });
-} else {
-  checks.push({ name: "stripe_webhook_secret", status: "fail" });
-}
-
-// Determine overall status
-const allPass = checks.every(c => c.status === "pass");
-const apiPass = checks.find(c => c.name === "stripe_api")?.status === "pass";
-
-return {
-  status: allPass ? "healthy" : (apiPass ? "degraded" : "unhealthy"),
-  // ...
-};
 ```
 
 ### Why `GET /v1/balance`?
