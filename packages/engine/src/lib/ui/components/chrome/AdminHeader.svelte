@@ -62,9 +62,9 @@
 	};
 
 	function isActiveTab(href: string): boolean {
-		// Exact match for root admin path
-		if (href === '/admin') {
-			return currentPath === '/admin';
+		// Exact match for root arbor path
+		if (href === '/arbor') {
+			return currentPath === '/arbor';
 		}
 		// Prefix match for sub-paths
 		return currentPath.startsWith(href);

@@ -43,29 +43,31 @@ describe("GROVE_URLS", () => {
 
     it("should route NEW_POST through /go/", () => {
       expect(GROVE_URLS.NEW_POST).toContain("/go/");
-      expect(GROVE_URLS.NEW_POST).toBe("https://grove.place/go/posts/new");
+      expect(GROVE_URLS.NEW_POST).toBe(
+        "https://grove.place/go/arbor/posts/new",
+      );
     });
 
     it("should route SETTINGS through /go/", () => {
       expect(GROVE_URLS.SETTINGS).toContain("/go/");
-      expect(GROVE_URLS.SETTINGS).toBe("https://grove.place/go/settings");
+      expect(GROVE_URLS.SETTINGS).toBe("https://grove.place/go/arbor/settings");
     });
 
     it("should route APPEARANCE through /go/", () => {
       expect(GROVE_URLS.APPEARANCE).toContain("/go/");
       expect(GROVE_URLS.APPEARANCE).toBe(
-        "https://grove.place/go/settings/appearance",
+        "https://grove.place/go/arbor/settings/appearance",
       );
     });
 
     it("should route POSTS through /go/", () => {
       expect(GROVE_URLS.POSTS).toContain("/go/");
-      expect(GROVE_URLS.POSTS).toBe("https://grove.place/go/posts");
+      expect(GROVE_URLS.POSTS).toBe("https://grove.place/go/arbor/posts");
     });
 
     it("should route PAGES through /go/", () => {
       expect(GROVE_URLS.PAGES).toContain("/go/");
-      expect(GROVE_URLS.PAGES).toBe("https://grove.place/go/pages");
+      expect(GROVE_URLS.PAGES).toBe("https://grove.place/go/arbor/pages");
     });
   });
 

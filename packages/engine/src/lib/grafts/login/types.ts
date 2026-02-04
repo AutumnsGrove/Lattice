@@ -60,7 +60,7 @@ export interface LoginGraftProps extends BaseGraftProps {
 
   /**
    * URL to redirect after successful authentication.
-   * Defaults to '/admin'.
+   * Defaults to '/arbor'.
    */
   returnTo?: string;
 
@@ -175,7 +175,7 @@ export interface LoginHandlerConfig {
 
   /**
    * Default URL to redirect to after successful auth.
-   * @default '/admin'
+   * @default '/arbor'
    */
   defaultReturnTo?: string;
 }
@@ -210,7 +210,7 @@ export interface CallbackHandlerConfig {
 
   /**
    * Default URL to redirect to after successful auth.
-   * @default '/admin'
+   * @default '/arbor'
    */
   defaultReturnTo?: string;
 

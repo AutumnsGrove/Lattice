@@ -77,7 +77,7 @@
 		user = null,
 		signInHref = 'https://heartwood.grove.place',
 		signInLabel = 'Sign in',
-		userHref = '/admin',
+		userHref = '/arbor',
 		signOutHref = '/logout',
 		signOutLabel = 'Sign out',
 		// Admin sidebar props
