@@ -13,6 +13,7 @@ interface CompedInvite {
   id: string;
   email: string;
   tier: "seedling" | "sapling" | "oak" | "evergreen";
+  invite_type: "comped" | "beta";
   custom_message: string | null;
   invited_by: string;
 }
@@ -48,7 +49,7 @@ export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
   // Check for comped invite
   const compedInvite = await db
     .prepare(
-      `SELECT id, email, tier, custom_message, invited_by
+      `SELECT id, email, tier, invite_type, custom_message, invited_by
        FROM comped_invites
        WHERE email = ? AND used_at IS NULL`,
     )
@@ -65,6 +66,7 @@ export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
     onboarding,
     compedInvite: {
       tier: compedInvite.tier,
+      inviteType: compedInvite.invite_type,
       customMessage: compedInvite.custom_message,
       invitedBy: compedInvite.invited_by,
     },
@@ -102,7 +104,7 @@ export const actions: Actions = {
     // Check for comped invite
     const compedInvite = await db
       .prepare(
-        `SELECT id, email, tier, custom_message
+        `SELECT id, email, tier, invite_type, custom_message
          FROM comped_invites
          WHERE email = ? AND used_at IS NULL`,
       )
@@ -163,14 +165,15 @@ export const actions: Actions = {
       const auditId = crypto.randomUUID();
       await db
         .prepare(
-          `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, actor_email, notes, created_at)
-           VALUES (?, 'use', ?, ?, ?, ?, ?, unixepoch())`,
+          `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+           VALUES (?, 'use', ?, ?, ?, ?, ?, ?, unixepoch())`,
         )
         .bind(
           auditId,
           compedInvite.id,
           compedInvite.email,
           compedInvite.tier,
+          compedInvite.invite_type,
           onboarding.email as string,
           `Claimed by ${onboarding.username}`,
         )

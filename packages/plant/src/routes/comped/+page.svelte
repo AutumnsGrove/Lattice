@@ -71,13 +71,23 @@
 				<Gift size={40} class="text-amber-500" />
 			</div>
 
-			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
-				You've been invited!
-			</h1>
+			{#if data.compedInvite?.inviteType === 'beta'}
+				<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
+					Welcome to the Grove beta!
+				</h1>
 
-			<p class="text-foreground-muted max-w-md mx-auto">
-				Someone special has gifted you a complimentary Grove account.
-			</p>
+				<p class="text-foreground-muted max-w-md mx-auto">
+					Thank you for being one of our first Wanderers. You're helping us grow.
+				</p>
+			{:else}
+				<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
+					You've been invited!
+				</h1>
+
+				<p class="text-foreground-muted max-w-md mx-auto">
+					Someone special has gifted you a complimentary Grove account.
+				</p>
+			{/if}
 		</div>
 
 		<!-- Invitation card -->
@@ -86,7 +96,11 @@
 				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4">
 					<Sparkles size={16} class="text-amber-500" />
 					<span class="text-sm font-medium text-amber-600 dark:text-amber-400">
-						Complimentary {tierInfo?.display.name || 'Premium'} Account
+						{#if data.compedInvite?.inviteType === 'beta'}
+							Beta Tester Access
+						{:else}
+							Complimentary {tierInfo?.display.name || 'Premium'} Account
+						{/if}
 					</span>
 				</div>
 
@@ -172,7 +186,11 @@
 		<div class="text-center">
 			<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1">
 				<Heart size={14} class="text-pink-400" />
-				A gift from someone who believes in you
+				{#if data.compedInvite?.inviteType === 'beta'}
+					Thank you for helping us grow
+				{:else}
+					A gift from someone who believes in you
+				{/if}
 			</p>
 		</div>
 	{/if}

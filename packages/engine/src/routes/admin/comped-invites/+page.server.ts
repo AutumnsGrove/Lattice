@@ -13,6 +13,7 @@ interface CompedInvite {
   id: string;
   email: string;
   tier: string;
+  invite_type: "comped" | "beta";
   custom_message: string | null;
   invited_by: string;
   created_at: number;
@@ -26,6 +27,7 @@ interface AuditLogEntry {
   invite_id: string;
   email: string;
   tier: string;
+  invite_type: "comped" | "beta";
   actor_email: string;
   notes: string | null;
   created_at: number;
@@ -34,6 +36,10 @@ interface AuditLogEntry {
 // Valid tiers for comped accounts
 const VALID_TIERS = ["seedling", "sapling", "oak", "evergreen"] as const;
 type CompedTier = (typeof VALID_TIERS)[number];
+
+// Valid invite types
+const VALID_INVITE_TYPES = ["comped", "beta"] as const;
+type InviteType = (typeof VALID_INVITE_TYPES)[number];
 
 // List of admin emails who can manage comped invites
 // In production, this would come from a config or database
@@ -70,6 +76,7 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
 
   // Filter
   const statusFilter = url.searchParams.get("status") || ""; // "used", "pending", ""
+  const typeFilter = url.searchParams.get("type") || ""; // "comped", "beta", ""
   const search = url.searchParams.get("search") || "";
 
   try {
@@ -89,6 +96,11 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
       conditions.push("used_at IS NULL");
     }
 
+    if (typeFilter === "comped" || typeFilter === "beta") {
+      conditions.push("invite_type = ?");
+      params.push(typeFilter);
+    }
+
     if (conditions.length > 0) {
       query += " WHERE " + conditions.join(" AND ");
     }
@@ -96,12 +108,14 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
     query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
     params.push(pageSize, offset);
 
-    // Build count query
+    // Build count query (same conditions, no LIMIT/OFFSET)
     let countQuery = "SELECT COUNT(*) as count FROM comped_invites";
     const countParams: string[] = [];
     if (conditions.length > 0) {
       countQuery += " WHERE " + conditions.join(" AND ");
       if (search) countParams.push(`%${search}%`);
+      if (typeFilter === "comped" || typeFilter === "beta")
+        countParams.push(typeFilter);
     }
 
     // Run all queries in parallel
@@ -124,14 +138,22 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
            LIMIT 20`,
         ).all<AuditLogEntry>(),
 
-        // Get statistics
+        // Get statistics (including by type)
         DB.prepare(
           `SELECT
              COUNT(*) as total,
              COUNT(CASE WHEN used_at IS NOT NULL THEN 1 END) as used,
-             COUNT(CASE WHEN used_at IS NULL THEN 1 END) as pending
+             COUNT(CASE WHEN used_at IS NULL THEN 1 END) as pending,
+             COUNT(CASE WHEN invite_type = 'beta' THEN 1 END) as beta,
+             COUNT(CASE WHEN invite_type = 'comped' THEN 1 END) as comped
            FROM comped_invites`,
-        ).first<{ total: number; used: number; pending: number }>(),
+        ).first<{
+          total: number;
+          used: number;
+          pending: number;
+          beta: number;
+          comped: number;
+        }>(),
       ]);
 
     return {
@@ -141,6 +163,8 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
         total: statsResult?.total || 0,
         used: statsResult?.used || 0,
         pending: statsResult?.pending || 0,
+        beta: statsResult?.beta || 0,
+        comped: statsResult?.comped || 0,
       },
       pagination: {
         page,
@@ -151,8 +175,10 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
       filters: {
         search,
         status: statusFilter,
+        type: typeFilter,
       },
       validTiers: VALID_TIERS,
+      validInviteTypes: VALID_INVITE_TYPES,
     };
   } catch (err) {
     console.error("[Comped Invites] Error loading data:", err);
@@ -177,6 +203,8 @@ export const actions: Actions = {
     const formData = await request.formData();
     const email = formData.get("email")?.toString().toLowerCase().trim();
     const tier = formData.get("tier")?.toString() as CompedTier;
+    const inviteType =
+      (formData.get("invite_type")?.toString() as InviteType) || "beta";
     const customMessage =
       formData.get("custom_message")?.toString().trim() || null;
     const notes = formData.get("notes")?.toString().trim() || null;
@@ -189,6 +217,11 @@ export const actions: Actions = {
     // Validate tier
     if (!tier || !VALID_TIERS.includes(tier)) {
       return fail(400, { error: "Please select a valid tier" });
+    }
+
+    // Validate invite type
+    if (!VALID_INVITE_TYPES.includes(inviteType)) {
+      return fail(400, { error: "Please select a valid invite type" });
     }
 
     try {
@@ -228,24 +261,40 @@ export const actions: Actions = {
       // Create the invite
       const inviteId = crypto.randomUUID();
       await DB.prepare(
-        `INSERT INTO comped_invites (id, email, tier, custom_message, invited_by, created_at)
-         VALUES (?, ?, ?, ?, ?, unixepoch())`,
+        `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, unixepoch())`,
       )
-        .bind(inviteId, email, tier, customMessage, locals.user.email)
+        .bind(
+          inviteId,
+          email,
+          tier,
+          inviteType,
+          customMessage,
+          locals.user.email,
+        )
         .run();
 
       // Log the action
       const auditId = crypto.randomUUID();
       await DB.prepare(
-        `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, actor_email, notes, created_at)
-         VALUES (?, 'create', ?, ?, ?, ?, ?, unixepoch())`,
+        `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+         VALUES (?, 'create', ?, ?, ?, ?, ?, ?, unixepoch())`,
       )
-        .bind(auditId, inviteId, email, tier, locals.user.email, notes)
+        .bind(
+          auditId,
+          inviteId,
+          email,
+          tier,
+          inviteType,
+          locals.user.email,
+          notes,
+        )
         .run();
 
+      const typeLabel = inviteType === "beta" ? "beta" : "comped";
       return {
         success: true,
-        message: `Created comped invite for ${email} (${tier} tier)`,
+        message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
       };
     } catch (err) {
       console.error("[Comped Invites] Error creating invite:", err);
@@ -277,7 +326,7 @@ export const actions: Actions = {
     try {
       // Check if invite exists and is not used
       const invite = await DB.prepare(
-        "SELECT id, email, tier, used_at FROM comped_invites WHERE id = ?",
+        "SELECT id, email, tier, invite_type, used_at FROM comped_invites WHERE id = ?",
       )
         .bind(inviteId)
         .first<CompedInvite>();
@@ -300,14 +349,15 @@ export const actions: Actions = {
       // Log the action
       const auditId = crypto.randomUUID();
       await DB.prepare(
-        `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, actor_email, notes, created_at)
-         VALUES (?, 'revoke', ?, ?, ?, ?, ?, unixepoch())`,
+        `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+         VALUES (?, 'revoke', ?, ?, ?, ?, ?, ?, unixepoch())`,
       )
         .bind(
           auditId,
           inviteId,
           invite.email,
           invite.tier,
+          invite.invite_type,
           locals.user.email,
           notes,
         )

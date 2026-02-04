@@ -34,6 +34,7 @@
 	// Form state
 	let newEmail = $state('');
 	let newTier = $state<string>('seedling');
+	let newInviteType = $state<'beta' | 'comped'>('beta');
 	let newMessage = $state('');
 	let newNotes = $state('');
 	let isAdding = $state(false);
@@ -44,11 +45,13 @@
 	// Search state
 	let searchQuery = $state('');
 	let statusFilter = $state('');
+	let typeFilter = $state('');
 
 	// Sync search state with URL filters when data changes
 	$effect(() => {
 		searchQuery = data.filters.search ?? '';
 		statusFilter = data.filters.status ?? '';
+		typeFilter = data.filters.type ?? '';
 	});
 
 	// Tier display names
@@ -67,6 +70,16 @@
 		evergreen: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
 	};
 
+	// Invite type labels and colors
+	const typeLabels: Record<string, string> = {
+		beta: 'Beta',
+		comped: 'Comped'
+	};
+	const typeColors: Record<string, string> = {
+		beta: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+		comped: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+	};
+
 	// Format timestamp
 	function formatDate(timestamp: number): string {
 		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
@@ -83,6 +96,7 @@
 		const params = new URLSearchParams();
 		if (searchQuery) params.set('search', searchQuery);
 		if (statusFilter) params.set('status', statusFilter);
+		if (typeFilter) params.set('type', typeFilter);
 		goto(`?${params.toString()}`, { replaceState: true });
 	}
 
@@ -90,6 +104,7 @@
 	function clearFilters() {
 		searchQuery = '';
 		statusFilter = '';
+		typeFilter = '';
 		goto('?', { replaceState: true });
 	}
 
@@ -115,7 +130,15 @@
 		</div>
 
 		<!-- Stats -->
-		<div class="flex gap-4 text-sm">
+		<div class="flex flex-wrap gap-3 text-sm">
+			<div class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
+				<span class="text-blue-300">Beta:</span>
+				<span class="font-medium text-foreground">{data.stats.beta}</span>
+			</div>
+			<div class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
+				<span class="text-purple-300">Comped:</span>
+				<span class="font-medium text-foreground">{data.stats.comped}</span>
+			</div>
 			<div class="px-3 py-1.5 rounded-lg bg-white/10 dark:bg-slate-800/30 flex items-center gap-2">
 				<Clock class="w-4 h-4 text-yellow-400" />
 				<span class="text-foreground-muted">Pending:</span>
@@ -168,11 +191,21 @@
 					</div>
 
 					<select
+						bind:value={typeFilter}
+						onchange={applyFilters}
+						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+					>
+						<option value="">All types</option>
+						<option value="beta">Beta</option>
+						<option value="comped">Comped</option>
+					</select>
+
+					<select
 						bind:value={statusFilter}
 						onchange={applyFilters}
 						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
 					>
-						<option value="">All invites</option>
+						<option value="">All status</option>
 						<option value="pending">Pending</option>
 						<option value="used">Used</option>
 					</select>
@@ -185,7 +218,7 @@
 						<Filter class="w-4 h-4" />
 					</button>
 
-					{#if searchQuery || statusFilter}
+					{#if searchQuery || statusFilter || typeFilter}
 						<button
 							type="button"
 							onclick={clearFilters}
@@ -217,6 +250,12 @@
 								<div class="min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
 										<span class="font-medium text-foreground truncate">{invite.email}</span>
+										<span
+											class="px-2 py-0.5 text-xs rounded border {typeColors[invite.invite_type] ||
+												typeColors.beta}"
+										>
+											{typeLabels[invite.invite_type] || invite.invite_type}
+										</span>
 										<span
 											class="px-2 py-0.5 text-xs rounded border {tierColors[invite.tier] ||
 												tierColors.seedling}"
@@ -343,6 +382,42 @@
 						</div>
 					</div>
 
+					<!-- Invite Type -->
+					<div>
+						<label class="block text-sm font-medium text-foreground mb-2">
+							Invite Type
+						</label>
+						<div class="flex gap-3">
+							<label class="flex items-center gap-2 cursor-pointer">
+								<input
+									type="radio"
+									name="invite_type"
+									value="beta"
+									bind:group={newInviteType}
+									class="w-4 h-4 text-blue-500 border-white/30 focus:ring-blue-500"
+								/>
+								<span class="text-sm text-foreground">Beta Tester</span>
+							</label>
+							<label class="flex items-center gap-2 cursor-pointer">
+								<input
+									type="radio"
+									name="invite_type"
+									value="comped"
+									bind:group={newInviteType}
+									class="w-4 h-4 text-purple-500 border-white/30 focus:ring-purple-500"
+								/>
+								<span class="text-sm text-foreground">Comped</span>
+							</label>
+						</div>
+						<p class="text-xs text-foreground-muted mt-1">
+							{#if newInviteType === 'beta'}
+								Beta testers get free access now, should convert to paid later.
+							{:else}
+								Comped users are free forever (special cases like EU tax issues).
+							{/if}
+						</p>
+					</div>
+
 					<div>
 						<label for="tier" class="block text-sm font-medium text-foreground mb-1">
 							Tier
@@ -414,7 +489,7 @@
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
 						<div class="p-2 rounded-lg bg-white/10 dark:bg-slate-800/20 text-sm">
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-2 flex-wrap">
 								{#if entry.action === 'create'}
 									<Plus class="w-3 h-3 text-success" />
 									<span class="text-success">Created</span>
@@ -426,6 +501,11 @@
 									<span class="text-error">Revoked</span>
 								{/if}
 								<span class="text-foreground truncate">{entry.email}</span>
+								{#if entry.invite_type}
+									<span class="px-1.5 py-0.5 text-xs rounded {typeColors[entry.invite_type]}">
+										{typeLabels[entry.invite_type]}
+									</span>
+								{/if}
 								<span class="px-1.5 py-0.5 text-xs rounded {tierColors[entry.tier]}">
 									{tierLabels[entry.tier]}
 								</span>
