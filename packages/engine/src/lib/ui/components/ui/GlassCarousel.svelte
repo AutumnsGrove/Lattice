@@ -53,6 +53,8 @@
 		autoplayInterval?: number;
 		/** Visual variant */
 		variant?: "default" | "frosted" | "minimal";
+		/** Aspect ratio for the card container (e.g., "4/3", "16/9"). Use "none" for height-driven layouts. */
+		aspectRatio?: string;
 		/** Custom class name */
 		class?: string;
 		/** Custom content renderer - receives index */
@@ -67,6 +69,7 @@
 		autoplay = false,
 		autoplayInterval = 5000,
 		variant = "default",
+		aspectRatio = "4/3",
 		class: className,
 		item,
 		...restProps
@@ -329,7 +332,8 @@
 >
 	<!-- Cards stack -->
 	<div
-		class="relative w-full aspect-[4/3] select-none"
+		class={cn("relative w-full select-none", aspectRatio === "none" && "h-full")}
+		style={aspectRatio !== "none" ? `aspect-ratio: ${aspectRatio}` : undefined}
 		ontouchstart={handleTouchStart}
 		ontouchmove={handleTouchMove}
 		ontouchend={handleTouchEnd}

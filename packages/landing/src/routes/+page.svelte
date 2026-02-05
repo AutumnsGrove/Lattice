@@ -47,25 +47,25 @@
 			title: 'Flow Editor',
 			description: 'Write in a clean, focused environment with markdown support and live preview.',
 			icon: PenLine,
-			href: '/knowledge/features/flow-editor'
+			href: '/knowledge/help/what-is-flow'
 		},
 		{
 			title: 'Shade Protection',
 			description: 'AI scrapers and bots are blocked automatically. Your creativity stays human.',
 			icon: Shield,
-			href: '/knowledge/features/shade'
+			href: '/knowledge/help/what-is-shade'
 		},
 		{
 			title: 'Custom Domains',
 			description: 'Use yourname.grove.place or bring your own domain. Make it truly yours.',
 			icon: Trees,
-			href: '/knowledge/features/domains'
+			href: '/pricing'
 		},
 		{
 			title: 'Gallery Curio',
 			description: 'Beautiful image galleries with lightbox viewing. Share your visual stories.',
 			icon: ImageIcon,
-			href: '/knowledge/features/gallery'
+			href: '/knowledge/help/what-is-gallery'
 		}
 	];
 
@@ -208,9 +208,9 @@
 			showDots={true}
 			showArrows={true}
 			autoplay={false}
-			autoplayInterval={6000}
-			variant="frosted"
-			class="w-full"
+			variant="minimal"
+			aspectRatio="none"
+			class="w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[420px]"
 		>
 			{#snippet item(index: number)}
 				{#if index === 0}

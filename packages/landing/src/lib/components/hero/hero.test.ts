@@ -135,7 +135,7 @@ describe("Slide Configuration", () => {
       index: 2,
       bgVariant: "warm" as BgVariant,
       headline: "Your words are not a dataset",
-      ctaHref: "/knowledge/features/shade",
+      ctaHref: "/knowledge/help/what-is-shade",
       ctaText: "Learn About Shade",
     },
     {
@@ -143,7 +143,7 @@ describe("Slide Configuration", () => {
       index: 3,
       bgVariant: "twilight" as BgVariant,
       headline: "Some trees outlive the people who planted them",
-      ctaHref: "/knowledge/features/centennial",
+      ctaHref: "/knowledge/help/what-is-centennial",
       ctaText: "Plant Your Legacy",
     },
     {

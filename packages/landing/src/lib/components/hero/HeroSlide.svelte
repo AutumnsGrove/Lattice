@@ -1,7 +1,8 @@
 <!--
   HeroSlide — Shared wrapper for hero carousel content slides.
-  Handles layout grid, background gradient, Lexend typography, entrance
-  animations (motion-safe gated), and semantic HTML for accessibility.
+  Layered approach: full-bleed scene → gradient veil → glass text overlay.
+  Handles background gradient, Lexend typography, entrance animations
+  (motion-safe gated), and semantic HTML for accessibility.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -36,18 +37,24 @@
 	aria-label={ariaLabel}
 	class="relative w-full h-full overflow-hidden bg-gradient-to-br {gradientClass}"
 >
-	<!-- Mobile: stacked (scene top 40%, text bottom 60%). Desktop: two columns 55/45 -->
-	<div class="grid grid-rows-[40%_60%] md:grid-rows-none md:grid-cols-[55%_45%] w-full h-full">
-		<!-- Text column -->
-		<div class="order-2 md:order-1 flex flex-col justify-center px-5 py-3 md:px-8 md:py-6 lg:px-10">
-			<Lexend as="div" class="flex flex-col gap-2 md:gap-3">
-				{@render text()}
-			</Lexend>
-		</div>
+	<!-- Layer 1: Full-bleed nature scene -->
+	<div class="absolute inset-0" aria-hidden="true">
+		{@render scene()}
+	</div>
 
-		<!-- Scene column -->
-		<div class="order-1 md:order-2 relative overflow-hidden" aria-hidden="true">
-			{@render scene()}
-		</div>
+	<!-- Layer 2: Gradient veil for text readability -->
+	<div class="absolute inset-0 pointer-events-none
+		bg-gradient-to-t from-white/80 via-white/40 to-transparent
+		dark:from-slate-900/85 dark:via-slate-900/40 dark:to-transparent
+		md:bg-gradient-to-r md:from-white/75 md:via-white/30 md:to-transparent
+		md:dark:from-slate-900/80 md:dark:via-slate-900/30 md:dark:to-transparent">
+	</div>
+
+	<!-- Layer 3: Text overlay -->
+	<div class="relative z-10 w-full h-full flex flex-col justify-end md:justify-center
+		p-5 pb-6 md:p-8 lg:p-10 md:max-w-[55%]">
+		<Lexend as="div" class="flex flex-col gap-2.5 md:gap-3">
+			{@render text()}
+		</Lexend>
 	</div>
 </div>

@@ -27,7 +27,7 @@
 			Shade blocks AI scrapers automatically. Your creativity stays human.
 		</p>
 		<a
-			href="/knowledge/features/shade"
+			href="/knowledge/help/what-is-shade"
 			class="btn-primary inline-flex items-center gap-2 text-sm md:text-base px-5 py-2.5 w-fit mt-2 motion-safe:animate-bloom"
 			style="animation-delay: 300ms;"
 		>
@@ -37,37 +37,37 @@
 	{/snippet}
 
 	{#snippet scene()}
-		<div class="relative w-full h-full flex items-end justify-center">
-			<!-- Dense canopy — two pines + cherry for shelter feel -->
-			<div class="absolute bottom-[10%] left-[10%]">
-				<TreePine {season} animate={active} class="w-14 h-24 md:w-18 md:h-32" />
+		<div class="relative w-full h-full">
+			<!-- Dense canopy — trees spread across canvas, weighted right for shelter feel -->
+			<div class="absolute bottom-[8%] left-[25%] md:left-[38%]">
+				<TreePine {season} animate={active} class="w-16 h-28 md:w-22 md:h-40" />
 			</div>
-			<div class="absolute bottom-[10%] right-[10%]">
-				<TreePine {season} animate={active} class="w-12 h-20 md:w-16 md:h-28 opacity-80" />
+			<div class="absolute bottom-[8%] right-[8%] md:right-[10%]">
+				<TreePine {season} animate={active} class="w-14 h-24 md:w-18 md:h-34 opacity-75" />
 			</div>
-			<div class="absolute bottom-[10%] left-1/2 -translate-x-1/2">
-				<TreeCherry {season} animate={active} class="w-16 h-26 md:w-20 md:h-34" />
-			</div>
-
-			<!-- Cardinal perched -->
-			<div class="absolute top-[25%] right-[22%]">
-				<Cardinal animate={active} class="w-6 h-6 md:w-8 md:h-8" facing="left" />
+			<div class="absolute bottom-[8%] right-[25%] md:right-[28%]">
+				<TreeCherry {season} animate={active} class="w-18 h-30 md:w-24 md:h-42" />
 			</div>
 
-			<!-- Falling leaves -->
-			<div class="absolute top-[15%] left-[30%]">
+			<!-- Cardinal perched — upper right -->
+			<div class="absolute top-[20%] right-[18%]">
+				<Cardinal animate={active} class="w-7 h-7 md:w-9 md:h-9" facing="left" />
+			</div>
+
+			<!-- Falling leaves — scattered across canopy -->
+			<div class="absolute top-[12%] right-[35%]">
 				<LeafFalling {season} animate={active} class="w-4 h-4" variant="maple" delay={0} />
 			</div>
-			<div class="absolute top-[10%] right-[35%] hidden md:block">
-				<LeafFalling {season} animate={active} class="w-3 h-3" variant="cherry" delay={1.5} />
+			<div class="absolute top-[8%] right-[20%]">
+				<LeafFalling {season} animate={active} class="w-3.5 h-3.5" variant="cherry" delay={1.5} />
 			</div>
 
-			<!-- Ground bushes -->
-			<div class="absolute bottom-[6%] left-[25%]">
-				<Bush {season} class="w-12 h-8 md:w-16 md:h-10 opacity-70" />
+			<!-- Ground bushes — wide spread -->
+			<div class="absolute bottom-[4%] left-[30%] md:left-[42%]">
+				<Bush {season} class="w-14 h-10 md:w-18 md:h-12 opacity-65" />
 			</div>
-			<div class="absolute bottom-[4%] right-[20%] hidden md:block">
-				<Bush {season} class="w-10 h-7 opacity-50" />
+			<div class="absolute bottom-[3%] right-[15%]">
+				<Bush {season} class="w-12 h-8 opacity-45" />
 			</div>
 		</div>
 	{/snippet}

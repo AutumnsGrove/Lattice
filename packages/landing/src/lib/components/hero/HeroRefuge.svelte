@@ -38,39 +38,42 @@
 	{/snippet}
 
 	{#snippet scene()}
-		<div class="relative w-full h-full flex items-end justify-center">
-			<!-- Background trees -->
-			<div class="absolute bottom-[10%] left-[8%]">
-				<TreePine {season} animate={active} class="w-12 h-20 md:w-16 md:h-28 opacity-60" />
+		<div class="relative w-full h-full">
+			<!-- Background trees — spread across full canvas, weighted right -->
+			<div class="absolute bottom-[8%] left-[15%] md:left-[35%]">
+				<TreePine {season} animate={active} class="w-14 h-24 md:w-20 md:h-36 opacity-50" />
 			</div>
-			<div class="absolute bottom-[10%] right-[8%] hidden md:block">
-				<TreeCherry {season} animate={active} class="w-14 h-22 md:w-16 md:h-28 opacity-60" />
+			<div class="absolute bottom-[8%] right-[8%] md:right-[12%]">
+				<TreeCherry {season} animate={active} class="w-16 h-24 md:w-20 md:h-36 opacity-55" />
 			</div>
-
-			<!-- Center logo -->
-			<div class="absolute bottom-[25%] left-1/2 -translate-x-1/2">
-				<Logo size={64} {season} />
+			<div class="absolute bottom-[8%] right-[28%] hidden md:block">
+				<TreePine {season} animate={active} class="w-14 h-28 opacity-40" />
 			</div>
 
-			<!-- Ground elements -->
-			<div class="absolute bottom-[6%] left-[20%]">
-				<GrassTuft class="w-8 h-4 md:w-10 md:h-5 opacity-70" />
-			</div>
-			<div class="absolute bottom-[4%] right-[25%]">
-				<Mushroom class="w-5 h-5 md:w-6 md:h-6" />
-			</div>
-			<div class="absolute bottom-[6%] right-[15%] hidden md:block">
-				<GrassTuft class="w-6 h-3 opacity-50" />
+			<!-- Center logo — focal point, shifted right on desktop -->
+			<div class="absolute bottom-[25%] right-[20%] md:right-[30%]">
+				<Logo size={72} {season} />
 			</div>
 
-			<!-- Fireflies (ambient) -->
-			<div class="absolute top-[20%] left-[25%]">
+			<!-- Ground elements — spread wide -->
+			<div class="absolute bottom-[4%] left-[40%] md:left-[45%]">
+				<GrassTuft class="w-10 h-5 md:w-12 md:h-6 opacity-60" />
+			</div>
+			<div class="absolute bottom-[3%] right-[18%]">
+				<Mushroom class="w-6 h-6 md:w-7 md:h-7" />
+			</div>
+			<div class="absolute bottom-[4%] right-[35%]">
+				<GrassTuft class="w-8 h-4 opacity-45" />
+			</div>
+
+			<!-- Fireflies — scattered across the full canvas -->
+			<div class="absolute top-[18%] right-[25%]">
 				<Firefly animate={active} class="w-2.5 h-2.5" intensity="subtle" />
 			</div>
-			<div class="absolute top-[35%] right-[20%]">
+			<div class="absolute top-[35%] right-[15%]">
 				<Firefly animate={active} class="w-2 h-2" intensity="subtle" />
 			</div>
-			<div class="absolute top-[15%] right-[35%] hidden md:block">
+			<div class="absolute top-[12%] left-[45%] md:left-[55%]">
 				<Firefly animate={active} class="w-3 h-3" intensity="normal" />
 			</div>
 		</div>
