@@ -374,6 +374,110 @@ export function getNonRenderableInfo(
   );
 }
 
+// ============================================================================
+// Actionable Error Messages
+// ============================================================================
+
+/**
+ * Map server error messages to actionable, human-friendly messages.
+ * Both the MarkdownEditor and gallery page import this for consistent UX.
+ *
+ * @param serverMessage - Raw error message from the server or fetch failure
+ * @returns A clear, actionable message the user can understand
+ */
+export function getActionableUploadError(serverMessage: string): string {
+  const msg = serverMessage.toLowerCase();
+
+  // Feature flag disabled
+  if (
+    msg.includes("feature_disabled") ||
+    msg.includes("limited beta") ||
+    msg.includes("not enabled")
+  ) {
+    return "Image uploads aren't available yet. This feature is being rolled out gradually.";
+  }
+
+  // Rate limiting
+  if (
+    msg.includes("rate_limited") ||
+    msg.includes("rate limit") ||
+    msg.includes("too many")
+  ) {
+    return "You're uploading too quickly. Wait a moment and try again.";
+  }
+
+  // Content moderation (Petal)
+  if (
+    msg.includes("content_rejected") ||
+    msg.includes("moderation") ||
+    msg.includes("inappropriate")
+  ) {
+    return "This image was flagged by our content safety system. Please try a different image.";
+  }
+
+  // File too large
+  if (
+    msg.includes("too large") ||
+    msg.includes("file size") ||
+    msg.includes("payload too large") ||
+    msg.includes("413")
+  ) {
+    return "This image is too large. Please use an image under 10 MB.";
+  }
+
+  // Invalid file type
+  if (
+    msg.includes("file type") ||
+    msg.includes("unsupported") ||
+    msg.includes("invalid type")
+  ) {
+    return `Unsupported file type. Allowed: ${ALLOWED_TYPES_DISPLAY}.`;
+  }
+
+  // Auth errors
+  if (
+    msg.includes("unauthorized") ||
+    msg.includes("401") ||
+    msg.includes("not authenticated")
+  ) {
+    return "You need to sign in to upload images. Please refresh and try again.";
+  }
+
+  // Forbidden (CSRF, permissions)
+  if (
+    msg.includes("forbidden") ||
+    msg.includes("403") ||
+    msg.includes("csrf")
+  ) {
+    return "Upload blocked — your session may have expired. Please refresh the page.";
+  }
+
+  // Service unavailable
+  if (
+    msg.includes("503") ||
+    msg.includes("service unavailable") ||
+    msg.includes("temporarily")
+  ) {
+    return "The upload service is temporarily unavailable. Please try again in a few minutes.";
+  }
+
+  // Network errors
+  if (
+    msg.includes("network") ||
+    msg.includes("failed to fetch") ||
+    msg.includes("connection")
+  ) {
+    return "Network error — check your connection and try again.";
+  }
+
+  // Fall back to the original message
+  return serverMessage;
+}
+
+// ============================================================================
+// Upload Strategy
+// ============================================================================
+
 /**
  * Comprehensive upload check that returns processing strategy.
  * Use this to decide whether to process client-side or upload raw.

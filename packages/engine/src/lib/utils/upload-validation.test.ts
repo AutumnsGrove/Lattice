@@ -14,6 +14,7 @@ import {
   getFileExtension,
   validateImageFile,
   validateImageFileDeep,
+  getActionableUploadError,
 } from "./upload-validation";
 
 // ============================================================================
@@ -1065,5 +1066,152 @@ describe("validateImageFileDeep - async deep validation", () => {
     const result = await validateImageFileDeep(mockFile);
     expect(result).not.toBeNull();
     expect(result).toContain("do not match declared type");
+  });
+});
+
+// ============================================================================
+// getActionableUploadError Tests
+// ============================================================================
+
+describe("getActionableUploadError", () => {
+  describe("feature flag disabled", () => {
+    it("maps feature_disabled to rollout message", () => {
+      const result = getActionableUploadError("feature_disabled");
+      expect(result).toContain("aren't available yet");
+    });
+
+    it("maps 'limited beta' to rollout message", () => {
+      const result = getActionableUploadError(
+        "Image uploads are in limited beta",
+      );
+      expect(result).toContain("aren't available yet");
+    });
+
+    it("maps 'not enabled' to rollout message", () => {
+      const result = getActionableUploadError(
+        "Feature not enabled for this tenant",
+      );
+      expect(result).toContain("aren't available yet");
+    });
+  });
+
+  describe("rate limiting", () => {
+    it("maps rate_limited to wait message", () => {
+      const result = getActionableUploadError("rate_limited");
+      expect(result).toContain("too quickly");
+    });
+
+    it("maps 'rate limit' to wait message", () => {
+      const result = getActionableUploadError("Rate limit exceeded");
+      expect(result).toContain("too quickly");
+    });
+
+    it("maps 'too many' to wait message", () => {
+      const result = getActionableUploadError("Too many requests");
+      expect(result).toContain("too quickly");
+    });
+  });
+
+  describe("content moderation", () => {
+    it("maps content_rejected to safety message", () => {
+      const result = getActionableUploadError("content_rejected");
+      expect(result).toContain("content safety");
+    });
+
+    it("maps 'moderation' to safety message", () => {
+      const result = getActionableUploadError("Failed moderation check");
+      expect(result).toContain("content safety");
+    });
+  });
+
+  describe("file size errors", () => {
+    it("maps 'too large' to size limit message", () => {
+      const result = getActionableUploadError("File too large");
+      expect(result).toContain("under 10 MB");
+    });
+
+    it("maps 'payload too large' to size limit message", () => {
+      const result = getActionableUploadError("413 Payload Too Large");
+      expect(result).toContain("under 10 MB");
+    });
+  });
+
+  describe("file type errors", () => {
+    it("maps 'file type' to allowed types message", () => {
+      const result = getActionableUploadError("Invalid file type");
+      expect(result).toContain("Unsupported file type");
+      expect(result).toContain(ALLOWED_TYPES_DISPLAY);
+    });
+
+    it("maps 'unsupported' to allowed types message", () => {
+      const result = getActionableUploadError("Unsupported format");
+      expect(result).toContain("Unsupported file type");
+    });
+  });
+
+  describe("auth errors", () => {
+    it("maps 'unauthorized' to sign-in message", () => {
+      const result = getActionableUploadError("Unauthorized");
+      expect(result).toContain("sign in");
+    });
+
+    it("maps '401' to sign-in message", () => {
+      const result = getActionableUploadError("401 Unauthorized");
+      expect(result).toContain("sign in");
+    });
+  });
+
+  describe("forbidden / CSRF errors", () => {
+    it("maps 'forbidden' to session expired message", () => {
+      const result = getActionableUploadError("403 Forbidden");
+      expect(result).toContain("session may have expired");
+    });
+
+    it("maps 'csrf' to session expired message", () => {
+      const result = getActionableUploadError("CSRF token validation failed");
+      expect(result).toContain("session may have expired");
+    });
+  });
+
+  describe("service unavailable", () => {
+    it("maps '503' to temporarily unavailable message", () => {
+      const result = getActionableUploadError("503 Service Unavailable");
+      expect(result).toContain("temporarily unavailable");
+    });
+
+    it("maps 'temporarily' to unavailable message", () => {
+      const result = getActionableUploadError("Service temporarily down");
+      expect(result).toContain("temporarily unavailable");
+    });
+  });
+
+  describe("network errors", () => {
+    it("maps 'Failed to fetch' to network message", () => {
+      const result = getActionableUploadError("Failed to fetch");
+      expect(result).toContain("Network error");
+    });
+
+    it("maps 'network' to network message", () => {
+      const result = getActionableUploadError("Network request failed");
+      expect(result).toContain("Network error");
+    });
+  });
+
+  describe("fallback behavior", () => {
+    it("returns original message for unknown errors", () => {
+      const original = "Something completely unexpected happened";
+      const result = getActionableUploadError(original);
+      expect(result).toBe(original);
+    });
+
+    it("returns original message for empty string", () => {
+      const result = getActionableUploadError("");
+      expect(result).toBe("");
+    });
+
+    it("is case-insensitive for matching", () => {
+      const result = getActionableUploadError("RATE_LIMITED");
+      expect(result).toContain("too quickly");
+    });
   });
 });

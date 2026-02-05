@@ -19,11 +19,15 @@
     ALLOWED_EXTENSIONS,
     ALLOWED_TYPES_DISPLAY,
     validateImageFile,
-    getUploadStrategy
+    getUploadStrategy,
+    getActionableUploadError,
   } from "$lib/utils/upload-validation";
 
-  /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean } } }} */
+  /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean }; grafts?: Record<string, boolean> } }} */
   let { data } = $props();
+
+  // Feature flag for image uploads (cascaded from Arbor layout grafts)
+  const uploadsEnabled = $derived(data.grafts?.image_uploads_enabled ?? false);
 
   // Feature flags from server (reactive to data changes)
   const jxlFeatureEnabled = $derived(data.jxl?.jxlEnabled ?? false);
@@ -241,6 +245,7 @@
       html: null,
       svelte: null,
       duplicate: false,
+      originalFile: file,
     };
 
     uploads = [uploadItem, ...uploads];
@@ -362,10 +367,11 @@
       }
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+      const rawMessage = err instanceof Error ? err.message : 'Upload failed';
+      const errorMessage = getActionableUploadError(rawMessage);
 
       // Show prominent toast notification for immediate visibility
-      toast.error(`Upload failed: ${errorMessage}`);
+      toast.error(errorMessage);
 
       updateUpload({
         status: 'error',
@@ -411,6 +417,13 @@
 
   function clearCompleted() {
     uploads = uploads.filter(u => u.status === 'processing');
+  }
+
+  /** @param {any} upload */
+  async function retryUpload(upload) {
+    if (!upload.originalFile) return;
+    uploads = uploads.filter(u => u.id !== upload.id);
+    await uploadSingleFile(upload.originalFile);
   }
 
   /** @param {any} image */
@@ -460,8 +473,14 @@
 
   <!-- Upload Section -->
   <section class="upload-section">
+    {#if !uploadsEnabled}
+      <div class="uploads-disabled-banner">
+        <span class="banner-icon">~</span>
+        <span>Image uploads are being rolled out gradually and aren't available for your grove yet. You can still browse your existing gallery below.</span>
+      </div>
+    {/if}
     <Glass variant="tint" intensity="light"
-      class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''}"
+      class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''} {!uploadsEnabled ? 'disabled' : ''}"
       role="button"
       tabindex={0}
       aria-label="Drop zone for image uploads"
@@ -676,7 +695,12 @@
             {/if}
 
             {#if upload.status === 'error'}
-              <p class="upload-error">{upload.error}</p>
+              <div class="upload-error-row">
+                <p class="upload-error">{upload.error}</p>
+                {#if upload.originalFile}
+                  <Button variant="secondary" size="sm" onclick={() => retryUpload(upload)}>Retry</Button>
+                {/if}
+              </div>
             {/if}
           </GlassCard>
         {/each}
@@ -1345,9 +1369,43 @@
   }
 
   .upload-error {
-    margin: 0.5rem 0 0 0;
+    margin: 0;
     color: var(--accent-danger);
     font-size: 0.85rem;
+  }
+
+  .upload-error-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .uploads-disabled-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--status-warning-bg, rgba(255, 200, 50, 0.1));
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-standard);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .banner-icon {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  :global(.drop-zone.disabled) {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
   }
 
   /* Gallery Section */

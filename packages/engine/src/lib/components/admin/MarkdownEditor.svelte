@@ -9,6 +9,9 @@
   import "$lib/styles/content.css";
   import { Button, Input, Logo } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
+  import { toast } from "$lib/ui/components/ui/toast";
+  import { apiRequest } from "$lib/utils/api";
+  import { getActionableUploadError } from "$lib/utils/upload-validation";
   import FloatingToolbar from "./FloatingToolbar.svelte";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic } from "lucide-svelte";
@@ -67,6 +70,7 @@
   // Derived graft flags - add new ones here as they're created
   const firesideEnabled = $derived(grafts?.fireside_mode ?? false);
   const scribeEnabled = $derived(grafts?.scribe_mode ?? false);
+  const uploadsEnabled = $derived(grafts?.image_uploads_enabled ?? false);
 
   // Core refs and state
   /** @type {HTMLTextAreaElement | null} */
@@ -100,6 +104,8 @@
   let uploadProgress = $state("");
   /** @type {string | null} */
   let uploadError = $state(null);
+  /** @type {File | null} */
+  let lastFailedFile = $state(null);
 
   // Full preview mode
   let showFullPreview = $state(false);
@@ -659,37 +665,55 @@
 
   /** @param {File} file */
   async function uploadImage(file) {
+    // Pre-check: is the feature enabled via grafts?
+    if (!uploadsEnabled) {
+      toast.warning("Image uploads aren't available yet. This feature is being rolled out gradually.");
+      return;
+    }
+
     isUploading = true;
     uploadProgress = `Uploading ${file.name}...`;
     uploadError = null;
+    lastFailedFile = null;
 
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("folder", "blog");
 
-      const response = await fetch("/api/images/upload", {
+      const result = await apiRequest("/api/images/upload", {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Upload failed");
-      }
-
-      const altText = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      const altText = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || "Image";
       const imageMarkdown = `![${altText}](${result.url})\n`;
       insertAtCursor(imageMarkdown);
 
+      toast.success(`Uploaded ${file.name}`);
       uploadProgress = "";
     } catch (err) {
-      uploadError = err instanceof Error ? err.message : String(err);
-      setTimeout(() => (uploadError = null), 5000);
+      const rawMessage = err instanceof Error ? err.message : String(err);
+      uploadError = getActionableUploadError(rawMessage);
+      lastFailedFile = file;
+      toast.error(uploadError);
+      setTimeout(() => (uploadError = null), 8000);
     } finally {
       isUploading = false;
       uploadProgress = "";
+    }
+  }
+
+  function retryUpload() {
+    if (lastFailedFile) {
+      const file = lastFailedFile;
+      lastFailedFile = null;
+      uploadError = null;
+      uploadImage(file);
     }
   }
 
@@ -760,6 +784,9 @@
       {:else if uploadError}
         <span class="upload-error-icon">!</span>
         <span>{uploadError}</span>
+        {#if lastFailedFile}
+          <button type="button" class="retry-btn" onclick={retryUpload}>[retry]</button>
+        {/if}
       {/if}
     </div>
   {/if}
@@ -1183,6 +1210,19 @@
     border-radius: 50%;
     font-size: 0.75rem;
     font-weight: bold;
+  }
+  .retry-btn {
+    background: transparent;
+    border: none;
+    color: #ffb0b0;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.1rem 0.3rem;
+    transition: color 0.15s ease;
+  }
+  .retry-btn:hover {
+    color: #ffd0d0;
   }
   @keyframes spin {
     to { transform: rotate(360deg); }

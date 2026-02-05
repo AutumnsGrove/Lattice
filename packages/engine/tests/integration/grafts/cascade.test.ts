@@ -335,6 +335,191 @@ describe("Grafts Cascade Integration", () => {
   });
 });
 
+describe("image_uploads_enabled graft", () => {
+  let db: ReturnType<typeof createMockD1>;
+  let kv: ReturnType<typeof createMockKV>;
+  let env: FeatureFlagsEnv;
+
+  beforeEach(() => {
+    db = createMockD1();
+    kv = createMockKV();
+    env = {
+      DB: db as unknown as D1Database,
+      FLAGS_KV: kv as unknown as KVNamespace,
+    };
+  });
+
+  it("evaluates to true when default_value is 'true' with no rules", async () => {
+    // Arrange: Flag enabled with default_value = "true" (the fix we applied)
+    db.prepare = vi.fn((sql: string) => {
+      if (sql.includes("SELECT id FROM feature_flags")) {
+        return {
+          all: vi.fn(async () => ({
+            results: [{ id: "image_uploads_enabled" }],
+          })),
+        };
+      }
+      if (sql.includes("SELECT * FROM feature_flags WHERE id")) {
+        return {
+          bind: vi.fn(() => ({
+            first: vi.fn(async () => ({
+              id: "image_uploads_enabled",
+              name: "Image Uploads",
+              flag_type: "boolean",
+              default_value: "true",
+              enabled: 1,
+              greenhouse_only: 0,
+              cache_ttl: 60,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })),
+          })),
+        };
+      }
+      if (sql.includes("flag_rules")) {
+        return {
+          bind: vi.fn(() => ({
+            all: vi.fn(async () => ({ results: [] })),
+          })),
+        };
+      }
+      return {
+        bind: vi.fn(() => ({
+          first: vi.fn(async () => null),
+          all: vi.fn(async () => ({ results: [] })),
+        })),
+      };
+    });
+
+    // Act
+    const grafts = await getEnabledGrafts({ tenantId: "any-tenant" }, env);
+
+    // Assert: The flag should evaluate to true
+    expect(grafts.image_uploads_enabled).toBe(true);
+
+    // Simulate component derivation pattern:
+    // const uploadsEnabled = $derived(grafts?.image_uploads_enabled ?? false);
+    const uploadsEnabled = grafts?.image_uploads_enabled ?? false;
+    expect(uploadsEnabled).toBe(true);
+  });
+
+  it("evaluates to false when default_value is 'false' with no rules (the original bug)", async () => {
+    // Arrange: This was the production state that caused issue #955
+    db.prepare = vi.fn((sql: string) => {
+      if (sql.includes("SELECT id FROM feature_flags")) {
+        return {
+          all: vi.fn(async () => ({
+            results: [{ id: "image_uploads_enabled" }],
+          })),
+        };
+      }
+      if (sql.includes("SELECT * FROM feature_flags WHERE id")) {
+        return {
+          bind: vi.fn(() => ({
+            first: vi.fn(async () => ({
+              id: "image_uploads_enabled",
+              name: "Image Uploads",
+              flag_type: "boolean",
+              default_value: "false", // <-- The original bug
+              enabled: 1,
+              greenhouse_only: 0,
+              cache_ttl: 60,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })),
+          })),
+        };
+      }
+      if (sql.includes("flag_rules")) {
+        return {
+          bind: vi.fn(() => ({
+            all: vi.fn(async () => ({ results: [] })), // No rules!
+          })),
+        };
+      }
+      return {
+        bind: vi.fn(() => ({
+          first: vi.fn(async () => null),
+          all: vi.fn(async () => ({ results: [] })),
+        })),
+      };
+    });
+
+    // Act
+    const grafts = await getEnabledGrafts({ tenantId: "any-tenant" }, env);
+
+    // Assert: With default_value "false" and no rules, flag is false
+    expect(grafts.image_uploads_enabled).toBe(false);
+
+    // Component would block uploads:
+    const uploadsEnabled = grafts?.image_uploads_enabled ?? false;
+    expect(uploadsEnabled).toBe(false);
+  });
+
+  it("cascades to page data like editor and gallery would consume", async () => {
+    // Arrange: Set up flag as enabled
+    db.prepare = vi.fn((sql: string) => {
+      if (sql.includes("SELECT id FROM feature_flags")) {
+        return {
+          all: vi.fn(async () => ({
+            results: [{ id: "image_uploads_enabled" }],
+          })),
+        };
+      }
+      if (sql.includes("SELECT * FROM feature_flags WHERE id")) {
+        return {
+          bind: vi.fn(() => ({
+            first: vi.fn(async () => ({
+              id: "image_uploads_enabled",
+              name: "Image Uploads",
+              flag_type: "boolean",
+              default_value: "true",
+              enabled: 1,
+              greenhouse_only: 0,
+              cache_ttl: 60,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })),
+          })),
+        };
+      }
+      if (sql.includes("flag_rules")) {
+        return {
+          bind: vi.fn(() => ({
+            all: vi.fn(async () => ({ results: [] })),
+          })),
+        };
+      }
+      return {
+        bind: vi.fn(() => ({
+          first: vi.fn(async () => null),
+          all: vi.fn(async () => ({ results: [] })),
+        })),
+      };
+    });
+
+    // Act: Simulate admin layout data cascade
+    const grafts = await getEnabledGrafts({ tenantId: "test-tenant" }, env);
+
+    const layoutData = {
+      user: { id: "user-1" },
+      tenant: { id: "test-tenant" },
+      grafts,
+    };
+
+    // Assert: MarkdownEditor pattern — receives grafts as prop
+    const editorGrafts = layoutData.grafts;
+    const uploadsEnabled = editorGrafts?.image_uploads_enabled ?? false;
+    expect(uploadsEnabled).toBe(true);
+
+    // Assert: Gallery page pattern — reads from data.grafts
+    const pageData = { ...layoutData, jxl: { jxlEnabled: false } };
+    const galleryUploadsEnabled =
+      pageData.grafts?.image_uploads_enabled ?? false;
+    expect(galleryUploadsEnabled).toBe(true);
+  });
+});
+
 describe("Grafts Error Handling", () => {
   it("returns empty grafts when database is unavailable", async () => {
     // Arrange: Create env with failing DB
