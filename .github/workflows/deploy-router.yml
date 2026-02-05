@@ -38,7 +38,7 @@ jobs:
         working-directory: .
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         working-directory: packages/grove-router
 
       - name: Run tests
@@ -52,3 +52,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: packages/grove-router
+          packageManager: pnpm

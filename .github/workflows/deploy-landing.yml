@@ -72,6 +72,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply grove-engine-db --remote
           workingDirectory: packages/landing
+          packageManager: pnpm
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -80,3 +81,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing
           workingDirectory: packages/landing
+          packageManager: pnpm

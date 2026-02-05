@@ -62,3 +62,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-plant
           workingDirectory: packages/plant
+          packageManager: pnpm

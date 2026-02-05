@@ -28,10 +28,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: packages/workers/clearing-monitor
+        working-directory: .
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
         working-directory: packages/workers/clearing-monitor
 
       - name: Deploy to Cloudflare Workers

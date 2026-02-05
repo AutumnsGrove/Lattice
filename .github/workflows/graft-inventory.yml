@@ -168,7 +168,7 @@ jobs:
             If this PR adds new grafts, please:
             1. Update \`.github/graft-inventory.json\` with the new flag(s)
             2. Add the flag ID to \`KnownGraftId\` type in \`grafts.ts\`
-            3. Apply migration to production: \`npx wrangler d1 execute grove-engine-db --remote --file=...\`
+            3. Apply migration to production: \`pnpm exec wrangler d1 execute grove-engine-db --remote --file=...\`
             4. Update the developer guide if the pattern is novel
 
             See \`docs/guides/adding-grafts-and-flags.md\` for the full process.
@@ -245,7 +245,7 @@ jobs:
             awk '/INSERT OR IGNORE INTO feature_flags/{f=1;next} f&&/VALUES/{v=1;next} v&&/^[[:space:]]*'"'"'[a-z_]+/{gsub(/[[:space:]'"'"',]/,"");print;f=0;v=0}' packages/engine/migrations/*.sql | sort -u
 
             # Query production D1
-            npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, name, greenhouse_only FROM feature_flags ORDER BY id;"
+            pnpm exec wrangler d1 execute grove-engine-db --remote --command="SELECT id, name, greenhouse_only FROM feature_flags ORDER BY id;"
             \`\`\`
 
             ---

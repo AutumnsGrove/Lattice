@@ -222,7 +222,7 @@ jobs:
           echo "Analyzing documentation keywords for: $TAG"
 
           # Run keyword analysis script
-          npx tsx scripts/generate/analyze-doc-keywords.ts "$TAG" || echo "Warning: Keyword analysis failed, continuing..."
+          pnpm exec tsx scripts/generate/analyze-doc-keywords.ts "$TAG" || echo "Warning: Keyword analysis failed, continuing..."
 
       - name: Sync data to landing page
         if: steps.snapshot.outcome == 'success'

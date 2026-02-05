@@ -56,3 +56,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=forage
           workingDirectory: packages/domains
+          packageManager: pnpm

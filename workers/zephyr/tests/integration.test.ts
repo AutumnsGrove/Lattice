@@ -158,7 +158,7 @@ describe("Zephyr Email Pipeline", () => {
       const dbAtLimit = {
         prepare: vi.fn(() => ({
           bind: vi.fn(() => ({
-            first: vi.fn().mockResolvedValue({ count: 10 }),
+            first: vi.fn().mockResolvedValue({ count: 11 }),
             all: vi.fn().mockResolvedValue({ results: [] }),
             run: vi.fn().mockResolvedValue({ success: true }),
           })),
