@@ -290,7 +290,7 @@
 						</div>
 						<div class="flex items-center gap-3 mt-3">
 							<a href="https://github.com/charmbracelet/crush" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
-								github.com/charmbracelet/crush →
+								charmbracelet/crush →
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
@@ -354,12 +354,12 @@
 					</div>
 
 					<div class="card p-5">
-						<h3 class="text-lg font-serif text-foreground mb-1">Lemon Squeezy</h3>
+						<h3 class="text-lg font-serif text-foreground mb-1">Stripe</h3>
 						<p class="text-foreground-muted font-sans text-sm">
-							Payment processing and merchant of record. Handles subscriptions, billing, tax compliance, and secure payment flows—so we can focus on building, not paperwork.
+							Payment processing for subscriptions, billing, and secure checkout. Powers Grove's payment flows with reliability and developer-friendly tooling.
 						</p>
-						<a href="https://lemonsqueezy.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
-							lemonsqueezy.com →
+						<a href="https://stripe.com" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline mt-2 inline-block">
+							stripe.com →
 						</a>
 					</div>
 
