@@ -18,7 +18,8 @@
 		AtSign,
 		Upload,
 		MessageSquare,
-		Sprout
+		Sprout,
+		Gift
 	} from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -51,7 +52,8 @@
 	// Wayfinder-only tabs
 	const wayfinderTabs = [
 		{ href: '/arbor/porch', label: 'Porch', icon: MessageSquare },
-		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout }
+		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout },
+		{ href: '/arbor/comped-invites', label: 'Invites', icon: Gift }
 	];
 
 	let tabs = $derived(data.isWayfinder ? [...baseTabs, ...wayfinderTabs] : baseTabs);

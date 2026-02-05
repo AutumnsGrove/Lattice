@@ -9,7 +9,8 @@
 		MessageSquare,
 		Sprout,
 		Home,
-		LogOut
+		LogOut,
+		Gift
 	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -110,6 +111,23 @@
 						<h2 class="text-lg font-serif text-foreground mb-1">Greenhouse</h2>
 						<p class="text-sm text-foreground-muted font-sans">
 							Manage early access to experimental features for trusted tenants.
+						</p>
+					</div>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Comped Invites Card (Wayfinder only) -->
+		<a href="/arbor/comped-invites" class="block">
+			<GlassCard hoverable class="p-6 h-full">
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+						<Gift class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+					</div>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-serif text-foreground mb-1">Comped Invites</h2>
+						<p class="text-sm text-foreground-muted font-sans">
+							Invite beta testers and friends to Grove with free accounts.
 						</p>
 					</div>
 				</div>
