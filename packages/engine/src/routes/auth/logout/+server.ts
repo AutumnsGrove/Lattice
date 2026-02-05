@@ -56,5 +56,5 @@ export const GET: RequestHandler = async ({
   // Also clear the old session cookie if it exists (from magic code auth)
   cookies.delete("session_token", { path: "/" });
 
-  redirect(302, "/auth/login");
+  redirect(302, "/");
 };
