@@ -1,7 +1,9 @@
 ---
 title: Firefly CI Specification
 description: Ephemeral CI/CD runners that ignite on demand and fade when done
+category: specs
 status: draft
+lastUpdated: '2026-02-05'
 ---
 
 # Firefly CI Specification

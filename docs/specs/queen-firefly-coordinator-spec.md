@@ -1,7 +1,9 @@
 ---
 title: Queen Firefly Coordinator Specification
 description: The sovereign orchestrator of ephemeral CI runners
+category: specs
 status: draft
+lastUpdated: '2026-02-05'
 ---
 
 # Queen Firefly Coordinator Specification

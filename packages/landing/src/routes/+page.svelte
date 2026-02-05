@@ -3,10 +3,8 @@
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview, GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm, GlassCarousel, GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/state';
-
-	let { data } = $props();
 
 	// Lucide icons
 	import {
@@ -20,8 +18,13 @@
 		Download,
 		ArrowRight,
 		Sprout,
-		ChevronDown
+		ChevronDown,
+		PenLine,
+		Image as ImageIcon,
+		ChevronRight
 	} from 'lucide-svelte';
+
+	let { data } = $props();
 
 	// Get error from URL if present
 	let error = $derived(page.url.searchParams.get('error'));
@@ -30,6 +33,58 @@
 	function handleLogoClick() {
 		seasonStore.cycle();
 	}
+
+	// Hero carousel slides - using prepared marketing images
+	const heroSlides = [
+		{
+			src: '/assets/carousel/hero-slide-1.png',
+			alt: 'A grove for people who lost their groves. Five seasonal Grove tree logos in pink, green, orange, blue, and purple. Plant your blog for $8/mo. No ads. No algorithms. Just your words.'
+		},
+		{
+			src: '/assets/carousel/hero-slide-2.png',
+			alt: 'Your words. Your space. Forever. A Grove tree logo next to you.grove.place domain showcase. Claim yours button.'
+		},
+		{
+			src: '/assets/carousel/hero-slide-3.png',
+			alt: '100 year domain guarantee. Some trees outlive the people who planted them. Your words remain accessible from 2026 to 2126. Plant your legacy button.'
+		},
+		{
+			src: '/assets/carousel/hero-slide-4.png',
+			alt: 'No algorithms. No engagement metrics. Just you. Four seasonal Grove tree logos. Find your peace button.'
+		},
+		{
+			src: '/assets/carousel/hero-slide-5.png',
+			alt: 'The internet should belong to everyone. Autumn-colored Grove tree logo. Become a Seedling for $8/mo button.'
+		}
+	];
+
+	// Feature showcase items with visual cards
+	const features = [
+		{
+			title: 'Flow Editor',
+			description: 'Write in a clean, focused environment with markdown support and live preview.',
+			icon: PenLine,
+			href: '/knowledge/features/flow-editor'
+		},
+		{
+			title: 'Shade Protection',
+			description: 'AI scrapers and bots are blocked automatically. Your creativity stays human.',
+			icon: Shield,
+			href: '/knowledge/features/shade'
+		},
+		{
+			title: 'Custom Domains',
+			description: 'Use yourname.grove.place or bring your own domain. Make it truly yours.',
+			icon: Trees,
+			href: '/knowledge/features/domains'
+		},
+		{
+			title: 'Gallery Curio',
+			description: 'Beautiful image galleries with lightbox viewing. Share your visual stories.',
+			icon: ImageIcon,
+			href: '/knowledge/features/gallery'
+		}
+	];
 
 	// FAQ data
 	const faqItems = [
@@ -82,7 +137,6 @@
 			expandedFaq = new Set(expandedFaq);
 		}
 	}
-
 </script>
 
 <SEO
@@ -98,12 +152,12 @@
 	signInLabel="Sign up"
 />
 
-<main class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+<main class="min-h-screen flex flex-col items-center px-6 py-12">
 	<!-- Error Banner -->
 	{#if error}
 		<div role="alert" class="mb-8 w-full max-w-md p-4 bg-error border border-error rounded-lg">
 			<div class="flex items-start gap-3">
-				<svg class="w-5 h-5 text-error flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+				<svg class="w-5 h-5 text-error flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 					<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
 				</svg>
 				<div>
@@ -114,33 +168,81 @@
 		</div>
 	{/if}
 
-	<!-- Logo/Brand -->
-	<div class="mb-8">
-		<button
-			onclick={handleLogoClick}
-			class="transition-transform hover:scale-110 active:scale-95"
-			aria-label="Toggle season theme"
-			title="Click to change season"
+	<!-- Hero Section -->
+	<section class="w-full max-w-4xl text-center mb-12">
+		<!-- Logo/Brand -->
+		<div class="mb-6">
+			<button
+				onclick={handleLogoClick}
+				class="transition-transform hover:scale-110 active:scale-95 inline-block"
+				aria-label="Toggle season theme"
+				title="Click to change season"
+			>
+				<Logo size={96} season={seasonStore.current} />
+			</button>
+		</div>
+
+		<!-- Title -->
+		<h1 class="text-4xl md:text-5xl lg:text-6xl font-serif text-foreground mb-3">Grove</h1>
+
+		<!-- Tagline -->
+		<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4">
+			A place to Be.
+		</p>
+
+		<!-- Subtagline -->
+		<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-xl mx-auto leading-relaxed mb-8">
+			Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice.
+		</p>
+
+		<!-- Primary CTA -->
+		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+			<a
+				href="https://plant.grove.place"
+				class="btn-primary inline-flex items-center gap-2 text-base px-6 py-3"
+			>
+				Plant Your Blog
+				<Sprout class="w-5 h-5" aria-hidden="true" />
+			</a>
+			<a
+				href="/knowledge/help/what-is-grove"
+				class="btn-secondary inline-flex items-center gap-2 text-base"
+			>
+				Learn More
+				<ArrowRight class="w-4 h-4" aria-hidden="true" />
+			</a>
+		</div>
+
+		<p class="text-foreground-subtle text-sm font-sans">
+			Signups open end of February. Feel free to look around.
+		</p>
+	</section>
+
+	<!-- Hero Carousel Section -->
+	<section class="w-full max-w-4xl mb-16" aria-label="Grove feature highlights">
+		<GlassCarousel
+			itemCount={heroSlides.length}
+			showDots={true}
+			showArrows={true}
+			autoplay={false}
+			autoplayInterval={6000}
+			variant="frosted"
+			class="w-full"
 		>
-			<Logo size={128} season={seasonStore.current} />
-		</button>
-	</div>
-
-	<!-- Title -->
-	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center">Grove</h1>
-
-	<!-- Tagline -->
-	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4 text-center">
-		A place to Be.
-	</p>
-
-	<!-- Subtagline -->
-	<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-lg text-center mb-8 leading-relaxed">
-		Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice.
-	</p>
+			{#snippet item(index: number)}
+				{@const slide = heroSlides[index]}
+				<img
+					src={slide.src}
+					alt={slide.alt}
+					class="w-full h-full object-contain"
+					loading={index === 0 ? 'eager' : 'lazy'}
+				/>
+			{/snippet}
+		</GlassCarousel>
+	</section>
 
 	<!-- Launch Notice -->
-	<div class="w-full max-w-md mb-8">
+	<div class="w-full max-w-lg mb-12">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
 				<span class="font-medium">Grove opens February 14th.</span> Be among the first to plant your corner of the internet.
@@ -148,10 +250,39 @@
 		</div>
 	</div>
 
+	<!-- Feature Showcase Grid -->
+	<section class="w-full max-w-4xl mb-16" aria-labelledby="features-heading">
+		<h2 id="features-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">What Grove Offers</h2>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{#each features as feature}
+				<a
+					href={feature.href}
+					class="group glass-grove rounded-xl p-6 hover:bg-white/60 dark:hover:bg-emerald-950/40 transition-all duration-200 border border-transparent hover:border-accent-muted/30"
+				>
+					<div class="flex items-start gap-4">
+						<div class="w-12 h-12 rounded-lg bg-accent-subtle/30 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-muted/30 transition-colors" aria-hidden="true">
+							<feature.icon class="w-6 h-6 text-accent-muted" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<h3 class="text-foreground font-sans font-medium mb-1 group-hover:text-accent-muted transition-colors flex items-center gap-2">
+								{feature.title}
+								<ChevronRight class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+							</h3>
+							<p class="text-foreground-subtle text-sm font-sans leading-relaxed">
+								{feature.description}
+							</p>
+						</div>
+					</div>
+				</a>
+			{/each}
+		</div>
+	</section>
+
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mb-12">
 		<div class="w-12 h-px bg-divider"></div>
-		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 			<path
 				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
 				fill-opacity="0.6"
@@ -160,89 +291,43 @@
 		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
-	<!-- CTA Links -->
-	<div class="text-center max-w-md mb-12">
-		<p class="text-foreground-muted text-lg font-sans leading-relaxed mb-4">
-			A quiet corner of the internet where your words can grow — and stay yours.
-		</p>
-
-		<!-- Quick explainer link -->
-		<a
-			href="/knowledge/marketing/grove-at-a-glance"
-			class="inline-flex items-center gap-1.5 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors mb-6"
-		>
-			<BookOpen class="w-4 h-4" />
-			<span>30-second overview</span>
-			<ArrowRight class="w-3 h-3" />
-		</a>
-
-		<!-- Primary CTA: Plant your blog -->
-		<a
-			href="https://plant.grove.place"
-			class="btn-primary inline-flex items-center gap-2 text-base mb-4"
-		>
-			Plant Your Blog
-			<Sprout class="w-4 h-4" />
-		</a>
-		<p class="text-foreground-subtle text-sm font-sans mb-6">
-			Opening day: February 14th. Claim your spot.
-		</p>
-
-		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-			<a
-				href="/knowledge/help/what-is-grove"
-				class="btn-secondary inline-flex items-center gap-2 text-base"
-			>
-				What is Grove?
-				<Leaf class="w-4 h-4" />
-			</a>
-			<a
-				href="/vision"
-				class="btn-secondary inline-flex items-center gap-2 text-base"
-			>
-				Our Vision
-				<ArrowRight class="w-4 h-4" />
-			</a>
-		</div>
-	</div>
-
 	<!-- Quick Links -->
-	<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-12">
+	<nav class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-12" aria-label="Quick links">
 		<a
 			href="/roadmap"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<Map class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<Map class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
 			<span>Roadmap</span>
 		</a>
-		<span class="text-divider hidden sm:inline">·</span>
+		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
 		<a
 			href="/knowledge"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<BookOpen class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<BookOpen class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
 			<span>Knowledge</span>
 		</a>
-		<span class="text-divider hidden sm:inline">·</span>
+		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
 		<a
 			href="/forest"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<Trees class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<Trees class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
 			<span>Forest</span>
 		</a>
-		<span class="text-divider hidden sm:inline">·</span>
+		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
 		<a
 			href="/pricing"
 			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
 		>
-			<HandCoins class="w-4 h-4 group-hover:scale-110 transition-transform" />
+			<HandCoins class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
 			<span>Pricing</span>
 		</a>
-	</div>
+	</nav>
 
 	<!-- Roadmap Preview Card -->
-	<section class="w-full max-w-lg mb-16">
+	<section class="w-full max-w-lg mb-16" aria-label="Development roadmap">
 		<RoadmapPreview
 			phase="Thaw"
 			subtitle="The ice begins to crack"
@@ -253,8 +338,8 @@
 	</section>
 
 	<!-- Who is Grove for? -->
-	<section class="w-full max-w-2xl mb-12">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Who is Grove for?</h2>
+	<section class="w-full max-w-2xl mb-12" aria-labelledby="audience-heading">
+		<h2 id="audience-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Who is Grove for?</h2>
 
 		<div class="glass-grove rounded-xl p-6 space-y-4">
 			<p class="text-foreground-subtle font-sans leading-relaxed">
@@ -270,8 +355,8 @@
 	</section>
 
 	<!-- Why I Built This -->
-	<section class="w-full max-w-2xl mb-12">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Why I built this</h2>
+	<section class="w-full max-w-2xl mb-12" aria-labelledby="why-heading">
+		<h2 id="why-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Why I built this</h2>
 
 		<div class="glass-grove rounded-xl p-6 space-y-4">
 			<p class="text-foreground-subtle font-sans leading-relaxed">
@@ -290,25 +375,25 @@
 	</section>
 
 	<!-- What You Get -->
-	<section class="w-full max-w-2xl mb-8">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">What you get</h2>
+	<section class="w-full max-w-2xl mb-8" aria-labelledby="benefits-heading">
+		<h2 id="benefits-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">What you get</h2>
 
 		<div class="glass-grove rounded-xl p-6">
 			<ul class="space-y-3 text-foreground-subtle font-sans">
 				<li class="flex items-start gap-3">
-					<Leaf class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<Leaf class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" aria-hidden="true" />
 					<span><span class="text-foreground font-medium">yourname.grove.place</span> — a website that's yours</span>
 				</li>
 				<li class="flex items-start gap-3">
-					<Shield class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<Shield class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" aria-hidden="true" />
 					<span><span class="text-foreground font-medium"><GroveTerm term="shade">Shade</GroveTerm> protection</span> — AI companies send bots to scrape websites and train their models on your writing. Grove blocks them.</span>
 				</li>
 				<li class="flex items-start gap-3">
-					<Users class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<Users class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" aria-hidden="true" />
 					<span><span class="text-foreground font-medium">No algorithms, no ads</span> — you're the customer, not the product</span>
 				</li>
 				<li class="flex items-start gap-3">
-					<Download class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" />
+					<Download class="w-5 h-5 text-accent-muted flex-shrink-0 mt-0.5" aria-hidden="true" />
 					<span><span class="text-foreground font-medium">Take your stuff and go</span> — export everything anytime, your content lives in standard formats</span>
 				</li>
 			</ul>
@@ -316,8 +401,8 @@
 	</section>
 
 	<!-- FAQ Section -->
-	<section id="faq" class="w-full max-w-2xl mb-12 scroll-mt-24">
-		<h2 class="text-lg font-serif text-foreground-muted text-center mb-6">Frequently Asked Questions</h2>
+	<section id="faq" class="w-full max-w-2xl mb-12 scroll-mt-24" aria-labelledby="faq-heading">
+		<h2 id="faq-heading" class="text-lg font-serif text-foreground-muted text-center mb-6">Frequently Asked Questions</h2>
 
 		<div class="glass-grove rounded-xl p-6">
 			<div class="space-y-3 text-sm font-sans">
@@ -336,6 +421,7 @@
 							</span>
 							<ChevronDown
 								class="w-4 h-4 text-foreground-faint flex-shrink-0 transition-transform duration-200 {isExpanded ? 'rotate-180' : ''}"
+								aria-hidden="true"
 							/>
 						</button>
 
@@ -356,7 +442,7 @@
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mt-8 mb-12">
 		<div class="w-12 h-px bg-divider"></div>
-		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor">
+		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 			<path
 				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
 				fill-opacity="0.6"
@@ -385,9 +471,9 @@
 			href="/pricing"
 			class="inline-flex items-center gap-2 text-accent-muted hover:text-accent font-sans transition-colors"
 		>
-			<HandCoins class="w-4 h-4" />
+			<HandCoins class="w-4 h-4" aria-hidden="true" />
 			See all plans
-			<ArrowRight class="w-4 h-4" />
+			<ArrowRight class="w-4 h-4" aria-hidden="true" />
 		</a>
 	</section>
 
