@@ -95,6 +95,84 @@ def secret_init(ctx: click.Context) -> None:
         ctx.exit(1)
 
 
+@secret.command("generate")
+@click.argument("name")
+@click.option("--length", "-l", default=32, help="Key length in bytes (default: 32)")
+@click.option("--force", is_flag=True, help="Overwrite existing secret")
+@click.pass_context
+def secret_generate(ctx: click.Context, name: str, length: int, force: bool) -> None:
+    """Generate and store a secure API key.
+
+    Creates a cryptographically secure random key using secrets.token_urlsafe()
+    and stores it in the vault. The value is NEVER shown - only confirmed.
+
+    This is agent-safe: the secret value is generated and stored without
+    ever being displayed or returned.
+
+    Examples:
+
+        gw secret generate ZEPHYR_API_KEY
+
+        gw secret generate MY_KEY --length 48
+
+        gw secret generate EXISTING_KEY --force
+    """
+    import secrets as secrets_module
+
+    output_json: bool = ctx.obj.get("output_json", False)
+    vault = SecretsVault()
+
+    # Create vault if it doesn't exist
+    if not vault.exists:
+        if output_json:
+            console.print(json.dumps({"error": "Vault does not exist. Run 'gw secret init' first."}))
+        else:
+            error("Vault does not exist. Run 'gw secret init' first.")
+        ctx.exit(1)
+
+    try:
+        password = get_vault_password()
+        vault.unlock(password)
+    except VaultError as e:
+        if output_json:
+            console.print(json.dumps({"error": f"Failed to unlock vault: {e}"}))
+        else:
+            error(f"Failed to unlock vault: {e}")
+        ctx.exit(1)
+
+    # Check if secret already exists
+    if vault.secret_exists(name) and not force:
+        if output_json:
+            console.print(json.dumps({"error": f"Secret '{name}' already exists. Use --force to overwrite."}))
+        else:
+            warning(f"Secret '{name}' already exists")
+            info("Use --force to overwrite")
+        ctx.exit(1)
+
+    # Generate secure key
+    key = secrets_module.token_urlsafe(length)
+
+    try:
+        vault.set_secret(name, key)
+        if output_json:
+            console.print(json.dumps({
+                "name": name,
+                "generated": True,
+                "length": length,
+                "note": "Value stored in vault (never shown)"
+            }))
+        else:
+            success(f"Generated and stored '{name}' ({length} bytes)")
+            console.print("[dim]🔒 Value stored in vault - never shown for security[/dim]")
+            console.print(f"[dim]Apply with: gw secret apply {name} --worker WORKER_NAME[/dim]")
+    except VaultError as e:
+        if output_json:
+            console.print(json.dumps({"error": f"Failed to store secret: {e}"}))
+        else:
+            error(f"Failed to store secret: {e}")
+        ctx.exit(1)
+
+
 @secret.command("set")
 @click.argument("name")
 @click.pass_context

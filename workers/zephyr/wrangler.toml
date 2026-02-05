@@ -6,7 +6,7 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "zephyr-logs"
-database_id = "[TO BE SET]"
+database_id = "a7038f4d-4850-428c-b816-f2636668852d"
 
 # Environment variables
 [vars]
