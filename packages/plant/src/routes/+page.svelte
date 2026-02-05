@@ -363,7 +363,7 @@
 				</p>
 
 				<LoginGraft
-					providers={['google']}
+					providers={['passkey', 'google']}
 					returnTo="/profile"
 					variant="default"
 					class="!p-0 !bg-transparent !border-none !shadow-none"
