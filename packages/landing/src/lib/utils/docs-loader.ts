@@ -8,6 +8,7 @@ import type {
   DocWithContent,
   DocHeader,
 } from "$lib/types/docs";
+import { processGroveTerms } from "./markdown-groveterm";
 
 /**
  * Generate a URL-safe ID from text.
@@ -296,7 +297,7 @@ export function loadDocBySlug(
     return {
       ...docWithoutPath,
       content: markdownContent,
-      html: md.render(markdownContent),
+      html: md.render(processGroveTerms(markdownContent)),
       headers,
     };
   } catch (error) {

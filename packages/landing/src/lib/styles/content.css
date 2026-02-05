@@ -523,3 +523,44 @@
     font-size: 2rem;
   }
 }
+
+/* ==========================================================================
+   GroveTerm - Interactive terminology
+   ========================================================================== */
+
+.content-body abbr.grove-term {
+  /* Remove default abbr styling */
+  text-decoration: none;
+
+  /* Grove styling */
+  border-bottom: 1px dotted #2c5f2d;
+  cursor: help;
+  font-style: normal;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.dark .content-body abbr.grove-term {
+  border-bottom-color: #5cb85f;
+}
+
+.content-body abbr.grove-term:hover {
+  border-bottom-style: solid;
+  color: #2c5f2d;
+}
+
+.dark .content-body abbr.grove-term:hover {
+  color: #5cb85f;
+}
+
+/* Focus styles for keyboard accessibility */
+.content-body abbr.grove-term:focus {
+  outline: 2px solid #2c5f2d;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.dark .content-body abbr.grove-term:focus {
+  outline-color: #5cb85f;
+}
