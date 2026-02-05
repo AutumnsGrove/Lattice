@@ -17,9 +17,9 @@ order: 1
 
 # Understanding Replies vs. Comments
 
-> **Coming in Full Bloom:** The comments and replies system is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+> **Coming in Full Bloom:** The comments and replies system is launching as part of [[your-grove|Grove]]'s Full Bloom release. The features described below represent what's coming—not what's available today.
 
-Grove has two ways for readers to respond to your posts: replies and comments. They work differently, and that's intentional.
+[[your-grove|Grove]] has two ways for readers to respond to your posts: replies and comments. They work differently, and that's intentional.
 
 ## The short version
 

@@ -25,7 +25,7 @@ Every platform faces a tension: build one experience for everyone, or let each u
 
 Grove uses Grafts to split the difference. The core experience stays consistent. But specific features can be "grafted" onto individual trees. Want JXL image encoding? Graft it on. Ready to test a feature before it's official? You might be in the greenhouse.
 
-This isn't about plugins you install. Grafts are trusted configurations the Wayfinder (that's Autumn) enables for specific groves. It's garden-level decision-making, not a marketplace.
+This isn't about plugins you install. [[Grafts]] are trusted configurations the [[wayfinder]] (that's Autumn) enables for specific [[your-grove|groves]]. It's [[your-garden|garden]]-level decision-making, not a marketplace.
 
 ## How it works
 
@@ -42,21 +42,21 @@ Think of your blog as a tree with a healthy trunk and branches. Grafts add new b
 
 **Kill switches** — If a feature causes problems, it can be disabled instantly across all affected groves. Protection built into the system.
 
-Grafts use Grove's vocabulary:
-- *Graft* — Enable a feature
-- *Prune* — Disable a feature
-- *Propagate* — Roll out gradually
-- *Blight* — Emergency disable
+[[Grafts]] use Grove's vocabulary:
+- *graft* — Enable a feature
+- *prune* — Disable a feature
+- *propagate* — Roll out gradually
+- *blight* — Emergency disable
 
 ## What this means for you
 
 **Features appear when they make sense.** If you see something new on your blog, it was grafted on intentionally—either because it fits your tier, because you're part of a rollout, or because you asked for it.
 
-**Some things are tier-gated.** Higher subscription tiers unlock more grafts. This is how Sapling features differ from Seedling, or how Oak unlocks capabilities beyond Sapling.
+**Some things are tier-gated.** Higher subscription tiers unlock more [[grafts]]. This is how Sapling features differ from Seedling, or how Oak unlocks capabilities beyond Sapling.
 
-**You won't notice most of this.** Grafts work behind the scenes. The important thing isn't the mechanism—it's that your grove grows in ways that make sense for you.
+**You won't notice most of this.** [[Grafts]] work behind the scenes. The important thing isn't the mechanism—it's that your [[your-grove|grove]] grows in ways that make sense for you.
 
-**Greenhouse mode** — Early access testing for features before they're ready for everyone. If your grove is in the greenhouse, you'll see things before they're official. (See [What is Greenhouse?](/knowledge/help/what-is-greenhouse))
+**Greenhouse mode** — Early access testing for features before they're ready for everyone. If your [[your-grove|grove]] is in the greenhouse, you'll see things before they're official. (See [What is Greenhouse?](/knowledge/help/what-is-greenhouse))
 
 ## Related
 

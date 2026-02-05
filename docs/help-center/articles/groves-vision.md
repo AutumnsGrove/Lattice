@@ -42,7 +42,7 @@ Write in Markdown. Upload images. Publish. That's it. No plugin ecosystems, no e
 
 ### Community can exist without competition
 
-Meadow (our optional community feed) doesn't display follower counts. Reactions are private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
+[[meadow|Meadow]] (our optional community feed) doesn't display follower counts. Reactions are private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
 
 ## What we're building against
 
@@ -72,9 +72,9 @@ Grove probably isn't for people who need e-commerce, complex membership tiers, o
 
 ## The metaphor
 
-A grove is a small group of trees. Each tree is independent—complete on its own. But beneath the surface, roots intermingle. Trees share nutrients through mycorrhizal networks. The oldest trees nurture the saplings.
+A [[grove|grove]] is a small group of trees. Each tree is independent—complete on its own. But beneath the surface, [[rooted|roots]] intermingle. Trees share nutrients through [[mycelium|mycorrhizal networks]]. The oldest trees nurture the saplings.
 
-That's what we're building. A forest of voices. A place where people can plant their thoughts and watch them grow.
+That's what we're building. A forest of voices. A place where people can [[plant]] their thoughts and watch them grow.
 
 ## Why this matters
 
@@ -86,11 +86,11 @@ Grove is one small corner where things work differently. A refuge from the noise
 
 These aren't abstract principles. They come from somewhere real.
 
-Before Grove existed, I had a backyard with a hammock and a garden. A front porch where I watched sunrises. Birds I knew by song. Friends who came over just to exist together. My days had texture.
+Before [[grove|Grove]] existed, I had a backyard with a hammock and a [[your-garden|garden]]. A front [[porch|porch]] where I watched sunrises. Birds I knew by song. Friends who came over just to exist together. My days had texture.
 
 Then I lost it all. And in the numbness that followed, I started building a place where people could plant their own little sanctuaries, tend their own corners of the internet, and find some of that texture again.
 
-Grove is a refuge because I needed one. I'm building a grove for people who lost their groves.
+[[grove|Grove]] is a refuge because I needed one. I'm building a [[grove|grove]] for people who lost their [[your-grove|groves]].
 
 *For the full story, see [Why I Built the Grove](/knowledge/philosophy/why-i-built-the-grove).*
 

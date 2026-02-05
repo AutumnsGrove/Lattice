@@ -69,9 +69,9 @@ Reverie works through three parts:
 
 ## Related
 
-- [What is Terrarium?](/knowledge/help/what-is-terrarium) — The canvas where you can hand-arrange components
-- [What is Foliage?](/knowledge/help/what-is-foliage) — Where themes and decorations get applied
-- [What are Curios?](/knowledge/help/what-are-curios) — Interactive elements for your site
+- [[terrarium|What is Terrarium?]] — The canvas where you can hand-arrange components
+- [[foliage|What is Foliage?]] — Where themes and decorations get applied
+- [[curios|What are Curios?]] — Interactive elements for your site
 - [Reverie Specification](/knowledge/specs/reverie-spec)
 - [Grove Workshop → Reverie](/workshop#tool-reverie)
 

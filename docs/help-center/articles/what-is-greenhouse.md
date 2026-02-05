@@ -17,7 +17,7 @@ order: 70
 
 Not everything is ready for the open air. Some plants need protection while they grow.
 
-Greenhouse is Grove's early access program—a space where features are tested before they launch to everyone. If your grove is in the greenhouse, you'll see things before they're official. You'll help us find bugs, give feedback, and shape how tools work before they're set in stone.
+Greenhouse is [[your-grove|Grove]]'s early access program—a space where features are tested before they launch to everyone. If your grove is in the greenhouse, you'll see things before they're official. You'll help us find bugs, give feedback, and shape how tools work before they're set in stone.
 
 ## Why Greenhouse exists
 
@@ -29,7 +29,7 @@ This isn't just about finding bugs. It's about listening. Greenhouse members giv
 
 ## How it works
 
-Greenhouse operates through the [Grafts](/knowledge/help/what-are-grafts) system. When a feature is in greenhouse testing, it gets grafted onto specific groves rather than rolled out universally.
+Greenhouse operates through the [[grafts|Grafts]] system. When a feature is in greenhouse testing, it gets grafted onto specific groves rather than rolled out universally.
 
 **Who gets greenhouse access?** — A few ways:
 - Higher subscription tiers often get automatic greenhouse access
@@ -38,7 +38,7 @@ Greenhouse operates through the [Grafts](/knowledge/help/what-are-grafts) system
 
 **What's the experience like?** — Features appear in your dashboard or editor before they're announced. Usually there's a small indicator noting "Greenhouse" so you know it's early access.
 
-**Feedback matters.** — When you notice something that doesn't work right, or have an idea for how something could work better, let us know through [Porch](/knowledge/help/what-is-porch). Greenhouse feedback gets special attention.
+**Feedback matters.** — When you notice something that doesn't work right, or have an idea for how something could work better, let us know through [[porch|Porch]]. Greenhouse feedback gets special attention.
 
 **Bugs happen.** — That's why it's called testing. Greenhouse features might be rough around the edges. If something breaks, it helps us fix it before the wider release.
 
@@ -54,8 +54,8 @@ Greenhouse operates through the [Grafts](/knowledge/help/what-are-grafts) system
 
 ## Related
 
-- [What are Grafts?](/knowledge/help/what-are-grafts) — How features get enabled
-- [What is Porch?](/knowledge/help/what-is-porch) — Where to send feedback
+- [[grafts|What are Grafts?]] — How features get enabled
+- [[porch|What is Porch?]] — Where to send feedback
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
 
 ---

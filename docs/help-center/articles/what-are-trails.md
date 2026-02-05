@@ -55,7 +55,7 @@ Your Trail lives on your blog at a URL you choose (`/roadmap`, `/trail`, or some
 
 ## Related
 
-- [What is Meadow?](/knowledge/help/what-is-meadow) — Community sharing
+- [[meadow]] — Community sharing
 - [Grove's roadmap](/roadmap) — See Trails in action
 - [Trails Specification](/knowledge/specs/trails-spec)
 - [Grove Workshop → Trails](/workshop#tool-trails)

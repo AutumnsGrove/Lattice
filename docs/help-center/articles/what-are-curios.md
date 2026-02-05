@@ -59,8 +59,8 @@ Curios offers a collection of interactive and decorative elements you can add to
 
 ## Related
 
-- [What is Foliage?](/knowledge/help/what-is-foliage) — For themes, not decorations
-- [What is Terrarium?](/knowledge/help/what-is-terrarium) — For custom-designed scenes
+- [[foliage|What is Foliage?]] — For themes, not decorations
+- [[terrarium|What is Terrarium?]] — For custom-designed scenes
 - [Curios Specification](/knowledge/specs/curios-spec)
 - [Grove Workshop → Curios](/workshop#tool-curios)
 

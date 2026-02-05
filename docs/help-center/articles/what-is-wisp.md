@@ -64,7 +64,7 @@ Posts created through Fireside include a small marker letting readers know you s
 
 ## Related
 
-- [What is Flow?](/knowledge/help/what-is-flow) — The editor where Wisp lives
+- [[flow|What is Flow?]] — The editor where Wisp lives
 - [What is Zero Data Retention?](/knowledge/help/what-is-zdr)
 - [What is Solarpunk?](/knowledge/help/what-is-solarpunk) — The values behind ethical AI
 - [Wisp Specification](/knowledge/specs/wisp-spec)

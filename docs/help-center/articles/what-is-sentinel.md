@@ -44,13 +44,13 @@ Each test targets specific systems: database reads and writes, image storage, au
 
 **Reliability you don't have to think about.** When Grove says it can handle your growing audience, that's been tested. Repeatedly.
 
-**Honest status reporting.** Sentinel feeds its results to [The Clearing](/clearing), Grove's status page. If a test reveals degraded performance, you'll see it there before it affects your experience.
+**Honest status reporting.** Sentinel feeds its results to [[clearing|The Clearing]], Grove's status page. If a test reveals degraded performance, you'll see it there before it affects your experience.
 
 **Growth without anxiety.** Whether your blog has ten readers or ten thousand, the infrastructure has already proven it can handle the load. You can focus on writing.
 
 ## Where Sentinel fits
 
-Sentinel is built on [Loom](/knowledge/help/what-is-loom), Grove's coordination layer. Long-running tests use their own Durable Object, so a thirty-minute stress test doesn't tie up resources that serve your actual readers.
+Sentinel is built on Loom, Grove's coordination layer. Long-running tests use their own Durable Object, so a thirty-minute stress test doesn't tie up resources that serve your actual readers.
 
 The results flow to The Clearing, where they become part of Grove's uptime tracking. Good results keep the status green. Concerning results trigger alerts so we can investigate before anything reaches you.
 

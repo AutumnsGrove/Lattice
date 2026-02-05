@@ -16,11 +16,11 @@ order: 4
 
 # What is my Garden?
 
-Your garden is where all your [blooms](/knowledge/help/what-are-blooms) live together. It's the page at `yourname.grove.place/garden` where visitors can browse everything you've written.
+Your garden is where all your [[blooms]] live together. It's the page at `yourname.grove.place/garden` where visitors can browse everything you've written.
 
 ## The short version
 
-Think of it like this: your [grove](/knowledge/help/what-is-my-grove) is your whole space. Your garden is the part where you've planted and tended your writing. Each piece you publish is a bloom. The garden is the collection of all of them.
+Think of it like this: your [[your-grove|grove]] is your whole space. Your garden is the part where you've planted and tended your writing. Each piece you publish is a bloom. The garden is the collection of all of them.
 
 ## Why "garden" instead of "blog index"?
 
@@ -30,7 +30,7 @@ A garden is where you tend what grows. It's cultivated, arranged, cared for. You
 
 ## What's in your garden?
 
-Your garden shows all your published blooms, typically organized by date (newest first). Depending on your [foliage](/knowledge/help/what-is-foliage) settings, you might also see:
+Your garden shows all your published blooms, typically organized by date (newest first). Depending on your [[foliage]] settings, you might also see:
 
 - Featured or pinned blooms at the top
 - Categories or tags for filtering
@@ -49,7 +49,7 @@ It's not a feed designed to maximize engagement. It's a space designed to invite
 
 Here's how it all connects:
 
-> You **wander** into the Grove → You **take root** → Your **tree** grows → Your **grove** flourishes → It **blooms**
+> You **wander** into the Grove → You **take root** → Your **[[your-garden|garden]]** grows → You **plant blooms** → Your **grove** flourishes
 
 Your grove is your space. Your garden is the cultivated area within it. Your blooms are the individual flowers growing there.
 

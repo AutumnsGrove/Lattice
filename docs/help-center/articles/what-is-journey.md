@@ -42,7 +42,7 @@ Journey displays your milestones in a visual timeline:
 
 ## Related
 
-- [What are Curios?](/knowledge/help/what-are-curios) — The full cabinet of wonders
+- [[curios|What are Curios?]] — The full cabinet of wonders
 - [What are Trails?](/knowledge/help/what-are-trails) — Project roadmaps for building in public
 - [Grove Workshop → Journey](/workshop#curio-journey)
 

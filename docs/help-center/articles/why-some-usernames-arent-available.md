@@ -24,7 +24,7 @@ Here's why that happens, and what you can do about it.
 
 ## The short version
 
-Grove filters usernames before they take root. Some names are reserved for system use. Some are protected for community safety. Others are already taken by existing users.
+[[your-grove|Grove]] filters usernames before they take root. Some names are reserved for system use. Some are protected for community safety. Others are already taken by existing users.
 
 We don't broadcast the full list (that would help bad actors), but here's what you need to know.
 
@@ -78,7 +78,7 @@ Not allowed: `42cool` (starts with number), `my--blog` (consecutive hyphens), `a
 
 **Think about your readers.** What URL would help them find you? Something memorable and relevant to your content often works better than a clever but obscure choice.
 
-**Contact support.** If you believe your username was incorrectly blocked (rare, but it happens), reach out through [Porch](/knowledge/help/contact-support). We review these case by case.
+**Contact support.** If you believe your username was incorrectly blocked (rare, but it happens), reach out through [[porch|Porch]]. We review these case by case.
 
 ## Why we do this
 
@@ -90,7 +90,7 @@ Good soil doesn't announce itself. It just quietly ensures that what grows here 
 
 ## What we call this system
 
-Internally, we call username validation **Loam**. Like the ideal soil that decides what can grow, Loam filters every name before it takes root. You'll never notice it working unless you try to plant something that doesn't belong.
+Internally, we call username validation **[[loam|Loam]]**. Like the ideal soil that decides what can grow, Loam filters every name before it takes root. You'll never notice it working unless you try to plant something that doesn't belong.
 
 For technical details, see our [Loam specification](/knowledge/specs/loam-spec).
 

@@ -58,7 +58,7 @@ Once earned, your grove has:
 
 - **100-year domain reservation** — `yourname.grove.place` is yours for a century
 - **Content preservation** — Your published posts stay publicly accessible
-- **Working RSS feed** — Wanderers can still receive your content
+- **Working RSS feed** — [[wanderer|Wanderers]] can still receive your content
 - **Reactivation anytime** — Resume your subscription and pick up where you left off
 
 ### If you stop paying
@@ -83,7 +83,7 @@ Grove runs on Cloudflare infrastructure. Hosting costs stay under 1% of revenue 
 
 ### The Reserve
 
-Once Grove reaches stability, excess revenue goes into **The Reserve**—a fund specifically for long-term sustainability. At scale, this fund can generate enough interest to keep servers running for decades without new Rooted joining.
+Once Grove reaches stability, excess revenue goes into **The Reserve**—a fund specifically for long-term sustainability. At scale, this fund can generate enough interest to keep servers running for decades without new [[rooted|Rooted]] joining.
 
 ### The plan
 
@@ -115,7 +115,7 @@ Your account settings show how many qualifying months you've accumulated toward 
 
 ### What if I want to change my username?
 
-While you're rooted, you can change your username anytime—Centennial follows your current username. When you eventually stop paying (if you ever do), whichever username you have at that moment becomes your preserved domain for the next century.
+While you're [[rooted|rooted]], you can change your username anytime—Centennial follows your current username. When you eventually stop paying (if you ever do), whichever username you have at that moment becomes your preserved domain for the next century.
 
 ### What if someone wants my username after I'm gone?
 
@@ -124,7 +124,7 @@ Centennial domains are never reclaimed during the 100-year period. Even if someo
 ### What about my family?
 
 If family members contact us with proof of relationship and a death certificate, we'll work with them. They can request:
-- Transfer of the grove to another Wanderer
+- Transfer of the grove to another [[wanderer]]
 - Deletion of the content
 - Keeping things as they are
 

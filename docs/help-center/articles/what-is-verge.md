@@ -41,7 +41,7 @@ Your code crosses the Verge. It comes back transformed.
 
 Verge is primarily internal infrastructure for the Wayfinder's development workflow. It's not a public service. If you're reading this, you probably stumbled here from a footer link or the Workshop page.
 
-The pattern Verge uses—ephemeral compute that spins up, does work, and tears down—is called the [Firefly pattern](/knowledge/help/what-is-firefly). It powers both Verge and [Outpost](/workshop#tool-outpost) (the on-demand Minecraft server).
+The pattern Verge uses—ephemeral compute that spins up, does work, and tears down—is called the [[firefly]] pattern. It powers both Verge and [Outpost](/workshop#tool-outpost) (the on-demand Minecraft server).
 
 ## Technical details
 

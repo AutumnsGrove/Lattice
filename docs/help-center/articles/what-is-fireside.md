@@ -24,7 +24,7 @@ Fireside is for those moments.
 
 ## The short version
 
-Fireside is a conversational drafting mode inside Flow, Grove's editor. Instead of staring at an empty page, you have a conversation with Wisp. It asks what's on your mind. You answer naturally. After a few exchanges, Wisp organizes *your words* into a draft you can edit.
+Fireside is a conversational drafting mode inside [[flow|Flow]], Grove's editor. Instead of staring at an empty page, you have a conversation with [[wisp|Wisp]]. It asks what's on your mind. You answer naturally. After a few exchanges, Wisp organizes *your words* into a draft you can edit.
 
 The fire doesn't tell the story. It creates the space where stories emerge.
 

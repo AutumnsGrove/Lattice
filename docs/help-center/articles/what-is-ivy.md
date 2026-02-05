@@ -55,7 +55,7 @@ When you sign up for Oak tier or above, you get a `yourname@grove.place` email a
 ## Related
 
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
-- [What is Amber?](/knowledge/help/what-is-amber) — Where attachments are stored
+- [[amber]] — Where attachments are stored
 - [Contact forms](/knowledge/help/contact-forms)
 - [Ivy Specification](/knowledge/specs/ivy-mail-spec)
 - [Grove Workshop → Ivy](/workshop#tool-ivy)

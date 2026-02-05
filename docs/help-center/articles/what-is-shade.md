@@ -18,7 +18,7 @@ order: 22
 
 You write for people. Not for AI training datasets.
 
-Shade is Grove's content protection system—layered defenses against AI crawlers, scrapers, and automated data harvesting. It works in the background so you can focus on writing, knowing your words stay yours.
+[[shade]] is Grove's content protection system—layered defenses against AI crawlers, scrapers, and automated data harvesting. It works in the background so you can focus on writing, knowing your words stay yours.
 
 ## Why Shade exists
 
@@ -26,11 +26,11 @@ Somewhere along the way, the internet changed. What was once a place for persona
 
 Grove takes a different position: *not here*.
 
-Shade doesn't just put up a robots.txt and hope for the best. It implements eight layers of protection, from Cloudflare's native bot detection to behavioral analysis to legal notices. Determined scrapers face compounding difficulty. And when technical barriers aren't enough, legal standing is established.
+[[shade]] doesn't just put up a robots.txt and hope for the best. It implements eight layers of protection, from Cloudflare's native bot detection to behavioral analysis to legal notices. Determined scrapers face compounding difficulty. And when technical barriers aren't enough, legal standing is established.
 
 ## How it works
 
-Shade operates through multiple complementary layers:
+[[shade]] operates through multiple complementary layers:
 
 **Layer 1: Native bot detection** — Cloudflare identifies known AI crawlers by their signatures and blocks them automatically.
 
@@ -44,19 +44,19 @@ Shade operates through multiple complementary layers:
 
 **Layer 6: Legal notice** — Every Grove site includes a clear statement: this content is not licensed for AI training. Technical access does not constitute consent.
 
-**And more** — Shade continues evolving as scraper techniques do.
+**And more** — [[shade]] continues evolving as scraper techniques do.
 
 No single layer is foolproof. Together, they create protection that's actually meaningful.
 
 ## What this means for you
 
-**Protection by default.** You don't have to configure anything. Shade activates automatically on every Grove blog.
+**Protection by default.** You don't have to configure anything. [[shade]] activates automatically on every Grove blog.
 
-**Search engines still work.** Shade protects against scrapers, not search. Google, Bing, and other legitimate search engines can still index your site so readers can find you.
+**Search engines still work.** [[shade]] protects against scrapers, not search. Google, Bing, and other legitimate search engines can still index your site so readers can find you.
 
-**Your words, your ownership.** What you write belongs to you. Grove is a steward, not an owner. Shade enforces that principle technically.
+**Your words, your ownership.** What you write belongs to you. Grove is a steward, not an owner. [[shade]] enforces that principle technically.
 
-**Deletion means deletion.** When you delete a post, it's gone. Shade helps ensure it doesn't persist in training datasets scraped before deletion.
+**Deletion means deletion.** When you delete a post, it's gone. [[shade]] helps ensure it doesn't persist in training datasets scraped before deletion.
 
 ## Related
 

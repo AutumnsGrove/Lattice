@@ -96,7 +96,7 @@ We're building a better export system that will give you a proper ZIP file with:
 - **A README** explaining the folder structure
 - **Everything ready to use** without any technical knowledge
 
-This will arrive with our Amber update in the next feature season. Your exports will look like this:
+This will arrive with our [[amber|Amber]] update in the next feature season. Your exports will look like this:
 
 ```
 grove-export-yourusername-2026-03-15.zip

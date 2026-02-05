@@ -56,9 +56,9 @@ Everything still works exactly the same. It's the same Grove, just wearing a dif
 
 ## Related
 
-- [What is Prism?](/knowledge/help/what-is-prism) — Grove's design system
-- [Choosing a theme](/knowledge/help/choosing-a-theme)
-- [What is Foliage?](/knowledge/help/what-is-foliage) — Theme customization
+- [[prism]] — Grove's design system
+- [[choosing-a-theme]]
+- [[foliage]] — Theme customization
 
 ---
 

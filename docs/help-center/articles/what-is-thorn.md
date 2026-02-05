@@ -15,9 +15,9 @@ order: 41
 
 # What is Thorn?
 
-Every grove needs protection. Thorn is Grove's.
+Every grove needs protection. [[thorn]] is Grove's.
 
-Thorn is the automated content moderation system that helps enforce Grove's [Acceptable Use Policy](/knowledge/legal/acceptable-use-policy). It reviews content for harmful material—not by keyword matching, but by understanding context. And it does this without human surveillance.
+[[thorn]] is the automated content moderation system that helps enforce Grove's [Acceptable Use Policy](/knowledge/legal/acceptable-use-policy). It reviews content for harmful material—not by keyword matching, but by understanding context. And it does this without human surveillance.
 
 ## Why Thorn exists
 
@@ -57,8 +57,8 @@ When you publish a post or submit a comment, Thorn reviews it automatically. The
 ## Related
 
 - [Acceptable Use Policy](/knowledge/legal/acceptable-use-policy)
-- [What is Petal?](/knowledge/help/what-is-petal) — Image moderation
-- [What is Zero Data Retention?](/knowledge/help/what-is-zdr)
+- [[petal|What is Petal?]] — Image moderation
+- [[zdr|What is Zero Data Retention?]]
 - [Thorn Specification](/knowledge/specs/thorn-spec)
 - [Grove Workshop → Thorn](/workshop#tool-thorn)
 

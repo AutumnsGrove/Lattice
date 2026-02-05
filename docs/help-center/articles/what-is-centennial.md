@@ -61,12 +61,12 @@ The 100-year clock starts from when you first created your Grove account—not w
 
 ## Related
 
-- [How Grove sustains itself](/knowledge/philosophy/grove-sustainability)
-- [Understanding your plan](/knowledge/help/understanding-your-plan)
-- [Account deletion](/knowledge/help/account-deletion)
-- [What is Solarpunk?](/knowledge/help/what-is-solarpunk) — The values behind longevity
-- [Centennial Specification](/knowledge/specs/centennial-spec)
-- [Grove Workshop → Centennial](/workshop#tool-centennial)
+- [[centennial|How Grove sustains itself]]
+- [[centennial|Understanding your plan]]
+- [[centennial|Account deletion]]
+- [[centennial|What is Solarpunk?]] — The values behind longevity
+- [[centennial|Centennial Specification]]
+- [[centennial|Grove Workshop → Centennial]]
 
 ---
 

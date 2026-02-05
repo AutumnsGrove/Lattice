@@ -17,7 +17,7 @@ order: 8
 
 # Known Limitations
 
-Grove is intentionally focused. Some things we don't do, not because we couldn't, but because they'd compromise what Grove is trying to be.
+[[your-grove|Grove]] is intentionally focused. Some things we don't do, not because we couldn't, but because they'd compromise what Grove is trying to be.
 
 Here's what you won't find, and why.
 

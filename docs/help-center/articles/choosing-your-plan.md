@@ -30,9 +30,9 @@ Grove has a few plans, each designed for different needs. Here's what you get at
 
 **$0/month**: Browse Meadow, comment on posts, explore the community.
 
-This isn't a blog plan. You can't publish posts on Free. But you can participate in Meadow: upvote posts, leave reactions, reply to others. It's a way to be part of Grove without running a blog yourself.
+This isn't a blog plan. You can't publish posts on Free. But you can participate in [[meadow]]: upvote posts, leave reactions, reply to others. It's a way to be part of Grove without running a blog yourself.
 
-- Access to Meadow community feed
+- Access to [[meadow]] community feed
 - 20 public comments per week on other blogs
 - Unlimited private replies to authors
 

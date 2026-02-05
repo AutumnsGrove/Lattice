@@ -19,7 +19,7 @@ The internet used to be a garden. Not a manicured one—a wild one. Full of weir
 
 Then the walls went up. Platforms became isolated biospheres. Friends scattered and became unreachable unless you followed them through gates someone else controlled.
 
-Grove is everything that isn't.
+[[grove|Grove]] is everything that isn't.
 
 ## What I reject
 
@@ -29,7 +29,7 @@ Dopamine slot machines designed to exploit how our minds work. Algorithms that s
 
 Platforms that built their empires on our words, then loosened protections for people like us the moment it became profitable.
 
-I think that's disgusting. *[Here's how Grove is different.](/knowledge/help/why-grove-is-different)*
+I think that's disgusting. *[Here's how [[grove|Grove]] is different.](/knowledge/help/why-grove-is-different)*
 
 ### The harvesting
 
@@ -53,21 +53,21 @@ Safe digital spaces, especially when physical ones feel hostile. Somewhere inten
 
 ### The long view
 
-Your words could outlive you. With Centennial status, your grove stays online for a hundred years—even after you're gone, if you want it to.
+Your words could outlive you. With [[centennial|Centennial]] status, your grove stays online for a hundred years—even after you're gone, if you want it to.
 
 *A hundred years is roughly how long an oak tree lives.*
 
 ### Building slowly
 
-I'm building this without venture capital pressure to enshittify. Grove is a forest, not a factory. I grow at the pace of roots.
+I'm building this without venture capital pressure to enshittify. [[grove|Grove]] is a forest, not a factory. I grow at the pace of [[rooted|rooted]] growth.
 
-*This is [solarpunk](/knowledge/help/what-is-solarpunk) thinking.*
+*This is [[solarpunk|solarpunk]] thinking.*
 
 ## The feeling I'm building toward
 
-When someone signs up for Grove, I want them to feel empowered. Like they've found a launching point for something good. Like they're planting something that could grow for years. Like their words are safe here.
+When someone signs up for [[grove|Grove]], I want them to feel empowered. Like they've found a launching point for something good. Like they're planting something that could grow for years. Like their words are safe here.
 
-Grove is not trying to be everything. It's trying to be *somewhere*.
+[[grove|Grove]] is not trying to be everything. It's trying to be *somewhere*.
 
 A quiet corner. A place to be.
 

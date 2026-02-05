@@ -57,7 +57,7 @@ Readers see Vines in the margin on desktop, or collapsed below sections on mobil
 
 Here's where it gets interesting.
 
-[Scribe](/knowledge/help/what-is-scribe) is Grove's voice transcription tool. When you use Draft mode—where Scribe structures your rambling speech into organized prose—it listens for tangents. Phrases like "by the way," "quick aside," or "this reminds me" signal that you've wandered off topic.
+[[scribe|Scribe]] is Grove's voice transcription tool. When you use Draft mode—where Scribe structures your rambling speech into organized prose—it listens for tangents. Phrases like "by the way," "quick aside," or "this reminds me" signal that you've wandered off topic.
 
 Instead of cluttering your main text with those tangents, Scribe pulls them out and turns them into Vines automatically. Your asides become margin notes. Your main argument stays clean. You didn't have to do anything.
 

@@ -51,9 +51,9 @@ Pages are for content that isn't a blog post: your About page, a Contact page, a
 
 Pages work almost identically to posts, just without dates or feed placement.
 
-### Curios
+### [[curios|Curios]]
 
-Curios are short-form thoughts and updates—like tweets or status updates. They're perfect for quick observations, links you want to share, or thoughts that don't need a full blog post.
+[[curios|Curios]] are short-form thoughts and updates—like tweets or status updates. They're perfect for quick observations, links you want to share, or thoughts that don't need a full blog post.
 
 ### Images
 
@@ -68,9 +68,9 @@ You can also upload images directly when writing posts by dragging and dropping.
 
 View your blog's performance metrics and visitor statistics. Available on Oak and Evergreen plans.
 
-### Trails
+### [[trails|Trails]]
 
-Your creative timeline and activity feed. Track your writing journey over time.
+[[trails|Trails]] are your creative timeline and activity feed. Track your writing journey over time.
 
 ### Account
 

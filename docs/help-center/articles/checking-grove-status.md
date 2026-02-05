@@ -18,7 +18,7 @@ order: 9
 
 # Checking Grove Status
 
-If something seems off with Grove, here's how to find out what's happening.
+If something seems off with [[your-grove|Grove]], here's how to find out what's happening.
 
 ## The status page
 

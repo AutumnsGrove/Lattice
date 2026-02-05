@@ -19,7 +19,7 @@ order: 7
 
 # Browser Compatibility
 
-Grove works in all modern browsers. Here's what's supported and what to do if something isn't working right.
+[[your-grove|Grove]] works in all modern browsers. Here's what's supported and what to do if something isn't working right.
 
 ## Supported browsers
 

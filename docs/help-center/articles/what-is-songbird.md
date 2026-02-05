@@ -81,7 +81,7 @@ Songbird follows the same ZDR (Zero Data Retention) principles as all Grove AI f
 
 If a check fails, we record a hash of the content (a mathematical fingerprint that can't be reversed) for security analysis. This helps us detect attack patterns without storing what you wrote.
 
-For more on how Grove protects your data, see [What is ZDR?](/knowledge/help/what-is-zdr).
+For more on how [[your-grove|Grove]] protects your data, see [[zdr|What is ZDR?]].
 
 ## Technical details
 

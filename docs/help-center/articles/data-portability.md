@@ -68,7 +68,7 @@ The Markdown content in your export works anywhere. Parse the JSON, grab the `co
 
 ## What's coming
 
-We're building a proper export system with our Amber update:
+We're building a proper export system with our [[amber|Amber]] update:
 
 - **ZIP file** with organized folders (not JSON)
 - **Markdown files** for each post and page
@@ -114,4 +114,4 @@ If you want to leave, take your words and go. We'd rather you left happy than st
 
 ---
 
-*For step-by-step export instructions, see [Exporting Your Content](/knowledge/help/exporting-your-content).*
+*For step-by-step export instructions, see [[exporting-your-content|Exporting Your Content]].*

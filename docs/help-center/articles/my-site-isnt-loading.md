@@ -43,7 +43,7 @@ If it works for others but not you, the issue is likely:
 
 If it's broken for everyone, keep reading.
 
-## Check Grove's status
+## Check [[your-grove|Grove]]'s status
 
 We post updates at **status.grove.place** when there's a known issue.
 

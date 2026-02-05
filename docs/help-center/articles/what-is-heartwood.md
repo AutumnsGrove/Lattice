@@ -54,10 +54,10 @@ Behind the scenes, Heartwood uses industry-standard security practices: PKCE for
 
 ## Related
 
-- [Creating your account](/knowledge/help/creating-your-account)
-- [Sessions and cookies](/knowledge/help/sessions-and-cookies)
-- [Heartwood Specification](/knowledge/specs/heartwood-spec)
-- [Grove Workshop → Heartwood](/workshop#tool-heartwood)
+- [[heartwood|Creating your account]]
+- [[heartwood|Sessions and cookies]]
+- [[heartwood|Heartwood Specification]]
+- [[heartwood|Grove Workshop → Heartwood]]
 
 ---
 

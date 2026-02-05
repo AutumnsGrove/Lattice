@@ -47,7 +47,7 @@ Everything saves automatically. Everything loads quickly. Mobile works as well a
 
 ## What this means for you
 
-**Your writing space, not a metrics dashboard.** Arbor won't show you visitor graphs or engagement scores. If you want analytics, they're available elsewhere (see [Rings](/knowledge/help/what-is-rings)). The admin panel stays focused on creation.
+**Your writing space, not a metrics dashboard.** Arbor won't show you visitor graphs or engagement scores. If you want analytics, they're available elsewhere (see [[rings|Rings]]). The admin panel stays focused on creation.
 
 **Fast and simple.** No page reloads when switching sections. No waiting for bloated dashboards to render. Arbor is lightweight by design.
 
@@ -59,7 +59,7 @@ Everything saves automatically. Everything loads quickly. Mobile works as well a
 
 - [Understanding the admin panel](/knowledge/help/understanding-the-admin-panel)
 - [Writing your first post](/knowledge/help/writing-your-first-post)
-- [What is Flow?](/knowledge/help/what-is-flow) — The editor inside Arbor
+- [[flow|What is Flow?]] — The editor inside Arbor
 - [Arbor Specification](/knowledge/specs/arbor-spec)
 - [Grove Workshop → Arbor](/workshop#tool-arbor)
 

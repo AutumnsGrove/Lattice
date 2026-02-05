@@ -66,7 +66,7 @@ Each Durable Object is a single-threaded instance with its own SQLite database (
 
 The key insight: requests for the same ID always route to the same instance. Your session handler is *your* session handler. No chance of two servers having conflicting ideas about whether you're logged in.
 
-If you're the type who reads technical specifications, the full architecture is documented in [Loom — Real-Time Coordination](/knowledge/patterns/loom-durable-objects-pattern).
+If you're the type who reads technical specifications, the full architecture is documented in [Loom — Real-Time Coordination](/knowledge/specs/loom-spec).
 
 ## Why we mention it
 

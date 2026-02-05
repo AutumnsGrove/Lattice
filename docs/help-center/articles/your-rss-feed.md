@@ -72,7 +72,7 @@ If someone asks "how do I subscribe?"—here are solid options:
 - **Feedbin**: Paid, privacy-focused
 - **Apple News**: Built into Apple devices, supports RSS
 
-There are dozens more. Any RSS reader will work with your Grove feed.
+There are dozens more. Any RSS reader will work with your [[your-grove|Grove]] feed.
 
 ## Technical details
 

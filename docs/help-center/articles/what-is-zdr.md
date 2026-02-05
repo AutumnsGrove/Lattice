@@ -40,21 +40,21 @@ Your words go in. The result comes out. Everything in between vanishes.
 
 ## Where Grove uses ZDR
 
-All AI features in Grove route through **Lumen**, our unified AI gateway. Lumen scrubs sensitive data before requests leave Grove, enforces rate limits, and ensures every provider we use meets our ZDR requirements. Here's what that powers:
+All AI features in Grove route through **[[lumen|Lumen]]**, our unified AI gateway. Lumen scrubs sensitive data before requests leave Grove, enforces rate limits, and ensures every provider we use meets our ZDR requirements. Here's what that powers:
 
-**Wisp** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
+**[[wisp|Wisp]]** (writing assistant) analyzes your drafts for grammar, tone, and readability. Your post content goes to an inference provider, gets analyzed, and disappears. Only the suggestions come back.
 
-**Fireside** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
+**[[fireside|Fireside]]** (conversational drafting) helps you get past the blank page. You talk through your ideas and the AI organizes your own words into a draft. The conversation is processed, the draft is generated, and everything disappears—we only store a simple flag noting that Fireside helped with the post, never the conversation itself. Fireside is powered by Wisp but works as its own distinct mode.
 
-**Scribe** (voice transcription) lets you speak your posts into existence. Your voice is recorded in your browser, sent to Cloudflare's Whisper models for transcription, and the audio is immediately discarded—only the text comes back. In Draft mode, an additional AI step structures your rambling into a clean draft with auto-generated Vines. PII (emails, phone numbers) is automatically scrubbed from the output. We never store your voice recordings.
+**[[scribe|Scribe]]** (voice transcription) lets you speak your posts into existence. Your voice is recorded in your browser, sent to Cloudflare's Whisper models for transcription, and the audio is immediately discarded—only the text comes back. In Draft mode, an additional AI step structures your rambling into a clean draft with auto-generated Vines. PII (emails, phone numbers) is automatically scrubbed from the output. We never store your voice recordings.
 
-**Flow** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. When you use AI features within Flow—like Wisp's grammar checks, Fireside conversations, or Scribe's voice input—those requests route through Lumen with full ZDR. Your drafts live in your browser until you publish; Flow never sends your writing to AI servers without your explicit action.
+**[[flow|Flow]]** (writing sanctuary) is Grove's immersive Markdown editor where you compose posts. When you use AI features within Flow—like Wisp's grammar checks, Fireside conversations, or Scribe's voice input—those requests route through Lumen with full ZDR. Your drafts live in your browser until you publish; Flow never sends your writing to AI servers without your explicit action.
 
-**Thorn** (text content moderation) reviews blog posts and written content against community guidelines. The post content is processed, a decision is made, and the content is deleted. We keep the outcome (pass, flag, or escalate) but never the words themselves.
+**[[thorn|Thorn]]** (text content moderation) reviews blog posts and written content against community guidelines. The post content is processed, a decision is made, and the content is deleted. We keep the outcome (pass, flag, or escalate) but never the words themselves.
 
-**Petal** (image content moderation) reviews uploaded images against community guidelines. Your image is processed through vision AI, a decision is made, and the image is deleted. We keep the moderation outcome but never your images.
+**[[petal|Petal]]** (image content moderation) reviews uploaded images against community guidelines. Your image is processed through vision AI, a decision is made, and the image is deleted. We keep the moderation outcome but never your images.
 
-**Forage** (domain discovery) helps you find available domain names. Your project description gets processed, domain suggestions come back, and your input is gone.
+**[[forage|Forage]]** (domain discovery) helps you find available domain names. Your project description gets processed, domain suggestions come back, and your input is gone.
 
 In each case: processing happens, results return, content vanishes.
 
@@ -77,7 +77,7 @@ Before using any provider, we verify:
 - SOC 2 compliance
 - US-based processing with encryption in transit
 
-We exclude providers that can't meet these standards. OpenAI, Anthropic's hosted API, and DeepSeek's direct API are all off the table for processing Wanderer content.
+We exclude providers that can't meet these standards. OpenAI, Anthropic's hosted API, and DeepSeek's direct API are all off the table for processing [[wanderer|Wanderer]] content.
 
 ## What we do keep
 

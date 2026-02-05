@@ -43,7 +43,7 @@ Changes apply immediately after saving—just refresh to see them site-wide.
 
 ## Curated themes (coming in Foliage)
 
-Grove is building **Foliage**, a full theme system with curated visual presets. Here's what's coming:
+Grove is building [[foliage|**Foliage**]], a full theme system with curated visual presets. Here's what's coming:
 
 **First Buds** — The first 3 curated themes will be available to all paid plans. These hand-designed themes let you change your blog's overall look beyond just fonts and accent colors.
 
@@ -61,11 +61,11 @@ All paid plans have access to Grove's complete collection of 10 carefully curate
 - Monospace fonts (perfect for technical or code-heavy blogs)
 - Display fonts (add personality and character)
 
-Each font is tested for readability, proper rendering across browsers, and accessibility. See the [Custom Fonts](/knowledge/help/custom-fonts) article for the complete list and details.
+Each font is tested for readability, proper rendering across browsers, and accessibility. See the [[custom-fonts]] article for the complete list and details.
 
 If you're unsure which to pick, Lexend (the default) is designed specifically for reading fluency and works well for most blogs.
 
-**Custom font uploads:** When the Evergreen plan launches, it will include the ability to upload your own custom fonts. See the [Custom Fonts](/knowledge/help/custom-fonts) article for details.
+**Custom font uploads:** When the Evergreen plan launches, it will include the ability to upload your own custom fonts. See the [[custom-fonts]] article for details.
 
 ## Accent colors
 

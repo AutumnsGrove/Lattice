@@ -24,15 +24,15 @@ A bloom is a piece of writing you publish on your Grove blog. An essay, a though
 
 ## Why "bloom"?
 
-A bloom is a flower opening. A moment of expression, color, and beauty. It's what your grove produces. It's why visitors come.
+A [[blooms|bloom]] is a flower opening. A moment of expression, color, and beauty. It's what your [[your-grove|grove]] produces. It's why visitors come.
 
 The metaphor matters. Posts feel transactional—content to be consumed, metrics to be counted. Blooms feel alive. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.
 
 ## Where blooms live
 
-Your blooms live in your [garden](/knowledge/help/what-is-my-garden)—the collection page at `yourname.grove.place/garden`. Each individual bloom has its own URL: `yourname.grove.place/garden/the-slug-you-chose`.
+Your blooms live in your [[your-garden|garden]]—the collection page at `yourname.grove.place/garden`. Each individual bloom has its own URL: `yourname.grove.place/garden/the-slug-you-chose`.
 
-You write blooms in [Arbor](/knowledge/help/what-is-arbor), Grove's admin panel. The editor is called [Flow](/knowledge/help/what-is-flow)—a clean, focused space where words take shape.
+You write [[blooms]] in [[arbor|Arbor]], Grove's admin panel. The editor is called [[flow|Flow]]—a clean, focused space where words take shape.
 
 ## The journey of a bloom
 
@@ -41,7 +41,7 @@ You write blooms in [Arbor](/knowledge/help/what-is-arbor), Grove's admin panel.
 3. You save it as a draft (it's tucked away, not yet blooming)
 4. When it's ready, you publish
 5. It blooms in your garden
-6. Visitors can find it, read it, maybe leave a comment in the [Reeds](/knowledge/help/what-are-reeds)
+6. Visitors can find it, read it, maybe leave a comment in the [[reeds|Reeds]]
 
 ## Blooms and accessibility
 

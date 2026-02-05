@@ -192,7 +192,7 @@ Footnotes appear at the bottom of your post, linked from where you reference the
 
 ## Images
 
-See [Adding Images and Media](/knowledge/help/adding-images-and-media) for the full guide. The short version:
+See [[media|Adding Images and Media]] for the full guide. The short version:
 
 ```markdown
 ![Alt text description](image-url.jpg)

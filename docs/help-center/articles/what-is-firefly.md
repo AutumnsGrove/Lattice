@@ -62,7 +62,7 @@ Firefly is invisible infrastructure. The best kind—the kind that saves money a
 
 ## Curious about the full pattern?
 
-If you enjoy technical architecture, the complete specification covers provisioners, idle detection, state synchronization, and failure handling in detail: [Firefly — Ephemeral Server Pattern](/knowledge/patterns/firefly-pattern).
+If you enjoy technical architecture, the complete specification covers provisioners, idle detection, state synchronization, and failure handling in detail: [[firefly|Firefly — Ephemeral Server Pattern]].
 
 ---
 

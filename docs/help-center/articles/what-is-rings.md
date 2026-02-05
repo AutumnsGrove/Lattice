@@ -68,7 +68,7 @@ Need to step away from analytics entirely? Focus Periods let you hide your stats
 ## Related
 
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
-- [What is Meadow?](/knowledge/help/what-is-meadow) — Community without public metrics
+- [[meadow|What is Meadow?]] — Community without public metrics
 - [Rings Specification](/knowledge/specs/rings-spec)
 - [Grove Workshop → Rings](/workshop#tool-rings)
 

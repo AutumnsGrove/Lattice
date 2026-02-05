@@ -27,9 +27,9 @@ Grove says no. Here's how we protect what you write.
 
 ## What we mean by "Shade"
 
-Internally, we call our AI protection system **Shade**. Like the cool relief beneath a forest canopy, it's protection from harsh exposure. You write in the open, for your readers. Not for data extraction.
+Internally, we call our AI protection system **[[shade]]**. Like the cool relief beneath a forest canopy, it's protection from harsh exposure. You write in the open, for your readers. Not for data extraction.
 
-Shade isn't a single switch. It's layers of protection working together, because no single defense is perfect.
+[[shade]] isn't a single switch. It's layers of protection working together, because no single defense is perfect.
 
 ## The layers of protection
 
@@ -162,8 +162,8 @@ Once verified, you won't see it again for a week. The verification is stored in 
 - [AI Crawler User Agents List](https://www.searchenginejournal.com/ai-crawler-user-agents-list/) — Comprehensive list
 
 **Grove documentation:**
-- [Understanding Your Privacy](/knowledge/help/understanding-your-privacy) — Broader privacy overview
-- [What is Grove?](/knowledge/help/what-is-grove) — Our philosophy and values
+- [Understanding your privacy](/knowledge/help/understanding-your-privacy) — Broader privacy overview
+- [Grove](/philosophy/why-grove) — Our philosophy and values
 
 ---
 

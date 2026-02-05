@@ -16,56 +16,56 @@ keywords:
 order: 2
 ---
 
-# Sharing Posts to Meadow
+# Sharing Posts to [[meadow|Meadow]]
 
-> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+> **Coming in Full Bloom:** [[meadow|Meadow]] is launching as part of [[your-grove|Grove]]'s Full Bloom release. The features described below represent what's coming—not what's available today.
 
-Meadow is Grove's community feed—a place where blog posts from across Grove can be discovered, upvoted, and discussed. Sharing your posts there is entirely optional.
+[[meadow|Meadow]] is [[your-grove|Grove]]'s community feed—a place where blog posts from across [[your-grove|Grove]] can be discovered, upvoted, and discussed. Sharing your posts there is entirely optional.
 
 ## How it works
 
 By default, your blog is private. Your posts live at your URL and that's it. People find them through your link, through search engines, or through your RSS feed.
 
-When you enable Meadow sharing, your published posts can appear in the community feed. Other Wanderers can discover your writing, vote on it, and react with emojis. It's a way to find readers who might never have stumbled across your blog otherwise.
+When you enable [[meadow|Meadow]] sharing, your published posts can appear in the community feed. Other [[wanderer|Wanderers]] can discover your writing, vote on it, and react with emojis. It's a way to find readers who might never have stumbled across your blog otherwise.
 
-## Enabling Meadow sharing
+## Enabling [[meadow|Meadow]] sharing
 
-1. Go to **Settings → Meadow** in your admin panel
-2. Toggle **Share my posts on Grove feed** to on
+1. Go to **Settings → [[meadow|Meadow]]** in your admin panel
+2. Toggle **Share my posts on [[your-grove|Grove]] feed** to on
 3. Save your settings
 
-That's the basic setup. New posts you publish will now appear in Meadow.
+That's the basic setup. New posts you publish will now appear in [[meadow|Meadow]].
 
 ## Choosing what gets shared
 
-You don't have to share everything. Use tag filtering to control which posts go to Meadow:
+You don't have to share everything. Use tag filtering to control which posts go to [[meadow|Meadow]]:
 
-1. In **Settings → Meadow**, look for **Tag filter**
+1. In **Settings → [[meadow|Meadow]]**, look for **Tag filter**
 2. Enter the tags you want to share (e.g., `public`, `essays`)
 3. Save
 
-Now only posts with those tags appear in Meadow. Personal updates, drafts-you-published-anyway, or anything you'd rather keep quieter stays on your blog only.
+Now only posts with those tags appear in [[meadow|Meadow]]. Personal updates, drafts-you-published-anyway, or anything you'd rather keep quieter stays on your blog only.
 
 **Example:** You might tag most posts normally, but add a `meadow` tag specifically to posts you want in the community feed.
 
 ## What happens when you share
 
-When one of your posts appears in Meadow:
+When one of your posts appears in [[meadow|Meadow]]:
 
-- **It shows up in the feed.** Other Wanderers browsing Meadow might see it, depending on how they've sorted (newest, popular, etc.)
+- **It shows up in the feed.** Other [[wanderer|Wanderers]] browsing [[meadow|Meadow]] might see it, depending on how they've sorted (newest, popular, etc.)
 - **People can vote.** Upvotes and downvotes affect where your post appears in rankings, but vote counts aren't displayed publicly.
 - **People can react.** Emoji reactions show community engagement. The top reactions appear on your post in the feed.
-- **People can reply.** Meadow comments are separate from your blog's comment section.
+- **People can reply.** [[meadow|Meadow]] comments are separate from your blog's comment section.
 
 ## Turning it off
 
 Changed your mind? No problem.
 
-1. Go to **Settings → Meadow**
-2. Toggle **Share my posts on Grove feed** to off
+1. Go to **Settings → [[meadow|Meadow]]**
+2. Toggle **Share my posts on [[your-grove|Grove]] feed** to off
 3. Save
 
-Posts already in Meadow will be removed from the feed. Your blog continues as normal. It just stops appearing in the community space.
+Posts already in [[meadow|Meadow]] will be removed from the feed. Your blog continues as normal. It just stops appearing in the community space.
 
 ## Who can use Meadow
 

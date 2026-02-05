@@ -35,7 +35,7 @@ Scribe is voice transcription for Grove. Press and hold a button, say what you'r
 
 ## Wait, what are Vines?
 
-[Vines](/knowledge/help/what-are-vines) are sidebar annotations—little notes that live in the margin next to your post. They add context without interrupting the flow of your writing. (Think marginalia, footnotes, or that friend who whispers helpful asides.)
+Vines are sidebar annotations—little notes that live in the margin next to your post. They add context without interrupting the flow of your writing. (Think marginalia, footnotes, or that friend who whispers helpful asides.)
 
 Creating Vines manually is tedious. You have to add them one by one, anchor them to the right spot, write the content. Most people don't bother.
 
@@ -45,7 +45,7 @@ For more on Vines and how they work, see [What are Vines?](/knowledge/help/what-
 
 ## How it works
 
-You're in Flow mode (the markdown editor in Arbor). You see the microphone button. You hold it down and start talking:
+You're in [[flow|Flow]] mode (the markdown editor in [[arbor|Arbor]]). You see the microphone button. You hold it down and start talking:
 
 > "So I've been thinking about how we handle authentication, and the token refresh is kind of a mess right now. Oh by the way, Jake found a related bug yesterday that's been causing crashes on iOS. Anyway, the main thing is we need proper token rotation..."
 
@@ -81,7 +81,7 @@ Scribe runs through Lumen, Grove's AI gateway. Your voice goes to the edge, gets
 
 ## Where you'll find it
 
-Scribe lives in Flow mode—the markdown editor in Arbor. Look for the microphone icon. Two ways to record:
+Scribe lives in [[flow|Flow]] mode—the markdown editor in [[arbor|Arbor]]. Look for the microphone icon. Two ways to record:
 
 - **Hold to record** — Press and hold the button (or shortcut), release to stop
 - **Toggle mode** — Click once to start, click again to stop (better for longer recordings or if holding is difficult)
@@ -90,7 +90,7 @@ The keyboard shortcut is `Cmd+Shift+U` (or `Ctrl+Shift+U` on Windows/Linux) for 
 
 ## Usage and quotas
 
-Scribe uses your daily AI quota. Raw mode counts as one transcription request. Draft mode counts as two (transcription + the AI structuring step). Check your usage in the Arbor dashboard under Settings → Usage.
+Scribe uses your daily AI quota. Raw mode counts as one transcription request. Draft mode counts as two (transcription + the AI structuring step). Check your usage in the [[arbor|Arbor]] dashboard under Settings → Usage.
 
 Higher tiers get more transcription requests per day. If you're doing a lot of voice writing, Sapling or above gives you room to breathe.
 

@@ -77,7 +77,7 @@ Regardless of which plan you choose:
 - **Markdown editor** with live preview and drag-drop images
 - **Autosave** so you never lose drafts
 - **RSS feed** for your blog
-- **Meadow access** (opt-in community features)
+- **[[meadow]] access** (opt-in community features)
 - **Unlimited comments** on your posts
 - **SSL/HTTPS** (secure connection)
 - **Cloudflare CDN** (fast loading worldwide)

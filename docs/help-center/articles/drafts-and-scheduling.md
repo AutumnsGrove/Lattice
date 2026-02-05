@@ -77,7 +77,7 @@ When you're ready to go live:
 Published posts:
 - Appear on your blog's homepage
 - Show up in your RSS feed
-- Can appear in Meadow (if you've enabled sharing)
+- Can appear in [[meadow|Meadow]] (if you've enabled sharing)
 
 ## Scheduling posts
 

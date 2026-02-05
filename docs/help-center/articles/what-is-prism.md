@@ -52,13 +52,13 @@ Prism defines several core elements:
 
 **Accessible by design.** WCAG AA compliant at minimum. Color choices are tested for contrast. Motion is optional.
 
-**Your blog fits in.** When you customize your Grove blog with Foliage, your choices integrate with Prism's foundation. You can't make something ugly because the system gently guides good choices.
+**Your blog fits in.** When you customize your Grove blog with [[foliage|Foliage]], your choices integrate with Prism's foundation. You can't make something ugly because the system gently guides good choices.
 
 ## Related
 
-- [What is Foliage?](/knowledge/help/what-is-foliage) — Theme customization
-- [What is Terrarium?](/knowledge/help/what-is-terrarium) — Custom decorations
-- [What is Midnight Mode?](/knowledge/help/what-is-midnight-mode) — The fifth season
+- [[foliage]] — Theme customization
+- [[terrarium]] — Custom decorations
+- [[midnight-mode]] — The fifth season
 - [Prism Pattern](/knowledge/patterns/prism-pattern)
 - [Grove Workshop → Prism](/workshop#tool-prism)
 

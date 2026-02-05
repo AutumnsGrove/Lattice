@@ -53,11 +53,11 @@ Grove is all that shared infrastructure: how you get to any site, keeping everyt
 
 Grove runs on servers all over the world, close to wherever your readers are. This makes everything fast. Your data stays isolated from everyone else's—private by design, not as an afterthought.
 
-*Curious about the technical architecture? See [What is Loom?](/knowledge/help/what-is-loom)*
+*Curious about the technical architecture? See [[lumen|What is Lumen?]]*
 
 ## What Grove isn't
 
-Grove isn't trying to be everything. While we offer optional community features (through Meadow) for those who want them, Grove's core is about writing and sharing your writing with people who want to read it. It's not a traditional social network, a newsletter platform, or a business website builder.
+Grove isn't trying to be everything. While we offer optional community features (through [[meadow|Meadow]]) for those who want them, Grove's core is about writing and sharing your writing with people who want to read it. It's not a traditional social network, a newsletter platform, or a business website builder.
 
 If you need e-commerce, complex membership tiers, or a design tool with infinite customization, Grove probably isn't the right fit. If you want a simple, honest blog that just works—welcome.
 

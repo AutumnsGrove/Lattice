@@ -35,13 +35,13 @@ This isn't new technology dressed up—it's a fundamentally different approach t
 
 ## How it works
 
-When you register a passkey with Grove, here's what happens:
+When you register a passkey with [[your-grove|Grove]], here's what happens:
 
 1. **Your device creates a key pair** — A public key (shared with Grove) and a private key (stays on your device, never leaves it).
 
 2. **The private key is protected** — It's stored in your device's secure enclave, protected by Touch ID, Face ID, Windows Hello, or your device PIN.
 
-3. **When you sign in** — Grove sends a challenge, your device uses the private key to sign it, and Grove verifies the signature with your public key. Your fingerprint or face unlocks the key, but the biometric data itself never leaves your device.
+3. **When you sign in** — [[your-grove|Grove]] sends a challenge, your device uses the private key to sign it, and [[your-grove|Grove]] verifies the signature with your public key. Your fingerprint or face unlocks the key, but the biometric data itself never leaves your device.
 
 The whole process takes about two seconds. Tap the button, touch your fingerprint sensor (or glance at your phone), and you're in.
 
@@ -81,7 +81,7 @@ We recommend registering passkeys on at least two devices you use regularly, so 
 
 ## Related
 
-- [What is Heartwood?](/knowledge/help/what-is-heartwood)
+- [[heartwood|What is Heartwood?]]
 - [Sessions and cookies](/knowledge/help/sessions-and-cookies)
 - [Heartwood Specification](/knowledge/specs/heartwood-spec)
 

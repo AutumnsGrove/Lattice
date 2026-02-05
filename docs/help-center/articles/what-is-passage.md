@@ -49,11 +49,11 @@ It sits at the entrance to Grove, catches every incoming request, and figures ou
 
 Passage is a Cloudflare Worker that handles all `*.grove.place` wildcard traffic. When a request arrives, it extracts the subdomain, checks a routing table, and proxies the request to the correct backend service. An `X-Forwarded-Host` header tells the destination which subdomain was originally requested.
 
-Known subdomains (like `heartwood`, `meadow`, or `arbor`) route to specific services. Unknown subdomains route to Lattice, which looks up whether that name belongs to a tenant's blog.
+Known subdomains (like `heartwood`, `meadow`, or `arbor`) route to specific services. Unknown subdomains route to [[lattice|Lattice]], which looks up whether that name belongs to a tenant's blog.
 
 The CDN subdomain (`cdn.grove.place`) serves files directly from R2 storage instead of proxying. Special handling prevents certain file types from executing in browsers.
 
-If terms like "Cloudflare Worker" or "R2" mean something to you, the full architecture is documented in [Passage: The Hidden Way Through](/knowledge/specs/passage-spec).
+If terms like "Cloudflare Worker" or "R2" mean something to you, the full architecture is documented in [[passage|Passage: The Hidden Way Through]].
 
 ## Why "Passage"?
 

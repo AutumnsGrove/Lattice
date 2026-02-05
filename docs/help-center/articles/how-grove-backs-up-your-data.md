@@ -21,13 +21,13 @@ order: 3
 
 You probably don't think about backups. You shouldn't have to.
 
-Every night while you sleep, Grove quietly preserves everything: your posts, your comments, your settings. It's been happening since the day you signed up. We call this system **Patina**.
+Every night while you sleep, Grove quietly preserves everything: your posts, your comments, your settings. It's been happening since the day you signed up. We call this system **[[patina]]**.
 
 ## What is Patina?
 
 A patina is the thin layer that forms on copper and bronze over time—not decay, but protection. It's what happens when something weathers the world and comes out stronger.
 
-Patina is Grove's automated backup system. Every night at 3 AM UTC, it creates a complete snapshot of every Grove database. Your words, preserved in layers, like rings in a tree.
+[[Patina]] is Grove's automated backup system. Every night at 3 AM UTC, it creates a complete snapshot of every Grove database. Your words, preserved in layers, like [[rings]] in a tree.
 
 ## What gets backed up
 
@@ -39,11 +39,11 @@ Everything:
 - **Your settings**: theme choices, blog configuration, preferences
 - **Your account**: authentication data, session history
 
-If it's in Grove, it's in Patina.
+If it's in [[your-grove]], it's in [[Patina]].
 
 ## How long backups are kept
 
-Patina runs on two rhythms:
+[[Patina]] runs on two rhythms:
 
 **Nightly snapshots**: A fresh backup every 24 hours. These are kept for 7 days, so we can restore to any night in the past week.
 
@@ -59,19 +59,19 @@ The storage is encrypted at rest. Even in cold storage, your words stay private.
 
 ## What this means for you
 
-**You don't need to do anything.** Patina runs automatically. No buttons to click, no schedules to set.
+**You don't need to do anything.** [[Patina]] runs automatically. No buttons to click, no schedules to set.
 
 **Your data survives mistakes.** Accidentally deleted something important? We can help recover it from a recent backup.
 
 **Your data survives disasters.** Server failures, database corruption, the apocalyptic edge cases we hope never happen: backups mean starting over isn't losing everything.
 
-**This isn't a replacement for your own exports.** You should still [export your content](/knowledge/help/exporting-your-content) regularly. Patina protects against Grove's failures. Personal exports protect against everything else—including Grove itself, if you ever want to leave.
+**This isn't a replacement for your own exports.** You should still [[exporting-your-content|export your content]] regularly. [[Patina]] protects against Grove's failures. Personal exports protect against everything else—including Grove itself, if you ever want to leave.
 
 ## If you need something restored
 
 Backup restores aren't self-service (yet). If you need something recovered:
 
-1. [Contact support](/knowledge/help/contact-support)
+1. [[contact-support|Contact support]]
 2. Tell us what you need (specific post, everything, etc.)
 3. Tell us approximately when it was lost or corrupted
 4. We'll restore from the appropriate backup
@@ -82,7 +82,7 @@ Most restores complete within 24 hours. Complex situations might take longer.
 
 ## What backups can't fix
 
-Patina is powerful, but not magic:
+[[Patina]] is powerful, but not magic:
 
 **Gradual data loss.** If something corrupts slowly over weeks, by the time you notice, even old backups might have the problem.
 
@@ -98,10 +98,10 @@ Backups aren't exciting. Nobody signs up for a blogging platform because it has 
 
 But losing years of writing to a server failure? Watching your creative work vanish because of a database corruption? That's the kind of disaster that makes people stop writing entirely.
 
-We built Patina so you never have to worry about it. Your words accumulate. Protection accumulates with them. Layer by layer, night by night.
+We built [[Patina]] so you never have to worry about it. Your words accumulate. Protection accumulates with them. Layer by layer, night by night.
 
 Age as armor.
 
 ---
 
-*Like rings in a tree, your history is preserved.*
+*Like [[rings]] in a tree, your history is preserved.*

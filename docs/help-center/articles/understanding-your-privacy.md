@@ -81,7 +81,7 @@ You can see trends without surveilling your readers.
 
 Grove uses two automated systems to keep the community safe:
 
-**Thorn** reviews your blog posts and written content against our community guidelines. **Petal** reviews uploaded images for prohibited content.
+**[[thorn]]** reviews your blog posts and written content against our community guidelines. **[[petal]]** reviews uploaded images for prohibited content.
 
 Both systems use AI tools with **zero data retention agreements**. This means:
 
@@ -92,9 +92,9 @@ Both systems use AI tools with **zero data retention agreements**. This means:
 
 We chose providers specifically because they offer these guarantees.
 
-**About image moderation:** Petal includes mandatory CSAM (child sexual abuse material) detection as required by federal law. If illegal content is detected, we're legally required to report it to authorities and retain the image hash (a mathematical fingerprint). This is the only exception to our zero-retention policy, and it's a legal requirement for all platforms.
+**About image moderation:** [[petal]] includes mandatory CSAM (child sexual abuse material) detection as required by federal law. If illegal content is detected, we're legally required to report it to authorities and retain the image hash (a mathematical fingerprint). This is the only exception to our zero-retention policy, and it's a legal requirement for all platforms.
 
-For the full technical details, see [What is ZDR?](/knowledge/help/what-is-zdr)
+For the full technical details, see [[zdr]]
 
 ## Your writing is invisible to AI crawlers
 
@@ -116,7 +116,7 @@ This matters more than most people realize. As the web gets scraped into dataset
 
 **An honest caveat:** Some companies (Perplexity being a notable example) have been caught ignoring these protections entirely, bypassing robots.txt and crawler blocks. This is a limitation of how the web works, not something specific to Grove. No website can stop a bad actor who chooses to ignore the rules. What we can promise is that we're using every tool available and staying vigilant as new threats emerge. It's the best protection possible, even if it's not perfect.
 
-**Want the full technical details?** See [How Grove Protects Your Content](/knowledge/help/how-grove-protects-your-content) for a deep dive into our seven-layer protection system, including verification steps for technically-minded users.
+**Want the full technical details?** See [[shade]] for a deep dive into our layered protection system, including verification steps for technically-minded users.
 
 *We use AI carefully and transparently for content moderation (Thorn for text, Petal for images). We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
 

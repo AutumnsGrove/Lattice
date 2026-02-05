@@ -49,10 +49,10 @@ Sapling includes everything in Seedling, plus:
 - 5 GB storage
 - Full theming options
 - Email forwarding to your `@grove.place` address
-- Read-only Ivy access
-- [Rings](/knowledge/help/what-is-rings) analytics
-- [Trails](/knowledge/help/what-is-trails) personal roadmaps
-- [Centennial](/knowledge/help/what-is-centennial) eligibility after 12 months
+- Read-only [[ivy]] access
+- [[rings]] analytics
+- [[trails]] personal roadmaps
+- [[centennial]] eligibility after 12 months
 
 Most hobbyist bloggers live comfortably here.
 
@@ -81,7 +81,7 @@ You want Grove to handle everything. Domain search, registration, priority suppo
 Evergreen includes everything in Oak, plus:
 - 100 GB storage
 - Custom fonts
-- [Forage](/knowledge/help/what-is-forage) domain discovery (included)
+- [[forage]] domain discovery (included)
 - Domain registration (one domain included)
 - Priority support
 
@@ -109,7 +109,7 @@ The full-service option for people who value their time.
 
 - [Understanding your plan](/knowledge/help/understanding-your-plan)
 - [Upgrading or downgrading](/knowledge/help/upgrading-or-downgrading)
-- [What is Centennial?](/knowledge/help/what-is-centennial) — The 100-year preservation promise
+- [[centennial|What is Centennial?]] — The 100-year preservation promise
 
 ---
 

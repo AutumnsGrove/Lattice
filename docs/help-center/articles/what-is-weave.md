@@ -72,8 +72,8 @@ Perfect for:
 
 ## Related
 
-- [What is Terrarium?](/knowledge/help/what-is-terrarium) — The creative canvas where Weave lives
-- [What is Foliage?](/knowledge/help/what-is-foliage) — Theming and visual customization
+- [[terrarium|What is Terrarium?]] — The creative canvas where Weave lives
+- [[foliage|What is Foliage?]] — Theming and visual customization
 - [Weave Specification](/knowledge/specs/weave-spec)
 - [Grove Workshop → Weave](/workshop#tool-weave)
 

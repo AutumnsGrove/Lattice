@@ -47,15 +47,15 @@ All help content stays updated as the platform evolves. When something changes, 
 
 **Self-service first.** Most questions have answers here. You can find them at your own pace, anytime.
 
-**Human support when needed.** Waystone handles common questions. When you need a person, Porch (our support system) is there.
+**Human support when needed.** [[waystone|Waystone]] handles common questions. When you need a person, [[porch|Porch]] (our support system) is there.
 
 ## Related
 
-- [Contact support](/knowledge/help/contact-support)
-- [What is Porch?](/knowledge/help/what-is-porch) — Personal support conversations
-- [What is Clearing?](/knowledge/help/what-is-clearing) — System status page
-- [Waystone Specification](/knowledge/specs/waystone-spec)
-- [Grove Workshop → Waystone](/workshop#tool-waystone)
+- [[waystone|Contact support]]
+- [[porch|What is Porch?]] — Personal support conversations
+- [[clearing|What is Clearing?]] — System status page
+- [[waystone|Waystone Specification]]
+- [[waystone|Grove Workshop → Waystone]]
 
 ---
 

@@ -102,7 +102,7 @@ If the primary model fails, Lumen automatically tries fallback options. DeepSeek
 
 Everything flows through Cloudflare AI Gateway for caching, logging, and analytics.
 
-If you're the type who reads technical specifications, the full architecture is documented in [Lumen — AI Gateway](/knowledge/specs/lumen-spec).
+If you're the type who reads technical specifications, the full architecture is documented in the Lumen specification.
 
 ## Why we mention it
 

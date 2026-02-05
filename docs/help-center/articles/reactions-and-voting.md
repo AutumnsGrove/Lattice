@@ -16,11 +16,11 @@ keywords:
 order: 3
 ---
 
-# Reactions and Voting in Meadow
+# Reactions and Voting in [[meadow|Meadow]]
 
-> **Coming in Full Bloom:** Meadow is launching as part of Grove's Full Bloom release. The features described below represent what's coming—not what's available today.
+> **Coming in Full Bloom:** [[meadow|Meadow]] is launching as part of [[your-grove|Grove]]'s Full Bloom release. The features described below represent what's coming—not what's available today.
 
-Meadow has two ways to engage with posts: voting and emoji reactions. Here's how they work.
+[[meadow|Meadow]] has two ways to engage with posts: voting and emoji reactions. Here's how they work.
 
 ## Voting
 
@@ -56,7 +56,7 @@ Reactions let you respond to posts with more nuance than an upvote. When you rea
 - 😢 (sad)
 - 😡 (angry)
 
-**Combination emojis:** Grove also has over 100 "emoji kitchen" combinations, creative mashups like ❤️‍🔥 or 🥹. These let you express reactions that don't fit the standard five.
+**Combination emojis:** [[your-grove|Grove]] also has over 100 "emoji kitchen" combinations, creative mashups like ❤️‍🔥 or 🥹. These let you express reactions that don't fit the standard five.
 
 **How reactions display:**
 - The top 5 most-used reactions show on each post
@@ -83,7 +83,7 @@ These limits are generous enough that you'll never hit them in normal use.
 
 ## Who can vote and react?
 
-**Everyone with a Grove account.** Free accounts have full access to voting and reactions in Meadow. You don't need a paid blog plan to participate in the community, just an account.
+**Everyone with a [[your-grove|Grove]] account.** Free accounts have full access to voting and reactions in [[meadow|Meadow]]. You don't need a paid blog plan to participate in the community, just an account.
 
 ## Can I see who voted or reacted?
 
@@ -93,7 +93,7 @@ These limits are generous enough that you'll never hit them in normal use.
 
 ## Tips for genuine engagement
 
-Meadow works best when people use it honestly:
+[[meadow|Meadow]] works best when people use it honestly:
 
 - Upvote posts you'd want to see more of
 - Downvote posts that don't belong, not posts you simply disagree with

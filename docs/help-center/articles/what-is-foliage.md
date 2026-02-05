@@ -58,9 +58,9 @@ All customizations respect accessibility. Foliage checks color contrast as you w
 
 ## Related
 
-- [Choosing a theme](/knowledge/help/choosing-a-theme)
-- [Custom fonts](/knowledge/help/custom-fonts)
-- [What is Terrarium?](/knowledge/help/what-is-terrarium) — For decorations, not themes
+- [[choosing-a-theme]]
+- [[custom-fonts]]
+- [[terrarium]] — For decorations, not themes
 - [Foliage Specification](/knowledge/specs/foliage-project-spec)
 - [Grove Workshop → Foliage](/workshop#tool-foliage)
 

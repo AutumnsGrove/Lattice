@@ -59,4 +59,4 @@ Then you're handed off to your blog. The address is live. You can start writing 
 
 ---
 
-*A seedbed is where seeds are planted and nurtured until they're ready to grow. That's what Plant does for new Wanderers.*
+*A seedbed is where seeds are planted and nurtured until they're ready to grow. That's what Plant does for new [[wanderer|Wanderers]].*

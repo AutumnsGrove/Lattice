@@ -71,7 +71,7 @@ Normal Wanderers almost never see anything past the first level.
 
 ## Related
 
-- [What is Shade?](/knowledge/help/what-is-shade) — Content protection
+- [[shade|What is Shade?]] — Content protection
 - [My site isn't loading](/knowledge/help/my-site-isnt-loading)
 - [Threshold Pattern](/knowledge/patterns/threshold-pattern)
 - [Grove Workshop → Threshold](/workshop#tool-threshold)

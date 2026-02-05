@@ -62,7 +62,7 @@ The agent gets what it asked for. The key stays home.
 
 ## Where Warden shows up
 
-You won't see Warden in the Grove interface. Like Lumen, it's infrastructure. But it powers:
+You won't see [[warden]] in the Grove interface. Like [[lumen]], it's infrastructure. But it powers:
 
 - **AI coding agents.** When Claude creates issues, opens PRs, or triggers workflows, Warden handles the GitHub API calls.
 - **Search integrations.** Web searches and documentation lookups go through Warden to protect search API keys.
@@ -73,11 +73,11 @@ You won't see Warden in the Grove interface. Like Lumen, it's infrastructure. Bu
 
 Grove has two gateways. They're complementary:
 
-**Lumen** routes AI inference requests. When Grove needs to moderate content, generate text, or transcribe audio, it talks to Lumen. Lumen picks the right model and provider.
+**[[lumen]]** routes AI inference requests. When Grove needs to moderate content, generate text, or transcribe audio, it talks to [[Lumen]]. [[Lumen]] picks the right model and provider.
 
-**Warden** routes external API requests. When an agent needs to interact with GitHub, search the web, or call any third-party service, it talks to Warden. Warden injects credentials and validates permissions.
+**[[warden]]** routes external API requests. When an agent needs to interact with GitHub, search the web, or call any third-party service, it talks to [[Warden]]. [[Warden]] injects credentials and validates permissions.
 
-| | Lumen | Warden |
+| | [[Lumen]] | [[Warden]] |
 |---|---|---|
 | **Purpose** | AI model inference | External API access |
 | **Consumer** | Grove services | Agents and workflows |
@@ -96,7 +96,7 @@ Warden uses a challenge-response authentication flow. Agents don't send credenti
 
 The agent's secret is never transmitted. Even if someone intercepts the signature, they can't reuse it.
 
-If you're the type who reads technical specifications, the full architecture is documented in [Warden — External API Gateway](/knowledge/specs/warden-spec).
+If you're the type who reads technical specifications, the full architecture is documented in [Warden — External API Gateway](/knowledge/specs/warden-spec)
 
 ## Why we mention it
 

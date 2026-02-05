@@ -57,9 +57,9 @@ When your scene feels complete, export it. Choose where it appears—header, sid
 
 ## Related
 
-- [What is Foliage?](/knowledge/help/what-is-foliage) — Where decorations get applied
+- [[foliage|What is Foliage?]] — Where decorations get applied
 - [Choosing a theme](/knowledge/help/choosing-a-theme)
-- [What are Curios?](/knowledge/help/what-are-curios) — Interactive decorations and collectibles
+- [[curios|What are Curios?]] — Interactive decorations and collectibles
 - [Terrarium Specification](/knowledge/specs/terrarium-spec)
 - [Grove Workshop → Terrarium](/workshop#tool-terrarium)
 

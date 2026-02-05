@@ -45,7 +45,7 @@ Gallery creates a dedicated space for images:
 
 ## Related
 
-- [What are Curios?](/knowledge/help/what-are-curios) — The full cabinet of wonders
+- [[curios|What are Curios?]] — The full cabinet of wonders
 - [Adding Images and Media](/knowledge/help/adding-images-and-media) — How to upload and manage images
 - [Grove Workshop → Gallery](/workshop#curio-gallery)
 

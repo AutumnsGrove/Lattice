@@ -17,9 +17,9 @@ order: 12
 
 # What is Flow?
 
-Some thoughts come easily. Others need space to unfold. Flow is Grove's writing sanctuary—the Markdown editor where your blog posts and pages take shape.
+Some thoughts come easily. Others need space to unfold. Flow is [[your-grove|Grove]]'s writing sanctuary—the Markdown editor where your blog posts and pages take shape.
 
-When you click "New Post" in Arbor, you enter Flow. It's more than a text box with formatting buttons. It's a space designed around one belief: **the best writing happens when the world fades away.**
+When you click "New Post" in [[arbor|Arbor]], you enter Flow. It's more than a text box with formatting buttons. It's a space designed around one belief: **the best writing happens when the world fades away.**
 
 ## Why Flow exists
 
@@ -53,7 +53,7 @@ Flow saves to your browser automatically as you type. Close the tab by accident,
 
 Some people freeze at a blank page. If that's you, Fireside might help.
 
-Press `Cmd/Ctrl + Shift + F` and instead of facing an empty editor, you have a conversation. Wisp (Grove's writing assistant) asks what you're thinking about. You respond naturally. After a few exchanges, your words get organized into a draft you can edit.
+Press `Cmd/Ctrl + Shift + F` and instead of facing an empty editor, you have a conversation. [[wisp|Wisp]] ([[your-grove|Grove]]'s writing assistant) asks what you're thinking about. You respond naturally. After a few exchanges, your words get organized into a draft you can edit.
 
 Fireside doesn't write for you—it helps you find your words when they're stuck. Every post created this way includes a small marker so readers know you started with a conversation.
 
@@ -69,7 +69,6 @@ Fireside doesn't write for you—it helps you find your words when they're stuck
 
 ## Related
 
-- [The Markdown editor](/knowledge/help/the-markdown-editor)
 - [Writing your first post](/knowledge/help/writing-your-first-post)
 - [What is Wisp?](/knowledge/help/what-is-wisp) — The assistant behind Fireside
 - [What are Vines?](/knowledge/help/what-are-vines) — Margin notes in your posts

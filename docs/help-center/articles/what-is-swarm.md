@@ -32,11 +32,11 @@ You don't see any of this happening. You make a request, wait a bit, and get res
 
 ## Where Grove uses swarms
 
-**Forage** (domain discovery) sends multiple agents hunting for domain names simultaneously. One might search for literal matches, another for creative variations, another for available TLDs. The results merge into a curated list.
+**[[forage]]** (domain discovery) sends multiple agents hunting for domain names simultaneously. One might search for literal matches, another for creative variations, another for available TLDs. The results merge into a curated list.
 
-**Scout** (shopping research) dispatches agents across different retailers and comparison sites. Instead of checking stores one by one, the swarm covers them all at once and brings back the best options.
+**[[scout]]** (shopping research) dispatches agents across different retailers and comparison sites. Instead of checking stores one by one, the swarm covers them all at once and brings back the best options.
 
-**The Daily Clearing** (curated news) uses swarms to research stories from multiple angles. Different agents investigate different sources, cross-reference claims, and identify what's actually worth reading.
+**[[clearing|The Daily Clearing]]** (curated news) uses swarms to research stories from multiple angles. Different agents investigate different sources, cross-reference claims, and identify what's actually worth reading.
 
 ## When swarms work well
 
@@ -60,7 +60,7 @@ Grove uses swarms where they make sense and single agents where they don't.
 
 Swarm-powered tools follow the same privacy principles as everything else in Grove. All agents use Zero Data Retention providers. Your queries don't get logged or used for training. The swarm processes your request, delivers results, and forgets.
 
-For more on how Grove protects your data with AI features, see [What is ZDR?](/knowledge/help/what-is-zdr).
+For more on how Grove protects your data with AI features, see [What is ZDR?](/knowledge/help/what-is-zdr)
 
 ## The trade-offs
 

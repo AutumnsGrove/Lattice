@@ -15,17 +15,17 @@ order: 51
 
 # What are Reeds?
 
-Every blog post invites a response. Reeds is how those responses happen.
+Every blog post invites a response. [[reeds|Reeds]] is how those responses happen.
 
-Reeds is Grove's comment system—but not quite like the ones you've seen before. It offers two modes: private replies that only you see, and public comments that you moderate. Thoughtful engagement without the performance anxiety.
+[[reeds|Reeds]] is [[your-grove|Grove]]'s comment system—but not quite like the ones you've seen before. It offers two modes: private replies that only you see, and public comments that you moderate. Thoughtful engagement without the performance anxiety.
 
-## Why Reeds exists
+## Why [[reeds|Reeds]] exists
 
 Public comments can be wonderful, but they can also be exhausting. Some readers want to share something personal. Some want to point out a typo without making a big deal of it. Some just want to say "this helped me" without performing appreciation for an audience.
 
 Traditional comments make everything public. That pressure stops people from engaging at all.
 
-Reeds offers a choice. Readers can send a private reply (only you see it) or a public comment (visible after you approve it). The result is more genuine engagement and less comment anxiety.
+[[reeds|Reeds]] offers a choice. Readers can send a private reply (only you see it) or a public comment (visible after you approve it). The result is more genuine engagement and less comment anxiety.
 
 ## How it works
 
@@ -47,7 +47,7 @@ Use cases:
 
 Both types support threaded replies, so conversations can develop naturally.
 
-**Note:** Reeds is currently planned and will launch alongside the comments feature.
+**Note:** [[reeds|Reeds]] is currently planned and will launch alongside the comments feature.
 
 ## What this means for you
 
@@ -57,16 +57,16 @@ Both types support threaded replies, so conversations can develop naturally.
 
 **Less spam, less noise.** Moderation happens before publication, not after.
 
-**Simple for readers.** One form, one choice. No account creation required (though authenticated Wanderers get additional features).
+**Simple for readers.** One form, one choice. No account creation required (though authenticated [[wanderer|Wanderers]] get additional features).
 
 ## Related
 
 - [Moderating your comments](/knowledge/help/moderating-your-comments)
 - [Comment settings](/knowledge/help/comment-settings)
-- [What is Thorn?](/knowledge/help/what-is-thorn) — Content moderation for comments
+- [[thorn|What is Thorn?]] — Content moderation for [[reeds|Reeds]]
 - [Reeds Specification](/knowledge/specs/reeds-spec)
 - [Grove Workshop → Reeds](/workshop#tool-reeds)
 
 ---
 
-*Reeds sway together at the water's edge, whispering in the breeze. A gentle murmur of community.*
+*[[reeds|Reeds]] sway together at the water's edge, whispering in the breeze. A gentle murmur of community.*

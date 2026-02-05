@@ -56,9 +56,9 @@ When you upload an image anywhere in Grove—profile photos, blog posts, anywher
 
 ## Related
 
-- [What is Thorn?](/knowledge/help/what-is-thorn) — Text content moderation
+- [[thorn|What is Thorn?]] — Text content moderation
 - [Adding images and media](/knowledge/help/adding-images-and-media)
-- [What is Zero Data Retention?](/knowledge/help/what-is-zdr)
+- [[zdr|What is Zero Data Retention?]]
 - [Petal Specification](/knowledge/specs/petal-spec)
 - [Grove Workshop → Petal](/workshop#tool-petal)
 

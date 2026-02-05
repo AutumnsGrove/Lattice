@@ -84,7 +84,7 @@ A few things that happen automatically:
 
 - It appears on your blog's homepage
 - It's added to your RSS feed (so subscribers see it)
-- If you've enabled Meadow, it may appear in the community feed
+- If you've enabled [[meadow|Meadow]], it may appear in the community feed
 
 That's it. You're a blogger now.
 

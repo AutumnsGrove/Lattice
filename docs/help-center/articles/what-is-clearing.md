@@ -51,11 +51,11 @@ The page updates in real-time. You can also subscribe to the RSS feed to get not
 
 ## Related
 
-- [Checking Grove status](/knowledge/help/checking-grove-status)
-- [My site isn't loading](/knowledge/help/my-site-isnt-loading)
-- [Contact support](/knowledge/help/contact-support)
-- [Clearing Specification](/knowledge/specs/clearing-spec)
-- [Grove Workshop → Clearing](/workshop#tool-clearing)
+- [[clearing|Checking Grove status]]
+- [[clearing|My site isn't loading]]
+- [[clearing|Contact support]]
+- [[clearing|Clearing Specification]]
+- [[clearing|Grove Workshop → Clearing]]
 
 ---
 
