@@ -284,7 +284,7 @@
 								<h3 class="text-lg font-serif text-foreground mb-1">Crush</h3>
 								<p class="text-foreground-subtle font-sans text-sm mb-2">by Charmbracelet</p>
 								<p class="text-foreground-muted font-sans text-sm">
-									A delightful terminal AI coding agent and OpenCode's successor. Used with frontier open source models via OpenRouter with ZDR enabled.
+									A delightful terminal AI coding agent. Used with frontier open source models via OpenRouter with ZDR enabled.
 								</p>
 							</div>
 						</div>
