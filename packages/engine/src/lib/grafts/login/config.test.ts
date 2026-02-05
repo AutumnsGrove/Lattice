@@ -61,11 +61,11 @@ describe("Login Graft Configuration", () => {
       expect(PROVIDERS.github.available).toBe(false);
     });
 
-    it("includes email provider (not yet available)", () => {
+    it("includes email provider (magic link support)", () => {
       expect(PROVIDERS.email).toBeDefined();
       expect(PROVIDERS.email.id).toBe("email");
       expect(PROVIDERS.email.name).toBe("Email");
-      expect(PROVIDERS.email.available).toBe(false);
+      expect(PROVIDERS.email.available).toBe(true);
     });
 
     it("includes passkey provider", () => {
@@ -75,11 +75,11 @@ describe("Login Graft Configuration", () => {
       expect(PROVIDERS.passkey.available).toBe(true);
     });
 
-    it("marks google and passkey as available", () => {
+    it("marks google, email, and passkey as available", () => {
       expect(PROVIDERS.google.available).toBe(true);
+      expect(PROVIDERS.email.available).toBe(true);
       expect(PROVIDERS.passkey.available).toBe(true);
       expect(PROVIDERS.github.available).toBe(false);
-      expect(PROVIDERS.email.available).toBe(false);
     });
 
     it("includes descriptions for all providers", () => {
@@ -116,7 +116,7 @@ describe("Login Graft Configuration", () => {
 
       expect(config.id).toBe("email");
       expect(config.name).toBe("Email");
-      expect(config.available).toBe(false);
+      expect(config.available).toBe(true);
     });
 
     it("returns config for passkey provider", () => {
@@ -172,8 +172,8 @@ describe("Login Graft Configuration", () => {
       expect(isProviderAvailable("github")).toBe(false);
     });
 
-    it("returns false for email", () => {
-      expect(isProviderAvailable("email")).toBe(false);
+    it("returns true for email (magic link)", () => {
+      expect(isProviderAvailable("email")).toBe(true);
     });
 
     it("returns false for unknown provider", () => {
@@ -191,9 +191,9 @@ describe("Login Graft Configuration", () => {
       const available = getAvailableProviders();
 
       expect(available).toContain("google");
+      expect(available).toContain("email");
       expect(available).toContain("passkey");
       expect(available).not.toContain("github");
-      expect(available).not.toContain("email");
     });
 
     it("returns an array", () => {
@@ -201,12 +201,13 @@ describe("Login Graft Configuration", () => {
       expect(Array.isArray(available)).toBe(true);
     });
 
-    it("currently returns google and passkey", () => {
-      // Google and Passkey are both implemented
+    it("currently returns google, email, and passkey", () => {
+      // Google, Email (magic link), and Passkey are all implemented
       const available = getAvailableProviders();
       expect(available).toContain("google");
+      expect(available).toContain("email");
       expect(available).toContain("passkey");
-      expect(available).toHaveLength(2);
+      expect(available).toHaveLength(3);
     });
   });
 
@@ -300,7 +301,8 @@ describe("Login Graft Configuration", () => {
         isProviderAvailable(p),
       );
 
-      expect(available).toEqual(["google"]);
+      // google and email are available; github is not
+      expect(available).toEqual(["google", "email"]);
     });
 
     it("handles empty input gracefully", () => {
@@ -313,7 +315,8 @@ describe("Login Graft Configuration", () => {
     });
 
     it("handles all-unavailable providers", () => {
-      const requestedProviders = ["github", "email"] as const;
+      // Only github is unavailable (email now has magic link support)
+      const requestedProviders = ["github"] as const;
       const available = requestedProviders.filter((p) =>
         isProviderAvailable(p),
       );
