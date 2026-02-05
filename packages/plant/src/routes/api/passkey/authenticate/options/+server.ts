@@ -22,28 +22,35 @@ interface RequestBody {
 }
 
 /**
- * Basic origin validation - ensures requests come from same origin
+ * Basic origin validation - ensures requests come from Grove or localhost
  */
 function validateOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
-  const host = request.headers.get("host");
 
-  // Allow requests without origin (same-origin requests from browser)
+  // Allow requests without origin header
   if (!origin) return true;
 
-  // Check that origin matches host
   try {
     const originUrl = new URL(origin);
-    const expectedHost = host?.split(":")[0]; // Remove port
-    return originUrl.hostname === expectedHost;
+    // Allow grove.place subdomains and localhost for development
+    return (
+      originUrl.hostname.endsWith(".grove.place") ||
+      originUrl.hostname === "grove.place" ||
+      originUrl.hostname === "localhost" ||
+      originUrl.hostname === "127.0.0.1"
+    );
   } catch {
     return false;
   }
 }
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
-  // Basic origin validation
+  // Validate origin is from Grove platform
   if (!validateOrigin(request)) {
+    console.warn(
+      "[Passkey Auth] Invalid origin:",
+      request.headers.get("origin"),
+    );
     throw error(403, "Invalid origin");
   }
 
