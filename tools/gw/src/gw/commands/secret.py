@@ -332,8 +332,9 @@ def secret_exists(ctx: click.Context, name: str) -> None:
 @secret.command("apply")
 @click.argument("names", nargs=-1, required=True)
 @click.option("--worker", "-w", required=True, help="Worker name to apply secrets to")
+@click.option("--force", "-f", is_flag=True, help="Overwrite existing secrets without prompting")
 @click.pass_context
-def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> None:
+def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str, force: bool) -> None:
     """Apply secrets to a Cloudflare Worker.
 
     Agent-safe: The secret value is never shown in output.
@@ -344,6 +345,8 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> Non
         gw secret apply STRIPE_KEY --worker grove-lattice
 
         gw secret apply KEY1 KEY2 KEY3 --worker grove-lattice
+
+        gw secret apply GROVE_KEK --worker grove-lattice --force
     """
     from ..config import GWConfig
 
@@ -371,11 +374,14 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> Non
         # Apply using wrangler secret put (piped via stdin)
         try:
             # wrangler secret put reads from stdin when piped
+            # When --force is set, prepend "y\n" to auto-confirm overwrite prompts
             import subprocess
+
+            stdin_value = f"y\n{value}" if force else value
 
             result = subprocess.run(
                 ["wrangler", "secret", "put", name, "--name", worker],
-                input=value,
+                input=stdin_value,
                 capture_output=True,
                 text=True,
             )
@@ -385,11 +391,21 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> Non
                 if not output_json:
                     success(f"Applied {name} to {worker}")
             else:
-                results.append(
-                    {"name": name, "success": False, "error": result.stderr.strip()}
-                )
-                if not output_json:
-                    error(f"Failed to apply {name}: {result.stderr.strip()}")
+                err_msg = result.stderr.strip()
+                # Check if this is an "already exists" prompt that needs --force
+                if "already exists" in err_msg.lower() or "overwrite" in err_msg.lower():
+                    results.append(
+                        {"name": name, "success": False, "error": "Secret already exists. Use --force to overwrite."}
+                    )
+                    if not output_json:
+                        warning(f"Secret '{name}' already exists on {worker}")
+                        info("Use --force to overwrite")
+                else:
+                    results.append(
+                        {"name": name, "success": False, "error": err_msg}
+                    )
+                    if not output_json:
+                        error(f"Failed to apply {name}: {err_msg}")
 
         except Exception as e:
             results.append({"name": name, "success": False, "error": str(e)})
@@ -402,16 +418,19 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str) -> Non
 
 @secret.command("sync")
 @click.option("--worker", "-w", required=True, help="Worker name to sync secrets to")
+@click.option("--force", "-f", is_flag=True, help="Overwrite existing secrets without prompting")
 @click.pass_context
-def secret_sync(ctx: click.Context, worker: str) -> None:
+def secret_sync(ctx: click.Context, worker: str, force: bool) -> None:
     """Sync all secrets to a Cloudflare Worker.
 
     Applies all secrets from the vault to the specified worker.
     Agent-safe: Values are never shown.
 
-    Example:
+    Examples:
 
         gw secret sync --worker grove-lattice
+
+        gw secret sync --worker grove-lattice --force
     """
     output_json: bool = ctx.obj.get("output_json", False)
     vault = _get_vault(ctx)
@@ -430,4 +449,4 @@ def secret_sync(ctx: click.Context, worker: str) -> None:
 
     # Invoke apply for all secrets
     names = tuple(s["name"] for s in secrets)
-    ctx.invoke(secret_apply, names=names, worker=worker)
+    ctx.invoke(secret_apply, names=names, worker=worker, force=force)
