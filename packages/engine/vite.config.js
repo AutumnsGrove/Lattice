@@ -8,7 +8,8 @@ export default defineConfig({
     // Disable source maps in production to prevent source code exposure
     sourcemap: false,
     rollupOptions: {
-      external: ["dompurify", "@jsquash/jxl"],
+      // @jsquash/jxl requires special WASM handling, loaded via CDN/importmap
+      external: ["@jsquash/jxl"],
     },
   },
   optimizeDeps: {
