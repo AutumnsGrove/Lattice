@@ -143,7 +143,7 @@
 	<div class="w-full max-w-md mb-8">
 		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
 			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">Grove is ready.</span> Awaiting payment processor verification. End of February.
+				<span class="font-medium">Grove opens February 14th.</span> Be among the first to plant your corner of the internet.
 			</p>
 		</div>
 	</div>
@@ -185,7 +185,7 @@
 			<Sprout class="w-4 h-4" />
 		</a>
 		<p class="text-foreground-subtle text-sm font-sans mb-6">
-			Signups open end of February. Feel free to look around.
+			Opening day: February 14th. Claim your spot.
 		</p>
 
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -365,9 +365,9 @@
 		<div class="w-12 h-px bg-divider"></div>
 	</div>
 
-	<!-- Coming soon text -->
+	<!-- Email signup prompt -->
 	<p class="text-foreground-subtle text-center max-w-md mb-8 font-sans text-sm">
-		Want to be notified when we launch?
+		Get a reminder when the gates open.
 	</p>
 
 	<!-- Email signup -->
