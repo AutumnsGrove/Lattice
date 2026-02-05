@@ -14,10 +14,10 @@ import {
 
 export const load: PageServerLoad = async ({ cookies, platform }) => {
   const onboardingId = cookies.get("onboarding_id");
-  const accessToken = cookies.get("access_token");
+  const groveSession = cookies.get("grove_session");
 
   // Must be authenticated
-  if (!onboardingId || !accessToken) {
+  if (!onboardingId || !groveSession) {
     redirect(302, "/");
   }
 

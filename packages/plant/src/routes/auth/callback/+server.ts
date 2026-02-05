@@ -1,8 +1,10 @@
 /**
- * OAuth Callback - Handle Heartwood OAuth response
+ * Auth Callback - Handle session validation after Better Auth login
  *
- * Exchanges authorization code for tokens, fetches user info,
- * creates/updates user_onboarding record, and redirects to profile.
+ * This route is called after LoginGraft completes OAuth.
+ * Better Auth has already set the grove_session cookie.
+ * We validate the session, sync user data to Plant's database,
+ * and redirect to the appropriate onboarding step.
  */
 
 import { redirect } from "@sveltejs/kit";
@@ -13,71 +15,53 @@ import type { RequestHandler } from "./$types";
  */
 const ERROR_MESSAGES: Record<string, string> = {
   access_denied: "You cancelled the login process",
-  invalid_grant: "Login session expired, please try again",
-  server_error: "Authentication service unavailable, please try later",
-  invalid_state: "Login session expired, please try again",
-  missing_verifier: "Login session expired, please try again",
-  missing_code: "Login was not completed, please try again",
-  token_exchange_failed: "Unable to complete login, please try again",
+  session_missing: "Login session not found, please try again",
+  session_invalid: "Login session expired, please try again",
   userinfo_failed: "Unable to fetch your profile, please try again",
+  server_error: "Authentication service unavailable, please try later",
 };
 
 function getFriendlyErrorMessage(errorCode: string): string {
   return ERROR_MESSAGES[errorCode] || "An error occurred during login";
 }
 
+interface SessionUser {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string;
+  isAdmin: boolean;
+}
+
+interface SessionValidateResponse {
+  valid: boolean;
+  user?: SessionUser;
+}
+
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
   const errorParam = url.searchParams.get("error");
 
-  // Check for error from GroveAuth
+  // Check for error from OAuth provider
   if (errorParam) {
-    console.error("[Auth Callback] Error from GroveAuth:", errorParam);
+    console.error("[Auth Callback] Error from OAuth:", errorParam);
     const friendlyMessage = getFriendlyErrorMessage(errorParam);
     redirect(302, `/?error=${encodeURIComponent(friendlyMessage)}`);
   }
 
-  // Validate state (CSRF protection)
-  const savedState = cookies.get("auth_state");
-  if (!state || state !== savedState) {
-    console.error("[Auth Callback] State mismatch - CSRF check failed");
+  // Get grove_session cookie (set by Better Auth during OAuth)
+  const groveSession = cookies.get("grove_session");
+
+  if (!groveSession) {
+    console.error("[Auth Callback] No grove_session cookie found");
     redirect(
       302,
-      `/?error=${encodeURIComponent(getFriendlyErrorMessage("invalid_state"))}`,
+      `/?error=${encodeURIComponent(getFriendlyErrorMessage("session_missing"))}`,
     );
   }
 
-  // Get code verifier (PKCE)
-  const codeVerifier = cookies.get("auth_code_verifier");
-  if (!codeVerifier) {
-    console.error("[Auth Callback] Missing code verifier");
-    redirect(
-      302,
-      `/?error=${encodeURIComponent(getFriendlyErrorMessage("missing_verifier"))}`,
-    );
-  }
-
-  if (!code) {
-    redirect(
-      302,
-      `/?error=${encodeURIComponent(getFriendlyErrorMessage("missing_code"))}`,
-    );
-  }
-
-  // Clear auth cookies immediately
-  cookies.delete("auth_state", { path: "/" });
-  cookies.delete("auth_code_verifier", { path: "/" });
-
-  // Get configuration
   const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
-  const clientId = env?.GROVEAUTH_CLIENT_ID || "grove-plant";
-  const clientSecret = env?.GROVEAUTH_CLIENT_SECRET || "";
-  // Use canonical URL to match what was sent in auth initiation
-  const appBaseUrl = env?.PUBLIC_APP_URL || "https://plant.grove.place";
-  const redirectUri = `${appBaseUrl}/auth/callback`;
   const db = platform?.env?.DB;
+  const authService = platform?.env?.AUTH;
 
   if (!db) {
     console.error("[Auth Callback] Database not available");
@@ -87,71 +71,52 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     );
   }
 
+  if (!authService) {
+    console.error("[Auth Callback] AUTH service binding not available");
+    redirect(
+      302,
+      `/?error=${encodeURIComponent("Service temporarily unavailable")}`,
+    );
+  }
+
   try {
-    // Exchange code for tokens
-    const tokenResponse = await fetch(`${authBaseUrl}/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+    // Validate session via GroveAuth service binding
+    const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+    const response = await authService.fetch(
+      `${authBaseUrl}/session/validate`,
+      {
+        method: "POST",
+        headers: { Cookie: `grove_session=${groveSession}` },
       },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-        code_verifier: codeVerifier,
-      }),
-    });
+    );
 
-    if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json().catch(() => ({}));
-      console.error("[Auth Callback] Token exchange failed:", {
-        status: tokenResponse.status,
-        error: errorData,
-      });
-      redirect(
-        302,
-        `/?error=${encodeURIComponent(getFriendlyErrorMessage("token_exchange_failed"))}`,
-      );
-    }
-
-    const tokens = (await tokenResponse.json()) as {
-      access_token: string;
-      refresh_token?: string;
-      expires_in?: number;
-    };
-
-    // Fetch user info from GroveAuth
-    const userinfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
-      },
-    });
-
-    if (!userinfoResponse.ok) {
+    if (!response.ok) {
       console.error(
-        "[Auth Callback] Userinfo fetch failed:",
-        userinfoResponse.status,
+        "[Auth Callback] Session validation failed:",
+        response.status,
       );
       redirect(
         302,
-        `/?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
+        `/?error=${encodeURIComponent(getFriendlyErrorMessage("session_invalid"))}`,
       );
     }
 
-    const userinfo = (await userinfoResponse.json()) as {
-      sub?: string;
-      id?: string;
-      email: string;
-      name?: string;
-      display_name?: string;
-      email_verified?: boolean;
-    };
-    const groveauthId = userinfo.sub || userinfo.id;
-    const email = userinfo.email;
-    const name = userinfo.name || userinfo.display_name;
-    const emailVerified = userinfo.email_verified === true;
+    const data = (await response.json()) as SessionValidateResponse;
+
+    if (!data.valid || !data.user) {
+      console.error("[Auth Callback] Session invalid or no user data");
+      redirect(
+        302,
+        `/?error=${encodeURIComponent(getFriendlyErrorMessage("session_invalid"))}`,
+      );
+    }
+
+    const { user } = data;
+    const groveauthId = user.id;
+    const email = user.email;
+    const name = user.name;
+    // OAuth providers typically verify email, so we trust it
+    const emailVerified = true;
 
     if (!groveauthId || !email) {
       console.error("[Auth Callback] Missing user info:", {
@@ -160,7 +125,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       });
       redirect(
         302,
-        `/?error=${encodeURIComponent("Unable to fetch your profile")}`,
+        `/?error=${encodeURIComponent(getFriendlyErrorMessage("userinfo_failed"))}`,
       );
     }
 
@@ -237,7 +202,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       }
     }
 
-    // Set cookies
+    // Set onboarding ID cookie
     const isProduction =
       url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
 
@@ -249,22 +214,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     };
 
-    // Store onboarding ID
+    // Store onboarding ID (grove_session is already set by Better Auth)
     cookies.set("onboarding_id", onboardingId, cookieOptions);
-
-    // Store access token for authenticated requests
-    cookies.set("access_token", tokens.access_token, {
-      ...cookieOptions,
-      maxAge: tokens.expires_in || 3600,
-    });
-
-    // Store refresh token if provided
-    if (tokens.refresh_token) {
-      cookies.set("refresh_token", tokens.refresh_token, {
-        ...cookieOptions,
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-      });
-    }
 
     // Redirect to profile page (or plans if profile already done)
     if (existingOnboarding?.profile_completed_at) {
@@ -285,7 +236,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     console.error("[Auth Callback] Error:", err);
     redirect(
       302,
-      `/?error=${encodeURIComponent(getFriendlyErrorMessage("token_exchange_failed"))}`,
+      `/?error=${encodeURIComponent(getFriendlyErrorMessage("server_error"))}`,
     );
   }
 };

@@ -3,9 +3,9 @@ import type { LayoutServerLoad } from "./$types";
 export const load: LayoutServerLoad = async ({ cookies, platform }) => {
   // Check if user has an active onboarding session
   const onboardingId = cookies.get("onboarding_id");
-  const accessToken = cookies.get("access_token");
+  const groveSession = cookies.get("grove_session");
 
-  if (!onboardingId || !accessToken) {
+  if (!onboardingId || !groveSession) {
     return {
       user: null,
       onboarding: null,

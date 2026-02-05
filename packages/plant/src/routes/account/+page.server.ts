@@ -7,263 +7,354 @@
  * - Linked OAuth Accounts
  */
 
-import { redirect, fail } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
+import { redirect, fail } from "@sveltejs/kit";
+import type { PageServerLoad, Actions } from "./$types";
 import {
-	isValidTotpCode,
-	getRequiredEnv,
-	TOTP_CODE_LENGTH
-} from '@autumnsgrove/groveengine/groveauth';
+  isValidTotpCode,
+  getRequiredEnv,
+  TOTP_CODE_LENGTH,
+} from "@autumnsgrove/groveengine/groveauth";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
-const DEFAULT_AUTH_URL = 'https://heartwood.grove.place';
+const DEFAULT_AUTH_URL = "https://heartwood.grove.place";
 
 // Response types
 interface ErrorResponse {
-	message?: string;
+  message?: string;
 }
 
 interface TwoFactorEnableResponse {
-	secret: string;
-	qrCodeUrl: string;
+  secret: string;
+  qrCodeUrl: string;
 }
 
 interface TwoFactorVerifyResponse {
-	backupCodes?: string[];
+  backupCodes?: string[];
 }
 
 interface BackupCodesResponse {
-	backupCodes: string[];
+  backupCodes: string[];
 }
 
 export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
-	const { user } = await parent();
+  const { user } = await parent();
 
-	// Redirect if not authenticated
-	if (!user) {
-		redirect(302, '/');
-	}
+  // Redirect if not authenticated
+  if (!user) {
+    redirect(302, "/");
+  }
 
-	const accessToken = cookies.get('access_token');
-	if (!accessToken) {
-		redirect(302, '/');
-	}
+  const groveSession = cookies.get("grove_session");
+  if (!groveSession) {
+    redirect(302, "/");
+  }
 
-	const env = platform?.env as Record<string, string> | undefined;
-	const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+  const env = platform?.env as Record<string, string> | undefined;
+  const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+  const authService = platform?.env?.AUTH;
 
-	// Fetch account data in parallel
-	const [passkeysRes, twoFactorRes, linkedAccountsRes] = await Promise.allSettled([
-		fetch(`${authBaseUrl}/api/auth/passkey/list-user-passkeys`, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		}),
-		fetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		}),
-		fetch(`${authBaseUrl}/api/auth/linked-accounts`, {
-			headers: { Authorization: `Bearer ${accessToken}` }
-		})
-	]);
+  // Use service binding if available, otherwise fall back to fetch
+  const authFetch = authService
+    ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+    : fetch;
 
-	// Parse responses
-	const passkeys =
-		passkeysRes.status === 'fulfilled' && passkeysRes.value.ok
-			? await passkeysRes.value.json()
-			: [];
+  // Fetch account data in parallel using Cookie header
+  const cookieHeader = { Cookie: `grove_session=${groveSession}` };
 
-	const twoFactorStatus =
-		twoFactorRes.status === 'fulfilled' && twoFactorRes.value.ok
-			? await twoFactorRes.value.json()
-			: { enabled: false, enabledAt: null, backupCodesRemaining: 0 };
+  const [passkeysRes, twoFactorRes, linkedAccountsRes] =
+    await Promise.allSettled([
+      authFetch(`${authBaseUrl}/api/auth/passkey/list-user-passkeys`, {
+        headers: cookieHeader,
+      }),
+      authFetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
+        headers: cookieHeader,
+      }),
+      authFetch(`${authBaseUrl}/api/auth/linked-accounts`, {
+        headers: cookieHeader,
+      }),
+    ]);
 
-	const linkedAccounts =
-		linkedAccountsRes.status === 'fulfilled' && linkedAccountsRes.value.ok
-			? await linkedAccountsRes.value.json()
-			: [];
+  // Parse responses
+  const passkeys =
+    passkeysRes.status === "fulfilled" && passkeysRes.value.ok
+      ? await passkeysRes.value.json()
+      : [];
 
-	return {
-		user,
-		passkeys,
-		twoFactorStatus,
-		linkedAccounts
-	};
+  const twoFactorStatus =
+    twoFactorRes.status === "fulfilled" && twoFactorRes.value.ok
+      ? await twoFactorRes.value.json()
+      : { enabled: false, enabledAt: null, backupCodesRemaining: 0 };
+
+  const linkedAccounts =
+    linkedAccountsRes.status === "fulfilled" && linkedAccountsRes.value.ok
+      ? await linkedAccountsRes.value.json()
+      : [];
+
+  return {
+    user,
+    passkeys,
+    twoFactorStatus,
+    linkedAccounts,
+  };
 };
 
 export const actions: Actions = {
-	// Delete a passkey
-	deletePasskey: async ({ request, cookies, platform }) => {
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return fail(401, { error: "You'll need to sign in to manage your account settings" });
-		}
+  // Delete a passkey
+  deletePasskey: async ({ request, cookies, platform }) => {
+    const groveSession = cookies.get("grove_session");
+    if (!groveSession) {
+      return fail(401, {
+        error: "You'll need to sign in to manage your account settings",
+      });
+    }
 
-		const formData = await request.formData();
-		const passkeyId = formData.get('passkeyId')?.toString();
+    const formData = await request.formData();
+    const passkeyId = formData.get("passkeyId")?.toString();
 
-		if (!passkeyId) {
-			return fail(400, { error: 'Passkey ID is required' });
-		}
+    if (!passkeyId) {
+      return fail(400, { error: "Passkey ID is required" });
+    }
 
-		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+    const env = platform?.env as Record<string, string> | undefined;
+    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+    const authService = platform?.env?.AUTH;
 
-		try {
-			const response = await fetch(`${authBaseUrl}/api/auth/passkey/delete-passkey`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ passkeyId })
-			});
+    // Use service binding if available, otherwise fall back to fetch
+    const authFetch = authService
+      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+      : fetch;
 
-			if (!response.ok) {
-				const data = (await response.json()) as ErrorResponse;
-				return fail(response.status, { error: data.message || 'Failed to delete passkey' });
-			}
+    try {
+      const response = await authFetch(
+        `${authBaseUrl}/api/auth/passkey/delete-passkey`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ passkeyId }),
+        },
+      );
 
-			return { success: true, action: 'deletePasskey' };
-		} catch {
-			return fail(500, { error: 'Unable to delete passkey. Please try again.' });
-		}
-	},
+      if (!response.ok) {
+        const data = (await response.json()) as ErrorResponse;
+        return fail(response.status, {
+          error: data.message || "Failed to delete passkey",
+        });
+      }
 
-	// Enable 2FA - Step 1: Generate secret and QR code
-	enableTwoFactor: async ({ cookies, platform }) => {
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return fail(401, { error: "You'll need to sign in to manage your account settings" });
-		}
+      return { success: true, action: "deletePasskey" };
+    } catch {
+      return fail(500, {
+        error: "Unable to delete passkey. Please try again.",
+      });
+    }
+  },
 
-		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+  // Enable 2FA - Step 1: Generate secret and QR code
+  enableTwoFactor: async ({ cookies, platform }) => {
+    const groveSession = cookies.get("grove_session");
+    if (!groveSession) {
+      return fail(401, {
+        error: "You'll need to sign in to manage your account settings",
+      });
+    }
 
-		try {
-			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/enable`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json'
-				}
-			});
+    const env = platform?.env as Record<string, string> | undefined;
+    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+    const authService = platform?.env?.AUTH;
 
-			if (!response.ok) {
-				const errorData = (await response.json()) as ErrorResponse;
-				return fail(response.status, { error: errorData.message || 'Failed to enable 2FA' });
-			}
+    const authFetch = authService
+      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+      : fetch;
 
-			const data = (await response.json()) as TwoFactorEnableResponse;
-			return { success: true, action: 'enableTwoFactor', secret: data.secret, qrCodeUrl: data.qrCodeUrl };
-		} catch {
-			return fail(500, { error: 'Unable to enable 2FA. Please try again.' });
-		}
-	},
+    try {
+      const response = await authFetch(
+        `${authBaseUrl}/api/auth/two-factor/enable`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-	// Verify 2FA code to complete setup
-	verifyTwoFactor: async ({ request, cookies, platform }) => {
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return fail(401, { error: "You'll need to sign in to manage your account settings" });
-		}
+      if (!response.ok) {
+        const errorData = (await response.json()) as ErrorResponse;
+        return fail(response.status, {
+          error: errorData.message || "Failed to enable 2FA",
+        });
+      }
 
-		const formData = await request.formData();
-		const code = formData.get('code')?.toString();
+      const data = (await response.json()) as TwoFactorEnableResponse;
+      return {
+        success: true,
+        action: "enableTwoFactor",
+        secret: data.secret,
+        qrCodeUrl: data.qrCodeUrl,
+      };
+    } catch {
+      return fail(500, { error: "Unable to enable 2FA. Please try again." });
+    }
+  },
 
-		if (!isValidTotpCode(code)) {
-			return fail(400, { error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code` });
-		}
+  // Verify 2FA code to complete setup
+  verifyTwoFactor: async ({ request, cookies, platform }) => {
+    const groveSession = cookies.get("grove_session");
+    if (!groveSession) {
+      return fail(401, {
+        error: "You'll need to sign in to manage your account settings",
+      });
+    }
 
-		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+    const formData = await request.formData();
+    const code = formData.get("code")?.toString();
 
-		try {
-			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/verify-totp`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ code })
-			});
+    if (!isValidTotpCode(code)) {
+      return fail(400, {
+        error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
+      });
+    }
 
-			if (!response.ok) {
-				const errorData = (await response.json()) as ErrorResponse;
-				return fail(response.status, { error: errorData.message || 'Invalid code. Please try again.' });
-			}
+    const env = platform?.env as Record<string, string> | undefined;
+    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+    const authService = platform?.env?.AUTH;
 
-			const data = (await response.json()) as TwoFactorVerifyResponse;
-			return { success: true, action: 'verifyTwoFactor', backupCodes: data.backupCodes };
-		} catch {
-			return fail(500, { error: 'Unable to verify code. Please try again.' });
-		}
-	},
+    const authFetch = authService
+      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+      : fetch;
 
-	// Disable 2FA
-	disableTwoFactor: async ({ request, cookies, platform }) => {
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return fail(401, { error: "You'll need to sign in to manage your account settings" });
-		}
+    try {
+      const response = await authFetch(
+        `${authBaseUrl}/api/auth/two-factor/verify-totp`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code }),
+        },
+      );
 
-		const formData = await request.formData();
-		const code = formData.get('code')?.toString();
+      if (!response.ok) {
+        const errorData = (await response.json()) as ErrorResponse;
+        return fail(response.status, {
+          error: errorData.message || "Invalid code. Please try again.",
+        });
+      }
 
-		if (!isValidTotpCode(code)) {
-			return fail(400, { error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code` });
-		}
+      const data = (await response.json()) as TwoFactorVerifyResponse;
+      return {
+        success: true,
+        action: "verifyTwoFactor",
+        backupCodes: data.backupCodes,
+      };
+    } catch {
+      return fail(500, { error: "Unable to verify code. Please try again." });
+    }
+  },
 
-		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+  // Disable 2FA
+  disableTwoFactor: async ({ request, cookies, platform }) => {
+    const groveSession = cookies.get("grove_session");
+    if (!groveSession) {
+      return fail(401, {
+        error: "You'll need to sign in to manage your account settings",
+      });
+    }
 
-		try {
-			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/disable`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ code })
-			});
+    const formData = await request.formData();
+    const code = formData.get("code")?.toString();
 
-			if (!response.ok) {
-				const errorData = (await response.json()) as ErrorResponse;
-				return fail(response.status, { error: errorData.message || 'Failed to disable 2FA' });
-			}
+    if (!isValidTotpCode(code)) {
+      return fail(400, {
+        error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
+      });
+    }
 
-			return { success: true, action: 'disableTwoFactor' };
-		} catch {
-			return fail(500, { error: 'Unable to disable 2FA. Please try again.' });
-		}
-	},
+    const env = platform?.env as Record<string, string> | undefined;
+    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+    const authService = platform?.env?.AUTH;
 
-	// Generate new backup codes
-	generateBackupCodes: async ({ cookies, platform }) => {
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return fail(401, { error: "You'll need to sign in to manage your account settings" });
-		}
+    const authFetch = authService
+      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+      : fetch;
 
-		const env = platform?.env as Record<string, string> | undefined;
-		const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+    try {
+      const response = await authFetch(
+        `${authBaseUrl}/api/auth/two-factor/disable`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code }),
+        },
+      );
 
-		try {
-			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/generate-backup-codes`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json'
-				}
-			});
+      if (!response.ok) {
+        const errorData = (await response.json()) as ErrorResponse;
+        return fail(response.status, {
+          error: errorData.message || "Failed to disable 2FA",
+        });
+      }
 
-			if (!response.ok) {
-				const errorData = (await response.json()) as ErrorResponse;
-				return fail(response.status, { error: errorData.message || 'Failed to generate backup codes' });
-			}
+      return { success: true, action: "disableTwoFactor" };
+    } catch {
+      return fail(500, { error: "Unable to disable 2FA. Please try again." });
+    }
+  },
 
-			const data = (await response.json()) as BackupCodesResponse;
-			return { success: true, action: 'generateBackupCodes', backupCodes: data.backupCodes };
-		} catch {
-			return fail(500, { error: 'Unable to generate backup codes. Please try again.' });
-		}
-	}
+  // Generate new backup codes
+  generateBackupCodes: async ({ cookies, platform }) => {
+    const groveSession = cookies.get("grove_session");
+    if (!groveSession) {
+      return fail(401, {
+        error: "You'll need to sign in to manage your account settings",
+      });
+    }
+
+    const env = platform?.env as Record<string, string> | undefined;
+    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+    const authService = platform?.env?.AUTH;
+
+    const authFetch = authService
+      ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+      : fetch;
+
+    try {
+      const response = await authFetch(
+        `${authBaseUrl}/api/auth/two-factor/generate-backup-codes`,
+        {
+          method: "POST",
+          headers: {
+            Cookie: `grove_session=${groveSession}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as ErrorResponse;
+        return fail(response.status, {
+          error: errorData.message || "Failed to generate backup codes",
+        });
+      }
+
+      const data = (await response.json()) as BackupCodesResponse;
+      return {
+        success: true,
+        action: "generateBackupCodes",
+        backupCodes: data.backupCodes,
+      };
+    } catch {
+      return fail(500, {
+        error: "Unable to generate backup codes. Please try again.",
+      });
+    }
+  },
 };

@@ -6,43 +6,58 @@
  * Returns WebAuthn options for registering a new passkey.
  */
 
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { getRequiredEnv } from '@autumnsgrove/groveengine/groveauth';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { getRequiredEnv } from "@autumnsgrove/groveengine/groveauth";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
-const DEFAULT_AUTH_URL = 'https://heartwood.grove.place';
+const DEFAULT_AUTH_URL = "https://heartwood.grove.place";
 
 export const POST: RequestHandler = async ({ cookies, platform }) => {
-	const accessToken = cookies.get('access_token');
+  const groveSession = cookies.get("grove_session");
 
-	if (!accessToken) {
-		return json({ error: "You'll need to sign in to register a passkey" }, { status: 401 });
-	}
+  if (!groveSession) {
+    return json(
+      { error: "You'll need to sign in to register a passkey" },
+      { status: 401 },
+    );
+  }
 
-	const env = platform?.env as Record<string, string> | undefined;
-	const authBaseUrl = getRequiredEnv(env, 'AUTH_BASE_URL', DEFAULT_AUTH_URL);
+  const env = platform?.env as Record<string, string> | undefined;
+  const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+  const authService = platform?.env?.AUTH;
 
-	try {
-		const response = await fetch(`${authBaseUrl}/api/auth/passkey/generate-register-options`, {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				'Content-Type': 'application/json'
-			}
-		});
+  // Use service binding if available, otherwise fall back to fetch
+  const authFetch = authService
+    ? (url: string, init?: RequestInit) => authService.fetch(url, init)
+    : fetch;
 
-		if (!response.ok) {
-			const data = (await response.json()) as { message?: string };
-			return json(
-				{ error: data.message || 'Failed to get registration options' },
-				{ status: response.status }
-			);
-		}
+  try {
+    const response = await authFetch(
+      `${authBaseUrl}/api/auth/passkey/generate-register-options`,
+      {
+        method: "POST",
+        headers: {
+          Cookie: `grove_session=${groveSession}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
-		const options = await response.json();
-		return json(options);
-	} catch {
-		return json({ error: 'Unable to get registration options' }, { status: 500 });
-	}
+    if (!response.ok) {
+      const data = (await response.json()) as { message?: string };
+      return json(
+        { error: data.message || "Failed to get registration options" },
+        { status: response.status },
+      );
+    }
+
+    const options = await response.json();
+    return json(options);
+  } catch {
+    return json(
+      { error: "Unable to get registration options" },
+      { status: 500 },
+    );
+  }
 };

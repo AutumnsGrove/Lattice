@@ -97,17 +97,21 @@
 <div class="space-y-12 animate-fade-in">
 	<!-- Returning user banner -->
 	<div class="flex justify-center">
-		<a
-			href="/auth?provider=google"
+		<button
+			onclick={() => {
+				authExpanded = true;
+				// Scroll to auth section smoothly
+				document.querySelector('#auth-section')?.scrollIntoView({ behavior: 'smooth' });
+			}}
 			class="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full
 				bg-slate-100/60 dark:bg-slate-800/40 backdrop-blur-md
 				border border-slate-200/50 dark:border-slate-700/40
 				text-foreground-muted hover:text-foreground hover:border-primary/50
-				transition-all"
+				transition-all cursor-pointer"
 		>
 			<LogIn class="w-4 h-4" />
 			<span>Already have a blog? <span class="text-primary font-medium">Sign in</span></span>
-		</a>
+		</button>
 	</div>
 
 	<!-- Signup Gate Notice (shown when user tries to sign up but payments aren't ready) -->
@@ -333,7 +337,7 @@
 	</section>
 
 	<!-- Section 5: Auth (Begin your journey) -->
-	<section>
+	<section id="auth-section">
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Begin your journey</h2>
 
 		<GlassCard variant="frosted" class="max-w-lg mx-auto">
@@ -360,7 +364,7 @@
 
 				<LoginGraft
 					providers={['passkey', 'google']}
-					returnTo="/arbor"
+					returnTo="/profile"
 					variant="default"
 					class="!p-0 !bg-transparent !border-none !shadow-none"
 				/>

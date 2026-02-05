@@ -571,16 +571,18 @@
 			<!-- Link new account buttons -->
 			<div class="mt-4 pt-4 border-t border-white/20 dark:border-slate-700/20">
 				<p class="text-sm text-foreground-muted mb-3">Link another account:</p>
-				<div class="flex gap-2">
+				<div class="flex gap-2 flex-wrap">
 					{#each Object.entries(providerInfo) as [provider, info]}
 						{@const isLinked = data.linkedAccounts?.some(
 							(a: { provider: string }) => a.provider === provider
 						)}
 						{#if !isLinked}
-							<a
-								href="/auth?provider={provider}&link=true"
-								class="btn-secondary flex items-center gap-2 text-sm"
+							<button
+								type="button"
+								disabled
+								class="btn-secondary flex items-center gap-2 text-sm opacity-50 cursor-not-allowed"
 								style="border-color: {info.color}; color: {info.color}"
+								title="Account linking coming soon"
 							>
 								<span
 									class="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold"
@@ -589,10 +591,11 @@
 									{info.icon}
 								</span>
 								{info.name}
-							</a>
+							</button>
 						{/if}
 					{/each}
 				</div>
+				<p class="text-xs text-foreground-subtle mt-2">Account linking is coming soon.</p>
 			</div>
 		</GlassCard>
 	</div>
