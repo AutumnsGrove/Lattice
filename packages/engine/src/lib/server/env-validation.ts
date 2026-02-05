@@ -18,6 +18,9 @@ export interface CloudflareEnv {
   AUTH?: Fetcher;
   IMAGES?: R2Bucket;
   AI?: Ai; // Workers AI binding for Petal image moderation
+  // Zephyr email gateway
+  ZEPHYR_API_KEY?: string;
+  ZEPHYR_URL?: string;
   [key: string]: unknown;
 }
 

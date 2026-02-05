@@ -1,8 +1,9 @@
 /**
- * Email Scheduling with Resend
+ * Email Scheduling via Zephyr
  *
  * Handles scheduling welcome sequences and individual emails
- * using Resend's native `scheduled_at` parameter.
+ * through the Zephyr email gateway, which passes through to
+ * Resend's native `scheduled_at` parameter.
  *
  * @example
  * ```typescript
@@ -12,11 +13,11 @@
  *   email: 'wanderer@example.com',
  *   name: 'Wanderer',
  *   audienceType: 'trial',
- *   resendApiKey: env.RESEND_API_KEY,
+ *   zephyrApiKey: env.ZEPHYR_API_KEY,
  * });
  * ```
  */
-import { Resend } from "resend";
+import { ZephyrClient } from "$lib/zephyr/client.js";
 import { render } from "./render";
 import { WelcomeEmail } from "./sequences/WelcomeEmail";
 import { Day1Email } from "./sequences/Day1Email";
@@ -31,6 +32,7 @@ import type { ReactElement } from "react";
 // =============================================================================
 
 const DEFAULT_FROM = "Autumn <autumn@grove.place>";
+const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
 /**
  * Template component map for dynamic rendering
@@ -59,8 +61,10 @@ export interface ScheduleSequenceOptions {
   name?: string;
   /** Which audience segment this user belongs to */
   audienceType: AudienceType;
-  /** Resend API key */
-  resendApiKey: string;
+  /** Zephyr API key */
+  zephyrApiKey: string;
+  /** Zephyr URL (optional, uses default if not provided) */
+  zephyrUrl?: string;
   /** Custom from address (defaults to Autumn) */
   from?: string;
   /** Base URL for links (defaults to grove.place) */
@@ -77,8 +81,8 @@ export interface ScheduleSequenceResult {
 /**
  * Schedule a complete welcome sequence for a new signup
  *
- * Uses Resend's native `scheduled_at` to queue all emails at once.
- * Emails are scheduled relative to the current time.
+ * Uses Zephyr to queue all emails at once, with Resend's
+ * native `scheduled_at` for delayed delivery.
  *
  * @example
  * ```typescript
@@ -86,7 +90,7 @@ export interface ScheduleSequenceResult {
  *   email: 'new-user@example.com',
  *   name: 'Wanderer',
  *   audienceType: 'trial',
- *   resendApiKey: env.RESEND_API_KEY,
+ *   zephyrApiKey: env.ZEPHYR_API_KEY,
  * });
  *
  * if (result.success) {
@@ -101,13 +105,21 @@ export async function scheduleWelcomeSequence(
     email,
     name,
     audienceType,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
     from = DEFAULT_FROM,
   } = options;
 
-  const resend = new Resend(resendApiKey);
+  const zephyr = new ZephyrClient({
+    baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
+    apiKey: zephyrApiKey,
+  });
+
   const sequence = SEQUENCES[audienceType];
   const now = new Date();
+
+  // Generate idempotency key base from email + timestamp to prevent duplicate sequences
+  const idempotencyBase = `${email}:${now.toISOString().split("T")[0]}`;
 
   const result: ScheduleSequenceResult = {
     success: true,
@@ -130,27 +142,30 @@ export async function scheduleWelcomeSequence(
         plainText: true,
       });
 
-      // Calculate scheduled time (null for immediate)
+      // Calculate scheduled time (undefined for immediate)
       const scheduledAt =
         dayOffset === 0 ? undefined : addDays(now, dayOffset).toISOString();
 
-      // Send via Resend
-      const response = await resend.emails.send({
-        from,
+      // Send via Zephyr
+      const response = await zephyr.send({
+        type: "sequence",
+        template: "raw",
         to: email,
         subject,
         html,
         text,
+        from,
         scheduledAt,
+        idempotencyKey: `${idempotencyBase}:day${dayOffset}`,
       });
 
-      if (response.error) {
+      if (!response.success) {
         result.errors.push(
-          `Day ${dayOffset}: ${response.error.message || "Unknown error"}`,
+          `Day ${dayOffset}: ${response.errorMessage || "Unknown error"}`,
         );
         result.success = false;
-      } else if (response.data?.id) {
-        result.messageIds.push(response.data.id);
+      } else if (response.messageId) {
+        result.messageIds.push(response.messageId);
         result.scheduled++;
       }
     } catch (error) {
@@ -176,16 +191,20 @@ export interface SendEmailOptions {
   html: string;
   /** Plain text version (optional) */
   text?: string;
-  /** Resend API key */
-  resendApiKey: string;
+  /** Zephyr API key */
+  zephyrApiKey: string;
+  /** Zephyr URL (optional, uses default if not provided) */
+  zephyrUrl?: string;
   /** Custom from address */
   from?: string;
   /** Schedule for later (ISO timestamp) */
   scheduledAt?: string;
+  /** Idempotency key to prevent duplicates */
+  idempotencyKey?: string;
 }
 
 /**
- * Send a single email via Resend
+ * Send a single email via Zephyr
  *
  * Lower-level function for sending individual emails.
  * Use scheduleWelcomeSequence for automated sequences.
@@ -198,40 +217,41 @@ export async function sendEmail(
     subject,
     html,
     text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
     from = DEFAULT_FROM,
     scheduledAt,
+    idempotencyKey,
   } = options;
 
-  try {
-    const resend = new Resend(resendApiKey);
+  const zephyr = new ZephyrClient({
+    baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
+    apiKey: zephyrApiKey,
+  });
 
-    const response = await resend.emails.send({
-      from,
-      to: email,
-      subject,
-      html,
-      text,
-      scheduledAt,
-    });
+  const response = await zephyr.send({
+    type: "sequence",
+    template: "raw",
+    to: email,
+    subject,
+    html,
+    text,
+    from,
+    scheduledAt,
+    idempotencyKey,
+  });
 
-    if (response.error) {
-      return {
-        success: false,
-        error: response.error.message || "Failed to send email",
-      };
-    }
-
-    return {
-      success: true,
-      messageId: response.data?.id,
-    };
-  } catch (error) {
+  if (!response.success) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: response.errorMessage || "Failed to send email",
     };
   }
+
+  return {
+    success: true,
+    messageId: response.messageId,
+  };
 }
 
 // =============================================================================

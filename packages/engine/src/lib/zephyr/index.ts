@@ -5,6 +5,7 @@
  */
 
 export { ZephyrClient, zephyr } from "./client";
+export { createZephyrClient } from "./factory";
 export type {
   ZephyrRequest,
   ZephyrResponse,

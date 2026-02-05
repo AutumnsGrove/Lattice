@@ -89,8 +89,11 @@ export class ZephyrClient {
     from?: string;
     fromName?: string;
     replyTo?: string;
+    headers?: Record<string, string>;
     tenant?: string;
     type?: EmailType;
+    scheduledAt?: string;
+    idempotencyKey?: string;
   }): Promise<ZephyrResponse> {
     return this.send({
       type: params.type || "transactional",
@@ -102,7 +105,10 @@ export class ZephyrClient {
       from: params.from,
       fromName: params.fromName,
       replyTo: params.replyTo,
+      headers: params.headers,
       tenant: params.tenant,
+      scheduledAt: params.scheduledAt,
+      idempotencyKey: params.idempotencyKey,
     });
   }
 

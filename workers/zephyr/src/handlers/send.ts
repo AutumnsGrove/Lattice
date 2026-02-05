@@ -201,6 +201,8 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
         html,
         text,
         replyTo: request.replyTo,
+        headers: request.headers,
+        scheduledAt: request.scheduledAt,
       },
       request.idempotencyKey,
     );

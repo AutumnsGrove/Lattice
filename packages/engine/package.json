@@ -272,9 +272,9 @@
       "default": "./dist/email/porch/index.js"
     },
     "./zephyr": {
-      "types": "./dist/lib/zephyr/index.d.ts",
-      "import": "./dist/lib/zephyr/index.js",
-      "default": "./dist/lib/zephyr/index.js"
+      "types": "./dist/zephyr/index.d.ts",
+      "import": "./dist/zephyr/index.js",
+      "default": "./dist/zephyr/index.js"
     }
   },
   "files": [

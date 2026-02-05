@@ -134,15 +134,16 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       .run();
 
     // Send email notification in background
-    const resendApiKey = platform.env.RESEND_API_KEY;
+    const zephyrApiKey = platform.env.ZEPHYR_API_KEY;
+    const zephyrUrl = platform.env.ZEPHYR_URL;
     const adminEmails = platform.env.ADMIN_EMAILS;
 
-    if (resendApiKey && adminEmails && platform.context) {
+    if (zephyrApiKey && adminEmails && platform.context) {
       const adminEmail = adminEmails.split(",")[0]?.trim();
 
       if (adminEmail) {
         platform.context.waitUntil(
-          sendTraceNotification(resendApiKey, adminEmail, {
+          sendTraceNotification(zephyrUrl, zephyrApiKey, adminEmail, {
             id,
             sourcePath: input.sourcePath,
             vote: input.vote,

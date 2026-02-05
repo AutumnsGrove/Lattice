@@ -33,9 +33,10 @@ import {
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
   const webhookSecret = platform?.env?.STRIPE_WEBHOOK_SECRET;
-  const resendApiKey = platform?.env?.RESEND_API_KEY;
+  const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY;
+  const zephyrUrl = platform?.env?.ZEPHYR_URL;
 
-  if (!db || !webhookSecret || !resendApiKey) {
+  if (!db || !webhookSecret || !zephyrApiKey) {
     console.error("[Webhook] Missing configuration");
     return json({ error: "Configuration error" }, { status: 500 });
   }
@@ -140,12 +141,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       }
 
       case "invoice.paid": {
-        await handleInvoicePaid(db, event, resendApiKey);
+        await handleInvoicePaid(db, event, zephyrApiKey, zephyrUrl);
         break;
       }
 
       case "invoice.payment_failed": {
-        await handleInvoicePaymentFailed(db, event, resendApiKey);
+        await handleInvoicePaymentFailed(db, event, zephyrApiKey, zephyrUrl);
         break;
       }
 
@@ -340,7 +341,8 @@ async function handleSubscriptionDeleted(
 async function handleInvoicePaid(
   db: D1Database,
   event: StripeWebhookEvent,
-  resendApiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
   const subscriptionId = invoice.subscription;
@@ -430,7 +432,8 @@ async function handleInvoicePaid(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
   });
 
   if (result.success) {
@@ -452,7 +455,8 @@ async function handleInvoicePaid(
 async function handleInvoicePaymentFailed(
   db: D1Database,
   event: StripeWebhookEvent,
-  resendApiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
   const subscriptionId = invoice.subscription;
@@ -501,7 +505,8 @@ async function handleInvoicePaymentFailed(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
   });
 
   if (result.success) {

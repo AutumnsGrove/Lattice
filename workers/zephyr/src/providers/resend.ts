@@ -15,6 +15,8 @@ export interface SendOptions {
   html: string;
   text: string;
   replyTo?: string;
+  headers?: Record<string, string>;
+  scheduledAt?: string;
 }
 
 export interface SendResult {
@@ -136,10 +138,12 @@ export async function sendWithRetry(
         subject: options.subject,
         html: options.html,
         text: options.text,
-        reply_to: options.replyTo,
-        headers: idempotencyKey
-          ? { "Idempotency-Key": idempotencyKey }
-          : undefined,
+        replyTo: options.replyTo,
+        scheduledAt: options.scheduledAt,
+        headers: {
+          ...(options.headers || {}),
+          ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
+        },
       });
 
       if (result.error) {

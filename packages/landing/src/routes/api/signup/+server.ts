@@ -55,9 +55,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
           .run();
 
         // Send welcome email in background
-        if (platform.env.RESEND_API_KEY) {
+        if (platform.env.ZEPHYR_API_KEY) {
           platform.context.waitUntil(
-            sendWelcomeEmail(normalizedEmail, platform.env.RESEND_API_KEY),
+            sendWelcomeEmail(
+              normalizedEmail,
+              platform.env.ZEPHYR_API_KEY,
+              platform.env.ZEPHYR_URL,
+              platform.env.UNSUBSCRIBE_SECRET,
+            ),
           );
         }
 
@@ -77,9 +82,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       .run();
 
     // Send welcome email in background
-    if (platform.env.RESEND_API_KEY) {
+    if (platform.env.ZEPHYR_API_KEY) {
       platform.context.waitUntil(
-        sendWelcomeEmail(normalizedEmail, platform.env.RESEND_API_KEY),
+        sendWelcomeEmail(
+          normalizedEmail,
+          platform.env.ZEPHYR_API_KEY,
+          platform.env.ZEPHYR_URL,
+          platform.env.UNSUBSCRIBE_SECRET,
+        ),
       );
     }
 

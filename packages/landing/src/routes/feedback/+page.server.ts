@@ -4,7 +4,7 @@ import {
   verifyTurnstileToken,
   generateId,
 } from "@autumnsgrove/groveengine/services";
-import { Resend } from "resend";
+import { createZephyrClient } from "@autumnsgrove/groveengine/zephyr";
 
 /**
  * Escape HTML special characters to prevent XSS in email templates
@@ -127,10 +127,10 @@ export const actions: Actions = {
       });
     }
 
-    // Forward to autumn@grove.place via Resend
-    if (platform.env.RESEND_API_KEY) {
+    // Forward to autumn@grove.place via Zephyr
+    if (platform.env.ZEPHYR_API_KEY) {
       try {
-        const resend = new Resend(platform.env.RESEND_API_KEY);
+        const zephyr = createZephyrClient(platform.env);
 
         const sentimentEmoji =
           sentiment === "positive"
@@ -182,12 +182,12 @@ Feedback ID: ${id}
 </p>
 </div>`;
 
-        await resend.emails.send({
-          from: "Grove <hello@grove.place>",
+        await zephyr.sendRaw({
           to: "autumn@grove.place",
           subject: emailSubject,
           text: emailText,
           html: emailHtml,
+          type: "notification",
         });
       } catch (err) {
         console.error("Failed to forward feedback email:", err);

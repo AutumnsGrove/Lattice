@@ -81,15 +81,16 @@ export const load: PageServerLoad = async ({ cookies, platform }) => {
   // If no existing code and can send, create one automatically
   let codeSent = !!existingCode;
   if (!existingCode && rateLimit.canResend) {
-    const resendApiKey = env?.RESEND_API_KEY;
-    if (resendApiKey) {
+    const zephyrApiKey = env?.ZEPHYR_API_KEY;
+    if (zephyrApiKey) {
       const result = await createVerificationCode(
         db,
         kv,
         onboardingId,
         user.email as string,
         user.display_name as string | null,
-        resendApiKey,
+        zephyrApiKey,
+        env?.ZEPHYR_URL,
       );
       codeSent = result.success;
 

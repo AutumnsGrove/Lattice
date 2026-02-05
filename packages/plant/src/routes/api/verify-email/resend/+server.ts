@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
   const db = platform?.env?.DB;
   const kv = platform?.env?.KV;
   const env = platform?.env as Record<string, string> | undefined;
-  const resendApiKey = env?.RESEND_API_KEY;
+  const zephyrApiKey = env?.ZEPHYR_API_KEY;
 
   if (!db || !kv) {
     return json(
@@ -34,8 +34,8 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
     );
   }
 
-  if (!resendApiKey) {
-    console.error("[Resend Code] RESEND_API_KEY not configured");
+  if (!zephyrApiKey) {
+    console.error("[Resend Code] ZEPHYR_API_KEY not configured");
     return json(
       { success: false, error: "Email service unavailable" },
       { status: 503 },
@@ -71,7 +71,8 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
     onboardingId,
     user.email as string,
     user.display_name as string | null,
-    resendApiKey,
+    zephyrApiKey,
+    env?.ZEPHYR_URL,
   );
 
   if (!result.success) {

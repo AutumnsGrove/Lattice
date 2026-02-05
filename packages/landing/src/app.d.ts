@@ -18,7 +18,14 @@ declare global {
         DB: D1Database;
         CDN_BUCKET: R2Bucket;
         CDN_URL: string;
-        RESEND_API_KEY: string;
+        /** @deprecated Use ZEPHYR_API_KEY instead */
+        RESEND_API_KEY?: string;
+        /** Zephyr email gateway API key */
+        ZEPHYR_API_KEY: string;
+        /** Zephyr email gateway URL */
+        ZEPHYR_URL?: string;
+        /** Secret for unsubscribe token generation */
+        UNSUBSCRIBE_SECRET?: string;
         ADMIN_EMAILS: string;
         /** GroveAuth Service Binding (Heartwood - fast session validation) */
         AUTH: Fetcher;

@@ -58,7 +58,12 @@ declare global {
         STRIPE_SECRET_KEY?: string;
         STRIPE_WEBHOOK_SECRET?: string;
 
-        RESEND_API_KEY: string;
+        /** @deprecated Use ZEPHYR_API_KEY instead */
+        RESEND_API_KEY?: string;
+        /** Zephyr email gateway API key */
+        ZEPHYR_API_KEY: string;
+        /** Zephyr email gateway URL */
+        ZEPHYR_URL?: string;
         /** Optional: Base URL for redirects (e.g., https://plant.grove.place) */
         PUBLIC_APP_URL?: string;
       };

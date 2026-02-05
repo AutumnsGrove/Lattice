@@ -135,7 +135,8 @@ export async function createVerificationCode(
   userId: string,
   email: string,
   displayName: string | null,
-  resendApiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
 ): Promise<CreateCodeResult> {
   const normalizedEmail = normalizeEmail(email);
 
@@ -204,7 +205,8 @@ export async function createVerificationCode(
     subject: emailContent.subject,
     html: emailContent.html,
     text: emailContent.text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
   });
 
   if (!emailResult.success) {

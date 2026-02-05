@@ -74,6 +74,9 @@ export interface ZephyrRequest {
   /** Reply-to address */
   replyTo?: string;
 
+  /** Custom email headers (e.g., List-Unsubscribe) */
+  headers?: Record<string, string>;
+
   /** Tenant identifier for multi-tenant rate limiting */
   tenant?: string;
 

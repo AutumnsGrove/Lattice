@@ -1,40 +1,38 @@
 /**
  * Email Sending Utility
  *
- * Uses Resend API to send transactional emails.
+ * Uses Zephyr email gateway for transactional emails.
  */
 
-import { Resend } from "resend";
+import { ZephyrClient } from "@autumnsgrove/groveengine/zephyr";
+
+const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
 export async function sendEmail(params: {
   to: string;
   subject: string;
   html: string;
   text: string;
-  resendApiKey: string;
+  zephyrUrl?: string;
+  zephyrApiKey: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const resend = new Resend(params.resendApiKey);
+  const zephyr = new ZephyrClient({
+    baseUrl: params.zephyrUrl || DEFAULT_ZEPHYR_URL,
+    apiKey: params.zephyrApiKey,
+  });
 
-  try {
-    const { error } = await resend.emails.send({
-      from: "Grove <hello@grove.place>",
-      to: params.to,
-      subject: params.subject,
-      html: params.html,
-      text: params.text,
-    });
+  const result = await zephyr.sendRaw({
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+    text: params.text,
+    type: "verification",
+  });
 
-    if (error) {
-      console.error("[Resend] Error:", error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error("[Resend] Exception:", err);
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Failed to send email",
-    };
+  if (!result.success) {
+    console.error("[Zephyr] Error:", result.errorMessage);
+    return { success: false, error: result.errorMessage };
   }
+
+  return { success: true };
 }

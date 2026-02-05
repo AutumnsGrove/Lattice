@@ -30,9 +30,10 @@ import {
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
   const webhookSecret = platform?.env?.LEMON_SQUEEZY_WEBHOOK_SECRET;
-  const resendApiKey = platform?.env?.RESEND_API_KEY;
+  const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY;
+  const zephyrUrl = platform?.env?.ZEPHYR_URL;
 
-  if (!db || !webhookSecret || !resendApiKey) {
+  if (!db || !webhookSecret || !zephyrApiKey) {
     console.error("[Webhook] Missing configuration");
     return json({ error: "Configuration error" }, { status: 500 });
   }
@@ -160,13 +161,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       }
 
       case "subscription_payment_failed": {
-        await handlePaymentFailed(db, event, resendApiKey);
+        await handlePaymentFailed(db, event, zephyrApiKey, zephyrUrl);
         break;
       }
 
       case "subscription_payment_success":
       case "subscription_payment_recovered": {
-        await handlePaymentSuccess(db, event, resendApiKey);
+        await handlePaymentSuccess(db, event, zephyrApiKey, zephyrUrl);
         break;
       }
 
@@ -425,7 +426,8 @@ async function handleSubscriptionResumed(
 async function handlePaymentFailed(
   db: D1Database,
   event: LemonSqueezyWebhookPayload,
-  resendApiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
 ) {
   const subscriptionId = event.data.id;
 
@@ -469,7 +471,8 @@ async function handlePaymentFailed(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
   });
 
   if (result.success) {
@@ -491,7 +494,8 @@ async function handlePaymentFailed(
 async function handlePaymentSuccess(
   db: D1Database,
   event: LemonSqueezyWebhookPayload,
-  resendApiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
 ) {
   const attrs = event.data.attributes as {
     status: string;
@@ -563,7 +567,8 @@ async function handlePaymentSuccess(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    resendApiKey,
+    zephyrApiKey,
+    zephyrUrl,
   });
 
   if (result.success) {

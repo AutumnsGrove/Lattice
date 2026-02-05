@@ -1,37 +1,43 @@
-import { Resend } from "resend";
+import { ZephyrClient } from "@autumnsgrove/groveengine/zephyr";
 import { getWelcomeEmailHtml, getWelcomeEmailText } from "./templates";
 import { generateUnsubscribeUrl } from "./tokens";
 
+const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
+
 export async function sendWelcomeEmail(
   toEmail: string,
-  apiKey: string,
+  zephyrApiKey: string,
+  zephyrUrl?: string,
+  /** Secret for unsubscribe token (if not provided, uses zephyrApiKey) */
+  unsubscribeSecret?: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const resend = new Resend(apiKey);
+  const zephyr = new ZephyrClient({
+    baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
+    apiKey: zephyrApiKey,
+  });
 
-  try {
-    // Generate unsubscribe URL for this recipient
-    const unsubscribeUrl = await generateUnsubscribeUrl(toEmail, apiKey);
+  // Generate unsubscribe URL for this recipient
+  // Uses a dedicated secret or falls back to the API key
+  const secret = unsubscribeSecret || zephyrApiKey;
+  const unsubscribeUrl = await generateUnsubscribeUrl(toEmail, secret);
 
-    const { error } = await resend.emails.send({
-      from: "Grove <hello@grove.place>",
-      to: toEmail,
-      subject: "Welcome to Grove 🌿",
-      html: getWelcomeEmailHtml(unsubscribeUrl),
-      text: getWelcomeEmailText(unsubscribeUrl),
-      headers: {
-        "List-Unsubscribe": `<${unsubscribeUrl}>`,
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-      },
-    });
+  const result = await zephyr.send({
+    type: "sequence",
+    template: "raw",
+    to: toEmail,
+    subject: "Welcome to Grove 🌿",
+    html: getWelcomeEmailHtml(unsubscribeUrl),
+    text: getWelcomeEmailText(unsubscribeUrl),
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
+  });
 
-    if (error) {
-      console.error("Resend error:", error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error("Email send error:", err);
-    return { success: false, error: "Failed to send email" };
+  if (!result.success) {
+    console.error("Zephyr error:", result.errorMessage);
+    return { success: false, error: result.errorMessage };
   }
+
+  return { success: true };
 }

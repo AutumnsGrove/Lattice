@@ -67,12 +67,19 @@ export async function validateApiKey(
 }
 
 /**
+ * Hono context variables for authenticated requests
+ */
+export interface AuthVariables {
+  tenant?: string;
+}
+
+/**
  * Hono middleware for API key authentication
  *
  * Usage: app.use('/send', authMiddleware)
  */
 export async function authMiddleware(
-  c: Context<{ Bindings: Env }>,
+  c: Context<{ Bindings: Env; Variables: AuthVariables }>,
   next: Next,
 ) {
   const apiKey = c.req.header("X-API-Key");

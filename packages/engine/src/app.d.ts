@@ -70,7 +70,11 @@ declare global {
         GITHUB_TOKEN?: string;
         ANTHROPIC_API_KEY?: string;
         SESSION_SECRET?: string; // Deprecated: was used for magic code auth
-        RESEND_API_KEY?: string; // Optional: for transactional emails
+        RESEND_API_KEY?: string; // @deprecated - use ZEPHYR_API_KEY
+        /** Zephyr email gateway API key */
+        ZEPHYR_API_KEY?: string;
+        /** Zephyr email gateway URL */
+        ZEPHYR_URL?: string;
         ALLOWED_ADMIN_EMAILS?: string;
         TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 

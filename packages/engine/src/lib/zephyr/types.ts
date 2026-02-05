@@ -35,6 +35,8 @@ export interface ZephyrRequest {
   from?: string;
   fromName?: string;
   replyTo?: string;
+  /** Custom email headers (e.g., List-Unsubscribe) */
+  headers?: Record<string, string>;
   tenant?: string;
   source?: string;
   correlationId?: string;

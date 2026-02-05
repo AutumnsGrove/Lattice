@@ -2,10 +2,12 @@
  * Trace Email Notification Service
  *
  * Sends email notifications when feedback is submitted via Trace.
- * Uses Resend API with Grove's warm, friendly tone.
+ * Uses Zephyr email gateway with Grove's warm, friendly tone.
  */
 
-import { Resend } from "resend";
+import { ZephyrClient } from "$lib/zephyr/client.js";
+
+const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
 export interface TraceNotification {
   sourcePath: string;
@@ -17,43 +19,40 @@ export interface TraceNotification {
 /**
  * Send email notification for new trace feedback.
  *
- * @param apiKey - Resend API key
+ * @param zephyrUrl - Zephyr gateway URL
+ * @param zephyrApiKey - Zephyr API key
  * @param adminEmail - Email address to notify
  * @param trace - Trace feedback data
  * @returns Success status and optional error
  */
 export async function sendTraceNotification(
-  apiKey: string,
+  zephyrUrl: string | undefined,
+  zephyrApiKey: string,
   adminEmail: string,
   trace: TraceNotification,
 ): Promise<{ success: boolean; error?: string }> {
-  const resend = new Resend(apiKey);
+  const zephyr = new ZephyrClient({
+    baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
+    apiKey: zephyrApiKey,
+  });
 
   const emoji = trace.vote === "up" ? "👍" : "👎";
   const voteText = trace.vote === "up" ? "positive" : "negative";
 
-  try {
-    const { error } = await resend.emails.send({
-      from: "Grove <hello@grove.place>",
-      to: adminEmail,
-      subject: `[Trace] ${emoji} ${trace.sourcePath}`,
-      html: buildHtmlEmail(trace, emoji, voteText),
-      text: buildTextEmail(trace, emoji, voteText),
-    });
+  const result = await zephyr.sendRaw({
+    to: adminEmail,
+    subject: `[Trace] ${emoji} ${trace.sourcePath}`,
+    html: buildHtmlEmail(trace, emoji, voteText),
+    text: buildTextEmail(trace, emoji, voteText),
+    type: "notification",
+  });
 
-    if (error) {
-      console.error("[Trace Email] Resend error:", error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error("[Trace Email] Exception:", err);
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Failed to send email",
-    };
+  if (!result.success) {
+    console.error("[Trace Email] Zephyr error:", result.errorMessage);
+    return { success: false, error: result.errorMessage };
   }
+
+  return { success: true };
 }
 
 function buildHtmlEmail(
