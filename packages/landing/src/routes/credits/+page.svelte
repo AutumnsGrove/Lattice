@@ -275,6 +275,31 @@
 							</a>
 						</div>
 					</div>
+
+					<div class="card p-5">
+						<div class="flex items-start justify-between gap-4">
+							<div>
+								<h3 class="text-lg font-serif text-foreground mb-1">Crush</h3>
+								<p class="text-foreground-subtle font-sans text-sm mb-2">by Charmbracelet</p>
+								<p class="text-foreground-muted font-sans text-sm">
+									A delightful terminal AI coding agent and OpenCode's successor. Used with frontier open source models via OpenRouter with ZDR enabled.
+								</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 mt-3">
+							<a href="https://github.com/charmbracelet/crush" target="_blank" rel="noopener noreferrer" class="text-accent-muted text-sm font-sans hover:underline">
+								github.com/charmbracelet/crush →
+							</a>
+							<a
+								href="/knowledge/help/what-is-zdr"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								title="Zero Data Retention"
+							>
+								<Shredder class="w-3 h-3" />
+								ZDR
+							</a>
+						</div>
+					</div>
 				</div>
 			</section>
 
