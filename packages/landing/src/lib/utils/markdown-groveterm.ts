@@ -1,19 +1,23 @@
 /**
  * Markdown-it GroveTerm Plugin
  *
- * Transforms [[term]] and [[term|display]] syntax in markdown content
- * into HTML spans with data attributes for tooltip functionality.
+ * Proper markdown-it plugin that registers an inline rule and renderer
+ * for [[term]] and [[term|display]] syntax. Outputs <abbr> tags with
+ * data attributes and native tooltips.
  *
- * Unlike the rehype plugin (for unified pipelines), this works directly
- * with markdown-it and outputs plain HTML that works with @html rendering.
+ * This is a real markdown-it plugin — it hooks into the tokenizer and
+ * renderer pipeline, so it works regardless of the `html` config setting.
+ * No more fighting against html escaping.
  *
  * Output format:
- *   [[bloom]] → <abbr class="grove-term" title="Your Writing — A bloom is...">Bloom</abbr>
- *   [[wanderer|visitors]] → <abbr class="grove-term" title="...">visitors</abbr>
+ *   [[bloom]] → <abbr class="grove-term" data-term="bloom" title="Your Writing — ...">Bloom</abbr>
+ *   [[wanderer|visitors]] → <abbr class="grove-term" data-term="wanderer" title="...">visitors</abbr>
  */
 
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import type MarkdownIt from "markdown-it";
+import type StateInline from "markdown-it/lib/rules_inline/state_inline.mjs";
 
 // Type for manifest entries
 interface GroveTermEntry {
@@ -51,12 +55,6 @@ try {
   );
   manifest = {};
 }
-
-/**
- * Regex pattern for GroveTerm syntax.
- * Matches: [[term]] or [[term|display text]]
- */
-const GROVETERM_PATTERN = /\[\[([a-zA-Z][a-zA-Z0-9-]*)(?:\|([^\]]*))?\]\]/g;
 
 /**
  * Normalize a term slug to lowercase for manifest lookup.
@@ -106,9 +104,9 @@ function findInManifest(slug: string): { found: boolean; actualSlug: string } {
 }
 
 /**
- * Escape HTML special characters.
+ * Escape HTML special characters for safe attribute embedding.
  */
-function escapeHtml(str: string): string {
+function escapeAttr(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -118,66 +116,138 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * Process GroveTerm syntax in markdown content.
+ * Inline rule: parse [[term]] and [[term|display]] syntax.
  *
- * This is a pre-processor that runs BEFORE markdown-it rendering.
- * It transforms [[term]] patterns into <abbr> tags with tooltips.
- *
- * @param content - Markdown content with [[term]] patterns
- * @returns Content with [[term]] replaced by <abbr> tags
+ * This is the tokenizer side — it recognizes the pattern in the source
+ * and creates a `grove_term` token in the token stream.
  */
-export function processGroveTerms(content: string): string {
-  return content.replace(
-    GROVETERM_PATTERN,
-    (fullMatch, rawTerm: string, rawDisplay: string | undefined) => {
-      // Handle empty term
-      if (!rawTerm || !rawTerm.trim()) {
-        return fullMatch;
-      }
+function groveTermRule(state: StateInline, silent: boolean): boolean {
+  const src = state.src;
+  const pos = state.pos;
+  const max = state.posMax;
 
-      const slug = normalizeSlug(rawTerm);
-      const { found, actualSlug } = findInManifest(slug);
+  // Quick fail: need at least [[ + one char + ]]
+  if (pos + 4 > max) return false;
 
-      if (!found) {
-        // Unknown term: warn and return display text only
-        console.warn(`[GroveTerm] Unknown term: "${slug}"`);
-        const displayText =
-          rawDisplay !== undefined && rawDisplay.trim() !== ""
-            ? rawDisplay.trim()
-            : capitalizeFirst(slug);
-        return displayText;
-      }
+  // Check for opening [[
+  if (
+    src.charCodeAt(pos) !== 0x5b /* [ */ ||
+    src.charCodeAt(pos + 1) !== 0x5b /* [ */
+  ) {
+    return false;
+  }
 
-      // Get term data from manifest
-      const termData = manifest[actualSlug];
+  // Find closing ]]
+  const start = pos + 2;
+  let end = start;
+
+  while (end < max - 1) {
+    if (
+      src.charCodeAt(end) === 0x5d /* ] */ &&
+      src.charCodeAt(end + 1) === 0x5d /* ] */
+    ) {
+      break;
+    }
+    end++;
+  }
+
+  // No closing ]] found
+  if (end >= max - 1) return false;
+
+  // Validate: term part must start with a letter
+  const content = src.slice(start, end);
+  if (!content || !/^[a-zA-Z]/.test(content)) return false;
+
+  // Parse term and optional display text
+  const pipeIndex = content.indexOf("|");
+  let rawTerm: string;
+  let rawDisplay: string | undefined;
+
+  if (pipeIndex !== -1) {
+    rawTerm = content.slice(0, pipeIndex);
+    rawDisplay = content.slice(pipeIndex + 1);
+  } else {
+    rawTerm = content;
+  }
+
+  // Validate term format: letters, numbers, hyphens
+  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(rawTerm)) return false;
+
+  // In silent mode, just confirm the match without creating tokens
+  if (silent) return true;
+
+  // Create the token
+  const token = state.push("grove_term", "abbr", 0);
+  token.content = content;
+  token.meta = { rawTerm, rawDisplay };
+
+  state.pos = end + 2;
+  return true;
+}
+
+/**
+ * Markdown-it GroveTerm plugin.
+ *
+ * Registers an inline rule and renderer for [[term]] syntax.
+ * Works regardless of the `html` config because it goes through
+ * markdown-it's own rendering pipeline.
+ *
+ * @example
+ * ```typescript
+ * import MarkdownIt from 'markdown-it';
+ * import { groveTermPlugin } from './markdown-groveterm';
+ *
+ * const md = new MarkdownIt({ html: false });
+ * md.use(groveTermPlugin);
+ *
+ * md.render('Welcome to [[grove]]!');
+ * // → <p>Welcome to <abbr class="grove-term" ...>Grove</abbr>!</p>
+ * ```
+ */
+export function groveTermPlugin(md: MarkdownIt): void {
+  // Register the inline rule
+  md.inline.ruler.push("grove_term", groveTermRule);
+
+  // Register the renderer
+  md.renderer.rules.grove_term = function (tokens, idx) {
+    const token = tokens[idx];
+    const { rawTerm, rawDisplay } = token.meta;
+
+    const slug = normalizeSlug(rawTerm);
+    const { found, actualSlug } = findInManifest(slug);
+
+    if (!found) {
+      console.warn(`[GroveTerm] Unknown term: "${slug}"`);
       const displayText =
         rawDisplay !== undefined && rawDisplay.trim() !== ""
           ? rawDisplay.trim()
-          : termData.term || capitalizeFirst(actualSlug);
+          : capitalizeFirst(slug);
+      return md.utils.escapeHtml(displayText);
+    }
 
-      // Build tooltip content: "Tagline — Definition"
-      const tooltipParts: string[] = [];
-      if (termData.tagline) {
-        tooltipParts.push(termData.tagline);
-      }
-      if (termData.definition) {
-        // Truncate long definitions for tooltip
-        const shortDef =
-          termData.definition.length > 150
-            ? termData.definition.substring(0, 147) + "..."
-            : termData.definition;
-        tooltipParts.push(shortDef);
-      }
-      const tooltip = tooltipParts.join(" — ");
+    // Get term data from manifest
+    const termData = manifest[actualSlug];
+    const displayText =
+      rawDisplay !== undefined && rawDisplay.trim() !== ""
+        ? rawDisplay.trim()
+        : termData.term || capitalizeFirst(actualSlug);
 
-      // Build the abbr tag
-      const escapedDisplay = escapeHtml(displayText);
-      const escapedTooltip = escapeHtml(tooltip);
-      const escapedSlug = escapeHtml(actualSlug);
+    // Build tooltip content: "Tagline — Definition"
+    const tooltipParts: string[] = [];
+    if (termData.tagline) {
+      tooltipParts.push(termData.tagline);
+    }
+    if (termData.definition) {
+      const shortDef =
+        termData.definition.length > 150
+          ? termData.definition.substring(0, 147) + "..."
+          : termData.definition;
+      tooltipParts.push(shortDef);
+    }
+    const tooltip = tooltipParts.join(" — ");
 
-      return `<abbr class="grove-term" data-term="${escapedSlug}" title="${escapedTooltip}">${escapedDisplay}</abbr>`;
-    },
-  );
+    return `<abbr class="grove-term" data-term="${escapeAttr(actualSlug)}" title="${escapeAttr(tooltip)}">${md.utils.escapeHtml(displayText)}</abbr>`;
+  };
 }
 
-export default processGroveTerms;
+export default groveTermPlugin;

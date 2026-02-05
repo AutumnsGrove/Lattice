@@ -14,12 +14,14 @@ import { getDocFilePath, findDocBySlug } from "$lib/server/docs-scanner";
 import { readFileSync } from "fs";
 import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
+import { groveTermPlugin } from "$lib/utils/markdown-groveterm";
 
 // Prerender all excerpt endpoints at build time
 export const prerender = true;
 
-// Markdown renderer for excerpts (simpler than full article renderer)
+// Markdown renderer for excerpts with GroveTerm support
 const md = new MarkdownIt({ html: false, linkify: true });
+md.use(groveTermPlugin);
 
 /**
  * Extract first section from markdown content.

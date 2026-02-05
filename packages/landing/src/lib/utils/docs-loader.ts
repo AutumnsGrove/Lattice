@@ -8,7 +8,7 @@ import type {
   DocWithContent,
   DocHeader,
 } from "$lib/types/docs";
-import { processGroveTerms } from "./markdown-groveterm";
+import { groveTermPlugin } from "./markdown-groveterm";
 
 /**
  * Generate a URL-safe ID from text.
@@ -35,8 +35,9 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#39;");
 }
 
-// Create markdown-it instance with custom renderers
+// Create markdown-it instance with custom renderers and GroveTerm plugin
 const md = new MarkdownIt({ html: false, linkify: true });
+md.use(groveTermPlugin);
 
 // Heading renderer - adds IDs for TOC navigation
 md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
@@ -297,7 +298,7 @@ export function loadDocBySlug(
     return {
       ...docWithoutPath,
       content: markdownContent,
-      html: md.render(processGroveTerms(markdownContent)),
+      html: md.render(markdownContent),
       headers,
     };
   } catch (error) {
