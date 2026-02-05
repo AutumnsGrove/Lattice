@@ -140,16 +140,24 @@
   // Debounced preview HTML - avoid expensive markdown rendering on every keystroke
   // Cache the last rendered HTML to prevent jank during typing
   let debouncedContent = $state(content);
-  let debounceTimer = $state(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
-  let isMounted = $state(true);  // Track mount state to prevent race condition
+  // NOT $state - these are cleanup handles, not reactive state
+  // Using $state here causes infinite loops (effect writes to state it reads)
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let debounceTimer = null;
+  let isMounted = true;
 
   // Update debounced content after 150ms of no typing
   $effect(() => {
+    // Clear any existing timer
     if (debounceTimer) clearTimeout(debounceTimer);
+
+    // Capture current content for the closure
+    const currentContent = content;
+
     debounceTimer = setTimeout(() => {
       // Only update if component is still mounted (prevents race condition)
       if (isMounted) {
-        debouncedContent = content;
+        debouncedContent = currentContent;
       }
     }, 150);
 
