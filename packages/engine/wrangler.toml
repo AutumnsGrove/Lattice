@@ -110,6 +110,7 @@ script_name = "grove-durable-objects"
 # =============================================================================
 [vars]
 CACHE_TTL_SECONDS = "3600"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 GROVEAUTH_URL = "https://auth.grove.place"
 # The Clearing (Status Page) - for Sentinel integration
 CLEARING_API_URL = "https://status.grove.place"

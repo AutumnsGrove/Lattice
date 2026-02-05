@@ -38,6 +38,7 @@ id = "82d6537525d345f1981924bfd082248f"
 # =============================================================================
 [vars]
 ALERT_EMAIL = "alerts@grove.place"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 
 # =============================================================================
 # Secrets (configured via wrangler secret put)

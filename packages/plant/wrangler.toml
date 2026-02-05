@@ -7,6 +7,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [vars]
 # Turnstile (Shade) - human verification
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 
 # Signup gate - set to "true" when payment processing is ready
 # This prevents OAuth flow from proceeding until Stripe is configured

@@ -6,6 +6,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 # Environment variables for local development
 [vars]
 CDN_URL = "http://localhost:5173/cdn"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 # Turnstile (Shade) - human verification
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 

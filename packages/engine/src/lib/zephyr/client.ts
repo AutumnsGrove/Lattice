@@ -197,6 +197,6 @@ export const zephyr = new ZephyrClient({
   baseUrl:
     getEnvVar("VITE_ZEPHYR_URL") ||
     getEnvVar("PUBLIC_ZEPHYR_URL") ||
-    "https://grove-zephyr.pages.dev",
+    "https://grove-zephyr.m7jv4v7npb.workers.dev",
   apiKey: getEnvVar("VITE_ZEPHYR_API_KEY") || getEnvVar("ZEPHYR_API_KEY") || "",
 });

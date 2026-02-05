@@ -10,6 +10,10 @@ compatibility_flags = ["nodejs_compat"]
 [triggers]
 crons = ["0 10 * * *"]
 
+# Environment variables
+[vars]
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+
 # D1 Database binding (same as landing page)
 [[d1_databases]]
 binding = "DB"
