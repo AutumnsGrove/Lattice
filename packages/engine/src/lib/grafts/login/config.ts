@@ -30,7 +30,7 @@ export const PROVIDERS: Record<AuthProvider, ProviderConfig> = {
   email: {
     id: "email",
     name: "Email",
-    available: false, // Not yet implemented
+    available: true,
     description: "Sign in with email magic link",
   },
   passkey: {
@@ -101,6 +101,8 @@ export const GROVEAUTH_URLS = {
   api: "https://auth-api.grove.place",
   /** Better Auth social sign-in endpoint (direct redirect) */
   socialSignIn: "https://auth-api.grove.place/api/auth/sign-in/social",
+  /** Better Auth magic link sign-in endpoint */
+  magicLink: "https://auth-api.grove.place/api/auth/sign-in/magic-link",
 } as const;
 
 /**

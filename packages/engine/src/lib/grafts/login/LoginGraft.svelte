@@ -50,6 +50,7 @@
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import PasskeyButton from "./PasskeyButton.svelte";
+	import EmailButton from "./EmailButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 
@@ -134,6 +135,9 @@
 		{#if primaryProvider === "passkey"}
 			<!-- Passkey uses its own button with WebAuthn ceremony -->
 			<PasskeyButton {returnTo} size="md" class={className} />
+		{:else if primaryProvider === "email"}
+			<!-- Email uses its own button with magic link form -->
+			<EmailButton {returnTo} size="md" class={className} />
 		{:else}
 			<GlassButton
 				variant="default"
@@ -195,6 +199,9 @@
 							{#if provider === "passkey"}
 								<!-- Passkey uses its own button with WebAuthn ceremony -->
 								<PasskeyButton {returnTo} />
+							{:else if provider === "email"}
+								<!-- Email uses its own button with magic link form -->
+								<EmailButton {returnTo} />
 							{:else}
 								<GlassButton
 									variant="default"
@@ -258,6 +265,9 @@
 						{#if provider === "passkey"}
 							<!-- Passkey uses its own button with WebAuthn ceremony -->
 							<PasskeyButton {returnTo} />
+						{:else if provider === "email"}
+							<!-- Email uses its own button with magic link form -->
+							<EmailButton {returnTo} />
 						{:else}
 							<GlassButton
 								variant="default"

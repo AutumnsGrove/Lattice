@@ -59,6 +59,7 @@ export {
 export { default as LoginGraft } from "./LoginGraft.svelte";
 export { default as ProviderIcon } from "./ProviderIcon.svelte";
 export { default as PasskeyButton } from "./PasskeyButton.svelte";
+export { default as EmailButton } from "./EmailButton.svelte";
 
 // Passkey utilities
 export {
