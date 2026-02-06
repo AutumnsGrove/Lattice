@@ -86,10 +86,10 @@ Assess the situation:
 │                      Elephant-Build                          │
 │                      (multi-file features)                   │
 │                                                              │
-│  🦝 SECURITY                                                   │
-│  ─────────                                                   │
-│  Raccoon-Audit                                               │
-│  (security audit/cleanup)                                    │
+│  🦝 SECURITY          🐢 HARDENING                              │
+│  ─────────            ─────────                              │
+│  Raccoon-Audit        Turtle-Harden                        │
+│  (secrets/cleanup)    (secure by design, defense in depth)   │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -128,6 +128,10 @@ What do you need to do?
 │
 ├─ Audit security? ──────────────→ 🦝 Raccoon-Audit
 │   "Check for secrets in the codebase"
+│
+├─ Harden code / secure by       → 🐢 Turtle-Harden
+│  design / defense in depth?
+│   "Make sure this is secure before we ship"
 │
 ├─ Migrate data? ────────────────→ 🐻 Bear-Migrate
 │   "Split user name into first/last"
@@ -188,9 +192,9 @@ Show the specific animals available:
 │           PATHS FOR BUILDING A NEW FEATURE                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  🐕 Bloodhound → 🐘 Elephant → 🦫 Beaver                    │
-│  ─────────────────────────────────────                      │
-│  Scout patterns → Build feature → Add tests                 │
+│  🐕 Bloodhound → 🐘 Elephant → 🐢 Turtle → 🦫 Beaver        │
+│  ──────────────────────────────────────────────             │
+│  Scout → Build → Harden → Test                              │
 │                                                             │
 │  Or just:                                                   │
 │                                                             │
@@ -200,7 +204,7 @@ Show the specific animals available:
 │  Or use a Gathering:                                        │
 │                                                             │
 │  🌲 /gathering-feature                                      │
-│  (mobilizes multiple animals automatically)                 │
+│  (mobilizes 8 animals — secure by design)                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -340,6 +344,10 @@ Use guiding metaphors:
 │     Sense accessibility barriers with gentle awareness             │
 │     Use: a11y audits, inclusive design                             │
 │                                                                    │
+│  🐢 turtle-harden                                                │
+│     Harden code with patient, layered defense-in-depth             │
+│     Use: Secure by design, deep vulnerability audits               │
+│                                                                    │
 │  🐦 robin-guide                                                    │
 │     Guide wanderers to the right animal (that's me!)               │
 │     Use: Choosing skills, discovering capabilities                 │
@@ -360,9 +368,9 @@ Use guiding metaphors:
 When the drum sounds, animals gather:
 
 ```
-🌲 /gathering-feature      Bloodhound → Elephant → Beaver → Raccoon → 
-                           Deer → Fox → Owl
-                           (Complete feature lifecycle)
+🌲 /gathering-feature      Bloodhound → Elephant → Turtle → Beaver →
+                           Raccoon → Deer → Fox → Owl
+                           (Complete feature lifecycle, secure by design)
 
 🌲 /gathering-architecture Eagle → Swan → Elephant
                            (System design to implementation)
@@ -370,8 +378,8 @@ When the drum sounds, animals gather:
 🌲 /gathering-ui          Chameleon → Deer
                            (UI design + accessibility)
 
-🌲 /gathering-security    Spider → Raccoon
-                           (Auth + security audit)
+🌲 /gathering-security    Spider → Raccoon → Turtle
+                           (Auth + security audit + hardening)
 
 🌲 /gathering-migration   Bear → Bloodhound
                            (Safe data movement)

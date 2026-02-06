@@ -1,11 +1,11 @@
 ---
 name: gathering-feature
-description: The drum sounds. Bloodhound, Elephant, Beaver, Raccoon, Deer, Fox, and Owl gather for complete feature development. Use when building a full feature from exploration to documentation.
+description: The drum sounds. Bloodhound, Elephant, Turtle, Beaver, Raccoon, Deer, Fox, and Owl gather for complete feature development. Use when building a full feature from exploration to documentation — secure by design.
 ---
 
 # Gathering Feature 🌲🐾
 
-The drum echoes through the forest. One by one, they come. The Bloodhound scouts the territory. The Elephant builds with unstoppable momentum. The Beaver tests what was built. The Raccoon audits for security. The Deer ensures all can travel the paths. The Fox optimizes for speed. The Owl documents what was learned. When the gathering completes, a feature stands where before there was only forest.
+The drum echoes through the forest. One by one, they come. The Bloodhound scouts the territory. The Elephant builds with unstoppable momentum. The Turtle hardens what was built — bone-deep security, not bolted on afterward. The Beaver tests the hardened code. The Raccoon audits for secrets and cleanup. The Deer ensures all can travel the paths. The Fox optimizes for speed. The Owl documents what was learned. When the gathering completes, a feature stands where before there was only forest — secure from birth.
 
 ## When to Summon
 
@@ -29,11 +29,12 @@ Request  Animals    Work       All      Ready
 
 1. **🐕 Bloodhound** — Scout the codebase, understand patterns
 2. **🐘 Elephant** — Build the multi-file feature
-3. **🦫 Beaver** — Write comprehensive tests
-4. **🦝 Raccoon** — Security audit and cleanup
-5. **🦌 Deer** — Accessibility audit
-6. **🦊 Fox** — Performance optimization
-7. **🦉 Owl** — Document the feature
+3. **🐢 Turtle** — Harden what was built (secure by design, not bolted on)
+4. **🦫 Beaver** — Write comprehensive tests (including hardened code)
+5. **🦝 Raccoon** — Security audit and cleanup
+6. **🦌 Deer** — Accessibility audit
+7. **🦊 Fox** — Performance optimization
+8. **🦉 Owl** — Document the feature
 
 ---
 
@@ -51,16 +52,17 @@ Receive and parse the request:
 
 **Confirm:**
 > "I'll mobilize a gathering for: **[feature description]**
-> 
+>
 > This will involve:
 > - 🐕 Bloodhound scouting the codebase
 > - 🐘 Elephant building across **[estimated files]** files
+> - 🐢 Turtle hardening security by design
 > - 🦫 Beaver writing tests
-> - 🦝 Raccoon auditing security
+> - 🦝 Raccoon auditing for secrets and cleanup
 > - 🦌 Deer checking accessibility
 > - 🦊 Fox optimizing performance
 > - 🦉 Owl writing documentation
-> 
+>
 > Proceed with the gathering?"
 
 ---
@@ -74,19 +76,23 @@ Dispatch in sequence:
 **Dispatch Order:**
 
 ```
-Bloodhound ──→ Elephant ──→ Beaver ──→ Raccoon ──→ Deer ──→ Fox ──→ Owl
-   │              │            │            │          │        │       │
-   │              │            │            │          │        │       │
-Scout          Build        Test        Security   a11y    Speed   Docs
-Patterns      Feature      Coverage     Audit      Check   Opt     Write
+Bloodhound ──→ Elephant ──→ Turtle ──→ Beaver ──→ Raccoon ──→ Deer ──→ Fox ──→ Owl
+   │              │            │          │           │          │        │       │
+   │              │            │          │           │          │        │       │
+Scout          Build       Harden      Test       Secrets    a11y    Speed   Docs
+Patterns      Feature     Security    Coverage    Cleanup    Check   Opt     Write
 ```
 
 **Dependencies:**
 - Bloodhound must complete before Elephant (needs context)
-- Elephant must complete before Beaver (tests the built feature)
-- Beaver must complete before Raccoon (tests catch security issues)
+- Elephant must complete before Turtle (hardens what was built)
+- Turtle must complete before Beaver (tests the hardened code)
+- Beaver must complete before Raccoon (tests catch remaining issues)
 - Raccoon, Deer, Fox can run in parallel after Beaver
 - Owl last (documents everything)
+
+**Why Turtle before Beaver:**
+Security is not a phase you bolt on after testing — it shapes *what* you build. The Turtle reviews Elephant's work and hardens it: adds input validation schemas, output encoding, parameterized queries, security headers. Then Beaver tests the hardened code, catching both functional and security regressions. This is secure by design.
 
 ---
 
@@ -121,6 +127,20 @@ Output:
 - Integration wired
 ```
 
+**🐢 TURTLE — HARDEN**
+
+```
+"Withdrawing to study what was built..."
+
+Output:
+- Input validation added (Zod schemas on all endpoints)
+- Output encoding verified (context-aware)
+- Parameterized queries enforced (zero concatenation)
+- Security headers configured (CSP, HSTS, etc.)
+- Error handling hardened (generic messages, no leaks)
+- Defense-in-depth layers applied
+```
+
 **🦫 BEAVER — TEST**
 
 ```
@@ -129,6 +149,7 @@ Output:
 Output:
 - Integration tests for user flows
 - Unit tests for complex logic
+- Security regression tests (from Turtle's hardening)
 - Edge case coverage
 - All tests passing
 ```
@@ -191,8 +212,12 @@ Output:
 
 - [ ] Bloodhound: All integration points mapped
 - [ ] Elephant: Feature functional end-to-end
+- [ ] Turtle: Input validation on all entry points
+- [ ] Turtle: Output encoding on all exit points
+- [ ] Turtle: Security headers configured
+- [ ] Turtle: Defense-in-depth layers verified
 - [ ] Beaver: All tests passing, coverage adequate
-- [ ] Raccoon: No security issues found
+- [ ] Raccoon: No secrets or dead code found
 - [ ] Deer: WCAG AA compliance verified
 - [ ] Fox: Performance targets met
 - [ ] Owl: Documentation complete
@@ -224,7 +249,7 @@ If all gates pass:
 ### Feature: [Name]
 
 ### Animals Mobilized
-🐕 Bloodhound → 🐘 Elephant → 🦫 Beaver → 🦝 Raccoon → 🦌 Deer → 🦊 Fox → 🦉 Owl
+🐕 Bloodhound → 🐘 Elephant → 🐢 Turtle → 🦫 Beaver → 🦝 Raccoon → 🦌 Deer → 🦊 Fox → 🦉 Owl
 
 ### What Was Built
 - **Files Changed:** [count]
@@ -234,7 +259,8 @@ If all gates pass:
 
 ### Quality Verification
 - ✅ Tests: [X] passing, [Y]% coverage
-- ✅ Security: No issues found
+- ✅ Hardened: Input validation, output encoding, security headers
+- ✅ Security: No secrets or vulnerabilities found
 - ✅ Accessibility: WCAG AA compliant
 - ✅ Performance: [metrics]
 - ✅ Documentation: Complete
@@ -261,20 +287,21 @@ If all gates pass:
 
 1. 🌲 **SUMMON** — "Mobilizing for: Bookmarking system. Allow users to save posts for later."
 
-2. 🌲 **ORGANIZE** — "Dispatch sequence: Bloodhound → Elephant → Beaver → Raccoon + Deer + Fox → Owl"
+2. 🌲 **ORGANIZE** — "Dispatch sequence: Bloodhound → Elephant → Turtle → Beaver → Raccoon + Deer + Fox → Owl"
 
-3. 🌲 **EXECUTE** — 
+3. 🌲 **EXECUTE** —
    - 🐕 Scout: "Found post components, user service patterns, database conventions"
    - 🐘 Build: "Created bookmark service, API endpoints, UI components, database schema"
-   - 🦫 Test: "Added 15 tests covering CRUD operations, auth checks, edge cases"
-   - 🦝 Audit: "No secrets, input validated, auth enforced"
+   - 🐢 Harden: "Added Zod validation on bookmark endpoints, parameterized all queries, output encoding on bookmark titles, CSP headers configured"
+   - 🦫 Test: "Added 18 tests covering CRUD operations, auth checks, security regressions, edge cases"
+   - 🦝 Audit: "No secrets, clean dependencies, dead code removed"
    - 🦌 Sense: "Keyboard nav works, screen reader announces, contrast passes"
    - 🦊 Optimize: "Lazy loaded bookmarks, indexed queries, compressed images"
    - 🦉 Archive: "Help doc written, API documented, code commented"
 
 4. 🌲 **VALIDATE** — "All quality gates pass"
 
-5. 🌲 **COMPLETE** — "Feature deployed, documented, tested, secured"
+5. 🌲 **COMPLETE** — "Feature deployed, hardened, tested, audited, documented — secure from birth"
 
 ---
 

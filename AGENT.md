@@ -732,6 +732,8 @@ Grove's development workflow is organized as a forest ecosystem. Each animal has
 
 **Watchers (Quality):**
 - **When auditing accessibility** → Use skill: `deer-sense`
+- **When hardening code for security by design** → Use skill: `turtle-harden`
+- **When auditing for deep/subtle vulnerabilities** → Use skill: `turtle-harden`
 
 **Guides (Navigation):**
 - **When unsure which skill to use** → Use skill: `robin-guide`
@@ -796,6 +798,7 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `walking-through-the-grove` | Finding Grove-themed names for new services |
 | `grove-issues` | Parse brain dumps into structured GitHub issues |
 | `npm-publish` | npm package publishing workflow |
+| `turtle-harden` | Security hardening, defense in depth, secure by design |
 | `research-strategy` | Systematic research |
 
 ---
