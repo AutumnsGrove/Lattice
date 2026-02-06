@@ -8,15 +8,26 @@
 
 The `AGENT.md` file contains all project-specific instructions, workflows, and guidelines. Read it first to keep the full context in memory for this session.
 
-## Codebase Navigation (grove-find)
+## Grove Tools Setup
 
-**After reading AGENT.md**, use the Python-based `gf` tool for codebase search:
+**After reading AGENT.md**, install the two core CLI tools. Check if they're already available:
 
 ```bash
-uv run --project tools/grove-find gf --agent <command>
+gf --help && gw --help
 ```
 
-The `--agent` flag enables agent mode: no colors, no emoji, no box-drawing characters—just clean output.
+If either command is not found, install them:
+
+```bash
+uv tool install --editable tools/grove-find
+uv tool install --editable tools/gw
+```
+
+Once installed, `gf` and `gw` are available directly — no `uv run` prefix needed.
+
+### Codebase Search (gf)
+
+`gf` is a fast codebase search tool. Use `--agent` for clean output (no colors/emoji).
 
 **Key commands:**
 - `gf --agent search "pattern"` — Search entire codebase
@@ -31,15 +42,11 @@ The `--agent` flag enables agent mode: no colors, no emoji, no box-drawing chara
 
 Run `gf --help` for full command list.
 
-**Web/remote sessions:** If `fd` is not installed, file-type searches (`gf svelte`, `gf ts`, etc.) won't work. All other commands (search, func, class, usage, recent, changed, todo, git, engine, etc.) work with just `rg` + `git`.
+**Web/remote note:** If `fd` is not installed, file-type searches (`gf svelte`, `gf ts`, etc.) won't work. All other commands work with just `rg` + `git`.
 
-## Infrastructure CLI (Grove Wrap)
+### Infrastructure CLI (gw)
 
-Use `gw` for git, GitHub, Cloudflare, and dev tool operations with safety guards:
-
-```bash
-uv run --project tools/gw gw <command>
-```
+`gw` wraps git, GitHub, Cloudflare, and dev tools with safety guards. Write operations require `--write`.
 
 **Key commands:**
 - `gw git status` / `gw git log` / `gw git diff` — Safe git reads
@@ -52,9 +59,9 @@ uv run --project tools/gw gw <command>
 - `gw d1 tables` / `gw d1 schema <table>` — Database introspection
 - `gw gh pr list` / `gw gh issue list` — GitHub reads
 
-Run `gw --help` for full command list, `gw <command> --help` for subcommand details.
+Run `gw --help` for full command list, `gw <command> --help` for details.
 
-**Web/remote sessions:** `wrangler` and `gh` are not installed, so Cloudflare operations (`gw d1`, `gw kv`, `gw deploy`) and GitHub operations (`gw gh`) won't work. Git commands, package listing, bindings scan, and doctor all work fine.
+**Web/remote note:** `wrangler` and `gh` are not installed, so Cloudflare operations (`gw d1`, `gw deploy`) and GitHub operations (`gw gh`) won't work. Git commands, package listing, bindings scan, and doctor all work fine.
 
 ---
 
