@@ -4,7 +4,7 @@ description: Trusted cross-property access between greenhouse-mode Grove propert
 category: specs
 specCategory: platform-services
 icon: network
-lastUpdated: '2026-01-21'
+lastUpdated: '2026-02-06'
 aliases: []
 tags:
   - cross-property-access
@@ -439,25 +439,35 @@ The handoff is the critical moment: transferring trust from source to target wit
 │      │    permissions + timestamp + nonce                       │   │
 │      │  )                                                       │   │
 │      │                                                          │   │
-│      │  Store in KV with short TTL (5 minutes):                 │   │
-│      │  burrow:handoff:{token} → { source, target, user, perms }│   │
+│      │  Store in KV with short TTL (60 seconds):               │   │
+│      │  burrow:handoff:{token} → {                             │   │
+│      │    source, target, user, perms,                         │   │
+│      │    client_ip, client_ua_hash                            │   │
+│      │  }                                                      │   │
 │      └──────────────────────────────────────────────────────────┘   │
 │                           │                                         │
 │                           ↓                                         │
 │   4. REDIRECT TO TARGET                                             │
 │      302 → https://the-prism.grove.place/admin?burrow_token={token} │
+│      Headers: Referrer-Policy: no-referrer                          │
 │                           │                                         │
 │                           ↓                                         │
 │   5. TARGET VALIDATES (Target Property)                             │
 │      ┌──────────────────────────────────────────────────────────┐   │
 │      │  • Fetch token from KV                                   │   │
 │      │  • Verify not expired                                    │   │
+│      │  • Verify client IP + UA hash match                      │   │
 │      │  • Delete token (single use)                             │   │
 │      │  • Create local session with permissions                 │   │
 │      └──────────────────────────────────────────────────────────┘   │
 │                           │                                         │
 │                           ↓                                         │
-│   6. USER ARRIVES                                                   │
+│   6. URL CLEANUP                                                    │
+│      302 → same URL without ?burrow_token (clean browser history)   │
+│      Set-Cookie: grove_burrow_session=...                           │
+│                           │                                         │
+│                           ↓                                         │
+│   7. USER ARRIVES                                                   │
 │      Welcome, Dave. You have admin access to The Prism.             │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -473,8 +483,10 @@ interface BurrowHandoffToken {
   user_role: UserRole;        // Their Grove-wide role
   permissions: PermissionLevel; // What they can do here
   created_at: number;         // Unix timestamp
-  expires_at: number;         // Unix timestamp (created_at + 5 min)
+  expires_at: number;         // Unix timestamp (created_at + 60s)
   nonce: string;              // Prevent replay
+  client_ip: string;          // IP at token creation (binding)
+  client_ua_hash: string;     // SHA-256 of User-Agent (binding)
 }
 ```
 
@@ -839,8 +851,11 @@ if (hasUniversalAccess) {
 │   MITIGATIONS                                                       │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │  • Token is single-use (deleted after validation)           │   │
-│   │  • Token has 5-minute TTL (short window for interception)   │   │
+│   │  • Token has 60-second TTL (minimal interception window)    │   │
+│   │  • Token is bound to client IP + User-Agent hash            │   │
 │   │  • Token is meaningless without KV access                   │   │
+│   │  • Referrer-Policy: no-referrer prevents URL leakage        │   │
+│   │  • URL cleanup removes token from browser history           │   │
 │   │  • All properties use HTTPS                                 │   │
 │   │  • Greenhouse requirement limits attack surface             │   │
 │   └─────────────────────────────────────────────────────────────┘   │
@@ -859,6 +874,20 @@ Every burrow action is logged:
 | `use` | When used, IP, user agent |
 | `expire` | Automatic expiration timestamp |
 | `extend` | Who extended, new duration |
+
+### Token Hardening
+
+Handoff tokens are hardened against interception and replay:
+
+| Protection | How | Why |
+|-----------|-----|-----|
+| **Single-use** | Atomic KV delete on first validation | Prevents replay even if token is intercepted |
+| **60-second TTL** | KV expiration + explicit check | Redirect takes <2s; 60s is generous buffer with minimal exposure |
+| **IP binding** | Client IP stored at creation, verified at validation | Stolen token is useless from a different network |
+| **UA binding** | SHA-256 of User-Agent stored and verified | Adds fingerprint layer alongside IP |
+| **Referrer-Policy** | `no-referrer` header on redirect response | Prevents token leaking to third-party resources via Referer header |
+| **URL cleanup** | 302 redirect to clean URL after validation | Removes token from address bar, browser history, and bookmarks |
+| **No third-party loads** | Token landing page loads zero external resources | No CDN fonts, no analytics, nothing that could leak the URL |
 
 ### Rate Limiting
 
@@ -923,8 +952,9 @@ Fast access paths require caching. Here's what gets cached, for how long, and wh
 │   HANDOFF TOKENS (BURROW_KV)                                        │
 │   ┌─────────────────────────────────────────────────────────────┐   │
 │   │  Key: burrow:handoff:{token}                                │   │
-│   │  Value: { source, target, user_id, permissions, expires }  │   │
-│   │  TTL: 5 minutes (short-lived, single-use)                   │   │
+│   │  Value: { source, target, user_id, permissions, expires,   │   │
+│   │           client_ip, client_ua_hash }                       │   │
+│   │  TTL: 60 seconds (short-lived, single-use)                  │   │
 │   │  Invalidation: Deleted on first read (consumed)             │   │
 │   └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
@@ -975,7 +1005,7 @@ Fast access paths require caching. Here's what gets cached, for how long, and wh
 
 ### Why These TTLs
 
-- **Handoff tokens (5 min)**: Security-critical. Short window limits interception risk.
+- **Handoff tokens (60s)**: Security-critical. Redirect completes in <2s; 60s is generous buffer with minimal exposure. Combined with IP/UA binding and single-use enforcement.
 - **Greenhouse status (1 hour)**: Changes rarely. Checked on every burrow initiation.
 - **Receiving status (15 min)**: Moderate change frequency. Balance freshness vs. D1 reads.
 - **User burrow list (5 min)**: Displayed in arbor. Needs timely updates on changes.
