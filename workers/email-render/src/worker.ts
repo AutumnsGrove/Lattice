@@ -28,6 +28,7 @@ import { Day1Email } from "./templates/Day1Email";
 import { Day7Email } from "./templates/Day7Email";
 import { Day14Email } from "./templates/Day14Email";
 import { Day30Email } from "./templates/Day30Email";
+import { BetaInviteEmail } from "./templates/BetaInviteEmail";
 import type { AudienceType } from "./templates/types";
 
 // =============================================================================
@@ -36,8 +37,10 @@ import type { AudienceType } from "./templates/types";
 
 interface RenderRequest {
   template: string;
-  audienceType: AudienceType;
+  audienceType?: AudienceType;
   name?: string | null;
+  /** Template-specific data (used by templates that don't follow the audience pattern) */
+  data?: Record<string, unknown>;
 }
 
 interface RenderResponse {
@@ -49,20 +52,40 @@ interface RenderResponse {
 // Template Registry
 // =============================================================================
 
-type TemplateProps = {
+type SequenceTemplateProps = {
   name?: string;
   audienceType: AudienceType;
 };
 
-type TemplateComponent = (props: TemplateProps) => React.ReactElement;
+type TemplateComponent = (props: Record<string, unknown>) => React.ReactElement;
 
-const TEMPLATES: Record<string, TemplateComponent> = {
-  WelcomeEmail: WelcomeEmail as TemplateComponent,
-  Day1Email: Day1Email as TemplateComponent,
-  Day7Email: Day7Email as TemplateComponent,
-  Day14Email: Day14Email as TemplateComponent,
-  Day30Email: Day30Email as TemplateComponent,
+/** Sequence templates use audienceType + name */
+const SEQUENCE_TEMPLATES: Record<
+  string,
+  (props: SequenceTemplateProps) => React.ReactElement
+> = {
+  WelcomeEmail: WelcomeEmail as (
+    props: SequenceTemplateProps,
+  ) => React.ReactElement,
+  Day1Email: Day1Email as (props: SequenceTemplateProps) => React.ReactElement,
+  Day7Email: Day7Email as (props: SequenceTemplateProps) => React.ReactElement,
+  Day14Email: Day14Email as (
+    props: SequenceTemplateProps,
+  ) => React.ReactElement,
+  Day30Email: Day30Email as (
+    props: SequenceTemplateProps,
+  ) => React.ReactElement,
 };
+
+/** Data-driven templates receive props via the data field */
+const DATA_TEMPLATES: Record<string, TemplateComponent> = {
+  BetaInviteEmail: BetaInviteEmail as TemplateComponent,
+};
+
+const ALL_TEMPLATE_NAMES = [
+  ...Object.keys(SEQUENCE_TEMPLATES),
+  ...Object.keys(DATA_TEMPLATES),
+];
 
 // =============================================================================
 // Worker Handler
@@ -81,7 +104,7 @@ export default {
 
     // Health check
     if (url.pathname === "/health") {
-      return json({ status: "ok", templates: Object.keys(TEMPLATES) });
+      return json({ status: "ok", templates: ALL_TEMPLATE_NAMES });
     }
 
     // Render endpoint
@@ -92,7 +115,9 @@ export default {
     // List available templates
     if (url.pathname === "/templates" && request.method === "GET") {
       return json({
-        templates: Object.keys(TEMPLATES),
+        templates: ALL_TEMPLATE_NAMES,
+        sequenceTemplates: Object.keys(SEQUENCE_TEMPLATES),
+        dataTemplates: Object.keys(DATA_TEMPLATES),
         audienceTypes: ["wanderer", "promo", "rooted"],
       });
     }
@@ -114,31 +139,66 @@ async function handleRender(request: Request): Promise<Response> {
       return json({ error: "Missing template parameter" }, 400);
     }
 
-    if (!body.audienceType) {
-      return json({ error: "Missing audienceType parameter" }, 400);
-    }
+    let element: React.ReactElement;
 
-    if (!["wanderer", "promo", "rooted"].includes(body.audienceType)) {
-      return json({ error: "Invalid audienceType" }, 400);
-    }
+    // Check if it's a data-driven template (e.g. BetaInviteEmail)
+    const DataTemplate = DATA_TEMPLATES[body.template];
+    if (DataTemplate) {
+      // Data templates receive props from the data field and/or top-level fields.
+      // Zephyr spreads request.data at top level when calling us, so extra fields
+      // like tier/inviteType/customMessage arrive as top-level JSON properties.
+      // We re-parse the raw body to capture everything beyond RenderRequest's type.
+      const rawBody = JSON.parse(JSON.stringify(body)) as Record<
+        string,
+        unknown
+      >;
+      const props: Record<string, unknown> = { name: body.name || undefined };
 
-    // Get template
-    const Template = TEMPLATES[body.template];
-    if (!Template) {
-      return json(
-        {
-          error: `Unknown template: ${body.template}`,
-          available: Object.keys(TEMPLATES),
-        },
-        400,
-      );
-    }
+      // Merge nested data (if sent directly with a data field)
+      if (body.data) {
+        Object.assign(props, body.data);
+      }
 
-    // Render the template
-    const element = React.createElement(Template, {
-      name: body.name || undefined,
-      audienceType: body.audienceType,
-    });
+      // Merge top-level extras (from Zephyr's spread)
+      for (const [key, value] of Object.entries(rawBody)) {
+        if (!["template", "audienceType", "name", "data"].includes(key)) {
+          props[key] = value;
+        }
+      }
+
+      element = React.createElement(DataTemplate, props);
+    } else {
+      // Sequence templates require audienceType
+      const SequenceTemplate = SEQUENCE_TEMPLATES[body.template];
+      if (!SequenceTemplate) {
+        return json(
+          {
+            error: `Unknown template: ${body.template}`,
+            available: ALL_TEMPLATE_NAMES,
+          },
+          400,
+        );
+      }
+
+      if (!body.audienceType) {
+        return json(
+          {
+            error:
+              "Missing audienceType parameter (required for sequence templates)",
+          },
+          400,
+        );
+      }
+
+      if (!["wanderer", "promo", "rooted"].includes(body.audienceType)) {
+        return json({ error: "Invalid audienceType" }, 400);
+      }
+
+      element = React.createElement(SequenceTemplate, {
+        name: body.name || undefined,
+        audienceType: body.audienceType,
+      });
+    }
 
     const html = await render(element);
     const text = await render(element, { plainText: true });

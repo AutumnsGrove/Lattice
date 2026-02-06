@@ -24,7 +24,9 @@
 		Loader2,
 		Mail,
 		CheckCircle,
-		Clock
+		Clock,
+		Eye,
+		EyeOff
 	} from 'lucide-svelte';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 
@@ -40,6 +42,27 @@
 	let revokeInvite = $state<{ id: string; email: string } | null>(null);
 	let revokeNotes = $state('');
 	let isRevoking = $state(false);
+	let showPreview = $state(false);
+
+	// Email preview content (mirrors BetaInviteEmail.tsx template)
+	const emailContent = {
+		beta: {
+			subject: "You're invited to the Grove beta",
+			intro: 'We\'re building something different — a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no tracking.',
+			middle: "We'd love for you to be one of the first to try it.",
+			feedback: 'As a beta tester, your feedback helps shape what Grove becomes. Every rough edge you find makes this place better for everyone who comes after.',
+			cta: 'Join the Beta'
+		},
+		comped: {
+			subject: "You've been invited to Grove",
+			intro: 'Someone believes you deserve your own corner of the internet — a quiet space where your words can grow without algorithms, ads, or tracking.',
+			middle: 'Your space is waiting whenever you\'re ready.',
+			feedback: null,
+			cta: 'Claim Your Invite'
+		}
+	} as const;
+
+	const previewContent = $derived(emailContent[newInviteType] || emailContent.beta);
 
 	// Search state
 	let searchQuery = $state('');
@@ -462,6 +485,92 @@
 						{/if}
 					</button>
 				</form>
+			</GlassCard>
+
+			<!-- Email Preview -->
+			<GlassCard class="p-6">
+				<button
+					type="button"
+					onclick={() => (showPreview = !showPreview)}
+					class="w-full flex items-center justify-between text-lg font-serif text-foreground"
+				>
+					<span class="flex items-center gap-2">
+						{#if showPreview}
+							<EyeOff class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						{:else}
+							<Eye class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						{/if}
+						Email Preview
+					</span>
+					<span class="text-xs text-foreground-muted font-sans">
+						{showPreview ? 'Hide' : 'Show'}
+					</span>
+				</button>
+
+				{#if showPreview}
+					<div class="mt-4 space-y-3">
+						<!-- Subject -->
+						<div class="text-xs text-foreground-muted">
+							<span class="font-medium">Subject:</span> {previewContent.subject}
+						</div>
+						<div class="text-xs text-foreground-muted">
+							<span class="font-medium">To:</span> {newEmail || 'friend@example.com'}
+						</div>
+
+						<!-- Email Body Preview -->
+						<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+							<!-- Warm cream header -->
+							<div class="bg-[#fefdfb] px-5 py-4 text-center">
+								<div class="w-8 h-8 mx-auto rounded-full bg-grove-500/20 flex items-center justify-center">
+									<span class="text-grove-600 text-sm font-bold">G</span>
+								</div>
+							</div>
+
+							<!-- Content area with soft green background -->
+							<div class="bg-[#f0fdf4] px-5 py-4 space-y-3" style="font-family: Georgia, Cambria, 'Times New Roman', serif;">
+								<p class="text-sm text-[#3d2914]">Hey,</p>
+								<p class="text-sm text-[#3d2914] leading-relaxed">{previewContent.intro}</p>
+
+								{#if newMessage.trim()}
+									<div class="border-l-[3px] border-grove-500 pl-4 py-2 bg-grove-500/5 rounded-r-lg">
+										<p class="text-sm text-[#3d2914] italic">"{newMessage}"</p>
+									</div>
+								{/if}
+
+								<p class="text-sm text-[#3d2914] leading-relaxed">{previewContent.middle}</p>
+
+								<p class="text-sm text-[#3d2914] leading-relaxed">
+									You're getting the <strong class="text-grove-600">{tierLabels[newTier] || newTier}</strong> plan, completely free.
+								</p>
+
+								{#if previewContent.feedback}
+									<p class="text-xs text-[#3d2914]/60 leading-relaxed">{previewContent.feedback}</p>
+								{/if}
+
+								<!-- CTA Button -->
+								<div class="text-center pt-2">
+									<span class="inline-block px-6 py-2.5 bg-grove-600 text-white text-sm font-semibold rounded-lg">
+										{previewContent.cta}
+									</span>
+								</div>
+
+								<p class="text-xs text-[#3d2914]/60 leading-relaxed">
+									This link is just for you. Click it whenever you're ready — no rush.
+								</p>
+							</div>
+
+							<!-- Footer -->
+							<div class="bg-[#fefdfb] px-5 py-3 text-center">
+								<p class="text-xs text-[#3d2914]/40">— Autumn</p>
+								<p class="text-[10px] text-[#3d2914]/30 italic mt-1">A place to be.</p>
+							</div>
+						</div>
+
+						<p class="text-[11px] text-foreground-muted text-center">
+							This is an approximation — the actual email uses the Grove React Email template.
+						</p>
+					</div>
+				{/if}
 			</GlassCard>
 
 			<!-- Recent Activity -->

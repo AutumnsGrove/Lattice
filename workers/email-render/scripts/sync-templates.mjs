@@ -6,7 +6,7 @@
  * Run automatically during build via `bun run prebuild`.
  */
 
-import { cpSync, mkdirSync, existsSync } from "fs";
+import { cpSync, mkdirSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -41,7 +41,7 @@ for (const file of componentFiles) {
   const src = join(engineEmail, "components", file);
   const dest = join(destinations.components, file);
   if (existsSync(src)) {
-    cpSync(src, dest);
+    cpSync(src, dest, { force: true });
     console.log(`  ✓ ${file}`);
   } else {
     console.log(`  ⚠ Missing: ${file}`);
@@ -55,13 +55,26 @@ const sequenceFiles = [
   "Day7Email.tsx",
   "Day14Email.tsx",
   "Day30Email.tsx",
+  "BetaInviteEmail.tsx",
 ];
 
 for (const file of sequenceFiles) {
   const src = join(engineEmail, "sequences", file);
   const dest = join(destinations.sequences, file);
   if (existsSync(src)) {
-    cpSync(src, dest);
+    cpSync(src, dest, { force: true });
+
+    // Rewrite import paths: in the engine, sequences/ imports from ../components/
+    // but in the worker, templates are siblings with components/ so it's ./components/
+    let content = readFileSync(dest, "utf-8");
+    content = content.replace(
+      /from ["']\.\.\/components\//g,
+      'from "./components/',
+    );
+    content = content.replace(/from ["']\.\.\/urls/g, 'from "./urls');
+    content = content.replace(/from ["']\.\.\/types/g, 'from "./types');
+    writeFileSync(dest, content);
+
     console.log(`  ✓ ${file}`);
   } else {
     console.log(`  ⚠ Missing: ${file}`);
@@ -72,7 +85,7 @@ for (const file of sequenceFiles) {
 const urlSrc = join(engineEmail, "urls.ts");
 const urlDest = join(destinations.sequences, "urls.ts");
 if (existsSync(urlSrc)) {
-  cpSync(urlSrc, urlDest);
+  cpSync(urlSrc, urlDest, { force: true });
   console.log(`  ✓ urls.ts`);
 }
 
@@ -80,7 +93,7 @@ if (existsSync(urlSrc)) {
 const typesSrc = join(engineEmail, "types.ts");
 const typesDest = join(destinations.sequences, "types.ts");
 if (existsSync(typesSrc)) {
-  cpSync(typesSrc, typesDest);
+  cpSync(typesSrc, typesDest, { force: true });
   console.log(`  ✓ types.ts`);
 }
 
