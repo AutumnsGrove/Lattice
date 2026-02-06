@@ -44,7 +44,7 @@
 	 */
 
 	import type { PricingTableProps, PricingTier } from "./types.js";
-	import { groveModeStore } from "../../stores/grove-mode.svelte";
+	import { groveModeStore } from "../../ui/stores/grove-mode.svelte";
 
 	let {
 		tiers,

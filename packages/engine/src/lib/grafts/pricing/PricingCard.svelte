@@ -10,7 +10,7 @@
 	import type { PricingCardProps } from "./types.js";
 	import type { TierIcon } from "../../config/tiers.js";
 	import PricingCTA from "./PricingCTA.svelte";
-	import { groveModeStore } from "../../stores/grove-mode.svelte";
+	import { groveModeStore } from "../../ui/stores/grove-mode.svelte";
 
 	let {
 		tier,
