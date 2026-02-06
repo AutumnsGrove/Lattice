@@ -88,6 +88,21 @@ Wanderer → Wayfinder reflects the journey:
 
 See `docs/grove-user-identity.md` for full documentation.
 
+### Grove Mode & GroveTerm Components
+
+When writing text that includes Grove terminology in UI or content, **use GroveTerm components instead of hardcoding terms**. Grove Mode lets users toggle between standard terms (default for new visitors) and Grove terms.
+
+**For Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` components from `@autumnsgrove/groveengine/ui`.
+
+**For data-driven content** (FAQ items, pricing text, help articles): Use `[[term]]` syntax. Examples:
+- `"Your [[bloom|posts]] are always yours."` renders "posts" when Grove Mode is OFF, "blooms" when ON
+- `"Visit your [[arbor|dashboard]] to get started."` renders "dashboard" or "Arbor"
+- `"Ask a [[pathfinder|community guide]] for help."` renders "community guide" or "Pathfinder"
+
+**For markdown content** (help center articles): The rehype-groveterm plugin transforms `[[term]]` syntax in markdown automatically.
+
+**Key principle:** New visitors should see familiar, standard terminology. Grove's nature-themed vocabulary is opt-in, not forced. This keeps the platform accessible and welcoming while rewarding those who want to explore the ecosystem's personality.
+
 ---
 
 ## Strict Avoidances

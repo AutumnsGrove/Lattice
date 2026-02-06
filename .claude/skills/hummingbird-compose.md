@@ -159,6 +159,9 @@ await sendEmail({
 - Excessive exclamation points
 - Pushy sales language
 
+### Note on Grove Terminology in Emails:
+Emails are rendered as static HTML (not Svelte components), so GroveTerm components don't apply here. Use Grove terms directly in emails (Wanderer, Rooted, etc.) since email recipients have already opted in to the Grove ecosystem by subscribing. The GroveTerm toggle system is for web UI only, where new visitors may not yet understand the vocabulary.
+
 ### Example Opening:
 ```
 ❌ "Hey there! We have some exciting news!"

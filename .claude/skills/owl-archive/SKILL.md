@@ -132,6 +132,15 @@ Wanderer → Wayfinder reflects the journey:
 - Wanderers *seek* the way (exploring, finding paths)
 - The Wayfinder *shows* the way (guiding, creating paths)
 
+**Grove Mode & GroveTerm Components:**
+
+When writing content that includes Grove terminology, use the GroveTerm component system instead of hardcoding terms. Grove Mode lets users toggle between standard terms (the default) and Grove-themed terms.
+
+- **In Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/groveengine/ui`
+- **In data strings** (FAQ items, tooltips, onboarding text): Use `[[term]]` syntax, e.g., `"Your [[bloom|posts]] are always yours."`
+- **In markdown** (help articles): The `[[term]]` syntax is auto-transformed by the rehype-groveterm plugin
+- **Key principle:** New visitors see standard, familiar terms by default. Grove vocabulary is opt-in.
+
 ---
 
 ### Phase 3: GATHER

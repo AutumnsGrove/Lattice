@@ -385,6 +385,7 @@ Before finalizing any museum documentation:
 
 3. **grove-spec-writing** — Borrow ASCII art techniques for diagrams
 4. **grove-documentation** — Check terminology (Wanderer, Rooted, etc.)
+5. **GroveTerm components** — When exhibits include Grove terminology in UI, use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/groveengine/ui` instead of hardcoding terms. New visitors see standard terms by default; Grove Mode users see the nature-themed vocabulary. Use `[[term]]` syntax in markdown content for auto-transformation via the rehype-groveterm plugin.
 
 ### After Writing
 

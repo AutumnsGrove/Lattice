@@ -267,7 +267,36 @@ Setup: Multi-step registration form with conditional fields
    ✓ Can activate with Enter AND Space?
 ```
 
-**Scenario 2: Testing a Data Table with Sorting**
+**Scenario 2: Testing GroveTerm Components**
+
+```
+Setup: Page using GroveTerm/GroveSwap/GroveText for terminology
+
+1. Tab to a GroveTerm element
+   ✓ Focus ring visible (2px outline)?
+   ✓ aria-label reads "Grove term: [term], [category] category"?
+   ✓ role="button" and tabindex="0" present?
+
+2. Activate with Enter or Space
+   ✓ Popup opens with definition?
+   ✓ Focus moves to popup content?
+   ✓ ESC closes popup and returns focus?
+
+3. Toggle Grove Mode OFF
+   ✓ Standard terms display (e.g., "Posts" not "Blooms")?
+   ✓ Screen reader announces "Grove's name for [standard term]" in popup?
+   ✓ GroveSwap silently updates without focus disruption?
+
+4. Check prefers-reduced-motion
+   ✓ No animations on GroveTerm hover/open?
+   ✓ Popup appears instantly without transition?
+
+5. GroveText with [[term]] syntax
+   ✓ Parsed terms are keyboard-navigable?
+   ✓ Each rendered GroveTerm has correct aria attributes?
+```
+
+**Scenario 3: Testing a Data Table with Sorting**
 
 ```
 Setup: Posts table with sortable columns

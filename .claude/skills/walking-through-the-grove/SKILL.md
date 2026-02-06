@@ -160,10 +160,12 @@ Before finalizing:
 
 Update all the files:
 1. `docs/grove-naming.md` — Add the full entry
-2. `packages/grove-router/src/index.ts` — Claim subdomain
-3. `plant/src/routes/api/check-username/+server.ts` — Reserve username
-4. Workshop page if applicable
-5. Icons if applicable
+2. `docs/philosophy/grove-naming.md` — Update source (generates manifest)
+3. `packages/grove-router/src/index.ts` — Claim subdomain
+4. `plant/src/routes/api/check-username/+server.ts` — Reserve username
+5. Workshop page if applicable
+6. Icons if applicable
+7. **Regenerate the GroveTerm manifest** — Run `scripts/generate/grove-term-manifest.ts` to rebuild `grove-term-manifest.json` with the new term. This manifest powers all GroveTerm components (`GroveTerm`, `GroveSwap`, `GroveText`, etc.) that automatically switch between standard and Grove terminology based on the user's Grove Mode setting.
 
 ---
 

@@ -279,6 +279,21 @@ No additional styling framework needed — components are self-contained with sc
 - All feature cards as "coming-soon"
 - No interactive demos needed yet
 
+## Grove Terminology
+
+When vineyard pages reference Grove-themed terms (tool names, feature names, user roles), use GroveTerm components to respect the user's Grove Mode setting. New visitors see standard terms by default.
+
+```svelte
+import { GroveTerm, GroveText } from '@autumnsgrove/groveengine/ui';
+import groveTermManifest from '$lib/data/grove-term-manifest.json';
+
+<!-- Use GroveText for data-driven content with [[term]] syntax -->
+<GroveText content="Manage your [[bloom|posts]] and [[garden|blog]] appearance." manifest={groveTermManifest} />
+
+<!-- Or GroveTerm for individual interactive terms -->
+<p>Customize how your <GroveTerm term="garden" manifest={groveTermManifest} /> looks.</p>
+```
+
 ## Checklist
 
 Before shipping a vineyard page:
@@ -289,3 +304,4 @@ Before shipping a vineyard page:
 - [ ] Works on mobile (feature grid responsive)
 - [ ] Icons are valid lucide-svelte names
 - [ ] Status badges accurately reflect feature state
+- [ ] Grove terminology uses GroveTerm components (not hardcoded)
