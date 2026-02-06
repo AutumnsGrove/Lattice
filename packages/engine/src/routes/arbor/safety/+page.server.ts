@@ -118,7 +118,7 @@ export const actions: Actions = {
 
     const formData = await request.formData();
     const flagId = formData.get("flag_id")?.toString();
-    const action = formData.get("action")?.toString() as "cleared" | "removed";
+    const action = formData.get("action")?.toString();
     const notes = formData.get("notes")?.toString().trim() || undefined;
 
     if (!flagId) {
@@ -138,7 +138,9 @@ export const actions: Actions = {
     );
 
     if (!success) {
-      return fail(500, { error: "Failed to update flag status" });
+      return fail(409, {
+        error: "Flag was already reviewed or no longer exists",
+      });
     }
 
     return {

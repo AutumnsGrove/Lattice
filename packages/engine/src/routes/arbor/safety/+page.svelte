@@ -69,11 +69,13 @@
 		}
 	}
 
-	// Parse categories from JSON string
+	// Parse categories from JSON string (validated as string array, bounded)
 	function parseCategories(cats: string | null): string[] {
 		if (!cats) return [];
 		try {
-			return JSON.parse(cats);
+			const parsed = JSON.parse(cats);
+			if (!Array.isArray(parsed)) return [];
+			return parsed.filter((c): c is string => typeof c === 'string').slice(0, 20);
 		} catch {
 			return [];
 		}

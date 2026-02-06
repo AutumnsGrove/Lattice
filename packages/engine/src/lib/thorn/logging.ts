@@ -88,6 +88,16 @@ function generateId(): string {
   return crypto.randomUUID().replace(/-/g, "").substring(0, 16);
 }
 
+/**
+ * Clamp and sanitize a numeric days parameter.
+ * Prevents SQL injection via string interpolation in datetime() modifiers.
+ * D1's datetime('now', '-N days') doesn't support parameterized modifiers,
+ * so we ensure the value is a safe integer in a bounded range.
+ */
+function safeDays(days: number, max: number = 365): number {
+  return Math.max(1, Math.min(max, Math.floor(Number(days) || 1)));
+}
+
 // ============================================================================
 // Write Operations
 // ============================================================================
@@ -124,7 +134,7 @@ export async function logModerationEvent(
       .run();
   } catch (err) {
     // Log to console but don't fail the request
-    console.error("[Thorn] Failed to log moderation event:", err);
+    console.error("[Thorn] Failed to log moderation event");
   }
 }
 
@@ -157,7 +167,7 @@ export async function flagContent(
       )
       .run();
   } catch (err) {
-    console.error("[Thorn] Failed to flag content:", err);
+    console.error("[Thorn] Failed to flag content");
   }
 }
 
@@ -172,18 +182,20 @@ export async function updateFlagStatus(
   notes?: string,
 ): Promise<boolean> {
   try {
+    // Race condition guard: only update if still pending.
+    // If two admins click simultaneously, only the first succeeds.
     const result = await db
       .prepare(
         `UPDATE thorn_flagged_content
          SET status = ?, reviewed_by = ?, reviewed_at = datetime('now'), review_notes = ?
-         WHERE id = ?`,
+         WHERE id = ? AND status = 'pending'`,
       )
       .bind(status, reviewedBy, notes || null, flagId)
       .run();
 
     return (result.meta?.changes || 0) > 0;
   } catch (err) {
-    console.error("[Thorn] Failed to update flag status:", err);
+    console.error("[Thorn] Failed to update flag status");
     return false;
   }
 }
@@ -199,7 +211,8 @@ export async function getRecentEvents(
   db: D1Database,
   options: { days?: number; limit?: number } = {},
 ): Promise<ThornModerationLogRow[]> {
-  const { days = 7, limit = 50 } = options;
+  const days = safeDays(options.days ?? 7);
+  const limit = Math.max(1, Math.min(100, Math.floor(options.limit ?? 50)));
 
   try {
     const result = await db
@@ -214,7 +227,7 @@ export async function getRecentEvents(
 
     return (result.results || []) as unknown as ThornModerationLogRow[];
   } catch (err) {
-    console.error("[Thorn] Failed to get recent events:", err);
+    console.error("[Thorn] Failed to get recent events");
     return [];
   }
 }
@@ -226,7 +239,8 @@ export async function getFlaggedContent(
   db: D1Database,
   options: { status?: string; limit?: number } = {},
 ): Promise<ThornFlaggedContentRow[]> {
-  const { status = "pending", limit = 50 } = options;
+  const status = options.status ?? "pending";
+  const limit = Math.max(1, Math.min(100, Math.floor(options.limit ?? 50)));
 
   try {
     let query = `SELECT * FROM thorn_flagged_content`;
@@ -247,7 +261,7 @@ export async function getFlaggedContent(
 
     return (result.results || []) as unknown as ThornFlaggedContentRow[];
   } catch (err) {
-    console.error("[Thorn] Failed to get flagged content:", err);
+    console.error("[Thorn] Failed to get flagged content");
     return [];
   }
 }
@@ -257,8 +271,9 @@ export async function getFlaggedContent(
  */
 export async function getStats(
   db: D1Database,
-  days: number = 30,
+  rawDays: number = 30,
 ): Promise<ThornStats> {
+  const days = safeDays(rawDays);
   const empty: ThornStats = {
     total: 0,
     allowed: 0,
@@ -320,7 +335,9 @@ export async function getStats(
       }>) {
         try {
           const cats = JSON.parse(row.categories);
-          for (const cat of cats) {
+          if (!Array.isArray(cats)) continue;
+          for (const cat of cats.slice(0, 20)) {
+            if (typeof cat !== "string") continue;
             catMap.set(cat, (catMap.get(cat) || 0) + row.count);
           }
         } catch {
@@ -331,7 +348,7 @@ export async function getStats(
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count);
     } catch (err) {
-      console.error("[Thorn] Failed to get category stats:", err);
+      console.error("[Thorn] Failed to get category stats");
     }
 
     // By-content-type breakdown
@@ -351,7 +368,7 @@ export async function getStats(
         count: number;
       }>;
     } catch (err) {
-      console.error("[Thorn] Failed to get content type stats:", err);
+      console.error("[Thorn] Failed to get content type stats");
     }
 
     return {
@@ -365,7 +382,7 @@ export async function getStats(
       byContentType,
     };
   } catch (err) {
-    console.error("[Thorn] Failed to get stats:", err);
+    console.error("[Thorn] Failed to get stats");
     return empty;
   }
 }
@@ -380,8 +397,9 @@ export async function getStats(
  */
 export async function cleanupOldLogs(
   db: D1Database,
-  retentionDays: number = 90,
+  rawRetentionDays: number = 90,
 ): Promise<number> {
+  const retentionDays = safeDays(rawRetentionDays);
   try {
     const result = await db
       .prepare(
@@ -392,7 +410,7 @@ export async function cleanupOldLogs(
 
     return result.meta?.changes || 0;
   } catch (err) {
-    console.error("[Thorn] Failed to cleanup old logs:", err);
+    console.error("[Thorn] Failed to cleanup old logs");
     return 0;
   }
 }
