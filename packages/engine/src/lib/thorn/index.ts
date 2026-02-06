@@ -6,21 +6,15 @@
  *
  * ## Implementation Status
  *
- * **Phase: Foundation (scaffolding only)**
+ * **Phase: Live (wired into publish flow)**
  *
- * Thorn is NOT yet called in production endpoints. The current PR establishes
- * the moderation logic and thresholds, which will be integrated in a follow-up:
- *
- * - [ ] Hook into post publish flow (on_publish)
+ * Thorn is active in production:
+ * - [x] Hook into post publish flow (on_publish) — via waitUntil
+ * - [x] Hook into post edit flow (on_edit) — via waitUntil
+ * - [x] D1 tables for moderation events (audit trail)
+ * - [x] Admin review UI for flagged content (/arbor/safety)
  * - [ ] Hook into comment submission (on_comment)
  * - [ ] Hook into profile bio updates (on_profile_update)
- * - [ ] D1 table for moderation events (audit trail)
- * - [ ] Admin review UI for flagged content
- *
- * Currently provides:
- * - moderateContent() function wrapping Lumen's .moderate()
- * - Config-driven category/threshold/action mappings
- * - Type definitions for the Thorn domain
  *
  * @see docs/specs/thorn-spec.md
  *
@@ -45,6 +39,29 @@ export { moderateContent } from "./moderate.js";
 
 // Configuration
 export { THORN_CONFIG, determineAction } from "./config.js";
+
+// Logging (for dashboard and audit trail)
+export {
+  logModerationEvent,
+  flagContent,
+  getRecentEvents,
+  getFlaggedContent,
+  updateFlagStatus,
+  getStats,
+  cleanupOldLogs,
+} from "./logging.js";
+
+export type {
+  ThornModerationEvent,
+  ThornFlaggedContentInput,
+  ThornFlaggedContentRow,
+  ThornModerationLogRow,
+  ThornStats,
+} from "./logging.js";
+
+// Publish hook (for waitUntil integration)
+export { moderatePublishedContent } from "./hooks.js";
+export type { ModeratePublishedContentOptions } from "./hooks.js";
 
 // Types
 export type {

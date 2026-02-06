@@ -12,6 +12,7 @@
     HelpCircle,
     MessageCircle,
     Shield,
+    ShieldAlert,
     Gift,
     Eye,
   } from "lucide-svelte";
@@ -133,6 +134,10 @@
           <Eye class="section-icon" />
           <span>Vista</span>
         </div>
+        <a href="/arbor/safety" class="nav-item" onclick={closeSidebar} title="Safety">
+          <ShieldAlert class="nav-icon" />
+          <span class="nav-label" class:hidden={!showExpanded}>Safety</span>
+        </a>
         <a href="/arbor/comped-invites" class="nav-item" onclick={closeSidebar} title="Comped Invites">
           <Gift class="nav-icon" />
           <span class="nav-label" class:hidden={!showExpanded}>Comped Invites</span>

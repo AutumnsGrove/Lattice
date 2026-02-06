@@ -9,6 +9,7 @@ import {
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
 import * as cache from "$lib/server/services/cache.js";
+import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import type { RequestHandler } from "./$types.js";
 
 interface PostRecord {
@@ -274,6 +275,23 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       } catch (err) {
         console.error("[Cache] Failed to invalidate list cache:", err);
       }
+    }
+
+    // Thorn: async post-publish moderation (non-blocking)
+    if (platform?.env?.AI && data.status === "published" && platform.context) {
+      platform.context.waitUntil(
+        moderatePublishedContent({
+          content: `${data.title}\n\n${data.markdown_content}`,
+          ai: platform.env.AI,
+          db: platform.env.DB,
+          openrouterApiKey: platform.env.OPENROUTER_API_KEY,
+          tenantId,
+          userId: locals.user.id,
+          contentType: "blog_post",
+          hookPoint: "on_publish",
+          contentRef: slug,
+        }),
+      );
     }
 
     return json({

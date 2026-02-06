@@ -5,6 +5,7 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import * as cache from "$lib/server/services/cache.js";
+import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import type { RequestHandler } from "./$types.js";
 
 /**
@@ -318,6 +319,23 @@ export const PUT: RequestHandler = async ({
 
     // Invalidate caches so readers see the updated content
     await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);
+
+    // Thorn: async post-edit moderation (non-blocking)
+    if (platform?.env?.AI && data.status === "published" && platform.context) {
+      platform.context.waitUntil(
+        moderatePublishedContent({
+          content: `${data.title}\n\n${data.markdown_content}`,
+          ai: platform.env.AI,
+          db: platform.env.DB,
+          openrouterApiKey: platform.env.OPENROUTER_API_KEY,
+          tenantId,
+          userId: locals.user.id,
+          contentType: "blog_post",
+          hookPoint: "on_edit",
+          contentRef: slug,
+        }),
+      );
+    }
 
     return json({
       success: true,
