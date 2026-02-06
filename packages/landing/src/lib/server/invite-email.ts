@@ -101,8 +101,11 @@ export function getBetaInviteEmail(params: InviteEmailParams): {
         </div>`
     : "";
 
+  // Text variant: plain text is inherently safe from XSS, but we still
+  // escape to establish a consistent pattern and prevent copy-paste risk
+  // if this template is ever adapted for HTML contexts.
   const customMessageText = params.customMessage
-    ? `\n"${params.customMessage}"\n`
+    ? `\n"${escapeHtml(params.customMessage)}"\n`
     : "";
 
   const html = wrapEmail(`

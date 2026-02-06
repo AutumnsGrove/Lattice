@@ -66,7 +66,7 @@ export const load: PageServerLoad = async ({ parent, platform, cookies }) => {
 
       const validTiers = ["seedling", "sapling", "oak", "evergreen"];
       if (compedInvite && validTiers.includes(compedInvite.tier)) {
-        // Auto-set the plan from the invite tier
+        // Auto-set the plan from the invite tier (idempotent — only if not already set)
         const onboardingId = cookies.get("onboarding_id");
         if (onboardingId) {
           await db
@@ -76,7 +76,7 @@ export const load: PageServerLoad = async ({ parent, platform, cookies }) => {
                    plan_billing_cycle = 'monthly',
                    plan_selected_at = unixepoch(),
                    updated_at = unixepoch()
-               WHERE id = ?`,
+               WHERE id = ? AND plan_selected IS NULL`,
             )
             .bind(compedInvite.tier, onboardingId)
             .run();
