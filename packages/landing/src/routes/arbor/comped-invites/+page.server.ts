@@ -205,7 +205,9 @@ export const actions: Actions = {
       return fail(400, { error: "Please select a valid invite type" });
     }
 
+    let step = "init";
     try {
+      step = "check-existing";
       const existing = await DB.prepare(
         "SELECT id, used_at FROM comped_invites WHERE email = ?",
       )
@@ -223,6 +225,7 @@ export const actions: Actions = {
         });
       }
 
+      step = "check-tenant";
       const existingTenant = await DB.prepare(
         `SELECT t.subdomain FROM tenants t
          JOIN users u ON t.owner_id = u.id
@@ -237,6 +240,7 @@ export const actions: Actions = {
         });
       }
 
+      step = "insert-invite";
       const inviteId = crypto.randomUUID();
       await DB.prepare(
         `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, created_at)
@@ -245,6 +249,7 @@ export const actions: Actions = {
         .bind(inviteId, email, tier, inviteType, customMessage, user.email)
         .run();
 
+      step = "insert-audit";
       const auditId = crypto.randomUUID();
       await DB.prepare(
         `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
@@ -259,8 +264,13 @@ export const actions: Actions = {
         message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
       };
     } catch (err) {
-      console.error("[Comped Invites] Error creating invite:", err);
-      return fail(500, { error: "Failed to create comped invite" });
+      const message =
+        err instanceof Error ? err.message : "Unknown database error";
+      console.error(`[Comped Invites] Error at step "${step}":`, message, err);
+      // Surface D1 error details to admin for debugging
+      return fail(500, {
+        error: `Failed to create comped invite (${step}): ${message}`,
+      });
     }
   },
 
@@ -330,8 +340,12 @@ export const actions: Actions = {
         message: `Revoked comped invite for ${invite.email}`,
       };
     } catch (err) {
-      console.error("[Comped Invites] Error revoking invite:", err);
-      return fail(500, { error: "Failed to revoke comped invite" });
+      const message =
+        err instanceof Error ? err.message : "Unknown database error";
+      console.error("[Comped Invites] Error revoking invite:", message, err);
+      return fail(500, {
+        error: `Failed to revoke comped invite: ${message}`,
+      });
     }
   },
 };
