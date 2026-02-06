@@ -606,8 +606,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const response = await resolve(event, {
     transformPageChunk: ({ html }) => {
-      // Inject nonce into the theme-detection script in app.html
-      return html.replace("<script>", `<script nonce="${cspNonce}">`);
+      // Inject nonce into ALL script tags (theme-detection, hydration, data serialization)
+      // Must use global regex — String.replace() only hits the first match,
+      // leaving SvelteKit's additional <script> tags blocked by CSP
+      return html.replace(/<script(?=[\s>])/g, `<script nonce="${cspNonce}"`);
     },
   });
 

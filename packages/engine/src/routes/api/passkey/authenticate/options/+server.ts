@@ -14,6 +14,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 import {
   checkRateLimit,
   buildRateLimitKey,
@@ -64,15 +65,19 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     // Body is optional, continue with defaults
   }
 
-  // Store returnTo in cookie for verification endpoint
+  // Store returnTo in cookie for verification endpoint (sanitized to prevent open redirects)
   if (body.returnTo) {
-    cookies.set("passkey_return_to", body.returnTo, {
-      path: "/",
-      httpOnly: true,
-      secure: request.url.includes("localhost") ? false : true,
-      sameSite: "lax",
-      maxAge: 60 * 10, // 10 minutes
-    });
+    cookies.set(
+      "passkey_return_to",
+      sanitizeReturnTo(body.returnTo, "/arbor"),
+      {
+        path: "/",
+        httpOnly: true,
+        secure: request.url.includes("localhost") ? false : true,
+        sameSite: "lax",
+        maxAge: 60 * 10, // 10 minutes
+      },
+    );
   }
 
   const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;

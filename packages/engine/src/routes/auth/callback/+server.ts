@@ -37,6 +37,7 @@ import {
   logAuthError,
   buildErrorParams,
 } from "$lib/groveauth/errors";
+import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 
 /**
  * Migration deadline for legacy session cookies.
@@ -88,8 +89,8 @@ export const GET: RequestHandler = async ({
     throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
   }
 
-  // Get return URL from query params (set by LoginGraft) or default to /arbor
-  const returnTo = url.searchParams.get("returnTo") || "/arbor";
+  // Get return URL from query params (set by LoginGraft), sanitized to prevent open redirects
+  const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
 
   // Verify Better Auth session cookie was set
   // Better Auth uses __Secure- prefix in production (HTTPS)

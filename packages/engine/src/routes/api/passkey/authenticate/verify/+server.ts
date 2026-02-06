@@ -16,6 +16,7 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 import {
   checkRateLimit,
   buildRateLimitKey,
@@ -116,9 +117,11 @@ export const POST: RequestHandler = async ({
     throw error(400, "Invalid credential data");
   }
 
-  // Get returnTo from request body or cookie
-  const returnTo =
-    body.returnTo || cookies.get("passkey_return_to") || "/arbor";
+  // Get returnTo from request body or cookie (sanitized to prevent open redirects)
+  const returnTo = sanitizeReturnTo(
+    body.returnTo || cookies.get("passkey_return_to"),
+    "/arbor",
+  );
 
   // Clear the returnTo cookie
   cookies.delete("passkey_return_to", { path: "/" });

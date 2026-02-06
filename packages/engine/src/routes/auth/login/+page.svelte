@@ -1,37 +1,49 @@
 <script lang="ts">
 	/**
-	 * Engine Admin Login Page
+	 * Engine Login Page
 	 *
 	 * Uses LoginGraft for unified authentication across Grove properties.
 	 * Redirects directly to Better Auth for OAuth, supports passkeys via WebAuthn.
+	 *
+	 * Context-aware: shows "Admin Panel" copy when redirected from /arbor,
+	 * otherwise shows a welcoming sign-in message for general visitors.
 	 */
 
 	import { LoginGraft } from '$lib/grafts/login';
 	import { Logo } from '$lib/ui/components/ui';
+	import { sanitizeReturnTo } from '$lib/utils/grove-url.js';
 	import { page } from '$app/stores';
 
 	// Get error details from URL params (set by callback on auth failure)
 	const error = $derived($page.url.searchParams.get('error'));
 	const errorCode = $derived($page.url.searchParams.get('error_code'));
+
+	// Dynamic return destination: /arbor redirects pass ?redirect=%2Farbor,
+	// header sign-in links arrive with no param → default to /
+	// Sanitized to prevent open redirect attacks via crafted ?redirect= param
+	const returnTo = $derived(sanitizeReturnTo($page.url.searchParams.get('redirect'), '/'));
+	const isAdminLogin = $derived(returnTo.startsWith('/arbor'));
 </script>
 
 <svelte:head>
-	<title>Admin Login - Grove</title>
+	<title>{isAdminLogin ? 'Admin Login' : 'Sign In'} - Grove</title>
 </svelte:head>
 
 <LoginGraft
 	variant="fullpage"
 	providers={['google', 'passkey']}
-	returnTo="/arbor"
+	returnTo={returnTo}
 >
 	{#snippet logo()}
 		<Logo class="w-16 h-16" />
 	{/snippet}
 
 	{#snippet header()}
-		<h1 class="text-2xl font-semibold text-foreground">Admin Panel</h1>
+		<h1 class="text-2xl font-semibold text-foreground">
+			{isAdminLogin ? 'Admin Panel' : 'Welcome, Wanderer'}
+		</h1>
 		<p class="mt-2 text-sm text-muted-foreground">
-			Sign in to access the admin panel
+			{isAdminLogin ? 'Sign in to access the admin panel' : 'Sign in to continue'}
 		</p>
 		{#if error}
 			<div class="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">

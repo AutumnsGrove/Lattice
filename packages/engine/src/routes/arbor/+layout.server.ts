@@ -64,22 +64,13 @@ export const load: LayoutServerLoad = async ({
           const userEmail = locals.user?.email;
           const match = emailsMatch(tenantEmail, userEmail);
 
-          // Debug logging for #866 - remove after issue is resolved
-          console.log("[Admin Auth]", {
-            tenantId: locals.tenantId,
-            tenantEmail: normalizeEmail(tenantEmail),
-            userEmail: normalizeEmail(userEmail),
-            match,
-            userExists: !!locals.user,
-          });
-
           if (!match) {
-            // DEBUG for #866: Include email info in error so it's visible on the page
-            // Format: "Tenant email: X | Session email: Y"
-            // This shows up in the error banner on the landing page
-            const debugInfo = `Email mismatch! Tenant: ${normalizeEmail(tenantEmail) || "(none)"} vs Session: ${normalizeEmail(userEmail) || "(none)"}`;
-            console.warn("[Admin Auth]", debugInfo);
-            throw redirect(302, `/?error=${encodeURIComponent(debugInfo)}`);
+            console.warn("[Admin Auth] Ownership mismatch", {
+              tenantId: locals.tenantId,
+              tenantEmail: normalizeEmail(tenantEmail),
+              userEmail: normalizeEmail(userEmail),
+            });
+            throw redirect(302, "/");
           }
         }
 

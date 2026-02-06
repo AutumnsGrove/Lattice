@@ -91,3 +91,42 @@ export function parseGroveUrl(url: string): string | null {
 export function isGroveUrl(url: string): boolean {
   return parseGroveUrl(url) !== null;
 }
+
+/**
+ * Sanitize a returnTo/redirect URL to prevent open redirect attacks.
+ *
+ * Only allows relative paths (e.g., "/arbor", "/blog/hello").
+ * Rejects absolute URLs, protocol-relative URLs, and other bypass attempts.
+ *
+ * @param returnTo - The redirect URL to validate
+ * @param fallback - Fallback path if validation fails (default: "/")
+ * @returns A safe relative path
+ *
+ * @example
+ * sanitizeReturnTo("/arbor")                    // "/arbor"
+ * sanitizeReturnTo("/blog/hello?page=2")        // "/blog/hello?page=2"
+ * sanitizeReturnTo("https://evil.com")          // "/"
+ * sanitizeReturnTo("//evil.com")                // "/"
+ * sanitizeReturnTo("\\/evil.com")               // "/"
+ * sanitizeReturnTo(null)                        // "/"
+ */
+export function sanitizeReturnTo(
+  returnTo: string | null | undefined,
+  fallback = "/",
+): string {
+  if (!returnTo || typeof returnTo !== "string") {
+    return fallback;
+  }
+
+  // Must start with / (relative path)
+  if (!returnTo.startsWith("/")) {
+    return fallback;
+  }
+
+  // Reject protocol-relative URLs (//evil.com) and backslash variants (\/evil.com)
+  if (returnTo.startsWith("//") || returnTo.startsWith("/\\")) {
+    return fallback;
+  }
+
+  return returnTo;
+}
