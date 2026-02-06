@@ -248,9 +248,7 @@ export const actions: Actions = {
       // Check if email is already a tenant owner
       step = "check-tenant";
       const existingTenant = await DB.prepare(
-        `SELECT t.subdomain FROM users u
-         JOIN tenants t ON u.tenant_id = t.id
-         WHERE u.email = ?`,
+        `SELECT subdomain FROM tenants WHERE email = ?`,
       )
         .bind(email)
         .first<{ subdomain: string }>();
