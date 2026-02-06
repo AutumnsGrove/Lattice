@@ -68,7 +68,8 @@ export const POST: RequestHandler = async ({
  * GET fallback — kept for backwards compatibility with existing <a> links.
  * Delegates to the same logic as POST. Safe because:
  * - Session revocation is idempotent (revoking a revoked session is a no-op)
- * - The hooks.server.ts CSRF check only applies to POST/PUT/DELETE/PATCH
+ * - SvelteKit's built-in CSRF protection (checkOrigin) only applies to
+ *   POST/PUT/DELETE/PATCH, so GET logout doesn't trigger CSRF rejection
  * - SameSite=Lax cookies prevent cross-origin GET-with-cookies in most contexts
  *
  * TODO: Remove once all logout links are migrated to POST forms

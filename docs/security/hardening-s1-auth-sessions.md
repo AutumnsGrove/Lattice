@@ -156,7 +156,7 @@
 
 | Vector | Status | Notes |
 |--------|--------|-------|
-| Timing Attacks | FIXED | `crypto.ts` timingSafeEqual had length-leak; patched to Math.max pattern |
+| Timing Attacks | FIXED | `crypto.ts` timingSafeEqual had length-leak; patched to Math.max + explicit bounds check |
 | Race Conditions (TOCTOU) | CLEAR | Auth code consumption uses atomic `UPDATE...RETURNING`; refresh token rotation atomic |
 | User Enumeration | FIXED | `/userinfo` no longer distinguishes missing user from invalid token |
 | Session Fixation | CLEAR | New session created on every login; no pre-auth session reuse |
@@ -193,18 +193,18 @@
 ### Fixes Applied (11)
 
 **Session 1 (initial audit):**
-1. **S1-F1**: `GroveAuth/src/utils/crypto.ts` — Changed `timingSafeEqual` from early-return on length mismatch to `Math.max` iteration with length XOR accumulation
+1. **S1-F1**: `GroveAuth/src/utils/crypto.ts` — Changed `timingSafeEqual` from early-return on length mismatch to `Math.max` iteration with length XOR accumulation; refined to use explicit bounds checks instead of `|| 0` coercion (PR review feedback)
 2. **S1-F2**: `GroveAuth/src/routes/verify.ts` — Changed `/userinfo` "User not found" error to match "Token is invalid or expired" error message; updated test
 3. **S1-F4**: `Engine/src/hooks.server.ts` — Changed JWT fallback from bare `fetch()` to use `AUTH` service binding with fetch fallback for local dev
 4. **S1-F7**: `GroveAuth/src/utils/constants.ts` — Added `Permissions-Policy: geolocation=(), microphone=(), camera=()` to SECURITY_HEADERS
 
 **Session 2 (full siege):**
-5. **S1-F3**: `GroveAuth/src/routes/session.ts` — Added `SERVICE_SECRET` bearer token check to `validate-service` endpoint (defense-in-depth alongside service bindings)
+5. **S1-F3**: `GroveAuth/src/routes/session.ts` — Added `SERVICE_SECRET` bearer token check to `validate-service` endpoint (defense-in-depth alongside service bindings); moved header extraction before conditional to prevent timing leak of secret configuration (PR review feedback)
 6. **S1-F5**: `GroveAuth/src/middleware/rateLimit.ts` + `betterAuth.ts` — Added `magicLinkRateLimiter` (5 req/15 min per IP) to magic link sign-in endpoint
 7. **S1-F6**: `GroveAuth/src/middleware/rateLimit.ts` — Token rate limiter now falls back to IP-based rate limiting when `client_id` is not in query params
 8. **S1-F8**: `GroveAuth/src/routes/betterAuth.ts` — Removed `debug` field from 500 error JSON responses
 9. **S1-F9**: `Engine/src/routes/auth/logout/+server.ts` + `arbor/+layout.svelte` — Changed logout from GET to POST (with GET fallback during migration); updated admin layout links to use `<form method="POST">`
-10. **S1-F11**: `GroveAuth/src/routes/device.ts` — Added Origin/Referer validation on device authorization POST endpoint
+10. **S1-F11**: `GroveAuth/src/routes/device.ts` — Added Origin/Referer validation on device authorization POST endpoint; tightened to deny-by-default when both Origin and Referer are absent (PR review feedback)
 11. **S1-F13**: `Engine/src/hooks.server.ts` — Fixed `getCookie()` regex to use `(?:^|;\s*)` prefix for boundary-safe cookie name matching
 
 ---
