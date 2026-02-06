@@ -56,7 +56,7 @@ No ticket numbers in the interface. No "your request has been escalated to tier 
 ## Related
 
 - [[contact-support]]
-- [[waystone|What is Waystone?]] — Self-service help
+- [[what-are-waystones|What are Waystones?]] — Contextual help markers
 - [[clearing|What is Clearing?]] — System status
 - [Porch Specification](/knowledge/specs/porch-spec)
 - [Grove Workshop → Porch](/workshop#tool-porch)

@@ -359,7 +359,7 @@
 					icon: 'signpost',
 					integration: 'Built into all Grove properties',
 					spec: '/knowledge/specs/waystone-spec',
-					whatIsLink: '/knowledge/help/what-is-waystone'
+					whatIsLink: '/knowledge/help/what-are-waystones'
 				},
 				{
 					name: 'Porch',

@@ -129,7 +129,7 @@
 				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
 				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
 				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download', major: true },
-				{ name: 'Waystone', description: 'Help center — guidance when you need it', done: true, icon: 'signpost', articleSlug: 'what-is-waystone' },
+				{ name: 'Waystone', description: 'Contextual help — guidance where you need it', done: true, icon: 'signpost', articleSlug: 'what-are-waystones' },
 				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true, articleSlug: 'what-is-shade' }
 			]
 		},
