@@ -221,15 +221,15 @@ describe("Full-Stack: CSRF Validation", () => {
       expect(validateCSRF(request)).toBe(false);
     });
 
-    it("accepts request with no origin header (non-browser)", () => {
+    it("rejects request with no origin header and no token (fail-closed)", () => {
       const request = createRequestWithHeaders(
         "https://autumn.grove.place/arbor/posts",
         { headers: { host: "autumn.grove.place" } },
       );
 
-      // No origin header means we can't validate — but the function allows it
-      // (origin-based is a fallback; token-based is primary protection)
-      expect(validateCSRF(request)).toBe(true);
+      // No origin header and no CSRF token fallback — fail closed for security.
+      // Non-browser clients must provide a CSRF token via options.
+      expect(validateCSRF(request)).toBe(false);
     });
 
     it("prevents cross-tenant CSRF (tenant1 → tenant2)", () => {

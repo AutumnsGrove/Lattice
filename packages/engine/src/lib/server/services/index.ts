@@ -222,6 +222,34 @@ export {
 } from "./og-fetcher.js";
 
 // ============================================================================
+// oEmbed Provider Registry
+// ============================================================================
+
+export * as oembedProviders from "./oembed-providers.js";
+export {
+  // Types
+  type EmbedProvider,
+  type EmbedRenderStrategy,
+  type ProviderMatch,
+  type OEmbedResponse,
+  // Registry
+  EMBED_PROVIDERS,
+  // Matching
+  findProvider,
+  isTrustedProvider,
+  getEmbedUrl,
+  extractIframeSrcFromHtml,
+  buildSandboxAttr,
+  aspectRatioToPercent,
+  // Security Hardening
+  normalizeUrl,
+  validateOEmbedResponse,
+  generateFrameSrcCSP,
+  MAX_OEMBED_RESPONSE_SIZE,
+  MAX_OEMBED_HTML_LENGTH,
+} from "./oembed-providers.js";
+
+// ============================================================================
 // Trace Email Service
 // ============================================================================
 

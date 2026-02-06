@@ -71,6 +71,10 @@ export interface GutterItemBase {
     alt?: string;
     caption?: string;
   }>;
+  /** The original URL for embed items (stored for re-fetching) */
+  embedUrl?: string;
+  /** The matched provider name for embed items (e.g., 'youtube', 'strawpoll') */
+  embedProvider?: string;
 }
 
 /**
@@ -88,6 +92,12 @@ export interface GutterItem extends GutterItemBase {
   src?: string;
   /** Resolved gallery images (for gallery type) */
   images?: GalleryImage[];
+  /** Cached oEmbed HTML for embed items (iframe src or srcdoc content) */
+  embedHtml?: string;
+  /** Cached oEmbed thumbnail URL for embed items */
+  embedThumbnail?: string;
+  /** Cached oEmbed title for embed items */
+  embedTitle?: string;
 }
 
 /** Gutter manifest structure */

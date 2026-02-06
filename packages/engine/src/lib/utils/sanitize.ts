@@ -136,6 +136,7 @@ function sanitizeServerSafe(html: string): string {
       a: ["href", "title", "target", "rel", "class", "id"],
       img: ["src", "alt", "title", "width", "height", "class"],
       "*": ["class", "id"],
+      span: ["class", "id", "data-anchor"],
       td: ["align"],
       th: ["align"],
       input: ["type", "checked", "disabled"],
