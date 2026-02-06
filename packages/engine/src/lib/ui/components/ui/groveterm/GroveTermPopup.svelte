@@ -6,7 +6,7 @@
 	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
 	import type { GroveTermEntry, GroveTermManifest, GroveTermCategory } from './types';
 	import { GROVE_TERM_CATEGORY_LABELS, GROVE_TERM_COLORS } from './types';
-	import { themeStore } from '$lib/ui/stores';
+	import { themeStore, groveModeStore } from '$lib/ui/stores';
 
 	/**
 	 * GroveTermPopup - Definition overlay for Grove terminology
@@ -86,6 +86,7 @@
 
 	// Get category color for badge (reactive to theme changes)
 	const isDark = $derived(themeStore.resolvedTheme === 'dark');
+	const isGroveMode = $derived(groveModeStore.current);
 
 	function getCategoryColor(category: GroveTermCategory): string {
 		return isDark ? GROVE_TERM_COLORS[category].dark : GROVE_TERM_COLORS[category].light;
@@ -150,7 +151,11 @@
 								id="grove-term-popup-description"
 								class="mt-1 text-sm text-muted-foreground"
 							>
-								{displayEntry.tagline}
+								{#if !isGroveMode && displayEntry.standardTerm && !displayEntry.alwaysGrove}
+									Grove's name for {displayEntry.standardTerm}
+								{:else}
+									{displayEntry.tagline}
+								{/if}
 							</DialogPrimitive.Description>
 						</div>
 					{:else}

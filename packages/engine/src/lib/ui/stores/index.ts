@@ -9,3 +9,4 @@
 export { seasonStore } from "./season.svelte";
 export { themeStore } from "./theme.svelte";
 export { sidebarStore } from "./sidebar.svelte";
+export { groveModeStore } from "./grove-mode.svelte";

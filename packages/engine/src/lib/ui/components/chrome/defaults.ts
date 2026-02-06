@@ -57,12 +57,13 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
   { href: "/roadmap", label: "Roadmap", icon: MapPin },
   { href: "/pricing", label: "Pricing", icon: Tag },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/forest", label: "Forest", icon: Trees },
+  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
   {
     href: "https://autumn.grove.place/garden",
     label: "Garden",
     icon: PenLine,
     external: true,
+    termSlug: "your-garden",
   },
 ];
 
@@ -74,12 +75,13 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
   { href: "/roadmap", label: "Roadmap", icon: MapPin },
   { href: "/pricing", label: "Pricing", icon: HandCoins },
   { href: "/knowledge", label: "Knowledge", icon: BookOpen },
-  { href: "/forest", label: "Forest", icon: Trees },
+  { href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
   {
     href: "https://autumn.grove.place/garden",
     label: "Garden",
     icon: PenLine,
     external: true,
+    termSlug: "your-garden",
   },
 ];
 
@@ -93,7 +95,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 // Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (already in nav)
 export const DEFAULT_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer },
-  { href: "/vineyard", label: "Vineyard", icon: Grape },
+  { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {
     href: "https://status.grove.place",
@@ -109,7 +111,7 @@ export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
-  { href: "/porch", label: "Porch", icon: Armchair },
+  { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
   { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
@@ -129,7 +131,7 @@ export const DEFAULT_CONNECT_LINKS: FooterLink[] = [
 // Excludes: Knowledge, Roadmap, Forest, Pricing, Manifesto, Vision (in mobile nav)
 export const DEFAULT_MOBILE_RESOURCE_LINKS: FooterLink[] = [
   { href: "/workshop", label: "Workshop", icon: Hammer },
-  { href: "/vineyard", label: "Vineyard", icon: Grape },
+  { href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
   { href: "/journey", label: "Journey", icon: Footprints },
   {
     href: "https://status.grove.place",
@@ -144,7 +146,7 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/hello", label: "Hello", icon: HeartHandshake },
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
-  { href: "/porch", label: "Porch", icon: Armchair },
+  { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
   { href: "/support", label: "Support", icon: Coffee },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
@@ -162,5 +164,5 @@ export const DEFAULT_MOBILE_CONNECT_LINKS: FooterLink[] = [
 export const DEFAULT_LEGAL_LINKS: FooterLink[] = [
   { href: "/knowledge/legal/privacy-policy", label: "Privacy" },
   { href: "/knowledge/legal/terms-of-service", label: "Terms" },
-  { href: "/shade", label: "Shade", icon: Blinds },
+  { href: "/shade", label: "Shade", icon: Blinds, termSlug: "shade" },
 ];

@@ -19,4 +19,4 @@ export { buildTenantNavItems } from "./tenant-nav";
 export type { TenantNavOptions, TenantNavPage } from "./tenant-nav";
 
 // Re-export stores for convenient access
-export { seasonStore, themeStore } from "../../stores";
+export { seasonStore, themeStore, groveModeStore } from "../../stores";

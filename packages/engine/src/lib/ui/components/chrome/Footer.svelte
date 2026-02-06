@@ -14,11 +14,16 @@
 		Hammer,
 		Scroll,
 		Grape,
-		Trees
+		Trees,
+		Leaf
 	} from 'lucide-svelte';
 	import { seasonStore } from '../../stores/season.svelte';
+	import { groveModeStore } from '../../stores/grove-mode.svelte';
 	import type { FooterLink, MaxWidth, Season } from './types';
+	import { resolveNavLabel } from './types';
 	import { DEFAULT_RESOURCE_LINKS, DEFAULT_CONNECT_LINKS, DEFAULT_LEGAL_LINKS, DIVIDER_VERTICAL } from './defaults';
+
+	import defaultManifestData from '$lib/data/grove-term-manifest.json';
 
 	// Easter egg: cycle through seasons when clicking the footer logo
 	function handleLogoClick() {
@@ -50,6 +55,11 @@
 	const resources = $derived(resourceLinks || DEFAULT_RESOURCE_LINKS);
 	const connect = $derived(connectLinks || DEFAULT_CONNECT_LINKS);
 	const legal = $derived(legalLinks || DEFAULT_LEGAL_LINKS);
+
+	// Resolve nav labels based on Grove Mode
+	function labelFor(link: FooterLink): string {
+		return resolveNavLabel(link, groveModeStore.current, defaultManifestData);
+	}
 </script>
 
 <footer class="py-12 border-t border-default">
@@ -95,7 +105,7 @@
 									{@const Icon = link.icon}
 								<Icon class="w-4 h-4" />
 								{/if}
-								{link.label}
+								{labelFor(link)}
 							</a>
 						</li>
 					{/each}
@@ -123,7 +133,7 @@
 									{@const Icon = link.icon}
 								<Icon class="w-4 h-4" />
 								{/if}
-								{link.label}
+								{labelFor(link)}
 								{#if link.external}
 									<ExternalLink class="w-3 h-3" />
 								{/if}
@@ -146,19 +156,71 @@
 					<a href="/credits" class="hover:text-accent-muted transition-colors">Credits</a>
 					<span class="text-divider">·</span>
 					{#each legal as link, index}
-						<a href={link.href} class="hover:text-accent-muted transition-colors">{link.label}</a>
+						<a href={link.href} class="hover:text-accent-muted transition-colors">{labelFor(link)}</a>
 						{#if index < legal.length - 1}
 							<span class="text-divider">·</span>
 						{/if}
 					{/each}
 				</div>
 
-				<!-- Theme Toggle -->
-				<div class="flex items-center gap-2">
-					<span class="text-xs text-foreground-faint font-sans">Theme</span>
-					<ThemeToggle />
+				<!-- Theme Toggle + Grove Mode Toggle -->
+				<div class="flex items-center gap-4">
+					<!-- Grove Mode Toggle -->
+					<button
+						type="button"
+						class="grove-mode-toggle flex items-center gap-1.5 text-xs font-sans transition-colors py-2 px-1 -my-2 -mx-1"
+						class:grove-mode-active={groveModeStore.current}
+						onclick={() => groveModeStore.toggle()}
+						aria-label={groveModeStore.current ? 'Disable Grove Mode (show standard terms)' : 'Enable Grove Mode (show nature-themed terms)'}
+						aria-pressed={groveModeStore.current}
+						title={groveModeStore.current ? 'Grove Mode is on' : 'Grove Mode is off'}
+					>
+						<Leaf class="w-3.5 h-3.5" />
+						<span>Grove Mode</span>
+					</button>
+
+					<span class="text-divider">·</span>
+
+					<!-- Theme Toggle -->
+					<div class="flex items-center gap-2">
+						<span class="text-xs text-foreground-faint font-sans">Theme</span>
+						<ThemeToggle />
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </footer>
+
+<style>
+	.grove-mode-toggle {
+		color: var(--color-foreground-faint, #9ca3af);
+		cursor: pointer;
+	}
+
+	.grove-mode-toggle:hover {
+		color: var(--color-foreground-subtle, #6b7280);
+	}
+
+	.grove-mode-active {
+		color: var(--color-accent, #16a34a);
+	}
+
+	.grove-mode-active:hover {
+		color: var(--color-accent-muted, #15803d);
+	}
+
+	/* Focus indicator for keyboard navigation */
+	.grove-mode-toggle:focus-visible {
+		outline: 2px solid var(--color-accent, #16a34a);
+		outline-offset: 2px;
+		border-radius: 4px;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.grove-mode-toggle {
+			transition: none;
+		}
+	}
+</style>

@@ -3,6 +3,8 @@ import { scanAllDocs } from "$lib/server/docs-scanner";
 import type { Doc, DocCategory } from "$lib/types/docs";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, EntryGenerator } from "./$types";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 // Prerender all knowledge base articles at build time
 // This is required because Cloudflare Workers don't have filesystem access at runtime
@@ -11,6 +13,15 @@ export const prerender = true;
 
 // Cache scanned docs at module level for entries + load
 const { allDocs } = scanAllDocs();
+
+// Load grove term manifest at build time for "what-is-*" article banners
+let groveTermManifest: Record<string, any> = {};
+try {
+  const manifestPath = resolve(process.cwd(), "packages/engine/src/lib/data/grove-term-manifest.json");
+  groveTermManifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+} catch (e) {
+  console.warn("[Grove Mode] Could not load grove-term-manifest.json — article banners will be disabled:", (e as Error).message);
+}
 
 // Generate entries for all known documents (scanned from filesystem)
 export const entries: EntryGenerator = () => {
@@ -54,8 +65,24 @@ export const load: PageServerLoad = async ({ params }) => {
       .filter((d): d is Doc => d !== undefined);
   }
 
+  // For "what-is-*" articles, pass matching grove term data for the banner
+  let groveTermEntry: { term: string; standardTerm?: string; alwaysGrove?: boolean; slug: string } | null = null;
+  if (slug.startsWith("what-is-")) {
+    const termPart = slug.replace("what-is-", "").replace("my-", "your-");
+    const entry = groveTermManifest[termPart] || groveTermManifest[`your-${termPart}`];
+    if (entry && entry.standardTerm) {
+      groveTermEntry = {
+        term: entry.term,
+        standardTerm: entry.standardTerm,
+        alwaysGrove: entry.alwaysGrove,
+        slug: entry.slug,
+      };
+    }
+  }
+
   return {
     doc,
     relatedArticles,
+    groveTermEntry,
   };
 };

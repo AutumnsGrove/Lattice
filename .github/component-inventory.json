@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
   "lastUpdated": "2026-02-06",
-  "lastAuditedBy": "claude/add-html-widget-support-CB8LI",
+  "lastAuditedBy": "claude/grove-mode-terminology-toggle-3zQfZ",
   "components": {
-    "total": 198,
+    "total": 199,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
-      "ui": 36,
+      "ui": 37,
       "typography": 11,
       "chrome": 7,
       "terrarium": 7,

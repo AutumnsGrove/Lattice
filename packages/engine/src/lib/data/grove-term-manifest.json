@@ -5,7 +5,8 @@
     "category": "foundational",
     "tagline": "Your Space",
     "definition": "A grove is a small group of trees growing together—intimate, sheltered, yours. The platform is called Grove. Your space within it is your grove. Not a blog. Not a site. A grove.",
-    "usageExample": "\"Welcome to my grove.\"\n\"Come visit Autumn's grove.\""
+    "usageExample": "\"Welcome to my grove.\"\n\"Come visit Autumn's grove.\"",
+    "alwaysGrove": true
   },
   "your-garden": {
     "slug": "your-garden",
@@ -18,7 +19,8 @@
       "blooms",
       "plant",
       "wander"
-    ]
+    ],
+    "standardTerm": "Blog"
   },
   "blooms": {
     "slug": "blooms",
@@ -30,7 +32,8 @@
     "seeAlso": [
       "flow",
       "press"
-    ]
+    ],
+    "standardTerm": "Posts"
   },
   "lattice": {
     "slug": "lattice",
@@ -47,7 +50,8 @@
     "term": "Arbor",
     "category": "platform",
     "tagline": "Admin Panel",
-    "definition": "An arbor is the structured framework where growth is tended—a garden structure that shapes and supports what grows within it."
+    "definition": "An arbor is the structured framework where growth is tended—a garden structure that shapes and supports what grows within it.",
+    "standardTerm": "Dashboard"
   },
   "plant": {
     "slug": "plant",
@@ -78,7 +82,8 @@
     "term": "Foliage",
     "category": "platform",
     "tagline": "Theming System",
-    "definition": "Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same."
+    "definition": "Foliage is what you see when you look at a tree. The leaves, the color, the personality that changes with the seasons. No two canopies are quite the same.",
+    "standardTerm": "Themes"
   },
   "curios": {
     "slug": "curios",
@@ -89,7 +94,8 @@
     "seeAlso": [
       "foliage",
       "terrarium"
-    ]
+    ],
+    "standardTerm": "Decorations"
   },
   "burrow": {
     "slug": "burrow",
@@ -109,21 +115,24 @@
     "term": "Rings",
     "category": "platform",
     "tagline": "Analytics",
-    "definition": "Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree."
+    "definition": "Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.",
+    "standardTerm": "Analytics"
   },
   "clearing": {
     "slug": "clearing",
     "term": "Clearing",
     "category": "platform",
     "tagline": "Status Page",
-    "definition": "A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening."
+    "definition": "A clearing is an open space in the forest where the trees part and visibility opens up. You can see what's around you, assess the situation, and understand what's happening.",
+    "standardTerm": "Status"
   },
   "porch": {
     "slug": "porch",
     "term": "Porch",
     "category": "platform",
     "tagline": "Front Porch Conversations",
-    "definition": "A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat."
+    "definition": "A porch is where you sit and talk. Not a ticket counter. Not a help desk. Just two people on a porch, figuring things out together. You come up the steps, have a seat, and the grove keeper comes out to chat.",
+    "standardTerm": "Support"
   },
   "wisp": {
     "slug": "wisp",
@@ -133,14 +142,16 @@
     "definition": "A wisp is a will-o'-the-wisp, a gentle, ephemeral light that appears in forests and marshes. It guides without forcing. It's there and then it's not.",
     "seeAlso": [
       "forests"
-    ]
+    ],
+    "standardTerm": "Writing Assistant"
   },
   "trails": {
     "slug": "trails",
     "term": "Trails",
     "category": "platform",
     "tagline": "Personal Roadmaps",
-    "definition": "A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same."
+    "definition": "A trail is the path you're walking: the route you've chosen through the forest, marked by where you've been and where you're headed. No two trails are the same.",
+    "standardTerm": "Roadmap"
   },
   "trace": {
     "slug": "trace",
@@ -174,7 +185,8 @@
     "definition": "A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.",
     "seeAlso": [
       "lattice"
-    ]
+    ],
+    "standardTerm": "Showcase"
   },
   "flow": {
     "slug": "flow",
@@ -185,7 +197,8 @@
     "seeAlso": [
       "blooms",
       "arbor"
-    ]
+    ],
+    "alwaysGrove": true
   },
   "terrarium": {
     "slug": "terrarium",
@@ -198,7 +211,8 @@
       "plant",
       "foliage",
       "flow"
-    ]
+    ],
+    "standardTerm": "Component Builder"
   },
   "weave": {
     "slug": "weave",
@@ -233,14 +247,16 @@
       "flow",
       "press",
       "lumen"
-    ]
+    ],
+    "alwaysGrove": true
   },
   "reeds": {
     "slug": "reeds",
     "term": "Reeds",
     "category": "content",
     "tagline": "Comments System",
-    "definition": "Reeds sway together at the water's edge, whispering in the breeze: a gentle murmur of community."
+    "definition": "Reeds sway together at the water's edge, whispering in the breeze: a gentle murmur of community.",
+    "standardTerm": "Comments"
   },
   "thorn": {
     "slug": "thorn",
@@ -254,7 +270,8 @@
     "term": "Meadow",
     "category": "content",
     "tagline": "The Social Layer",
-    "definition": "A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view."
+    "definition": "A meadow is where the forest opens up. Sunlight reaches the ground. You can see the people around you clearly, without the dense canopy of algorithmic noise blocking the view.",
+    "standardTerm": "Feed"
   },
   "forests": {
     "slug": "forests",
@@ -265,7 +282,8 @@
     "seeAlso": [
       "foliage",
       "wander"
-    ]
+    ],
+    "standardTerm": "Communities"
   },
   "wander": {
     "slug": "wander",
@@ -294,7 +312,8 @@
     "term": "Waystone",
     "category": "tools",
     "tagline": "Help Center",
-    "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward."
+    "definition": "Waystones are the markers travelers leave along forest paths—guiding those who follow, showing the way forward.",
+    "standardTerm": "Help"
   },
   "gossamer": {
     "slug": "gossamer",
@@ -498,7 +517,8 @@
     "term": "Shade",
     "category": "operations",
     "tagline": "AI Content Protection",
-    "definition": "Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking."
+    "definition": "Shade is the cool relief beneath the canopy. Protection from the harsh glare of exposure. It's where you rest, out of sight from those who would harvest without asking.",
+    "alwaysGrove": true
   },
   "wanderer": {
     "slug": "wanderer",
@@ -509,7 +529,8 @@
     "usageExample": "\"Welcome, Wanderer.\"",
     "seeAlso": [
       "wander"
-    ]
+    ],
+    "standardTerm": "Visitor"
   },
   "rooted": {
     "slug": "rooted",
@@ -522,7 +543,8 @@
       "plant",
       "scribe",
       "wander"
-    ]
+    ],
+    "standardTerm": "Subscriber"
   },
   "pathfinder": {
     "slug": "pathfinder",

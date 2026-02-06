@@ -34,6 +34,10 @@ export interface GroveTermEntry {
   usageExample?: string;
   /** Related term slugs for "See also" links */
   seeAlso?: string[];
+  /** Standard/familiar equivalent shown when Grove Mode is OFF */
+  standardTerm?: string;
+  /** If true, always show the Grove term regardless of mode */
+  alwaysGrove?: boolean;
 }
 
 /**

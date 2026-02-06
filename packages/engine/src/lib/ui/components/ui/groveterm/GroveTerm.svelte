@@ -3,6 +3,7 @@
 	import GroveTermPopup from './GroveTermPopup.svelte';
 	import type { GroveTermEntry, GroveTermManifest, GroveTermCategory } from './types';
 	import type { Snippet } from 'svelte';
+	import { groveModeStore } from '$lib/ui/stores';
 
 	// Import manifest internally so consumers don't need to
 	import defaultManifestData from '$lib/data/grove-term-manifest.json';
@@ -10,15 +11,14 @@
 
 	// GroveTerm - Interactive Grove terminology with popup definitions
 	//
-	// Renders as an underlined term that opens a popup with the definition.
-	// Each category has its own color for visual vocabulary building.
+	// Mode-aware: when Grove Mode is OFF, shows standard terms for entries
+	// that have a standardTerm. When ON (or alwaysGrove), shows Grove terms
+	// with the category-colored dotted underline.
 	//
 	// Usage:
 	//   <GroveTerm term="grove" />
 	//   <GroveTerm term="wanderer">wanderers</GroveTerm>
 	//   <p>Welcome to your <GroveTerm term="grove" /> where <GroveTerm term="bloom">blooms</GroveTerm> grow.</p>
-	//
-	// The manifest is loaded internally—no additional imports needed!
 
 	interface Props {
 		/** Term slug to look up (e.g., "grove", "heartwood", "wanderer") */
@@ -60,6 +60,19 @@
 
 	// Normalize term to slug format
 	const slug = $derived(term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+
+	// Eagerly resolve entry from manifest for mode-aware display
+	$effect(() => {
+		if (!entry && manifest) {
+			const found = findInManifest(manifest, slug);
+			if (found) entry = found;
+		}
+	});
+
+	// Whether this term should show as Grove (interactive underline) or standard (plain)
+	const showAsGrove = $derived(
+		groveModeStore.current || !entry?.standardTerm || entry?.alwaysGrove
+	);
 
 	// Try common slug variations
 	function findInManifest(m: GroveTermManifest, s: string): GroveTermEntry | null {
@@ -155,26 +168,32 @@
 	// Get category for styling (from loaded entry or default)
 	const category = $derived<GroveTermCategory>(entry?.category || 'foundational');
 
-	// Display text - either children or capitalized term
+	// Display text: standard term when Grove Mode is OFF, Grove term when ON
 	const displayText = $derived(
-		term.charAt(0).toUpperCase() + term.slice(1)
+		showAsGrove
+			? (entry?.term || term.charAt(0).toUpperCase() + term.slice(1))
+			: (entry?.standardTerm || entry?.term || term.charAt(0).toUpperCase() + term.slice(1))
 	);
 </script>
 
 <!--
-  Progressive enhancement: renders as a styled span for no-JS,
-  becomes interactive when JS is available.
+  Mode-aware rendering:
+  - Grove Mode ON (or alwaysGrove): interactive span with category underline
+  - Grove Mode OFF + has standardTerm: subtle style, still clickable for learning
 -->
 <span
 	class={cn(
 		'grove-term',
-		`grove-term--${category}`,
+		showAsGrove && `grove-term--${category}`,
+		!showAsGrove && 'grove-term--standard',
 		inline && 'grove-term--inline',
 		className
 	)}
 	role="button"
 	tabindex="0"
-	aria-label="Grove term: {term}, {category} category"
+	aria-label={showAsGrove
+		? `Grove term: ${entry?.term || term}, ${category} category`
+		: `${entry?.standardTerm || term} (Grove term: ${entry?.term || term})`}
 	aria-haspopup="dialog"
 	onclick={handleClick}
 	onkeydown={handleKeydown}
@@ -225,6 +244,30 @@
 		--gt-content: #c084fc;
 		--gt-tools: #fcd34d;
 		--gt-operations: #9ca3af;
+	}
+
+	/* Standard mode: visible but understated indicator */
+	.grove-term--standard {
+		text-decoration-color: rgba(107, 114, 128, 0.5);
+		text-decoration-style: dotted;
+		text-decoration-thickness: 1px;
+	}
+
+	:global(.dark) .grove-term--standard {
+		text-decoration-color: rgba(156, 163, 175, 0.5);
+	}
+
+	.grove-term--standard:hover,
+	.grove-term--standard:focus-visible {
+		text-decoration-color: rgba(107, 114, 128, 0.8);
+		text-decoration-style: solid;
+		background-color: rgba(107, 114, 128, 0.08);
+	}
+
+	:global(.dark) .grove-term--standard:hover,
+	:global(.dark) .grove-term--standard:focus-visible {
+		text-decoration-color: rgba(156, 163, 175, 0.8);
+		background-color: rgba(156, 163, 175, 0.08);
 	}
 
 	/* Category-specific underline colors */

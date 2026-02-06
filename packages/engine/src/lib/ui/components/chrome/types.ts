@@ -22,6 +22,8 @@ export interface NavItem {
   label: string;
   icon?: IconComponent;
   external?: boolean;
+  /** Term slug for Grove Mode label resolution (e.g., "porch", "forests") */
+  termSlug?: string;
 }
 
 /**
@@ -38,6 +40,8 @@ export interface FooterLink {
   label: string;
   icon?: IconComponent;
   external?: boolean;
+  /** Term slug for Grove Mode label resolution */
+  termSlug?: string;
 }
 
 /**
@@ -58,4 +62,23 @@ export type MaxWidth = "narrow" | "default" | "wide";
 export function isActivePath(href: string, currentPath: string): boolean {
   if (href === "/") return currentPath === "/";
   return currentPath.startsWith(href);
+}
+
+/**
+ * Resolve the display label for a nav/footer item based on Grove Mode state.
+ *
+ * When Grove Mode is ON: shows the Grove term from the manifest.
+ * When Grove Mode is OFF: shows the standard term if available, otherwise the Grove term.
+ * Falls back to the item's label prop if no termSlug or no manifest match.
+ */
+export function resolveNavLabel(
+  item: NavItem | FooterLink,
+  groveMode: boolean,
+  manifest?: Record<string, { term: string; standardTerm?: string; alwaysGrove?: boolean }>
+): string {
+  if (!item.termSlug || !manifest) return item.label;
+  const entry = manifest[item.termSlug];
+  if (!entry) return item.label;
+  if (entry.alwaysGrove) return entry.term;
+  return groveMode ? entry.term : (entry.standardTerm || entry.term);
 }

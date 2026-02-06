@@ -3,6 +3,8 @@
   import { browser } from '$app/environment';
   import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
   import { Trace } from '@autumnsgrove/groveengine/ui/feedback';
+  import { GroveTerm } from '@autumnsgrove/groveengine/ui';
+  import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
   import SEO from '$lib/components/SEO.svelte';
   import { TableOfContents, MobileTOC } from '@autumnsgrove/groveengine';
   import RelatedArticles from '$lib/components/RelatedArticles.svelte';
@@ -20,6 +22,14 @@
 
   // Get colors for current category (with fallback)
   let colors = $derived(kbCategoryColors[category] || kbCategoryColors.help);
+
+  // Grove term banner data (passed from server for "what-is-*" articles)
+  let groveTermEntry = $derived(data.groveTermEntry);
+
+  // Show banner when: Grove Mode is OFF and a matching term with standardTerm exists
+  const showGroveBanner = $derived(
+    !groveModeStore.current && groveTermEntry && groveTermEntry.standardTerm && !groveTermEntry.alwaysGrove
+  );
 
   let categoryTitle = $derived(
     categoryLabels[category] ||
@@ -151,6 +161,14 @@
               <p class="text-xl text-foreground-muted mt-4">{doc.description}</p>
             {/if}
           </header>
+
+          <!-- Grove Term Banner (for "What is X?" articles when Grove Mode is OFF) -->
+          {#if showGroveBanner && groveTermEntry}
+            <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30 text-sm text-foreground-subtle">
+              <strong class="text-foreground">{groveTermEntry.term}</strong> is Grove's name for <strong>{groveTermEntry.standardTerm}</strong>
+              — <GroveTerm term={groveTermEntry.slug}>learn more</GroveTerm>
+            </div>
+          {/if}
 
           <!-- Article Content -->
           <article class="content-body prose prose-slate dark:prose-invert max-w-none">
