@@ -390,6 +390,14 @@ These are a separate concern from the Grove Mode toggle work because they're abo
 
 **Action:** Create a GitHub issue titled `chore: Legacy term replacement pass (posts→blooms, blog→garden, user→wanderer)` with the lexicon audit as reference, and tag it for the next sprint.
 
+**Issue body should include:**
+- Reference to `docs/audits/grove-lexicon-audit.md` for the full hit list
+- Key files: `packages/engine/src/routes/arbor/garden/new/+page.svelte`, `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte`, `packages/durable-objects/src/tiers.ts`, `packages/engine/src/lib/components/admin/MarkdownEditor.svelte`
+- Dependency: Requires this Grove Mode rollout to be complete first (shared `resolveTermString` utility needs to exist)
+- Label: `chore`
+
+> **TODO:** This issue could not be auto-created (`gh` CLI was unavailable). Create it manually before starting Phase 1.
+
 ---
 
 ## Cross-Cutting Concerns
