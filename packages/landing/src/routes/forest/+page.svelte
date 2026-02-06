@@ -25,7 +25,7 @@
 	} from '@autumnsgrove/groveengine/ui/nature';
 
 	// Import glass components and color utilities
-	import { Glass, GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { Glass, GlassCard, GroveIntro } from '@autumnsgrove/groveengine/ui';
 	import { generateTierColors } from '@autumnsgrove/groveengine/ui/utils';
 
 	// Path utilities
@@ -825,6 +825,7 @@
 				<h1 class="text-4xl md:text-6xl font-serif text-foreground mb-4">
 					The Grove Forest
 				</h1>
+				<GroveIntro term="forests" />
 				<p class="text-lg md:text-xl text-foreground-muted font-sans">
 					A community of trees, each one unique, all growing together.
 				</p>

@@ -10,7 +10,7 @@
 	 */
 
 	import { LoginGraft } from '$lib/grafts/login';
-	import { Logo } from '$lib/ui/components/ui';
+	import { Logo, GroveSwap } from '$lib/ui/components/ui';
 	import { sanitizeReturnTo } from '$lib/utils/grove-url.js';
 	import { page } from '$app/stores';
 
@@ -40,10 +40,10 @@
 
 	{#snippet header()}
 		<h1 class="text-2xl font-semibold text-foreground">
-			{isAdminLogin ? 'Admin Panel' : 'Welcome, Wanderer'}
+			{#if isAdminLogin}<GroveSwap term="arbor" standard="Dashboard">Admin Panel</GroveSwap>{:else}Welcome{#if false}, <GroveSwap term="wanderer">Wanderer</GroveSwap>{/if}{/if}
 		</h1>
 		<p class="mt-2 text-sm text-muted-foreground">
-			{isAdminLogin ? 'Sign in to access the admin panel' : 'Sign in to continue'}
+			{isAdminLogin ? 'Sign in to access your dashboard' : 'Sign in to continue'}
 		</p>
 		{#if error}
 			<div class="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">

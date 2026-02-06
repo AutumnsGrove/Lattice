@@ -26,7 +26,7 @@
 		CheckCircle,
 		Clock
 	} from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 
 	let { data, form } = $props();
 
@@ -398,7 +398,7 @@
 							{#if newInviteType === 'beta'}
 								Beta testers get free access now, should convert to paid later.
 							{:else}
-								Comped Wanderers are free forever (special cases).
+								Comped <GroveSwap term="wanderer" standard="Visitors">Wanderers</GroveSwap> are free forever (special cases).
 							{/if}
 						</p>
 					</div>

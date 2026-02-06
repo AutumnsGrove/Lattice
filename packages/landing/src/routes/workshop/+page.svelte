@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { GroveTerm, GroveSwapText } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();
@@ -171,7 +171,7 @@
 					name: 'Arbor',
 					termSlug: 'arbor',
 					tagline: 'Admin Panel',
-					description: 'The structured framework where growth is tended. Arbor is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
+					description: 'The structured framework where growth is tended. [[arbor|Arbor]] is your blog\'s control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.',
 					status: 'live',
 					icon: 'dashboard',
 					domain: '{you}.grove.place/arbor',
@@ -188,7 +188,7 @@
 					name: 'Flow',
 					termSlug: 'flow',
 					tagline: 'The Writing Sanctuary',
-					description: 'Where the current carries you. Flow is Grove\'s immersive Markdown editor—the space inside Arbor where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.',
+					description: 'Where the current carries you. Flow is Grove\'s immersive Markdown editor—the space inside [[arbor|Arbor]] where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.',
 					status: 'live',
 					icon: 'drafting-compass',
 					integration: 'Built into Arbor',
@@ -281,7 +281,7 @@
 					name: 'Burrow',
 					termSlug: 'burrow',
 					tagline: 'Cross-Property Access',
-					description: 'A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role—Pathfinders get admin, Rooted Wanderers can contribute.',
+					description: 'A protected passage beneath the earth. Burrow lets you access Grove properties without creating separate accounts. When two properties are both in greenhouse mode, you can burrow through with a single click. The connection respects your existing role—[[pathfinder|Pathfinders]] get admin, [[rooted|Rooted]] [[wanderer|Wanderers]] can contribute.',
 					status: 'planned',
 					icon: 'network',
 					integration: 'Integrated into Arbor for greenhouse properties',
@@ -302,7 +302,7 @@
 					name: 'Foliage',
 					termSlug: 'foliage',
 					tagline: 'Theming Engine',
-					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your foliage is how the world sees your corner of the grove.',
+					description: 'Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your [[foliage|foliage]] is how the world sees your corner of the grove.',
 					status: 'complete',
 					icon: 'swatchbook',
 					integration: 'Theme customization for all Grove blogs',
@@ -335,7 +335,7 @@
 					name: 'Terrarium',
 					termSlug: 'terrarium',
 					tagline: 'Creative Canvas',
-					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your foliage.',
+					description: 'A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your [[foliage|foliage]].',
 					status: 'greenhouse',
 					icon: 'pencilruler',
 					domain: 'terrarium.grove.place',
@@ -396,7 +396,7 @@
 				{
 					name: 'Trace',
 					tagline: 'Inline Feedback',
-					description: 'A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the Wayfinder see which paths are clear and which need tending.',
+					description: 'A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the [[wayfinder|Wayfinder]] see which paths are clear and which need tending.',
 					status: 'live',
 					icon: 'footprints',
 					integration: 'Embedded in help articles, docs, and anywhere feedback matters',
@@ -441,7 +441,7 @@
 					name: 'Meadow',
 					termSlug: 'meadow',
 					tagline: 'Social Feed',
-					description: 'Where voices gather. Meadow is Grove\'s opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.',
+					description: 'Where voices gather. [[meadow|Meadow]] is Grove\'s opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.',
 					status: 'building',
 					icon: 'users',
 					domain: 'meadow.grove.place',
@@ -525,7 +525,7 @@
 					name: 'Reeds',
 					termSlug: 'reeds',
 					tagline: 'Comments System',
-					description: 'Whisper together at the water\'s edge. Reeds is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
+					description: 'Whisper together at the water\'s edge. [[reeds|Reeds]] is Grove\'s comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.',
 					status: 'planned',
 					icon: 'messagessquare',
 					integration: 'Comments and replies for Grove blogs',
@@ -1130,7 +1130,7 @@
 								{/if}
 
 								<p class="text-foreground-muted mb-4 leading-relaxed">
-									{tool.description}
+									<GroveSwapText content={tool.description} />
 								</p>
 
 								<div class="pt-4 border-t border-divider space-y-2">

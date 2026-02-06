@@ -1,6 +1,6 @@
 <script>
 	import InternalsPostViewer from '$lib/components/custom/InternalsPostViewer.svelte';
-	import { Button } from '$lib/ui';
+	import { Button, GroveSwap } from '$lib/ui';
 
 	let { data } = $props();
 </script>
@@ -21,7 +21,7 @@
 			<h1>Welcome to {data.tenantName}</h1>
 			<p class="setup-subtitle">Your new grove is ready to be set up!</p>
 			<p class="setup-description">
-				Sign in to the admin panel to create your first post, customize your theme,
+				Sign in to the <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> to create your first post, customize your theme,
 				and make this space your own.
 			</p>
 			<div class="setup-actions">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { MessageCircle, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-svelte';
@@ -46,7 +46,7 @@
 			</div>
 			<h1 class="text-3xl font-serif text-foreground mb-3">Your Visits</h1>
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
-				Your past conversations with the Wayfinder.
+				Your past conversations with the <GroveSwap term="wayfinder">Wayfinder</GroveSwap>.
 			</p>
 		</div>
 

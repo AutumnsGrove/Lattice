@@ -3,9 +3,10 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { Input, Button, GlassCard } from "$lib/ui";
+  import { Input, Button, GlassCard, GroveSwap } from "$lib/ui";
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
+  import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
   import { ExternalLink } from "lucide-svelte";
 
@@ -129,10 +130,10 @@
       // Clear draft on successful save
       editorRef?.clearDraft();
 
-      toast.success("Bloom saved successfully!");
+      toast.success(`${resolveTermString('Bloom', 'Post')} saved successfully!`);
       hasUnsavedChanges = false;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update bloom");
+      toast.error(err instanceof Error ? err.message : `Failed to update ${resolveTermString('bloom', 'post')}`);
     } finally {
       saving = false;
     }
@@ -178,9 +179,9 @@
       editorRef?.clearDraft();
 
       if (newStatus === "published") {
-        toast.success("Bloom published! 🎉", { description: "Your bloom is now live." });
+        toast.success(`${resolveTermString('Bloom', 'Post')} published!`, { description: `Your ${resolveTermString('bloom', 'post')} is now live.` });
       } else {
-        toast.success("Bloom unpublished", { description: "Moved back to drafts." });
+        toast.success(`${resolveTermString('Bloom', 'Post')} unpublished`, { description: "Moved back to drafts." });
       }
       hasUnsavedChanges = false;
     } catch (err) {
@@ -203,11 +204,11 @@
     try {
       await api.delete(`/api/blooms/${slug}`);
 
-      toast.success("Bloom deleted successfully");
+      toast.success(`${resolveTermString('Bloom', 'Post')} deleted successfully`);
       // Redirect to blog admin
       goto("/arbor/garden");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete bloom");
+      toast.error(err instanceof Error ? err.message : `Failed to delete ${resolveTermString('bloom', 'post')}`);
     } finally {
       saving = false;
     }
@@ -229,9 +230,9 @@
 <div class="edit-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/arbor/garden" class="back-link">&larr; Back to Garden</a>
+      <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <div class="title-row">
-        <h1>Edit Bloom</h1>
+        <h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
         {#if data.source === "filesystem"}
           <span class="source-badge filesystem">From UserContent</span>
         {:else}
@@ -286,7 +287,7 @@
     >
       <div class="panel-header">
         <h2 class="panel-title">
-          {#if detailsCollapsed}Details{:else}Bloom Details{/if}
+          {#if detailsCollapsed}Details{:else}<GroveSwap term="blooms">Bloom</GroveSwap> Details{/if}
         </h2>
         <button
           class="collapse-details-btn"
@@ -306,7 +307,7 @@
               type="text"
               id="title"
               bind:value={title}
-              placeholder="Your Bloom Title"
+              placeholder={resolveTermString("Your Bloom Title", "Your Post Title")}
               class="form-input"
             />
           </div>
@@ -512,7 +513,7 @@
 </div>
 
 <!-- Delete Confirmation Dialog -->
-<Dialog bind:open={showDeleteDialog} title="Delete Bloom">
+<Dialog bind:open={showDeleteDialog} title={`Delete ${resolveTermString('Bloom', 'Post')}`}>
   <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
   {#snippet footer()}
     <Button variant="outline" onclick={() => (showDeleteDialog = false)}

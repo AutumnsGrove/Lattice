@@ -1,5 +1,5 @@
 <script>
-  import { Toast, Logo } from "$lib/ui/components/ui";
+  import { Toast, Logo, GroveSwap } from "$lib/ui/components/ui";
   import {
     LayoutDashboard,
     FileText,
@@ -81,7 +81,7 @@
       {#if showExpanded}
         <div class="sidebar-brand">
           <Logo class="sidebar-logo-small" />
-          <h2>Arbor <span class="admin-label">(admin panel)</span></h2>
+          <h2><GroveSwap term="arbor">Arbor</GroveSwap> <span class="admin-label">(<GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap>)</span></h2>
         </div>
       {:else}
         <a href="/arbor" class="sidebar-logo-link" title="Arbor Dashboard">
@@ -104,11 +104,11 @@
     <nav class="sidebar-nav">
       <a href="/arbor" class="nav-item" onclick={closeSidebar} title="Dashboard">
         <LayoutDashboard class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Dashboard</span>
+        <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="arbor">Dashboard</GroveSwap></span>
       </a>
       <a href="/arbor/garden" class="nav-item" onclick={closeSidebar} title="Garden">
         <FileText class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Garden</span>
+        <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="your-garden">Garden</GroveSwap></span>
       </a>
       <a href="/arbor/pages" class="nav-item" onclick={closeSidebar} title="Pages">
         <FileStack class="nav-icon" />

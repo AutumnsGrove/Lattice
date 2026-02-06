@@ -177,7 +177,7 @@
 						{@render header()}
 					{:else}
 						<h1 class="text-2xl font-semibold text-foreground">
-							Welcome back, Wanderer
+							Welcome back
 						</h1>
 						<p class="mt-2 text-sm text-muted-foreground">
 							Sign in to continue to Grove

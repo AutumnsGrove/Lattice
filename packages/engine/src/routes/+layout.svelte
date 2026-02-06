@@ -14,7 +14,7 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { Button, GroveTerm } from '$lib/ui';
+	import { Button, GroveTerm, GroveSwap } from '$lib/ui';
 	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
 	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
 	import { groveModeStore } from '$lib/ui/stores/grove-mode.svelte';
@@ -90,9 +90,9 @@
 {#if context?.type === 'not_found'}
 <div class="not-found-layout">
 	<div class="not-found-content">
-		<h1>Garden Not Found</h1>
-		<p>The garden <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
-		<p>Want to start your own garden? <a href="https://grove.place">Get started at grove.place</a></p>
+		<h1><GroveSwap term="your-garden">Garden</GroveSwap> Not Found</h1>
+		<p>The <GroveSwap term="your-garden" standard="blog">garden</GroveSwap> <strong>{context.subdomain}.grove.place</strong> doesn't exist yet.</p>
+		<p>Want to start your own <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>? <a href="https://grove.place">Get started at grove.place</a></p>
 	</div>
 </div>
 {:else}

@@ -7,7 +7,7 @@
 	 */
 
 	import { Check, User, Mail, CreditCard, Sparkles } from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/state';
 
 	// Define onboarding steps with Grove-friendly language
@@ -169,7 +169,7 @@
 		{#snippet footer()}
 			<p class="text-xs text-foreground-subtle text-center">
 				{#if completedCount === 0}
-					Let's get started, Wanderer ✨
+					Let's get started<GroveSwap term="wanderer" standard="">, Wanderer</GroveSwap> ✨
 				{:else if completedCount < steps.length - 1}
 					You're making great progress!
 				{:else}

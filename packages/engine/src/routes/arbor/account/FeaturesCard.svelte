@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Waystone, GroveTerm } from "$lib/ui";
+  import { GlassCard, Waystone, GroveTerm, GroveSwap } from "$lib/ui";
   import { BarChart3, Calendar, Sparkles } from "lucide-svelte";
 
   interface Props {
@@ -41,7 +41,7 @@
       </div>
       <div class="feature-content">
         <div class="feature-title">
-          <span>Trail</span>
+          <span><GroveSwap term="trails">Trail</GroveSwap></span>
           <Waystone slug="what-are-trails" label="Learn about Trail" />
         </div>
         <p class="feature-description">

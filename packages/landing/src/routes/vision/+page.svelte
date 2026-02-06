@@ -1,7 +1,7 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { MobileTOC } from '@autumnsgrove/groveengine';
 	import SEO from '$lib/components/SEO.svelte';
 
@@ -82,7 +82,7 @@
 						The Vision
 					</h2>
 					<p class="text-foreground-muted font-sans leading-relaxed">
-						<em>A forest of voices.</em> Every Wanderer is a tree in the grove. Some are saplings just starting out.
+						<em>A forest of voices.</em> Every <GroveSwap term="wanderer">Wanderer</GroveSwap> is a tree in the grove. Some are saplings just starting out.
 						Some are ancient oaks with deep roots. All are welcome. All have space to grow.
 					</p>
 					<p class="text-foreground-muted font-sans leading-relaxed mt-4">

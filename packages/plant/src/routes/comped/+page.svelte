@@ -8,7 +8,7 @@
 
 	import { enhance } from '$app/forms';
 	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { TIERS } from '@autumnsgrove/groveengine/config';
 
 	let { data, form } = $props();
@@ -77,7 +77,7 @@
 				</h1>
 
 				<p class="text-foreground-muted max-w-md mx-auto">
-					Thank you for being one of our first Wanderers. You're helping us grow.
+					Thank you for being one of our first <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>. You're helping us grow.
 				</p>
 			{:else}
 				<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">

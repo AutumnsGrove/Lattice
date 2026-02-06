@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData, ActionData } from "./$types";
   import { enhance } from "$app/forms";
-  import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone, GroveSwap } from "$lib/ui/components/ui";
   import {
     Image,
     Settings2,
@@ -227,7 +227,7 @@
           <div>
             <strong>For power users only</strong>
             <p>
-              These settings are pre-configured for most Wanderers. Changing them
+              These settings are pre-configured for most <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>. Changing them
               incorrectly can break your gallery or cause images not to load.
               Only modify if you have your own CDN or storage setup.
             </p>
@@ -248,7 +248,7 @@
           />
           <p class="field-help">
             Where your images are served from. The default (<code>cdn.grove.place</code>)
-            works for all Wanderers. Only change this if you have your own CDN
+            works for all <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>. Only change this if you have your own CDN
             that you control and can upload to.
           </p>
           <p class="field-help field-warning">

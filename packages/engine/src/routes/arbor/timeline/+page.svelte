@@ -1,5 +1,5 @@
 <script>
-	import { GlassCard, Waystone, GroveTerm } from '$lib/ui';
+	import { GlassCard, Waystone, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
 	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout } from 'lucide-svelte';
 </script>
 
@@ -10,6 +10,7 @@
 			<h1 class="m-0 text-3xl text-foreground"><GroveTerm term="trails">Trail</GroveTerm></h1>
 			<Waystone slug="what-are-trails" label="Learn about Trails" />
 		</div>
+		<GroveIntro term="trails" />
 		<p class="m-0 text-foreground-muted text-lg italic">The path becomes clear by walking it.</p>
 	</header>
 
@@ -160,7 +161,7 @@
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">Build in Public. Show the Journey.</h3>
 				<p class="text-sm text-foreground-muted mb-3">
-					Trails wind through the forest, marking where others have walked. They show the journey, not just the destination.
+					<GroveSwap term="trails">Trails</GroveSwap> wind through the forest, marking where others have walked. They show the journey, not just the destination.
 					Whether planning a creative project, outlining upcoming blog content, or tracking progress on a long-term goal,
 					Trails provides a beautiful way to show where you've been, where you are, and where you're headed.
 				</p>

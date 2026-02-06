@@ -5,8 +5,8 @@
 	 * A clearing in the forest where you can see what's happening.
 	 * Public-facing status page showing platform health, incidents, and uptime.
 	 */
-	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
-	import Footer from '$lib/components/Footer.svelte';
+	import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
+	import { GroveIntro } from '@autumnsgrove/groveengine/ui';
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';
@@ -64,6 +64,8 @@
 
 	<main class="flex-1 py-8 px-4 sm:px-6" aria-label="Status page content">
 		<div class="max-w-4xl mx-auto space-y-8">
+			<GroveIntro term="clearing" />
+
 			<!-- Mock data indicator for development -->
 			{#if data.isMockData}
 				<div class="flex items-center justify-center gap-2 py-2 px-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-700 dark:text-amber-300" role="alert">

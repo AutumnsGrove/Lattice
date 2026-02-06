@@ -1,5 +1,5 @@
 <script>
-  import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap } from '$lib/ui';
+  import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
   import { api } from '$lib/utils';
   import { Trash2 } from 'lucide-svelte';
 
@@ -54,7 +54,7 @@
   {#if data.isExampleSite}
     <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
       <p class="m-0 text-amber-800 dark:text-amber-200 text-sm">
-        <strong>✨ Welcome to the Example Site!</strong> This admin panel is publicly accessible so you can explore Grove's features.
+        <strong>✨ Welcome to the Example Site!</strong> This <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> is publicly accessible so you can explore Grove's features.
         On your own site, this panel is private and only accessible to you.
       </p>
     </div>
@@ -63,6 +63,7 @@
   <header class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4">
     <div>
       <h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm term="garden">Garden</GroveTerm></h1>
+      <GroveIntro term="your-garden" />
       <p class="m-0 text-foreground-muted">{data.posts.length} <GroveSwap term="blooms">blooms</GroveSwap></p>
     </div>
     <Button variant="primary" onclick={() => window.location.href = '/arbor/garden/new'}>
@@ -137,7 +138,7 @@
   </GlassCard>
 
   <GlassCard variant="muted">
-    <h3>How the Garden Works</h3>
+    <h3>How the <GroveSwap term="your-garden">Garden</GroveSwap> Works</h3>
     <p>
       Create and edit <GroveSwap term="blooms">blooms</GroveSwap> directly in the built-in markdown editor. <GroveSwap term="blooms">Blooms</GroveSwap> are saved to the database
       and available immediately.

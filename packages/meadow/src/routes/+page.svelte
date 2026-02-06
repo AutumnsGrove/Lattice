@@ -1,9 +1,8 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui';
+	import { Logo, GroveSwap, GroveIntro } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Header, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
 	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
 	import { Trees, Users, Heart, Calendar, Zap, Sprout, ArrowRight } from 'lucide-svelte';
 
@@ -40,7 +39,8 @@
 	</div>
 
 	<!-- Title -->
-	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center">Meadow</h1>
+	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center"><GroveSwap term="meadow">Meadow</GroveSwap></h1>
+	<GroveIntro term="meadow" />
 
 	<!-- Tagline -->
 	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4 text-center">
@@ -76,11 +76,11 @@
 	<!-- What is Meadow? Section -->
 	<section class="w-full max-w-2xl mb-12">
 		<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6 text-center">
-			What is Meadow?
+			What is <GroveSwap term="meadow">Meadow</GroveSwap>?
 		</h2>
 		<div class="glass-grove rounded-xl p-6 border border-divider">
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">
-				Think of it as the clearing in the forest. When you step out from under the dense canopy of your own blog, you can see what others in the Grove are writing.
+				Think of it as the <GroveSwap term="clearing" standard="status page">clearing</GroveSwap> in the forest. When you step out from under the dense canopy of your own blog, you can see what others in the Grove are writing.
 			</p>
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">
 				Posts flow chronologically. You can vote (only you see the scores). You can react with emojis (only the author sees who reacted). You can bookmark for later.
@@ -146,7 +146,7 @@
 	<!-- Why Meadow Exists Section -->
 	<section class="w-full max-w-2xl mb-12">
 		<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6 text-center">
-			Why Meadow exists
+			Why <GroveSwap term="meadow">Meadow</GroveSwap> exists
 		</h2>
 		<div class="glass-grove rounded-xl p-6 border border-divider">
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { MessageCircle, Clock, CheckCircle, ArrowLeft, Send, User, Mail, StickyNote } from 'lucide-svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -82,7 +82,13 @@
 						<GlassCard class="{message.sender_type === 'autumn' ? 'bg-grove-50/80 border-grove-200 ml-8' : 'mr-8'}">
 							<div class="flex items-center gap-2 mb-2">
 								<span class="text-sm font-medium text-foreground">
-									{message.sender_type === 'autumn' ? 'Autumn (you)' : message.sender_name || 'Wanderer'}
+									{#if message.sender_type === 'autumn'}
+									Autumn (you)
+								{:else if message.sender_name}
+									{message.sender_name}
+								{:else}
+									<GroveSwap term="wanderer">Wanderer</GroveSwap>
+								{/if}
 								</span>
 								<span class="text-xs text-foreground/50">
 									{formatDate(message.created_at)}

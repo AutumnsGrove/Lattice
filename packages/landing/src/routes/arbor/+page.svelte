@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getUserDisplayName } from '@autumnsgrove/groveengine/utils';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import {
 		MessageCircle,
 		AtSign,
@@ -39,7 +39,7 @@
 					<MessageCircle class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 				</div>
 				<div class="flex-1 min-w-0">
-					<h2 class="text-lg font-serif text-foreground mb-1">Wanderer Feedback</h2>
+					<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="wanderer" standard="Visitor">Wanderer</GroveSwap> Feedback</h2>
 					<p class="text-sm text-foreground-muted font-sans">
 						View and respond to feedback from the community.
 					</p>
@@ -91,9 +91,9 @@
 						<MessageSquare class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div class="flex-1 min-w-0">
-						<h2 class="text-lg font-serif text-foreground mb-1">The Porch</h2>
+						<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="porch">The Porch</GroveSwap></h2>
 						<p class="text-sm text-foreground-muted font-sans">
-							View and respond to support conversations from Wanderers.
+							View and respond to support conversations from <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>.
 						</p>
 					</div>
 				</div>

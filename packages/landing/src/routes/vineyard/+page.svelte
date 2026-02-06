@@ -20,6 +20,7 @@
 		GlassOverlay,
 		GlassCarousel,
 		GroveTerm,
+		GroveIntro,
 	} from '@autumnsgrove/groveengine/ui';
 
 	// Import nature assets
@@ -286,6 +287,7 @@
 	<!-- Hero Section -->
 	<section class="text-center mb-12">
 		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3"><GroveTerm term="lattice">Lattice</GroveTerm> <GroveTerm term="vineyard">Vineyard</GroveTerm></h1>
+		<GroveIntro term="vineyard" />
 		<p class="text-lg text-[var(--color-foreground-muted)] max-w-2xl mx-auto">
 			Every vine starts somewhere. This is where <GroveTerm term="your-grove">Grove's</GroveTerm> UI components grow,
 			ready to be picked and planted throughout the ecosystem.

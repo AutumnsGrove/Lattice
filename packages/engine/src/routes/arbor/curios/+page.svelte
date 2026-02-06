@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, GlassButton, Badge, Waystone, GroveTerm, GroveSwap } from "$lib/ui/components/ui";
+  import { GlassCard, GlassButton, Badge, Waystone, GroveTerm, GroveSwap, GroveIntro } from "$lib/ui/components/ui";
   import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse } from "lucide-svelte";
 
   // Available curios with their status
@@ -61,6 +61,7 @@
         <h1><GroveTerm term="curios">Curios</GroveTerm></h1>
         <Waystone slug="what-are-curios" label="Learn about Curios" />
       </div>
+      <GroveIntro term="curios" />
       <p class="subtitle">
         Fun, delightful tools that make your site feel alive.
         Developer <GroveSwap term="curios">curios</GroveSwap> help you showcase your work in unique ways.

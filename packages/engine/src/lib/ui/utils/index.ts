@@ -20,4 +20,7 @@ export {
   type LogoTierColors,
 } from "./color.js";
 
+// Grove term resolution utilities (for non-component contexts)
+export { resolveTerm, resolveTermString } from "./grove-term-resolve.js";
+
 export const UTILS_VERSION = "0.2.0";

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard, GlassButton, GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton, GroveTerm, GroveIntro } from '@autumnsgrove/groveengine/ui';
 	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { MessageCircle, Clock, ArrowRight } from 'lucide-svelte';
@@ -23,6 +23,7 @@
 				<Logo class="w-16 h-16" season={seasonStore.current} />
 			</div>
 			<h1 class="text-3xl font-serif text-foreground mb-3">The <GroveTerm term="porch">Porch</GroveTerm></h1>
+			<GroveIntro term="porch" />
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
 				Have a seat. Whether you're stuck, confused, or just want to say hi—I'm here to help. This is a conversation, not a ticket queue.
 			</p>

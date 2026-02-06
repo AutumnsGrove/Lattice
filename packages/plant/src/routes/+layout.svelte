@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
 	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from 'lucide-svelte';
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
 
@@ -176,22 +176,5 @@
 		{@render children()}
 	</main>
 
-	<!-- Footer -->
-	<footer class="border-t border-default bg-surface/80 backdrop-blur-sm">
-		<div class="max-w-2xl mx-auto px-4 py-6">
-			<div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-foreground-subtle">
-				<p>
-					Already have a blog?
-					<a href={GROVE_LINKS.HOME} class="text-accent-muted hover:text-accent transition-colors">
-						Sign in at Grove
-					</a>
-				</p>
-				<div class="flex items-center gap-4">
-					<a href={GROVE_LINKS.TERMS} class="hover:text-foreground transition-colors">Terms</a>
-					<a href={GROVE_LINKS.PRIVACY} class="hover:text-foreground transition-colors">Privacy</a>
-					<a href={GROVE_LINKS.PRICING} class="hover:text-foreground transition-colors">Pricing</a>
-				</div>
-			</div>
-		</div>
-	</footer>
+	<Footer />
 </div>

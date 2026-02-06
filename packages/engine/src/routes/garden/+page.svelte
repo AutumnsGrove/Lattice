@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { Card, Badge, GroveSwap } from '$lib/ui';
+	import { Card, Badge, GroveSwap, GroveIntro } from '$lib/ui';
 
 	let { data } = $props();
 
@@ -38,7 +38,8 @@
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">
-	<h1 class="blog-header-title">Garden</h1>
+	<h1 class="blog-header-title"><GroveSwap term="your-garden">Garden</GroveSwap></h1>
+	<GroveIntro term="your-garden" />
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>
 	{#if data.isOwner}
 		<div class="flex gap-2 items-center mt-4">

@@ -3,8 +3,9 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { GlassCard, Glass } from '$lib/ui';
+  import { GlassCard, Glass, GroveSwap, GroveIntro } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
+  import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
 
   // Page data from admin layout (includes grafts cascade)
@@ -128,7 +129,7 @@
       editorRef?.clearDraft();
 
       // Show success toast
-      toast.success("Bloom created!", {
+      toast.success(`${resolveTermString('Bloom', 'Post')} created!`, {
         description: `"${result.title}" has been saved.`,
       });
 
@@ -137,7 +138,7 @@
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       error = errorMessage;
-      toast.error("Failed to create bloom", { description: errorMessage });
+      toast.error(`Failed to create ${resolveTermString('bloom', 'post')}`, { description: errorMessage });
     } finally {
       saving = false;
     }
@@ -147,15 +148,16 @@
 <div class="new-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/arbor/garden" class="back-link">&larr; Back to Garden</a>
-      <h1>New Bloom</h1>
+      <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
+      <h1>New <GroveSwap term="blooms">Bloom</GroveSwap></h1>
+      <GroveIntro term="blooms" />
     </div>
     <button
       class="save-btn"
       onclick={handleSave}
       disabled={saving}
     >
-      {saving ? "Saving..." : "Save Bloom"}
+      {saving ? "Saving..." : `Save ${resolveTermString('Bloom', 'Post')}`}
     </button>
   </header>
 
@@ -171,7 +173,7 @@
     <!-- Metadata Panel -->
     <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
       <div class="panel-header">
-        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}Bloom Details{/if}</h2>
+        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}<GroveSwap term="blooms">Bloom</GroveSwap> Details{/if}</h2>
         <button
           class="collapse-details-btn"
           onclick={toggleDetailsCollapsed}
@@ -190,7 +192,7 @@
               type="text"
               id="title"
               bind:value={title}
-              placeholder="Your Bloom Title"
+              placeholder={resolveTermString("Your Bloom Title", "Your Post Title")}
               class="form-input"
             />
           </div>

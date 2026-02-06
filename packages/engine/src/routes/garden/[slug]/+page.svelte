@@ -1,6 +1,6 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
-	import { Button, Badge } from '$lib/ui';
+	import { Button, Badge, GroveSwap } from '$lib/ui';
 	import { fontMap } from '$lib/ui/tokens/fonts';
 
 	let { data } = $props();
@@ -71,7 +71,7 @@
 			<!-- Navigation outside of article header for semantic clarity -->
 			<nav class="article-nav" aria-label="Article navigation">
 				<div class="nav-row">
-					<Button variant="link" href="/garden" class="!p-0">&larr; Back to Garden</Button>
+					<Button variant="link" href="/garden" class="!p-0">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></Button>
 					{#if data.isOwner}
 						<a href="/arbor/garden/edit/{data.post.slug}" class="edit-link" aria-label="Edit this post in Flow">
 							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

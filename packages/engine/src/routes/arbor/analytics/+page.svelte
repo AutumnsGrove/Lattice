@@ -1,5 +1,5 @@
 <script>
-	import { GlassCard, Waystone, GroveTerm } from '$lib/ui';
+	import { GlassCard, Waystone, GroveTerm, GroveIntro } from '$lib/ui';
 	import { BarChart3, TrendingUp, Heart, Eye, Users, Calendar, Sprout, Leaf, TreePine } from 'lucide-svelte';
 </script>
 
@@ -10,6 +10,7 @@
 			<h1 class="m-0 text-3xl text-foreground"><GroveTerm term="rings">Rings</GroveTerm></h1>
 			<Waystone slug="what-is-rings" label="Learn about Rings" />
 		</div>
+		<GroveIntro term="rings" />
 		<p class="m-0 text-foreground-muted text-lg italic">Count the rings and you learn the story.</p>
 	</header>
 

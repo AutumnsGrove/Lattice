@@ -1,7 +1,7 @@
 <script>
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { Card, Badge, Button, ContentSearch, GroveSwap } from '$lib/ui';
+	import { Card, Badge, Button, ContentSearch, GroveSwap, GroveIntro } from '$lib/ui';
 
 	let { data } = $props();
 
@@ -92,7 +92,8 @@
 </svelte:head>
 
 <div class="search-header">
-	<h1>Search Garden</h1>
+	<h1>Search <GroveSwap term="your-garden">Garden</GroveSwap></h1>
+	<GroveIntro term="your-garden" />
 	<p>Find <GroveSwap term="blooms">blooms</GroveSwap> by keyword or filter by tags.</p>
 </div>
 

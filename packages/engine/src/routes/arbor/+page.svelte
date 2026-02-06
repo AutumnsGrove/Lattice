@@ -1,5 +1,5 @@
 <script>
-  import { GlassCard, Spinner, GroveTerm, BetaBadge, BetaWelcomeDialog } from '$lib/ui';
+  import { GlassCard, Spinner, GroveTerm, GroveSwap, BetaBadge, BetaWelcomeDialog, GroveIntro } from '$lib/ui';
   import { api, getUserDisplayName } from "$lib/utils";
   import {
     FileText,
@@ -78,7 +78,7 @@
 <div class="max-w-screen-xl">
   <header class="mb-8">
     <div class="flex items-center gap-3 mb-2">
-      <h1 class="m-0 text-3xl text-foreground">Dashboard</h1>
+      <h1 class="m-0 text-3xl text-foreground"><GroveSwap term="arbor">Dashboard</GroveSwap></h1>
       <a
         href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
         target="_blank"
@@ -94,6 +94,7 @@
         <BetaBadge />
       {/if}
     </div>
+    <GroveIntro term="arbor" />
     <p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
   </header>
 
@@ -172,7 +173,7 @@
     <div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
       <a href="/arbor/garden" class="action-card glass-action">
         <FileText class="w-7 h-7 text-accent-muted" />
-        <span class="font-medium text-center text-sm">Manage Garden</span>
+        <span class="font-medium text-center text-sm">Manage <GroveSwap term="your-garden">Garden</GroveSwap></span>
       </a>
       <a href="/arbor/images" class="action-card glass-action">
         <Image class="w-7 h-7 text-accent-muted" />
