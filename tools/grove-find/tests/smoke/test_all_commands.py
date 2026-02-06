@@ -61,6 +61,15 @@ class TestCLISmoke:
             ["export", "--help"],
             ["auth", "--help"],
             ["engine", "--help"],
+            # Infrastructure commands
+            ["large", "--help"],
+            ["orphaned", "--help"],
+            ["migrations", "--help"],
+            ["flags", "--help"],
+            ["workers", "--help"],
+            ["emails", "--help"],
+            ["deps", "--help"],
+            ["config-diff", "--help"],
         ],
     )
     def test_command_help(self, command):

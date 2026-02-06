@@ -3,6 +3,7 @@
 Provides: gf large, gf orphaned, gf migrations, gf flags, gf workers, gf emails, gf deps, gf config
 """
 
+import re
 from pathlib import Path
 from typing import Optional
 import typer
@@ -145,11 +146,12 @@ def orphaned_command() -> None:
     orphaned = []
     for filepath in component_files:
         component_name = Path(filepath).stem  # e.g., "GlassCard"
+        escaped_name = re.escape(component_name)
 
         # Check if this component is imported anywhere
         rg_output = _run_rg(
             [
-                f"(import.*{component_name}|<{component_name}[\\s/>])",
+                f"(import.*{escaped_name}|<{escaped_name}[\\s/>])",
                 "--glob", "*.{ts,js,svelte}",
                 "-l",  # files-with-matches only (fast)
                 str(config.grove_root),
@@ -471,6 +473,16 @@ def deps_command(package: Optional[str] = None) -> None:
     config = get_config()
 
     if package:
+        # Validate package name — reject path traversal attempts
+        if ".." in package or "/" in package or "\\" in package:
+            print_warning("Invalid package name — must be a simple name like 'engine'")
+            return
+
+        package_dir = config.grove_root / "packages" / package
+        if not package_dir.is_dir():
+            print_warning(f"Package not found: packages/{package}")
+            return
+
         print_header(f"Dependencies of: {package}", "")
 
         # Find imports from workspace packages
@@ -479,7 +491,7 @@ def deps_command(package: Optional[str] = None) -> None:
             [
                 "@autumnsgrove/",
                 "--glob", "*.{ts,js,svelte}",
-                str(config.grove_root / "packages" / package),
+                str(package_dir),
             ],
             cwd=config.grove_root,
         )
@@ -570,7 +582,9 @@ def deps_command(package: Optional[str] = None) -> None:
                                     pkg = part.split("/")[0].split("'")[0].split('"')[0].strip()
                                     if pkg and pkg != source:
                                         dep_map[source].add(pkg)
-                except (OSError, UnicodeDecodeError):
+                except (OSError, UnicodeDecodeError) as exc:
+                    if config.verbose:
+                        console.print(f"  [dim]skipped {filepath}: {exc}[/dim]")
                     continue
 
         for pkg in sorted(dep_map.keys()):
