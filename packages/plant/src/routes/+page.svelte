@@ -56,6 +56,9 @@
 	// Check for signup gate redirect notice
 	const showSignupGateNotice = $derived(page.url.searchParams.get('notice') === 'coming_soon');
 
+	// Check for expired/invalid invite link notice
+	const showInviteExpiredNotice = $derived(page.url.searchParams.get('notice') === 'invite_expired');
+
 	// Config - could be fetched from API or environment
 	const WAITLIST_COUNT = 67;
 
@@ -113,6 +116,19 @@
 			<span>Already have a blog? <span class="text-primary font-medium">Sign in</span></span>
 		</button>
 	</div>
+
+	<!-- Invite Expired Notice (shown when invite link is invalid or already used) -->
+	{#if showInviteExpiredNotice}
+		<GlassCard variant="frosted" class="text-center border-amber-300/50 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20">
+			<div class="flex items-center justify-center gap-2 mb-2">
+				<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+				<span class="font-medium text-foreground">Invite link expired</span>
+			</div>
+			<p class="text-foreground-muted text-sm">
+				This invite link is no longer valid — it may have already been used or expired. If you think this is a mistake, reach out to whoever invited you.
+			</p>
+		</GlassCard>
+	{/if}
 
 	<!-- Signup Gate Notice (shown when user tries to sign up but payments aren't ready) -->
 	{#if showSignupGateNotice}

@@ -8,6 +8,7 @@
 
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { sendInviteEmail } from "$lib/server/invite-email";
 
 interface CompedInvite {
   id: string;
@@ -240,11 +241,20 @@ export const actions: Actions = {
 
       step = "insert-invite";
       const inviteId = crypto.randomUUID();
+      const inviteToken = crypto.randomUUID();
       await DB.prepare(
-        `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, unixepoch())`,
+        `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())`,
       )
-        .bind(inviteId, email, tier, inviteType, customMessage, user.email)
+        .bind(
+          inviteId,
+          email,
+          tier,
+          inviteType,
+          customMessage,
+          user.email,
+          inviteToken,
+        )
         .run();
 
       step = "insert-audit";
@@ -256,10 +266,46 @@ export const actions: Actions = {
         .bind(auditId, inviteId, email, tier, inviteType, user.email, notes)
         .run();
 
+      // Send the invite email via Zephyr
+      step = "send-email";
+      const zephyrApiKey =
+        platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
+      if (zephyrApiKey) {
+        const emailResult = await sendInviteEmail({
+          email,
+          tier,
+          inviteType,
+          customMessage,
+          inviteToken,
+          invitedBy: user.email,
+          zephyrApiKey,
+          zephyrUrl: platform?.env?.ZEPHYR_URL,
+        });
+
+        if (emailResult.success) {
+          await DB.prepare(
+            `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
+          )
+            .bind(inviteId)
+            .run();
+        } else {
+          console.error(
+            `[Comped Invites] Email send failed for ${email}:`,
+            emailResult.error,
+          );
+          // Invite was created but email failed — don't fail the whole action
+        }
+      } else {
+        console.warn(
+          "[Comped Invites] No ZEPHYR_API_KEY configured — invite created but email not sent",
+        );
+      }
+
       const typeLabel = inviteType === "beta" ? "beta" : "comped";
+      const emailSent = zephyrApiKey ? " and email sent" : " (email not configured)";
       return {
         success: true,
-        message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
+        message: `Created ${typeLabel} invite for ${email} (${tier} tier)${emailSent}`,
       };
     } catch (err) {
       const message =

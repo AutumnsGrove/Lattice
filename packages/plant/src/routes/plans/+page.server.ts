@@ -29,7 +29,7 @@ function getTierByKey(id: string): PricingTier | undefined {
   return tiers.find((t) => t.key === id);
 }
 
-export const load: PageServerLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent, platform, cookies }) => {
   const { user, onboarding } = await parent();
 
   // Redirect if not authenticated
@@ -50,6 +50,52 @@ export const load: PageServerLoad = async ({ parent }) => {
   // Redirect if already selected plan and paid
   if (onboarding?.paymentCompleted) {
     redirect(302, "/success");
+  }
+
+  // Check for comped/beta invite — skip plan selection entirely
+  const db = platform?.env?.DB;
+  if (db && user?.email) {
+    try {
+      const compedInvite = await db
+        .prepare(
+          `SELECT id, tier FROM comped_invites
+           WHERE email = ? AND used_at IS NULL`,
+        )
+        .bind(user.email.toLowerCase())
+        .first<{ id: string; tier: string }>();
+
+      const validTiers = ["seedling", "sapling", "oak", "evergreen"];
+      if (compedInvite && validTiers.includes(compedInvite.tier)) {
+        // Auto-set the plan from the invite tier (idempotent — only if not already set)
+        const onboardingId = cookies.get("onboarding_id");
+        if (onboardingId) {
+          await db
+            .prepare(
+              `UPDATE user_onboarding
+               SET plan_selected = ?,
+                   plan_billing_cycle = 'monthly',
+                   plan_selected_at = unixepoch(),
+                   updated_at = unixepoch()
+               WHERE id = ? AND plan_selected IS NULL`,
+            )
+            .bind(compedInvite.tier, onboardingId)
+            .run();
+        }
+        redirect(302, "/comped");
+      }
+    } catch (err) {
+      // Don't block the plans page if the invite check fails
+      if (
+        err &&
+        typeof err === "object" &&
+        "status" in err &&
+        (err as { status: number }).status >= 300 &&
+        (err as { status: number }).status < 400
+      ) {
+        throw err;
+      }
+      console.error("[Plans] Error checking comped invite:", err);
+    }
   }
 
   return {
