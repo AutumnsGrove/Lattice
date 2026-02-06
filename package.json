@@ -21,7 +21,8 @@
     "test:plant": "pnpm --filter grove-plant test:run",
     "test:clearing": "pnpm --filter grove-clearing test:run",
     "test:router": "pnpm --filter grove-router test:run",
-    "test:shell": "bats scripts/repo/tests/"
+    "test:shell": "bats scripts/repo/tests/",
+    "email:preview": "NODE_PATH=packages/engine/node_modules bun run scripts/email/preview.tsx"
   },
   "devDependencies": {
     "sharp": "^0.34.5",

@@ -56,5 +56,8 @@ baseproject-update-summary.md
 # Generated backfill output
 scripts/journey/output/
 
+# Email preview output
+.preview/
+
 # gw-managed worktrees
 .gw-worktrees/
