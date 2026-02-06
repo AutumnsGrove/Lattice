@@ -434,6 +434,21 @@ def _generate_dashboard_html(summary: dict[str, Any]) -> str:
     by_group_success = json.dumps([g["successes"] for g in summary.get("by_group", [])])
     by_group_failures = json.dumps([g["failures"] for g in summary.get("by_group", [])])
 
+    # Pre-build errors HTML outside the f-string (Python 3.11 compat — no nested f-strings)
+    error_items = []
+    for e in summary.get('top_errors', []):
+        error_type = e.get('error_type', 'Unknown')
+        error_count = e.get('count', 0)
+        error_msg = (e.get('error_message', '') or '')[:100]
+        error_items.append(
+            f'<div class="error-item">'
+            f'<span class="error-type">{error_type}</span>'
+            f'<span class="error-count">({error_count}x)</span>'
+            f'<div style="color: #9ca3af; font-size: 0.85rem; margin-top: 0.25rem;">{error_msg}</div>'
+            f'</div>'
+        )
+    errors_html = "".join(error_items) or '<div class="error-item" style="color: #4ade80;">No errors recorded!</div>'
+
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -580,13 +595,7 @@ def _generate_dashboard_html(summary: dict[str, Any]) -> str:
 
         <div class="errors-list">
             <div class="chart-title">Top Errors</div>
-            {"".join(f'''<div class="error-item">
-                <span class="error-type">{e.get('error_type', 'Unknown')}</span>
-                <span class="error-count">({e.get('count', 0)}x)</span>
-                <div style="color: #9ca3af; font-size: 0.85rem; margin-top: 0.25rem;">
-                    {(e.get('error_message', '') or '')[:100]}
-                </div>
-            </div>''' for e in summary.get('top_errors', [])) or '<div class="error-item" style="color: #4ade80;">No errors recorded! 🎉</div>'}
+            {errors_html}
         </div>
 
         <div class="footer">

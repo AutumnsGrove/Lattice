@@ -2,7 +2,7 @@
 name = "grove-find"
 version = "1.0.0"
 description = "Blazing fast codebase search for the Grove ecosystem"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "typer>=0.9.0",
     "rich>=13.0.0",

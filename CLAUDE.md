@@ -33,6 +33,29 @@ Run `gf --help` for full command list.
 
 **Web/remote sessions:** If `fd` is not installed, file-type searches (`gf svelte`, `gf ts`, etc.) won't work. All other commands (search, func, class, usage, recent, changed, todo, git, engine, etc.) work with just `rg` + `git`.
 
+## Infrastructure CLI (Grove Wrap)
+
+Use `gw` for git, GitHub, Cloudflare, and dev tool operations with safety guards:
+
+```bash
+uv run --project tools/gw gw <command>
+```
+
+**Key commands:**
+- `gw git status` / `gw git log` / `gw git diff` — Safe git reads
+- `gw git commit --write -m "feat: ..."` — Commit (requires `--write`)
+- `gw git push --write` — Push (requires `--write`)
+- `gw packages list` — List all monorepo packages
+- `gw bindings` — Show all Cloudflare bindings (D1, KV, R2, DO)
+- `gw doctor` — Diagnose environment issues
+- `gw whoami` — Show current auth context
+- `gw d1 tables` / `gw d1 schema <table>` — Database introspection
+- `gw gh pr list` / `gw gh issue list` — GitHub reads
+
+Run `gw --help` for full command list, `gw <command> --help` for subcommand details.
+
+**Web/remote sessions:** `wrangler` and `gh` are not installed, so Cloudflare operations (`gw d1`, `gw kv`, `gw deploy`) and GitHub operations (`gw gh`) won't work. Git commands, package listing, bindings scan, and doctor all work fine.
+
 ---
 
 All project instructions, tech stack details, architecture notes, and workflow guidelines are in:
