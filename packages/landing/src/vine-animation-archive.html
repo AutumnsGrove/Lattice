@@ -1,0 +1,1147 @@
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  GROVE ENTRANCE ANIMATION - "Parting the Vines" v2 — ARCHIVED
+  ══════════════════════════════════════════════════════════════════════
+
+  This file preserves the full vine swinging first-content-paint animation
+  that was removed from app.html for performance (flash of unstyled overlay
+  before JS hydration could remove it).
+
+  TO RE-ENABLE:
+  1. Copy the <style> block back into app.html <head> (after the theme script)
+  2. Copy the <noscript> block after the </style>
+  3. Copy the overlay HTML into <body> (before %sveltekit.body%)
+  4. Copy the fallback <script> after %sveltekit.body%
+  5. Restore the vine animation code in +layout.svelte (onMount handler)
+
+  Archived: 2026-02-05
+  ══════════════════════════════════════════════════════════════════════
+-->
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 1: CSS (goes in <head> after theme script)
+     ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Loading overlay styles (inline for immediate rendering) -->
+    <style id="grove-loading-styles">
+      /* ══════════════════════════════════════════════════════════════
+         GROVE ENTRANCE ANIMATION - "Parting the Vines" v2
+         ══════════════════════════════════════════════════════════════
+
+         THREE-LAYER ARCHITECTURE:
+         ┌─────────────────────────────────────────────┐
+         │  Layer 3: Vine Strips (z-index: 100000)    │
+         │  - Individual DOM elements per vine         │
+         │  - Swing animation with gravity physics     │
+         ├─────────────────────────────────────────────┤
+         │  Layer 2: Glass Backdrop (z-index: 99999)  │
+         │  - Semi-transparent background              │
+         │  - backdrop-filter: blur(12px)              │
+         ├─────────────────────────────────────────────┤
+         │  Layer 1: Page Content (normal flow)        │
+         │  - Visible but blurred until parting        │
+         └─────────────────────────────────────────────┘
+         ══════════════════════════════════════════════════════════════ */
+
+      #grove-loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Glass Backdrop (Layer 2) - Blurs content behind vines
+         ───────────────────────────────────────────────────────────── */
+
+      #grove-glass-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 1; /* Below vines but covers content */
+        background: rgba(30, 30, 30, 0.75);
+        transition: opacity 0.8s ease-out;
+        pointer-events: none;
+      }
+
+      html:not(.dark) #grove-glass-backdrop {
+        background: rgba(255, 255, 255, 0.65);
+      }
+
+      .grove-parting #grove-glass-backdrop {
+        opacity: 0;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Vine Containers (hold the swinging strips)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-vine-container {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 50vw;
+        display: flex;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 2; /* Above glass backdrop */
+      }
+
+      .grove-vine-left {
+        left: 0;
+        justify-content: flex-end;
+      }
+
+      .grove-vine-right {
+        right: 0;
+        justify-content: flex-start;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Individual Vine Strips (the magic happens here)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-vine-strip {
+        position: relative;
+        width: 80px;
+        height: 120vh; /* Extra height for rotation overhang */
+        flex-shrink: 0;
+        transform-origin: top center;
+      }
+
+      /* SVG fills the strip */
+      .grove-vine-strip svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Organic variation in strip widths */
+      .grove-vine-strip:nth-child(1) { width: 85px; }
+      .grove-vine-strip:nth-child(2) { width: 75px; }
+      .grove-vine-strip:nth-child(3) { width: 90px; }
+      .grove-vine-strip:nth-child(4) { width: 70px; }
+      .grove-vine-strip:nth-child(5) { width: 80px; }
+      .grove-vine-strip:nth-child(6) { width: 75px; }
+      .grove-vine-strip:nth-child(7) { width: 82px; }
+      .grove-vine-strip:nth-child(8) { width: 72px; }
+
+      /* Slight initial rotation for organic feel */
+      .grove-vine-strip:nth-child(odd) {
+        transform: rotate(1deg);
+      }
+      .grove-vine-strip:nth-child(even) {
+        transform: rotate(-1deg);
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Vine Segments (nested structure for cascading physics)
+         ─────────────────────────────────────────────────────────────
+
+         Each vine is split into 8 nested segments. When a parent
+         segment rotates, all children rotate with it (DOM inheritance).
+         This creates natural "rope physics" with CSS alone.
+         ───────────────────────────────────────────────────────────── */
+
+      .vine-seg {
+        position: relative;
+        width: 80px;
+        height: 125px;
+        transform-origin: top center;
+      }
+
+      /* Add will-change only during animation */
+      .grove-parting .vine-seg {
+        will-change: transform, opacity;
+      }
+
+      .vine-seg svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Child segments positioned at bottom of parent */
+      .vine-seg > .vine-seg {
+        position: absolute;
+        top: 125px;
+        left: 0;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Logo (center, breathing)
+         ───────────────────────────────────────────────────────────── */
+
+      .grove-entrance-logo {
+        position: relative;
+        z-index: 3; /* Above vines (z-index: 2) and glass (z-index: 1) */
+      }
+
+      .grove-loader-logo {
+        width: 120px;
+        height: 120px;
+        animation: grove-breathe 2s ease-in-out infinite;
+      }
+
+      html:not(.dark) .grove-loader-bg {
+        fill: #dcfce7;
+      }
+
+      @keyframes grove-breathe {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(0.96); }
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         SEGMENTED SWING KEYFRAMES (v3 - "Rope Physics")
+         ─────────────────────────────────────────────────────────────
+
+         Each vine is divided into 8 nested segments. Parent rotation
+         cascades to children, so each segment's keyframes define only
+         its LOCAL rotation contribution.
+
+         Progressive dampening: Top segments swing large (18-30°),
+         bottom segments swing small (3-6°). This creates natural
+         "jingle and jangle" like a rope.
+
+         Left vines swing RIGHT (positive rotation = outward)
+         Right vines swing LEFT (negative rotation = outward)
+         ───────────────────────────────────────────────────────────── */
+
+      /* ═══ RIGHT SWING (for LEFT vines - swing outward to the right) ═══ */
+
+      /* Segment 1 (top) - largest amplitude */
+      @keyframes vine-swing-r-1 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(18deg); }      /* Big initial swing */
+        50%  { transform: rotate(-10deg); }     /* Pullback */
+        70%  { transform: rotate(5deg); }       /* Settle */
+        85%  { transform: rotate(25deg); }      /* Final swing out */
+        100% { transform: rotate(30deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-2 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(15deg); }
+        50%  { transform: rotate(-8deg); }
+        70%  { transform: rotate(4deg); }
+        85%  { transform: rotate(22deg); }
+        100% { transform: rotate(26deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-3 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(12deg); }
+        50%  { transform: rotate(-7deg); }
+        70%  { transform: rotate(3deg); }
+        85%  { transform: rotate(18deg); }
+        100% { transform: rotate(22deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-4 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(10deg); }
+        50%  { transform: rotate(-6deg); }
+        70%  { transform: rotate(2deg); }
+        85%  { transform: rotate(15deg); }
+        100% { transform: rotate(18deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-5 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(8deg); }
+        50%  { transform: rotate(-5deg); }
+        70%  { transform: rotate(2deg); }
+        85%  { transform: rotate(12deg); }
+        100% { transform: rotate(14deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-6 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(6deg); }
+        50%  { transform: rotate(-4deg); }
+        70%  { transform: rotate(1deg); }
+        85%  { transform: rotate(9deg); }
+        100% { transform: rotate(10deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-r-7 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(4deg); }
+        50%  { transform: rotate(-3deg); }
+        70%  { transform: rotate(1deg); }
+        85%  { transform: rotate(6deg); }
+        100% { transform: rotate(7deg); opacity: 0; }
+      }
+
+      /* Segment 8 (tip) - smallest amplitude */
+      @keyframes vine-swing-r-8 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(3deg); }
+        50%  { transform: rotate(-2deg); }
+        70%  { transform: rotate(1deg); }
+        85%  { transform: rotate(5deg); }
+        100% { transform: rotate(6deg); opacity: 0; }
+      }
+
+      /* ═══ LEFT SWING (for RIGHT vines - swing outward to the left) ═══ */
+
+      /* Segment 1 (top) - largest amplitude (negative = left) */
+      @keyframes vine-swing-l-1 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-18deg); }
+        50%  { transform: rotate(10deg); }
+        70%  { transform: rotate(-5deg); }
+        85%  { transform: rotate(-25deg); }
+        100% { transform: rotate(-30deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-2 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-15deg); }
+        50%  { transform: rotate(8deg); }
+        70%  { transform: rotate(-4deg); }
+        85%  { transform: rotate(-22deg); }
+        100% { transform: rotate(-26deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-3 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-12deg); }
+        50%  { transform: rotate(7deg); }
+        70%  { transform: rotate(-3deg); }
+        85%  { transform: rotate(-18deg); }
+        100% { transform: rotate(-22deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-4 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-10deg); }
+        50%  { transform: rotate(6deg); }
+        70%  { transform: rotate(-2deg); }
+        85%  { transform: rotate(-15deg); }
+        100% { transform: rotate(-18deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-5 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-8deg); }
+        50%  { transform: rotate(5deg); }
+        70%  { transform: rotate(-2deg); }
+        85%  { transform: rotate(-12deg); }
+        100% { transform: rotate(-14deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-6 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-6deg); }
+        50%  { transform: rotate(4deg); }
+        70%  { transform: rotate(-1deg); }
+        85%  { transform: rotate(-9deg); }
+        100% { transform: rotate(-10deg); opacity: 0; }
+      }
+
+      @keyframes vine-swing-l-7 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-4deg); }
+        50%  { transform: rotate(3deg); }
+        70%  { transform: rotate(-1deg); }
+        85%  { transform: rotate(-6deg); }
+        100% { transform: rotate(-7deg); opacity: 0; }
+      }
+
+      /* Segment 8 (tip) - smallest amplitude */
+      @keyframes vine-swing-l-8 {
+        0%   { transform: rotate(0deg); }
+        30%  { transform: rotate(-3deg); }
+        50%  { transform: rotate(2deg); }
+        70%  { transform: rotate(-1deg); }
+        85%  { transform: rotate(-5deg); }
+        100% { transform: rotate(-6deg); opacity: 0; }
+      }
+
+      @keyframes grove-logo-exit {
+        0% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.85); }
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Parting State (triggered by adding .grove-parting class)
+         ─────────────────────────────────────────────────────────────
+
+         SEGMENTED ANIMATION (v3):
+         - Each segment has its own keyframes with dampening
+         - 60ms delay between segments creates wave propagation
+         - 80ms delay between adjacent vines for visual separation
+         - Total duration: 2.5s (slow enough to appreciate)
+         ───────────────────────────────────────────────────────────── */
+
+      /* ═══ LEFT VINES swing RIGHT (positive rotation = outward) ═══ */
+      /* Vine 8 (center-most) starts first */
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 0ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 60ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 120ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 180ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 240ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 300ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 360ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(8) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 420ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 80ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 140ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 200ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 260ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 320ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 380ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 440ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(7) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 500ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 160ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 220ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 280ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 340ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 400ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 460ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 520ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(6) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 580ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 240ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 300ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 360ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 420ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 480ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 540ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 600ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(5) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 660ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 320ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 380ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 440ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 500ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 560ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 620ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 680ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(4) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 740ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 400ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 460ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 520ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 580ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 640ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 700ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 760ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(3) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 820ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 480ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 540ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 600ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 660ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 720ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 780ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 840ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(2) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 900ms forwards; }
+
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-1 { animation: vine-swing-r-1 2.5s ease-out 560ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-2 { animation: vine-swing-r-2 2.5s ease-out 620ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-3 { animation: vine-swing-r-3 2.5s ease-out 680ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-4 { animation: vine-swing-r-4 2.5s ease-out 740ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-5 { animation: vine-swing-r-5 2.5s ease-out 800ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-6 { animation: vine-swing-r-6 2.5s ease-out 860ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-7 { animation: vine-swing-r-7 2.5s ease-out 920ms forwards; }
+      .grove-parting .grove-vine-left .grove-vine-strip:nth-child(1) .vine-seg-8 { animation: vine-swing-r-8 2.5s ease-out 980ms forwards; }
+
+      /* ═══ RIGHT VINES swing LEFT (negative rotation = outward) ═══ */
+      /* Vine 1 (center-most) starts first */
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 0ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 60ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 120ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 180ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 240ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 300ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 360ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(1) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 420ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 80ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 140ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 200ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 260ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 320ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 380ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 440ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(2) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 500ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 160ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 220ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 280ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 340ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 400ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 460ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 520ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(3) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 580ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 240ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 300ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 360ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 420ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 480ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 540ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 600ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(4) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 660ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 320ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 380ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 440ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 500ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 560ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 620ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 680ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(5) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 740ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 400ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 460ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 520ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 580ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 640ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 700ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 760ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(6) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 820ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 480ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 540ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 600ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 660ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 720ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 780ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 840ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(7) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 900ms forwards; }
+
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-1 { animation: vine-swing-l-1 2.5s ease-out 560ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-2 { animation: vine-swing-l-2 2.5s ease-out 620ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-3 { animation: vine-swing-l-3 2.5s ease-out 680ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-4 { animation: vine-swing-l-4 2.5s ease-out 740ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-5 { animation: vine-swing-l-5 2.5s ease-out 800ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-6 { animation: vine-swing-l-6 2.5s ease-out 860ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-7 { animation: vine-swing-l-7 2.5s ease-out 920ms forwards; }
+      .grove-parting .grove-vine-right .grove-vine-strip:nth-child(8) .vine-seg-8 { animation: vine-swing-l-8 2.5s ease-out 980ms forwards; }
+
+      .grove-parting .grove-entrance-logo {
+        animation: grove-logo-exit 600ms ease-in 400ms forwards;
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         Reduced Motion: Instant fade (accessibility)
+         ───────────────────────────────────────────────────────────── */
+
+      @media (prefers-reduced-motion: reduce) {
+        .grove-loader-logo { animation: none; }
+
+        .grove-vine-strip,
+        .vine-seg {
+          transform: none !important;
+        }
+
+        .grove-parting .vine-seg,
+        .grove-parting #grove-glass-backdrop {
+          animation: none !important;
+          opacity: 0;
+          transition: opacity 0.3s ease-out !important;
+        }
+
+        .grove-parting .grove-entrance-logo {
+          animation: none;
+          opacity: 0;
+          transition: opacity 0.3s ease-out;
+        }
+      }
+
+    </style>
+    <!-- Fallback for users with JavaScript disabled -->
+    <noscript>
+      <style>#grove-loading-overlay { display: none !important; }</style>
+    </noscript>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 2: HTML overlay (goes in <body> before %sveltekit.body%)
+     ═══════════════════════════════════════════════════════════════════ -->
+    <!-- First Paint Loading Overlay - "Parting the Vines" v2 -->
+    <div id="grove-loading-overlay" aria-hidden="true">
+      <!-- Glass Backdrop - blurs content behind vines (inside overlay so CSS selector works) -->
+      <div id="grove-glass-backdrop"></div>
+
+      <!-- Left vine container - 8 individual swinging strips (4 personality types) -->
+      <div class="grove-vine-container grove-vine-left">
+        <!-- Type: Dense/Leafy - thick stem, many leaves, berries -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1a)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M52 90 Q72 70 68 42 Q52 70 36 82 Q52 90 52 90Z" fill="#22c55e" opacity="0.75"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1b)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M28 180 Q48 160 44 132 Q28 160 12 172 Q28 180 28 180Z" fill="#16a34a" opacity="0.7"/><ellipse cx="22" cy="140" rx="11" ry="16" transform="rotate(-22 22 140)" fill="#22c55e" opacity="0.6"/><circle cx="65" cy="200" r="4" fill="#166534" opacity="0.5"/><circle cx="68" cy="210" r="3" fill="#166534" opacity="0.45"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1c)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M56 280 Q76 260 72 232 Q56 260 40 272 Q56 280 56 280Z" fill="#22c55e" opacity="0.65"/><ellipse cx="62" cy="330" rx="10" ry="15" transform="rotate(-28 62 330)" fill="#16a34a" opacity="0.55"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1d)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M32 380 Q52 360 48 332 Q32 360 16 372 Q32 380 32 380Z" fill="#15803d" opacity="0.6"/><circle cx="15" cy="440" r="4" fill="#166534" opacity="0.45"/><circle cx="12" cy="450" r="3" fill="#166534" opacity="0.4"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1e)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M54 480 Q74 460 70 432 Q54 460 38 472 Q54 480 54 480Z" fill="#22c55e" opacity="0.55"/><ellipse cx="18" cy="530" rx="9" ry="14" transform="rotate(-18 18 530)" fill="#22c55e" opacity="0.5"/><path d="M26 580 Q46 560 42 532 Q26 560 10 572 Q26 580 26 580Z" fill="#16a34a" opacity="0.5"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1f)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M50 680 Q70 660 66 632 Q50 660 34 672 Q50 680 50 680Z" fill="#22c55e" opacity="0.45"/><circle cx="60" cy="640" r="3.5" fill="#166534" opacity="0.4"/><ellipse cx="58" cy="730" rx="9" ry="13" transform="rotate(-25 58 730)" fill="#15803d" opacity="0.45"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1g)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M34 780 Q54 760 50 732 Q34 760 18 772 Q34 780 34 780Z" fill="#15803d" opacity="0.4"/><circle cx="20" cy="840" r="3" fill="#166534" opacity="0.35"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg1h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.95"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C62 80 18 180 52 280 S28 420 56 520 S22 660 48 760 S32 880 40 1020" stroke="url(#vg1h)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M46 880 Q66 860 62 832 Q46 860 30 872 Q46 880 46 880Z" fill="#22c55e" opacity="0.35"/><ellipse cx="28" cy="930" rx="8" ry="12" transform="rotate(-20 28 930)" fill="#22c55e" opacity="0.4"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril - thin stem, curling tendrils, sparse leaves -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2a)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M48 100 Q68 90 72 70 Q78 55 70 50" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.6" stroke-linecap="round"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2b)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M46 180 Q62 165 58 145 Q46 162 34 170 Q46 178 46 180Z" fill="#22c55e" opacity="0.55"/><circle cx="70" cy="140" r="2" fill="#15803d" opacity="0.5"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2c)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M32 250 Q12 240 8 220 Q2 205 10 200" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="10" cy="320" r="2" fill="#15803d" opacity="0.45"/><path d="M36 360 Q52 345 48 325 Q36 342 24 350 Q36 358 36 360Z" fill="#16a34a" opacity="0.5"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2d)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M52 420 Q72 410 76 390 Q82 375 74 370" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2e)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="72" cy="500" r="2" fill="#15803d" opacity="0.4"/><path d="M50 540 Q66 525 62 505 Q50 522 38 530 Q50 538 50 540Z" fill="#22c55e" opacity="0.45"/><path d="M28 580 Q8 570 4 550 Q-2 535 6 530" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.45" stroke-linecap="round"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2f)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="8" cy="680" r="2" fill="#15803d" opacity="0.35"/><path d="M40 720 Q56 705 52 685 Q40 702 28 710 Q40 718 40 720Z" fill="#16a34a" opacity="0.4"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2g)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M44 740 Q64 730 68 710 Q74 695 66 690" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/><circle cx="68" cy="860" r="2" fill="#15803d" opacity="0.3"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg2h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M42 -30 C58 70 26 170 48 270 S32 410 52 510 S28 650 44 750 S38 870 42 1020" stroke="url(#vg2h)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M38 900 Q18 890 14 870 Q8 855 16 850" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.35" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Ferny - medium stem, fern fronds -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3a)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.65"><path d="M54 80 L68 60 M54 80 L72 75 M54 80 L70 90" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="68" cy="60" rx="5" ry="8" transform="rotate(-30 68 60)" fill="#22c55e"/><ellipse cx="72" cy="75" rx="4" ry="7" transform="rotate(-15 72 75)" fill="#16a34a"/><ellipse cx="70" cy="90" rx="4" ry="6" transform="rotate(10 70 90)" fill="#22c55e"/></g></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3b)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.6"><path d="M30 220 L16 200 M30 220 L12 215 M30 220 L14 230" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="16" cy="200" rx="5" ry="8" transform="rotate(30 16 200)" fill="#16a34a"/><ellipse cx="12" cy="215" rx="4" ry="7" transform="rotate(15 12 215)" fill="#22c55e"/><ellipse cx="14" cy="230" rx="4" ry="6" transform="rotate(-10 14 230)" fill="#16a34a"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3c)" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3d)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.55"><path d="M58 380 L72 360 M58 380 L76 375 M58 380 L74 395" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="72" cy="360" rx="4" ry="7" transform="rotate(-25 72 360)" fill="#22c55e"/><ellipse cx="76" cy="375" rx="4" ry="6" transform="rotate(-10 76 375)" fill="#16a34a"/><ellipse cx="74" cy="395" rx="3" ry="5" transform="rotate(15 74 395)" fill="#22c55e"/></g></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3e)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.5"><path d="M32 540 L18 520 M32 540 L14 535 M32 540 L16 555" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="18" cy="520" rx="4" ry="7" transform="rotate(25 18 520)" fill="#16a34a"/><ellipse cx="14" cy="535" rx="4" ry="6" transform="rotate(10 14 535)" fill="#22c55e"/><ellipse cx="16" cy="555" rx="3" ry="5" transform="rotate(-15 16 555)" fill="#16a34a"/></g></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3f)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.45"><path d="M50 700 L64 680 M50 700 L68 695 M50 700 L66 715" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="64" cy="680" rx="4" ry="6" transform="rotate(-20 64 680)" fill="#22c55e"/><ellipse cx="68" cy="695" rx="3" ry="5" transform="rotate(-5 68 695)" fill="#16a34a"/><ellipse cx="66" cy="715" rx="3" ry="5" transform="rotate(20 66 715)" fill="#22c55e"/></g></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3g)" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg3h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.3"/></linearGradient></defs><path d="M44 -25 C62 75 28 175 54 275 S34 415 58 515 S30 655 50 755 S40 875 44 1020" stroke="url(#vg3h)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.4"><path d="M40 860 L26 840 M40 860 L22 855 M40 860 L24 875" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="26" cy="840" rx="3" ry="5" transform="rotate(20 26 840)" fill="#16a34a"/><ellipse cx="22" cy="855" rx="3" ry="5" transform="rotate(5 22 855)" fill="#22c55e"/><ellipse cx="24" cy="875" rx="3" ry="4" transform="rotate(-20 24 875)" fill="#16a34a"/></g></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Dense/Leafy variant - darker, more berries -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4a)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M50 80 Q68 62 64 38 Q50 60 36 70 Q50 78 50 80Z" fill="#15803d" opacity="0.7"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4b)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M26 170 Q44 152 40 128 Q26 150 12 160 Q26 168 26 170Z" fill="#166534" opacity="0.65"/><ellipse cx="64" cy="130" rx="9" ry="14" transform="rotate(-26 64 130)" fill="#15803d" opacity="0.55"/><g opacity="0.55"><circle cx="68" cy="220" r="4" fill="#14532d"/><circle cx="72" cy="228" r="3.5" fill="#14532d"/><circle cx="65" cy="232" r="3" fill="#14532d"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4c)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M54 270 Q72 252 68 228 Q54 250 40 260 Q54 268 54 270Z" fill="#15803d" opacity="0.6"/><ellipse cx="18" cy="320" rx="8" ry="13" transform="rotate(-20 18 320)" fill="#166534" opacity="0.5"/><path d="M30 370 Q48 352 44 328 Q30 350 16 360 Q30 368 30 370Z" fill="#166534" opacity="0.55"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4d)" stroke-width="4.5" fill="none" stroke-linecap="round"/><g opacity="0.5"><circle cx="12" cy="420" r="4" fill="#14532d"/><circle cx="8" cy="428" r="3.5" fill="#14532d"/><circle cx="15" cy="432" r="3" fill="#14532d"/></g><path d="M52 470 Q70 452 66 428 Q52 450 38 460 Q52 468 52 470Z" fill="#15803d" opacity="0.5"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4e)" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="520" rx="8" ry="12" transform="rotate(-28 60 520)" fill="#15803d" opacity="0.45"/><path d="M28 570 Q46 552 42 528 Q28 550 14 560 Q28 568 28 570Z" fill="#166534" opacity="0.45"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4f)" stroke-width="4.5" fill="none" stroke-linecap="round"/><g opacity="0.4"><circle cx="58" cy="620" r="3.5" fill="#14532d"/><circle cx="62" cy="628" r="3" fill="#14532d"/></g><path d="M48 670 Q66 652 62 628 Q48 650 34 660 Q48 668 48 670Z" fill="#15803d" opacity="0.4"/><ellipse cx="22" cy="720" rx="7" ry="11" transform="rotate(-22 22 720)" fill="#166534" opacity="0.4"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4g)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M36 770 Q54 752 50 728 Q36 750 22 760 Q36 768 36 770Z" fill="#166534" opacity="0.35"/><g opacity="0.35"><circle cx="18" cy="820" r="3" fill="#14532d"/><circle cx="22" cy="826" r="2.5" fill="#14532d"/></g></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg4h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#166534" stop-opacity="0.9"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -40 C58 60 22 160 50 260 S30 400 54 500 S26 640 46 740 S36 860 38 1020" stroke="url(#vg4h)" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="42" cy="920" rx="7" ry="10" transform="rotate(-18 42 920)" fill="#15803d" opacity="0.35"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril variant - extra tendrils -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5a)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M46 60 Q66 50 72 30 Q80 15 72 8" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="72" cy="100" r="1.8" fill="#15803d" opacity="0.45"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5b)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 140 Q14 130 8 110 Q0 95 8 88" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/><path d="M44 180 Q58 168 54 152 Q44 165 34 172 Q44 178 44 180Z" fill="#22c55e" opacity="0.45"/><circle cx="8" cy="220" r="1.8" fill="#15803d" opacity="0.4"/><path d="M46 240 Q66 230 74 210 Q82 195 74 188" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5c)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 340 Q14 330 6 310 Q-2 295 6 288" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.45" stroke-linecap="round"/><circle cx="74" cy="360" r="1.5" fill="#15803d" opacity="0.35"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5d)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M48 380 Q62 368 58 352 Q48 365 38 372 Q48 378 48 380Z" fill="#16a34a" opacity="0.4"/><path d="M50 460 Q70 450 78 430 Q86 415 78 408" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.45" stroke-linecap="round"/><circle cx="6" cy="480" r="1.5" fill="#15803d" opacity="0.35"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5e)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M30 560 Q10 550 2 530 Q-6 515 2 508" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round"/><path d="M38 580 Q52 568 48 552 Q38 565 28 572 Q38 578 38 580Z" fill="#22c55e" opacity="0.35"/><circle cx="70" cy="620" r="1.5" fill="#15803d" opacity="0.3"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5f)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M42 680 Q62 670 70 650 Q78 635 70 628" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round"/><circle cx="10" cy="740" r="1.5" fill="#15803d" opacity="0.25"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5g)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M42 780 Q56 768 52 752 Q42 765 32 772 Q42 778 42 780Z" fill="#16a34a" opacity="0.3"/><path d="M36 800 Q16 790 8 770 Q0 755 8 748" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.35" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg5h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C56 80 28 180 46 280 S34 420 50 520 S30 660 42 760 S36 880 40 1020" stroke="url(#vg5h)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 920 Q60 910 68 890 Q76 875 68 868" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.3" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Ferny variant - denser fronds -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6a)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.55"><path d="M52 70 L66 52 M52 70 L70 65 M52 70 L68 80 M52 70 L64 88" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="66" cy="52" rx="4" ry="6" transform="rotate(-28 66 52)" fill="#22c55e"/><ellipse cx="70" cy="65" rx="3.5" ry="5.5" transform="rotate(-12 70 65)" fill="#16a34a"/><ellipse cx="68" cy="80" rx="3.5" ry="5" transform="rotate(8 68 80)" fill="#22c55e"/><ellipse cx="64" cy="88" rx="3" ry="4.5" transform="rotate(25 64 88)" fill="#16a34a"/></g></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6b)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.5"><path d="M32 200 L18 182 M32 200 L14 195 M32 200 L16 210 M32 200 L20 218" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="18" cy="182" rx="4" ry="6" transform="rotate(28 18 182)" fill="#16a34a"/><ellipse cx="14" cy="195" rx="3.5" ry="5.5" transform="rotate(12 14 195)" fill="#22c55e"/><ellipse cx="16" cy="210" rx="3.5" ry="5" transform="rotate(-8 16 210)" fill="#16a34a"/><ellipse cx="20" cy="218" rx="3" ry="4.5" transform="rotate(-25 20 218)" fill="#22c55e"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6c)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.45"><path d="M56 360 L70 342 M56 360 L74 355 M56 360 L72 375" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="70" cy="342" rx="3.5" ry="5.5" transform="rotate(-22 70 342)" fill="#22c55e"/><ellipse cx="74" cy="355" rx="3" ry="5" transform="rotate(-8 74 355)" fill="#16a34a"/><ellipse cx="72" cy="375" rx="3" ry="4.5" transform="rotate(18 72 375)" fill="#22c55e"/></g></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6d)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6e)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.4"><path d="M34 520 L20 502 M34 520 L16 515 M34 520 L18 535" stroke="#16a34a" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="20" cy="502" rx="3.5" ry="5.5" transform="rotate(22 20 502)" fill="#16a34a"/><ellipse cx="16" cy="515" rx="3" ry="5" transform="rotate(8 16 515)" fill="#22c55e"/><ellipse cx="18" cy="535" rx="3" ry="4.5" transform="rotate(-18 18 535)" fill="#16a34a"/></g></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6f)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.35"><path d="M48 680 L62 662 M48 680 L66 675 M48 680 L64 695" stroke="#22c55e" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="62" cy="662" rx="3" ry="5" transform="rotate(-20 62 662)" fill="#22c55e"/><ellipse cx="66" cy="675" rx="3" ry="4.5" transform="rotate(-5 66 675)" fill="#16a34a"/><ellipse cx="64" cy="695" rx="2.5" ry="4" transform="rotate(15 64 695)" fill="#22c55e"/></g></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6g)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg6h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M42 -30 C60 70 30 170 52 270 S36 410 56 510 S32 650 48 750 S38 870 42 1020" stroke="url(#vg6h)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.3"><path d="M38 840 L24 822 M38 840 L20 835 M38 840 L22 855" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="24" cy="822" rx="3" ry="5" transform="rotate(20 24 822)" fill="#16a34a"/><ellipse cx="20" cy="835" rx="3" ry="4.5" transform="rotate(5 20 835)" fill="#22c55e"/><ellipse cx="22" cy="855" rx="2.5" ry="4" transform="rotate(-15 22 855)" fill="#16a34a"/></g></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Dense/Leafy variant 2 (vine 7) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7a)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M50 75 Q68 58 64 35 Q50 57 36 68 Q50 76 50 75Z" fill="#22c55e" opacity="0.7"/><ellipse cx="32" cy="140" rx="10" ry="15" transform="rotate(-24 32 140)" fill="#16a34a" opacity="0.6"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7b)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M26 165 Q44 147 40 123 Q26 145 12 157 Q26 165 26 165Z" fill="#166534" opacity="0.6"/><ellipse cx="62" cy="125" rx="9" ry="14" transform="rotate(-26 62 125)" fill="#15803d" opacity="0.55"/><g opacity="0.5"><circle cx="66" cy="215" r="4" fill="#14532d"/><circle cx="70" cy="223" r="3.5" fill="#14532d"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7c)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M52 265 Q70 247 66 223 Q52 245 38 257 Q52 265 52 265Z" fill="#15803d" opacity="0.55"/><ellipse cx="16" cy="315" rx="8" ry="13" transform="rotate(-20 16 315)" fill="#166534" opacity="0.5"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7d)" stroke-width="3.8" fill="none" stroke-linecap="round"/><g opacity="0.48"><circle cx="10" cy="415" r="4" fill="#14532d"/><circle cx="6" cy="423" r="3.5" fill="#14532d"/></g><path d="M50 465 Q68 447 64 423 Q50 445 36 455 Q50 463 50 465Z" fill="#15803d" opacity="0.48"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7e)" stroke-width="3.8" fill="none" stroke-linecap="round"/><ellipse cx="58" cy="515" rx="8" ry="12" transform="rotate(-28 58 515)" fill="#15803d" opacity="0.43"/><path d="M26 565 Q44 547 40 523 Q26 545 12 555 Q26 563 26 565Z" fill="#166534" opacity="0.43"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7f)" stroke-width="3.8" fill="none" stroke-linecap="round"/><g opacity="0.38"><circle cx="56" cy="615" r="3.5" fill="#14532d"/><circle cx="60" cy="623" r="3" fill="#14532d"/></g><path d="M46 665 Q64 647 60 623 Q46 645 32 655 Q46 663 46 665Z" fill="#15803d" opacity="0.38"/><ellipse cx="20" cy="715" rx="7" ry="11" transform="rotate(-22 20 715)" fill="#166534" opacity="0.38"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7g)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M34 765 Q52 747 48 723 Q34 745 20 755 Q34 763 34 765Z" fill="#166534" opacity="0.33"/><g opacity="0.33"><circle cx="16" cy="815" r="3" fill="#14532d"/><circle cx="20" cy="821" r="2.5" fill="#14532d"/></g></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg7h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -25 C58 75 26 175 48 275 S32 415 52 515 S28 655 44 755 S38 875 42 1020" stroke="url(#vg7h)" stroke-width="3.8" fill="none" stroke-linecap="round"/><ellipse cx="40" cy="915" rx="7" ry="10" transform="rotate(-18 40 915)" fill="#15803d" opacity="0.33"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril variant 2 (vine 8) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8a" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8a)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M46 55 Q64 45 70 25 Q78 10 70 3" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.5" stroke-linecap="round"/><circle cx="70" cy="95" r="1.8" fill="#15803d" opacity="0.4"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8b)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M32 135 Q12 125 6 105 Q-2 90 6 83" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.48" stroke-linecap="round"/><path d="M42 175 Q56 163 52 147 Q42 160 32 167 Q42 173 42 175Z" fill="#22c55e" opacity="0.43"/><circle cx="6" cy="215" r="1.8" fill="#15803d" opacity="0.38"/><path d="M44 235 Q64 225 72 205 Q80 190 72 183" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.48" stroke-linecap="round"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8c" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8c)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M32 335 Q12 325 4 305 Q-4 290 4 283" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.43" stroke-linecap="round"/><circle cx="72" cy="355" r="1.5" fill="#15803d" opacity="0.33"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8d" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8d)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M46 375 Q60 363 56 347 Q46 360 36 367 Q46 373 46 375Z" fill="#16a34a" opacity="0.38"/><path d="M48 455 Q68 445 76 425 Q84 410 76 403" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.43" stroke-linecap="round"/><circle cx="4" cy="475" r="1.5" fill="#15803d" opacity="0.33"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8e" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8e)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M28 555 Q8 545 0 525 Q-8 510 0 503" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.38" stroke-linecap="round"/><path d="M36 575 Q50 563 46 547 Q36 560 26 567 Q36 573 36 575Z" fill="#22c55e" opacity="0.33"/><circle cx="68" cy="615" r="1.5" fill="#15803d" opacity="0.28"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8f" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8f)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M40 675 Q60 665 68 645 Q76 630 68 623" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.38" stroke-linecap="round"/><circle cx="8" cy="735" r="1.5" fill="#15803d" opacity="0.23"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8g" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8g)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M40 775 Q54 763 50 747 Q40 760 30 767 Q40 773 40 775Z" fill="#16a34a" opacity="0.28"/><path d="M34 795 Q14 785 6 765 Q-2 750 6 743" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.33" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vg8h" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C54 70 30 170 44 270 S36 410 48 510 S32 650 40 750 S36 870 40 1020" stroke="url(#vg8h)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M38 915 Q58 905 66 885 Q74 870 66 863" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.28" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: breathing logo -->
+      <div class="grove-entrance-logo">
+        <svg class="grove-loader-logo" viewBox="-28 -28 156 156" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background circle -->
+          <circle cx="50" cy="50" r="70" fill="#122a1a" class="grove-loader-bg" />
+          <!-- Tree with -12deg rotation (summer palette) -->
+          <g transform="rotate(-12 50 50)">
+            <path fill="#15803d" d="M50 5 L18 32 L50 18 Z"/>
+            <path fill="#86efac" d="M50 5 L50 18 L82 32 Z"/>
+            <path fill="#166534" d="M50 20 L12 50 L50 35 Z"/>
+            <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z"/>
+            <path fill="#14532d" d="M50 38 L18 68 L50 54 Z"/>
+            <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z"/>
+            <path fill="#3d2914" d="M50 54 L42 58 L46 100 L50 100 Z"/>
+            <path fill="#5a3f30" d="M50 54 L58 58 L54 100 L50 100 Z"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Right vine container - 8 individual swinging strips (4 personality types, mirrored) -->
+      <div class="grove-vine-container grove-vine-right">
+        <!-- Type: Ferny variant (mirrors left vine 6) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1a)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.55"><path d="M28 70 L14 52 M28 70 L10 65 M28 70 L12 80 M28 70 L16 88" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="14" cy="52" rx="4" ry="6" transform="rotate(28 14 52)" fill="#22c55e"/><ellipse cx="10" cy="65" rx="3.5" ry="5.5" transform="rotate(12 10 65)" fill="#16a34a"/><ellipse cx="12" cy="80" rx="3.5" ry="5" transform="rotate(-8 12 80)" fill="#22c55e"/><ellipse cx="16" cy="88" rx="3" ry="4.5" transform="rotate(-25 16 88)" fill="#16a34a"/></g></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1b)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.5"><path d="M48 200 L62 182 M48 200 L66 195 M48 200 L64 210 M48 200 L60 218" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="62" cy="182" rx="4" ry="6" transform="rotate(-28 62 182)" fill="#16a34a"/><ellipse cx="66" cy="195" rx="3.5" ry="5.5" transform="rotate(-12 66 195)" fill="#22c55e"/><ellipse cx="64" cy="210" rx="3.5" ry="5" transform="rotate(8 64 210)" fill="#16a34a"/><ellipse cx="60" cy="218" rx="3" ry="4.5" transform="rotate(25 60 218)" fill="#22c55e"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1c)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.45"><path d="M24 360 L10 342 M24 360 L6 355 M24 360 L8 375" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="10" cy="342" rx="3.5" ry="5.5" transform="rotate(22 10 342)" fill="#22c55e"/><ellipse cx="6" cy="355" rx="3" ry="5" transform="rotate(8 6 355)" fill="#16a34a"/><ellipse cx="8" cy="375" rx="3" ry="4.5" transform="rotate(-18 8 375)" fill="#22c55e"/></g></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1d)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1e)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.4"><path d="M46 520 L60 502 M46 520 L64 515 M46 520 L62 535" stroke="#16a34a" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="60" cy="502" rx="3.5" ry="5.5" transform="rotate(-22 60 502)" fill="#16a34a"/><ellipse cx="64" cy="515" rx="3" ry="5" transform="rotate(-8 64 515)" fill="#22c55e"/><ellipse cx="62" cy="535" rx="3" ry="4.5" transform="rotate(18 62 535)" fill="#16a34a"/></g></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1f)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.35"><path d="M32 680 L18 662 M32 680 L14 675 M32 680 L16 695" stroke="#22c55e" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="18" cy="662" rx="3" ry="5" transform="rotate(20 18 662)" fill="#22c55e"/><ellipse cx="14" cy="675" rx="3" ry="4.5" transform="rotate(5 14 675)" fill="#16a34a"/><ellipse cx="16" cy="695" rx="2.5" ry="4" transform="rotate(-15 16 695)" fill="#22c55e"/></g></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1g)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr1h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.2"/></linearGradient></defs><path d="M38 -30 C20 70 50 170 28 270 S44 410 24 510 S48 650 32 750 S42 870 38 1020" stroke="url(#vgr1h)" stroke-width="3" fill="none" stroke-linecap="round"/><g opacity="0.3"><path d="M42 840 L56 822 M42 840 L60 835 M42 840 L58 855" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round"/><ellipse cx="56" cy="822" rx="3" ry="5" transform="rotate(-20 56 822)" fill="#16a34a"/><ellipse cx="60" cy="835" rx="3" ry="4.5" transform="rotate(-5 60 835)" fill="#22c55e"/><ellipse cx="58" cy="855" rx="2.5" ry="4" transform="rotate(15 58 855)" fill="#16a34a"/></g></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril variant (mirrors left vine 5) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2a)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M34 60 Q14 50 8 30 Q0 15 8 8" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/><circle cx="8" cy="100" r="1.8" fill="#15803d" opacity="0.45"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2b)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M46 140 Q66 130 72 110 Q80 95 72 88" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/><path d="M36 180 Q22 168 26 152 Q36 165 46 172 Q36 178 36 180Z" fill="#22c55e" opacity="0.45"/><circle cx="72" cy="220" r="1.8" fill="#15803d" opacity="0.4"/><path d="M34 240 Q14 230 6 210 Q-2 195 6 188" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2c)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M46 340 Q66 330 74 310 Q82 295 74 288" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.45" stroke-linecap="round"/><circle cx="6" cy="360" r="1.5" fill="#15803d" opacity="0.35"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2d)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M32 380 Q18 368 22 352 Q32 365 42 372 Q32 378 32 380Z" fill="#16a34a" opacity="0.4"/><path d="M30 460 Q10 450 2 430 Q-6 415 2 408" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.45" stroke-linecap="round"/><circle cx="74" cy="480" r="1.5" fill="#15803d" opacity="0.35"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2e)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M50 560 Q70 550 78 530 Q86 515 78 508" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round"/><path d="M42 580 Q28 568 32 552 Q42 565 52 572 Q42 578 42 580Z" fill="#22c55e" opacity="0.35"/><circle cx="10" cy="620" r="1.5" fill="#15803d" opacity="0.3"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2f)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M38 680 Q18 670 10 650 Q2 635 10 628" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.4" stroke-linecap="round"/><circle cx="70" cy="740" r="1.5" fill="#15803d" opacity="0.25"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2g)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M38 780 Q24 768 28 752 Q38 765 48 772 Q38 778 38 780Z" fill="#16a34a" opacity="0.3"/><path d="M44 800 Q64 790 72 770 Q80 755 72 748" stroke="#16a34a" stroke-width="1.2" fill="none" opacity="0.35" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr2h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#16a34a" stop-opacity="0.75"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -20 C24 80 52 180 34 280 S46 420 30 520 S50 660 38 760 S44 880 40 1020" stroke="url(#vgr2h)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M40 920 Q20 910 12 890 Q4 875 12 868" stroke="#22c55e" stroke-width="1.2" fill="none" opacity="0.3" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Dense/Leafy variant (mirrors left vine 4) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3a)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M30 80 Q12 62 16 38 Q30 60 44 70 Q30 78 30 80Z" fill="#15803d" opacity="0.7"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3b)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M54 170 Q36 152 40 128 Q54 150 68 160 Q54 168 54 170Z" fill="#166534" opacity="0.65"/><ellipse cx="16" cy="130" rx="9" ry="14" transform="rotate(26 16 130)" fill="#15803d" opacity="0.55"/><g opacity="0.55"><circle cx="12" cy="220" r="4" fill="#14532d"/><circle cx="8" cy="228" r="3.5" fill="#14532d"/><circle cx="15" cy="232" r="3" fill="#14532d"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3c)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M26 270 Q8 252 12 228 Q26 250 40 260 Q26 268 26 270Z" fill="#15803d" opacity="0.6"/><ellipse cx="62" cy="320" rx="8" ry="13" transform="rotate(20 62 320)" fill="#166534" opacity="0.5"/><path d="M50 370 Q32 352 36 328 Q50 350 64 360 Q50 368 50 370Z" fill="#166534" opacity="0.55"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3d)" stroke-width="4.5" fill="none" stroke-linecap="round"/><g opacity="0.5"><circle cx="68" cy="420" r="4" fill="#14532d"/><circle cx="72" cy="428" r="3.5" fill="#14532d"/><circle cx="65" cy="432" r="3" fill="#14532d"/></g><path d="M28 470 Q10 452 14 428 Q28 450 42 460 Q28 468 28 470Z" fill="#15803d" opacity="0.5"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3e)" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="20" cy="520" rx="8" ry="12" transform="rotate(28 20 520)" fill="#15803d" opacity="0.45"/><path d="M52 570 Q34 552 38 528 Q52 550 66 560 Q52 568 52 570Z" fill="#166534" opacity="0.45"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3f)" stroke-width="4.5" fill="none" stroke-linecap="round"/><g opacity="0.4"><circle cx="22" cy="620" r="3.5" fill="#14532d"/><circle cx="18" cy="628" r="3" fill="#14532d"/></g><path d="M32 670 Q14 652 18 628 Q32 650 46 660 Q32 668 32 670Z" fill="#15803d" opacity="0.4"/><ellipse cx="58" cy="720" rx="7" ry="11" transform="rotate(22 58 720)" fill="#166534" opacity="0.4"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3g)" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M44 770 Q26 752 30 728 Q44 750 58 760 Q44 768 44 770Z" fill="#166534" opacity="0.35"/><g opacity="0.35"><circle cx="62" cy="820" r="3" fill="#14532d"/><circle cx="58" cy="826" r="2.5" fill="#14532d"/></g></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr3h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/><stop offset="100%" stop-color="#166534" stop-opacity="0.35"/></linearGradient></defs><path d="M42 -40 C22 60 58 160 30 260 S50 400 26 500 S54 640 34 740 S44 860 42 1020" stroke="url(#vgr3h)" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="38" cy="920" rx="7" ry="10" transform="rotate(18 38 920)" fill="#15803d" opacity="0.35"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Ferny (mirrors left vine 3) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4a)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.65"><path d="M26 80 L12 60 M26 80 L8 75 M26 80 L10 90" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="12" cy="60" rx="5" ry="8" transform="rotate(30 12 60)" fill="#22c55e"/><ellipse cx="8" cy="75" rx="4" ry="7" transform="rotate(15 8 75)" fill="#16a34a"/><ellipse cx="10" cy="90" rx="4" ry="6" transform="rotate(-10 10 90)" fill="#22c55e"/></g></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4b)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.6"><path d="M50 220 L64 200 M50 220 L68 215 M50 220 L66 230" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="64" cy="200" rx="5" ry="8" transform="rotate(-30 64 200)" fill="#16a34a"/><ellipse cx="68" cy="215" rx="4" ry="7" transform="rotate(-15 68 215)" fill="#22c55e"/><ellipse cx="66" cy="230" rx="4" ry="6" transform="rotate(10 66 230)" fill="#16a34a"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4c)" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4d)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.55"><path d="M22 380 L8 360 M22 380 L4 375 M22 380 L6 395" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="8" cy="360" rx="4" ry="7" transform="rotate(25 8 360)" fill="#22c55e"/><ellipse cx="4" cy="375" rx="4" ry="6" transform="rotate(10 4 375)" fill="#16a34a"/><ellipse cx="6" cy="395" rx="3" ry="5" transform="rotate(-15 6 395)" fill="#22c55e"/></g></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4e)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.5"><path d="M48 540 L62 520 M48 540 L66 535 M48 540 L64 555" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="62" cy="520" rx="4" ry="7" transform="rotate(-25 62 520)" fill="#16a34a"/><ellipse cx="66" cy="535" rx="4" ry="6" transform="rotate(-10 66 535)" fill="#22c55e"/><ellipse cx="64" cy="555" rx="3" ry="5" transform="rotate(15 64 555)" fill="#16a34a"/></g></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4f)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.45"><path d="M30 700 L16 680 M30 700 L12 695 M30 700 L14 715" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="16" cy="680" rx="4" ry="6" transform="rotate(20 16 680)" fill="#22c55e"/><ellipse cx="12" cy="695" rx="3" ry="5" transform="rotate(5 12 695)" fill="#16a34a"/><ellipse cx="14" cy="715" rx="3" ry="5" transform="rotate(-20 14 715)" fill="#22c55e"/></g></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4g)" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr4h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.85"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0.3"/></linearGradient></defs><path d="M36 -25 C18 75 52 175 26 275 S46 415 22 515 S50 655 30 755 S40 875 36 1020" stroke="url(#vgr4h)" stroke-width="3.5" fill="none" stroke-linecap="round"/><g opacity="0.4"><path d="M40 860 L54 840 M40 860 L58 855 M40 860 L56 875" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="54" cy="840" rx="3" ry="5" transform="rotate(-20 54 840)" fill="#16a34a"/><ellipse cx="58" cy="855" rx="3" ry="5" transform="rotate(-5 58 855)" fill="#22c55e"/><ellipse cx="56" cy="875" rx="3" ry="4" transform="rotate(20 56 875)" fill="#16a34a"/></g></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril (mirrors left vine 2) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5a)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M32 100 Q12 90 8 70 Q2 55 10 50" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.6" stroke-linecap="round"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5b)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="10" cy="140" r="2" fill="#15803d" opacity="0.5"/><path d="M34 180 Q18 165 22 145 Q34 162 46 170 Q34 178 34 180Z" fill="#22c55e" opacity="0.55"/><path d="M48 250 Q68 240 72 220 Q78 205 70 200" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.55" stroke-linecap="round"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5c)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="70" cy="320" r="2" fill="#15803d" opacity="0.45"/><path d="M44 360 Q28 345 32 325 Q44 342 56 350 Q44 358 44 360Z" fill="#16a34a" opacity="0.5"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5d)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M28 420 Q8 410 4 390 Q-2 375 6 370" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5e)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="8" cy="500" r="2" fill="#15803d" opacity="0.4"/><path d="M30 540 Q14 525 18 505 Q30 522 42 530 Q30 538 30 540Z" fill="#22c55e" opacity="0.45"/><path d="M52 580 Q72 570 76 550 Q82 535 74 530" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.45" stroke-linecap="round"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5f)" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="72" cy="680" r="2" fill="#15803d" opacity="0.35"/><path d="M40 720 Q24 705 28 685 Q40 702 52 710 Q40 718 40 720Z" fill="#16a34a" opacity="0.4"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5g)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M36 740 Q16 730 12 710 Q6 695 14 690" stroke="#22c55e" stroke-width="1.5" fill="none" opacity="0.4" stroke-linecap="round"/><circle cx="12" cy="860" r="2" fill="#15803d" opacity="0.3"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr5h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.25"/></linearGradient></defs><path d="M38 -30 C22 70 54 170 32 270 S48 410 28 510 S52 650 36 750 S42 870 38 1020" stroke="url(#vgr5h)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M42 900 Q62 890 66 870 Q72 855 64 850" stroke="#16a34a" stroke-width="1.5" fill="none" opacity="0.35" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Dense/Leafy (mirrors left vine 1) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6a)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M28 90 Q8 70 12 42 Q28 70 44 82 Q28 90 28 90Z" fill="#22c55e" opacity="0.75"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6b)" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="58" cy="140" rx="11" ry="16" transform="rotate(22 58 140)" fill="#22c55e" opacity="0.6"/><path d="M52 180 Q32 160 36 132 Q52 160 68 172 Q52 180 52 180Z" fill="#16a34a" opacity="0.7"/><circle cx="15" cy="200" r="4" fill="#166534" opacity="0.5"/><circle cx="12" cy="210" r="3" fill="#166534" opacity="0.45"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6c)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M24 280 Q4 260 8 232 Q24 260 40 272 Q24 280 24 280Z" fill="#22c55e" opacity="0.65"/><ellipse cx="18" cy="330" rx="10" ry="15" transform="rotate(28 18 330)" fill="#16a34a" opacity="0.55"/><path d="M48 380 Q28 360 32 332 Q48 360 64 372 Q48 380 48 380Z" fill="#15803d" opacity="0.6"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6d)" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="65" cy="440" r="4" fill="#166534" opacity="0.45"/><circle cx="68" cy="450" r="3" fill="#166534" opacity="0.4"/><path d="M26 480 Q6 460 10 432 Q26 460 42 472 Q26 480 26 480Z" fill="#22c55e" opacity="0.55"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6e)" stroke-width="5" fill="none" stroke-linecap="round"/><ellipse cx="62" cy="530" rx="9" ry="14" transform="rotate(18 62 530)" fill="#22c55e" opacity="0.5"/><path d="M54 580 Q34 560 38 532 Q54 560 70 572 Q54 580 54 580Z" fill="#16a34a" opacity="0.5"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6f)" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="20" cy="640" r="3.5" fill="#166534" opacity="0.4"/><path d="M30 680 Q10 660 14 632 Q30 660 46 672 Q30 680 30 680Z" fill="#22c55e" opacity="0.45"/><ellipse cx="22" cy="730" rx="9" ry="13" transform="rotate(25 22 730)" fill="#15803d" opacity="0.45"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6g)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M46 780 Q26 760 30 732 Q46 760 62 772 Q46 780 46 780Z" fill="#15803d" opacity="0.4"/><circle cx="60" cy="840" r="3" fill="#166534" opacity="0.35"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr6h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.95"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.4"/></linearGradient></defs><path d="M40 -20 C18 80 62 180 28 280 S52 420 24 520 S58 660 32 760 S48 880 40 1020" stroke="url(#vgr6h)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M34 880 Q14 860 18 832 Q34 860 50 872 Q34 880 34 880Z" fill="#22c55e" opacity="0.35"/><ellipse cx="52" cy="930" rx="8" ry="12" transform="rotate(20 52 930)" fill="#22c55e" opacity="0.4"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Dense/Leafy variant 2 (mirrors left vine 7, vine 7 right) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7a)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M30 75 Q12 58 16 35 Q30 57 44 68 Q30 76 30 75Z" fill="#22c55e" opacity="0.7"/><ellipse cx="48" cy="140" rx="10" ry="15" transform="rotate(24 48 140)" fill="#16a34a" opacity="0.6"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7b)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M54 165 Q36 147 40 123 Q54 145 68 157 Q54 165 54 165Z" fill="#166534" opacity="0.6"/><ellipse cx="18" cy="125" rx="9" ry="14" transform="rotate(-26 18 125)" fill="#15803d" opacity="0.55"/><g opacity="0.5"><circle cx="14" cy="215" r="4" fill="#14532d"/><circle cx="10" cy="223" r="3.5" fill="#14532d"/></g></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7c)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M28 265 Q10 247 14 223 Q28 245 42 257 Q28 265 28 265Z" fill="#15803d" opacity="0.55"/><ellipse cx="64" cy="315" rx="8" ry="13" transform="rotate(20 64 315)" fill="#166534" opacity="0.5"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7d)" stroke-width="3.8" fill="none" stroke-linecap="round"/><g opacity="0.48"><circle cx="70" cy="415" r="4" fill="#14532d"/><circle cx="74" cy="423" r="3.5" fill="#14532d"/></g><path d="M30 465 Q12 447 16 423 Q30 445 44 455 Q30 463 30 465Z" fill="#15803d" opacity="0.48"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7e)" stroke-width="3.8" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="515" rx="8" ry="12" transform="rotate(-28 22 515)" fill="#15803d" opacity="0.43"/><path d="M54 565 Q36 547 40 523 Q54 545 68 555 Q54 563 54 565Z" fill="#166534" opacity="0.43"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7f)" stroke-width="3.8" fill="none" stroke-linecap="round"/><g opacity="0.38"><circle cx="24" cy="615" r="3.5" fill="#14532d"/><circle cx="20" cy="623" r="3" fill="#14532d"/></g><path d="M34 665 Q16 647 20 623 Q34 645 48 655 Q34 663 34 665Z" fill="#15803d" opacity="0.38"/><ellipse cx="60" cy="715" rx="7" ry="11" transform="rotate(22 60 715)" fill="#166534" opacity="0.38"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7g)" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M46 765 Q28 747 32 723 Q46 745 60 755 Q46 763 46 765Z" fill="#166534" opacity="0.33"/><g opacity="0.33"><circle cx="64" cy="815" r="3" fill="#14532d"/><circle cx="60" cy="821" r="2.5" fill="#14532d"/></g></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr7h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.8"/><stop offset="100%" stop-color="#15803d" stop-opacity="0.35"/></linearGradient></defs><path d="M38 -25 C22 75 54 175 32 275 S48 415 28 515 S52 655 36 755 S42 875 38 1020" stroke="url(#vgr7h)" stroke-width="3.8" fill="none" stroke-linecap="round"/><ellipse cx="40" cy="915" rx="7" ry="10" transform="rotate(18 40 915)" fill="#15803d" opacity="0.33"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Type: Wispy/Tendril variant 2 (mirrors left vine 8, vine 8 right) -->
+        <div class="grove-vine-strip">
+          <div class="vine-seg vine-seg-1">
+            <svg viewBox="0 0 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8a" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8a)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M34 55 Q16 45 10 25 Q2 10 10 3" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.5" stroke-linecap="round"/><circle cx="10" cy="95" r="1.8" fill="#15803d" opacity="0.4"/></svg>
+            <div class="vine-seg vine-seg-2">
+              <svg viewBox="0 125 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8b" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8b)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M48 135 Q68 125 74 105 Q82 90 74 83" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.48" stroke-linecap="round"/><path d="M38 175 Q24 163 28 147 Q38 160 48 167 Q38 173 38 175Z" fill="#22c55e" opacity="0.43"/><circle cx="74" cy="215" r="1.8" fill="#15803d" opacity="0.38"/><path d="M36 235 Q16 225 8 205 Q0 190 8 183" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.48" stroke-linecap="round"/></svg>
+              <div class="vine-seg vine-seg-3">
+                <svg viewBox="0 250 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8c" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8c)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M48 335 Q68 325 76 305 Q84 290 76 283" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.43" stroke-linecap="round"/><circle cx="8" cy="355" r="1.5" fill="#15803d" opacity="0.33"/></svg>
+                <div class="vine-seg vine-seg-4">
+                  <svg viewBox="0 375 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8d" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8d)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M34 375 Q20 363 24 347 Q34 360 44 367 Q34 373 34 375Z" fill="#16a34a" opacity="0.38"/><path d="M32 455 Q12 445 4 425 Q-4 410 4 403" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.43" stroke-linecap="round"/><circle cx="76" cy="475" r="1.5" fill="#15803d" opacity="0.33"/></svg>
+                  <div class="vine-seg vine-seg-5">
+                    <svg viewBox="0 500 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8e" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8e)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M52 555 Q72 545 80 525 Q88 510 80 503" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.38" stroke-linecap="round"/><path d="M44 575 Q30 563 34 547 Q44 560 54 567 Q44 573 44 575Z" fill="#22c55e" opacity="0.33"/><circle cx="12" cy="615" r="1.5" fill="#15803d" opacity="0.28"/></svg>
+                    <div class="vine-seg vine-seg-6">
+                      <svg viewBox="0 625 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8f" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8f)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M40 675 Q20 665 12 645 Q4 630 12 623" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.38" stroke-linecap="round"/><circle cx="72" cy="735" r="1.5" fill="#15803d" opacity="0.23"/></svg>
+                      <div class="vine-seg vine-seg-7">
+                        <svg viewBox="0 750 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8g" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8g)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M40 775 Q26 763 30 747 Q40 760 50 767 Q40 773 40 775Z" fill="#16a34a" opacity="0.28"/><path d="M46 795 Q66 785 74 765 Q82 750 74 743" stroke="#16a34a" stroke-width="1.4" fill="none" opacity="0.33" stroke-linecap="round"/></svg>
+                        <div class="vine-seg vine-seg-8">
+                          <svg viewBox="0 875 80 125" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vgr8h" x1="100%" y1="0%" x2="0%" y2="0%"><stop offset="0%" stop-color="#22c55e" stop-opacity="0.7"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0.2"/></linearGradient></defs><path d="M40 -30 C26 70 50 170 36 270 S44 410 32 510 S48 650 40 750 S44 870 40 1020" stroke="url(#vgr8h)" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M42 915 Q22 905 14 885 Q6 870 14 863" stroke="#22c55e" stroke-width="1.4" fill="none" opacity="0.28" stroke-linecap="round"/></svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 3: Fallback JS (goes after %sveltekit.body%)
+     ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Fallback overlay removal (handles edge cases where Svelte doesn't hydrate) -->
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var o = document.getElementById('grove-loading-overlay');
+          if (!o) return;
+
+          // Check if vine animation is disabled via data attribute (set by Svelte)
+          // This allows us to disable the animation for performance while keeping
+          // all the CSS and HTML intact for future re-enablement
+          var animationDisabled = document.documentElement.dataset.vineAnimationDisabled === 'true';
+
+          // If disabled by feature flag, show logo briefly then remove
+          if (animationDisabled) {
+            setTimeout(function() { if (o) o.remove(); }, 800);
+            return;
+          }
+
+          // Cooldown check: skip animation if shown recently (15 minutes)
+          var COOLDOWN = 15 * 60 * 1000;
+          var MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
+          var KEY = 'grove-vines-last-shown';
+          var withinCooldown = false;
+
+          try {
+            var last = localStorage.getItem(KEY);
+            if (last) {
+              var ts = parseInt(last, 10);
+              var elapsed = Date.now() - ts;
+              // Only apply cooldown if timestamp is valid and not stale
+              if (!isNaN(ts) && elapsed >= 0 && elapsed < MAX_AGE && elapsed < COOLDOWN) {
+                withinCooldown = true;
+              }
+            }
+          } catch (e) {}
+
+          // Only trigger parting if not already triggered by Svelte
+          if (!withinCooldown && !o.classList.contains('grove-parting')) {
+            o.classList.add('grove-parting');
+            // Record that we showed the animation
+            try { localStorage.setItem(KEY, Date.now().toString()); } catch (e) {}
+            // Remove after animation completes (3500ms allows full 2.5s + delays)
+            setTimeout(function() { if (o) o.remove(); }, 3500);
+          } else if (withinCooldown) {
+            // Within cooldown - user has seen animation recently
+            // Remove immediately to not slow down returning visitors
+            o.remove();
+          } else {
+            // Animation already triggered by Svelte, just ensure cleanup
+            setTimeout(function() { if (o) o.remove(); }, 3500);
+          }
+        }, 100);
+      });
+    </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 4: Svelte onMount handler (goes in +layout.svelte)
+     ═══════════════════════════════════════════════════════════════════ -->
+<!--
+  // ============================================================================
+  // VINE ANIMATION FEATURE FLAG
+  // ============================================================================
+  // Set to true to re-enable the vine swinging entrance animation.
+  const VINE_ANIMATION_ENABLED = true;
+
+  // Cooldown configuration for the vine parting animation
+  const VINES_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+  const VINES_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+  const VINES_STORAGE_KEY = 'grove-vines-last-shown';
+
+  function shouldShowVinesAnimation(): boolean {
+    try {
+      const lastShown = localStorage.getItem(VINES_STORAGE_KEY);
+      if (!lastShown) return true;
+      const timestamp = parseInt(lastShown, 10);
+      if (isNaN(timestamp)) return true;
+      const elapsed = Date.now() - timestamp;
+      if (elapsed < 0 || elapsed > VINES_MAX_AGE_MS) return true;
+      return elapsed >= VINES_COOLDOWN_MS;
+    } catch {
+      return true;
+    }
+  }
+
+  function recordVinesShown(): void {
+    try {
+      localStorage.setItem(VINES_STORAGE_KEY, Date.now().toString());
+    } catch {}
+  }
+
+  onMount(() => {
+    if (browser) {
+      document.documentElement.dataset.vineAnimationDisabled = String(!VINE_ANIMATION_ENABLED);
+      const overlay = document.getElementById('grove-loading-overlay');
+      if (overlay) {
+        overlay.style.pointerEvents = 'none';
+        if (!VINE_ANIMATION_ENABLED) {
+          setTimeout(() => overlay.remove(), 800);
+        } else if (shouldShowVinesAnimation()) {
+          overlay.classList.add('grove-parting');
+          recordVinesShown();
+          setTimeout(() => overlay.remove(), 3500);
+        } else {
+          overlay.remove();
+        }
+      }
+    }
+  });
+-->
