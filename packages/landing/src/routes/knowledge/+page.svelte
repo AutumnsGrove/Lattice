@@ -216,7 +216,8 @@
         </a>
       </div>
 
-      <!-- Art Exhibit - Gallery (teal) -->
+      <!-- Art Exhibit - Hidden until museum is ready for public release -->
+      {#if false}
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow md:col-span-2">
         <div class="flex items-center mb-4">
           <div class="w-12 h-12 {colors.exhibit.iconBg} {colors.exhibit.iconBgDark} rounded-lg flex items-center justify-center mr-4">
@@ -247,6 +248,7 @@
           </svg>
         </a>
       </div>
+      {/if}
 
       <!-- Marketing Documents - Summer (emerald) -->
       <div class="bg-surface-elevated rounded-lg shadow-sm border border-default p-6 hover:shadow-md transition-shadow">
