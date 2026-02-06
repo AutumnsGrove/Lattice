@@ -192,9 +192,9 @@ Show the specific animals available:
 │           PATHS FOR BUILDING A NEW FEATURE                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  🐕 Bloodhound → 🐘 Elephant → 🦫 Beaver                    │
-│  ─────────────────────────────────────                      │
-│  Scout patterns → Build feature → Add tests                 │
+│  🐕 Bloodhound → 🐘 Elephant → 🐢 Turtle → 🦫 Beaver        │
+│  ──────────────────────────────────────────────             │
+│  Scout → Build → Harden → Test                              │
 │                                                             │
 │  Or just:                                                   │
 │                                                             │
@@ -204,7 +204,7 @@ Show the specific animals available:
 │  Or use a Gathering:                                        │
 │                                                             │
 │  🌲 /gathering-feature                                      │
-│  (mobilizes multiple animals automatically)                 │
+│  (mobilizes 8 animals — secure by design)                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -368,9 +368,9 @@ Use guiding metaphors:
 When the drum sounds, animals gather:
 
 ```
-🌲 /gathering-feature      Bloodhound → Elephant → Beaver → Raccoon → 
-                           Deer → Fox → Owl
-                           (Complete feature lifecycle)
+🌲 /gathering-feature      Bloodhound → Elephant → Turtle → Beaver →
+                           Raccoon → Deer → Fox → Owl
+                           (Complete feature lifecycle, secure by design)
 
 🌲 /gathering-architecture Eagle → Swan → Elephant
                            (System design to implementation)
