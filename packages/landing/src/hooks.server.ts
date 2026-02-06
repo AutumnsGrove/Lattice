@@ -5,6 +5,8 @@
  */
 
 import type { Handle } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
+import { validateCSRF } from "@autumnsgrove/groveengine/utils";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -30,6 +32,13 @@ interface UserRow {
 export const handle: Handle = async ({ event, resolve }) => {
   // Initialize user as null
   event.locals.user = null;
+
+  // CSRF validation for state-changing requests
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
+    if (!validateCSRF(event.request)) {
+      throw error(403, "Cross-site request blocked");
+    }
+  }
 
   // Skip DB access for prerendered routes
   // (adapter-cloudflare throws when accessing platform.env during prerendering)

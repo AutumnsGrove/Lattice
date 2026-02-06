@@ -24,6 +24,7 @@
 
 import { BROWSER } from "esm-env";
 import type { DOMPurify as DOMPurifyInstance, Config } from "dompurify";
+import sanitizeHtml from "sanitize-html";
 
 // DOMPurify instance - dynamically imported only in browser
 let DOMPurify: DOMPurifyInstance | null = null;
@@ -60,147 +61,163 @@ if (BROWSER) {
 }
 
 /**
- * Server-safe sanitization fallback for SSR/Cloudflare Workers
- * Uses regex-based approach since DOMPurify requires DOM
+ * Reverse-tabnabbing protection transformer for sanitize-html.
+ * Enforces rel="noopener noreferrer" on external links.
+ */
+function tabnabbingTransform(
+  tagName: string,
+  attribs: sanitizeHtml.Attributes,
+): sanitizeHtml.Tag {
+  const href = attribs.href || "";
+  const target = attribs.target;
+  const isExternal =
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    target === "_blank";
+
+  if (isExternal) {
+    const existingRel = attribs.rel || "";
+    const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
+    relParts.add("noopener");
+    relParts.add("noreferrer");
+    attribs.rel = Array.from(relParts).join(" ");
+  }
+  return { tagName, attribs };
+}
+
+/**
+ * Normalize whitespace within HTML tag brackets.
+ * Collapses newlines/tabs inside < > to prevent tag-name obfuscation
+ * (e.g., "<scr\nipt>" → "<script>") before the parser sees it.
+ */
+function normalizeTagWhitespace(html: string): string {
+  return html.replace(/<([^>]*)>/g, (match, inner) => {
+    return "<" + inner.replace(/[\n\r\t]+/g, "") + ">";
+  });
+}
+
+/**
+ * Server-safe sanitization for SSR/Cloudflare Workers
+ * Uses sanitize-html (htmlparser2-based) instead of regex for robust XSS prevention.
  *
- * SECURITY NOTE: This is a basic sanitizer for SSR. It strips:
- * - <script>, <iframe>, <object>, <embed>, <link>, <style>
- * - <form>, <input>, <button>, <base>, <meta>
- * - Event handlers (onclick, onerror, etc.)
- * - javascript: and data: protocol URLs
+ * sanitize-html uses a proper HTML parser, immune to mXSS, encoding tricks,
+ * and SVG/MathML namespace attacks that bypass regex sanitizers.
  */
 function sanitizeServerSafe(html: string): string {
   if (!html || typeof html !== "string") {
     return "";
   }
 
-  let sanitized = html;
+  html = normalizeTagWhitespace(html);
 
-  // Normalize whitespace in tag names to prevent bypass via newlines/tabs
-  // This catches payloads like <scr\nipt> or <scr\tipt>
-  sanitized = sanitized.replace(
-    /<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
-    "<script",
-  );
-  sanitized = sanitized.replace(
-    /<\/([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
-    "</script",
-  );
+  return sanitizeHtml(html, {
+    // Allow safe HTML elements (mirrors DOMPurify FORBID_TAGS approach)
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "h1",
+      "h2",
+      "del",
+      "ins",
+      "sub",
+      "sup",
+      "mark",
+      "kbd",
+      "samp",
+      "var",
+      "small",
+      "abbr",
+      "dd",
+      "dl",
+      "dt",
+      "hr",
+    ]),
+    disallowedTagsMode: "discard",
+    allowedAttributes: {
+      a: ["href", "title", "target", "rel", "class", "id"],
+      img: ["src", "alt", "title", "width", "height", "class"],
+      "*": ["class", "id"],
+      td: ["align"],
+      th: ["align"],
+      input: ["type", "checked", "disabled"],
+      label: [],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    transformTags: {
+      a: tabnabbingTransform,
+    },
+  });
+}
 
-  // Strip script tags with content (closed tags)
-  sanitized = sanitized.replace(
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    "",
-  );
-
-  // Strip unclosed script tags (opening tag without closing)
-  // This catches payloads like <script>alert(1) with no </script>
-  sanitized = sanitized.replace(/<script\b[^>]*>/gi, "");
-
-  // Strip iframe tags
-  sanitized = sanitized.replace(
-    /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
-    "",
-  );
-
-  // Strip other dangerous tags (with and without content)
-  const dangerousTags = [
-    "object",
-    "embed",
-    "link",
-    "style",
-    "form",
-    "button",
-    "base",
-    "meta",
-  ];
-  for (const tag of dangerousTags) {
-    // Tags with closing tag
-    const regex = new RegExp(
-      `<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`,
-      "gi",
-    );
-    sanitized = sanitized.replace(regex, "");
-    // Self-closing or unclosed tags
-    const selfClosing = new RegExp(`<${tag}\\b[^>]*\/?>`, "gi");
-    sanitized = sanitized.replace(selfClosing, "");
+/**
+ * Server-safe SVG sanitization for SSR/Cloudflare Workers.
+ * Uses a strict allowlist of SVG elements and attributes.
+ */
+function sanitizeServerSafeSVG(svg: string): string {
+  if (!svg || typeof svg !== "string") {
+    return "";
   }
 
-  // Strip event handlers (on* attributes)
-  sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
-  sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, "");
-
-  // Strip javascript: protocol in href/src (with optional leading whitespace)
-  sanitized = sanitized.replace(
-    /href\s*=\s*["']\s*javascript:[^"']*["']/gi,
-    'href="#"',
-  );
-  sanitized = sanitized.replace(/src\s*=\s*["']\s*javascript:[^"']*["']/gi, "");
-
-  // Strip data: protocol in href/src (except images, with optional leading whitespace)
-  sanitized = sanitized.replace(
-    /href\s*=\s*["']\s*data:[^"']*["']/gi,
-    'href="#"',
-  );
-  sanitized = sanitized.replace(
-    /src\s*=\s*["']\s*data:(?!image\/)[^"']*["']/gi,
-    "",
-  );
-
-  // Strip vbscript: and other dangerous protocols (with optional leading whitespace)
-  sanitized = sanitized.replace(
-    /href\s*=\s*["']\s*vbscript:[^"']*["']/gi,
-    'href="#"',
-  );
-  sanitized = sanitized.replace(/src\s*=\s*["']\s*vbscript:[^"']*["']/gi, "");
-
-  // Add rel="noopener noreferrer" to external links (target="_blank" or absolute URLs)
-  // This prevents reverse tabnabbing attacks
-  sanitized = sanitized.replace(
-    /<a\s+([^>]*?)href\s*=\s*["'](https?:\/\/[^"']+)["']([^>]*)>/gi,
-    (match, before, href, after) => {
-      // Check if rel already exists
-      const fullAttrs = before + after;
-      if (/\brel\s*=/i.test(fullAttrs)) {
-        // rel exists - ensure noopener noreferrer are included
-        return match.replace(
-          /rel\s*=\s*["']([^"']*)["']/i,
-          (_relMatch, relValue) => {
-            const parts = new Set(relValue.split(/\s+/).filter(Boolean));
-            parts.add("noopener");
-            parts.add("noreferrer");
-            return `rel="${Array.from(parts).join(" ")}"`;
-          },
-        );
-      }
-      // No rel attribute - add it
-      return `<a ${before}href="${href}"${after} rel="noopener noreferrer">`;
+  return sanitizeHtml(svg, {
+    allowedTags: [
+      "svg",
+      "g",
+      "path",
+      "circle",
+      "rect",
+      "line",
+      "polyline",
+      "polygon",
+      "ellipse",
+      "text",
+      "tspan",
+      "defs",
+      "marker",
+      "pattern",
+      "clippath",
+      "mask",
+      "lineargradient",
+      "radialgradient",
+      "stop",
+      "use",
+      "symbol",
+      "title",
+      "desc",
+    ],
+    allowedAttributes: {
+      "*": [
+        "class",
+        "id",
+        "transform",
+        "fill",
+        "stroke",
+        "stroke-width",
+        "x",
+        "y",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "cx",
+        "cy",
+        "r",
+        "rx",
+        "ry",
+        "width",
+        "height",
+        "d",
+        "points",
+        "viewbox",
+        "xmlns",
+        "version",
+        "preserveaspectratio",
+        "opacity",
+        "fill-opacity",
+        "stroke-opacity",
+      ],
     },
-  );
-
-  // Also handle target="_blank" links that might be relative URLs
-  sanitized = sanitized.replace(
-    /<a\s+([^>]*?)target\s*=\s*["']_blank["']([^>]*)>/gi,
-    (match, before, after) => {
-      const fullAttrs = before + after;
-      if (/\brel\s*=/i.test(fullAttrs)) {
-        // rel exists - ensure noopener noreferrer
-        return match.replace(
-          /rel\s*=\s*["']([^"']*)["']/i,
-          (_relMatch, relValue) => {
-            const parts = new Set(relValue.split(/\s+/).filter(Boolean));
-            parts.add("noopener");
-            parts.add("noreferrer");
-            return `rel="${Array.from(parts).join(" ")}"`;
-          },
-        );
-      }
-      // No rel - add it
-      return `<a ${before}target="_blank"${after} rel="noopener noreferrer">`;
-    },
-  );
-
-  return sanitized;
+    disallowedTagsMode: "discard",
+    allowedSchemes: [],
+  });
 }
 
 /**
@@ -265,9 +282,9 @@ export function sanitizeSVG(svg: string): string {
     return "";
   }
 
-  // On server, use regex-based fallback sanitization
+  // On server, use SVG-specific sanitization
   if (!BROWSER || !DOMPurify) {
-    return sanitizeServerSafe(svg);
+    return sanitizeServerSafeSVG(svg);
   }
 
   return DOMPurify.sanitize(svg, {

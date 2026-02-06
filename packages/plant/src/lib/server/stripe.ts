@@ -126,7 +126,7 @@ export async function createCheckoutSession(
 
   console.log("[Stripe] Creating checkout session:", {
     priceId,
-    email: customerEmail,
+    email: customerEmail.replace(/(.{2}).*(@.*)/, "$1***$2"),
     onboardingId,
     plan,
     billingCycle,
@@ -280,13 +280,15 @@ export async function verifyWebhookSignature(
  * Constant-time string comparison to prevent timing attacks
  */
 function secureCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
+  // Pad to equal length to avoid leaking length information via timing
+  const maxLen = Math.max(a.length, b.length);
+  const paddedA = a.padEnd(maxLen, "\0");
+  const paddedB = b.padEnd(maxLen, "\0");
 
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  // XOR all bytes — length mismatch still produces nonzero result
+  let result = a.length ^ b.length;
+  for (let i = 0; i < maxLen; i++) {
+    result |= paddedA.charCodeAt(i) ^ paddedB.charCodeAt(i);
   }
 
   return result === 0;

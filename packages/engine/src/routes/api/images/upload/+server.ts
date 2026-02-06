@@ -517,14 +517,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Log the full error for server-side debugging
     console.error("[Image Upload] Unexpected error:", err);
 
-    // Extract a user-friendly error message while preserving debugging info
-    let errorMessage = "Failed to upload image";
-    if (err instanceof Error) {
-      // Include the actual error message to help diagnose issues
-      // but keep it generic enough to not expose sensitive internals
-      errorMessage = `Upload failed: ${err.message}`;
-    }
-
-    throw error(500, errorMessage);
+    // Return generic message to client — full error already logged above
+    throw error(500, "Failed to upload image");
   }
 };

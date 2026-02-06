@@ -118,6 +118,9 @@ declare global {
         // Envelope Encryption - Key Encryption Key
         /** KEK for envelope encryption (64 hex chars, set via wrangler secret put) */
         GROVE_KEK?: string;
+
+        /** CSRF HMAC secret for session-bound tokens (set via wrangler secret put) */
+        CSRF_SECRET?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;

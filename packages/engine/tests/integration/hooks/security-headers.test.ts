@@ -237,10 +237,11 @@ describe("Security Headers Hook Orchestration", () => {
 
     it("should set CSP header on response", () => {
       const response = new Response("OK");
+      const nonce = "abc123";
       const csp = [
         "default-src 'self'",
         "upgrade-insecure-requests",
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
+        `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://challenges.cloudflare.com`,
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' https://cdn.grove.place data:",
         "font-src 'self' https://cdn.grove.place",
@@ -255,92 +256,79 @@ describe("Security Headers Hook Orchestration", () => {
   });
 
   describe("Content-Security-Policy - Script Sources", () => {
-    it("should include 'unsafe-inline' for inline scripts", () => {
-      const csp =
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-      expect(csp).toContain("'unsafe-inline'");
+    it("should use nonce-based CSP instead of unsafe-inline", () => {
+      const nonce = "abc123def456";
+      const csp = `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
+      expect(csp).toContain(`'nonce-${nonce}'`);
+      expect(csp).not.toContain("'unsafe-inline'");
     });
 
     it("should include cdn.jsdelivr.net for CDN scripts", () => {
       const csp =
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
+        "script-src 'self' 'nonce-abc123' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
       expect(csp).toContain("https://cdn.jsdelivr.net");
     });
 
     it("should include challenges.cloudflare.com for Turnstile", () => {
       const csp =
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
+        "script-src 'self' 'nonce-abc123' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
       expect(csp).toContain("https://challenges.cloudflare.com");
     });
   });
 
   describe("Content-Security-Policy - unsafe-eval Routes", () => {
-    it("should include 'unsafe-eval' for arbor routes", () => {
-      const pathname = "/arbor/settings";
-      const hasUnsafeEval =
-        pathname.startsWith("/arbor/") ||
-        /^\/[^/]+$/.test(pathname) ||
-        pathname.includes("/preview");
+    // Mirror the production needsUnsafeEval() logic with exclusion list
+    const NON_CONTENT_ROOTS = [
+      "/auth",
+      "/api",
+      "/verify",
+      "/_app",
+      "/login",
+      "/logout",
+      "/settings",
+      "/arbor",
+    ];
 
-      if (hasUnsafeEval) {
-        const csp =
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-        expect(csp).toContain("'unsafe-eval'");
-      }
+    function needsUnsafeEval(pathname: string): boolean {
+      return (
+        pathname.startsWith("/arbor/") ||
+        (/^\/[^/]+$/.test(pathname) &&
+          !NON_CONTENT_ROOTS.some((p) => pathname.startsWith(p))) ||
+        pathname.includes("/preview")
+      );
+    }
+
+    it("should include 'unsafe-eval' for arbor routes", () => {
+      expect(needsUnsafeEval("/arbor/settings")).toBe(true);
     });
 
     it("should include 'unsafe-eval' for root tenant pages", () => {
-      const pathname = "/about";
-      const hasUnsafeEval =
-        pathname.startsWith("/arbor/") ||
-        /^\/[^/]+$/.test(pathname) ||
-        pathname.includes("/preview");
-
-      if (hasUnsafeEval) {
-        const csp =
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-        expect(csp).toContain("'unsafe-eval'");
-      }
+      expect(needsUnsafeEval("/about")).toBe(true);
+      expect(needsUnsafeEval("/contact")).toBe(true);
     });
 
     it("should include 'unsafe-eval' for preview routes", () => {
-      const pathname = "/posts/draft-1/preview";
-      const hasUnsafeEval =
-        pathname.startsWith("/arbor/") ||
-        /^\/[^/]+$/.test(pathname) ||
-        pathname.includes("/preview");
-
-      if (hasUnsafeEval) {
-        const csp =
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-        expect(csp).toContain("'unsafe-eval'");
-      }
+      expect(needsUnsafeEval("/posts/draft-1/preview")).toBe(true);
     });
 
     it("should NOT include 'unsafe-eval' for regular API routes", () => {
-      const pathname = "/api/posts";
-      const hasUnsafeEval =
-        pathname.startsWith("/arbor/") ||
-        /^\/[^/]+$/.test(pathname) ||
-        pathname.includes("/preview");
-
-      const csp =
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-      expect(hasUnsafeEval).toBe(false);
-      expect(csp).not.toContain("'unsafe-eval'");
+      expect(needsUnsafeEval("/api/posts")).toBe(false);
     });
 
     it("should NOT include 'unsafe-eval' for auth routes", () => {
-      const pathname = "/auth/signin";
-      const hasUnsafeEval =
-        pathname.startsWith("/arbor/") ||
-        /^\/[^/]+$/.test(pathname) ||
-        pathname.includes("/preview");
+      expect(needsUnsafeEval("/auth/signin")).toBe(false);
+      expect(needsUnsafeEval("/auth")).toBe(false);
+    });
 
-      const csp =
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com";
-      expect(hasUnsafeEval).toBe(false);
-      expect(csp).not.toContain("'unsafe-eval'");
+    it("should NOT include 'unsafe-eval' for other non-content roots", () => {
+      expect(needsUnsafeEval("/login")).toBe(false);
+      expect(needsUnsafeEval("/logout")).toBe(false);
+      expect(needsUnsafeEval("/settings")).toBe(false);
+      expect(needsUnsafeEval("/verify")).toBe(false);
+    });
+
+    it("should NOT include 'unsafe-eval' for /arbor itself (no trailing slash)", () => {
+      expect(needsUnsafeEval("/arbor")).toBe(false);
     });
   });
 
@@ -560,7 +548,7 @@ describe("Security Headers Hook Orchestration", () => {
       );
       response.headers.set(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
+        "default-src 'self'; script-src 'self' 'nonce-abc123' https://cdn.jsdelivr.net https://challenges.cloudflare.com",
       );
 
       // All should be present

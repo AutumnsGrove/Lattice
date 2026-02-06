@@ -14,12 +14,16 @@ const config = {
   kit: {
     adapter: adapter(),
 
-    // Disable SvelteKit's built-in CSRF protection.
-    // Behind grove-router proxy, SvelteKit's Origin/Host comparison fails because
-    // it doesn't understand X-Forwarded-Host. Our hooks.server.ts handles CSRF
-    // validation for ALL requests (including form actions) using proxy-aware logic.
+    // SvelteKit's built-in CSRF protection needs explicit trusted origins because
+    // behind grove-router proxy, Origin and Host headers mismatch. Our hooks.server.ts
+    // provides additional proxy-aware CSRF validation for all requests.
     csrf: {
-      trustedOrigins: ["*"],
+      trustedOrigins: [
+        "https://grove.place",
+        "https://*.grove.place",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+      ],
     },
     prerender: {
       // In CI, skip prerendering - the AI binding requires remote auth

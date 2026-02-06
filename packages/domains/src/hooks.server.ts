@@ -156,7 +156,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (!session) {
       // Clear invalid session cookie
-      event.cookies.delete("session", { path: "/" });
+      event.cookies.delete("session", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
       const response = await resolve(event);
       return addSecurityHeaders(response);
     }

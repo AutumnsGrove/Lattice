@@ -1,6 +1,7 @@
 import type { Handle } from "@sveltejs/kit";
 import {
   generateCSRFToken,
+  generateSessionCSRFToken,
   validateCSRFToken,
   validateCSRF,
 } from "$lib/utils/csrf.js";
@@ -61,16 +62,19 @@ function extractSubdomain(
   }
 
   // Local development: Check for subdomain simulation
-  if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    // Option 1: x-subdomain header
+  // SECURITY: Use raw Host header (not x-forwarded-host) for localhost detection
+  // to prevent production bypass via spoofed forwarded headers
+  const rawHost = request.headers.get("host") || "";
+  if (rawHost.includes("localhost") || rawHost.includes("127.0.0.1")) {
+    // Option 1: x-subdomain header (validate format to prevent injection)
     const headerSubdomain = request.headers.get("x-subdomain");
-    if (headerSubdomain) {
+    if (headerSubdomain && isValidSubdomain(headerSubdomain)) {
       return headerSubdomain;
     }
 
-    // Option 2: ?subdomain= query param
+    // Option 2: ?subdomain= query param (validate format to prevent injection)
     const paramSubdomain = url.searchParams.get("subdomain");
-    if (paramSubdomain) {
+    if (paramSubdomain && isValidSubdomain(paramSubdomain)) {
       return paramSubdomain;
     }
   }
@@ -270,10 +274,26 @@ function getTierLimits(tier: TenantConfig["tier"]): TenantConfig["limits"] {
  * - /[slug] (root tenant pages) - Mermaid diagrams in published content
  * - /.../preview - Preview routes for draft content with diagrams
  */
+/**
+ * Non-content root paths that should NEVER get unsafe-eval.
+ * These are internal app routes, not user-generated content pages.
+ */
+const NON_CONTENT_ROOTS = [
+  "/auth",
+  "/api",
+  "/verify",
+  "/_app",
+  "/login",
+  "/logout",
+  "/settings",
+  "/arbor",
+];
+
 function needsUnsafeEval(pathname: string): boolean {
   return (
     pathname.startsWith("/arbor/") ||
-    /^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
+    (/^\/[^/]+$/.test(pathname) &&
+      !NON_CONTENT_ROOTS.some((p) => pathname.startsWith(p))) ||
     pathname.includes("/preview")
   );
 }
@@ -518,8 +538,12 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // Use the shared getCookie helper for consistent cookie parsing
   let csrfToken: string | null = getCookie(cookieHeader, "csrf_token");
+  const csrfSecret = event.platform?.env?.CSRF_SECRET;
 
-  if (!csrfToken) {
+  // Generate CSRF token: session-bound HMAC for authenticated users, random UUID for guests
+  if (event.locals.user && csrfSecret && sessionCookie) {
+    csrfToken = await generateSessionCSRFToken(sessionCookie, csrfSecret);
+  } else if (!csrfToken) {
     csrfToken = generateCSRFToken();
   }
 
@@ -541,10 +565,16 @@ export const handle: Handle = async ({ event, resolve }) => {
     const isFormActionUrl = event.url.search.startsWith("?/");
     const isFormAction = isSvelteKitAction || isFormActionUrl;
 
+    // Get the CSRF token from the request header for fallback validation
+    const requestCsrfToken =
+      event.request.headers.get("x-csrf-token") ||
+      event.request.headers.get("csrf-token");
+
     // All form actions and auth endpoints use origin-based validation
     // (proxy-aware: checks Origin against X-Forwarded-Host, not just Host)
     // SvelteKit's built-in CSRF is disabled because it doesn't understand
     // our grove-router proxy setup (compares Origin against internal Host).
+    // SECURITY: When Origin is absent, falls back to CSRF token validation
     if (
       isFormAction ||
       isAuthEndpoint ||
@@ -552,7 +582,12 @@ export const handle: Handle = async ({ event, resolve }) => {
       isAdminApi ||
       isPasskeyApi
     ) {
-      if (!validateCSRF(event.request)) {
+      if (
+        !validateCSRF(event.request, false, {
+          csrfToken: requestCsrfToken,
+          expectedToken: csrfToken,
+        })
+      ) {
         throw error(403, "Invalid origin");
       }
     } else {
@@ -566,23 +601,35 @@ export const handle: Handle = async ({ event, resolve }) => {
   // =========================================================================
   // RESOLVE & SECURITY HEADERS
   // =========================================================================
-  const response = await resolve(event);
+  // Generate a per-request nonce for CSP script-src (replaces 'unsafe-inline')
+  const cspNonce = crypto.randomUUID().replace(/-/g, "");
 
-  // Set CSRF token cookie if it was just generated
-  if (!cookieHeader || !cookieHeader.includes("csrf_token=")) {
+  const response = await resolve(event, {
+    transformPageChunk: ({ html }) => {
+      // Inject nonce into the theme-detection script in app.html
+      return html.replace("<script>", `<script nonce="${cspNonce}">`);
+    },
+  });
+
+  // Set CSRF token cookie — always refresh for authenticated users (session-bound)
+  // or set once for unauthenticated users
+  const needsCsrfCookie =
+    event.locals.user || !cookieHeader?.includes("csrf_token=");
+  if (needsCsrfCookie) {
     const isProduction =
       event.url.hostname !== "localhost" && event.url.hostname !== "127.0.0.1";
     const cookieParts = [
       `csrf_token=${csrfToken}`,
       "Path=/",
-      "Max-Age=604800", // 7 days
+      // Session-scoped for authenticated users, 1 hour for guests
+      `Max-Age=${event.locals.user ? 86400 : 3600}`,
       "SameSite=Lax",
     ];
 
     if (isProduction) {
       cookieParts.push("Secure");
-      // Set cookie for all subdomains
-      cookieParts.push("Domain=.grove.place");
+      // SECURITY: No Domain attribute — cookie scoped to exact subdomain only
+      // This prevents cross-tenant CSRF token sharing (M-3)
     }
 
     response.headers.append("Set-Cookie", cookieParts.join("; "));
@@ -602,11 +649,11 @@ export const handle: Handle = async ({ event, resolve }) => {
   );
 
   // Content-Security-Policy
-  // Note: 'unsafe-eval' is only allowed on routes that need Mermaid diagram rendering
-  // Note: 'unsafe-inline' is used for the theme script in app.html
-  // Note: challenges.cloudflare.com is required for Turnstile (Shade)
+  // Nonce-based script-src replaces 'unsafe-inline' for stronger XSS protection.
+  // 'unsafe-eval' is only allowed on routes that need Mermaid diagram rendering.
+  // challenges.cloudflare.com is required for Turnstile (Shade).
   const hasUnsafeEval = needsUnsafeEval(event.url.pathname);
-  const scriptSrc = `'self' 'unsafe-inline' ${hasUnsafeEval ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
+  const scriptSrc = `'self' 'nonce-${cspNonce}' ${hasUnsafeEval ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
 
   const csp = [
     "default-src 'self'",

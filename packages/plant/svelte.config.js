@@ -11,10 +11,15 @@ const config = {
         exclude: ["<all>"],
       },
     }),
-    // Disable built-in CSRF check - we handle it in hooks.server.ts
-    // with explicit allowed origins for Cloudflare Pages custom domains
+    // SvelteKit's built-in CSRF protection with explicit trusted origins.
+    // hooks.server.ts provides additional origin validation for all state-changing requests.
     csrf: {
-      trustedOrigins: ["*"],
+      trustedOrigins: [
+        "https://grove.place",
+        "https://*.grove.place",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+      ],
     },
   },
 };

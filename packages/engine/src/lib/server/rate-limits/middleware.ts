@@ -7,24 +7,30 @@
  * @see docs/patterns/threshold-pattern.md
  */
 
-import { json } from '@sveltejs/kit';
-import { rateLimit, type RateLimitResult } from '../services/cache.js';
+import { json } from "@sveltejs/kit";
+import { rateLimit, type RateLimitResult } from "../services/cache.js";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface RateLimitMiddlewareOptions {
-	kv: KVNamespace;
-	key: string;
-	limit: number;
-	windowSeconds: number;
-	namespace?: string;
+  kv: KVNamespace;
+  key: string;
+  limit: number;
+  windowSeconds: number;
+  namespace?: string;
+  /**
+   * When true, KV errors return 503 Service Unavailable instead of allowing
+   * the request through. Use for security-critical endpoints (login, password
+   * reset) where failing open could enable brute-force during KV outages.
+   */
+  failClosed?: boolean;
 }
 
 export interface RateLimitCheckResult {
-	result: RateLimitResult;
-	response?: Response;
+  result: RateLimitResult;
+  response?: Response;
 }
 
 // ============================================================================
@@ -54,47 +60,78 @@ export interface RateLimitCheckResult {
  * ```
  */
 export async function checkRateLimit(
-	options: RateLimitMiddlewareOptions
+  options: RateLimitMiddlewareOptions,
 ): Promise<RateLimitCheckResult> {
-	let result: RateLimitResult;
+  let result: RateLimitResult;
 
-	try {
-		result = await rateLimit(options.kv, options.key, {
-			limit: options.limit,
-			windowSeconds: options.windowSeconds,
-			namespace: options.namespace
-		});
-	} catch (error) {
-		// Fail open: allow request if rate limit check fails
-		console.error('[rate-limit] KV error, failing open:', error);
-		return {
-			result: { allowed: true, remaining: options.limit, resetAt: 0 }
-		};
-	}
+  try {
+    result = await rateLimit(options.kv, options.key, {
+      limit: options.limit,
+      windowSeconds: options.windowSeconds,
+      namespace: options.namespace,
+    });
+  } catch (error) {
+    if (options.failClosed) {
+      // Fail closed: reject request when KV is unavailable
+      // Used for auth-critical endpoints to prevent brute-force during outages
+      console.error("[rate-limit] KV error, failing closed:", error);
+      const response = json(
+        {
+          error: "service_unavailable",
+          message:
+            "Unable to process your request right now. Please try again in a moment.",
+        },
+        {
+          status: 503,
+          headers: {
+            "Retry-After": "30",
+          },
+        },
+      );
+      return {
+        result: {
+          allowed: false,
+          remaining: 0,
+          resetAt: Math.floor(Date.now() / 1000) + 30,
+        },
+        response,
+      };
+    }
 
-	if (!result.allowed) {
-		const retryAfter = Math.max(0, result.resetAt - Math.floor(Date.now() / 1000));
-		const response = json(
-			{
-				error: 'rate_limited',
-				message: "You're moving faster than we can keep up! Take a moment and try again soon.",
-				retryAfter,
-				resetAt: new Date(result.resetAt * 1000).toISOString()
-			},
-			{
-				status: 429,
-				headers: {
-					'Retry-After': String(retryAfter),
-					'X-RateLimit-Limit': String(options.limit),
-					'X-RateLimit-Remaining': '0',
-					'X-RateLimit-Reset': String(result.resetAt)
-				}
-			}
-		);
-		return { result, response };
-	}
+    // Fail open: allow request if rate limit check fails
+    console.error("[rate-limit] KV error, failing open:", error);
+    return {
+      result: { allowed: true, remaining: options.limit, resetAt: 0 },
+    };
+  }
 
-	return { result };
+  if (!result.allowed) {
+    const retryAfter = Math.max(
+      0,
+      result.resetAt - Math.floor(Date.now() / 1000),
+    );
+    const response = json(
+      {
+        error: "rate_limited",
+        message:
+          "You're moving faster than we can keep up! Take a moment and try again soon.",
+        retryAfter,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(retryAfter),
+          "X-RateLimit-Limit": String(options.limit),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(result.resetAt),
+        },
+      },
+    );
+    return { result, response };
+  }
+
+  return { result };
 }
 
 /**
@@ -108,14 +145,14 @@ export async function checkRateLimit(
  * ```
  */
 export function rateLimitHeaders(
-	result: RateLimitResult,
-	limit: number
+  result: RateLimitResult,
+  limit: number,
 ): Record<string, string> {
-	return {
-		'X-RateLimit-Limit': String(limit),
-		'X-RateLimit-Remaining': String(result.remaining),
-		'X-RateLimit-Reset': String(result.resetAt)
-	};
+  return {
+    "X-RateLimit-Limit": String(limit),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(result.resetAt),
+  };
 }
 
 /**
@@ -127,8 +164,11 @@ export function rateLimitHeaders(
  * // Returns: 'posts/create:user123'
  * ```
  */
-export function buildRateLimitKey(endpoint: string, identifier: string): string {
-	return `${endpoint}:${identifier}`;
+export function buildRateLimitKey(
+  endpoint: string,
+  identifier: string,
+): string {
+  return `${endpoint}:${identifier}`;
 }
 
 /**
@@ -139,11 +179,11 @@ export function buildRateLimitKey(endpoint: string, identifier: string): string 
  * @returns Client IP address or 'unknown'
  */
 export function getClientIP(request: Request): string {
-	// Cloudflare provides the real client IP
-	return (
-		request.headers.get('cf-connecting-ip') ||
-		request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-		request.headers.get('x-real-ip') ||
-		'unknown'
-	);
+  // Cloudflare provides the real client IP
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
 }
