@@ -175,6 +175,7 @@
 					<iframe
 						src={displayEmbedUrl}
 						sandbox={displaySandbox.join(' ')}
+						referrerpolicy="no-referrer"
 						loading="lazy"
 						title={displayTitle || `${displayProvider || 'Embedded'} content`}
 						allowfullscreen
@@ -184,6 +185,7 @@
 					<iframe
 						srcdoc={getSanitizedSrcdoc(displayEmbedHtml)}
 						sandbox={displaySandbox.filter((p) => p !== 'allow-same-origin').join(' ')}
+						referrerpolicy="no-referrer"
 						loading="lazy"
 						title={displayTitle || `${displayProvider || 'Embedded'} content`}
 						class="embed-iframe"

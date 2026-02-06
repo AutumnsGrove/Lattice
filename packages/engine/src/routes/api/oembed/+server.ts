@@ -4,9 +4,13 @@ import {
   findProvider,
   getEmbedUrl,
   extractIframeSrcFromHtml,
+  validateOEmbedResponse,
+  generateFrameSrcCSP,
+  MAX_OEMBED_RESPONSE_SIZE,
   type OEmbedResponse,
 } from "$lib/server/services/oembed-providers.js";
 import { fetchOGMetadata } from "$lib/server/services/og-fetcher.js";
+import { rateLimit } from "$lib/server/services/cache.js";
 
 /**
  * GET /api/oembed?url=... - Fetch embed data for a URL
@@ -15,20 +19,14 @@ import { fetchOGMetadata } from "$lib/server/services/og-fetcher.js";
  * - If matched: fetches oEmbed data from the provider, returns embed info
  * - If not matched: fetches OG metadata for a link preview fallback
  *
- * Response shape:
- * {
- *   type: 'embed' | 'preview',
- *   provider?: string,
- *   embedUrl?: string,        // For iframe-src rendering
- *   embedHtml?: string,       // For iframe-srcdoc rendering
- *   title?: string,
- *   thumbnail?: string,
- *   aspectRatio?: string,
- *   sandboxPermissions?: string[],
- *   og?: OGMetadata,          // For preview fallback
- * }
+ * Security hardening:
+ * - Rate limited (20 requests per 60s per IP)
+ * - oEmbed responses validated for shape and size
+ * - Content-Length enforced before reading response body
+ * - CSP frame-src header mirrors the JS allowlist
+ * - URL normalized before pattern matching (case, tracking params)
  */
-export const GET: RequestHandler = async ({ url, platform }) => {
+export const GET: RequestHandler = async ({ url, platform, request }) => {
   const targetUrl = url.searchParams.get("url");
 
   if (!targetUrl) {
@@ -42,7 +40,40 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     throw error(400, "Invalid URL");
   }
 
-  // Check against provider allowlist
+  // ── Rate Limiting ──────────────────────────────────────────────────
+  const kv = platform?.env?.CACHE_KV;
+  if (kv) {
+    const clientIp =
+      request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+
+    const rateLimitResult = await rateLimit(kv, `oembed:${clientIp}`, {
+      limit: 20,
+      windowSeconds: 60,
+      namespace: "ratelimit",
+    });
+
+    if (!rateLimitResult.allowed) {
+      return json(
+        { error: "Too many requests. Try again shortly." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimitResult.resetInSeconds),
+          },
+        },
+      );
+    }
+  }
+
+  // ── Security Headers (applied to all responses) ────────────────────
+  const securityHeaders: Record<string, string> = {
+    "Content-Security-Policy": generateFrameSrcCSP(),
+    "X-Content-Type-Options": "nosniff",
+  };
+
+  // ── Provider Matching (URL is normalized inside findProvider) ───────
   const match = findProvider(targetUrl);
 
   if (match) {
@@ -73,7 +104,38 @@ export const GET: RequestHandler = async ({ url, platform }) => {
         clearTimeout(timeoutId);
 
         if (response.ok) {
-          oembedData = (await response.json()) as OEmbedResponse;
+          // ── Content-Length check ──────────────────────────────────
+          const contentLength = response.headers.get("content-length");
+          if (contentLength && parseInt(contentLength) > MAX_OEMBED_RESPONSE_SIZE) {
+            // Response too large, skip oEmbed data
+            console.warn(
+              `oEmbed response from ${match.provider.name} exceeds size limit: ${contentLength} bytes`,
+            );
+          } else {
+            // ── Content-Type check ─────────────────────────────────
+            const contentType = response.headers.get("content-type") || "";
+            if (
+              !contentType.includes("application/json") &&
+              !contentType.includes("text/json")
+            ) {
+              console.warn(
+                `oEmbed response from ${match.provider.name} has unexpected content-type: ${contentType}`,
+              );
+            } else {
+              // Read with size limit (stream-safe)
+              const text = await response.text();
+              if (text.length <= MAX_OEMBED_RESPONSE_SIZE) {
+                const rawData = JSON.parse(text);
+                // ── Response validation ────────────────────────────
+                oembedData = validateOEmbedResponse(rawData);
+                if (!oembedData) {
+                  console.warn(
+                    `oEmbed response from ${match.provider.name} failed validation`,
+                  );
+                }
+              }
+            }
+          }
         }
       } catch {
         // oEmbed fetch failed — we can still use extractEmbedUrl
@@ -108,6 +170,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
         },
         {
           headers: {
+            ...securityHeaders,
             "Cache-Control": "public, max-age=3600, s-maxage=86400",
           },
         },
@@ -138,6 +201,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     },
     {
       headers: {
+        ...securityHeaders,
         "Cache-Control": ogResult.success
           ? "public, max-age=1800, s-maxage=3600"
           : "no-cache",

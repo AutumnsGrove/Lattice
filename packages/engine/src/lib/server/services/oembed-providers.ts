@@ -256,13 +256,17 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
 
 /**
  * Match a URL against the provider registry.
+ * Normalizes the URL first to prevent case-based or tracking-param bypasses.
  * Returns the matching provider or null if no match.
  */
 export function findProvider(url: string): ProviderMatch | null {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return null;
+
   for (const provider of EMBED_PROVIDERS) {
     for (const pattern of provider.patterns) {
-      if (pattern.test(url)) {
-        return { provider, url };
+      if (pattern.test(normalized)) {
+        return { provider, url: normalized };
       }
     }
   }
@@ -314,4 +318,184 @@ export function aspectRatioToPercent(ratio: string): string {
   const [w, h] = ratio.split(":").map(Number);
   if (!w || !h) return "56.25%"; // Default 16:9
   return `${(h / w) * 100}%`;
+}
+
+// ============================================================================
+// URL Normalization (Security Hardening)
+// ============================================================================
+
+/**
+ * Normalize a URL before matching against provider patterns.
+ *
+ * Prevents bypass via:
+ * - Mixed-case hostnames (YOUTUBE.COM vs youtube.com)
+ * - Trailing fragments
+ * - Common tracking parameters that don't affect the resource
+ *
+ * Returns null for invalid URLs.
+ */
+export function normalizeUrl(rawUrl: string): string | null {
+  try {
+    const parsed = new URL(rawUrl);
+
+    // Force lowercase scheme and hostname
+    parsed.protocol = parsed.protocol.toLowerCase();
+    parsed.hostname = parsed.hostname.toLowerCase();
+
+    // Strip tracking params that don't affect embed identity
+    const trackingParams = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "ref",
+      "fbclid",
+      "gclid",
+      "si", // Spotify share tracking
+    ];
+    for (const param of trackingParams) {
+      parsed.searchParams.delete(param);
+    }
+
+    // Strip fragment
+    parsed.hash = "";
+
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================================
+// oEmbed Response Validation (Security Hardening)
+// ============================================================================
+
+/** Maximum allowed oEmbed response size (512KB) */
+export const MAX_OEMBED_RESPONSE_SIZE = 512 * 1024;
+
+/** Maximum allowed HTML length within an oEmbed response (256KB) */
+export const MAX_OEMBED_HTML_LENGTH = 256 * 1024;
+
+/** Valid oEmbed response types */
+const VALID_OEMBED_TYPES = new Set(["photo", "video", "link", "rich"]);
+
+/**
+ * Validate an oEmbed response for expected shape and safe values.
+ *
+ * Returns a sanitized copy or null if the response is malformed.
+ * This prevents a compromised or malicious provider from injecting
+ * unexpected data through the oEmbed protocol.
+ */
+export function validateOEmbedResponse(
+  data: unknown,
+): OEmbedResponse | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return null;
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Type is required and must be a known value
+  if (typeof obj.type !== "string" || !VALID_OEMBED_TYPES.has(obj.type)) {
+    return null;
+  }
+
+  // HTML must be a string and within size limits (if present)
+  if (obj.html !== undefined && obj.html !== null) {
+    if (typeof obj.html !== "string") return null;
+    if (obj.html.length > MAX_OEMBED_HTML_LENGTH) return null;
+  }
+
+  // Title must be a string if present, capped at 500 chars
+  let title: string | undefined;
+  if (obj.title !== undefined && obj.title !== null) {
+    if (typeof obj.title !== "string") return null;
+    title = obj.title.length > 500 ? obj.title.slice(0, 500) : obj.title;
+  }
+
+  // Thumbnail URL must be a valid HTTPS URL if present
+  let thumbnailUrl: string | undefined;
+  if (obj.thumbnail_url !== undefined && obj.thumbnail_url !== null) {
+    if (typeof obj.thumbnail_url === "string") {
+      try {
+        const thumbUrl = new URL(obj.thumbnail_url);
+        if (thumbUrl.protocol === "https:") {
+          thumbnailUrl = obj.thumbnail_url;
+        }
+      } catch {
+        // Invalid URL, skip it
+      }
+    }
+  }
+
+  // Validate numeric fields
+  const safeNum = (val: unknown): number | undefined => {
+    if (typeof val === "number" && isFinite(val) && val >= 0) return val;
+    return undefined;
+  };
+
+  return {
+    type: obj.type as OEmbedResponse["type"],
+    version: typeof obj.version === "string" ? obj.version : undefined,
+    title,
+    author_name:
+      typeof obj.author_name === "string" ? obj.author_name : undefined,
+    provider_name:
+      typeof obj.provider_name === "string" ? obj.provider_name : undefined,
+    html: obj.html as string | undefined,
+    width: safeNum(obj.width),
+    height: safeNum(obj.height),
+    thumbnail_url: thumbnailUrl,
+    thumbnail_width: safeNum(obj.thumbnail_width),
+    thumbnail_height: safeNum(obj.thumbnail_height),
+    cache_age: safeNum(obj.cache_age),
+    url: typeof obj.url === "string" ? obj.url : undefined,
+  };
+}
+
+// ============================================================================
+// CSP frame-src Generation (Security Hardening)
+// ============================================================================
+
+/**
+ * Generate a Content-Security-Policy frame-src directive from the provider registry.
+ *
+ * This creates browser-level enforcement that mirrors the JS allowlist.
+ * Even if the JS allowlist is somehow bypassed, the browser blocks
+ * iframes from non-approved origins.
+ */
+export function generateFrameSrcCSP(): string {
+  const domains = new Set<string>();
+
+  for (const provider of EMBED_PROVIDERS) {
+    switch (provider.name) {
+      case "YouTube":
+        domains.add("https://www.youtube-nocookie.com");
+        domains.add("https://www.youtube.com");
+        break;
+      case "Vimeo":
+        domains.add("https://player.vimeo.com");
+        break;
+      case "Spotify":
+        domains.add("https://open.spotify.com");
+        break;
+      case "Strawpoll":
+        domains.add("https://strawpoll.com");
+        break;
+      case "SoundCloud":
+        domains.add("https://w.soundcloud.com");
+        domains.add("https://soundcloud.com");
+        break;
+      case "Bluesky":
+        domains.add("https://embed.bsky.app");
+        break;
+      case "CodePen":
+        domains.add("https://codepen.io");
+        break;
+    }
+  }
+
+  const domainList = Array.from(domains).sort().join(" ");
+  return `frame-src 'self' blob: ${domainList}`;
 }

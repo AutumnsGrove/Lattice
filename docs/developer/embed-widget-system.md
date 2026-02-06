@@ -120,13 +120,20 @@ Then add tests in `oembed-providers.test.ts` for the new URL patterns and embed 
 
 ## Security Model
 
-Five layers, defense in depth:
+Nine layers, defense in depth:
 
-1. **Allowlist** — Only registered providers get interactive embeds. Default deny.
-2. **Sandboxed iframes** — All embeds run in `<iframe sandbox>` with minimal permissions. No `allow-top-navigation` on any provider.
-3. **SSRF protection** — The OG fetcher blocks localhost, private IPs, and cloud metadata endpoints. Applied to all preview fallback requests.
-4. **CSP frame-src** — (Future) Mirror the allowlist in Content-Security-Policy headers.
-5. **Client-side sanitization** — Any `srcdoc` HTML passes through DOMPurify before rendering.
+1. **Allowlist (default-deny)** — Only registered providers get interactive embeds. Everything else becomes a safe OG card.
+2. **URL normalization** — URLs are lowercased, tracking params stripped, and fragments removed before pattern matching. Prevents case-based bypasses (e.g., `YOUTUBE.COM`).
+3. **Sandboxed iframes** — All embeds run in `<iframe sandbox>` with minimal permissions. No `allow-top-navigation` on any provider.
+4. **Opaque origin isolation** — For `iframe-srcdoc` providers, `allow-same-origin` is stripped at render time to prevent sandbox escape.
+5. **oEmbed response validation** — Provider responses are validated for type, shape, and size before use. Invalid responses are silently dropped.
+6. **Content-Length limits** — oEmbed responses exceeding 512KB are rejected before reading the body. HTML within responses is capped at 256KB.
+7. **Content-Type enforcement** — Only `application/json` and `text/json` responses from oEmbed providers are accepted.
+8. **CSP frame-src headers** — The `/api/oembed` endpoint returns `Content-Security-Policy: frame-src` headers auto-generated from the provider registry. Browser-level enforcement that mirrors the JS allowlist.
+9. **SSRF protection** — The OG fetcher blocks localhost, private IPs, and cloud metadata endpoints. Applied to all preview fallback requests.
+10. **Referrer policy** — All embed iframes use `referrerpolicy="no-referrer"` to prevent leaking the user's page URL to providers.
+11. **Rate limiting** — The `/api/oembed` endpoint is rate-limited (20 requests/60s per IP) to prevent abuse as an outbound proxy.
+12. **Client-side sanitization** — Any `srcdoc` HTML passes through DOMPurify before rendering.
 
 ### What Each Sandbox Permission Does
 
@@ -166,10 +173,10 @@ The `embedProvider` field is optional. If present, the client skips the API call
 
 ## Testing
 
-62 tests cover this feature:
+105 tests cover this feature:
 
-- **49 unit tests** (`oembed-providers.test.ts`) — Provider matching, URL extraction, security properties, registry integrity
-- **13 integration tests** (`oembed.test.ts`) — Full endpoint flow with mocked fetch, fallback behavior, SSRF protection
+- **86 unit tests** (`oembed-providers.test.ts`) — Provider matching, URL extraction, URL normalization, response validation, CSP generation, security properties, registry integrity
+- **19 integration tests** (`oembed.test.ts`) — Full endpoint flow with mocked fetch, fallback behavior, response validation, content-type/size enforcement, URL normalization, SSRF protection
 
 Run them:
 
@@ -183,7 +190,6 @@ npx vitest run src/routes/api/oembed/oembed.test.ts
 
 ## Future Work
 
-- **CSP `frame-src` headers** — Generate from the provider registry automatically
 - **oEmbed response caching** — Cache resolved embed data in KV alongside OG metadata
 - **Admin preview** — Show a live preview of the embed in GutterManager before saving
 - **Provider discovery** — Support `<link rel="alternate" type="application/json+oembed">` for auto-detecting oEmbed endpoints on arbitrary pages

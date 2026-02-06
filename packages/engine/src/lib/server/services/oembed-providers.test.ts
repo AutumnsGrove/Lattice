@@ -16,6 +16,10 @@ import {
   extractIframeSrcFromHtml,
   buildSandboxAttr,
   aspectRatioToPercent,
+  normalizeUrl,
+  validateOEmbedResponse,
+  generateFrameSrcCSP,
+  MAX_OEMBED_HTML_LENGTH,
   EMBED_PROVIDERS,
 } from "./oembed-providers.js";
 
@@ -103,6 +107,57 @@ describe("findProvider", () => {
       );
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("CodePen");
+    });
+  });
+
+  describe("matches after URL normalization (security)", () => {
+    it("matches YouTube with uppercase hostname", () => {
+      const match = findProvider(
+        "https://WWW.YOUTUBE.COM/watch?v=dQw4w9WgXcQ",
+      );
+      expect(match).not.toBeNull();
+      expect(match!.provider.name).toBe("YouTube");
+    });
+
+    it("matches Spotify with mixed case", () => {
+      const match = findProvider(
+        "https://Open.Spotify.Com/track/4uLU6hMCjMI75M1A2tKUQC",
+      );
+      expect(match).not.toBeNull();
+      expect(match!.provider.name).toBe("Spotify");
+    });
+
+    it("matches URLs with tracking parameters stripped", () => {
+      const match = findProvider(
+        "https://www.youtube.com/watch?v=abc123&utm_source=twitter&utm_medium=social",
+      );
+      expect(match).not.toBeNull();
+      expect(match!.provider.name).toBe("YouTube");
+    });
+
+    it("matches Spotify with si tracking param stripped", () => {
+      const match = findProvider(
+        "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC?si=abc123def",
+      );
+      expect(match).not.toBeNull();
+      expect(match!.provider.name).toBe("Spotify");
+    });
+
+    it("matches URLs with fragment stripped", () => {
+      const match = findProvider(
+        "https://vimeo.com/123456789#t=30s",
+      );
+      expect(match).not.toBeNull();
+      expect(match!.provider.name).toBe("Vimeo");
+    });
+
+    it("returns normalized URL in match result", () => {
+      const match = findProvider(
+        "HTTPS://WWW.YOUTUBE.COM/watch?v=abc123&utm_source=test#comment",
+      );
+      expect(match).not.toBeNull();
+      // URL should be lowercase, tracking stripped, fragment removed
+      expect(match!.url).toBe("https://www.youtube.com/watch?v=abc123");
     });
   });
 
@@ -414,5 +469,245 @@ describe("EMBED_PROVIDERS registry", () => {
     );
     // Just verify these providers exist (the actual filtering happens in EmbedWidget)
     expect(srcdocProviders.length).toBeGreaterThan(0);
+  });
+});
+
+// ============================================================================
+// URL Normalization (Security Hardening)
+// ============================================================================
+
+describe("normalizeUrl", () => {
+  it("lowercases hostname", () => {
+    expect(normalizeUrl("https://WWW.YOUTUBE.COM/watch?v=abc")).toBe(
+      "https://www.youtube.com/watch?v=abc",
+    );
+  });
+
+  it("lowercases scheme", () => {
+    expect(normalizeUrl("HTTPS://example.com/path")).toBe(
+      "https://example.com/path",
+    );
+  });
+
+  it("strips utm tracking parameters", () => {
+    const result = normalizeUrl(
+      "https://example.com/page?key=val&utm_source=twitter&utm_medium=social",
+    );
+    expect(result).toBe("https://example.com/page?key=val");
+  });
+
+  it("strips fbclid and gclid", () => {
+    const result = normalizeUrl(
+      "https://example.com/page?fbclid=abc123&gclid=def456",
+    );
+    expect(result).toBe("https://example.com/page");
+  });
+
+  it("strips Spotify si parameter", () => {
+    const result = normalizeUrl(
+      "https://open.spotify.com/track/abc?si=xyz123",
+    );
+    expect(result).toBe("https://open.spotify.com/track/abc");
+  });
+
+  it("strips fragment", () => {
+    expect(normalizeUrl("https://example.com/page#section")).toBe(
+      "https://example.com/page",
+    );
+  });
+
+  it("preserves meaningful query parameters", () => {
+    const result = normalizeUrl(
+      "https://www.youtube.com/watch?v=abc123&t=30",
+    );
+    expect(result).toContain("v=abc123");
+    expect(result).toContain("t=30");
+  });
+
+  it("returns null for invalid URLs", () => {
+    expect(normalizeUrl("not-a-url")).toBeNull();
+  });
+
+  it("returns null for empty string", () => {
+    expect(normalizeUrl("")).toBeNull();
+  });
+});
+
+// ============================================================================
+// oEmbed Response Validation (Security Hardening)
+// ============================================================================
+
+describe("validateOEmbedResponse", () => {
+  it("accepts valid oEmbed response", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      title: "Test Video",
+      html: '<iframe src="https://example.com/embed"></iframe>',
+      width: 560,
+      height: 315,
+    });
+    expect(result).not.toBeNull();
+    expect(result!.type).toBe("video");
+    expect(result!.title).toBe("Test Video");
+  });
+
+  it("accepts all valid types", () => {
+    for (const type of ["photo", "video", "link", "rich"]) {
+      const result = validateOEmbedResponse({ type });
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe(type);
+    }
+  });
+
+  it("rejects unknown type", () => {
+    expect(validateOEmbedResponse({ type: "malicious" })).toBeNull();
+  });
+
+  it("rejects missing type", () => {
+    expect(validateOEmbedResponse({ title: "No type" })).toBeNull();
+  });
+
+  it("rejects non-object input", () => {
+    expect(validateOEmbedResponse(null)).toBeNull();
+    expect(validateOEmbedResponse("string")).toBeNull();
+    expect(validateOEmbedResponse(42)).toBeNull();
+    expect(validateOEmbedResponse(undefined)).toBeNull();
+  });
+
+  it("rejects arrays", () => {
+    expect(validateOEmbedResponse([{ type: "video" }])).toBeNull();
+  });
+
+  it("rejects HTML exceeding size limit", () => {
+    const hugeHtml = "x".repeat(MAX_OEMBED_HTML_LENGTH + 1);
+    expect(
+      validateOEmbedResponse({ type: "rich", html: hugeHtml }),
+    ).toBeNull();
+  });
+
+  it("accepts HTML within size limit", () => {
+    const okHtml = "<div>small</div>";
+    const result = validateOEmbedResponse({ type: "rich", html: okHtml });
+    expect(result).not.toBeNull();
+    expect(result!.html).toBe(okHtml);
+  });
+
+  it("truncates title longer than 500 chars", () => {
+    const longTitle = "A".repeat(600);
+    const result = validateOEmbedResponse({
+      type: "video",
+      title: longTitle,
+    });
+    expect(result).not.toBeNull();
+    expect(result!.title!.length).toBe(500);
+  });
+
+  it("rejects non-string title", () => {
+    expect(
+      validateOEmbedResponse({ type: "video", title: 42 }),
+    ).toBeNull();
+  });
+
+  it("strips non-HTTPS thumbnail URLs", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      thumbnail_url: "http://insecure.com/thumb.jpg",
+    });
+    expect(result).not.toBeNull();
+    expect(result!.thumbnail_url).toBeUndefined();
+  });
+
+  it("keeps valid HTTPS thumbnail URLs", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      thumbnail_url: "https://img.youtube.com/thumb.jpg",
+    });
+    expect(result).not.toBeNull();
+    expect(result!.thumbnail_url).toBe("https://img.youtube.com/thumb.jpg");
+  });
+
+  it("strips invalid thumbnail URLs", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      thumbnail_url: "not-a-url",
+    });
+    expect(result).not.toBeNull();
+    expect(result!.thumbnail_url).toBeUndefined();
+  });
+
+  it("rejects non-string HTML", () => {
+    expect(
+      validateOEmbedResponse({ type: "rich", html: 42 }),
+    ).toBeNull();
+  });
+
+  it("validates numeric fields are finite and non-negative", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      width: -1,
+      height: Infinity,
+      cache_age: NaN,
+    });
+    expect(result).not.toBeNull();
+    expect(result!.width).toBeUndefined();
+    expect(result!.height).toBeUndefined();
+    expect(result!.cache_age).toBeUndefined();
+  });
+
+  it("preserves valid numeric fields", () => {
+    const result = validateOEmbedResponse({
+      type: "video",
+      width: 560,
+      height: 315,
+      cache_age: 86400,
+    });
+    expect(result).not.toBeNull();
+    expect(result!.width).toBe(560);
+    expect(result!.height).toBe(315);
+    expect(result!.cache_age).toBe(86400);
+  });
+});
+
+// ============================================================================
+// CSP frame-src Generation (Security Hardening)
+// ============================================================================
+
+describe("generateFrameSrcCSP", () => {
+  it("returns a valid frame-src directive", () => {
+    const csp = generateFrameSrcCSP();
+    expect(csp).toMatch(/^frame-src /);
+  });
+
+  it("includes 'self'", () => {
+    const csp = generateFrameSrcCSP();
+    expect(csp).toContain("'self'");
+  });
+
+  it("includes YouTube nocookie domain", () => {
+    const csp = generateFrameSrcCSP();
+    expect(csp).toContain("https://www.youtube-nocookie.com");
+  });
+
+  it("includes all registered provider domains", () => {
+    const csp = generateFrameSrcCSP();
+    // Each provider should have at least one domain in CSP
+    expect(csp).toContain("youtube-nocookie.com");
+    expect(csp).toContain("player.vimeo.com");
+    expect(csp).toContain("open.spotify.com");
+    expect(csp).toContain("strawpoll.com");
+    expect(csp).toContain("soundcloud.com");
+    expect(csp).toContain("embed.bsky.app");
+    expect(csp).toContain("codepen.io");
+  });
+
+  it("does not include non-registered domains", () => {
+    const csp = generateFrameSrcCSP();
+    expect(csp).not.toContain("evil.com");
+    expect(csp).not.toContain("example.com");
+  });
+
+  it("includes blob: for srcdoc providers", () => {
+    const csp = generateFrameSrcCSP();
+    expect(csp).toContain("blob:");
   });
 });

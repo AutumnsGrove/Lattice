@@ -241,6 +241,12 @@ export {
   extractIframeSrcFromHtml,
   buildSandboxAttr,
   aspectRatioToPercent,
+  // Security Hardening
+  normalizeUrl,
+  validateOEmbedResponse,
+  generateFrameSrcCSP,
+  MAX_OEMBED_RESPONSE_SIZE,
+  MAX_OEMBED_HTML_LENGTH,
 } from "./oembed-providers.js";
 
 // ============================================================================

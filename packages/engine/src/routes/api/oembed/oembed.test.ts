@@ -6,6 +6,8 @@
  * - Unknown URLs fall back to OG preview
  * - Invalid URLs return proper errors
  * - oEmbed fetch failures gracefully degrade to OG preview
+ * - Response validation rejects malformed oEmbed data
+ * - URL normalization prevents case-based bypasses
  *
  * Mock boundary: global fetch (network). Everything else runs for real.
  */
@@ -15,6 +17,8 @@ import {
   findProvider,
   getEmbedUrl,
   extractIframeSrcFromHtml,
+  validateOEmbedResponse,
+  MAX_OEMBED_RESPONSE_SIZE,
   type OEmbedResponse,
 } from "$lib/server/services/oembed-providers.js";
 import { fetchOGMetadata } from "$lib/server/services/og-fetcher.js";
@@ -39,10 +43,18 @@ afterEach(() => {
 /**
  * Helper: create a mock oEmbed JSON response
  */
-function createOEmbedResponse(data: Partial<OEmbedResponse>): Response {
-  return new Response(JSON.stringify({ version: "1.0", ...data }), {
-    headers: { "content-type": "application/json" },
-  });
+function createOEmbedResponse(
+  data: Partial<OEmbedResponse>,
+  options?: { contentType?: string; contentLength?: string },
+): Response {
+  const body = JSON.stringify({ version: "1.0", ...data });
+  const headers: Record<string, string> = {
+    "content-type": options?.contentType || "application/json",
+  };
+  if (options?.contentLength) {
+    headers["content-length"] = options.contentLength;
+  }
+  return new Response(body, { headers });
 }
 
 /**
@@ -69,7 +81,7 @@ function createOGResponse(
 }
 
 /**
- * Simulate the endpoint logic (extracted from the handler)
+ * Simulate the endpoint logic (mirrors the hardened handler)
  * This tests the actual business logic without SvelteKit request handling
  */
 async function simulateOEmbedEndpoint(
@@ -83,7 +95,7 @@ async function simulateOEmbedEndpoint(
     return { error: "Invalid URL", status: 400 };
   }
 
-  // Check against provider allowlist
+  // Check against provider allowlist (includes URL normalization)
   const match = findProvider(targetUrl);
 
   if (match) {
@@ -113,7 +125,30 @@ async function simulateOEmbedEndpoint(
         clearTimeout(timeoutId);
 
         if (response.ok) {
-          oembedData = (await response.json()) as OEmbedResponse;
+          // Content-Length check
+          const contentLength = response.headers.get("content-length");
+          if (
+            contentLength &&
+            parseInt(contentLength) > MAX_OEMBED_RESPONSE_SIZE
+          ) {
+            // Response too large, skip
+          } else {
+            // Content-Type check
+            const contentType = response.headers.get("content-type") || "";
+            if (
+              !contentType.includes("application/json") &&
+              !contentType.includes("text/json")
+            ) {
+              // Wrong content type, skip
+            } else {
+              const text = await response.text();
+              if (text.length <= MAX_OEMBED_RESPONSE_SIZE) {
+                const rawData = JSON.parse(text);
+                // Response validation
+                oembedData = validateOEmbedResponse(rawData);
+              }
+            }
+          }
         }
       } catch {
         // oEmbed fetch failed
@@ -283,6 +318,123 @@ describe("trusted provider embed flow", () => {
     );
 
     expect(result.aspectRatio).toBe("16:9");
+  });
+});
+
+// ============================================================================
+// Response Validation (Security Hardening)
+// ============================================================================
+
+describe("oEmbed response validation in flow", () => {
+  it("rejects oEmbed with invalid type and still returns embed via extractEmbedUrl", async () => {
+    // Provider returns bad type, but we have extractEmbedUrl as fallback
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      createOEmbedResponse({ type: "malicious" as any, title: "Bad" }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://www.youtube.com/watch?v=abc123",
+    );
+
+    // Should still return embed type (extractEmbedUrl works independently)
+    expect(result.type).toBe("embed");
+    expect(result.provider).toBe("YouTube");
+    expect(result.embedUrl).toBe(
+      "https://www.youtube-nocookie.com/embed/abc123",
+    );
+    // But no oEmbed data (validation rejected it)
+    expect(result.title).toBeUndefined();
+  });
+
+  it("rejects oEmbed with wrong content-type and uses extractEmbedUrl", async () => {
+    // Provider returns HTML instead of JSON
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      new Response("<html>not json</html>", {
+        headers: { "content-type": "text/html" },
+      }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://www.youtube.com/watch?v=def456",
+    );
+
+    expect(result.type).toBe("embed");
+    expect(result.provider).toBe("YouTube");
+    expect(result.embedUrl).toBe(
+      "https://www.youtube-nocookie.com/embed/def456",
+    );
+    expect(result.title).toBeUndefined();
+  });
+
+  it("rejects oEmbed with oversized content-length", async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      createOEmbedResponse(
+        { type: "video", title: "Video" },
+        { contentLength: String(MAX_OEMBED_RESPONSE_SIZE + 1) },
+      ),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://www.youtube.com/watch?v=ghi789",
+    );
+
+    expect(result.type).toBe("embed");
+    expect(result.title).toBeUndefined();
+  });
+
+  it("strips HTTP thumbnail URLs from oEmbed response", async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      createOEmbedResponse({
+        type: "video",
+        title: "Test",
+        thumbnail_url: "http://insecure.example.com/thumb.jpg",
+      }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://www.youtube.com/watch?v=thumb123",
+    );
+
+    expect(result.type).toBe("embed");
+    expect(result.thumbnail).toBeUndefined();
+  });
+});
+
+// ============================================================================
+// URL Normalization (Security Hardening)
+// ============================================================================
+
+describe("URL normalization in flow", () => {
+  it("matches YouTube URL with uppercase hostname", async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      createOEmbedResponse({ type: "video", title: "Test" }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://WWW.YOUTUBE.COM/watch?v=abc123",
+    );
+
+    expect(result.type).toBe("embed");
+    expect(result.provider).toBe("YouTube");
+  });
+
+  it("matches Spotify URL with tracking params", async () => {
+    const mockFetch = vi.fn().mockResolvedValueOnce(
+      createOEmbedResponse({ type: "rich", title: "Track" }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const result = await simulateOEmbedEndpoint(
+      "https://open.spotify.com/track/abc123?si=xyz&utm_source=twitter",
+    );
+
+    expect(result.type).toBe("embed");
+    expect(result.provider).toBe("Spotify");
   });
 });
 
