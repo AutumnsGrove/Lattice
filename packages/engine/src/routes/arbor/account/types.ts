@@ -61,4 +61,4 @@ export interface AccountPageData {
 export type { ExportType } from "../../api/export/+server";
 
 // Re-export Passkey type for use in Account page components
-export type { Passkey } from "$lib/groveauth";
+export type { Passkey } from "$lib/heartwood";

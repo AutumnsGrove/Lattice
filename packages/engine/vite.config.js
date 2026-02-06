@@ -35,7 +35,7 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
       include: [
         "src/lib/server/services/**/*.ts",
-        "src/lib/groveauth/**/*.ts",
+        "src/lib/heartwood/**/*.ts",
         "src/lib/payments/**/*.ts",
         "src/lib/utils/**/*.ts",
         "src/lib/ui/components/**/*.{ts,svelte}",

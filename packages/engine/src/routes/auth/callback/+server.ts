@@ -36,7 +36,7 @@ import {
   getAuthError,
   logAuthError,
   buildErrorParams,
-} from "$lib/groveauth/errors";
+} from "$lib/heartwood/errors";
 import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 
 /**

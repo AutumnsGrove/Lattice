@@ -13,7 +13,7 @@ import {
   isValidTotpCode,
   getRequiredEnv,
   TOTP_CODE_LENGTH,
-} from "@autumnsgrove/groveengine/groveauth";
+} from "@autumnsgrove/groveengine/heartwood";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
 const DEFAULT_AUTH_URL = "https://heartwood.grove.place";

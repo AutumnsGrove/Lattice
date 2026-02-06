@@ -6,8 +6,8 @@
    * Can be placed on the post editor or dashboard.
    */
 
-  import type { PreSubmitCheckResult, AlertVariant } from '../../groveauth/index.js';
-  import { ALERT_VARIANTS } from '../../groveauth/index.js';
+  import type { PreSubmitCheckResult, AlertVariant } from '../../heartwood/index.js';
+  import { ALERT_VARIANTS } from '../../heartwood/index.js';
 
   interface Props {
     check: PreSubmitCheckResult;

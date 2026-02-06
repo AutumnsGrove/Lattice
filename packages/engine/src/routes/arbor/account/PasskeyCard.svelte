@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GlassCard, Button, Spinner } from "$lib/ui";
   import { KeyRound, Plus, Trash2, Fingerprint, AlertCircle } from "lucide-svelte";
-  import type { Passkey } from "$lib/groveauth";
+  import type { Passkey } from "$lib/heartwood";
 
   interface Props {
     passkeys: Passkey[];

@@ -1,0 +1,191 @@
+/**
+ * E2E Test Suite - Future Playwright Implementation
+ *
+ * This file documents the end-to-end test that should be implemented
+ * when Playwright is added to the project. These tests require a real
+ * browser and actual OAuth flow, so they can't be run as unit tests.
+ *
+ * ===========================================================================
+ * CROWN JEWEL TEST: Complete Device Code Login Flow
+ * ===========================================================================
+ *
+ * This test verifies the entire CLI authentication journey from start to finish:
+ *
+ * FLOW DIAGRAM:
+ *
+ *   CLI                      Browser                     GroveAuth
+ *    │                          │                           │
+ *    │ POST /auth/device-code   │                           │
+ *    │──────────────────────────────────────────────────────>│
+ *    │<─────────────────────────────────────────────────────│
+ *    │  { device_code, user_code, verification_uri }        │
+ *    │                          │                           │
+ *    │    "Open browser, enter: ABCD-1234"                  │
+ *    │    ─────────────────────>│                           │
+ *    │                          │ GET /auth/device          │
+ *    │                          │──────────────────────────>│
+ *    │                          │<──────────────────────────│
+ *    │                          │   302 → /login            │
+ *    │                          │                           │
+ *    │                          │ OAuth with Google          │
+ *    │                          │<─────────────────────────>│
+ *    │                          │                           │
+ *    │                          │ GET /auth/device (authed) │
+ *    │                          │──────────────────────────>│
+ *    │                          │<──────────────────────────│
+ *    │                          │   "Authorize Grove CLI?"  │
+ *    │                          │                           │
+ *    │                          │ POST /auth/device/authorize
+ *    │                          │ { user_code, action: 'approve' }
+ *    │                          │──────────────────────────>│
+ *    │                          │<──────────────────────────│
+ *    │                          │   302 → success page      │
+ *    │                          │                           │
+ *    │ POST /token (polling)    │                           │
+ *    │ { grant_type: device_code, device_code, client_id }  │
+ *    │──────────────────────────────────────────────────────>│
+ *    │<─────────────────────────────────────────────────────│
+ *    │  { access_token, refresh_token }                     │
+ *    │                          │                           │
+ *    │ GET /userinfo            │                           │
+ *    │──────────────────────────────────────────────────────>│
+ *    │<─────────────────────────────────────────────────────│
+ *    │  { sub, email, name }    │                           │
+ *
+ *
+ * ===========================================================================
+ * TEST STEPS
+ * ===========================================================================
+ *
+ * 1. CLI initiates device code request
+ *    - POST /auth/device-code { client_id: 'grove-cli' }
+ *    - Verify: Returns device_code, user_code, verification_uri
+ *    - Store: device_code, user_code
+ *
+ * 2. User visits device authorization page (not logged in)
+ *    - Browser: GET /auth/device?user_code=XXXX-XXXX
+ *    - Verify: Redirected to /login?returnTo=...
+ *    - Verify: returnTo contains user_code
+ *
+ * 3. User signs in with Google (mocked OAuth)
+ *    - Click "Continue with Google"
+ *    - Mock OAuth flow returns test user credentials
+ *    - Verify: Better Auth session cookie is set on .grove.place
+ *
+ * 4. User returns to device page (now authenticated)
+ *    - Browser: GET /auth/device?user_code=XXXX-XXXX
+ *    - Verify: Shows "Authorize Grove CLI?" prompt
+ *    - Verify: Displays user code and client name
+ *    - Verify: User's name/email shown ("Logged in as...")
+ *
+ * 5. User approves the request
+ *    - Click "Approve" button
+ *    - POST /auth/device/authorize { user_code, action: 'approve' }
+ *    - Verify: Redirected to success page
+ *    - Verify: Device code marked as authorized in DB
+ *    - Verify: Audit log created
+ *
+ * 6. CLI polls and receives tokens
+ *    - POST /token { grant_type: urn:ietf:params:oauth:grant-type:device_code, ... }
+ *    - Verify: Returns access_token and refresh_token
+ *    - Verify: Device code deleted from DB
+ *    - Verify: Audit log created
+ *
+ * 7. CLI can now make authenticated requests
+ *    - GET /userinfo with Bearer token
+ *    - Verify: Returns user's email and name
+ *
+ *
+ * ===========================================================================
+ * ADDITIONAL E2E TESTS TO IMPLEMENT
+ * ===========================================================================
+ *
+ * - Device Flow Denial Test
+ *   Same as above but user clicks "Deny" → CLI receives access_denied error
+ *
+ * - Device Flow Expiration Test
+ *   User waits too long → device code expires → CLI receives expired_token
+ *
+ * - Passkey Registration Flow
+ *   User registers a new passkey → can sign in with it later
+ *
+ * - Magic Link Flow
+ *   User enters email → receives link → clicks link → authenticated
+ *
+ * - Session Management
+ *   User signs in → views active sessions → revokes a session
+ *
+ * - OAuth Callback Error Handling
+ *   OAuth provider returns error → user sees friendly error page
+ *
+ *
+ * ===========================================================================
+ * PREREQUISITES
+ * ===========================================================================
+ *
+ * - Playwright installed: pnpm add -D @playwright/test
+ * - Test fixtures:
+ *   - Seeded test client in database (grove-cli)
+ *   - Mock OAuth provider OR test Google credentials
+ *   - Test user email on allowlist
+ * - Environment:
+ *   - AUTH_BASE_URL pointing to test server
+ *   - Database in test mode (isolated from production)
+ *
+ *
+ * ===========================================================================
+ * EXAMPLE PLAYWRIGHT TEST STRUCTURE
+ * ===========================================================================
+ *
+ * import { test, expect } from '@playwright/test';
+ *
+ * test.describe('Device Code Flow', () => {
+ *   test('complete CLI authentication journey', async ({ page, request }) => {
+ *     // Step 1: CLI initiates device code request
+ *     const deviceCodeResponse = await request.post('/auth/device-code', {
+ *       form: { client_id: 'grove-cli' }
+ *     });
+ *     const { device_code, user_code, verification_uri } = await deviceCodeResponse.json();
+ *
+ *     // Step 2: User visits verification URI
+ *     await page.goto(`${verification_uri}?user_code=${user_code}`);
+ *     await expect(page).toHaveURL(/\/login/);
+ *
+ *     // Step 3: User signs in (mock OAuth)
+ *     await page.click('text=Continue with Google');
+ *     // ... OAuth mock handles authentication ...
+ *
+ *     // Step 4: User sees authorization prompt
+ *     await expect(page.locator('text=Authorize Grove CLI?')).toBeVisible();
+ *
+ *     // Step 5: User approves
+ *     await page.click('button:has-text("Approve")');
+ *     await expect(page.locator('text=authorized')).toBeVisible();
+ *
+ *     // Step 6: CLI receives tokens
+ *     const tokenResponse = await request.post('/token', {
+ *       form: {
+ *         grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+ *         device_code,
+ *         client_id: 'grove-cli'
+ *       }
+ *     });
+ *     const { access_token } = await tokenResponse.json();
+ *     expect(access_token).toBeDefined();
+ *
+ *     // Step 7: CLI uses token
+ *     const userInfoResponse = await request.get('/userinfo', {
+ *       headers: { Authorization: `Bearer ${access_token}` }
+ *     });
+ *     const userInfo = await userInfoResponse.json();
+ *     expect(userInfo.email).toBeDefined();
+ *   });
+ * });
+ *
+ *
+ * @see https://playwright.dev/docs/intro
+ * @see https://datatracker.ietf.org/doc/html/rfc8628 (Device Authorization Grant)
+ */
+
+// Uncomment when implementing:
+// export {};

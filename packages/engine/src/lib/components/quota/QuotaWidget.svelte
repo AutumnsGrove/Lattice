@@ -6,8 +6,8 @@
    * Includes upgrade prompts when near or at limit.
    */
 
-  import type { QuotaWidgetData } from '../../groveauth/index.js';
-  import { STATUS_COLORS } from '../../groveauth/index.js';
+  import type { QuotaWidgetData } from '../../heartwood/index.js';
+  import { STATUS_COLORS } from '../../heartwood/index.js';
 
   interface Props {
     data: QuotaWidgetData;

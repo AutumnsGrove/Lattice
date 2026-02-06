@@ -57,7 +57,7 @@ export {
 } from "./config/presets.js";
 export type { ColorPreset, FontPreset } from "./config/presets.js";
 
-// GroveAuth client (re-export explicitly to avoid StatusColor conflict with UI)
+// Heartwood client (re-export explicitly to avoid StatusColor conflict with UI)
 export {
   GroveAuthClient,
   createGroveAuthClient,
@@ -81,9 +81,9 @@ export {
   RateLimitError,
   withRateLimit,
   DEFAULT_RATE_LIMITS,
-} from "./groveauth/index";
+} from "./heartwood/index";
 
-// Re-export GroveAuth types with renamed StatusColor to avoid conflict
+// Re-export Heartwood types with renamed StatusColor to avoid conflict
 export type {
   GroveAuthConfig,
   TokenResponse,
@@ -99,9 +99,9 @@ export type {
   QuotaWidgetData,
   PreSubmitCheckResult,
   AlertVariant,
-} from "./groveauth/index";
+} from "./heartwood/index";
 
-export type { StatusColor as GroveAuthStatusColor } from "./groveauth/index";
+export type { StatusColor as GroveAuthStatusColor } from "./heartwood/index";
 
 // =============================================================================
 // Curios - Developer Tools & Fun Website Features

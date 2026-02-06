@@ -1,0 +1,2 @@
+# This directory stores saved session state for OAuth testing
+# The google-auth.json file is gitignored (contains session tokens)

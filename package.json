@@ -73,9 +73,9 @@
       "types": "./packages/engine/dist/payments/*.d.ts",
       "default": "./packages/engine/dist/payments/*.js"
     },
-    "./groveauth": {
-      "types": "./packages/engine/dist/groveauth/index.d.ts",
-      "default": "./packages/engine/dist/groveauth/index.js"
+    "./heartwood": {
+      "types": "./packages/engine/dist/heartwood/index.d.ts",
+      "default": "./packages/engine/dist/heartwood/index.js"
     }
   },
   "overrides": {

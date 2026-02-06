@@ -1,0 +1,76 @@
+# Heartwood - Centralized Authentication Service
+# Canonical Name: Heartwood | Worker Name: groveauth (legacy)
+# Public Domain: heartwood.grove.place
+# API Domain: auth-api.grove.place (internal backend)
+
+name = "groveauth"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Production environment variables
+[vars]
+AUTH_BASE_URL = "https://auth-api.grove.place"
+ENVIRONMENT = "production"
+CDN_URL = "https://cdn.grove.place"
+
+# Feature flags
+PUBLIC_SIGNUP_ENABLED = "false"  # Set to "true" to allow public signup (bypass email allowlist)
+
+# D1 Database binding (Heartwood auth data)
+[[d1_databases]]
+binding = "DB"
+database_name = "groveauth"
+database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
+
+# D1 Database binding (GroveEngine data - email signups, etc.)
+[[d1_databases]]
+binding = "ENGINE_DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# R2 Storage binding (CDN assets)
+[[r2_buckets]]
+binding = "CDN_BUCKET"
+bucket_name = "grove-cdn"
+
+# Custom domain for API
+[[routes]]
+pattern = "auth-api.grove.place"
+custom_domain = true
+
+# Durable Objects - SessionDO for per-user session management
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionDO"
+
+# Migration for SQLite-backed Durable Object
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SessionDO"]
+
+# KV Namespace for session caching (Better Auth)
+[[kv_namespaces]]
+binding = "SESSION_KV"
+id = "7cfbd9e67125405994b49ecf80a372a4"
+
+# Smart Placement - run worker closer to D1 database location
+# Reduces latency for database-heavy auth operations
+[placement]
+mode = "smart"
+
+# Cron triggers
+# - Every minute: keepalive (warm worker + D1 connection)
+# - Daily at midnight UTC: maintenance (audit log cleanup)
+[triggers]
+crons = ["* * * * *", "0 0 * * *"]
+
+# Secrets (set via `wrangler secret put <NAME>`):
+# - JWT_PRIVATE_KEY: RSA private key for signing JWTs (PEM format)
+# - JWT_PUBLIC_KEY: RSA public key for verifying JWTs (PEM format)
+# - GOOGLE_CLIENT_ID: Google OAuth client ID
+# - GOOGLE_CLIENT_SECRET: Google OAuth client secret
+# - RESEND_API_KEY: Resend API key for sending emails
+# - SESSION_SECRET: Secret for signing session cookies (32+ bytes)
+# - BETTER_AUTH_SECRET: Secret for Better Auth (can reuse SESSION_SECRET)

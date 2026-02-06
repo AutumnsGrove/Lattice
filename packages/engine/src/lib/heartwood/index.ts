@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { createGroveAuthClient } from '@autumnsgrove/groveengine/groveauth';
+ * import { createGroveAuthClient } from '@autumnsgrove/groveengine/heartwood';
  *
  * const auth = createGroveAuthClient({
  *   clientId: 'your-client-id',

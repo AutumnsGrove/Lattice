@@ -48,14 +48,14 @@ export interface UserInfo {
   email: string;
   name: string | null;
   picture: string | null;
-  provider: "google" | "discord" | "magic_code";
+  provider: "google" | "magic_code";
 }
 
 // =============================================================================
 // OAUTH TYPES
 // =============================================================================
 
-export type OAuthProvider = "google" | "discord";
+export type OAuthProvider = "google";
 
 // =============================================================================
 // PASSKEY TYPES

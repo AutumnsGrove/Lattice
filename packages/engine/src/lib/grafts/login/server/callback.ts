@@ -18,7 +18,7 @@ import {
   getAuthError,
   logAuthError,
   buildErrorParams,
-} from "../../../groveauth/errors.js";
+} from "../../../heartwood/errors.js";
 
 // =============================================================================
 // RATE LIMITING

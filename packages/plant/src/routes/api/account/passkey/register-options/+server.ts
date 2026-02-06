@@ -8,7 +8,7 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getRequiredEnv } from "@autumnsgrove/groveengine/groveauth";
+import { getRequiredEnv } from "@autumnsgrove/groveengine/heartwood";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
 const DEFAULT_AUTH_URL = "https://heartwood.grove.place";

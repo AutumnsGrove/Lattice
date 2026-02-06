@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
-import type { Passkey } from "$lib/groveauth";
+import type { Passkey } from "$lib/heartwood";
 
 /**
  * Account & Subscription Management Page
