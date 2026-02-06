@@ -30,6 +30,10 @@ export { default as Logo } from "./Logo.svelte";
 export { default as LogoLoader } from "./LogoLoader.svelte";
 export { default as LogoArchive } from "./LogoArchive.svelte";
 
+// Beta program components
+export { default as BetaBadge } from "./BetaBadge.svelte";
+export { default as BetaWelcomeDialog } from "./BetaWelcomeDialog.svelte";
+
 // Glass suite - glassmorphism components
 export { default as Glass } from "./Glass.svelte";
 export { default as GlassButton } from "./GlassButton.svelte";

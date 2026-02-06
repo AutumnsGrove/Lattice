@@ -1,6 +1,7 @@
 <script>
-  import { GlassCard, Spinner, GroveTerm } from '$lib/ui';
+  import { GlassCard, Spinner, GroveTerm, BetaBadge, BetaWelcomeDialog } from '$lib/ui';
   import { api, getUserDisplayName } from "$lib/utils";
+  import { browser } from '$app/environment';
   import {
     FileText,
     Image,
@@ -31,6 +32,20 @@
   /** @type {DashboardStats | null} */
   let stats = $state(null);
   let loading = $state(true);
+
+  // Beta welcome dialog — show once per browser for beta users
+  let showBetaWelcome = $state(false);
+  $effect(() => {
+    if (data.isBeta && browser) {
+      try {
+        if (!localStorage.getItem('grove-beta-welcome-seen')) {
+          showBetaWelcome = true;
+        }
+      } catch {
+        // Storage unavailable
+      }
+    }
+  });
 
   // Current roadmap phase config
   const currentPhase = {
@@ -90,6 +105,9 @@
         <TreeDeciduous class="w-3.5 h-3.5" />
         <GroveTerm term="rooted">Rooted</GroveTerm>
       </a>
+      {#if data.isBeta}
+        <BetaBadge />
+      {/if}
     </div>
     <p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
   </header>
@@ -233,6 +251,14 @@
     </a>
   </section>
 </div>
+
+{#if data.isBeta}
+  <BetaWelcomeDialog
+    bind:open={showBetaWelcome}
+    userName={userName}
+    feedbackUrl="https://grove.place/feedback"
+  />
+{/if}
 
 <style>
   .stat-card {
