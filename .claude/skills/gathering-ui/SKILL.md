@@ -120,12 +120,16 @@ Phase: ADAPT
 - Reduced motion support
 - Touch targets 44px minimum
 - Dark mode variants
+- GroveTerm components for all Grove terminology
+  (never hardcode — use GroveTerm, GroveSwap, GroveText)
+  ([[term]] syntax for data-driven content strings)
 
 Output:
 - Complete Svelte components
 - Styled with Tailwind
 - Glass variants applied
 - Seasonal decorations
+- Grove terminology uses GroveTerm V2 components
 ```
 
 **🦌 DEER — SENSE**
@@ -180,6 +184,8 @@ Output:
 - [ ] Deer: Color contrast passes (4.5:1)
 - [ ] Deer: Reduced motion respected
 - [ ] Deer: Touch targets adequate (44px)
+- [ ] Both: Grove terminology uses GroveTerm components (not hardcoded)
+- [ ] Both: `[[term]]` syntax used in data-driven content strings
 
 **Quality Gates:**
 

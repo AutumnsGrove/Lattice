@@ -641,20 +641,63 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 {/if}
 ```
 
-**User Identity Language:**
+**Grove Mode & Terminology (GroveTerm V2):**
 
-| Term | Who | Use For |
-|------|-----|---------|
-| **Wanderer** | Everyone | Greetings, welcome messages, all users |
-| **Rooted** | Subscribers | Subscription confirmations, thank-yous |
-| **Pathfinder** | Trusted guides | Community leaders (appointed) |
-| **Wayfinder** | Autumn | The grove keeper (singular) |
+Grove has a complete terminology system that automatically switches between Grove-themed terms and standard/understandable terms based on the user's **Grove Mode** setting. **Always use GroveTerm components instead of hardcoding Grove terminology.**
 
-**In UI text:**
-- "Welcome, Wanderer." (not "Welcome, user")
-- "Welcome back, Wanderer." (dashboard greeting)
-- "You've taken root." (subscription confirmation)
-- "Thanks for staying rooted." (payment received)
+When Grove Mode is OFF (the default for new visitors), users see familiar terms like "Posts" instead of "Blooms", "Dashboard" instead of "Arbor", "Support" instead of "Porch". This keeps the experience welcoming and non-alienating. When users opt in to Grove Mode, they see the full nature-themed vocabulary.
+
+**The GroveTerm Component Suite:**
+
+```svelte
+import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/groveengine/ui';
+import groveTermManifest from '$lib/data/grove-term-manifest.json';
+```
+
+| Component | When to Use | Behavior |
+|-----------|-------------|----------|
+| `GroveTerm` | Interactive terms with popup definitions | Shows standard term when Grove Mode OFF, Grove term with colored underline when ON. Click opens popup. |
+| `GroveSwap` | Silent text replacement (no popup) | Reactively swaps between Grove/standard terms. No underline, no interaction. |
+| `GroveText` | Parsing `[[term]]` syntax in strings | Converts `[[bloom\|posts]]` in data strings to interactive GroveTerm components. |
+| `GroveSwapText` | Parsing `[[term]]` syntax silently | Same parsing but renders silent swaps (no popups). |
+| `GroveIntro` | "We call it X" banners below page titles | Shows a standardized intro: "we call it the [Grove Term]". |
+
+**Usage Examples:**
+
+```svelte
+<!-- Interactive term with popup -->
+<GroveTerm term="bloom" manifest={groveTermManifest} />
+
+<!-- Custom display text -->
+<GroveTerm term="wanderer" manifest={groveTermManifest}>wanderers</GroveTerm>
+
+<!-- Silent swap (no popup, no underline) -->
+<GroveSwap term="arbor" manifest={groveTermManifest} />
+
+<!-- Parse [[term]] syntax in data strings -->
+<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+
+<!-- Page intro banner -->
+<GroveIntro term="meadow" manifest={groveTermManifest} />
+```
+
+**Key Rules:**
+- **Never hardcode Grove terms** in user-facing UI. Always use GroveTerm components.
+- **Default is OFF** for new visitors. They see standard, familiar terminology.
+- **URLs stay as Grove terms** (e.g., `/porch`, `/garden`) regardless of display mode.
+- **Subscription tiers** (Seedling/Sapling/Oak/Evergreen) and brand terms (Grove) always show as-is.
+- **The `[[term]]` syntax** is preferred for data-driven content (FAQ items, pricing text, etc.).
+
+**Grove Mode Store:**
+
+```svelte
+import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
+
+// Check current mode
+const isGroveMode = $derived(groveModeStore.current);
+
+// Toggle is in the footer — don't add competing toggles
+```
 
 **Final Checklist:**
 
@@ -667,6 +710,8 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 - [ ] Trees randomized with proper spacing (8% minimum gap)?
 - [ ] Dark mode supported with appropriate glass variants?
 - [ ] User-facing text follows Grove voice?
+- [ ] Grove terminology uses GroveTerm components (not hardcoded)?
+- [ ] `[[term]]` syntax used in data-driven content strings?
 
 **Output:** Fully adapted, accessible, responsive UI ready for production
 

@@ -245,6 +245,28 @@ src/
 └── hooks.server.js
 ```
 
+## Grove-Specific: GroveTerm Components
+
+When building Grove UI that includes nature-themed terminology, always use the GroveTerm component suite instead of hardcoding terms. This respects users' Grove Mode setting (standard terms by default, opt-in to Grove vocabulary).
+
+```svelte
+<script lang="ts">
+  import { GroveTerm, GroveSwap, GroveText } from '@autumnsgrove/groveengine/ui';
+  import groveTermManifest from '$lib/data/grove-term-manifest.json';
+</script>
+
+<!-- Interactive term with popup definition -->
+<GroveTerm term="bloom" manifest={groveTermManifest} />
+
+<!-- Silent swap (no popup, no underline) -->
+<GroveSwap term="arbor" manifest={groveTermManifest} />
+
+<!-- Parse [[term]] syntax in data strings -->
+<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+```
+
+See `packages/engine/src/lib/ui/components/ui/groveterm/` for component source and `chameleon-adapt` skill for full UI design guidance.
+
 ## Related Resources
 
 See `AgentUsage/svelte5_guide.md` for complete documentation including:

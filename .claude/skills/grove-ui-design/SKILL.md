@@ -34,24 +34,55 @@ Write with the warmth of a midnight tea shop and the clarity of good documentati
 - **Readable** — content-first, decorations enhance, never obstruct
 - **Alive** — subtle animations, seasonal changes, randomization
 
-### User Identity Language
+### Grove Mode & Terminology (GroveTerm V2)
 
-Grove uses specific terms for community members in all UI:
+Grove has a terminology system that automatically switches between Grove-themed terms and standard terms based on the user's **Grove Mode** setting. **Always use GroveTerm components instead of hardcoding Grove terminology in UI.**
 
-| Term | Who | Use For |
-|------|-----|---------|
-| **Wanderer** | Everyone | Greetings, welcome messages, all users |
-| **Rooted** | Subscribers | Subscription confirmations, thank-yous |
-| **Pathfinder** | Trusted guides | Community leaders (appointed) |
-| **Wayfinder** | Autumn | The grove keeper (singular) |
+By default, Grove Mode is OFF for new visitors. They see familiar terms: "Posts" instead of "Blooms", "Dashboard" instead of "Arbor", "Support" instead of "Porch". When users opt in via the footer toggle, they see the full nature-themed vocabulary with interactive definitions.
 
-**In UI text:**
-- "Welcome, Wanderer." (not "Welcome, user")
-- "Welcome back, Wanderer." (dashboard greeting)
-- "You've taken root." (subscription confirmation)
-- "Thanks for staying rooted." (payment received)
+**The Component Suite:**
 
-See `docs/grove-user-identity.md` for full documentation.
+```svelte
+import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/groveengine/ui';
+import groveTermManifest from '$lib/data/grove-term-manifest.json';
+```
+
+| Component | Use Case | Behavior |
+|-----------|----------|----------|
+| `GroveTerm` | Interactive terms with popup definitions | Colored underline when ON, click for popup. Shows standard term when OFF. |
+| `GroveSwap` | Silent text replacement | Reactively swaps text. No underline, no interaction. |
+| `GroveText` | Parse `[[term]]` syntax in data strings | Renders `[[bloom\|posts]]` as interactive GroveTerm components. |
+| `GroveSwapText` | Parse `[[term]]` syntax silently | Same parsing, silent swaps (no popups). |
+| `GroveIntro` | "We call it X" page banners | Standardized intro below page titles. |
+
+**Usage:**
+
+```svelte
+<!-- Interactive term with popup -->
+<GroveTerm term="bloom" manifest={groveTermManifest} />
+
+<!-- Custom display text -->
+<GroveTerm term="wanderer" manifest={groveTermManifest}>wanderers</GroveTerm>
+
+<!-- Silent swap (no popup, no underline) -->
+<GroveSwap term="arbor" manifest={groveTermManifest} />
+
+<!-- Parse [[term]] syntax in data strings (ideal for FAQ items, pricing, etc.) -->
+<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+
+<!-- Page intro banner: "we call it the Meadow" -->
+<GroveIntro term="meadow" manifest={groveTermManifest} />
+```
+
+**Key Rules:**
+- **Never hardcode Grove terms** in user-facing UI. Always use GroveTerm components.
+- **Default is OFF** for new visitors. Standard, familiar terminology first.
+- **URLs stay as Grove terms** (`/porch`, `/garden`) regardless of display mode.
+- **Brand terms** (Grove) and **subscription tiers** (Seedling/Sapling/Oak/Evergreen) always show as-is.
+- **Use `[[term]]` syntax** for data-driven content (FAQ items, pricing fineprint, feature lists).
+- **Grove Mode store**: `groveModeStore` from `@autumnsgrove/groveengine/ui/stores`. Toggle lives in the footer.
+
+See `docs/grove-user-identity.md` for the full identity language documentation and `packages/engine/src/lib/ui/components/ui/groveterm/` for component source.
 
 ---
 
@@ -987,3 +1018,5 @@ Before shipping a Grove page:
 - [ ] Trees randomized with proper spacing (8% minimum gap)?
 - [ ] Dark mode supported with appropriate glass variants?
 - [ ] User-facing text follows Grove voice (see `grove-documentation`)?
+- [ ] Grove terminology uses GroveTerm components (not hardcoded)?
+- [ ] Data-driven content uses `[[term]]` syntax with GroveText?
