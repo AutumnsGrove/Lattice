@@ -1,6 +1,7 @@
 <script>
 	import Lightbox from '$lib/ui/components/gallery/Lightbox.svelte';
 	import GlassCarousel from '$lib/ui/components/ui/GlassCarousel.svelte';
+	import EmbedWidget from '$lib/ui/components/content/EmbedWidget.svelte';
 	import { sanitizeHTML } from '$lib/utils/sanitize';
 
 	let { item = {} } = $props();
@@ -77,6 +78,18 @@
 	{:else if item.type === 'emoji'}
 		<div class="gutter-emoji">
 			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} loading="lazy" decoding="async" />
+		</div>
+	{:else if item.type === 'embed'}
+		<div class="gutter-embed">
+			<EmbedWidget
+				url={item.embedUrl || item.url || ''}
+				provider={item.embedProvider}
+				embedUrl={item.embedHtml ? undefined : item.embedUrl}
+				embedHtml={item.embedHtml}
+				embedTitle={item.embedTitle}
+				embedThumbnail={item.embedThumbnail}
+				compact={true}
+			/>
 		</div>
 	{/if}
 </div>
@@ -286,5 +299,10 @@
 	}
 	.gutter-emoji img:hover {
 		transform: scale(1.15);
+	}
+	/* Embed styles */
+	.gutter-embed {
+		width: 100%;
+		max-width: 220px;
 	}
 </style>

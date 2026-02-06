@@ -10,5 +10,6 @@ export { default as SearchCard } from './SearchCard.svelte';
 export { default as PlanCard } from './PlanCard.svelte';
 export { default as RoadmapPreview } from './RoadmapPreview.svelte';
 export { default as LinkPreview } from './LinkPreview.svelte';
+export { default as EmbedWidget } from './EmbedWidget.svelte';
 
-export const CONTENT_VERSION = '0.3.0';
+export const CONTENT_VERSION = '0.4.0';

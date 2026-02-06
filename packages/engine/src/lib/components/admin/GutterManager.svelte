@@ -3,7 +3,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X } from "lucide-svelte";
+  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X, Link2, Loader2 } from "lucide-svelte";
   import { debounce } from '$lib/utils/debounce';
 
   /**
@@ -15,6 +15,11 @@
    * @property {string} [file]
    * @property {string} [caption]
    * @property {GalleryImage[]} [images]
+   * @property {string} [embedUrl]
+   * @property {string} [embedProvider]
+   * @property {string} [embedHtml]
+   * @property {string} [embedTitle]
+   * @property {string} [embedThumbnail]
    */
 
   /**
@@ -156,6 +161,16 @@
   /** @type {GalleryImage[]} */
   let galleryImages = $state([]);
 
+  // Embed-specific form state
+  let embedUrl = $state("");
+  let embedProvider = $state("");
+  let embedResolvedUrl = $state("");
+  let embedHtml = $state("");
+  let embedTitle = $state("");
+  let embedThumbnail = $state("");
+  let embedLoading = $state(false);
+  let embedError = $state("");
+
   // Image picker state
   /** @type {CdnImage[]} */
   let cdnImages = $state([]);
@@ -213,6 +228,14 @@
     itemCaption = "";
     itemUrl = "";
     galleryImages = [];
+    embedUrl = "";
+    embedProvider = "";
+    embedResolvedUrl = "";
+    embedHtml = "";
+    embedTitle = "";
+    embedThumbnail = "";
+    embedLoading = false;
+    embedError = "";
   }
 
   function openAddModal() {
@@ -230,6 +253,12 @@
     itemCaption = item.caption || "";
     itemUrl = item.url || item.file || "";
     galleryImages = item.images ? [...item.images] : [];
+    embedUrl = item.embedUrl || "";
+    embedProvider = item.embedProvider || "";
+    embedResolvedUrl = item.embedUrl || "";
+    embedHtml = item.embedHtml || "";
+    embedTitle = item.embedTitle || "";
+    embedThumbnail = item.embedThumbnail || "";
     editingIndex = index;
     showAddModal = true;
   }
@@ -254,6 +283,13 @@
       if (itemCaption) newItem.caption = itemCaption;
     } else if (itemType === "gallery") {
       newItem.images = galleryImages;
+    } else if (itemType === "embed") {
+      newItem.embedUrl = embedUrl;
+      if (embedProvider) newItem.embedProvider = embedProvider;
+      if (embedResolvedUrl) newItem.url = embedResolvedUrl;
+      if (embedHtml) newItem.embedHtml = embedHtml;
+      if (embedTitle) newItem.embedTitle = embedTitle;
+      if (embedThumbnail) newItem.embedThumbnail = embedThumbnail;
     }
 
     if (editingIndex !== null) {
@@ -359,6 +395,68 @@
     galleryImages = [...galleryImages];
   }
 
+  /**
+   * Resolve embed URL against the oEmbed API
+   * Called when user pastes a URL in the embed field
+   */
+  async function resolveEmbedUrl() {
+    if (!embedUrl) return;
+
+    // Basic URL validation
+    try {
+      new URL(embedUrl);
+    } catch {
+      embedError = "Please enter a valid URL";
+      return;
+    }
+
+    embedLoading = true;
+    embedError = "";
+    embedProvider = "";
+    embedResolvedUrl = "";
+    embedHtml = "";
+    embedTitle = "";
+    embedThumbnail = "";
+
+    try {
+      const params = new URLSearchParams({ url: embedUrl });
+      const response = await fetch(`/api/oembed?${params}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to resolve: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.type === 'embed') {
+        embedProvider = data.provider || "";
+        embedResolvedUrl = data.embedUrl || "";
+        embedHtml = data.embedHtml || "";
+        embedTitle = data.title || "";
+        embedThumbnail = data.thumbnail || "";
+        toast.success(`Detected: ${data.provider} embed`);
+      } else if (data.type === 'preview') {
+        // Not a known provider — will show as OG preview
+        embedProvider = "";
+        if (data.og) {
+          embedTitle = data.og.title || "";
+          embedThumbnail = data.og.image || "";
+          toast.success("Link preview ready (not an embeddable provider)");
+        } else {
+          toast.success("URL saved — will show as a link");
+        }
+      }
+    } catch (err) {
+      embedError = err instanceof Error ? err.message : "Failed to resolve embed";
+      toast.error("Failed to resolve embed URL");
+    } finally {
+      embedLoading = false;
+    }
+  }
+
+  // Debounced embed resolution
+  const debouncedResolveEmbed = debounce(resolveEmbedUrl, 600);
+
   // Get preview of item content
   /** @param {GutterItem} item */
   function getItemPreview(item) {
@@ -370,6 +468,10 @@
     }
     if (item.type === "gallery") {
       return `${item.images?.length || 0} images`;
+    }
+    if (item.type === "embed") {
+      const label = item.embedProvider ? `[${item.embedProvider}] ` : "";
+      return label + (item.embedTitle || item.embedUrl || "Embed");
     }
     return "";
   }
@@ -403,6 +505,8 @@
                 <ImageIcon class="type-icon" />
               {:else if item.type === "gallery"}
                 <Images class="type-icon" />
+              {:else if item.type === "embed"}
+                <Link2 class="type-icon" />
               {:else}
                 <Pin class="type-icon" />
               {/if}
@@ -476,7 +580,8 @@
         options={[
           { value: "comment", label: "Comment (Markdown)" },
           { value: "photo", label: "Photo" },
-          { value: "gallery", label: "Image Gallery" }
+          { value: "gallery", label: "Image Gallery" },
+          { value: "embed", label: "Embed / Link Preview" }
         ]}
       />
     </div>
@@ -624,6 +729,79 @@
         + Add Image
       </button>
     </div>
+  {/if}
+
+  {#if itemType === "embed"}
+    <div class="form-group">
+      <label for="embed-url">URL to Embed</label>
+      <div class="url-input-row">
+        <Input
+          type="text"
+          id="embed-url"
+          bind:value={embedUrl}
+          placeholder="https://strawpoll.com/polls/... or any URL"
+          oninput={() => debouncedResolveEmbed()}
+        />
+        <Button
+          variant="outline"
+          onclick={resolveEmbedUrl}
+          disabled={embedLoading || !embedUrl}
+        >
+          {#if embedLoading}
+            <Loader2 class="btn-icon animate-spin" />
+          {:else}
+            Resolve
+          {/if}
+        </Button>
+      </div>
+      <span class="form-hint">
+        Paste a URL. Supported providers auto-embed; others show a link preview.
+      </span>
+    </div>
+
+    {#if embedLoading}
+      <div class="embed-resolving">
+        <Loader2 class="type-icon animate-spin" />
+        <span>Resolving URL...</span>
+      </div>
+    {/if}
+
+    {#if embedError}
+      <div class="embed-error">{embedError}</div>
+    {/if}
+
+    {#if embedProvider}
+      <div class="embed-resolved">
+        <div class="embed-resolved-badge">
+          <Link2 class="type-icon" />
+          <span class="embed-provider-name">{embedProvider}</span>
+          <span class="embed-resolved-label">interactive embed</span>
+        </div>
+        {#if embedTitle}
+          <div class="embed-resolved-title">{embedTitle}</div>
+        {/if}
+        {#if embedThumbnail}
+          <div class="embed-thumbnail-preview">
+            <img src={embedThumbnail} alt="Embed thumbnail" />
+          </div>
+        {/if}
+      </div>
+    {:else if embedTitle && !embedLoading && embedUrl}
+      <div class="embed-resolved">
+        <div class="embed-resolved-badge preview-badge">
+          <Link2 class="type-icon" />
+          <span class="embed-resolved-label">link preview</span>
+        </div>
+        {#if embedTitle}
+          <div class="embed-resolved-title">{embedTitle}</div>
+        {/if}
+        {#if embedThumbnail}
+          <div class="embed-thumbnail-preview">
+            <img src={embedThumbnail} alt="Preview thumbnail" />
+          </div>
+        {/if}
+      </div>
+    {/if}
   {/if}
   {/snippet}
 
@@ -1280,6 +1458,116 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* Embed form styles */
+  .embed-resolving {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--grove-overlay-5);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  .embed-error {
+    padding: 0.5rem 0.75rem;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: #ef4444;
+  }
+
+  :global(.dark) .embed-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+
+  .embed-resolved {
+    padding: 0.75rem;
+    background: rgba(34, 197, 94, 0.06);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  :global(.dark) .embed-resolved {
+    background: rgba(74, 222, 128, 0.06);
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
+  .embed-resolved-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .embed-provider-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-primary);
+  }
+
+  :global(.dark) .embed-provider-name {
+    color: #86efac;
+  }
+
+  .embed-resolved-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .preview-badge .embed-resolved-label {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  :global(.dark) .preview-badge .embed-resolved-label {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+  }
+
+  .embed-resolved-title {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .embed-thumbnail-preview {
+    max-height: 100px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--color-bg-secondary);
+  }
+
+  .embed-thumbnail-preview img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  :global(.animate-spin) {
+    animation: gutter-spin 1s linear infinite;
+  }
+
+  @keyframes gutter-spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Screen reader only utility */
