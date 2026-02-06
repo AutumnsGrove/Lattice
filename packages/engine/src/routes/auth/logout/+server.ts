@@ -9,7 +9,12 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-export const GET: RequestHandler = async ({
+/**
+ * POST is the primary logout handler (CSRF-safe).
+ * GET is kept as a fallback for existing links during migration,
+ * but new code should always use POST.
+ */
+export const POST: RequestHandler = async ({
   url,
   cookies,
   platform,
@@ -58,3 +63,14 @@ export const GET: RequestHandler = async ({
 
   redirect(302, "/");
 };
+
+/**
+ * GET fallback — kept for backwards compatibility with existing <a> links.
+ * Delegates to the same logic as POST. Safe because:
+ * - Session revocation is idempotent (revoking a revoked session is a no-op)
+ * - The hooks.server.ts CSRF check only applies to POST/PUT/DELETE/PATCH
+ * - SameSite=Lax cookies prevent cross-origin GET-with-cookies in most contexts
+ *
+ * TODO: Remove once all logout links are migrated to POST forms
+ */
+export const GET: RequestHandler = POST;

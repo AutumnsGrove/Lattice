@@ -18,7 +18,9 @@ import { TIERS, type TierKey } from "$lib/config/tiers.js";
  */
 function getCookie(cookieHeader: string | null, name: string): string | null {
   if (!cookieHeader) return null;
-  const match = cookieHeader.match(new RegExp(`${name}=([^;]+)`));
+  // Use word boundary ((?:^|;\s*)) to prevent matching substrings
+  // e.g. "session=" must not match inside "grove_session="
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
   return match ? match[1] : null;
 }
 
@@ -491,12 +493,19 @@ export const handle: Handle = async ({ event, resolve }) => {
     const accessToken = getCookie(cookieHeader, "access_token");
     if (accessToken) {
       try {
-        const authBaseUrl =
-          event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place";
-
-        const userInfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        // SECURITY: Use service binding when available (Worker-to-Worker, no public internet)
+        // Falls back to bare fetch only when AUTH binding is unavailable (e.g., local dev)
+        const authBinding = event.platform?.env?.AUTH;
+        const userInfoResponse = authBinding
+          ? await authBinding.fetch("https://auth-api.grove.place/userinfo", {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            })
+          : await fetch(
+              `${event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place"}/userinfo`,
+              {
+                headers: { Authorization: `Bearer ${accessToken}` },
+              },
+            );
 
         if (userInfoResponse.ok) {
           const userInfo = (await userInfoResponse.json()) as Record<

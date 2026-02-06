@@ -163,10 +163,12 @@
           <span>Get Support</span>
         </a>
         {#if data.user}
-          <a href="/auth/logout" class="logout-btn">
-            <LogOut class="logout-icon" />
-            <span>Logout</span>
-          </a>
+          <form method="POST" action="/auth/logout" class="logout-form">
+            <button type="submit" class="logout-btn">
+              <LogOut class="logout-icon" />
+              <span>Logout</span>
+            </button>
+          </form>
         {:else}
           <a href="/auth/login" class="logout-btn">
             <LogOut class="logout-icon" />
@@ -183,9 +185,11 @@
           <MessageCircle class="help-icon" />
         </a>
         {#if data.user}
-          <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
-            <LogOut class="logout-icon" />
-          </a>
+          <form method="POST" action="/auth/logout" class="logout-form">
+            <button type="submit" class="logout-btn-icon" title="Logout" aria-label="Logout">
+              <LogOut class="logout-icon" />
+            </button>
+          </form>
         {:else}
           <a href="/auth/login" class="logout-btn-icon" title="Sign In" aria-label="Sign In">
             <LogOut class="logout-icon" />
@@ -515,6 +519,10 @@
     color: var(--grove-text-muted);
   }
 
+  .logout-form {
+    display: contents;
+  }
+
   .logout-btn {
     display: flex;
     align-items: center;
@@ -524,6 +532,10 @@
     background: var(--grove-overlay-8);
     color: var(--color-text-muted);
     text-decoration: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
     border-radius: var(--border-radius-button);
     font-size: 0.85rem;
     transition: background 0.2s, color 0.2s;
@@ -552,6 +564,9 @@
     background: var(--grove-overlay-8);
     color: var(--color-text-muted);
     text-decoration: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
     border-radius: var(--border-radius-button);
     transition: background 0.2s, color 0.2s;
   }

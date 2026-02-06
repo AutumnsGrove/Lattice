@@ -11,3 +11,7 @@ import type { RequestHandler } from "./$types";
 export const GET: RequestHandler = async () => {
   redirect(302, "/auth/logout");
 };
+
+export const POST: RequestHandler = async () => {
+  redirect(307, "/auth/logout");
+};

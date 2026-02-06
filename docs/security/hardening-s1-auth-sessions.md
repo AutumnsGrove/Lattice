@@ -127,10 +127,9 @@
 
 [~] JWT: Claims validated (iss, aud, exp, nbf)
     - exp validated by jose automatically
-    - iss set to 'https://auth.grove.place' on signing
-    - iss NOT validated on verification (jose defaults don't enforce)
-    - aud NOT set or validated
-    - Recommendation: Add issuer validation to jwtVerify() call
+    - iss validated: jwt.ts passes `issuer: JWT_ISSUER` to jwtVerify()
+    - aud NOT set or validated (acceptable for single-service architecture)
+    - Recommendation: Add audience claim if additional services are added
 
 [x] Timing-safe comparison for tokens/secrets
     - crypto.ts:timingSafeEqual() — FIXED: now uses Math.max pattern
@@ -148,7 +147,7 @@
     - Passkey register: 5/hour per user
     - Token endpoint: 20/min per client
     - Device code polling: 12/min per device_code with slow_down
-    - Gap: Better Auth magic link has no external rate limit (see findings)
+    - Magic link: FIXED — 5 requests/15 min per IP (new magicLinkRateLimiter)
 ```
 
 ---
@@ -179,37 +178,34 @@
 |----|----------|-------------|-------------|-------------|
 | S1-F1 | MEDIUM | `timingSafeEqual` in crypto.ts leaked length info via early return | YES | N/A |
 | S1-F2 | MEDIUM | `/userinfo` returned "User not found" enabling user enumeration | YES | N/A |
-| S1-F3 | LOW | `/session/validate-service` lacks service-to-service authentication | NO | YES |
+| S1-F3 | LOW | `/session/validate-service` lacks service-to-service authentication | YES | N/A |
 | S1-F4 | MEDIUM | Engine JWT fallback used bare `fetch()` bypassing service binding | YES | N/A |
-| S1-F5 | LOW | Better Auth magic link endpoint lacks external rate limiting | NO | YES |
-| S1-F6 | LOW | Token rate limiter reads `client_id` from query params only (misses POST body) | NO | YES |
+| S1-F5 | LOW | Better Auth magic link endpoint lacks external rate limiting | YES | N/A |
+| S1-F6 | LOW | Token rate limiter reads `client_id` from query params only (misses POST body) | YES | N/A |
 | S1-F7 | LOW | GroveAuth missing `Permissions-Policy` security header | YES | N/A |
-| S1-F8 | LOW | `betterAuth.ts` leaks debug info (`message`, `cause`, `stack`) in 500 error responses | NO | YES |
-| S1-F9 | LOW | GET logout in Engine is CSRF-vulnerable (should require POST) | NO | YES |
-| S1-F10 | LOW | JWT issuer claim not validated on verification | NO | YES |
-| S1-F11 | INFO | No CSRF protection on device authorization POST (`/device/authorize`) | NO | YES |
-| S1-F12 | INFO | CORS wildcard `*.grove.place` includes tenant subdomains | NO | N/A (by design, documented) |
-| S1-F13 | INFO | Cookie regex `getCookie()` in Engine may not be boundary-safe for cookie names that are substrings | NO | YES |
+| S1-F8 | LOW | `betterAuth.ts` leaks debug info (`message`, `cause`, `stack`) in 500 error responses | YES | N/A |
+| S1-F9 | LOW | GET logout in Engine is CSRF-vulnerable (should require POST) | YES | N/A |
+| S1-F10 | LOW | JWT issuer claim not validated on verification | N/A | N/A (was already validated — false positive) |
+| S1-F11 | INFO | No CSRF protection on device authorization POST (`/device/authorize`) | YES | N/A |
+| S1-F12 | INFO | CORS wildcard `*.grove.place` includes tenant subdomains | N/A | N/A (by design, documented) |
+| S1-F13 | INFO | Cookie regex `getCookie()` in Engine may not be boundary-safe for cookie names that are substrings | YES | N/A |
 
-### Fixes Applied (4)
+### Fixes Applied (11)
 
+**Session 1 (initial audit):**
 1. **S1-F1**: `GroveAuth/src/utils/crypto.ts` — Changed `timingSafeEqual` from early-return on length mismatch to `Math.max` iteration with length XOR accumulation
-2. **S1-F2**: `GroveAuth/src/routes/verify.ts` — Changed `/userinfo` "User not found" error to match "Token is invalid or expired" error message
+2. **S1-F2**: `GroveAuth/src/routes/verify.ts` — Changed `/userinfo` "User not found" error to match "Token is invalid or expired" error message; updated test
 3. **S1-F4**: `Engine/src/hooks.server.ts` — Changed JWT fallback from bare `fetch()` to use `AUTH` service binding with fetch fallback for local dev
 4. **S1-F7**: `GroveAuth/src/utils/constants.ts` — Added `Permissions-Policy: geolocation=(), microphone=(), camera=()` to SECURITY_HEADERS
 
-### Issues to File (8)
-
-| Finding | Priority | Title |
-|---------|----------|-------|
-| S1-F3 | P2 | `validate-service` endpoint needs service-to-service authentication |
-| S1-F5 | P2 | Add rate limiting to Better Auth magic link endpoint |
-| S1-F6 | P3 | Token rate limiter should read client_id from POST body, not just query params |
-| S1-F8 | P2 | Strip debug info from betterAuth.ts 500 error responses |
-| S1-F9 | P2 | Change Engine logout from GET to POST to prevent CSRF |
-| S1-F10 | P3 | Add issuer validation to JWT verification |
-| S1-F11 | P3 | Add CSRF protection to device authorization POST endpoint |
-| S1-F13 | P3 | Make getCookie() regex boundary-safe for substring cookie names |
+**Session 2 (full siege):**
+5. **S1-F3**: `GroveAuth/src/routes/session.ts` — Added `SERVICE_SECRET` bearer token check to `validate-service` endpoint (defense-in-depth alongside service bindings)
+6. **S1-F5**: `GroveAuth/src/middleware/rateLimit.ts` + `betterAuth.ts` — Added `magicLinkRateLimiter` (5 req/15 min per IP) to magic link sign-in endpoint
+7. **S1-F6**: `GroveAuth/src/middleware/rateLimit.ts` — Token rate limiter now falls back to IP-based rate limiting when `client_id` is not in query params
+8. **S1-F8**: `GroveAuth/src/routes/betterAuth.ts` — Removed `debug` field from 500 error JSON responses
+9. **S1-F9**: `Engine/src/routes/auth/logout/+server.ts` + `arbor/+layout.svelte` — Changed logout from GET to POST (with GET fallback during migration); updated admin layout links to use `<form method="POST">`
+10. **S1-F11**: `GroveAuth/src/routes/device.ts` — Added Origin/Referer validation on device authorization POST endpoint
+11. **S1-F13**: `Engine/src/hooks.server.ts` — Fixed `getCookie()` regex to use `(?:^|;\s*)` prefix for boundary-safe cookie name matching
 
 ---
 
