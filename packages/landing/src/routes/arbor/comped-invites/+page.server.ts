@@ -227,8 +227,8 @@ export const actions: Actions = {
 
       step = "check-tenant";
       const existingTenant = await DB.prepare(
-        `SELECT t.subdomain FROM tenants t
-         JOIN users u ON t.owner_id = u.id
+        `SELECT t.subdomain FROM users u
+         JOIN tenants t ON u.tenant_id = t.id
          WHERE u.email = ?`,
       )
         .bind(email)
