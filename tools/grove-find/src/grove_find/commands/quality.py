@@ -34,10 +34,10 @@ def _run_rg(args: list[str], cwd: Path) -> str:
 
 
 def _run_fd(args: list[str], cwd: Path) -> str:
-    """Run fd with standard options."""
+    """Run fd with standard options. Returns empty string if fd is not installed."""
     tools = discover_tools()
     if not tools.fd:
-        raise typer.Exit(1)
+        return ""
 
     config = get_config()
     base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]

@@ -102,6 +102,14 @@ def main(
         print(get_install_instructions())
         raise typer.Exit(1)
 
+    # Warn about missing optional tools (fd, gh) — common in remote/web environments
+    missing_optional = tools.get_missing_optional()
+    if missing_optional and verbose:
+        print_warning(
+            "Some optional tools are missing (limited functionality):\n  - "
+            + "\n  - ".join(missing_optional)
+        )
+
     # Store tools in context for commands to use
     ctx.ensure_object(dict)
     ctx.obj["config"] = config

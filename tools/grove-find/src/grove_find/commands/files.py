@@ -2,8 +2,11 @@
 
 Provides: gf svelte, gf ts, gf js, gf css, gf md, gf json, gf toml, gf yaml, gf html, gf shell
 Also: gf test, gf config
+
+When fd is not installed, falls back to `rg --files` with glob patterns.
 """
 
+import subprocess
 from pathlib import Path
 from typing import Optional
 import typer
@@ -15,27 +18,157 @@ from grove_find.output import console, print_section, print_warning
 app = typer.Typer(help="File type searches")
 
 
-def _run_fd(args: list[str], cwd: Path, limit: int = 50) -> str:
-    """Run fd with standard options."""
+def _find_files(
+    extensions: list[str],
+    cwd: Path,
+    pattern: Optional[str] = None,
+    excludes: Optional[list[str]] = None,
+    limit: int = 50,
+) -> str:
+    """Find files by extension using fd (preferred) or rg --files (fallback).
+
+    Args:
+        extensions: File extensions to match (e.g. ["svelte"], ["yml", "yaml"])
+        cwd: Working directory for the search
+        pattern: Optional filename pattern filter
+        excludes: Optional glob patterns to exclude (e.g. ["*.d.ts"])
+        limit: Max results before truncating
+    """
     tools = discover_tools()
-    if not tools.fd:
-        raise typer.Exit(1)
-
     config = get_config()
-    base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
 
-    if config.is_human_mode:
-        base_args.append("--color=always")
+    if tools.fd:
+        # Preferred: use fd
+        args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
+        if config.is_human_mode:
+            args.append("--color=always")
+        else:
+            args.append("--color=never")
+        for ext in extensions:
+            args.extend(["-e", ext])
+        if excludes:
+            for exc in excludes:
+                args.extend(["--exclude", exc])
+        if pattern:
+            args.append(pattern)
+        else:
+            args.append(".")
+        args.append(str(cwd))
+        result = run_tool(tools.fd, args, cwd=cwd)
+        output = result.stdout
     else:
-        base_args.append("--color=never")
+        # Fallback: use rg --files with glob patterns
+        args = ["--files", "--sort", "path"]
+        for ext in extensions:
+            args.extend(["-g", f"*.{ext}"])
+        if excludes:
+            for exc in excludes:
+                args.extend(["-g", f"!{exc}"])
+        args.append(str(cwd))
+        result = run_tool(tools.rg, args, cwd=cwd)
+        output = result.stdout
+        # If pattern specified, filter the results
+        if pattern and output:
+            lines = output.strip().split("\n")
+            filtered = [l for l in lines if pattern.lower() in l.lower()]
+            output = "\n".join(filtered) + "\n" if filtered else ""
 
-    result = run_tool(tools.fd, base_args + args, cwd=cwd)
-    lines = result.stdout.strip().split("\n") if result.stdout.strip() else []
-
+    lines = output.strip().split("\n") if output.strip() else []
     if len(lines) > limit:
-        output = "\n".join(lines[:limit])
-        return output + f"\n\n(Showing first {limit} results. Add a pattern to filter.)"
-    return result.stdout
+        return "\n".join(lines[:limit]) + f"\n\n(Showing first {limit} results. Add a pattern to filter.)"
+    return output
+
+
+def _find_files_regex(
+    regex: str,
+    cwd: Path,
+    limit: int = 50,
+) -> str:
+    """Find files matching a regex pattern using fd or rg --files.
+
+    Args:
+        regex: Regex pattern for fd, or translated to globs for rg
+        cwd: Working directory
+        limit: Max results
+    """
+    tools = discover_tools()
+    config = get_config()
+
+    if tools.fd:
+        args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
+        if config.is_human_mode:
+            args.append("--color=always")
+        else:
+            args.append("--color=never")
+        args.extend([regex, str(cwd)])
+        result = run_tool(tools.fd, args, cwd=cwd)
+        output = result.stdout
+    else:
+        # Fallback: use rg --files then filter with grep-style matching
+        args = ["--files", "--sort", "path", str(cwd)]
+        result = run_tool(tools.rg, args, cwd=cwd)
+        if result.stdout:
+            import re
+            lines = result.stdout.strip().split("\n")
+            try:
+                compiled = re.compile(regex)
+                filtered = [l for l in lines if compiled.search(l)]
+            except re.error:
+                filtered = [l for l in lines if regex in l]
+            output = "\n".join(filtered) + "\n" if filtered else ""
+        else:
+            output = ""
+
+    lines = output.strip().split("\n") if output.strip() else []
+    if len(lines) > limit:
+        return "\n".join(lines[:limit]) + f"\n\n(Showing first {limit} results.)"
+    return output
+
+
+def _find_dirs(
+    pattern: str,
+    cwd: Path,
+    limit: int = 20,
+) -> str:
+    """Find directories matching a pattern using fd or find (fallback).
+
+    Args:
+        pattern: Directory name pattern (regex for fd, glob for find)
+        cwd: Working directory
+        limit: Max results
+    """
+    tools = discover_tools()
+
+    if tools.fd:
+        config = get_config()
+        args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
+        if config.is_human_mode:
+            args.append("--color=always")
+        else:
+            args.append("--color=never")
+        args.extend(["-t", "d", pattern, str(cwd)])
+        result = run_tool(tools.fd, args, cwd=cwd)
+        output = result.stdout
+    else:
+        # Fallback: use find
+        result = subprocess.run(
+            [
+                "find", str(cwd),
+                "-type", "d",
+                "-regextype", "posix-extended",
+                "-regex", f".*({pattern})",
+                "-not", "-path", "*/node_modules/*",
+                "-not", "-path", "*/.git/*",
+                "-not", "-path", "*/dist/*",
+            ],
+            capture_output=True, text=True, cwd=cwd,
+        )
+        output = result.stdout
+
+    lines = output.strip().split("\n") if output.strip() else []
+    if len(lines) > limit:
+        return "\n".join(lines[:limit])
+    return output
 
 
 def _file_search(
@@ -52,22 +185,13 @@ def _file_search(
     else:
         print_section(description, "")
 
-    args = ["-e", extension]
-
-    # Add any additional exclusions
-    if excludes:
-        for exc in excludes:
-            args.extend(["--exclude", exc])
-
-    if pattern:
-        args.append(pattern)
-    else:
-        args.append(".")
-
-    args.append(str(config.grove_root))
-
-    output = _run_fd(args, cwd=config.grove_root)
-    if output:
+    output = _find_files(
+        extensions=[extension],
+        cwd=config.grove_root,
+        pattern=pattern,
+        excludes=excludes,
+    )
+    if output.strip():
         console.print_raw(output.rstrip())
     else:
         print_warning("No files found")
@@ -173,29 +297,13 @@ def yaml_command(pattern: Optional[str] = None) -> None:
     else:
         print_section("YAML files", "")
 
-    tools = discover_tools()
-    if not tools.fd:
-        raise typer.Exit(1)
-
-    base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
-    if config.is_human_mode:
-        base_args.append("--color=always")
-    else:
-        base_args.append("--color=never")
-
-    # fd supports multiple extensions
-    args = base_args + ["-e", "yml", "-e", "yaml"]
-
-    if pattern:
-        args.append(pattern)
-    else:
-        args.append(".")
-
-    args.append(str(config.grove_root))
-
-    result = run_tool(tools.fd, args, cwd=config.grove_root)
-    if result.stdout:
-        console.print_raw(result.stdout.rstrip())
+    output = _find_files(
+        extensions=["yml", "yaml"],
+        cwd=config.grove_root,
+        pattern=pattern,
+    )
+    if output.strip():
+        console.print_raw(output.rstrip())
     else:
         print_warning("No files found")
 
@@ -230,28 +338,13 @@ def shell_command(pattern: Optional[str] = None) -> None:
     else:
         print_section("Shell scripts", "")
 
-    tools = discover_tools()
-    if not tools.fd:
-        raise typer.Exit(1)
-
-    base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
-    if config.is_human_mode:
-        base_args.append("--color=always")
-    else:
-        base_args.append("--color=never")
-
-    args = base_args + ["-e", "sh", "-e", "bash", "-e", "zsh"]
-
-    if pattern:
-        args.append(pattern)
-    else:
-        args.append(".")
-
-    args.append(str(config.grove_root))
-
-    result = run_tool(tools.fd, args, cwd=config.grove_root)
-    if result.stdout:
-        console.print_raw(result.stdout.rstrip())
+    output = _find_files(
+        extensions=["sh", "bash", "zsh"],
+        cwd=config.grove_root,
+        pattern=pattern,
+    )
+    if output.strip():
+        console.print_raw(output.rstrip())
     else:
         print_warning("No files found")
 
@@ -273,26 +366,13 @@ def test_command(name: Optional[str] = None) -> None:
     else:
         print_section("Test files", "")
 
-    tools = discover_tools()
-    if not tools.fd:
-        raise typer.Exit(1)
-
-    base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
-    if config.is_human_mode:
-        base_args.append("--color=always")
-    else:
-        base_args.append("--color=never")
-
-    # Match .test.ts, .spec.ts, .test.js, .spec.js
-    args = base_args + [r"\.(test|spec)\.(ts|js)$"]
-
-    args.append(str(config.grove_root))
-
-    result = run_tool(tools.fd, args, cwd=config.grove_root)
-    output = result.stdout.strip()
+    output = _find_files_regex(
+        regex=r"\.(test|spec)\.(ts|js)$",
+        cwd=config.grove_root,
+    )
+    output = output.strip()
 
     if name and output:
-        # Filter by name
         lines = [line for line in output.split("\n") if name.lower() in line.lower()]
         if lines:
             console.print_raw("\n".join(lines[:30]))
@@ -308,10 +388,12 @@ def test_command(name: Optional[str] = None) -> None:
 
     # Also show test directories
     print_section("Test Directories", "")
-    dir_args = base_args + ["-t", "d", r"test|tests|__tests__", str(config.grove_root)]
-    result = run_tool(tools.fd, dir_args, cwd=config.grove_root)
-    if result.stdout:
-        lines = result.stdout.strip().split("\n")
+    dir_output = _find_dirs(
+        pattern=r"test|tests|__tests__",
+        cwd=config.grove_root,
+    )
+    if dir_output.strip():
+        lines = dir_output.strip().split("\n")
         console.print_raw("\n".join(lines[:20]))
     else:
         console.print("  (no test directories found)")
@@ -334,25 +416,16 @@ def config_command(name: Optional[str] = None) -> None:
     else:
         print_section("Configuration files", "")
 
-    tools = discover_tools()
-    if not tools.fd:
-        raise typer.Exit(1)
-
-    base_args = ["--exclude", "node_modules", "--exclude", "dist", "--exclude", ".git"]
-    if config.is_human_mode:
-        base_args.append("--color=always")
-    else:
-        base_args.append("--color=never")
-
     if name:
-        # Search for specific config
-        args = base_args + [name, str(config.grove_root)]
-        result = run_tool(tools.fd, args, cwd=config.grove_root)
-        if result.stdout:
-            # Filter for config-like files
+        # Search for specific config by name
+        output = _find_files_regex(
+            regex=name,
+            cwd=config.grove_root,
+        )
+        if output.strip():
             lines = [
                 line
-                for line in result.stdout.strip().split("\n")
+                for line in output.strip().split("\n")
                 if any(
                     kw in line.lower()
                     for kw in ["config", "rc", ".toml", ".json", ".yaml", ".yml"]
@@ -367,50 +440,45 @@ def config_command(name: Optional[str] = None) -> None:
     else:
         # Show categorized config files
         print_section("Build & Bundler Configs", "")
-        pattern = (
-            r"(vite|svelte|tailwind|postcss|tsconfig|jsconfig)\.config\.(js|ts|mjs)"
-        )
-        result = run_tool(
-            tools.fd,
-            base_args + [pattern, str(config.grove_root)],
+        output = _find_files_regex(
+            regex=r"(vite|svelte|tailwind|postcss|tsconfig|jsconfig)\.config\.(js|ts|mjs)",
             cwd=config.grove_root,
         )
-        if result.stdout:
-            console.print_raw(result.stdout.rstrip())
+        if output.strip():
+            console.print_raw(output.rstrip())
         else:
             console.print("  (none found)")
 
         print_section("Wrangler Configs", "")
-        result = run_tool(
-            tools.fd,
-            base_args + ["-e", "toml", "wrangler", str(config.grove_root)],
+        output = _find_files(
+            extensions=["toml"],
             cwd=config.grove_root,
+            pattern="wrangler",
         )
-        if result.stdout:
-            console.print_raw(result.stdout.rstrip())
+        if output.strip():
+            console.print_raw(output.rstrip())
         else:
             console.print("  (none found)")
 
         print_section("Package Configs", "")
-        result = run_tool(
-            tools.fd,
-            base_args + ["package.json", str(config.grove_root)],
+        output = _find_files_regex(
+            regex=r"package\.json$",
             cwd=config.grove_root,
         )
-        if result.stdout:
-            lines = result.stdout.strip().split("\n")
+        if output.strip():
+            lines = output.strip().split("\n")
             console.print_raw("\n".join(lines[:20]))
         else:
             console.print("  (none found)")
 
         print_section("TypeScript Configs", "")
-        result = run_tool(
-            tools.fd,
-            base_args + ["-e", "json", "tsconfig", str(config.grove_root)],
+        output = _find_files(
+            extensions=["json"],
             cwd=config.grove_root,
+            pattern="tsconfig",
         )
-        if result.stdout:
-            console.print_raw(result.stdout.rstrip())
+        if output.strip():
+            console.print_raw(output.rstrip())
         else:
             console.print("  (none found)")
 

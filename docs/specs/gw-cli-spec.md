@@ -1917,11 +1917,14 @@ gw mcp serve
 
 ## Integration with grove-find
 
-The `gw` CLI integrates with the existing `grove-find.sh` toolkit:
+> **Note:** grove-find has been rewritten as a Python CLI (`tools/grove-find/`).
+> The bash version (`grove-find.sh`) is archived at `archive/grove-find-bash/`.
+> Use `uv run --project tools/grove-find gf --agent <command>` instead.
+
+The `gw` CLI integrates with the grove-find toolkit. These shell aliases are available locally:
 
 ```bash
-# Source grove-find to get gw shortcuts
-source scripts/repo/grove-find.sh
+# Shell aliases (local dev only — not available in remote/web sessions)
 
 # ─── Cloudflare Shortcuts ───
 gwd                    # Alias for: gw db
@@ -2138,7 +2141,7 @@ tools/gw/
 
 - [ ] MCP server implementation
 - [ ] Agent mode safety restrictions
-- [ ] grove-find.sh integration (`gwq`, `gwc`, `gws`, etc.)
+- [ ] grove-find Python CLI integration (`gwq`, `gwc`, `gws`, etc.)
 - [ ] Claude Code settings documentation
 - [ ] Full test coverage
 
@@ -2324,7 +2327,7 @@ tools/gw/
 - **Issue #348**: Database safety layer integration (parent issue)
 - **Issue #527**: Cache management admin tool (CLI implementation)
 - **database-safety.ts**: TypeScript safety layer (pattern to port)
-- **grove-find.sh**: Existing search toolkit (integration target)
+- **tools/grove-find/**: Python CLI search toolkit (integration target)
 
 ---
 

@@ -8,24 +8,60 @@
 
 The `AGENT.md` file contains all project-specific instructions, workflows, and guidelines. Read it first to keep the full context in memory for this session.
 
-## Codebase Navigation (grove-find)
+## Grove Tools Setup
 
-**After reading AGENT.md**, run this command to load the codebase search toolkit:
+**After reading AGENT.md**, install the two core CLI tools. Check if they're already available:
 
 ```bash
-GF_AGENT=1 source scripts/repo/grove-find.sh && gfagent
+gf --help && gw --help
 ```
 
-The `GF_AGENT=1` flag enables agent mode: no colors, no emoji, no box-drawing characters—just clean output.
+If either command is not found, install them:
 
-This gives you 45+ blazing-fast search commands for navigating the codebase. Key commands:
-- `gf "pattern"` — Search entire codebase
-- `gfused "Name"` — Find where a component is used
-- `gfrecent 1` — Files changed today
-- `gfchanged` — Files changed on current branch
-- `gfengine` — Verify engine-first pattern compliance
+```bash
+uv tool install --editable tools/grove-find
+uv tool install --editable tools/gw
+```
 
-Run `gfhelp` for full documentation or `gfagent` for a compact reference.
+Once installed, `gf` and `gw` are available directly — no `uv run` prefix needed.
+
+### Codebase Search (gf)
+
+`gf` is a fast codebase search tool. Use `--agent` for clean output (no colors/emoji).
+
+**Key commands:**
+- `gf --agent search "pattern"` — Search entire codebase
+- `gf --agent usage "Name"` — Find where a component is used
+- `gf --agent func "name"` — Find function definitions
+- `gf --agent class "Name"` — Find class/component definitions
+- `gf --agent recent 1` — Files changed today
+- `gf --agent changed` — Files changed on current branch
+- `gf --agent engine` — Find engine imports
+- `gf --agent todo` — Find TODO/FIXME/HACK comments
+- `gf --agent git churn` — Most frequently changed files
+
+Run `gf --help` for full command list.
+
+All `gf` commands work in any environment — when `fd` is not installed, file-type searches automatically fall back to `rg --files`.
+
+### Infrastructure CLI (gw)
+
+`gw` wraps git, GitHub, Cloudflare, and dev tools with safety guards. Write operations require `--write`.
+
+**Key commands:**
+- `gw git status` / `gw git log` / `gw git diff` — Safe git reads
+- `gw git commit --write -m "feat: ..."` — Commit (requires `--write`)
+- `gw git push --write` — Push (requires `--write`)
+- `gw packages list` — List all monorepo packages
+- `gw bindings` — Show all Cloudflare bindings (D1, KV, R2, DO)
+- `gw doctor` — Diagnose environment issues
+- `gw whoami` — Show current auth context
+- `gw d1 tables` / `gw d1 schema <table>` — Database introspection
+- `gw gh pr list` / `gw gh issue list` — GitHub reads
+
+Run `gw --help` for full command list, `gw <command> --help` for details.
+
+**Web/remote note:** `wrangler` and `gh` are not installed, so Cloudflare operations (`gw d1`, `gw deploy`) and GitHub operations (`gw gh`) won't work. Git commands, package listing, bindings scan, and doctor all work fine.
 
 ---
 

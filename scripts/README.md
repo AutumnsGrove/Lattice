@@ -44,7 +44,10 @@ Repository management tools.
 # Files:
 # - repo-snapshot.sh   - Create repository snapshot
 # - with-secrets.js    - Run commands with secrets loaded
-# - grove-find.sh      - Search utility for codebase
+#
+# NOTE: grove-find has moved to tools/grove-find/ (Python CLI via UV)
+# Usage: uv run --project tools/grove-find gf --agent search "pattern"
+# Old bash version archived at: archive/grove-find-bash/
 ```
 
 ## Usage Notes

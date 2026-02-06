@@ -16,14 +16,19 @@ class ToolPaths:
     """Discovered paths to external tools."""
 
     rg: Optional[Path] = None  # ripgrep (required)
-    fd: Optional[Path] = None  # fd-find (required)
+    fd: Optional[Path] = None  # fd-find (optional — needed for file-type searches)
     git: Optional[Path] = None  # git (required)
-    gh: Optional[Path] = None  # GitHub CLI (optional)
+    gh: Optional[Path] = None  # GitHub CLI (optional — needed for GitHub commands)
 
     @property
     def has_required_tools(self) -> bool:
-        """Check if all required tools are available."""
-        return all([self.rg, self.fd, self.git])
+        """Check if minimum required tools (rg + git) are available."""
+        return all([self.rg, self.git])
+
+    @property
+    def has_fd(self) -> bool:
+        """Check if fd-find is available (needed for file-type searches)."""
+        return self.fd is not None
 
     @property
     def has_gh(self) -> bool:
@@ -35,10 +40,17 @@ class ToolPaths:
         missing = []
         if not self.rg:
             missing.append("ripgrep (rg)")
-        if not self.fd:
-            missing.append("fd")
         if not self.git:
             missing.append("git")
+        return missing
+
+    def get_missing_optional(self) -> list[str]:
+        """Get list of missing optional tools."""
+        missing = []
+        if not self.fd:
+            missing.append("fd (file-type searches: gf svelte, gf ts, gf test, etc.)")
+        if not self.gh:
+            missing.append("gh (GitHub commands: gf github issue, gf github board, etc.)")
         return missing
 
 
