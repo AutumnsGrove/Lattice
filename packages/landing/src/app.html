@@ -14,6 +14,11 @@
         document.documentElement.classList.add("dark");
       }
     </script>
+    <!-- Inline critical colors to prevent white flash before CSS loads -->
+    <style>
+      html { background-color: #fefdfb; color: #3d2914; }
+      html.dark { background-color: #171a1e; color: #f5f2ea; }
+    </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Grove: a place to Be. Coming soon." />
