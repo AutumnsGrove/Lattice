@@ -135,7 +135,7 @@
 	const items = $derived(navItems || DEFAULT_NAV_ITEMS);
 
 	// Resolve nav labels based on Grove Mode
-	function labelFor(item) {
+	function labelFor(item: NavItem) {
 		return resolveNavLabel(item, groveModeStore.current, defaultManifestData);
 	}
 </script>
