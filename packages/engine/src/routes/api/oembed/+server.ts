@@ -60,7 +60,7 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
         {
           status: 429,
           headers: {
-            "Retry-After": String(rateLimitResult.resetInSeconds),
+            "Retry-After": String(Math.max(1, rateLimitResult.resetAt - Math.floor(Date.now() / 1000))),
           },
         },
       );
