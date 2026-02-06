@@ -196,43 +196,37 @@
 			icon: Sprout,
 			title: 'Getting Started',
 			description: 'New to the Grove? Start here.',
-			items: gettingStartedItems,
-			gossamer: 'grove-mist' as const
+			items: gettingStartedItems
 		},
 		{
 			icon: PenLine,
 			title: 'Your Blog',
 			description: 'Writing, customizing, and managing your space.',
-			items: blogItems,
-			gossamer: false as const
+			items: blogItems
 		},
 		{
 			icon: Users,
 			title: 'Community',
 			description: 'The Meadow, sharing, and belonging.',
-			items: communityItems,
-			gossamer: false as const
+			items: communityItems
 		},
 		{
 			icon: ShieldCheck,
 			title: 'Privacy & Security',
 			description: 'Your data, your rules.',
-			items: privacyItems,
-			gossamer: false as const
+			items: privacyItems
 		},
 		{
 			icon: CreditCard,
 			title: 'Billing & Plans',
 			description: 'Subscriptions, payments, and tiers.',
-			items: billingItems,
-			gossamer: false as const
+			items: billingItems
 		},
 		{
 			icon: LifeBuoy,
 			title: 'Troubleshooting',
 			description: 'Something not working? Let\u2019s fix it.',
-			items: troubleshootingItems,
-			gossamer: false as const
+			items: troubleshootingItems
 		}
 	];
 </script>
@@ -262,12 +256,7 @@
 	<!-- FAQ sections -->
 	<div class="space-y-8">
 		{#each sections as section}
-			<GlassCard
-				as="section"
-				gossamer={section.gossamer || false}
-				gossamerOpacity={0.15}
-				gossamerStatic
-			>
+			<GlassCard as="section">
 				{#snippet header()}
 					<div class="flex items-center gap-3">
 						<div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
