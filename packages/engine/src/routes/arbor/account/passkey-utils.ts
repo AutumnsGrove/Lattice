@@ -108,6 +108,7 @@ export async function registerPasskey(
     }
 
     const optionsResponse = await fetch("/api/passkey/register-options", {
+      // csrf-ok: manual CSRF headers for WebAuthn
       method: "POST",
       headers: { "Content-Type": "application/json", ...csrfHeaders },
       credentials: "include",
@@ -188,6 +189,7 @@ export async function registerPasskey(
 
     // Step 5: Verify credential with server
     const verifyResponse = await fetch("/api/passkey/verify-registration", {
+      // csrf-ok: manual CSRF headers for WebAuthn
       method: "POST",
       headers: { "Content-Type": "application/json", ...csrfHeaders },
       credentials: "include",

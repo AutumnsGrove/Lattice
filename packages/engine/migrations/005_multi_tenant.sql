@@ -41,6 +41,9 @@ CREATE TABLE IF NOT EXISTS tenants (
   -- Customization
   theme TEXT DEFAULT 'default',           -- Theme identifier
 
+  -- Status
+  active INTEGER DEFAULT 1,               -- 1 = active, 0 = inactive/suspended
+
   -- Timestamps
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())

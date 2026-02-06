@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS audit_log (
     created_at INTEGER NOT NULL
 );
 
-CREATE INDEX idx_audit_log_tenant ON audit_log(tenant_id, created_at DESC);
-CREATE INDEX idx_audit_log_category ON audit_log(category, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_tenant ON audit_log(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_category ON audit_log(category, created_at DESC);

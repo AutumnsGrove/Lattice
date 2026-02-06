@@ -144,7 +144,7 @@
         headers["csrf-token"] = csrfToken;
       }
 
-      const response = await fetch("/api/export", {
+      const response = await fetch("/api/export", { // csrf-ok: manual CSRF headers for blob download
         method: "POST",
         headers,
         credentials: "include",

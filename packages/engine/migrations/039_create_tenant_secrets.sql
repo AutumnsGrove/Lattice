@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS tenant_secrets (
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_tenant_secrets_tenant ON tenant_secrets(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tenant_secrets_tenant ON tenant_secrets(tenant_id);

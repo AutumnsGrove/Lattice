@@ -13,8 +13,8 @@ import type { PageServerLoad } from "./$types";
 interface InviteData {
   email: string;
   tier: string;
-  inviteType: "comped" | "beta";
-  customMessage: string | null;
+  invite_type: "comped" | "beta";
+  custom_message: string | null;
 }
 
 export const load: PageServerLoad = async ({ url, platform, parent }) => {

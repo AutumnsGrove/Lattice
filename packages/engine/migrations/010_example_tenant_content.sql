@@ -2,6 +2,12 @@
 -- Tenant ID: example-tenant-001
 
 -- =============================================================================
+-- EXAMPLE TENANT
+-- =============================================================================
+INSERT OR IGNORE INTO tenants (id, subdomain, display_name, email, plan, theme, active, created_at, updated_at)
+VALUES ('example-tenant-001', 'midnight-bloom', 'The Midnight Bloom', 'example@grove.place', 'starter', 'default', 1, unixepoch(), unixepoch());
+
+-- =============================================================================
 -- PAGES
 -- =============================================================================
 
