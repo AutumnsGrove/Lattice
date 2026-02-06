@@ -86,10 +86,10 @@ Assess the situation:
 │                      Elephant-Build                          │
 │                      (multi-file features)                   │
 │                                                              │
-│  🦝 SECURITY                                                   │
-│  ─────────                                                   │
-│  Raccoon-Audit                                               │
-│  (security audit/cleanup)                                    │
+│  🦝 SECURITY          🐢 HARDENING                              │
+│  ─────────            ─────────                              │
+│  Raccoon-Audit        Tortoise-Harden                        │
+│  (secrets/cleanup)    (secure by design, defense in depth)   │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -128,6 +128,10 @@ What do you need to do?
 │
 ├─ Audit security? ──────────────→ 🦝 Raccoon-Audit
 │   "Check for secrets in the codebase"
+│
+├─ Harden code / secure by       → 🐢 Tortoise-Harden
+│  design / defense in depth?
+│   "Make sure this is secure before we ship"
 │
 ├─ Migrate data? ────────────────→ 🐻 Bear-Migrate
 │   "Split user name into first/last"
@@ -340,6 +344,10 @@ Use guiding metaphors:
 │     Sense accessibility barriers with gentle awareness             │
 │     Use: a11y audits, inclusive design                             │
 │                                                                    │
+│  🐢 tortoise-harden                                                │
+│     Harden code with patient, layered defense-in-depth             │
+│     Use: Secure by design, deep vulnerability audits               │
+│                                                                    │
 │  🐦 robin-guide                                                    │
 │     Guide wanderers to the right animal (that's me!)               │
 │     Use: Choosing skills, discovering capabilities                 │
@@ -370,8 +378,8 @@ When the drum sounds, animals gather:
 🌲 /gathering-ui          Chameleon → Deer
                            (UI design + accessibility)
 
-🌲 /gathering-security    Spider → Raccoon
-                           (Auth + security audit)
+🌲 /gathering-security    Spider → Raccoon → Tortoise
+                           (Auth + security audit + hardening)
 
 🌲 /gathering-migration   Bear → Bloodhound
                            (Safe data movement)
