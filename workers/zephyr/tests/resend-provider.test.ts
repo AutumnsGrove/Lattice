@@ -329,7 +329,7 @@ describe("sendWithRetry", () => {
     await sendWithRetry("test-reply-key", optionsWithReplyTo);
 
     const callArgs = mockResend.emails.send.mock.calls[0][0];
-    expect(callArgs.reply_to).toBe("reply@grove.place");
+    expect(callArgs.replyTo).toBe("reply@grove.place");
   });
 });
 
