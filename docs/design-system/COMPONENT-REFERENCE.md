@@ -1,12 +1,12 @@
 ---
 title: Component Reference
-description: Complete catalog of Grove's 188 UI components
+description: Complete catalog of Grove's 204 UI components
 category: design
 lastUpdated: '2026-01-25'
 ---
 # Component Reference
 
-> 188 components organized by category, ready to help you build something beautiful.
+> 204 components organized by category, ready to help you build something beautiful.
 > Import from `@autumnsgrove/groveengine/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
@@ -16,14 +16,14 @@ This is your field guide to Grove's component library. Each component is designe
 ## Quick Links
 
 - [Import Patterns](#import-patterns)
-- [ui/ - Core UI Components](#ui---core-ui-components-30)
+- [ui/ - Core UI Components](#ui---core-ui-components-42)
 - [primitives/ - Headless Primitives](#primitives---headless-primitives-45)
-- [nature/ - Decorative Nature](#nature---decorative-nature-62)
+- [nature/ - Decorative Nature](#nature---decorative-nature-65)
 - [typography/ - Font Providers](#typography---font-providers-11)
-- [chrome/ - Layout Shell](#chrome---layout-shell-6)
+- [chrome/ - Layout Shell](#chrome---layout-shell-7)
 - [terrarium/ - Canvas Editor](#terrarium---canvas-editor-7)
 - [charts/ - Data Visualization](#charts---data-visualization-4)
-- [content/ - Content Display](#content---content-display-4)
+- [content/ - Content Display](#content---content-display-6)
 - [gallery/ - Image Galleries](#gallery---image-galleries-4)
 - [states/ - Loading & Empty States](#states---loading--empty-states-4)
 - [forms/ - Search & Input](#forms---search--input-3)
@@ -77,7 +77,7 @@ Import from specific subpaths when you need several components from the same fam
 
 ---
 
-## ui/ - Core UI Components (30)
+## ui/ - Core UI Components (42)
 
 The heart of Grove's visual language. These components implement our glassmorphism design system—translucent surfaces with gentle blur that let the forest peek through.
 
@@ -214,6 +214,15 @@ For moments that need a pause—destructive actions, important decisions.
 | `GlassLogo` | Logo with glass container |
 | `GlassLogoArchive` | Archived logo variant |
 | `GlassStatusWidget` | Real-time status widget with auto-refresh—displays system health from The Clearing |
+
+### Beta Program Components
+
+Components for beta tester onboarding, status display, and program enrollment. Reusable for any future beta programs.
+
+| Component | Description |
+|-----------|-------------|
+| `BetaBadge` | Inline pill badge with flask icon indicating beta program membership |
+| `BetaWelcomeDialog` | One-time welcome dialog for beta users with feedback link and warm messaging |
 
 ### Standard Components
 
@@ -387,7 +396,7 @@ Table subcomponents are exported for flexible table composition:
 
 ---
 
-## nature/ - Decorative Nature (62)
+## nature/ - Decorative Nature (65)
 
 This is where Grove comes alive. These SVG components create atmospheric forest scenes that respond to seasons and bring warmth to every page.
 
@@ -667,7 +676,7 @@ import {
 
 ---
 
-## chrome/ - Layout Shell (6)
+## chrome/ - Layout Shell (7)
 
 The scaffolding that holds every Grove page together.
 
@@ -787,7 +796,7 @@ Simple, warm charts for displaying data without overwhelming.
 
 ---
 
-## content/ - Content Display (4)
+## content/ - Content Display (6)
 
 Cards for displaying structured content like products, plans, and search results.
 
@@ -1025,4 +1034,4 @@ When you're building with Grove components, you're creating spaces where people 
 
 ---
 
-*Last updated: 2026-01-25*
+*Last updated: 2026-02-06*
