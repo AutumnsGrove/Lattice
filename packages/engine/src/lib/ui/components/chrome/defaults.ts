@@ -23,6 +23,7 @@ import {
   Inbox,
   Armchair,
 } from "lucide-svelte";
+import BlueSky from "../icons/BlueSky.svelte";
 
 // =============================================================================
 // GROVE DIVIDER CONFIGURATION
@@ -112,6 +113,12 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
   { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
   { href: "/support", label: "Support", icon: Coffee },
   {
+    href: "https://bsky.app/profile/groveplace.bsky.social",
+    label: "Bluesky",
+    icon: BlueSky,
+    external: true,
+  },
+  {
     href: "https://github.com/AutumnsGrove/GroveEngine",
     label: "GitHub",
     icon: Github,
@@ -143,6 +150,12 @@ export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
   { href: "/support", label: "Support", icon: Coffee },
+  {
+    href: "https://bsky.app/profile/groveplace.bsky.social",
+    label: "Bluesky",
+    icon: BlueSky,
+    external: true,
+  },
   {
     href: "https://github.com/AutumnsGrove/GroveEngine",
     label: "GitHub",
