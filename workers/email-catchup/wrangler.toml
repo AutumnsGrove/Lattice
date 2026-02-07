@@ -23,9 +23,14 @@ binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
-# Environment variables
+# Service binding for Worker-to-Worker communication
+[[services]]
+binding = "EMAIL_RENDER"
+service = "grove-email-render"
+
+# Environment variables (URL kept as fallback for local dev)
 [vars]
-EMAIL_RENDER_URL = "https://grove-email-render.autumnsgrove.workers.dev"
+EMAIL_RENDER_URL = "https://grove-email-render.m7jv4v7npb.workers.dev"
 
 # Secrets (set via wrangler secret put)
 # - RESEND_API_KEY: Resend API key for sending emails

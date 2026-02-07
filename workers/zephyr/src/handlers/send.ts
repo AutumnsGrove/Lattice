@@ -152,6 +152,7 @@ export async function sendHandler(c: Context<{ Bindings: Env }>) {
         request.html,
         request.text,
         request.subject,
+        c.env.EMAIL_RENDER,
       );
       html = rendered.html;
       text = rendered.text;

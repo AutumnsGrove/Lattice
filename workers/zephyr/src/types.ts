@@ -192,8 +192,11 @@ export interface Env {
   /** Zephyr service API key for authentication */
   ZEPHYR_API_KEY: string;
 
-  /** Email render worker URL */
+  /** Email render worker URL (fallback for local dev) */
   EMAIL_RENDER_URL: string;
+
+  /** Service binding to email-render worker (preferred over URL) */
+  EMAIL_RENDER?: Fetcher;
 
   /** Environment name */
   ENVIRONMENT?: string;

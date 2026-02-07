@@ -38,7 +38,8 @@ export const TEMPLATES: Record<string, TemplateRenderFn> = {
 /**
  * Render a template
  *
- * For named templates, calls the email-render worker.
+ * For named templates, calls the email-render worker via Service Binding
+ * (preferred) or HTTP URL fallback (for local dev).
  * For "raw" template, returns pre-rendered content.
  */
 export async function renderTemplate(
@@ -48,6 +49,7 @@ export async function renderTemplate(
   rawHtml?: string,
   rawText?: string,
   rawSubject?: string,
+  renderBinding?: Fetcher,
 ): Promise<{ html: string; text: string; subject: string }> {
   // Handle raw template
   if (templateName === "raw") {
@@ -70,17 +72,27 @@ export async function renderTemplate(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    const response = await fetch(`${renderUrl}/render`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        template: templateName,
-        audienceType: data.audienceType || "wanderer",
-        name: data.name || null,
-        ...data,
-      }),
-      signal: controller.signal,
+    const body = JSON.stringify({
+      template: templateName,
+      audienceType: data.audienceType || "wanderer",
+      name: data.name || null,
+      ...data,
     });
+
+    // Prefer Service Binding (direct Worker-to-Worker), fall back to HTTP URL
+    const response = renderBinding
+      ? await renderBinding.fetch("https://email-render/render", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          signal: controller.signal,
+        })
+      : await fetch(`${renderUrl}/render`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          signal: controller.signal,
+        });
 
     clearTimeout(timeoutId);
 

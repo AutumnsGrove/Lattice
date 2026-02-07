@@ -22,8 +22,10 @@ import { Resend } from "resend";
 interface Env {
   DB: D1Database;
   RESEND_API_KEY: string;
-  /** URL for the email-render worker */
+  /** URL for the email-render worker (fallback for local dev) */
   EMAIL_RENDER_URL: string;
+  /** Service binding to email-render worker (preferred over URL) */
+  EMAIL_RENDER?: Fetcher;
 }
 
 type AudienceType = "wanderer" | "promo" | "rooted";
@@ -200,11 +202,15 @@ async function processOverdueEmails(env: Env) {
       }
 
       // Get the email content for this stage
-      const emailContent = await renderEmail(renderUrl, {
-        template: TEMPLATE_MAP[nextStage],
-        audienceType: user.audience_type,
-        name: user.name,
-      });
+      const emailContent = await renderEmail(
+        renderUrl,
+        {
+          template: TEMPLATE_MAP[nextStage],
+          audienceType: user.audience_type,
+          name: user.name,
+        },
+        env.EMAIL_RENDER,
+      );
 
       if (!emailContent) {
         console.log(
@@ -274,13 +280,23 @@ async function renderEmail(
     audienceType: AudienceType;
     name: string | null;
   },
+  renderBinding?: Fetcher,
 ): Promise<{ html: string; text: string } | null> {
   try {
-    const response = await fetch(`${renderUrl}/render`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
-    });
+    const body = JSON.stringify(params);
+
+    // Prefer Service Binding (direct Worker-to-Worker), fall back to HTTP URL
+    const response = renderBinding
+      ? await renderBinding.fetch("https://email-render/render", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        })
+      : await fetch(`${renderUrl}/render`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        });
 
     if (!response.ok) {
       const error = await response.text();
