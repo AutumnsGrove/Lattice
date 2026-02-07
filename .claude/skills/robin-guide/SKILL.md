@@ -86,10 +86,10 @@ Assess the situation:
 │                      Elephant-Build                          │
 │                      (multi-file features)                   │
 │                                                              │
-│  🦝 SECURITY          🐢 HARDENING                              │
-│  ─────────            ─────────                              │
-│  Raccoon-Audit        Turtle-Harden                        │
-│  (secrets/cleanup)    (secure by design, defense in depth)   │
+│  🦝 SECURITY          🐢 HARDENING        🦅 ASSESSMENT         │
+│  ─────────            ─────────           ────────────         │
+│  Raccoon-Audit        Turtle-Harden       Hawk-Survey          │
+│  (secrets/cleanup)    (defense in depth)  (full audit/report)  │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -126,7 +126,10 @@ What do you need to do?
 ├─ Write documentation? ─────────→ 🦉 Owl-Archive
 │   "Write help article about the editor"
 │
-├─ Audit security? ──────────────→ 🦝 Raccoon-Audit
+├─ Full security assessment? ───→ 🦅 Hawk-Survey
+│   "Audit the entire app's security"
+│
+├─ Find secrets / cleanup? ────→ 🦝 Raccoon-Audit
 │   "Check for secrets in the codebase"
 │
 ├─ Harden code / secure by       → 🐢 Turtle-Harden
@@ -347,6 +350,10 @@ Use guiding metaphors:
 │  🐢 turtle-harden                                                │
 │     Harden code with patient, layered defense-in-depth             │
 │     Use: Secure by design, deep vulnerability audits               │
+│                                                                    │
+│  🦅 hawk-survey                                                    │
+│     Comprehensive security assessment with threat modeling         │
+│     Use: Full app audits, OWASP review, formal security reports    │
 │                                                                    │
 │  🐦 robin-guide                                                    │
 │     Guide wanderers to the right animal (that's me!)               │
