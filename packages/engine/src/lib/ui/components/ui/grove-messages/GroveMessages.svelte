@@ -90,6 +90,46 @@
 		},
 	};
 
+	// Parse body text into segments of plain text and links
+	// Matches: https://..., http://..., and bare domains like grove.place/path
+	const URL_RE =
+		/(?:https?:\/\/[^\s<]+)|(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(?:\/[^\s<]*)?)/gi;
+
+	interface TextSegment {
+		type: "text";
+		value: string;
+	}
+	interface LinkSegment {
+		type: "link";
+		href: string;
+		label: string;
+	}
+	type BodySegment = TextSegment | LinkSegment;
+
+	function parseBody(text: string): BodySegment[] {
+		const segments: BodySegment[] = [];
+		let lastIndex = 0;
+
+		for (const match of text.matchAll(URL_RE)) {
+			const matchStart = match.index!;
+			// Add text before match
+			if (matchStart > lastIndex) {
+				segments.push({ type: "text", value: text.slice(lastIndex, matchStart) });
+			}
+			const raw = match[0];
+			const href = raw.startsWith("http") ? raw : `https://${raw}`;
+			segments.push({ type: "link", href, label: raw });
+			lastIndex = matchStart + raw.length;
+		}
+
+		// Add remaining text
+		if (lastIndex < text.length) {
+			segments.push({ type: "text", value: text.slice(lastIndex) });
+		}
+
+		return segments.length > 0 ? segments : [{ type: "text", value: text }];
+	}
+
 	function formatDate(iso: string): string {
 		try {
 			const d = new Date(iso);
@@ -142,9 +182,20 @@
 							{/if}
 						</div>
 						<p
-							class="font-sans text-sm text-foreground-muted leading-relaxed"
+							class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line"
 						>
-							{message.body}
+							{#each parseBody(message.body) as segment}
+								{#if segment.type === "link"}
+									<a
+										href={segment.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="underline decoration-current/40 hover:decoration-current transition-colors"
+									>{segment.label}</a>
+								{:else}
+									{segment.value}
+								{/if}
+							{/each}
 						</p>
 						<time
 							class="block mt-1 text-xs text-foreground-faint font-sans"
