@@ -145,6 +145,14 @@ export const API_ERRORS = {
     adminMessage: "Admin-only endpoint accessed by non-admin user.",
   },
 
+  FORBIDDEN: {
+    code: "GROVE-API-028",
+    category: "user" as const,
+    userMessage: "You don't have permission to perform this action.",
+    adminMessage:
+      "Tenant isolation violation — user attempted to access a resource belonging to another tenant.",
+  },
+
   SESSION_EXPIRED: {
     code: "GROVE-API-025",
     category: "user" as const,
