@@ -236,6 +236,10 @@ interface SocialDelivery {
   postId?: string;
   /** URL to the published post */
   postUrl?: string;
+  /** True when the platform was silently skipped (e.g., DEV.to without longForm) */
+  skipped?: boolean;
+  /** Human-readable reason for skip */
+  skipReason?: string;
   error?: {
     code: string;
     message: string;
@@ -352,15 +356,14 @@ export class DevtoProvider implements SocialProvider {
   }
 
   async post(content: SocialContent): Promise<SocialDelivery> {
-    // DEV.to is article-only. Short posts skip this platform.
+    // DEV.to is article-only. Short posts silently skip this platform.
+    // Returns skipped status instead of an error — the broadcast handler
+    // excludes skipped platforms from the attempted/failed counts.
     return {
-      success: false,
+      success: true,
       platform: "devto",
-      error: {
-        code: "UNSUPPORTED",
-        message: "DEV.to only supports long-form articles",
-        retryable: false,
-      },
+      skipped: true,
+      skipReason: "DEV.to only supports long-form articles",
     };
   }
 }
@@ -401,7 +404,8 @@ interface BroadcastRequest {
   /** Schedule for later (ISO timestamp) */
   scheduledAt?: string;
 
-  /** Prevent duplicate posts */
+  /** Prevent duplicate posts. If omitted, a fallback key is generated
+   *  from hash(content + platforms + scheduled_at) to catch accidental dupes. */
   idempotencyKey?: string;
 
   /** Metadata for logging */
@@ -416,6 +420,8 @@ interface BroadcastRequest {
 
 interface BroadcastResponse {
   success: boolean;
+  /** True when at least one platform succeeded but not all */
+  partial: boolean;
   /** Per-platform delivery results */
   deliveries: SocialDelivery[];
   /** Summary counts */
@@ -470,7 +476,7 @@ interface ContentAdapter {
 │       │    └─ URLs count as 23 chars (Mastodon link shortening)         │
 │       │                                                                 │
 │       ├──▶ DEV.to (articles only)                                       │
-│       │    └─ Skip if no longForm content provided                      │
+│       │    └─ Silently skip if no longForm content (not counted as failure) │
 │       │    └─ Full markdown body, canonical URL, up to 4 tags           │
 │       │                                                                 │
 │       ├──▶ LinkedIn (3000 chars)                                        │
@@ -631,14 +637,14 @@ Zephyr gains a cron trigger for processing queued broadcasts.
 ```toml
 # Added to existing wrangler.toml
 [triggers]
-crons = ["*/5 * * * *"]  # Every 5 minutes, check queue
+crons = ["*/15 * * * *"]  # Every 15 minutes, check queue (conserves free tier quota)
 ```
 
 ### Queue Processing Flow
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                         CRON TRIGGER (every 5 min)                      │
+│                         CRON TRIGGER (every 15 min)                      │
 │                                                                        │
 │   1. Query D1 for posts where:                                         │
 │      scheduled_at <= NOW and status = 'queued'                         │
@@ -709,6 +715,10 @@ CREATE INDEX idx_broadcasts_status ON zephyr_broadcasts(status, scheduled_at);
 CREATE INDEX idx_broadcasts_created ON zephyr_broadcasts(created_at);
 CREATE UNIQUE INDEX idx_broadcasts_idempotency ON zephyr_broadcasts(idempotency_key)
   WHERE idempotency_key IS NOT NULL;
+-- Note: When no idempotency_key is provided by the caller, the broadcast handler
+-- generates a fallback key as hash(content + platforms + scheduled_at). This ensures
+-- accidental duplicate submissions (retries, double-clicks) are caught even without
+-- an explicit key. Only truly distinct broadcasts bypass deduplication.
 
 -- Per-platform delivery results (one row per platform per broadcast)
 CREATE TABLE zephyr_social_deliveries (
@@ -790,15 +800,19 @@ Same circuit breaker pattern as email. Per-platform circuits.
 Unlike email (one recipient, pass/fail), a broadcast can partially succeed. The response always includes per-platform results, so the caller knows exactly what happened.
 
 ```typescript
-// This is fine. Bluesky worked, Mastodon didn't.
+// Bluesky worked, Mastodon didn't. Caller must check deliveries.
 {
-  success: true,  // At least one platform succeeded
+  success: false,   // false because not ALL platforms succeeded
+  partial: true,    // at least one platform succeeded
   deliveries: [
     { platform: "bluesky", success: true, postUrl: "..." },
     { platform: "mastodon", success: false, error: { code: "PROVIDER_ERROR", ... } }
   ],
   summary: { attempted: 2, succeeded: 1, failed: 1 }
 }
+// success=true only when ALL requested platforms succeed.
+// partial=true when at least one succeeded but not all.
+// This forces callers to handle partial failures explicitly.
 ```
 
 ---
@@ -928,7 +942,7 @@ export class ZephyrClient {
 # Add to existing wrangler.toml
 
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/15 * * * *"]
 
 # Secrets to configure:
 # wrangler secret put BLUESKY_HANDLE
