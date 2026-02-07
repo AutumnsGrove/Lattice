@@ -1,0 +1,41 @@
+{
+  "version": "v0.9.99",
+  "date": "2026-02-07 15:38:47 -0500",
+  "commitHash": "7531f791",
+  "summary": "This release brings exciting new ways to connect with the beta program and each other, launching our new Grove Messages system for cross-app communication. We've made significant strides in security and stability across the entire platform, while also introducing helpful features like interactive demos and a polished FAQ. Overall, this update focuses on creating a more welcoming, secure, and feature-rich experience as we prepare for wider availability.\n",
+  "stats": {
+    "totalCommits": 137,
+    "features": 40,
+    "fixes": 64,
+    "refactoring": 5,
+    "docs": 17,
+    "tests": 1,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "add worktree finish, status commands and auto-install deps",
+  "implement Signpost structured error codes across engine",
+  "cross-app messaging for Plant, Meadow, and Clearing",
+  "extract shared FaqPage component and add landing /faq route",
+  "add grove messages beta communication system",
+  "accept positional actions for stash command",
+  "add clear Waystone descriptions to all Grove terminology",
+  "add promote-to-beta for existing email subscribers",
+  "support local auth testing via Cloudflare Tunnel",
+  "migrate email-render calls to service bindings"
+],
+    "fixes": [
+  "respect grove mode in tier chart feature strings",
+  "add missing FORBIDDEN error code to API catalog",
+  "replace form actions with JSON APIs for iOS Safari compatibility",
+  "add magic link diagnostic logging and error code threading",
+  "polish FAQ content for accuracy and warmth",
+  "replace emoji toolbar icons with Lucide formatting groups",
+  "add centered banner variant for landing page",
+  "correct webhook payload assertion blocking engine deploys",
+  "support line breaks and auto-link URLs in message body",
+  "show in tenant arbor panel and move landing placement higher"
+]
+  }
+}
