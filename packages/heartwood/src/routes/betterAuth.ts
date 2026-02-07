@@ -159,6 +159,83 @@ betterAuthRoutes.all("/*", async (c) => {
     // Log response status for debugging
     console.log("[BetterAuth] Response status:", response.status);
 
+    // Fix: Better Auth can return JSON instead of HTTP redirects for browser-navigated
+    // endpoints (magic link verify, OAuth callbacks). When a user clicks a link in their
+    // email, the browser does a direct GET — if Better Auth returns JSON, the browser
+    // downloads it as a file (e.g., "verify"). Convert JSON responses to proper redirects.
+    const isBrowserNavigation = c.req.method === "GET";
+    const isMagicVerify =
+      c.req.path.includes("magic-link/verify") ||
+      c.req.path.includes("magiclink/verify");
+    const isRedirectResponse = response.status >= 300 && response.status < 400;
+
+    if (isBrowserNavigation && isMagicVerify && !isRedirectResponse) {
+      const reqUrl = new URL(c.req.url);
+      const callbackURL = reqUrl.searchParams.get("callbackURL") || "/";
+
+      try {
+        const cloned = response.clone();
+        const body = (await cloned.json()) as Record<string, unknown>;
+
+        // Preserve Set-Cookie headers from Better Auth (session cookies)
+        const setCookies: string[] = [];
+        response.headers.forEach((value, key) => {
+          if (key.toLowerCase() === "set-cookie") {
+            setCookies.push(value);
+          }
+        });
+
+        // Build redirect URL
+        let redirectTarget: string;
+        if (body.redirect && typeof body.redirect === "string") {
+          // Better Auth returned { redirect: "..." }
+          redirectTarget = body.redirect;
+        } else if (
+          body.error ||
+          body.code === "INVALID_TOKEN" ||
+          body.code === "TOKEN_EXPIRED"
+        ) {
+          // Error — redirect to callbackURL with error param
+          const errorUrl = new URL(callbackURL, reqUrl.origin);
+          const errorMsg =
+            typeof body.message === "string"
+              ? body.message
+              : typeof body.error === "string"
+                ? body.error
+                : "Magic link expired or is invalid";
+          errorUrl.searchParams.set("error", errorMsg);
+          redirectTarget = errorUrl.toString();
+        } else {
+          // Success with session data — redirect to callbackURL
+          redirectTarget = callbackURL;
+        }
+
+        // Build redirect response with preserved cookies
+        const redirectHeaders = new Headers({ Location: redirectTarget });
+        for (const cookie of setCookies) {
+          redirectHeaders.append("Set-Cookie", cookie);
+        }
+
+        console.log(
+          "[BetterAuth] Converted JSON response to redirect for magic link verify →",
+          redirectTarget.slice(0, 80),
+        );
+
+        return new Response(null, {
+          status: 302,
+          headers: redirectHeaders,
+        });
+      } catch {
+        // JSON parse failed — redirect to callbackURL with generic error
+        const errorUrl = new URL(callbackURL, reqUrl.origin);
+        errorUrl.searchParams.set("error", "Verification failed");
+        console.error(
+          "[BetterAuth] Failed to parse magic link verify response, redirecting with error",
+        );
+        return c.redirect(errorUrl.toString());
+      }
+    }
+
     // Audit logging for passkey operations (non-blocking, fire-and-forget)
     const path = c.req.path;
     const isPasskeyOp = path.includes("/passkey/");

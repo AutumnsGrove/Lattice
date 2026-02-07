@@ -65,5 +65,6 @@ export const load: PageServerLoad = async ({ url, platform, parent }) => {
     inviteType: invite.invite_type,
     customMessage: invite.custom_message,
     token,
+    expired: url.searchParams.get("expired") === "true",
   };
 };

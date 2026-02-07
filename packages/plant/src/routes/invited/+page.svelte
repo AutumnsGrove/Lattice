@@ -23,6 +23,9 @@
 	let mode = $state<'ready' | 'sending' | 'sent' | 'error'>('ready');
 	let errorMessage = $state<string | null>(null);
 
+	// Show expired notification if redirected back from an expired magic link
+	let showExpiredNotice = $state(data.expired ?? false);
+
 	/**
 	 * Capitalize a tier name for display
 	 */
@@ -36,12 +39,13 @@
 	async function sendMagicLink() {
 		mode = 'sending';
 		errorMessage = null;
+		showExpiredNotice = false;
 
 		try {
-			const response = await fetch('/api/auth/magic-link', {
+			const response = await fetch('/api/auth/magic-link', { // csrf-ok: unauthenticated invite flow
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email: data.inviteEmail }),
+				body: JSON.stringify({ email: data.inviteEmail, inviteToken: data.token }),
 			});
 
 			if (!response.ok) {
@@ -82,6 +86,15 @@
 			</p>
 		{/if}
 	</section>
+
+	<!-- Expired magic link notice -->
+	{#if showExpiredNotice}
+		<div class="max-w-md mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm" role="alert">
+			<p class="text-sm text-amber-800 dark:text-amber-200 text-center">
+				Your sign-in link expired — no worries! Click below to get a fresh one.
+			</p>
+		</div>
+	{/if}
 
 	<!-- Invite details card -->
 	<GlassCard variant="frosted" class="max-w-md mx-auto">

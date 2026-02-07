@@ -22,6 +22,18 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const authBaseUrl = env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
   const db = platform?.env?.DB;
 
+  // Invite token threaded through for expired-link recovery
+  const inviteToken = url.searchParams.get("inviteToken");
+  const errorParam = url.searchParams.get("error");
+
+  // If redirected here with an error (e.g., expired magic link), redirect to invite page
+  if (errorParam && inviteToken) {
+    redirect(
+      302,
+      `/invited?token=${encodeURIComponent(inviteToken)}&expired=true`,
+    );
+  }
+
   if (!db) {
     console.error("[Magic Link Callback] Database not available");
     redirect(302, "/?error=Service%20temporarily%20unavailable");
