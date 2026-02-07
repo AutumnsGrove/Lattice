@@ -189,7 +189,7 @@ describe("Zephyr Email Pipeline", () => {
 
       const validation1 = validateRequest(invalidRawRequest);
       expect(validation1.valid).toBe(false);
-      expect(validation1.errorCode).toBe("INVALID_TEMPLATE");
+      expect(validation1.errorCode).toBe("ZEPHYR-034");
 
       // Missing subject
       const invalidRawRequest2: ZephyrRequest = {
@@ -201,7 +201,7 @@ describe("Zephyr Email Pipeline", () => {
 
       const validation2 = validateRequest(invalidRawRequest2);
       expect(validation2.valid).toBe(false);
-      expect(validation2.errorCode).toBe("INVALID_TEMPLATE");
+      expect(validation2.errorCode).toBe("ZEPHYR-034");
 
       // Valid raw request
       const validRawRequest: ZephyrRequest = {
@@ -365,7 +365,7 @@ describe("Zephyr Email Pipeline", () => {
         template: "porch-reply",
         recipient: "user@example.com",
         success: false,
-        error_code: "PROVIDER_ERROR" as const,
+        error_code: "ZEPHYR-060" as const,
         error_message: "Network timeout",
         provider: "resend",
         attempts: 3,

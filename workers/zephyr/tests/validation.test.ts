@@ -30,7 +30,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_REQUEST");
+    expect(result.errorCode).toBe("ZEPHYR-031");
     expect(result.errorMessage).toContain("type");
   });
 
@@ -42,7 +42,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_REQUEST");
+    expect(result.errorCode).toBe("ZEPHYR-031");
     expect(result.errorMessage).toContain("template");
   });
 
@@ -54,7 +54,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_REQUEST");
+    expect(result.errorCode).toBe("ZEPHYR-031");
     expect(result.errorMessage).toContain("to");
   });
 
@@ -67,7 +67,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_RECIPIENT");
+    expect(result.errorCode).toBe("ZEPHYR-033");
   });
 
   it("should reject invalid email type", () => {
@@ -79,7 +79,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_REQUEST");
+    expect(result.errorCode).toBe("ZEPHYR-032");
   });
 
   it("should reject raw template without html/text", () => {
@@ -92,7 +92,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_TEMPLATE");
+    expect(result.errorCode).toBe("ZEPHYR-034");
   });
 
   it("should reject raw template without subject", () => {
@@ -105,7 +105,7 @@ describe("validateRequest", () => {
 
     const result = validateRequest(request);
     expect(result.valid).toBe(false);
-    expect(result.errorCode).toBe("INVALID_TEMPLATE");
+    expect(result.errorCode).toBe("ZEPHYR-034");
   });
 
   it("should accept raw template with html and subject", () => {
@@ -160,13 +160,13 @@ describe("validateRequest", () => {
     it("should reject null body", () => {
       const result = validateRequest(null);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_REQUEST");
+      expect(result.errorCode).toBe("ZEPHYR-030");
     });
 
     it("should reject non-object body", () => {
       const result = validateRequest("string");
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_REQUEST");
+      expect(result.errorCode).toBe("ZEPHYR-030");
     });
 
     it("should reject email with spaces", () => {
@@ -178,7 +178,7 @@ describe("validateRequest", () => {
 
       const result = validateRequest(request);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_RECIPIENT");
+      expect(result.errorCode).toBe("ZEPHYR-033");
     });
 
     it("should reject email without TLD", () => {
@@ -190,7 +190,7 @@ describe("validateRequest", () => {
 
       const result = validateRequest(request);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_RECIPIENT");
+      expect(result.errorCode).toBe("ZEPHYR-033");
     });
 
     it("should reject email with multiple @ symbols", () => {
@@ -202,7 +202,7 @@ describe("validateRequest", () => {
 
       const result = validateRequest(request);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_RECIPIENT");
+      expect(result.errorCode).toBe("ZEPHYR-033");
     });
 
     it("should accept valid email with plus sign", () => {
@@ -257,7 +257,7 @@ describe("validateRequest", () => {
 
       const result = validateRequest(invalidRequest);
       expect(result.valid).toBe(false);
-      expect(result.errorCode).toBe("INVALID_REQUEST");
+      expect(result.errorCode).toBe("ZEPHYR-035");
     });
   });
 });

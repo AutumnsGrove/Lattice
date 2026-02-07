@@ -136,7 +136,7 @@ describe("sendHandler", () => {
 
     vi.mocked(validateRequest).mockReturnValue({
       valid: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: "ZEPHYR-030",
       errorMessage: "Missing required field: type",
     });
 
@@ -148,7 +148,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(400);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "INVALID_REQUEST",
+      errorCode: "ZEPHYR-030",
       errorMessage: "Missing required field: type",
     });
 
@@ -182,7 +182,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(429);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "RATE_LIMITED",
+      errorCode: "ZEPHYR-050",
     });
     // Should log the failure via waitUntil
     expect(mockContext.executionCtx.waitUntil).toHaveBeenCalled();
@@ -218,7 +218,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(403);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "UNSUBSCRIBED",
+      errorCode: "ZEPHYR-051",
       unsubscribed: true,
     });
     // Should log the failure via waitUntil
@@ -258,7 +258,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(400);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "TEMPLATE_ERROR",
+      errorCode: "ZEPHYR-070",
     });
     // Should log the failure via waitUntil
     expect(mockContext.executionCtx.waitUntil).toHaveBeenCalled();
@@ -305,7 +305,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(502);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "PROVIDER_ERROR",
+      errorCode: "ZEPHYR-060",
       attempts: 3,
     });
     // Should log the failure via waitUntil
@@ -353,7 +353,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(502);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "PROVIDER_ERROR",
+      errorCode: "ZEPHYR-060",
     });
     expect(result.data.errorMessage).toContain("Circuit breaker");
     // Should log the failure via waitUntil
@@ -480,7 +480,7 @@ describe("sendHandler", () => {
     expect(result.status).toBe(500);
     expect(result.data).toMatchObject({
       success: false,
-      errorCode: "INTERNAL_ERROR",
+      errorCode: "ZEPHYR-080",
     });
     // Should log via waitUntil (fire-and-forget)
     expect(mockContext.executionCtx.waitUntil).toHaveBeenCalled();
