@@ -14,6 +14,10 @@ import {
   createVerificationCookie,
   TURNSTILE_COOKIE_NAME,
 } from "$lib/server/services/turnstile";
+import {
+  checkRateLimit,
+  getClientIP,
+} from "$lib/server/rate-limits/middleware.js";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   // Get the token from the request body
@@ -28,6 +32,18 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   if (!token) {
     throw error(400, "Missing Turnstile token");
+  }
+
+  // Rate limit Turnstile verification (each call hits Cloudflare API)
+  if ((platform?.env as Record<string, unknown>)?.CACHE_KV) {
+    const { response } = await checkRateLimit({
+      kv: (platform!.env as Record<string, unknown>).CACHE_KV as KVNamespace,
+      key: `turnstile:${getClientIP(request)}`,
+      limit: 10,
+      windowSeconds: 60, // 1 minute
+      namespace: "turnstile-ratelimit",
+    });
+    if (response) return response;
   }
 
   // Get the secret key from environment
@@ -69,17 +85,20 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     "HttpOnly",
     "Secure",
     "SameSite=Lax",
-    "Domain=grove.place" // No leading dot - modern browsers handle this correctly
+    "Domain=grove.place", // No leading dot - modern browsers handle this correctly
   ].join("; ");
 
-  return new Response(JSON.stringify({
-    success: true,
-    message: "Verification successful",
-  }), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Set-Cookie": cookieHeader
-    }
-  });
+  return new Response(
+    JSON.stringify({
+      success: true,
+      message: "Verification successful",
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": cookieHeader,
+      },
+    },
+  );
 };

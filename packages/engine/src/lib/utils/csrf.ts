@@ -70,6 +70,19 @@ export async function validateSessionCSRFToken(
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ * Compares all characters regardless of match (no early exit).
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
  * Validate CSRF token from request against session token
  */
 export function validateCSRFToken(
@@ -83,7 +96,10 @@ export function validateCSRFToken(
 
   if (!headerToken && !bodyToken) return false;
 
-  return headerToken === sessionToken || bodyToken === sessionToken;
+  return (
+    (headerToken !== null && timingSafeEqual(headerToken, sessionToken)) ||
+    (bodyToken !== null && timingSafeEqual(bodyToken, sessionToken))
+  );
 }
 
 /**
@@ -191,7 +207,10 @@ export function validateCSRF(
   // SECURITY: Origin header is absent — fall back to CSRF token validation
   // This prevents bypass via requests that strip the Origin header
   if (options?.csrfToken && options?.expectedToken) {
-    const tokenValid = options.csrfToken === options.expectedToken;
+    const tokenValid = timingSafeEqual(
+      options.csrfToken,
+      options.expectedToken,
+    );
     if (debug)
       console.log("[validateCSRF] No origin, token fallback:", { tokenValid });
     return tokenValid;

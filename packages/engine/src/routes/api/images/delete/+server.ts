@@ -1,6 +1,10 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 interface DeleteBody {
@@ -20,6 +24,18 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
     throw error(403, "Tenant context required");
+  }
+
+  // Rate limit deletions (prevent deletion storms)
+  if (platform?.env?.CACHE_KV) {
+    const { response } = await checkRateLimit({
+      kv: platform.env.CACHE_KV,
+      key: buildRateLimitKey("images/delete", locals.user.id),
+      limit: 50,
+      windowSeconds: 3600, // 1 hour
+      namespace: "upload-ratelimit",
+    });
+    if (response) return response;
   }
 
   // CSRF Protection: Validate origin header against host

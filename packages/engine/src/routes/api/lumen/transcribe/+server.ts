@@ -17,6 +17,10 @@ import { getTenantSubscription } from "$lib/server/billing.js";
 import { validateEnv } from "$lib/server/env-validation.js";
 import { createLumenClient } from "$lib/lumen/client.js";
 import type { ScribeMode } from "$lib/lumen/types.js";
+import {
+  checkRateLimit,
+  buildRateLimitKey,
+} from "$lib/server/rate-limits/middleware.js";
 
 // Maximum audio file size (25MB as per plan)
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
@@ -47,6 +51,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // CSRF check
   if (!validateCSRF(request)) {
     throw error(403, "Invalid origin");
+  }
+
+  // Rate limit transcriptions (expensive AI operation)
+  if (platform?.env?.CACHE_KV) {
+    const { response } = await checkRateLimit({
+      kv: platform.env.CACHE_KV,
+      key: buildRateLimitKey("ai/transcribe", locals.user.id),
+      limit: 20,
+      windowSeconds: 86400, // 24 hours
+      namespace: "ai-ratelimit",
+      failClosed: true,
+    });
+    if (response) return response;
   }
 
   // Validate required environment variables
