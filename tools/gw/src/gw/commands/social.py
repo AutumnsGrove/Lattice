@@ -16,13 +16,13 @@ ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 
 
 def _get_api_key(config: GWConfig) -> Optional[str]:
-    """Get Zephyr API key from environment or secrets."""
-    # Check environment variable first
+    """Get Zephyr API key from environment, secrets.json, or vault."""
+    # 1. Check environment variable first (fastest)
     key = os.environ.get("ZEPHYR_API_KEY")
     if key:
         return key
 
-    # Check secrets.json
+    # 2. Check secrets.json (legacy)
     secrets_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))),
         "secrets.json",
@@ -30,9 +30,25 @@ def _get_api_key(config: GWConfig) -> Optional[str]:
     try:
         with open(secrets_path) as f:
             secrets = json.load(f)
-            return secrets.get("ZEPHYR_API_KEY")
+            key = secrets.get("ZEPHYR_API_KEY")
+            if key:
+                return key
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
-        return None
+        pass
+
+    # 3. Check encrypted vault
+    try:
+        from ..secrets_vault import SecretsVault, VaultError, get_vault_password
+
+        vault = SecretsVault()
+        if vault.exists:
+            password = get_vault_password()
+            vault.unlock(password)
+            return vault.get_secret("ZEPHYR_API_KEY")
+    except (VaultError, Exception):
+        pass
+
+    return None
 
 
 def _zephyr_request(
@@ -123,7 +139,7 @@ def social_post(
             console.print(json.dumps({"error": "ZEPHYR_API_KEY not found"}))
         else:
             error("ZEPHYR_API_KEY not found")
-            info("Set ZEPHYR_API_KEY environment variable or add to secrets.json")
+            info("Set ZEPHYR_API_KEY env var, add to secrets.json, or store in vault (gw secret set)")
         raise SystemExit(1)
 
     platforms = list(platform)
@@ -204,7 +220,7 @@ def social_status(ctx: click.Context) -> None:
             console.print(json.dumps({"error": "ZEPHYR_API_KEY not found"}))
         else:
             error("ZEPHYR_API_KEY not found")
-            info("Set ZEPHYR_API_KEY environment variable or add to secrets.json")
+            info("Set ZEPHYR_API_KEY env var, add to secrets.json, or store in vault (gw secret set)")
         raise SystemExit(1)
 
     result = _zephyr_request("/broadcast/platforms", api_key)

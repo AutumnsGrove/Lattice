@@ -265,9 +265,30 @@ class SecretsVault:
                 "name": name,
                 "created_at": entry["created_at"],
                 "updated_at": entry["updated_at"],
+                "deployed_to": entry.get("deployed_to", []),
             }
             for name, entry in sorted(self._secrets.items())
         ]
+
+    def record_deployment(self, name: str, target: str) -> None:
+        """Record that a secret was deployed to a target.
+
+        Args:
+            name: Secret name
+            target: Deployment target (e.g. "grove-zephyr" or "Pages:grove-landing")
+        """
+        if not self._unlocked:
+            raise VaultError("Vault is not unlocked")
+        if name not in self._secrets:
+            return
+
+        entry = self._secrets[name]
+        deployed_to = entry.get("deployed_to", [])
+        if target not in deployed_to:
+            deployed_to.append(target)
+        entry["deployed_to"] = deployed_to
+        entry["last_deployed_at"] = datetime.now().isoformat()
+        self._save()
 
     def secret_exists(self, name: str) -> bool:
         """Check if a secret exists.

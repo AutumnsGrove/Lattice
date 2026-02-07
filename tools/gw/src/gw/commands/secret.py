@@ -265,12 +265,14 @@ def secret_list(ctx: click.Context) -> None:
     table.add_column("Name", style="cyan")
     table.add_column("Created", style="yellow")
     table.add_column("Updated", style="magenta")
+    table.add_column("Deployed To", style="dim")
 
     for s in secrets:
         # Format timestamps
         created = s["created_at"][:10] if s["created_at"] else "-"
         updated = s["updated_at"][:10] if s["updated_at"] else "-"
-        table.add_row(s["name"], created, updated)
+        deployed = ", ".join(s.get("deployed_to", [])) or "[dim]—[/dim]"
+        table.add_row(s["name"], created, updated, deployed)
 
     console.print(table)
     console.print(
@@ -460,6 +462,7 @@ def secret_apply(ctx: click.Context, names: tuple[str, ...], worker: str | None,
 
             if result.returncode == 0:
                 results.append({"name": name, "success": True})
+                vault.record_deployment(name, target_label)
                 if not output_json:
                     success(f"Applied {name} to {target_label}")
             else:
