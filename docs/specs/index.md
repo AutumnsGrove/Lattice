@@ -90,6 +90,8 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Press](press-spec.md)** | Image processing CLI | Active | Amber, R2 |
 | **[Seasons](seasons-spec.md)** | Semantic versioning system | Active | npm, Lattice |
 | **[Versioning](versioning-spec.md)** | npm publishing workflow | Active | npm, Seasons |
+| **[Zephyr](zephyr-spec.md)** | Unified email gateway | Planned | Resend, D1 |
+| **[Zephyr Social](zephyr-social-spec.md)** | Cross-platform social broadcasting | Planned | Bluesky, Mastodon, DEV.to |
 
 ### Security & Operations
 
