@@ -72,7 +72,7 @@
 	<button
 		type="button"
 		onclick={() => isExpanded = !isExpanded}
-		class="w-full p-4 text-left flex items-start gap-3 hover:bg-white/20 dark:hover:bg-slate-800/20 transition-colors"
+		class="w-full p-4 text-left flex items-start gap-3 hover:bg-white/20 dark:hover:bg-bark-800/20 transition-colors"
 	>
 		<div class={cn(
 			'p-2 rounded-lg flex-shrink-0',
@@ -109,7 +109,7 @@
 			{#if components.length > 0}
 				<div class="flex flex-wrap gap-1.5 mt-2">
 					{#each components as component}
-						<span class="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-800 rounded text-foreground-muted">
+						<span class="px-2 py-0.5 text-xs bg-cream-100 dark:bg-bark-800 rounded text-foreground-muted">
 							{component.name}
 						</span>
 					{/each}
@@ -134,7 +134,7 @@
 
 	<!-- Timeline (expandable) -->
 	{#if isExpanded && updates.length > 0}
-		<div class="border-t border-white/20 dark:border-slate-700/30 p-4">
+		<div class="border-t border-white/20 dark:border-bark-700/30 p-4">
 			<h4 class="text-sm font-medium text-foreground-muted mb-4">Timeline</h4>
 
 			<div class="space-y-4">
@@ -144,7 +144,7 @@
 						<div class="flex flex-col items-center">
 							<div class={cn(
 								'p-1.5 rounded-full',
-								update.status === 'resolved' ? 'bg-green-500/10' : 'bg-slate-100 dark:bg-slate-800'
+								update.status === 'resolved' ? 'bg-green-500/10' : 'bg-cream-100 dark:bg-bark-800'
 							)}>
 								<UpdateIcon class={cn(
 									'w-4 h-4',
@@ -152,7 +152,7 @@
 								)} />
 							</div>
 							{#if updates.indexOf(update) < updates.length - 1}
-								<div class="w-px flex-1 bg-slate-200 dark:bg-slate-700 my-1"></div>
+								<div class="w-px flex-1 bg-cream-200 dark:bg-bark-700 my-1"></div>
 							{/if}
 						</div>
 

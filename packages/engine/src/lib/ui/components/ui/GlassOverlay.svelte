@@ -54,7 +54,7 @@
 	// Variant backgrounds
 	const variantClasses: Record<OverlayVariant, string> = {
 		dark: "bg-black/50 dark:bg-black/60",
-		light: "bg-white/50 dark:bg-slate-900/50",
+		light: "bg-white/70 dark:bg-bark-900/50",
 		accent: "bg-accent/30 dark:bg-accent/20"
 	};
 

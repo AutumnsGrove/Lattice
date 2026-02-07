@@ -86,15 +86,15 @@
 <!-- Desktop: Full comparison table (hidden on mobile) -->
 <div class={cn(
 	"hidden md:block rounded-xl overflow-hidden",
-	"bg-white/60 dark:bg-slate-800/50 backdrop-blur-md",
-	"border border-white/40 dark:border-slate-700/40",
+	"bg-white/80 dark:bg-bark-800/50 backdrop-blur-md",
+	"border border-white/40 dark:border-bark-700/40",
 	"shadow-sm",
 	className
 )}>
 	<div class="overflow-x-auto">
 		<table class="w-full text-sm font-sans" aria-label={title ?? "Platform comparison"}>
 			<thead>
-				<tr class="border-b border-white/30 dark:border-slate-700/30">
+				<tr class="border-b border-white/30 dark:border-bark-700/30">
 					<!-- Feature column header -->
 					<th scope="col" class="text-left px-5 py-4 text-foreground-muted font-medium w-[200px]">
 						Feature
@@ -125,7 +125,7 @@
 			<tbody>
 				{#each rows as row, i}
 					<tr class={cn(
-						i < rows.length - 1 && "border-b border-white/20 dark:border-slate-700/20"
+						i < rows.length - 1 && "border-b border-white/20 dark:border-bark-700/20"
 					)}>
 						<!-- Feature name -->
 						<th scope="row" class="text-left px-5 py-3.5 text-foreground font-medium">
@@ -180,17 +180,17 @@
 		<div
 			class={cn(
 				"rounded-xl overflow-hidden",
-				"bg-white/60 dark:bg-slate-800/50 backdrop-blur-md",
-				"border border-white/40 dark:border-slate-700/40",
+				"bg-white/80 dark:bg-bark-800/50 backdrop-blur-md",
+				"border border-white/40 dark:border-bark-700/40",
 				"shadow-sm"
 			)}
 		>
 			<!-- Card header: Grove vs Competitor -->
-			<div class="flex items-center border-b border-white/30 dark:border-slate-700/30">
+			<div class="flex items-center border-b border-white/30 dark:border-bark-700/30">
 				<div class="flex-1 px-4 py-3 text-center bg-accent-subtle/20 dark:bg-grove-950/20">
 					<span class="font-semibold text-sm text-foreground font-sans">{highlightedCol}</span>
 				</div>
-				<div class="w-px h-8 bg-white/30 dark:bg-slate-700/30"></div>
+				<div class="w-px h-8 bg-white/30 dark:bg-bark-700/30"></div>
 				<div class="flex-1 px-4 py-3 text-center">
 					{#if competitor.href}
 						<a href={competitor.href} class="font-semibold text-sm text-foreground-muted font-sans hover:text-accent-muted transition-colors" target="_blank" rel="noopener noreferrer">
@@ -208,7 +208,7 @@
 				{@const competitorValue = row.values[competitor.name]}
 				<div class={cn(
 					"px-4 py-3",
-					i < rows.length - 1 && "border-b border-white/15 dark:border-slate-700/15"
+					i < rows.length - 1 && "border-b border-white/15 dark:border-bark-700/15"
 				)}>
 					<!-- Feature name -->
 					<div class="text-xs text-foreground-muted font-sans mb-2 font-medium">{row.feature}</div>
@@ -226,7 +226,7 @@
 								<span class="text-sm text-foreground font-medium font-sans">{groveValue}</span>
 							{/if}
 						</div>
-						<div class="w-px h-5 bg-white/20 dark:bg-slate-700/20 mx-2"></div>
+						<div class="w-px h-5 bg-white/20 dark:bg-bark-700/20 mx-2"></div>
 						<!-- Competitor value -->
 						<div class="flex-1 flex items-center justify-center" aria-label="{competitor.name}: {getCellLabel(competitorValue)}">
 							{#if competitorValue === true}

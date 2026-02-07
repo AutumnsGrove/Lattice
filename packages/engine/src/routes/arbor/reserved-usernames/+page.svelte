@@ -57,11 +57,11 @@
 
 	// Reason colors for badges
 	const reasonColors: Record<string, string> = {
-		system: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-		trademark: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-		offensive: 'bg-red-500/20 text-red-300 border-red-500/30',
-		taken_external: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-		custom: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+		system: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30',
+		trademark: 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30',
+		offensive: 'bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/30',
+		taken_external: 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border-orange-500/30',
+		custom: 'bg-slate-500/20 text-foreground dark:text-foreground border-slate-500/30'
 	};
 
 	// Format timestamp
@@ -114,7 +114,7 @@
 		<!-- Stats -->
 		<div class="flex gap-4 text-sm">
 			{#each Object.entries(data.stats) as [reason, count]}
-				<div class="px-3 py-1.5 rounded-lg bg-white/10 dark:bg-slate-800/30">
+				<div class="px-3 py-1.5 rounded-lg bg-white/30 dark:bg-bark-800/30">
 					<span class="text-foreground-muted">{reasonLabels[reason] || reason}:</span>
 					<span class="font-medium text-foreground ml-1">{count}</span>
 				</div>
@@ -156,14 +156,14 @@
 							bind:value={searchQuery}
 							onkeydown={(e) => e.key === 'Enter' && applyFilters()}
 							placeholder="Search usernames..."
-							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 						/>
 					</div>
 
 					<select
 						bind:value={reasonFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+						class="px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-primary"
 					>
 						<option value="">All reasons</option>
 						{#each data.validReasons as reason}
@@ -183,7 +183,7 @@
 						<button
 							type="button"
 							onclick={clearFilters}
-							class="px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 text-foreground-muted hover:text-foreground transition-colors"
+							class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground transition-colors"
 						>
 							<X class="w-4 h-4" />
 						</button>
@@ -193,11 +193,11 @@
 
 			<!-- Reserved Usernames List -->
 			<GlassCard variant="frosted">
-				<div class="divide-y divide-white/10 dark:divide-slate-700/30">
+				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.reservedUsernames as item}
 						<div class="p-4 flex items-center justify-between group">
 							<div class="flex items-center gap-3">
-								<code class="px-2 py-1 rounded bg-white/20 dark:bg-slate-800/40 text-sm font-mono">
+								<code class="px-2 py-1 rounded bg-white/40 dark:bg-bark-800/40 text-sm font-mono">
 									{item.username}
 								</code>
 								<span
@@ -236,7 +236,7 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div class="p-4 border-t border-white/10 dark:border-slate-700/30 flex items-center justify-between">
+					<div class="p-4 border-t border-white/10 dark:border-bark-700/30 flex items-center justify-between">
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
 							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data.pagination.total}
@@ -247,7 +247,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -260,7 +260,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -306,7 +306,7 @@
 							bind:value={newUsername}
 							placeholder="username-to-reserve"
 							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 						/>
 					</div>
 
@@ -319,7 +319,7 @@
 							name="reason"
 							bind:value={newReason}
 							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-primary"
 						>
 							{#each data.validReasons as reason}
 								<option value={reason}>{reasonLabels[reason] || reason}</option>
@@ -337,7 +337,7 @@
 							bind:value={newNotes}
 							placeholder="Why is this being reserved?"
 							rows="2"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
 						></textarea>
 					</div>
 
@@ -366,7 +366,7 @@
 
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
-						<div class="p-2 rounded-lg bg-white/10 dark:bg-slate-800/20 text-sm">
+						<div class="p-2 rounded-lg bg-white/30 dark:bg-bark-800/20 text-sm">
 							<div class="flex items-center gap-2">
 								{#if entry.action === 'add'}
 									<Plus class="w-3 h-3 text-success" />
@@ -404,7 +404,7 @@
 			<GlassCard variant="frosted" class="max-w-md mx-4">
 				<h3 class="text-lg font-medium text-foreground mb-2">Remove Reservation</h3>
 				<p class="text-foreground-muted mb-4">
-					Are you sure you want to release <code class="px-1 py-0.5 rounded bg-white/20"
+					Are you sure you want to release <code class="px-1 py-0.5 rounded bg-white/40"
 						>{removeUsername}</code
 					>? This username will become available for <GroveTerm term="wanderer">wanderers</GroveTerm> to claim.
 				</p>
@@ -437,7 +437,7 @@
 							bind:value={removeNotes}
 							placeholder="Why is this being released?"
 							rows="2"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
 						></textarea>
 					</div>
 
@@ -448,7 +448,7 @@
 								removeUsername = null;
 								removeNotes = '';
 							}}
-							class="flex-1 px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 text-foreground hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+							class="flex-1 px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground hover:bg-white/60 dark:hover:bg-bark-800/40 transition-colors"
 						>
 							Cancel
 						</button>

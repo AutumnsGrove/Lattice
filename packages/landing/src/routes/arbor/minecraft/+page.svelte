@@ -49,8 +49,8 @@
 		},
 		IDLE: {
 			label: 'Idle',
-			color: 'text-gray-700 dark:text-slate-300',
-			bg: 'bg-gray-100 dark:bg-slate-700',
+			color: 'text-foreground-muted dark:text-cream-300',
+			bg: 'bg-cream-100 dark:bg-bark-700',
 			pulse: false
 		},
 		PROVISIONING: {
@@ -73,8 +73,8 @@
 		},
 		UNKNOWN: {
 			label: 'Unknown',
-			color: 'text-gray-500 dark:text-slate-400',
-			bg: 'bg-gray-100 dark:bg-slate-700',
+			color: 'text-foreground-subtle dark:text-cream-400',
+			bg: 'bg-cream-100 dark:bg-bark-700',
 			pulse: false
 		}
 	};
@@ -161,7 +161,7 @@
 			{:else if isTransitioning}
 				<Loader2 class="w-6 h-6 text-amber-600 dark:text-amber-400 animate-spin" />
 			{:else}
-				<WifiOff class="w-6 h-6 text-gray-400 dark:text-slate-500" />
+				<WifiOff class="w-6 h-6 text-foreground-subtle dark:text-cream-500" />
 			{/if}
 			<div>
 				<div class="text-lg font-serif text-foreground">Server Status</div>
@@ -180,7 +180,7 @@
 						<select
 							bind:value={selectedRegion}
 							aria-label="Select server region"
-							class="text-xs font-sans px-2 py-1.5 rounded border border-grove-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground"
+							class="text-xs font-sans px-2 py-1.5 rounded border border-grove-200 dark:border-bark-600 bg-white dark:bg-bark-800 text-foreground"
 						>
 							<option value="eu">EU</option>
 							<option value="us">US</option>
@@ -210,7 +210,7 @@
 
 	<!-- Status Details (when running) -->
 	{#if isRunning}
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-grove-200 dark:border-slate-700">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-grove-200 dark:border-bark-700">
 			{#if data.serverStatus.players}
 				<div class="text-center">
 					<Users class="w-4 h-4 mx-auto mb-1 text-foreground-muted" />
@@ -251,7 +251,7 @@
 
 		<!-- Online Players List -->
 		{#if data.serverStatus.players && data.serverStatus.players.list.length > 0}
-			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-slate-700">
+			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-bark-700">
 				<div class="text-xs font-sans text-foreground-muted mb-2">Online Players</div>
 				<div class="flex flex-wrap gap-2">
 					{#each data.serverStatus.players.list as player}
@@ -265,7 +265,7 @@
 
 		<!-- Session Cost -->
 		{#if data.serverStatus.sessionCost}
-			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-slate-700 flex items-center justify-between">
+			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-bark-700 flex items-center justify-between">
 				<span class="text-sm font-sans text-foreground-muted">Session Cost</span>
 				<span class="text-sm font-sans text-foreground font-medium">
 					{formatCost(data.serverStatus.sessionCost)}
@@ -274,7 +274,7 @@
 		{/if}
 
 		<!-- Last Backup + Manual Sync -->
-		<div class="mt-4 pt-4 border-t border-grove-200 dark:border-slate-700 flex items-center justify-between">
+		<div class="mt-4 pt-4 border-t border-grove-200 dark:border-bark-700 flex items-center justify-between">
 			<div class="text-sm font-sans text-foreground-muted">
 				Last backup:
 				{data.serverStatus.lastBackup ? formatDate(data.serverStatus.lastBackup) : 'Never'}
@@ -282,7 +282,7 @@
 			<form method="POST" action="?/sync" use:enhance>
 				<button
 					type="submit"
-					class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-grove-600 dark:text-grove-400 border border-grove-200 dark:border-slate-600 rounded-lg hover:bg-grove-50 dark:hover:bg-slate-700 transition-colors"
+					class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-grove-600 dark:text-grove-400 border border-grove-200 dark:border-bark-600 rounded-lg hover:bg-grove-50 dark:hover:bg-bark-700 transition-colors"
 				>
 					<RefreshCw class="w-3 h-3" />
 					Sync Now
@@ -293,7 +293,7 @@
 </GlassCard>
 
 <!-- Tab Navigation -->
-<div class="flex gap-1 mb-6 border-b border-grove-200 dark:border-slate-700" role="tablist">
+<div class="flex gap-1 mb-6 border-b border-grove-200 dark:border-bark-700" role="tablist">
 	<button
 		type="button"
 		onclick={() => (activeTab = 'controls')}
@@ -362,7 +362,7 @@
 					bind:value={newWhitelistUser}
 					placeholder="Minecraft username"
 					aria-label="Minecraft username"
-					class="flex-1 px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+					class="flex-1 px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 				/>
 				<button
 					type="submit"
@@ -379,7 +379,7 @@
 					No players whitelisted
 				</p>
 			{:else}
-				<div class="divide-y divide-grove-100 dark:divide-slate-700/50">
+				<div class="divide-y divide-grove-100 dark:divide-bark-700/50">
 					{#each data.whitelist as entry}
 						<div class="flex items-center justify-between py-2">
 							<span class="text-sm font-sans text-foreground">{entry.username}</span>
@@ -431,7 +431,7 @@
 							bind:value={commandInput}
 							placeholder="Enter server command..."
 							aria-label="Server command"
-							class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-mono bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+							class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-mono bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 						/>
 					</div>
 					<button
@@ -457,11 +457,11 @@
 				<p class="text-foreground-muted font-sans">No sessions recorded</p>
 			</GlassCard>
 		{:else}
-			<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
+			<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
 				<div class="overflow-x-auto">
 					<table class="w-full" aria-label="Session history">
 						<thead
-							class="bg-grove-50 dark:bg-slate-800/50 border-b border-grove-200 dark:border-slate-700"
+							class="bg-grove-50 dark:bg-bark-800/50 border-b border-grove-200 dark:border-bark-700"
 						>
 							<tr>
 								<th
@@ -497,7 +497,7 @@
 							</tr>
 						</thead>
 						<tbody
-							class="divide-y divide-grove-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800/30"
+							class="divide-y divide-grove-100 dark:divide-bark-700/50 bg-white dark:bg-bark-800/30"
 						>
 							{#each data.history as session}
 								<tr>

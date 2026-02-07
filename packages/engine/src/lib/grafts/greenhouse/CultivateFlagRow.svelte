@@ -52,9 +52,9 @@
 			case "variant":
 				return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400";
 			case "json":
-				return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400";
+				return "bg-cream-100 text-bark-700 dark:bg-bark-900/30 dark:text-cream-400";
 			default:
-				return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
+				return "bg-cream-100 text-foreground dark:bg-bark-900/30 dark:text-foreground-faint";
 		}
 	});
 </script>
@@ -74,10 +74,10 @@
 					aria-label="Global Flag"
 				/>
 			{/if}
-			<span class="font-medium text-slate-800 dark:text-slate-100">{displayName}</span>
+			<span class="font-medium text-bark-800 dark:text-cream-100">{displayName}</span>
 		</div>
 		{#if flag.description}
-			<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 pl-6">
+			<p class="text-xs text-bark-500 dark:text-cream-400 mt-0.5 pl-6">
 				{flag.description}
 			</p>
 		{/if}
@@ -98,7 +98,7 @@
 			<span
 				class="w-2 h-2 rounded-full {flag.enabled
 					? 'bg-emerald-500'
-					: 'bg-gray-300 dark:bg-gray-600'}"
+					: 'bg-cream-300 dark:bg-bark-600'}"
 				aria-hidden="true"
 			></span>
 			<span class="text-sm {statusColor}">{statusLabel}</span>

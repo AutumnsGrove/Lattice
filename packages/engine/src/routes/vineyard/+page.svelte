@@ -112,19 +112,19 @@
 
 	<!-- Quick Nav -->
 	<nav class="flex flex-wrap justify-center gap-4 mb-16">
-		<a href="#glass" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/80 transition-colors">
+		<a href="#glass" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
 			<Sparkles class="w-4 h-4 text-grove-600" />
 			Glass Suite
 		</a>
-		<a href="#components" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/80 transition-colors">
+		<a href="#components" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
 			<Box class="w-4 h-4 text-grove-600" />
 			UI Components
 		</a>
-		<a href="#typography" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/80 transition-colors">
+		<a href="#typography" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
 			<Type class="w-4 h-4 text-grove-600" />
 			Typography
 		</a>
-		<a href="#palettes" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/80 transition-colors">
+		<a href="#palettes" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/60 text-bark-700 hover:bg-white/90 transition-colors">
 			<Palette class="w-4 h-4 text-grove-600" />
 			Color Palettes
 		</a>
@@ -135,7 +135,7 @@
 	<!-- ========================================== -->
 	<section id="glass" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/60 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
 				<Sparkles class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
@@ -504,7 +504,7 @@
 	<!-- ========================================== -->
 	<section id="components" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/60 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
 				<Box class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
@@ -716,7 +716,7 @@
 	<!-- ========================================== -->
 	<section id="typography" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/60 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
 				<Type class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
@@ -738,7 +738,7 @@
 							>{f.name}</button>
 						{/each}
 					</div>
-					<div class="p-6 bg-white/60 rounded-lg border border-white/60">
+					<div class="p-6 bg-white/80 rounded-lg border border-white/60">
 						<FontProvider font={selectedFont} as="p" class="text-2xl text-bark-800">
 							The quick brown fox jumps over the lazy dog.
 						</FontProvider>
@@ -778,15 +778,15 @@
 			<GlassCard title="Sans-Serif Fonts" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Clean, modern fonts for interfaces and body text</p>
 				<div class="grid md:grid-cols-2 gap-4">
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
 						<Lexend as="h3" class="text-xl text-bark-800 mb-2">Lexend (Default)</Lexend>
 						<Lexend as="p" class="text-bark-600">Modern, highly readable sans-serif. Grove's default font.</Lexend>
 					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
 						<Quicksand as="h3" class="text-xl text-bark-800 mb-2">Quicksand</Quicksand>
 						<Quicksand as="p" class="text-bark-600">Geometric sans with rounded terminals. Light and modern.</Quicksand>
 					</div>
-					<div class="p-4 bg-white/60 rounded-lg border border-bark-200">
+					<div class="p-4 bg-white/80 rounded-lg border border-bark-200">
 						<PlusJakartaSans as="h3" class="text-xl text-bark-800 mb-2">Plus Jakarta Sans</PlusJakartaSans>
 						<PlusJakartaSans as="p" class="text-bark-600">Contemporary geometric sans. Balanced and versatile.</PlusJakartaSans>
 					</div>
@@ -865,7 +865,7 @@ $ npm run dev
 	<!-- ========================================== -->
 	<section id="palettes" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
-			<div class="p-2 rounded-lg bg-white/60 backdrop-blur-sm">
+			<div class="p-2 rounded-lg bg-white/80 backdrop-blur-sm">
 				<Palette class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
@@ -987,7 +987,7 @@ $ npm run dev
 
 <!-- Helper Components -->
 {#snippet PaletteRow({ name, colors, description }: { name: string; colors: Record<string, string>; description: string })}
-	<div class="p-4 bg-white/40 backdrop-blur-sm rounded-lg border border-white/60">
+	<div class="p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-white/60">
 		<div class="flex items-center justify-between mb-3">
 			<div>
 				<h4 class="font-medium text-bark-800">{name}</h4>

@@ -118,7 +118,7 @@
 				</div>
 
 				{#if data.compedInvite?.customMessage}
-					<div class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/20 mb-4">
+					<div class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20 mb-4">
 						<p class="text-foreground-muted italic">
 							"{data.compedInvite.customMessage}"
 						</p>
@@ -133,7 +133,7 @@
 
 			<!-- What's included -->
 			{#if tierInfo}
-				<div class="border-t border-white/20 dark:border-slate-700/20 pt-4 mb-6">
+				<div class="border-t border-white/20 dark:border-bark-700/20 pt-4 mb-6">
 					<h3 class="text-sm font-medium text-foreground mb-3">What's included:</h3>
 					<ul class="space-y-2 text-sm text-foreground-muted">
 						<li class="flex items-center gap-2">

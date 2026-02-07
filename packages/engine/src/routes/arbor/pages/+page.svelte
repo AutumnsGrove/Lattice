@@ -103,7 +103,7 @@
   {/if}
 
   {#if navLimit === 0}
-    <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+    <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-bark-900/40 border border-slate-200 dark:border-bark-700 text-slate-700 dark:text-bark-300">
       <AlertCircle class="w-4 h-4 flex-shrink-0" />
       <span class="text-sm">Custom navigation pages are available starting with <GroveTerm term="sapling">Sapling</GroveTerm>. <a href="/arbor/billing" class="underline hover:no-underline">Upgrade your plan</a> to add pages to your nav.</span>
     </div>
@@ -118,11 +118,11 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
-          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
+          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -189,11 +189,11 @@
             href={curio.configUrl}
             class="flex items-center gap-3 p-3 rounded-lg border transition-all {curio.enabled
               ? 'border-grove-300 bg-grove-50 dark:border-grove-700 dark:bg-grove-900/30 hover:border-grove-400 dark:hover:border-grove-600'
-              : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/30 hover:border-gray-300 dark:hover:border-gray-600'}"
+              : 'border-cream-200 bg-cream-50 dark:border-bark-700 dark:bg-bark-800/30 hover:border-cream-300 dark:hover:border-bark-600'}"
           >
             <div class="w-10 h-10 rounded-lg flex items-center justify-center {curio.enabled
               ? 'bg-grove-100 text-grove-600 dark:bg-grove-800 dark:text-grove-400'
-              : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'}">
+              : 'bg-cream-100 text-foreground-faint dark:bg-bark-700 dark:text-foreground-muted'}">
               <CurioIcon class="w-5 h-5" />
             </div>
             <div class="flex-1 min-w-0">

@@ -137,16 +137,16 @@
 		overlay: "bg-black/50 dark:bg-black/60",
 
 		// Medium opacity for content cards - translucent with grove warmth
-		card: "bg-white/60 dark:bg-emerald-950/25",
+		card: "bg-white/80 dark:bg-grove-950/25",
 
 		// Light tint for text readability
-		tint: "bg-white/50 dark:bg-emerald-950/20",
+		tint: "bg-white/70 dark:bg-grove-950/20",
 
 		// Accent-colored glass for highlights/callouts
 		accent: "bg-accent/25 dark:bg-accent/15",
 
 		// Barely visible, very subtle
-		muted: "bg-white/30 dark:bg-emerald-950/15"
+		muted: "bg-white/50 dark:bg-grove-950/15"
 	};
 
 	// Blur intensity classes - default to medium blur for true glass effect
@@ -161,10 +161,10 @@
 	const borderClasses: Record<Variant, string> = {
 		surface: "border-border",
 		overlay: "border-white/10",
-		card: "border-white/40 dark:border-emerald-800/25",
-		tint: "border-white/30 dark:border-emerald-800/20",
+		card: "border-white/40 dark:border-grove-800/25",
+		tint: "border-white/30 dark:border-grove-800/20",
 		accent: "border-accent/30 dark:border-accent/20",
-		muted: "border-white/20 dark:border-emerald-800/15"
+		muted: "border-white/20 dark:border-grove-800/15"
 	};
 
 	// Shadow classes

@@ -146,10 +146,10 @@
 			<p class="text-foreground-muted font-sans">No feedback yet</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
+		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
 			<div class="overflow-x-auto">
 				<table class="w-full" aria-label="Wanderer feedback">
-					<thead class="bg-grove-50 dark:bg-slate-800/50 border-b border-grove-200 dark:border-slate-700">
+					<thead class="bg-grove-50 dark:bg-bark-800/50 border-b border-grove-200 dark:border-bark-700">
 						<tr>
 							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider w-12">
 								<span class="sr-only">Source</span>
@@ -168,12 +168,12 @@
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-grove-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800/30">
+					<tbody class="divide-y divide-grove-100 dark:divide-bark-700/50 bg-white dark:bg-bark-800/30">
 						{#each feedback as item}
 							{@const SourceIcon = sourceIcons[item.source] || Globe}
 							{@const SentimentIcon = item.sentiment ? sentimentIcons[item.sentiment] : null}
 							<tr
-								class="hover:bg-grove-50/50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer"
+								class="hover:bg-grove-50/50 dark:hover:bg-bark-700/30 transition-colors cursor-pointer"
 								tabindex="0"
 								role="button"
 								aria-expanded={expandedId === item.id}
@@ -227,12 +227,12 @@
 									{:else if item.status === 'read'}
 										<span class="text-xs font-sans bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">Read</span>
 									{:else}
-										<span class="text-xs font-sans bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 px-2 py-1 rounded">Archived</span>
+										<span class="text-xs font-sans bg-cream-100 dark:bg-bark-700 text-foreground-muted dark:text-cream-300 px-2 py-1 rounded">Archived</span>
 									{/if}
 								</td>
 							</tr>
 							{#if expandedId === item.id}
-								<tr id="details-{item.id}" class="bg-grove-50/30 dark:bg-slate-800/50">
+								<tr id="details-{item.id}" class="bg-grove-50/30 dark:bg-bark-800/50">
 									<td colspan="5" class="px-6 py-6">
 										<div class="max-w-3xl">
 											<!-- Full Details -->
@@ -273,7 +273,7 @@
 															name="notes"
 															bind:value={notesText[item.id]}
 															rows="3"
-															class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+															class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 															placeholder="Add notes about this feedback..."
 														></textarea>
 														<div class="flex gap-2 mt-2">
@@ -286,7 +286,7 @@
 															<button
 																type="button"
 																onclick={cancelEditingNotes}
-																class="px-4 py-2 bg-white dark:bg-slate-700 border border-grove-200 dark:border-slate-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-slate-600 transition-colors"
+																class="px-4 py-2 bg-white dark:bg-bark-700 border border-grove-200 dark:border-bark-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-bark-600 transition-colors"
 															>
 																Cancel
 															</button>
@@ -326,7 +326,7 @@
 														<input type="hidden" name="id" value={item.id} />
 														<button
 															type="submit"
-															class="px-4 py-2 bg-white dark:bg-slate-700 border border-grove-200 dark:border-slate-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-slate-600 transition-colors"
+															class="px-4 py-2 bg-white dark:bg-bark-700 border border-grove-200 dark:border-bark-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-bark-600 transition-colors"
 														>
 															Archive
 														</button>

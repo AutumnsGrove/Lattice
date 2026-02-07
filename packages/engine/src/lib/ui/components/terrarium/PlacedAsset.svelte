@@ -402,7 +402,7 @@
 	{:else}
 		<!-- Loading placeholder -->
 		<div class="w-16 h-16 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
-			<div class="text-xs text-gray-500">Loading...</div>
+			<div class="text-xs text-foreground-muted">Loading...</div>
 		</div>
 	{/if}
 </div>

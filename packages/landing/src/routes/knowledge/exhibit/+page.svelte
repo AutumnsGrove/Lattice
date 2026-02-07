@@ -65,11 +65,11 @@
   url="/knowledge/exhibit"
 />
 
-<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+<main class="min-h-screen flex flex-col bg-cream-50 dark:bg-bark-900">
   <Header user={data.user} />
 
   <!-- Hero -->
-  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-violet-50 via-slate-50 to-white dark:from-violet-950/30 dark:via-slate-900 dark:to-slate-950">
+  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-violet-50 via-cream-50 to-white dark:from-violet-950/30 dark:via-bark-900 dark:to-bark-950">
     <div class="max-w-3xl mx-auto">
       <nav aria-label="Breadcrumb" class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
         <a href="/knowledge" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
@@ -122,7 +122,7 @@
             <div class="grid gap-4 md:grid-cols-2">
               {#each wingExhibits as exhibit}
                 {@const ExhibitIcon = getIcon(exhibit.icon)}
-                <article class="p-5 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-violet-200/50 dark:border-slate-700 hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700/50 focus-within:shadow-md focus-within:border-violet-300 dark:focus-within:border-violet-700/50 transition-all motion-reduce:transition-none">
+                <article class="p-5 rounded-xl bg-white dark:bg-bark-800 shadow-sm border border-violet-200/50 dark:border-bark-700 hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700/50 focus-within:shadow-md focus-within:border-violet-300 dark:focus-within:border-violet-700/50 transition-all motion-reduce:transition-none">
                   <div class="flex items-start gap-3 mb-3">
                     <div class="w-9 h-9 rounded-lg {colors.iconBg} {colors.iconBgDark} flex items-center justify-center {colors.text} {colors.textDark} flex-shrink-0">
                       <ExhibitIcon class="w-4 h-4" />
@@ -170,12 +170,12 @@
   </section>
 
   <!-- Links -->
-  <section class="py-8 px-6 bg-white/50 dark:bg-slate-900/50 border-t border-divider">
+  <section class="py-8 px-6 bg-white/70 dark:bg-bark-900/50 border-t border-divider">
     <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         ← Knowledge Base
       </a>
-      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         Technical Specifications →
       </a>
     </div>

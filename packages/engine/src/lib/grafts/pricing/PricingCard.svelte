@@ -71,11 +71,11 @@
 <div
 	class="
     relative flex flex-col h-full p-6 rounded-xl
-    bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md
+    bg-white/80 dark:bg-grove-950/25 backdrop-blur-md
     border shadow-sm transition-all duration-200
     {highlighted
 		? 'border-accent dark:border-accent shadow-accent/20 scale-[1.02]'
-		: 'border-white/40 dark:border-emerald-800/25 hover:shadow-md'}
+		: 'border-white/40 dark:border-grove-800/25 hover:shadow-md'}
     {className}
   "
 >
@@ -97,9 +97,9 @@
 	<div class="text-center mb-6">
 		<!-- Icon -->
 		<div
-			class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-3"
+			class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-grove-100/50 dark:bg-grove-900/30 mb-3"
 		>
-			<IconComponent class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+			<IconComponent class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 		</div>
 
 		<!-- Name & tagline -->

@@ -83,7 +83,7 @@
 		'bg-gradient-to-br',
 		config.bgGradient,
 		config.borderColor,
-		'bg-white/60 dark:bg-slate-900/40',
+		'bg-white/80 dark:bg-bark-900/40',
 		className
 	)}
 >
@@ -104,7 +104,7 @@
 		<div class="flex justify-center mb-4">
 			<div class={cn(
 				'p-3 rounded-full',
-				'bg-white/50 dark:bg-slate-800/50',
+				'bg-white/70 dark:bg-bark-800/50',
 				'ring-2 ring-inset',
 				status === 'operational' && 'ring-green-500/30',
 				status === 'degraded' && 'ring-yellow-500/30',

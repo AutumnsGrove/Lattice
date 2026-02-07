@@ -315,7 +315,7 @@
 		class="border-2 border-dashed rounded-xl p-8 text-center transition-colors
 			{isDragging
 				? 'border-grove-500 dark:border-grove-400 bg-grove-50/50 dark:bg-grove-950/30'
-				: 'border-grove-300 dark:border-slate-600 hover:border-grove-400 dark:hover:border-grove-500'}"
+				: 'border-grove-300 dark:border-bark-600 hover:border-grove-400 dark:hover:border-grove-500'}"
 		ondrop={handleDrop}
 		ondragover={handleDragOver}
 		ondragleave={handleDragLeave}
@@ -343,7 +343,7 @@
 						type="text"
 						bind:value={newFolderName}
 						placeholder="folder-name"
-						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-foreground focus:border-grove-500 focus:outline-none"
+						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-bark-600 rounded-lg bg-white dark:bg-bark-800 text-foreground focus:border-grove-500 focus:outline-none"
 					/>
 					<button
 						onclick={() => {
@@ -358,7 +358,7 @@
 					<select
 						id="folder-select"
 						bind:value={selectedFolder}
-						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-foreground focus:border-grove-500 focus:outline-none"
+						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-bark-600 rounded-lg bg-white dark:bg-bark-800 text-foreground focus:border-grove-500 focus:outline-none"
 					>
 						<option value="/">/ (root)</option>
 						{#each folders.filter((f) => f !== '/') as folder}
@@ -392,7 +392,7 @@
 						<CheckCircle class="w-5 h-5 text-grove-500 dark:text-grove-400" />
 					{:else}
 						<div
-							class="w-24 h-2 bg-grove-100 dark:bg-slate-700 rounded-full overflow-hidden"
+							class="w-24 h-2 bg-grove-100 dark:bg-bark-700 rounded-full overflow-hidden"
 							role="progressbar"
 							aria-valuenow={item.progress}
 							aria-valuemin={0}
@@ -444,7 +444,7 @@
 				{@const FileTypeIcon = fileTypeIcons[iconType] || FileIcon}
 				<GlassCard class="overflow-hidden hover:border-grove-300 dark:hover:border-grove-600 transition-colors group">
 					<!-- Preview -->
-					<div class="aspect-square bg-grove-50 dark:bg-slate-800/50 flex items-center justify-center relative">
+					<div class="aspect-square bg-grove-50 dark:bg-bark-800/50 flex items-center justify-center relative">
 						{#if isImage(file.content_type)}
 							<img
 								src={file.url}
@@ -478,7 +478,7 @@
 											deleteConfirmId = null;
 											deleteButtonRefs[file.id]?.focus();
 										}}
-										class="px-3 py-1.5 bg-white text-slate-900 text-sm rounded-lg hover:bg-gray-100 transition-colors"
+										class="px-3 py-1.5 bg-white text-bark-900 text-sm rounded-lg hover:bg-gray-100 transition-colors"
 									>
 										Cancel
 									</button>
@@ -508,7 +508,7 @@
 						<div class="flex items-center gap-2 mt-3">
 							<button
 								onclick={() => copyUrl(file)}
-								class="flex-1 px-2 py-1.5 text-xs font-sans bg-grove-50 dark:bg-slate-700 text-grove-700 dark:text-grove-300 rounded-lg hover:bg-grove-100 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-1"
+								class="flex-1 px-2 py-1.5 text-xs font-sans bg-grove-50 dark:bg-bark-700 text-grove-700 dark:text-grove-300 rounded-lg hover:bg-grove-100 dark:hover:bg-bark-600 transition-colors flex items-center justify-center gap-1"
 							>
 								{#if copiedId === file.id}
 									<Check class="w-3.5 h-3.5" />

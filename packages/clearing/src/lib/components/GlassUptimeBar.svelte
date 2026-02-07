@@ -100,17 +100,17 @@
 <!-- Tooltip (fixed position, portal-like) -->
 {#if hoveredDay}
 	<div
-		class="fixed z-50 px-3 py-2 text-sm bg-slate-900 dark:bg-slate-800 text-white rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-full"
+		class="fixed z-50 px-3 py-2 text-sm bg-bark-900 dark:bg-bark-800 text-white rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-full"
 		style="left: {tooltipPosition.x}px; top: {tooltipPosition.y}px;"
 	>
 		<div class="font-medium">{formatDateShort(hoveredDay.date)}</div>
-		<div class="text-slate-300">{getStatusLabel(hoveredDay.status)}</div>
+		<div class="text-cream-300">{getStatusLabel(hoveredDay.status)}</div>
 		{#if hoveredDay.incidentCount > 0}
-			<div class="text-slate-400 text-xs mt-0.5">
+			<div class="text-cream-400 text-xs mt-0.5">
 				{hoveredDay.incidentCount} incident{hoveredDay.incidentCount > 1 ? 's' : ''}
 			</div>
 		{/if}
 		<!-- Arrow -->
-		<div class="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-slate-900 dark:bg-slate-800 rotate-45"></div>
+		<div class="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-bark-900 dark:bg-bark-800 rotate-45"></div>
 	</div>
 {/if}

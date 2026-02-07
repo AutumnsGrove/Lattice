@@ -306,15 +306,15 @@
 
 	// Variant styles
 	const variantClasses = {
-		default: "bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md border-white/40 dark:border-emerald-800/25",
-		frosted: "bg-white/70 dark:bg-emerald-950/35 backdrop-blur-lg border-white/50 dark:border-emerald-800/30",
+		default: "bg-white/80 dark:bg-grove-950/25 backdrop-blur-md border-white/40 dark:border-grove-800/25",
+		frosted: "bg-white/85 dark:bg-grove-950/35 backdrop-blur-lg border-white/50 dark:border-grove-800/30",
 		minimal: "bg-transparent border-transparent"
 	};
 
 	const containerClass = $derived(
 		cn(
 			"relative overflow-hidden rounded-2xl border p-4 outline-none",
-			"focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+			"focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2",
 			variant !== "minimal" && variantClasses[variant],
 			variant === "minimal" && "p-0",
 			className
@@ -350,7 +350,7 @@
 			<div
 				class={cn(
 					"absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-all duration-[400ms] ease-out",
-					"bg-white dark:bg-slate-900",
+					"bg-cream-50 dark:bg-bark-900",
 					isDragging && "transition-none"
 				)}
 				style={getCardStyle(index)}
@@ -449,10 +449,10 @@
 					type="button"
 					class={cn(
 						"w-10 h-10 rounded-full flex items-center justify-center",
-						"bg-white/60 dark:bg-emerald-950/40 backdrop-blur-sm",
-						"border border-white/40 dark:border-emerald-800/30",
-						"text-slate-700 dark:text-slate-200",
-						"hover:bg-white/80 dark:hover:bg-emerald-950/60",
+						"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
+						"border border-white/40 dark:border-grove-800/30",
+						"text-foreground dark:text-foreground",
+						"hover:bg-white/95 dark:hover:bg-grove-950/60",
 						"transition-all duration-200",
 						"disabled:opacity-40 disabled:cursor-not-allowed"
 					)}
@@ -476,8 +476,8 @@
 							class={cn(
 								"h-2 rounded-full transition-all duration-300",
 								index === currentIndex
-									? "w-6 bg-emerald-600 dark:bg-emerald-400"
-									: "w-2 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500"
+									? "w-6 bg-grove-600 dark:bg-grove-400"
+									: "w-2 bg-bark-300 dark:bg-bark-600 hover:bg-bark-400 dark:hover:bg-bark-500"
 							)}
 							onclick={() => goTo(index)}
 							aria-label={`Go to slide ${index + 1}`}
@@ -493,10 +493,10 @@
 					type="button"
 					class={cn(
 						"w-10 h-10 rounded-full flex items-center justify-center",
-						"bg-white/60 dark:bg-emerald-950/40 backdrop-blur-sm",
-						"border border-white/40 dark:border-emerald-800/30",
-						"text-slate-700 dark:text-slate-200",
-						"hover:bg-white/80 dark:hover:bg-emerald-950/60",
+						"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
+						"border border-white/40 dark:border-grove-800/30",
+						"text-foreground dark:text-foreground",
+						"hover:bg-white/95 dark:hover:bg-grove-950/60",
 						"transition-all duration-200",
 						"disabled:opacity-40 disabled:cursor-not-allowed"
 					)}

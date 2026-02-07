@@ -174,7 +174,7 @@
 					sizeClasses.button,
 					vote === "up"
 						? "bg-grove-100 dark:bg-grove-900/50 border-grove-300 dark:border-grove-700 text-grove-700 dark:text-grove-300"
-						: "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-grove-600 dark:hover:text-grove-400",
+						: "hover:bg-cream-100 dark:hover:bg-bark-800 text-foreground-muted hover:text-grove-600 dark:hover:text-grove-400",
 					isSubmitting && "opacity-50 cursor-not-allowed",
 				)}
 				aria-pressed={vote === "up"}
@@ -199,7 +199,7 @@
 					sizeClasses.button,
 					vote === "down"
 						? "bg-rose-100 dark:bg-rose-900/50 border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300"
-						: "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400",
+						: "hover:bg-cream-100 dark:hover:bg-bark-800 text-foreground-muted hover:text-rose-600 dark:hover:text-rose-400",
 					isSubmitting && "opacity-50 cursor-not-allowed",
 				)}
 				aria-pressed={vote === "down"}
@@ -264,8 +264,8 @@
 							rows={3}
 							disabled={isSubmitting}
 							class={cn(
-								"w-full rounded-lg border border-slate-200 dark:border-slate-700",
-								"bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm",
+								"w-full rounded-lg border border-cream-200 dark:border-bark-700",
+								"bg-white/80 dark:bg-bark-800/50 backdrop-blur-sm",
 								"px-3 py-2 resize-none",
 								"placeholder:text-muted-foreground/60",
 								"focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent",

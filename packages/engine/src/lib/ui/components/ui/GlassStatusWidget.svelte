@@ -124,9 +124,9 @@
 		unknown: {
 			icon: RefreshCw,
 			label: 'Status Unknown',
-			color: 'text-gray-500',
-			bg: 'bg-gray-500/10',
-			border: 'border-gray-500/20'
+			color: 'text-foreground-muted',
+			bg: 'bg-foreground/10',
+			border: 'border-foreground/20'
 		}
 	};
 
@@ -189,8 +189,8 @@
 		)}
 	>
 		{#if loading}
-			<RefreshCw class="w-4 h-4 text-gray-400 animate-spin" />
-			<span class="text-sm text-gray-500">Loading...</span>
+			<RefreshCw class="w-4 h-4 text-foreground-muted animate-spin" />
+			<span class="text-sm text-foreground-muted">Loading...</span>
 		{:else}
 			<StatusIcon class={cn('w-4 h-4', currentConfig.color)} />
 			<span class={cn('text-sm font-medium', currentConfig.color)}>
@@ -203,8 +203,8 @@
 	<div
 		class={cn(
 			'glass-card rounded-xl overflow-hidden',
-			'bg-white/60 dark:bg-slate-800/50 backdrop-blur-md',
-			'border border-white/40 dark:border-slate-700/40',
+			'bg-white/80 dark:bg-bark-800/50 backdrop-blur-md',
+			'border border-white/40 dark:border-bark-700/40',
 			className
 		)}
 	>
@@ -213,8 +213,8 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					{#if loading}
-						<RefreshCw class="w-5 h-5 text-gray-400 animate-spin" />
-						<span class="font-medium text-gray-600 dark:text-gray-300">
+						<RefreshCw class="w-5 h-5 text-foreground-muted animate-spin" />
+						<span class="font-medium text-foreground-muted dark:text-foreground-subtle">
 							Checking status...
 						</span>
 					{:else}
@@ -243,7 +243,7 @@
 
 		<!-- Components (if enabled) -->
 		{#if showComponents && statusData?.components?.length}
-			<div class="px-4 py-3 border-t border-white/20 dark:border-slate-700/30">
+			<div class="px-4 py-3 border-t border-white/20 dark:border-bark-700/30">
 				<h4 class="text-xs font-medium text-foreground-muted uppercase tracking-wide mb-2">
 					Components
 				</h4>
@@ -263,7 +263,7 @@
 
 		<!-- Active Incidents (if enabled) -->
 		{#if showIncidents && statusData?.activeIncidents?.length}
-			<div class="px-4 py-3 border-t border-white/20 dark:border-slate-700/30">
+			<div class="px-4 py-3 border-t border-white/20 dark:border-bark-700/30">
 				<h4 class="text-xs font-medium text-foreground-muted uppercase tracking-wide mb-2">
 					Active Incidents
 				</h4>
@@ -283,7 +283,7 @@
 		{/if}
 
 		<!-- Footer -->
-		<div class="px-4 py-2 bg-white/30 dark:bg-slate-900/30 border-t border-white/20 dark:border-slate-700/30">
+		<div class="px-4 py-2 bg-white/50 dark:bg-bark-900/30 border-t border-white/20 dark:border-bark-700/30">
 			<div class="flex items-center justify-between text-xs text-foreground-muted">
 				<span>
 					{#if statusData?.updatedAt}

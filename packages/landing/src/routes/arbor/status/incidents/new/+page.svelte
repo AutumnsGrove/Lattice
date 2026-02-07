@@ -54,7 +54,7 @@
 				name="title"
 				required
 				placeholder="e.g., CDN degraded performance in EU region"
-				class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+				class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 			/>
 		</div>
 
@@ -68,7 +68,7 @@
 					id="type"
 					name="type"
 					required
-					class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+					class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 				>
 					<option value="incident">Incident</option>
 					<option value="outage">Outage</option>
@@ -84,7 +84,7 @@
 					id="impact"
 					name="impact"
 					required
-					class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+					class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 				>
 					<option value="minor">Minor</option>
 					<option value="major">Major</option>
@@ -102,7 +102,7 @@
 				id="status"
 				name="status"
 				required
-				class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+				class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 			>
 				<option value="investigating">Investigating</option>
 				<option value="identified">Identified</option>
@@ -125,7 +125,7 @@
 								type="checkbox"
 								name="components"
 								value={component.id}
-								class="rounded border-grove-300 dark:border-slate-500 text-grove-600 focus:ring-grove-500"
+								class="rounded border-grove-300 dark:border-bark-500 text-grove-600 focus:ring-grove-500"
 							/>
 							<span class="text-sm font-sans text-foreground">{component.name}</span>
 						</label>
@@ -145,7 +145,7 @@
 				required
 				rows="4"
 				placeholder="Describe what's happening and what we know so far..."
-				class="w-full px-3 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+				class="w-full px-3 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 			></textarea>
 		</div>
 
@@ -153,7 +153,7 @@
 		<div class="flex justify-end gap-3">
 			<a
 				href="/arbor/status"
-				class="px-4 py-2 bg-white dark:bg-slate-700 border border-grove-200 dark:border-slate-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-slate-600 transition-colors"
+				class="px-4 py-2 bg-white dark:bg-bark-700 border border-grove-200 dark:border-bark-600 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-bark-600 transition-colors"
 			>
 				Cancel
 			</a>

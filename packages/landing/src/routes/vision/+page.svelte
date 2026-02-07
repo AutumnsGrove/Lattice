@@ -292,7 +292,7 @@
 			<div class="relative group">
 				<a
 					href="#{header.id}"
-					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-accent/30 dark:border-accent/20 hover:bg-accent/10 dark:hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-all duration-200"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-bark-800 shadow-md border border-accent/30 dark:border-accent/20 hover:bg-accent/10 dark:hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-all duration-200"
 					aria-label="Jump to {header.text}"
 					title={header.text}
 				>
@@ -303,7 +303,7 @@
 
 				<!-- Section name tooltip on hover -->
 				<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
-					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
+					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-bark-800 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
 						{header.text}
 					</div>
 				</div>

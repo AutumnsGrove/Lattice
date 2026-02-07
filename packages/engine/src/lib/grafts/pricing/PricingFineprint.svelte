@@ -123,7 +123,7 @@
 </script>
 
 <div
-	class="bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
+	class="bg-white/80 dark:bg-grove-950/25 backdrop-blur-md rounded-xl p-8 border border-white/40 dark:border-grove-800/25 shadow-sm {className}"
 >
 	<h2 class="text-xl font-serif text-foreground mb-6">The Fine Print</h2>
 

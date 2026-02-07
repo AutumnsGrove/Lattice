@@ -75,10 +75,10 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
-          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
-          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
-          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Title</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Date</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Tags</th>
+          <th scope="col" class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -98,7 +98,7 @@
               {:else if post.status === 'draft'}
                 <span class="text-amber-600 dark:text-amber-400 font-medium">Draft</span>
               {:else}
-                <span class="text-gray-400 dark:text-gray-500">—</span>
+                <span class="text-foreground-subtle">—</span>
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:hidden">

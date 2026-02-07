@@ -47,7 +47,7 @@
   <!-- Compact mode: just the numbers -->
   <div class="flex items-center gap-2 text-sm">
     <span class="font-medium">
-      {safeData.count}{#if safeData.limit !== null}<span class="text-gray-400">/{safeData.limit}</span>{/if}
+      {safeData.count}{#if safeData.limit !== null}<span class="text-foreground-faint">/{safeData.limit}</span>{/if}
     </span>
     <span class="px-1.5 py-0.5 text-xs rounded {colorClasses.badge}">
       {safeData.statusText}
@@ -57,20 +57,20 @@
   <!-- Full widget -->
   <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 {colorClasses.bg}">
     <div class="flex justify-between items-center mb-2">
-      <h4 class="font-semibold text-gray-900 dark:text-gray-100">Post Usage</h4>
+      <h4 class="font-semibold text-foreground">Post Usage</h4>
       <span class="px-2 py-1 text-xs font-medium rounded-full {colorClasses.badge}">
         {safeData.statusText}
       </span>
     </div>
 
     <!-- Count display -->
-    <div class="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-      {safeData.count}{#if safeData.limit !== null}<span class="text-gray-400 dark:text-gray-500">/{safeData.limit}</span>{/if}
+    <div class="text-2xl font-bold mb-2 text-foreground">
+      {safeData.count}{#if safeData.limit !== null}<span class="text-foreground-faint">/{safeData.limit}</span>{/if}
     </div>
 
     <!-- Progress bar -->
     {#if safeData.limit !== null && safeData.percentage !== null}
-      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+      <div class="w-full bg-cream-200 dark:bg-bark-700 rounded-full h-2 mb-2">
         <div
           class="h-full rounded-full transition-all duration-300 {colorClasses.fill}"
           style="width: {Math.min(safeData.percentage, 100)}%"
@@ -78,7 +78,7 @@
       </div>
       <p class="text-sm {colorClasses.text}">{safeData.percentage.toFixed(1)}% used</p>
     {:else}
-      <p class="text-sm text-gray-500 dark:text-gray-400">Unlimited posts with {safeData.tierName} plan</p>
+      <p class="text-sm text-foreground-muted">Unlimited posts with {safeData.tierName} plan</p>
     {/if}
 
     <!-- Upgrade prompt -->
@@ -110,8 +110,8 @@
 
     <!-- Error state for invalid data -->
     {#if !isValidData}
-      <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+      <div class="mt-4 p-3 bg-cream-50 dark:bg-bark-800 rounded-lg border border-cream-200 dark:border-bark-700">
+        <p class="text-sm text-foreground-subtle">
           Unable to load quota information. Please refresh the page.
         </p>
       </div>

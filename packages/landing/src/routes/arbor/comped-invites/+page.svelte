@@ -261,7 +261,7 @@
 						<select
 							name="tier"
 							bind:value={promoteTier}
-							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground focus:outline-none focus:border-grove-500"
+							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground focus:outline-none focus:border-grove-500"
 						>
 							{#each data.validTiers as tier}
 								<option value={tier}>{tierLabels[tier] || tier}</option>
@@ -291,7 +291,7 @@
 						type="text"
 						bind:value={promoteMessage}
 						placeholder="Optional welcome message for beta invite emails..."
-						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 					/>
 				</div>
 
@@ -299,9 +299,9 @@
 					These people signed up for the email list but don't have a beta invite yet. Promoting them creates an invite and sends the beta email.
 				</p>
 
-				<div class="divide-y divide-slate-200 dark:divide-slate-700 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700">
+				<div class="divide-y divide-slate-200 dark:divide-bark-700 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-bark-700">
 					{#each data.eligibleSubscribers as sub}
-						<div class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-slate-800/30">
+						<div class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-bark-800/30">
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-foreground text-sm truncate">{sub.email}</span>
@@ -370,14 +370,14 @@
 							bind:value={searchQuery}
 							onkeydown={(e) => e.key === 'Enter' && applyFilters()}
 							placeholder="Search by email..."
-							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
 					<select
 						bind:value={typeFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All types</option>
 						<option value="beta">Beta</option>
@@ -387,7 +387,7 @@
 					<select
 						bind:value={statusFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All status</option>
 						<option value="pending">Pending</option>
@@ -406,7 +406,7 @@
 						<button
 							type="button"
 							onclick={clearFilters}
-							class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-foreground-muted hover:text-foreground transition-colors"
+							class="px-4 py-2 rounded-lg bg-bark-200 dark:bg-bark-700 text-foreground-muted hover:text-foreground transition-colors"
 						>
 							<X class="w-4 h-4" />
 						</button>
@@ -416,7 +416,7 @@
 
 			<!-- Invites List -->
 			<GlassCard>
-				<div class="divide-y divide-slate-200 dark:divide-slate-700">
+				<div class="divide-y divide-slate-200 dark:divide-bark-700">
 					{#each data.invites as invite}
 						<div class="p-4 flex items-center justify-between group">
 							<div class="flex items-center gap-3 min-w-0">
@@ -482,7 +482,7 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div class="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+					<div class="p-4 border-t border-slate-200 dark:border-bark-700 flex items-center justify-between">
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
 							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data.pagination.total}
@@ -493,7 +493,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-cream-200 dark:hover:bg-bark-700 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -506,7 +506,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-cream-200 dark:hover:bg-bark-700 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -555,7 +555,7 @@
 								bind:value={newEmail}
 								placeholder="friend@example.com"
 								required
-								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 							/>
 						</div>
 					</div>
@@ -605,7 +605,7 @@
 							name="tier"
 							bind:value={newTier}
 							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground focus:outline-none focus:border-grove-500"
 						>
 							{#each data.validTiers as tier}
 								<option value={tier}>{tierLabels[tier] || tier}</option>
@@ -623,7 +623,7 @@
 							bind:value={newMessage}
 							placeholder="A personal message shown when they sign up..."
 							rows="2"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 resize-none"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 resize-none"
 						></textarea>
 					</div>
 
@@ -637,7 +637,7 @@
 							name="notes"
 							bind:value={newNotes}
 							placeholder="Why are we inviting them?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
@@ -688,7 +688,7 @@
 						</div>
 
 						<!-- Email Body Preview -->
-						<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+						<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-bark-700">
 							<!-- Warm cream header -->
 							<div class="bg-[#fefdfb] px-5 py-4 text-center">
 								<div class="w-8 h-8 mx-auto rounded-full bg-grove-500/20 flex items-center justify-center">
@@ -752,7 +752,7 @@
 
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
-						<div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/50 text-sm">
+						<div class="p-2 rounded-lg bg-cream-100 dark:bg-bark-800/50 text-sm">
 							<div class="flex items-center gap-2 flex-wrap">
 								{#if entry.action === 'create'}
 									<Plus class="w-3 h-3 text-green-500" />
@@ -833,7 +833,7 @@
 							name="notes"
 							bind:value={revokeNotes}
 							placeholder="Why are we revoking this?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-bark-800/50 border border-slate-200 dark:border-bark-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
@@ -844,7 +844,7 @@
 								revokeInvite = null;
 								revokeNotes = '';
 							}}
-							class="flex-1 px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-foreground hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+							class="flex-1 px-4 py-2 rounded-lg bg-bark-200 dark:bg-bark-700 text-foreground hover:bg-cream-300 dark:hover:bg-bark-600 transition-colors"
 						>
 							Cancel
 						</button>

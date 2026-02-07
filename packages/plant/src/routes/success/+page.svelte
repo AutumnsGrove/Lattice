@@ -150,7 +150,7 @@
 
 				<ul class="space-y-3">
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/60 dark:bg-bark-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">1</span>
 						</div>
 						<div>
@@ -159,7 +159,7 @@
 						</div>
 					</li>
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/60 dark:bg-bark-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">2</span>
 						</div>
 						<div>
@@ -168,7 +168,7 @@
 						</div>
 					</li>
 					<li class="flex items-start gap-3">
-						<div class="w-6 h-6 rounded-full bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+						<div class="w-6 h-6 rounded-full bg-white/60 dark:bg-bark-800/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-0.5">
 							<span class="text-xs font-medium text-primary">3</span>
 						</div>
 						<div>

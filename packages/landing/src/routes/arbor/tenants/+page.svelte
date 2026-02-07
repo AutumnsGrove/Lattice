@@ -120,7 +120,7 @@
 			type="text"
 			bind:value={searchQuery}
 			placeholder="Search by subdomain, name, or email..."
-			class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-slate-600 rounded-lg text-sm font-sans bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+			class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-bark-600 rounded-lg text-sm font-sans bg-white dark:bg-bark-800 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
 		/>
 	</div>
 </div>
@@ -134,11 +134,11 @@
 		</p>
 	</GlassCard>
 {:else}
-	<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
+	<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
 		<div class="overflow-x-auto">
 			<table class="w-full" aria-label="Tenant list">
 				<thead
-					class="bg-grove-50 dark:bg-slate-800/50 border-b border-grove-200 dark:border-slate-700"
+					class="bg-grove-50 dark:bg-bark-800/50 border-b border-grove-200 dark:border-bark-700"
 				>
 					<tr>
 						<th
@@ -189,7 +189,7 @@
 					</tr>
 				</thead>
 				<tbody
-					class="divide-y divide-grove-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800/30"
+					class="divide-y divide-grove-100 dark:divide-bark-700/50 bg-white dark:bg-bark-800/30"
 				>
 					{#each filteredTenants as tenant (tenant.id)}
 						{@const plan = planConfig[tenant.plan] || planConfig.seedling}

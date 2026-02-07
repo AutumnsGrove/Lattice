@@ -162,7 +162,7 @@
 				</div>
 
 				<!-- Footer with actions -->
-				<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex justify-end gap-3">
+				<div class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end gap-3">
 					<Button
 						variant="ghost"
 						onclick={handleCancel}

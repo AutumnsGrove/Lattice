@@ -205,7 +205,7 @@
 					<select
 						bind:value={voteFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All votes</option>
 						<option value="up">👍 Helpful only</option>
@@ -218,7 +218,7 @@
 						bind:value={sourceFilter}
 						onkeydown={(e) => e.key === "Enter" && applyFilters()}
 						placeholder="Filter by source path..."
-						class="flex-1 px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-grove-500"
+						class="flex-1 px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-grove-500"
 					/>
 
 					<!-- Unread toggle -->
@@ -230,7 +230,7 @@
 						}}
 						class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 {unreadOnly
 							? 'bg-grove-600 text-white'
-							: 'bg-white/30 dark:bg-slate-800/30 text-foreground-muted hover:text-foreground'}"
+							: 'bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground'}"
 					>
 						{#if unreadOnly}
 							<EyeOff class="w-4 h-4" />
@@ -252,7 +252,7 @@
 						<button
 							type="button"
 							onclick={clearFilters}
-							class="px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 text-foreground-muted hover:text-foreground transition-colors"
+							class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground transition-colors"
 						>
 							<X class="w-4 h-4" />
 						</button>
@@ -262,7 +262,7 @@
 
 			<!-- Traces List -->
 			<GlassCard variant="frosted">
-				<div class="divide-y divide-white/10 dark:divide-slate-700/30">
+				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.traces as trace}
 						<div
 							class="p-4 group {trace.read_at ? 'opacity-70' : ''}"
@@ -282,7 +282,7 @@
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
 										<code
-											class="px-2 py-0.5 rounded bg-white/20 dark:bg-slate-800/40 text-sm font-mono text-foreground"
+											class="px-2 py-0.5 rounded bg-white/40 dark:bg-bark-800/40 text-sm font-mono text-foreground"
 										>
 											{trace.source_path}
 										</code>
@@ -372,7 +372,7 @@
 							{#if voteFilter || unreadOnly || sourceFilter}
 								No traces match your filters
 							{:else}
-								No traces yet. Add <code class="px-1 py-0.5 rounded bg-white/20">&lt;Trace /&gt;</code> to your pages to start collecting feedback.
+								No traces yet. Add <code class="px-1 py-0.5 rounded bg-white/40">&lt;Trace /&gt;</code> to your pages to start collecting feedback.
 							{/if}
 						</div>
 					{/each}
@@ -381,7 +381,7 @@
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
 					<div
-						class="p-4 border-t border-white/10 dark:border-slate-700/30 flex items-center justify-between"
+						class="p-4 border-t border-white/10 dark:border-bark-700/30 flex items-center justify-between"
 					>
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
@@ -396,7 +396,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -409,7 +409,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -429,7 +429,7 @@
 					By Location
 				</h2>
 
-				<div class="divide-y divide-white/10 dark:divide-slate-700/30">
+				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.sourceStats as source}
 						{@const rate =
 							source.total > 0
@@ -441,7 +441,7 @@
 								sourceFilter = source.source_path;
 								applyFilters();
 							}}
-							class="w-full p-3 text-left hover:bg-white/10 dark:hover:bg-slate-800/20 transition-colors"
+							class="w-full p-3 text-left hover:bg-white/30 dark:hover:bg-bark-800/20 transition-colors"
 						>
 							<div class="flex items-center justify-between">
 								<code class="text-sm font-mono text-foreground truncate">

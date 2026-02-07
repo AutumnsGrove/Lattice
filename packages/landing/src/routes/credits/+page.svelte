@@ -246,7 +246,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-bark-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -271,7 +271,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-bark-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -296,7 +296,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-bark-700/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -801,7 +801,7 @@
 			{@const Icon = item.icon}
 			<a
 				href="#{item.id}"
-				class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200 group"
+				class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-bark-800 shadow-md border border-amber-200 dark:border-bark-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200 group"
 				aria-label="Jump to {item.text}"
 				title={item.text}
 			>
@@ -825,8 +825,8 @@
 		</button>
 
 		{#if isTocOpen}
-			<div class="absolute bottom-16 right-0 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-amber-200 dark:border-slate-700 overflow-hidden">
-				<div class="px-4 py-3 border-b border-amber-200 dark:border-slate-700 flex items-center justify-between">
+			<div class="absolute bottom-16 right-0 w-56 bg-white dark:bg-bark-800 rounded-xl shadow-xl border border-amber-200 dark:border-bark-700 overflow-hidden">
+				<div class="px-4 py-3 border-b border-amber-200 dark:border-bark-700 flex items-center justify-between">
 					<span class="font-medium text-foreground">Navigate</span>
 					<button type="button" onclick={() => isTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

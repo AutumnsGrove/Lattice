@@ -57,7 +57,7 @@
 		critical: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
 		major: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
 		minor: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-		none: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300'
+		none: 'bg-cream-100 dark:bg-bark-700 text-foreground-muted dark:text-cream-300'
 	};
 
 	function formatDate(dateStr: string): string {
@@ -143,7 +143,7 @@
 		<div class="space-y-3">
 			{#each data.incidents as incident}
 				<a href="/arbor/status/incidents/{incident.id}" class="block group">
-					<GlassCard class="p-4 hover:bg-grove-50/50 dark:hover:bg-slate-700/30 transition-colors">
+					<GlassCard class="p-4 hover:bg-grove-50/50 dark:hover:bg-bark-700/30 transition-colors">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<span
@@ -181,13 +181,13 @@
 			<p class="text-foreground-muted font-sans">No components configured</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
-			<div class="divide-y divide-grove-100 dark:divide-slate-700/50">
+		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
+			<div class="divide-y divide-grove-100 dark:divide-bark-700/50">
 				{#each data.components as component}
 					{@const config = statusConfig[component.current_status] || statusConfig.operational}
 					{@const StatusIcon = config.icon}
 					<div
-						class="flex items-center justify-between px-6 py-4 bg-white dark:bg-slate-800/30"
+						class="flex items-center justify-between px-6 py-4 bg-white dark:bg-bark-800/30"
 					>
 						<div class="flex items-center gap-3">
 							<StatusIcon class="w-5 h-5 {config.color}" />
@@ -207,7 +207,7 @@
 							<select
 								name="status"
 								aria-label="Update status for {component.name}"
-								class="text-xs font-sans px-2 py-1 rounded border border-grove-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground"
+								class="text-xs font-sans px-2 py-1 rounded border border-grove-200 dark:border-bark-600 bg-white dark:bg-bark-800 text-foreground"
 								value={component.current_status}
 								onchange={(e) => e.currentTarget.form?.requestSubmit()}
 							>

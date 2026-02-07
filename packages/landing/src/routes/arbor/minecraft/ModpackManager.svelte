@@ -202,7 +202,7 @@
 				<button
 					type="button"
 					onclick={() => (showDeleteAllConfirm = false)}
-					class="px-3 py-1.5 bg-white dark:bg-slate-700 border border-grove-200 dark:border-slate-600 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-slate-600 transition-colors"
+					class="px-3 py-1.5 bg-white dark:bg-bark-700 border border-grove-200 dark:border-bark-600 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-bark-600 transition-colors"
 				>
 					Cancel
 				</button>
@@ -228,7 +228,7 @@
 		class="mb-4 border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
 			{dragOver
 			? 'border-grove-400 bg-grove-50/50 dark:bg-grove-900/20'
-			: 'border-grove-200 dark:border-slate-600 hover:border-grove-300 dark:hover:border-slate-500'}"
+			: 'border-grove-200 dark:border-bark-600 hover:border-grove-300 dark:hover:border-bark-500'}"
 	>
 		{#if uploading}
 			<Loader2 class="w-8 h-8 mx-auto mb-2 text-grove-500 animate-spin" />
@@ -260,11 +260,11 @@
 			<p class="text-foreground-muted font-sans">No mods installed</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
-			<div class="divide-y divide-grove-100 dark:divide-slate-700/50">
+		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
+			<div class="divide-y divide-grove-100 dark:divide-bark-700/50">
 				{#each mods as mod}
 					<div
-						class="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800/30"
+						class="flex items-center justify-between px-4 py-3 bg-white dark:bg-bark-800/30"
 					>
 						<div class="flex items-center gap-3">
 							<FileBox class="w-4 h-4 text-foreground-muted shrink-0" />

@@ -112,7 +112,7 @@
 	<GlassCard variant="frosted" class="max-w-md mx-auto mb-8">
 		<h2 class="font-medium text-foreground mb-4">What you're planting</h2>
 
-		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-slate-700/20">
+		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-bark-700/20">
 			<div>
 				<p class="font-medium text-foreground">{planName}</p>
 				<p class="text-sm text-foreground-muted">
@@ -127,7 +127,7 @@
 			</div>
 		</div>
 
-		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-slate-700/20">
+		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-bark-700/20">
 			<p class="text-foreground-muted">14-day free trial</p>
 			<p class="text-success font-medium">Included</p>
 		</div>
@@ -163,11 +163,11 @@
 
 	<!-- Security badges -->
 	<div class="flex items-center justify-center gap-6 mt-8">
-		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
+		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-white/20 dark:border-bark-700/20 text-foreground-subtle">
 			<ShieldCheck size={18} />
 			<span>Secure checkout</span>
 		</div>
-		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20 text-foreground-subtle">
+		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-white/20 dark:border-bark-700/20 text-foreground-subtle">
 			<CreditCard size={18} />
 			<span>Powered by Stripe</span>
 		</div>

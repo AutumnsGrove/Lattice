@@ -760,7 +760,7 @@
 			<div class="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)]">
 				<h4 class="font-semibold mb-4 text-[var(--color-foreground)]">Monospace Fonts</h4>
 				<div class="space-y-4">
-					<div class="p-4 bg-gray-900 rounded-lg">
+					<div class="p-4 bg-bark-900 rounded-lg">
 						<IBMPlexMono as="code" class="text-grove-400 block mb-2">
 							// IBM Plex Mono - corporate warmth
 						</IBMPlexMono>
@@ -874,7 +874,7 @@ $ npm run dev
 						title="{key}: {color}"
 						data-color={color}
 					></button>
-					<div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+					<div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-bark-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
 						{key}: {color}
 					</div>
 				</div>

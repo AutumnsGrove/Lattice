@@ -160,7 +160,7 @@
 				<a href="/garden/{post.slug}" class="post-link">
 					<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
 					<div class="post-meta">
-						<time datetime={post.date} class="text-sm text-gray-600 dark:text-gray-400 transition-colors">
+						<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
 							{new Date(post.date).toLocaleDateString('en-US', {
 								year: 'numeric',
 								month: 'long',

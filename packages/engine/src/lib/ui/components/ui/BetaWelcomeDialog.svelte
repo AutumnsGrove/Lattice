@@ -185,7 +185,7 @@
 				</div>
 
 				<!-- Footer -->
-				<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex justify-end">
+				<div class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end">
 					<Button
 						variant="primary"
 						onclick={handleDismiss}

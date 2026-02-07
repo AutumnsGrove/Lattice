@@ -241,7 +241,7 @@
 					<div class="space-y-2 mb-4">
 						{#each data.passkeys as passkey}
 							<div
-								class="flex items-center justify-between p-3 rounded-lg bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/20"
+								class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
 							>
 								<div class="flex items-center gap-3">
 									<Key class="w-4 h-4 text-foreground-muted" />
@@ -283,7 +283,7 @@
 							type="text"
 							bind:value={passkeyName}
 							placeholder="Passkey name (optional)"
-							class="flex-1 px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint text-sm transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+							class="flex-1 px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint text-sm transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
 						<button
 							onclick={addPasskey}
@@ -371,7 +371,7 @@
 								placeholder="000000"
 								maxlength="6"
 								pattern="[0-9]{6}"
-								class="w-32 px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-error/30 text-foreground placeholder:text-foreground-faint text-sm text-center tracking-wider font-mono transition-all focus:outline-none focus:border-error focus:ring-2 focus:ring-error/20"
+								class="w-32 px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-error/30 text-foreground placeholder:text-foreground-faint text-sm text-center tracking-wider font-mono transition-all focus:outline-none focus:border-error focus:ring-2 focus:ring-error/20"
 							/>
 							<button type="submit" class="btn-primary bg-error hover:bg-error/90 text-sm">
 								Confirm
@@ -421,7 +421,7 @@
 
 					{#if twoFactorSecret}
 						<div
-							class="p-3 rounded-lg bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/20"
+							class="p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
 						>
 							<p class="text-xs text-foreground-subtle mb-1">Or enter this code manually:</p>
 							<code class="text-sm font-mono text-foreground">{twoFactorSecret}</code>
@@ -441,7 +441,7 @@
 							maxlength="6"
 							pattern="[0-9]{6}"
 							required
-							class="w-full px-4 py-3 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint text-center text-xl tracking-widest font-mono transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+							class="w-full px-4 py-3 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint text-center text-xl tracking-widest font-mono transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
 						/>
 						<div class="flex gap-2">
 							<button type="submit" class="btn-primary flex-1"> Verify & Enable </button>
@@ -542,7 +542,7 @@
 							icon: '?'
 						}}
 						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/20"
+							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
 						>
 							<div class="flex items-center gap-3">
 								<div
@@ -569,7 +569,7 @@
 			{/if}
 
 			<!-- Link new account buttons -->
-			<div class="mt-4 pt-4 border-t border-white/20 dark:border-slate-700/20">
+			<div class="mt-4 pt-4 border-t border-white/20 dark:border-bark-700/20">
 				<p class="text-sm text-foreground-muted mb-3">Link another account:</p>
 				<div class="flex gap-2 flex-wrap">
 					{#each Object.entries(providerInfo) as [provider, info]}

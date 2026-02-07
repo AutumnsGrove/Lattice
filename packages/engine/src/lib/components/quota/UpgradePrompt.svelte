@@ -176,7 +176,7 @@
     <!-- Modal -->
     <div
       bind:this={dialogRef}
-      class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+      class="bg-white dark:bg-bark-800 rounded-xl shadow-2xl max-w-md w-full p-6"
       onclick={(e) => e.stopPropagation()}
       role="dialog"
       aria-modal="true"
@@ -192,7 +192,7 @@
           </svg>
         </div>
 
-        <h3 id="upgrade-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 id="upgrade-title" class="text-lg font-semibold text-foreground">
           {#if safeStatus.upgrade_required}
             Upgrade Required
           {:else}
@@ -204,25 +204,25 @@
       <!-- Content -->
       <div id="upgrade-description" class="space-y-4 mb-6">
         {#if safeStatus.upgrade_required}
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+          <p class="text-sm text-foreground-subtle text-center">
             Your grace period has expired. To continue creating posts, please upgrade your plan or delete some existing posts.
           </p>
         {:else if safeStatus.is_in_grace_period}
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+          <p class="text-sm text-foreground-subtle text-center">
             You're over your post limit. You have <strong class="text-yellow-600 dark:text-yellow-400">{safeStatus.grace_period_days_remaining} days</strong> remaining in your grace period.
           </p>
 
           {#if oldestPostTitle}
-            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-sm">
-              <p class="text-gray-500 dark:text-gray-400">If you continue, new posts may need to replace older ones. Your oldest post:</p>
-              <p class="mt-1 font-medium text-gray-900 dark:text-gray-100">"{oldestPostTitle}"</p>
+            <div class="bg-cream-50 dark:bg-bark-700/50 rounded-lg p-3 text-sm">
+              <p class="text-foreground-muted">If you continue, new posts may need to replace older ones. Your oldest post:</p>
+              <p class="mt-1 font-medium text-foreground">"{oldestPostTitle}"</p>
               {#if oldestPostDate}
-                <p class="text-xs text-gray-500 dark:text-gray-400">{oldestPostDate}</p>
+                <p class="text-xs text-foreground-muted">{oldestPostDate}</p>
               {/if}
             </div>
           {/if}
         {:else}
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+          <p class="text-sm text-foreground-subtle text-center">
             You've reached your post limit on the <strong>{currentTierName}</strong> plan. Upgrade to get more posts.
           </p>
         {/if}
@@ -262,14 +262,14 @@
         <div class="flex gap-3">
           <a
             href="/arbor/posts"
-            class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 text-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            class="flex-1 px-4 py-2 bg-cream-100 hover:bg-cream-200 dark:bg-bark-700 dark:hover:bg-bark-600 text-foreground text-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bark-800"
           >
             Manage Posts
           </a>
 
           <button
             onclick={onClose}
-            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            class="flex-1 px-4 py-2 border border-cream-300 dark:border-bark-600 hover:bg-cream-50 dark:hover:bg-bark-700 text-foreground font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-bark-800"
           >
             Cancel
           </button>

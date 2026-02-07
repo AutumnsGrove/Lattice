@@ -59,7 +59,7 @@
 </div>
 
 {#if data.posts.length === 0}
-	<div class="text-center py-12 text-gray-500">
+	<div class="text-center py-12 text-foreground-muted">
 		<p>No <GroveSwap term="blooms">blooms</GroveSwap> yet. Check back soon!</p>
 	</div>
 {:else}
@@ -74,7 +74,7 @@
 			>
 				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">
-					<time datetime={post.date} class="text-sm text-gray-600 dark:text-gray-400 transition-colors">
+					<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
 						{new Date(post.date).toLocaleDateString('en-US', {
 							year: 'numeric',
 							month: 'long',

@@ -32,8 +32,8 @@
 <header
 	class={cn(
 		'sticky top-0 z-grove-sticky py-4 px-6',
-		'bg-white/60 dark:bg-slate-900/60 backdrop-blur-md',
-		'border-b border-white/40 dark:border-slate-700/40',
+		'bg-white/80 dark:bg-bark-900/60 backdrop-blur-md',
+		'border-b border-white/40 dark:border-bark-700/40',
 		className
 	)}
 >
@@ -54,7 +54,7 @@
 			<!-- RSS Feed link -->
 			<a
 				href="/feed"
-				class="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
+				class="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-cream-200/50 dark:hover:bg-bark-800/50 transition-colors"
 				aria-label="RSS Feed"
 				title="Subscribe via RSS"
 			>

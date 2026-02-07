@@ -85,9 +85,9 @@
 		},
 		future: {
 			text: 'text-foreground-subtle',
-			bg: 'bg-slate-100/60 dark:bg-slate-800/40',
-			check: 'text-slate-400',
-			overlay: 'bg-slate-500/10 dark:bg-slate-500/10'
+			bg: 'bg-bark-100/60 dark:bg-bark-800/40',
+			check: 'text-bark-700 dark:text-bark-400',
+			overlay: 'bg-bark-500/10 dark:bg-bark-500/10'
 		},
 		deprecated: {
 			text: 'text-red-600 dark:text-red-400',
@@ -189,7 +189,7 @@
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
-								bg-slate-400 dark:bg-slate-600 text-white shadow-lg"
+								bg-bark-400 dark:bg-bark-600 text-white shadow-lg"
 						>
 							<Lock class="w-3 h-3" />
 							Future
@@ -266,7 +266,7 @@
 
 							<!-- Selection indicator for available plans -->
 							{#if isAvailable}
-								<div class="mt-4 pt-4 border-t border-white/20 dark:border-slate-700/30">
+								<div class="mt-4 pt-4 border-t border-white/20 dark:border-bark-700/30">
 									<div class="flex items-center justify-between">
 										<span class="text-sm text-foreground-muted">
 											{isSelected ? 'Selected' : 'Click to select'}
@@ -275,7 +275,7 @@
 											class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
 												{isSelected
 												? 'border-emerald-500 bg-emerald-500'
-												: 'border-slate-300 dark:border-slate-600'}"
+												: 'border-bark-300 dark:border-bark-600'}"
 										>
 											{#if isSelected}
 												<Check class="w-3 h-3 text-white" />

@@ -178,7 +178,7 @@
 </script>
 
 <div
-	class="overflow-x-auto bg-white/60 dark:bg-emerald-950/25 backdrop-blur-md rounded-xl p-4 border border-white/40 dark:border-emerald-800/25 shadow-sm {className}"
+	class="overflow-x-auto bg-white/80 dark:bg-grove-950/25 backdrop-blur-md rounded-xl p-4 border border-white/40 dark:border-grove-800/25 shadow-sm {className}"
 >
 	<table class="w-full text-left border-collapse" aria-label="Pricing tier comparison">
 		<thead>
@@ -194,10 +194,10 @@
 					<th scope="col" aria-label="{tier.name} tier" class="py-4 px-3 text-center min-w-[120px]">
 						{#if tier.monthlyPrice > 0}
 							<div
-								class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 mb-2"
+								class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-grove-100/50 dark:bg-grove-900/30 mb-2"
 							>
 								<IconComponent
-									class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+									class="w-5 h-5 text-grove-600 dark:text-grove-400"
 								/>
 							</div>
 						{/if}

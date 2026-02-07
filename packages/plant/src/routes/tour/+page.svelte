@@ -228,7 +228,7 @@
 
 		<!-- Image placeholder (would show actual screenshots) -->
 		{#if currentTourStop.image}
-			<div class="aspect-video bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
+			<div class="aspect-video bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-bark-700/20">
 				<div class="text-center text-foreground-subtle">
 					<p class="text-sm">Screenshot coming soon — {currentTourStop.location}</p>
 					{#if currentTourStop.url}
@@ -240,7 +240,7 @@
 			</div>
 		{:else if currentStep === 0}
 			<!-- Welcome illustration -->
-			<div class="aspect-video bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
+			<div class="aspect-video bg-white/40 dark:bg-bark-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-bark-700/20">
 				<div class="text-center">
 					<Sprout class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-foreground-muted">Let's explore Grove together</p>
@@ -248,7 +248,7 @@
 			</div>
 		{:else if isLastStep}
 			<!-- Completion illustration -->
-			<div class="aspect-video bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
+			<div class="aspect-video bg-white/40 dark:bg-bark-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-bark-700/20">
 				<div class="text-center">
 					<PartyPopper class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-lg font-medium text-foreground mb-2">
@@ -260,7 +260,7 @@
 		{/if}
 
 		<!-- Navigation -->
-		<div class="flex items-center justify-between pt-4 border-t border-white/20 dark:border-slate-700/20">
+		<div class="flex items-center justify-between pt-4 border-t border-white/20 dark:border-bark-700/20">
 			<button
 				onclick={prevStep}
 				disabled={isFirstStep}
@@ -276,7 +276,7 @@
 				{#each tourStops as stop, i}
 					<button
 						onclick={() => (currentStep = i)}
-						class="w-3 h-3 md:w-2 md:h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/30 dark:bg-slate-700/30' : ''}"
+						class="w-3 h-3 md:w-2 md:h-2 rounded-full transition-all backdrop-blur-sm {i !== currentStep ? 'bg-white/50 dark:bg-bark-700/30' : ''}"
 						class:bg-primary={i === currentStep}
 						class:w-5={i === currentStep}
 						class:md:w-4={i === currentStep}

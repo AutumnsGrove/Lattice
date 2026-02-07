@@ -64,10 +64,10 @@
 
 	// Tier colors for badges
 	const tierColors: Record<string, string> = {
-		seedling: 'bg-green-500/20 text-green-300 border-green-500/30',
-		sapling: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
-		oak: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-		evergreen: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+		seedling: 'bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30',
+		sapling: 'bg-teal-500/20 text-teal-700 dark:text-teal-300 border-teal-500/30',
+		oak: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30',
+		evergreen: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
 	};
 
 	// Invite type labels and colors
@@ -76,8 +76,8 @@
 		comped: 'Comped'
 	};
 	const typeColors: Record<string, string> = {
-		beta: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-		comped: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+		beta: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30',
+		comped: 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30'
 	};
 
 	// Format timestamp
@@ -132,19 +132,19 @@
 		<!-- Stats -->
 		<div class="flex flex-wrap gap-3 text-sm">
 			<div class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
-				<span class="text-blue-300">Beta:</span>
+				<span class="text-blue-700 dark:text-blue-300">Beta:</span>
 				<span class="font-medium text-foreground">{data.stats.beta}</span>
 			</div>
 			<div class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
-				<span class="text-purple-300">Comped:</span>
+				<span class="text-purple-700 dark:text-purple-300">Comped:</span>
 				<span class="font-medium text-foreground">{data.stats.comped}</span>
 			</div>
-			<div class="px-3 py-1.5 rounded-lg bg-white/10 dark:bg-slate-800/30 flex items-center gap-2">
+			<div class="px-3 py-1.5 rounded-lg bg-white/30 dark:bg-bark-800/30 flex items-center gap-2">
 				<Clock class="w-4 h-4 text-yellow-400" />
 				<span class="text-foreground-muted">Pending:</span>
 				<span class="font-medium text-foreground">{data.stats.pending}</span>
 			</div>
-			<div class="px-3 py-1.5 rounded-lg bg-white/10 dark:bg-slate-800/30 flex items-center gap-2">
+			<div class="px-3 py-1.5 rounded-lg bg-white/30 dark:bg-bark-800/30 flex items-center gap-2">
 				<CheckCircle class="w-4 h-4 text-green-400" />
 				<span class="text-foreground-muted">Used:</span>
 				<span class="font-medium text-foreground">{data.stats.used}</span>
@@ -186,14 +186,14 @@
 							bind:value={searchQuery}
 							onkeydown={(e) => e.key === 'Enter' && applyFilters()}
 							placeholder="Search by email..."
-							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 						/>
 					</div>
 
 					<select
 						bind:value={typeFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+						class="px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-primary"
 					>
 						<option value="">All types</option>
 						<option value="beta">Beta</option>
@@ -203,7 +203,7 @@
 					<select
 						bind:value={statusFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+						class="px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-primary"
 					>
 						<option value="">All status</option>
 						<option value="pending">Pending</option>
@@ -222,7 +222,7 @@
 						<button
 							type="button"
 							onclick={clearFilters}
-							class="px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 text-foreground-muted hover:text-foreground transition-colors"
+							class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground transition-colors"
 						>
 							<X class="w-4 h-4" />
 						</button>
@@ -232,7 +232,7 @@
 
 			<!-- Invites List -->
 			<GlassCard variant="frosted">
-				<div class="divide-y divide-white/10 dark:divide-slate-700/30">
+				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.invites as invite}
 						<div class="p-4 flex items-center justify-between group">
 							<div class="flex items-center gap-3 min-w-0">
@@ -304,7 +304,7 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div class="p-4 border-t border-white/10 dark:border-slate-700/30 flex items-center justify-between">
+					<div class="p-4 border-t border-white/10 dark:border-bark-700/30 flex items-center justify-between">
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
 							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data.pagination.total}
@@ -315,7 +315,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -328,7 +328,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -377,7 +377,7 @@
 								bind:value={newEmail}
 								placeholder="friend@example.com"
 								required
-								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 							/>
 						</div>
 					</div>
@@ -427,7 +427,7 @@
 							name="tier"
 							bind:value={newTier}
 							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground focus:outline-none focus:border-primary"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-primary"
 						>
 							{#each data.validTiers as tier}
 								<option value={tier}>{tierLabels[tier] || tier}</option>
@@ -445,7 +445,7 @@
 							bind:value={newMessage}
 							placeholder="A personal message shown when they sign up..."
 							rows="2"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary resize-none"
 						></textarea>
 					</div>
 
@@ -459,7 +459,7 @@
 							name="notes"
 							bind:value={newNotes}
 							placeholder="Why are we comping them?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 						/>
 					</div>
 
@@ -488,7 +488,7 @@
 
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
-						<div class="p-2 rounded-lg bg-white/10 dark:bg-slate-800/20 text-sm">
+						<div class="p-2 rounded-lg bg-white/30 dark:bg-bark-800/20 text-sm">
 							<div class="flex items-center gap-2 flex-wrap">
 								{#if entry.action === 'create'}
 									<Plus class="w-3 h-3 text-success" />
@@ -569,7 +569,7 @@
 							name="notes"
 							bind:value={revokeNotes}
 							placeholder="Why are we revoking this?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
+							class="w-full px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 						/>
 					</div>
 
@@ -580,7 +580,7 @@
 								revokeInvite = null;
 								revokeNotes = '';
 							}}
-							class="flex-1 px-4 py-2 rounded-lg bg-white/30 dark:bg-slate-800/30 text-foreground hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+							class="flex-1 px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground hover:bg-white/60 dark:hover:bg-bark-800/40 transition-colors"
 						>
 							Cancel
 						</button>

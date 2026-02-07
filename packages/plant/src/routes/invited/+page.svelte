@@ -117,7 +117,7 @@
 			</div>
 
 			{#if data.customMessage}
-				<div class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 border border-white/20 dark:border-slate-700/20 mb-4">
+				<div class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20 mb-4">
 					<p class="text-foreground-muted italic">
 						"{data.customMessage}"
 					</p>
@@ -130,14 +130,14 @@
 		</div>
 
 		<!-- Magic link form -->
-		<div class="border-t border-white/20 dark:border-slate-700/20 pt-6">
+		<div class="border-t border-white/20 dark:border-bark-700/20 pt-6">
 			{#if mode === 'ready' || mode === 'error'}
 				<div class="space-y-4">
 					<div>
 						<p class="block text-sm font-medium text-foreground mb-2">
 							Your email
 						</p>
-						<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/40">
+						<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-slate-200/50 dark:border-bark-700/40">
 							<Mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
 							<span class="text-foreground">{data.inviteEmail}</span>
 						</div>

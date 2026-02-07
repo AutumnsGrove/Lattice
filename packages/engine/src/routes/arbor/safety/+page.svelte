@@ -55,7 +55,7 @@
 			case 'block':
 				return 'bg-red-500/20 text-red-300 border-red-500/30';
 			default:
-				return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+				return 'bg-slate-500/20 text-foreground-faint border-slate-500/30';
 		}
 	}
 

@@ -113,14 +113,14 @@
 					</button>
 					<button
 						onclick={exportAsList}
-						class="px-4 py-2 bg-white dark:bg-slate-800 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-white dark:bg-bark-800 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
 					>
 						<Download class="w-4 h-4" />
 						Export as List (.txt)
 					</button>
 					<button
 						onclick={exportAsCSV}
-						class="px-4 py-2 bg-white dark:bg-slate-800 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-white dark:bg-bark-800 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
 					>
 						<Download class="w-4 h-4" />
 						Export as CSV
@@ -141,10 +141,10 @@
 			<p class="text-foreground-muted font-sans">No subscribers yet</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-slate-700">
+		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-bark-700">
 			<div class="overflow-x-auto">
 				<table class="w-full" aria-label="Email subscribers">
-					<thead class="bg-grove-50 dark:bg-slate-800/50 border-b border-grove-200 dark:border-slate-700">
+					<thead class="bg-grove-50 dark:bg-bark-800/50 border-b border-grove-200 dark:border-bark-700">
 						<tr>
 							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
 								Email
@@ -160,9 +160,9 @@
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-grove-100 dark:divide-slate-700/50 bg-white dark:bg-slate-800/30">
+					<tbody class="divide-y divide-grove-100 dark:divide-bark-700/50 bg-white dark:bg-bark-800/30">
 						{#each subscribers as subscriber}
-							<tr class="hover:bg-grove-50/50 dark:hover:bg-slate-700/30 transition-colors">
+							<tr class="hover:bg-grove-50/50 dark:hover:bg-bark-700/30 transition-colors">
 								<td class="px-6 py-4">
 									<span class="text-sm font-sans text-foreground font-medium">{subscriber.email}</span>
 								</td>
@@ -170,7 +170,7 @@
 									<span class="text-sm font-sans text-foreground-muted">{formatDate(subscriber.created_at)}</span>
 								</td>
 								<td class="px-6 py-4">
-									<span class="text-xs font-sans text-foreground-muted bg-grove-100 dark:bg-slate-700 px-2 py-1 rounded">
+									<span class="text-xs font-sans text-foreground-muted bg-grove-100 dark:bg-bark-700 px-2 py-1 rounded">
 										{subscriber.source}
 									</span>
 								</td>

@@ -77,8 +77,8 @@
 							? 'bg-emerald-500/90 text-white shadow-md shadow-emerald-500/30'
 							: status === 'current'
 								? 'bg-primary/90 text-white shadow-lg shadow-primary/40 ring-2 ring-primary/30 ring-offset-2 ring-offset-white/50 dark:ring-offset-slate-800/50'
-								: 'bg-white/50 dark:bg-slate-700/50 text-foreground-muted backdrop-blur-sm border border-white/40 dark:border-slate-600/40'}"
-					>
+								: 'bg-white/70 dark:bg-bark-700/50 text-foreground-muted backdrop-blur-sm border border-white/40 dark:border-bark-600/40'}"
+	>
 						{#if status === 'completed'}
 							<Check size={16} strokeWidth={2.5} />
 						{:else}
@@ -90,7 +90,7 @@
 					{#if index < steps.length - 1}
 						<div
 							class="w-6 h-0.5 mx-1 rounded-full transition-colors duration-300
-								{status === 'completed' ? 'bg-emerald-500/70' : 'bg-white/30 dark:bg-slate-600/30'}"
+								{status === 'completed' ? 'bg-emerald-500/70' : 'bg-white/30 dark:bg-bark-600/30'}"
 						></div>
 					{/if}
 				</div>
@@ -123,7 +123,7 @@
 								? 'bg-emerald-500/90 text-white shadow-md shadow-emerald-500/25'
 								: status === 'current'
 									? 'bg-primary/90 text-white shadow-lg shadow-primary/30 ring-2 ring-primary/20 ring-offset-2 ring-offset-white/30 dark:ring-offset-slate-800/30'
-									: 'bg-white/60 dark:bg-slate-700/60 text-foreground-muted backdrop-blur-sm border border-white/50 dark:border-slate-600/40'}"
+									: 'bg-white/80 dark:bg-bark-700/60 text-foreground-muted backdrop-blur-sm border border-white/50 dark:border-bark-600/40'}"
 						>
 							{#if status === 'completed'}
 								<Check size={18} strokeWidth={2.5} />
@@ -136,7 +136,7 @@
 						{#if index < steps.length - 1}
 							<div
 								class="absolute top-10 left-1/2 -translate-x-1/2 w-0.5 h-8 rounded-full transition-colors duration-300
-									{status === 'completed' ? 'bg-emerald-500/50' : 'bg-white/30 dark:bg-slate-600/30'}"
+									{status === 'completed' ? 'bg-emerald-500/50' : 'bg-white/30 dark:bg-bark-600/30'}"
 							></div>
 						{/if}
 					</div>

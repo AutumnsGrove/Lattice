@@ -367,11 +367,11 @@
 	url="/roadmap"
 />
 
-<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+<main class="min-h-screen flex flex-col bg-cream-50 dark:bg-bark-900">
 	<Header user={data.user} />
 
 	<!-- Hero Section -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950">
+	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-cream-100 via-cream-50 to-white dark:from-bark-800 dark:via-bark-900 dark:to-bark-950">
 		<div class="max-w-3xl mx-auto relative z-10">
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
 				The Journey Ahead
@@ -383,7 +383,7 @@
 			<!-- Quick link to version history -->
 			<a
 				href="/journey"
-				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-slate-800 transition-colors"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-bark-800 transition-colors"
 			>
 				<Tag class="w-4 h-4" />
 				View the Journey
@@ -407,7 +407,7 @@
 
 	<!-- Navigation Pills -->
 	<nav
-		class="sticky top-[73px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
+		class="sticky top-[73px] z-30 bg-white/80 dark:bg-bark-900/80 backdrop-blur-sm border-b border-divider py-3 px-4"
 		aria-label="Development phases"
 	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">
@@ -418,7 +418,7 @@
 					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all inline-flex items-center gap-1.5
 						{status === 'current' ? 'bg-accent text-white shadow-md' : ''}
 						{status === 'past' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : ''}
-						{status === 'future' ? 'bg-slate-100 dark:bg-slate-800 text-foreground-muted hover:bg-slate-200 dark:hover:bg-slate-700' : ''}"
+						{status === 'future' ? 'bg-cream-100 dark:bg-bark-800 text-foreground-muted hover:bg-cream-200 dark:hover:bg-bark-700' : ''}"
 				>
 					{#if status === 'current'}
 						<MapPin class="w-3.5 h-3.5" />
@@ -437,8 +437,8 @@
 		<section
 			id="first-frost"
 			class="relative py-20 px-6 overflow-hidden transition-colors duration-700
-				bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50
-				dark:from-slate-800 dark:via-slate-850 dark:to-slate-900"
+				bg-gradient-to-b from-bark-200 via-cream-100 to-cream-50
+				dark:from-bark-800 dark:via-bark-850 dark:to-bark-900"
 		>
 			<!-- Snowfall -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -458,18 +458,18 @@
 							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['first-frost'].title}</h2>
-					<p class="text-slate-700 dark:text-slate-300 italic">{phases['first-frost'].subtitle}</p>
-					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['first-frost'].title}</h2>
+					<p class="text-bark-700 dark:text-cream-300 italic">{phases['first-frost'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-bark-900/25 backdrop-blur-sm shadow-sm">
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">
+									<span class="font-medium text-bark-900 dark:text-cream-100">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -485,7 +485,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
+								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -497,8 +497,8 @@
 		<section
 			id="thaw"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-slate-200 via-sky-100 to-teal-100
-				dark:from-slate-800 dark:via-slate-850 dark:to-teal-950"
+				bg-gradient-to-b from-bark-200 via-sky-100 to-teal-100
+				dark:from-bark-800 dark:via-bark-850 dark:to-teal-950"
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -545,15 +545,15 @@
 							You are here
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases.thaw.title}</h2>
-					<p class="text-slate-700 dark:text-slate-300 italic">{phases.thaw.subtitle}</p>
-					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases.thaw.description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases.thaw.title}</h2>
+					<p class="text-bark-700 dark:text-cream-300 italic">{phases.thaw.subtitle}</p>
+					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases.thaw.description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-bark-900/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
 							{feature.internal ? 'opacity-75' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
 							<IconComponent
@@ -561,7 +561,7 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">
+									<span class="font-medium text-bark-900 dark:text-cream-100">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -577,10 +577,10 @@
 										<FeatureStar />
 									{/if}
 									{#if feature.internal}
-										<span class="px-2 py-0.5 text-xs font-medium rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-400">Internal</span>
+										<span class="px-2 py-0.5 text-xs font-medium rounded bg-bark-200 dark:bg-bark-700 text-bark-700 dark:text-cream-400">Internal</span>
 									{/if}
 								</div>
-								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
+								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -655,9 +655,9 @@
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['first-buds'].title}</h2>
-					<p class="text-slate-700 dark:text-slate-300 italic">{phases['first-buds'].subtitle}</p>
-					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['first-buds'].title}</h2>
+					<p class="text-bark-700 dark:text-cream-300 italic">{phases['first-buds'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -687,16 +687,16 @@
 							terminal: 'border-l-4 border-lime-500',
 							centennial: 'border-l-4 border-indigo-500'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-bark-900/25 backdrop-blur-sm shadow-sm
 							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
 						>
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-bark-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">
+									<span class="font-medium text-bark-900 dark:text-cream-100">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -712,7 +712,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
+								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -788,9 +788,9 @@
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-slate-900 dark:text-slate-100 mb-2">{phases['full-bloom'].title}</h2>
-					<p class="text-slate-700 dark:text-slate-300 italic">{phases['full-bloom'].subtitle}</p>
-					<p class="mt-4 text-slate-700/80 dark:text-slate-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['full-bloom'].title}</h2>
+					<p class="text-bark-700 dark:text-cream-300 italic">{phases['full-bloom'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -805,20 +805,20 @@
 							crown: 'text-amber-500',
 							paintbrush: 'text-violet-500',
 							users: 'text-indigo-500',
-							shield: 'text-slate-500',
+							shield: 'text-bark-500',
 							curios: 'text-amber-600',
 							terrarium: 'text-lime-500',
 							weave: 'text-cyan-500',
 							outpost: 'text-purple-500'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-slate-900/25 backdrop-blur-sm shadow-sm">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-bark-900/25 backdrop-blur-sm shadow-sm">
 							<!-- Use icon lookup map with feature-specific color -->
 							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-slate-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-bark-400'} mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-slate-900 dark:text-slate-100">
+									<span class="font-medium text-bark-900 dark:text-cream-100">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -834,7 +834,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-slate-700 dark:text-slate-400">{feature.description}</p>
+								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -929,11 +929,11 @@
 							gem: 'text-amber-600 dark:text-amber-400',
 							zap: 'text-yellow-500',
 							accessibility: 'text-blue-500',
-							smartphone: 'text-slate-600 dark:text-slate-400',
+							smartphone: 'text-bark-600 dark:text-cream-400',
 							puzzle: 'text-purple-500',
 							wander: 'text-teal-500'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-slate-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-bark-900/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30">
 							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
 							<IconComponent
 								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-500'} mt-0.5 flex-shrink-0"

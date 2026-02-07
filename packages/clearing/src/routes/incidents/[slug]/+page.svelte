@@ -167,7 +167,7 @@
 								<span class="text-sm text-foreground-subtle">Affected Components</span>
 								<div class="flex flex-wrap gap-2 mt-1.5">
 									{#each incident.components as component}
-										<span class="px-3 py-1 text-sm bg-slate-100 dark:bg-slate-800 rounded-full text-foreground-muted">
+										<span class="px-3 py-1 text-sm bg-cream-100 dark:bg-bark-800 rounded-full text-foreground-muted">
 											{component.name}
 										</span>
 									{/each}
@@ -191,7 +191,7 @@
 								<div class="flex flex-col items-center">
 									<div class={cn(
 										'p-2 rounded-full',
-										update.status === 'resolved' ? 'bg-green-500/10' : 'bg-slate-100 dark:bg-slate-800'
+										update.status === 'resolved' ? 'bg-green-500/10' : 'bg-cream-100 dark:bg-bark-800'
 									)}>
 										<UpdateIcon class={cn(
 											'w-5 h-5',
@@ -199,7 +199,7 @@
 										)} />
 									</div>
 									{#if i < incident.updates.length - 1}
-										<div class="w-0.5 flex-1 bg-slate-200 dark:bg-slate-700 my-2"></div>
+										<div class="w-0.5 flex-1 bg-cream-200 dark:bg-bark-700 my-2"></div>
 									{/if}
 								</div>
 

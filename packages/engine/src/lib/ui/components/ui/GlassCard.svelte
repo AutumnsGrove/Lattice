@@ -164,7 +164,7 @@
 	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/60 dark:bg-slate-800/50
+			bg-white/80 dark:bg-bark-800/50
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
@@ -174,38 +174,38 @@
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-slate-900/40 dark:bg-slate-950/40
+			bg-bark-900/40 dark:bg-bark-950/40
 			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/40 dark:bg-slate-800/30
+			bg-white/60 dark:bg-bark-800/30
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/80 dark:bg-slate-800/70
+			bg-white/90 dark:bg-bark-800/70
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
 	// Border colors per variant - subtle, warm borders
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-slate-700/40",
+		default: "border-white/40 dark:border-bark-700/40",
 		accent: "border-accent/30 dark:border-accent/20",
-		dark: "border-slate-700/30 dark:border-slate-600/30",
-		muted: "border-white/20 dark:border-slate-700/30",
-		frosted: "border-white/50 dark:border-slate-700/40"
+		dark: "border-bark-700/30 dark:border-bark-600/30",
+		muted: "border-white/20 dark:border-bark-700/30",
+		frosted: "border-white/50 dark:border-bark-700/40"
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/70 dark:hover:bg-slate-800/50 hover:shadow-lg hover:border-white/50 dark:hover:border-slate-600/50",
+		default: "hover:bg-white/90 dark:hover:bg-bark-800/50 hover:shadow-lg hover:border-white/50 dark:hover:border-bark-600/50",
 		accent: "hover:bg-accent/30 dark:hover:bg-accent/25 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-slate-900/50 dark:hover:bg-slate-950/50 hover:shadow-xl hover:border-slate-600/40",
-		muted: "hover:bg-white/40 dark:hover:bg-slate-800/40 hover:shadow-md hover:border-white/30 dark:hover:border-slate-600/40",
-		frosted: "hover:bg-white/80 dark:hover:bg-slate-800/60 hover:shadow-lg hover:border-white/60 dark:hover:border-slate-600/50"
+		dark: "hover:bg-bark-900/50 dark:hover:bg-bark-950/50 hover:shadow-xl hover:border-bark-600/40",
+		muted: "hover:bg-white/70 dark:hover:bg-bark-800/40 hover:shadow-md hover:border-white/30 dark:hover:border-bark-600/40",
+		frosted: "hover:bg-white/95 dark:hover:bg-bark-800/60 hover:shadow-lg hover:border-white/60 dark:hover:border-bark-600/50"
 	};
 
 	const computedClass = $derived(
@@ -232,7 +232,7 @@
 
 	const descriptionClass = $derived(
 		variant === "dark"
-			? "text-slate-300"
+			? "text-cream-300"
 			: "text-muted-foreground"
 	);
 </script>
@@ -241,7 +241,7 @@
 	{#if featured}
 		<!-- Featured star indicator (decorative - context provides meaning) -->
 		<div
-			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-md border border-amber-200 dark:border-amber-700"
+			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-bark-800 shadow-md border border-amber-200 dark:border-amber-700"
 			title="Featured"
 			aria-hidden="true"
 		>

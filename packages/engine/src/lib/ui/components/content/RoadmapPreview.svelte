@@ -59,8 +59,8 @@
 	rel={linkRel}
 	class={cn(
 		"block rounded-2xl p-6 transition-transform hover:scale-[1.02] group",
-		"bg-white/60 dark:bg-slate-800/40 backdrop-blur-md",
-		"border border-white/40 dark:border-slate-700/40",
+		"bg-white/80 dark:bg-bark-800/40 backdrop-blur-md",
+		"border border-white/40 dark:border-bark-700/40",
 		className
 	)}
 >
@@ -78,7 +78,7 @@
 
 	<!-- Progress bar -->
 	<div class="mb-3">
-		<div class="h-2 bg-slate-200/50 dark:bg-slate-700/50 rounded-full overflow-hidden">
+		<div class="h-2 bg-bark-200/50 dark:bg-bark-700/50 rounded-full overflow-hidden">
 			<div
 				class="h-full bg-primary rounded-full transition-all duration-500"
 				style="width: {progress}%"

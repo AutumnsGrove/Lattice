@@ -194,7 +194,7 @@
 		<span class="text-sm font-sans font-medium text-foreground">Storage Usage</span>
 		<span class="text-sm font-sans text-foreground-muted">{storagePct}%</span>
 	</div>
-	<div class="w-full h-2 bg-grove-100 dark:bg-slate-700 rounded-full overflow-hidden">
+	<div class="w-full h-2 bg-grove-100 dark:bg-bark-700 rounded-full overflow-hidden">
 		<div
 			role="progressbar"
 			aria-valuenow={storagePct}

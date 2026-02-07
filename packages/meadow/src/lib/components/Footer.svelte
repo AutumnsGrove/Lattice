@@ -17,8 +17,8 @@
 <footer
 	class={cn(
 		'mt-auto py-8 px-6',
-		'border-t border-white/20 dark:border-slate-700/30',
-		'bg-white/30 dark:bg-slate-900/30',
+		'border-t border-white/20 dark:border-bark-700/30',
+		'bg-white/50 dark:bg-bark-900/30',
 		className
 	)}
 >

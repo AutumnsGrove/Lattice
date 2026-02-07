@@ -112,8 +112,8 @@
 				document.querySelector('#auth-section')?.scrollIntoView({ behavior: 'smooth' });
 			}}
 			class="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full
-				bg-slate-100/60 dark:bg-slate-800/40 backdrop-blur-md
-				border border-slate-200/50 dark:border-slate-700/40
+				bg-bark-100/60 dark:bg-bark-800/40 backdrop-blur-md
+				border border-bark-200/50 dark:border-bark-700/40
 				text-foreground-muted hover:text-foreground hover:border-primary/50
 				transition-all cursor-pointer"
 		>
@@ -305,7 +305,7 @@
 						</div>
 					{:else if isFuture}
 						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
-							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-400 dark:bg-slate-600 text-white shadow-lg">
+							<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-bark-400 dark:bg-bark-600 text-white shadow-lg">
 								<Lock class="w-2.5 h-2.5" />
 								Future
 							</span>
@@ -324,7 +324,7 @@
 							{#if isComingSoon}
 								<div class="absolute inset-0 bg-amber-500/5 dark:bg-amber-500/5 rounded-xl pointer-events-none"></div>
 							{:else if isFuture}
-								<div class="absolute inset-0 bg-slate-500/5 dark:bg-slate-500/10 rounded-xl pointer-events-none"></div>
+								<div class="absolute inset-0 bg-bark-500/5 dark:bg-bark-500/10 rounded-xl pointer-events-none"></div>
 							{/if}
 
 							<div class="relative z-10">
@@ -335,14 +335,14 @@
 										? 'bg-emerald-100/60 dark:bg-emerald-900/40'
 										: isComingSoon
 											? 'bg-amber-100/60 dark:bg-amber-900/30'
-											: 'bg-slate-100/60 dark:bg-slate-800/40'}"
+											: 'bg-bark-100/60 dark:bg-bark-800/40'}"
 								>
 									<PlanIcon
 										class="w-5 h-5 {isAvailable
 											? 'text-emerald-600 dark:text-emerald-400'
 											: isComingSoon
 												? 'text-amber-600 dark:text-amber-400'
-												: 'text-slate-400 dark:text-slate-500'}"
+												: 'text-bark-700 dark:text-bark-500'}"
 									/>
 								</div>
 

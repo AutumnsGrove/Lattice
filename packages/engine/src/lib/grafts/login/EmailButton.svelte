@@ -161,8 +161,8 @@
 					placeholder="you@example.com"
 					disabled={mode === "sending"}
 					class="w-full px-4 py-3 rounded-xl
-						bg-white/60 dark:bg-slate-800/40 backdrop-blur-md
-						border border-slate-200/50 dark:border-slate-700/40
+						bg-white/80 dark:bg-bark-800/40 backdrop-blur-md
+						border border-bark-200/50 dark:border-bark-700/40
 						text-foreground placeholder:text-muted-foreground
 						focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50
 						disabled:opacity-50 disabled:cursor-not-allowed
@@ -228,10 +228,10 @@
 	{:else if mode === "sent"}
 		<!-- Success state -->
 		<div class="text-center space-y-4 py-2">
-			<div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+			<div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-grove-100/50 dark:bg-grove-900/30">
 				<!-- Checkmark icon -->
 				<svg
-					class="w-6 h-6 text-emerald-600 dark:text-emerald-400"
+					class="w-6 h-6 text-grove-600 dark:text-grove-400"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"

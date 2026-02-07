@@ -82,14 +82,14 @@
 		>
 			<GlassCard variant="frosted" flush class="overflow-hidden max-h-[70vh] flex flex-col">
 				<!-- Header -->
-				<div class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-slate-700/30">
+				<div class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-bark-700/30">
 					<div class="flex-shrink-0 p-2.5 rounded-full bg-accent/10 dark:bg-accent/20">
 						<HelpCircle class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div class="flex-1 min-w-0">
 						{#if loading}
-							<div class="h-6 w-3/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse mt-2"></div>
+							<div class="h-6 w-3/4 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-full bg-bark-200 dark:bg-bark-700 rounded animate-pulse mt-2"></div>
 						{:else if error}
 							<DialogPrimitive.Title
 								id="waystone-popup-title"
@@ -121,7 +121,7 @@
 						{/if}
 					</div>
 					<DialogPrimitive.Close
-						class="flex-shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+						class="flex-shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-cream-100 dark:hover:bg-bark-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 						aria-label="Close help popup"
 					>
 						<X class="w-5 h-5" />
@@ -133,11 +133,11 @@
 					{#if loading}
 						<!-- Loading skeleton -->
 						<div class="space-y-3">
-							<div class="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-4/5 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+							<div class="h-4 w-full bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-5/6 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-4/5 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-full bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-3/4 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
 						</div>
 					{:else if error}
 						<p class="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@
 				</div>
 
 				<!-- Footer with link to full article - flex-shrink-0 ensures always visible -->
-				<div class="flex-shrink-0 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex items-center justify-between">
+				<div class="flex-shrink-0 px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex items-center justify-between">
 					<div class="flex items-center gap-2 text-sm text-muted-foreground">
 						{#if excerpt?.readingTime}
 							<BookOpen class="w-4 h-4" />

@@ -141,11 +141,11 @@
   const buttonClass = cn(
     "inline-flex items-center justify-center gap-2",
     "h-9 px-3 rounded-lg",
-    "bg-white/60 dark:bg-emerald-950/25",
-    "border border-white/40 dark:border-emerald-800/25",
+    "bg-white/80 dark:bg-grove-950/25",
+    "border border-white/40 dark:border-grove-800/25",
     "text-foreground text-sm font-medium",
-    "hover:bg-white/75 dark:hover:bg-emerald-950/35",
-    "hover:border-white/50 dark:hover:border-emerald-700/30",
+    "hover:bg-white/75 dark:hover:bg-grove-950/35",
+    "hover:border-white/50 dark:hover:border-grove-700/30",
     "transition-all duration-200",
     "backdrop-blur-md shadow-sm hover:shadow-md",
     "disabled:opacity-50 disabled:pointer-events-none",
@@ -156,11 +156,11 @@
   const iconButtonClass = cn(
     "inline-flex items-center justify-center",
     "h-9 w-9 rounded-lg",
-    "bg-white/60 dark:bg-emerald-950/25",
-    "border border-white/40 dark:border-emerald-800/25",
+    "bg-white/80 dark:bg-grove-950/25",
+    "border border-white/40 dark:border-grove-800/25",
     "text-foreground",
-    "hover:bg-white/75 dark:hover:bg-emerald-950/35",
-    "hover:border-white/50 dark:hover:border-emerald-700/30",
+    "hover:bg-white/75 dark:hover:bg-grove-950/35",
+    "hover:border-white/50 dark:hover:border-grove-700/30",
     "transition-all duration-200",
     "backdrop-blur-md shadow-sm hover:shadow-md",
     "disabled:opacity-50 disabled:pointer-events-none",
@@ -181,14 +181,14 @@
 <nav
   class={cn(
     "flex flex-col",
-    "bg-white/60 dark:bg-emerald-950/25",
-    "border-b border-white/40 dark:border-emerald-800/25",
+    "bg-white/80 dark:bg-grove-950/25",
+    "border-b border-white/40 dark:border-grove-800/25",
     "backdrop-blur-md shadow-sm",
   )}
 >
   <!-- Row 1: Scene Name -->
   <div
-    class="flex items-center px-4 py-2 border-b border-white/30 dark:border-emerald-800/20"
+    class="flex items-center px-4 py-2 border-b border-white/30 dark:border-grove-800/20"
   >
     {#if isEditingName}
       <input
@@ -198,7 +198,7 @@
         onkeydown={handleNameKeydown}
         class={cn(
           "px-3 py-1.5 rounded-lg text-xl font-semibold",
-          "bg-white/80 dark:bg-emerald-950/40",
+          "bg-white/80 dark:bg-grove-950/40",
           "border border-accent/40 dark:border-accent/30",
           "focus:outline-none focus:ring-2 focus:ring-accent/50",
           "min-w-[300px] max-w-[600px]",
@@ -210,7 +210,7 @@
         onclick={startEditingName}
         class={cn(
           "px-3 py-1.5 rounded-lg text-xl font-semibold truncate",
-          "hover:bg-white/40 dark:hover:bg-emerald-950/20",
+          "hover:bg-white/60 dark:hover:bg-grove-950/20",
           "transition-colors duration-200",
           "text-left max-w-[600px]",
         )}
@@ -259,10 +259,10 @@
             onSetGridSize(Number(e.currentTarget.value) as 16 | 32 | 64)}
           class={cn(
             "h-9 px-3 rounded-lg",
-            "bg-white/60 dark:bg-emerald-950/25",
-            "border border-white/40 dark:border-emerald-800/25",
+            "bg-white/80 dark:bg-grove-950/25",
+            "border border-white/40 dark:border-grove-800/25",
             "text-foreground text-sm font-medium",
-            "hover:bg-white/75 dark:hover:bg-emerald-950/35",
+            "hover:bg-white/75 dark:hover:bg-grove-950/35",
             "transition-all duration-200",
             "backdrop-blur-md shadow-sm",
             "focus:outline-none focus:ring-2 focus:ring-accent/50",
@@ -279,7 +279,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+    <div class="w-px h-6 bg-white/60 dark:bg-grove-800/25"></div>
 
     <!-- Zoom Controls -->
     <div class="flex items-center gap-1">
@@ -296,10 +296,10 @@
         onclick={onResetZoom}
         class={cn(
           "h-9 px-2 rounded-lg min-w-[60px]",
-          "bg-white/60 dark:bg-emerald-950/25",
-          "border border-white/40 dark:border-emerald-800/25",
+          "bg-white/80 dark:bg-grove-950/25",
+          "border border-white/40 dark:border-grove-800/25",
           "text-foreground text-sm font-medium",
-          "hover:bg-white/75 dark:hover:bg-emerald-950/35",
+          "hover:bg-white/75 dark:hover:bg-grove-950/35",
           "transition-all duration-200",
           "backdrop-blur-md shadow-sm",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
@@ -321,7 +321,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+    <div class="w-px h-6 bg-white/60 dark:bg-grove-800/25"></div>
 
     <!-- Background Picker -->
     <div class="relative" data-background-picker>
@@ -344,8 +344,8 @@
         <div
           class={cn(
             "absolute top-full left-0 mt-2 p-3 rounded-lg z-50",
-            "bg-white/90 dark:bg-emerald-950/90",
-            "border border-white/40 dark:border-emerald-800/40",
+            "bg-white/90 dark:bg-grove-950/90",
+            "border border-white/40 dark:border-grove-800/40",
             "backdrop-blur-xl shadow-xl",
             "min-w-[220px]",
           )}
@@ -353,7 +353,7 @@
           <!-- Header with close button -->
           <div class="flex items-center justify-between mb-3">
             <span
-              class="text-sm font-semibold text-slate-700 dark:text-slate-200"
+              class="text-sm font-semibold text-bark-700 dark:text-cream-200"
             >
               Background
             </span>
@@ -361,8 +361,8 @@
               onclick={() => (showBackgroundPicker = false)}
               class={cn(
                 "w-6 h-6 flex items-center justify-center rounded",
-                "text-slate-500 dark:text-slate-400",
-                "hover:bg-slate-200/50 dark:hover:bg-slate-700/50",
+                "text-bark-500 dark:text-bark-400",
+                "hover:bg-cream-200/50 dark:hover:bg-bark-700/50",
                 "transition-colors duration-150",
               )}
               title="Close"
@@ -373,7 +373,7 @@
           </div>
 
           <div
-            class="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2"
+            class="text-xs font-medium text-bark-600 dark:text-bark-400 mb-2"
           >
             Presets
           </div>
@@ -388,7 +388,7 @@
                   "w-10 h-10 rounded-lg border-2 transition-all",
                   background === bg.value
                     ? "border-accent ring-2 ring-accent/30"
-                    : "border-white/40 dark:border-emerald-800/40 hover:border-accent/50",
+                    : "border-white/40 dark:border-grove-800/40 hover:border-accent/50",
                 )}
                 style="background: {bg.value};"
                 title={bg.name}
@@ -398,7 +398,7 @@
           </div>
 
           <div
-            class="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2"
+            class="text-xs font-medium text-bark-600 dark:text-bark-400 mb-2"
           >
             Custom Color
           </div>
@@ -406,7 +406,7 @@
             <input
               type="color"
               bind:value={customColor}
-              class="w-10 h-10 rounded-lg border border-white/40 dark:border-emerald-800/40 cursor-pointer"
+              class="w-10 h-10 rounded-lg border border-white/40 dark:border-grove-800/40 cursor-pointer"
               title="Pick custom color"
             />
             <button
@@ -429,7 +429,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+    <div class="w-px h-6 bg-white/60 dark:bg-grove-800/25"></div>
 
     <!-- Flip Buttons -->
     <div class="flex items-center gap-1">
@@ -455,7 +455,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+    <div class="w-px h-6 bg-white/60 dark:bg-grove-800/25"></div>
 
     <!-- Action Buttons Section -->
     <div class="flex items-center gap-2">
@@ -494,7 +494,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="w-px h-6 bg-white/40 dark:bg-emerald-800/25"></div>
+    <div class="w-px h-6 bg-white/60 dark:bg-grove-800/25"></div>
 
     <!-- Save Button -->
     <button

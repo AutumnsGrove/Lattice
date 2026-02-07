@@ -93,7 +93,7 @@
 		green: "bg-green-500 dark:bg-green-400",
 		amber: "bg-amber-500 dark:bg-amber-400",
 		blue: "bg-blue-500 dark:bg-blue-400",
-		slate: "bg-slate-400 dark:bg-slate-500",
+		slate: "bg-bark-400 dark:bg-bark-500",
 		red: "bg-red-500 dark:bg-red-400",
 		purple: "bg-purple-500 dark:bg-purple-400",
 		accent: "bg-accent dark:bg-accent"
@@ -101,9 +101,9 @@
 
 	// Variant-specific glass styles
 	const variantClasses: Record<GlassVariant, string> = {
-		default: "bg-white/60 dark:bg-slate-800/50 backdrop-blur-md border-white/40 dark:border-slate-700/40",
-		muted: "bg-white/40 dark:bg-slate-800/30 backdrop-blur border-white/20 dark:border-slate-700/30",
-		frosted: "bg-white/80 dark:bg-slate-800/70 backdrop-blur-lg border-white/50 dark:border-slate-700/40"
+		default: "bg-white/80 dark:bg-bark-800/50 backdrop-blur-md border-white/40 dark:border-bark-700/40",
+		muted: "bg-white/60 dark:bg-bark-800/30 backdrop-blur border-white/20 dark:border-bark-700/30",
+		frosted: "bg-white/80 dark:bg-bark-800/70 backdrop-blur-lg border-white/50 dark:border-bark-700/40"
 	};
 
 	// Layout classes

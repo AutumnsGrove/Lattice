@@ -167,7 +167,7 @@
 								'inline-flex items-center justify-center',
 								'h-8 w-8 rounded-lg',
 								'text-muted-foreground hover:text-foreground',
-								'hover:bg-white/40 dark:hover:bg-emerald-950/25',
+								'hover:bg-white/60 dark:hover:bg-grove-950/25',
 								'transition-colors duration-200',
 								'disabled:opacity-50 disabled:pointer-events-none',
 								'[&_svg]:w-4 [&_svg]:h-4'
@@ -192,10 +192,10 @@
 							disabled={isExporting}
 							class={cn(
 								'w-full h-10 px-3 rounded-lg',
-								'bg-white/60 dark:bg-emerald-950/25',
-								'border border-white/40 dark:border-emerald-800/25',
+								'bg-white/80 dark:bg-grove-950/25',
+								'border border-white/40 dark:border-grove-800/25',
 								'text-foreground text-sm',
-								'hover:bg-white/75 dark:hover:bg-emerald-950/35',
+								'hover:bg-white/75 dark:hover:bg-grove-950/35',
 								'transition-all duration-200',
 								'backdrop-blur-md',
 								'focus:outline-none focus:ring-2 focus:ring-accent/50',
@@ -218,8 +218,8 @@
 							disabled={isExporting}
 							class={cn(
 								'h-4 w-4 rounded',
-								'border border-white/40 dark:border-emerald-800/25',
-								'bg-white/60 dark:bg-emerald-950/25',
+								'border border-white/40 dark:border-grove-800/25',
+								'bg-white/80 dark:bg-grove-950/25',
 								'text-accent focus:ring-accent/50',
 								'disabled:opacity-50 disabled:pointer-events-none',
 								'cursor-pointer'
@@ -237,8 +237,8 @@
 					<div
 						class={cn(
 							'p-4 rounded-lg',
-							'bg-white/40 dark:bg-emerald-950/20',
-							'border border-white/30 dark:border-emerald-800/20'
+							'bg-white/60 dark:bg-grove-950/20',
+							'border border-white/30 dark:border-grove-800/20'
 						)}
 					>
 						<h3 class="text-sm font-medium text-foreground mb-2">Estimated Output</h3>

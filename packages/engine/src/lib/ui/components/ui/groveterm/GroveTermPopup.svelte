@@ -115,12 +115,12 @@
 		>
 			<GlassCard variant="frosted" class="overflow-hidden max-h-[70vh] flex flex-col">
 				<!-- Header -->
-				<div class="px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-slate-700/30">
+				<div class="px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-bark-700/30">
 					{#if loading}
-						<div class="flex-shrink-0 p-2.5 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse w-10 h-10"></div>
+						<div class="flex-shrink-0 p-2.5 rounded-full bg-bark-200 dark:bg-bark-700 animate-pulse w-10 h-10"></div>
 						<div class="flex-1 min-w-0">
-							<div class="h-6 w-3/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mt-2"></div>
+							<div class="h-6 w-3/4 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-1/2 bg-bark-200 dark:bg-bark-700 rounded animate-pulse mt-2"></div>
 						</div>
 					{:else if error}
 						<div class="flex-shrink-0 p-2.5 rounded-full bg-red-100 dark:bg-red-900/30">
@@ -162,7 +162,7 @@
 							</DialogPrimitive.Description>
 						</div>
 					{:else}
-						<div class="flex-shrink-0 p-2.5 rounded-full bg-slate-100 dark:bg-slate-800">
+						<div class="flex-shrink-0 p-2.5 rounded-full bg-cream-100 dark:bg-bark-800">
 							<Leaf class="w-5 h-5 text-muted-foreground" />
 						</div>
 						<div class="flex-1 min-w-0">
@@ -176,7 +176,7 @@
 					{/if}
 
 					<DialogPrimitive.Close
-						class="flex-shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+						class="flex-shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-cream-100 dark:hover:bg-bark-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 						aria-label="Close term popup"
 					>
 						<X class="w-5 h-5" />
@@ -188,9 +188,9 @@
 					{#if loading}
 						<!-- Loading skeleton -->
 						<div class="space-y-3">
-							<div class="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-							<div class="h-4 w-4/5 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+							<div class="h-4 w-full bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-5/6 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
+							<div class="h-4 w-4/5 bg-bark-200 dark:bg-bark-700 rounded animate-pulse"></div>
 						</div>
 					{:else if error}
 						<p class="text-sm text-muted-foreground">
@@ -204,7 +204,7 @@
 
 						<!-- Usage example -->
 						{#if displayEntry.usageExample}
-							<blockquote class="mt-4 pl-4 border-l-2 border-slate-300 dark:border-slate-600 italic text-sm text-muted-foreground">
+							<blockquote class="mt-4 pl-4 border-l-2 border-cream-300 dark:border-bark-600 italic text-sm text-muted-foreground">
 								{#each displayEntry.usageExample.split('\n') as line}
 									<p class="my-1">{line}</p>
 								{/each}
@@ -213,7 +213,7 @@
 
 						<!-- See also links -->
 						{#if displayEntry.seeAlso && displayEntry.seeAlso.length > 0 && manifest}
-							<div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+							<div class="mt-4 pt-4 border-t border-cream-200 dark:border-bark-700">
 								<p class="text-xs font-medium text-muted-foreground mb-2">See also</p>
 								<div class="flex flex-wrap gap-2">
 									{#each displayEntry.seeAlso as relatedSlug}
@@ -221,7 +221,7 @@
 										{#if related}
 											<button
 												type="button"
-												class="px-2 py-1 text-xs rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
+												class="px-2 py-1 text-xs rounded-md bg-cream-100 dark:bg-bark-800 text-bark-700 dark:text-cream-300 hover:bg-cream-200 dark:hover:bg-bark-700 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
 												onclick={() => handleRelatedClick(relatedSlug)}
 											>
 												{related.term}
@@ -240,7 +240,7 @@
 
 				<!-- Footer - back button for related terms, visit link for href -->
 				{#if relatedEntry || href}
-					<div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex items-center justify-between gap-3">
+					<div class="px-6 py-3 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex items-center justify-between gap-3">
 						{#if relatedEntry}
 							<button
 								type="button"
@@ -255,7 +255,7 @@
 						{#if href}
 							<a
 								{href}
-								class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline underline-offset-2 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded"
+								class="inline-flex items-center gap-1.5 text-sm font-medium text-grove-700 dark:text-grove-400 hover:text-grove-800 dark:hover:text-grove-300 hover:underline underline-offset-2 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded"
 								target="_blank"
 								rel="noopener noreferrer"
 							>

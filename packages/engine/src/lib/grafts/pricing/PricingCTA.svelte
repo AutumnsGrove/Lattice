@@ -59,9 +59,9 @@
 		primary:
 			"bg-accent hover:bg-accent-hover text-white shadow-sm hover:shadow",
 		secondary:
-			"bg-white/60 dark:bg-emerald-800/40 hover:bg-white/80 dark:hover:bg-emerald-800/60 text-foreground border border-white/40 dark:border-emerald-700/40",
+			"bg-white/80 dark:bg-grove-800/40 hover:bg-white/90 dark:hover:bg-grove-800/60 text-foreground border border-white/40 dark:border-grove-700/40",
 		outline:
-			"bg-transparent hover:bg-white/40 dark:hover:bg-emerald-800/30 text-foreground border border-divider hover:border-accent",
+			"bg-transparent hover:bg-white/60 dark:hover:bg-grove-800/30 text-foreground border border-divider hover:border-accent",
 	};
 
 	function handleClick() {

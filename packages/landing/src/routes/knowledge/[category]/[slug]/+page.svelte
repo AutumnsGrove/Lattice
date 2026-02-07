@@ -171,7 +171,7 @@
           {/if}
 
           <!-- Article Content -->
-          <article class="content-body prose prose-slate dark:prose-invert max-w-none">
+          <article class="content-body prose prose-bark dark:prose-invert max-w-none">
             {@html doc.html || `<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}
           </article>
 
@@ -179,7 +179,7 @@
           <RelatedArticles articles={relatedArticles} />
 
           <!-- Feedback -->
-          <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+          <div class="mt-12 pt-8 border-t border-bark-200 dark:border-bark-700">
             <Trace prompt="Was this article helpful?" />
           </div>
 

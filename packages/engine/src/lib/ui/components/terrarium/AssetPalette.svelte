@@ -146,16 +146,16 @@
 
 <aside
 	class="asset-palette flex flex-col h-full w-full
-		bg-white/50 dark:bg-emerald-950/25
+		bg-white/70 dark:bg-grove-950/25
 		backdrop-blur-md
-		border-r border-white/40 dark:border-emerald-800/25
+		border-r border-white/40 dark:border-grove-800/25
 		shadow-lg"
 	aria-label="Asset palette"
 >
 	<!-- Header -->
-	<div class="flex-shrink-0 px-4 py-4 border-b border-white/40 dark:border-emerald-800/25">
-		<h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Assets</h2>
-		<p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+	<div class="flex-shrink-0 px-4 py-4 border-b border-white/40 dark:border-grove-800/25">
+		<h2 class="text-lg font-semibold text-bark-900 dark:text-cream-100">Assets</h2>
+		<p class="text-xs text-bark-600 dark:text-bark-400 mt-1">
 			Drag or click to add to canvas
 		</p>
 	</div>
@@ -169,8 +169,8 @@
 					<button
 						id={`category-${key}`}
 						class="w-full flex items-center justify-between px-3 py-2 rounded-lg
-							text-sm font-medium text-slate-700 dark:text-slate-300
-							hover:bg-white/40 dark:hover:bg-emerald-950/30
+							text-sm font-medium text-bark-700 dark:text-cream-300
+							hover:bg-white/40 dark:hover:bg-grove-950/30
 							focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1
 							transition-colors duration-150"
 						onclick={() => toggleCategory(key)}
@@ -181,7 +181,7 @@
 						<span class="flex items-center gap-2">
 							<Icon class="w-4 h-4" />
 							<span>{name}</span>
-							<span class="text-xs text-slate-500 dark:text-slate-500">
+							<span class="text-xs text-bark-500 dark:text-bark-500">
 								({assets.length})
 							</span>
 						</span>
@@ -212,10 +212,10 @@
 
 	<!-- Footer hint -->
 	<div
-		class="flex-shrink-0 px-4 py-3 border-t border-white/40 dark:border-emerald-800/25
-			bg-white/30 dark:bg-emerald-950/20"
+		class="flex-shrink-0 px-4 py-3 border-t border-white/40 dark:border-grove-800/25
+			bg-white/50 dark:bg-grove-950/20"
 	>
-		<p class="text-xs text-slate-600 dark:text-slate-400 text-center">
+		<p class="text-xs text-bark-600 dark:text-bark-400 text-center">
 			Use Tab and Arrow keys to navigate
 		</p>
 	</div>

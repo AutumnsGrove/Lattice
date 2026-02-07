@@ -170,14 +170,14 @@
 	const containerClasses = $derived.by(() => {
 		const base = `
 			group relative overflow-hidden rounded-xl
-			bg-white/60 dark:bg-slate-800/50 backdrop-blur-md
-			border border-white/40 dark:border-slate-700/40
+			bg-white/80 dark:bg-bark-800/50 backdrop-blur-md
+			border border-white/40 dark:border-bark-700/40
 			shadow-sm transition-all duration-200
 		`;
 
 		const hover = disabled
 			? ""
-			: "hover:bg-white/70 dark:hover:bg-slate-800/60 hover:shadow-md hover:border-white/50 dark:hover:border-slate-600/50";
+			: "hover:bg-white/70 dark:hover:bg-bark-800/60 hover:shadow-md hover:border-white/50 dark:hover:border-bark-600/50";
 
 		const layout =
 			effectiveImagePosition === "top"
@@ -242,7 +242,7 @@
 	{:else}
 		<!-- Image -->
 		{#if hasImage}
-			<div class={cn(imageContainerClasses, "relative bg-bark-100 dark:bg-slate-700/50")}>
+			<div class={cn(imageContainerClasses, "relative bg-bark-100 dark:bg-bark-700/50")}>
 				<img
 					src={displayImage}
 					alt={displayTitle || "Link preview"}
@@ -317,7 +317,7 @@
 		<!-- External link indicator (decorative, link already has rel and target) -->
 		{#if !disabled && newTab}
 			<div
-				class="absolute top-2 right-2 p-1.5 rounded-md bg-white/80 dark:bg-slate-800/80 opacity-0 group-hover:opacity-100 transition-opacity"
+				class="absolute top-2 right-2 p-1.5 rounded-md bg-white/80 dark:bg-bark-800/80 opacity-0 group-hover:opacity-100 transition-opacity"
 				aria-hidden="true"
 			>
 				<Icons name="external" size="sm" class="text-bark-400 dark:text-cream-500" />

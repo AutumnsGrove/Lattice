@@ -122,10 +122,10 @@
 
 <button
 	class="palette-item group relative flex flex-col items-center gap-2 p-3 rounded-lg
-		bg-white/40 dark:bg-emerald-950/20 backdrop-blur-sm
-		border border-white/30 dark:border-emerald-800/20
-		hover:bg-white/60 dark:hover:bg-emerald-950/30
-		hover:border-white/50 dark:hover:border-emerald-700/30
+		bg-white/60 dark:bg-grove-950/20 backdrop-blur-sm
+		border border-white/30 dark:border-grove-800/20
+		hover:bg-white/80 dark:hover:bg-grove-950/30
+		hover:border-white/50 dark:hover:border-grove-700/30
 		hover:shadow-md
 		focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2
 		transition-all duration-200
@@ -141,9 +141,9 @@
 	<div
 		class="w-16 h-16 flex items-center justify-center rounded-md
 			bg-gradient-to-b from-sky-100/50 to-emerald-50/50
-			dark:from-sky-950/30 dark:to-emerald-950/30
+			dark:from-sky-950/30 dark:to-grove-950/30
 			group-hover:from-sky-100/70 group-hover:to-emerald-50/70
-			dark:group-hover:from-sky-950/40 dark:group-hover:to-emerald-950/40
+			dark:group-hover:from-sky-950/40 dark:group-hover:to-grove-950/40
 			transition-colors duration-200"
 	>
 		{#if isLoading}
@@ -158,8 +158,8 @@
 
 	<!-- Display name -->
 	<span
-		class="text-xs font-medium text-slate-700 dark:text-slate-300
-			group-hover:text-slate-900 dark:group-hover:text-slate-100
+		class="text-xs font-medium text-bark-700 dark:text-cream-300
+			group-hover:text-bark-900 dark:group-hover:text-cream-100
 			text-center leading-tight"
 	>
 		{displayName()}

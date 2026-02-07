@@ -148,8 +148,8 @@
 					bind:value={displayName}
 					placeholder="How should we call you?"
 					required
-					class="w-full px-4 py-3 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:border-primary focus:bg-white/70 dark:focus:bg-slate-800/70 focus:ring-2 focus:ring-primary/20"
-				/>
+					class="w-full px-4 py-3 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:border-primary focus:bg-white/80 dark:focus:bg-bark-800/70 focus:ring-2 focus:ring-primary/20"
+	/>
 				<p class="text-xs text-foreground-subtle mt-1">This is how your name appears on your blog.</p>
 			</div>
 
@@ -167,7 +167,7 @@
 						oninput={onUsernameInput}
 						placeholder="yourname"
 						required
-						class="w-full px-4 py-3 pr-32 rounded-lg bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:bg-white/70 dark:focus:bg-slate-800/70 focus:ring-2 focus:ring-primary/20 {usernameStatus === 'available' ? 'border-success focus:border-success' : usernameStatus === 'taken' || usernameStatus === 'error' ? 'border-error focus:border-error' : 'border-white/30 focus:border-primary'}"
+						class="w-full px-4 py-3 pr-32 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border text-foreground placeholder:text-foreground-faint transition-all focus:outline-none focus:bg-white/80 dark:focus:bg-bark-800/70 focus:ring-2 focus:ring-primary/20 {usernameStatus === 'available' ? 'border-success focus:border-success' : usernameStatus === 'taken' || usernameStatus === 'error' ? 'border-error focus:border-error' : 'border-white/30 focus:border-primary'}"
 					/>
 					<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
 						<span class="text-sm text-foreground-subtle">.grove.place</span>
@@ -202,7 +202,7 @@
 								<button
 									type="button"
 									onclick={() => selectSuggestion(suggestion)}
-									class="text-xs px-3 py-1.5 rounded-md bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm border border-white/30 dark:border-slate-700/30 text-foreground hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-primary transition-all"
+									class="text-xs px-3 py-1.5 rounded-md bg-white/60 dark:bg-bark-800/40 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground hover:bg-white/70 dark:hover:bg-bark-800/60 hover:border-primary transition-all"
 								>
 									{suggestion}
 								</button>
@@ -213,7 +213,7 @@
 			</div>
 
 			<!-- Favorite Color (Optional) -->
-			<fieldset class="p-4 rounded-lg bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm border border-white/20 dark:border-slate-700/20">
+			<fieldset class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-white/20 dark:border-bark-700/20">
 				<legend class="block text-sm font-medium text-foreground mb-1.5">
 					Favorite Color <span class="text-foreground-subtle">(optional)</span>
 				</legend>
@@ -224,7 +224,7 @@
 						<button
 							type="button"
 							onclick={() => (favoriteColor = favoriteColor === color.hex ? null : color.hex)}
-							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative {favoriteColor === color.hex ? 'border-white shadow-lg' : 'border-white/30 dark:border-slate-700/30'}"
+							class="aspect-square rounded-lg border-3 transition-all hover:scale-105 relative {favoriteColor === color.hex ? 'border-white shadow-lg' : 'border-white/30 dark:border-bark-700/30'}"
 							style="background-color: {color.hex}"
 							title={color.name}
 						>
@@ -252,7 +252,7 @@
 						<button
 							type="button"
 							onclick={() => toggleInterest(interest.id)}
-							class="flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm border text-left text-sm transition-all relative {selectedInterests.includes(interest.id) ? 'bg-white/60 dark:bg-slate-800/60 border-primary border-2 shadow-md' : 'bg-white/30 dark:bg-slate-800/30 border-white/30 dark:border-slate-700/30 hover:bg-white/45 dark:hover:bg-slate-800/45'}"
+							class="flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm border text-left text-sm transition-all relative {selectedInterests.includes(interest.id) ? 'bg-white/70 dark:bg-bark-800/60 border-primary border-2 shadow-md' : 'bg-white/50 dark:bg-bark-800/30 border-white/30 dark:border-bark-700/30 hover:bg-white/60 dark:hover:bg-bark-800/45'}"
 						>
 							<Icon class="w-5 h-5 {selectedInterests.includes(interest.id) ? 'text-primary' : 'text-foreground-muted'}" />
 							<span class="text-foreground font-medium">{interest.label}</span>

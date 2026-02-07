@@ -67,7 +67,7 @@
 		<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
 			{#each capabilities as cap}
 				<div
-					class="bg-white/60 border border-grove-200 rounded-xl p-4 text-center hover:border-grove-300 transition-colors"
+					class="bg-white/80 border border-grove-200 rounded-xl p-4 text-center hover:border-grove-300 transition-colors"
 				>
 					<div class="w-10 h-10 mx-auto mb-3 text-grove-500">
 						{#if cap.icon === 'image'}

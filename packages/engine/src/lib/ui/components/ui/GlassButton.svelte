@@ -74,11 +74,11 @@
 	// Glass variant-specific overlays - these ADD to Button's styling
 	const glassOverlays: Record<GlassVariant, string> = {
 		default: `
-			bg-white/60 dark:bg-emerald-950/25
-			border border-white/40 dark:border-emerald-800/25
+			bg-white/80 dark:bg-grove-950/25
+			border border-white/40 dark:border-grove-800/25
 			text-foreground
-			hover:bg-white/75 dark:hover:bg-emerald-950/35
-			hover:border-white/50 dark:hover:border-emerald-700/30
+			hover:bg-white/90 dark:hover:bg-grove-950/35
+			hover:border-white/50 dark:hover:border-grove-700/30
 			shadow-sm hover:shadow-md
 		`
 			.trim()
@@ -87,7 +87,7 @@
 		accent: `
 			bg-accent/70 dark:bg-accent/60
 			border border-accent/40 dark:border-accent/30
-			text-white
+			text-accent-foreground dark:text-white
 			hover:bg-accent/85 dark:hover:bg-accent/75
 			hover:border-accent/60 dark:hover:border-accent/50
 			shadow-sm hover:shadow-md shadow-accent/20
@@ -96,11 +96,11 @@
 			.replace(/\s+/g, " "),
 
 		dark: `
-			bg-slate-900/50 dark:bg-slate-950/50
-			border border-slate-700/30 dark:border-slate-600/30
+			bg-bark-900/50 dark:bg-bark-950/50
+			border border-bark-700/30 dark:border-bark-600/30
 			text-white
-			hover:bg-slate-900/65 dark:hover:bg-slate-950/65
-			hover:border-slate-600/40 dark:hover:border-slate-500/35
+			hover:bg-bark-900/65 dark:hover:bg-bark-950/65
+			hover:border-bark-600/40 dark:hover:border-bark-500/35
 			shadow-md hover:shadow-lg
 		`
 			.trim()
@@ -110,18 +110,18 @@
 			bg-transparent
 			border border-transparent
 			text-foreground
-			hover:bg-white/40 dark:hover:bg-emerald-950/25
-			hover:border-white/25 dark:hover:border-emerald-800/20
+			hover:bg-white/60 dark:hover:bg-grove-950/25
+			hover:border-white/25 dark:hover:border-grove-800/20
 		`
 			.trim()
 			.replace(/\s+/g, " "),
 
 		outline: `
 			bg-transparent
-			border border-white/40 dark:border-emerald-800/30
+			border border-white/40 dark:border-grove-800/30
 			text-foreground
-			hover:bg-white/25 dark:hover:bg-emerald-950/20
-			hover:border-white/55 dark:hover:border-emerald-700/40
+			hover:bg-white/50 dark:hover:bg-grove-950/20
+			hover:border-white/55 dark:hover:border-grove-700/40
 		`
 			.trim()
 			.replace(/\s+/g, " ")

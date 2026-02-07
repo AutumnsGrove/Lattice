@@ -113,7 +113,7 @@
       iconText: 'text-emerald-600 dark:text-emerald-400',
       hoverBg: 'hover:bg-emerald-100 dark:hover:bg-emerald-900/30',
       focusRing: 'focus-visible:ring-emerald-500',
-      border: 'border-emerald-200 dark:border-slate-700',
+      border: 'border-emerald-200 dark:border-bark-700',
       buttonBg: 'bg-emerald-500 hover:bg-emerald-600',
       mobileHover: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 focus-visible:bg-emerald-50 dark:focus-visible:bg-emerald-900/20',
       chipText: 'text-emerald-600 dark:text-emerald-400',
@@ -123,7 +123,7 @@
       iconText: 'text-violet-600 dark:text-violet-400',
       hoverBg: 'hover:bg-violet-100 dark:hover:bg-violet-900/30',
       focusRing: 'focus-visible:ring-violet-500',
-      border: 'border-violet-200 dark:border-slate-700',
+      border: 'border-violet-200 dark:border-bark-700',
       buttonBg: 'bg-violet-500 hover:bg-violet-600',
       mobileHover: 'hover:bg-violet-50 dark:hover:bg-violet-900/20 focus-visible:bg-violet-50 dark:focus-visible:bg-violet-900/20',
       chipText: 'text-violet-600 dark:text-violet-400',
@@ -171,7 +171,7 @@
       <!-- Section icon button -->
       <a
         href={getSectionHref(section)}
-        class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md {colors.border} {colors.hoverBg} focus-visible:outline-none focus-visible:ring-2 {colors.focusRing} focus-visible:ring-offset-2 transition-all duration-200 motion-reduce:transition-none"
+        class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-bark-800 shadow-md {colors.border} {colors.hoverBg} focus-visible:outline-none focus-visible:ring-2 {colors.focusRing} focus-visible:ring-offset-2 transition-all duration-200 motion-reduce:transition-none"
         aria-label="Jump to {section.name}"
         title="{section.name}{itemCount > 0 ? ` (${itemCount})` : ''}"
       >
@@ -185,7 +185,7 @@
       <!-- Hover reveal: Section name tooltip (when no items) -->
       {#if !hasHoverItems(section)}
         <div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 motion-reduce:transition-none">
-          <div class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-md {colors.border} text-sm font-medium text-foreground whitespace-nowrap">
+          <div class="px-3 py-1.5 rounded-lg bg-white dark:bg-bark-800 shadow-md {colors.border} text-sm font-medium text-foreground whitespace-nowrap">
             {section.name}
             {#if itemCount > 0}
               <span class="text-foreground-muted">({itemCount})</span>
@@ -201,7 +201,7 @@
             {@const ItemIcon = isValidIcon(item.icon) ? item.icon : null}
             <a
               href={getItemHref ? getItemHref(item, section) : `#${item.id}`}
-              class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-md {colors.border} {colors.chipText} {colors.chipHover} focus-visible:outline-none focus-visible:ring-2 {colors.focusRing} transition-colors motion-reduce:transition-none whitespace-nowrap"
+              class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-bark-800 shadow-md {colors.border} {colors.chipText} {colors.chipHover} focus-visible:outline-none focus-visible:ring-2 {colors.focusRing} transition-colors motion-reduce:transition-none whitespace-nowrap"
               title={item.description}
             >
               {#if ItemIcon}
@@ -236,10 +236,10 @@
   {#if isMobileOpen}
     <div
       bind:this={dropdownRef}
-      class="absolute bottom-16 right-0 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl {colors.border} overflow-hidden max-h-[70vh] overflow-y-auto"
+      class="absolute bottom-16 right-0 w-72 bg-white dark:bg-bark-800 rounded-xl shadow-xl {colors.border} overflow-hidden max-h-[70vh] overflow-y-auto"
     >
       <!-- Header -->
-      <div class="px-4 py-3 {colors.border} border-b flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800">
+      <div class="px-4 py-3 {colors.border} border-b flex items-center justify-between sticky top-0 bg-white dark:bg-bark-800">
         <span class="font-medium text-foreground">{mobileTitle}</span>
         <button
           type="button"
