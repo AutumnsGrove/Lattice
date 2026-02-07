@@ -158,8 +158,12 @@ function extractDefinition(lines: string[]): string {
       continue;
     }
 
-    // Skip Standard and AlwaysGrove annotation lines
-    if (trimmed === "**AlwaysGrove**" || trimmed.startsWith("**Standard:**")) {
+    // Skip Standard, AlwaysGrove, and Waystone annotation lines
+    if (
+      trimmed === "**AlwaysGrove**" ||
+      trimmed.startsWith("**Standard:**") ||
+      trimmed.startsWith("**Waystone:**")
+    ) {
       continue;
     }
 
@@ -316,24 +320,40 @@ function parseGroveNaming(content: string): GroveTermManifest {
       }
     }
 
-    // Parse Standard and AlwaysGrove annotations
+    // Parse Standard, AlwaysGrove, and Waystone annotations
     let standardTerm: string | undefined;
     let alwaysGrove: boolean | undefined;
+    let waystoneDesc: string | undefined;
     for (const line of termLines) {
       const trimmedLine = line.trim();
       const standardMatch = trimmedLine.match(/^\*\*Standard:\*\*\s+(.+)$/);
       if (standardMatch) {
         standardTerm = standardMatch[1].trim();
       }
+      const waystoneMatch = trimmedLine.match(/^\*\*Waystone:\*\*\s+(.+)$/);
+      if (waystoneMatch) {
+        waystoneDesc = waystoneMatch[1].trim();
+      }
       if (trimmedLine === "**AlwaysGrove**") {
         alwaysGrove = true;
       }
     }
 
-    const definition = extractDefinition(termLines);
+    // Prefer the explicit Waystone description over the parsed first paragraph
+    const definition = waystoneDesc || extractDefinition(termLines);
     const usageExample = extractUsageExample(termLines);
+    // Filter out annotation lines before scanning for related terms,
+    // so that **Waystone:** / **Standard:** don't pollute seeAlso
+    const contentForRelated = termLines
+      .filter(
+        (l) =>
+          !l.trim().startsWith("**Waystone:**") &&
+          !l.trim().startsWith("**Standard:**") &&
+          l.trim() !== "**AlwaysGrove**",
+      )
+      .join("\n");
     const seeAlso = findRelatedTerms(
-      termLines.join("\n"),
+      contentForRelated,
       allTermSlugs,
       displayTerm,
     );
