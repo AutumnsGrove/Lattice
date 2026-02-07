@@ -68,6 +68,7 @@ export default {
           DEFAULT: "var(--bark-900)",
           muted: "var(--bark-700)",
           subtle: "var(--bark-600)",
+          faint: "hsl(var(--foreground-faint, 25 15% 62%))",
         },
         muted: {
           DEFAULT: "var(--cream-300)",
@@ -76,7 +77,18 @@ export default {
         accent: {
           DEFAULT: "var(--grove-100)",
           foreground: "var(--grove-800)",
+          muted: "hsl(var(--accent-muted, 121 37% 32%))",
+          subtle: "hsl(var(--accent-subtle, 121 40% 92%))",
         },
+        surface: {
+          DEFAULT: "hsl(var(--surface, 0 0% 100%))",
+          hover: "hsl(var(--surface-hover, 30 10% 96%))",
+          elevated: "hsl(var(--surface-elevated, 0 0% 100%))",
+          subtle: "hsl(var(--surface-subtle, 30 15% 97%))",
+          alt: "hsl(var(--surface-alt, 30 10% 95%))",
+        },
+        default: "hsl(var(--default, 0 0% 88%))",
+        subtle: "hsl(var(--subtle, 0 0% 92%))",
         destructive: {
           DEFAULT: "#dc2626",
           foreground: "#ffffff",

@@ -40,10 +40,26 @@
 		--popover: 0 0% 100%;
 		--popover-foreground: 0 0% 20%;
 
+		/* Surface: component backgrounds */
+		--surface: 0 0% 100%;
+		--surface-hover: 30 10% 96%;
+		--surface-elevated: 0 0% 100%;
+		--surface-subtle: 30 15% 97%;
+		--surface-alt: 30 10% 95%;
+
+		/* Accent extensions */
+		--accent-muted: 121 37% 32%;
+		--accent-subtle: 121 40% 92%;
+
 		/* Border & Input */
 		--border: 0 0% 88%;
 		--input: 0 0% 88%;
 		--ring: 121 37% 27%;
+		--default: 0 0% 88%;
+		--subtle: 0 0% 92%;
+
+		/* Foreground extensions */
+		--foreground-faint: 25 15% 62%;
 
 		/* Border Radius */
 		--radius: 0.5rem;
@@ -86,10 +102,26 @@
 		--popover: 0 0% 14%;
 		--popover-foreground: 0 0% 94%;
 
+		/* Surface: component backgrounds */
+		--surface: 0 0% 12%;
+		--surface-hover: 0 0% 18%;
+		--surface-elevated: 0 0% 16%;
+		--surface-subtle: 0 0% 14%;
+		--surface-alt: 0 0% 16%;
+
+		/* Accent extensions */
+		--accent-muted: 121 45% 55%;
+		--accent-subtle: 121 25% 20%;
+
 		/* Border & Input */
 		--border: 0 0% 20%;
 		--input: 0 0% 20%;
 		--ring: 121 37% 45%;
+		--default: 0 0% 20%;
+		--subtle: 0 0% 16%;
+
+		/* Foreground extensions */
+		--foreground-faint: 30 5% 45%;
 	}
 }
 

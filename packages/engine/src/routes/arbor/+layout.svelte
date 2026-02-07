@@ -436,7 +436,7 @@
   }
 
   .nav-item:hover {
-    background: var(--grove-overlay-8);
+    background: var(--grove-overlay-12);
     color: var(--user-accent, var(--color-primary));
   }
 
@@ -534,7 +534,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background: var(--grove-overlay-8);
+    background: var(--grove-overlay-12);
     color: var(--color-text-muted);
     text-decoration: none;
     border: none;
@@ -552,7 +552,7 @@
   }
 
   .logout-btn:hover {
-    background: var(--grove-overlay-15);
+    background: var(--grove-overlay-20);
     color: var(--user-accent, var(--color-primary));
   }
 
@@ -566,7 +566,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
-    background: var(--grove-overlay-8);
+    background: var(--grove-overlay-12);
     color: var(--color-text-muted);
     text-decoration: none;
     border: none;
@@ -582,7 +582,7 @@
   }
 
   .logout-btn-icon:hover {
-    background: var(--grove-overlay-15);
+    background: var(--grove-overlay-20);
     color: var(--user-accent, var(--color-primary));
   }
 
@@ -597,7 +597,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background: var(--grove-overlay-8);
+    background: var(--grove-overlay-12);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -612,7 +612,7 @@
   }
 
   .help-link:hover {
-    background: var(--grove-overlay-15);
+    background: var(--grove-overlay-20);
     color: var(--user-accent, var(--color-primary));
   }
 
@@ -626,7 +626,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
-    background: var(--grove-overlay-8);
+    background: var(--grove-overlay-12);
     color: var(--color-text-muted);
     text-decoration: none;
     border-radius: var(--border-radius-button);
@@ -640,7 +640,7 @@
   }
 
   .help-link-icon:hover {
-    background: var(--grove-overlay-15);
+    background: var(--grove-overlay-20);
     color: var(--user-accent, var(--color-primary));
   }
 

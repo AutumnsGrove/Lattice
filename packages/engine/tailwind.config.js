@@ -18,6 +18,7 @@ export default {
           DEFAULT: "hsl(var(--foreground))",
           muted: "hsl(var(--foreground-muted))",
           subtle: "hsl(var(--foreground-subtle))",
+          faint: "hsl(var(--foreground-faint))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -38,7 +39,18 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          muted: "hsl(var(--accent-muted))",
+          subtle: "hsl(var(--accent-subtle))",
         },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          hover: "hsl(var(--surface-hover))",
+          elevated: "hsl(var(--surface-elevated))",
+          subtle: "hsl(var(--surface-subtle))",
+          alt: "hsl(var(--surface-alt))",
+        },
+        default: "hsl(var(--default))",
+        subtle: "hsl(var(--subtle))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
