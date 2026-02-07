@@ -91,7 +91,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           .first<PostData>(),
       ]);
     } catch (err) {
-      console.error("D1 fetch error for home page data:", err);
+      console.warn(
+        "[Home] D1 fetch failed, falling back to filesystem:",
+        (err as Error)?.message,
+      );
       // Fall through to filesystem fallback
     }
   }

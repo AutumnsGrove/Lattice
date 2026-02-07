@@ -664,7 +664,10 @@ export const PATCH: RequestHandler = async ({
             planName: PLANS[billing.plan]?.name || billing.plan,
             resendApiKey: platform.env.RESEND_API_KEY,
           }).catch((err) => {
-            console.error("[Billing] Failed to send cancellation email:", err);
+            console.error("[Billing] Failed to send cancellation email:", err, {
+              tenant: tenantId,
+              email: locals.user.email,
+            });
           });
         }
 

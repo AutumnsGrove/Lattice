@@ -103,8 +103,8 @@ export async function getCachedValue<T>(
     // Check if expired (KV TTL should handle this, but double-check)
     if (isCacheExpired(cached)) {
       // Don't await delete - let it happen in background
-      env.FLAGS_KV.delete(key).catch(() => {
-        // Ignore delete errors
+      env.FLAGS_KV.delete(key).catch((err) => {
+        console.warn("[Flags] KV cleanup failed:", err?.message);
       });
       return null;
     }

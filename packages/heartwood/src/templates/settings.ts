@@ -854,6 +854,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       } catch (err) {
         console.error('Error signing out:', err);
         signOutBtn.classList.remove('loading');
+        alert('Sign out failed. Please try again or clear your cookies.');
       }
     });
 
@@ -937,7 +938,11 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
         }
       } catch (err) {
         console.error('Error loading 2FA status:', err);
-        twoFaDisabled.style.display = 'block';
+        // Show error instead of misleadingly defaulting to "disabled"
+        const statusEl = document.getElementById('2fa-status');
+        if (statusEl) {
+          statusEl.innerHTML = '<div class="message message-error">Could not check 2FA status. Please refresh the page.</div>';
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from "./$types";
 
 export const prerender = false;
 
@@ -57,6 +57,6 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     });
   } catch (err) {
     console.error("Failed to fetch settings:", err);
-    return json({ font_family: "lexend" });
+    return json({ font_family: "lexend", _loadError: true });
   }
 };

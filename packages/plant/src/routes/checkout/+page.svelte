@@ -43,6 +43,14 @@
 		if (checkoutInitialized) return;
 		checkoutInitialized = true;
 
+		// Safety net: if redirect hasn't happened in 15s, stop the spinner
+		const timeout = setTimeout(() => {
+			if (isLoading) {
+				error = 'Checkout is taking longer than expected. Please go back and try again.';
+				isLoading = false;
+			}
+		}, 15000);
+
 		(async () => {
 			try {
 				const res = await fetch('/checkout', {
@@ -66,10 +74,15 @@
 				} else if (result.error) {
 					error = result.error;
 					isLoading = false;
+				} else {
+					error = "Checkout couldn't be initialized. Please go back and try again.";
+					isLoading = false;
 				}
 			} catch (err) {
 				error = 'Unable to initialize checkout. Please try again.';
 				isLoading = false;
+			} finally {
+				clearTimeout(timeout);
 			}
 		})();
 	});

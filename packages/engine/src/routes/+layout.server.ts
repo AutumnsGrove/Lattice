@@ -29,6 +29,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Get tenant ID from context if available
   const tenantId = locals.tenantId;
 
+  // Track database access failures for admin-only error banners
+  let dbAccessError = false;
+
   // Only fetch from database at runtime (not during prerendering)
   // The Cloudflare adapter throws when accessing platform.env during prerendering
   // Must check `building` BEFORE accessing platform.env to avoid the getter throwing
@@ -149,6 +152,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
       // If DB bindings aren't configured, gracefully fall back to defaults
       const message = error instanceof Error ? error.message : "Unknown error";
       console.error("Failed to access database (using defaults):", message);
+      dbAccessError = true;
     }
   }
 
@@ -169,5 +173,6 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
     // Uses hoisted booleans since Promise.all results are block-scoped
     showTimeline: timelineEnabled,
     showGallery: galleryEnabled,
+    dbAccessError,
   };
 };

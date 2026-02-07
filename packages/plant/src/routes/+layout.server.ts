@@ -115,6 +115,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
     return {
       user: null,
       onboarding: null,
+      loadError: true,
     };
   }
 };

@@ -159,6 +159,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     (galleryCurio?.enabled === 1 ? 1 : 0) +
     (journeyCurio?.enabled === 1 ? 1 : 0);
 
+  // Detect if any sub-query failed (returned null from .catch)
+  const _partialFailure =
+    !postStatsResult || !tagsResult.results || !tenantResult;
+
   const stats: StatsResult = {
     postCount,
     totalWords,
@@ -171,7 +175,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   // PERFORMANCE: Use no-cache to ensure fresh data after post changes
   // The browser can cache but must revalidate on each request
   // This prevents stale counts after creating/deleting posts (#623)
-  return json(stats, {
-    headers: { "Cache-Control": "private, no-cache" },
-  });
+  return json(
+    { ...stats, _partialFailure },
+    {
+      headers: { "Cache-Control": "private, no-cache" },
+    },
+  );
 };

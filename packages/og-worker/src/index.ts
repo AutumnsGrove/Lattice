@@ -362,8 +362,8 @@ async function checkRateLimit(env: Env, ip: string): Promise<RateLimitResult> {
 
     // Increment counter (fire-and-forget for performance)
     env.OG_CACHE.put(key, String(count + 1), { expirationTtl: window }).catch(
-      () => {
-        // Ignore KV write errors for rate limiting
+      (err) => {
+        console.warn("[OG] Rate limit update failed:", err?.message);
       },
     );
 

@@ -308,7 +308,10 @@ export async function processHealthCheckResult(
               `Latency: ${result.latencyMs}ms\n\n` +
               `The service has recovered and is operating normally.`,
           ).catch((err) =>
-            console.error("[Clearing Monitor] Email send failed:", err),
+            console.error("[Clearing Monitor] Recovery email failed:", err, {
+              component: result.componentName,
+              status: "operational",
+            }),
           );
         }
 
@@ -354,7 +357,10 @@ export async function processHealthCheckResult(
           `Error: ${result.error || "N/A"}\n\n` +
           `Automated monitoring has detected an issue and created an incident.`,
       ).catch((err) =>
-        console.error("[Clearing Monitor] Email send failed:", err),
+        console.error("[Clearing Monitor] Incident email failed:", err, {
+          component: result.componentName,
+          status: result.status,
+        }),
       );
 
       state.activeIncidentId = incidentId;

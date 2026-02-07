@@ -95,6 +95,13 @@
     </a>
   </header>
 
+  {#if data.pagesLoadError}
+    <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
+      <AlertCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="text-sm">Couldn't load your pages. Try refreshing the page.</span>
+    </div>
+  {/if}
+
   {#if navLimit === 0}
     <div class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
       <AlertCircle class="w-4 h-4 flex-shrink-0" />

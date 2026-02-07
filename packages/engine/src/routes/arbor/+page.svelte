@@ -1,5 +1,6 @@
 <script>
   import { GlassCard, Spinner, GroveTerm, GroveSwap, BetaBadge, BetaWelcomeDialog, GroveIntro } from '$lib/ui';
+  import { toast } from '$lib/ui/components/ui/toast';
   import { api, getUserDisplayName } from "$lib/utils";
   import {
     FileText,
@@ -48,6 +49,7 @@
       // Server calculates word count via SQL instead of fetching all content
       stats = await api.get('/api/stats');
     } catch (error) {
+      toast.error("Couldn't load your dashboard stats.");
       console.error('Failed to fetch stats:', error);
       stats = {
         postCount: 0,

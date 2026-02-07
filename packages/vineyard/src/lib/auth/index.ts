@@ -88,7 +88,10 @@ export async function getSession(): Promise<BetterAuthSessionResponse> {
     const data = await response.json();
     return data as BetterAuthSessionResponse;
   } catch (error) {
-    console.error("Failed to fetch session:", error);
+    console.warn(
+      "[Vineyard Auth] Session fetch failed:",
+      (error as Error)?.message,
+    );
     return { user: null, session: null };
   }
 }
@@ -124,7 +127,10 @@ export async function signOut(redirectTo: string = "/"): Promise<void> {
       },
     });
   } catch (error) {
-    console.error("Failed to sign out:", error);
+    console.warn(
+      "[Vineyard Auth] Sign-out failed (redirecting anyway):",
+      (error as Error)?.message,
+    );
   }
 
   // Redirect regardless of fetch result

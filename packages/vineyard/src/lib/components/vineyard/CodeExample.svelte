@@ -19,6 +19,7 @@
   let { language, filename, children }: Props = $props();
 
   let copied = $state(false);
+  let copyFailed = $state(false);
   let codeElement: HTMLElement | null = $state(null);
 
   async function copyCode() {
@@ -32,6 +33,10 @@
       }, 2000);
     } catch {
       console.error('Failed to copy code');
+      copyFailed = true;
+      setTimeout(() => {
+        copyFailed = false;
+      }, 3000);
     }
   }
 
@@ -58,10 +63,13 @@
       {/if}
       <span class="language">{languageLabels[language] ?? language}</span>
     </div>
-    <button class="copy-btn" onclick={copyCode} aria-label="Copy code">
+    <button class="copy-btn" class:copy-failed={copyFailed} onclick={copyCode} aria-label="Copy code">
       {#if copied}
         <Check size={14} />
         <span>Copied!</span>
+      {:else if copyFailed}
+        <Copy size={14} />
+        <span>Copy failed</span>
       {:else}
         <Copy size={14} />
         <span>Copy</span>
@@ -139,6 +147,11 @@
     background: rgba(255, 255, 255, 0.05);
     color: var(--code-text);
     border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .copy-btn.copy-failed {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
   }
 
   .code-content {

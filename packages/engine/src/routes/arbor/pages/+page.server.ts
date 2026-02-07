@@ -26,6 +26,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   const tenantId = locals.tenantId;
   let pages: PageRecord[] = [];
   let curios: CurioStatus[] = [];
+  let pagesLoadError = false;
 
   // Try D1 first
   if (platform?.env?.DB) {
@@ -42,6 +43,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           .all<PageRecord>()
           .catch((err) => {
             console.error("D1 fetch error for pages:", err);
+            pagesLoadError = true;
             return { results: [] };
           }),
 
@@ -95,5 +97,6 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   return {
     pages,
     curios,
+    pagesLoadError,
   };
 };

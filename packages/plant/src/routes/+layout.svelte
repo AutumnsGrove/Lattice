@@ -35,7 +35,7 @@
 		{ num: 6, label: 'Done' }
 	];
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	// Mobile menu state
 	let mobileMenuOpen = $state(false);
@@ -173,6 +173,11 @@
 
 	<!-- Main content -->
 	<main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8 md:py-12">
+		{#if data?.loadError}
+			<div class="p-4 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm text-center">
+				Something went wrong loading your session. Please refresh the page.
+			</div>
+		{/if}
 		{@render children()}
 	</main>
 

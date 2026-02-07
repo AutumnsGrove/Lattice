@@ -77,7 +77,11 @@ export async function getBackupStatus(
       },
     });
     // Don't await - let it cache in background
-    caches.default.put(CACHE_KEY, response).catch(() => {});
+    caches.default
+      .put(CACHE_KEY, response)
+      .catch((err) =>
+        console.warn("[Backups] Cache write failed:", err?.message),
+      );
   }
 
   return freshData;

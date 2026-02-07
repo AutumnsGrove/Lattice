@@ -34,7 +34,9 @@ export const load: PageServerLoad = async ({ platform }) => {
   if (workerUrl) {
     try {
       // First, refresh running jobs to get fresh status from DOs
-      await fetch(`${workerUrl}/api/jobs/refresh`).catch(() => {});
+      await fetch(`${workerUrl}/api/jobs/refresh`).catch((err) =>
+        console.warn("[History] Job refresh failed:", err?.message),
+      );
 
       const response = await fetch(`${workerUrl}/api/jobs/list?limit=100`);
       if (response.ok) {
