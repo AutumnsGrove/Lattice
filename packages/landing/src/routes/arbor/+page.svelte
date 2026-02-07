@@ -9,8 +9,19 @@
 		MessageSquare,
 		Sprout,
 		Home,
-		LogOut,
-		Gift
+		Gift,
+		Activity,
+		Users,
+		Gamepad2,
+		Github,
+		Cloud,
+		Bot,
+		BarChart3,
+		CreditCard,
+		CircleDot,
+		ExternalLink,
+		Trees,
+		Kanban
 	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -133,6 +144,57 @@
 				</div>
 			</GlassCard>
 		</a>
+
+		<!-- Status Card (Wayfinder only) -->
+		<a href="/arbor/status" class="block">
+			<GlassCard hoverable class="p-6 h-full">
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+						<Activity class="w-6 h-6 text-sky-600 dark:text-sky-400" />
+					</div>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-serif text-foreground mb-1">Status</h2>
+						<p class="text-sm text-foreground-muted font-sans">
+							Monitor service health, uptime, and infrastructure status.
+						</p>
+					</div>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Tenants Card (Wayfinder only) -->
+		<a href="/arbor/tenants" class="block">
+			<GlassCard hoverable class="p-6 h-full">
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+						<Users class="w-6 h-6 text-violet-600 dark:text-violet-400" />
+					</div>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-serif text-foreground mb-1">Tenants</h2>
+						<p class="text-sm text-foreground-muted font-sans">
+							View and manage tenant accounts across the Grove ecosystem.
+						</p>
+					</div>
+				</div>
+			</GlassCard>
+		</a>
+
+		<!-- Minecraft Card (Wayfinder only) -->
+		<a href="/arbor/minecraft" class="block">
+			<GlassCard hoverable class="p-6 h-full">
+				<div class="flex items-start gap-4">
+					<div class="w-12 h-12 bg-lime-100 dark:bg-lime-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+						<Gamepad2 class="w-6 h-6 text-lime-600 dark:text-lime-400" />
+					</div>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-serif text-foreground mb-1">Minecraft</h2>
+						<p class="text-sm text-foreground-muted font-sans">
+							Manage the Grove Minecraft server and player settings.
+						</p>
+					</div>
+				</div>
+			</GlassCard>
+		</a>
 	{/if}
 </section>
 
@@ -148,3 +210,131 @@
 		</div>
 	</GlassCard>
 </section>
+
+<!-- My Links (Wayfinder only) -->
+{#if data.isWayfinder}
+	<section class="mt-8">
+		<h2 class="text-lg font-serif text-foreground mb-4">My Links</h2>
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			<a href="https://github.com/AutumnsGrove/GroveEngine" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-gray-100 dark:bg-gray-800/50 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Github class="w-5 h-5 text-gray-700 dark:text-gray-300" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">GroveEngine</p>
+							<p class="text-xs text-foreground-muted font-sans">GitHub Repository</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://dash.cloudflare.com/04e847fa7655624e84414a8280b3a4d0/home/domains" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Cloud class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Cloudflare</p>
+							<p class="text-xs text-foreground-muted font-sans">Domain Management</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://knownagents.com/projects/378d0348-a640-4be0-9a60-fbd306d6bf4e/crawlers-and-scrapers" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Bot class="w-5 h-5 text-violet-600 dark:text-violet-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Known Agents</p>
+							<p class="text-xs text-foreground-muted font-sans">Crawlers & Scrapers</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://dash.cloudflare.com/04e847fa7655624e84414a8280b3a4d0/grove.place" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<BarChart3 class="w-5 h-5 text-sky-600 dark:text-sky-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Grove.place</p>
+							<p class="text-xs text-foreground-muted font-sans">Cloudflare Analytics</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<CreditCard class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Stripe</p>
+							<p class="text-xs text-foreground-muted font-sans">Payments & Billing</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://github.com/AutumnsGrove/GroveEngine/issues" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<CircleDot class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Issues</p>
+							<p class="text-xs text-foreground-muted font-sans">GitHub Issue Tracker</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://github.com/users/AutumnsGrove/projects/1" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Kanban class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Lattice Board</p>
+							<p class="text-xs text-foreground-muted font-sans">GitHub Project Kanban</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://autumn.grove.place/arbor" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Trees class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">My Arbor</p>
+							<p class="text-xs text-foreground-muted font-sans">autumn.grove.place</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+		</div>
+	</section>
+{/if}
