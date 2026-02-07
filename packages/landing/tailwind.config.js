@@ -25,8 +25,6 @@ export default {
           900: "#14532d",
           950: "#052e16",
         },
-        cream: "#fefdfb",
-        bark: "#3d2914",
       },
       fontFamily: {
         serif: ["Lexend", "Georgia", "Cambria", "Times New Roman", "serif"],

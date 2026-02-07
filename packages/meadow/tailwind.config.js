@@ -25,8 +25,6 @@ export default {
           900: "#14532d",
           950: "#052e16",
         },
-        cream: "#fefdfb",
-        bark: "#3d2914",
         // Neutral palette for dark mode and glass effects
         neutral: {
           50: "#fafaf9",

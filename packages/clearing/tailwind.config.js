@@ -33,8 +33,6 @@ export default {
 					major: '#ef4444',            // Red
 					maintenance: '#3b82f6'       // Blue
 				},
-				cream: '#fefdfb',
-				bark: '#3d2914'
 			},
 			fontFamily: {
 				serif: ['Lexend', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
