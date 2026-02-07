@@ -127,6 +127,9 @@
 		featured?: boolean;
 		/** Custom color for the featured star (defaults to amber) */
 		featuredColor?: string;
+		/** Render children without padding wrapper, propagating flex layout.
+		 *  Use when the card needs flex-col overflow control (e.g. scroll + sticky footer). */
+		flush?: boolean;
 	}
 
 	let {
@@ -147,6 +150,7 @@
 		gossamerStatic = false,
 		featured = false,
 		featuredColor,
+		flush = false,
 		...restProps
 	}: Props = $props();
 
@@ -274,7 +278,10 @@
 	{/if}
 
 	<!-- Content layer (above Gossamer) -->
-	<div class={gossamer ? "relative z-10" : ""}>
+	<div class={cn(
+		gossamer && "relative z-10",
+		flush && "flex-1 flex flex-col min-h-0"
+	)}>
 		{#if header || title || description}
 			<div class="px-6 py-4 {(children || footer) ? 'border-b border-inherit' : ''}">
 				{#if header}
@@ -291,9 +298,13 @@
 		{/if}
 
 		{#if children}
-			<div class="px-6 py-4">
+			{#if flush}
 				{@render children()}
-			</div>
+			{:else}
+				<div class="px-6 py-4">
+					{@render children()}
+				</div>
+			{/if}
 		{/if}
 
 		{#if footer}
