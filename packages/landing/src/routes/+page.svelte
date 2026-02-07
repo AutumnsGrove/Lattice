@@ -5,7 +5,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview, GroveTerm, GroveText, GlassCarousel, GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm, GroveText, GlassCarousel, GlassCard, GroveMessages } from '@autumnsgrove/groveengine/ui';
 	import {
 		HeroRefuge,
 		HeroOwnership,
@@ -231,6 +231,13 @@
 			{/snippet}
 		</GlassCarousel>
 	</section>
+
+	<!-- Grove Messages -->
+	{#if data.messages?.length}
+		<div class="w-full max-w-2xl mb-12">
+			<GroveMessages messages={data.messages} dismissible={false} />
+		</div>
+	{/if}
 
 	<!-- Launch Notice -->
 	<div class="w-full max-w-lg mb-12">

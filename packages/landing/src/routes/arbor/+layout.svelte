@@ -11,7 +11,7 @@
 
 	import { page } from '$app/state';
 	import { AdminHeader } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
+	import { GlassConfirmDialog, GroveMessages } from '@autumnsgrove/groveengine/ui';
 	import {
 		Home,
 		MessageCircle,
@@ -22,7 +22,8 @@
 		Gift,
 		Activity,
 		Users,
-		Gamepad2
+		Gamepad2,
+		Megaphone
 	} from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -54,6 +55,7 @@
 
 	// Wayfinder-only tabs
 	const wayfinderTabs = [
+		{ href: '/arbor/messages', label: 'Messages', icon: Megaphone },
 		{ href: '/arbor/porch', label: 'Porch', icon: MessageSquare },
 		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout },
 		{ href: '/arbor/comped-invites', label: 'Invites', icon: Gift },
@@ -80,6 +82,11 @@
 		/>
 
 		<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			{#if data.messages?.length && !isLoginPage}
+				<div class="mb-6">
+					<GroveMessages messages={data.messages} dismissible={true} />
+				</div>
+			{/if}
 			{@render children()}
 		</main>
 	</div>

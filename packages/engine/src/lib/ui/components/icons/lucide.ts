@@ -399,6 +399,7 @@ export {
   Users,
   Activity,
   // Actions
+  Megaphone,
   Plus,
   Copy,
   Trash2,
