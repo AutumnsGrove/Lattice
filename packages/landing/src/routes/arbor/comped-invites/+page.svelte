@@ -26,7 +26,10 @@
 		CheckCircle,
 		Clock,
 		Eye,
-		EyeOff
+		EyeOff,
+		Users,
+		ArrowUpRight,
+		Zap
 	} from 'lucide-svelte';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 
@@ -43,6 +46,13 @@
 	let revokeNotes = $state('');
 	let isRevoking = $state(false);
 	let showPreview = $state(false);
+
+	// Promote state
+	let promoteTier = $state<string>('seedling');
+	let promoteMessage = $state('');
+	let isPromoting = $state<string | null>(null); // email currently being promoted
+	let isPromotingAll = $state(false);
+	let showEligible = $state(true);
 
 	// Email preview content (mirrors BetaInviteEmail.tsx template)
 	const emailContent = {
@@ -186,10 +196,28 @@
 				<AlertTriangle size={18} />
 				<span>Invite created, but the email failed to send{form.emailError ? `: ${form.emailError}` : ''}. You may need to resend manually.</span>
 			</div>
+		{:else if form.emailStatus === 'partial'}
+			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+				<AlertTriangle size={18} />
+				<span>Some invite emails failed to send. Check the audit log for details.</span>
+			</div>
 		{:else if form.emailStatus === 'not-configured'}
 			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
 				<AlertTriangle size={18} />
 				<span>Invite created, but no email API key is configured — email was not sent.</span>
+			</div>
+		{/if}
+		{#if form.promoteErrors?.length}
+			<div class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300">
+				<div class="flex items-center gap-2 mb-2">
+					<AlertTriangle size={18} />
+					<span class="font-medium">Some promotions failed:</span>
+				</div>
+				<ul class="text-sm space-y-1 ml-6 list-disc">
+					{#each form.promoteErrors as promoteError}
+						<li>{promoteError}</li>
+					{/each}
+				</ul>
 			</div>
 		{/if}
 	{/if}
@@ -199,6 +227,134 @@
 			<AlertTriangle size={18} />
 			{form.error}
 		</div>
+	{/if}
+
+	<!-- Eligible Subscribers (from email list, not yet in beta) -->
+	{#if data.eligibleSubscribers.length > 0}
+		<GlassCard class="p-6">
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+				<button
+					type="button"
+					onclick={() => (showEligible = !showEligible)}
+					class="flex items-center gap-2 text-lg font-serif text-foreground"
+				>
+					<Users class="w-5 h-5 text-blue-500" />
+					Email Subscribers Ready for Beta
+					<span class="px-2 py-0.5 text-xs rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-sans">
+						{data.eligibleSubscribers.length}
+					</span>
+				</button>
+
+				{#if showEligible}
+					<form
+						method="POST"
+						action="?/promote_all"
+						use:enhance={() => {
+							isPromotingAll = true;
+							return async ({ update }) => {
+								await update();
+								isPromotingAll = false;
+							};
+						}}
+						class="flex items-center gap-2"
+					>
+						<select
+							name="tier"
+							bind:value={promoteTier}
+							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground focus:outline-none focus:border-grove-500"
+						>
+							{#each data.validTiers as tier}
+								<option value={tier}>{tierLabels[tier] || tier}</option>
+							{/each}
+						</select>
+						<input type="hidden" name="custom_message" value={promoteMessage} />
+						<button
+							type="submit"
+							disabled={isPromotingAll}
+							class="flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+						>
+							{#if isPromotingAll}
+								<Loader2 class="w-4 h-4 animate-spin" />
+								Promoting all...
+							{:else}
+								<Zap class="w-4 h-4" />
+								Promote All ({data.eligibleSubscribers.length})
+							{/if}
+						</button>
+					</form>
+				{/if}
+			</div>
+
+			{#if showEligible}
+				<div class="mb-3">
+					<input
+						type="text"
+						bind:value={promoteMessage}
+						placeholder="Optional welcome message for beta invite emails..."
+						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+					/>
+				</div>
+
+				<p class="text-xs text-foreground-muted mb-3">
+					These people signed up for the email list but don't have a beta invite yet. Promoting them creates an invite and sends the beta email.
+				</p>
+
+				<div class="divide-y divide-slate-200 dark:divide-slate-700 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-slate-700">
+					{#each data.eligibleSubscribers as sub}
+						<div class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-slate-800/30">
+							<div class="min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-foreground text-sm truncate">{sub.email}</span>
+									{#if sub.name}
+										<span class="text-xs text-foreground-muted">({sub.name})</span>
+									{/if}
+								</div>
+								<div class="text-xs text-foreground-muted mt-0.5">
+									Signed up {new Date(sub.created_at).toLocaleDateString('en-US', {
+										month: 'short',
+										day: 'numeric',
+										year: 'numeric'
+									})}
+									{#if sub.source && sub.source !== 'landing'}
+										<span class="ml-1">via {sub.source}</span>
+									{/if}
+								</div>
+							</div>
+
+							<form
+								method="POST"
+								action="?/promote"
+								use:enhance={() => {
+									isPromoting = sub.email;
+									return async ({ update }) => {
+										await update();
+										isPromoting = null;
+									};
+								}}
+								class="flex-shrink-0"
+							>
+								<input type="hidden" name="email" value={sub.email} />
+								<input type="hidden" name="tier" value={promoteTier} />
+								<input type="hidden" name="custom_message" value={promoteMessage} />
+								<button
+									type="submit"
+									disabled={isPromoting === sub.email || isPromotingAll}
+									class="flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								>
+									{#if isPromoting === sub.email}
+										<Loader2 class="w-3 h-3 animate-spin" />
+										Promoting...
+									{:else}
+										<ArrowUpRight class="w-3 h-3" />
+										Promote
+									{/if}
+								</button>
+							</form>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</GlassCard>
 	{/if}
 
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
