@@ -1,36 +1,12 @@
 import { Hono } from "hono";
 import type { Env } from "../types.js";
-import { createDbSession } from "../db/session.js";
-import { isUserAdmin } from "../db/queries.js";
-import { verifyAccessToken } from "../services/jwt.js";
+import { adminCookieAuth } from "../middleware/cookieAuth.js";
 import * as statusQueries from "../db/status-queries.js";
 
 const status = new Hono<{ Bindings: Env }>();
 
-// Middleware: Verify admin access (same pattern as admin.ts)
-status.use("/*", async (c, next) => {
-  const authHeader = c.req.header("Authorization");
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return c.json({ error: "unauthorized" }, 401);
-  }
-
-  const token = authHeader.substring(7);
-  const payload = await verifyAccessToken(c.env, token);
-
-  if (!payload) {
-    return c.json({ error: "invalid_token" }, 401);
-  }
-
-  const db = createDbSession(c.env);
-  const admin = await isUserAdmin(db, payload.sub);
-
-  if (!admin) {
-    return c.json({ error: "forbidden" }, 403);
-  }
-
-  await next();
-});
+// Middleware: Verify admin access (supports Bearer token + cookie auth)
+status.use("/*", adminCookieAuth());
 
 // GET /status/incidents - List all incidents (with optional status filter)
 status.get("/incidents", async (c) => {

@@ -4,10 +4,9 @@
  */
 
 import { Hono } from "hono";
+import type { StatusCode } from "hono/utils/http-status";
 import type { Env } from "../types.js";
-import { isUserAdmin } from "../db/queries.js";
-import { verifyAccessToken } from "../services/jwt.js";
-import { createDbSession } from "../db/session.js";
+import { adminCookieAuth } from "../middleware/cookieAuth.js";
 
 // Use custom domain to avoid Cloudflare error 1042 (worker-to-worker fetch restriction)
 const MC_CONTROL_URL = "https://mc-control.grove.place";
@@ -20,50 +19,18 @@ type Variables = {
 const minecraft = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 /**
- * Middleware: Verify admin access
+ * Middleware: Verify admin access (supports Bearer token + cookie auth)
  */
-minecraft.use("/*", async (c, next) => {
-  const authHeader = c.req.header("Authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
-
-  const token = authHeader.substring(7);
-  const payload = await verifyAccessToken(c.env, token);
-
-  if (!payload) {
-    return c.json(
-      {
-        error: "invalid_token",
-        error_description: "Token is invalid or expired",
-      },
-      401,
-    );
-  }
-
-  const db = createDbSession(c.env);
-  const isAdmin = await isUserAdmin(db, payload.sub);
-  if (!isAdmin) {
-    return c.json(
-      { error: "forbidden", error_description: "Admin access required" },
-      403,
-    );
-  }
-
-  // Store the token for forwarding to mc-control
-  c.set("accessToken", token);
-  await next();
-});
+minecraft.use("/*", adminCookieAuth());
 
 /**
  * Helper to proxy requests to mc-control
  */
 async function proxyToMcControl(
-  c: any,
+  c: {
+    get: (key: "accessToken") => string;
+    json: (data: unknown, status?: StatusCode) => Response;
+  },
   method: string,
   path: string,
   body?: unknown,
@@ -71,7 +38,7 @@ async function proxyToMcControl(
   const token = c.get("accessToken");
   const url = `${MC_CONTROL_URL}${path}`;
 
-  console.log(`[mc-proxy] ${method} ${url}`);
+  console.log(`[mc-proxy] ${method} ${path}`);
 
   try {
     const response = await fetch(url, {
@@ -86,7 +53,7 @@ async function proxyToMcControl(
     console.log(`[mc-proxy] Response status: ${response.status}`);
 
     const text = await response.text();
-    console.log(`[mc-proxy] Response body: ${text.substring(0, 500)}`);
+    console.log(`[mc-proxy] Response length: ${text.length}`);
 
     let data;
     try {
@@ -227,7 +194,7 @@ minecraft.delete("/mods", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as any);
+  return c.json(data, response.status as StatusCode);
 });
 
 /**
@@ -270,7 +237,7 @@ minecraft.post("/mods/upload", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as any);
+  return c.json(data, response.status as StatusCode);
 });
 
 // ============================================================================
@@ -301,7 +268,7 @@ minecraft.delete("/world", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as any);
+  return c.json(data, response.status as StatusCode);
 });
 
 /**
@@ -335,7 +302,7 @@ minecraft.post("/backups/:id/restore", async (c) => {
   );
 
   const data = await response.json();
-  return c.json(data, response.status as any);
+  return c.json(data, response.status as StatusCode);
 });
 
 /**
@@ -357,7 +324,7 @@ minecraft.get("/backups/:id/download", async (c) => {
 
   if (!response.ok) {
     const data = await response.json();
-    return c.json(data, response.status as any);
+    return c.json(data, response.status as StatusCode);
   }
 
   // Stream the file back

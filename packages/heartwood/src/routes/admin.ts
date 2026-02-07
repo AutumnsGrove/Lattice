@@ -7,14 +7,13 @@ import { Hono } from "hono";
 import type { Env } from "../types.js";
 import {
   getAdminStats,
-  isUserAdmin,
   getAllUsers,
   getAuditLogs,
   getAllClients,
 } from "../db/queries.js";
-import { verifyAccessToken } from "../services/jwt.js";
 import { createDbSession } from "../db/session.js";
 import { adminRateLimiter } from "../middleware/rateLimit.js";
+import { adminCookieAuth } from "../middleware/cookieAuth.js";
 import {
   ADMIN_PAGINATION_MAX_LIMIT,
   ADMIN_PAGINATION_DEFAULT_LIMIT,
@@ -28,42 +27,9 @@ const admin = new Hono<{ Bindings: Env }>();
 admin.use("/*", adminRateLimiter);
 
 /**
- * Middleware: Verify admin access
+ * Middleware: Verify admin access (supports Bearer token + cookie auth)
  */
-admin.use("/*", async (c, next) => {
-  const authHeader = c.req.header("Authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
-
-  const token = authHeader.substring(7);
-  const payload = await verifyAccessToken(c.env, token);
-
-  if (!payload) {
-    return c.json(
-      {
-        error: "invalid_token",
-        error_description: "Token is invalid or expired",
-      },
-      401,
-    );
-  }
-
-  const db = createDbSession(c.env);
-  const isAdmin = await isUserAdmin(db, payload.sub);
-  if (!isAdmin) {
-    return c.json(
-      { error: "forbidden", error_description: "Admin access required" },
-      403,
-    );
-  }
-
-  await next();
-});
+admin.use("/*", adminCookieAuth());
 
 /**
  * GET /admin/stats - Get dashboard statistics

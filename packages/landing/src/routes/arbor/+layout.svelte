@@ -19,7 +19,10 @@
 		Upload,
 		MessageSquare,
 		Sprout,
-		Gift
+		Gift,
+		Activity,
+		Users,
+		Gamepad2
 	} from 'lucide-svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -37,7 +40,7 @@
 	}
 
 	async function handleSignOutConfirm() {
-		await fetch('/api/auth/signout', { method: 'POST' });
+		await fetch('/api/auth/signout', { method: 'POST' }); // csrf-ok
 		window.location.href = '/';
 	}
 
@@ -53,7 +56,10 @@
 	const wayfinderTabs = [
 		{ href: '/arbor/porch', label: 'Porch', icon: MessageSquare },
 		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout },
-		{ href: '/arbor/comped-invites', label: 'Invites', icon: Gift }
+		{ href: '/arbor/comped-invites', label: 'Invites', icon: Gift },
+		{ href: '/arbor/status', label: 'Status', icon: Activity },
+		{ href: '/arbor/tenants', label: 'Tenants', icon: Users },
+		{ href: '/arbor/minecraft', label: 'Minecraft', icon: Gamepad2 }
 	];
 
 	let tabs = $derived(data.isWayfinder ? [...baseTabs, ...wayfinderTabs] : baseTabs);
