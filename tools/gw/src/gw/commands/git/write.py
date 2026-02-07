@@ -353,11 +353,24 @@ def push(
             console.print(f"[green]Pushed to {remote}/{current_branch}[/green]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
-        if "rejected" in e.stderr.lower():
-            console.print(
-                "[dim]Hint: Pull changes first, or use --force-with-lease[/dim]"
-            )
+        stderr = e.stderr.lower()
+        if "rejected" in stderr or "failed to push" in stderr:
+            if "pre-push hook" in stderr or "pre-push checks failed" in stderr:
+                console.print("[red]Push blocked by pre-push hook[/red]")
+                console.print("[dim]Fix the issues above, then try again.[/dim]")
+            elif "non-fast-forward" in stderr or "fetch first" in stderr:
+                console.print("[red]Remote has newer commits[/red]")
+                console.print(
+                    "[dim]Run 'gw git sync --write' to rebase and push, "
+                    "or 'gw git push --write --force-with-lease' to overwrite.[/dim]"
+                )
+            else:
+                console.print(f"[red]Push failed:[/red] {e.stderr.strip() or e.message}")
+                console.print(
+                    "[dim]Hint: Pull changes first with 'gw git sync --write'[/dim]"
+                )
+        else:
+            console.print(f"[red]Push failed:[/red] {e.stderr.strip() or e.message}")
         raise SystemExit(1)
 
 

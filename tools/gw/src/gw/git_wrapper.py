@@ -307,15 +307,17 @@ class Git:
         Returns:
             GitDiff with parsed diff information
         """
-        args = ["diff"]
+        # Build base args: options first, then ref, then -- path
+        # Git requires options (--stat, --staged) before non-option args
+        base_options = ["diff"]
 
         if staged:
-            args.append("--staged")
-        if ref:
-            args.append(ref)
+            base_options.append("--staged")
 
-        # Get stat separately
-        stat_args = args.copy() + ["--stat", "--numstat"]
+        # Get stat separately (options must precede ref/path)
+        stat_args = base_options.copy() + ["--stat", "--numstat"]
+        if ref:
+            stat_args.append(ref)
         if file_path:
             stat_args.extend(["--", file_path])
 
@@ -347,7 +349,9 @@ class Git:
         # Get raw diff if not stat_only
         raw = ""
         if not stat_only:
-            raw_args = args.copy()
+            raw_args = base_options.copy()
+            if ref:
+                raw_args.append(ref)
             if file_path:
                 raw_args.extend(["--", file_path])
             raw = self.execute(raw_args)

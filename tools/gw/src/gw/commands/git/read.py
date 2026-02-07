@@ -253,28 +253,51 @@ def log(
 @click.command()
 @click.option("--staged", is_flag=True, help="Show staged changes")
 @click.option("--stat", "stat_only", is_flag=True, help="Show only statistics")
-@click.argument("ref", required=False)
-@click.argument("file_path", required=False)
+@click.option("--path", "-p", "file_path", help="Diff specific file or directory")
+@click.argument("args", nargs=-1)
 @click.pass_context
 def diff(
     ctx: click.Context,
     staged: bool,
     stat_only: bool,
-    ref: Optional[str],
     file_path: Optional[str],
+    args: tuple[str, ...],
 ) -> None:
     """Show changes between commits, commit and working tree, etc.
 
     Always safe - no --write flag required.
 
+    Positional args are interpreted as: [REF] [-- PATH]. Use --path for explicit
+    path filtering, or use git-style -- separator.
+
     \b
     Examples:
-        gw git diff                # Unstaged changes
-        gw git diff --staged       # Staged changes
-        gw git diff main           # Compare to branch
-        gw git diff HEAD~3         # Last 3 commits
-        gw git diff --stat         # Summary only
+        gw git diff                        # Unstaged changes
+        gw git diff --staged               # Staged changes
+        gw git diff main                   # Compare to branch
+        gw git diff HEAD~3                 # Last 3 commits
+        gw git diff --stat                 # Summary only
+        gw git diff --staged -p src/       # Staged changes in src/
+        gw git diff --staged -- src/       # Same, git-style separator
+        gw git diff main...HEAD            # Branch comparison
     """
+    # Parse positional args: support [REF] and [-- PATH] patterns
+    ref: Optional[str] = None
+    separator_seen = False
+
+    for arg in args:
+        if arg == "--":
+            separator_seen = True
+            continue
+        if separator_seen:
+            # Everything after -- is a path
+            file_path = arg
+        elif file_path is None and (arg.startswith("/") or arg.startswith(".")
+                                    or arg.endswith("/") or "/" in arg):
+            # Looks like a path (contains slashes, starts with . or /)
+            file_path = arg
+        else:
+            ref = arg
     output_json = ctx.obj.get("output_json", False)
 
     try:
