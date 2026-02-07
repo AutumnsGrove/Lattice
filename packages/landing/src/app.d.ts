@@ -24,6 +24,8 @@ declare global {
         ZEPHYR_API_KEY: string;
         /** Zephyr email gateway URL */
         ZEPHYR_URL?: string;
+        /** Zephyr service binding (Worker-to-Worker) */
+        ZEPHYR?: Fetcher;
         /** Secret for unsubscribe token generation */
         UNSUBSCRIBE_SECRET?: string;
         ADMIN_EMAILS: string;

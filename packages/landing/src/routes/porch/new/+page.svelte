@@ -140,7 +140,7 @@
 										: 'border-grove-200 bg-white/50 text-foreground/70 hover:border-grove-300'}"
 									disabled={submitting}
 								>
-									<svelte:component this={cat.icon} class="w-5 h-5 mb-1" />
+									<cat.icon class="w-5 h-5 mb-1" />
 									<span class="block text-sm font-medium">{cat.label}</span>
 									<span class="block text-xs opacity-70">{cat.description}</span>
 								</button>

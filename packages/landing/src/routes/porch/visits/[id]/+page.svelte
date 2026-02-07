@@ -81,7 +81,7 @@
 						</p>
 					</div>
 					<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-sans {config.color}">
-						<svelte:component this={config.icon} class="w-4 h-4" />
+						<config.icon class="w-4 h-4" />
 						{config.label}
 					</span>
 				</div>
@@ -93,9 +93,9 @@
 					<div class="flex {message.sender_type === 'autumn' ? 'justify-start' : 'justify-end'}">
 						<div class="max-w-[85%] {message.sender_type === 'autumn' ? 'order-2' : 'order-1'}">
 							<GlassCard
-								class="{message.sender_type === 'autumn'
+								class={message.sender_type === 'autumn'
 									? 'bg-grove-50/80 border-grove-200'
-									: 'bg-white/80'}"
+									: 'bg-white/80'}
 							>
 								<div class="flex items-center gap-2 mb-2">
 									<span class="text-sm font-medium text-foreground">

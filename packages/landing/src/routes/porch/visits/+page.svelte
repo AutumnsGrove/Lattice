@@ -95,7 +95,7 @@
 									<div class="flex items-center gap-2 mb-1">
 										<span class="text-xs font-mono text-foreground/50">{visit.visit_number}</span>
 										<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-sans {config.color}">
-											<svelte:component this={config.icon} class="w-3 h-3" />
+											<config.icon class="w-3 h-3" />
 											{config.label}
 										</span>
 									</div>

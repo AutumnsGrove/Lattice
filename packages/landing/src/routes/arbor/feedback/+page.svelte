@@ -183,8 +183,7 @@
 							>
 								<td class="px-6 py-4 text-center">
 									<span title={item.source === 'email' ? 'Email' : 'Web form'}>
-										<svelte:component
-											this={SourceIcon}
+										<SourceIcon
 											class="w-5 h-5 text-foreground-muted mx-auto"
 										/>
 									</span>
@@ -192,8 +191,7 @@
 								<td class="px-6 py-4">
 									<div class="flex items-center gap-2">
 										{#if SentimentIcon}
-											<svelte:component
-												this={SentimentIcon}
+											<SentimentIcon
 												class="w-5 h-5 {sentimentColors[item.sentiment || 'neutral']}"
 												aria-label="{getSentimentLabel(item.sentiment)} sentiment"
 											/>
@@ -247,8 +245,7 @@
 													<div class="flex items-center gap-2 text-foreground">
 														<strong>Sentiment:</strong>
 														{#if DetailSentimentIcon}
-															<svelte:component
-																this={DetailSentimentIcon}
+															<DetailSentimentIcon
 																class="w-4 h-4 {sentimentColors[item.sentiment]}"
 															/>
 														{/if}

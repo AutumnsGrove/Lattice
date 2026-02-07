@@ -205,7 +205,7 @@
 					<h3 class="text-sm font-sans font-medium text-foreground mb-3">Status</h3>
 					<div class="flex items-center gap-2 mb-3">
 						<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-sans {config.color}">
-							<svelte:component this={config.icon} class="w-4 h-4" />
+							<config.icon class="w-4 h-4" />
 							{config.label}
 						</span>
 					</div>
