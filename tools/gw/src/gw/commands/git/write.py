@@ -500,6 +500,12 @@ def switch(ctx: click.Context, branch_name: str, create: bool) -> None:
 
 
 @click.command()
+@click.argument(
+    "action",
+    required=False,
+    default=None,
+    type=click.Choice(["pop", "apply", "drop", "list"], case_sensitive=False),
+)
 @click.option("--write", is_flag=True, help="Confirm write operation")
 @click.option("--message", "-m", help="Stash message")
 @click.option("--list", "list_stashes", is_flag=True, help="List stashes")
@@ -510,6 +516,7 @@ def switch(ctx: click.Context, branch_name: str, create: bool) -> None:
 @click.pass_context
 def stash(
     ctx: click.Context,
+    action: Optional[str],
     write: bool,
     message: Optional[str],
     list_stashes: bool,
@@ -522,15 +529,31 @@ def stash(
 
     Requires --write flag for push/pop/apply/drop. List is always safe.
 
+    Accepts git-style positional actions (pop, apply, drop, list) as well as flags.
+
     \b
     Examples:
         gw git stash --list                          # List stashes
+        gw git stash list                            # List stashes (positional)
         gw git stash --write                         # Stash changes
         gw git stash --write -m "WIP: auth flow"     # Stash with message
         gw git stash --write --pop                   # Pop most recent
+        gw git stash --write pop                     # Pop most recent (positional)
         gw git stash --write --apply --index 2       # Apply specific stash
         gw git stash --write --drop --index 0        # Drop stash
     """
+    # Map positional action to flags for unified handling
+    if action:
+        action_lower = action.lower()
+        if action_lower == "pop":
+            pop = True
+        elif action_lower == "apply":
+            apply_stash = True
+        elif action_lower == "drop":
+            drop = True
+        elif action_lower == "list":
+            list_stashes = True
+
     output_json = ctx.obj.get("output_json", False)
 
     try:
