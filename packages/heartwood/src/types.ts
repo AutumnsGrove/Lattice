@@ -390,4 +390,22 @@ export interface AdminStats {
   email_signups_count: number;
 }
 
+// =============================================================================
+// CDN TYPES
+// =============================================================================
+
+export interface CdnFileRow {
+  id: string;
+  filename: string;
+  original_filename: string;
+  key: string;
+  content_type: string;
+  size_bytes: number;
+  folder: string;
+  alt_text: string | null;
+  uploaded_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const ADMIN_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];

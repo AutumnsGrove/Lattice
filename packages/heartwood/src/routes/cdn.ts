@@ -4,10 +4,11 @@
  */
 
 import { Hono } from "hono";
-import type { Env } from "../types.js";
-import { verifyAccessToken } from "../services/jwt.js";
+import type { Env, CdnFileRow } from "../types.js";
 import { isUserAdmin } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
+import { extractBearerToken } from "../middleware/bearerAuth.js";
+import { verifyAccessToken } from "../services/jwt.js";
 
 // Define context variables for type-safe c.set()/c.get()
 type Variables = {
@@ -61,16 +62,15 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
  * Middleware: Verify admin access
  */
 cdn.use("/*", async (c, next) => {
-  const authHeader = c.req.header("Authorization");
+  const token = extractBearerToken(c.req.header("Authorization"));
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },
       401,
     );
   }
 
-  const token = authHeader.substring(7);
   const payload = await verifyAccessToken(c.env, token);
 
   if (!payload) {
@@ -180,14 +180,18 @@ cdn.post("/upload", async (c) => {
     }
 
     if (!file) {
-      return c.json({ error: "No file provided" }, 400);
+      return c.json(
+        { error: "no_file", error_description: "No file provided" },
+        400,
+      );
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return c.json(
         {
-          error: `Invalid file type: ${file.type}. Allowed types: images, videos, audio, fonts, PDFs, CSS, JS`,
+          error: "invalid_file_type",
+          error_description: `Invalid file type: ${file.type}. Allowed types: images, videos, audio, fonts, PDFs, CSS, JS`,
         },
         400,
       );
@@ -195,7 +199,13 @@ cdn.post("/upload", async (c) => {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      return c.json({ error: `File too large. Maximum size is 50MB` }, 400);
+      return c.json(
+        {
+          error: "file_too_large",
+          error_description: "File too large. Maximum size is 50MB",
+        },
+        400,
+      );
     }
 
     const originalFilename = file.name;
@@ -269,7 +279,10 @@ cdn.post("/upload", async (c) => {
     });
   } catch (error) {
     console.error("[CDN Upload Error]", error);
-    return c.json({ error: "Failed to upload file" }, 500);
+    return c.json(
+      { error: "upload_failed", error_description: "Failed to upload file" },
+      500,
+    );
   }
 });
 
@@ -314,7 +327,7 @@ cdn.get("/files", async (c) => {
     const total = countResult?.total || 0;
 
     // Add URLs to files
-    const files = (result.results || []).map((file: any) => ({
+    const files = (result.results || []).map((file: CdnFileRow) => ({
       ...file,
       url: `${c.env.CDN_URL}/${file.key}`,
     }));
@@ -327,7 +340,10 @@ cdn.get("/files", async (c) => {
     });
   } catch (error) {
     console.error("[CDN List Error]", error);
-    return c.json({ error: "Failed to list files" }, 500);
+    return c.json(
+      { error: "list_failed", error_description: "Failed to list files" },
+      500,
+    );
   }
 });
 
@@ -342,12 +358,17 @@ cdn.get("/folders", async (c) => {
       .prepare("SELECT DISTINCT folder FROM cdn_files ORDER BY folder")
       .all();
 
-    const folders = (result.results || []).map((row: any) => row.folder);
+    const folders = (result.results || []).map(
+      (row: Pick<CdnFileRow, "folder">) => row.folder,
+    );
 
     return c.json({ folders });
   } catch (error) {
     console.error("[CDN Folders Error]", error);
-    return c.json({ error: "Failed to list folders" }, 500);
+    return c.json(
+      { error: "list_failed", error_description: "Failed to list folders" },
+      500,
+    );
   }
 });
 
@@ -369,7 +390,10 @@ cdn.delete("/files/:id", async (c) => {
       }>();
 
     if (!file) {
-      return c.json({ error: "File not found" }, 404);
+      return c.json(
+        { error: "not_found", error_description: "File not found" },
+        404,
+      );
     }
 
     // Delete from R2
@@ -381,7 +405,10 @@ cdn.delete("/files/:id", async (c) => {
     return c.json({ success: true, message: "File deleted" });
   } catch (error) {
     console.error("[CDN Delete Error]", error);
-    return c.json({ error: "Failed to delete file" }, 500);
+    return c.json(
+      { error: "delete_failed", error_description: "Failed to delete file" },
+      500,
+    );
   }
 });
 
@@ -398,7 +425,9 @@ cdn.get("/audit", async (c) => {
 
     // Get all keys from database
     const dbResult = await db.prepare("SELECT key FROM cdn_files").all();
-    const dbKeys = new Set((dbResult.results || []).map((row: any) => row.key));
+    const dbKeys = new Set(
+      (dbResult.results || []).map((row: Pick<CdnFileRow, "key">) => row.key),
+    );
 
     // Find objects in R2 but not in database
     const untracked = r2Objects.objects
@@ -413,8 +442,8 @@ cdn.get("/audit", async (c) => {
     // Find entries in database but not in R2
     const r2Keys = new Set(r2Objects.objects.map((obj) => obj.key));
     const orphaned = (dbResult.results || [])
-      .filter((row: any) => !r2Keys.has(row.key))
-      .map((row: any) => row.key);
+      .filter((row: Pick<CdnFileRow, "key">) => !r2Keys.has(row.key))
+      .map((row: Pick<CdnFileRow, "key">) => row.key);
 
     return c.json({
       summary: {
@@ -428,7 +457,10 @@ cdn.get("/audit", async (c) => {
     });
   } catch (error) {
     console.error("[CDN Audit Error]", error);
-    return c.json({ error: "Failed to audit CDN" }, 500);
+    return c.json(
+      { error: "audit_failed", error_description: "Failed to audit CDN" },
+      500,
+    );
   }
 });
 
@@ -446,7 +478,9 @@ cdn.post("/migrate", async (c) => {
 
     // Get all keys from database
     const dbResult = await db.prepare("SELECT key FROM cdn_files").all();
-    const dbKeys = new Set((dbResult.results || []).map((row: any) => row.key));
+    const dbKeys = new Set(
+      (dbResult.results || []).map((row: Pick<CdnFileRow, "key">) => row.key),
+    );
 
     // Find untracked files
     const untracked = r2Objects.objects.filter((obj) => !dbKeys.has(obj.key));
@@ -510,7 +544,10 @@ cdn.post("/migrate", async (c) => {
     });
   } catch (error) {
     console.error("[CDN Migrate Error]", error);
-    return c.json({ error: "Failed to migrate files" }, 500);
+    return c.json(
+      { error: "migrate_failed", error_description: "Failed to migrate files" },
+      500,
+    );
   }
 });
 

@@ -14,31 +14,42 @@ import {
   updateSubscriptionTier,
   getSubscriptionStatus,
 } from "../db/queries.js";
-import { verifyAccessToken } from "../services/jwt.js";
 import { createDbSession } from "../db/session.js";
+import { verifyBearerAuth } from "../middleware/bearerAuth.js";
+import { checkRouteRateLimit } from "../middleware/rateLimit.js";
+import { getClientIP } from "../middleware/security.js";
+import {
+  RATE_LIMIT_WINDOW,
+  RATE_LIMIT_SUBSCRIPTION_READ,
+  RATE_LIMIT_SUBSCRIPTION_WRITE,
+} from "../utils/constants.js";
 
 const subscription = new Hono<{ Bindings: Env }>();
-
-/**
- * Helper to extract and verify Bearer token
- */
-async function verifyBearerToken(c: {
-  req: { header: (name: string) => string | undefined };
-  env: Env;
-}) {
-  const authHeader = c.req.header("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-  const token = authHeader.substring(7);
-  return verifyAccessToken(c.env, token);
-}
 
 /**
  * GET /subscription - Get current user's subscription (requires Bearer token)
  */
 subscription.get("/", async (c) => {
-  const payload = await verifyBearerToken(c);
+  // Rate limit by IP
+  const rateLimit = await checkRouteRateLimit(
+    c.env.DB,
+    "subscription_read",
+    getClientIP(c.req.raw),
+    RATE_LIMIT_SUBSCRIPTION_READ,
+    RATE_LIMIT_WINDOW,
+  );
+  if (!rateLimit.allowed) {
+    return c.json(
+      {
+        error: "rate_limit",
+        error_description: "Too many requests. Please try again later.",
+        retry_after: rateLimit.retryAfter,
+      },
+      429,
+    );
+  }
+
+  const payload = await verifyBearerAuth(c.req, c.env);
   if (!payload) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },
@@ -60,7 +71,26 @@ subscription.get("/", async (c) => {
  * GET /subscription/:userId - Get specific user's subscription
  */
 subscription.get("/:userId", async (c) => {
-  const payload = await verifyBearerToken(c);
+  // Rate limit by IP
+  const rateLimit = await checkRouteRateLimit(
+    c.env.DB,
+    "subscription_read",
+    getClientIP(c.req.raw),
+    RATE_LIMIT_SUBSCRIPTION_READ,
+    RATE_LIMIT_WINDOW,
+  );
+  if (!rateLimit.allowed) {
+    return c.json(
+      {
+        error: "rate_limit",
+        error_description: "Too many requests. Please try again later.",
+        retry_after: rateLimit.retryAfter,
+      },
+      429,
+    );
+  }
+
+  const payload = await verifyBearerAuth(c.req, c.env);
   if (!payload) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },
@@ -102,7 +132,26 @@ subscription.get("/:userId", async (c) => {
  * GET /subscription/:userId/can-post - Check if user can create a post
  */
 subscription.get("/:userId/can-post", async (c) => {
-  const payload = await verifyBearerToken(c);
+  // Rate limit by IP
+  const rateLimit = await checkRouteRateLimit(
+    c.env.DB,
+    "subscription_read",
+    getClientIP(c.req.raw),
+    RATE_LIMIT_SUBSCRIPTION_READ,
+    RATE_LIMIT_WINDOW,
+  );
+  if (!rateLimit.allowed) {
+    return c.json(
+      {
+        error: "rate_limit",
+        error_description: "Too many requests. Please try again later.",
+        retry_after: rateLimit.retryAfter,
+      },
+      429,
+    );
+  }
+
+  const payload = await verifyBearerAuth(c.req, c.env);
   if (!payload) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },
@@ -133,7 +182,26 @@ subscription.get("/:userId/can-post", async (c) => {
  * Body: { action: 'increment' | 'decrement' } or { count: number }
  */
 subscription.post("/:userId/post-count", async (c) => {
-  const payload = await verifyBearerToken(c);
+  // Rate limit by IP (write endpoint — stricter limit)
+  const rateLimit = await checkRouteRateLimit(
+    c.env.DB,
+    "subscription_write",
+    getClientIP(c.req.raw),
+    RATE_LIMIT_SUBSCRIPTION_WRITE,
+    RATE_LIMIT_WINDOW,
+  );
+  if (!rateLimit.allowed) {
+    return c.json(
+      {
+        error: "rate_limit",
+        error_description: "Too many requests. Please try again later.",
+        retry_after: rateLimit.retryAfter,
+      },
+      429,
+    );
+  }
+
+  const payload = await verifyBearerAuth(c.req, c.env);
   if (!payload) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },
@@ -204,7 +272,26 @@ subscription.post("/:userId/post-count", async (c) => {
  * Body: { tier: 'seedling' | 'sapling' | 'evergreen' | 'canopy' | 'platform' }
  */
 subscription.put("/:userId/tier", async (c) => {
-  const payload = await verifyBearerToken(c);
+  // Rate limit by IP (write endpoint — stricter limit)
+  const rateLimit = await checkRouteRateLimit(
+    c.env.DB,
+    "subscription_write",
+    getClientIP(c.req.raw),
+    RATE_LIMIT_SUBSCRIPTION_WRITE,
+    RATE_LIMIT_WINDOW,
+  );
+  if (!rateLimit.allowed) {
+    return c.json(
+      {
+        error: "rate_limit",
+        error_description: "Too many requests. Please try again later.",
+        retry_after: rateLimit.retryAfter,
+      },
+      429,
+    );
+  }
+
+  const payload = await verifyBearerAuth(c.req, c.env);
   if (!payload) {
     return c.json(
       { error: "unauthorized", error_description: "Missing or invalid token" },

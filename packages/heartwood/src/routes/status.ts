@@ -33,7 +33,13 @@ status.post("/incidents", async (c) => {
     !initialStatus ||
     !initialMessage
   ) {
-    return c.json({ error: "missing_required_fields" }, 400);
+    return c.json(
+      {
+        error: "missing_required_fields",
+        error_description: "One or more required fields are missing",
+      },
+      400,
+    );
   }
 
   const incident = await statusQueries.createIncident(db, {
@@ -56,7 +62,10 @@ status.get("/incidents/:id", async (c) => {
   const incident = await statusQueries.getIncidentById(db, id);
 
   if (!incident) {
-    return c.json({ error: "not_found" }, 404);
+    return c.json(
+      { error: "not_found", error_description: "Incident not found" },
+      404,
+    );
   }
 
   return c.json({ incident });
@@ -71,7 +80,13 @@ status.post("/incidents/:id/updates", async (c) => {
   const { status: newStatus, message } = body;
 
   if (!newStatus || !message) {
-    return c.json({ error: "missing_required_fields" }, 400);
+    return c.json(
+      {
+        error: "missing_required_fields",
+        error_description: "One or more required fields are missing",
+      },
+      400,
+    );
   }
 
   const update = await statusQueries.addIncidentUpdate(
@@ -116,7 +131,13 @@ status.patch("/components/:slug", async (c) => {
   const { status } = body;
 
   if (!status) {
-    return c.json({ error: "missing_status" }, 400);
+    return c.json(
+      {
+        error: "missing_status",
+        error_description: "Status field is required",
+      },
+      400,
+    );
   }
 
   const component = await statusQueries.updateComponentStatus(db, slug, status);
@@ -139,7 +160,13 @@ status.post("/scheduled", async (c) => {
   const { title, description, scheduledStart, scheduledEnd, components } = body;
 
   if (!title || !scheduledStart || !scheduledEnd || !components?.length) {
-    return c.json({ error: "missing_required_fields" }, 400);
+    return c.json(
+      {
+        error: "missing_required_fields",
+        error_description: "One or more required fields are missing",
+      },
+      400,
+    );
   }
 
   const maintenance = await statusQueries.createScheduledMaintenance(db, {

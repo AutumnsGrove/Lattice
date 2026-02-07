@@ -36,6 +36,10 @@ export const RATE_LIMIT_PASSKEY_DELETE = 10; // per hour per user
 export const RATE_LIMIT_PASSKEY_AUTH = 20; // per minute per IP (auth attempts)
 export const RATE_LIMIT_PASSKEY_WINDOW = 3600; // 1 hour in seconds
 
+// Subscription rate limiting
+export const RATE_LIMIT_SUBSCRIPTION_READ = 30; // per minute (GET endpoints)
+export const RATE_LIMIT_SUBSCRIPTION_WRITE = 10; // per minute (POST/PUT endpoints)
+
 // Pagination limits
 export const ADMIN_PAGINATION_MAX_LIMIT = 100;
 export const ADMIN_PAGINATION_DEFAULT_LIMIT = 50;
