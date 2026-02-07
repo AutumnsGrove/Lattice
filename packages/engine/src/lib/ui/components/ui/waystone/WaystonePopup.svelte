@@ -2,7 +2,6 @@
 	import { Dialog as DialogPrimitive } from 'bits-ui';
 	import { X, BookOpen, HelpCircle } from 'lucide-svelte';
 	import { cn } from '$lib/ui/utils';
-	import GlassCard from '../GlassCard.svelte';
 	import Button from '../Button.svelte';
 	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
 	import { sanitizeMarkdown } from '$lib/utils/sanitize';
@@ -80,9 +79,12 @@
 			aria-labelledby="waystone-popup-title"
 			aria-describedby="waystone-popup-description"
 		>
-			<GlassCard variant="frosted" class="overflow-hidden max-h-[70vh] flex flex-col">
+			<!-- Frosted glass container with flex layout for scroll + sticky footer.
+				 Uses direct styling instead of GlassCard because GlassCard's internal
+				 wrapper divs break the flex layout needed for overflow scrolling. -->
+			<div class="rounded-xl bg-white/80 dark:bg-slate-800/70 backdrop-blur-lg border border-white/50 dark:border-slate-700/40 shadow-sm overflow-hidden max-h-[70vh] flex flex-col">
 				<!-- Header -->
-				<div class="px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-slate-700/30">
+				<div class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-slate-700/30">
 					<div class="flex-shrink-0 p-2.5 rounded-full bg-accent/10 dark:bg-accent/20">
 						<HelpCircle class="w-5 h-5 text-accent-muted" />
 					</div>
@@ -128,8 +130,8 @@
 					</DialogPrimitive.Close>
 				</div>
 
-				<!-- Content area - scrollable -->
-				<div class="flex-1 overflow-y-auto px-6 py-4">
+				<!-- Content area - scrollable (min-h-0 required for flex + overflow) -->
+				<div class="flex-1 min-h-0 overflow-y-auto px-6 py-4">
 					{#if loading}
 						<!-- Loading skeleton -->
 						<div class="space-y-3">
@@ -157,8 +159,8 @@
 					{/if}
 				</div>
 
-				<!-- Footer with link to full article -->
-				<div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex items-center justify-between">
+				<!-- Footer with link to full article - flex-shrink-0 ensures it's always visible -->
+				<div class="flex-shrink-0 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-white/20 dark:border-slate-700/30 flex items-center justify-between">
 					<div class="flex items-center gap-2 text-sm text-muted-foreground">
 						{#if excerpt?.readingTime}
 							<BookOpen class="w-4 h-4" />
@@ -180,7 +182,7 @@
 						</a>
 					</div>
 				</div>
-			</GlassCard>
+			</div>
 		</DialogPrimitive.Content>
 	</DialogPrimitive.Portal>
 </DialogPrimitive.Root>
