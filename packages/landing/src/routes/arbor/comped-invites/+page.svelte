@@ -177,7 +177,21 @@
 		<div class="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-300 flex items-center gap-2">
 			<Check size={18} />
 			{form.message}
+			{#if form.emailStatus === 'sent'}
+				— email sent
+			{/if}
 		</div>
+		{#if form.emailStatus === 'failed'}
+			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+				<AlertTriangle size={18} />
+				<span>Invite created, but the email failed to send{form.emailError ? `: ${form.emailError}` : ''}. You may need to resend manually.</span>
+			</div>
+		{:else if form.emailStatus === 'not-configured'}
+			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+				<AlertTriangle size={18} />
+				<span>Invite created, but no email API key is configured — email was not sent.</span>
+			</div>
+		{/if}
 	{/if}
 
 	{#if form?.error}

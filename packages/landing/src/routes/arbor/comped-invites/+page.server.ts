@@ -270,6 +270,9 @@ export const actions: Actions = {
       step = "send-email";
       const zephyrApiKey =
         platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
+      let emailStatus: "sent" | "failed" | "not-configured" = "not-configured";
+      let emailError: string | undefined;
+
       if (zephyrApiKey) {
         const emailResult = await sendInviteEmail({
           email,
@@ -283,17 +286,19 @@ export const actions: Actions = {
         });
 
         if (emailResult.success) {
+          emailStatus = "sent";
           await DB.prepare(
             `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
           )
             .bind(inviteId)
             .run();
         } else {
+          emailStatus = "failed";
+          emailError = emailResult.error;
           console.error(
             `[Comped Invites] Email send failed for ${email}:`,
             emailResult.error,
           );
-          // Invite was created but email failed — don't fail the whole action
         }
       } else {
         console.warn(
@@ -302,10 +307,11 @@ export const actions: Actions = {
       }
 
       const typeLabel = inviteType === "beta" ? "beta" : "comped";
-      const emailSent = zephyrApiKey ? " and email sent" : " (email not configured)";
       return {
         success: true,
-        message: `Created ${typeLabel} invite for ${email} (${tier} tier)${emailSent}`,
+        emailStatus,
+        emailError,
+        message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
       };
     } catch (err) {
       const message =
