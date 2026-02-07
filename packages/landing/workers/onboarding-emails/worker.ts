@@ -457,7 +457,9 @@ async function processOnboardingEmails(
       continue;
     }
 
-    console.log(`[Onboarding] Sending ${emailType} email to ${user.email}`);
+    console.log(
+      `[Onboarding] Sending ${emailType} email to ${user.email?.replace(/(.{2}).*(@.*)/, "$1***$2") ?? "unknown"}`,
+    );
 
     const success = await sendEmail(
       resend,

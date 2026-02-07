@@ -302,15 +302,10 @@
   async function fetchSessions() {
     loadingSessions = true;
     try {
-      const response = await fetch("/api/auth/sessions");
-      if (response.ok) {
-        const result = await response.json();
-        sessions = result.sessions || [];
-      } else {
-        console.error("Failed to fetch sessions:", response.status);
-        sessions = [];
-      }
+      const result = await api.get("/api/auth/sessions");
+      sessions = result.sessions || [];
     } catch (error) {
+      toast.error("Couldn't load your sessions");
       console.error("Failed to fetch sessions:", error);
       sessions = [];
     }
@@ -324,17 +319,9 @@
   async function revokeSession(sessionId) {
     revokingSessionId = sessionId;
     try {
-      const response = await fetch(`/api/auth/sessions/${sessionId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        toast.success("Session revoked");
-        sessions = sessions.filter((s) => s.id !== sessionId);
-      } else {
-        const result = await response.json();
-        toast.error(result.error || "Failed to revoke session");
-      }
+      await api.delete(`/api/auth/sessions/${sessionId}`);
+      toast.success("Session revoked");
+      sessions = sessions.filter((s) => s.id !== sessionId);
     } catch (error) {
       toast.error("Failed to revoke session");
       console.error("Revoke session error:", error);
@@ -348,23 +335,12 @@
   async function revokeAllSessions() {
     revokingAllSessions = true;
     try {
-      const response = await fetch("/api/auth/sessions/revoke-all", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keepCurrent: true }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(
-          `Signed out of ${result.revokedCount || "all other"} devices`,
-        );
-        // Refresh the list
-        await fetchSessions();
-      } else {
-        const result = await response.json();
-        toast.error(result.error || "Failed to revoke sessions");
-      }
+      const result = await api.post("/api/auth/sessions/revoke-all", { keepCurrent: true });
+      toast.success(
+        `Signed out of ${result.revokedCount || "all other"} devices`,
+      );
+      // Refresh the list
+      await fetchSessions();
     } catch (error) {
       toast.error("Failed to revoke sessions");
       console.error("Revoke all sessions error:", error);

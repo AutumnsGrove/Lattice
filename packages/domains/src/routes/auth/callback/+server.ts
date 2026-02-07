@@ -168,7 +168,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     console.log(
       "[Auth Callback] Success, user:",
-      userEmail,
+      userEmail?.replace(/(.{2}).*(@.*)/, "$1***$2") ?? "unknown",
       "redirecting to:",
       returnTo,
     );

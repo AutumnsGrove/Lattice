@@ -93,6 +93,9 @@ export async function sendInviteEmail(
     return { success: false, error: result.errorMessage };
   }
 
-  console.log("[Invite Email] Sent to:", emailParams.email);
+  console.log(
+    "[Invite Email] Sent to:",
+    emailParams.email?.replace(/(.{2}).*(@.*)/, "$1***$2") ?? "unknown",
+  );
   return { success: true };
 }

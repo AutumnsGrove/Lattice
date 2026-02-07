@@ -105,7 +105,7 @@ export class SessionDO extends DurableObject<SessionDOEnv> {
         const oldestId = oldest[0].id as string;
         await this.revokeSession(oldestId);
         console.log(
-          `[SessionDO] Revoked oldest session ${oldestId} due to session limit`,
+          `[SessionDO] Revoked oldest session ${oldestId.slice(0, 8)}... due to session limit`,
         );
       }
     }
@@ -130,7 +130,7 @@ export class SessionDO extends DurableObject<SessionDOEnv> {
     await this.scheduleCleanup();
 
     console.log(
-      `[SessionDO] Created session ${sessionId} for device ${params.deviceId}`,
+      `[SessionDO] Created session ${sessionId.slice(0, 8)}... for device ${params.deviceId?.slice(0, 8) ?? "unknown"}...`,
     );
 
     return { sessionId };
@@ -195,7 +195,7 @@ export class SessionDO extends DurableObject<SessionDOEnv> {
       sessionId,
     );
 
-    console.log(`[SessionDO] Revoked session ${sessionId}`);
+    console.log(`[SessionDO] Revoked session ${sessionId.slice(0, 8)}...`);
 
     return result.rowsWritten > 0;
   }

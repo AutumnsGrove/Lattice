@@ -57,7 +57,11 @@ export async function exchangeGoogleCode(
     });
 
     if (!response.ok) {
-      console.error("Google token exchange failed:", await response.text());
+      console.error(
+        "Google token exchange failed:",
+        response.status,
+        response.statusText,
+      );
       return null;
     }
 

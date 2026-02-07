@@ -8,6 +8,10 @@ import {
   updateCustomer,
   getOrCreateCustomer,
 } from "$lib/payments/shop";
+import {
+  sanitizeWebhookPayload,
+  calculateWebhookExpiry,
+} from "$lib/utils/webhook-sanitizer";
 
 // Shop e-commerce feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 // Note: This webhook endpoint remains ENABLED because it handles platform billing subscription events
@@ -75,20 +79,29 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       return json({ received: true, message: "Already processed" });
     }
 
-    // Insert webhook event
-    // TODO(privacy): Implement 30-day TTL for webhook_events table
-    // TODO(privacy): Sanitize payloads before storage - remove customer PII (email, name, payment_method details beyond last4/brand)
+    // Insert webhook event with PII sanitization and retention TTL
+    const sanitizedPayload = sanitizeWebhookPayload(eventData);
+    const payloadToStore = sanitizedPayload
+      ? JSON.stringify(sanitizedPayload)
+      : JSON.stringify({
+          meta: { event_name: event.type },
+          data: { id: eventData?.id, type: eventData?.object },
+          _sanitization_failed: true,
+        });
+    const expiresAt = calculateWebhookExpiry(); // 120 days from now
+
     await platform.env.DB.prepare(
-      `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO webhook_events (id, provider, provider_event_id, event_type, payload, created_at, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
     )
       .bind(
         event.id,
         "stripe",
         event.providerEventId,
         event.type,
-        JSON.stringify(eventData),
+        payloadToStore,
         Math.floor(Date.now() / 1000),
+        expiresAt,
       )
       .run();
 

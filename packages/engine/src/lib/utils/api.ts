@@ -26,13 +26,19 @@ export function getCSRFToken(): string | null {
  * Fetch wrapper with automatic CSRF token injection
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function apiRequest<T = any>(url: string, options: RequestInit = {}): Promise<T | null> {
+export async function apiRequest<T = any>(
+  url: string,
+  options: RequestInit = {},
+): Promise<T | null> {
   const csrfToken = getCSRFToken();
   const method = options.method?.toUpperCase() || "GET";
   const isStateMutating = ["POST", "PUT", "DELETE", "PATCH"].includes(method);
 
   // Debug logging
-  if (typeof console !== "undefined" && import.meta.env?.MODE !== "production") {
+  if (
+    typeof console !== "undefined" &&
+    import.meta.env?.MODE !== "production"
+  ) {
     console.debug("[apiRequest]", {
       url,
       method,
@@ -43,7 +49,7 @@ export async function apiRequest<T = any>(url: string, options: RequestInit = {}
 
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
   const headers: Record<string, string> = {
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   // Only add Content-Type if not FormData
@@ -66,7 +72,7 @@ export async function apiRequest<T = any>(url: string, options: RequestInit = {}
   if (!response.ok) {
     let errorMessage = "Request failed";
     try {
-      const error = await response.json() as { message?: string };
+      const error = (await response.json()) as { message?: string };
       errorMessage = error.message || errorMessage;
     } catch {
       errorMessage = `${response.status} ${response.statusText}`;
@@ -74,8 +80,7 @@ export async function apiRequest<T = any>(url: string, options: RequestInit = {}
     // Include CSRF debug info
     if (response.status === 403 && errorMessage.includes("CSRF")) {
       console.error("[apiRequest] CSRF token validation failed", {
-        csrfToken,
-        headers: Object.fromEntries(response.headers.entries()),
+        csrfToken: csrfToken ? "present" : "missing",
         url,
       });
     }
