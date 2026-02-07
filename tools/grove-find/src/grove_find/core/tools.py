@@ -7,8 +7,14 @@ error messages when tools are missing.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+import re
 import shutil
 import subprocess
+
+
+# Detect nested quantifiers that cause catastrophic backtracking (ReDoS).
+# Matches patterns like (a+)+, (x*)+, (y+)*, (z?){2,} etc.
+_REDOS_PATTERN = re.compile(r"[+*]\)?[+*{]")
 
 
 @dataclass
@@ -152,10 +158,149 @@ def run_tool(
     Returns:
         CompletedProcess with results
     """
-    return subprocess.run(
+    result = subprocess.run(
         [str(tool_path)] + args,
         cwd=cwd,
         capture_output=capture_output,
         text=True,
         check=check,
     )
+    # Log stderr on non-zero exit for debugging (only in verbose mode)
+    if result.returncode != 0 and result.stderr:
+        import sys
+        if "--verbose" in sys.argv or "-v" in sys.argv:
+            print(f"[gf] {tool_path.name} exited {result.returncode}: {result.stderr.strip()}", file=sys.stderr)
+    return result
+
+
+def _safe_compile_regex(pattern: str, flags: int = 0) -> Optional[re.Pattern]:
+    """Compile a regex pattern, rejecting ReDoS-prone patterns.
+
+    Returns None if the pattern is invalid or contains nested quantifiers
+    that could cause catastrophic backtracking.
+    """
+    if _REDOS_PATTERN.search(pattern):
+        return None
+    try:
+        return re.compile(pattern, flags)
+    except re.error:
+        return None
+
+
+def find_files(
+    pattern: str,
+    extensions: Optional[list[str]] = None,
+    cwd: Optional[Path] = None,
+) -> str:
+    """Find files by name pattern, using fd if available, falling back to rg --files.
+
+    This is the universal file-finding helper. All commands that need to locate
+    files by name should use this instead of calling fd directly.
+
+    Args:
+        pattern: Filename pattern to search for (regex for fd, glob for rg fallback)
+        extensions: File extensions to filter (e.g., ["svelte", "ts"])
+        cwd: Working directory
+
+    Returns:
+        Newline-separated list of matching file paths, or empty string
+    """
+    tools = discover_tools()
+    search_cwd = cwd or Path.cwd()
+
+    if tools.fd:
+        # Use fd (preferred — faster, regex by default)
+        fd_args = [
+            "--exclude", "node_modules",
+            "--exclude", "dist",
+            "--exclude", ".git",
+            "--color=never",
+        ]
+        if extensions:
+            for ext in extensions:
+                fd_args.extend(["-e", ext])
+        fd_args.append(pattern)
+        fd_args.append(str(search_cwd))
+
+        result = run_tool(tools.fd, fd_args, cwd=search_cwd)
+        return result.stdout
+    elif tools.rg:
+        # Fallback to rg --files with glob filtering
+        rg_args = [
+            "--files",
+            "--color=never",
+            "--glob", "!node_modules",
+            "--glob", "!dist",
+            "--glob", "!.git",
+        ]
+        if extensions:
+            for ext in extensions:
+                rg_args.extend(["--glob", f"*.{ext}"])
+
+        rg_args.append(str(search_cwd))
+
+        result = run_tool(tools.rg, rg_args, cwd=search_cwd)
+        if not result.stdout:
+            return ""
+
+        # Filter results by pattern (case-insensitive filename match)
+        regex = _safe_compile_regex(pattern, re.IGNORECASE)
+
+        lines = result.stdout.strip().split("\n")
+        matched = []
+        for line in lines:
+            filename = Path(line).name
+            if regex and regex.search(filename):
+                matched.append(line)
+            elif not regex and pattern.lower() in filename.lower():
+                matched.append(line)
+
+        return "\n".join(matched) + "\n" if matched else ""
+
+    return ""
+
+
+def find_files_by_glob(
+    glob_pattern: str,
+    cwd: Optional[Path] = None,
+) -> str:
+    """Find files matching a glob pattern, using fd if available, falling back to rg --files.
+
+    Use this for SvelteKit route patterns like '+page.svelte', '+server.ts', etc.
+
+    Args:
+        glob_pattern: Glob pattern (e.g., '*+page.svelte')
+        cwd: Working directory
+
+    Returns:
+        Newline-separated list of matching file paths, or empty string
+    """
+    tools = discover_tools()
+    search_cwd = cwd or Path.cwd()
+
+    if tools.fd:
+        fd_args = [
+            "--exclude", "node_modules",
+            "--exclude", "dist",
+            "--exclude", ".git",
+            "--color=never",
+            "-g", glob_pattern,
+            str(search_cwd),
+        ]
+        result = run_tool(tools.fd, fd_args, cwd=search_cwd)
+        return result.stdout
+    elif tools.rg:
+        # rg --files with glob
+        rg_args = [
+            "--files",
+            "--color=never",
+            "--glob", "!node_modules",
+            "--glob", "!dist",
+            "--glob", "!.git",
+            "--glob", glob_pattern,
+            str(search_cwd),
+        ]
+        result = run_tool(tools.rg, rg_args, cwd=search_cwd)
+        return result.stdout
+
+    return ""

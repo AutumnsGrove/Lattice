@@ -68,6 +68,8 @@ class Wrangler:
             data = json.loads(result.stdout)
             self._whoami_cache = data
             return data
+        except FileNotFoundError as e:
+            raise WranglerError("Wrangler is not installed. Install with: npm i -g wrangler") from e
         except subprocess.CalledProcessError as e:
             raise WranglerError(f"Wrangler whoami failed: {e.stderr}") from e
         except json.JSONDecodeError as e:
@@ -98,6 +100,8 @@ class Wrangler:
                 check=True,
             )
             return result.stdout
+        except FileNotFoundError as e:
+            raise WranglerError("Wrangler is not installed. Install with: npm i -g wrangler") from e
         except subprocess.CalledProcessError as e:
             raise WranglerError(
                 f"Wrangler command failed: {' '.join(cmd)}\n{e.stderr}"
@@ -144,5 +148,7 @@ class Wrangler:
             )
             # Clear cache after login
             self._whoami_cache = None
+        except FileNotFoundError as e:
+            raise WranglerError("Wrangler is not installed. Install with: npm i -g wrangler") from e
         except subprocess.CalledProcessError as e:
             raise WranglerError(f"Wrangler login failed: {e}") from e

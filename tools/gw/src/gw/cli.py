@@ -10,6 +10,9 @@ from .commands.history import history
 from .commands.completion import completion
 from .commands.mcp import mcp
 from .commands.metrics import metrics
+from .commands.config_validate import config_validate
+from .commands.env_audit import env_audit
+from .commands.monorepo_size import monorepo_size
 from .commands.git import git
 from .commands.gh import gh
 from .commands.dev import dev
@@ -155,6 +158,11 @@ main.add_command(mcp)
 
 # Metrics
 main.add_command(metrics)
+
+# Infrastructure audit commands
+main.add_command(config_validate)
+main.add_command(env_audit)
+main.add_command(monorepo_size)
 
 
 if __name__ == "__main__":

@@ -73,8 +73,9 @@ def record_command(
         pass
 
 
-@click.group()
-def history() -> None:
+@click.group(invoke_without_command=True)
+@click.pass_context
+def history(ctx: click.Context) -> None:
     """View and manage command history.
 
     Track previous commands and re-run them easily.
@@ -87,7 +88,8 @@ def history() -> None:
         gw history run 5          # Re-run command #5
         gw history clear          # Clear history
     """
-    pass
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(history_list)
 
 
 @history.command("list")

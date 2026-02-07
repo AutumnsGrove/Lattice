@@ -33,19 +33,28 @@ def status(ctx: click.Context) -> None:
     }
 
     # Get Cloudflare account info
-    try:
-        whoami_data = wrangler.whoami()
-        account = whoami_data.get("account", {})
-        status_data["cloudflare"] = {
-            "account_id": account.get("id"),
-            "account_name": account.get("name"),
-            "authenticated": True,
-        }
-    except WranglerError:
+    if not wrangler.is_installed():
         status_data["cloudflare"] = {
             "authenticated": False,
-            "error": "Not authenticated with Cloudflare",
+            "installed": False,
+            "error": "Wrangler is not installed",
         }
+    else:
+        try:
+            whoami_data = wrangler.whoami()
+            account = whoami_data.get("account", {})
+            status_data["cloudflare"] = {
+                "account_id": account.get("id"),
+                "account_name": account.get("name"),
+                "authenticated": True,
+                "installed": True,
+            }
+        except WranglerError:
+            status_data["cloudflare"] = {
+                "authenticated": False,
+                "installed": True,
+                "error": "Not authenticated with Cloudflare",
+            }
 
     # Collect databases
     for alias, db in config.databases.items():
@@ -73,14 +82,22 @@ def status(ctx: click.Context) -> None:
     console.print("\n[bold green]Grove Wrap Status[/bold green]\n")
 
     # Cloudflare section
-    if status_data["cloudflare"]["authenticated"]:
-        cf = status_data["cloudflare"]
+    cf = status_data["cloudflare"]
+    if cf.get("authenticated"):
         console.print(
             create_panel(
                 f"Account: [bold]{cf['account_name']}[/bold]\n"
                 f"ID: {cf['account_id']}",
                 title="Cloudflare",
                 style="blue",
+            )
+        )
+    elif not cf.get("installed", True):
+        console.print(
+            create_panel(
+                "[dim]Wrangler not installed[/dim]\nInstall with: [bold]npm i -g wrangler[/bold]",
+                title="Cloudflare",
+                style="dim",
             )
         )
     else:

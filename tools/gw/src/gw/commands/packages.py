@@ -33,8 +33,9 @@ def packages(ctx: click.Context) -> None:
 
 @packages.command("list")
 @click.option("--type", "-t", "pkg_type", help="Filter by package type")
+@click.option("--scripts", "-s", "script_filter", help="Filter by available script (e.g., test, build, dev)")
 @click.pass_context
-def packages_list(ctx: click.Context, pkg_type: Optional[str]) -> None:
+def packages_list(ctx: click.Context, pkg_type: Optional[str], script_filter: Optional[str]) -> None:
     """List all packages in the monorepo.
 
     \b
@@ -42,6 +43,8 @@ def packages_list(ctx: click.Context, pkg_type: Optional[str]) -> None:
         gw packages list
         gw packages list --type sveltekit
         gw packages list --type python
+        gw packages list --scripts test
+        gw packages list --scripts build
     """
     output_json = ctx.obj.get("output_json", False)
 
@@ -73,6 +76,12 @@ def packages_list(ctx: click.Context, pkg_type: Optional[str]) -> None:
             else:
                 error(f"Invalid package type. Valid types: {valid_types}")
             raise SystemExit(1)
+
+    # Filter by script availability
+    if script_filter:
+        packages_to_show = [
+            p for p in packages_to_show if p.has_script.get(script_filter, False)
+        ]
 
     if output_json:
         console.print(

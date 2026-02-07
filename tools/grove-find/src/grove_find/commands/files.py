@@ -108,12 +108,12 @@ def _find_files_regex(
         args = ["--files", "--sort", "path", str(cwd)]
         result = run_tool(tools.rg, args, cwd=cwd)
         if result.stdout:
-            import re
+            from grove_find.core.tools import _safe_compile_regex
             lines = result.stdout.strip().split("\n")
-            try:
-                compiled = re.compile(regex)
+            compiled = _safe_compile_regex(regex)
+            if compiled:
                 filtered = [l for l in lines if compiled.search(l)]
-            except re.error:
+            else:
                 filtered = [l for l in lines if regex in l]
             output = "\n".join(filtered) + "\n" if filtered else ""
         else:

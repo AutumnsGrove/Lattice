@@ -12,7 +12,7 @@ from grove_find.core.tools import discover_tools, get_install_instructions
 from grove_find.output import print_error, print_warning, print_success
 
 # Import command modules (will be added as we implement them)
-from grove_find.commands import search, files, git, github, cloudflare, quality, project
+from grove_find.commands import search, files, git, github, cloudflare, quality, project, infra
 
 # Create the main Typer app
 app = typer.Typer(
@@ -123,6 +123,7 @@ app.add_typer(github.app, name="github", help="GitHub issue commands")
 app.add_typer(cloudflare.app, name="cf", help="Cloudflare bindings")
 app.add_typer(quality.app, name="quality", help="Code quality commands", hidden=True)
 app.add_typer(project.app, name="project", help="Project health commands", hidden=True)
+app.add_typer(infra.app, name="infra", help="Infrastructure commands", hidden=True)
 
 
 # Primary search command at top level
@@ -367,11 +368,12 @@ def briefing_cmd() -> None:
 @app.command("routes")
 def routes_cmd(
     pattern: Optional[str] = typer.Argument(None, help="Route pattern to filter"),
+    guards: bool = typer.Option(False, "--guards", "-g", help="Show auth guards and protected routes"),
 ) -> None:
     """Find SvelteKit routes."""
     from grove_find.commands.quality import routes_command
 
-    routes_command(pattern)
+    routes_command(pattern, guards=guards)
 
 
 @app.command("db")
@@ -424,6 +426,81 @@ def store_cmd(
     from grove_find.commands.quality import store_command
 
     store_command(name)
+
+
+# Infrastructure commands
+@app.command("large")
+def large_cmd(
+    threshold: int = typer.Argument(500, help="Minimum line count threshold"),
+) -> None:
+    """Find oversized files (>N lines)."""
+    from grove_find.commands.infra import large_command
+
+    large_command(threshold)
+
+
+@app.command("orphaned")
+def orphaned_cmd() -> None:
+    """Find Svelte components not imported anywhere."""
+    from grove_find.commands.infra import orphaned_command
+
+    orphaned_command()
+
+
+@app.command("migrations")
+def migrations_cmd() -> None:
+    """List D1 migrations across all packages."""
+    from grove_find.commands.infra import migrations_command
+
+    migrations_command()
+
+
+@app.command("flags")
+def flags_cmd(
+    name: Optional[str] = typer.Argument(None, help="Flag name to search for"),
+) -> None:
+    """Find feature flag definitions and usage."""
+    from grove_find.commands.infra import flags_command
+
+    flags_command(name)
+
+
+@app.command("workers")
+def workers_cmd() -> None:
+    """List Cloudflare Worker configurations."""
+    from grove_find.commands.infra import workers_command
+
+    workers_command()
+
+
+@app.command("emails")
+def emails_cmd() -> None:
+    """Find email templates and send functions."""
+    from grove_find.commands.infra import emails_command
+
+    emails_command()
+
+
+@app.command("deps")
+def deps_cmd(
+    package: Optional[str] = typer.Argument(None, help="Package name to inspect"),
+) -> None:
+    """Show workspace dependency graph."""
+    from grove_find.commands.infra import deps_command
+
+    deps_command(package)
+
+
+@app.command("config-diff")
+def config_diff_cmd(
+    config_type: Optional[str] = typer.Argument(
+        None, help="Config type (tailwind, svelte, tsconfig, vitest)"
+    ),
+) -> None:
+    """Compare configuration files across packages."""
+    from grove_find.commands.infra import config_diff_command
+
+    config_diff_command(config_type)
 
 
 @app.command("type")

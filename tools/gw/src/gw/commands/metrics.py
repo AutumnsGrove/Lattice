@@ -214,8 +214,9 @@ def get_summary(days: int = 7) -> dict[str, Any]:
         return {"error": str(e)}
 
 
-@click.group()
-def metrics() -> None:
+@click.group(invoke_without_command=True)
+@click.pass_context
+def metrics(ctx: click.Context) -> None:
     """View usage metrics and statistics.
 
     Track how gw commands are being used, success rates,
@@ -230,7 +231,8 @@ def metrics() -> None:
         gw metrics export         # Export as JSON
         gw metrics clear --write  # Clear all metrics
     """
-    pass
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(metrics_summary)
 
 
 @metrics.command("summary")

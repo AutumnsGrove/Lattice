@@ -906,6 +906,73 @@ def grove_ci() -> str:
 
 
 # =============================================================================
+# BINDINGS TOOLS (READ)
+# =============================================================================
+
+
+@mcp.tool()
+def grove_bindings(
+    binding_type: str = "all",
+    package_filter: str = "",
+) -> str:
+    """List Cloudflare bindings from all wrangler.toml files.
+
+    Scans the monorepo for D1 databases, KV namespaces, R2 buckets,
+    Durable Objects, service bindings, and AI bindings.
+
+    Args:
+        binding_type: Filter by type: d1, kv, r2, do, services, ai, or all
+        package_filter: Filter by package name (substring match)
+    """
+    from .commands.bindings import find_project_root, find_wrangler_configs, parse_wrangler_config
+
+    try:
+        root = find_project_root()
+        configs = find_wrangler_configs(root)
+
+        if not configs:
+            return json.dumps({"bindings": [], "message": "No wrangler.toml files found"})
+
+        all_bindings = []
+        for config_path in configs:
+            try:
+                parsed = parse_wrangler_config(config_path)
+                if package_filter and package_filter.lower() not in parsed["package"].lower():
+                    continue
+                all_bindings.append(parsed)
+            except Exception:
+                continue
+
+        # Filter by type if specified
+        if binding_type != "all":
+            type_map = {
+                "d1": "d1_databases",
+                "kv": "kv_namespaces",
+                "r2": "r2_buckets",
+                "do": "durable_objects",
+                "services": "services",
+                "ai": "ai",
+            }
+            key = type_map.get(binding_type)
+            if key:
+                filtered = []
+                for pkg in all_bindings:
+                    if key == "ai":
+                        if pkg.get("ai"):
+                            filtered.append({"package": pkg["package"], "ai": pkg["ai"]})
+                    elif pkg.get(key):
+                        filtered.append({"package": pkg["package"], key: pkg[key]})
+                return json.dumps({"bindings": filtered, "type": binding_type}, indent=2)
+
+        return json.dumps({
+            "scanned_files": len(configs),
+            "bindings": all_bindings,
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+# =============================================================================
 # SERVER ENTRY POINT
 # =============================================================================
 

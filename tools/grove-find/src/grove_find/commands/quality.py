@@ -8,7 +8,7 @@ from typing import Optional
 import typer
 
 from grove_find.core.config import get_config
-from grove_find.core.tools import discover_tools, run_tool
+from grove_find.core.tools import discover_tools, find_files, find_files_by_glob, run_tool
 from grove_find.output import console, print_section, print_warning
 
 app = typer.Typer(help="Code quality commands")
@@ -503,18 +503,81 @@ def engine_cmd(
     engine_command(module)
 
 
-def routes_command(pattern: Optional[str] = None) -> None:
+def routes_command(pattern: Optional[str] = None, guards: bool = False) -> None:
     """Find SvelteKit routes."""
     config = get_config()
+
+    if guards:
+        print_section("Route Guards (Auth/Redirect)", "")
+
+        # Find +page.server.ts and +layout.server.ts with auth patterns
+        print_section("Server Load Functions with Auth", "")
+        output = _run_rg(
+            [
+                "(redirect|session|auth|locals\\.user|locals\\.session)",
+                "--glob", "**/+page.server.ts",
+                "--glob", "**/+layout.server.ts",
+                str(config.grove_root),
+            ],
+            cwd=config.grove_root,
+        )
+        if output:
+            lines = output.strip().split("\n")[:30]
+            console.print_raw("\n".join(lines))
+        else:
+            console.print("  (no auth guards found)")
+
+        # Find hooks with auth
+        print_section("Auth Hooks (hooks.server.ts)", "")
+        output = _run_rg(
+            [
+                "(handle|auth|session|redirect)",
+                "--glob", "**/hooks.server.ts",
+                str(config.grove_root),
+            ],
+            cwd=config.grove_root,
+        )
+        if output:
+            lines = output.strip().split("\n")[:20]
+            console.print_raw("\n".join(lines))
+        else:
+            console.print("  (no auth hooks found)")
+
+        # Protected vs public routes summary
+        print_section("Protected Routes Summary", "")
+        server_files = find_files_by_glob("**/+page.server.ts", cwd=config.grove_root)
+        if server_files and server_files.strip():
+            protected = []
+            for filepath in server_files.strip().split("\n"):
+                filepath = filepath.strip()
+                if not filepath or "node_modules" in filepath:
+                    continue
+                try:
+                    content = Path(filepath).read_text()
+                    if any(kw in content for kw in ["redirect", "session", "locals.user"]):
+                        try:
+                            rel = str(Path(filepath).relative_to(config.grove_root))
+                        except ValueError:
+                            rel = filepath
+                        protected.append(rel)
+                except OSError:
+                    continue
+            if protected:
+                console.print(f"  {len(protected)} protected routes:")
+                for route in protected[:15]:
+                    console.print(f"    {route}")
+                if len(protected) > 15:
+                    console.print(f"    ... and {len(protected) - 15} more")
+            else:
+                console.print("  (no protected routes detected)")
+        return
 
     if pattern:
         print_section(f"SvelteKit routes matching: {pattern}", "")
 
-        # Find route files matching pattern
-        output = _run_fd(
-            ["-g", "*+page*", str(config.grove_root)], cwd=config.grove_root
-        )
-        if output:
+        # Find page routes matching pattern (uses fd with rg fallback)
+        output = find_files_by_glob("**/+page.svelte", cwd=config.grove_root)
+        if output and output.strip():
             lines = [
                 l for l in output.strip().split("\n") if pattern.lower() in l.lower()
             ]
@@ -525,10 +588,9 @@ def routes_command(pattern: Optional[str] = None) -> None:
         else:
             console.print("  (no page routes found)")
 
-        output = _run_fd(
-            ["-g", "*+server*", str(config.grove_root)], cwd=config.grove_root
-        )
-        if output:
+        # Find API routes matching pattern
+        output = find_files_by_glob("**/+server.ts", cwd=config.grove_root)
+        if output and output.strip():
             lines = [
                 l for l in output.strip().split("\n") if pattern.lower() in l.lower()
             ]
@@ -541,22 +603,38 @@ def routes_command(pattern: Optional[str] = None) -> None:
 
         # Page routes
         print_section("Page Routes", "")
-        output = _run_fd(
-            ["-g", "*+page.svelte", str(config.grove_root)], cwd=config.grove_root
-        )
-        if output:
+        output = find_files_by_glob("**/+page.svelte", cwd=config.grove_root)
+        if output and output.strip():
             lines = output.strip().split("\n")[:30]
             console.print_raw("\n".join(lines))
+            console.print(f"  ({len(output.strip().split(chr(10)))} total)")
         else:
             console.print("  (none found)")
 
         # API routes
         print_section("API Routes", "")
-        output = _run_fd(
-            ["-g", "*+server.ts", str(config.grove_root)], cwd=config.grove_root
-        )
-        if output:
+        output = find_files_by_glob("**/+server.ts", cwd=config.grove_root)
+        if output and output.strip():
             lines = output.strip().split("\n")[:30]
+            console.print_raw("\n".join(lines))
+            console.print(f"  ({len(output.strip().split(chr(10)))} total)")
+        else:
+            console.print("  (none found)")
+
+        # Layout routes
+        print_section("Layouts", "")
+        output = find_files_by_glob("**/+layout.svelte", cwd=config.grove_root)
+        if output and output.strip():
+            lines = output.strip().split("\n")[:20]
+            console.print_raw("\n".join(lines))
+        else:
+            console.print("  (none found)")
+
+        # Error pages
+        print_section("Error Pages", "")
+        output = find_files_by_glob("**/+error.svelte", cwd=config.grove_root)
+        if output and output.strip():
+            lines = output.strip().split("\n")[:20]
             console.print_raw("\n".join(lines))
         else:
             console.print("  (none found)")
@@ -565,9 +643,10 @@ def routes_command(pattern: Optional[str] = None) -> None:
 @app.command("routes")
 def routes_cmd(
     pattern: Optional[str] = typer.Argument(None, help="Route pattern to filter"),
+    guards: bool = typer.Option(False, "--guards", "-g", help="Show auth guards and protected routes"),
 ) -> None:
     """Find SvelteKit routes."""
-    routes_command(pattern)
+    routes_command(pattern, guards=guards)
 
 
 def db_command(table: Optional[str] = None) -> None:
@@ -660,11 +739,13 @@ def glass_cmd(
 
 
 def store_command(name: Optional[str] = None) -> None:
-    """Find Svelte stores."""
+    """Find Svelte stores and reactive state."""
     config = get_config()
 
     if name:
-        print_section(f"Svelte stores matching: {name}", "")
+        print_section(f"Svelte stores/state matching: {name}", "")
+
+        # Svelte 4 stores
         output = _run_rg(
             [
                 f"(writable|readable|derived).*{name}|{name}.*(writable|readable|derived)",
@@ -676,25 +757,39 @@ def store_command(name: Optional[str] = None) -> None:
         )
         if output:
             console.print_raw(output.rstrip())
-        else:
-            console.print("  (none found)")
-    else:
-        print_section("Svelte Stores", "")
 
-        # Store files
-        print_section("Store Files", "")
-        output = _run_fd(
-            ["store", "-e", "ts", "-e", "js", str(config.grove_root)],
+        # Svelte 5 runes
+        rune_output = _run_rg(
+            [
+                f"(\\$state|\\$derived|\\$effect|\\$bindable).*{name}|{name}.*(\\$state|\\$derived|\\$effect|\\$bindable)",
+                "--glob",
+                "*.{ts,js,svelte}",
+                str(config.grove_root),
+            ],
             cwd=config.grove_root,
         )
-        if output:
-            lines = output.strip().split("\n")[:20]
-            console.print_raw("\n".join(lines))
+        if rune_output:
+            console.print_raw(rune_output.rstrip())
+
+        if not output and not rune_output:
+            console.print("  (none found)")
+    else:
+        print_section("Svelte Stores & Reactive State", "")
+
+        # Store files (uses fd with rg fallback, exclude _deprecated)
+        print_section("Store Files", "")
+        output = find_files("store", extensions=["ts", "js"], cwd=config.grove_root)
+        if output and output.strip():
+            lines = [l for l in output.strip().split("\n") if "_deprecated" not in l]
+            if lines:
+                console.print_raw("\n".join(lines[:20]))
+            else:
+                console.print("  (none found)")
         else:
             console.print("  (none found)")
 
-        # Store definitions
-        print_section("Store Definitions", "")
+        # Svelte 4 store definitions
+        print_section("Svelte 4 Stores (writable/readable/derived)", "")
         output = _run_rg(
             [
                 "export\\s+(const|let).*=\\s*(writable|readable|derived)",
@@ -702,6 +797,8 @@ def store_command(name: Optional[str] = None) -> None:
                 "ts",
                 "--type",
                 "js",
+                "--glob",
+                "!_deprecated",
                 str(config.grove_root),
             ],
             cwd=config.grove_root,
@@ -709,6 +806,28 @@ def store_command(name: Optional[str] = None) -> None:
         if output:
             lines = output.strip().split("\n")[:30]
             console.print_raw("\n".join(lines))
+        else:
+            console.print("  (none found)")
+
+        # Svelte 5 rune-based reactive state
+        print_section("Svelte 5 Runes ($state/$derived/$effect)", "")
+        rune_output = _run_rg(
+            [
+                "\\$state\\(|\\$state\\.snapshot|\\$derived\\(|\\$derived\\.by|\\$effect\\(|\\$bindable\\(",
+                "--glob",
+                "*.{ts,js,svelte}",
+                "--glob",
+                "!_deprecated",
+                str(config.grove_root),
+            ],
+            cwd=config.grove_root,
+        )
+        if rune_output:
+            lines = rune_output.strip().split("\n")[:30]
+            console.print_raw("\n".join(lines))
+            total = len(rune_output.strip().split("\n"))
+            if total > 30:
+                console.print(f"  ... and {total - 30} more")
         else:
             console.print("  (none found)")
 

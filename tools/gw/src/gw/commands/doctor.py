@@ -106,6 +106,20 @@ def doctor(ctx: click.Context, fix: bool, verbose: bool) -> None:
     if monorepo_check["status"] == "warning":
         warnings_count += 1
 
+    # Check 11: Wrangler config consistency
+    config_check2 = _check_wrangler_configs(verbose)
+    checks.append(config_check2)
+    if config_check2["status"] == "warning":
+        warnings_count += 1
+    elif config_check2["status"] == "error":
+        errors_count += 1
+
+    # Check 12: Migration health
+    migration_check = _check_migrations(verbose)
+    checks.append(migration_check)
+    if migration_check["status"] == "warning":
+        warnings_count += 1
+
     if output_json:
         console.print(json.dumps({
             "checks": checks,
@@ -455,4 +469,128 @@ def _check_monorepo(verbose: bool) -> dict:
         "name": "Grove Monorepo",
         "status": "warning",
         "details": "Not in a monorepo",
+    }
+
+
+def _check_wrangler_configs(verbose: bool) -> dict:
+    """Check wrangler.toml configs for ID consistency."""
+    try:
+        import tomllib
+    except ImportError:
+        try:
+            import tomli as tomllib
+        except ImportError:
+            return {
+                "name": "Config Consistency",
+                "status": "warning",
+                "details": "tomllib not available",
+            }
+
+    cwd = Path.cwd()
+    root = cwd
+    for parent in [cwd] + list(cwd.parents):
+        if (parent / "pnpm-workspace.yaml").exists():
+            root = parent
+            break
+
+    wrangler_files = [
+        f for f in root.rglob("wrangler.toml")
+        if "node_modules" not in str(f) and "_deprecated" not in str(f)
+    ]
+
+    if not wrangler_files:
+        return {
+            "name": "Config Consistency",
+            "status": "ok",
+            "details": "No wrangler.toml files",
+        }
+
+    # Collect binding IDs across files
+    from collections import defaultdict
+    binding_ids: dict[str, set] = defaultdict(set)
+
+    for wpath in wrangler_files:
+        try:
+            with open(wpath, "rb") as f:
+                data = tomllib.load(f)
+        except Exception:
+            continue
+
+        for db in data.get("d1_databases", []):
+            binding = db.get("binding", "?")
+            db_id = db.get("database_id", "")
+            if db_id:
+                binding_ids[f"D1:{binding}"].add(db_id)
+
+        for kv in data.get("kv_namespaces", []):
+            binding = kv.get("binding", "?")
+            kv_id = kv.get("id", "")
+            if kv_id:
+                binding_ids[f"KV:{binding}"].add(kv_id)
+
+    mismatches = [k for k, v in binding_ids.items() if len(v) > 1]
+
+    if mismatches:
+        return {
+            "name": "Config Consistency",
+            "status": "warning",
+            "details": f"{len(mismatches)} binding(s) have mismatched IDs",
+            "fix": "gw config-validate --fix-report",
+        }
+
+    return {
+        "name": "Config Consistency",
+        "status": "ok",
+        "details": f"{len(wrangler_files)} configs, all IDs consistent",
+    }
+
+
+def _check_migrations(verbose: bool) -> dict:
+    """Check migration health across packages."""
+    cwd = Path.cwd()
+    root = cwd
+    for parent in [cwd] + list(cwd.parents):
+        if (parent / "pnpm-workspace.yaml").exists():
+            root = parent
+            break
+
+    migration_dirs = []
+    for migrations_dir in root.rglob("migrations"):
+        if "node_modules" in str(migrations_dir) or "_deprecated" in str(migrations_dir):
+            continue
+        if migrations_dir.is_dir():
+            sql_files = list(migrations_dir.glob("*.sql"))
+            if sql_files:
+                migration_dirs.append((migrations_dir, sql_files))
+
+    if not migration_dirs:
+        return {
+            "name": "D1 Migrations",
+            "status": "ok",
+            "details": "No migrations found",
+        }
+
+    total = sum(len(files) for _, files in migration_dirs)
+
+    # Check for naming consistency (should be sequential numbers)
+    issues = []
+    for mdir, files in migration_dirs:
+        names = sorted([f.stem for f in files])
+        # Check if all start with numbers
+        numbered = [n for n in names if n[:4].isdigit()]
+        if len(numbered) != len(names):
+            issues.append(str(mdir.relative_to(root)))
+
+    if issues:
+        return {
+            "name": "D1 Migrations",
+            "status": "warning",
+            "details": f"{total} migrations, {len(issues)} dir(s) with inconsistent naming",
+            "fix": "gf migrations",
+        }
+
+    return {
+        "name": "D1 Migrations",
+        "status": "ok",
+        "details": f"{total} migrations across {len(migration_dirs)} databases",
     }

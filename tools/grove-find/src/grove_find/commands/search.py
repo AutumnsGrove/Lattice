@@ -8,7 +8,7 @@ from typing import Optional
 import typer
 
 from grove_find.core.config import get_config
-from grove_find.core.tools import discover_tools, run_tool
+from grove_find.core.tools import discover_tools, find_files, run_tool
 from grove_find.output import console, print_section, print_warning
 
 app = typer.Typer(help="Search commands")
@@ -103,13 +103,29 @@ def class_command(name: str) -> None:
 
     print_section(f"Finding class/component: {name}", "")
 
-    # Search for Svelte component files
+    # Search for Svelte component files (uses fd with rg --files fallback)
     print_section("Svelte Components", "")
-    fd_output = _run_fd(["-e", "svelte", name], cwd=config.grove_root)
-    if fd_output:
-        console.print_raw(fd_output.rstrip())
+    file_output = find_files(name, extensions=["svelte"], cwd=config.grove_root)
+    if file_output and file_output.strip():
+        console.print_raw(file_output.rstrip())
     else:
         console.print("  (no Svelte components found)")
+
+    # Search for component exports inside .svelte files
+    print_section("Component Exports", "")
+    rg_output = _run_rg(
+        [
+            f"(export\\s+(let|const|interface)\\s+.*{name}|<script.*>.*{name})",
+            "--glob", "*.svelte",
+            str(config.grove_root),
+        ],
+        cwd=config.grove_root,
+    )
+    if rg_output:
+        lines = rg_output.strip().split("\n")[:20]
+        console.print_raw("\n".join(lines))
+    else:
+        console.print("  (no component exports found)")
 
     # Search for class definitions
     print_section("Class Definitions", "")
