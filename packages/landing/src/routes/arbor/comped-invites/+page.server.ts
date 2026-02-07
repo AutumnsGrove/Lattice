@@ -46,6 +46,9 @@ type InviteType = (typeof VALID_INVITE_TYPES)[number];
 // Must match +layout.server.ts - duplicated here for action access
 const WAYFINDER_EMAILS = ["autumn@grove.place", "autumnbrown23@pm.me"];
 
+// Basic email format check — real validation happens at send time via Zephyr
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface EligibleSubscriber {
   id: number;
   email: string;
@@ -118,38 +121,43 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
     }
 
     // Run all queries in parallel
-    const [invitesResult, countResult, auditResult, statsResult, eligibleResult] =
-      await Promise.all([
-        DB.prepare(query)
-          .bind(...params)
-          .all<CompedInvite>(),
-        DB.prepare(countQuery)
-          .bind(...countParams)
-          .first<{ count: number }>(),
-        DB.prepare(
-          `SELECT * FROM comped_invites_audit ORDER BY created_at DESC LIMIT 20`,
-        ).all<AuditLogEntry>(),
-        DB.prepare(
-          `SELECT
+    const [
+      invitesResult,
+      countResult,
+      auditResult,
+      statsResult,
+      eligibleResult,
+    ] = await Promise.all([
+      DB.prepare(query)
+        .bind(...params)
+        .all<CompedInvite>(),
+      DB.prepare(countQuery)
+        .bind(...countParams)
+        .first<{ count: number }>(),
+      DB.prepare(
+        `SELECT * FROM comped_invites_audit ORDER BY created_at DESC LIMIT 20`,
+      ).all<AuditLogEntry>(),
+      DB.prepare(
+        `SELECT
              COUNT(*) as total,
              COUNT(CASE WHEN used_at IS NOT NULL THEN 1 END) as used,
              COUNT(CASE WHEN used_at IS NULL THEN 1 END) as pending,
              COUNT(CASE WHEN invite_type = 'beta' THEN 1 END) as beta,
              COUNT(CASE WHEN invite_type = 'comped' THEN 1 END) as comped
            FROM comped_invites`,
-        ).first<{
-          total: number;
-          used: number;
-          pending: number;
-          beta: number;
-          comped: number;
-        }>(),
-        // Find email subscribers who are eligible for beta promotion:
-        // - Active (not unsubscribed)
-        // - Don't already have a comped_invites entry
-        // - Don't already have a tenants entry (not already a Grove user)
-        DB.prepare(
-          `SELECT es.id, es.email, es.name, es.created_at, es.source
+      ).first<{
+        total: number;
+        used: number;
+        pending: number;
+        beta: number;
+        comped: number;
+      }>(),
+      // Find email subscribers who are eligible for beta promotion:
+      // - Active (not unsubscribed)
+      // - Don't already have a comped_invites entry
+      // - Don't already have a tenants entry (not already a Grove user)
+      DB.prepare(
+        `SELECT es.id, es.email, es.name, es.created_at, es.source
            FROM email_signups es
            LEFT JOIN comped_invites ci ON LOWER(es.email) = LOWER(ci.email)
            LEFT JOIN tenants t ON LOWER(es.email) = LOWER(t.email)
@@ -157,8 +165,8 @@ export const load: PageServerLoad = async ({ parent, platform, url }) => {
              AND ci.id IS NULL
              AND t.id IS NULL
            ORDER BY es.created_at DESC`,
-        ).all<EligibleSubscriber>(),
-      ]);
+      ).all<EligibleSubscriber>(),
+    ]);
 
     return {
       invites: invitesResult.results || [],
@@ -217,7 +225,7 @@ export const actions: Actions = {
       formData.get("custom_message")?.toString().trim() || null;
     const notes = formData.get("notes")?.toString().trim() || null;
 
-    if (!email || !email.includes("@")) {
+    if (!email || !EMAIL_RE.test(email)) {
       return fail(400, { error: "Please enter a valid email address" });
     }
 
@@ -229,9 +237,8 @@ export const actions: Actions = {
       return fail(400, { error: "Please select a valid invite type" });
     }
 
-    let step = "init";
+    let step = "check-existing";
     try {
-      step = "check-existing";
       const existing = await DB.prepare(
         "SELECT id, used_at FROM comped_invites WHERE email = ?",
       )
@@ -443,14 +450,17 @@ export const actions: Actions = {
     const customMessage =
       formData.get("custom_message")?.toString().trim() || null;
 
-    if (!email || !email.includes("@")) {
+    if (!email || !EMAIL_RE.test(email)) {
       return fail(400, { error: "Invalid email address" });
     }
 
-    let step = "init";
+    if (!VALID_TIERS.includes(tier)) {
+      return fail(400, { error: "Please select a valid tier" });
+    }
+
+    let step = "check-subscriber";
     try {
       // Verify subscriber exists in email list
-      step = "check-subscriber";
       const subscriber = await DB.prepare(
         "SELECT id, email FROM email_signups WHERE LOWER(email) = LOWER(?) AND unsubscribed_at IS NULL",
       )
@@ -592,8 +602,15 @@ export const actions: Actions = {
     const customMessage =
       formData.get("custom_message")?.toString().trim() || null;
 
+    if (!VALID_TIERS.includes(tier)) {
+      return fail(400, { error: "Please select a valid tier" });
+    }
+
+    // Cap batch size to avoid worker timeout (4 async ops per subscriber)
+    const BATCH_LIMIT = 50;
+
     try {
-      // Find all eligible subscribers
+      // Find eligible subscribers (capped to avoid worker timeout)
       const eligible = await DB.prepare(
         `SELECT es.id, es.email
          FROM email_signups es
@@ -602,8 +619,11 @@ export const actions: Actions = {
          WHERE es.unsubscribed_at IS NULL
            AND ci.id IS NULL
            AND t.id IS NULL
-         ORDER BY es.created_at ASC`,
-      ).all<{ id: number; email: string }>();
+         ORDER BY es.created_at ASC
+         LIMIT ?`,
+      )
+        .bind(BATCH_LIMIT)
+        .all<{ id: number; email: string }>();
 
       const subscribers = eligible.results || [];
       if (subscribers.length === 0) {
@@ -625,9 +645,9 @@ export const actions: Actions = {
         const inviteToken = crypto.randomUUID();
 
         try {
-          // Create the invite
-          await DB.prepare(
-            `INSERT INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
+          // Create the invite (OR IGNORE handles race if already promoted)
+          const insertResult = await DB.prepare(
+            `INSERT OR IGNORE INTO comped_invites (id, email, tier, invite_type, custom_message, invited_by, invite_token, created_at)
              VALUES (?, ?, ?, 'beta', ?, ?, ?, unixepoch())`,
           )
             .bind(
@@ -639,6 +659,11 @@ export const actions: Actions = {
               inviteToken,
             )
             .run();
+
+          // Skip if already promoted by a concurrent request
+          if (insertResult.meta.changes === 0) {
+            continue;
+          }
 
           // Audit log
           await DB.prepare(
@@ -679,8 +704,7 @@ export const actions: Actions = {
             }
           }
         } catch (err) {
-          const message =
-            err instanceof Error ? err.message : "Unknown error";
+          const message = err instanceof Error ? err.message : "Unknown error";
           errors.push(`${sub.email}: ${message}`);
           console.error(
             `[Comped Invites] Bulk promote error for ${sub.email}:`,
@@ -693,20 +717,23 @@ export const actions: Actions = {
         ? ` (${emailsSent} emails sent${emailsFailed > 0 ? `, ${emailsFailed} failed` : ""})`
         : " (no email API key configured — emails not sent)";
 
+      const errorNote = errors.length > 0 ? ` (${errors.length} failed)` : "";
+
       return {
         success: true,
-        emailStatus: emailsFailed > 0 ? ("partial" as const) : emailsSent > 0 ? ("sent" as const) : ("not-configured" as const),
-        message: `Promoted ${promoted} of ${subscribers.length} subscribers to beta (${tier} tier)${emailNote}`,
+        emailStatus:
+          emailsFailed > 0
+            ? ("partial" as const)
+            : emailsSent > 0
+              ? ("sent" as const)
+              : ("not-configured" as const),
+        message: `Promoted ${promoted} of ${subscribers.length} subscribers to beta (${tier} tier)${errorNote}${emailNote}`,
         promoteErrors: errors.length > 0 ? errors : undefined,
       };
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Unknown database error";
-      console.error(
-        "[Comped Invites] Error in bulk promote:",
-        message,
-        err,
-      );
+      console.error("[Comped Invites] Error in bulk promote:", message, err);
       return fail(500, {
         error: `Failed to bulk promote subscribers: ${message}`,
       });
