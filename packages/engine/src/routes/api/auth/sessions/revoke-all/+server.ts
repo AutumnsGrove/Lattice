@@ -7,17 +7,30 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   const groveSession = cookies.get("grove_session");
 
   if (!groveSession) {
-    return json({ error: "Not authenticated" }, { status: 401 });
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   if (!platform?.env?.AUTH) {
-    console.error("[Sessions] AUTH service binding not available");
-    return json({ error: "Auth service unavailable" }, { status: 503 });
+    logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   let keepCurrent = true;
@@ -44,7 +57,10 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     if (!response.ok) {
       const data = (await response.json()) as { error?: string };
       return json(
-        { error: data.error || "Failed to revoke sessions" },
+        {
+          error: data.error || API_ERRORS.OPERATION_FAILED.userMessage,
+          error_code: API_ERRORS.OPERATION_FAILED.code,
+        },
         { status: response.status },
       );
     }
@@ -55,7 +71,13 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       revokedCount: data.revokedCount || 0,
     });
   } catch (err) {
-    console.error("[Sessions] Failed to revoke all sessions:", err);
-    return json({ error: "Failed to revoke sessions" }, { status: 500 });
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };

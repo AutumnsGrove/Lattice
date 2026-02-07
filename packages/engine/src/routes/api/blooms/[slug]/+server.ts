@@ -7,6 +7,7 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
  * Invalidate blog post caches after create/update/delete
@@ -70,11 +71,11 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Determine access level
@@ -106,7 +107,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
         // Check access: owners can see all, anonymous only published
         const isPublished = !post.status || post.status === "published";
         if (!isOwner && !isPublished) {
-          throw error(404, "Post not found");
+          throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
         }
 
         // PERFORMANCE: Cache headers for Cloudflare edge caching
@@ -144,7 +145,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     const post = getPostBySlug(slug);
 
     if (!post) {
-      throw error(404, "Post not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Reconstruct markdown from the post (we don't have raw markdown stored)
@@ -171,8 +172,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     );
   } catch (err) {
     if ((err as { status?: number }).status === 404) throw err;
-    console.error("Filesystem fetch error:", err);
-    throw error(500, "Failed to fetch post");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -188,26 +188,26 @@ export const PUT: RequestHandler = async ({
 }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -222,7 +222,7 @@ export const PUT: RequestHandler = async ({
 
     // Validate required fields
     if (!data.title || !data.markdown_content) {
-      throw error(400, "Missing required fields: title, markdown_content");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validation constants
@@ -232,18 +232,15 @@ export const PUT: RequestHandler = async ({
 
     // Validate lengths
     if (data.title.length > MAX_TITLE_LENGTH) {
-      throw error(400, `Title too long (max ${MAX_TITLE_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw error(
-        400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
-      throw error(400, "Content too large (max 1MB)");
+      throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     // Validate gutter_content is valid JSON if provided
@@ -251,11 +248,11 @@ export const PUT: RequestHandler = async ({
       try {
         const parsed = JSON.parse(data.gutter_content);
         if (!Array.isArray(parsed)) {
-          throw error(400, "gutter_content must be a JSON array");
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
         }
       } catch (e) {
         if ((e as { status?: number }).status === 400) throw e;
-        throw error(400, "gutter_content must be valid JSON");
+        throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
       }
     }
 
@@ -264,11 +261,11 @@ export const PUT: RequestHandler = async ({
       try {
         const imageUrl = new URL(data.featured_image);
         if (!["http:", "https:"].includes(imageUrl.protocol)) {
-          throw error(400, "Cover image must be an HTTP or HTTPS URL");
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
         }
       } catch (e) {
         if ((e as { status?: number }).status === 400) throw e;
-        throw error(400, "Cover image must be a valid URL");
+        throwGroveError(400, API_ERRORS.INVALID_FILE, "API");
       }
     }
 
@@ -279,7 +276,7 @@ export const PUT: RequestHandler = async ({
     const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (!existing) {
-      throw error(404, "Post not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
@@ -344,8 +341,7 @@ export const PUT: RequestHandler = async ({
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error updating post:", err);
-    throw error(500, "Failed to update post");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -361,26 +357,26 @@ export const DELETE: RequestHandler = async ({
 }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -398,7 +394,7 @@ export const DELETE: RequestHandler = async ({
     const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (!existing) {
-      throw error(404, "Post not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Delete using TenantDb (automatically adds tenant_id to WHERE clause)
@@ -413,7 +409,6 @@ export const DELETE: RequestHandler = async ({
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error deleting post:", err);
-    throw error(500, "Failed to delete post");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {
@@ -25,7 +26,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, ARBOR_ERRORS.FIELD_REQUIRED, "Arbor");
   }
 
   // Try D1 first
@@ -51,10 +52,10 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
       }
     } catch (err) {
       console.error("D1 fetch error:", err);
-      throw error(500, "Failed to fetch page");
+      throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
     }
   }
 
   // If not found in D1, return error
-  throw error(404, "Page not found");
+  throwGroveError(404, ARBOR_ERRORS.RESOURCE_NOT_FOUND, "Arbor");
 };

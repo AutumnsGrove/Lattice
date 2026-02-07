@@ -7,6 +7,7 @@ import {
   getEndpointLimitByKey,
   rateLimitHeaders,
 } from "$lib/server/rate-limits/index.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
  * Data Export API
@@ -83,15 +84,15 @@ interface ExportRequest {
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const body = (await request.json()) as ExportRequest;
@@ -99,10 +100,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const validTypes = ["full", "posts", "media", "pages"];
 
   if (!validTypes.includes(exportType)) {
-    throw error(
-      400,
-      `Invalid export type. Valid types: ${validTypes.join(", ")}`,
-    );
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   const requestedTenantId = locals.tenantId;
@@ -125,10 +123,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         .first<{ count: number }>();
 
       if (postCount && postCount.count > MAX_EXPORT_ITEMS) {
-        throw error(
-          413,
-          `Export too large (${postCount.count} posts). Please contact support for bulk data exports.`,
-        );
+        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
       }
     }
 
@@ -140,10 +135,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         .first<{ count: number }>();
 
       if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {
-        throw error(
-          413,
-          `Export too large (${mediaCount.count} media files). Please contact support for bulk data exports.`,
-        );
+        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
       }
     }
 
@@ -155,10 +147,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         .first<{ count: number }>();
 
       if (pageCount && pageCount.count > MAX_EXPORT_ITEMS) {
-        throw error(
-          413,
-          `Export too large (${pageCount.count} pages). Please contact support for bulk data exports.`,
-        );
+        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
       }
     }
 
@@ -334,7 +323,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error exporting data:", err);
-    throw error(500, "Failed to export data");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

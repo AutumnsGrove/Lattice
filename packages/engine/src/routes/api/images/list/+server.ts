@@ -2,6 +2,7 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { parseImageFilename } from "$lib/utils/gallery.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /** Tag associated with an image */
 interface ImageTag {
@@ -39,22 +40,22 @@ interface MetadataRow {
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Check for R2 binding
   if (!platform?.env?.IMAGES) {
-    throw error(500, "R2 bucket not configured");
+    throwGroveError(500, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
 
   // Check for database
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -172,7 +173,10 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
         }
       } catch (metadataErr) {
         // D1 metadata join failed - continue with R2 images only
-        console.error("[ImageList] Failed to fetch D1 metadata:", metadataErr);
+        logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+          detail: "D1 metadata fetch failed",
+          cause: metadataErr,
+        });
         // Images will have null custom_title/description/date and empty tags
       }
     }
@@ -248,7 +252,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       truncated: listResult.truncated,
     });
   } catch (err) {
-    console.error("List error:", err);
-    throw error(500, "Failed to list images");
+    if ((err as { status?: number }).status) throw err;
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

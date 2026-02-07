@@ -12,6 +12,7 @@ import {
   isSupportedImage,
   generateGalleryId,
 } from "$lib/curios/gallery";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
   enabled: number;
@@ -30,15 +31,15 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 
   // Check authentication (admin only)
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Get gallery config to find R2 bucket
@@ -50,7 +51,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
     .first<ConfigRow>();
 
   if (!config) {
-    throw error(404, "Gallery not configured for this tenant");
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   // Get R2 bucket binding
@@ -61,7 +62,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
     | undefined;
 
   if (!r2Bucket) {
-    throw error(503, `R2 bucket '${bucketName}' not configured`);
+    throwGroveError(500, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
 
   const cdnBaseUrl = config.cdn_base_url || "";
@@ -199,7 +200,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
       total: added + updated,
     });
   } catch (err) {
-    console.error("Gallery sync error:", err);
-    throw error(500, "Failed to sync images from R2");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

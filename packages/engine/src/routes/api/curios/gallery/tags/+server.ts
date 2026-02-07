@@ -11,6 +11,7 @@ import {
   generateSlug,
   DEFAULT_TAG_COLOR,
 } from "$lib/curios/gallery";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface TagRow {
   id: string;
@@ -27,11 +28,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const result = await db
@@ -57,15 +58,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   // Check authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const body = (await request.json()) as {
@@ -76,7 +77,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const { name, color, description } = body;
 
   if (!name || typeof name !== "string") {
-    throw error(400, "Tag name is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   const slug = generateSlug(name);
@@ -110,9 +111,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err: unknown) {
     if (err instanceof Error && err.message?.includes("UNIQUE constraint")) {
-      throw error(409, "A tag with this name already exists");
+      throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
     }
-    throw error(500, "Failed to create tag");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -123,21 +125,21 @@ export const DELETE: RequestHandler = async ({ url, platform, locals }) => {
 
   // Check authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const tagId = url.searchParams.get("id");
 
   if (!tagId) {
-    throw error(400, "Tag ID is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -148,7 +150,7 @@ export const DELETE: RequestHandler = async ({ url, platform, locals }) => {
       .first();
 
     if (!tag) {
-      throw error(404, "Tag not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Delete the tag (cascades to gallery_image_tags)
@@ -159,7 +161,8 @@ export const DELETE: RequestHandler = async ({ url, platform, locals }) => {
     if (err instanceof Error && "status" in err) {
       throw err;
     }
-    throw error(500, "Failed to delete tag");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -170,15 +173,15 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
   // Check authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const body = (await request.json()) as {
@@ -191,7 +194,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   const { id, name, color, description, sortOrder } = body;
 
   if (!id) {
-    throw error(400, "Tag ID is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Verify tag belongs to this tenant
@@ -201,7 +204,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     .first();
 
   if (!tag) {
-    throw error(404, "Tag not found");
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   // Build update query dynamically
@@ -229,7 +232,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   if (updates.length === 0) {
-    throw error(400, "No fields to update");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   params.push(id);
@@ -243,8 +246,9 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     return json({ success: true });
   } catch (err: unknown) {
     if (err instanceof Error && err.message?.includes("UNIQUE constraint")) {
-      throw error(409, "A tag with this name already exists");
+      throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
     }
-    throw error(500, "Failed to update tag");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

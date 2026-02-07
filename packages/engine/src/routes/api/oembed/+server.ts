@@ -11,6 +11,7 @@ import {
 } from "$lib/server/services/oembed-providers.js";
 import { fetchOGMetadata } from "$lib/server/services/og-fetcher.js";
 import { rateLimit } from "$lib/server/services/cache.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
  * GET /api/oembed?url=... - Fetch embed data for a URL
@@ -30,14 +31,14 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
   const targetUrl = url.searchParams.get("url");
 
   if (!targetUrl) {
-    throw error(400, "Missing required 'url' parameter");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Validate it's a real URL
   try {
     new URL(targetUrl);
   } catch {
-    throw error(400, "Invalid URL");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // ── Rate Limiting ──────────────────────────────────────────────────
@@ -60,7 +61,12 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.max(1, rateLimitResult.resetAt - Math.floor(Date.now() / 1000))),
+            "Retry-After": String(
+              Math.max(
+                1,
+                rateLimitResult.resetAt - Math.floor(Date.now() / 1000),
+              ),
+            ),
           },
         },
       );
@@ -106,7 +112,10 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
         if (response.ok) {
           // ── Content-Length check ──────────────────────────────────
           const contentLength = response.headers.get("content-length");
-          if (contentLength && parseInt(contentLength) > MAX_OEMBED_RESPONSE_SIZE) {
+          if (
+            contentLength &&
+            parseInt(contentLength) > MAX_OEMBED_RESPONSE_SIZE
+          ) {
             // Response too large, skip oEmbed data
             console.warn(
               `oEmbed response from ${match.provider.name} exceeds size limit: ${contentLength} bytes`,
@@ -177,10 +186,7 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
       );
     } catch (err) {
       // Provider fetch failed entirely — fall through to OG preview
-      console.error(
-        `oEmbed fetch failed for ${match.provider.name}:`,
-        err,
-      );
+      console.error(`oEmbed fetch failed for ${match.provider.name}:`, err);
     }
   }
 

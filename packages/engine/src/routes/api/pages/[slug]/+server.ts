@@ -4,6 +4,7 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface PageInput {
   title?: string;
@@ -28,27 +29,27 @@ export const PUT: RequestHandler = async ({
 }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check
   if (!locals.tenantId) {
-    throw error(401, "Tenant not found");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -63,7 +64,7 @@ export const PUT: RequestHandler = async ({
 
     // Validate required fields
     if (!data.title || !data.markdown_content) {
-      throw error(400, "Missing required fields: title, markdown_content");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validation constants
@@ -73,18 +74,15 @@ export const PUT: RequestHandler = async ({
 
     // Validate lengths
     if (data.title.length > MAX_TITLE_LENGTH) {
-      throw error(400, `Title too long (max ${MAX_TITLE_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw error(
-        400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
-      throw error(400, "Content too large (max 1MB)");
+      throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     // Check if page exists and belongs to tenant
@@ -95,7 +93,7 @@ export const PUT: RequestHandler = async ({
       .first();
 
     if (!existing) {
-      throw error(404, "Page not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
@@ -131,10 +129,7 @@ export const PUT: RequestHandler = async ({
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error updating page:", err);
-    throw error(
-      500,
-      err instanceof Error ? err.message : "Failed to update page",
-    );
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -155,27 +150,27 @@ export const PATCH: RequestHandler = async ({
 
   // Auth check (skip for example tenant)
   if (!locals.user && !isExampleTenant) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check
   if (!locals.tenantId) {
-    throw error(401, "Tenant not found");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // CSRF check (skip for example tenant since they don't have session cookies)
   if (!isExampleTenant && !validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -201,7 +196,7 @@ export const PATCH: RequestHandler = async ({
       .first();
 
     if (!existing) {
-      throw error(404, "Page not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Build dynamic update based on provided fields
@@ -219,7 +214,7 @@ export const PATCH: RequestHandler = async ({
     }
 
     if (updates.length === 0) {
-      throw error(400, "No valid fields to update");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Always update the timestamp
@@ -240,9 +235,6 @@ export const PATCH: RequestHandler = async ({
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error patching page:", err);
-    throw error(
-      500,
-      err instanceof Error ? err.message : "Failed to update page",
-    );
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

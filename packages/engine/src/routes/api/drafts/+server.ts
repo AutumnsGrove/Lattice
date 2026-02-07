@@ -1,6 +1,7 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /**
  * GET /api/drafts - List all drafts for the current tenant
@@ -11,15 +12,15 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
 export const GET: RequestHandler = async ({ platform, locals }) => {
   // Auth check - drafts are private
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   try {
@@ -38,13 +39,13 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       .first<{ subdomain: string }>();
 
     if (!tenant) {
-      throw error(404, "Tenant not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Proxy to TenantDO
     const tenants = platform.env.TENANTS;
     if (!tenants) {
-      throw error(500, "Durable Objects not configured");
+      throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
     }
 
     const doId = tenants.idFromName(`tenant:${tenant.subdomain}`);
@@ -53,15 +54,17 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
     if (!response.ok) {
       const text = await response.text();
-      throw error(response.status, text || "Failed to fetch drafts");
+      throwGroveError(response.status, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: text,
+      });
     }
 
     const drafts = await response.json();
     return json(drafts);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Drafts API] Error listing drafts:", err);
-    throw error(500, "Failed to list drafts");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };
 
@@ -73,20 +76,20 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   try {
@@ -105,7 +108,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .first<{ subdomain: string }>();
 
     if (!tenant) {
-      throw error(404, "Tenant not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     const data = (await request.json()) as {
@@ -117,10 +120,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate required fields
     if (!data.content || !data.metadata?.title || !data.deviceId) {
-      throw error(
-        400,
-        "Missing required fields: content, metadata.title, deviceId",
-      );
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+        detail: "content, metadata.title, deviceId required",
+      });
     }
 
     // Generate slug if not provided
@@ -136,7 +138,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Proxy to TenantDO
     const tenants = platform.env.TENANTS;
     if (!tenants) {
-      throw error(500, "Durable Objects not configured");
+      throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
     }
 
     const doId = tenants.idFromName(`tenant:${tenant.subdomain}`);
@@ -156,14 +158,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     if (!response.ok) {
       const text = await response.text();
-      throw error(response.status, text || "Failed to create draft");
+      throwGroveError(response.status, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: text,
+      });
     }
 
     const result = (await response.json()) as { lastSaved?: number };
     return json({ success: true, slug, lastSaved: result.lastSaved });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Drafts API] Error creating draft:", err);
-    throw error(500, "Failed to create draft");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

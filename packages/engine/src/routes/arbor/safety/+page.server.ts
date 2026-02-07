@@ -13,6 +13,7 @@ import {
   updateFlagStatus,
 } from "$lib/thorn/logging.js";
 import { getRecentBlocksByCategory } from "$lib/server/petal/logging.js";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 
 // Wayfinder-only access
@@ -36,18 +37,15 @@ interface PetalFlag {
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
   if (!isAdmin(locals.user.email)) {
-    throw error(
-      403,
-      "Access denied. This page is for Grove administrators only.",
-    );
+    throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not available");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   const { DB } = platform.env;
@@ -109,11 +107,17 @@ export const actions: Actions = {
    */
   reviewFlag: async ({ request, locals, platform }) => {
     if (!locals.user || !isAdmin(locals.user.email)) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
@@ -122,11 +126,17 @@ export const actions: Actions = {
     const notes = formData.get("notes")?.toString().trim() || undefined;
 
     if (!flagId) {
-      return fail(400, { error: "Flag ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     if (action !== "cleared" && action !== "removed") {
-      return fail(400, { error: "Action must be 'cleared' or 'removed'" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     const success = await updateFlagStatus(
@@ -139,7 +149,8 @@ export const actions: Actions = {
 
     if (!success) {
       return fail(409, {
-        error: "Flag was already reviewed or no longer exists",
+        error: ARBOR_ERRORS.CONFLICT.userMessage,
+        error_code: ARBOR_ERRORS.CONFLICT.code,
       });
     }
 

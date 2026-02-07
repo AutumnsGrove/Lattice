@@ -5,7 +5,7 @@ import {
   renderMarkdown,
   type GutterItem,
 } from "$lib/utils/markdown.js";
-import { error } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import { getTenantDb } from "$lib/server/services/database.js";
 import * as cache from "$lib/server/services/cache.js";
 import { emailsMatch } from "$lib/utils/user.js";
@@ -129,7 +129,7 @@ export const load: PageServerLoad = async ({
         "DB binding not available - check Cloudflare Pages D1 bindings",
       );
     }
-    throw error(404, "Post not found");
+    throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, "Site");
   } catch (err) {
     // If it's already a SvelteKit error, rethrow it
     if ((err as { status?: number })?.status) {
@@ -137,10 +137,7 @@ export const load: PageServerLoad = async ({
     }
     // Log and rethrow as 500
     console.error("Blog post load error:", err);
-    throw error(
-      500,
-      `Failed to load post: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    throwGroveError(500, SITE_ERRORS.POST_LOAD_FAILED, "Site");
   }
 };
 

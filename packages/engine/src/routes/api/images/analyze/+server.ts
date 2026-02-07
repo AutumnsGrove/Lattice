@@ -9,6 +9,7 @@ import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
 import { validateEnv } from "$lib/server/env-validation.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 interface ClaudeContentBlock {
   type: string;
@@ -32,17 +33,17 @@ interface AnalysisResult {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Validate required environment variables (fail-fast with actionable errors)
@@ -53,7 +54,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   ]);
   if (!envValidation.valid) {
     console.error(`[AI Analyze] ${envValidation.message}`);
-    throw error(503, "AI analysis service temporarily unavailable");
+    throwGroveError(503, API_ERRORS.AI_SERVICE_NOT_CONFIGURED, "API");
   }
 
   // Safe to access after validation (non-null assertion is safe here)
@@ -71,10 +72,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Check subscription access to AI features
   const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
   if (!featureCheck.allowed) {
-    throw error(
-      403,
-      featureCheck.reason || "AI features require an active subscription",
-    );
+    throwGroveError(403, API_ERRORS.SUBSCRIPTION_REQUIRED, "API", {
+      detail: featureCheck.reason || "AI features require active subscription",
+    });
   }
 
   // Rate limit expensive AI operations (fail-closed - already validated above)
@@ -89,8 +89,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (response) {
     return new Response(
       JSON.stringify({
-        error: "rate_limited",
-        message: "Daily AI analysis limit reached. Limit resets in 24 hours.",
+        error: API_ERRORS.RATE_LIMITED.code,
+        error_code: API_ERRORS.RATE_LIMITED.code,
+        message: API_ERRORS.RATE_LIMITED.userMessage,
         remaining: 0,
         resetAt: new Date(result.resetAt * 1000).toISOString(),
       }),
@@ -109,13 +110,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const file = formData.get("file");
 
     if (!file || !(file instanceof File)) {
-      throw error(400, "No file provided");
+      throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
+        detail: "file required",
+      });
     }
 
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      throw error(400, "Invalid file type for analysis");
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+        detail: "unsupported file type for analysis",
+      });
     }
 
     // Convert file to base64
@@ -177,7 +182,7 @@ Respond in this exact JSON format only, no other text:
     } catch (err) {
       clearTimeout(timeoutId);
       if ((err as Error).name === "AbortError") {
-        throw error(504, "AI analysis timed out - please try again");
+        throwGroveError(504, API_ERRORS.AI_TIMEOUT, "API");
       }
       throw err;
     }
@@ -186,7 +191,9 @@ Respond in this exact JSON format only, no other text:
     if (!response.ok) {
       const errorData = await response.text();
       console.error("Claude API error:", errorData);
-      throw error(500, "AI analysis failed");
+      throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API", {
+        detail: "Claude API returned error",
+      });
     }
 
     const result = (await response.json()) as ClaudeResponse;
@@ -194,7 +201,9 @@ Respond in this exact JSON format only, no other text:
     // Extract the text content from Claude's response
     const textContent = result.content?.find((c) => c.type === "text")?.text;
     if (!textContent) {
-      throw error(500, "Invalid AI response format");
+      throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API", {
+        detail: "invalid Claude response format",
+      });
     }
 
     // Parse the JSON response
@@ -233,7 +242,7 @@ Respond in this exact JSON format only, no other text:
     });
   } catch (err) {
     if (err instanceof Error && "status" in err) throw err;
-    console.error("Analysis error:", err);
-    throw error(500, "Failed to analyze image");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

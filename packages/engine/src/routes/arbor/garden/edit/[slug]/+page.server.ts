@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import { getTenantDb } from "$lib/server/services/database";
 import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
@@ -24,13 +25,13 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
   const { slug } = params;
 
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, ARBOR_ERRORS.FIELD_REQUIRED, "Arbor");
   }
 
   // Require tenant context for multi-tenant data access
   if (!locals.tenantId) {
     console.error("[Edit Post] No tenant ID found");
-    throw error(403, "Tenant context required");
+    throwGroveError(403, ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED, "Arbor");
   }
 
   // Try D1 first using TenantDb for proper tenant scoping
@@ -78,7 +79,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     });
 
     if (!entry) {
-      throw error(404, "Post not found");
+      throwGroveError(404, ARBOR_ERRORS.RESOURCE_NOT_FOUND, "Arbor");
     }
 
     const rawContent = entry[1] as string;
@@ -102,6 +103,6 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     if (err && typeof err === "object" && "status" in err && err.status === 404)
       throw err;
     console.error("Filesystem fetch error:", err);
-    throw error(500, "Failed to fetch post");
+    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
   }
 };

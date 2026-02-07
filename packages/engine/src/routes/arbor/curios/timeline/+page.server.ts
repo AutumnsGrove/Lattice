@@ -1,5 +1,6 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import {
   getAllVoices,
   getOpenRouterModels,
@@ -125,7 +126,10 @@ export const actions: Actions = {
 
     if (!db || !tenantId) {
       console.log("[Timeline Config] Missing db or tenantId");
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
@@ -158,7 +162,8 @@ export const actions: Actions = {
     if (enabled) {
       if (!githubUsername?.trim()) {
         return fail(400, {
-          error: "GitHub username is required when enabling Timeline",
+          error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+          error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
         });
       }
       // Note: We'd also validate tokens exist (either new or previously saved)
@@ -308,7 +313,11 @@ export const actions: Actions = {
       return { success: true };
     } catch (error) {
       console.error("[Timeline Config] Failed to save:", error);
-      return fail(500, { error: "Failed to save configuration" });
+      logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+      return fail(500, {
+        error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+      });
     }
   },
 };

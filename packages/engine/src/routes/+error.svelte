@@ -10,6 +10,9 @@
 	<h1>{page.status}</h1>
 	<p class="message">{page.error?.message || 'Page not found'}</p>
 	<p class="description">The page you're looking for doesn't exist or has been moved.</p>
+	{#if page.error?.code}
+		<p class="error-code">{page.error.code}</p>
+	{/if}
 	<a href="/" class="home-link">Go back home</a>
 </div>
 
@@ -40,8 +43,15 @@
 	.description {
 		font-size: 1.1rem;
 		color: #666;
-		margin: 0 0 2rem 0;
+		margin: 0 0 1rem 0;
 		transition: color 0.3s ease;
+	}
+	.error-code {
+		font-family: monospace;
+		font-size: 0.85rem;
+		color: #999;
+		margin: 0 0 2rem 0;
+		letter-spacing: 0.05em;
 	}
 	.home-link {
 		display: inline-block;

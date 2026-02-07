@@ -6,6 +6,7 @@ import {
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 interface DeleteBody {
   key: string;
@@ -18,12 +19,12 @@ interface DeleteBody {
 export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Rate limit deletions (prevent deletion storms)
@@ -57,22 +58,22 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
         console.warn(
           `CSRF violation: origin ${origin} does not match host ${host}`,
         );
-        throw error(403, "Invalid origin");
+        throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
       }
     } catch (err) {
       if (err instanceof Error && "status" in err) throw err;
-      throw error(403, "Invalid origin header");
+      throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
     }
   }
 
   // Check for R2 binding
   if (!platform?.env?.IMAGES) {
-    throw error(500, "R2 bucket not configured");
+    throwGroveError(500, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
 
   // Check for database
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -85,7 +86,9 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     const { key } = body;
 
     if (!key || typeof key !== "string") {
-      throw error(400, "Missing or invalid image key");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+        detail: "key required and must be string",
+      });
     }
 
     // Comprehensive key sanitization to prevent directory traversal
@@ -102,13 +105,15 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
       sanitizedKey.startsWith("/") ||
       !sanitizedKey
     ) {
-      throw error(400, "Invalid image key format");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+        detail: "key fails format validation",
+      });
     }
 
     // Check if the object exists before attempting deletion
     const existingObject = await platform.env.IMAGES.head(sanitizedKey);
     if (!existingObject) {
-      throw error(404, "Image not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
@@ -117,7 +122,7 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
       console.warn(
         `Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`,
       );
-      throw error(403, "Access denied");
+      throwGroveError(403, API_ERRORS.FORBIDDEN, "API");
     }
 
     // Delete from R2
@@ -130,7 +135,7 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err) {
     if (err instanceof Error && "status" in err) throw err;
-    console.error("Delete error:", err);
-    throw error(500, "Failed to delete image");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

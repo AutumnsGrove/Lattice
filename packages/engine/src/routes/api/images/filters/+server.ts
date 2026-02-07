@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { parseImageFilename } from "$lib/utils/gallery.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 interface R2ListResult {
   objects: Array<{ key: string }>;
@@ -26,16 +27,16 @@ interface CollectionRecord {
  */
 export const GET: RequestHandler = async ({ platform, locals }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   if (!platform?.env?.IMAGES) {
-    throw error(500, "R2 bucket not configured");
+    throwGroveError(500, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
 
   // NOTE: Each data source is in its own try/catch to prevent cascading failures.
@@ -91,7 +92,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       cursor = listResult.truncated ? listResult.cursor : undefined;
     } while (cursor);
   } catch (err) {
-    console.error("[Filters] Failed to scan R2 images:", err);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "R2 scan failed",
+      cause: err,
+    });
     // Continue - we can still return tags and collections from D1
   }
 
@@ -108,7 +112,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
       tags = (tagResults.results as unknown as TagRecord[]) || [];
     }
   } catch (err) {
-    console.error("[Filters] Failed to fetch tags:", err);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "tag fetch failed",
+      cause: err,
+    });
     // Continue - we can still return categories, years, and collections
   }
 
@@ -126,7 +133,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
         (collectionResults.results as unknown as CollectionRecord[]) || [];
     }
   } catch (err) {
-    console.error("[Filters] Failed to fetch collections:", err);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "collection fetch failed",
+      cause: err,
+    });
     // Continue - we can still return categories, years, and tags
   }
 

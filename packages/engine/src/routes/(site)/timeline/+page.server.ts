@@ -7,6 +7,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { SITE_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface SummaryRow {
   id: string;
@@ -38,11 +39,11 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(503, SITE_ERRORS.DB_NOT_CONFIGURED, "Site");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, SITE_ERRORS.TENANT_CONTEXT_REQUIRED, "Site");
   }
 
   // Check if timeline is enabled for this tenant
@@ -56,7 +57,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     .first<ConfigRow>();
 
   if (!config?.enabled) {
-    throw error(404, "Timeline is not enabled for this site");
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
   }
 
   // Pagination params
@@ -115,8 +116,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
         .all<ActivityRow>(),
     ]);
   } catch (err) {
-    console.error("[Timeline] Query failed:", err);
-    throw error(500, "Failed to load timeline data");
+    throwGroveError(500, SITE_ERRORS.PAGE_LOAD_FAILED, "Site", { cause: err });
   }
 
   const total = countResult?.total ?? 0;

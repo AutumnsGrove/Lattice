@@ -14,6 +14,7 @@ import {
   MAX_MILESTONE_LIMIT,
 } from "$lib/curios/journey";
 import { safeParseJson } from "$lib/utils/json";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface MilestoneRow {
   id: string;
@@ -41,11 +42,11 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Check if journey is enabled for this tenant
@@ -57,11 +58,11 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     .first();
 
   if (!config?.enabled) {
-    throw error(404, "Journey not enabled for this site");
+    throwGroveError(404, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!config?.show_milestones) {
-    throw error(404, "Milestones are disabled for this site");
+    throwGroveError(404, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // Parse query params with safe defaults for invalid values

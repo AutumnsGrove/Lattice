@@ -18,6 +18,7 @@ import {
   buildRateLimitKey,
 } from "$lib/server/rate-limits/index.js";
 import { encryptToken } from "$lib/server/encryption";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface ConfigRow {
   tenant_id: string;
@@ -97,11 +98,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Service temporarily unavailable");
+    throwGroveError(503, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Rate limiting (only if KV available)
@@ -137,15 +138,15 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
   // Check authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!db) {
-    throw error(503, "Service temporarily unavailable");
+    throwGroveError(503, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Rate limiting
@@ -177,16 +178,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   // Validate githubUsername if provided
   const trimmedUsername = githubUsername?.trim() || null;
   if (trimmedUsername && !isValidUsername(trimmedUsername)) {
-    throw error(
-      400,
-      "Invalid GitHub username. Must be 1-39 alphanumeric characters or hyphens.",
-    );
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Validate cacheTtlSeconds if provided
   const ttl = cacheTtlSeconds || DEFAULT_GIT_CONFIG.cacheTtlSeconds;
   if (typeof ttl !== "number" || ttl < 60 || ttl > 86400) {
-    throw error(400, "Cache TTL must be between 60 and 86400 seconds.");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Handle token encryption
@@ -241,6 +239,6 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     return json({ success: true });
   } catch (err) {
     console.error("Failed to save git dashboard config:", err);
-    throw error(500, "Unable to save configuration. Please try again.");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

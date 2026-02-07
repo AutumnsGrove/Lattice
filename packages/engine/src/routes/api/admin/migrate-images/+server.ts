@@ -19,6 +19,7 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { isSupportedImage } from "$lib/curios/gallery";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 const TENANT_ID = "autumn-primary";
 
@@ -99,20 +100,17 @@ function slugify(input: string): string {
 
 export const POST: RequestHandler = async ({ url, platform, locals }) => {
   if (!locals.user?.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const sourceBucket = platform?.env?.IMAGES_SOURCE;
   const destBucket = platform?.env?.IMAGES;
 
   if (!sourceBucket) {
-    throw error(
-      503,
-      "IMAGES_SOURCE binding not configured. Add it to wrangler.toml.",
-    );
+    throwGroveError(503, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
   if (!destBucket) {
-    throw error(503, "IMAGES (destination) bucket not configured.");
+    throwGroveError(503, API_ERRORS.R2_NOT_CONFIGURED, "API");
   }
 
   const dryRun = url.searchParams.get("dryRun") === "true";

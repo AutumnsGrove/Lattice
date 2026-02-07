@@ -3,6 +3,7 @@ import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -14,15 +15,15 @@ const SHOP_DISABLED_MESSAGE =
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -131,7 +132,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching Connect account:", err);
-    throw error(500, "Failed to fetch Connect account");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -154,23 +155,23 @@ export const POST: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -189,7 +190,7 @@ export const POST: RequestHandler = async ({
     const returnUrl = data.returnUrl as string;
     const refreshUrl = data.refreshUrl as string;
     if (!returnUrl || !refreshUrl) {
-      throw error(400, "Return URL and refresh URL are required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Check if account already exists
@@ -262,7 +263,7 @@ export const POST: RequestHandler = async ({
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error creating Connect account:", err);
-    throw error(500, "Failed to create Connect account");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -277,19 +278,19 @@ export const DELETE: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -316,6 +317,6 @@ export const DELETE: RequestHandler = async ({
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error disconnecting Connect account:", err);
-    throw error(500, "Failed to disconnect Connect account");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

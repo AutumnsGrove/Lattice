@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
 import type { Passkey } from "$lib/heartwood";
@@ -110,13 +111,13 @@ export const load: PageServerLoad = async ({
   const parentData = await parent();
 
   if (!locals.tenantId) {
-    throw error(400, "No tenant context");
+    throwGroveError(400, ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED, "Arbor");
   }
 
   if (!platform?.env?.DB) {
     // This is a critical infrastructure failure - fail hard.
     // Query-level errors below use graceful degradation (billingError, usageError).
-    throw error(500, "Database not configured");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   // Get session cookies for passkey API calls

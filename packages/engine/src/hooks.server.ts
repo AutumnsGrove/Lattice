@@ -6,6 +6,7 @@ import {
   validateCSRF,
 } from "$lib/utils/csrf.js";
 import { error, redirect } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import {
   TURNSTILE_COOKIE_NAME,
   validateVerificationCookie,
@@ -597,12 +598,12 @@ export const handle: Handle = async ({ event, resolve }) => {
           expectedToken: csrfToken,
         })
       ) {
-        throw error(403, "Invalid origin");
+        throwGroveError(403, SITE_ERRORS.INVALID_ORIGIN, "Site");
       }
     } else {
       // All other endpoints require CSRF token validation
       if (!validateCSRFToken(event.request, csrfToken)) {
-        throw error(403, "Invalid CSRF token");
+        throwGroveError(403, SITE_ERRORS.INVALID_CSRF_TOKEN, "Site");
       }
     }
   }

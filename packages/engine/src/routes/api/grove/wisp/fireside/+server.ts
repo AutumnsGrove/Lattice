@@ -13,6 +13,7 @@
 
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 import { RATE_LIMIT } from "$lib/config/wisp.js";
 import { secureUserContent } from "$lib/server/inference-client.js";
 import { createLumenClient, type LumenClient } from "$lib/lumen/index.js";
@@ -61,8 +62,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
     return json(
       {
-        error:
-          "Looks like you're not signed in. Pop back in when you're ready.",
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
     );
@@ -72,8 +73,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!validateCSRF(request)) {
     return json(
       {
-        error:
-          "Something seems off with your request. Mind refreshing the page?",
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
       },
       { status: 403 },
     );
@@ -142,11 +143,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           errorMessage,
         );
       } else {
-        console.error("[Fireside] Settings check failed:", errorMessage);
+        logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE, { cause: err });
         return json(
           {
-            error:
-              "I need a moment to check on things. Mind trying again shortly?",
+            error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+            error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
           },
           { status: 503 },
         );
@@ -184,7 +185,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     body = await request.json();
   } catch {
     return json(
-      { error: "Hmm, I couldn't quite understand that. Mind trying again?" },
+      {
+        error: API_ERRORS.INVALID_REQUEST_BODY.userMessage,
+        error_code: API_ERRORS.INVALID_REQUEST_BODY.code,
+      },
       { status: 400 },
     );
   }
@@ -195,8 +199,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!["start", "respond", "draft"].includes(action)) {
     return json(
       {
-        error:
-          "That's not something I know how to do yet. Try starting a conversation?",
+        error: API_ERRORS.INVALID_REQUEST_BODY.userMessage,
+        error_code: API_ERRORS.INVALID_REQUEST_BODY.code,
       },
       { status: 400 },
     );
@@ -204,11 +208,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   // Rate limiting (fail-closed for AI operations)
   if (!kv) {
-    console.error("[Fireside] Rate limiting failed: CACHE_KV not configured");
+    logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
     return json(
       {
-        error:
-          "I need a moment to gather myself. Mind waiting a bit and trying again?",
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
       },
       { status: 503 },
     );
@@ -229,8 +233,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!openrouterApiKey) {
     return json(
       {
-        error:
-          "I'm not quite set up yet. Ask the site owner to configure the AI settings.",
+        error: API_ERRORS.AI_SERVICE_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.AI_SERVICE_NOT_CONFIGURED.code,
       },
       { status: 503 },
     );
@@ -261,15 +265,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         );
 
       default:
-        return json({ error: "Invalid action" }, { status: 400 });
+        return json(
+          {
+            error: API_ERRORS.INVALID_REQUEST_BODY.userMessage,
+            error_code: API_ERRORS.INVALID_REQUEST_BODY.code,
+          },
+          { status: 400 },
+        );
     }
   } catch (err) {
-    console.error(
-      "[Fireside] Error:",
-      err instanceof Error ? err.message : "Unknown error",
-    );
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
     return json(
-      { error: "Oh dear, something got tangled up. Mind trying that again?" },
+      {
+        error: API_ERRORS.INTERNAL_ERROR.userMessage,
+        error_code: API_ERRORS.INTERNAL_ERROR.code,
+      },
       { status: 500 },
     );
   }

@@ -13,9 +13,14 @@
  * Uses the same session cookie pattern as OAuth callback.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  logGroveError,
+} from "$lib/errors/index.js";
 import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
 import {
   checkRateLimit,
@@ -73,7 +78,7 @@ export const POST: RequestHandler = async ({
 }) => {
   // Validate CSRF (origin-based for API endpoints)
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Rate limit to prevent brute force
@@ -102,7 +107,7 @@ export const POST: RequestHandler = async ({
   try {
     body = (await request.json()) as VerifyRequestBody;
   } catch {
-    throw error(400, "Invalid request body");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   // Validate credential structure
@@ -114,7 +119,7 @@ export const POST: RequestHandler = async ({
     !body.credential.response.clientDataJSON ||
     !body.credential.response.signature
   ) {
-    throw error(400, "Invalid credential data");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   // Get returnTo from request body or cookie (sanitized to prevent open redirects)
@@ -149,29 +154,26 @@ export const POST: RequestHandler = async ({
         error?: string;
       };
 
-      console.error("[Passkey Verify] GroveAuth verification failed:", {
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: errorData.error || errorData.message,
         status: response.status,
-        error: errorData.error || errorData.message,
       });
 
-      // Map specific errors to user-friendly messages
-      const errorMessage =
-        errorData.message || errorData.error || "Passkey verification failed";
-
+      // Map specific errors to appropriate error codes
       if (response.status === 404) {
-        throw error(
-          401,
-          "No passkey found. Try signing in with Google instead.",
-        );
+        throwGroveError(401, API_ERRORS.RESOURCE_NOT_FOUND, "API");
       }
 
-      throw error(response.status, errorMessage);
+      throwGroveError(response.status, API_ERRORS.UPSTREAM_ERROR, "API");
     }
 
     const result = (await response.json()) as GroveAuthVerifyResponse;
 
     if (!result.verified || !result.accessToken) {
-      throw error(401, result.error || "Passkey verification failed");
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: result.error,
+      });
+      throwGroveError(401, API_ERRORS.UPSTREAM_ERROR, "API");
     }
 
     // Upsert user into D1 if we have user info and database access
@@ -263,7 +265,7 @@ export const POST: RequestHandler = async ({
       throw err;
     }
 
-    console.error("[Passkey Verify] Error:", err);
-    throw error(500, "Failed to verify passkey authentication");
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };

@@ -8,6 +8,7 @@ import {
   createOrder,
   getOrCreateCustomer,
 } from "$lib/payments/shop";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -46,25 +47,25 @@ export const POST: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // CSRF check - validate origin for public checkout
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
-    throw error(400, "Tenant ID required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -76,17 +77,17 @@ export const POST: RequestHandler = async ({
       .first();
 
     if (!tenant) {
-      throw error(404, "Store not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
     const data = (await request.json()) as Record<string, unknown>;
 
     // Validate required fields
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
-      throw error(400, "At least one item is required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     if (!data.successUrl || !data.cancelUrl) {
-      throw error(400, "Success and cancel URLs are required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validate items and calculate totals
@@ -109,22 +110,22 @@ export const POST: RequestHandler = async ({
       const variantId = item.variantId as string;
       const quantity = item.quantity as number;
       if (!variantId || !quantity || quantity < 1) {
-        throw error(400, "Invalid item: variantId and quantity required");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
 
       const variant = await getVariantById(platform.env.DB, variantId);
       if (!variant) {
-        throw error(404, `Variant not found: ${variantId}`);
+        throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
       }
 
       const product = await getProductById(platform.env.DB, variant.productId);
       if (!product) {
-        throw error(404, `Product not found for variant: ${variantId}`);
+        throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
       }
 
       // Check product is active
       if (product.status !== "active") {
-        throw error(400, `Product is not available: ${product.name}`);
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
 
       // Check inventory (if tracking)
@@ -133,10 +134,7 @@ export const POST: RequestHandler = async ({
         variant.inventoryPolicy === "deny" &&
         variant.inventoryQuantity < quantity
       ) {
-        throw error(
-          400,
-          `Insufficient inventory for ${product.name} - ${variant.name}`,
-        );
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
 
       // Track product types
@@ -292,8 +290,7 @@ export const POST: RequestHandler = async ({
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error creating checkout:", err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    throw error(500, `Failed to create checkout: ${message}`);
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -302,17 +299,17 @@ export const POST: RequestHandler = async ({
  */
 export const GET: RequestHandler = async ({ url, platform }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   const sessionId = url.searchParams.get("session_id");
 
   if (!sessionId) {
-    throw error(400, "Session ID required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -323,7 +320,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const session = await stripe.getCheckoutSession(sessionId);
 
     if (!session) {
-      throw error(404, "Session not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     return json({
@@ -335,6 +332,6 @@ export const GET: RequestHandler = async ({ url, platform }) => {
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching checkout session:", err);
-    throw error(500, "Failed to fetch checkout session");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

@@ -1,5 +1,5 @@
 import { getContactPage } from "$lib/utils/markdown.js";
-import { error } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types.js";
 
 export const prerender = true;
@@ -8,7 +8,7 @@ export const load: PageServerLoad = () => {
   const page = getContactPage();
 
   if (!page) {
-    throw error(404, "Contact page not found");
+    throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Site");
   }
 
   return {

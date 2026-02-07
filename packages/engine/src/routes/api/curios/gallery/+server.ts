@@ -6,6 +6,7 @@
 
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface ConfigRow {
   enabled: number;
@@ -42,11 +43,11 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Check if gallery is enabled
@@ -58,7 +59,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     .first<ConfigRow>();
 
   if (!config?.enabled) {
-    throw error(404, "Gallery not enabled for this site");
+    throwGroveError(404, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   const cdnBaseUrl = config.cdn_base_url || "";

@@ -5,7 +5,13 @@
 
 declare global {
   namespace App {
-    // interface Error {}
+    interface Error {
+      message: string;
+      /** Structured error code (e.g. GROVE-API-040, HW-AUTH-001) */
+      code?: string;
+      /** Error category: user (retry), admin (config), bug (investigate) */
+      category?: string;
+    }
 
     interface Locals {
       /** Authenticated user from Heartwood OAuth */

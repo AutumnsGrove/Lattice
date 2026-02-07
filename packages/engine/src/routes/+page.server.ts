@@ -5,7 +5,7 @@ import {
   renderMarkdown,
   type GutterItem,
 } from "$lib/utils/markdown.js";
-import { error } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - latest post is fetched from D1 at runtime
@@ -193,7 +193,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         description: "Set up your new blog",
       };
     }
-    throw error(404, "Home page not found");
+    throwGroveError(404, SITE_ERRORS.HOME_PAGE_NOT_FOUND, "Site");
   }
 
   // Process latest post data

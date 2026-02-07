@@ -8,6 +8,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface ActivityRow {
   activity_date: string;
@@ -22,11 +23,11 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Check if timeline is enabled
@@ -36,7 +37,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     .first();
 
   if (!config?.enabled) {
-    throw error(404, "Timeline not enabled for this site");
+    throwGroveError(404, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // Default to last 365 days

@@ -1,5 +1,6 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import {
   DEFAULT_GALLERY_CONFIG,
   GRID_STYLE_OPTIONS,
@@ -167,7 +168,10 @@ export const actions: Actions = {
     const tenantId = locals.tenantId;
 
     if (!db || !tenantId) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
@@ -262,8 +266,11 @@ export const actions: Actions = {
 
       return { success: true };
     } catch (error) {
-      console.error("Failed to save Gallery config:", error);
-      return fail(500, { error: "Failed to save configuration" });
+      logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+      return fail(500, {
+        error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+      });
     }
   },
 };

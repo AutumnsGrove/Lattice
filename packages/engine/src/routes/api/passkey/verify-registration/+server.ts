@@ -7,9 +7,14 @@
  * completing the WebAuthn registration ceremony.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  logGroveError,
+} from "$lib/errors/index.js";
 
 const AUTH_API_URL = "https://auth-api.grove.place";
 
@@ -31,25 +36,25 @@ interface VerifyRegistrationRequest {
  */
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   const groveSession = cookies.get("grove_session");
   const accessToken = cookies.get("access_token");
 
   if (!groveSession && !accessToken) {
-    throw error(401, "Not authenticated");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   let body: VerifyRegistrationRequest;
   try {
     body = (await request.json()) as VerifyRegistrationRequest;
   } catch {
-    throw error(400, "Invalid request body");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   if (!body.credential || !body.credential.id || !body.credential.response) {
-    throw error(400, "Invalid credential data");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   try {
@@ -86,29 +91,29 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
         },
       );
     } else {
-      throw error(401, "Not authenticated");
+      throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
     }
 
     if (!response.ok) {
       const errorData = (await response.json().catch(() => ({}))) as {
         message?: string;
       };
-      console.error(
-        "[Passkey Verify] GroveAuth error:",
-        response.status,
-        errorData,
-      );
-      throw error(
-        response.status === 401 ? 401 : 500,
-        errorData.message || "Failed to verify passkey registration",
-      );
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: errorData.message,
+        status: response.status,
+      });
+      const errorToThrow =
+        response.status === 401
+          ? API_ERRORS.SESSION_EXPIRED
+          : API_ERRORS.UPSTREAM_ERROR;
+      throwGroveError(response.status === 401 ? 401 : 500, errorToThrow, "API");
     }
 
     const passkey = await response.json();
     return json(passkey);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Passkey Verify] Error:", err);
-    throw error(500, "Failed to verify passkey registration");
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };

@@ -1,6 +1,7 @@
 """Write Git commands (Tier 2 - Require --write flag)."""
 
 import json
+import os
 from typing import Optional
 
 import click
@@ -632,6 +633,21 @@ def stash(
             else:
                 console.print(f"[green]Dropped stash@{{{index}}}[/green]")
         else:
+            # SAFETY: Warn when stash is called non-interactively.
+            # AI agents should NEVER stash user WIP to work around
+            # sync/push failures. The user decides what happens to
+            # their working tree.
+            if not os.isatty(0):
+                console.print(
+                    "[bold red]AGENT SAFETY BLOCK:[/bold red] "
+                    "Stashing is not allowed from non-interactive contexts.\n"
+                    "[yellow]AI agents must NEVER stash user work to fix "
+                    "push/sync conflicts.[/yellow]\n"
+                    "[dim]Tell the user the operation needs a clean tree "
+                    "and let them decide how to proceed.[/dim]"
+                )
+                raise SystemExit(1)
+
             # Push to stash
             git.stash_push(message)
             if output_json:

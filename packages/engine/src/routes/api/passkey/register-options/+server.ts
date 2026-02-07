@@ -7,9 +7,14 @@
  * The client uses these options to trigger the browser's WebAuthn ceremony.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  logGroveError,
+} from "$lib/errors/index.js";
 
 /** GroveAuth API URL (not the frontend URL!) */
 const AUTH_API_URL = "https://auth-api.grove.place";
@@ -17,7 +22,7 @@ const AUTH_API_URL = "https://auth-api.grove.place";
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate CSRF (origin-based for API endpoints)
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Support both grove_session (SessionDO) and access_token (legacy JWT)
@@ -25,7 +30,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   const accessToken = cookies.get("access_token");
 
   if (!groveSession && !accessToken) {
-    throw error(401, "Not authenticated");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   try {
@@ -55,7 +60,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
         },
       );
     } else {
-      throw error(401, "Not authenticated");
+      throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
     }
 
     if (!response.ok) {
@@ -67,25 +72,16 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
         // Response wasn't JSON
       }
 
-      console.error("[Passkey] Failed to get registration options:", {
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: errorData.message || errorData.error,
         status: response.status,
-        statusText: response.statusText,
-        errorData,
-        responseText: responseText.slice(0, 500),
-        hasGroveSession: !!cookies.get("grove_session"),
-        hasAccessToken: !!cookies.get("access_token"),
       });
 
       if (response.status === 401) {
-        throw error(401, "Session expired. Please sign in again.");
+        throwGroveError(401, API_ERRORS.SESSION_EXPIRED, "API");
       }
 
-      // Include status in error message for debugging
-      const errorMessage =
-        errorData.message ||
-        errorData.error ||
-        `GroveAuth returned ${response.status}: ${response.statusText}`;
-      throw error(response.status, errorMessage);
+      throwGroveError(response.status, API_ERRORS.UPSTREAM_ERROR, "API");
     }
 
     const options = await response.json();
@@ -96,16 +92,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       throw err;
     }
 
-    console.error("[Passkey] Registration options error:", {
-      error: err,
-      message: err instanceof Error ? err.message : String(err),
-      hasGroveSession: !!cookies.get("grove_session"),
-      hasAccessToken: !!cookies.get("access_token"),
-      hasAuthBinding: !!platform?.env?.AUTH,
-    });
-    throw error(
-      500,
-      `Passkey registration failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-    );
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };

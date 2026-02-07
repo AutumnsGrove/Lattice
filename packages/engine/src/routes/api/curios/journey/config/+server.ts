@@ -16,6 +16,7 @@ import {
   CLEAR_TOKEN_VALUE,
 } from "$lib/curios/journey";
 import { encryptToken } from "$lib/server/encryption";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
   enabled: number;
@@ -50,16 +51,16 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   const user = locals.user;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Require authentication for config access
   if (!user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   const config = await db
@@ -120,15 +121,15 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   const user = locals.user;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   if (!user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   const body = (await request.json()) as ConfigUpdateRequest;
@@ -148,21 +149,18 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
   // Validate required fields when enabling
   if (enabled && !githubRepoUrl?.trim()) {
-    throw error(400, "GitHub repository URL is required when enabling Journey");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Validate GitHub repo URL format (owner/repo)
   if (githubRepoUrl?.trim() && !isValidGithubRepoUrl(githubRepoUrl)) {
-    throw error(
-      400,
-      "GitHub repository URL must be in format: owner/repo (e.g., 'AutumnsGrove/GroveEngine')",
-    );
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Validate snapshot frequency
   const validFrequencies = ["release", "weekly", "monthly", "manual"];
   if (snapshotFrequency && !validFrequencies.includes(snapshotFrequency)) {
-    throw error(400, "Invalid snapshot frequency");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   try {
@@ -263,7 +261,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
     return json({ success: true });
   } catch (err) {
-    console.error("Failed to save Journey config:", err);
-    throw error(500, "Failed to save configuration");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

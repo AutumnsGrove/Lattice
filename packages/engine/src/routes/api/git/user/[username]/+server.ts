@@ -20,6 +20,7 @@ import {
   getClientIP,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Rate limit: 60 requests per minute per IP
 // Calls GitHub REST API (60 req/hour unauthenticated, 5000 with token)
@@ -31,7 +32,7 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
   const kv = platform?.env?.CACHE_KV;
 
   if (!username || !isValidUsername(username)) {
-    throw error(400, "Invalid username");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Rate limiting by IP (public endpoint)
@@ -85,9 +86,9 @@ export const GET: RequestHandler = async ({ params, platform, request }) => {
     return json({ user, cached: false }, { headers: getHeaders() });
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {
-      throw error(404, "User not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
     console.error("Failed to fetch GitHub user:", err);
-    throw error(502, "Unable to fetch user data. Please try again later.");
+    throwGroveError(502, API_ERRORS.UPSTREAM_ERROR, "API");
   }
 };

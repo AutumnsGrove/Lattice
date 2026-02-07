@@ -20,6 +20,7 @@ import {
   type TargetSystem,
   type R2Bucket as SentinelR2Bucket,
 } from "$lib/sentinel/index.js";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 /**
  * GET /api/sentinel
@@ -27,15 +28,15 @@ import {
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   // Require admin authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
   if (!locals.user.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const tenantId = locals.tenantId ?? "default";
@@ -65,8 +66,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       count: runs.length,
     });
   } catch (err) {
-    console.error("[Sentinel API] List error:", err);
-    throw error(500, "Failed to list sentinel runs");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -91,15 +92,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     !platform?.env?.CACHE_KV ||
     !platform?.env?.IMAGES
   ) {
-    throw error(500, "Required bindings not configured");
+    throwGroveError(500, API_ERRORS.SERVICE_UNAVAILABLE, "API");
   }
 
   // Require admin authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
   if (!locals.user.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const tenantId = locals.tenantId ?? "default";
@@ -125,44 +126,41 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   try {
     body = await request.json();
   } catch {
-    throw error(400, "Invalid JSON body");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   if (!body.name) {
-    throw error(400, "Name is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Input validation - prevent abuse and ensure reasonable limits
   if (body.targetOperations !== undefined) {
     if (body.targetOperations < 1 || body.targetOperations > 1_000_000) {
-      throw error(400, "targetOperations must be between 1 and 1,000,000");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   }
 
   if (body.durationSeconds !== undefined) {
     if (body.durationSeconds < 1 || body.durationSeconds > 3600) {
-      throw error(
-        400,
-        "durationSeconds must be between 1 and 3600 (1 hour max)",
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   }
 
   if (body.concurrency !== undefined) {
     if (body.concurrency < 1 || body.concurrency > 500) {
-      throw error(400, "concurrency must be between 1 and 500");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   }
 
   if (body.spikeMultiplier !== undefined) {
     if (body.spikeMultiplier < 1 || body.spikeMultiplier > 100) {
-      throw error(400, "spikeMultiplier must be between 1 and 100");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   }
 
   if (body.maxOpsPerSecond !== undefined) {
     if (body.maxOpsPerSecond < 1 || body.maxOpsPerSecond > 10000) {
-      throw error(400, "maxOpsPerSecond must be between 1 and 10,000");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   }
 
@@ -181,10 +179,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (body.targetSystems) {
     for (const system of body.targetSystems) {
       if (!validSystems.includes(system)) {
-        throw error(
-          400,
-          `Invalid target system: ${system}. Valid options: ${validSystems.join(", ")}`,
-        );
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }
   }
@@ -292,7 +287,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       message: body.scheduledAt ? "Test run scheduled" : "Test run created",
     });
   } catch (err) {
-    console.error("[Sentinel API] Create error:", err);
-    throw error(500, "Failed to create sentinel run");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

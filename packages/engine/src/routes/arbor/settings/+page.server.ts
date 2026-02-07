@@ -1,4 +1,5 @@
 import { fail } from "@sveltejs/kit";
+import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import {
   getGreenhouseTenant,
@@ -135,11 +136,17 @@ export const actions: Actions = {
   toggleGraft: async ({ request, locals, platform }) => {
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     if (!locals.tenantId) {
-      return fail(403, { error: "Tenant context required" });
+      return fail(403, {
+        error: ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED.code,
+      });
     }
 
     // Verify greenhouse membership
@@ -149,7 +156,10 @@ export const actions: Actions = {
     });
 
     if (!tenant?.enabled) {
-      return fail(403, { error: "Greenhouse membership required" });
+      return fail(403, {
+        error: ARBOR_ERRORS.GREENHOUSE_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.GREENHOUSE_REQUIRED.code,
+      });
     }
 
     const formData = await request.formData();
@@ -157,7 +167,10 @@ export const actions: Actions = {
     const enabled = formData.get("enabled") === "true";
 
     if (!graftId) {
-      return fail(400, { error: "Graft ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await setTenantGraftOverride(
@@ -171,7 +184,10 @@ export const actions: Actions = {
     );
 
     if (!success) {
-      return fail(500, { error: "Failed to update graft preference" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return {
@@ -188,11 +204,17 @@ export const actions: Actions = {
   resetGrafts: async ({ locals, platform }) => {
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     if (!locals.tenantId) {
-      return fail(403, { error: "Tenant context required" });
+      return fail(403, {
+        error: ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED.code,
+      });
     }
 
     // Verify greenhouse membership
@@ -202,7 +224,10 @@ export const actions: Actions = {
     });
 
     if (!tenant?.enabled) {
-      return fail(403, { error: "Greenhouse membership required" });
+      return fail(403, {
+        error: ARBOR_ERRORS.GREENHOUSE_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.GREENHOUSE_REQUIRED.code,
+      });
     }
 
     const count = await resetTenantGraftOverrides(locals.tenantId, {
@@ -228,12 +253,18 @@ export const actions: Actions = {
    */
   enrollTenant: async ({ request, locals, platform }) => {
     if (!isWayfinder(locals.user?.email)) {
-      return fail(403, { error: "Unauthorized" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
@@ -241,7 +272,10 @@ export const actions: Actions = {
     const notes = formData.get("notes")?.toString() || undefined;
 
     if (!tenantId) {
-      return fail(400, { error: "Tenant ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await enrollInGreenhouse(
@@ -252,7 +286,10 @@ export const actions: Actions = {
     );
 
     if (!success) {
-      return fail(500, { error: "Failed to enroll tenant" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return { success: true, message: "Tenant enrolled in greenhouse" };
@@ -263,19 +300,28 @@ export const actions: Actions = {
    */
   removeTenant: async ({ request, locals, platform }) => {
     if (!isWayfinder(locals.user?.email)) {
-      return fail(403, { error: "Unauthorized" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
     const tenantId = formData.get("tenantId")?.toString();
 
     if (!tenantId) {
-      return fail(400, { error: "Tenant ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await removeFromGreenhouse(tenantId, {
@@ -284,7 +330,10 @@ export const actions: Actions = {
     });
 
     if (!success) {
-      return fail(500, { error: "Failed to remove tenant" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return { success: true, message: "Tenant removed from greenhouse" };
@@ -295,12 +344,18 @@ export const actions: Actions = {
    */
   toggleTenant: async ({ request, locals, platform }) => {
     if (!isWayfinder(locals.user?.email)) {
-      return fail(403, { error: "Unauthorized" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
@@ -308,7 +363,10 @@ export const actions: Actions = {
     const enabled = formData.get("enabled") === "true";
 
     if (!tenantId) {
-      return fail(400, { error: "Tenant ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await toggleGreenhouseStatus(tenantId, enabled, {
@@ -317,7 +375,10 @@ export const actions: Actions = {
     });
 
     if (!success) {
-      return fail(500, { error: "Failed to toggle tenant status" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return {
@@ -333,19 +394,28 @@ export const actions: Actions = {
    */
   cultivateFlag: async ({ request, locals, platform }) => {
     if (!isWayfinder(locals.user?.email)) {
-      return fail(403, { error: "Unauthorized" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
     const flagId = formData.get("flagId")?.toString();
 
     if (!flagId) {
-      return fail(400, { error: "Flag ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await setFlagEnabled(flagId, true, {
@@ -354,7 +424,10 @@ export const actions: Actions = {
     });
 
     if (!success) {
-      return fail(500, { error: "Failed to cultivate flag" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return { success: true, message: `${flagId} is now cultivated` };
@@ -365,19 +438,28 @@ export const actions: Actions = {
    */
   pruneFlag: async ({ request, locals, platform }) => {
     if (!isWayfinder(locals.user?.email)) {
-      return fail(403, { error: "Unauthorized" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     const env = platform?.env;
     if (!env?.DB || !env?.CACHE_KV) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const formData = await request.formData();
     const flagId = formData.get("flagId")?.toString();
 
     if (!flagId) {
-      return fail(400, { error: "Flag ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     const success = await setFlagEnabled(flagId, false, {
@@ -386,7 +468,10 @@ export const actions: Actions = {
     });
 
     if (!success) {
-      return fail(500, { error: "Failed to prune flag" });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
 
     return { success: true, message: `${flagId} is now pruned` };

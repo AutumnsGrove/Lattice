@@ -10,7 +10,7 @@
  * - Email notification via waitUntil (non-blocking)
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { validateTracePath } from "$lib/utils/trace-path.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
@@ -20,6 +20,7 @@ import {
   getClientIP,
 } from "$lib/server/rate-limits/middleware.js";
 import { sendTraceNotification } from "$lib/server/services/trace-email.js";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 import type { RequestHandler } from "./$types.js";
 
 interface TraceInput {
@@ -48,11 +49,23 @@ const MAX_COMMENT_LENGTH = 500;
 export const POST: RequestHandler = async ({ request, platform }) => {
   // Validate CSRF (origin-based)
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    return json(
+      {
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
+      },
+      { status: 403 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   const db = platform.env.DB;
@@ -82,16 +95,34 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     // Validate required fields
     if (!input.sourcePath || typeof input.sourcePath !== "string") {
-      throw error(400, "Missing required field: sourcePath");
+      return json(
+        {
+          error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+          error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+        },
+        { status: 400 },
+      );
     }
 
     if (!input.vote || !["up", "down"].includes(input.vote)) {
-      throw error(400, "Invalid vote: must be 'up' or 'down'");
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
+      );
     }
 
     // Validate sourcePath format
     if (!validateTracePath(input.sourcePath)) {
-      throw error(400, "Invalid sourcePath format");
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
+      );
     }
 
     // Validate and sanitize comment
@@ -99,9 +130,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     if (input.comment && typeof input.comment === "string") {
       const trimmed = input.comment.trim();
       if (trimmed.length > MAX_COMMENT_LENGTH) {
-        throw error(
-          400,
-          `Comment too long (max ${MAX_COMMENT_LENGTH} characters)`,
+        return json(
+          {
+            error: API_ERRORS.VALIDATION_FAILED.userMessage,
+            error_code: API_ERRORS.VALIDATION_FAILED.code,
+          },
+          { status: 400 },
         );
       }
       if (trimmed.length > 0) {
@@ -158,8 +192,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     return json({ success: true, id });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Trace API] Error:", err);
-    throw error(500, "Failed to submit feedback");
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, {
+      detail: "Failed to submit trace feedback",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.INTERNAL_ERROR.userMessage,
+        error_code: API_ERRORS.INTERNAL_ERROR.code,
+      },
+      { status: 500 },
+    );
   }
 };
 

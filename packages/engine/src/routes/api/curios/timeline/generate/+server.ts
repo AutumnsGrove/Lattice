@@ -32,6 +32,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */
 const CONCURRENCY_LIMIT = 5;
@@ -106,15 +107,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const user = locals.user;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   if (!user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Rate limit generation (expensive AI + GitHub API operation)
@@ -158,10 +159,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     .first<ConfigRow>();
 
   if (!config) {
-    throw error(
-      400,
-      "Timeline not configured. Please set up in Admin → Curios → Timeline.",
-    );
+    throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // Get tokens using SecretsManager (preferred) with legacy fallback
@@ -201,25 +199,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const openrouterKey = openrouterResult.token;
 
   if (!githubToken) {
-    console.error(
-      `[Timeline Generate] GitHub token retrieval failed - source: ${githubResult.source}`,
-    );
-    throw error(
-      500,
-      "GitHub token is missing or invalid. " +
-        "Try re-saving the token in Admin → Curios → Timeline.",
-    );
+    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+      detail: "GitHub token missing",
+    });
+    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
   }
 
   if (!openrouterKey) {
-    console.error(
-      `[Timeline Generate] OpenRouter key retrieval failed - source: ${openrouterResult.source}`,
-    );
-    throw error(
-      500,
-      "OpenRouter API key is missing or invalid. " +
-        "Try re-saving the token in Admin → Curios → Timeline.",
-    );
+    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+      detail: "OpenRouter key missing",
+    });
+    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
   }
 
   try {
@@ -509,9 +499,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
     });
   } catch (err) {
-    console.error("Failed to generate timeline summary:", err);
-    // Don't leak internal error details to the client
-    throw error(500, "Generation failed. Please try again later.");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 

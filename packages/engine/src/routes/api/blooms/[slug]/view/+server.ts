@@ -1,4 +1,5 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
  * POST /api/posts/[slug]/view - Record a view for a post
@@ -15,16 +16,16 @@ export const POST: RequestHandler = async ({
   locals,
 }) => {
   if (!platform?.env?.POST_META) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -56,8 +57,7 @@ export const POST: RequestHandler = async ({
     return json(result);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Views API] Error recording view:", err);
-    throw error(500, "Failed to record view");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -68,16 +68,16 @@ export const POST: RequestHandler = async ({
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   if (!platform?.env?.POST_META) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -104,7 +104,6 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     return json({ viewCount: meta.viewCount, isPopular: meta.isPopular });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Views API] Error getting views:", err);
-    throw error(500, "Failed to get view count");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

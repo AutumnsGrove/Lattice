@@ -11,6 +11,7 @@ import {
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface PostRecord {
   id?: string;
@@ -48,11 +49,11 @@ interface PostInput {
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   try {
@@ -112,8 +113,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     );
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error fetching posts:", err);
-    throw error(500, "Failed to fetch posts");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -124,20 +124,20 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Rate limit content creation to prevent spam
@@ -166,10 +166,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
-      throw error(
-        400,
-        "Missing required fields: title, slug, markdown_content",
-      );
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validation constants
@@ -180,22 +177,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate lengths
     if (data.title.length > MAX_TITLE_LENGTH) {
-      throw error(400, `Title too long (max ${MAX_TITLE_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw error(
-        400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
-      throw error(400, "Content too large (max 1MB)");
+      throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     if (data.slug.length > MAX_SLUG_LENGTH) {
-      throw error(400, `Slug too long (max ${MAX_SLUG_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Validate gutter_content is valid JSON if provided
@@ -203,11 +197,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       try {
         const parsed = JSON.parse(data.gutter_content);
         if (!Array.isArray(parsed)) {
-          throw error(400, "gutter_content must be a JSON array");
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
         }
       } catch (e) {
         if ((e as { status?: number }).status === 400) throw e;
-        throw error(400, "gutter_content must be valid JSON");
+        throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
       }
     }
 
@@ -216,11 +210,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       try {
         const imageUrl = new URL(data.featured_image);
         if (!["http:", "https:"].includes(imageUrl.protocol)) {
-          throw error(400, "Cover image must be an HTTP or HTTPS URL");
+          throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
         }
       } catch (e) {
         if ((e as { status?: number }).status === 400) throw e;
-        throw error(400, "Cover image must be a valid URL");
+        throwGroveError(400, API_ERRORS.INVALID_FILE, "API");
       }
     }
 
@@ -238,7 +232,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
 
     if (existing) {
-      throw error(409, "A post with this slug already exists");
+      throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
@@ -301,7 +295,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error creating post:", err);
-    throw error(500, "Failed to create post");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

@@ -18,6 +18,7 @@ import {
   checkRateLimit,
   getClientIP,
 } from "$lib/server/rate-limits/middleware.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   // Get the token from the request body
@@ -27,11 +28,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     const body = (await request.json()) as Record<string, unknown>;
     token = body.token as string;
   } catch {
-    throw error(400, "Invalid request body");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   if (!token) {
-    throw error(400, "Missing Turnstile token");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Rate limit Turnstile verification (each call hits Cloudflare API)
@@ -52,7 +53,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   if (!secretKey) {
     console.error("Turnstile: TURNSTILE_SECRET_KEY not configured");
-    throw error(500, "Verification service not configured");
+    throwGroveError(500, API_ERRORS.TURNSTILE_NOT_CONFIGURED, "API");
   }
 
   // Get the user's IP for additional validation
@@ -70,7 +71,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   if (!result.success) {
     console.warn("Turnstile verification failed:", result["error-codes"]);
-    throw error(403, "Human verification failed");
+    throwGroveError(403, API_ERRORS.HUMAN_VERIFICATION_FAILED, "API");
   }
 
   // Create the verification cookie

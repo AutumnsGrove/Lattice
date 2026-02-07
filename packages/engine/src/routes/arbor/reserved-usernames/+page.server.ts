@@ -6,6 +6,7 @@
  */
 
 import { error, fail } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface ReservedUsername {
@@ -45,19 +46,16 @@ function isAdmin(email: string | undefined): boolean {
 
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
   // Check if user is a Grove admin
   if (!isAdmin(locals.user.email)) {
-    throw error(
-      403,
-      "Access denied. This page is for Grove administrators only.",
-    );
+    throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not available");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   const { DB } = platform.env;
@@ -161,8 +159,7 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
       validReasons: VALID_REASONS,
     };
   } catch (err) {
-    console.error("[Reserved Usernames] Error loading data:", err);
-    throw error(500, "Failed to load reserved usernames");
+    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
   }
 };
 
@@ -172,11 +169,17 @@ export const actions: Actions = {
    */
   add: async ({ request, locals, platform }) => {
     if (!locals.user || !isAdmin(locals.user.email)) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -187,22 +190,32 @@ export const actions: Actions = {
 
     // Validate username
     if (!username || username.length < 2) {
-      return fail(400, { error: "Username must be at least 2 characters" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/.test(username)) {
       return fail(400, {
-        error: "Username must be lowercase letters, numbers, and hyphens only",
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
       });
     }
 
     if (username.length > 30) {
-      return fail(400, { error: "Username must be 30 characters or less" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     // Validate reason
     if (!reason || !VALID_REASONS.includes(reason)) {
-      return fail(400, { error: "Invalid reservation reason" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     try {
@@ -214,8 +227,9 @@ export const actions: Actions = {
         .first();
 
       if (existing) {
-        return fail(400, {
-          error: `Username "${username}" is already reserved`,
+        return fail(409, {
+          error: ARBOR_ERRORS.CONFLICT.userMessage,
+          error_code: ARBOR_ERRORS.CONFLICT.code,
         });
       }
 
@@ -238,8 +252,11 @@ export const actions: Actions = {
 
       return { success: true, message: `Reserved "${username}" successfully` };
     } catch (err) {
-      console.error("[Reserved Usernames] Error adding:", err);
-      return fail(500, { error: "Failed to add reserved username" });
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
   },
 
@@ -248,11 +265,17 @@ export const actions: Actions = {
    */
   remove: async ({ request, locals, platform }) => {
     if (!locals.user || !isAdmin(locals.user.email)) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -261,7 +284,10 @@ export const actions: Actions = {
     const notes = formData.get("notes")?.toString().trim() || null;
 
     if (!username) {
-      return fail(400, { error: "Username is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     try {
@@ -273,7 +299,10 @@ export const actions: Actions = {
         .first<{ username: string; reason: string }>();
 
       if (!existing) {
-        return fail(404, { error: `Username "${username}" is not reserved` });
+        return fail(404, {
+          error: ARBOR_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+          error_code: ARBOR_ERRORS.RESOURCE_NOT_FOUND.code,
+        });
       }
 
       // Remove from reserved usernames
@@ -292,8 +321,11 @@ export const actions: Actions = {
 
       return { success: true, message: `Released "${username}" successfully` };
     } catch (err) {
-      console.error("[Reserved Usernames] Error removing:", err);
-      return fail(500, { error: "Failed to remove reserved username" });
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
   },
 };

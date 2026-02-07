@@ -279,6 +279,10 @@
       "types": "./dist/zephyr/index.d.ts",
       "import": "./dist/zephyr/index.js",
       "default": "./dist/zephyr/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "default": "./dist/errors/index.js"
     }
   },
   "files": [

@@ -220,6 +220,28 @@ def sync(ctx: click.Context, write: bool, remote: str, base_branch: str) -> None
             console.print("[red]Not a git repository[/red]")
             raise SystemExit(1)
 
+        # SAFETY: Refuse to sync with a dirty working tree.
+        # Rebasing with unstaged changes can silently lose work.
+        # The user must decide how to handle their WIP — never auto-stash.
+        status = git.status()
+        if status.unstaged or status.untracked:
+            dirty_count = len(status.unstaged) + len(status.untracked)
+            console.print(
+                f"[red]Cannot sync: working tree has {dirty_count} "
+                f"uncommitted file(s)[/red]"
+            )
+            console.print(
+                "\n[yellow]Your options:[/yellow]\n"
+                "  1. Use a worktree (best):   [dim]gw git worktree create --write -n my-feature[/dim]\n"
+                "     Then sync main separately — no conflicts, no stashing.\n"
+                "  2. Commit WIP to a branch:  [dim]gw git save --write[/dim]\n"
+                "  3. Stash manually:          [dim]gw git stash --write[/dim]\n"
+                "  4. Discard changes:         [dim]git checkout -- .[/dim]\n"
+                "\n[dim]gw will never auto-stash your work. "
+                "You decide what happens to it.[/dim]"
+            )
+            raise SystemExit(1)
+
         current_branch = git.current_branch()
 
         if not output_json:

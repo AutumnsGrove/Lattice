@@ -6,9 +6,14 @@
  * This endpoint proxies to GroveAuth's passkey delete endpoint.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  logGroveError,
+} from "$lib/errors/index.js";
 
 const AUTH_API_URL = "https://auth-api.grove.place";
 
@@ -22,19 +27,19 @@ export const DELETE: RequestHandler = async ({
   platform,
 }) => {
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   const passkeyId = params.id;
   if (!passkeyId) {
-    throw error(400, "Passkey ID is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   const groveSession = cookies.get("grove_session");
   const accessToken = cookies.get("access_token");
 
   if (!groveSession && !accessToken) {
-    throw error(401, "Not authenticated");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   try {
@@ -68,28 +73,34 @@ export const DELETE: RequestHandler = async ({
         },
       );
     } else {
-      throw error(401, "Not authenticated");
+      throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
     }
 
     if (!response.ok) {
       const errorData = (await response.json().catch(() => ({}))) as {
         message?: string;
       };
-      console.error(
-        "[Passkey Delete] GroveAuth error:",
-        response.status,
-        errorData,
-      );
-      throw error(
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: errorData.message,
+        status: response.status,
+      });
+      const errorToThrow =
+        response.status === 401
+          ? API_ERRORS.SESSION_EXPIRED
+          : response.status === 404
+            ? API_ERRORS.RESOURCE_NOT_FOUND
+            : API_ERRORS.UPSTREAM_ERROR;
+      throwGroveError(
         response.status === 401 ? 401 : response.status === 404 ? 404 : 500,
-        errorData.message || "Failed to delete passkey",
+        errorToThrow,
+        "API",
       );
     }
 
     return json({ success: true });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Passkey Delete] Error:", err);
-    throw error(500, "Failed to delete passkey");
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };

@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types";
 
 interface Subscriber {
@@ -16,12 +17,12 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
   // Auth is handled by the parent /admin layout - no duplicate check needed here
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not available");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   const tenantId = locals.tenantId;
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED, "Arbor");
   }
 
   const { DB } = platform.env;
@@ -55,7 +56,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
       totalUnsubscribed: unsubscribedCount?.count || 0,
     };
   } catch (err) {
-    console.error("[Subscribers Error]", err);
-    throw error(500, "Failed to load subscribers");
+    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
   }
 };

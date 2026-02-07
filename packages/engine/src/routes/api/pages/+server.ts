@@ -9,6 +9,7 @@ import {
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface PageInput {
   title?: string;
@@ -26,20 +27,20 @@ interface PageInput {
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // Rate limit content creation to prevent spam
@@ -68,7 +69,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate required fields
     if (!data.title || !data.markdown_content) {
-      throw error(400, "Missing required fields: title, markdown_content");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validation constants
@@ -79,18 +80,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate lengths
     if (data.title.length > MAX_TITLE_LENGTH) {
-      throw error(400, `Title too long (max ${MAX_TITLE_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.description && data.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw error(
-        400,
-        `Description too long (max ${MAX_DESCRIPTION_LENGTH} characters)`,
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
-      throw error(400, "Content too large (max 1MB)");
+      throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     // Generate slug from title if not provided
@@ -108,12 +106,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate slug length
     if (slug.length > MAX_SLUG_LENGTH) {
-      throw error(400, `Slug too long (max ${MAX_SLUG_LENGTH} characters)`);
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Basic slug validation
     if (!slug || slug.length < 1) {
-      throw error(400, "Invalid slug - must contain at least one character");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Use TenantDb for automatic tenant isolation
@@ -126,11 +124,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     if (existing) {
       // Suggest alternative slug with timestamp
-      const suggested = `${slug}-${Date.now().toString(36)}`;
-      throw error(409, {
-        message: "A page with this slug already exists",
-        suggested_slug: suggested,
-      } as any);
+      throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
@@ -169,18 +163,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         errMsg.includes("UNIQUE constraint failed") ||
         errMsg.includes("unique")
       ) {
-        const suggested = `${slug}-${Date.now().toString(36)}`;
-        throw error(409, {
-          message: "A page with this slug already exists",
-          suggested_slug: suggested,
-        } as any);
+        throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
       }
       throw insertErr;
     }
   } catch (err) {
     // Pass through HTTP errors with status codes
     if ((err as { status?: number }).status) throw err;
-    console.error("Error creating page:", err);
-    throw error(500, "Failed to create page");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

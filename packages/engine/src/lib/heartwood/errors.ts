@@ -9,29 +9,23 @@
  * - admin: User should contact admin/support (config issue, permissions)
  * - bug: Internal error (should not happen, needs investigation)
  *
+ * Uses the shared GroveErrorDef type from the Grove error system.
+ * AuthErrorDef is a type alias for backward compatibility.
+ *
  * @see https://github.com/AutumnsGrove/GroveEngine/issues/668
  */
 
-// =============================================================================
-// ERROR CATEGORIES
-// =============================================================================
-
-export type ErrorCategory = "user" | "admin" | "bug";
+import type { ErrorCategory, GroveErrorDef } from "../errors/types.js";
+import { logGroveError } from "../errors/helpers.js";
 
 // =============================================================================
-// ERROR DEFINITIONS
+// BACKWARD-COMPATIBLE TYPE ALIASES
 // =============================================================================
 
-export interface AuthErrorDef {
-  /** Heartwood error code (e.g., HW-AUTH-001) */
-  code: string;
-  /** Error category for determining how to display */
-  category: ErrorCategory;
-  /** User-facing message (safe to display) */
-  userMessage: string;
-  /** Admin-facing message with more detail */
-  adminMessage: string;
-}
+export type { ErrorCategory };
+
+/** @deprecated Use GroveErrorDef from '@autumnsgrove/groveengine/errors' */
+export type AuthErrorDef = GroveErrorDef;
 
 /**
  * All Heartwood authentication error codes.
@@ -249,7 +243,7 @@ export function getAuthErrorByCode(hwCode: string): AuthErrorDef | undefined {
 
 /**
  * Log an auth error with structured context.
- * Sensitive data (tokens, secrets) is NEVER logged.
+ * Thin wrapper around the shared logGroveError helper.
  *
  * @param error - The error definition
  * @param context - Additional context (sanitized)
@@ -263,14 +257,7 @@ export function logAuthError(
     userAgent?: string;
   } = {},
 ): void {
-  console.error(
-    `[Heartwood Auth] ${error.code}: ${error.adminMessage}`,
-    JSON.stringify({
-      code: error.code,
-      category: error.category,
-      ...context,
-    }),
-  );
+  logGroveError("Heartwood Auth", error, context);
 }
 
 // =============================================================================

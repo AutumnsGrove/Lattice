@@ -6,9 +6,14 @@
  * Returns all passkeys for the authenticated user.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import {
+  API_ERRORS,
+  throwGroveError,
+  logGroveError,
+} from "$lib/errors/index.js";
 
 /** Default GroveAuth API URL */
 const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
@@ -16,13 +21,13 @@ const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 export const GET: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate origin - this endpoint returns sensitive security data
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Get access token from cookie
   const accessToken = cookies.get("access_token");
   if (!accessToken) {
-    throw error(401, "Not authenticated");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
@@ -50,13 +55,13 @@ export const GET: RequestHandler = async ({ request, cookies, platform }) => {
       });
 
       if (response.status === 401) {
-        throw error(401, "Session expired. Please sign in again.");
+        throwGroveError(401, API_ERRORS.SESSION_EXPIRED, "API");
       }
 
-      throw error(
-        response.status,
-        errorData.message || errorData.error || "Failed to list passkeys",
-      );
+      logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+        detail: errorData.message || errorData.error,
+      });
+      throwGroveError(response.status, API_ERRORS.UPSTREAM_ERROR, "API");
     }
 
     const passkeys = await response.json();
@@ -67,7 +72,7 @@ export const GET: RequestHandler = async ({ request, cookies, platform }) => {
       throw err;
     }
 
-    console.error("[Passkey] List error:", err);
-    throw error(500, "Failed to list passkeys");
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
+    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
   }
 };

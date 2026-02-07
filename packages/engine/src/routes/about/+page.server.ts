@@ -3,7 +3,7 @@ import {
   type GutterItem,
   renderMarkdown,
 } from "$lib/utils/markdown.js";
-import { error } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - content is fetched from D1 at runtime for tenants
@@ -106,7 +106,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   const page = getAboutPage();
 
   if (!page) {
-    throw error(404, "About page not found");
+    throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Site");
   }
 
   return {

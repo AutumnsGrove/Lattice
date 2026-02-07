@@ -21,6 +21,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Maximum audio file size (25MB as per plan)
 const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
@@ -40,17 +41,17 @@ const ALLOWED_AUDIO_TYPES = [
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Rate limit transcriptions (expensive AI operation)
@@ -74,7 +75,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   ]);
   if (!envValidation.valid) {
     console.error(`[Scribe] ${envValidation.message}`);
-    throw error(503, "Transcription service temporarily unavailable");
+    throwGroveError(503, API_ERRORS.AI_SERVICE_NOT_CONFIGURED, "API");
   }
 
   const db = platform!.env!.DB;
@@ -89,11 +90,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   ]);
 
   if (!subscription) {
-    throw error(404, "Tenant not found");
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   if (!subscription.isActive) {
-    throw error(403, "Subscription inactive");
+    throwGroveError(403, API_ERRORS.SUBSCRIPTION_REQUIRED, "API");
   }
 
   try {
@@ -104,23 +105,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate audio file
     if (!audioFile || !(audioFile instanceof File)) {
-      throw error(400, "Audio file required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validate file type
     if (!ALLOWED_AUDIO_TYPES.includes(audioFile.type)) {
-      throw error(
-        400,
-        `Invalid audio type: ${audioFile.type}. Allowed: ${ALLOWED_AUDIO_TYPES.join(", ")}`,
-      );
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API");
     }
 
     // Validate file size
     if (audioFile.size > MAX_AUDIO_SIZE) {
-      throw error(
-        400,
-        `Audio file too large (${(audioFile.size / 1024 / 1024).toFixed(1)}MB). Maximum: 25MB`,
-      );
+      throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     // Convert to Uint8Array
@@ -176,20 +171,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
       // Quota exceeded
       if (message.includes("quota") || message.includes("limit")) {
-        throw error(429, "Daily transcription limit reached");
+        throwGroveError(429, API_ERRORS.USAGE_LIMIT_REACHED, "API");
       }
 
       // Transcription failed
       if (message.includes("Transcription failed")) {
-        throw error(
-          422,
-          "Couldn't understand the recording. Please try again.",
-        );
+        throwGroveError(400, API_ERRORS.INVALID_FILE, "API");
       }
 
       console.error("[Scribe] Transcription error:", err);
     }
 
-    throw error(500, "Transcription failed");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

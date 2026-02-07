@@ -19,6 +19,7 @@ import {
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
 import { isFeatureEnabled } from "$lib/feature-flags/index.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -68,13 +69,12 @@ async function validateImageDimensions(
   // Validate dimensions if we could parse them
   if (width > 0 && height > 0) {
     if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-      throw error(
-        400,
-        `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+        detail: `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
+      });
     }
     if (width * height > MAX_IMAGE_PIXELS) {
-      throw error(400, "Image has too many pixels (max 50 megapixels)");
+      throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
   }
 }
@@ -86,17 +86,17 @@ async function validateImageDimensions(
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
-    throw error(403, "Tenant context required");
+    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // ========================================================================
@@ -119,10 +119,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!uploadsEnabled) {
     return json(
       {
-        error: true,
-        code: "feature_disabled",
-        message:
-          "Image uploads are currently in limited beta. This feature will be available soon!",
+        error: API_ERRORS.FEATURE_DISABLED.code,
+        error_code: API_ERRORS.FEATURE_DISABLED.code,
+        message: API_ERRORS.FEATURE_DISABLED.userMessage,
       },
       { status: 403 },
     );
@@ -136,7 +135,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   ]);
   if (!envValidation.valid) {
     console.error(`[Image Upload] ${envValidation.message}`);
-    throw error(503, "Upload service temporarily unavailable");
+    throwGroveError(503, API_ERRORS.UPLOAD_SERVICE_UNAVAILABLE, "API");
   }
 
   // Safe to access after validation
@@ -156,9 +155,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (response) {
     return new Response(
       JSON.stringify({
-        error: "rate_limited",
-        message:
-          "Upload limit reached. Please wait before uploading more images.",
+        error: API_ERRORS.RATE_LIMITED.code,
+        error_code: API_ERRORS.RATE_LIMITED.code,
+        message: API_ERRORS.RATE_LIMITED.userMessage,
         remaining: 0,
         resetAt: new Date(result.resetAt * 1000).toISOString(),
       }),
@@ -195,15 +194,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
 
     if (!file || !(file instanceof File)) {
-      throw error(400, "No file provided");
+      throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
+        detail: "file required",
+      });
     }
 
     // Validate file type using shared constants
     if (!isAllowedImageType(file.type)) {
-      throw error(
-        400,
-        `Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES_DISPLAY}`,
-      );
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+        detail: `Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES_DISPLAY}`,
+      });
     }
 
     // Extract and validate extension
@@ -211,25 +211,28 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const ext = originalName.split(".").pop()?.toLowerCase();
 
     if (!ext) {
-      throw error(400, "File must have an extension");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+        detail: "file must have extension",
+      });
     }
 
     const validExtensions = MIME_TO_EXTENSIONS[file.type as AllowedImageType];
     if (!validExtensions || !validExtensions.includes(ext)) {
-      throw error(
-        400,
-        `File extension '.${ext}' does not match content type '${file.type}'`,
-      );
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+        detail: `File extension '.${ext}' does not match content type '${file.type}'`,
+      });
     }
 
     // Block double extensions that might indicate attacks
     if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
-      throw error(400, "Invalid file name");
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+        detail: "invalid filename",
+      });
     }
 
     // Validate file size
     if (file.size > MAX_SIZE) {
-      throw error(400, "File too large. Maximum size is 10MB");
+      throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     // Read file once for both validation and upload
@@ -243,26 +246,26 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       signatures.some((sig) => sig.every((byte, i) => buffer[i] === byte));
 
     if (!matchesSignature) {
-      throw error(
-        400,
-        "Invalid file signature - file may be corrupted or spoofed",
-      );
+      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+        detail: "invalid file signature - may be corrupted or spoofed",
+      });
     }
 
     // Additional WebP validation: verify WEBP marker at offset 8
     // This prevents other RIFF-based formats (WAV, AVI) from being accepted
     if (file.type === "image/webp") {
       if (buffer.length < 12) {
-        throw error(400, "Invalid WebP file - too small");
+        throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+          detail: "webp file too small",
+        });
       }
       const hasWebpMarker = WEBP_MARKER.every(
         (byte, i) => buffer[8 + i] === byte,
       );
       if (!hasWebpMarker) {
-        throw error(
-          400,
-          "Invalid WebP file - missing WEBP marker (may be a different RIFF format)",
-        );
+        throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+          detail: "invalid webp file - missing WEBP marker",
+        });
       }
     }
 
@@ -287,10 +290,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (rejectedCheck.response) {
       return json(
         {
-          error: true,
-          code: "upload_restricted",
-          message:
-            "Upload access temporarily restricted. Please try again later or contact support.",
+          error: API_ERRORS.UPLOAD_RESTRICTED.code,
+          error_code: API_ERRORS.UPLOAD_RESTRICTED.code,
+          message: API_ERRORS.UPLOAD_RESTRICTED.userMessage,
         },
         { status: 429 },
       );
@@ -354,8 +356,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         // IMPORTANT: Never reveal CSAM detection reason
         return json(
           {
-            error: true,
-            code: "content_rejected",
+            error: API_ERRORS.INVALID_FILE.code,
+            error_code: API_ERRORS.INVALID_FILE.code,
             message: petalResult.message,
             // Include processing time for debugging (not the reason)
             processingTimeMs: petalResult.processingTimeMs,
@@ -515,9 +517,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if ((err as { status?: number }).status) throw err;
 
     // Log the full error for server-side debugging
-    console.error("[Image Upload] Unexpected error:", err);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
 
     // Return generic message to client — full error already logged above
-    throw error(500, "Failed to upload image");
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

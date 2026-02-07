@@ -11,6 +11,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import {
   parseImageFilename,
   getAvailableYears,
@@ -90,11 +91,11 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   const tenantId = locals.tenantId;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(503, SITE_ERRORS.DB_NOT_CONFIGURED, "Site");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, SITE_ERRORS.TENANT_CONTEXT_REQUIRED, "Site");
   }
 
   // Check if gallery is enabled for this tenant
@@ -127,11 +128,11 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
   } catch (err) {
     console.warn("Gallery config query failed (table may not exist):", err);
     // Table doesn't exist or query failed - gallery not enabled
-    throw error(404, "Gallery is not enabled for this site");
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
   }
 
   if (!config?.enabled) {
-    throw error(404, "Gallery is not enabled for this site");
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
   }
 
   const cdnBaseUrl = config.cdn_base_url || "https://cdn.grove.place";

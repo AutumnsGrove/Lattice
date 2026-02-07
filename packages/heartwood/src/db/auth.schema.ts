@@ -33,6 +33,11 @@ export const baUser = sqliteTable("ba_user", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 
+  // Two-factor authentication (required by twoFactor plugin)
+  twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).default(
+    false,
+  ),
+
   // Grove-specific extensions
   tenantId: text("tenant_id"), // Multi-tenant association
   isAdmin: integer("is_admin", { mode: "boolean" }).default(false),

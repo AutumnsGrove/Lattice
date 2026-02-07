@@ -1,4 +1,4 @@
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import {
@@ -10,6 +10,7 @@ import {
   deleteVariant,
 } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 import type {
   ProductStatus,
   ProductType,
@@ -32,16 +33,34 @@ export const GET: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
-    throw error(400, "Tenant ID required");
+    return json(
+      {
+        error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+        error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+      },
+      { status: 400 },
+    );
   }
 
   try {
@@ -52,14 +71,29 @@ export const GET: RequestHandler = async ({
     );
 
     if (!product) {
-      throw error(404, "Product not found");
+      return json(
+        {
+          error: API_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+          error_code: API_ERRORS.RESOURCE_NOT_FOUND.code,
+        },
+        { status: 404 },
+      );
     }
 
     return json({ product });
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
-    console.error("Error fetching product:", err);
-    throw error(500, "Failed to fetch product");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Error fetching product",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };
 
@@ -76,26 +110,56 @@ export const PATCH: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    return json(
+      {
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
+      },
+      { status: 403 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
-    throw error(400, "Tenant ID required");
+    return json(
+      {
+        error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+        error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+      },
+      { status: 400 },
+    );
   }
 
   try {
@@ -107,7 +171,13 @@ export const PATCH: RequestHandler = async ({
     );
 
     if (!product) {
-      throw error(404, "Product not found");
+      return json(
+        {
+          error: API_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+          error_code: API_ERRORS.RESOURCE_NOT_FOUND.code,
+        },
+        { status: 404 },
+      );
     }
 
     const data = (await request.json()) as Record<string, unknown>;
@@ -117,9 +187,12 @@ export const PATCH: RequestHandler = async ({
     if (newSlug && newSlug !== params.slug) {
       const slugRegex = /^[a-z0-9-]+$/;
       if (!slugRegex.test(newSlug)) {
-        throw error(
-          400,
-          "Slug must contain only lowercase letters, numbers, and hyphens",
+        return json(
+          {
+            error: API_ERRORS.VALIDATION_FAILED.userMessage,
+            error_code: API_ERRORS.VALIDATION_FAILED.code,
+          },
+          { status: 400 },
         );
       }
     }
@@ -236,8 +309,17 @@ export const PATCH: RequestHandler = async ({
     });
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
-    console.error("Error updating product:", err);
-    throw error(500, "Failed to update product");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Error updating product",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };
 
@@ -252,26 +334,56 @@ export const DELETE: RequestHandler = async ({
   locals,
 }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    return json(
+      {
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
+      },
+      { status: 403 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   const tenantId = url.searchParams.get("tenant_id") || locals.tenantId;
   if (!tenantId) {
-    throw error(400, "Tenant ID required");
+    return json(
+      {
+        error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+        error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+      },
+      { status: 400 },
+    );
   }
 
   try {
@@ -282,7 +394,13 @@ export const DELETE: RequestHandler = async ({
     );
 
     if (!product) {
-      throw error(404, "Product not found");
+      return json(
+        {
+          error: API_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+          error_code: API_ERRORS.RESOURCE_NOT_FOUND.code,
+        },
+        { status: 404 },
+      );
     }
 
     await deleteProduct(platform.env.DB, product.id);
@@ -293,7 +411,16 @@ export const DELETE: RequestHandler = async ({
     });
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
-    console.error("Error deleting product:", err);
-    throw error(500, "Failed to delete product");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Error deleting product",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };

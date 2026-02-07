@@ -35,6 +35,7 @@ import {
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 import { safeDecryptToken } from "$lib/server/encryption";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface GitStatsResponse {
   user: {
@@ -82,7 +83,7 @@ export const GET: RequestHandler = async ({
   const tenantId = locals.tenantId;
 
   if (!username || !isValidUsername(username)) {
-    throw error(400, "Invalid username");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Resolve token: tenant config first, then global env fallback
@@ -160,7 +161,7 @@ export const GET: RequestHandler = async ({
     user = await fetchUser(username);
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {
-      throw error(404, "User not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
     errors.push("user");
     console.error("Failed to fetch GitHub user:", err);
@@ -178,7 +179,7 @@ export const GET: RequestHandler = async ({
 
   // If user fetch failed and we have no cached data, return error
   if (!user && errors.includes("user")) {
-    throw error(502, "Unable to fetch user data. Please try again later.");
+    throwGroveError(502, API_ERRORS.UPSTREAM_ERROR, "API");
   }
 
   // Build response with available data

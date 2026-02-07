@@ -4,6 +4,7 @@ import { validateCSRF } from "$lib/utils/csrf.js";
 import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { OrderStatus, PaymentStatus } from "$lib/payments/types";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Shop feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 const SHOP_DISABLED = true;
@@ -21,15 +22,15 @@ const SHOP_DISABLED_MESSAGE =
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -58,7 +59,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error fetching orders:", err);
-    throw error(500, "Failed to fetch orders");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -76,19 +77,19 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
  */
 export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -96,13 +97,13 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
     const orderId = data.orderId as string;
     if (!orderId) {
-      throw error(400, "Order ID required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Get order to verify it exists
     const order = await getOrderById(platform.env.DB, orderId);
     if (!order) {
-      throw error(404, "Order not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Verify user owns the tenant this order belongs to
@@ -130,7 +131,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
         "refunded",
       ];
       if (!validStatuses.includes(newStatus as OrderStatus)) {
-        throw error(400, "Invalid status");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
       updates.push("status = ?");
       params.push(newStatus);
@@ -169,7 +170,7 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     if (updates.length === 0) {
-      throw error(400, "No updates provided");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     updates.push("updated_at = ?");
@@ -195,6 +196,6 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
     console.error("Error updating order:", err);
-    throw error(500, "Failed to update order");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

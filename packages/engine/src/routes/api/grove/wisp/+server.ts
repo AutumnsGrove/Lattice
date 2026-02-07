@@ -9,6 +9,7 @@
 
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 import {
   MAX_CONTENT_LENGTH,
   RATE_LIMIT,
@@ -35,12 +36,24 @@ export const prerender = false;
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    return json({ error: "Invalid origin" }, { status: 403 });
+    return json(
+      {
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
+      },
+      { status: 403 },
+    );
   }
 
   const db = platform?.env?.DB;
@@ -92,14 +105,26 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   try {
     body = await request.json();
   } catch {
-    return json({ error: "Invalid request body" }, { status: 400 });
+    return json(
+      {
+        error: API_ERRORS.INVALID_REQUEST_BODY.userMessage,
+        error_code: API_ERRORS.INVALID_REQUEST_BODY.code,
+      },
+      { status: 400 },
+    );
   }
 
   const { content, action, mode = "quick", context } = body;
 
   // Validate content
   if (!content || typeof content !== "string") {
-    return json({ error: "No content provided" }, { status: 400 });
+    return json(
+      {
+        error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+        error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+      },
+      { status: 400 },
+    );
   }
 
   if (content.length > MAX_CONTENT_LENGTH) {
@@ -115,7 +140,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const validActions = ["grammar", "tone", "readability", "all"];
   if (!action || !validActions.includes(action)) {
     return json(
-      { error: "Invalid action. Use: grammar, tone, readability, or all" },
+      {
+        error: API_ERRORS.INVALID_REQUEST_BODY.userMessage,
+        error_code: API_ERRORS.INVALID_REQUEST_BODY.code,
+      },
       { status: 400 },
     );
   }
@@ -123,7 +151,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Validate mode
   if (!["quick", "thorough"].includes(mode)) {
     return json(
-      { error: "Invalid mode. Use: quick or thorough" },
+      {
+        error: API_ERRORS.VALIDATION_FAILED.userMessage,
+        error_code: API_ERRORS.VALIDATION_FAILED.code,
+      },
       { status: 400 },
     );
   }
@@ -131,22 +162,43 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Validate context object (if provided)
   if (context !== undefined) {
     if (context !== null && typeof context !== "object") {
-      return json({ error: "Invalid context format" }, { status: 400 });
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
+      );
     }
     if (context?.slug !== undefined && typeof context.slug !== "string") {
-      return json({ error: "Invalid slug in context" }, { status: 400 });
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
+      );
     }
     if (context?.title !== undefined && typeof context.title !== "string") {
-      return json({ error: "Invalid title in context" }, { status: 400 });
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
+      );
     }
   }
 
   // Rate limiting using Threshold middleware (fail-closed to prevent cost overruns)
   if (!kv) {
     // Fail closed: AI operations are expensive, so we reject if we can't enforce limits
-    console.error("[Wisp] Rate limiting failed: CACHE_KV not configured");
+    logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
     return json(
-      { error: "Service temporarily unavailable. Please try again." },
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
       { status: 503 },
     );
   }
@@ -182,13 +234,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         .first()) as { monthly_cost: number } | null;
     } catch (err) {
       // Fail closed: reject request if we can't verify cost limits for safety
-      console.error(
-        "[Wisp] Cost limit check failed - blocking request:",
-        err instanceof Error ? err.message : "Unknown database error",
-      );
+      logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE, { cause: err });
       return json(
         {
-          error: "Unable to verify usage limits. Please try again.",
+          error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+          error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
         },
         { status: 503 },
       );
@@ -210,7 +260,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     !openrouterApiKey &&
     (action === "grammar" || action === "tone" || action === "all")
   ) {
-    return json({ error: "AI service not configured" }, { status: 503 });
+    return json(
+      {
+        error: API_ERRORS.AI_SERVICE_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.AI_SERVICE_NOT_CONFIGURED.code,
+      },
+      { status: 503 },
+    );
   }
 
   const lumen = openrouterApiKey
@@ -313,12 +369,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
     });
   } catch (err) {
-    console.error(
-      "[Wisp] Analysis error:",
-      err instanceof Error ? err.message : "Unknown error",
-    );
+    logGroveError("API", API_ERRORS.INTERNAL_ERROR, { cause: err });
     return json(
-      { error: "Analysis failed. Please try again." },
+      {
+        error: API_ERRORS.INTERNAL_ERROR.userMessage,
+        error_code: API_ERRORS.INTERNAL_ERROR.code,
+      },
       { status: 500 },
     );
   }
@@ -330,7 +386,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
   if (!locals.user) {
-    return json({ error: "Unauthorized" }, { status: 401 });
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   const db = platform?.env?.DB;

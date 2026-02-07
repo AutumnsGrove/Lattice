@@ -9,7 +9,7 @@
  * 2. Global GITHUB_TOKEN env var (fallback)
  */
 
-import { error, json } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   fetchContributions,
@@ -26,6 +26,7 @@ import {
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
 import { safeDecryptToken } from "$lib/server/encryption";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 // Rate limit: 60 requests per minute per IP
 // Calls GitHub GraphQL API (5000 points/hour, each query ~1-2 points)
@@ -46,7 +47,7 @@ export const GET: RequestHandler = async ({
   const tenantId = locals.tenantId;
 
   if (!username || !isValidUsername(username)) {
-    throw error(400, "Invalid username");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   // Resolve token: tenant config first, then global env fallback
@@ -82,10 +83,7 @@ export const GET: RequestHandler = async ({
   }
 
   if (!token) {
-    throw error(
-      503,
-      "GitHub token not configured. Please set up your GitHub token in the dashboard.",
-    );
+    throwGroveError(503, API_ERRORS.GITHUB_TOKEN_NOT_CONFIGURED, "API");
   }
 
   // Rate limiting by IP (public endpoint)
@@ -157,7 +155,16 @@ export const GET: RequestHandler = async ({
 
     return json({ ...responseData, cached: false }, { headers: getHeaders() });
   } catch (err) {
-    console.error("Failed to fetch GitHub contributions:", err);
-    throw error(502, "Unable to fetch contributions. Please try again later.");
+    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+      detail: `Failed to fetch GitHub contributions for ${username}`,
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.UPSTREAM_ERROR.userMessage,
+        error_code: API_ERRORS.UPSTREAM_ERROR.code,
+      },
+      { status: 502 },
+    );
   }
 };

@@ -12,6 +12,7 @@ import {
   sanitizeWebhookPayload,
   calculateWebhookExpiry,
 } from "$lib/utils/webhook-sanitizer";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Shop e-commerce feature is temporarily disabled - deferred to Phase 5 (Grove Social and beyond)
 // Note: This webhook endpoint remains ENABLED because it handles platform billing subscription events
@@ -34,15 +35,15 @@ const SHOP_ECOMMERCE_DISABLED = true;
  */
 export const POST: RequestHandler = async ({ request, platform }) => {
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_WEBHOOK_SECRET) {
-    throw error(500, "Webhook secret not configured");
+    throwGroveError(500, API_ERRORS.WEBHOOK_SECRET_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -57,7 +58,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     if (!result.received) {
       console.error("Webhook verification failed:", result.error);
-      throw error(400, result.error || "Webhook verification failed");
+      throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
     }
 
     const event = result.event!;

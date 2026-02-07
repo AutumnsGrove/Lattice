@@ -14,6 +14,7 @@ import { json, error } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createSecretsManager } from "$lib/server/secrets";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 /**
  * GET /api/tenants/[tenantId]/secrets
@@ -31,15 +32,15 @@ export async function GET({
   locals: App.Locals;
 }) {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "GROVE_KEK secret not configured");
+    throwGroveError(500, API_ERRORS.KEK_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -58,8 +59,8 @@ export async function GET({
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Secrets API] List failed:", err);
-    throw error(500, "Failed to list secrets");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 }
 
@@ -81,19 +82,19 @@ export async function PUT({
   locals: App.Locals;
 }) {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "GROVE_KEK secret not configured");
+    throwGroveError(500, API_ERRORS.KEK_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -106,24 +107,21 @@ export async function PUT({
     const body = (await request.json()) as { keyName?: string; value?: string };
 
     if (!body.keyName || typeof body.keyName !== "string") {
-      throw error(400, "keyName is required and must be a string");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     if (typeof body.value !== "string") {
-      throw error(400, "value is required and must be a string");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Validate keyName format (alphanumeric, underscores, hyphens)
     if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(body.keyName)) {
-      throw error(
-        400,
-        "keyName must start with a letter and contain only letters, numbers, underscores, and hyphens",
-      );
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Limit keyName length
     if (body.keyName.length > 64) {
-      throw error(400, "keyName must be 64 characters or less");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     const secrets = await createSecretsManager(platform.env);
@@ -135,8 +133,8 @@ export async function PUT({
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Secrets API] Set failed:", err);
-    throw error(500, "Failed to save secret");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 }
 
@@ -158,19 +156,19 @@ export async function DELETE({
   locals: App.Locals;
 }) {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.GROVE_KEK) {
-    throw error(500, "GROVE_KEK secret not configured");
+    throwGroveError(500, API_ERRORS.KEK_NOT_CONFIGURED, "API");
   }
 
   try {
@@ -183,14 +181,14 @@ export async function DELETE({
     const body = (await request.json()) as { keyName?: string };
 
     if (!body.keyName || typeof body.keyName !== "string") {
-      throw error(400, "keyName is required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     const secrets = await createSecretsManager(platform.env);
     const deleted = await secrets.deleteSecret(tenantId, body.keyName);
 
     if (!deleted) {
-      throw error(404, `Secret '${body.keyName}' not found`);
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     return json({
@@ -199,7 +197,7 @@ export async function DELETE({
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Secrets API] Delete failed:", err);
-    throw error(500, "Failed to delete secret");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 }

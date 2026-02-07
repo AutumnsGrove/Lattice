@@ -1,6 +1,7 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /**
  * Helper to get TenantDO stub for the current tenant
@@ -16,12 +17,12 @@ async function getTenantStub(
     .first<{ subdomain: string }>();
 
   if (!tenant) {
-    throw error(404, "Tenant not found");
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   const tenants = platform.env.TENANTS;
   if (!tenants) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   const doId = tenants.idFromName(`tenant:${tenant.subdomain}`);
@@ -37,20 +38,22 @@ async function getTenantStub(
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   // Auth check - drafts are private
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+      detail: "slug required",
+    });
   }
 
   try {
@@ -68,18 +71,20 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw error(404, "Draft not found");
+        throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
       }
       const text = await response.text();
-      throw error(response.status, text || "Failed to fetch draft");
+      throwGroveError(response.status, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: text,
+      });
     }
 
     const draft = await response.json();
     return json(draft);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Drafts API] Error fetching draft:", err);
-    throw error(500, "Failed to fetch draft");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };
 
@@ -97,25 +102,27 @@ export const PUT: RequestHandler = async ({
 }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+      detail: "slug required",
+    });
   }
 
   try {
@@ -134,15 +141,14 @@ export const PUT: RequestHandler = async ({
 
     // Validate required fields
     if (!data.content || !data.metadata?.title || !data.deviceId) {
-      throw error(
-        400,
-        "Missing required fields: content, metadata.title, deviceId",
-      );
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+        detail: "content, metadata.title, deviceId required",
+      });
     }
 
     // Validate content size (1MB limit)
     if (data.content.length > 1024 * 1024) {
-      throw error(400, "Draft content too large (max 1MB)");
+      throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
     const stub = await getTenantStub(platform, tenantId);
@@ -161,15 +167,17 @@ export const PUT: RequestHandler = async ({
 
     if (!response.ok) {
       const text = await response.text();
-      throw error(response.status, text || "Failed to save draft");
+      throwGroveError(response.status, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: text,
+      });
     }
 
     const result = await response.json();
     return json(result);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Drafts API] Error saving draft:", err);
-    throw error(500, "Failed to save draft");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };
 
@@ -186,25 +194,27 @@ export const DELETE: RequestHandler = async ({
 }) => {
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+      detail: "slug required",
+    });
   }
 
   try {
@@ -230,13 +240,15 @@ export const DELETE: RequestHandler = async ({
         });
       }
       const text = await response.text();
-      throw error(response.status, text || "Failed to delete draft");
+      throwGroveError(response.status, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: text,
+      });
     }
 
     return json({ success: true, message: "Draft deleted successfully" });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Drafts API] Error deleting draft:", err);
-    throw error(500, "Failed to delete draft");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
 };

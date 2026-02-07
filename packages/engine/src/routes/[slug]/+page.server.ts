@@ -1,4 +1,4 @@
-import { error } from "@sveltejs/kit";
+import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import {
   extractHeaders,
   type GutterItem,
@@ -48,11 +48,11 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     "vineyard",
   ];
   if (reservedSlugs.includes(slug)) {
-    throw error(404, "Page not found");
+    throwGroveError(404, SITE_ERRORS.RESERVED_SLUG, "Site");
   }
 
   if (!db || !tenantId) {
-    throw error(404, "Page not found");
+    throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Site");
   }
 
   try {
@@ -66,7 +66,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
       .first()) as PageData | null;
 
     if (!pageData) {
-      throw error(404, "Page not found");
+      throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Site");
     }
 
     // Parse hero JSON
@@ -138,6 +138,6 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
     // Pass through HTTP errors
     if ((err as { status?: number }).status) throw err;
     console.error(`Error loading page ${slug}:`, err);
-    throw error(500, "Failed to load page");
+    throwGroveError(500, SITE_ERRORS.PAGE_LOAD_FAILED, "Site");
   }
 };

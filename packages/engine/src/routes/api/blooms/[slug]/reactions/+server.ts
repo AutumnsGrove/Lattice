@@ -1,5 +1,6 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
  * Helper to get PostMetaDO stub for a post
@@ -11,7 +12,7 @@ function getPostMetaStub(
 ): DurableObjectStub {
   const postMeta = platform.env.POST_META;
   if (!postMeta) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   const doId = postMeta.idFromName(`post:${tenantId}:${slug}`);
@@ -26,16 +27,16 @@ function getPostMetaStub(
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   if (!platform?.env?.POST_META) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
@@ -59,8 +60,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     return json(reactions);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Reactions API] Error getting reactions:", err);
-    throw error(500, "Failed to get reactions");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -78,27 +78,27 @@ export const POST: RequestHandler = async ({
 }) => {
   // CSRF check for state-changing operation
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.POST_META) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
     const data = (await request.json()) as { type: "like" | "bookmark" };
 
     if (!data.type || !["like", "bookmark"].includes(data.type)) {
-      throw error(400, "Invalid reaction type. Must be 'like' or 'bookmark'");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     const stub = getPostMetaStub(platform, locals.tenantId, slug);
@@ -131,8 +131,7 @@ export const POST: RequestHandler = async ({
     return json(result);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Reactions API] Error adding reaction:", err);
-    throw error(500, "Failed to add reaction");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -149,27 +148,27 @@ export const DELETE: RequestHandler = async ({
 }) => {
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.POST_META) {
-    throw error(500, "Durable Objects not configured");
+    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const { slug } = params;
   if (!slug) {
-    throw error(400, "Slug is required");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   try {
     const data = (await request.json()) as { type: "like" | "bookmark" };
 
     if (!data.type || !["like", "bookmark"].includes(data.type)) {
-      throw error(400, "Invalid reaction type. Must be 'like' or 'bookmark'");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     const stub = getPostMetaStub(platform, locals.tenantId, slug);
@@ -195,7 +194,6 @@ export const DELETE: RequestHandler = async ({
     return json(result);
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("[Reactions API] Error removing reaction:", err);
-    throw error(500, "Failed to remove reaction");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

@@ -8,6 +8,7 @@
 
 import { error, fail } from "@sveltejs/kit";
 import { validateEmail } from "$lib/utils/validation.js";
+import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface CompedInvite {
@@ -53,19 +54,16 @@ function isAdmin(email: string | undefined): boolean {
 
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
   // Check if user is a Grove admin
   if (!isAdmin(locals.user.email)) {
-    throw error(
-      403,
-      "Access denied. This page is for Grove administrators only.",
-    );
+    throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not available");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   const { DB } = platform.env;
@@ -182,8 +180,7 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
       validInviteTypes: VALID_INVITE_TYPES,
     };
   } catch (err) {
-    console.error("[Comped Invites] Error loading data:", err);
-    throw error(500, "Failed to load comped invites");
+    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
   }
 };
 
@@ -193,11 +190,17 @@ export const actions: Actions = {
    */
   create: async ({ request, locals, platform }) => {
     if (!locals.user || !isAdmin(locals.user.email)) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -212,17 +215,26 @@ export const actions: Actions = {
 
     // Validate email
     if (!email || !validateEmail(email)) {
-      return fail(400, { error: "Please enter a valid email address" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     // Validate tier
     if (!tier || !VALID_TIERS.includes(tier)) {
-      return fail(400, { error: "Please select a valid tier" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     // Validate invite type
     if (!VALID_INVITE_TYPES.includes(inviteType)) {
-      return fail(400, { error: "Please select a valid invite type" });
+      return fail(400, {
+        error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+        error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+      });
     }
 
     let step = "init";
@@ -237,12 +249,14 @@ export const actions: Actions = {
 
       if (existing) {
         if (existing.used_at) {
-          return fail(400, {
-            error: `${email} has already used their comped invite`,
+          return fail(409, {
+            error: ARBOR_ERRORS.CONFLICT.userMessage,
+            error_code: ARBOR_ERRORS.CONFLICT.code,
           });
         }
-        return fail(400, {
-          error: `${email} already has a pending comped invite`,
+        return fail(409, {
+          error: ARBOR_ERRORS.CONFLICT.userMessage,
+          error_code: ARBOR_ERRORS.CONFLICT.code,
         });
       }
 
@@ -255,8 +269,9 @@ export const actions: Actions = {
         .first<{ subdomain: string }>();
 
       if (existingTenant) {
-        return fail(400, {
-          error: `${email} is already a Grove user (${existingTenant.subdomain}.grove.place)`,
+        return fail(409, {
+          error: ARBOR_ERRORS.CONFLICT.userMessage,
+          error_code: ARBOR_ERRORS.CONFLICT.code,
         });
       }
 
@@ -301,12 +316,10 @@ export const actions: Actions = {
         message: `Created ${typeLabel} invite for ${email} (${tier} tier)`,
       };
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unknown database error";
-      console.error(`[Comped Invites] Error at step "${step}":`, message, err);
-      // Surface D1 error details to admin for debugging
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
       return fail(500, {
-        error: `Failed to create comped invite (${step}): ${message}`,
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
       });
     }
   },
@@ -316,11 +329,17 @@ export const actions: Actions = {
    */
   revoke: async ({ request, locals, platform }) => {
     if (!locals.user || !isAdmin(locals.user.email)) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -329,7 +348,10 @@ export const actions: Actions = {
     const notes = formData.get("notes")?.toString().trim() || null;
 
     if (!inviteId) {
-      return fail(400, { error: "Invite ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     try {
@@ -341,12 +363,16 @@ export const actions: Actions = {
         .first<CompedInvite>();
 
       if (!invite) {
-        return fail(404, { error: "Invite not found" });
+        return fail(404, {
+          error: ARBOR_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+          error_code: ARBOR_ERRORS.RESOURCE_NOT_FOUND.code,
+        });
       }
 
       if (invite.used_at) {
         return fail(400, {
-          error: "Cannot revoke an invite that has already been used",
+          error: ARBOR_ERRORS.CANNOT_MODIFY.userMessage,
+          error_code: ARBOR_ERRORS.CANNOT_MODIFY.code,
         });
       }
 
@@ -377,11 +403,10 @@ export const actions: Actions = {
         message: `Revoked comped invite for ${invite.email}`,
       };
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unknown database error";
-      console.error("[Comped Invites] Error revoking invite:", message, err);
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
       return fail(500, {
-        error: `Failed to revoke comped invite: ${message}`,
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
       });
     }
   },

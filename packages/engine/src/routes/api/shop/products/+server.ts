@@ -1,8 +1,9 @@
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 import type {
   ProductStatus,
   ProductType,
@@ -27,15 +28,33 @@ const SHOP_DISABLED_MESSAGE =
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   const requestedTenantId =
@@ -64,8 +83,17 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     return json({ products });
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
-    console.error("Error fetching products:", err);
-    throw error(500, "Failed to fetch products");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Error fetching products",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };
 
@@ -97,21 +125,45 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (SHOP_DISABLED) {
-    throw error(503, SHOP_DISABLED_MESSAGE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   // Auth check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    return json(
+      {
+        error: API_ERRORS.INVALID_ORIGIN.userMessage,
+        error_code: API_ERRORS.INVALID_ORIGIN.code,
+      },
+      { status: 403 },
+    );
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    return json(
+      {
+        error: API_ERRORS.DB_NOT_CONFIGURED.userMessage,
+        error_code: API_ERRORS.DB_NOT_CONFIGURED.code,
+      },
+      { status: 500 },
+    );
   }
 
   try {
@@ -127,16 +179,25 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate required fields
     if (!data.name || !data.slug) {
-      throw error(400, "Missing required fields: name, slug");
+      return json(
+        {
+          error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+          error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+        },
+        { status: 400 },
+      );
     }
 
     // Validate slug format
     const slugRegex = /^[a-z0-9-]+$/;
     const slugStr = data.slug as string;
     if (!slugRegex.test(slugStr)) {
-      throw error(
-        400,
-        "Slug must contain only lowercase letters, numbers, and hyphens",
+      return json(
+        {
+          error: API_ERRORS.VALIDATION_FAILED.userMessage,
+          error_code: API_ERRORS.VALIDATION_FAILED.code,
+        },
+        { status: 400 },
       );
     }
 
@@ -222,7 +283,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     });
   } catch (err) {
     if (err && typeof err === "object" && "status" in err) throw err;
-    console.error("Error creating product:", err);
-    throw error(500, "Failed to create product");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+      detail: "Error creating product",
+      cause: err,
+    });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };

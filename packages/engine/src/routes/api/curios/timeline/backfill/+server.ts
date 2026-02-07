@@ -24,6 +24,7 @@ import {
   checkRateLimit,
   buildRateLimitKey,
 } from "$lib/server/rate-limits/middleware.js";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
   github_username: string;
@@ -67,15 +68,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const user = locals.user;
 
   if (!db) {
-    throw error(503, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!tenantId) {
-    throw error(400, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   if (!user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // Rate limit backfill (bulk GitHub API operation)
@@ -99,7 +100,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   } = body;
 
   if (!startDate) {
-    throw error(400, "startDate is required (YYYY-MM-DD format)");
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
   }
 
   // Fetch config
@@ -117,10 +118,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     .first<ConfigRow>();
 
   if (!config) {
-    throw error(
-      400,
-      "Timeline not configured. Set up in Admin → Curios → Timeline.",
-    );
+    throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // Get token using SecretsManager (preferred) with legacy fallback
@@ -146,14 +144,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const githubToken = githubResult.token;
 
   if (!githubToken) {
-    console.error(
-      `[Timeline Backfill] Token retrieval failed - source: ${githubResult.source}`,
-    );
-    throw error(
-      500,
-      "GitHub token is missing or invalid. " +
-        "Try re-saving the token in Admin → Curios → Timeline.",
-    );
+    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+      detail: "GitHub token missing",
+    });
+    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
   }
 
   const includeRepos = config.repos_include
@@ -260,11 +254,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
     });
   } catch (err) {
-    console.error("Backfill failed:", err);
-    throw error(
-      500,
-      `Backfill failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-    );
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 

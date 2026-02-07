@@ -6,6 +6,7 @@
  */
 
 import { error, fail } from "@sveltejs/kit";
+import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface TraceFeedback {
@@ -58,19 +59,16 @@ function escapeLikePattern(input: string): string {
 
 export const load: PageServerLoad = async ({ locals, platform, url }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, ARBOR_ERRORS.UNAUTHORIZED, "Arbor");
   }
 
   // Check if user is a Grove admin (uses ALLOWED_ADMIN_EMAILS env var)
   if (!isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)) {
-    throw error(
-      403,
-      "Access denied. This page is for Grove administrators only.",
-    );
+    throwGroveError(403, ARBOR_ERRORS.ACCESS_DENIED, "Arbor");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not available");
+    throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
   }
 
   const { DB } = platform.env;
@@ -189,8 +187,7 @@ export const load: PageServerLoad = async ({ locals, platform, url }) => {
       },
     };
   } catch (err) {
-    console.error("[Traces Admin] Error loading data:", err);
-    throw error(500, "Failed to load traces");
+    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
   }
 };
 
@@ -203,11 +200,17 @@ export const actions: Actions = {
       !locals.user ||
       !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
     ) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -215,7 +218,10 @@ export const actions: Actions = {
     const id = formData.get("id")?.toString();
 
     if (!id) {
-      return fail(400, { error: "Trace ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     try {
@@ -226,8 +232,11 @@ export const actions: Actions = {
 
       return { success: true };
     } catch (err) {
-      console.error("[Traces Admin] Error marking read:", err);
-      return fail(500, { error: "Failed to mark as read" });
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
   },
 
@@ -239,11 +248,17 @@ export const actions: Actions = {
       !locals.user ||
       !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
     ) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -258,8 +273,11 @@ export const actions: Actions = {
 
       return { success: true, message: "All traces marked as read" };
     } catch (err) {
-      console.error("[Traces Admin] Error marking all read:", err);
-      return fail(500, { error: "Failed to mark all as read" });
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
   },
 
@@ -271,11 +289,17 @@ export const actions: Actions = {
       !locals.user ||
       !isAdmin(locals.user.email, platform?.env?.ALLOWED_ADMIN_EMAILS)
     ) {
-      return fail(403, { error: "Access denied" });
+      return fail(403, {
+        error: ARBOR_ERRORS.ACCESS_DENIED.userMessage,
+        error_code: ARBOR_ERRORS.ACCESS_DENIED.code,
+      });
     }
 
     if (!platform?.env?.DB) {
-      return fail(500, { error: "Database not available" });
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
     }
 
     const { DB } = platform.env;
@@ -283,7 +307,10 @@ export const actions: Actions = {
     const id = formData.get("id")?.toString();
 
     if (!id) {
-      return fail(400, { error: "Trace ID is required" });
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
     }
 
     try {
@@ -294,8 +321,11 @@ export const actions: Actions = {
 
       return { success: true, message: "Trace archived" };
     } catch (err) {
-      console.error("[Traces Admin] Error archiving:", err);
-      return fail(500, { error: "Failed to archive trace" });
+      logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: err });
+      return fail(500, {
+        error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+      });
     }
   },
 };

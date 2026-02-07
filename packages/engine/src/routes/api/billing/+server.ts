@@ -12,6 +12,7 @@ import {
 } from "$lib/server/rate-limits/index.js";
 import { isCompedAccount } from "$lib/server/billing.js";
 import { Resend } from "resend";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 // Rate limit config is now centralized in $lib/server/rate-limits/config.ts
 const BILLING_RATE_LIMIT = getEndpointLimitByKey("billing/operations");
@@ -310,11 +311,11 @@ const PLANS: Record<string, PlanConfig> = Object.fromEntries(
  */
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -371,8 +372,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     });
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
-    console.error("Error fetching billing:", err);
-    throw error(500, "Failed to fetch billing information");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -386,19 +387,19 @@ export const POST: RequestHandler = async ({
   locals,
 }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -421,11 +422,11 @@ export const POST: RequestHandler = async ({
     const data = (await request.json()) as CheckoutRequest;
 
     if (!data.plan || !PLANS[data.plan]) {
-      throw error(400, "Invalid plan");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     if (!data.successUrl || !data.cancelUrl) {
-      throw error(400, "Success and cancel URLs required");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     const plan = PLANS[data.plan];
@@ -563,7 +564,8 @@ export const POST: RequestHandler = async ({
       err instanceof Error ? err.stack : undefined,
     );
 
-    throw error(500, errorMessage);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -577,19 +579,19 @@ export const PATCH: RequestHandler = async ({
   locals,
 }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -625,7 +627,7 @@ export const PATCH: RequestHandler = async ({
       .first()) as (BillingRecord & { subdomain: string }) | null;
 
     if (!billing || !billing.provider_subscription_id) {
-      throw error(404, "No active subscription found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     const payments = createPaymentProvider("stripe", {
@@ -732,13 +734,10 @@ export const PATCH: RequestHandler = async ({
       case "change_plan":
         // Plan changes are handled through Stripe's billing portal
         // Use PUT /api/billing to get a portal URL
-        throw error(
-          400,
-          "Plan changes are managed through your billing portal. Use the 'Manage Payment' button to access it.",
-        );
+        throwGroveError(400, API_ERRORS.INVALID_STATE_TRANSITION, "API");
 
       default:
-        throw error(400, "Invalid action");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
@@ -782,7 +781,8 @@ export const PATCH: RequestHandler = async ({
       err instanceof Error ? err.stack : undefined,
     );
 
-    throw error(500, errorMessage);
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -802,19 +802,19 @@ export const PUT: RequestHandler = async ({
   locals,
 }) => {
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throw error(500, "Payment provider not configured");
+    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
   const requestedTenantId =
@@ -851,10 +851,7 @@ export const PUT: RequestHandler = async ({
 
     if (!billing?.provider_customer_id) {
       // Not comped but no customer ID - might be pre-migration or data issue
-      throw error(
-        404,
-        "No payment method on file. If you recently signed up, please contact support.",
-      );
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Get subdomain for return URL
@@ -892,14 +889,13 @@ export const PUT: RequestHandler = async ({
 
     if (!response.ok || data.error) {
       console.error("[Billing] Portal creation failed:", data.error);
-      throw error(
-        500,
-        data.error?.message || "Failed to create portal session",
-      );
+      logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: data.error });
+      throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");
     }
 
     if (!data.url) {
-      throw error(500, "No portal URL returned");
+      logGroveError("API", API_ERRORS.OPERATION_FAILED);
+      throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");
     }
 
     return json({
@@ -909,6 +905,7 @@ export const PUT: RequestHandler = async ({
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("[Billing] Portal creation error:", err);
-    throw error(500, "Failed to create billing portal session");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

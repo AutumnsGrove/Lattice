@@ -7,29 +7,54 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { API_ERRORS, logGroveError } from "$lib/errors";
 
 export const DELETE: RequestHandler = async ({ params, cookies, platform }) => {
   const { sessionId } = params;
   const groveSession = cookies.get("grove_session");
 
   if (!groveSession) {
-    return json({ error: "Not authenticated" }, { status: 401 });
+    return json(
+      {
+        error: API_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: API_ERRORS.UNAUTHORIZED.code,
+      },
+      { status: 401 },
+    );
   }
 
   if (!sessionId) {
-    return json({ error: "Session ID required" }, { status: 400 });
+    return json(
+      {
+        error: API_ERRORS.MISSING_REQUIRED_FIELDS.userMessage,
+        error_code: API_ERRORS.MISSING_REQUIRED_FIELDS.code,
+      },
+      { status: 400 },
+    );
   }
 
   // Validate sessionId format (UUID) to prevent path injection
   const UUID_REGEX =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_REGEX.test(sessionId)) {
-    return json({ error: "Invalid session ID format" }, { status: 400 });
+    return json(
+      {
+        error: API_ERRORS.VALIDATION_FAILED.userMessage,
+        error_code: API_ERRORS.VALIDATION_FAILED.code,
+      },
+      { status: 400 },
+    );
   }
 
   if (!platform?.env?.AUTH) {
-    console.error("[Sessions] AUTH service binding not available");
-    return json({ error: "Auth service unavailable" }, { status: 503 });
+    logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
+    return json(
+      {
+        error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
+        error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
+      },
+      { status: 503 },
+    );
   }
 
   try {
@@ -44,14 +69,23 @@ export const DELETE: RequestHandler = async ({ params, cookies, platform }) => {
     if (!response.ok) {
       const data = (await response.json()) as { error?: string };
       return json(
-        { error: data.error || "Failed to revoke session" },
+        {
+          error: data.error || API_ERRORS.OPERATION_FAILED.userMessage,
+          error_code: API_ERRORS.OPERATION_FAILED.code,
+        },
         { status: response.status },
       );
     }
 
     return json({ success: true });
   } catch (err) {
-    console.error("[Sessions] Failed to revoke session:", err);
-    return json({ error: "Failed to revoke session" }, { status: 500 });
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    return json(
+      {
+        error: API_ERRORS.OPERATION_FAILED.userMessage,
+        error_code: API_ERRORS.OPERATION_FAILED.code,
+      },
+      { status: 500 },
+    );
   }
 };

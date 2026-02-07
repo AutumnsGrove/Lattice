@@ -13,6 +13,7 @@ import {
   getSentinelRun,
   type R2Bucket as SentinelR2Bucket,
 } from "$lib/sentinel/index.js";
+import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 /**
  * GET /api/sentinel/[id]
@@ -20,15 +21,15 @@ import {
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   // Require admin authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
   if (!locals.user.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const { id } = params;
@@ -38,12 +39,12 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     const run = await getSentinelRun(db, id);
 
     if (!run) {
-      throw error(404, "Sentinel run not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Verify tenant access
     if (run.tenantId !== (locals.tenantId ?? "default")) {
-      throw error(403, "Access denied");
+      throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
     }
 
     // Fetch checkpoints for the run
@@ -61,8 +62,8 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
     });
   } catch (err) {
     if (err instanceof Response) throw err;
-    console.error("[Sentinel API] Get error:", err);
-    throw error(500, "Failed to get sentinel run");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -84,15 +85,15 @@ export const POST: RequestHandler = async ({
     !platform?.env?.CACHE_KV ||
     !platform?.env?.IMAGES
   ) {
-    throw error(500, "Required bindings not configured");
+    throwGroveError(500, API_ERRORS.SERVICE_UNAVAILABLE, "API");
   }
 
   // Require admin authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
   if (!locals.user.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const { id } = params;
@@ -106,29 +107,29 @@ export const POST: RequestHandler = async ({
   try {
     body = await request.json();
   } catch {
-    throw error(400, "Invalid JSON body");
+    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
   }
 
   if (!body.action || !["start", "cancel"].includes(body.action)) {
-    throw error(400, 'Action must be "start" or "cancel"');
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   }
 
   try {
     const run = await getSentinelRun(db, id);
 
     if (!run) {
-      throw error(404, "Sentinel run not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Verify tenant access
     if (run.tenantId !== tenantId) {
-      throw error(403, "Access denied");
+      throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
     }
 
     if (body.action === "start") {
       // Can only start pending runs
       if (run.status !== "pending") {
-        throw error(400, `Cannot start run with status: ${run.status}`);
+        throwGroveError(400, API_ERRORS.INVALID_STATE_TRANSITION, "API");
       }
 
       // Update database status to 'running' before returning response
@@ -179,7 +180,7 @@ export const POST: RequestHandler = async ({
     if (body.action === "cancel") {
       // Can only cancel pending or running runs
       if (!["pending", "running"].includes(run.status)) {
-        throw error(400, `Cannot cancel run with status: ${run.status}`);
+        throwGroveError(400, API_ERRORS.INVALID_STATE_TRANSITION, "API");
       }
 
       // Update status to cancelled
@@ -197,11 +198,11 @@ export const POST: RequestHandler = async ({
       });
     }
 
-    throw error(400, "Invalid action");
+    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
   } catch (err) {
     if (err instanceof Response) throw err;
-    console.error("[Sentinel API] Action error:", err);
-    throw error(500, "Failed to perform action on sentinel run");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
 
@@ -211,15 +212,15 @@ export const POST: RequestHandler = async ({
  */
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   // Require admin authentication
   if (!locals.user) {
-    throw error(401, "Authentication required");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
   if (!locals.user.isAdmin) {
-    throw error(403, "Admin access required");
+    throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
   }
 
   const { id } = params;
@@ -230,17 +231,17 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
     const run = await getSentinelRun(db, id);
 
     if (!run) {
-      throw error(404, "Sentinel run not found");
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
     // Verify tenant access
     if (run.tenantId !== tenantId) {
-      throw error(403, "Access denied");
+      throwGroveError(403, API_ERRORS.ADMIN_ACCESS_REQUIRED, "API");
     }
 
     // Cannot delete running tests
     if (run.status === "running") {
-      throw error(400, "Cannot delete a running test. Cancel it first.");
+      throwGroveError(400, API_ERRORS.INVALID_STATE_TRANSITION, "API");
     }
 
     // Delete the run (cascades to metrics and checkpoints)
@@ -252,7 +253,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
     });
   } catch (err) {
     if (err instanceof Response) throw err;
-    console.error("[Sentinel API] Delete error:", err);
-    throw error(500, "Failed to delete sentinel run");
+    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

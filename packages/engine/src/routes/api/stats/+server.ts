@@ -1,6 +1,7 @@
 import { json, error } from "@sveltejs/kit";
 import { getTenantDb } from "$lib/server/services/database.js";
 import type { RequestHandler } from "./$types.js";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 interface StatsResult {
   postCount: number;
@@ -34,15 +35,15 @@ interface UserRow {
 export const GET: RequestHandler = async ({ platform, locals }) => {
   // Auth check for admin access
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   if (!platform?.env?.DB) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   if (!locals.tenantId) {
-    throw error(401, "Tenant ID not found");
+    throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   const db = platform.env.DB;

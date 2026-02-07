@@ -4,6 +4,7 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { validFontIds } from "$lib/ui/tokens/fonts";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 export const prerender = false;
 
@@ -18,23 +19,23 @@ interface SettingsBody {
 export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
-    throw error(401, "Unauthorized");
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
   // CSRF check
   if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
+    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Use the correct D1 database binding (multi-tenant architecture)
   const db = platform?.env?.DB;
   if (!db) {
-    throw error(500, "Database not configured");
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
 
   // Require tenant context for settings
   if (!locals.tenantId) {
-    throw error(401, "Tenant context required");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   try {
@@ -49,23 +50,23 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate required fields
     if (!setting_key || typeof setting_key !== "string") {
-      throw error(400, "Missing or invalid setting_key");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     if (setting_value === undefined || setting_value === null) {
-      throw error(400, "Missing setting_value");
+      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
     }
 
     // Whitelist allowed settings to prevent arbitrary data injection
     const allowedSettings = ["font_family", "accent_color", "show_grove_logo"];
     if (!allowedSettings.includes(setting_key)) {
-      throw error(400, "Invalid setting key");
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Validate show_grove_logo (boolean string)
     if (setting_key === "show_grove_logo") {
       if (setting_value !== "true" && setting_value !== "false") {
-        throw error(400, "Invalid value for show_grove_logo");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }
 
@@ -75,14 +76,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       const hexColorRegex =
         /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
       if (!hexColorRegex.test(setting_value)) {
-        throw error(400, "Invalid color format. Use hex format like #16a34a");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }
 
     // Validate font_family value against canonical font list
     if (setting_key === "font_family") {
       if (!validFontIds.includes(setting_value)) {
-        throw error(400, "Invalid font value");
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }
 
@@ -111,6 +112,6 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   } catch (err) {
     if (err instanceof Error && "status" in err) throw err;
     console.error("Settings update error:", err);
-    throw error(500, "Failed to update setting");
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };
