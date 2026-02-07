@@ -412,7 +412,7 @@ export default new OAuthProvider({
 
 1. Go to **Settings > Connectors**
 2. Click **Add custom connector**
-3. Enter your MCP server URL: `https://grove-mcp.autumnsgrove.workers.dev/sse`
+3. Enter your MCP server URL: `https://mycelium.m7jv4v7npb.workers.dev/sse`
 4. If using OAuth, configure client ID/secret
 
 ### For Claude Desktop (via mcp-remote)
@@ -426,7 +426,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://grove-mcp.autumnsgrove.workers.dev/sse"
+        "https://mycelium.m7jv4v7npb.workers.dev/sse"
       ]
     }
   }
