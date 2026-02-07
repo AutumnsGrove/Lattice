@@ -28,3 +28,5 @@ ENVIRONMENT = "staging"
 # Secrets (set via wrangler secret put)
 # RESEND_API_KEY - Resend API key for sending emails
 # ZEPHYR_API_KEY - API key for authenticating requests to this service
+# BLUESKY_HANDLE - Bluesky handle (e.g. autumn.bsky.social)
+# BLUESKY_APP_PASSWORD - Bluesky app password for social posting

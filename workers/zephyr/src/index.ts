@@ -22,6 +22,7 @@
 import { Hono } from "hono";
 import type { Env } from "./types";
 import { sendHandler } from "./handlers/send";
+import { broadcastHandler, platformsHandler } from "./handlers/broadcast";
 import { healthHandler } from "./handlers/health";
 import { authMiddleware } from "./middleware/auth";
 
@@ -33,8 +34,12 @@ app.get("/health", healthHandler);
 // Main send endpoint (requires authentication)
 app.post("/send", authMiddleware, sendHandler);
 
-// List available templates
-app.get("/templates", async (c) => {
+// Social broadcast endpoints (requires authentication)
+app.post("/broadcast", authMiddleware, broadcastHandler);
+app.get("/broadcast/platforms", authMiddleware, platformsHandler);
+
+// List available templates (requires authentication)
+app.get("/templates", authMiddleware, async (c) => {
   const { TEMPLATES } = await import("./templates");
   return c.json({
     templates: Object.keys(TEMPLATES),

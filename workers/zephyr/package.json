@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@atproto/api": "^0.13.0",
     "hono": "^4.6.0",
     "resend": "^4.0.0"
   },

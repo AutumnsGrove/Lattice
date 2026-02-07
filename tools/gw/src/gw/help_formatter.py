@@ -39,6 +39,7 @@ CATEGORIES: Dict[str, Tuple[str, str, List[Tuple[str, str]]]] = {
             ("cache", "Cache management"),
             ("backup", "D1 database backups"),
             ("email", "Email routing"),
+            ("social", "Social cross-posting"),
         ],
     ),
     "developer": (

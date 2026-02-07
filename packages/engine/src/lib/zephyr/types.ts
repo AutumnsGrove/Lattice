@@ -62,3 +62,68 @@ export interface ZephyrConfig {
     fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
   };
 }
+
+// =============================================================================
+// Social Broadcasting Types
+// =============================================================================
+
+export type SocialPlatform = "bluesky";
+
+export interface BroadcastRequest {
+  /** Channel identifier */
+  channel: "social";
+
+  /** Text content to post */
+  content: string;
+
+  /** Target platforms (specific list or "all") */
+  platforms: SocialPlatform[] | "all";
+
+  /** Optional deduplication key */
+  idempotencyKey?: string;
+
+  /** Optional metadata for tracing */
+  metadata?: {
+    tenant?: string;
+    source?: string;
+    correlationId?: string;
+  };
+}
+
+export interface BroadcastResponse {
+  /** True only when ALL platforms succeed */
+  success: boolean;
+
+  /** True when some-but-not-all platforms succeeded */
+  partial: boolean;
+
+  /** Per-platform delivery results */
+  deliveries: SocialDelivery[];
+
+  /** Aggregate counts */
+  summary: {
+    attempted: number;
+    succeeded: number;
+    failed: number;
+  };
+
+  /** Response metadata */
+  metadata: {
+    broadcastId: string;
+    latencyMs: number;
+  };
+}
+
+export interface SocialDelivery {
+  success: boolean;
+  platform: SocialPlatform;
+  postId?: string;
+  postUrl?: string;
+  skipped?: boolean;
+  skipReason?: string;
+  error?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+  };
+}

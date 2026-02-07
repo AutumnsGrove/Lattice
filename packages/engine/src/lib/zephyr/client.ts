@@ -17,7 +17,13 @@
  * ```
  */
 
-import type { ZephyrRequest, ZephyrResponse, ZephyrConfig } from "./types";
+import type {
+  ZephyrRequest,
+  ZephyrResponse,
+  ZephyrConfig,
+  BroadcastRequest,
+  BroadcastResponse,
+} from "./types";
 
 export class ZephyrClient {
   private baseUrl: string;
@@ -113,6 +119,55 @@ export class ZephyrClient {
       scheduledAt: params.scheduledAt,
       idempotencyKey: params.idempotencyKey,
     });
+  }
+
+  /**
+   * Broadcast content to social platforms
+   *
+   * @param request - Broadcast request with content and target platforms
+   * @returns Promise<BroadcastResponse>
+   */
+  async broadcast(request: BroadcastRequest): Promise<BroadcastResponse> {
+    try {
+      const doFetch = this.fetcher?.fetch ?? fetch;
+      const response = await doFetch(`${this.baseUrl}/broadcast`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": this.apiKey,
+        },
+        body: JSON.stringify(request),
+      });
+
+      const result = (await response.json()) as BroadcastResponse;
+
+      if (!response.ok && !result.deliveries) {
+        return {
+          success: false,
+          partial: false,
+          deliveries: [],
+          summary: { attempted: 0, succeeded: 0, failed: 0 },
+          metadata: {
+            broadcastId: "",
+            latencyMs: 0,
+          },
+        };
+      }
+
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        success: false,
+        partial: false,
+        deliveries: [],
+        summary: { attempted: 0, succeeded: 0, failed: 0 },
+        metadata: {
+          broadcastId: "",
+          latencyMs: 0,
+        },
+      };
+    }
   }
 
   /**

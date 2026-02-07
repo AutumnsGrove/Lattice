@@ -18,15 +18,22 @@ export interface AuthResult {
 }
 
 /**
- * Timing-safe string comparison to prevent timing attacks
+ * Timing-safe string comparison to prevent timing attacks.
+ *
+ * Hashes both inputs first so the comparison always operates on
+ * equal-length buffers — no early return that leaks key length.
  */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+  const encoder = new TextEncoder();
+  const [hashA, hashB] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(a)),
+    crypto.subtle.digest("SHA-256", encoder.encode(b)),
+  ]);
+  const viewA = new Uint8Array(hashA);
+  const viewB = new Uint8Array(hashB);
   let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < viewA.length; i++) {
+    result |= viewA[i] ^ viewB[i];
   }
   return result === 0;
 }
@@ -59,7 +66,7 @@ export async function validateApiKey(
   }
 
   // Use timing-safe comparison to prevent timing attacks
-  if (!timingSafeEqual(apiKey, validKey)) {
+  if (!(await timingSafeEqual(apiKey, validKey))) {
     return { valid: false, error: "Invalid API key" };
   }
 

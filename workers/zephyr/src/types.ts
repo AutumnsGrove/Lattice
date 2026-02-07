@@ -176,6 +176,124 @@ export interface ZephyrLogEntry {
 }
 
 // =============================================================================
+// Social Broadcasting Types
+// =============================================================================
+
+/**
+ * Supported social platforms
+ */
+export type SocialPlatform = "bluesky"; // Expand later: | "mastodon" | "devto"
+
+/**
+ * Social provider interface - every platform adapter implements this
+ */
+export interface SocialProvider {
+  readonly platform: SocialPlatform;
+  post(content: SocialContent): Promise<SocialDelivery>;
+  healthCheck(): Promise<boolean>;
+}
+
+/**
+ * Content prepared for social posting
+ */
+export interface SocialContent {
+  text: string;
+  facets?: BlueskyFacet[];
+}
+
+/**
+ * Bluesky rich text facet (link/mention annotation)
+ */
+export interface BlueskyFacet {
+  index: { byteStart: number; byteEnd: number };
+  features: Array<
+    | { $type: "app.bsky.richtext.facet#link"; uri: string }
+    | { $type: "app.bsky.richtext.facet#mention"; did: string }
+  >;
+}
+
+/**
+ * Social broadcast request
+ */
+export interface BroadcastRequest {
+  /** Channel identifier */
+  channel: "social";
+
+  /** Text content to post */
+  content: string;
+
+  /** Target platforms (specific list or "all") */
+  platforms: SocialPlatform[] | "all";
+
+  /** Optional deduplication key (auto-generated if omitted) */
+  idempotencyKey?: string;
+
+  /** Optional metadata for tracing */
+  metadata?: {
+    tenant?: string;
+    source?: string;
+    correlationId?: string;
+  };
+}
+
+/**
+ * Social broadcast response (follows partial failure pattern)
+ */
+export interface BroadcastResponse {
+  /** True only when ALL platforms succeed */
+  success: boolean;
+
+  /** True when some-but-not-all platforms succeeded */
+  partial: boolean;
+
+  /** Per-platform delivery results */
+  deliveries: SocialDelivery[];
+
+  /** Aggregate counts */
+  summary: {
+    attempted: number;
+    succeeded: number;
+    failed: number;
+  };
+
+  /** Response metadata */
+  metadata: {
+    broadcastId: string;
+    latencyMs: number;
+  };
+}
+
+/**
+ * Per-platform delivery result
+ */
+export interface SocialDelivery {
+  /** Whether this platform delivery succeeded */
+  success: boolean;
+
+  /** Which platform this result is for */
+  platform: SocialPlatform;
+
+  /** Platform-specific post ID */
+  postId?: string;
+
+  /** Public URL of the created post */
+  postUrl?: string;
+
+  /** True when platform was skipped (incompatible content) */
+  skipped?: boolean;
+
+  /** Reason for skipping */
+  skipReason?: string;
+
+  /** Error details if failed */
+  error?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+  };
+}
+
+// =============================================================================
 // Environment
 // =============================================================================
 
@@ -197,6 +315,12 @@ export interface Env {
 
   /** Service binding to email-render worker (preferred over URL) */
   EMAIL_RENDER?: Fetcher;
+
+  /** Bluesky handle (e.g. autumn.bsky.social) */
+  BLUESKY_HANDLE: string;
+
+  /** Bluesky app password for API access */
+  BLUESKY_APP_PASSWORD: string;
 
   /** Environment name */
   ENVIRONMENT?: string;
