@@ -24,7 +24,10 @@ import type { SessionDO } from "../durables/SessionDO.js";
  * Both paths verify admin access before proceeding.
  */
 export function adminCookieAuth() {
-  return async (c: Context<{ Bindings: Env }>, next: Next) => {
+  return async (
+    c: Context<{ Bindings: Env; Variables: Record<string, unknown> }>,
+    next: Next,
+  ) => {
     // Path 1: Bearer token (existing behavior)
     const token = extractBearerToken(c.req.header("Authorization"));
     if (token) {

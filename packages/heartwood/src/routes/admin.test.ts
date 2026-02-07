@@ -109,7 +109,7 @@ describe("GET /admin/stats", () => {
     const res = await app.request("/admin/stats", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.total_users).toBe(42);
     expect(json.total_clients).toBe(3);
     expect(json.replication).toBeDefined();
@@ -129,7 +129,7 @@ describe("GET /admin/stats", () => {
     const res = await app.request("/admin/stats", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.replication).toHaveProperty("served_by_region");
     expect(json.replication).toHaveProperty("served_by_primary");
   });
@@ -163,7 +163,7 @@ describe("GET /admin/users", () => {
     const res = await app.request("/admin/users", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.users).toHaveLength(2);
     expect(json.pagination.limit).toBe(50); // ADMIN_PAGINATION_DEFAULT_LIMIT
     expect(json.pagination.offset).toBe(0);
@@ -180,7 +180,7 @@ describe("GET /admin/users", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.limit).toBe(10);
     expect(json.pagination.offset).toBe(20);
     expect(vi.mocked(getAllUsers)).toHaveBeenCalledWith(
@@ -201,7 +201,7 @@ describe("GET /admin/users", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.limit).toBe(100); // ADMIN_PAGINATION_MAX_LIMIT
   });
 
@@ -216,7 +216,7 @@ describe("GET /admin/users", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.limit).toBe(1);
   });
 
@@ -231,7 +231,7 @@ describe("GET /admin/users", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.offset).toBe(0);
   });
 });
@@ -253,7 +253,7 @@ describe("GET /admin/audit-log", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.logs).toHaveLength(1);
     expect(json.pagination.limit).toBe(50);
     expect(json.pagination.offset).toBe(0);
@@ -286,7 +286,7 @@ describe("GET /admin/audit-log", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.limit).toBe(25);
     expect(json.pagination.offset).toBe(50);
   });
@@ -301,7 +301,7 @@ describe("GET /admin/audit-log", () => {
       mockEnv,
     );
 
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.pagination.limit).toBe(100);
   });
 });
@@ -332,7 +332,7 @@ describe("GET /admin/clients", () => {
     const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.clients).toHaveLength(1);
 
     const client = json.clients[0];
@@ -357,7 +357,7 @@ describe("GET /admin/clients", () => {
     const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.clients).toEqual([]);
   });
 
@@ -380,7 +380,7 @@ describe("GET /admin/clients", () => {
     const app = createApp();
     const res = await app.request("/admin/clients", { method: "GET" }, mockEnv);
 
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.clients[0].redirect_uris).toBeInstanceOf(Array);
     expect(json.clients[0].redirect_uris).toHaveLength(2);
   });

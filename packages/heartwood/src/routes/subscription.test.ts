@@ -82,7 +82,6 @@ import { checkRouteRateLimit } from "../middleware/rateLimit.js";
 
 // Test data
 const TEST_USER_ID = "user-123";
-const TEST_TOKEN = "bearer-test-token";
 
 const mockSubscription: UserSubscription = {
   id: "sub-1",

@@ -57,7 +57,7 @@ describe("GET /minecraft/status", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.online).toBe(true);
     expect(json.players).toBe(3);
 
@@ -84,7 +84,7 @@ describe("GET /minecraft/status", () => {
     );
 
     expect(res.status).toBe(503);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("service_unavailable");
   });
 
@@ -99,7 +99,7 @@ describe("GET /minecraft/status", () => {
     );
 
     expect(res.status).toBe(503);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("service_unavailable");
   });
 });
@@ -128,7 +128,7 @@ describe("POST /minecraft/command", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.success).toBe(true);
   });
 });

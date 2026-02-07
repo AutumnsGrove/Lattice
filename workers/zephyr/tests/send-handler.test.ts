@@ -409,6 +409,7 @@ describe("sendHandler", () => {
       "<p>Custom HTML</p>",
       "Custom text",
       "Custom Subject",
+      undefined,
     );
     // Should log via waitUntil (fire-and-forget)
     expect(mockContext.executionCtx.waitUntil).toHaveBeenCalled();

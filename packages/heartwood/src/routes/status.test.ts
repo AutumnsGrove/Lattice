@@ -61,7 +61,7 @@ describe("GET /status/incidents", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.incidents).toHaveLength(1);
   });
 
@@ -108,7 +108,7 @@ describe("POST /status/incidents", () => {
     );
 
     expect(res.status).toBe(201);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.incident.id).toBe("inc-new");
   });
 
@@ -125,7 +125,7 @@ describe("POST /status/incidents", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("missing_required_fields");
   });
 });
@@ -146,7 +146,7 @@ describe("GET /status/incidents/:id", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.incident.id).toBe("inc-1");
   });
 
@@ -223,7 +223,7 @@ describe("GET /status/components", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.components).toHaveLength(1);
   });
 });
@@ -262,7 +262,7 @@ describe("PATCH /status/components/:slug", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("missing_status");
   });
 });
@@ -283,7 +283,7 @@ describe("GET /status/scheduled", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.scheduled).toEqual([]);
   });
 });

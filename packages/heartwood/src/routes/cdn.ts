@@ -311,7 +311,7 @@ cdn.get("/files", async (c) => {
     const result = await db
       .prepare(query)
       .bind(...params)
-      .all();
+      .all<CdnFileRow>();
 
     // Get total count
     let countQuery = "SELECT COUNT(*) as total FROM cdn_files";
@@ -327,7 +327,7 @@ cdn.get("/files", async (c) => {
     const total = countResult?.total || 0;
 
     // Add URLs to files
-    const files = (result.results || []).map((file: CdnFileRow) => ({
+    const files = (result.results || []).map((file) => ({
       ...file,
       url: `${c.env.CDN_URL}/${file.key}`,
     }));
@@ -356,11 +356,9 @@ cdn.get("/folders", async (c) => {
   try {
     const result = await db
       .prepare("SELECT DISTINCT folder FROM cdn_files ORDER BY folder")
-      .all();
+      .all<Pick<CdnFileRow, "folder">>();
 
-    const folders = (result.results || []).map(
-      (row: Pick<CdnFileRow, "folder">) => row.folder,
-    );
+    const folders = (result.results || []).map((row) => row.folder);
 
     return c.json({ folders });
   } catch (error) {
@@ -424,10 +422,10 @@ cdn.get("/audit", async (c) => {
     const r2Objects = await c.env.CDN_BUCKET.list();
 
     // Get all keys from database
-    const dbResult = await db.prepare("SELECT key FROM cdn_files").all();
-    const dbKeys = new Set(
-      (dbResult.results || []).map((row: Pick<CdnFileRow, "key">) => row.key),
-    );
+    const dbResult = await db
+      .prepare("SELECT key FROM cdn_files")
+      .all<Pick<CdnFileRow, "key">>();
+    const dbKeys = new Set((dbResult.results || []).map((row) => row.key));
 
     // Find objects in R2 but not in database
     const untracked = r2Objects.objects
@@ -442,8 +440,8 @@ cdn.get("/audit", async (c) => {
     // Find entries in database but not in R2
     const r2Keys = new Set(r2Objects.objects.map((obj) => obj.key));
     const orphaned = (dbResult.results || [])
-      .filter((row: Pick<CdnFileRow, "key">) => !r2Keys.has(row.key))
-      .map((row: Pick<CdnFileRow, "key">) => row.key);
+      .filter((row) => !r2Keys.has(row.key))
+      .map((row) => row.key);
 
     return c.json({
       summary: {
@@ -477,10 +475,10 @@ cdn.post("/migrate", async (c) => {
     const r2Objects = await c.env.CDN_BUCKET.list();
 
     // Get all keys from database
-    const dbResult = await db.prepare("SELECT key FROM cdn_files").all();
-    const dbKeys = new Set(
-      (dbResult.results || []).map((row: Pick<CdnFileRow, "key">) => row.key),
-    );
+    const dbResult = await db
+      .prepare("SELECT key FROM cdn_files")
+      .all<Pick<CdnFileRow, "key">>();
+    const dbKeys = new Set((dbResult.results || []).map((row) => row.key));
 
     // Find untracked files
     const untracked = r2Objects.objects.filter((obj) => !dbKeys.has(obj.key));

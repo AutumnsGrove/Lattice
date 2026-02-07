@@ -52,7 +52,7 @@ describe("GET /health", () => {
     const res = await app.request("/health", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.status).toBe("healthy");
     expect(json.components.database).toBe("healthy");
     expect(json.timestamp).toBeDefined();
@@ -71,7 +71,7 @@ describe("GET /health", () => {
     const res = await app.request("/health", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.status).toBe("degraded");
     expect(json.components.database).toBe("unhealthy");
   });
@@ -107,7 +107,7 @@ describe("GET /health/replication", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.status).toBe("healthy");
     expect(json.replication.served_by_region).toBe("WNAM");
     expect(json.replication.served_by_primary).toBe(false);
@@ -131,7 +131,7 @@ describe("GET /health/replication", () => {
     );
 
     expect(res.status).toBe(500);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.status).toBe("error");
   });
 });

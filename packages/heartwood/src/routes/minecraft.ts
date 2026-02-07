@@ -4,7 +4,7 @@
  */
 
 import { Hono } from "hono";
-import type { StatusCode } from "hono/utils/http-status";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { Env } from "../types.js";
 import { adminCookieAuth } from "../middleware/cookieAuth.js";
 
@@ -29,7 +29,7 @@ minecraft.use("/*", adminCookieAuth());
 async function proxyToMcControl(
   c: {
     get: (key: "accessToken") => string;
-    json: (data: unknown, status?: StatusCode) => Response;
+    json: (data: unknown, status?: ContentfulStatusCode) => Response;
   },
   method: string,
   path: string,
@@ -74,7 +74,7 @@ async function proxyToMcControl(
       );
     }
 
-    return c.json(data, response.status);
+    return c.json(data, response.status as ContentfulStatusCode);
   } catch (error) {
     // Log details internally for debugging
     const errorMsg = error instanceof Error ? error.message : String(error);
@@ -194,7 +194,7 @@ minecraft.delete("/mods", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as StatusCode);
+  return c.json(data, response.status as ContentfulStatusCode);
 });
 
 /**
@@ -237,7 +237,7 @@ minecraft.post("/mods/upload", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as StatusCode);
+  return c.json(data, response.status as ContentfulStatusCode);
 });
 
 // ============================================================================
@@ -268,7 +268,7 @@ minecraft.delete("/world", async (c) => {
   });
 
   const data = await response.json();
-  return c.json(data, response.status as StatusCode);
+  return c.json(data, response.status as ContentfulStatusCode);
 });
 
 /**
@@ -302,7 +302,7 @@ minecraft.post("/backups/:id/restore", async (c) => {
   );
 
   const data = await response.json();
-  return c.json(data, response.status as StatusCode);
+  return c.json(data, response.status as ContentfulStatusCode);
 });
 
 /**
@@ -324,7 +324,7 @@ minecraft.get("/backups/:id/download", async (c) => {
 
   if (!response.ok) {
     const data = await response.json();
-    return c.json(data, response.status as StatusCode);
+    return c.json(data, response.status as ContentfulStatusCode);
   }
 
   // Stream the file back

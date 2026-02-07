@@ -137,7 +137,7 @@ describe("extractBearerToken", () => {
 // ===================================================================
 
 describe("verifyBearerAuth", () => {
-  let mockReq: { header: ReturnType<typeof vi.fn> };
+  let mockReq: any;
 
   beforeEach(() => {
     vi.clearAllMocks();

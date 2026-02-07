@@ -21,7 +21,7 @@ vi.mock("../db/queries.js", () => ({
 
 // Mock db session
 vi.mock("../db/session.js", () => ({
-  createDbSession: vi.fn().mockImplementation((env: Env) => createMockDb()),
+  createDbSession: vi.fn().mockImplementation((_env: Env) => createMockDb()),
 }));
 
 // Mock JWT verification
@@ -75,7 +75,7 @@ describe("CDN Auth Middleware", () => {
     const res = await app.request("/cdn/files", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(401);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("unauthorized");
   });
 
@@ -87,26 +87,38 @@ describe("CDN Auth Middleware", () => {
     const res = await app.request("/cdn/files", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(401);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_token");
   });
 
   it("returns 403 when user is not admin", async () => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(false);
 
     const app = createApp();
     const res = await app.request("/cdn/files", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(403);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("forbidden");
   });
 
   it("allows request when token is valid and user is admin", async () => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
 
     const app = createApp();
@@ -126,7 +138,13 @@ describe("POST /cdn/upload", () => {
   beforeEach(() => {
     // Setup successful auth for all upload tests
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -142,7 +160,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("no_file");
   });
 
@@ -162,7 +180,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_file_type");
   });
 
@@ -191,7 +209,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.success).toBe(true);
     expect(json.file).toBeDefined();
     expect(json.file.content_type).toBe("image/png");
@@ -222,7 +240,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.file.content_type).toBe("video/mp4");
   });
 
@@ -251,7 +269,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.file.content_type).toBe("audio/mpeg");
   });
 
@@ -305,7 +323,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("file_too_large");
   });
 
@@ -325,7 +343,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_folder");
   });
 
@@ -345,7 +363,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_folder");
   });
 
@@ -365,7 +383,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_folder");
   });
 
@@ -385,7 +403,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(400);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("invalid_folder");
   });
 
@@ -415,7 +433,7 @@ describe("POST /cdn/upload", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.success).toBe(true);
     expect(json.file.id).toBeDefined();
     expect(json.file.filename).toBeDefined();
@@ -504,7 +522,13 @@ describe("POST /cdn/upload", () => {
 describe("GET /cdn/files", () => {
   beforeEach(() => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -519,7 +543,7 @@ describe("GET /cdn/files", () => {
     const res = await app.request("/cdn/files", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.files).toEqual([]);
     expect(json.total).toBe(0);
     expect(json.limit).toBe(50);
@@ -553,7 +577,7 @@ describe("GET /cdn/files", () => {
     const res = await app.request("/cdn/files", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.files).toHaveLength(1);
     expect(json.files[0].url).toBe(
       "https://cdn.grove.place/images/test-image.png",
@@ -575,7 +599,7 @@ describe("GET /cdn/files", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.limit).toBe(10);
   });
 
@@ -594,7 +618,7 @@ describe("GET /cdn/files", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.offset).toBe(25);
   });
 
@@ -632,7 +656,7 @@ describe("GET /cdn/files", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.total).toBe(100);
     expect(json.limit).toBe(25);
     expect(json.offset).toBe(50);
@@ -646,7 +670,13 @@ describe("GET /cdn/files", () => {
 describe("GET /cdn/folders", () => {
   beforeEach(() => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -662,7 +692,7 @@ describe("GET /cdn/folders", () => {
     const res = await app.request("/cdn/folders", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.folders).toEqual([]);
   });
 
@@ -684,7 +714,7 @@ describe("GET /cdn/folders", () => {
     const res = await app.request("/cdn/folders", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.folders).toEqual(["images", "videos", "fonts"]);
   });
 
@@ -711,7 +741,13 @@ describe("GET /cdn/folders", () => {
 describe("DELETE /cdn/files/:id", () => {
   beforeEach(() => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -733,7 +769,7 @@ describe("DELETE /cdn/files/:id", () => {
     );
 
     expect(res.status).toBe(404);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.error).toBe("not_found");
   });
 
@@ -770,7 +806,7 @@ describe("DELETE /cdn/files/:id", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.success).toBe(true);
     expect(mockR2Delete).toHaveBeenCalledWith("images/test-image.png");
     expect(mockDbRun).toHaveBeenCalled();
@@ -802,7 +838,7 @@ describe("DELETE /cdn/files/:id", () => {
     );
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.message).toBe("File deleted");
   });
 });
@@ -814,7 +850,13 @@ describe("DELETE /cdn/files/:id", () => {
 describe("GET /cdn/audit", () => {
   beforeEach(() => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -835,7 +877,7 @@ describe("GET /cdn/audit", () => {
     const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.summary).toEqual({
       total_r2_objects: 0,
       total_db_entries: 0,
@@ -869,7 +911,7 @@ describe("GET /cdn/audit", () => {
     const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.untracked_files).toHaveLength(1);
     expect(json.untracked_files[0].key).toBe("untracked.png");
     expect(json.untracked_files[0].url).toContain("https://cdn.grove.place/");
@@ -894,7 +936,7 @@ describe("GET /cdn/audit", () => {
     const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.orphaned_db_entries).toHaveLength(1);
     expect(json.orphaned_db_entries[0]).toBe("orphaned.png");
   });
@@ -924,7 +966,7 @@ describe("GET /cdn/audit", () => {
     const app = createApp();
     const res = await app.request("/cdn/audit", { method: "GET" }, mockEnv);
 
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.untracked_files[0]).toHaveProperty("key");
     expect(json.untracked_files[0]).toHaveProperty("size");
     expect(json.untracked_files[0]).toHaveProperty("uploaded");
@@ -940,7 +982,13 @@ describe("GET /cdn/audit", () => {
 describe("POST /cdn/migrate", () => {
   beforeEach(() => {
     vi.mocked(extractBearerToken).mockReturnValue("valid-token");
-    vi.mocked(verifyAccessToken).mockResolvedValue({ sub: "admin-user-123" });
+    vi.mocked(verifyAccessToken).mockResolvedValue({
+      sub: "admin-user-123",
+      client_id: "test",
+      iss: "https://auth.grove.place",
+      iat: 1000000000,
+      exp: 1000003600,
+    });
     vi.mocked(isUserAdmin).mockResolvedValue(true);
   });
 
@@ -959,7 +1007,7 @@ describe("POST /cdn/migrate", () => {
     const res = await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.migrated).toBe(0);
   });
 
@@ -993,7 +1041,7 @@ describe("POST /cdn/migrate", () => {
     const res = await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.success).toBe(true);
     expect(json.migrated).toBe(1);
     expect(mockR2Head).toHaveBeenCalledWith("images/test.png");
@@ -1120,7 +1168,7 @@ describe("POST /cdn/migrate", () => {
     const res = await app.request("/cdn/migrate", { method: "POST" }, mockEnv);
 
     expect(res.status).toBe(200);
-    const json = await res.json();
+    const json: any = await res.json();
     expect(json.errors).toBeDefined();
   });
 });
