@@ -222,7 +222,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
           .bind(existingOnboarding.tenant_id)
           .first()) as { subdomain: string } | null;
 
-        if (tenant) {
+        if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
           redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
         }
       } catch (err) {
@@ -262,10 +262,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
           .run();
       }
 
-      console.log(
-        "[Auth Callback] Created onboarding record:",
-        onboardingId,
-      );
+      console.log("[Auth Callback] Created onboarding record:", onboardingId);
     } catch (err) {
       errorRedirect(PLANT_ERRORS.ONBOARDING_INSERT_FAILED, {
         path,

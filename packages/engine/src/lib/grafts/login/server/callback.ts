@@ -19,6 +19,7 @@ import {
   logAuthError,
   buildErrorParams,
 } from "../../../heartwood/errors.js";
+import { sanitizeReturnTo } from "../../../utils/grove-url.js";
 
 // =============================================================================
 // RATE LIMITING
@@ -154,7 +155,10 @@ export function createCallbackHandler(
     }
 
     // Get return URL from query params (set by LoginGraft) or use default
-    const returnTo = url.searchParams.get("returnTo") || defaultReturnTo;
+    const returnTo = sanitizeReturnTo(
+      url.searchParams.get("returnTo"),
+      defaultReturnTo,
+    );
 
     // Verify Better Auth session cookie was set
     // Better Auth uses __Secure- prefix in production (HTTPS)

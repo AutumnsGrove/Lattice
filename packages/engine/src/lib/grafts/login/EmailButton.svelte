@@ -91,6 +91,7 @@
 			const origin = window.location.origin;
 			const callbackURL = `${origin}/auth/magic-link/callback?returnTo=${encodeURIComponent(returnTo)}`;
 
+			// csrf-ok: cross-origin POST to GroveAuth, not an internal API
 			const response = await fetch(GROVEAUTH_URLS.magicLink, {
 				method: "POST",
 				credentials: "include",

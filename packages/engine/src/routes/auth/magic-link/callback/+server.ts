@@ -23,6 +23,7 @@ import {
 import { AUTH_COOKIE_NAMES } from "$lib/grafts/login";
 import {
   AUTH_ERRORS,
+  getAuthError,
   logAuthError,
   buildErrorParams,
 } from "$lib/heartwood/errors";
@@ -39,7 +40,10 @@ export const GET: RequestHandler = async ({
   if (kv) {
     const clientIp = getClientIP(request);
     const limitConfig = getEndpointLimitByKey("auth/callback");
-    const rateLimitKey = buildRateLimitKey("auth/magic-link-callback", clientIp);
+    const rateLimitKey = buildRateLimitKey(
+      "auth/magic-link-callback",
+      clientIp,
+    );
 
     const { response: rateLimitResponse } = await checkRateLimit({
       kv,
@@ -58,18 +62,17 @@ export const GET: RequestHandler = async ({
   // Check for error from Better Auth
   const errorParam = url.searchParams.get("error");
   if (errorParam) {
-    console.error("[Magic Link Callback] Error from auth:", errorParam);
-    throw redirect(
-      302,
-      `/auth/login?${buildErrorParams(AUTH_ERRORS.PROVIDER_ERROR)}`,
-    );
+    const authError = getAuthError(errorParam);
+    logAuthError(authError, {
+      oauthError: errorParam,
+      ip: getClientIP(request),
+      path: url.pathname,
+    });
+    throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
   }
 
   // Get return URL from query params, sanitized to prevent open redirects
-  const returnTo = sanitizeReturnTo(
-    url.searchParams.get("returnTo"),
-    "/arbor",
-  );
+  const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
 
   // Verify Better Auth session cookie was set
   const sessionToken =
@@ -88,10 +91,7 @@ export const GET: RequestHandler = async ({
     );
   }
 
-  console.log(
-    "[Magic Link Callback] Session found, redirecting to:",
-    returnTo,
-  );
+  console.log("[Magic Link Callback] Session found, redirecting to:", returnTo);
 
   // Success! Redirect to the requested destination
   throw redirect(302, returnTo);

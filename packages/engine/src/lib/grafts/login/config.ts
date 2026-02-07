@@ -2,7 +2,7 @@
  * Login Graft Configuration
  *
  * Provider registry and default configuration for the LoginGraft.
- * Currently only Google OAuth is fully supported.
+ * Includes all three fully implemented providers: Google OAuth, Passkeys, and Email magic links.
  */
 
 import type { AuthProvider, ProviderConfig } from "./types.js";

@@ -14,7 +14,7 @@ import type { BaseGraftProps } from "../types.js";
 
 /**
  * Supported authentication providers.
- * Currently Google and Passkey are fully implemented.
+ * Currently Google OAuth, Passkeys, and Email magic links are fully implemented.
  */
 export type AuthProvider = "google" | "github" | "email" | "passkey";
 
@@ -54,7 +54,7 @@ export type LoginVariant = "default" | "compact" | "fullpage";
 export interface LoginGraftProps extends BaseGraftProps {
   /**
    * Which providers to show (order matters for display).
-   * Defaults to ['google'] since that's the only fully supported provider.
+   * Defaults to ['google', 'passkey', 'email'] for all fully supported providers.
    */
   providers?: AuthProvider[];
 
