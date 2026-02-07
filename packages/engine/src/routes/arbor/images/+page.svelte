@@ -903,7 +903,7 @@
   }
 
   :global(.dark .drop-zone) {
-    border-color: var(--slate-glass-border);
+    border-color: var(--glass-border);
   }
 
   :global(.drop-zone:hover) {
@@ -1504,8 +1504,8 @@
   }
 
   :global(.dark) .gallery-card {
-    background: var(--slate-glass-bg);
-    border-color: var(--slate-glass-border);
+    background: var(--glass-bg-medium);
+    border-color: var(--glass-border);
   }
 
   .gallery-card:hover {
@@ -1515,7 +1515,7 @@
   }
 
   :global(.dark) .gallery-card:hover {
-    background: rgba(30, 41, 59, 0.65);
+    background: var(--glass-bg);
   }
 
   .gallery-image {

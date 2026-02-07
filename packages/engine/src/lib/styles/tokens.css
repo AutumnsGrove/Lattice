@@ -116,10 +116,6 @@
 	--glass-border: rgba(255, 255, 255, 0.3);
 	--glass-border-strong: rgba(255, 255, 255, 0.4);
 
-	/* Slate glass (for some dark backgrounds in light mode) */
-	--slate-glass-bg: rgba(30, 41, 59, 0.5);
-	--slate-glass-border: rgba(71, 85, 105, 0.3);
-
 	/* Neutral overlays */
 	--overlay-dark-5: rgba(0, 0, 0, 0.05);
 	--overlay-dark-10: rgba(0, 0, 0, 0.1);
@@ -317,10 +313,6 @@
 	--glass-bg-subtle: rgba(30, 41, 59, 0.4);
 	--glass-border: rgba(74, 124, 89, 0.25);
 	--glass-border-strong: rgba(74, 124, 89, 0.3);
-
-	/* Slate glass - dark mode */
-	--slate-glass-bg: rgba(30, 41, 59, 0.9);
-	--slate-glass-border: rgba(71, 85, 105, 0.3);
 
 	/* Grove sage text - dark mode muted text (WCAG AA compliant) */
 	--grove-text-muted: rgba(167, 199, 183, 0.75);
