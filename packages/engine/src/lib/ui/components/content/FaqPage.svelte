@@ -93,7 +93,7 @@
 					{#if item.value === 'what-is-grove'}
 						<GroveTerm term="your-grove">Grove</GroveTerm> is a cozy corner of the internet where you can have your own <GroveSwap term="your-garden">blog</GroveSwap>, your own space, away from algorithms and big tech. Think of it as a digital <GroveSwap term="your-garden">garden</GroveSwap> you actually own -- a place to write, share, and belong.
 					{:else if item.value === 'how-do-i-sign-up'}
-						Head to <a href="https://grove.place" class="text-emerald-700 dark:text-emerald-400 underline underline-offset-2">grove.place</a> and sign in with your Google account. That's it -- no lengthy forms, no passwords to remember. Once you're in, you can pick a username and start setting up your <GroveSwap term="your-garden">garden</GroveSwap>.
+						Head to <a href="https://grove.place" class="text-emerald-700 dark:text-emerald-400 underline underline-offset-2">grove.place</a> and sign in with your Google account -- no lengthy forms, no passwords to remember. We're also adding passkey support and magic link sign-in soon, so you'll have even more ways to get in without fussing with passwords. Once you're in, you can pick a username and start setting up your <GroveSwap term="your-garden">garden</GroveSwap>.
 					{:else if item.value === 'what-is-a-wanderer'}
 						Everyone who enters <GroveSwap term="your-grove">the Grove</GroveSwap> is a <GroveTerm term="wanderer" />. It's our way of saying "welcome" without the cold, corporate feel of "user." You're exploring, finding your path -- and that's a beautiful thing.
 					{:else if item.value === 'is-grove-free'}
@@ -157,7 +157,7 @@
 					{:else if item.value === 'do-i-have-to-share'}
 						Not at all. Sharing to the <GroveSwap term="meadow">Meadow</GroveSwap> is completely optional on a per-<GroveSwap term="blooms">post</GroveSwap> basis. Your <GroveSwap term="your-garden">blog</GroveSwap> is your private <GroveSwap term="your-garden">garden</GroveSwap> first. The community is there when you want it, invisible when you don't.
 					{:else if item.value === 'moderation'}
-						<GroveSwap term="your-grove">Grove</GroveSwap> is a safe space by design. <GroveTerm term="pathfinder">Pathfinders</GroveTerm> (trusted community guides) and the <GroveTerm term="wayfinder">Wayfinder</GroveTerm> help keep things welcoming. We have clear community guidelines, and harmful content is not tolerated.
+						<GroveSwap term="your-grove">Grove</GroveSwap> is a safe space by design. On the automated side, <GroveTerm term="thorn">Thorn</GroveTerm> scans text for harmful content and <GroveTerm term="petal">Petal</GroveTerm> checks uploaded images -- both work quietly in the background without storing or training on your content. On the human side, <GroveTerm term="pathfinder">Pathfinders</GroveTerm> (trusted community guides) and the <GroveTerm term="wayfinder">Wayfinder</GroveTerm> help keep things welcoming. We have clear community guidelines, and the combination of careful technology and caring people means harmful content doesn't get a foothold here.
 					{:else if item.value === 'queer-friendly'}
 						Yes, fundamentally. <GroveSwap term="your-grove">Grove</GroveSwap> was built to be a refuge -- a place where queer creators, writers, and friends can exist freely without hostility. This isn't a policy bolted on after the fact; it's in the foundation.
 					{/if}
@@ -186,7 +186,7 @@
 					{:else if item.value === 'tracking'}
 						<GroveSwap term="your-grove">Grove</GroveSwap> uses privacy-first <GroveTerm term="rings">analytics</GroveTerm> that count page views without tracking individuals. No cookies for tracking, no fingerprinting, no third-party scripts watching your readers. We believe you can understand your audience without surveilling them.
 					{:else if item.value === 'authentication'}
-						We use <GroveTerm term="heartwood">Heartwood</GroveTerm>, our own authentication system built on OAuth 2.0 with PKCE. Your password is never stored by <GroveSwap term="your-grove">Grove</GroveSwap> -- authentication is handled securely through your identity provider. Sessions are encrypted and scoped.
+						We built our own sign-in system called <GroveTerm term="heartwood">Heartwood</GroveTerm>. You sign in through your existing accounts (like Google), so <GroveSwap term="your-grove">Grove</GroveSwap> never sees or stores a password. Your sessions are encrypted, and we're adding passkey support so you can sign in with just your fingerprint or face -- no passwords anywhere in the chain.
 					{:else if item.value === 'delete-account'}
 						Yes, completely. If you choose to leave, we'll delete your account, your <GroveSwap term="blooms">posts</GroveSwap>, your images -- everything. No "we keep your data for 90 days" games. When you say delete, we mean delete.
 					{/if}
@@ -257,7 +257,7 @@
 	<Glass variant="tint" as="section" class="rounded-2xl p-8 md:p-10 mt-10 text-center">
 		<h2 class="text-xl font-semibold text-foreground mb-2">Still have questions?</h2>
 		<p class="text-muted-foreground mb-6 max-w-lg mx-auto">
-			We're a real team of real people, and we'd love to hear from you. Reach out anytime.
+			I'm a real person, and I'd love to hear from you. Reach out anytime.
 		</p>
 		<div class="flex flex-wrap items-center justify-center gap-4">
 			<GlassButton variant="accent" href="https://grove.place/contact">
