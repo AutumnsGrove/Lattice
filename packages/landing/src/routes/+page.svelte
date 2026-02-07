@@ -176,6 +176,13 @@
 			A place to Be.
 		</p>
 
+		<!-- Grove Messages -->
+		{#if data.messages?.length}
+			<div class="w-full max-w-2xl mx-auto mb-6">
+				<GroveMessages messages={data.messages} dismissible={false} />
+			</div>
+		{/if}
+
 		<!-- Subtagline -->
 		<p class="text-base md:text-lg text-foreground-subtle font-sans max-w-xl mx-auto leading-relaxed mb-8">
 			Your own subdomain, no AI training, no algorithms, no ads. Just you and your voice.
@@ -231,13 +238,6 @@
 			{/snippet}
 		</GlassCarousel>
 	</section>
-
-	<!-- Grove Messages -->
-	{#if data.messages?.length}
-		<div class="w-full max-w-2xl mb-12">
-			<GroveMessages messages={data.messages} dismissible={false} />
-		</div>
-	{/if}
 
 	<!-- Launch Notice -->
 	<div class="w-full max-w-lg mb-12">

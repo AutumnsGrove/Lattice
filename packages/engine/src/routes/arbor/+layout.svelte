@@ -1,5 +1,5 @@
 <script>
-  import { Toast, Logo, GroveSwap } from "$lib/ui/components/ui";
+  import { Toast, Logo, GroveSwap, GroveMessages } from "$lib/ui/components/ui";
   import {
     LayoutDashboard,
     FileText,
@@ -200,6 +200,11 @@
   </aside>
 
   <main class="content" class:expanded={sidebarCollapsed}>
+    {#if data.messages?.length}
+      <div class="mb-6">
+        <GroveMessages messages={data.messages} dismissible={true} />
+      </div>
+    {/if}
     {@render children()}
   </main>
 </div>

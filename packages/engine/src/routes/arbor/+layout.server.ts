@@ -129,6 +129,47 @@ export const load: LayoutServerLoad = async ({
     }
   }
 
+  // Fetch arbor-channel messages for wanderer notifications
+  type MessageType = "info" | "warning" | "celebration" | "update";
+  let messages: Array<{
+    id: string;
+    title: string;
+    body: string;
+    message_type: MessageType;
+    pinned: boolean;
+    created_at: string;
+  }> = [];
+
+  if (platform?.env?.DB) {
+    try {
+      const result = await platform.env.DB.prepare(
+        `SELECT id, title, body, message_type, pinned, created_at
+         FROM grove_messages
+         WHERE channel = 'arbor' AND published = 1
+           AND (expires_at IS NULL OR expires_at > datetime('now'))
+         ORDER BY pinned DESC, created_at DESC
+         LIMIT 5`,
+      ).all<{
+        id: string;
+        title: string;
+        body: string;
+        message_type: string;
+        pinned: number;
+        created_at: string;
+      }>();
+      messages = (result.results || []).map((m) => ({
+        id: m.id,
+        title: m.title,
+        body: m.body,
+        message_type: m.message_type as MessageType,
+        pinned: !!m.pinned,
+        created_at: m.created_at,
+      }));
+    } catch {
+      // grove_messages table may not exist yet — that's fine
+    }
+  }
+
   return {
     ...parentData,
     user: locals.user,
@@ -136,5 +177,6 @@ export const load: LayoutServerLoad = async ({
     grafts,
     isBeta,
     csrfToken: locals.csrfToken,
+    messages,
   };
 };
