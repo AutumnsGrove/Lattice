@@ -13,13 +13,11 @@
 		HeroCentennial,
 		HeroCommunity
 	} from '$lib/components/hero';
-	import { SeasonSwitcher, EditorDemo, BlogCardsDemo } from '$lib/components/demos';
+	import { EditorDemo, BlogCardsDemo } from '$lib/components/demos';
 	import { page } from '$app/state';
 
 	// Lucide icons
 	import {
-		Map,
-		BookOpen,
 		Trees,
 		HandCoins,
 		Leaf,
@@ -206,9 +204,6 @@
 			</a>
 		</div>
 
-		<p class="text-foreground-subtle text-sm font-sans">
-			Signups open February 14th. Feel free to look around.
-		</p>
 	</section>
 
 	<!-- Hero Carousel Section -->
@@ -238,15 +233,6 @@
 			{/snippet}
 		</GlassCarousel>
 	</section>
-
-	<!-- Launch Notice -->
-	<div class="w-full max-w-lg mb-12">
-		<div class="glass-grove rounded-xl p-4 border-l-4 border-accent-muted">
-			<p class="text-foreground font-sans text-sm leading-relaxed">
-				<span class="font-medium">Grove opens February 14th.</span> Be among the first to plant your corner of the internet.
-			</p>
-		</div>
-	</div>
 
 	<!-- Feature Showcase Grid -->
 	<section class="w-full max-w-4xl mb-16" aria-labelledby="features-heading">
@@ -292,89 +278,6 @@
 			Clean, focused, distraction-free. Every grove is a quiet place to read.
 		</p>
 		<BlogCardsDemo />
-	</section>
-
-	<!-- Live Demo: Season Switcher -->
-	<section class="w-full max-w-4xl mb-16" aria-labelledby="seasons-demo-heading">
-		<h2 id="seasons-demo-heading" class="text-lg font-serif text-foreground-muted text-center mb-3">Every Season Tells a Story</h2>
-		<p class="text-sm font-sans text-foreground-subtle text-center max-w-lg mx-auto mb-8">
-			Grove changes with the seasons. Your blog stays alive all year.
-		</p>
-		<SeasonSwitcher />
-	</section>
-
-	<!-- Comparison CTA -->
-	<section class="w-full max-w-lg mb-16" aria-labelledby="comparison-heading">
-		<h2 id="comparison-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">How Grove Compares</h2>
-		<a href="/compare" class="group block">
-			<GlassCard hoverable>
-				<p class="text-foreground-subtle font-sans text-sm leading-relaxed mb-3">
-					Honest, feature-level comparison with Bear Blog, Substack, WordPress, Ghost, and Tumblr. Where others do it well, we say so.
-				</p>
-				<span class="inline-flex items-center gap-2 text-accent-muted font-sans text-sm font-medium group-hover:gap-3 transition-all">
-					See the full comparison
-					<ArrowRight class="w-4 h-4" aria-hidden="true" />
-				</span>
-			</GlassCard>
-		</a>
-	</section>
-
-	<!-- Decorative divider -->
-	<div class="flex items-center gap-4 mb-12">
-		<div class="w-12 h-px bg-divider"></div>
-		<svg class="w-5 h-5 text-accent-subtle" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-			<path
-				d="M10 2C8 6 5 8 2 8c3 2 5 5 5 10 2-4 5-6 8-6-3-2-5-5-5-10z"
-				fill-opacity="0.6"
-			/>
-		</svg>
-		<div class="w-12 h-px bg-divider"></div>
-	</div>
-
-	<!-- Quick Links -->
-	<nav class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-12" aria-label="Quick links">
-		<a
-			href="/roadmap"
-			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
-		>
-			<Map class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
-			<span>Roadmap</span>
-		</a>
-		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
-		<a
-			href="/knowledge"
-			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
-		>
-			<BookOpen class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
-			<span>Knowledge</span>
-		</a>
-		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
-		<a
-			href="/forest"
-			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
-		>
-			<Trees class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
-			<span>Forest</span>
-		</a>
-		<span class="text-divider hidden sm:inline" aria-hidden="true">·</span>
-		<a
-			href="/pricing"
-			class="group flex items-center gap-2 text-sm font-sans text-foreground-subtle hover:text-accent-muted transition-colors"
-		>
-			<HandCoins class="w-4 h-4 group-hover:scale-110 transition-transform" aria-hidden="true" />
-			<span>Pricing</span>
-		</a>
-	</nav>
-
-	<!-- Roadmap Preview Card -->
-	<section class="w-full max-w-lg mb-16" aria-label="Development roadmap">
-		<RoadmapPreview
-			phase="Thaw"
-			subtitle="The ice begins to crack"
-			description="Grove opens its doors. The first trees take root."
-			progress={33}
-			href="/roadmap"
-		/>
 	</section>
 
 	<!-- Who is Grove for? -->
@@ -489,6 +392,22 @@
 		</p>
 	</section>
 
+	<!-- Comparison CTA -->
+	<section class="w-full max-w-lg mb-12" aria-labelledby="comparison-heading">
+		<h2 id="comparison-heading" class="text-lg font-serif text-foreground-muted text-center mb-8">How Grove Compares</h2>
+		<a href="/compare" class="group block">
+			<GlassCard hoverable>
+				<p class="text-foreground-subtle font-sans text-sm leading-relaxed mb-3">
+					Honest, feature-level comparison with Bear Blog, Substack, WordPress, Ghost, and Tumblr. Where others do it well, we say so.
+				</p>
+				<span class="inline-flex items-center gap-2 text-accent-muted font-sans text-sm font-medium group-hover:gap-3 transition-all">
+					See the full comparison
+					<ArrowRight class="w-4 h-4" aria-hidden="true" />
+				</span>
+			</GlassCard>
+		</a>
+	</section>
+
 	<!-- Decorative divider -->
 	<div class="flex items-center gap-4 mb-12">
 		<div class="w-12 h-px bg-divider"></div>
@@ -525,6 +444,17 @@
 			See all plans
 			<ArrowRight class="w-4 h-4" aria-hidden="true" />
 		</a>
+	</section>
+
+	<!-- Roadmap Preview -->
+	<section class="w-full max-w-lg mb-12" aria-label="Development roadmap">
+		<RoadmapPreview
+			phase="Thaw"
+			subtitle="The ice begins to crack"
+			description="Grove opens its doors. The first trees take root."
+			progress={33}
+			href="/roadmap"
+		/>
 	</section>
 
 </main>
