@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from 'lucide-svelte';
+	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
@@ -58,7 +58,7 @@
 		{
 			id: 'homepage',
 			title: 'Your Blog Homepage',
-			description: "This is what visitors see when they arrive at your blog. Clean, focused, and beautiful by default. This is The Midnight Bloom - a demo blog.",
+			description: "This is what visitors see when they arrive. Clean, focused, and beautiful by default — here's an example blog.",
 			location: 'example.grove.place',
 			url: 'https://example.grove.place?tour=1',
 			image: '/tour/homepage.png'
@@ -66,15 +66,15 @@
 		{
 			id: 'post',
 			title: 'Blog Posts',
-			description: "Your posts are the heart of your blog. Write in markdown, add images, and use 'vines' to link related content in the margins.",
+			description: "Your posts are the heart of your blog. Write in markdown, add images, and link related content with margin notes.",
 			location: 'example.grove.place/post/...',
 			url: 'https://example.grove.place?tour=2',
 			image: '/tour/post.png'
 		},
 		{
 			id: 'vines',
-			title: 'Vines - Margin Notes',
-			description: "Vines are Grove's unique feature - add annotations, links, and thoughts in the margins. They're like friendly marginalia.",
+			title: 'Margin Notes',
+			description: "Add annotations, links, and thoughts alongside your writing. They live in the margins — like notes a friend might leave in a shared book.",
 			location: 'Sidebar annotations',
 			url: 'https://example.grove.place?tour=3',
 			image: '/tour/vines.png'
@@ -230,7 +230,7 @@
 		{#if currentTourStop.image}
 			<div class="aspect-video bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-slate-700/20">
 				<div class="text-center text-foreground-subtle">
-					<p class="text-sm">Preview of {currentTourStop.location}</p>
+					<p class="text-sm">Screenshot coming soon — {currentTourStop.location}</p>
 					{#if currentTourStop.url}
 						<button onclick={visitDemo} class="text-primary hover:underline text-sm mt-2">
 							Open in new tab →

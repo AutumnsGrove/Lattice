@@ -343,7 +343,7 @@
 
 		<div class="text-center mt-6">
 			<a
-				href="https://grove.place/pricing/full"
+				href="https://grove.place/pricing"
 				class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 			>
 				See future plans

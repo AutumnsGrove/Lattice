@@ -7,7 +7,7 @@
 	 */
 
 	import { enhance } from '$app/forms';
-	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from 'lucide-svelte';
+	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { TIERS } from '@autumnsgrove/groveengine/config';
 
@@ -47,7 +47,7 @@
 					</h1>
 
 					<p class="text-foreground-muted mb-2">
-						Welcome to Grove, {data.user?.displayName || 'friend'}!
+						Welcome to Grove, {data.user?.displayName || 'Wanderer'}!
 					</p>
 					<p class="text-lg text-primary font-medium">
 						{form.subdomain}.grove.place

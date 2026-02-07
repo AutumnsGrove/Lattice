@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from 'lucide-svelte';
+	import { Check, X, Loader2, PenTool, Camera, Palette, ChefHat, Laptop, Plane, BookOpen, Briefcase, Star } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { COLOR_PRESETS } from '@autumnsgrove/groveengine';
 
@@ -55,7 +55,7 @@
 		usernameSuggestions = [];
 
 		try {
-			const res = await fetch(`/api/check-username?username=${encodeURIComponent(trimmed)}`);
+			const res = await fetch(`/api/check-username?username=${encodeURIComponent(trimmed)}`); // csrf-ok: GET-only read
 			const result = (await res.json()) as { available?: boolean; error?: string; suggestions?: string[] };
 
 			if (result.available) {
@@ -94,7 +94,7 @@
 	}
 </script>
 
-<div class="animate-fade-in max-w-2xl mx-auto px-4 py-8">
+<div class="animate-fade-in">
 	<!-- Back navigation -->
 	<div class="flex items-center gap-2 mb-6">
 		<a
@@ -108,8 +108,8 @@
 
 	<!-- Header -->
 	<div class="text-center mb-8">
-		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Set up your profile</h1>
-		<p class="text-foreground-muted">Tell us a bit about yourself and choose your blog address.</p>
+		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Tell us about yourself</h1>
+		<p class="text-foreground-muted">Let's get you settled in. Pick a name and claim your corner of the Grove.</p>
 	</div>
 
 	<!-- Form -->

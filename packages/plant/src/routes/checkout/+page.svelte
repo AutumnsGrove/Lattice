@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from 'lucide-svelte';
+	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
 
@@ -104,17 +104,17 @@
 
 	<!-- Header -->
 	<div class="text-center mb-8">
-		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">Complete your purchase</h1>
-		<p class="text-foreground-muted">You're almost ready to start your blog!</p>
+		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">One last step</h1>
+		<p class="text-foreground-muted">Almost there — your blog is just around the corner.</p>
 	</div>
 
 	<!-- Order summary -->
 	<GlassCard variant="frosted" class="max-w-md mx-auto mb-8">
-		<h2 class="font-medium text-foreground mb-4">Order Summary</h2>
+		<h2 class="font-medium text-foreground mb-4">What you're planting</h2>
 
 		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-slate-700/20">
 			<div>
-				<p class="font-medium text-foreground">{planName} Plan</p>
+				<p class="font-medium text-foreground">{planName}</p>
 				<p class="text-sm text-foreground-muted">
 					{billingCycle === 'yearly' ? 'Billed yearly' : 'Billed monthly'}
 				</p>
@@ -133,7 +133,7 @@
 		</div>
 
 		<div class="flex justify-between items-center py-3">
-			<p class="font-medium text-foreground">Due today</p>
+			<p class="font-medium text-foreground">Today</p>
 			<p class="text-2xl font-semibold text-foreground">$0.00</p>
 		</div>
 
@@ -147,7 +147,7 @@
 		<div class="text-center">
 			<GlassCard variant="default" class="inline-flex items-center gap-3">
 				<Loader2 size={24} class="animate-spin text-primary" />
-				<span class="text-foreground">Redirecting to secure checkout...</span>
+				<span class="text-foreground">Taking you to secure checkout...</span>
 			</GlassCard>
 		</div>
 	{:else if error}

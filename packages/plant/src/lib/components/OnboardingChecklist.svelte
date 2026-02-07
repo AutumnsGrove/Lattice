@@ -6,7 +6,7 @@
 	 * in their journey to taking root in the Grove.
 	 */
 
-	import { Check, User, Mail, CreditCard, Sparkles } from 'lucide-svelte';
+	import { Check, User, Mail, CreditCard, Sparkles } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 	import { page } from '$app/state';
 

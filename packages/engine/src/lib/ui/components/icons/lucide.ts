@@ -99,6 +99,17 @@ import {
   Fingerprint,
   Key,
   Link2,
+  // Profile & Onboarding
+  User,
+  CreditCard,
+  Gift,
+  PartyPopper,
+  PenTool,
+  Camera,
+  ChefHat,
+  Laptop,
+  Plane,
+  Briefcase,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -352,18 +363,25 @@ export {
   Settings,
   ExternalLink,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   LogIn,
   Github,
+  HandCoins,
+  FileText,
   // Features
   Mail,
   HardDrive,
   Palette,
   Shield,
+  ShieldCheck,
   Download,
   Rss,
   Eye,
   MessageCircle,
   Layers,
+  Lightbulb,
+  BookOpen,
   // States
   Loader2,
   AlertTriangle,
@@ -371,6 +389,7 @@ export {
   Lock,
   // Phase/Special & Seasons
   Sparkles,
+  Star,
   Moon,
   Sun,
   Snowflake,
@@ -388,4 +407,15 @@ export {
   Fingerprint,
   Key,
   Link2,
+  // Profile & Onboarding
+  User,
+  CreditCard,
+  Gift,
+  PartyPopper,
+  PenTool,
+  Camera,
+  ChefHat,
+  Laptop,
+  Plane,
+  Briefcase,
 };

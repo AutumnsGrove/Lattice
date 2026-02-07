@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
 	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
-	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from 'lucide-svelte';
+	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from '@autumnsgrove/groveengine/ui/icons';
 	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
 
 	// Centralized external links to prevent drift

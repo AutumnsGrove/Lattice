@@ -273,19 +273,14 @@
 	<!-- Free tier note -->
 	<div class="text-center py-2">
 		<p class="text-sm text-foreground-subtle">
-			Just want to hang out in <GroveTerm term="meadow">Meadow</GroveTerm>?
-			<span class="text-foreground-muted">Free social-only tier coming with <GroveTerm term="meadow">Meadow</GroveTerm> launch.</span>
+			A free tier is on its way — we'll share more when it's ready.
 		</p>
 	</div>
 
 	<!-- Fine print -->
 	<div class="text-center py-2 space-y-1">
 		<p class="text-xs text-foreground-subtle">
-			<strong>Navigation pages:</strong> <GroveTerm term="seedling">Seedling</GroveTerm> includes default nav only.
-			<GroveTerm term="sapling">Sapling</GroveTerm> adds 3 custom nav pages, <GroveTerm term="oak">Oak</GroveTerm> adds 5, <GroveTerm term="evergreen">Evergreen</GroveTerm> includes 8.
-		</p>
-		<p class="text-xs text-foreground-subtle">
-			Home, Blog, and About are always included in your navigation for free.
+			Every plan includes Home, Blog, and About pages. Higher plans add more custom navigation pages.
 		</p>
 	</div>
 

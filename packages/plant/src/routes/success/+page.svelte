@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Check, Loader2, Lightbulb, ArrowRight, X } from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { Check, Loader2, Lightbulb, ArrowRight, X } from '@autumnsgrove/groveengine/ui/icons';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
 
 	let { data } = $props();
 
@@ -80,13 +80,13 @@
 			</div>
 
 			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
-				{status === 'verifying' ? 'Verifying payment...' : 'Setting up your blog...'}
+				{status === 'verifying' ? 'Confirming everything...' : 'Setting up your blog...'}
 			</h1>
 
 			<p class="text-foreground-muted max-w-md mx-auto">
 				{status === 'verifying'
-					? "We're confirming your payment..."
-					: "We're creating your blog at " + (data.user?.username || 'your') + '.grove.place'}
+					? "Just a moment while we get things ready..."
+					: "Preparing your corner of the Grove..."}
 			</p>
 
 			<div class="mt-8 flex justify-center gap-2">
@@ -133,7 +133,7 @@
 					</h1>
 
 					<p class="text-foreground-muted mb-2">
-						Welcome to Grove, {data.user?.displayName || 'friend'}!
+						Welcome to Grove, {data.user?.displayName || 'Wanderer'}!
 					</p>
 					<p class="text-lg text-primary font-medium">
 						{tenant.subdomain}.grove.place
@@ -173,7 +173,7 @@
 						</div>
 						<div>
 							<p class="font-medium text-foreground">Make it yours</p>
-							<p class="text-sm text-foreground-muted">Customize your theme and add vines</p>
+							<p class="text-sm text-foreground-muted">Customize your theme and explore your dashboard</p>
 						</div>
 					</li>
 				</ul>
