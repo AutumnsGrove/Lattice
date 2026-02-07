@@ -21,7 +21,7 @@ vi.mock("../db/queries.js", () => ({
 import { createRateLimiter, checkRouteRateLimit } from "./rateLimit.js";
 import { checkRateLimit } from "../db/queries.js";
 
-const mockEnv = createMockEnv();
+const mockEnv = createMockEnv({ ENVIRONMENT: "development" });
 
 // =============================================================================
 // createRateLimiter middleware

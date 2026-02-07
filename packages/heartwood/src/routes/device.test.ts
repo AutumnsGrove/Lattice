@@ -505,7 +505,10 @@ describe("POST /auth/device/authorize", () => {
         "/auth/device/authorize",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Origin: mockEnv.AUTH_BASE_URL,
+          },
           body: JSON.stringify(body),
         },
         mockEnv,
@@ -516,7 +519,10 @@ describe("POST /auth/device/authorize", () => {
       "/auth/device/authorize",
       {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: mockEnv.AUTH_BASE_URL,
+        },
         body: formBody(body),
       },
       mockEnv,

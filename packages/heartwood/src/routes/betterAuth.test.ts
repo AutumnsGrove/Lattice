@@ -42,6 +42,9 @@ vi.mock("../middleware/rateLimit.js", () => ({
   passkeyAuthRateLimiter: vi.fn((_c: unknown, next: () => Promise<void>) =>
     next(),
   ),
+  magicLinkRateLimiter: vi.fn((_c: unknown, next: () => Promise<void>) =>
+    next(),
+  ),
 }));
 
 import betterAuthRoutes from "./betterAuth.js";
