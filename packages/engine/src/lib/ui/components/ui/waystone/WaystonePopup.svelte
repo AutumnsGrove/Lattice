@@ -5,6 +5,7 @@
 	import GlassCard from '../GlassCard.svelte';
 	import Button from '../Button.svelte';
 	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
+	import { sanitizeMarkdown } from '$lib/utils/sanitize';
 	import type { WaystoneExcerpt } from './types';
 
 	/**
@@ -147,7 +148,7 @@
 						<div
 							class="prose prose-sm prose-slate dark:prose-invert max-w-none waystone-content"
 						>
-							{@html excerpt.firstSection}
+							{@html sanitizeMarkdown(excerpt.firstSection)}
 						</div>
 					{:else}
 						<p class="text-sm text-muted-foreground">

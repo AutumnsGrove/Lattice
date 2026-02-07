@@ -174,6 +174,29 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     throw error(400, "GitHub username is required when enabling Timeline");
   }
 
+  // Length limits on free-text fields (defense against storage abuse)
+  if (customSystemPrompt && customSystemPrompt.length > 10_000) {
+    throw error(400, "Custom system prompt too long (max 10,000 characters)");
+  }
+  if (customSummaryInstructions && customSummaryInstructions.length > 5_000) {
+    throw error(
+      400,
+      "Custom summary instructions too long (max 5,000 characters)",
+    );
+  }
+  if (customGutterStyle && customGutterStyle.length > 2_000) {
+    throw error(400, "Custom gutter style too long (max 2,000 characters)");
+  }
+  if (ownerName && ownerName.length > 200) {
+    throw error(400, "Owner name too long (max 200 characters)");
+  }
+  if (githubUsername && githubUsername.length > 100) {
+    throw error(400, "GitHub username too long (max 100 characters)");
+  }
+  if (timezone && timezone.length > 100) {
+    throw error(400, "Timezone too long (max 100 characters)");
+  }
+
   // Parse repo lists if arrays
   const reposIncludeJson =
     Array.isArray(reposInclude) && reposInclude.length > 0

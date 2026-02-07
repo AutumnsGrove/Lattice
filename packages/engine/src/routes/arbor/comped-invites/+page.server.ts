@@ -7,6 +7,7 @@
  */
 
 import { error, fail } from "@sveltejs/kit";
+import { validateEmail } from "$lib/utils/validation.js";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface CompedInvite {
@@ -210,7 +211,7 @@ export const actions: Actions = {
     const notes = formData.get("notes")?.toString().trim() || null;
 
     // Validate email
-    if (!email || !email.includes("@")) {
+    if (!email || !validateEmail(email)) {
       return fail(400, { error: "Please enter a valid email address" });
     }
 
