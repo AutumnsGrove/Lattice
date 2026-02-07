@@ -355,21 +355,28 @@ def push(
 
     except GitError as e:
         stderr = e.stderr.lower()
-        if "rejected" in stderr or "failed to push" in stderr:
-            if "pre-push hook" in stderr or "pre-push checks failed" in stderr:
-                console.print("[red]Push blocked by pre-push hook[/red]")
-                console.print("[dim]Fix the issues above, then try again.[/dim]")
-            elif "non-fast-forward" in stderr or "fetch first" in stderr:
-                console.print("[red]Remote has newer commits[/red]")
-                console.print(
-                    "[dim]Run 'gw git sync --write' to rebase and push, "
-                    "or 'gw git push --write --force-with-lease' to overwrite.[/dim]"
-                )
-            else:
-                console.print(f"[red]Push failed:[/red] {e.stderr.strip() or e.message}")
-                console.print(
-                    "[dim]Hint: Pull changes first with 'gw git sync --write'[/dim]"
-                )
+        # Pre-push hook failures — now detectable because execute() includes
+        # subprocess stdout in the error (hooks write diagnostics there).
+        if "pre-push" in stderr:
+            console.print("[red]Push blocked by pre-push hook[/red]")
+            if e.stderr.strip():
+                console.print(f"\n{e.stderr.strip()}")
+            console.print(
+                "\n[dim]Fix the issues reported above, then push again.\n"
+                "To bypass: git push --no-verify[/dim]"
+            )
+        # Remote has newer commits that need to be integrated
+        elif "non-fast-forward" in stderr or "fetch first" in stderr:
+            console.print("[red]Remote has newer commits[/red]")
+            console.print(
+                "[dim]Run 'gw git sync --write' to rebase and push, "
+                "or 'gw git push --write --force-with-lease' to overwrite.[/dim]"
+            )
+        # Other rejection (permissions, protected branch, etc.)
+        elif "rejected" in stderr or "failed to push" in stderr:
+            console.print("[red]Push rejected[/red]")
+            if e.stderr.strip():
+                console.print(f"\n{e.stderr.strip()}")
         else:
             console.print(f"[red]Push failed:[/red] {e.stderr.strip() or e.message}")
         raise SystemExit(1)

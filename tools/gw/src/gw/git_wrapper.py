@@ -146,13 +146,20 @@ class Git:
             return result.stdout if capture_output else ""
         except subprocess.CalledProcessError as e:
             stderr_text = (e.stderr or "").strip()
+            stdout_text = (e.stdout or "").strip()
             msg = f"Git command failed: {' '.join(cmd)}"
             if stderr_text:
                 msg += f"\n{stderr_text}"
+            # Include stdout in error output — git hooks (pre-push, pre-commit)
+            # write their diagnostics to stdout, which is captured separately.
+            # Without this, hook failures are invisible to error handlers.
+            combined = e.stderr or ""
+            if stdout_text:
+                combined = f"{combined}\n{e.stdout}" if combined.strip() else e.stdout
             raise GitError(
                 msg,
                 returncode=e.returncode,
-                stderr=e.stderr or "",
+                stderr=combined,
             ) from e
 
     def status(self) -> GitStatus:

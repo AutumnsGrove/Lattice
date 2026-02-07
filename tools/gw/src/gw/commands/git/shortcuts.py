@@ -262,9 +262,24 @@ def sync(ctx: click.Context, write: bool, remote: str, base_branch: str) -> None
         git.rebase(f"{remote}/{base_branch}")
 
         # Step 3: Push
+        # Try regular push first — after rebasing local-only commits onto
+        # the fetched remote, the result is often a fast-forward. Only fall
+        # back to --force-with-lease when needed (e.g. a feature branch
+        # with rewritten commits that was already pushed).
         if not output_json:
             console.print("[dim]Pushing to remote...[/dim]")
-        git.push(remote=remote, branch=current_branch, force_with_lease=True)
+        try:
+            git.push(remote=remote, branch=current_branch)
+        except GitError as push_err:
+            push_stderr = push_err.stderr.lower()
+            if "non-fast-forward" in push_stderr or "fetch first" in push_stderr:
+                if not output_json:
+                    console.print(
+                        "[dim]Fast-forward not possible, retrying with --force-with-lease...[/dim]"
+                    )
+                git.push(remote=remote, branch=current_branch, force_with_lease=True)
+            else:
+                raise
 
         if output_json:
             console.print(json.dumps({
@@ -277,11 +292,22 @@ def sync(ctx: click.Context, write: bool, remote: str, base_branch: str) -> None
             console.print(f"\n[green]Branch is up to date with {remote}/{base_branch}[/green]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
-        if "conflict" in e.stderr.lower():
+        stderr = e.stderr.lower()
+        if "conflict" in stderr:
+            console.print("[red]Rebase conflict[/red]")
             console.print(
-                "[dim]Hint: Resolve conflicts, then 'gw git rebase --write --continue'[/dim]"
+                "[dim]Resolve conflicts, then 'gw git rebase --write --continue'[/dim]"
             )
+        elif "pre-push" in stderr:
+            console.print("[red]Sync completed but push blocked by pre-push hook[/red]")
+            if e.stderr.strip():
+                console.print(f"\n{e.stderr.strip()}")
+            console.print(
+                "\n[dim]Fix the issues above, then 'gw git push --write'.\n"
+                "To bypass: git push --no-verify[/dim]"
+            )
+        else:
+            console.print(f"[red]Git error:[/red] {e.message}")
         raise SystemExit(1)
 
 
