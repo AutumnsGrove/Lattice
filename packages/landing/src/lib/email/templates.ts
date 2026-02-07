@@ -29,7 +29,7 @@ function wrapEmail(content: string, unsubscribeUrl: string): string {
     <tr>
       <td align="center" style="padding-bottom: 30px;">
         <!-- Grove Logo -->
-        <img src="https://grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
+        <img src="https://cdn.grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     ${content}
@@ -67,7 +67,7 @@ export function getWelcomeEmailHtml(unsubscribeUrl: string): string {
     <tr>
       <td align="center" style="padding-bottom: 30px;">
         <!-- Grove Logo -->
-        <img src="https://grove.place/email/logo.png" width="56" height="56" alt="Grove" style="display: inline-block; border-radius: 50%;" />
+        <img src="https://cdn.grove.place/email/logo.png" width="56" height="56" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     <tr>
