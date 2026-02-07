@@ -7,8 +7,14 @@ error messages when tools are missing.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+import re
 import shutil
 import subprocess
+
+
+# Detect nested quantifiers that cause catastrophic backtracking (ReDoS).
+# Matches patterns like (a+)+, (x*)+, (y+)*, (z?){2,} etc.
+_REDOS_PATTERN = re.compile(r"[+*]\)?[+*{]")
 
 
 @dataclass
@@ -167,6 +173,20 @@ def run_tool(
     return result
 
 
+def _safe_compile_regex(pattern: str, flags: int = 0) -> Optional[re.Pattern]:
+    """Compile a regex pattern, rejecting ReDoS-prone patterns.
+
+    Returns None if the pattern is invalid or contains nested quantifiers
+    that could cause catastrophic backtracking.
+    """
+    if _REDOS_PATTERN.search(pattern):
+        return None
+    try:
+        return re.compile(pattern, flags)
+    except re.error:
+        return None
+
+
 def find_files(
     pattern: str,
     extensions: Optional[list[str]] = None,
@@ -224,12 +244,7 @@ def find_files(
             return ""
 
         # Filter results by pattern (case-insensitive filename match)
-        import re
-        try:
-            regex = re.compile(pattern, re.IGNORECASE)
-        except re.error:
-            # Fall back to simple substring match
-            regex = None
+        regex = _safe_compile_regex(pattern, re.IGNORECASE)
 
         lines = result.stdout.strip().split("\n")
         matched = []
