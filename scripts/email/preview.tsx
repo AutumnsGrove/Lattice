@@ -37,6 +37,9 @@ import { GentleNudge } from "../../packages/engine/src/lib/email/lifecycle/Gentl
 import { PatchNotesEmail } from "../../packages/engine/src/lib/email/updates/PatchNotesEmail";
 import { AnnouncementEmail } from "../../packages/engine/src/lib/email/updates/AnnouncementEmail";
 
+// Invites
+import { BetaInviteEmail } from "../../packages/engine/src/lib/email/sequences/BetaInviteEmail";
+
 // Seasonal
 import { SeasonalGreeting } from "../../packages/engine/src/lib/email/seasonal/SeasonalGreeting";
 
@@ -135,6 +138,40 @@ const TEMPLATES: TemplateEntry[] = [
     element: React.createElement(Day30Email, {
       name: "Wanderer",
       audienceType: "wanderer" as const,
+    }),
+  },
+
+  // ── Invites ────────────────────────────────────────────────────────
+  {
+    name: "BetaInviteEmail-beta",
+    category: "invites",
+    description: "Beta invite — early access",
+    element: React.createElement(BetaInviteEmail, {
+      name: "Wanderer",
+      tier: "seedling",
+      inviteType: "beta",
+    }),
+  },
+  {
+    name: "BetaInviteEmail-comped",
+    category: "invites",
+    description: "Comped invite — gifted plan",
+    element: React.createElement(BetaInviteEmail, {
+      name: "River",
+      tier: "canopy",
+      inviteType: "comped",
+    }),
+  },
+  {
+    name: "BetaInviteEmail-custom-message",
+    category: "invites",
+    description: "Beta invite with personal message",
+    element: React.createElement(BetaInviteEmail, {
+      name: "Alex",
+      tier: "seedling",
+      inviteType: "beta",
+      customMessage:
+        "Loved your writing on indie web. I think you'd really enjoy building here.",
     }),
   },
 
@@ -281,6 +318,7 @@ function generateIndexHtml(
 
   const categoryLabels: Record<string, string> = {
     sequences: "Onboarding Sequences",
+    invites: "Invites",
     lifecycle: "Lifecycle",
     updates: "Updates & Patch Notes",
     seasonal: "Seasonal Greetings",
@@ -589,9 +627,7 @@ async function main() {
 
   if (templates.length === 0) {
     console.error(`No templates matched filter: ${filter || categoryFilter}`);
-    console.error(
-      `Available: ${TEMPLATES.map((t) => t.name).join(", ")}`,
-    );
+    console.error(`Available: ${TEMPLATES.map((t) => t.name).join(", ")}`);
     process.exit(1);
   }
 
