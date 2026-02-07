@@ -178,8 +178,8 @@
 
 		<!-- Grove Messages -->
 		{#if data.messages?.length}
-			<div class="w-full max-w-2xl mx-auto mb-6">
-				<GroveMessages messages={data.messages} dismissible={false} />
+			<div class="w-full max-w-lg mx-auto mb-6">
+				<GroveMessages messages={data.messages} centered={true} />
 			</div>
 		{/if}
 

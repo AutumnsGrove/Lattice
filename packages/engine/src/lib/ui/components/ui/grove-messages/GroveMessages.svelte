@@ -12,10 +12,16 @@
 	interface Props {
 		messages: GroveMessage[];
 		dismissible?: boolean;
+		centered?: boolean;
 		class?: string;
 	}
 
-	let { messages, dismissible = false, class: className }: Props = $props();
+	let {
+		messages,
+		dismissible = false,
+		centered = false,
+		class: className,
+	}: Props = $props();
 
 	// localStorage key for dismissed message IDs
 	const STORAGE_KEY = "grove_dismissed_messages";
@@ -151,73 +157,109 @@
 	>
 		{#each visibleMessages as message (message.id)}
 			{@const config = typeConfig[message.message_type]}
-			<div
-				class={cn(
-					"relative rounded-xl border backdrop-blur-sm px-4 py-3",
-					"transition-opacity duration-200",
-					config.bg,
-					config.border,
-				)}
-				role="article"
-			>
-				<div class="flex items-start gap-3">
-					<!-- Icon -->
-					<div class={cn("mt-0.5 flex-shrink-0", config.accent)}>
-						<config.icon class="w-5 h-5" aria-hidden="true" />
-					</div>
-
-					<!-- Content -->
-					<div class="flex-1 min-w-0">
-						<div class="flex items-baseline gap-2 mb-0.5">
-							<h3
-								class="font-sans font-medium text-sm text-foreground leading-snug"
-							>
-								{message.title}
-							</h3>
-							{#if message.pinned}
-								<span
-									class="text-[10px] font-sans font-medium uppercase tracking-wider text-foreground-faint"
-									>pinned</span
-								>
+			{#if centered}
+				<!-- Centered banner variant (landing page) -->
+				<div
+					class={cn(
+						"relative rounded-xl border backdrop-blur-sm px-5 py-4 text-center",
+						"transition-opacity duration-200",
+						config.bg,
+						config.border,
+					)}
+					role="article"
+				>
+					<h3
+						class="font-sans font-medium text-sm text-foreground leading-snug mb-1"
+					>
+						{message.title}
+					</h3>
+					<p
+						class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line"
+					>
+						{#each parseBody(message.body) as segment}
+							{#if segment.type === "link"}
+								<a
+									href={segment.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="underline decoration-current/40 hover:decoration-current transition-colors"
+								>{segment.label}</a>
+							{:else}
+								{segment.value}
 							{/if}
-						</div>
-						<p
-							class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line"
-						>
-							{#each parseBody(message.body) as segment}
-								{#if segment.type === "link"}
-									<a
-										href={segment.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="underline decoration-current/40 hover:decoration-current transition-colors"
-									>{segment.label}</a>
-								{:else}
-									{segment.value}
-								{/if}
-							{/each}
-						</p>
-						<time
-							class="block mt-1 text-xs text-foreground-faint font-sans"
-							datetime={message.created_at}
-						>
-							{formatDate(message.created_at)}
-						</time>
-					</div>
-
-					<!-- Dismiss button -->
-					{#if dismissible}
-						<button
-							type="button"
-							onclick={() => dismiss(message.id)}
-							class="flex-shrink-0 p-1 rounded-md text-foreground-faint hover:text-foreground-muted hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-							aria-label="Dismiss message: {message.title}"
-						>
-							<X class="w-4 h-4" />
-						</button>
-					{/if}
+						{/each}
+					</p>
 				</div>
-			</div>
+			{:else}
+				<!-- Default variant (arbor admin) -->
+				<div
+					class={cn(
+						"relative rounded-xl border backdrop-blur-sm px-4 py-3",
+						"transition-opacity duration-200",
+						config.bg,
+						config.border,
+					)}
+					role="article"
+				>
+					<div class="flex items-start gap-3">
+						<!-- Icon -->
+						<div class={cn("mt-0.5 flex-shrink-0", config.accent)}>
+							<config.icon class="w-5 h-5" aria-hidden="true" />
+						</div>
+
+						<!-- Content -->
+						<div class="flex-1 min-w-0">
+							<div class="flex items-baseline gap-2 mb-0.5">
+								<h3
+									class="font-sans font-medium text-sm text-foreground leading-snug"
+								>
+									{message.title}
+								</h3>
+								{#if message.pinned}
+									<span
+										class="text-[10px] font-sans font-medium uppercase tracking-wider text-foreground-faint"
+										>pinned</span
+									>
+								{/if}
+							</div>
+							<p
+								class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line"
+							>
+								{#each parseBody(message.body) as segment}
+									{#if segment.type === "link"}
+										<a
+											href={segment.href}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="underline decoration-current/40 hover:decoration-current transition-colors"
+										>{segment.label}</a>
+									{:else}
+										{segment.value}
+									{/if}
+								{/each}
+							</p>
+							<time
+								class="block mt-1 text-xs text-foreground-faint font-sans"
+								datetime={message.created_at}
+							>
+								{formatDate(message.created_at)}
+							</time>
+						</div>
+
+						<!-- Dismiss button -->
+						{#if dismissible}
+							<button
+								type="button"
+								onclick={() => dismiss(message.id)}
+								class="flex-shrink-0 p-1 rounded-md text-foreground-faint hover:text-foreground-muted hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+								aria-label="Dismiss message: {message.title}"
+							>
+								<X class="w-4 h-4" />
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		{/each}
 	</div>
 {/if}
