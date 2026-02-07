@@ -7,6 +7,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import MarkdownIt from 'markdown-it';
+	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from 'lucide-svelte';
 
 	const md = new MarkdownIt({
 		html: false,
@@ -64,12 +65,29 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 		</div>
 
 		<div class="flex items-center gap-2">
-			<!-- Decorative formatting buttons -->
-			<div class="hidden sm:flex items-center gap-0.5 text-foreground-faint">
-				<span class="px-1.5 py-0.5 rounded text-xs font-mono hover:bg-white/50 cursor-default" title="Bold">B</span>
-				<span class="px-1.5 py-0.5 rounded text-xs font-mono italic hover:bg-white/50 cursor-default" title="Italic">I</span>
-				<span class="px-1.5 py-0.5 rounded text-xs font-mono hover:bg-white/50 cursor-default" title="Link">🔗</span>
-			</div>
+			<!-- Formatting button groups (decorative, matching the real editor) -->
+			{#if activeTab !== 'preview'}
+				<div class="hidden sm:flex items-center gap-1.5">
+					<!-- Text formatting group -->
+					<div class="fmt-group">
+						<span class="fmt-btn" title="Bold"><Bold class="w-3.5 h-3.5" /></span>
+						<span class="fmt-btn" title="Italic"><Italic class="w-3.5 h-3.5" /></span>
+						<span class="fmt-btn" title="Code"><Code class="w-3.5 h-3.5" /></span>
+					</div>
+					<div class="w-px h-4 bg-foreground-faint/20" aria-hidden="true"></div>
+					<!-- Link group -->
+					<div class="fmt-group">
+						<span class="fmt-btn" title="Link"><Link class="w-3.5 h-3.5" /></span>
+					</div>
+					<div class="w-px h-4 bg-foreground-faint/20" aria-hidden="true"></div>
+					<!-- Heading group -->
+					<div class="fmt-group">
+						<span class="fmt-btn" title="Heading 1"><Heading1 class="w-3.5 h-3.5" /></span>
+						<span class="fmt-btn" title="Heading 2"><Heading2 class="w-3.5 h-3.5" /></span>
+						<span class="fmt-btn" title="Heading 3"><Heading3 class="w-3.5 h-3.5" /></span>
+					</div>
+				</div>
+			{/if}
 			<span class="text-[10px] text-foreground-faint font-sans px-2 py-0.5 rounded-full bg-accent-subtle/20">
 				Flow Editor
 			</span>
@@ -110,3 +128,37 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 		{/if}
 	</div>
 </div>
+
+<style>
+	/* Formatting button groups — mirrors the real Flow Editor toolbar */
+	.fmt-group {
+		display: flex;
+		align-items: center;
+		gap: 1px;
+		background: rgba(0, 0, 0, 0.06);
+		border-radius: 6px;
+		padding: 2px;
+	}
+	:global(.dark) .fmt-group {
+		background: rgba(255, 255, 255, 0.08);
+	}
+	.fmt-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 4px;
+		color: var(--color-foreground-subtle, #6b7280);
+		cursor: default;
+		transition: background 150ms ease;
+	}
+	.fmt-btn:hover {
+		background: rgba(0, 0, 0, 0.06);
+		color: var(--color-foreground-muted, #4b5563);
+	}
+	:global(.dark) .fmt-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: var(--color-foreground-muted, #9ca3af);
+	}
+</style>
