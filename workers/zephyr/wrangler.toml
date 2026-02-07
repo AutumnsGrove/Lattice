@@ -8,6 +8,11 @@ binding = "DB"
 database_name = "zephyr-logs"
 database_id = "a7038f4d-4850-428c-b816-f2636668852d"
 
+# Service binding for Worker-to-Worker communication (no public URL needed)
+[[services]]
+binding = "EMAIL_RENDER"
+service = "grove-email-render"
+
 # Environment variables
 [vars]
 EMAIL_RENDER_URL = "https://grove-email-render.m7jv4v7npb.workers.dev"
