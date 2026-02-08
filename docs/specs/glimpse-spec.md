@@ -2,6 +2,7 @@
 aliases: []
 date created: Friday, February 7th 2026
 date modified: Friday, February 7th 2026
+lastUpdated: '2026-02-07'
 tags:
   - tooling
   - screenshots
