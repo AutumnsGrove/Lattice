@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Badge, toast, GroveSwap } from "$lib/ui";
-  import { MessageSquare, Mail, Check, X, Ban } from "lucide-svelte";
+  import { GlassCard, Badge, toast, GroveSwap, MessageSquare, Mail, Check, X, Ban } from "$lib/ui";
 
   let { data } = $props();
 

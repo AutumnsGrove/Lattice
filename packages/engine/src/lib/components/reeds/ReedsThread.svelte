@@ -163,7 +163,7 @@
 </script>
 
 {#if commentsEnabled}
-  <section class="reeds-section" aria-label="Comments">
+  <section class="reeds-section" id="reeds" aria-label="Comments">
     <div class="reeds-header">
       <h2 class="reeds-title">
         {#if total > 0}

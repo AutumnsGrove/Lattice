@@ -42,6 +42,8 @@ import {
   Upload,
   MessagesSquare,
   MessageCircle,
+  MessageSquare,
+  MessageSquareText,
   FileText,
   Tag,
   Rss,
@@ -55,6 +57,7 @@ import {
   Flower2,
   TreeDeciduous,
   Crown,
+  Ban,
   // States & Feedback
   Check,
   CheckCircle,
@@ -149,6 +152,7 @@ export const stateIcons = {
   info: InfoIcon,
   circle: Circle,
   lock: Lock,
+  ban: Ban,
 } as const;
 
 // ============================================================================
@@ -200,6 +204,8 @@ export const featureIcons = {
   eye: Eye,
   download: Download,
   layers: Layers,
+  messagesquare: MessageSquare,
+  messagesquaretext: MessageSquareText,
 } as const;
 
 // ============================================================================
@@ -379,6 +385,8 @@ export {
   Rss,
   Eye,
   MessageCircle,
+  MessageSquare,
+  MessageSquareText,
   Layers,
   Lightbulb,
   BookOpen,
@@ -387,6 +395,7 @@ export {
   AlertTriangle,
   HelpCircle,
   Lock,
+  Ban,
   // Phase/Special & Seasons
   Sparkles,
   Star,
