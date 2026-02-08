@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-02-07",
-  "lastAuditedBy": "claude/grove-messages-beta-comm",
+  "lastUpdated": "2026-02-08",
+  "lastAuditedBy": "PR #1011 - Hum music link previews",
   "components": {
-    "total": 207,
+    "total": 212,
     "breakdown": {
       "primitives": 45,
       "nature": 65,
@@ -15,7 +15,7 @@
       "terrarium": 7,
       "gallery": 4,
       "charts": 4,
-      "content": 7,
+      "content": 12,
       "states": 4,
       "forms": 3,
       "feedback": 1,
