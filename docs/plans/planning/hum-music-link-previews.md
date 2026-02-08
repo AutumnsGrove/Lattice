@@ -51,10 +51,10 @@ We use cross-platform APIs to resolve metadata, falling back gracefully when a s
 | Spotify | `open.spotify.com/{type}/{id}` | Phase 1 |
 | YouTube Music | `music.youtube.com/watch?v={id}` | Phase 1 |
 | SoundCloud | `soundcloud.com/{user}/{track}` | Phase 1 |
-| Bandcamp | `{artist}.bandcamp.com/{type}/{slug}` | Phase 2 |
 | Tidal | `tidal.com/browse/{type}/{id}` | Phase 2 |
 | Deezer | `deezer.com/{type}/{id}` | Phase 2 |
 | Amazon Music | `music.amazon.com/{type}/{id}` | Phase 3 |
+| Bandcamp | `{artist}.bandcamp.com/{type}/{slug}` | Future (needs OG scraping) |
 
 Phase 1 covers the providers you and your friends actually use. Phase 2 and 3 add coverage as demand appears — the architecture supports adding new providers by dropping a regex + URL extractor into the registry.
 
@@ -262,6 +262,7 @@ This means detection happens at **write time** (when the post is saved), not at 
 | `HumCardSkeleton.svelte` | Loading state (shimmer animation matching card layout) |
 | `HumCardFallback.svelte` | Unresolved state — provider logo + styled link |
 | `HumProviderBadge.svelte` | Small provider logo (Apple, Spotify, etc.) |
+| `HumPlatformTray.svelte` | Slide-out tray showing cross-platform links |
 
 ### Component location
 
@@ -273,6 +274,7 @@ packages/engine/src/lib/ui/components/content/hum/
 ├── HumCardSkeleton.svelte
 ├── HumCardFallback.svelte
 ├── HumProviderBadge.svelte
+├── HumPlatformTray.svelte
 └── providers.ts                  # URL patterns + provider metadata
 ```
 
@@ -294,9 +296,10 @@ packages/engine/src/lib/ui/components/content/hum/
 - **Glass card** with subtle backdrop blur (follows Grove glassmorphism)
 - **Album artwork** on the left, rounded corners (grove border radius)
 - **Text** right of artwork: title (bold), artist (regular), album (muted, if different from title)
-- **Provider badge** top-right: small logo icon (16×16) with provider name on hover
+- **Provider badge** top-right: small logo icon (16×16), clickable → opens source URL
+- **Platform tray:** tap badge to slide out a row of platform icons (Spotify, Apple Music, YouTube, etc.) from Odesli data. Each icon links to that platform. Tray slides back on blur/outside click. This is the one interactive element.
 - **Hover state:** subtle lift + glow, cursor pointer
-- **Click:** entire card is an `<a>` tag wrapping everything → opens source URL
+- **Click (card body):** opens source URL in new tab
 - **Dark mode:** warm dark glass, not cold — "album cover at night"
 - **Reduced motion:** no hover animation, still fully functional
 - **Mobile:** card goes full-width, artwork stays proportional
@@ -431,8 +434,8 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 
 ### Phase 2: Polish (1 day)
 
-1. Artwork proxying through R2
-2. Add YouTube Music, SoundCloud, Bandcamp providers
+1. `HumPlatformTray` slide-out with cross-platform links from Odesli
+2. Add YouTube Music, SoundCloud providers
 3. Provider-specific fallback APIs (iTunes Lookup, Spotify oEmbed)
 4. Accessible focus states, reduced motion, screen reader labels
 5. Dark mode refinement
@@ -440,10 +443,10 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 
 ### Phase 3: Enrichment (future)
 
-1. Cross-platform links in card (e.g., "Also on: Spotify, Apple Music")
-2. OG image generation for social sharing
-3. Seasonal card variations
-4. Add Tidal, Deezer, Amazon Music providers
+1. OG image generation for social sharing
+2. Seasonal card variations
+3. Add Tidal, Deezer, Amazon Music providers
+4. Bandcamp support (OG tag scraping — no free metadata API)
 5. Integration with Now Playing curio (share what you're listening to → auto-creates a hum card in your feed)
 
 ---
@@ -490,13 +493,13 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 
 1. ~~**Artwork caching strategy**~~ — **Decided: KV.** Base64 for small images (< 100KB), 7-day TTL matching metadata cache. Simpler to reason about, no R2 plumbing needed for v1. Can migrate to R2 later if permanence or storage costs become a concern.
 
-2. **Cross-platform links UX** — If Odesli gives us the same song on 5 platforms, do we show all 5 as tiny icons below the card? Or is that too busy? Maybe just the source provider + "also available on..." hover/expand?
+2. ~~**Cross-platform links UX**~~ — **Decided: source badge + slide-out.** Card shows the source provider badge by default. Tap/click reveals a slide-out tray with icons for all available platforms (from Odesli). Keeps the card clean at rest, but lets people pick their preferred service. The slide-out is the one interactive element on the card.
 
-3. **Write-time vs. read-time resolution** — Current plan resolves metadata at read-time (client calls `/api/hum/resolve`). Alternative: resolve at write-time (when post is saved) and store metadata in D1 alongside the post. Write-time is faster for readers but means metadata could go stale. Read-time with KV caching is probably the sweet spot.
+3. ~~**Write-time vs. read-time resolution**~~ — **Decided: read-time.** Client calls `/api/hum/resolve` on page load, KV cache makes most hits instant (7-day TTL). No stale metadata baked into D1, no re-render needed when posts are edited. The architecture section already reflects this.
 
-4. **Existing Spotify/SoundCloud embeds in oEmbed registry** — The current `oembed-providers.ts` already handles Spotify and SoundCloud for gutter embeds. Should Hum cards *replace* those in the main content body, or coexist? Recommendation: Hum handles music links in post content; the oEmbed system continues to handle gutter embeds. Different contexts, different presentations.
+4. ~~**Existing Spotify/SoundCloud embeds in oEmbed registry**~~ — **Decided: coexist.** Hum handles music links in post content body; the oEmbed system continues to handle gutter embeds. Different contexts, different presentations. No migration needed.
 
-5. **Bandcamp edge case** — Bandcamp has no free metadata API and their oEmbed is limited. Might need to fall back to OG tag scraping for Bandcamp. This is fine — we just need title + artist + artwork.
+5. ~~**Bandcamp edge case**~~ — **Decided: skip for now.** Bandcamp has no free metadata API and limited oEmbed. Moved to future enhancement — can revisit with OG tag scraping if there's demand. Not worth the complexity for Phase 1 or 2.
 
 ---
 
