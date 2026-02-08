@@ -283,12 +283,26 @@
     "definition": "Automated content moderation that scans for harmful material — without storing or training on your content.",
     "standardTerm": "Content Moderation"
   },
+  "canopy": {
+    "slug": "canopy",
+    "term": "Canopy",
+    "category": "content",
+    "tagline": "The Visible Grove",
+    "definition": "Grove's opt-in directory — browse who's growing here, discover other wanderers, and find your people.",
+    "seeAlso": [
+      "flow"
+    ],
+    "standardTerm": "Directory"
+  },
   "meadow": {
     "slug": "meadow",
     "term": "Meadow",
     "category": "content",
     "tagline": "The Social Layer",
     "definition": "A social feed where you follow other Grove blogs and see their posts in chronological order — no algorithms.",
+    "seeAlso": [
+      "canopy"
+    ],
     "standardTerm": "Community Feed"
   },
   "forests": {
@@ -499,6 +513,7 @@
     "seeAlso": [
       "rings",
       "clearing",
+      "canopy",
       "etch"
     ],
     "standardTerm": "Monitoring"
@@ -560,6 +575,9 @@
     "category": "operations",
     "tagline": "AI Content Protection",
     "definition": "Grove's defense against AI scrapers and data harvesters — robots.txt, meta tags, rate limiting, and legal protections working together.",
+    "seeAlso": [
+      "canopy"
+    ],
     "alwaysGrove": true
   },
   "wanderer": {
@@ -646,7 +664,8 @@
     "tagline": "Pro Tier",
     "definition": "Grove's pro plan ($25/month) — unlimited posts, theme customizer, custom domain, and analytics.",
     "seeAlso": [
-      "blooms"
+      "blooms",
+      "canopy"
     ],
     "standardTerm": "Pro"
   },
@@ -690,8 +709,8 @@
     "seeAlso": [
       "lattice",
       "flow",
-      "workshop",
-      "fireside"
+      "canopy",
+      "wander"
     ],
     "standardTerm": "Sidebar Links"
   }

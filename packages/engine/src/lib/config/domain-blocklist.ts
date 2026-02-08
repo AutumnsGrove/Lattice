@@ -282,6 +282,7 @@ const GROVE_PUBLIC_SERVICES: string[] = [
   "wander", // Immersive Discovery
   "curios", // Cabinet of Wonders
   "forests", // Community Groves
+  "canopy", // Wanderer Directory
   "shutter", // Web Content Distillation (Beyond)
   "centennial", // Domain Preservation
   // Route-based services
@@ -459,7 +460,7 @@ const GROVE_CONCEPTS: string[] = [
   // Note: 'centennial' is in GROVE_PUBLIC_SERVICES (Domain Preservation feature)
   "seasons",
   "acorn",
-  "canopy",
+  // "canopy" moved to GROVE_PUBLIC_SERVICES (Wanderer Directory)
   "understory",
   "overstory",
   "forest",

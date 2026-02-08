@@ -538,6 +538,22 @@
 					]
 				},
 				{
+					name: 'Canopy',
+					termSlug: 'canopy',
+					tagline: 'Wanderer Directory',
+					description: 'See who\'s growing here. Canopy is Grove\'s opt-in directory — browse who\'s here, discover other writers, and find your people. Rise into the Canopy by enabling visibility in your settings, write a line about yourself, and choose what kind of growth you represent. No algorithms. No ranking. Just trees, visible to anyone who looks.',
+					status: 'planned',
+					icon: 'book-user',
+					domain: 'grove.place/canopy',
+					integration: 'Discovery layer for all Wanderers',
+					spec: '/knowledge/specs/canopy-spec',
+					subComponents: [
+						{ name: 'Directory', icon: 'book-user', description: 'Browse wanderers' },
+						{ name: 'Categories', icon: 'tag', description: 'Filter by interest' },
+						{ name: 'Opt-In', icon: 'squareasterisk', description: 'Consent-first visibility' }
+					]
+				},
+				{
 					name: 'Forests',
 					termSlug: 'forests',
 					tagline: 'Community Groves',

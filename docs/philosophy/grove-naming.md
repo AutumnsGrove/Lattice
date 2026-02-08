@@ -368,6 +368,19 @@ Thorn is Grove's automated content moderation—privacy-first, context-aware, de
 
 *Protection that works in the background.*
 
+### Canopy
+**The Visible Grove** · `grove.place/canopy`
+**Standard:** Directory
+**Waystone:** Grove's opt-in directory — browse who's growing here, discover other wanderers, and find your people.
+
+The canopy is what you see when you look at a forest from above. Every tree's crown is visible—distinct shapes, different colors, each one reaching toward the light in its own way. Some tower. Some spread wide. Some flower. From up here, you can see the whole grove at once.
+
+Canopy is Grove's opt-in directory. When you're ready to be found, you rise into the Canopy—set your name, write a line about yourself, choose what kind of growth you represent. Others browse the Canopy to discover who's here: photographers, poets, developers, dreamers, anyone who chose to be visible. Not everyone reaches the canopy. Some prefer the understory—present, growing, but private. That's okay. The canopy is for those who want to say: *I'm here. Come visit.*
+
+No algorithms. No ranking. Just trees, reaching up, visible to anyone who looks.
+
+*See who's growing here.*
+
 ### Meadow
 **The Social Layer** · `meadow.grove.place`
 **Standard:** Community Feed
@@ -754,6 +767,7 @@ Shade is Grove's layered defense against AI crawlers, scrapers, and automated da
 | **Scribe** | Content | Voice transcription | *(integrated)* |
 | **Reeds** | Content | Comments system | *(integrated)* |
 | **Thorn** | Content | Content moderation | *(internal)* |
+| **Canopy** | Content | Wanderer directory | grove.place/canopy |
 | **Meadow** | Content | Social connection | meadow.grove.place |
 | **Forests** | Content | Community aggregation | {forest}.grove.place |
 | **Wander** | Content | Immersive discovery | wander.grove.place |
@@ -816,6 +830,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Scribe | GroveScribe |
 | Reeds | GroveReeds |
 | Thorn | GroveThorn |
+| Canopy | GroveDirectory |
 | Meadow | GroveSocial |
 | Forests | GroveForests |
 | Wander | GroveWander |
@@ -986,5 +1001,5 @@ Vines are sidebar widgets in your blog's gutters—the content that grows alongs
 
 ---
 
-*Last updated: February 6, 2026 — Added Standard/AlwaysGrove annotations + tier entries, Workshop, Fireside, Vines*
+*Last updated: February 8, 2026 — Added Canopy (opt-in wanderer directory)*
 *Status: Placeholder names, pending launch*

@@ -89,6 +89,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
   mc: "grove-landing.pages.dev", // Outpost Minecraft (coming soon)
   search: "grove-landing.pages.dev", // Search (coming soon)
   porch: "grove-landing.pages.dev", // Porch conversations (coming soon)
+  canopy: "grove-landing.pages.dev", // Canopy directory (route-based at grove.place/canopy)
 
   // Special handling
   www: "REDIRECT", // Redirect to root
