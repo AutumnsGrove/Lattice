@@ -57,6 +57,14 @@
   <title>Admin - {data.tenant?.displayName || data.tenant?.subdomain || 'Grove'}</title>
 </svelte:head>
 
+{#if data.isDemoMode}
+  <div class="demo-banner">
+    <span class="demo-icon">📸</span>
+    <span class="demo-text">Demo Mode — Screenshots enabled</span>
+    <span class="demo-tip">Use ?demo=true on any admin page</span>
+  </div>
+{/if}
+
 <div class="admin-layout leaf-pattern">
   <!-- Header is now unified Chrome Header from root layout with sidebar toggle -->
 
@@ -211,7 +219,52 @@
 
 <Toast />
 
+<div class="demo-mode-banner" class:visible={data.isDemoMode}>
+  <span class="demo-icon">📸</span>
+  <span class="demo-text">Demo Mode</span>
+  <span class="demo-tip">Screenshots enabled — use ?demo=true on any admin page</span>
+</div>
+
 <style>
+  .demo-mode-banner {
+    position: fixed;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: var(--grove-100, #ecfccb);
+    color: var(--grove-800, #3f6212);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 var(--border-radius-standard) var(--border-radius-standard);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .demo-mode-banner.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  :global(.dark) .demo-mode-banner {
+    background: var(--grove-900, #14532d);
+    color: var(--grove-200, #bbf7d0);
+  }
+
+  .demo-icon {
+    font-size: 1rem;
+  }
+
+  .demo-tip {
+    opacity: 0.7;
+    font-weight: 400;
+    margin-left: 0.5rem;
+  }
   .admin-layout {
     display: flex;
     min-height: 100vh;

@@ -8,6 +8,50 @@ import { emailsMatch, normalizeEmail } from "$lib/utils/user.js";
 import { loadChannelMessages } from "$lib/server/services/messages.js";
 import type { LayoutServerLoad } from "./$types";
 
+// Demo mode secret key for local development and screenshots
+// In production, this should come from environment variables
+const DEMO_MODE_SECRET = "glimpse-demo-2026";
+
+interface DemoUser {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+  isAdmin: boolean;
+}
+
+interface DemoTenant {
+  id: string;
+  subdomain: string;
+  displayName: string;
+}
+
+// Check if request is in demo mode
+function isDemoRequest(url: URL): boolean {
+  const demoKey = url.searchParams.get("demo");
+  return demoKey === DEMO_MODE_SECRET;
+}
+
+// Get demo user for screenshots and exploration
+function getDemoUser(): DemoUser {
+  return {
+    id: "demo-user-001",
+    email: "demo@grove.place",
+    name: "Demo Explorer",
+    picture: "https://cdn.grove.place/assets/default-avatar.png",
+    isAdmin: true,
+  };
+}
+
+// Get demo tenant for screenshots
+function getDemoTenant(): DemoTenant {
+  return {
+    id: "demo-tenant-001",
+    subdomain: "demo",
+    displayName: "Demo Grove",
+  };
+}
+
 // Disable prerendering for all admin routes
 // Admin pages require authentication and should be server-rendered at request time
 export const prerender = false;
@@ -33,17 +77,33 @@ export const load: LayoutServerLoad = async ({
 }) => {
   // Get parent layout data (includes navPages, siteSettings, context)
   const parentData = await parent();
+
+  // Check for demo mode (for screenshots and development)
+  const isDemoMode = isDemoRequest(url);
+
   // SECURITY: Example tenant admin is publicly accessible for demos (S2-F2 documented risk)
   // This allows visitors to explore the admin panel without signing in.
   // Risk accepted: demo data only, queries still scoped to example tenant.
   // TODO: Consider making example tenant read-only or gating behind feature flag
   const isExampleTenant = locals.tenantId === "example-tenant-001";
 
-  if (!locals.user && !isExampleTenant) {
+  // Demo mode or example tenant bypasses authentication
+  if (!locals.user && !isExampleTenant && !isDemoMode) {
     throw redirect(
       302,
       `/auth/login?redirect=${encodeURIComponent(url.pathname)}`,
     );
+  }
+
+  // Set up demo user/tenant if in demo mode
+  let demoUser: DemoUser | null = null;
+  let demoTenant: DemoTenant | null = null;
+
+  if (isDemoMode) {
+    demoUser = getDemoUser();
+    demoTenant = getDemoTenant();
+    // Set demo user on locals so downstream code can access it
+    locals.user = demoUser;
   }
 
   // Load tenant data for the admin panel
@@ -89,6 +149,11 @@ export const load: LayoutServerLoad = async ({
       }
       console.error("[Admin Layout] Failed to load tenant:", error);
     }
+  }
+
+  // Use demo tenant if in demo mode (no database required)
+  if (isDemoMode && !tenant) {
+    tenant = demoTenant;
   }
 
   // Load ALL grafts for this tenant (engine-first approach)
@@ -141,6 +206,7 @@ export const load: LayoutServerLoad = async ({
     tenant,
     grafts,
     isBeta,
+    isDemoMode,
     csrfToken: locals.csrfToken,
     messages,
   };
