@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { GreenhouseAdminPanel } from "@autumnsgrove/groveengine/grafts/greenhouse";
 	import { enhance } from "$app/forms";
+	import { invalidateAll } from "$app/navigation";
 	import type { PageData, ActionData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -80,6 +81,7 @@
 		return async ({ update }) => {
 			await update();
 			enrollLoading = false;
+			await invalidateAll();
 		};
 	}}
 	class="hidden"
@@ -92,7 +94,12 @@
 	bind:this={toggleFormRef}
 	method="POST"
 	action="?/toggle"
-	use:enhance
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+			await invalidateAll();
+		};
+	}}
 	class="hidden"
 >
 	<input type="hidden" name="tenantId" value={toggleTenantId} />
@@ -103,7 +110,12 @@
 	bind:this={removeFormRef}
 	method="POST"
 	action="?/remove"
-	use:enhance
+	use:enhance={() => {
+		return async ({ update }) => {
+			await update();
+			await invalidateAll();
+		};
+	}}
 	class="hidden"
 >
 	<input type="hidden" name="tenantId" value={removeTenantId} />
@@ -117,6 +129,7 @@
 		return async ({ update }) => {
 			await update();
 			loadingFlagId = undefined;
+			await invalidateAll();
 		};
 	}}
 	class="hidden"
@@ -132,6 +145,7 @@
 		return async ({ update }) => {
 			await update();
 			loadingFlagId = undefined;
+			await invalidateAll();
 		};
 	}}
 	class="hidden"

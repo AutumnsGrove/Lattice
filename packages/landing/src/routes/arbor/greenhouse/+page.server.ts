@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
     ).all<Tenant>();
     allTenants = result.results ?? [];
   } catch (error) {
-    console.error("Failed to load tenants:", error);
+    console.error("[Greenhouse] Failed to load tenants from DB:", error);
   }
 
   // Build tenant names map
@@ -81,6 +81,12 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
       availableTenants[tenant.id] = displayName;
     }
   }
+
+  // Debug logging
+  console.log(
+    `[Greenhouse] Loaded ${allTenants.length} total tenants, ${greenhouseTenants.length} enrolled, ` +
+    `${Object.keys(availableTenants).length} available for enrollment`
+  );
 
   return {
     tenants: greenhouseTenants,

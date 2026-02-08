@@ -223,9 +223,12 @@ function loadImage(file: File): Promise<HTMLImageElement> {
       }
 
       // Generic error with helpful context
+      // Avoid the word "unsupported" here — getActionableUploadError() maps
+      // it to "Unsupported file type" which is misleading when the type IS
+      // valid but the browser can't decode the image data
       reject(
         new Error(
-          `Failed to load image "${file.name}" (${fileType}). The file may be corrupted or in an unsupported format.`,
+          `Failed to load image "${file.name}" (${fileType}). The file may be corrupted or in a format your browser can't decode.`,
         ),
       );
     };
@@ -393,7 +396,30 @@ export async function processImage(
     };
   }
 
-  const img = await loadImage(file);
+  // Try loading the image. If it fails and the file claims to be JPEG,
+  // it might be HEIF data with a .jpeg extension (some iOS apps like Dazz Cam
+  // do this). Fall back to HEIC conversion as a rescue attempt.
+  let img: HTMLImageElement;
+  try {
+    img = await loadImage(file);
+  } catch (loadError) {
+    if (
+      !isHeicFile(file) &&
+      (file.type === "image/jpeg" ||
+        file.type === "image/heic" ||
+        file.type === "image/heif")
+    ) {
+      try {
+        file = await convertHeicToJpeg(file);
+        img = await loadImage(file);
+      } catch {
+        // HEIC conversion also failed — throw the original error
+        throw loadError;
+      }
+    } else {
+      throw loadError;
+    }
+  }
   const originalSize = file.size;
 
   // Calculate target dimensions

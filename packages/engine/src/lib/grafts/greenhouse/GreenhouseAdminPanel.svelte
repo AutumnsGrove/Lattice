@@ -77,6 +77,7 @@
   const totalEnrolled = $derived(tenants.length);
   const activeCount = $derived(tenants.filter((t) => t.enabled).length);
   const disabledCount = $derived(totalEnrolled - activeCount);
+  const availableCount = $derived(Object.keys(availableTenants).length);
 
   // Handle enrollment
   /** @param {string} tenantId @param {string} notes */
@@ -124,9 +125,13 @@
     <Button
       variant="primary"
       onclick={() => (showEnrollDialog = true)}
+      disabled={availableCount === 0}
     >
       <Plus class="btn-icon" />
       Enroll Tenant
+      {#if availableCount > 0}
+        <span class="available-badge">{availableCount}</span>
+      {/if}
     </Button>
   </div>
 
@@ -285,6 +290,18 @@
     width: 1rem;
     height: 1rem;
     margin-right: 0.25rem;
+  }
+
+  .available-badge {
+    margin-left: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  :global(.dark) .available-badge {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   /* Message cards */
