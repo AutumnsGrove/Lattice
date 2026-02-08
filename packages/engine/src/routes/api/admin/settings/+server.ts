@@ -116,23 +116,15 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
         if (!Array.isArray(parsed)) {
           throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
         }
-        const validCategories = [
-          "writing",
-          "photography",
-          "art",
-          "code",
-          "music",
-          "poetry",
-          "gaming",
-          "food",
-          "travel",
-          "science",
-          "queer",
-          "journal",
-          "other",
-        ];
+        // Import from centralized config to ensure consistency
+        const { CANOPY_CATEGORIES } =
+          await import("$lib/config/canopy-categories.js");
         const allValid = parsed.every(
-          (cat) => typeof cat === "string" && validCategories.includes(cat),
+          (cat) =>
+            typeof cat === "string" &&
+            CANOPY_CATEGORIES.includes(
+              cat as (typeof CANOPY_CATEGORIES)[number],
+            ),
         );
         if (!allValid) {
           throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");

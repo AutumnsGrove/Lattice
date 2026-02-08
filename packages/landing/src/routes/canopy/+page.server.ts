@@ -1,56 +1,10 @@
 import type { PageServerLoad } from "./$types";
-
-/**
- * Canopy setting keys used in site_settings table
- */
-const CANOPY_SETTING_KEYS = {
-  VISIBLE: "canopy_visible",
-  BANNER: "canopy_banner",
-  CATEGORIES: "canopy_categories",
-} as const;
-
-/**
- * Predefined category options for Canopy listings
- */
-const CANOPY_CATEGORIES = [
-  "writing",
-  "photography",
-  "art",
-  "code",
-  "music",
-  "poetry",
-  "gaming",
-  "food",
-  "travel",
-  "science",
-  "queer",
-  "journal",
-  "other",
-] as const;
-
-type CanopyCategory = (typeof CANOPY_CATEGORIES)[number];
-
-/**
- * Parse and validate categories from a JSON string
- */
-function parseCanopyCategories(
-  categoriesJson: string | null | undefined,
-): CanopyCategory[] {
-  if (!categoriesJson) return [];
-
-  try {
-    const parsed = JSON.parse(categoriesJson);
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.filter(
-      (c): c is CanopyCategory =>
-        typeof c === "string" &&
-        CANOPY_CATEGORIES.includes(c as CanopyCategory),
-    );
-  } catch {
-    return [];
-  }
-}
+import {
+  CANOPY_CATEGORIES,
+  CANOPY_SETTING_KEYS,
+  parseCanopyCategories,
+  type CanopyCategory,
+} from "@autumnsgrove/groveengine";
 
 /**
  * Seeded shuffle for consistent daily ordering

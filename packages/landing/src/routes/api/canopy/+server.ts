@@ -1,32 +1,16 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import {
+  CANOPY_CATEGORIES,
+  CANOPY_SETTING_KEYS,
+  type CanopyCategory,
+} from "@autumnsgrove/groveengine";
 
 /**
- * Canopy setting keys
+ * Canopy API endpoint
+ *
+ * Returns the Canopy directory listing with filtering and search support.
  */
-const CANOPY_SETTING_KEYS = {
-  VISIBLE: "canopy_visible",
-  BANNER: "canopy_banner",
-  CATEGORIES: "canopy_categories",
-} as const;
-
-const CANOPY_CATEGORIES = [
-  "writing",
-  "photography",
-  "art",
-  "code",
-  "music",
-  "poetry",
-  "gaming",
-  "food",
-  "travel",
-  "science",
-  "queer",
-  "journal",
-  "other",
-] as const;
-
-type CanopyCategory = (typeof CANOPY_CATEGORIES)[number];
 
 interface TenantRow {
   id: string;
