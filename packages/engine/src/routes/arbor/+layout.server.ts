@@ -207,9 +207,9 @@ export const load: LayoutServerLoad = async ({
     ? await loadChannelMessages(platform.env.DB, "arbor").catch(() => [])
     : [];
 
-  // Pending comment count for nav activity indicator
+  // Pending comment count for nav activity indicator (only when reeds graft is on)
   let pendingCommentCount = 0;
-  if (platform?.env?.DB && locals.tenantId) {
+  if (grafts.reeds_comments && platform?.env?.DB && locals.tenantId) {
     try {
       const tenantDb = getTenantDb(platform.env.DB, {
         tenantId: locals.tenantId,

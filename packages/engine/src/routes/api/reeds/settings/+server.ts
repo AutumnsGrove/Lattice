@@ -11,11 +11,31 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags/index.js";
 import {
   getCommentSettings,
   upsertCommentSettings,
 } from "$lib/server/services/reeds.js";
 import type { RequestHandler } from "./$types.js";
+
+/** Check if the reeds_comments graft is enabled for this tenant. */
+async function isReedsEnabled(
+  db: D1Database,
+  kv: KVNamespace | undefined,
+  tenantId: string,
+): Promise<boolean> {
+  if (!kv) return false;
+  const flagsEnv = { DB: db, FLAGS_KV: kv };
+  const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
+    () => false,
+  );
+  if (!inGreenhouse) return false;
+  return isFeatureEnabled(
+    "reeds_comments",
+    { tenantId, inGreenhouse: true },
+    flagsEnv,
+  ).catch(() => false);
+}
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
   if (!locals.user) {
@@ -24,6 +44,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
   if (!platform?.env?.DB || !locals.tenantId) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+  }
+
+  // Gate: reeds_comments graft
+  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   try {
@@ -63,6 +88,11 @@ export const PATCH: RequestHandler = async ({
 
   if (!platform?.env?.DB || !locals.tenantId) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+  }
+
+  // Gate: reeds_comments graft
+  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
+    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
   try {

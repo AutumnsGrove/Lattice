@@ -15,6 +15,7 @@ import {
   getCommentSettings,
   buildCommentTree,
 } from "$lib/server/services/reeds.js";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags/index.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -104,7 +105,7 @@ export const load: PageServerLoad = async ({
         });
 
         // Load comments (not cached — always fresh from D1)
-        const reeds = await loadComments(db, tenantId, slug);
+        const reeds = await loadComments(db, tenantId, slug, kv);
         return { post: cachedPost, isOwner: isOwner || false, ...reeds };
       }
     } else if (db && tenantId) {
@@ -156,13 +157,32 @@ export const load: PageServerLoad = async ({
 /**
  * Load Reeds comments for a blog post.
  * Fails gracefully — comments are non-critical for page rendering.
+ * Returns empty data when the reeds_comments graft is disabled.
  */
 async function loadComments(
   db: D1Database,
   tenantId: string,
   slug: string,
+  kv?: KVNamespace,
 ) {
   try {
+    // Gate: reeds_comments graft — skip loading if feature is off
+    if (kv) {
+      const flagsEnv = { DB: db, FLAGS_KV: kv };
+      const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+      if (!inGreenhouse) {
+        return { comments: [], commentTotal: 0, commentSettings: null };
+      }
+      const reedsEnabled = await isFeatureEnabled(
+        "reeds_comments",
+        { tenantId, inGreenhouse: true },
+        flagsEnv,
+      ).catch(() => false);
+      if (!reedsEnabled) {
+        return { comments: [], commentTotal: 0, commentSettings: null };
+      }
+    }
+
     const tenantDb = getTenantDb(db, { tenantId });
 
     // Get the post ID from slug

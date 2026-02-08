@@ -16,6 +16,7 @@ import {
   type CommentSettingsRecord,
   type BlockedCommenterRecord,
 } from "$lib/server/services/reeds.js";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad } from "./$types.js";
 
 interface PostLookup {
@@ -24,7 +25,13 @@ interface PostLookup {
   title: string;
 }
 
-export const load: PageServerLoad = async ({ platform, locals }) => {
+export const load: PageServerLoad = async ({ platform, locals, parent }) => {
+  // Gate: reeds_comments graft (cascaded from arbor layout)
+  const parentData = await parent();
+  if (!parentData.grafts?.reeds_comments) {
+    throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
+  }
+
   if (!locals.tenantId || !platform?.env?.DB) {
     return {
       pending: [],

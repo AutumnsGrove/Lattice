@@ -7,8 +7,8 @@
   "grafts": {
     "total": 13,
     "breakdown": {
-      "platform": 11,
-      "greenhouse": 2
+      "platform": 9,
+      "greenhouse": 4
     },
     "byType": {
       "boolean": 12,
@@ -92,7 +92,7 @@
       "id": "photo_gallery",
       "name": "Photo Gallery",
       "type": "boolean",
-      "greenhouseOnly": false,
+      "greenhouseOnly": true,
       "migration": "049_photo_gallery_graft.sql",
       "description": "Upload photos and display a public gallery on your site"
     },
@@ -100,9 +100,9 @@
       "id": "reeds_comments",
       "name": "Reeds Comments",
       "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "051_reeds_comments.sql",
-      "description": "Enable the Reeds comment system on blog posts"
+      "greenhouseOnly": true,
+      "migration": "052_reeds_comments_graft.sql",
+      "description": "Enable threaded comments on blog posts with moderation, blocking, and private replies"
     },
     {
       "id": "scribe_mode",

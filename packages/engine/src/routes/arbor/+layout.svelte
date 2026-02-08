@@ -127,6 +127,7 @@
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
+      {#if data.grafts?.reeds_comments}
       <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title="Comments">
         <span class="nav-icon-wrap">
           <MessageSquare class="nav-icon" />
@@ -136,6 +137,7 @@
         </span>
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
       </a>
+      {/if}
       <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Account</span>
