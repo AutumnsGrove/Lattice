@@ -41,7 +41,7 @@ VALUES (
   'fireside_mode',
   100,
   'tenant',
-  '{"tenant_id": "autumn-primary"}',
+  '{"tenantIds": ["autumn-primary"]}',
   'true',
   1
 );
@@ -51,7 +51,7 @@ VALUES (
   'scribe_mode',
   100,
   'tenant',
-  '{"tenant_id": "autumn-primary"}',
+  '{"tenantIds": ["autumn-primary"]}',
   'true',
   1
 );

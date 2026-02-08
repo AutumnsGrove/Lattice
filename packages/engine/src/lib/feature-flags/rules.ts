@@ -13,6 +13,7 @@ import type {
   FlagRule,
   RuleType,
   TenantRuleCondition,
+  TenantOverrideCondition,
   TierRuleCondition,
   PercentageRuleCondition,
   UserRuleCondition,
@@ -51,6 +52,11 @@ export async function evaluateRule(
       return evaluateTimeRule(rule.ruleValue as TimeRuleCondition);
     case "greenhouse":
       return context.inGreenhouse === true;
+    case "tenant_override":
+      return evaluateTenantOverrideRule(
+        rule.ruleValue as TenantOverrideCondition,
+        context,
+      );
     case "always":
       return true;
     default:
@@ -69,6 +75,18 @@ function evaluateTenantRule(
 ): boolean {
   if (!context.tenantId) return false;
   return condition.tenantIds.includes(context.tenantId);
+}
+
+/**
+ * Evaluate a tenant self-service override rule.
+ * Matches if the context's tenantId matches the override's target tenant.
+ */
+function evaluateTenantOverrideRule(
+  condition: TenantOverrideCondition,
+  context: EvaluationContext,
+): boolean {
+  if (!context.tenantId) return false;
+  return context.tenantId === condition.tenantId;
 }
 
 /**

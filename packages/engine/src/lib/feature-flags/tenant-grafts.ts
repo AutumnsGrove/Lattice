@@ -187,12 +187,12 @@ export async function setTenantGraftOverride(
 
     if (updateResult.meta.changes === 0) {
       // No existing rule, insert a new one
-      // Priority 50: below explicit tenant rules (100), above defaults
+      // Auto-assign unique priority in 40-59 range (below explicit tenant rules at 100)
       await env.DB.prepare(
         `INSERT INTO flag_rules (flag_id, priority, rule_type, rule_value, result_value, enabled, created_at)
-         VALUES (?, 50, 'tenant_override', ?, ?, 1, datetime('now'))`,
+         VALUES (?, (SELECT COALESCE(MAX(priority), 39) + 1 FROM flag_rules WHERE flag_id = ? AND priority BETWEEN 40 AND 59), 'tenant_override', ?, ?, 1, datetime('now'))`,
       )
-        .bind(flagId, ruleValue, resultValue)
+        .bind(flagId, flagId, ruleValue, resultValue)
         .run();
     }
 

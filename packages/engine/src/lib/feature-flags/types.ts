@@ -28,6 +28,7 @@ export type RuleType =
   | "user" // Specific user IDs
   | "time" // Time-based (start/end dates)
   | "greenhouse" // Greenhouse program tenants
+  | "tenant_override" // Tenant self-service override
   | "always"; // Catch-all default
 
 // =============================================================================
@@ -72,6 +73,14 @@ export interface TimeRuleCondition {
 }
 
 /**
+ * Condition for tenant self-service overrides.
+ * Matches a single tenant who opted in/out of a greenhouse graft.
+ */
+export interface TenantOverrideCondition {
+  tenantId: string;
+}
+
+/**
  * Condition for always-matching rules (catch-all).
  */
 export type AlwaysRuleCondition = Record<string, never>;
@@ -91,6 +100,7 @@ export type RuleCondition =
   | PercentageRuleCondition
   | UserRuleCondition
   | TimeRuleCondition
+  | TenantOverrideCondition
   | GreenhouseRuleCondition
   | AlwaysRuleCondition;
 

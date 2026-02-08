@@ -31,7 +31,7 @@ VALUES (
   'photo_gallery',
   100,
   'tenant',
-  '{"tenant_id": "autumn-primary"}',
+  '{"tenantIds": ["autumn-primary"]}',
   'true',
   1
 );
