@@ -108,6 +108,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
   "what-are-vines",
   "account-deletion",
   "sessions-and-cookies",
+  "image-upload-failures", // Used in Arbor image upload error state
 ];
 
 // Generate entries for all waystone-linked articles

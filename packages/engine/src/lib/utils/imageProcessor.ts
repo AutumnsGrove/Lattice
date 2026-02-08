@@ -93,6 +93,48 @@ export function isHeicFile(file: File): boolean {
 }
 
 /**
+ * HEIF/HEIC brand identifiers in ISOBMFF ftyp box.
+ * iPad camera apps (especially third-party ones like Dazz Cam) sometimes
+ * save HEIF data with a .jpeg extension, so we can't rely on extension alone.
+ */
+const HEIF_BRANDS = ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1"];
+
+/**
+ * Detect HEIF/HEIC format by reading the file's magic bytes (ISOBMFF ftyp box).
+ * This catches files that have wrong extensions (e.g., HEIF data saved as .jpeg).
+ *
+ * ISOBMFF layout: [4 bytes size][4 bytes "ftyp"][4 bytes brand]
+ */
+export async function isHeifByMagicBytes(file: File): Promise<boolean> {
+  if (file.size < 12) return false;
+
+  try {
+    const slice = file.slice(0, 12);
+    const buffer = new Uint8Array(await slice.arrayBuffer());
+
+    // Check for ftyp box at offset 4-7
+    const hasFtyp =
+      buffer[4] === 0x66 && // f
+      buffer[5] === 0x74 && // t
+      buffer[6] === 0x79 && // y
+      buffer[7] === 0x70; // p
+
+    if (!hasFtyp) return false;
+
+    // Check brand at offset 8-11
+    const brand = String.fromCharCode(
+      buffer[8],
+      buffer[9],
+      buffer[10],
+      buffer[11],
+    );
+    return HEIF_BRANDS.includes(brand);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Convert a HEIC/HEIF file to JPEG using the heic2any WASM decoder.
  * Quality is intentionally high (0.92) since this is an intermediate step —
  * the result will be re-encoded to JXL/WebP by the normal processing pipeline.
@@ -108,8 +150,9 @@ export async function convertHeicToJpeg(file: File): Promise<File> {
   // heic2any may return a single Blob or an array (for multi-image HEIC)
   const jpegBlob = Array.isArray(result) ? result[0] : result;
 
-  // Create a new File with .jpg extension
-  const baseName = file.name.replace(/\.(heic|heif)$/i, "");
+  // Create a new File with .jpg extension, stripping any existing extension
+  const lastDot = file.name.lastIndexOf(".");
+  const baseName = lastDot > 0 ? file.name.substring(0, lastDot) : file.name;
   return new File([jpegBlob], `${baseName}.jpg`, { type: "image/jpeg" });
 }
 
@@ -377,9 +420,13 @@ export async function processImage(
     formatPreference = convertToWebP ? "auto" : "original";
   }
 
-  // Convert HEIC/HEIF to JPEG before processing
-  if (isHeicFile(file)) {
+  // Convert HEIC/HEIF to JPEG before processing.
+  // Check both extension/MIME and magic bytes — iPad camera apps (e.g., Dazz Cam)
+  // sometimes save HEIF data with a .jpeg extension, so extension alone isn't reliable.
+  let alreadyConvertedFromHeic = false;
+  if (isHeicFile(file) || (await isHeifByMagicBytes(file))) {
     file = await convertHeicToJpeg(file);
+    alreadyConvertedFromHeic = true;
   }
 
   // For GIFs, return original to preserve animation
@@ -396,19 +443,14 @@ export async function processImage(
     };
   }
 
-  // Try loading the image. If it fails and the file claims to be JPEG,
-  // it might be HEIF data with a .jpeg extension (some iOS apps like Dazz Cam
-  // do this). Fall back to HEIC conversion as a rescue attempt.
+  // Try loading the image. If it fails and we haven't already tried HEIC
+  // conversion, attempt it as a last resort — catches rare HEIF variants
+  // whose brand isn't in our magic bytes list.
   let img: HTMLImageElement;
   try {
     img = await loadImage(file);
   } catch (loadError) {
-    if (
-      !isHeicFile(file) &&
-      (file.type === "image/jpeg" ||
-        file.type === "image/heic" ||
-        file.type === "image/heif")
-    ) {
+    if (!alreadyConvertedFromHeic) {
       try {
         file = await convertHeicToJpeg(file);
         img = await loadImage(file);
