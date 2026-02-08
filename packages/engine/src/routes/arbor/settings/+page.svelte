@@ -26,6 +26,9 @@
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
 
+  // Load all font faces so the font picker previews render correctly
+  import "$lib/styles/fonts-optional.css";
+
   /**
    * @typedef {Object} HealthStatus
    * @property {string} [status]
