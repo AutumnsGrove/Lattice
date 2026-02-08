@@ -156,7 +156,16 @@ interface MigrationResult {
 
 export default {
   /**
-   * Scheduled handler - runs on cron trigger (daily at 3 AM UTC)
+   * Scheduled handler - DISABLED
+   *
+   * Storage tier migration is disabled until D1 costs justify it.
+   * The cron trigger has been removed from wrangler.toml, but this
+   * handler is also a no-op as a safety belt.
+   *
+   * Before re-enabling, fix the published_at timestamp bug:
+   * - published_at stores SECONDS, but was passed to new Date() without * 1000
+   * - This made all posts appear ~55 years old, causing immediate Hot→Warm→Cold
+   * - Content was cleared from D1 and moved to R2, breaking page rendering
    */
   async scheduled(
     controller: ScheduledController,
@@ -164,26 +173,10 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     console.log(
-      `[PostMigrator] Starting migration run at ${new Date().toISOString()}`,
+      `[PostMigrator] Migration DISABLED - no-op at ${new Date().toISOString()}`,
     );
-
-    try {
-      const result = await runMigration(env);
-
-      console.log("[PostMigrator] Migration complete:", {
-        hotToWarm: result.hotToWarm,
-        warmToCold: result.warmToCold,
-        coldToWarm: result.coldToWarm,
-        errors: result.errors.length,
-      });
-
-      if (result.errors.length > 0) {
-        console.error("[PostMigrator] Errors encountered:", result.errors);
-      }
-    } catch (err) {
-      console.error("[PostMigrator] Migration failed:", err);
-      throw err;
-    }
+    // Storage tier migration is disabled. See comment above.
+    return;
   },
 
   /**
@@ -248,6 +241,35 @@ export default {
         return new Response(
           JSON.stringify({
             error: err instanceof Error ? err.message : "Failed to get stats",
+          }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
+    // Recovery endpoint - restore all cold/warm posts back to hot
+    // This reverses the damage from the timestamp bug that migrated all posts
+    if (url.pathname === "/recover" && request.method === "POST") {
+      const authHeader = request.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response("Unauthorized: Missing Bearer token", {
+          status: 401,
+        });
+      }
+      const token = authHeader.replace("Bearer ", "");
+      if (!env.MIGRATOR_SECRET || token !== env.MIGRATOR_SECRET) {
+        return new Response("Unauthorized: Invalid token", { status: 401 });
+      }
+
+      try {
+        const result = await recoverAllPosts(env);
+        return new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        return new Response(
+          JSON.stringify({
+            error: err instanceof Error ? err.message : "Recovery failed",
           }),
           { status: 500, headers: { "Content-Type": "application/json" } },
         );
@@ -521,6 +543,103 @@ async function runMigration(env: Env): Promise<MigrationResult> {
     console.warn("[PostMigrator] Failed to log migration run");
   }
 
+  return result;
+}
+
+// ============================================================================
+// Recovery - Restore all migrated posts back to D1
+// ============================================================================
+
+interface RecoveryResult {
+  coldRestored: number;
+  warmReset: number;
+  errors: string[];
+}
+
+/**
+ * Recover all posts that were incorrectly migrated by the timestamp bug.
+ *
+ * For cold posts: fetch content from R2 and restore to D1
+ * For warm posts: just reset storage_location to 'hot' (content still in D1)
+ * For all: set storage_location back to 'hot'
+ */
+async function recoverAllPosts(env: Env): Promise<RecoveryResult> {
+  const result: RecoveryResult = {
+    coldRestored: 0,
+    warmReset: 0,
+    errors: [],
+  };
+
+  // --- Restore cold posts (content in R2) ---
+  try {
+    const coldPosts = await env.DB.prepare(
+      `SELECT id, tenant_id, slug, r2_key FROM posts WHERE storage_location = 'cold' AND r2_key IS NOT NULL`,
+    ).all<{ id: number; tenant_id: string; slug: string; r2_key: string }>();
+
+    for (const post of coldPosts.results || []) {
+      try {
+        const r2Object = await env.COLD_STORAGE.get(post.r2_key);
+        if (!r2Object) {
+          result.errors.push(
+            `R2 object not found for ${post.tenant_id}/${post.slug} at ${post.r2_key}`,
+          );
+          continue;
+        }
+
+        const content = (await r2Object.json()) as {
+          markdownContent: string;
+          htmlContent: string;
+          gutterContent: string;
+        };
+
+        await env.DB.prepare(
+          `UPDATE posts
+           SET storage_location = 'hot',
+               markdown_content = ?,
+               html_content = ?,
+               gutter_content = ?,
+               r2_key = NULL,
+               updated_at = ?
+           WHERE id = ?`,
+        )
+          .bind(
+            content.markdownContent,
+            content.htmlContent,
+            content.gutterContent,
+            Date.now(),
+            post.id,
+          )
+          .run();
+
+        result.coldRestored++;
+        console.log(
+          `[Recovery] Restored cold post: ${post.tenant_id}/${post.slug}`,
+        );
+      } catch (err) {
+        result.errors.push(
+          `Failed to restore ${post.tenant_id}/${post.slug}: ${err}`,
+        );
+      }
+    }
+  } catch (err) {
+    result.errors.push(`Cold recovery query failed: ${err}`);
+  }
+
+  // --- Reset warm posts (content still in D1, just reset location) ---
+  try {
+    const warmResult = await env.DB.prepare(
+      `UPDATE posts SET storage_location = 'hot', updated_at = ? WHERE storage_location = 'warm'`,
+    )
+      .bind(Date.now())
+      .run();
+
+    result.warmReset = warmResult.meta?.changes || 0;
+    console.log(`[Recovery] Reset ${result.warmReset} warm posts to hot`);
+  } catch (err) {
+    result.errors.push(`Warm reset failed: ${err}`);
+  }
+
+  console.log("[Recovery] Complete:", result);
   return result;
 }
 

@@ -12,10 +12,14 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
 # =============================================================================
-# Cron Triggers - Run daily at 3 AM UTC (off-peak hours)
+# Cron Triggers - DISABLED (storage tier migration not needed yet)
+# Re-enable when D1 costs justify tiered storage.
+# IMPORTANT: Fix the published_at timestamp bug before re-enabling!
+# (published_at is stored in seconds but was being passed to new Date()
+#  without * 1000 conversion, making all posts appear ~55 years old)
 # =============================================================================
-[triggers]
-crons = ["0 3 * * *"]
+# [triggers]
+# crons = ["0 3 * * *"]
 
 # =============================================================================
 # D1 Database - Same database as GroveEngine
