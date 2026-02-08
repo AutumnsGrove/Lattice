@@ -162,50 +162,53 @@
 	// Variant-specific styles - warm grove tones with true glass transparency
 	// See grove-ui-design skill for opacity guidelines:
 	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
+	//
+	// Dark mode uses cream (cool dark grays in dark mode) for glass tinting.
+	// The /XX alpha modifier works because CSS vars store RGB channels.
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/80 dark:bg-bark-800/50
+			bg-white/80 dark:bg-cream-100/65
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		accent: `
-			bg-accent/20 dark:bg-accent/15
+			bg-accent/20 dark:bg-grove-950/25
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-bark-900/40 dark:bg-bark-950/40
+			bg-bark-900/40 dark:bg-cream-50/50
 			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/60 dark:bg-bark-800/30
+			bg-white/60 dark:bg-cream-100/40
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/90 dark:bg-bark-800/70
+			bg-white/90 dark:bg-cream-100/80
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
 	// Border colors per variant - subtle, warm borders
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-bark-700/40",
-		accent: "border-accent/30 dark:border-accent/20",
-		dark: "border-bark-700/30 dark:border-bark-600/30",
-		muted: "border-white/20 dark:border-bark-700/30",
-		frosted: "border-white/50 dark:border-bark-700/40"
+		default: "border-white/40 dark:border-cream-300/40",
+		accent: "border-accent/30 dark:border-grove-900/30",
+		dark: "border-bark-700/30 dark:border-cream-400/30",
+		muted: "border-white/20 dark:border-cream-300/30",
+		frosted: "border-white/50 dark:border-cream-300/40"
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/90 dark:hover:bg-bark-800/50 hover:shadow-lg hover:border-white/50 dark:hover:border-bark-600/50",
-		accent: "hover:bg-accent/30 dark:hover:bg-accent/25 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-bark-900/50 dark:hover:bg-bark-950/50 hover:shadow-xl hover:border-bark-600/40",
-		muted: "hover:bg-white/70 dark:hover:bg-bark-800/40 hover:shadow-md hover:border-white/30 dark:hover:border-bark-600/40",
-		frosted: "hover:bg-white/95 dark:hover:bg-bark-800/60 hover:shadow-lg hover:border-white/60 dark:hover:border-bark-600/50"
+		default: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-cream-400/50",
+		accent: "hover:bg-accent/30 dark:hover:bg-grove-900/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
+		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
+		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-cream-400/40",
+		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-cream-400/50"
 	};
 
 	const computedClass = $derived(
@@ -241,7 +244,7 @@
 	{#if featured}
 		<!-- Featured star indicator (decorative - context provides meaning) -->
 		<div
-			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-bark-800 shadow-md border border-amber-200 dark:border-amber-700"
+			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-cream-200 shadow-md border border-amber-200 dark:border-amber-700"
 			title="Featured"
 			aria-hidden="true"
 		>
