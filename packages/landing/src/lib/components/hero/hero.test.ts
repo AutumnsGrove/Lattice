@@ -28,42 +28,21 @@ describe("getGradientClasses", () => {
     expect(classes).toContain("to-emerald");
   });
 
-  it("returns indigo gradient for twilight variant", () => {
+  it("returns indigo gradient with emerald tones for twilight variant", () => {
     const classes = getGradientClasses("twilight");
     expect(classes).toContain("from-indigo");
-    expect(classes).toContain("via-slate");
-    expect(classes).toContain("to-violet");
+    expect(classes).toContain("via-emerald");
   });
 
-  it("returns amber/rose gradient for dawn variant", () => {
+  it("returns amber/orange gradient with emerald for dawn variant", () => {
     const classes = getGradientClasses("dawn");
     expect(classes).toContain("from-amber");
     expect(classes).toContain("via-orange");
-    expect(classes).toContain("to-rose");
-  });
-
-  it("returns amber/orange gradient for warm variant", () => {
-    const classes = getGradientClasses("warm");
-    expect(classes).toContain("from-amber");
-    expect(classes).toContain("via-yellow");
-    expect(classes).toContain("to-orange");
-  });
-
-  it("returns slate/cyan gradient for mist variant", () => {
-    const classes = getGradientClasses("mist");
-    expect(classes).toContain("from-slate");
-    expect(classes).toContain("via-blue");
-    expect(classes).toContain("to-cyan");
+    expect(classes).toContain("to-emerald");
   });
 
   it("every variant includes dark mode classes", () => {
-    const variants: BgVariant[] = [
-      "forest",
-      "twilight",
-      "dawn",
-      "warm",
-      "mist",
-    ];
+    const variants: BgVariant[] = ["forest", "twilight", "dawn"];
 
     for (const variant of variants) {
       const classes = getGradientClasses(variant);
@@ -73,27 +52,15 @@ describe("getGradientClasses", () => {
     }
   });
 
-  it("all five variants produce distinct gradient classes", () => {
-    const variants: BgVariant[] = [
-      "forest",
-      "twilight",
-      "dawn",
-      "warm",
-      "mist",
-    ];
+  it("all three variants produce distinct gradient classes", () => {
+    const variants: BgVariant[] = ["forest", "twilight", "dawn"];
     const results = variants.map(getGradientClasses);
     const unique = new Set(results);
-    expect(unique.size).toBe(5);
+    expect(unique.size).toBe(3);
   });
 
   it("uses opacity modifiers for glass layering effect", () => {
-    const variants: BgVariant[] = [
-      "forest",
-      "twilight",
-      "dawn",
-      "warm",
-      "mist",
-    ];
+    const variants: BgVariant[] = ["forest", "twilight", "dawn"];
 
     for (const variant of variants) {
       const classes = getGradientClasses(variant);
@@ -112,39 +79,44 @@ describe("Slide Configuration", () => {
   /**
    * Each slide's expected configuration — documents the contract
    * between the hero components and the carousel.
+   *
+   * Updated to reflect the redesigned hero section:
+   * - Trees + lanterns only (removed cluttered nature elements)
+   * - Reduced to 3 warm, forest-rooted gradient variants
+   * - Responsive density (more elements on larger screens)
    */
   const slideConfig = [
     {
-      name: "HeroRefuge",
+      name: "HeroOwnership",
       index: 0,
       bgVariant: "forest" as BgVariant,
-      headline: "A grove for people who lost their groves",
-      ctaHref: "https://plant.grove.place",
-      ctaText: "Plant Your Blog",
-    },
-    {
-      name: "HeroOwnership",
-      index: 1,
-      bgVariant: "mist" as BgVariant,
       headline: "Your words. Your space. Forever.",
       ctaHref: "/pricing",
       ctaText: "Claim Yours",
     },
     {
       name: "HeroShade",
-      index: 2,
-      bgVariant: "warm" as BgVariant,
+      index: 1,
+      bgVariant: "forest" as BgVariant,
       headline: "Your words are not a dataset",
       ctaHref: "/knowledge/help/what-is-shade",
       ctaText: "Learn About Shade",
     },
     {
       name: "HeroCentennial",
-      index: 3,
+      index: 2,
       bgVariant: "twilight" as BgVariant,
       headline: "Some trees outlive the people who planted them",
       ctaHref: "/knowledge/help/what-is-centennial",
       ctaText: "Plant Your Legacy",
+    },
+    {
+      name: "HeroRefuge",
+      index: 3,
+      bgVariant: "forest" as BgVariant,
+      headline: "Your words deserve room to bloom",
+      ctaHref: "https://plant.grove.place",
+      ctaText: "Plant Your Blog",
     },
     {
       name: "HeroCommunity",
@@ -163,12 +135,6 @@ describe("Slide Configuration", () => {
   it("each slide has a unique index from 0-4", () => {
     const indices = slideConfig.map((s) => s.index);
     expect(indices).toEqual([0, 1, 2, 3, 4]);
-  });
-
-  it("each slide uses a distinct bgVariant", () => {
-    const variants = slideConfig.map((s) => s.bgVariant);
-    const unique = new Set(variants);
-    expect(unique.size).toBe(5);
   });
 
   it("all bgVariants produce valid gradient classes", () => {
@@ -200,12 +166,10 @@ describe("Slide Configuration", () => {
     }
   });
 
-  it("internal CTAs use knowledge base paths", () => {
-    const internal = slideConfig.filter(
-      (s) => s.ctaHref.startsWith("/") && s.ctaHref !== "/pricing",
-    );
+  it("internal CTAs use knowledge base paths or pricing", () => {
+    const internal = slideConfig.filter((s) => s.ctaHref.startsWith("/"));
     for (const slide of internal) {
-      expect(slide.ctaHref).toMatch(/^\/knowledge\//);
+      expect(slide.ctaHref).toMatch(/^\/(knowledge\/|pricing)/);
     }
   });
 });
@@ -215,28 +179,28 @@ describe("Slide Configuration", () => {
 // =============================================================================
 
 describe("BgVariant type coverage", () => {
-  it("handles all five variants without throwing", () => {
-    const variants: BgVariant[] = [
-      "forest",
-      "twilight",
-      "dawn",
-      "warm",
-      "mist",
-    ];
+  it("handles all three variants without throwing", () => {
+    const variants: BgVariant[] = ["forest", "twilight", "dawn"];
 
     for (const variant of variants) {
       expect(() => getGradientClasses(variant)).not.toThrow();
     }
   });
 
-  it("dawn and warm variants are visually distinct despite sharing amber", () => {
+  it("twilight and dawn variants are visually distinct from forest", () => {
+    const forest = getGradientClasses("forest");
+    const twilight = getGradientClasses("twilight");
     const dawn = getGradientClasses("dawn");
-    const warm = getGradientClasses("warm");
 
-    // Both use from-amber, but diverge on via and to
-    expect(dawn).toContain("via-orange");
-    expect(dawn).toContain("to-rose");
-    expect(warm).toContain("via-yellow");
-    expect(warm).toContain("to-orange");
+    // Forest is pure emerald/green
+    expect(forest).toContain("from-emerald");
+    // Twilight has indigo character
+    expect(twilight).toContain("from-indigo");
+    // Dawn has amber warmth
+    expect(dawn).toContain("from-amber");
+
+    // All share emerald undertones for cohesion
+    expect(twilight).toContain("emerald");
+    expect(dawn).toContain("emerald");
   });
 });

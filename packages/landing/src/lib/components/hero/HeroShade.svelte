@@ -1,24 +1,22 @@
 <!--
-  HeroShade — Slide 3: "Your words are not a dataset"
-  AI protection — the shield. Dense canopy with 2× TreePine + TreeCherry,
-  Cardinal perched, falling leaves, bushes, warm/amber mood.
+  HeroShade — "Your words are not a dataset."
+  AI protection — the shield. A dense canopy of pines, protective
+  and sheltering. Trees layered dark-to-light for atmospheric depth.
+  Dense on tablet+, protective wall on desktop.
 -->
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
 	import HeroSlide from './HeroSlide.svelte';
 	import { Shield } from 'lucide-svelte';
 	import {
-		TreePine,
-		TreeCherry,
-		Cardinal,
-		Bush,
-		LeafFalling
+		TreePine
 	} from '@autumnsgrove/groveengine/ui/nature';
+	import { greens, bark } from '@autumnsgrove/groveengine/ui/nature';
 
 	let { season, active, index }: HeroSlideContentProps = $props();
 </script>
 
-<HeroSlide {season} {active} bgVariant="warm" ariaLabel="Your words are not a dataset — Shade AI protection">
+<HeroSlide {season} {active} bgVariant="forest" ariaLabel="Your words are not a dataset — Shade AI protection">
 	{#snippet text()}
 		<h2 class="text-2xl sm:text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
 			Your words are not a dataset.
@@ -38,36 +36,55 @@
 
 	{#snippet scene()}
 		<div class="relative w-full h-full">
-			<!-- Dense canopy — trees spread across canvas, weighted right for shelter feel -->
-			<div class="absolute bottom-[8%] left-[25%] md:left-[38%]">
-				<TreePine {season} animate={active} class="w-16 h-28 md:w-22 md:h-40" />
-			</div>
-			<div class="absolute bottom-[8%] right-[8%] md:right-[10%]">
-				<TreePine {season} animate={active} class="w-14 h-24 md:w-18 md:h-34 opacity-75" />
-			</div>
-			<div class="absolute bottom-[8%] right-[25%] md:right-[28%]">
-				<TreeCherry {season} animate={active} class="w-18 h-30 md:w-24 md:h-42" />
+			<!-- === ALWAYS VISIBLE (mobile+) — core canopy === -->
+
+			<!-- Left pine — medium -->
+			<div class="absolute bottom-[8%] left-[22%] md:left-[38%]">
+				<TreePine {season} animate={active} color={greens.grove} trunkColor={bark.warmBark} class="w-14 h-28 md:w-20 md:h-40 lg:w-24 lg:h-48" />
 			</div>
 
-			<!-- Cardinal perched — upper right -->
-			<div class="absolute top-[20%] right-[18%]">
-				<Cardinal animate={active} class="w-7 h-7 md:w-9 md:h-9" facing="left" />
+			<!-- Center pine — tallest -->
+			<div class="absolute bottom-[7%] right-[25%] md:right-[30%]">
+				<TreePine {season} animate={active} color={greens.meadow} trunkColor={bark.warmBark} class="w-16 h-32 md:w-22 md:h-44 lg:w-26 lg:h-52" />
 			</div>
 
-			<!-- Falling leaves — scattered across canopy -->
-			<div class="absolute top-[12%] right-[35%]">
-				<LeafFalling {season} animate={active} class="w-4 h-4" variant="maple" delay={0} />
-			</div>
-			<div class="absolute top-[8%] right-[20%]">
-				<LeafFalling {season} animate={active} class="w-3.5 h-3.5" variant="cherry" delay={1.5} />
+			<!-- Right pine — slightly smaller -->
+			<div class="absolute bottom-[9%] right-[5%] md:right-[10%]">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="w-11 h-22 md:w-16 md:h-32 lg:w-18 lg:h-36 opacity-70" />
 			</div>
 
-			<!-- Ground bushes — wide spread -->
-			<div class="absolute bottom-[4%] left-[30%] md:left-[42%]">
-				<Bush {season} class="w-14 h-10 md:w-18 md:h-12 opacity-65" />
+			<!-- === TABLET+ (md) — fill out the canopy === -->
+
+			<!-- Back-left pine — depth -->
+			<div class="absolute bottom-[12%] left-[30%] md:left-[34%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="md:w-12 md:h-24 lg:w-14 lg:h-28 opacity-45" />
 			</div>
-			<div class="absolute bottom-[3%] right-[15%]">
-				<Bush {season} class="w-12 h-8 opacity-45" />
+
+			<!-- Back-right pine — fills gap -->
+			<div class="absolute bottom-[11%] right-[18%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="md:w-14 md:h-28 lg:w-16 lg:h-32 opacity-55" />
+			</div>
+
+			<!-- Far right accent -->
+			<div class="absolute bottom-[13%] right-[3%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="md:w-9 md:h-18 lg:w-11 lg:h-22 opacity-35" />
+			</div>
+
+			<!-- === DESKTOP (lg) — dense protective wall === -->
+
+			<!-- Extra back pine — leftmost -->
+			<div class="absolute bottom-[14%] left-[28%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="lg:w-10 lg:h-20 opacity-30" />
+			</div>
+
+			<!-- Fill pine — between left and center -->
+			<div class="absolute bottom-[9%] right-[42%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.grove} trunkColor={bark.warmBark} class="lg:w-16 lg:h-34 opacity-65" />
+			</div>
+
+			<!-- Far background pine — barely visible, adds depth -->
+			<div class="absolute bottom-[15%] right-[50%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="lg:w-8 lg:h-16 opacity-25" />
 			</div>
 		</div>
 	{/snippet}

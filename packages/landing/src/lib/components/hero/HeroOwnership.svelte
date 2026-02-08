@@ -1,24 +1,23 @@
 <!--
-  HeroOwnership — Slide 2: "Your words. Your space. Forever."
-  Personal space — the domain. TreeAspen growing tall, GardenGate,
-  Butterfly, Fern + Bush, monospace domain display.
+  HeroOwnership — "Your words. Your space. Forever."
+  Personal space — the domain. A gentle grove clearing with pines
+  and a welcoming lantern. Trees use explicit palette colors for depth.
+  Responsive density: mobile gets 2-3 trees, tablet 4-5, desktop 6+.
 -->
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
 	import HeroSlide from './HeroSlide.svelte';
 	import { ArrowRight } from 'lucide-svelte';
 	import {
-		TreeAspen,
-		GardenGate,
-		Butterfly,
-		Fern,
-		Bush
+		TreePine,
+		Lantern
 	} from '@autumnsgrove/groveengine/ui/nature';
+	import { greens, bark } from '@autumnsgrove/groveengine/ui/nature';
 
 	let { season, active, index }: HeroSlideContentProps = $props();
 </script>
 
-<HeroSlide {season} {active} bgVariant="mist" ariaLabel="Your words, your space, forever">
+<HeroSlide {season} {active} bgVariant="forest" ariaLabel="Your words, your space, forever">
 	{#snippet text()}
 		<h2 class="text-2xl sm:text-display-sm md:text-display lg:text-display-lg text-foreground motion-safe:animate-fade-in-up">
 			Your words. Your space. Forever.
@@ -39,30 +38,50 @@
 
 	{#snippet scene()}
 		<div class="relative w-full h-full">
-			<!-- Tall aspen — shifted right of center -->
-			<div class="absolute bottom-[8%] right-[25%] md:right-[30%]">
-				<TreeAspen {season} animate={active} class="w-16 h-32 md:w-22 md:h-44" />
+			<!-- === ALWAYS VISIBLE (mobile+) === -->
+
+			<!-- Main pine — hero tree, right of center -->
+			<div class="absolute bottom-[8%] right-[28%] md:right-[35%]">
+				<TreePine {season} animate={active} color={greens.grove} trunkColor={bark.warmBark} class="w-14 h-28 md:w-22 md:h-44 lg:w-26 lg:h-52" />
 			</div>
 
-			<!-- Garden gate — center-right -->
-			<div class="absolute bottom-[6%] right-[50%] md:right-[55%]">
-				<GardenGate class="w-14 h-16 md:w-18 md:h-22 opacity-75" />
+			<!-- Secondary pine — smaller, right -->
+			<div class="absolute bottom-[10%] right-[8%] md:right-[14%]">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="w-10 h-20 md:w-16 md:h-32 lg:w-18 lg:h-36 opacity-65" />
 			</div>
 
-			<!-- Butterfly — upper right -->
-			<div class="absolute top-[22%] right-[18%]">
-				<Butterfly animate={active} class="w-7 h-7 md:w-9 md:h-9" />
+			<!-- Standing lantern — warm glow in the clearing -->
+			<div class="absolute bottom-[7%] right-[18%] md:right-[24%]">
+				<Lantern animate={active} class="w-4 h-7 md:w-5 md:h-9 lg:w-6 lg:h-11" variant="standing" />
 			</div>
 
-			<!-- Foliage — spread across bottom -->
-			<div class="absolute bottom-[4%] right-[10%]">
-				<Fern class="w-10 h-8 md:w-12 md:h-10 opacity-65" />
+			<!-- === TABLET+ (md) === -->
+
+			<!-- Back pine — small, atmospheric depth -->
+			<div class="absolute bottom-[12%] right-[48%] md:right-[52%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.meadow} trunkColor={bark.warmBark} class="md:w-18 md:h-36 lg:w-22 lg:h-44" />
 			</div>
-			<div class="absolute bottom-[6%] left-[35%] md:left-[45%]">
-				<Bush {season} class="w-16 h-12 opacity-50" />
+
+			<!-- Far back pine — distant, muted -->
+			<div class="absolute bottom-[13%] right-[5%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="md:w-10 md:h-20 lg:w-12 lg:h-24 opacity-40" />
 			</div>
-			<div class="absolute bottom-[3%] right-[40%] hidden md:block">
-				<Fern class="w-8 h-6 opacity-40" />
+
+			<!-- === DESKTOP (lg) === -->
+
+			<!-- Extra depth pine — far left of scene -->
+			<div class="absolute bottom-[14%] right-[62%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="lg:w-10 lg:h-20 opacity-30" />
+			</div>
+
+			<!-- Mid-ground accent pine -->
+			<div class="absolute bottom-[10%] right-[42%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="lg:w-14 lg:h-28 opacity-55" />
+			</div>
+
+			<!-- Second lantern — further back -->
+			<div class="absolute bottom-[9%] right-[55%] hidden lg:block">
+				<Lantern animate={active} class="lg:w-4 lg:h-7 opacity-60" variant="post" />
 			</div>
 		</div>
 	{/snippet}

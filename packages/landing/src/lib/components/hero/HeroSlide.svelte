@@ -45,14 +45,14 @@
 	<!-- Layer 2: Gradient veil for text readability -->
 	<div class="absolute inset-0 pointer-events-none
 		bg-gradient-to-t from-white/80 via-white/40 to-transparent
-		dark:from-slate-900/85 dark:via-slate-900/40 dark:to-transparent
+		dark:from-emerald-950/85 dark:via-emerald-950/40 dark:to-transparent
 		md:bg-gradient-to-r md:from-white/75 md:via-white/30 md:to-transparent
-		md:dark:from-slate-900/80 md:dark:via-slate-900/30 md:dark:to-transparent">
+		md:dark:from-emerald-950/80 md:dark:via-emerald-950/30 md:dark:to-transparent">
 	</div>
 
 	<!-- Layer 3: Text overlay -->
 	<div class="relative z-10 w-full h-full flex flex-col justify-end md:justify-center
-		px-16 pt-5 pb-14 md:p-8 lg:p-10 md:max-w-[55%]">
+		px-6 pt-5 pb-14 md:px-8 lg:px-10 md:max-w-[55%]">
 		<Lexend as="div" class="flex flex-col gap-2.5 md:gap-3">
 			{@render text()}
 		</Lexend>

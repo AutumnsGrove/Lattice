@@ -1,7 +1,8 @@
 <!--
-  HeroCentennial — Slide 4: "Some trees outlive the people who planted them"
-  Legacy — 100-year guarantee. Large TreePine, Lantern at base,
-  StonePath, MushroomCluster, Stars in sky, twilight mood.
+  HeroCentennial — "Some trees outlive the people who planted them."
+  Legacy — 100-year guarantee. A grand sentinel pine with
+  lanterns glowing at its base. Twilight mood with depth.
+  More companion trees and lanterns revealed on larger screens.
 -->
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
@@ -9,11 +10,9 @@
 	import { ArrowRight } from 'lucide-svelte';
 	import {
 		TreePine,
-		Lantern,
-		StonePath,
-		MushroomCluster,
-		Star
+		Lantern
 	} from '@autumnsgrove/groveengine/ui/nature';
+	import { greens, bark } from '@autumnsgrove/groveengine/ui/nature';
 
 	let { season, active, index }: HeroSlideContentProps = $props();
 </script>
@@ -38,41 +37,55 @@
 
 	{#snippet scene()}
 		<div class="relative w-full h-full">
-			<!-- Stars — scattered across the full sky -->
-			<div class="absolute top-[8%] right-[20%]">
-				<Star class="w-2.5 h-2.5 opacity-55" />
-			</div>
-			<div class="absolute top-[6%] right-[40%]">
-				<Star class="w-2 h-2 opacity-35" />
-			</div>
-			<div class="absolute top-[15%] right-[12%]">
-				<Star class="w-3 h-3 opacity-45" />
-			</div>
-			<div class="absolute top-[12%] left-[40%] md:left-[50%]">
-				<Star class="w-2 h-2 opacity-30" />
-			</div>
-			<div class="absolute top-[5%] left-[55%] hidden md:block">
-				<Star class="w-2.5 h-2.5 opacity-40" />
+			<!-- === ALWAYS VISIBLE (mobile+) === -->
+
+			<!-- The sentinel — grand central pine -->
+			<div class="absolute bottom-[6%] right-[22%] md:right-[30%]">
+				<TreePine {season} animate={active} color={greens.grove} trunkColor={bark.warmBark} class="w-18 h-36 md:w-28 md:h-52 lg:w-32 lg:h-60" />
 			</div>
 
-			<!-- Large central pine — the sentinel tree, shifted right -->
-			<div class="absolute bottom-[8%] right-[22%] md:right-[28%]">
-				<TreePine {season} animate={active} class="w-20 h-36 md:w-28 md:h-48" />
+			<!-- Companion pine — smaller, left of sentinel -->
+			<div class="absolute bottom-[9%] right-[42%] md:right-[48%]">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="w-10 h-20 md:w-14 md:h-30 lg:w-16 lg:h-34 opacity-60" />
 			</div>
 
-			<!-- Lantern at base of tree -->
-			<div class="absolute bottom-[6%] right-[38%] md:right-[42%]">
-				<Lantern animate={active} class="w-5 h-8 md:w-6 md:h-10" variant="standing" />
+			<!-- Lantern at base — warm glow -->
+			<div class="absolute bottom-[5%] right-[35%] md:right-[42%]">
+				<Lantern animate={active} class="w-4 h-7 md:w-5 md:h-9 lg:w-6 lg:h-11" variant="standing" />
 			</div>
 
-			<!-- Stone path — visible on all sizes now -->
-			<div class="absolute bottom-[2%] right-[15%] md:right-[20%]">
-				<StonePath class="w-24 h-5 md:w-32 md:h-7 opacity-55" />
+			<!-- === TABLET+ (md) === -->
+
+			<!-- Distant pine — far right background -->
+			<div class="absolute bottom-[12%] right-[6%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="md:w-10 md:h-20 lg:w-12 lg:h-24 opacity-35" />
 			</div>
 
-			<!-- Mushroom cluster -->
-			<div class="absolute bottom-[5%] right-[8%]">
-				<MushroomCluster class="w-10 h-7 md:w-12 md:h-9" />
+			<!-- Mid-right pine — between sentinel and far right -->
+			<div class="absolute bottom-[10%] right-[12%] hidden md:block">
+				<TreePine {season} animate={active} color={greens.deepGreen} trunkColor={bark.bark} class="md:w-12 md:h-24 lg:w-14 lg:h-28 opacity-50" />
+			</div>
+
+			<!-- Second lantern — post variant, right side -->
+			<div class="absolute bottom-[5%] right-[18%] hidden md:block">
+				<Lantern animate={active} class="md:w-4 md:h-7 lg:w-5 lg:h-9" variant="post" />
+			</div>
+
+			<!-- === DESKTOP (lg) === -->
+
+			<!-- Far-left background pine -->
+			<div class="absolute bottom-[14%] right-[58%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.darkForest} trunkColor={bark.darkBark} class="lg:w-10 lg:h-20 opacity-25" />
+			</div>
+
+			<!-- Fill pine — between companion and sentinel -->
+			<div class="absolute bottom-[8%] right-[38%] hidden lg:block">
+				<TreePine {season} animate={active} color={greens.grove} trunkColor={bark.warmBark} class="lg:w-12 lg:h-24 opacity-45" />
+			</div>
+
+			<!-- Third lantern — hanging, near leftmost tree -->
+			<div class="absolute bottom-[8%] right-[52%] hidden lg:block">
+				<Lantern animate={active} class="lg:w-4 lg:h-7 opacity-55" variant="standing" />
 			</div>
 		</div>
 	{/snippet}

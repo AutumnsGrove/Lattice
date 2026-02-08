@@ -1,6 +1,6 @@
 import type { Season } from "@autumnsgrove/groveengine/ui/nature";
 
-export type BgVariant = "forest" | "twilight" | "dawn" | "warm" | "mist";
+export type BgVariant = "forest" | "twilight" | "dawn";
 
 export interface HeroSlideContentProps {
   season: Season;
@@ -10,17 +10,20 @@ export interface HeroSlideContentProps {
 
 /**
  * Maps a bgVariant to its Tailwind gradient classes.
- * Extracted as a pure function for testability.
+ * Warmer, nature-rooted gradients inspired by the forest page.
+ *
+ * - forest: Deep grove greens — growth, ownership, protection
+ * - twilight: Warm indigo with green undertones — legacy, timelessness
+ * - dawn: Golden amber through soft rose — community, home, warmth
  */
 export function getGradientClasses(variant: BgVariant): string {
   const variants: Record<BgVariant, string> = {
     forest:
-      "from-emerald-50/80 via-green-50/60 to-emerald-100/40 dark:from-emerald-950/60 dark:via-green-950/40 dark:to-emerald-900/30",
+      "from-emerald-50/90 via-green-100/70 to-emerald-50/50 dark:from-emerald-950/70 dark:via-green-950/50 dark:to-emerald-900/40",
     twilight:
-      "from-indigo-50/80 via-slate-50/60 to-violet-100/40 dark:from-indigo-950/60 dark:via-slate-950/40 dark:to-violet-900/30",
-    dawn: "from-amber-50/80 via-orange-50/60 to-rose-100/40 dark:from-amber-950/60 dark:via-orange-950/40 dark:to-rose-900/30",
-    warm: "from-amber-50/80 via-yellow-50/60 to-orange-100/40 dark:from-amber-950/60 dark:via-yellow-950/40 dark:to-orange-900/30",
-    mist: "from-slate-50/80 via-blue-50/60 to-cyan-100/40 dark:from-slate-950/60 dark:via-blue-950/40 dark:to-cyan-900/30",
+      "from-indigo-50/80 via-emerald-50/50 to-slate-100/60 dark:from-indigo-950/60 dark:via-emerald-950/30 dark:to-slate-900/40",
+    dawn:
+      "from-amber-50/85 via-orange-50/60 to-emerald-50/40 dark:from-amber-950/60 dark:via-orange-950/35 dark:to-emerald-950/30",
   };
   return variants[variant];
 }
