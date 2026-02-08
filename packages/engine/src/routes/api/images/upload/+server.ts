@@ -18,7 +18,7 @@ import {
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
-import { isFeatureEnabled } from "$lib/feature-flags/index.js";
+import { isFeatureEnabled, isInGreenhouse } from "$lib/feature-flags/index.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /** Maximum file size (10MB) */
@@ -100,20 +100,41 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // ========================================================================
-  // Feature Flag Gate: Image Uploads
+  // Feature Flag Gate: Photo Gallery (greenhouse-only)
   // ========================================================================
-  // Image uploads are DISABLED by default until PhotoDNA hash-based CSAM
-  // detection is integrated. Can be enabled per-tenant for trusted beta users.
+  // Photo uploads are gated behind the photo_gallery graft, which is
+  // greenhouse-only. Tenants must be enrolled in greenhouse and have
+  // the graft enabled to upload images.
   //
-  // @see migrations/031_petal_upload_gate.sql
-  // @see TODOS.md "NCMEC CyberTipline Integration" section
+  // @see migrations/049_photo_gallery_graft.sql
+  const flagsEnv = platform?.env?.CACHE_KV
+    ? { DB: platform.env.DB!, FLAGS_KV: platform.env.CACHE_KV }
+    : null;
+
+  if (!flagsEnv) {
+    return json(
+      {
+        error: API_ERRORS.FEATURE_DISABLED.code,
+        error_code: API_ERRORS.FEATURE_DISABLED.code,
+        message: API_ERRORS.FEATURE_DISABLED.userMessage,
+      },
+      { status: 403 },
+    );
+  }
+
+  const inGreenhouse = await isInGreenhouse(
+    locals.tenantId,
+    flagsEnv,
+  ).catch(() => false);
+
   const uploadsEnabled = await isFeatureEnabled(
-    "image_uploads_enabled",
+    "photo_gallery",
     {
       tenantId: locals.tenantId,
       userId: locals.user.id,
+      inGreenhouse,
     },
-    platform?.env as unknown as Parameters<typeof isFeatureEnabled>[2],
+    flagsEnv,
   );
 
   if (!uploadsEnabled) {

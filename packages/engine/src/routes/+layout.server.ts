@@ -2,6 +2,7 @@ import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
 import { getNavPageLimit } from "$lib/server/tier-features.js";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags";
 
 interface SiteSettings {
   font_family: string;
@@ -43,13 +44,16 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
         // If we have a tenant context, load tenant-specific settings
         if (tenantId) {
           // PERFORMANCE: Run independent queries in parallel to reduce latency
-          // Settings, nav pages, and curio configs are independent - execute concurrently
-          // Each query still has its own error handling to prevent cascading failures
+          // Settings, nav pages, curio configs, and greenhouse check run concurrently
+          // Each query has its own error handling to prevent cascading failures
+          const kv = platform?.env?.CACHE_KV;
+          const flagsEnv = kv ? { DB: db, FLAGS_KV: kv } : null;
+
           const [
             settingsResult,
             navResult,
             timelineResult,
-            galleryResult,
+            greenhouseCheck,
             journeyResult,
           ] = await Promise.all([
             // Site settings query
@@ -85,14 +89,11 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .first<{ enabled: number }>()
               .catch(() => null), // Timeline table might not exist - that's OK
 
-            // Gallery curio config query
-            db
-              .prepare(
-                `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ? AND enabled = 1`,
-              )
-              .bind(tenantId)
-              .first<{ enabled: number }>()
-              .catch(() => null), // Gallery table might not exist - that's OK
+            // Gallery: check greenhouse status (photo_gallery is greenhouse-only)
+            // Replaces gallery_curio_config query — gallery is now graft-gated
+            flagsEnv
+              ? isInGreenhouse(tenantId, flagsEnv).catch(() => false)
+              : Promise.resolve(false),
 
             // Journey curio config query
             db
@@ -103,6 +104,16 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .first<{ enabled: number }>()
               .catch(() => null), // Journey table might not exist - that's OK
           ]);
+
+          // Step 2: If tenant is in greenhouse, check photo_gallery graft
+          // Only runs for greenhouse tenants (most requests skip this entirely)
+          if (greenhouseCheck && flagsEnv) {
+            galleryEnabled = await isFeatureEnabled(
+              "photo_gallery",
+              { tenantId, inGreenhouse: true },
+              flagsEnv,
+            ).catch(() => false);
+          }
 
           // Process settings results
           if (settingsResult?.results) {
@@ -133,16 +144,15 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
             navPages.push({ slug: "timeline", title: "Timeline" });
             timelineEnabled = true;
           }
-          if (galleryResult?.enabled) {
+          if (galleryEnabled) {
             navPages.push({ slug: "gallery", title: "Gallery" });
-            galleryEnabled = true;
           }
 
           // Calculate enabled curios count for the pages admin UI
           // This count is used to show accurate "slots used" (nav pages + curios share the same limit)
           enabledCuriosCount =
             (timelineResult?.enabled ? 1 : 0) +
-            (galleryResult?.enabled ? 1 : 0) +
+            (galleryEnabled ? 1 : 0) +
             (journeyResult?.enabled ? 1 : 0);
         }
         // No tenant context = use hardcoded defaults only (line 19)

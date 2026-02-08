@@ -1,44 +1,22 @@
 /**
  * Gallery Public Route - Server
  *
- * Loads gallery images and metadata for the public gallery page.
- * Requires Gallery Curio to be enabled for the current tenant.
+ * Loads gallery images for the public gallery page.
+ * Gated by the `photo_gallery` graft (greenhouse-only).
  *
- * Hybrid R2 + D1 architecture:
- * - Images stored in R2 (blob storage)
- * - Metadata stored in D1 (fast queries)
+ * Images are loaded from R2 via D1 metadata. Display settings
+ * use sensible defaults, optionally overridden by gallery_curio_config.
  */
 
-import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { SITE_ERRORS, throwGroveError } from "$lib/errors";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags";
 import {
-  parseImageFilename,
   getAvailableYears,
   getAvailableCategories,
-  isSupportedImage,
-  type GalleryCurioConfig,
   type GalleryTagRecord,
   type GalleryCollectionRecord,
 } from "$lib/curios/gallery";
-
-interface ConfigRow {
-  enabled: number;
-  r2_bucket: string | null;
-  cdn_base_url: string | null;
-  gallery_title: string | null;
-  gallery_description: string | null;
-  items_per_page: number;
-  sort_order: string;
-  show_descriptions: number;
-  show_dates: number;
-  show_tags: number;
-  enable_lightbox: number;
-  enable_search: number;
-  enable_filters: number;
-  grid_style: string;
-  thumbnail_size: string;
-}
 
 interface ImageRow {
   id: string;
@@ -86,8 +64,23 @@ interface CollectionRow {
   is_public: number;
 }
 
-export const load: PageServerLoad = async ({ url, platform, locals }) => {
+/** Sensible defaults — no curio config table needed */
+const GALLERY_DEFAULTS = {
+  sortOrder: "date-desc",
+  itemsPerPage: 30,
+  showDescriptions: true,
+  showDates: true,
+  showTags: true,
+  enableLightbox: true,
+  enableSearch: true,
+  enableFilters: true,
+  gridStyle: "mood-board",
+  thumbnailSize: "medium",
+};
+
+export const load: PageServerLoad = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
+  const kv = platform?.env?.CACHE_KV;
   const tenantId = locals.tenantId;
 
   if (!db) {
@@ -98,69 +91,63 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     throwGroveError(400, SITE_ERRORS.TENANT_CONTEXT_REQUIRED, "Site");
   }
 
-  // Check if gallery is enabled for this tenant
-  // CRITICAL: Wrap in try/catch - if table doesn't exist, treat as not enabled
-  let config: ConfigRow | null = null;
+  // Gate: photo_gallery graft (greenhouse-only)
+  if (!kv) {
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+  }
+
+  const flagsEnv = { DB: db, FLAGS_KV: kv };
+
+  const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
+    () => false,
+  );
+
+  if (!inGreenhouse) {
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+  }
+
+  const galleryEnabled = await isFeatureEnabled(
+    "photo_gallery",
+    { tenantId, inGreenhouse: true },
+    flagsEnv,
+  ).catch(() => false);
+
+  if (!galleryEnabled) {
+    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+  }
+
+  const cdnBaseUrl =
+    (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
+
+  // Optionally load display settings from gallery_curio_config (if customized)
+  let title = "Gallery";
+  let description: string | null = null;
   try {
-    config = await db
+    const configRow = await db
       .prepare(
-        `SELECT
-          enabled,
-          r2_bucket,
-          cdn_base_url,
-          gallery_title,
-          gallery_description,
-          items_per_page,
-          sort_order,
-          show_descriptions,
-          show_dates,
-          show_tags,
-          enable_lightbox,
-          enable_search,
-          enable_filters,
-          grid_style,
-          thumbnail_size
-        FROM gallery_curio_config
-        WHERE tenant_id = ?`,
+        `SELECT gallery_title, gallery_description FROM gallery_curio_config WHERE tenant_id = ?`,
       )
       .bind(tenantId)
-      .first<ConfigRow>();
-  } catch (err) {
-    console.warn("Gallery config query failed (table may not exist):", err);
-    // Table doesn't exist or query failed - gallery not enabled
-    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+      .first<{ gallery_title: string | null; gallery_description: string | null }>();
+
+    if (configRow?.gallery_title) title = configRow.gallery_title;
+    if (configRow?.gallery_description) description = configRow.gallery_description;
+  } catch {
+    // No curio config — sensible defaults are fine
   }
 
-  if (!config?.enabled) {
-    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
-  }
-
-  const cdnBaseUrl = config.cdn_base_url || "https://cdn.grove.place";
+  const sortOrder = GALLERY_DEFAULTS.sortOrder;
 
   // Run images, allTags, collections, and image-tags queries in parallel
-  // (400-800ms savings vs sequential execution)
   const [imagesResult, allTagsResult, collectionsResult, imageTagsResult] =
     await Promise.all([
-      // Fetch images from database
       db
         .prepare(
           `SELECT
-          id,
-          r2_key,
-          parsed_date,
-          parsed_category,
-          parsed_slug,
-          custom_title,
-          custom_description,
-          custom_date,
-          alt_text,
-          file_size,
-          uploaded_at,
-          cdn_url,
-          width,
-          height,
-          sort_index,
-          is_featured
+          id, r2_key, parsed_date, parsed_category, parsed_slug,
+          custom_title, custom_description, custom_date, alt_text,
+          file_size, uploaded_at, cdn_url, width, height,
+          sort_index, is_featured
         FROM gallery_images
         WHERE tenant_id = ?
         ORDER BY
@@ -170,58 +157,36 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
           CASE WHEN ? = 'title-desc' THEN COALESCE(custom_title, parsed_slug) END DESC,
           sort_index DESC`,
         )
-        .bind(
-          tenantId,
-          config.sort_order,
-          config.sort_order,
-          config.sort_order,
-          config.sort_order,
-        )
+        .bind(tenantId, sortOrder, sortOrder, sortOrder, sortOrder)
         .all<ImageRow>()
         .catch((err) => {
           console.warn("Gallery images query failed:", err);
           return { results: [] as ImageRow[] };
         }),
 
-      // Fetch all available tags (for filters)
       db
         .prepare(
           `SELECT id, name, slug, color, description, sort_order
-         FROM gallery_tags
-         WHERE tenant_id = ?
-         ORDER BY sort_order, name`,
+         FROM gallery_tags WHERE tenant_id = ? ORDER BY sort_order, name`,
         )
         .bind(tenantId)
         .all<TagRow>()
-        .catch((err) => {
-          console.warn("Gallery all tags query failed:", err);
-          return { results: [] as TagRow[] };
-        }),
+        .catch(() => ({ results: [] as TagRow[] })),
 
-      // Fetch public collections (for filters)
       db
         .prepare(
           `SELECT id, name, slug, description, cover_image_id, display_order, is_public
-         FROM gallery_collections
-         WHERE tenant_id = ? AND is_public = 1
+         FROM gallery_collections WHERE tenant_id = ? AND is_public = 1
          ORDER BY display_order, name`,
         )
         .bind(tenantId)
         .all<CollectionRow>()
-        .catch((err) => {
-          console.warn("Gallery collections query failed:", err);
-          return { results: [] as CollectionRow[] };
-        }),
+        .catch(() => ({ results: [] as CollectionRow[] })),
 
-      // Fetch ALL image-tag mappings for this tenant in one query (replaces batch loop)
       db
         .prepare(
-          `SELECT
-          git.image_id,
-          gt.id as tag_id,
-          gt.name as tag_name,
-          gt.slug as tag_slug,
-          gt.color as tag_color
+          `SELECT git.image_id, gt.id as tag_id, gt.name as tag_name,
+                gt.slug as tag_slug, gt.color as tag_color
         FROM gallery_image_tags git
         JOIN gallery_tags gt ON git.tag_id = gt.id
         JOIN gallery_images gi ON git.image_id = gi.id
@@ -229,10 +194,7 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
         )
         .bind(tenantId)
         .all<ImageTagRow>()
-        .catch((err) => {
-          console.warn("Gallery image tags query failed:", err);
-          return { results: [] as ImageTagRow[] };
-        }),
+        .catch(() => ({ results: [] as ImageTagRow[] })),
     ]);
 
   // Build tag map from image-tags query result
@@ -272,7 +234,6 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     tags: tagsByImageId.get(row.id) || [],
   }));
 
-  // Transform tags
   const tags: GalleryTagRecord[] = allTagsResult.results.map((row) => ({
     id: row.id,
     tenantId,
@@ -284,7 +245,6 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     createdAt: 0,
   }));
 
-  // Transform collections
   const collections: GalleryCollectionRecord[] = collectionsResult.results.map(
     (row) => ({
       id: row.id,
@@ -300,7 +260,6 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
     }),
   );
 
-  // Extract filter options from images
   const categories = getAvailableCategories(images);
   const years = getAvailableYears(images);
 
@@ -313,18 +272,9 @@ export const load: PageServerLoad = async ({ url, platform, locals }) => {
       collections,
     },
     config: {
-      title: config.gallery_title || "Gallery",
-      description: config.gallery_description,
-      itemsPerPage: config.items_per_page,
-      sortOrder: config.sort_order,
-      showDescriptions: Boolean(config.show_descriptions),
-      showDates: Boolean(config.show_dates),
-      showTags: Boolean(config.show_tags),
-      enableLightbox: Boolean(config.enable_lightbox),
-      enableSearch: Boolean(config.enable_search),
-      enableFilters: Boolean(config.enable_filters),
-      gridStyle: config.grid_style,
-      thumbnailSize: config.thumbnail_size,
+      title,
+      description,
+      ...GALLERY_DEFAULTS,
     },
   };
 };

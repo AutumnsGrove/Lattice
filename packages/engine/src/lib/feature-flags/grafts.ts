@@ -42,7 +42,8 @@ export type KnownGraftId =
   | "meadow_access"
   | "jxl_encoding"
   | "jxl_kill_switch"
-  | "image_uploads_enabled";
+  | "image_uploads_enabled"
+  | "photo_gallery";
 
 /**
  * Record of graft ID to enabled status.
