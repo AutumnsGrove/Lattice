@@ -18,6 +18,7 @@
     Eye,
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
+  import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
 
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
@@ -128,11 +129,11 @@
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
       {#if data.grafts?.reeds_comments}
-      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title="Comments">
+      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title={resolveTerm("reeds")}>
         <span class="nav-icon-wrap">
           <MessageSquare class="nav-icon" />
           {#if data.pendingCommentCount > 0}
-            <span class="activity-dot" aria-label="{data.pendingCommentCount} pending"></span>
+            <span class="activity-dot" aria-label="{data.pendingCommentCount} pending {resolveTerm('reeds').toLowerCase()}"></span>
           {/if}
         </span>
         <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
