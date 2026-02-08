@@ -11,10 +11,9 @@ import { validateEnv, hasAnyEnv } from "$lib/server/env-validation.js";
 import {
   ALLOWED_IMAGE_TYPES,
   ALLOWED_TYPES_DISPLAY,
-  FILE_SIGNATURES,
   MIME_TO_EXTENSIONS,
-  WEBP_MARKER,
   isAllowedImageType,
+  validateFileSignature,
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
@@ -122,10 +121,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  const inGreenhouse = await isInGreenhouse(
-    locals.tenantId,
-    flagsEnv,
-  ).catch(() => false);
+  const inGreenhouse = await isInGreenhouse(locals.tenantId, flagsEnv).catch(
+    () => false,
+  );
 
   const uploadsEnabled = await isFeatureEnabled(
     "photo_gallery",
@@ -260,34 +258,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const arrayBuffer = await file.arrayBuffer();
 
     // Validate magic bytes to prevent MIME type spoofing
+    // Uses the shared validateFileSignature() which handles WebP marker
+    // and AVIF ISOBMFF ftyp box checks
     const buffer = new Uint8Array(arrayBuffer);
-    const signatures = FILE_SIGNATURES[file.type as AllowedImageType];
-    const matchesSignature =
-      signatures &&
-      signatures.some((sig) => sig.every((byte, i) => buffer[i] === byte));
-
-    if (!matchesSignature) {
+    if (!validateFileSignature(buffer, file.type as AllowedImageType)) {
       throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
         detail: "invalid file signature - may be corrupted or spoofed",
       });
-    }
-
-    // Additional WebP validation: verify WEBP marker at offset 8
-    // This prevents other RIFF-based formats (WAV, AVI) from being accepted
-    if (file.type === "image/webp") {
-      if (buffer.length < 12) {
-        throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-          detail: "webp file too small",
-        });
-      }
-      const hasWebpMarker = WEBP_MARKER.every(
-        (byte, i) => buffer[8 + i] === byte,
-      );
-      if (!hasWebpMarker) {
-        throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-          detail: "invalid webp file - missing WEBP marker",
-        });
-      }
     }
 
     // Validate image dimensions to prevent DoS attacks
@@ -430,6 +407,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         "image/png": "png",
         "image/jpeg": "jpg",
         "image/jxl": "jxl",
+        "image/avif": "avif",
       };
       const ext = extMap[file.type] || "webp";
       filename = `${customFilename}.${ext}`;
