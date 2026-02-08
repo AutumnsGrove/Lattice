@@ -330,6 +330,24 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(301, `${newPath}${event.url.search}`);
   }
 
+  // Phase 3: /comments → /reeds (arbor and API routes)
+  if (pathname === "/arbor/comments" || pathname.startsWith("/arbor/comments/")) {
+    const newPath = pathname.replace(/^\/arbor\/comments/, "/arbor/reeds");
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+  // Redirect old API comment routes to /api/reeds/. The regex has no $ anchor,
+  // so nested paths like /api/blooms/slug/comments/123/moderate are preserved:
+  //   /api/blooms/my-post/comments       → /api/reeds/my-post
+  //   /api/blooms/my-post/comments/abc   → /api/reeds/my-post/abc
+  //   /api/blooms/my-post/comments/abc/moderate → /api/reeds/my-post/abc/moderate
+  if (pathname.startsWith("/api/blooms/") && pathname.includes("/comments")) {
+    const newPath = pathname.replace(
+      /^\/api\/blooms\/([^/]+)\/comments/,
+      "/api/reeds/$1",
+    );
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+
   // =========================================================================
   // TURNSTILE VERIFICATION (Shade)
   // =========================================================================

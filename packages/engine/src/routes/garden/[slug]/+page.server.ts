@@ -9,6 +9,13 @@ import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import { getTenantDb } from "$lib/server/services/database.js";
 import * as cache from "$lib/server/services/cache.js";
 import { emailsMatch } from "$lib/utils/user.js";
+import {
+  getApprovedComments,
+  getCommentCount,
+  getCommentSettings,
+  buildCommentTree,
+} from "$lib/server/services/reeds.js";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags/index.js";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
@@ -99,13 +106,16 @@ export const load: PageServerLoad = async ({
           Vary: "Cookie",
         });
 
-        return { post: cachedPost, isOwner: isOwner || false };
+        // Load comments (not cached — always fresh from D1)
+        const reeds = await loadComments(db, tenantId, slug, kv);
+        return { post: cachedPost, isOwner: isOwner || false, ...reeds };
       }
     } else if (db && tenantId) {
       // No KV available, fall back to direct D1 (no caching)
       const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
       if (post) {
-        return { post, isOwner: isOwner || false };
+        const reeds = await loadComments(db, tenantId, slug);
+        return { post, isOwner: isOwner || false, ...reeds };
       }
     }
 
@@ -121,6 +131,9 @@ export const load: PageServerLoad = async ({
             author: authorName,
           },
           isOwner: isOwner || false,
+          comments: [],
+          commentTotal: 0,
+          commentSettings: null,
         };
       }
     }
@@ -142,6 +155,63 @@ export const load: PageServerLoad = async ({
     throwGroveError(500, SITE_ERRORS.POST_LOAD_FAILED, "Site");
   }
 };
+
+/**
+ * Load Reeds comments for a blog post.
+ * Fails gracefully — comments are non-critical for page rendering.
+ * Returns empty data when the reeds_comments graft is disabled.
+ */
+async function loadComments(
+  db: D1Database,
+  tenantId: string,
+  slug: string,
+  kv?: KVNamespace,
+) {
+  try {
+    // Gate: reeds_comments graft — skip loading if feature is off
+    if (kv) {
+      const flagsEnv = { DB: db, FLAGS_KV: kv };
+      const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+      if (!inGreenhouse) {
+        return { comments: [], commentTotal: 0, commentSettings: null };
+      }
+      const reedsEnabled = await isFeatureEnabled(
+        "reeds_comments",
+        { tenantId, inGreenhouse: true },
+        flagsEnv,
+      ).catch(() => false);
+      if (!reedsEnabled) {
+        return { comments: [], commentTotal: 0, commentSettings: null };
+      }
+    }
+
+    const tenantDb = getTenantDb(db, { tenantId });
+
+    // Get the post ID from slug
+    const post = await tenantDb.queryOne<{ id: string }>(
+      "posts",
+      "slug = ?",
+      [slug],
+    );
+
+    if (!post) {
+      return { comments: [], commentTotal: 0, commentSettings: null };
+    }
+
+    const [rawComments, commentTotal, commentSettings] = await Promise.all([
+      getApprovedComments(tenantDb, post.id).catch(() => []),
+      getCommentCount(tenantDb, post.id).catch(() => 0),
+      getCommentSettings(tenantDb).catch(() => null),
+    ]);
+
+    const comments = buildCommentTree(rawComments);
+
+    return { comments, commentTotal, commentSettings };
+  } catch (err) {
+    console.error("[Reeds] Failed to load comments:", err);
+    return { comments: [], commentTotal: 0, commentSettings: null };
+  }
+}
 
 /**
  * Fetch post from D1 and process it (markdown, headers, gutter content)

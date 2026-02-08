@@ -1,6 +1,7 @@
 <script>
 	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
-	import { Button, Badge, GroveSwap } from '$lib/ui';
+	import ReedsThread from '$lib/components/reeds/ReedsThread.svelte';
+	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from '$lib/ui';
 	import { fontMap } from '$lib/ui/tokens/fonts';
 
 	let { data } = $props();
@@ -119,10 +120,37 @@
 							</div>
 						{/if}
 					</div>
+
+				{#if data.commentSettings?.comments_enabled}
+					<a
+						href="#reeds"
+						class="comment-count-badge"
+						aria-label="{data.commentTotal || 0} {data.commentTotal === 1 ? 'comment' : 'comments'} — jump to discussion"
+					>
+						{#if (data.commentTotal || 0) > 0}
+							<MessageSquareText class="comment-badge-icon has-comments" />
+						{:else}
+							<MessageSquare class="comment-badge-icon" />
+						{/if}
+					</a>
+				{/if}
 				</div>
 			</header>
 		{/snippet}
 	</ContentWithGutter>
+
+	<!-- Reeds: Comments section -->
+	<div class="reeds-container">
+		<ReedsThread
+			slug={data.post.slug}
+			initialComments={data.comments || []}
+			initialTotal={data.commentTotal || 0}
+			settings={data.commentSettings ?? undefined}
+			currentUserId={data.user?.id}
+			isOwner={data.isOwner || false}
+			isLoggedIn={!!data.user}
+		/>
+	</div>
 </div>
 
 <style>
@@ -167,6 +195,7 @@
 
 	/* Glassmorphism container for post metadata */
 	.post-meta-glass {
+		position: relative;
 		background: rgba(255, 255, 255, 0.7);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
@@ -314,5 +343,97 @@
 	.edit-link:hover {
 		background: var(--accent-success-faint-hover, rgba(44, 95, 45, 0.15));
 		border-color: var(--accent-success-border-hover, rgba(44, 95, 45, 0.3));
+	}
+
+	/* Comment count badge — floats at right edge of glass meta box */
+	.comment-count-badge {
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 1px solid rgba(0, 0, 0, 0.06);
+		border-radius: 10px;
+		color: var(--color-text-muted, #888);
+		text-decoration: none;
+		transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+	}
+
+	.comment-count-badge:hover {
+		background: rgba(255, 255, 255, 0.8);
+		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		transform: translateY(-50%) scale(1.08);
+	}
+
+	:global(.dark) .comment-count-badge {
+		background: rgba(255, 255, 255, 0.06);
+		border-color: rgba(255, 255, 255, 0.1);
+		color: var(--grove-text-muted, #999);
+	}
+
+	:global(.dark) .comment-count-badge:hover {
+		background: rgba(255, 255, 255, 0.12);
+		color: var(--grove-300, #86efac);
+	}
+
+	.comment-count-badge:focus-visible {
+		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline-offset: 2px;
+	}
+
+	:global(.dark) .comment-count-badge:focus-visible {
+		outline-color: var(--grove-300, #86efac);
+	}
+
+	:global(.comment-badge-icon) {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	:global(.comment-badge-icon.has-comments) {
+		color: var(--user-accent, var(--color-primary, #2c5f2d));
+	}
+
+	:global(.dark) :global(.comment-badge-icon.has-comments) {
+		color: var(--grove-300, #86efac);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.comment-count-badge {
+			transition: none;
+		}
+		.comment-count-badge:hover {
+			transform: translateY(-50%);
+		}
+	}
+
+	/* On narrow screens, badge sits below meta instead of floating */
+	@media (max-width: 540px) {
+		.comment-count-badge {
+			position: static;
+			transform: none;
+			margin-top: 0.75rem;
+		}
+		.comment-count-badge:hover {
+			transform: scale(1.05);
+		}
+	}
+
+	@media (max-width: 540px) and (prefers-reduced-motion: reduce) {
+		.comment-count-badge:hover {
+			transform: none;
+		}
+	}
+
+	/* Reeds comment section container */
+	.reeds-container {
+		max-width: 768px;
+		margin: 0 auto;
+		padding: 0 1rem;
 	}
 </style>

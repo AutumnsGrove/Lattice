@@ -35,13 +35,17 @@ import {
   HardDrive,
   Palette,
   ShieldCheck,
+  ShieldAlert,
   Shield,
+  UserX,
   Cloud,
   SearchCode,
   Archive,
   Upload,
   MessagesSquare,
   MessageCircle,
+  MessageSquare,
+  MessageSquareText,
   FileText,
   Tag,
   Rss,
@@ -55,6 +59,7 @@ import {
   Flower2,
   TreeDeciduous,
   Crown,
+  Ban,
   // States & Feedback
   Check,
   CheckCircle,
@@ -149,6 +154,7 @@ export const stateIcons = {
   info: InfoIcon,
   circle: Circle,
   lock: Lock,
+  ban: Ban,
 } as const;
 
 // ============================================================================
@@ -187,7 +193,9 @@ export const featureIcons = {
   harddrive: HardDrive,
   palette: Palette,
   shieldcheck: ShieldCheck,
+  shieldalert: ShieldAlert,
   shield: Shield,
+  userx: UserX,
   cloud: Cloud,
   searchcode: SearchCode,
   archive: Archive,
@@ -200,6 +208,8 @@ export const featureIcons = {
   eye: Eye,
   download: Download,
   layers: Layers,
+  messagesquare: MessageSquare,
+  messagesquaretext: MessageSquareText,
 } as const;
 
 // ============================================================================
@@ -375,10 +385,14 @@ export {
   Palette,
   Shield,
   ShieldCheck,
+  ShieldAlert,
+  UserX,
   Download,
   Rss,
   Eye,
   MessageCircle,
+  MessageSquare,
+  MessageSquareText,
   Layers,
   Lightbulb,
   BookOpen,
@@ -387,6 +401,7 @@ export {
   AlertTriangle,
   HelpCircle,
   Lock,
+  Ban,
   // Phase/Special & Seasons
   Sparkles,
   Star,

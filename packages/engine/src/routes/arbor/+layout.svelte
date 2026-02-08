@@ -11,12 +11,14 @@
     CreditCard,
     HelpCircle,
     MessageCircle,
+    MessageSquare,
     Shield,
     ShieldAlert,
     Gift,
     Eye,
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
+  import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
 
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)
@@ -126,6 +128,17 @@
         <Image class="nav-icon" />
         <span class="nav-label" class:hidden={!showExpanded}>Images</span>
       </a>
+      {#if data.grafts?.reeds_comments}
+      <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title={resolveTerm("reeds")}>
+        <span class="nav-icon-wrap">
+          <MessageSquare class="nav-icon" />
+          {#if data.pendingCommentCount > 0}
+            <span class="activity-dot" aria-label="{data.pendingCommentCount} pending {resolveTerm('reeds').toLowerCase()}"></span>
+          {/if}
+        </span>
+        <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
+      </a>
+      {/if}
       <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />
         <span class="nav-label" class:hidden={sidebarCollapsed}>Account</span>
@@ -506,6 +519,41 @@
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
+  }
+
+  .nav-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .activity-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--user-accent, var(--color-primary, #2c5f2d));
+    opacity: 0.75;
+    animation: dot-breathe 3s ease-in-out infinite;
+  }
+
+  :global(.dark) .activity-dot {
+    background: var(--grove-300, #86efac);
+    opacity: 0.65;
+  }
+
+  @keyframes dot-breathe {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.15); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .activity-dot {
+      animation: none;
+      opacity: 0.7;
+    }
   }
 
   .nav-label {

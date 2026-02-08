@@ -257,6 +257,40 @@ export const API_ERRORS = {
     adminMessage: "Invalid state transition (e.g., cancel a non-running test).",
   },
 
+  COMMENTS_DISABLED: {
+    code: "GROVE-API-050",
+    category: "user" as const,
+    userMessage: "Comments are closed on this post.",
+    adminMessage:
+      "Comment submission attempted on post with comments disabled.",
+  },
+
+  COMMENT_NOT_FOUND: {
+    code: "GROVE-API-051",
+    category: "user" as const,
+    userMessage:
+      "That comment doesn't exist or has already been removed.",
+    adminMessage: "Comment ID not found in database.",
+  },
+
+  COMMENT_EDIT_WINDOW_CLOSED: {
+    code: "GROVE-API-052",
+    category: "user" as const,
+    userMessage:
+      "The edit window has closed. Comments can only be edited within 15 minutes.",
+    adminMessage:
+      "Comment edit attempted after 15-minute edit window expired.",
+  },
+
+  COMMENT_BLOCKED: {
+    code: "GROVE-API-053",
+    category: "user" as const,
+    userMessage:
+      "You're unable to comment on this blog.",
+    adminMessage:
+      "Blocked user attempted to submit comment on tenant.",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // Rate Limiting & Security (060-079)
   // ─────────────────────────────────────────────────────────────────────────

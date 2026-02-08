@@ -43,7 +43,9 @@ export type KnownGraftId =
   | "jxl_encoding"
   | "jxl_kill_switch"
   | "image_uploads_enabled"
-  | "photo_gallery";
+  | "photo_gallery"
+  | "reeds_comments"
+  | "thorn_moderation";
 
 /**
  * Record of graft ID to enabled status.

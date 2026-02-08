@@ -6,6 +6,8 @@ import {
 } from "$lib/feature-flags";
 import { emailsMatch, normalizeEmail } from "$lib/utils/user.js";
 import { loadChannelMessages } from "$lib/server/services/messages.js";
+import { getTenantDb } from "$lib/server/services/database.js";
+import { getPendingCount } from "$lib/server/services/reeds.js";
 import type { LayoutServerLoad } from "./$types";
 
 // Demo mode secret key for local development and screenshots
@@ -205,6 +207,19 @@ export const load: LayoutServerLoad = async ({
     ? await loadChannelMessages(platform.env.DB, "arbor").catch(() => [])
     : [];
 
+  // Pending comment count for nav activity indicator (only when reeds graft is on)
+  let pendingCommentCount = 0;
+  if (grafts.reeds_comments && platform?.env?.DB && locals.tenantId) {
+    try {
+      const tenantDb = getTenantDb(platform.env.DB, {
+        tenantId: locals.tenantId,
+      });
+      pendingCommentCount = await getPendingCount(tenantDb);
+    } catch {
+      // Non-critical — continue without count
+    }
+  }
+
   return {
     ...parentData,
     user: locals.user,
@@ -214,5 +229,6 @@ export const load: LayoutServerLoad = async ({
     isDemoMode,
     csrfToken: locals.csrfToken,
     messages,
+    pendingCommentCount,
   };
 };
