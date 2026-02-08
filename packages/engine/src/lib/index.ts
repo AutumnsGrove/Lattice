@@ -46,6 +46,7 @@ export * from "./ui/index";
 
 // Utilities
 export { cn } from "./utils/cn";
+export { seededShuffle } from "./utils/shuffle.js";
 
 // Config presets (colors, fonts)
 export {

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { GlassCard, Button, Input } from '@autumnsgrove/groveengine/ui';
   import { Search, Users, Leaf, TreePine } from 'lucide-svelte';
+  import {
+    CANOPY_CATEGORY_LABELS,
+    type CanopyCategory,
+  } from '@autumnsgrove/groveengine';
   
-  // Local type definitions (avoiding engine import issues during build)
-  type CanopyCategory = 'writing' | 'photography' | 'art' | 'code' | 'music' | 'poetry' | 'gaming' | 'food' | 'travel' | 'science' | 'queer' | 'journal' | 'other';
-  
+  // Types derived from engine - defined locally for Svelte 5 runes compatibility
   interface CanopyWanderer {
     subdomain: string;
     display_name: string;
@@ -25,22 +27,6 @@
     categories: CategoryCount[];
     seed: string;
   }
-  
-  const CANOPY_CATEGORY_LABELS: Record<CanopyCategory, string> = {
-    writing: 'Writing',
-    photography: 'Photography',
-    art: 'Art',
-    code: 'Code',
-    music: 'Music',
-    poetry: 'Poetry',
-    gaming: 'Gaming',
-    food: 'Food',
-    travel: 'Travel',
-    science: 'Science',
-    queer: 'Queer',
-    journal: 'Journal',
-    other: 'Other'
-  };
   
   // Get data from server load
   let { data } = $props<{ data: { canopy: CanopyData } }>();

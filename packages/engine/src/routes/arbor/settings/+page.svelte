@@ -23,6 +23,10 @@
     DEFAULT_ACCENT_COLOR,
     DEFAULT_FONT,
   } from "$lib/config/presets";
+  import {
+    CANOPY_CATEGORIES,
+    CANOPY_CATEGORY_LABELS,
+  } from "$lib/config/canopy-categories";
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
 
@@ -593,22 +597,12 @@
   // CANOPY SETTINGS
   // =========================================================================
 
-  // Canopy categories
-  const CANOPY_CATEGORIES = [
-    { id: 'writing', label: 'Writing' },
-    { id: 'photography', label: 'Photography' },
-    { id: 'art', label: 'Art' },
-    { id: 'code', label: 'Code' },
-    { id: 'music', label: 'Music' },
-    { id: 'poetry', label: 'Poetry' },
-    { id: 'gaming', label: 'Gaming' },
-    { id: 'food', label: 'Food' },
-    { id: 'travel', label: 'Travel' },
-    { id: 'science', label: 'Science' },
-    { id: 'queer', label: 'Queer' },
-    { id: 'journal', label: 'Journal' },
-    { id: 'other', label: 'Other' }
-  ];
+  // Canopy categories - derived from engine config
+  // Transforms the engine's string array + labels record into UI-friendly objects
+  const CANOPY_CATEGORY_OPTIONS = CANOPY_CATEGORIES.map((id) => ({
+    id,
+    label: CANOPY_CATEGORY_LABELS[id],
+  }));
 
   // Canopy settings state
   let canopyVisible = $state(false);
@@ -1220,7 +1214,7 @@
         <div class="canopy-field">
           <label class="field-label">Categories</label>
           <div class="category-grid">
-            {#each CANOPY_CATEGORIES as category}
+            {#each CANOPY_CATEGORY_OPTIONS as category}
               <label class="category-checkbox">
                 <input
                   type="checkbox"

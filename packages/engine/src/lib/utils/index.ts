@@ -5,6 +5,7 @@ export * from "./api";
 export * from "./cn";
 export * from "./csrf";
 export * from "./debounce";
+export * from "./shuffle";
 
 // Gallery - explicit exports to avoid ambiguity
 export {

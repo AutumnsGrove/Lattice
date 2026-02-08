@@ -3,6 +3,8 @@ import type { RequestHandler } from "./$types";
 import {
   CANOPY_CATEGORIES,
   CANOPY_SETTING_KEYS,
+  parseCanopyCategories,
+  seededShuffle,
   type CanopyCategory,
 } from "@autumnsgrove/groveengine";
 
@@ -33,41 +35,6 @@ interface CanopyWanderer {
   categories: CanopyCategory[];
   bloom_count: number;
   forests: string[];
-}
-
-function parseCategories(
-  categoriesJson: string | null | undefined,
-): CanopyCategory[] {
-  if (!categoriesJson) return [];
-  try {
-    const parsed = JSON.parse(categoriesJson);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (c): c is CanopyCategory =>
-        typeof c === "string" &&
-        CANOPY_CATEGORIES.includes(c as CanopyCategory),
-    );
-  } catch {
-    return [];
-  }
-}
-
-function seededShuffle<T>(array: T[], seed: string): T[] {
-  let seedNum = 0;
-  for (let i = 0; i < seed.length; i++) {
-    seedNum = (seedNum << 5) - seedNum + seed.charCodeAt(i);
-    seedNum |= 0;
-  }
-  const a = 1664525;
-  const c = 1013904223;
-  const m = 2 ** 32;
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    seedNum = (a * seedNum + c) % m;
-    const j = Math.abs(seedNum) % (i + 1);
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
 }
 
 /**
@@ -170,14 +137,14 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     }
 
     // Build wanderer objects
-    let wanderers: CanopyWanderer[] = tenants.map((tenant: TenantRow) => {
+    let wanderers: CanopyWanderer[] = tenants.map((tenant) => {
       const tenantSettings = settingsByTenant.get(tenant.id) || {};
       return {
         subdomain: tenant.subdomain,
         display_name: tenant.display_name || tenant.subdomain,
         avatar_url: null, // Placeholder
         banner: tenantSettings.banner || "",
-        categories: parseCategories(tenantSettings.categories),
+        categories: parseCanopyCategories(tenantSettings.categories),
         bloom_count: tenant.post_count,
         forests: [], // Placeholder for future Forests integration
       };
@@ -204,14 +171,14 @@ export const GET: RequestHandler = async ({ url, platform }) => {
     const shuffledWanderers = seededShuffle(wanderers, today);
 
     // Calculate category counts (from all wanderers, not just filtered)
-    const allWanderers: CanopyWanderer[] = tenants.map((tenant: TenantRow) => {
+    const allWanderers: CanopyWanderer[] = tenants.map((tenant) => {
       const tenantSettings = settingsByTenant.get(tenant.id) || {};
       return {
         subdomain: tenant.subdomain,
         display_name: tenant.display_name || tenant.subdomain,
         avatar_url: null,
         banner: tenantSettings.banner || "",
-        categories: parseCategories(tenantSettings.categories),
+        categories: parseCanopyCategories(tenantSettings.categories),
         bloom_count: tenant.post_count,
         forests: [],
       };
