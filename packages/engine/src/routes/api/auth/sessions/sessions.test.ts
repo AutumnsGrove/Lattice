@@ -93,7 +93,9 @@ describe("GET /api/auth/sessions", () => {
     // Assert
     expect(response.status).toBe(503);
     const data = await response.json();
-    expect(data.error).toBe("Auth service unavailable");
+    expect(data.error).toBe(
+      "Service temporarily unavailable. Please try again in a moment.",
+    );
   });
 
   it("should return sessions from GroveAuth", async () => {
@@ -176,7 +178,7 @@ describe("DELETE /api/auth/sessions/:sessionId", () => {
     // Assert
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe("Not authenticated");
+    expect(data.error).toBe("Please sign in to continue.");
   });
 
   it("should return 400 for invalid session ID format", async () => {
@@ -194,7 +196,9 @@ describe("DELETE /api/auth/sessions/:sessionId", () => {
     // Assert
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe("Invalid session ID format");
+    expect(data.error).toBe(
+      "Some of the information provided isn't quite right. Please check and try again.",
+    );
   });
 
   it("should return 400 when sessionId is missing", async () => {
@@ -212,7 +216,9 @@ describe("DELETE /api/auth/sessions/:sessionId", () => {
     // Assert
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe("Session ID required");
+    expect(data.error).toBe(
+      "Some required fields are missing. Please fill them in and try again.",
+    );
   });
 
   it("should revoke session via GroveAuth", async () => {
@@ -290,7 +296,7 @@ describe("POST /api/auth/sessions/revoke-all", () => {
     // Assert
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe("Not authenticated");
+    expect(data.error).toBe("Please sign in to continue.");
   });
 
   it("should revoke all sessions keeping current", async () => {

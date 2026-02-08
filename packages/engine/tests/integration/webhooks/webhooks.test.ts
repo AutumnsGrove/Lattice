@@ -126,7 +126,7 @@ describe("Webhook Endpoint - Configuration Validation", () => {
       const error = err as HttpError;
       expect(error.status).toBe(500);
       expect((error.body as any).message).toContain(
-        "Payment provider not configured",
+        "Payment service is temporarily unavailable",
       );
     }
   });
@@ -143,7 +143,7 @@ describe("Webhook Endpoint - Configuration Validation", () => {
       const error = err as HttpError;
       expect(error.status).toBe(500);
       expect((error.body as any).message).toContain(
-        "Webhook secret not configured",
+        "Service temporarily unavailable",
       );
     }
   });
@@ -159,7 +159,9 @@ describe("Webhook Endpoint - Configuration Validation", () => {
     } catch (err) {
       const error = err as HttpError;
       expect(error.status).toBe(500);
-      expect((error.body as any).message).toContain("Database not configured");
+      expect((error.body as any).message).toContain(
+        "Service temporarily unavailable",
+      );
     }
   });
 });
@@ -188,7 +190,7 @@ describe("Webhook Endpoint - Verification", () => {
       const error = err as HttpError;
       expect(error.status).toBe(400);
       // SvelteKit error() wraps message in { message: string }
-      expect((error.body as any).message).toContain("Invalid signature");
+      expect((error.body as any).message).toContain("couldn't be processed");
     }
   });
 });

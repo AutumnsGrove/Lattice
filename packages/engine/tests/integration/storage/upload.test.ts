@@ -50,6 +50,7 @@ vi.mock("$lib/server/env-validation.js", () => ({
 
 vi.mock("$lib/feature-flags/index.js", () => ({
   isFeatureEnabled: vi.fn(async () => true),
+  isInGreenhouse: vi.fn(async () => false),
 }));
 
 vi.mock("$lib/server/petal/index.js", () => ({
@@ -95,6 +96,7 @@ vi.mock("$lib/utils/upload-validation.js", () => ({
       "image/jxl",
     ].includes(type),
   ),
+  validateFileSignature: vi.fn(() => true),
 }));
 
 // ============================================================================
@@ -185,7 +187,10 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import { isFeatureEnabled } from "$lib/feature-flags/index.js";
 import { scanImage } from "$lib/server/petal/index.js";
-import { isAllowedImageType } from "$lib/utils/upload-validation.js";
+import {
+  isAllowedImageType,
+  validateFileSignature,
+} from "$lib/utils/upload-validation.js";
 import { validateEnv } from "$lib/server/env-validation.js";
 
 // ============================================================================
@@ -199,6 +204,7 @@ const mockBuildRateLimitKey = vi.mocked(buildRateLimitKey);
 const mockIsFeatureEnabled = vi.mocked(isFeatureEnabled);
 const mockScanImage = vi.mocked(scanImage);
 const mockIsAllowedImageType = vi.mocked(isAllowedImageType);
+const mockValidateFileSignature = vi.mocked(validateFileSignature);
 
 beforeEach(() => {
   // Reset all mocks
@@ -250,7 +256,7 @@ describe("Image Upload Endpoint - Authentication", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(401);
-      expect(error.body.message).toContain("Unauthorized");
+      expect(error.body.message).toContain("sign in");
     }
   });
 
@@ -272,7 +278,7 @@ describe("Image Upload Endpoint - Authentication", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(403);
-      expect(error.body.message).toContain("Tenant context required");
+      expect(error.body.message).toContain("went wrong");
     }
   });
 
@@ -291,7 +297,7 @@ describe("Image Upload Endpoint - Authentication", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(403);
-      expect(error.body.message).toContain("Invalid origin");
+      expect(error.body.message).toContain("security reasons");
     }
   });
 });
@@ -314,8 +320,8 @@ describe("Image Upload Endpoint - Feature Flag", () => {
     const data = await response.json();
 
     expect(response.status).toBe(403);
-    expect(data.code).toBe("feature_disabled");
-    expect(data.error).toBe(true);
+    expect(data.error_code).toBe("GROVE-API-047");
+    expect(data.message).toContain("isn't enabled");
   });
 });
 
@@ -357,7 +363,7 @@ describe("Image Upload Endpoint - Rate Limiting", () => {
     const data = await response.json();
 
     expect(response.status).toBe(429);
-    expect(data.error).toBe("rate_limited");
+    expect(data.error_code).toBe("GROVE-API-060");
   });
 });
 
@@ -379,7 +385,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("No file provided");
+      expect(error.body.message).toContain("couldn't be processed");
     }
   });
 
@@ -404,7 +410,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("Invalid file type");
+      expect(error.body.message).toContain("file type");
     }
   });
 
@@ -427,7 +433,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("does not match content type");
+      expect(error.body.message).toContain("file type");
     }
   });
 
@@ -450,7 +456,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("must have an extension");
+      expect(error.body.message).toContain("isn't quite right");
     }
   });
 
@@ -473,7 +479,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("Invalid file name");
+      expect(error.body.message).toContain("file type");
     }
   });
 
@@ -503,7 +509,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("File too large");
+      expect(error.body.message).toContain("too large");
     }
   });
 
@@ -511,6 +517,8 @@ describe("Image Upload Endpoint - File Validation", () => {
     // PNG file type but JPEG magic bytes
     const jpegBytes = new Uint8Array([0xff, 0xd8, 0xff]);
     const formData = createImageFormData("image/png", jpegBytes, "test.png");
+
+    mockValidateFileSignature.mockReturnValueOnce(false);
 
     const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
       url: "https://test-tenant.grove.place/api/images/upload",
@@ -524,7 +532,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("Invalid file signature");
+      expect(error.body.message).toContain("file type");
     }
   });
 
@@ -539,6 +547,8 @@ describe("Image Upload Endpoint - File Validation", () => {
 
     const formData = createImageFormData("image/webp", buffer, "test.webp");
 
+    mockValidateFileSignature.mockReturnValueOnce(false);
+
     const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
       url: "https://test-tenant.grove.place/api/images/upload",
       method: "POST",
@@ -551,7 +561,7 @@ describe("Image Upload Endpoint - File Validation", () => {
     } catch (err) {
       const error = err as { status: number; body: { message: string } };
       expect(error.status).toBe(400);
-      expect(error.body.message).toContain("missing WEBP marker");
+      expect(error.body.message).toContain("file type");
     }
   });
 });
@@ -840,8 +850,8 @@ describe("Image Upload Endpoint - Content Moderation", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.code).toBe("content_rejected");
-    expect(data.error).toBe(true);
+    expect(data.error_code).toBe("GROVE-API-046");
+    expect(data.error).toBe("GROVE-API-046");
   });
 });
 
@@ -913,7 +923,7 @@ describe("Image Upload Endpoint - Abuse Detection", () => {
     const data = await response.json();
 
     expect(response.status).toBe(429);
-    expect(data.code).toBe("upload_restricted");
+    expect(data.error_code).toBe("GROVE-API-062");
   });
 });
 
