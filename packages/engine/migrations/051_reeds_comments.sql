@@ -63,6 +63,10 @@ CREATE TABLE IF NOT EXISTS comment_rate_limits (
   PRIMARY KEY (user_id, limit_type)
 );
 
+-- Composite index for rate limit lookups by period
+CREATE INDEX IF NOT EXISTS idx_rate_limits_lookup
+  ON comment_rate_limits(user_id, limit_type, period_start);
+
 -- Blocked commenters table
 -- Blog authors can block specific users from commenting
 CREATE TABLE IF NOT EXISTS blocked_commenters (

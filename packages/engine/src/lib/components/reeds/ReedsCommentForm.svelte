@@ -61,13 +61,13 @@
       });
 
       if (!response.ok) {
-        const err = await response.json().catch(() => null);
+        const err = (await response.json().catch(() => null)) as { error_description?: string; message?: string } | null;
         throw new Error(
           err?.error_description || err?.message || "Failed to submit comment",
         );
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as { message?: string };
 
       // Clear form
       content = "";

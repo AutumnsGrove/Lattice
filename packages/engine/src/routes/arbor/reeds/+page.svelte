@@ -50,11 +50,11 @@
       );
 
       if (!res.ok) {
-        const err = await res.json().catch(() => null);
+        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
         throw new Error(err?.error_description || "Moderation failed");
       }
 
-      const result = await res.json();
+      const result = (await res.json()) as { message?: string };
       toast.success(result.message || "Done!");
 
       // Remove from pending list

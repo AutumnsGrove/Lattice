@@ -70,7 +70,7 @@
     try {
       const res = await fetch(`/api/reeds/${slug}`);
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as { comments?: Comment[]; total?: number };
         comments = data.comments || [];
         total = data.total || 0;
       }
@@ -105,7 +105,7 @@
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => null);
+        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
         throw new Error(err?.error_description || "Failed to edit comment");
       }
 
@@ -133,7 +133,7 @@
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => null);
+        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
         throw new Error(err?.error_description || "Failed to delete comment");
       }
 

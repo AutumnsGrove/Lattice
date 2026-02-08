@@ -443,6 +443,10 @@ export async function unblockCommenter(
 /**
  * Check and increment comment rate limit for a user.
  * Returns true if the action is allowed, false if rate limited.
+ *
+ * Uses D1 batch for atomicity — the upsert's WHERE clause ensures
+ * the count only increments when below the limit, preventing race
+ * condition bypass from concurrent requests.
  */
 export async function checkCommentRateLimit(
   db: D1Database,
@@ -465,34 +469,39 @@ export async function checkCommentRateLimit(
     periodStart = now.toISOString().split("T")[0];
   }
 
-  // Get current count
-  const row = await db
-    .prepare(
-      "SELECT count FROM comment_rate_limits WHERE user_id = ? AND limit_type = ? AND period_start = ?",
-    )
-    .bind(userId, limitType, periodStart)
-    .first<{ count: number }>();
+  // Atomic increment-if-allowed using D1 batch transaction.
+  // The WHERE clause on DO UPDATE prevents increment when at/over limit,
+  // and meta.changes tells us whether the slot was actually granted.
+  const results = await db.batch([
+    db
+      .prepare(
+        `INSERT INTO comment_rate_limits (user_id, limit_type, period_start, count)
+         VALUES (?, ?, ?, 1)
+         ON CONFLICT (user_id, limit_type) DO UPDATE SET
+           count = CASE
+             WHEN comment_rate_limits.period_start != excluded.period_start THEN 1
+             ELSE comment_rate_limits.count + 1
+           END,
+           period_start = excluded.period_start
+         WHERE comment_rate_limits.period_start != excluded.period_start
+            OR comment_rate_limits.count < ?`,
+      )
+      .bind(userId, limitType, periodStart, limit),
+    db
+      .prepare(
+        `SELECT count FROM comment_rate_limits WHERE user_id = ? AND limit_type = ?`,
+      )
+      .bind(userId, limitType),
+  ]);
 
-  const currentCount = row?.count ?? 0;
+  const writeResult = results[0];
+  const readResult = results[1] as D1Result<{ count: number }>;
+  const currentCount = readResult.results?.[0]?.count ?? 0;
+  const wasIncremented = (writeResult.meta?.changes ?? 0) > 0;
 
-  if (currentCount >= limit) {
+  if (!wasIncremented) {
     return { allowed: false, remaining: 0 };
   }
 
-  // Upsert the counter
-  await db
-    .prepare(
-      `INSERT INTO comment_rate_limits (user_id, limit_type, period_start, count)
-       VALUES (?, ?, ?, 1)
-       ON CONFLICT (user_id, limit_type) DO UPDATE SET
-         count = CASE
-           WHEN period_start = excluded.period_start THEN count + 1
-           ELSE 1
-         END,
-         period_start = excluded.period_start`,
-    )
-    .bind(userId, limitType, periodStart)
-    .run();
-
-  return { allowed: true, remaining: limit - currentCount - 1 };
+  return { allowed: true, remaining: limit - currentCount };
 }

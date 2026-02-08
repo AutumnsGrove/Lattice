@@ -645,9 +645,18 @@ describe("unblockCommenter", () => {
 });
 
 describe("checkCommentRateLimit", () => {
-  it("allows when under limit", async () => {
+  /** Helper: create a mock D1 with batch returning the given write/read results */
+  function createRateLimitMockD1(opts: { changes: number; count: number }) {
     const db = createMockD1();
-    // first() returns null = no existing record = count is 0
+    (db.batch as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { success: true, meta: { changes: opts.changes } },
+      { success: true, results: [{ count: opts.count }] },
+    ]);
+    return db;
+  }
+
+  it("allows when under limit", async () => {
+    const db = createRateLimitMockD1({ changes: 1, count: 1 });
     const result = await checkCommentRateLimit(
       db,
       "user-1",
@@ -660,11 +669,8 @@ describe("checkCommentRateLimit", () => {
     expect(result.remaining).toBe(19);
   });
 
-  it("denies when at limit", async () => {
-    const db = createMockD1();
-    const stmt = (db as unknown as { _mockStatement: { first: ReturnType<typeof vi.fn> } })._mockStatement;
-    stmt.first.mockResolvedValue({ count: 20 });
-
+  it("denies when at limit (no increment)", async () => {
+    const db = createRateLimitMockD1({ changes: 0, count: 20 });
     const result = await checkCommentRateLimit(
       db,
       "user-1",
@@ -678,10 +684,7 @@ describe("checkCommentRateLimit", () => {
   });
 
   it("denies when over limit", async () => {
-    const db = createMockD1();
-    const stmt = (db as unknown as { _mockStatement: { first: ReturnType<typeof vi.fn> } })._mockStatement;
-    stmt.first.mockResolvedValue({ count: 25 });
-
+    const db = createRateLimitMockD1({ changes: 0, count: 25 });
     const result = await checkCommentRateLimit(
       db,
       "user-1",
@@ -693,8 +696,8 @@ describe("checkCommentRateLimit", () => {
     expect(result.allowed).toBe(false);
   });
 
-  it("increments counter when allowed", async () => {
-    const db = createMockD1();
+  it("uses atomic batch for increment and read", async () => {
+    const db = createRateLimitMockD1({ changes: 1, count: 1 });
     await checkCommentRateLimit(
       db,
       "user-1",
@@ -703,15 +706,13 @@ describe("checkCommentRateLimit", () => {
       "day",
     );
 
-    // Should call prepare twice: once for SELECT, once for INSERT/UPSERT
+    // Both UPSERT and SELECT run in a single atomic batch
+    expect(db.batch).toHaveBeenCalledTimes(1);
     expect(db.prepare).toHaveBeenCalledTimes(2);
   });
 
-  it("does not increment when rate limited", async () => {
-    const db = createMockD1();
-    const stmt = (db as unknown as { _mockStatement: { first: ReturnType<typeof vi.fn> } })._mockStatement;
-    stmt.first.mockResolvedValue({ count: 50 });
-
+  it("still uses batch when rate limited (atomic check)", async () => {
+    const db = createRateLimitMockD1({ changes: 0, count: 50 });
     await checkCommentRateLimit(
       db,
       "user-1",
@@ -720,12 +721,13 @@ describe("checkCommentRateLimit", () => {
       "day",
     );
 
-    // Should only call prepare once: just the SELECT
-    expect(db.prepare).toHaveBeenCalledTimes(1);
+    // Batch is always called — the WHERE clause prevents increment atomically
+    expect(db.batch).toHaveBeenCalledTimes(1);
+    expect(db.prepare).toHaveBeenCalledTimes(2);
   });
 
-  it("uses parameterized queries for both SELECT and UPSERT", async () => {
-    const db = createMockD1();
+  it("uses parameterized queries for UPSERT and SELECT", async () => {
+    const db = createRateLimitMockD1({ changes: 1, count: 1 });
     await checkCommentRateLimit(
       db,
       "user-1",
@@ -735,7 +737,7 @@ describe("checkCommentRateLimit", () => {
     );
 
     const calls = (db.prepare as ReturnType<typeof vi.fn>).mock.calls;
-    expect(calls[0][0]).toContain("SELECT count FROM comment_rate_limits");
-    expect(calls[1][0]).toContain("INSERT INTO comment_rate_limits");
+    expect(calls[0][0]).toContain("INSERT INTO comment_rate_limits");
+    expect(calls[1][0]).toContain("SELECT count FROM comment_rate_limits");
   });
 });

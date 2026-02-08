@@ -145,7 +145,7 @@
 			slug={data.post.slug}
 			initialComments={data.comments || []}
 			initialTotal={data.commentTotal || 0}
-			settings={data.commentSettings}
+			settings={data.commentSettings ?? undefined}
 			currentUserId={data.user?.id}
 			isOwner={data.isOwner || false}
 			isLoggedIn={!!data.user}
