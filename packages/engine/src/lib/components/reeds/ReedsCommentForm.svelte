@@ -50,7 +50,7 @@
     submitting = true;
 
     try {
-      const response = await fetch(`/api/blooms/${slug}/comments`, {
+      const response = await fetch(`/api/reeds/${slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

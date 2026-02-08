@@ -330,6 +330,19 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(301, `${newPath}${event.url.search}`);
   }
 
+  // Phase 3: /comments → /reeds (arbor and API routes)
+  if (pathname === "/arbor/comments" || pathname.startsWith("/arbor/comments/")) {
+    const newPath = pathname.replace(/^\/arbor\/comments/, "/arbor/reeds");
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+  if (pathname.startsWith("/api/blooms/") && pathname.includes("/comments")) {
+    const newPath = pathname.replace(
+      /^\/api\/blooms\/([^/]+)\/comments/,
+      "/api/reeds/$1",
+    );
+    throw redirect(301, `${newPath}${event.url.search}`);
+  }
+
   // =========================================================================
   // TURNSTILE VERIFICATION (Shade)
   // =========================================================================

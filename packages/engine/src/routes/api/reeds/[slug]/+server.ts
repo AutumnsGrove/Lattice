@@ -1,6 +1,6 @@
 /**
- * GET  /api/blooms/[slug]/comments — List approved public comments
- * POST /api/blooms/[slug]/comments — Submit a comment or reply
+ * GET  /api/reeds/[slug] — List approved public comments
+ * POST /api/reeds/[slug] — Submit a comment or reply
  */
 
 import { json } from "@sveltejs/kit";
@@ -165,6 +165,24 @@ export const POST: RequestHandler = async ({
       throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
     }
 
+    // Enforce who_can_comment setting
+    if (settings.who_can_comment === "nobody") {
+      throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
+    }
+
+    if (settings.who_can_comment === "grove_members" && !locals.user) {
+      throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+    }
+
+    if (settings.who_can_comment === "paid_only") {
+      const context = locals.context;
+      const plan = context?.type === "tenant" ? context.tenant.plan : null;
+      const isPaid = plan && plan !== "free" && plan !== "seedling";
+      if (!isPaid) {
+        throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
+      }
+    }
+
     // Check if user is blocked
     const blocked = await isUserBlocked(
       platform.env.DB,
@@ -191,11 +209,6 @@ export const POST: RequestHandler = async ({
 
     // Check if public comments are enabled
     if (isPublic && !settings.public_comments_enabled) {
-      throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
-    }
-
-    // Enforce who_can_comment setting
-    if (settings.who_can_comment === "nobody") {
       throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
     }
 

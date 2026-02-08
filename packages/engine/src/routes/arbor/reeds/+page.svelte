@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { GlassCard, Badge, toast } from "$lib/ui";
+  import { GlassCard, Badge, toast, GroveSwap } from "$lib/ui";
   import { MessageSquare, Mail, Check, X, Ban } from "lucide-svelte";
 
   let { data } = $props();
@@ -42,7 +42,7 @@
 
     try {
       const res = await fetch(
-        `/api/blooms/${postSlug}/comments/${commentId}/moderate`,
+        `/api/reeds/${postSlug}/${commentId}/moderate`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -78,10 +78,10 @@
   <header class="page-header">
     <h1 class="page-title">
       <MessageSquare class="title-icon" />
-      Reeds
+      <GroveSwap term="reeds">Comments</GroveSwap>
     </h1>
     <p class="page-subtitle">
-      Comments and replies on your posts
+      <GroveSwap term="reeds" standard="Comments and replies on your posts">Reeds and replies on your blooms</GroveSwap>
     </p>
   </header>
 

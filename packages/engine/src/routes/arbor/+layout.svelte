@@ -129,7 +129,7 @@
       </a>
       <a href="/arbor/reeds" class="nav-item" onclick={closeSidebar} title="Comments">
         <MessageSquare class="nav-icon" />
-        <span class="nav-label" class:hidden={!showExpanded}>Reeds</span>
+        <span class="nav-label" class:hidden={!showExpanded}><GroveSwap term="reeds">Comments</GroveSwap></span>
       </a>
       <a href="/arbor/account" class="nav-item" onclick={closeSidebar} title="Account">
         <CreditCard class="nav-icon" />

@@ -8,7 +8,7 @@
 
   import ReedsComment from "./ReedsComment.svelte";
   import ReedsCommentForm from "./ReedsCommentForm.svelte";
-  import { GlassConfirmDialog, toast } from "$lib/ui";
+  import { GlassConfirmDialog, toast, GroveSwap } from "$lib/ui";
 
   interface Comment {
     id: string;
@@ -68,7 +68,7 @@
   async function refreshComments() {
     loading = true;
     try {
-      const res = await fetch(`/api/blooms/${slug}/comments`);
+      const res = await fetch(`/api/reeds/${slug}`);
       if (res.ok) {
         const data = await res.json();
         comments = data.comments || [];
@@ -98,7 +98,7 @@
 
   async function submitEdit(commentId: string, content: string) {
     try {
-      const res = await fetch(`/api/blooms/${slug}/comments/${commentId}`, {
+      const res = await fetch(`/api/reeds/${slug}/${commentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -128,7 +128,7 @@
 
     deleting = true;
     try {
-      const res = await fetch(`/api/blooms/${slug}/comments/${deletingId}`, {
+      const res = await fetch(`/api/reeds/${slug}/${deletingId}`, {
         method: "DELETE",
       });
 
@@ -167,9 +167,9 @@
     <div class="reeds-header">
       <h2 class="reeds-title">
         {#if total > 0}
-          Comments ({total})
+          <GroveSwap term="reeds">Comments</GroveSwap> ({total})
         {:else}
-          Comments
+          <GroveSwap term="reeds">Comments</GroveSwap>
         {/if}
       </h2>
     </div>

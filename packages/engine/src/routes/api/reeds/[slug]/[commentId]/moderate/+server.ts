@@ -1,5 +1,5 @@
 /**
- * POST /api/blooms/[slug]/comments/[commentId]/moderate — Moderate a comment
+ * POST /api/reeds/[slug]/[commentId]/moderate — Moderate a comment
  *
  * Blog author only. Approve, reject, spam-flag, or block the commenter.
  */

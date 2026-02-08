@@ -1,6 +1,6 @@
 /**
- * PATCH  /api/blooms/[slug]/comments/[commentId] — Edit own comment
- * DELETE /api/blooms/[slug]/comments/[commentId] — Delete own comment
+ * PATCH  /api/reeds/[slug]/[commentId] — Edit own comment
+ * DELETE /api/reeds/[slug]/[commentId] — Delete own comment
  */
 
 import { json } from "@sveltejs/kit";

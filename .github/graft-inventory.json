@@ -2,16 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-  "lastUpdated": "2026-02-01",
-  "lastAuditedBy": "claude/admin-auth-design-overhaul",
+  "lastUpdated": "2026-02-08",
+  "lastAuditedBy": "claude/explore-blog-comments-wPeu7",
   "grafts": {
-    "total": 10,
+    "total": 13,
     "breakdown": {
-      "platform": 8,
+      "platform": 11,
       "greenhouse": 2
     },
     "byType": {
-      "boolean": 9,
+      "boolean": 12,
       "number": 1
     }
   },
@@ -89,12 +89,36 @@
       "description": "Strict validation for try-on detection"
     },
     {
+      "id": "photo_gallery",
+      "name": "Photo Gallery",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "049_photo_gallery_graft.sql",
+      "description": "Upload photos and display a public gallery on your site"
+    },
+    {
+      "id": "reeds_comments",
+      "name": "Reeds Comments",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "051_reeds_comments.sql",
+      "description": "Enable the Reeds comment system on blog posts"
+    },
+    {
       "id": "scribe_mode",
       "name": "Scribe Mode",
       "type": "boolean",
       "greenhouseOnly": true,
       "migration": "040_fireside_scribe_grafts.sql",
       "description": "Voice-to-text transcription in the blog editor"
+    },
+    {
+      "id": "thorn_moderation",
+      "name": "Thorn Text Moderation",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "044_thorn_moderation_log.sql",
+      "description": "AI-powered text content moderation"
     }
   ],
   "migrations": {
