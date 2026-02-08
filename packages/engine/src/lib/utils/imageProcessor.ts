@@ -423,8 +423,10 @@ export async function processImage(
   // Convert HEIC/HEIF to JPEG before processing.
   // Check both extension/MIME and magic bytes — iPad camera apps (e.g., Dazz Cam)
   // sometimes save HEIF data with a .jpeg extension, so extension alone isn't reliable.
+  let alreadyConvertedFromHeic = false;
   if (isHeicFile(file) || (await isHeifByMagicBytes(file))) {
     file = await convertHeicToJpeg(file);
+    alreadyConvertedFromHeic = true;
   }
 
   // For GIFs, return original to preserve animation
@@ -441,17 +443,14 @@ export async function processImage(
     };
   }
 
-  // Try loading the image. If it fails, check magic bytes as a last resort —
-  // the proactive check above should catch most HEIF-as-JPEG cases, but this
-  // handles edge cases where magic byte detection succeeded yet conversion
-  // wasn't triggered (shouldn't happen, but defense in depth).
+  // Try loading the image. If it fails and we haven't already tried HEIC
+  // conversion, attempt it as a last resort — catches rare HEIF variants
+  // whose brand isn't in our magic bytes list.
   let img: HTMLImageElement;
   try {
     img = await loadImage(file);
   } catch (loadError) {
-    // Last-resort rescue: try HEIC conversion for any image type that failed
-    // to load, since some formats masquerade as JPEG/other types
-    if (!isHeicFile(file)) {
+    if (!alreadyConvertedFromHeic) {
       try {
         file = await convertHeicToJpeg(file);
         img = await loadImage(file);
