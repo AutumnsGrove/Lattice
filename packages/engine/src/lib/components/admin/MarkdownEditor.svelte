@@ -1,7 +1,6 @@
 <script>
   import MarkdownIt from "markdown-it";
   import { tick } from "svelte";
-  import { sanitizeMarkdown } from "$lib/utils/sanitize";
 
   // Local instance for admin editor preview
   const editorMd = new MarkdownIt({ html: false, linkify: true });
@@ -181,7 +180,8 @@
   let charCount = $derived(content.length);
   let lineCount = $derived(content.split("\n").length);
   // Use debounced content for expensive operations (markdown rendering)
-  let previewHtml = $derived(debouncedContent ? sanitizeMarkdown(editorMd.render(debouncedContent)) : "");
+  // Note: editorMd has html:false so output is already safe — no sanitization needed for admin preview
+  let previewHtml = $derived(debouncedContent ? editorMd.render(debouncedContent) : "");
   let previewHeaders = $derived(debouncedContent ? extractHeaders(debouncedContent) : []);
 
   let readingTime = $derived.by(() => {
