@@ -88,9 +88,9 @@
 	}: Props = $props();
 
 	const maxWidthClass = {
-		narrow: 'max-w-3xl',
-		default: 'max-w-4xl',
-		wide: 'max-w-5xl'
+		narrow: 'max-w-4xl',
+		default: 'max-w-6xl',
+		wide: 'max-w-7xl'
 	};
 
 	// Mobile menu state
@@ -140,10 +140,10 @@
 	}
 </script>
 
-<header class="sticky top-0 z-grove-sticky py-6 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
+<header class="sticky top-0 z-grove-sticky py-3 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-3">
 			<!-- Sidebar toggle for admin pages (left hamburger) -->
 			{#if showSidebarToggle}
 				<button
