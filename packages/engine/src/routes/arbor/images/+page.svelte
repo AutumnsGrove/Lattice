@@ -1,5 +1,5 @@
 <script>
-  import { Button, GlassCard, Glass } from '$lib/ui';
+  import { Button, GlassCard, Glass, Waystone } from '$lib/ui';
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import {
@@ -702,7 +702,7 @@
 
             {#if upload.status === 'error'}
               <div class="upload-error-row">
-                <p class="upload-error">{upload.error}</p>
+                <p class="upload-error">{upload.error} <Waystone slug="image-upload-failures" label="Troubleshoot upload issues" inline /></p>
                 {#if upload.originalFile}
                   <Button variant="secondary" size="sm" onclick={() => retryUpload(upload)}>Retry</Button>
                 {/if}
