@@ -127,6 +127,9 @@ declare global {
 
         /** CSRF HMAC secret for session-bound tokens (set via wrangler secret put) */
         CSRF_SECRET?: string;
+
+        /** Demo mode secret for arbor panel screenshots (set via wrangler secret put) */
+        DEMO_MODE_SECRET?: string;
       };
       context: {
         waitUntil(promise: Promise<unknown>): void;
