@@ -99,43 +99,4 @@ CREATE TABLE IF NOT EXISTS comment_settings (
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
--- Feature flag for gradual rollout
-INSERT OR IGNORE INTO feature_flags (id, name, flag_type, default_value, enabled, description, created_at, updated_at)
-VALUES (
-  'reeds_comments',
-  'Reeds Comments',
-  'boolean',
-  'false',
-  1,
-  'Enable the Reeds comment system on blog posts',
-  datetime('now'),
-  datetime('now')
-);
-
--- Enable for all paid tiers
-INSERT OR IGNORE INTO flag_rules (id, flag_id, priority, rule_type, rule_value, result_value, enabled, created_at, updated_at)
-VALUES (
-  'reeds_comments_paid',
-  'reeds_comments',
-  1,
-  'tier',
-  '["seedling","sapling","oak","evergreen"]',
-  'true',
-  1,
-  datetime('now'),
-  datetime('now')
-);
-
--- Default deny for free tier
-INSERT OR IGNORE INTO flag_rules (id, flag_id, priority, rule_type, rule_value, result_value, enabled, created_at, updated_at)
-VALUES (
-  'reeds_comments_default',
-  'reeds_comments',
-  10,
-  'always',
-  '{}',
-  'false',
-  1,
-  datetime('now'),
-  datetime('now')
-);
+-- Feature flag: handled by 052_reeds_comments_graft.sql (greenhouse-only graft)

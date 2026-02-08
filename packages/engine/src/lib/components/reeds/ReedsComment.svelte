@@ -106,6 +106,7 @@
     {#if isDeleted}
       <p class="deleted-text">[This comment has been removed]</p>
     {:else if comment.content_html}
+      <!-- Safe: content_html is produced by renderMarkdown() → sanitizeMarkdown() (DOMPurify) -->
       {@html comment.content_html}
     {:else}
       <p>{comment.content}</p>

@@ -80,7 +80,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
       tenantId: locals.tenantId,
     });
 
-    // Get the post ID from slug
+    // Get the post ID from slug (must resolve before comment queries that need post.id)
     const post = await tenantDb.queryOne<{ id: string }>(
       "posts",
       "slug = ?",
@@ -91,6 +91,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
       throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
     }
 
+    // Parallel: all three queries depend on post.id which is now resolved
     const [comments, commentCount, settings] = await Promise.all([
       getApprovedComments(tenantDb, post.id),
       getCommentCount(tenantDb, post.id),
