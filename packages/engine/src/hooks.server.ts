@@ -335,6 +335,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     const newPath = pathname.replace(/^\/arbor\/comments/, "/arbor/reeds");
     throw redirect(301, `${newPath}${event.url.search}`);
   }
+  // Redirect old API comment routes to /api/reeds/. The regex has no $ anchor,
+  // so nested paths like /api/blooms/slug/comments/123/moderate are preserved:
+  //   /api/blooms/my-post/comments       → /api/reeds/my-post
+  //   /api/blooms/my-post/comments/abc   → /api/reeds/my-post/abc
+  //   /api/blooms/my-post/comments/abc/moderate → /api/reeds/my-post/abc/moderate
   if (pathname.startsWith("/api/blooms/") && pathname.includes("/comments")) {
     const newPath = pathname.replace(
       /^\/api\/blooms\/([^/]+)\/comments/,

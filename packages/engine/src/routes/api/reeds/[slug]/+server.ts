@@ -13,6 +13,7 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { isPaidTier } from "$lib/config/tiers.js";
 import {
   getApprovedComments,
   getCommentSettings,
@@ -177,8 +178,7 @@ export const POST: RequestHandler = async ({
     if (settings.who_can_comment === "paid_only") {
       const context = locals.context;
       const plan = context?.type === "tenant" ? context.tenant.plan : null;
-      const isPaid = plan && plan !== "free" && plan !== "seedling";
-      if (!isPaid) {
+      if (!plan || !isPaidTier(plan)) {
         throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
       }
     }

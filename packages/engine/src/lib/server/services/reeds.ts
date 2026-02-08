@@ -446,7 +446,11 @@ export async function unblockCommenter(
  *
  * Uses D1 batch for atomicity — the upsert's WHERE clause ensures
  * the count only increments when below the limit, preventing race
- * condition bypass from concurrent requests.
+ * condition bypass from concurrent requests. D1 is single-writer
+ * SQLite, so batched writes are serialized.
+ *
+ * This is the secondary (durable, per-tier) limit. The primary
+ * burst defense is the KV rate limiter in the API route handler.
  */
 export async function checkCommentRateLimit(
   db: D1Database,
