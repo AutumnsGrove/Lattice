@@ -348,13 +348,15 @@ packages/engine/src/lib/ui/components/content/hum/
 
 We should **not** hotlink provider CDNs directly. Album art URLs from Apple/Spotify could change, get rate-limited, or leak referrer data.
 
-**Strategy:** On first resolve, fetch the artwork and store it in **R2** (or cache in KV as a base64 blob for smaller images). Serve through the existing CDN domain (`cdn.grove.place`).
+**Strategy:** On first resolve, the **server-side** `/api/hum/resolve` endpoint fetches the artwork (never the browser — avoids CORS issues with provider CDNs) and stores it as a base64 blob in **KV** alongside the metadata.
 
-- **R2 key:** `hum/{sha256(artworkSourceUrl)}.jpg`
-- **Dimensions:** Store at 300×300 (card display) and 600×600 (OG image generation)
-- **Fallback:** If R2 storage fails, fall back to direct URL with a `referrerpolicy="no-referrer"` attribute
+- **KV key:** `hum:art:{sha256(artworkSourceUrl)}`
+- **Dimensions:** Fetch at 300×300 for card display (swap `100x100bb` → `300x300bb` in Apple URLs; use thumbnail sizes from other providers)
+- **TTL:** 7 days, matching metadata cache
+- **Size guard:** Only cache artwork under 100KB as base64; larger images fall back to direct URL with `referrerpolicy="no-referrer"`
+- **Fallback:** If KV write fails or image is too large, serve the original URL proxied through the API endpoint
 
-This also means artwork survives even if the provider takes the album down — a small but meaningful detail for a platform that values permanence.
+Can migrate to R2 later if permanence or storage costs become a concern — but KV keeps Phase 1 simple.
 
 ---
 
@@ -486,7 +488,7 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 
 ## Open Questions
 
-1. **Artwork caching strategy** — R2 (permanent, survives provider takedowns) vs. KV (simpler, TTL-based, less storage)? R2 feels right for permanence, but KV is simpler to start. Could start with KV and migrate to R2 later.
+1. ~~**Artwork caching strategy**~~ — **Decided: KV.** Base64 for small images (< 100KB), 7-day TTL matching metadata cache. Simpler to reason about, no R2 plumbing needed for v1. Can migrate to R2 later if permanence or storage costs become a concern.
 
 2. **Cross-platform links UX** — If Odesli gives us the same song on 5 platforms, do we show all 5 as tiny icons below the card? Or is that too busy? Maybe just the source provider + "also available on..." hover/expand?
 
