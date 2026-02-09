@@ -225,22 +225,23 @@ export const PUT: RequestHandler = async ({
     // If publishing a draft, enforce published post limit (isolated — DB failures fail open)
     if (data.status === "published") {
       try {
-        // Fetch plan, current post status, and published count in parallel.
-        // Getting the count upfront avoids a second query and reduces the
-        // TOCTOU window (D1 has no transactions, so soft limits are by design).
-        const [tenant, postInfo] = await Promise.all([
+        // Fetch plan, current post status, and published count in parallel
+        // (D1 has no transactions, so soft limits with minimal TOCTOU are by design)
+        const [tenant, currentPost, publishedCount] = await Promise.all([
           platform.env.DB
             .prepare("SELECT plan FROM tenants WHERE id = ?")
             .bind(tenantId)
             .first<{ plan: string }>(),
           platform.env.DB
+            .prepare("SELECT status FROM posts WHERE tenant_id = ? AND slug = ?")
+            .bind(tenantId, slug)
+            .first<{ status: string }>(),
+          platform.env.DB
             .prepare(
-              `SELECT
-                (SELECT status FROM posts WHERE tenant_id = ? AND slug = ?) as current_status,
-                (SELECT COUNT(*) FROM posts WHERE tenant_id = ? AND status = 'published') as published_count`,
+              "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
             )
-            .bind(tenantId, slug, tenantId)
-            .first<{ current_status: string | null; published_count: number }>(),
+            .bind(tenantId)
+            .first<{ count: number }>(),
         ]);
 
         const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
@@ -251,17 +252,19 @@ export const PUT: RequestHandler = async ({
         // Only enforce limit on draft→published transitions
         if (
           tierConfig.limits.posts !== Infinity &&
-          postInfo &&
-          postInfo.current_status !== "published" &&
-          postInfo.published_count >= tierConfig.limits.posts
+          currentPost &&
+          currentPost.status !== "published" &&
+          publishedCount &&
+          publishedCount.count >= tierConfig.limits.posts
         ) {
           throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
         }
       } catch (err) {
         // Re-throw intentional HTTP errors (limit violations)
         if (isHttpError(err)) throw err;
-        // DB failure on tier lookup — fail open, log, and allow the write
-        console.error("[Blooms] Publish limit check failed, allowing write:", err);
+        // [FAIL_OPEN] DB failure on tier/limit check — allow the write through.
+        // Monitor this log line to detect D1 outages bypassing limits.
+        console.error("[Blooms] [FAIL_OPEN] Publish limit check failed:", err);
       }
     }
 

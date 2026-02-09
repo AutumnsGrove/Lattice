@@ -214,8 +214,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     } catch (err) {
       // Re-throw intentional HTTP errors (limit violations, blog gating)
       if (isHttpError(err)) throw err;
-      // DB failure on tier lookup — fail open, log, and allow the write
-      console.error("[Blooms] Tier limit check failed, allowing write:", err);
+      // [FAIL_OPEN] DB failure on tier/limit check — allow the write through.
+      // Monitor this log line to detect D1 outages bypassing limits.
+      console.error("[Blooms] [FAIL_OPEN] Tier limit check failed:", err);
     }
 
     // Validate required fields

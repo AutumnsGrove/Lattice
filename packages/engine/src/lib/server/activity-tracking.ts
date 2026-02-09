@@ -16,18 +16,23 @@
 /**
  * Update the last_activity_at timestamp for a tenant.
  *
- * This is a fire-and-forget operation — it runs asynchronously and
- * never throws. Safe to call without awaiting.
+ * Returns a promise that never rejects — errors are caught and logged.
+ * Callers can fire-and-forget (no await) or optionally await if needed.
  *
  * @param db - D1 database binding
  * @param tenantId - The tenant to update
  */
-export function updateLastActivity(db: D1Database, tenantId: string): void {
-  db.prepare(
-    "UPDATE tenants SET last_activity_at = unixepoch() WHERE id = ?",
-  )
+export function updateLastActivity(
+  db: D1Database,
+  tenantId: string,
+): Promise<void> {
+  return db
+    .prepare(
+      "UPDATE tenants SET last_activity_at = unixepoch() WHERE id = ?",
+    )
     .bind(tenantId)
     .run()
+    .then(() => {})
     .catch((err) => {
       console.error("[Activity] Failed to update last_activity_at:", err);
     });
