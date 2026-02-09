@@ -33,9 +33,9 @@
 	// ============================================================================
 
 	let billingPeriod = $state<BillingPeriod>('monthly');
-	// Auto-select first available tier
+	// Auto-select first available paid tier (skip free so users see it as an explicit choice)
 	let selectedPlan = $state<string | null>(
-		plans.find((p: PricingTier) => p.status === 'available')?.key ?? null
+		plans.find((p: PricingTier) => p.status === 'available' && p.key !== 'free')?.key ?? null
 	);
 
 	// Submission state
@@ -45,15 +45,21 @@
 	// Map billing period to database format (annual → yearly)
 	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
 
+	// Check if the selected plan is free (Wanderer)
+	let isFreePlan = $derived(selectedPlan === 'free');
+
 	// Submit plan selection via JSON API
 	async function savePlan() {
 		if (!selectedPlan || isSubmitting) return;
 		isSubmitting = true;
 		submitError = null;
 
+		// Free plan skips checkout — goes directly to success
+		const redirect = isFreePlan ? '/success' : '/checkout';
+
 		const error = await submitFormAndGo('/api/select-plan', {
 			plan: selectedPlan,
-			billingCycle: billingCycleForDb,
+			billingCycle: isFreePlan ? 'monthly' : billingCycleForDb,
 		});
 
 		if (error) submitError = error;
@@ -149,7 +155,7 @@
 			Choose how you'd like to grow
 		</h1>
 		<p class="text-foreground-muted max-w-md mx-auto">
-			Every plan includes a 14-day free trial. Your words are always yours.
+			Start writing for free, or pick a plan that grows with you.
 		</p>
 	</header>
 
@@ -170,6 +176,7 @@
 			{@const isComingSoon = tier.status === 'coming_soon'}
 			{@const isFuture = tier.status === 'future'}
 			{@const isSelected = selectedPlan === tier.key}
+			{@const isFree = tier.key === 'free'}
 			{@const displayName = groveModeStore.current ? tier.name : (tier.standardName || tier.name)}
 			{@const displayFeatures = groveModeStore.current ? tier.featureStrings : (tier.standardFeatureStrings || tier.featureStrings)}
 
@@ -206,7 +213,7 @@
 					role="radio"
 					aria-checked={isSelected}
 					aria-disabled={!isAvailable}
-					aria-label="{displayName} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
+					aria-label="{displayName} plan{isFree ? ', free' : `, $${getMonthlyEquivalentPrice(tier, billingPeriod)} per month`}{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
 				>
 					<GlassCard
 						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
@@ -239,14 +246,23 @@
 
 								<!-- Price -->
 								<div class="text-right flex-shrink-0">
-									<div class="flex items-baseline gap-1">
-										<span class="text-2xl font-semibold text-foreground">${getMonthlyEquivalentPrice(tier, billingPeriod)}</span>
-										<span class="text-sm text-foreground-muted">/mo</span>
-									</div>
-									{#if billingPeriod === 'annual'}
+									{#if isFree}
+										<div class="flex items-baseline gap-1">
+											<span class="text-2xl font-semibold text-foreground">Free</span>
+										</div>
 										<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-											Save ${getYearlySavingsAmount(tier)}/year
+											No credit card
 										</p>
+									{:else}
+										<div class="flex items-baseline gap-1">
+											<span class="text-2xl font-semibold text-foreground">${getMonthlyEquivalentPrice(tier, billingPeriod)}</span>
+											<span class="text-sm text-foreground-muted">/mo</span>
+										</div>
+										{#if billingPeriod === 'annual'}
+											<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+												Save ${getYearlySavingsAmount(tier)}/year
+											</p>
+										{/if}
 									{/if}
 								</div>
 							</div>
@@ -291,13 +307,6 @@
 		{/each}
 	</div>
 
-	<!-- Free tier note -->
-	<div class="text-center py-2">
-		<p class="text-sm text-foreground-subtle">
-			A free tier is on its way — we'll share more when it's ready.
-		</p>
-	</div>
-
 	<!-- Fine print -->
 	<div class="text-center py-2 space-y-1">
 		<p class="text-xs text-foreground-subtle">
@@ -324,15 +333,24 @@
 				Processing...
 			{:else if selectedPlan}
 				{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
-				Continue with {groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}
-
+				{#if isFreePlan}
+					Start writing for free
+				{:else}
+					Continue with {groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}
+				{/if}
 			{:else}
 				Select a plan to continue
 			{/if}
 		</button>
-		<p class="text-xs text-foreground-subtle text-center">
-			You won't be charged until after your 14-day trial. Cancel anytime.
-		</p>
+		{#if isFreePlan}
+			<p class="text-xs text-foreground-subtle text-center">
+				No credit card required. Upgrade anytime.
+			</p>
+		{:else}
+			<p class="text-xs text-foreground-subtle text-center">
+				You won't be charged until after your 14-day trial. Cancel anytime.
+			</p>
+		{/if}
 	</div>
 
 	<!-- Full comparison link -->

@@ -19,6 +19,11 @@ export const load: PageServerLoad = async ({ parent }) => {
 		redirect(302, '/plans');
 	}
 
+	// Free plan (Wanderer) doesn't need checkout — redirect to success
+	if (onboarding?.planSelected === 'free') {
+		redirect(302, '/success');
+	}
+
 	// Redirect if already paid
 	if (onboarding?.paymentCompleted) {
 		redirect(302, '/success');

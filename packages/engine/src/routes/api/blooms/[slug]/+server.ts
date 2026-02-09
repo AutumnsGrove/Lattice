@@ -6,8 +6,10 @@ import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
+import { updateLastActivity } from "$lib/server/activity-tracking.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { TIERS, type TierKey, isValidTier } from "$lib/config/tiers.js";
 
 /**
  * Invalidate blog post caches after create/update/delete
@@ -220,6 +222,43 @@ export const PUT: RequestHandler = async ({
 
     const data = sanitizeObject(await request.json()) as PostInput;
 
+    // If publishing a draft, enforce published post limit
+    if (data.status === "published") {
+      const tenant = await platform.env.DB
+        .prepare("SELECT plan FROM tenants WHERE id = ?")
+        .bind(tenantId)
+        .first<{ plan: string }>();
+
+      const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
+        ? tenant.plan
+        : "seedling";
+      const tierConfig = TIERS[tierKey];
+
+      if (tierConfig.limits.posts !== Infinity) {
+        // Check if the post being updated is already published (not a status change)
+        const currentPost = await platform.env.DB
+          .prepare(
+            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
+          )
+          .bind(tenantId, slug)
+          .first<{ status: string }>();
+
+        // Only enforce limit if this is a draft→published transition
+        if (currentPost && currentPost.status !== "published") {
+          const publishedCount = await platform.env.DB
+            .prepare(
+              "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+            )
+            .bind(tenantId)
+            .first<{ count: number }>();
+
+          if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+            throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+          }
+        }
+      }
+    }
+
     // Validate required fields
     if (!data.title || !data.markdown_content) {
       throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
@@ -313,6 +352,9 @@ export const PUT: RequestHandler = async ({
 
     // Update using TenantDb (automatically adds tenant_id to WHERE clause)
     await tenantDb.update("posts", updateData, "slug = ?", [slug]);
+
+    // Track activity for inactivity reclamation
+    updateLastActivity(platform.env.DB, tenantId);
 
     // Invalidate caches so readers see the updated content
     await invalidatePostCaches(platform.env.CACHE_KV, tenantId, slug);

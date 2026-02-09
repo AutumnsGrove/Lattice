@@ -5,7 +5,7 @@
  * This file consolidates feature limits, rate limits, pricing, and display info.
  *
  * Tier progression:
- * - free: Meadow-only (no blog) - coming soon
+ * - free: Wanderer Plan — 5 posts, 50 MB, no credit card
  * - seedling: $8/mo entry tier
  * - sapling: $12/mo mid tier - coming soon
  * - oak: $25/mo with BYOD domain - future
@@ -19,7 +19,13 @@
 export type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 export type PaidTierKey = Exclude<TierKey, "free">;
 export type TierStatus = "available" | "coming_soon" | "future" | "deprecated";
-export type TierIcon = "user" | "sprout" | "tree-deciduous" | "trees" | "crown";
+export type TierIcon =
+  | "user"
+  | "footprints"
+  | "sprout"
+  | "tree-deciduous"
+  | "trees"
+  | "crown";
 
 // =============================================================================
 // INTERFACES
@@ -27,6 +33,7 @@ export type TierIcon = "user" | "sprout" | "tree-deciduous" | "trees" | "crown";
 
 export interface TierLimits {
   posts: number; // Infinity = unlimited, 0 = none
+  drafts: number; // Infinity = unlimited, max drafts allowed
   storage: number; // bytes (0 = none)
   storageDisplay: string; // Human-readable storage (e.g., "1 GB")
   themes: number;
@@ -115,18 +122,19 @@ export const TIERS: Record<TierKey, TierConfig> = {
   free: {
     id: "free",
     order: 0,
-    status: "coming_soon",
+    status: "available",
     limits: {
-      posts: 0,
-      storage: 0,
-      storageDisplay: "0 MB",
-      themes: 0,
+      posts: 5,
+      drafts: 100,
+      storage: 50 * 1024 * 1024, // 50 MB
+      storageDisplay: "50 MB",
+      themes: 1,
       navPages: 0,
       commentsPerWeek: 20,
       aiWordsPerMonth: 0,
     },
     features: {
-      blog: false,
+      blog: true,
       meadow: true,
       emailForwarding: false,
       fullEmail: false,
@@ -140,9 +148,9 @@ export const TIERS: Record<TierKey, TierConfig> = {
       analytics: false,
     },
     rateLimits: {
-      requests: { limit: 50, windowSeconds: 60 },
+      requests: { limit: 60, windowSeconds: 60 },
       writes: { limit: 20, windowSeconds: 3600 },
-      uploads: { limit: 0, windowSeconds: 86400 },
+      uploads: { limit: 5, windowSeconds: 86400 },
       ai: { limit: 0, windowSeconds: 86400 },
     },
     pricing: {
@@ -152,23 +160,26 @@ export const TIERS: Record<TierKey, TierConfig> = {
       yearlyPriceCents: 0,
     },
     display: {
-      name: "Free",
-      tagline: "Just visiting",
-      description: "Hang out in Meadow, follow gardens, react and comment.",
-      icon: "user",
-      bestFor: "Readers",
+      name: "Wanderer",
+      tagline: "Just passing through?",
+      description:
+        "A quiet clearing to try your hand at writing. No commitment, no credit card.",
+      icon: "footprints",
+      bestFor: "The curious",
       featureStrings: [
-        "Meadow access",
-        "20 comments/week",
-        "Follow gardens",
-        "React to blooms",
+        "5 blooms",
+        "50 MB storage",
+        "Your own grove.place address",
+        "RSS feed",
+        "No credit card needed",
       ],
       standardName: "Free",
       standardFeatureStrings: [
-        "Community feed access",
-        "20 comments/week",
-        "Follow blogs",
-        "React to posts",
+        "5 posts",
+        "50 MB storage",
+        "Your own grove.place address",
+        "RSS feed",
+        "No credit card needed",
       ],
     },
     support: { level: "help_center", displayString: "Help Center" },
@@ -180,6 +191,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     status: "available",
     limits: {
       posts: 50,
+      drafts: Infinity,
       storage: 1 * 1024 * 1024 * 1024, // 1 GB
       storageDisplay: "1 GB",
       themes: 3,
@@ -247,6 +259,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     status: "coming_soon",
     limits: {
       posts: 250,
+      drafts: Infinity,
       storage: 5 * 1024 * 1024 * 1024, // 5 GB
       storageDisplay: "5 GB",
       themes: 10,
@@ -315,6 +328,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     status: "future",
     limits: {
       posts: Infinity,
+      drafts: Infinity,
       storage: 20 * 1024 * 1024 * 1024, // 20 GB
       storageDisplay: "20 GB",
       themes: Infinity,
@@ -383,6 +397,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     status: "future",
     limits: {
       posts: Infinity,
+      drafts: Infinity,
       storage: 100 * 1024 * 1024 * 1024, // 100 GB
       storageDisplay: "100 GB",
       themes: Infinity,
@@ -460,7 +475,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
  *
  * Seedling is the default because:
  * - It's the entry-level paid tier with reasonable limits
- * - Free tier doesn't have blog access, so can't be a safe default
+ * - Free tier (Wanderer) has tight limits (5 posts, 50 MB), so defaulting
+ *   to it could unexpectedly restrict users with unknown/invalid tier data
  * - It provides a good baseline without being overly permissive
  */
 export const DEFAULT_TIER: TierKey = "seedling";

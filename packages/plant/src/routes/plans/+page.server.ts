@@ -4,20 +4,22 @@ import {
   transformAllTiers,
   type PricingTier,
 } from "@autumnsgrove/groveengine/grafts/pricing";
-import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/groveengine/config";
+import {
+  TIER_ORDER,
+  type TierKey,
+  isValidTier,
+} from "@autumnsgrove/groveengine/config";
 
 // Valid billing cycles for database storage (maps from graft's "annual" to "yearly")
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
 type BillingCycle = (typeof VALID_BILLING_CYCLES)[number];
 
-// Transform tiers once at module load (paid tiers only for Plant onboarding)
-const tiers = transformAllTiers({
-  excludeTiers: ["free"],
-});
+// Transform all tiers including free (Wanderer) for onboarding
+const tiers = transformAllTiers();
 
 // Helper functions for validation
-function isValidPlanId(id: string): id is PaidTierKey {
-  return PAID_TIERS.includes(id as PaidTierKey);
+function isValidPlanId(id: string): id is TierKey {
+  return isValidTier(id);
 }
 
 function isPlanAvailable(id: string): boolean {

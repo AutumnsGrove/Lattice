@@ -291,6 +291,42 @@ export const API_ERRORS = {
       "Blocked user attempted to submit comment on tenant.",
   },
 
+  POST_LIMIT_REACHED: {
+    code: "GROVE-API-054",
+    category: "user" as const,
+    userMessage:
+      "You've filled your garden. Upgrade your plan to keep writing.",
+    adminMessage:
+      "Published post count has reached tier limit. Upgrade required to create more.",
+  },
+
+  DRAFT_LIMIT_REACHED: {
+    code: "GROVE-API-055",
+    category: "user" as const,
+    userMessage:
+      "You've reached your draft limit. Publish or delete some drafts to make room.",
+    adminMessage:
+      "Draft count has reached tier limit (100 for free tier).",
+  },
+
+  BLOG_NOT_AVAILABLE: {
+    code: "GROVE-API-056",
+    category: "user" as const,
+    userMessage:
+      "Blog features aren't available on your current plan.",
+    adminMessage:
+      "User attempted blog operation but tier does not include blog access.",
+  },
+
+  FREE_ACCOUNT_IP_LIMIT: {
+    code: "GROVE-API-057",
+    category: "user" as const,
+    userMessage:
+      "Too many free accounts have been created recently. Please try again later.",
+    adminMessage:
+      "IP-based free account creation limit exceeded (3 per IP per 30 days).",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // Rate Limiting & Security (060-079)
   // ─────────────────────────────────────────────────────────────────────────

@@ -10,8 +10,10 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
+import { updateLastActivity } from "$lib/server/activity-tracking.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { TIERS, type TierKey, isValidTier } from "$lib/config/tiers.js";
 
 interface PostRecord {
   id?: string;
@@ -162,7 +164,54 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       locals.user,
     );
 
+    // Look up tenant plan for limit enforcement
+    const tenant = await platform.env.DB
+      .prepare("SELECT plan FROM tenants WHERE id = ?")
+      .bind(tenantId)
+      .first<{ plan: string }>();
+
+    const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
+      ? tenant.plan
+      : "seedling";
+    const tierConfig = TIERS[tierKey];
+
+    // Check blog access
+    if (!tierConfig.features.blog) {
+      throwGroveError(403, API_ERRORS.BLOG_NOT_AVAILABLE, "API");
+    }
+
     const data = sanitizeObject(await request.json()) as PostInput;
+
+    // Enforce post limit (published posts only) and draft limit
+    const isDraft = !data.status || data.status === "draft";
+
+    if (isDraft && tierConfig.limits.drafts !== Infinity) {
+      // Count existing drafts
+      const draftCount = await platform.env.DB
+        .prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
+        )
+        .bind(tenantId)
+        .first<{ count: number }>();
+
+      if (draftCount && draftCount.count >= tierConfig.limits.drafts) {
+        throwGroveError(403, API_ERRORS.DRAFT_LIMIT_REACHED, "API");
+      }
+    }
+
+    if (!isDraft && tierConfig.limits.posts !== Infinity) {
+      // Count published posts only (drafts don't count toward the limit)
+      const publishedCount = await platform.env.DB
+        .prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+        )
+        .bind(tenantId)
+        .first<{ count: number }>();
+
+      if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+        throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+      }
+    }
 
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
@@ -261,6 +310,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       fireside_assisted: data.fireside_assisted || 0,
       featured_image: data.featured_image || null,
     });
+
+    // Track activity for inactivity reclamation
+    updateLastActivity(platform.env.DB, tenantId);
 
     // Invalidate post list cache so the new post appears in listings
     if (kv) {

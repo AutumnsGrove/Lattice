@@ -15,11 +15,12 @@ import {
 } from './config.js';
 
 describe('TIER_RATE_LIMITS', () => {
-	const tiers: SubscriptionTier[] = ['seedling', 'sapling', 'oak', 'evergreen'];
+	const allTiers: SubscriptionTier[] = ['free', 'seedling', 'sapling', 'oak', 'evergreen'];
+	const paidTiers: SubscriptionTier[] = ['seedling', 'sapling', 'oak', 'evergreen'];
 	const categories: RateLimitCategory[] = ['requests', 'writes', 'uploads', 'ai'];
 
 	it('all tiers have all categories', () => {
-		for (const tier of tiers) {
+		for (const tier of allTiers) {
 			for (const category of categories) {
 				expect(TIER_RATE_LIMITS[tier][category]).toBeDefined();
 			}
@@ -27,12 +28,11 @@ describe('TIER_RATE_LIMITS', () => {
 	});
 
 	it('all categories have limit and windowSeconds', () => {
-		for (const tier of tiers) {
+		for (const tier of allTiers) {
 			for (const category of categories) {
 				const config = TIER_RATE_LIMITS[tier][category];
 				expect(config.limit).toBeTypeOf('number');
 				expect(config.windowSeconds).toBeTypeOf('number');
-				expect(config.limit).toBeGreaterThan(0);
 				expect(config.windowSeconds).toBeGreaterThan(0);
 			}
 		}
@@ -40,6 +40,9 @@ describe('TIER_RATE_LIMITS', () => {
 
 	it('higher tiers have higher or equal limits', () => {
 		for (const category of categories) {
+			expect(TIER_RATE_LIMITS.seedling[category].limit).toBeGreaterThanOrEqual(
+				TIER_RATE_LIMITS.free[category].limit
+			);
 			expect(TIER_RATE_LIMITS.sapling[category].limit).toBeGreaterThanOrEqual(
 				TIER_RATE_LIMITS.seedling[category].limit
 			);
@@ -50,6 +53,14 @@ describe('TIER_RATE_LIMITS', () => {
 				TIER_RATE_LIMITS.oak[category].limit
 			);
 		}
+	});
+
+	it('free tier has expected rate limits', () => {
+		expect(TIER_RATE_LIMITS.free.requests.limit).toBe(60);
+		expect(TIER_RATE_LIMITS.free.requests.windowSeconds).toBe(60);
+		expect(TIER_RATE_LIMITS.free.writes.limit).toBe(20);
+		expect(TIER_RATE_LIMITS.free.uploads.limit).toBe(5);
+		expect(TIER_RATE_LIMITS.free.ai.limit).toBe(0);
 	});
 
 	it('seedling has expected default values', () => {
@@ -119,7 +130,8 @@ describe('getTierLimit', () => {
 });
 
 describe('isValidTier', () => {
-	it('returns true for valid tiers', () => {
+	it('returns true for valid tiers including free', () => {
+		expect(isValidTier('free')).toBe(true);
 		expect(isValidTier('seedling')).toBe(true);
 		expect(isValidTier('sapling')).toBe(true);
 		expect(isValidTier('oak')).toBe(true);
