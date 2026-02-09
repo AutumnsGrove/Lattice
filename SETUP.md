@@ -201,7 +201,7 @@ GroveEngine/
 │   ├── post-migrator/    # Storage migration Worker
 │   ├── vineyard/         # Component showcase library
 │   ├── workers/          # Scheduled workers
-│   └── zig-core/         # Zig WASM modules
+
 ├── docs/                 # Specs, patterns, guides
 ├── AgentUsage/           # Agent workflow documentation
 ├── AGENT.md              # Agent instructions

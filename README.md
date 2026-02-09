@@ -59,7 +59,7 @@ This isn't just a SaaS — it's about helping people have their own space online
 | [post-migrator](packages/post-migrator) | Hot/warm/cold storage migration (cron-triggered) |
 | [@autumnsgrove/vineyard](packages/vineyard) | Component showcase library for `/vineyard` routes |
 | [workers](packages/workers) | Scheduled workers (health monitoring, timeline sync, webhook cleanup) |
-| [@autumnsgrove/zig-core](packages/zig-core) | High-performance WASM modules (validation, search) powered by Zig |
+
 
 ### Live Sites
 
@@ -178,7 +178,7 @@ See [SETUP.md](SETUP.md) for the full development guide, including Cloudflare bi
 - **AI:** DeepSeek via OpenRouter (Forage domain search)
 - **Testing:** Vitest, Testing Library, happy-dom
 - **Build:** Vite, pnpm workspaces
-- **Performance:** Zig + WASM (zig-core)
+
 
 ---
 
