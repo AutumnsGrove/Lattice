@@ -28,7 +28,7 @@
 		if (categoryName === 'Patterns') {
 			return 'p-6 rounded-xl bg-amber-50 dark:bg-amber-950/25 shadow-sm border border-amber-200 dark:border-amber-800/30';
 		}
-		return 'p-6 rounded-xl bg-white dark:bg-bark-800 shadow-sm border border-amber-200 dark:border-bark-700';
+		return 'p-6 rounded-xl bg-white dark:bg-cream-100 shadow-sm border border-amber-200 dark:border-cream-200';
 	}
 
 	interface SubComponent {
@@ -936,7 +936,7 @@
 			case 'applied': return { text: 'Applied', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
 			case 'building': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
 			case 'being implemented': return { text: 'Building', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
-			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-bark-800 dark:text-slate-400' };
+			case 'planned': return { text: 'Planned', class: 'bg-slate-100 text-slate-600 dark:bg-cream-200 dark:text-slate-400' };
 			default: return { text: status, class: 'bg-slate-100 text-slate-600' };
 		}
 	}
@@ -973,11 +973,11 @@
 	accentColor="f59e0b"
 />
 
-<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-bark-900">
+<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-cream-50">
 	<Header user={data.user} />
 
 	<!-- Hero -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-bark-800 dark:via-bark-900 dark:to-bark-950">
+	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-bark-50">
 		<!-- Lanterns -->
 		<div class="absolute top-8 left-[15%] opacity-60" aria-hidden="true">
 			<Lantern class="w-8 h-12" variant="hanging" lit animate />
@@ -1007,7 +1007,7 @@
 			<div class="relative group">
 				<a
 					href="#{item.id}"
-					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-bark-800 shadow-md border border-amber-200 dark:border-bark-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-cream-100 shadow-md border border-amber-200 dark:border-cream-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
 					aria-label="Jump to {item.text}"
 					title={item.text}
 				>
@@ -1021,7 +1021,7 @@
 							{@const ToolIconComponent = getToolIcon(tool.icon)}
 							<a
 								href="#{getToolId(tool.name)}"
-								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-bark-800 shadow-md border border-amber-200 dark:border-bark-700 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
+								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-cream-100 shadow-md border border-amber-200 dark:border-cream-200 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
 								title={tool.tagline}
 							>
 								<ToolIconComponent class="w-3.5 h-3.5" />
@@ -1049,8 +1049,8 @@
 		</button>
 
 		{#if isMobileTocOpen}
-			<div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-bark-800 rounded-xl shadow-xl border border-amber-200 dark:border-bark-700 overflow-hidden max-h-[70vh] overflow-y-auto">
-				<div class="px-4 py-3 border-b border-amber-200 dark:border-bark-700 flex items-center justify-between sticky top-0 bg-white dark:bg-bark-800">
+			<div class="absolute bottom-16 right-0 w-72 bg-white dark:bg-cream-100 rounded-xl shadow-xl border border-amber-200 dark:border-cream-200 overflow-hidden max-h-[70vh] overflow-y-auto">
+				<div class="px-4 py-3 border-b border-amber-200 dark:border-cream-200 flex items-center justify-between sticky top-0 bg-white dark:bg-cream-100">
 					<span class="font-medium text-foreground">Navigate</span>
 					<button type="button" onclick={() => isMobileTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close table of contents">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1080,7 +1080,7 @@
 										<a
 											href="#{getToolId(tool.name)}"
 											onclick={() => isMobileTocOpen = false}
-											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-bark-700/50 transition-colors"
+											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-cream-200/50 transition-colors"
 										>
 											<ToolIconComponent class="w-4 h-4 text-amber-400" />
 											<span>{tool.name}</span>
@@ -1135,7 +1135,7 @@
 											<svelte:element
 												this={sub.href ? 'a' : 'span'}
 												href={sub.href}
-												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-bark-700/50 text-xs text-foreground-muted transition-colors {sub.href ? 'cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300' : ''}"
+												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-cream-200/50 text-xs text-foreground-muted transition-colors {sub.href ? 'cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300' : ''}"
 												title={sub.description}
 												role="listitem"
 												aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
@@ -1156,13 +1156,13 @@
 										<div class="flex items-start gap-2 text-sm min-w-0">
 											<span class="text-foreground-faint shrink-0">Domain:</span>
 											{#if tool.domain.includes('{you}')}
-												<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-bark-700 text-foreground-muted break-all">{tool.domain}</code>
+												<code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-cream-200 text-foreground-muted break-all">{tool.domain}</code>
 											{:else}
 												<a
 													href="https://{tool.domain}"
 													target="_blank"
 													rel="noopener noreferrer"
-													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-bark-700 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-bark-600 transition-colors font-mono text-sm break-all"
+													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-cream-300 transition-colors font-mono text-sm break-all"
 												>{tool.domain}</a>
 											{/if}
 										</div>
@@ -1216,12 +1216,12 @@
 	</section>
 
 	<!-- Links -->
-	<section class="py-8 px-6 bg-white/70 dark:bg-bark-900/50 border-t border-divider">
+	<section class="py-8 px-6 bg-white/70 dark:bg-cream-100/50 border-t border-divider">
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground transition-colors">
+			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground transition-colors">
 				← Main Roadmap
 			</a>
-			<a href="/beyond" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground transition-colors">
+			<a href="/beyond" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground transition-colors">
 				Beyond the Grove →
 			</a>
 		</div>

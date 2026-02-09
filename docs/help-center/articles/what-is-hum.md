@@ -2,7 +2,7 @@
 title: What is Hum?
 description: Music link previews that transform bare URLs into beautiful, informative cards
 category: help
-section: features
+section: writing-publishing
 lastUpdated: '2026-02-08'
 keywords:
   - hum
