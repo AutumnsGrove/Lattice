@@ -1,4 +1,4 @@
-import { json, error } from "@sveltejs/kit";
+import { json, error, isHttpError } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
@@ -212,8 +212,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         }
       }
     } catch (err) {
-      // Re-throw intentional Grove errors (limit violations, blog gating)
-      if ((err as { status?: number }).status) throw err;
+      // Re-throw intentional HTTP errors (limit violations, blog gating)
+      if (isHttpError(err)) throw err;
       // DB failure on tier lookup — fail open, log, and allow the write
       console.error("[Blooms] Tier limit check failed, allowing write:", err);
     }
