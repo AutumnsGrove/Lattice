@@ -128,29 +128,34 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 
   // Free plan (Wanderer) skips checkout — create tenant directly
   if (plan === "free") {
-    // IP-based abuse prevention: max 3 free accounts per IP per 30 days
+    // Resolve client IP once for both rate-check and logging
+    let clientIP: string | undefined;
     try {
-      const clientIP =
+      clientIP =
         request.headers.get("CF-Connecting-IP") ||
         request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
         getClientAddress();
+    } catch {
+      // Best-effort — IP resolution is non-critical
+    }
 
-      const allowed = await checkFreeAccountIPLimit(db, clientIP);
-      if (!allowed) {
-        return json(
-          {
-            error:
-              "Too many free accounts have been created from this location recently. Please try again later.",
-          },
-          { status: 429 },
-        );
+    // IP-based abuse prevention: max 3 free accounts per IP per 30 days
+    if (clientIP) {
+      try {
+        const allowed = await checkFreeAccountIPLimit(db, clientIP);
+        if (!allowed) {
+          return json(
+            {
+              error:
+                "Too many free accounts have been created from this location recently. Please try again later.",
+            },
+            { status: 429 },
+          );
+        }
+      } catch (err) {
+        // Don't block signup if the IP check fails — log and continue
+        console.error("[Select Plan API] IP limit check error:", err);
       }
-
-      // Log this creation attempt
-      await logFreeAccountCreation(db, clientIP);
-    } catch (err) {
-      // Don't block signup if the IP check fails — log and continue
-      console.error("[Select Plan API] IP limit check error:", err);
     }
 
     try {
@@ -199,6 +204,13 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
           plan: "free",
           favoriteColor: onboarding.favorite_color,
         });
+
+        // Log IP only after successful tenant creation
+        if (clientIP) {
+          logFreeAccountCreation(db, clientIP).catch((err) => {
+            console.error("[Select Plan API] IP log error:", err);
+          });
+        }
 
         console.log(
           `[Select Plan API] Created free tier tenant for ${onboarding.username}`,

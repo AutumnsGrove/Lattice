@@ -164,11 +164,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       locals.user,
     );
 
-    // Look up tenant plan for limit enforcement
-    const tenant = await platform.env.DB
-      .prepare("SELECT plan FROM tenants WHERE id = ?")
-      .bind(tenantId)
-      .first<{ plan: string }>();
+    // Look up tenant plan and parse request body in parallel
+    const [tenant, data] = await Promise.all([
+      platform.env.DB
+        .prepare("SELECT plan FROM tenants WHERE id = ?")
+        .bind(tenantId)
+        .first<{ plan: string }>(),
+      request.json().then((body) => sanitizeObject(body) as PostInput),
+    ]);
 
     const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
       ? tenant.plan
@@ -179,8 +182,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!tierConfig.features.blog) {
       throwGroveError(403, API_ERRORS.BLOG_NOT_AVAILABLE, "API");
     }
-
-    const data = sanitizeObject(await request.json()) as PostInput;
 
     // Enforce post limit (published posts only) and draft limit
     const isDraft = !data.status || data.status === "draft";

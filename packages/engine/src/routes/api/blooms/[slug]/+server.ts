@@ -224,37 +224,40 @@ export const PUT: RequestHandler = async ({
 
     // If publishing a draft, enforce published post limit
     if (data.status === "published") {
-      const tenant = await platform.env.DB
-        .prepare("SELECT plan FROM tenants WHERE id = ?")
-        .bind(tenantId)
-        .first<{ plan: string }>();
+      // Fetch tenant plan and current post status in parallel
+      const [tenant, currentPost] = await Promise.all([
+        platform.env.DB
+          .prepare("SELECT plan FROM tenants WHERE id = ?")
+          .bind(tenantId)
+          .first<{ plan: string }>(),
+        platform.env.DB
+          .prepare(
+            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
+          )
+          .bind(tenantId, slug)
+          .first<{ status: string }>(),
+      ]);
 
       const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
         ? tenant.plan
         : "seedling";
       const tierConfig = TIERS[tierKey];
 
-      if (tierConfig.limits.posts !== Infinity) {
-        // Check if the post being updated is already published (not a status change)
-        const currentPost = await platform.env.DB
+      // Only enforce limit on draft→published transitions
+      if (
+        tierConfig.limits.posts !== Infinity &&
+        currentPost &&
+        currentPost.status !== "published"
+      ) {
+        const publishedCount = await platform.env.DB
           .prepare(
-            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
+            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
           )
-          .bind(tenantId, slug)
-          .first<{ status: string }>();
+          .bind(tenantId)
+          .first<{ count: number }>();
 
-        // Only enforce limit if this is a draft→published transition
-        if (currentPost && currentPost.status !== "published") {
-          const publishedCount = await platform.env.DB
-            .prepare(
-              "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-            )
-            .bind(tenantId)
-            .first<{ count: number }>();
-
-          if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
-            throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
-          }
+        if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+          throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
         }
       }
     }

@@ -19,6 +19,7 @@ import {
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
 import { isFeatureEnabled, isInGreenhouse } from "$lib/feature-flags/index.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
+import { updateLastActivity } from "$lib/server/activity-tracking.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -444,6 +445,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
       customMetadata: metadata,
     });
+
+    // Track activity for inactivity reclamation
+    updateLastActivity(db, tenantId);
 
     // Build CDN URL - uses environment variable for flexibility
     // Defaults to production CDN if not configured
