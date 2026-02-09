@@ -87,12 +87,13 @@ Turn "I've heard of Grove" into "I have a Grove." Remove every barrier between c
 |---------|-----------------|-------------------|
 | Blog | Yes | Yes |
 | Published posts | 5 | 50 |
+| Drafts | 100 | Unlimited |
 | Storage | 50 MB | 1 GB |
 | Themes | 1 (default) | 3 |
 | Subdomain | `username.grove.place` | `username.grove.place` |
 | RSS feed | Yes | Yes |
-| Meadow access | Browse only | Full participation |
-| Comments received | Yes (20/week) | Unlimited |
+| Meadow access | Browse + reply | Full participation |
+| Comments/replies | 20/week (shared reed counter) | Unlimited |
 | Nav pages | 0 | 0 |
 | AI features | No | Yes (750 words/mo) |
 | Custom domain | No | No |
@@ -101,11 +102,21 @@ Turn "I've heard of Grove" into "I have a Grove." Remove every barrier between c
 | Analytics | No | No |
 | Credit card required | No | Yes |
 
+### Drafts
+
+Drafts do **not** count toward the 5-post limit. Only published posts count. Wanderers can have up to **100 drafts**. Paid tiers get unlimited drafts.
+
+This keeps the creative process frictionless. Write as much as you want. The limit is on what's live, not what's in progress. And 100 drafts is generous enough that nobody hits it by accident, but it prevents someone from using Grove as a free infinite note-taking app.
+
+### Meadow Access
+
+Wanderers can **browse and reply** in Meadow, but cannot **start** new posts in the feed. Starting posts requires Seedling. Replies and comments share the same 20/week reed counter.
+
 ### Not Included
 
 - **AI writing assistance** (Seedling and up)
-- **Multiple themes** (Seedling: 3, Sapling: 10)
-- **Full Meadow participation** (posting to feed, deeper social features)
+- **Multiple themes** (Seedling: 3, Sapling: 10. Note: Foliage theme system is not yet integrated, so at launch all accounts use the default theme.)
+- **Starting Meadow posts** (posting to feed requires Seedling. Browsing and replying is free.)
 - **Email forwarding, shop, analytics, custom domains** (higher tiers)
 
 ### Rate Limits
@@ -411,40 +422,52 @@ Once launched, track:
 
 ---
 
-## Open Questions
+## Decisions
 
-1. **Should Wanderers appear in Canopy?** Leaning yes, with a "Wanderer" badge. Their blog exists. Let people find it. But maybe only if they have at least 1 published post.
+All open questions have been resolved:
 
-2. **Should Wanderers get Meadow browse access?** The current free tier config says yes (meadow: true). Keep this. Browsing Meadow without posting is fine. Full participation (posting to feed) requires Seedling.
-
-3. **Draft posts: do they count toward the 5-post limit?** Leaning no. Only published posts count. Let people draft as much as they want. The limit is on what's live on their blog.
-
-4. **What theme do Wanderers get?** The default theme, whatever that is at launch. Clean, readable, warm. They can preview others but not apply them.
-
-5. **Can Wanderers receive comments?** Yes, 20/week (matching current config). Their blog is real. People should be able to respond to it.
-
-6. **Account creation: Google OAuth only, or email/password too?** Follow whatever Heartwood supports. Don't add friction just for free accounts.
+| Question | Decision |
+|----------|----------|
+| Canopy visibility | Yes, with 1+ published post. Account age icons shown (see `docs/plans/planned/account-age-icons.md`). |
+| Meadow access | Browse + reply. Cannot start new feed posts. Replies share the 20/week reed counter. |
+| Drafts vs. limit | Drafts don't count. Only published posts. Max 100 drafts (unlimited for paid). |
+| Theme | 1 default theme (Foliage not yet integrated). Can preview others, can't apply. |
+| Receive comments | Yes, 20/week via reed counter. |
+| Auth method | Identical to all other Grove login points. Same Heartwood flow, no restrictions. |
 
 ---
 
 ## Implementation Checklist
 
+### Tier Config & Limits
 - [ ] Update free tier config in `tiers.ts` (blog: true, posts: 5, storage: 50MB, themes: 1, status: available)
 - [ ] Update free tier display strings (name: "Wanderer", tagline, description, feature list)
 - [ ] Update rate limits for free tier (uploads: 5/day, requests: 60/min)
+- [ ] Add draft limit enforcement (100 drafts for free tier, unlimited for paid)
+- [ ] Update post limit enforcement to handle 5-post limit (published only, drafts excluded)
+
+### Database & Infra
 - [ ] Add `last_activity_at` column to tenants table (migration)
 - [ ] Add `reclamation_status` column to tenants table (migration)
 - [ ] Create `reclaimed_accounts` table (migration)
 - [ ] Implement activity tracking (update `last_activity_at` on key events)
 - [ ] Build reclamation cron worker (daily check, email triggers, archive, release)
 - [ ] Write "We miss you" and "Final notice" email templates
-- [ ] Update onboarding flow to support free signups (skip payment)
+
+### Onboarding & Plans
+- [ ] Update onboarding flow to support free signups (skip payment, same Heartwood auth)
 - [ ] Update plans page to show Wanderer Plan first
-- [ ] Update post limit enforcement to handle 5-post limit
 - [ ] Add IP-based free account creation limits (3 per IP per 30 days)
-- [ ] Add upgrade prompts (post limit reached, storage warning, theme browsing)
+
+### Upgrade Experience
+- [ ] Add upgrade prompts (post limit reached, storage warning, theme preview)
+- [ ] Add draft limit upgrade prompt (approaching 100 drafts)
 - [ ] Test free → Seedling upgrade path (content preservation)
-- [ ] Update Canopy to handle Wanderer listings (if included)
+
+### Community Integration
+- [ ] Update Canopy to show Wanderers with 1+ published post
+- [ ] Meadow: allow browse + reply for free tier, block starting new feed posts
+- [ ] Ensure reed counter is shared across blog comments and Meadow replies
 
 ---
 
