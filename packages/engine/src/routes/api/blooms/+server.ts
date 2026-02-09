@@ -167,15 +167,29 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const data = sanitizeObject(await request.json()) as PostInput;
 
     // Tier-based limit enforcement (isolated — DB failures fail open)
+    // Run all queries in parallel to minimize latency (per AGENT.md parallelization pattern)
+    let tenant: { plan: string } | null;
+    let draftCount: { count: number } | null;
+    let publishedCount: { count: number } | null;
     try {
-      const tenant = await platform.env.DB
-        .prepare("SELECT plan FROM tenants WHERE id = ?")
-        .bind(tenantId)
-        .first<{ plan: string }>();
+      [tenant, draftCount, publishedCount] = await Promise.all([
+        platform.env.DB.prepare("SELECT plan FROM tenants WHERE id = ?")
+          .bind(tenantId)
+          .first<{ plan: string }>(),
+        platform.env.DB.prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
+        )
+          .bind(tenantId)
+          .first<{ count: number }>(),
+        platform.env.DB.prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+        )
+          .bind(tenantId)
+          .first<{ count: number }>(),
+      ]);
 
-      const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
-        ? tenant.plan
-        : "seedling";
+      const tierKey: TierKey =
+        tenant?.plan && isValidTier(tenant.plan) ? tenant.plan : "seedling";
       const tierConfig = TIERS[tierKey];
 
       // Check blog access
@@ -186,28 +200,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       // Enforce draft or published post limit (mutually exclusive branches)
       const isDraft = !data.status || data.status === "draft";
 
-      if (isDraft && tierConfig.limits.drafts !== Infinity) {
-        const draftCount = await platform.env.DB
-          .prepare(
-            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
-          )
-          .bind(tenantId)
-          .first<{ count: number }>();
-
-        if (draftCount && draftCount.count >= tierConfig.limits.drafts) {
+      if (isDraft && tierConfig.limits.drafts !== Infinity && draftCount) {
+        if (draftCount.count >= tierConfig.limits.drafts) {
           throwGroveError(403, API_ERRORS.DRAFT_LIMIT_REACHED, "API");
         }
       }
 
-      if (!isDraft && tierConfig.limits.posts !== Infinity) {
-        const publishedCount = await platform.env.DB
-          .prepare(
-            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-          )
-          .bind(tenantId)
-          .first<{ count: number }>();
-
-        if (publishedCount && publishedCount.count >= tierConfig.limits.posts) {
+      if (!isDraft && tierConfig.limits.posts !== Infinity && publishedCount) {
+        if (publishedCount.count >= tierConfig.limits.posts) {
           throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
         }
       }
