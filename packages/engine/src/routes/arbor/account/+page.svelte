@@ -14,10 +14,15 @@
   import DataExportCard from "./DataExportCard.svelte";
   import FeaturesCard from "./FeaturesCard.svelte";
 
+  // Import UpgradesGraft components for garden status
+  import { CurrentStageBadge, GardenStatus } from '@autumnsgrove/groveengine/grafts/upgrades';
+  import type { FlourishState } from '@autumnsgrove/groveengine/grafts/upgrades';
+
   // Import types and utils
   import type { ExportType } from "./types";
   import { sanitizeErrorMessage } from "./utils";
   import { checkPasskeySupport, registerPasskey } from "./passkey-utils";
+  import type { TierKey } from '@autumnsgrove/groveengine/config';
 
   let { data } = $props();
 
@@ -45,6 +50,45 @@
       supportsPasskeys = supported;
     });
   });
+
+  // Derive flourish state from billing status
+  let flourishState = $derived<FlourishState>((): FlourishState => {
+    if (!data.billing) return 'active';
+    const status = data.billing.status;
+
+    if (status === 'trialing') return 'trialing';
+    if (status === 'past_due') return 'past_due';
+    if (data.billing.cancelAtPeriodEnd) return 'resting';
+    if (status === 'canceled' || status === 'unpaid') return 'pruned';
+    return 'active';
+  })();
+
+  // Get current period end as timestamp for GardenStatus
+  let currentPeriodEnd = $derived((): number | null => {
+    if (!data.billing?.currentPeriodEnd) return null;
+    return new Date(data.billing.currentPeriodEnd).getTime() / 1000;
+  })();
+
+  // Handle nurture - open plan selection for upgrades
+  function handleNurture(): void {
+    // Scroll to change plan section
+    const changePlanSection = document.getElementById('change-plan-section');
+    changePlanSection?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Handle tend - open billing portal
+  async function handleTend(): Promise<void> {
+    try {
+      const response = await api.post('/api/grafts/upgrades/tend', {});
+      if (response.url) {
+        window.location.href = response.url;
+      } else {
+        toast.error('Unable to open billing portal');
+      }
+    } catch (error) {
+      toast.error(sanitizeErrorMessage(error, 'Failed to open billing portal'));
+    }
+  }
 
   
   // Cancel subscription - show dialog
@@ -219,7 +263,31 @@
   <header class="page-header">
     <h1>Account & Subscription</h1>
     <p class="subtitle">Manage your subscription, billing, and data</p>
+    <!-- Current Stage Badge - shows growth stage with nurture CTA -->
+    <div class="mt-4">
+      <CurrentStageBadge
+        currentStage={data.currentPlan as TierKey}
+        {flourishState}
+        showNurture={true}
+        showTend={true}
+        onNurture={handleNurture}
+        onTend={handleTend}
+      />
+    </div>
   </header>
+
+  <!-- Garden Status Overview -->
+  <GardenStatus
+    currentStage={data.currentPlan as TierKey}
+    {flourishState}
+    currentPeriodEnd={currentPeriodEnd}
+    pruningScheduled={data.billing?.cancelAtPeriodEnd ?? false}
+    paymentBrand={data.billing?.paymentMethod?.brand ?? ''}
+    paymentLast4={data.billing?.paymentMethod?.last4 ?? ''}
+    showDetails={true}
+    onTend={handleTend}
+    class="mb-6"
+  />
 
   <!-- Current Plan Overview -->
   <SubscriptionCard
@@ -276,13 +344,15 @@
   {/await}
 
   <!-- Change Plan -->
-  <ChangePlanCard
-    availableTiers={data.availableTiers}
-    {changingPlan}
-    {selectedPlan}
-    hasSubscription={data.billing?.hasSubscription ?? false}
-    onChangePlan={handleChangePlan}
-  />
+  <div id="change-plan-section">
+    <ChangePlanCard
+      availableTiers={data.availableTiers}
+      {changingPlan}
+      {selectedPlan}
+      hasSubscription={data.billing?.hasSubscription ?? false}
+      onChangePlan={handleChangePlan}
+    />
+  </div>
 
   <!-- Data Export -->
   <DataExportCard

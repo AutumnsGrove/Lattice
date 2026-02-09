@@ -29,6 +29,18 @@ export const GRAFT_REGISTRY = new Map<GraftId, GraftRegistryEntry>([
       status: "stable",
     },
   ],
+  [
+    "upgrades",
+    {
+      id: "upgrades",
+      name: "UpgradesGraft",
+      description:
+        "Cultivation, garden management, and growth tracking for Grove products",
+      featureFlagId: "upgrades_graft",
+      version: "1.0.0",
+      status: "experimental",
+    },
+  ],
   // Future grafts will be added here:
   // ['nav', { ... }],
   // ['footer', { ... }],

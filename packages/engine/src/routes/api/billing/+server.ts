@@ -595,15 +595,13 @@ export const PATCH: RequestHandler = async ({
     throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
-  const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenantId;
+  const tenantId = locals.tenantId;
+  if (!tenantId) {
+    throwGroveError(400, API_ERRORS.TENANT_REQUIRED, "API");
+  }
 
   try {
-    const tenantId = await getVerifiedTenantId(
-      platform.env.DB,
-      requestedTenantId,
-      locals.user,
-    );
+    await getVerifiedTenantId(platform.env.DB, tenantId, locals.user);
 
     // Check rate limit before processing (centralized in $lib/server/rate-limits)
     const { result: rateLimitResult, response: rateLimitResponse } =
@@ -624,7 +622,7 @@ export const PATCH: RequestHandler = async ({
        JOIN tenants t ON t.id = pb.tenant_id
        WHERE pb.tenant_id = ?`,
     )
-      .bind(tenantId)
+      .bind(verifiedTenantId)
       .first()) as (BillingRecord & { subdomain: string }) | null;
 
     if (!billing || !billing.provider_subscription_id) {
@@ -649,7 +647,7 @@ export const PATCH: RequestHandler = async ({
             updated_at = ?
            WHERE id = ? AND tenant_id = ?`,
         )
-          .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
+          .bind(Math.floor(Date.now() / 1000), billing.id, verifiedTenantId)
           .run();
 
         // Send cancellation confirmation email (non-blocking)

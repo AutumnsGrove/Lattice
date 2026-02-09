@@ -100,6 +100,51 @@ export const POST: RequestHandler = async ({
     return json({ error: "Service temporarily unavailable" }, { status: 503 });
   }
 
+  // Validate onboarding steps are complete before allowing plan selection
+  try {
+    const onboarding = await db
+      .prepare(
+        `SELECT profile_completed_at, email_verified
+         FROM user_onboarding WHERE id = ?`,
+      )
+      .bind(onboardingId)
+      .first<{
+        profile_completed_at: number | null;
+        email_verified: number | null;
+      }>();
+
+    if (!onboarding) {
+      return json(
+        { error: "Onboarding session not found. Please sign in again." },
+        { status: 404 },
+      );
+    }
+
+    if (!onboarding.profile_completed_at) {
+      return json(
+        { error: "Please complete your profile before selecting a plan." },
+        { status: 400 },
+      );
+    }
+
+    if (!onboarding.email_verified) {
+      return json(
+        { error: "Please verify your email before selecting a plan." },
+        { status: 400 },
+      );
+    }
+  } catch (err) {
+    logPlantError(PLANT_ERRORS.DB_ERROR, {
+      path: "/api/select-plan",
+      detail: "Failed to validate onboarding status",
+      cause: err,
+    });
+    return json(
+      { error: "Unable to validate onboarding status. Please try again." },
+      { status: 500 },
+    );
+  }
+
   // Update onboarding record with selected plan
   try {
     await db

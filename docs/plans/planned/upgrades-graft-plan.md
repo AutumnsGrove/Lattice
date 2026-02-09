@@ -381,6 +381,53 @@ STRIPE_PLANT_EVERGREEN_YEARLY=https://checkout.stripe.com/...
 
 These are decisions the Wayfinder will make when implementation begins.
 
+## Security Considerations: Protecting the Grove
+
+The billing subsystem has been surveyed using the Hawk security methodology. These controls must be preserved and extended in UpgradesGraft:
+
+### Critical Security Controls to Preserve
+
+| Control | Location | Purpose |
+|---------|----------|---------|
+| **Webhook Signature Verification** | `plant/src/routes/api/webhooks/stripe/+server.ts` | HMAC-SHA256 verification of Stripe events |
+| **Tenant Isolation** | `engine/src/lib/auth/session.ts:58` | Ownership verification before any tenant operation |
+| **Rate Limiting** | `engine/src/lib/server/rate-limits.ts` | 20 ops/hour for billing, 3 free accounts/IP/30 days |
+| **CSRF Validation** | `engine/src/lib/utils/csrf.ts` | Origin/referer validation for API requests |
+| **PIl Sanitization** | `engine/src/lib/utils/webhook-sanitizer.ts` | Removes PII before logging webhook payloads |
+
+### Validation Requirements
+
+**Onboarding Step Sequencing** (`HAWK-001`):
+- Plan selection must verify `profile_completed_at` and `email_verified` are set
+- Prevent skipping onboarding steps by calling API directly
+- Return 400 with descriptive error message
+
+**Tenant ID Handling** (`HAWK-002`):
+- Never accept `tenant_id` from query parameters
+- Use only `locals.tenantId` from authenticated session
+- Always run ownership verification via `getVerifiedTenantId`
+
+### New Graft Security Requirements
+
+When building UpgradesGraft:
+
+1. **Plan Selection API** (`POST /api/grafts/upgrades/cultivate`):
+   - Validate onboarding status before allowing cultivation
+   - Check rate limits before any DB writes
+   - Audit log all cultivation attempts
+
+2. **Billing Portal API** (`POST /api/grafts/upgrades/tend`):
+   - Verify tenant ownership before opening portal
+   - Validate returnTo URL against allowlist
+   - Log portal session creation
+
+3. **Growth Status API** (`GET /api/grafts/upgrades/growth`):
+   - Return minimal data (only what's needed for UI)
+   - Never expose provider customer IDs to client
+   - Cache appropriately with tenant isolation
+
+---
+
 ## Dependencies
 
 - `@autumnsgrove/groveengine/config` — Growth stage definitions
