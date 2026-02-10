@@ -70,7 +70,7 @@
 	 */
 	async function fetchExcerpt(): Promise<WaystoneExcerpt | null> {
 		try {
-			const response = await fetch(`${EXCERPT_API_BASE}/${slug}`);
+			const response = await fetch(`${EXCERPT_API_BASE}/${slug}`); // csrf-ok
 			if (!response.ok) {
 				throw new Error('Article not found');
 			}

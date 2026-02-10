@@ -95,7 +95,7 @@
 		error = null;
 
 		try {
-			const response = await fetch(GROVEAUTH_URLS.socialSignIn, {
+			const response = await fetch(GROVEAUTH_URLS.socialSignIn, { // csrf-ok: cross-origin POST to GroveAuth
 				method: "POST",
 				credentials: "include",  // Required for cross-origin cookies
 				headers: {

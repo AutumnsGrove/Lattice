@@ -137,7 +137,7 @@
 
 	async function fetchStatus() {
 		try {
-			const response = await fetch(`${clearingUrl}/api/status`);
+			const response = await fetch(`${clearingUrl}/api/status`); // csrf-ok
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			statusData = await response.json();
 			error = null;

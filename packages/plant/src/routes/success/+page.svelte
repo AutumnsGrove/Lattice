@@ -26,7 +26,7 @@
 
 			const checkTenant = async () => {
 				try {
-					const res = await fetch('/success/check');
+					const res = await fetch('/success/check'); // csrf-ok
 					const result = (await res.json()) as { ready?: boolean; creating?: boolean; subdomain?: string };
 
 					if (result.ready) {

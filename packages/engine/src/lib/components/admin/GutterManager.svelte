@@ -199,7 +199,7 @@
       if (query) params.set("prefix", String(query));
       params.set("limit", "50");
 
-      const response = await fetch(`/api/images/list?${params}`);
+      const response = await fetch(`/api/images/list?${params}`); // csrf-ok
       const data = await response.json();
 
       if (response.ok) {
@@ -420,7 +420,7 @@
 
     try {
       const params = new URLSearchParams({ url: embedUrl });
-      const response = await fetch(`/api/oembed?${params}`);
+      const response = await fetch(`/api/oembed?${params}`); // csrf-ok
 
       if (!response.ok) {
         throw new Error(`Failed to resolve: ${response.statusText}`);

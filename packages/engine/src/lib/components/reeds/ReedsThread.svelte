@@ -68,7 +68,7 @@
   async function refreshComments() {
     loading = true;
     try {
-      const res = await fetch(`/api/reeds/${slug}`);
+      const res = await fetch(`/api/reeds/${slug}`); // csrf-ok
       if (res.ok) {
         const data = (await res.json()) as { comments?: Comment[]; total?: number };
         comments = data.comments || [];
@@ -98,7 +98,7 @@
 
   async function submitEdit(commentId: string, content: string) {
     try {
-      const res = await fetch(`/api/reeds/${slug}/${commentId}`, {
+      const res = await fetch(`/api/reeds/${slug}/${commentId}`, { // csrf-ok: origin fallback, migrate to api.*()
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
@@ -128,7 +128,7 @@
 
     deleting = true;
     try {
-      const res = await fetch(`/api/reeds/${slug}/${deletingId}`, {
+      const res = await fetch(`/api/reeds/${slug}/${deletingId}`, { // csrf-ok: origin fallback, migrate to api.*()
         method: "DELETE",
       });
 

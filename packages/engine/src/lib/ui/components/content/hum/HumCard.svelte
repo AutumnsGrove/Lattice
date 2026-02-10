@@ -44,7 +44,7 @@
 			try {
 				const res = await fetch(
 					`/api/hum/resolve?url=${encodeURIComponent(url)}`,
-				);
+				); // csrf-ok
 				if (cancelled) return;
 
 				if (!res.ok) {

@@ -331,7 +331,10 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   // Phase 3: /comments → /reeds (arbor and API routes)
-  if (pathname === "/arbor/comments" || pathname.startsWith("/arbor/comments/")) {
+  if (
+    pathname === "/arbor/comments" ||
+    pathname.startsWith("/arbor/comments/")
+  ) {
     const newPath = pathname.replace(/^\/arbor\/comments/, "/arbor/reeds");
     throw redirect(301, `${newPath}${event.url.search}`);
   }
@@ -619,9 +622,28 @@ export const handle: Handle = async ({ event, resolve }) => {
         throwGroveError(403, SITE_ERRORS.INVALID_ORIGIN, "Site");
       }
     } else {
-      // All other endpoints require CSRF token validation
+      // API routes: CSRF token primary, origin validation fallback.
+      // This allows bare fetch() calls (which send Origin but not X-CSRF-Token)
+      // to pass via the same origin validation used for form actions.
+      // SECURITY: validateCSRF() is fail-closed — no Origin + no token = reject.
       if (!validateCSRFToken(event.request, csrfToken)) {
-        throwGroveError(403, SITE_ERRORS.INVALID_CSRF_TOKEN, "Site");
+        if (
+          !validateCSRF(event.request, false, {
+            csrfToken: requestCsrfToken,
+            expectedToken: csrfToken,
+          })
+        ) {
+          throwGroveError(403, SITE_ERRORS.INVALID_CSRF_TOKEN, "Site");
+        }
+        // Dev-mode warning so developers know to migrate to api.*()
+        if (
+          event.url.hostname === "localhost" ||
+          event.url.hostname === "127.0.0.1"
+        ) {
+          console.warn(
+            `[CSRF] Origin-fallback for ${event.request.method} ${event.url.pathname} — use api.*() from $lib/utils/api`,
+          );
+        }
       }
     }
   }

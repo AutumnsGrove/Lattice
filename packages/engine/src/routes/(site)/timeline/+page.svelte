@@ -40,7 +40,7 @@
 		try {
 			const response = await fetch(
 				`/api/curios/timeline?limit=${pagination.limit}&offset=${newOffset}`
-			);
+			); // csrf-ok
 
 			if (!response.ok) {
 				throw new Error('Failed to load more');
