@@ -119,6 +119,9 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
     // New images use `${tenantId}/...` prefix. Legacy/migrated images may lack
     // a tenant prefix — allow those unless they belong to a different tenant.
+    // SECURITY NOTE: Unprefixed keys are allowed for the requesting tenant because
+    // the gallery UI only exposes keys from R2 list(prefix: tenantId), so users
+    // can only discover their own keys. Legacy images predate tenant prefixing.
     const expectedPrefix = `${tenantId}/`;
     const UUID_PREFIX_RE =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\//i;
