@@ -172,7 +172,8 @@ export class BlueskyProvider implements SocialProvider {
 
         // Use the AT Protocol's RichText for proper facet detection
         const rt = new RichText({ text: content.text });
-        await rt.detectFacets(agent);
+        // Explicitly bind to avoid "illegal invocation" error in Cloudflare Workers
+        await rt.detectFacets.call(rt, agent);
 
         const result = await agent.post({
           text: rt.text,

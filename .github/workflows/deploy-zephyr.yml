@@ -1,0 +1,53 @@
+name: Deploy Zephyr (Email & Social Worker)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/zephyr/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: .
+
+      - name: Type check
+        run: pnpm run typecheck
+        working-directory: workers/zephyr
+
+      - name: Run tests
+        run: pnpm run test:run
+        working-directory: workers/zephyr
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/zephyr
+          command: deploy
+          packageManager: pnpm
+        # Secrets (RESEND_API_KEY, ZEPHYR_API_KEY, BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
+        # are managed via Cloudflare Secrets Store in wrangler.toml
