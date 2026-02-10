@@ -190,22 +190,24 @@ async function loadComments(
 ) {
   try {
     // Gate: reeds_comments graft — skip loading if feature is off
-    if (kv) {
-      const flagsEnv = { DB: db, FLAGS_KV: kv };
-      const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
-        () => false,
-      );
-      if (!inGreenhouse) {
-        return { comments: [], commentTotal: 0, commentSettings: null };
-      }
-      const reedsEnabled = await isFeatureEnabled(
-        "reeds_comments",
-        { tenantId, inGreenhouse: true },
-        flagsEnv,
-      ).catch(() => false);
-      if (!reedsEnabled) {
-        return { comments: [], commentTotal: 0, commentSettings: null };
-      }
+    // When KV is unavailable, default to disabled (can't verify graft)
+    if (!kv) {
+      return { comments: [], commentTotal: 0, commentSettings: null };
+    }
+    const flagsEnv = { DB: db, FLAGS_KV: kv };
+    const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
+      () => false,
+    );
+    if (!inGreenhouse) {
+      return { comments: [], commentTotal: 0, commentSettings: null };
+    }
+    const reedsEnabled = await isFeatureEnabled(
+      "reeds_comments",
+      { tenantId, inGreenhouse: true },
+      flagsEnv,
+    ).catch(() => false);
+    if (!reedsEnabled) {
+      return { comments: [], commentTotal: 0, commentSettings: null };
     }
 
     const tenantDb = getTenantDb(db, { tenantId });

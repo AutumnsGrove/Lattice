@@ -3,6 +3,7 @@
     GlassCard, Badge, toast, GroveSwap,
     MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX,
   } from "$lib/ui";
+  import { api } from "$lib/utils/api";
 
   let { data } = $props();
 
@@ -54,22 +55,11 @@
     moderating = commentId;
 
     try {
-      const res = await fetch(
+      const result = await api.post<{ message?: string }>(
         `/api/reeds/${postSlug}/${commentId}/moderate`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action }),
-        },
+        { action },
       );
-
-      if (!res.ok) {
-        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
-        throw new Error(err?.error_description || "Moderation failed");
-      }
-
-      const result = (await res.json()) as { message?: string };
-      toast.success(result.message || "Done!");
+      toast.success(result?.message || "Done!");
 
       // Remove from the appropriate list
       if (data.pending) {
@@ -95,15 +85,7 @@
     unblocking = userId;
 
     try {
-      const res = await fetch(`/api/reeds/blocked/${userId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
-        throw new Error(err?.error_description || "Unblock failed");
-      }
-
+      await api.delete(`/api/reeds/blocked/${userId}`);
       toast.success("User unblocked.");
 
       if (data.blocked) {
@@ -124,22 +106,12 @@
     savingSettings = true;
 
     try {
-      const res = await fetch("/api/reeds/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          comments_enabled: commentsEnabled,
-          public_comments_enabled: publicEnabled,
-          who_can_comment: whoCanComment,
-          show_comment_count: showCount,
-        }),
+      await api.patch("/api/reeds/settings", {
+        comments_enabled: commentsEnabled,
+        public_comments_enabled: publicEnabled,
+        who_can_comment: whoCanComment,
+        show_comment_count: showCount,
       });
-
-      if (!res.ok) {
-        const err = (await res.json().catch(() => null)) as { error_description?: string } | null;
-        throw new Error(err?.error_description || "Failed to save settings");
-      }
-
       toast.success("Settings saved.");
     } catch (err) {
       toast.error(
@@ -592,7 +564,7 @@
     border: none;
     border-bottom: 2px solid transparent;
     color: var(--color-text-muted, #666);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
@@ -648,7 +620,7 @@
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     flex-wrap: wrap;
   }
 
@@ -760,7 +732,7 @@
     gap: 0.375rem;
     padding: 0.625rem 1.125rem;
     min-height: 44px;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 500;
     font-family: inherit;
     border: 1px solid;

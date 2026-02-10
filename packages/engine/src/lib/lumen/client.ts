@@ -337,7 +337,7 @@ export class LumenClient {
 
   /**
    * Check content for safety.
-   * Uses Cloudflare AI (LlamaGuard).
+   * Uses OpenRouter (LlamaGuard 4) with Cloudflare AI fallback.
    */
   async moderate(
     request: LumenModerationRequest,
@@ -364,7 +364,7 @@ export class LumenClient {
         request.tenant,
         "moderation",
         result.model,
-        "cloudflare-ai",
+        result.provider,
         { input: Math.ceil(request.content.length / 4), output: 0, cost: 0 },
         0,
         false,

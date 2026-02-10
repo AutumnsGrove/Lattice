@@ -117,8 +117,15 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
+    // New images use `${tenantId}/...` prefix. Legacy/migrated images may lack
+    // a tenant prefix — allow those unless they belong to a different tenant.
     const expectedPrefix = `${tenantId}/`;
-    if (!sanitizedKey.startsWith(expectedPrefix)) {
+    const UUID_PREFIX_RE =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\//i;
+    const hasTenantPrefix = UUID_PREFIX_RE.test(sanitizedKey);
+
+    if (hasTenantPrefix && !sanitizedKey.startsWith(expectedPrefix)) {
+      // Key belongs to a different tenant — block
       console.warn(
         `Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`,
       );
