@@ -14,7 +14,7 @@ import {
 } from "$lib/thorn/logging.js";
 import { getRecentBlocksByCategory } from "$lib/server/petal/logging.js";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
-import { isWayfinder } from "$lib/config/wayfinder.js";
+import { isWayfinder } from "$lib/config/wayfinder";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface PetalFlag {

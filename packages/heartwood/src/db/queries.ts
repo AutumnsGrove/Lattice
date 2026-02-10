@@ -24,7 +24,7 @@ import type {
   D1DatabaseOrSession,
   DeviceCode,
 } from "../types.js";
-import { TIER_POST_LIMITS, ADMIN_EMAILS } from "../types.js";
+import { TIER_POST_LIMITS, isWayfinder } from "../types.js";
 import { generateUUID } from "../utils/crypto.js";
 
 // ==================== Wildcard Redirect URI Configuration ====================
@@ -1181,7 +1181,7 @@ export async function getAllClients(
 // ==================== Admin Queries ====================
 
 export function isEmailAdmin(email: string): boolean {
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+  return isWayfinder(email);
 }
 
 export async function isUserAdmin(

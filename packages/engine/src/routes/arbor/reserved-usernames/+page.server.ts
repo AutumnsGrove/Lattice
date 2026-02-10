@@ -7,7 +7,7 @@
 
 import { error, fail } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
-import { isWayfinder } from "$lib/config/wayfinder.js";
+import { isWayfinder } from "$lib/config/wayfinder";
 import type { PageServerLoad, Actions } from "./$types";
 
 interface ReservedUsername {

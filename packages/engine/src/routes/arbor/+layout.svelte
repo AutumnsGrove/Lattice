@@ -19,7 +19,7 @@
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
-  import { isWayfinder } from "$lib/config/wayfinder.js";
+  import { isWayfinder } from "$lib/config/wayfinder";
 
   let { data, children } = $props();
   // Sidebar open state now comes from shared store (controlled by Chrome Header)

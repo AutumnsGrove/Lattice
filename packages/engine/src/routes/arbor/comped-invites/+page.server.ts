@@ -10,7 +10,7 @@ import { error, fail } from "@sveltejs/kit";
 import { validateEmail } from "$lib/utils/validation.js";
 import { ARBOR_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
-import { isWayfinder } from "$lib/config/wayfinder.js";
+import { isWayfinder } from "$lib/config/wayfinder";
 
 interface CompedInvite {
   id: string;

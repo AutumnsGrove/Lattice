@@ -17,7 +17,7 @@ import {
 import type { TenantGraftInfo } from "$lib/feature-flags/tenant-grafts";
 import type { GreenhouseTenant } from "$lib/feature-flags/types";
 import type { FeatureFlagSummary } from "$lib/feature-flags/admin";
-import { isWayfinder } from "$lib/config/wayfinder.js";
+import { isWayfinder } from "$lib/config/wayfinder";
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
   const env = platform?.env;
