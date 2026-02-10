@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '$lib/ui';
 	import {
 		Sparkles,
 		Activity,
