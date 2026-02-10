@@ -82,6 +82,9 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
     // Validate grove_title (max 50 chars, store trimmed)
     if (setting_key === "grove_title") {
+      if (typeof setting_value !== "string") {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
       setting_value = setting_value.trim();
       if (setting_value.length > 50) {
         throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
