@@ -12,7 +12,7 @@
  * await scheduleWelcomeSequence({
  *   email: 'wanderer@example.com',
  *   name: 'Wanderer',
- *   audienceType: 'trial',
+ *   audienceType: 'rooted',
  *   zephyrApiKey: env.ZEPHYR_API_KEY,
  * });
  * ```
@@ -90,7 +90,7 @@ export interface ScheduleSequenceResult {
  * const result = await scheduleWelcomeSequence({
  *   email: 'new-user@example.com',
  *   name: 'Wanderer',
- *   audienceType: 'trial',
+ *   audienceType: 'rooted',
  *   zephyrApiKey: env.ZEPHYR_API_KEY,
  * });
  *

@@ -142,7 +142,6 @@ const mockSubscriptionAttributes: LemonSqueezySubscriptionAttributes = {
   card_last_four: "4242",
   pause: null,
   cancelled: false,
-  trial_ends_at: null,
   billing_anchor: 1,
   first_subscription_item: null as any,
   urls: {
@@ -676,19 +675,6 @@ describe("LemonSqueezyProvider - Subscriptions", () => {
       });
     });
 
-    it("should map on_trial status to trialing", async () => {
-      mockClient.getSubscription.mockResolvedValue({
-        id: "sub_123",
-        attributes: {
-          ...mockSubscriptionAttributes,
-          status: "on_trial",
-        },
-      });
-
-      const result = await provider.getSubscription("sub_123");
-      expect(result?.status).toBe("trialing");
-    });
-
     it("should map cancelled status correctly", async () => {
       mockClient.getSubscription.mockResolvedValue({
         id: "sub_123",
@@ -702,22 +688,6 @@ describe("LemonSqueezyProvider - Subscriptions", () => {
       const result = await provider.getSubscription("sub_123");
       expect(result?.status).toBe("canceled");
       expect(result?.cancelAtPeriodEnd).toBe(true);
-    });
-
-    it("should include trial end date if present", async () => {
-      const trialEnd = new Date(
-        Date.now() + 14 * 24 * 60 * 60 * 1000,
-      ).toISOString();
-      mockClient.getSubscription.mockResolvedValue({
-        id: "sub_123",
-        attributes: {
-          ...mockSubscriptionAttributes,
-          trial_ends_at: trialEnd,
-        },
-      });
-
-      const result = await provider.getSubscription("sub_123");
-      expect(result?.trialEnd).toEqual(new Date(trialEnd));
     });
 
     it("should include cancellation date if subscription ended", async () => {
@@ -1245,19 +1215,6 @@ describe("LemonSqueezyProvider - Edge Cases", () => {
       (result.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60);
     expect(hoursFromNow).toBeGreaterThan(23);
     expect(hoursFromNow).toBeLessThan(25);
-  });
-
-  it("should handle subscription with no trial end", async () => {
-    mockClient.getSubscription.mockResolvedValue({
-      id: "sub_123",
-      attributes: {
-        ...mockSubscriptionAttributes,
-        trial_ends_at: null,
-      },
-    });
-
-    const result = await provider.getSubscription("sub_123");
-    expect(result?.trialEnd).toBeUndefined();
   });
 
   it("should handle subscription with no cancellation date", async () => {

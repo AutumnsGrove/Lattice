@@ -53,7 +53,7 @@
 
 		(async () => {
 			try {
-				const res = await fetch('/checkout', {
+				const res = await fetch('/checkout', { // csrf-ok
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' }
 				});
@@ -127,18 +127,13 @@
 			</div>
 		</div>
 
-		<div class="flex justify-between items-center py-3 border-b border-white/20 dark:border-bark-700/20">
-			<p class="text-foreground-muted">14-day free trial</p>
-			<p class="text-success font-medium">Included</p>
-		</div>
-
 		<div class="flex justify-between items-center py-3">
 			<p class="font-medium text-foreground">Today</p>
 			<p class="text-2xl font-semibold text-foreground">$0.00</p>
 		</div>
 
 		<p class="text-xs text-foreground-subtle mt-2">
-			You won't be charged until your trial ends. Cancel anytime.
+			Full refund within 14 days if you change your mind.
 		</p>
 	</GlassCard>
 

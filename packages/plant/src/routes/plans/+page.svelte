@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2 } from '@autumnsgrove/groveengine/ui/icons';
+	import { Check, Clock, Lock, ArrowRight, ArrowLeft, Loader2, Sprout } from '@autumnsgrove/groveengine/ui/icons';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
 
@@ -13,7 +13,10 @@
 		getMonthlyEquivalentPrice,
 		getYearlySavingsAmount,
 	} from '@autumnsgrove/groveengine/grafts/pricing';
-	import type { TierStatus } from '@autumnsgrove/groveengine/config';
+	import type { TierStatus, TierKey } from '@autumnsgrove/groveengine/config';
+
+	// UpgradesGraft components for plan selection
+	import { GrowthCard } from '@autumnsgrove/groveengine/grafts/upgrades';
 
 	// Shared icon mapping
 	import { tierIcons } from '$lib/ui/tier-icons';
@@ -33,9 +36,9 @@
 	// ============================================================================
 
 	let billingPeriod = $state<BillingPeriod>('monthly');
-	// Auto-select first available tier
+	// Auto-select first available paid tier (skip free so users see it as an explicit choice)
 	let selectedPlan = $state<string | null>(
-		plans.find((p: PricingTier) => p.status === 'available')?.key ?? null
+		plans.find((p: PricingTier) => p.status === 'available' && p.key !== 'free')?.key ?? null
 	);
 
 	// Submission state
@@ -45,19 +48,28 @@
 	// Map billing period to database format (annual → yearly)
 	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
 
+	// Check if the selected plan is free (Wanderer)
+	let isFreePlan = $derived(selectedPlan === 'free');
+
 	// Submit plan selection via JSON API
-	async function savePlan() {
-		if (!selectedPlan || isSubmitting) return;
+	async function selectPlanForOnboarding(stage: TierKey) {
+		if (isSubmitting) return;
 		isSubmitting = true;
 		submitError = null;
 
+		// Free plan skips checkout — goes directly to success
+		const redirect = stage === 'free' ? '/success' : '/checkout';
+
 		const error = await submitFormAndGo('/api/select-plan', {
-			plan: selectedPlan,
-			billingCycle: billingCycleForDb,
+			plan: stage,
+			billingCycle: stage === 'free' ? 'monthly' : billingCycleForDb,
 		});
 
-		if (error) submitError = error;
-		isSubmitting = false;
+		if (error) {
+			submitError = error;
+			isSubmitting = false;
+		}
+		// On success, the page will navigate via submitFormAndGo
 	}
 
 	// ============================================================================
@@ -109,25 +121,23 @@
 		return tier.status === 'available';
 	}
 
-	function selectPlan(tier: PricingTier): void {
+	function handleSelectPlan(tier: PricingTier): void {
 		if (canSelect(tier)) {
 			selectedPlan = tier.key;
 		}
 	}
 
-	function getStatusClasses(tier: PricingTier): string {
-		switch (tier.status) {
-			case 'available':
-				return selectedPlan === tier.key
-					? 'ring-2 ring-primary ring-offset-2 ring-offset-transparent'
-					: 'hover:ring-1 hover:ring-primary/30';
-			case 'coming_soon':
-				return 'opacity-90';
-			case 'future':
-				return 'opacity-50 grayscale';
-			case 'deprecated':
-				return 'opacity-40 grayscale line-through';
-		}
+	// Get icon name for GrowthCard
+	function getIconName(iconKey: string): string {
+		const iconMap: Record<string, string> = {
+			user: 'sprout',
+			footprints: 'footprints',
+			sprout: 'sprout',
+			'tree-deciduous': 'tree-deciduous',
+			trees: 'trees',
+			crown: 'crown',
+		};
+		return iconMap[iconKey] || 'sprout';
 	}
 </script>
 
@@ -149,7 +159,7 @@
 			Choose how you'd like to grow
 		</h1>
 		<p class="text-foreground-muted max-w-md mx-auto">
-			Every plan includes a 14-day free trial. Your words are always yours.
+			Start writing for free, or pick a plan that grows with you.
 		</p>
 	</header>
 
@@ -162,19 +172,21 @@
 		/>
 	</div>
 
-	<!-- Plans grid -->
+	<!-- Plans grid - using GrowthCard components -->
 	<div class="space-y-4" role="radiogroup" aria-label="Select a plan">
 		{#each plans as tier (tier.key)}
-			{@const TierIcon = tierIcons[tier.icon]}
 			{@const isAvailable = tier.status === 'available'}
 			{@const isComingSoon = tier.status === 'coming_soon'}
 			{@const isFuture = tier.status === 'future'}
 			{@const isSelected = selectedPlan === tier.key}
 			{@const displayName = groveModeStore.current ? tier.name : (tier.standardName || tier.name)}
 			{@const displayFeatures = groveModeStore.current ? tier.featureStrings : (tier.standardFeatureStrings || tier.featureStrings)}
+			{@const monthlyPrice = getMonthlyEquivalentPrice(tier, billingPeriod)}
+			{@const yearlyPrice = billingPeriod === 'annual' ? getMonthlyEquivalentPrice(tier, 'annual') : 0}
+			{@const savings = billingPeriod === 'annual' ? getYearlySavingsAmount(tier) : 0}
 
 			<div class="relative">
-				<!-- Status badge positioned above card -->
+				<!-- Status badge positioned above card for unavailable tiers -->
 				{#if isComingSoon}
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
@@ -197,105 +209,23 @@
 					</div>
 				{/if}
 
-				<button
-					onclick={() => selectPlan(tier)}
-					disabled={!isAvailable}
-					class="w-full text-left transition-all duration-200 rounded-xl {getStatusClasses(tier)}
-						{isAvailable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2' : 'cursor-not-allowed'}"
-					type="button"
-					role="radio"
-					aria-checked={isSelected}
-					aria-disabled={!isAvailable}
-					aria-label="{displayName} plan, ${getMonthlyEquivalentPrice(tier, billingPeriod)} per month{!isAvailable ? `, ${tier.status === 'coming_soon' ? 'coming soon' : 'not yet available'}` : ''}"
-				>
-					<GlassCard
-						variant={isAvailable ? (isSelected ? 'accent' : 'default') : 'muted'}
-						class="relative overflow-hidden {isComingSoon || isFuture ? 'pt-6' : ''}"
-					>
-						<!-- Subtle overlay for unavailable tiers -->
-						{#if !isAvailable}
-							<div
-								class="absolute inset-0 pointer-events-none {getStatusColor(tier.status, 'overlay')}"
-							></div>
-						{/if}
-
-						<div class="relative z-10 p-6">
-							<!-- Plan header: icon, name, price -->
-							<div class="flex items-start justify-between gap-4 mb-4">
-								<div class="flex items-start gap-4">
-									<!-- Tier icon -->
-									<div class="flex-shrink-0 p-3 rounded-xl transition-colors {getStatusColor(tier.status, 'bg')}">
-										<TierIcon class="w-6 h-6 {getStatusColor(tier.status, 'text')}" />
-									</div>
-
-									<!-- Name and tagline -->
-									<div>
-										<h3 class="text-lg font-medium text-foreground">{displayName}</h3>
-										<p class="text-sm {getStatusColor(tier.status, 'text')}">
-											{tier.tagline}
-										</p>
-									</div>
-								</div>
-
-								<!-- Price -->
-								<div class="text-right flex-shrink-0">
-									<div class="flex items-baseline gap-1">
-										<span class="text-2xl font-semibold text-foreground">${getMonthlyEquivalentPrice(tier, billingPeriod)}</span>
-										<span class="text-sm text-foreground-muted">/mo</span>
-									</div>
-									{#if billingPeriod === 'annual'}
-										<p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-											Save ${getYearlySavingsAmount(tier)}/year
-										</p>
-									{/if}
-								</div>
-							</div>
-
-							<!-- Best for description -->
-							<p class="text-sm text-foreground-muted mb-4">{tier.bestFor}</p>
-
-							<!-- Features grid - responsive: single column on mobile, two on tablet+ -->
-							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-								{#each displayFeatures as feature}
-									<div class="flex items-center gap-2">
-										<Check class="w-4 h-4 flex-shrink-0 {getStatusColor(tier.status, 'check')}" />
-										<span class="text-sm text-foreground-muted">{feature}</span>
-									</div>
-								{/each}
-							</div>
-
-							<!-- Selection indicator for available plans -->
-							{#if isAvailable}
-								<div class="mt-4 pt-4 border-t border-white/20 dark:border-bark-700/30">
-									<div class="flex items-center justify-between">
-										<span class="text-sm text-foreground-muted">
-											{isSelected ? 'Selected' : 'Click to select'}
-										</span>
-										<div
-											class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-												{isSelected
-												? 'border-emerald-500 bg-emerald-500'
-												: 'border-bark-300 dark:border-bark-600'}"
-										>
-											{#if isSelected}
-												<Check class="w-3 h-3 text-white" />
-											{/if}
-										</div>
-									</div>
-								</div>
-							{/if}
-						</div>
-					</GlassCard>
-				</button>
+				<!-- GrowthCard for plan selection -->
+				<GrowthCard
+					stage={tier.key as TierKey}
+					displayName={displayName}
+					tagline={tier.tagline}
+					icon={getIconName(tier.icon)}
+					isCurrent={false}
+					isNext={isSelected}
+					available={isAvailable}
+					monthlyPrice={tier.key === 'free' ? 0 : Number(monthlyPrice)}
+					annualPrice={tier.key === 'free' ? 0 : Number(yearlyPrice)}
+					features={displayFeatures}
+					variant={isSelected ? 'primary' : 'secondary'}
+					onCultivate={() => handleSelectPlan(tier)}
+				/>
 			</div>
 		{/each}
-	</div>
-
-	<!-- Free tier note -->
-	<div class="text-center py-2">
-		<p class="text-sm text-foreground-subtle">
-			A free tier is on its way — we'll share more when it's ready.
-		</p>
 	</div>
 
 	<!-- Fine print -->
@@ -305,7 +235,7 @@
 		</p>
 	</div>
 
-	<!-- Continue button -->
+	<!-- Selection status and continue -->
 	<div class="space-y-4">
 		{#if submitError}
 			<div class="p-3 rounded-lg bg-red-50/80 dark:bg-red-950/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-sm">
@@ -313,9 +243,33 @@
 			</div>
 		{/if}
 
+		{#if selectedPlan}
+			{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
+			{@const selectedSavings = billingPeriod === 'annual' && selectedTier?.key !== 'free' && selectedTier ? getYearlySavingsAmount(selectedTier) : 0}
+			<div class="p-4 rounded-lg bg-grove-100/50 dark:bg-grove-900/30 border border-grove-200 dark:border-grove-800">
+				<div class="flex items-center justify-between">
+					<div>
+						<p class="text-sm text-foreground-muted">
+							Selected: <span class="font-medium text-foreground">{groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}</span>
+						</p>
+						{#if billingPeriod === 'annual' && selectedTier?.key !== 'free'}
+							<p class="text-xs text-accent mt-0.5">
+								Save ${selectedSavings}/year with annual billing
+							</p>
+						{/if}
+					</div>
+					{#if isSubmitting}
+						<Loader2 class="w-5 h-5 animate-spin text-foreground-muted" />
+					{:else}
+						<Check class="w-5 h-5 text-emerald-500" />
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		<button
 			type="button"
-			onclick={savePlan}
+			onclick={() => selectedPlan && selectPlanForOnboarding(selectedPlan as TierKey)}
 			disabled={!selectedPlan || isSubmitting}
 			class="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
 		>
@@ -324,15 +278,24 @@
 				Processing...
 			{:else if selectedPlan}
 				{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
-				Continue with {groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}
-
+				{#if selectedTier?.key === 'free'}
+					Start writing for free
+				{:else}
+					Continue with {groveModeStore.current ? selectedTier?.name : (selectedTier?.standardName || selectedTier?.name)}
+				{/if}
 			{:else}
 				Select a plan to continue
 			{/if}
 		</button>
-		<p class="text-xs text-foreground-subtle text-center">
-			You won't be charged until after your 14-day trial. Cancel anytime.
-		</p>
+		{#if selectedPlan === 'free'}
+			<p class="text-xs text-foreground-subtle text-center">
+				No credit card required. Upgrade anytime.
+			</p>
+		{:else}
+			<p class="text-xs text-foreground-subtle text-center">
+				Full refund within 14 days. Cancel anytime.
+			</p>
+		{/if}
 	</div>
 
 	<!-- Full comparison link -->

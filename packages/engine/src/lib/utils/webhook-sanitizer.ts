@@ -54,7 +54,6 @@ export interface SanitizedAttributes {
   updated_at?: string;
   renews_at?: string;
   ends_at?: string | null;
-  trial_ends_at?: string | null;
   cancelled_at?: string | null;
   pause_starts_at?: string | null;
   pause_resumes_at?: string | null;
@@ -121,7 +120,6 @@ const ATTRIBUTES_WHITELIST = new Set([
   "updated_at",
   "renews_at",
   "ends_at",
-  "trial_ends_at",
   "cancelled_at",
   "pause_starts_at",
   "pause_resumes_at",

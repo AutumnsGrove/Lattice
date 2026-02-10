@@ -105,7 +105,7 @@
 		{
 			id: 'pricing',
 			question: 'How much does it cost?',
-			answer: "Reading is always free. Writing starts at $8/month ([[seedling|Seedling]]). We're launching with one simple plan and adding more tiers as we grow. See the pricing page for details."
+			answer: "Writing is free with [[wanderer|Wanderer]] tier. Paid plans start at $8/month ([[seedling|Seedling]]) for more storage, custom domains, and archival protection. See the pricing page for details."
 		}
 	];
 
@@ -187,7 +187,7 @@
 		</p>
 
 		<!-- Primary CTA -->
-		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
 			<a
 				href="https://plant.grove.place"
 				class="btn-primary inline-flex items-center gap-2 text-base px-6 py-3"
@@ -203,6 +203,7 @@
 				<ArrowRight class="w-4 h-4" aria-hidden="true" />
 			</a>
 		</div>
+		<p class="text-sm text-foreground-subtle mb-6">Free to start. No credit card needed.</p>
 
 	</section>
 
@@ -434,7 +435,7 @@
 			Reading is free. Always.
 		</p>
 		<p class="text-foreground-muted font-sans mb-4">
-			Every Grove blog is publicly accessible — just visit and read, no account needed. When you're ready to write your own, plans start at <span class="text-foreground font-medium">$8/month</span>.
+			Every Grove blog is publicly accessible — just visit and read, no account needed. When you're ready to write your own, start for free or upgrade to paid plans.
 		</p>
 		<a
 			href="/pricing"

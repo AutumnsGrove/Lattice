@@ -238,12 +238,12 @@ export async function verifyWebhookSignature(
  */
 export function mapSubscriptionStatus(
   lsStatus: string,
-): "active" | "trialing" | "past_due" | "paused" | "cancelled" | "expired" {
+): "active" | "past_due" | "paused" | "cancelled" | "expired" {
   const statusMap: Record<
     string,
-    "active" | "trialing" | "past_due" | "paused" | "cancelled" | "expired"
+    "active" | "past_due" | "paused" | "cancelled" | "expired"
   > = {
-    on_trial: "trialing",
+    on_trial: "active",
     active: "active",
     paused: "paused",
     past_due: "past_due",

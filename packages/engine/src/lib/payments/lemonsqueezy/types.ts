@@ -100,9 +100,6 @@ export interface LemonSqueezyVariantAttributes {
   is_subscription: boolean;
   interval: "day" | "week" | "month" | "year" | null;
   interval_count: number | null;
-  has_free_trial: boolean;
-  trial_interval: "day" | "week" | "month" | "year" | null;
-  trial_interval_count: number | null;
   pay_what_you_want: boolean;
   min_price: number;
   suggested_price: number;
@@ -141,7 +138,6 @@ export interface LemonSqueezyCheckoutAttributes {
     logo?: boolean;
     desc?: boolean;
     discount?: boolean;
-    skip_trial?: boolean;
     subscription_preview?: boolean;
     button_color?: string;
   };
@@ -251,7 +247,6 @@ export interface LemonSqueezySubscriptionAttributes {
     resumes_at: string | null;
   } | null;
   cancelled: boolean;
-  trial_ends_at: string | null;
   billing_anchor: number;
   first_subscription_item: {
     id: number;

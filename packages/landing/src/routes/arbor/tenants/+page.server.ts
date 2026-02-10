@@ -27,6 +27,7 @@ interface Tenant {
 interface TenantStats {
   total: number;
   active: number;
+  free: number;
   seedling: number;
   sapling: number;
   oak: number;
@@ -65,6 +66,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
       `SELECT
          COUNT(*) as total,
          COUNT(CASE WHEN active = 1 THEN 1 END) as active,
+         COUNT(CASE WHEN plan = 'free' THEN 1 END) as free,
          COUNT(CASE WHEN plan = 'seedling' THEN 1 END) as seedling,
          COUNT(CASE WHEN plan = 'sapling' THEN 1 END) as sapling,
          COUNT(CASE WHEN plan = 'oak' THEN 1 END) as oak,
@@ -85,6 +87,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
     stats: {
       total: statsResult?.total || 0,
       active: statsResult?.active || 0,
+      free: statsResult?.free || 0,
       seedling: statsResult?.seedling || 0,
       sapling: statsResult?.sapling || 0,
       oak: statsResult?.oak || 0,

@@ -8,7 +8,6 @@ import { getTiersWithFeature, type TierKey } from "../config/tiers.js";
 
 export type PlanTier = TierKey;
 export type SubscriptionStatus =
-  | "trialing"
   | "active"
   | "past_due"
   | "paused"
@@ -20,6 +19,47 @@ export interface TenantSubscription {
   status: SubscriptionStatus | null;
   isActive: boolean;
   currentPeriodEnd: number | null;
+}
+
+export interface AuditLogEntry {
+  tenantId: string;
+  action: string;
+  details: Record<string, unknown>;
+  userEmail?: string;
+}
+
+/**
+ * Log a billing action to the audit log.
+ * Non-blocking with graceful failure - never blocks user operations.
+ */
+export async function logBillingAudit(
+  db: D1Database,
+  entry: AuditLogEntry,
+): Promise<void> {
+  try {
+    await db
+      .prepare(
+        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        crypto.randomUUID(),
+        entry.tenantId,
+        "billing",
+        entry.action,
+        JSON.stringify(entry.details),
+        entry.userEmail,
+        Math.floor(Date.now() / 1000),
+      )
+      .run();
+  } catch (e) {
+    console.error("[Billing Audit] CRITICAL - Failed to log billing action:", {
+      error: e instanceof Error ? e.message : String(e),
+      action: entry.action,
+      tenantId: entry.tenantId,
+      userEmail: entry.userEmail,
+    });
+  }
 }
 
 /**
@@ -61,10 +101,8 @@ export async function getTenantSubscription(
 
   // Subscription is active if:
   // 1. Tenant is active (not suspended)
-  // 2. AND either no billing record (free tier) OR billing status is active/trialing
-  const isActive =
-    tenant.active === 1 &&
-    (!billing || status === "active" || status === "trialing");
+  // 2. AND either no billing record (free tier) OR billing status is active
+  const isActive = tenant.active === 1 && (!billing || status === "active");
 
   return {
     tier,

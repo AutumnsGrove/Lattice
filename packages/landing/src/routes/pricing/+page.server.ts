@@ -1,23 +1,21 @@
 /**
  * Pricing Page Server Load
  *
- * Phase 1: Shows only Seedling tier.
- * See /pricing/full for the complete 4-tier view.
+ * Shows available tiers - Wanderer (free) and Seedling ($8/mo).
+ * See /pricing/full for the complete 5-tier view.
  */
 
 import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
 
 export function load() {
-  // Phase 1: Only Seedling available at launch
-  // See /pricing/full for the complete pricing picture
+  // Available tiers: Wanderer (free) first, then Seedling
   const tiers = transformAllTiers({
-    includeTiers: ["seedling"],
-    highlightTier: "seedling",
+    includeTiers: ["free", "seedling"],
+    highlightTier: "free",
     badges: {
-      seedling: "Available Now",
+      free: "Free",
+      seedling: "$8/mo",
     },
-    // No checkout URLs yet - they'll be added when LemonSqueezy is configured
-    // checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),
   });
 
   return { tiers };

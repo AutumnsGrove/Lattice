@@ -37,6 +37,7 @@ export {
   ArrowLeft,
   MapPin,
   Sprout,
+  Footprints,
   Trees,
   TreeDeciduous,
   Crown,

@@ -50,9 +50,11 @@ Where wanderers seek paths, the Wayfinder creates them.
 
 ## What about subscription tiers?
 
-Subscription tiers (Seedling, Sapling, Oak, Evergreen) are separate from identity. Tiers describe what you pay and what features you access. Identity describes who you are in the community.
+Subscription tiers (Wanderer, Seedling, Sapling, Oak, Evergreen) are separate from identity. Tiers describe what you pay and what features you access. Identity describes who you are in the community.
 
-You can be a [[rooted|Rooted]] Seedling or a [[rooted|Rooted]] Evergreen. You can be a [[pathfinder|Pathfinder]] at any tier. The two systems don't overlap.
+You might notice the free tier is also called Wanderer. That's intentional — it's the natural starting point. Everyone begins as a wanderer, and your first steps in the grove are free. The identity and the tier share a name because they share a spirit: exploring, discovering, finding your place.
+
+You can be a [[rooted|Rooted]] Seedling or a [[rooted|Rooted]] Evergreen. You can be a [[pathfinder|Pathfinder]] at any tier. The two systems are separate — identity is about who you are in the community, tiers are about what features you access.
 
 ---
 

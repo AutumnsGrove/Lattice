@@ -1,4 +1,4 @@
-import { json, error } from "@sveltejs/kit";
+import { json, isHttpError } from "@sveltejs/kit";
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
@@ -10,8 +10,10 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
+import { updateLastActivity } from "$lib/server/activity-tracking.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { TIERS, type TierKey, isValidTier } from "$lib/config/tiers.js";
 
 interface PostRecord {
   id?: string;
@@ -164,6 +166,59 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
     const data = sanitizeObject(await request.json()) as PostInput;
 
+    // Tier-based limit enforcement (isolated — DB failures fail open)
+    // Run all queries in parallel to minimize latency (per AGENT.md parallelization pattern)
+    let tenant: { plan: string } | null;
+    let draftCount: { count: number } | null;
+    let publishedCount: { count: number } | null;
+    try {
+      [tenant, draftCount, publishedCount] = await Promise.all([
+        platform.env.DB.prepare("SELECT plan FROM tenants WHERE id = ?")
+          .bind(tenantId)
+          .first<{ plan: string }>(),
+        platform.env.DB.prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'draft'",
+        )
+          .bind(tenantId)
+          .first<{ count: number }>(),
+        platform.env.DB.prepare(
+          "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+        )
+          .bind(tenantId)
+          .first<{ count: number }>(),
+      ]);
+
+      const tierKey: TierKey =
+        tenant?.plan && isValidTier(tenant.plan) ? tenant.plan : "seedling";
+      const tierConfig = TIERS[tierKey];
+
+      // Check blog access
+      if (!tierConfig.features.blog) {
+        throwGroveError(403, API_ERRORS.BLOG_NOT_AVAILABLE, "API");
+      }
+
+      // Enforce draft or published post limit (mutually exclusive branches)
+      const isDraft = !data.status || data.status === "draft";
+
+      if (isDraft && tierConfig.limits.drafts !== Infinity && draftCount) {
+        if (draftCount.count >= tierConfig.limits.drafts) {
+          throwGroveError(403, API_ERRORS.DRAFT_LIMIT_REACHED, "API");
+        }
+      }
+
+      if (!isDraft && tierConfig.limits.posts !== Infinity && publishedCount) {
+        if (publishedCount.count >= tierConfig.limits.posts) {
+          throwGroveError(403, API_ERRORS.POST_LIMIT_REACHED, "API");
+        }
+      }
+    } catch (err) {
+      // Re-throw intentional HTTP errors (limit violations, blog gating)
+      if (isHttpError(err)) throw err;
+      // [FAIL_OPEN] DB failure on tier/limit check — allow the write through.
+      // Monitor this log line to detect D1 outages bypassing limits.
+      console.error("[Blooms] [FAIL_OPEN] Tier limit check failed:", err);
+    }
+
     // Validate required fields
     if (!data.title || !data.slug || !data.markdown_content) {
       throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
@@ -261,6 +316,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       fireside_assisted: data.fireside_assisted || 0,
       featured_image: data.featured_image || null,
     });
+
+    // Track activity for inactivity reclamation
+    updateLastActivity(platform.env.DB, tenantId);
 
     // Invalidate post list cache so the new post appears in listings
     if (kv) {

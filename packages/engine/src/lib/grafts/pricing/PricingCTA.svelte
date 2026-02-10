@@ -30,7 +30,7 @@
 	// Determine button text
 	let buttonText = $derived(
 		isFree
-			? "Coming Soon"
+			? "Free"
 			: tier.status === "coming_soon"
 				? "Coming Soon"
 				: tier.status === "future"

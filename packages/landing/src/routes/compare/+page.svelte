@@ -52,7 +52,7 @@
 		},
 		{
 			feature: 'Pricing starts at',
-			values: { 'Grove': '$8/mo', 'Bear Blog': 'Free', 'Substack': 'Free', 'WordPress': 'Free', 'Ghost': '$9/mo', 'Tumblr': 'Free' }
+			values: { 'Grove': 'Free — $8/mo', 'Bear Blog': 'Free', 'Substack': 'Free', 'WordPress': 'Free', 'Ghost': '$9/mo', 'Tumblr': 'Free' }
 		}
 	];
 </script>

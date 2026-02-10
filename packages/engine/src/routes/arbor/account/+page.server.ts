@@ -25,7 +25,6 @@ interface BillingRecord {
   current_period_start: number | null;
   current_period_end: number | null;
   cancel_at_period_end: number;
-  trial_end: number | null;
   payment_method_last4: string | null;
   payment_method_brand: string | null;
   created_at: number;
@@ -152,7 +151,7 @@ export const load: PageServerLoad = async ({
     platform.env.DB.prepare(
       `SELECT id, tenant_id, plan, status, provider_customer_id, provider_subscription_id,
               current_period_start, current_period_end, cancel_at_period_end,
-              trial_end, payment_method_last4, payment_method_brand,
+              payment_method_last4, payment_method_brand,
               created_at, updated_at
        FROM platform_billing WHERE tenant_id = ?`,
     )
@@ -299,9 +298,6 @@ export const load: PageServerLoad = async ({
           ? new Date(billing.current_period_end * 1000).toISOString()
           : null,
         cancelAtPeriodEnd: billing.cancel_at_period_end === 1,
-        trialEnd: billing.trial_end
-          ? new Date(billing.trial_end * 1000).toISOString()
-          : null,
         paymentMethod: billing.payment_method_last4
           ? {
               last4: billing.payment_method_last4,
@@ -319,7 +315,6 @@ export const load: PageServerLoad = async ({
           currentPeriodStart: null,
           currentPeriodEnd: null,
           cancelAtPeriodEnd: false,
-          trialEnd: null,
           paymentMethod: null,
           customerId: null,
         }

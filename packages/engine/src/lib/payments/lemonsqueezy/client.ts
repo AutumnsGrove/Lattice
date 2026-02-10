@@ -93,7 +93,6 @@ export class LemonSqueezyClient {
     redirectUrl?: string;
     receiptButtonText?: string;
     receiptThankYouNote?: string;
-    trialLengthDays?: number;
     expiresAt?: Date;
   }): Promise<{ id: string; url: string; expiresAt: Date | null }> {
     this.init();

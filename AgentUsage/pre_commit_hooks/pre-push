@@ -91,6 +91,18 @@ if [ -f "package.json" ]; then
         PKG_MANAGER="npm"
     fi
 
+    # Generate types for engine package first (required by other packages)
+    # The engine exports types from ./dist/ which is gitignored
+    echo -e "${YELLOW}🔧 Generating engine package types...${NC}"
+    if [ -d "packages/engine" ] && [ -f "packages/engine/package.json" ]; then
+        (
+            cd "packages/engine"
+            $PKG_MANAGER run build:package > /dev/null 2>&1
+        )
+        echo -e "   ${GREEN}✓ Types generated${NC}"
+    fi
+    echo ""
+
     # Core packages to type check (most critical, frequently changed)
     # Other packages (domains, vineyard, og-worker, durable-objects, post-migrator)
     # are checked in CI — they're more stable and rarely break in isolation

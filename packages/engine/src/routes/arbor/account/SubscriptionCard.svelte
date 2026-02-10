@@ -32,10 +32,7 @@
   }: Props = $props();
 
   // Computed status flags
-  const isTrialing = $derived(billing?.status === "trialing");
-  const isActive = $derived(
-    billing?.status === "active" || billing?.status === "trialing"
-  );
+  const isActive = $derived(billing?.status === "active");
   const isCancelled = $derived(billing?.cancelAtPeriodEnd === true);
   const isPastDue = $derived(billing?.status === "past_due");
 </script>
@@ -60,12 +57,7 @@
       </div>
 
       <div class="plan-status" role="status" aria-live="polite">
-        {#if isTrialing}
-          <span class="status-badge trialing" aria-label="Subscription status: Trial period">
-            <Calendar class="status-icon" aria-hidden="true" />
-            Trial
-          </span>
-        {:else if isPastDue}
+        {#if isPastDue}
           <span class="status-badge past-due" aria-label="Subscription status: Payment past due">
             <AlertCircle class="status-icon" aria-hidden="true" />
             Past Due
@@ -118,14 +110,6 @@
         </div>
       {/if}
 
-      {#if isTrialing && billing?.trialEnd}
-        <div class="detail-row">
-          <span class="detail-label">Trial Ends</span>
-          <span class="detail-value">
-            {formatDate(billing.trialEnd)}
-          </span>
-        </div>
-      {/if}
     </div>
 
     <div class="plan-actions" role="group" aria-label="Subscription actions">
@@ -263,11 +247,6 @@
     color: #166534;
   }
 
-  .status-badge.trialing {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
   .status-badge.cancelled {
     background: #fef3c7;
     color: #92400e;
@@ -286,11 +265,6 @@
   :global(.dark) .status-badge.active {
     background: rgba(34, 197, 94, 0.2);
     color: #86efac;
-  }
-
-  :global(.dark) .status-badge.trialing {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93c5fd;
   }
 
   :global(.dark) .status-badge.cancelled {

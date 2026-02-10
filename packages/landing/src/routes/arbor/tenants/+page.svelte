@@ -19,6 +19,11 @@
 	);
 
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
+		free: {
+			label: 'Wanderer',
+			color: 'text-stone-700 dark:text-stone-400',
+			bg: 'bg-stone-100 dark:bg-stone-900/30'
+		},
 		seedling: {
 			label: 'Seedling',
 			color: 'text-green-700 dark:text-green-400',
@@ -96,8 +101,10 @@
 		<div class="text-sm text-foreground-muted font-sans">Storage</div>
 	</GlassCard>
 	<GlassCard class="p-4 text-center">
+		{@const paid = data.stats.seedling + data.stats.sapling + data.stats.oak + data.stats.evergreen}
+		{@const pct = data.stats.total > 0 ? Math.round((paid / data.stats.total) * 100) : 0}
 		<div class="flex justify-center gap-1 mb-1">
-			{#each ['seedling', 'sapling', 'oak', 'evergreen'] as plan}
+			{#each ['free', 'seedling', 'sapling', 'oak', 'evergreen'] as plan}
 				{@const count = data.stats[plan as keyof typeof data.stats]}
 				{#if typeof count === 'number' && count > 0}
 					<span class="text-xs font-sans px-1.5 py-0.5 rounded {planConfig[plan]?.bg} {planConfig[plan]?.color}">
@@ -106,7 +113,9 @@
 				{/if}
 			{/each}
 		</div>
-		<div class="text-sm text-foreground-muted font-sans">By Plan</div>
+		<div class="text-sm text-foreground-muted font-sans">
+			{pct}% subscribed
+		</div>
 	</GlassCard>
 </div>
 

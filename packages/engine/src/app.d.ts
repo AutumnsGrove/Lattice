@@ -38,6 +38,9 @@ declare global {
 
       /** CSRF token for form protection */
       csrfToken?: string;
+
+      /** Origin for CSRF validation */
+      origin?: string;
     }
 
     // interface PageData {}

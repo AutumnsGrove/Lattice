@@ -18,7 +18,7 @@ import {
   type StripeAccountLink,
   type StripeEvent,
   type StripeBillingPortalSession,
-} from './client.js';
+} from "./client.js";
 
 import type {
   PaymentProvider,
@@ -42,14 +42,14 @@ import type {
   ConnectOnboardingOptions,
   ConnectOnboardingResult,
   Money,
-} from '../types.js';
+} from "../types.js";
 
 // =============================================================================
 // STRIPE PROVIDER
 // =============================================================================
 
 export class StripeProvider implements PaymentProvider {
-  readonly name = 'stripe';
+  readonly name = "stripe";
 
   private readonly client: StripeClient;
   private readonly webhookSecret?: string;
@@ -65,17 +65,19 @@ export class StripeProvider implements PaymentProvider {
   // PRODUCTS & PRICES
   // ==========================================================================
 
-  async syncProduct(product: ProductBase): Promise<{ providerProductId: string }> {
+  async syncProduct(
+    product: ProductBase,
+  ): Promise<{ providerProductId: string }> {
     // Check if product already exists in Stripe
     // For now, always create new. In production, you'd want to update existing.
 
-    const stripeProduct = await this.client.request<StripeProduct>('products', {
-      method: 'POST',
+    const stripeProduct = await this.client.request<StripeProduct>("products", {
+      method: "POST",
       params: {
         name: product.name,
         description: product.description,
         images: product.images.slice(0, 8), // Stripe allows max 8 images
-        active: product.status === 'active',
+        active: product.status === "active",
         metadata: {
           grove_product_id: product.id,
           grove_tenant_id: product.tenantId,
@@ -90,7 +92,7 @@ export class StripeProvider implements PaymentProvider {
 
   async syncPrice(
     variant: ProductVariant,
-    providerProductId: string
+    providerProductId: string,
   ): Promise<{ providerPriceId: string }> {
     const params: Record<string, unknown> = {
       product: providerProductId,
@@ -104,15 +106,15 @@ export class StripeProvider implements PaymentProvider {
     };
 
     // Add recurring config for subscriptions
-    if (variant.pricingType === 'recurring' && variant.recurring) {
+    if (variant.pricingType === "recurring" && variant.recurring) {
       params.recurring = {
         interval: variant.recurring.interval,
         interval_count: variant.recurring.intervalCount,
       };
     }
 
-    const stripePrice = await this.client.request<StripePrice>('prices', {
-      method: 'POST',
+    const stripePrice = await this.client.request<StripePrice>("prices", {
+      method: "POST",
       params,
     });
 
@@ -121,7 +123,7 @@ export class StripeProvider implements PaymentProvider {
 
   async archiveProduct(providerProductId: string): Promise<void> {
     await this.client.request(`products/${providerProductId}`, {
-      method: 'POST',
+      method: "POST",
       params: { active: false },
     });
   }
@@ -133,7 +135,7 @@ export class StripeProvider implements PaymentProvider {
   async createCheckoutSession(
     items: CartItem[],
     options: CheckoutOptions,
-    resolveVariant: (variantId: string) => Promise<ProductVariant | null>
+    resolveVariant: (variantId: string) => Promise<ProductVariant | null>,
   ): Promise<CheckoutSession> {
     // Build line items from cart
     const lineItems: Array<{
@@ -166,7 +168,7 @@ export class StripeProvider implements PaymentProvider {
                 grove_variant_id: variant.id,
               },
             },
-            ...(variant.pricingType === 'recurring' && variant.recurring
+            ...(variant.pricingType === "recurring" && variant.recurring
               ? {
                   recurring: {
                     interval: variant.recurring.interval,
@@ -218,21 +220,18 @@ export class StripeProvider implements PaymentProvider {
       };
     }
 
-    // Subscription trial
-    if (options.mode === 'subscription' && options.trialPeriodDays) {
-      params.subscription_data = {
-        trial_period_days: options.trialPeriodDays,
-      };
-    }
-
     // Promo codes
     if (options.allowPromotionCodes) {
       params.allow_promotion_codes = true;
     }
 
     // Stripe Connect: application fee and connected account
-    const requestOptions: { method: 'POST'; params: Record<string, unknown>; stripeAccount?: string } = {
-      method: 'POST',
+    const requestOptions: {
+      method: "POST";
+      params: Record<string, unknown>;
+      stripeAccount?: string;
+    } = {
+      method: "POST",
       params,
     };
 
@@ -241,9 +240,9 @@ export class StripeProvider implements PaymentProvider {
 
       // Application fee (platform commission)
       if (options.applicationFeeAmount) {
-        if (options.mode === 'subscription') {
+        if (options.mode === "subscription") {
           params.subscription_data = {
-            ...params.subscription_data as object,
+            ...(params.subscription_data as object),
             application_fee_percent: undefined, // Use fixed amount instead
           };
           // For subscriptions, we need to use transfer_data instead
@@ -259,8 +258,8 @@ export class StripeProvider implements PaymentProvider {
     }
 
     const session = await this.client.request<StripeCheckoutSession>(
-      'checkout/sessions',
-      requestOptions
+      "checkout/sessions",
+      requestOptions,
     );
 
     return this.mapCheckoutSession(session);
@@ -269,7 +268,7 @@ export class StripeProvider implements PaymentProvider {
   async getCheckoutSession(sessionId: string): Promise<CheckoutSession | null> {
     try {
       const session = await this.client.request<StripeCheckoutSession>(
-        `checkout/sessions/${sessionId}`
+        `checkout/sessions/${sessionId}`,
       );
       return this.mapCheckoutSession(session);
     } catch (err) {
@@ -285,7 +284,7 @@ export class StripeProvider implements PaymentProvider {
       id: session.id,
       url: session.url,
       status: session.status,
-      mode: session.mode as CheckoutSession['mode'],
+      mode: session.mode as CheckoutSession["mode"],
       customerId: session.customer,
       customerEmail: session.customer_email,
       amountTotal: session.amount_total
@@ -303,25 +302,25 @@ export class StripeProvider implements PaymentProvider {
 
   async getPaymentStatus(providerPaymentId: string): Promise<PaymentStatus> {
     const intent = await this.client.request<{ status: string }>(
-      `payment_intents/${providerPaymentId}`
+      `payment_intents/${providerPaymentId}`,
     );
 
     const statusMap: Record<string, PaymentStatus> = {
-      requires_payment_method: 'pending',
-      requires_confirmation: 'pending',
-      requires_action: 'pending',
-      processing: 'processing',
-      requires_capture: 'processing',
-      canceled: 'canceled',
-      succeeded: 'succeeded',
+      requires_payment_method: "pending",
+      requires_confirmation: "pending",
+      requires_action: "pending",
+      processing: "processing",
+      requires_capture: "processing",
+      canceled: "canceled",
+      succeeded: "succeeded",
     };
 
-    return statusMap[intent.status] || 'pending';
+    return statusMap[intent.status] || "pending";
   }
 
   async refund(
     request: RefundRequest,
-    providerPaymentId: string
+    providerPaymentId: string,
   ): Promise<RefundResult> {
     const params: Record<string, unknown> = {
       payment_intent: providerPaymentId,
@@ -335,8 +334,8 @@ export class StripeProvider implements PaymentProvider {
       params.reason = request.reason;
     }
 
-    const refund = await this.client.request<StripeRefund>('refunds', {
-      method: 'POST',
+    const refund = await this.client.request<StripeRefund>("refunds", {
+      method: "POST",
       params,
     });
 
@@ -345,7 +344,7 @@ export class StripeProvider implements PaymentProvider {
       orderId: request.orderId,
       amount: { amount: refund.amount, currency: refund.currency },
       status: refund.status,
-      reason: refund.reason as RefundResult['reason'],
+      reason: refund.reason as RefundResult["reason"],
       providerRefundId: refund.id,
       createdAt: new Date(refund.created * 1000),
     };
@@ -355,10 +354,12 @@ export class StripeProvider implements PaymentProvider {
   // SUBSCRIPTIONS
   // ==========================================================================
 
-  async getSubscription(providerSubscriptionId: string): Promise<Subscription | null> {
+  async getSubscription(
+    providerSubscriptionId: string,
+  ): Promise<Subscription | null> {
     try {
       const sub = await this.client.request<StripeSubscription>(
-        `subscriptions/${providerSubscriptionId}`
+        `subscriptions/${providerSubscriptionId}`,
       );
       return this.mapSubscription(sub);
     } catch (err) {
@@ -371,15 +372,15 @@ export class StripeProvider implements PaymentProvider {
 
   async cancelSubscription(
     providerSubscriptionId: string,
-    cancelImmediately = false
+    cancelImmediately = false,
   ): Promise<void> {
     if (cancelImmediately) {
       await this.client.request(`subscriptions/${providerSubscriptionId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
     } else {
       await this.client.request(`subscriptions/${providerSubscriptionId}`, {
-        method: 'POST',
+        method: "POST",
         params: { cancel_at_period_end: true },
       });
     }
@@ -387,40 +388,40 @@ export class StripeProvider implements PaymentProvider {
 
   async resumeSubscription(providerSubscriptionId: string): Promise<void> {
     await this.client.request(`subscriptions/${providerSubscriptionId}`, {
-      method: 'POST',
+      method: "POST",
       params: { cancel_at_period_end: false },
     });
   }
 
   private mapSubscription(sub: StripeSubscription): Subscription {
     const statusMap: Record<string, SubscriptionStatus> = {
-      trialing: 'trialing',
-      active: 'active',
-      past_due: 'past_due',
-      paused: 'paused',
-      canceled: 'canceled',
-      unpaid: 'unpaid',
-      incomplete: 'unpaid',
-      incomplete_expired: 'canceled',
+      trialing: "active",
+      active: "active",
+      past_due: "past_due",
+      paused: "paused",
+      canceled: "canceled",
+      unpaid: "unpaid",
+      incomplete: "unpaid",
+      incomplete_expired: "canceled",
     };
 
     const item = sub.items.data[0];
 
     return {
       id: sub.id,
-      tenantId: sub.metadata.grove_tenant_id || '',
+      tenantId: sub.metadata.grove_tenant_id || "",
       customerId: sub.customer,
-      customerEmail: '', // Would need to fetch customer to get email
-      productId: sub.metadata.grove_product_id || '',
-      variantId: sub.metadata.grove_variant_id || '',
+      customerEmail: "", // Would need to fetch customer to get email
+      productId: sub.metadata.grove_product_id || "",
+      variantId: sub.metadata.grove_variant_id || "",
       quantity: item?.quantity || 1,
-      status: statusMap[sub.status] || 'active',
+      status: statusMap[sub.status] || "active",
       currentPeriodStart: new Date(sub.current_period_start * 1000),
       currentPeriodEnd: new Date(sub.current_period_end * 1000),
       cancelAtPeriodEnd: sub.cancel_at_period_end,
-      canceledAt: sub.canceled_at ? new Date(sub.canceled_at * 1000) : undefined,
-      trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : undefined,
-      trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : undefined,
+      canceledAt: sub.canceled_at
+        ? new Date(sub.canceled_at * 1000)
+        : undefined,
       providerSubscriptionId: sub.id,
       createdAt: new Date(sub.created * 1000),
       updatedAt: new Date(sub.created * 1000), // Stripe doesn't have updated_at
@@ -431,7 +432,9 @@ export class StripeProvider implements PaymentProvider {
   // CUSTOMERS
   // ==========================================================================
 
-  async syncCustomer(customer: Partial<Customer>): Promise<{ providerCustomerId: string }> {
+  async syncCustomer(
+    customer: Partial<Customer>,
+  ): Promise<{ providerCustomerId: string }> {
     const params: Record<string, unknown> = {
       metadata: {
         grove_customer_id: customer.id,
@@ -448,12 +451,12 @@ export class StripeProvider implements PaymentProvider {
     if (customer.providerCustomerId) {
       const updated = await this.client.request<StripeCustomer>(
         `customers/${customer.providerCustomerId}`,
-        { method: 'POST', params }
+        { method: "POST", params },
       );
       return { providerCustomerId: updated.id };
     } else {
-      const created = await this.client.request<StripeCustomer>('customers', {
-        method: 'POST',
+      const created = await this.client.request<StripeCustomer>("customers", {
+        method: "POST",
         params,
       });
       return { providerCustomerId: created.id };
@@ -463,13 +466,13 @@ export class StripeProvider implements PaymentProvider {
   async getCustomer(providerCustomerId: string): Promise<Customer | null> {
     try {
       const cust = await this.client.request<StripeCustomer>(
-        `customers/${providerCustomerId}`
+        `customers/${providerCustomerId}`,
       );
 
       return {
         id: cust.metadata.grove_customer_id || cust.id,
-        tenantId: cust.metadata.grove_tenant_id || '',
-        email: cust.email || '',
+        tenantId: cust.metadata.grove_tenant_id || "",
+        email: cust.email || "",
         name: cust.name,
         phone: cust.phone,
         providerCustomerId: cust.id,
@@ -487,20 +490,20 @@ export class StripeProvider implements PaymentProvider {
 
   async createBillingPortalSession(
     providerCustomerId: string,
-    returnUrl: string
-  ): Promise<{ url: string }> {
+    returnUrl: string,
+  ): Promise<{ id: string; url: string }> {
     const session = await this.client.request<StripeBillingPortalSession>(
-      'billing_portal/sessions',
+      "billing_portal/sessions",
       {
-        method: 'POST',
+        method: "POST",
         params: {
           customer: providerCustomerId,
           return_url: returnUrl,
         },
-      }
+      },
     );
 
-    return { url: session.url };
+    return { id: session.id, url: session.url };
   }
 
   // ==========================================================================
@@ -508,13 +511,13 @@ export class StripeProvider implements PaymentProvider {
   // ==========================================================================
 
   async handleWebhook(request: Request): Promise<WebhookResult> {
-    const signature = request.headers.get('stripe-signature');
+    const signature = request.headers.get("stripe-signature");
     if (!signature) {
-      return { received: false, error: 'Missing Stripe-Signature header' };
+      return { received: false, error: "Missing Stripe-Signature header" };
     }
 
     if (!this.webhookSecret) {
-      return { received: false, error: 'Webhook secret not configured' };
+      return { received: false, error: "Webhook secret not configured" };
     }
 
     const payload = await request.text();
@@ -522,7 +525,7 @@ export class StripeProvider implements PaymentProvider {
     const result = await this.client.verifyWebhookSignature(
       payload,
       signature,
-      this.webhookSecret
+      this.webhookSecret,
     );
 
     if (!result.valid) {
@@ -544,23 +547,22 @@ export class StripeProvider implements PaymentProvider {
 
   private mapEventType(stripeType: string): WebhookEventType {
     const typeMap: Record<string, WebhookEventType> = {
-      'checkout.session.completed': 'checkout.session.completed',
-      'checkout.session.expired': 'checkout.session.expired',
-      'payment_intent.succeeded': 'payment.succeeded',
-      'payment_intent.payment_failed': 'payment.failed',
-      'customer.subscription.created': 'subscription.created',
-      'customer.subscription.updated': 'subscription.updated',
-      'customer.subscription.deleted': 'subscription.canceled',
-      'customer.subscription.trial_will_end': 'subscription.trial_will_end',
-      'invoice.paid': 'invoice.paid',
-      'invoice.payment_failed': 'invoice.payment_failed',
-      'charge.refunded': 'refund.created',
-      'refund.updated': 'refund.updated',
-      'account.updated': 'account.updated',
-      'payout.paid': 'payout.paid',
+      "checkout.session.completed": "checkout.session.completed",
+      "checkout.session.expired": "checkout.session.expired",
+      "payment_intent.succeeded": "payment.succeeded",
+      "payment_intent.payment_failed": "payment.failed",
+      "customer.subscription.created": "subscription.created",
+      "customer.subscription.updated": "subscription.updated",
+      "customer.subscription.deleted": "subscription.canceled",
+      "invoice.paid": "invoice.paid",
+      "invoice.payment_failed": "invoice.payment_failed",
+      "charge.refunded": "refund.created",
+      "refund.updated": "refund.updated",
+      "account.updated": "account.updated",
+      "payout.paid": "payout.paid",
     };
 
-    return typeMap[stripeType] || ('payment.succeeded' as WebhookEventType);
+    return typeMap[stripeType] || ("payment.succeeded" as WebhookEventType);
   }
 
   // ==========================================================================
@@ -568,14 +570,14 @@ export class StripeProvider implements PaymentProvider {
   // ==========================================================================
 
   async createConnectAccount(
-    options: ConnectOnboardingOptions
+    options: ConnectOnboardingOptions,
   ): Promise<ConnectOnboardingResult> {
     // Create the Connect account
-    const account = await this.client.request<StripeAccount>('accounts', {
-      method: 'POST',
+    const account = await this.client.request<StripeAccount>("accounts", {
+      method: "POST",
       params: {
-        type: options.type || 'express',
-        country: options.country || 'US',
+        type: options.type || "express",
+        country: options.country || "US",
         email: options.email,
         business_type: options.businessType,
         capabilities: {
@@ -589,15 +591,18 @@ export class StripeProvider implements PaymentProvider {
     });
 
     // Create account link for onboarding
-    const accountLink = await this.client.request<StripeAccountLink>('account_links', {
-      method: 'POST',
-      params: {
-        account: account.id,
-        refresh_url: options.refreshUrl,
-        return_url: options.returnUrl,
-        type: 'account_onboarding',
+    const accountLink = await this.client.request<StripeAccountLink>(
+      "account_links",
+      {
+        method: "POST",
+        params: {
+          account: account.id,
+          refresh_url: options.refreshUrl,
+          return_url: options.returnUrl,
+          type: "account_onboarding",
+        },
       },
-    });
+    );
 
     return {
       accountId: account.id,
@@ -606,10 +611,12 @@ export class StripeProvider implements PaymentProvider {
     };
   }
 
-  async getConnectAccount(providerAccountId: string): Promise<ConnectAccount | null> {
+  async getConnectAccount(
+    providerAccountId: string,
+  ): Promise<ConnectAccount | null> {
     try {
       const account = await this.client.request<StripeAccount>(
-        `accounts/${providerAccountId}`
+        `accounts/${providerAccountId}`,
       );
 
       return this.mapConnectAccount(account);
@@ -623,17 +630,20 @@ export class StripeProvider implements PaymentProvider {
 
   async createConnectAccountLink(
     providerAccountId: string,
-    options: Pick<ConnectOnboardingOptions, 'returnUrl' | 'refreshUrl'>
+    options: Pick<ConnectOnboardingOptions, "returnUrl" | "refreshUrl">,
   ): Promise<{ url: string; expiresAt?: Date }> {
-    const accountLink = await this.client.request<StripeAccountLink>('account_links', {
-      method: 'POST',
-      params: {
-        account: providerAccountId,
-        refresh_url: options.refreshUrl,
-        return_url: options.returnUrl,
-        type: 'account_onboarding',
+    const accountLink = await this.client.request<StripeAccountLink>(
+      "account_links",
+      {
+        method: "POST",
+        params: {
+          account: providerAccountId,
+          refresh_url: options.refreshUrl,
+          return_url: options.returnUrl,
+          type: "account_onboarding",
+        },
       },
-    });
+    );
 
     return {
       url: accountLink.url,
@@ -641,29 +651,31 @@ export class StripeProvider implements PaymentProvider {
     };
   }
 
-  async createConnectLoginLink(providerAccountId: string): Promise<{ url: string }> {
+  async createConnectLoginLink(
+    providerAccountId: string,
+  ): Promise<{ url: string }> {
     const loginLink = await this.client.request<{ url: string }>(
       `accounts/${providerAccountId}/login_links`,
-      { method: 'POST' }
+      { method: "POST" },
     );
 
     return { url: loginLink.url };
   }
 
   private mapConnectAccount(account: StripeAccount): ConnectAccount {
-    let status: ConnectAccountStatus = 'pending';
+    let status: ConnectAccountStatus = "pending";
 
     if (account.charges_enabled && account.payouts_enabled) {
-      status = 'enabled';
+      status = "enabled";
     } else if (account.details_submitted) {
-      status = 'restricted';
+      status = "restricted";
     } else if (!account.charges_enabled && account.details_submitted) {
-      status = 'disabled';
+      status = "disabled";
     }
 
     return {
       id: account.id,
-      tenantId: '', // Would need to look up from metadata
+      tenantId: "", // Would need to look up from metadata
       providerAccountId: account.id,
       status,
       chargesEnabled: account.charges_enabled,
@@ -682,6 +694,8 @@ export class StripeProvider implements PaymentProvider {
 // FACTORY FUNCTION
 // =============================================================================
 
-export function createStripeProvider(config: PaymentProviderConfig): StripeProvider {
+export function createStripeProvider(
+  config: PaymentProviderConfig,
+): StripeProvider {
   return new StripeProvider(config);
 }

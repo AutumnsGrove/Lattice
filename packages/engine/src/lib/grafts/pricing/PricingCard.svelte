@@ -6,7 +6,7 @@
 	 * Glassmorphism styled with Grove aesthetics.
 	 */
 
-	import { Sprout, TreeDeciduous, Trees, Crown, User, Check } from "lucide-svelte";
+	import { Sprout, TreeDeciduous, Trees, Crown, User, Footprints, Check } from "lucide-svelte";
 	import type { PricingCardProps } from "./types.js";
 	import type { TierIcon } from "../../config/tiers.js";
 	import PricingCTA from "./PricingCTA.svelte";
@@ -25,6 +25,7 @@
 	// Map tier icons to components
 	const iconComponents: Record<TierIcon, typeof Sprout> = {
 		user: User,
+		footprints: Footprints,
 		sprout: Sprout,
 		"tree-deciduous": TreeDeciduous,
 		trees: Trees,

@@ -303,13 +303,13 @@ function secureCompare(a: string, b: string): boolean {
  */
 export function mapSubscriptionStatus(
   stripeStatus: string,
-): "active" | "trialing" | "past_due" | "paused" | "cancelled" | "expired" {
+): "active" | "past_due" | "paused" | "cancelled" | "expired" {
   const statusMap: Record<
     string,
-    "active" | "trialing" | "past_due" | "paused" | "cancelled" | "expired"
+    "active" | "past_due" | "paused" | "cancelled" | "expired"
   > = {
     active: "active",
-    trialing: "trialing",
+    trialing: "active",
     past_due: "past_due",
     unpaid: "past_due",
     canceled: "cancelled",
@@ -381,8 +381,7 @@ export type StripeEventType =
   | "customer.subscription.updated"
   | "customer.subscription.deleted"
   | "invoice.paid"
-  | "invoice.payment_failed"
-  | "customer.subscription.trial_will_end";
+  | "invoice.payment_failed";
 
 /**
  * Stripe webhook event structure
@@ -429,8 +428,6 @@ export interface StripeSubscription {
   current_period_end: number;
   cancel_at_period_end: boolean;
   canceled_at?: number;
-  trial_start?: number;
-  trial_end?: number;
   metadata: Record<string, string>;
   items: {
     data: Array<{

@@ -28,14 +28,15 @@
 				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
 		},
 		free: {
-			title: "Free Accounts",
+			title: "Wanderer Accounts",
 			content:
-				"Free accounts get full [[meadow|Meadow]] access—browse, follow, react—and can comment on posts (20 public comments per week, private replies are rate-limited to prevent spam). No [[your-garden|garden]], no storage. When you're ready to write, upgrade to [[seedling|Seedling]].",
+				"Wanderer accounts get 5 blog posts and 50 MB storage — enough to try your hand at writing with no commitment. [[meadow|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling|Seedling]].",
 		},
+		// TODO(foliage): update content when themes launch
 		themes: {
 			title: "Themes",
 			content:
-				"[[seedling|Seedling]]: Choose from 3 hand-curated themes plus a custom accent color. [[sapling|Sapling]]: All 10 themes plus accent color. [[oak|Oak]]+: Full theme customizer (colors, fonts, layout, custom CSS) plus community themes. [[evergreen|Evergreen]]: Everything Oak gets, plus upload your own custom fonts.",
+				"Themes are coming soon. Every blog currently uses Grove's default theme with accent color customization. When themes launch, [[seedling|Seedling]] gets 3 curated themes, [[sapling|Sapling]] gets all 10, and [[oak|Oak]]+ gets the full theme customizer.",
 		},
 		curios: {
 			title: "Curios",

@@ -53,6 +53,7 @@ import {
   Github,
   Layers,
   // Nature/Growth (Grove themed)
+  Footprints,
   Sprout,
   Heart,
   Leaf,
@@ -163,6 +164,7 @@ export const stateIcons = {
 /** Icons for pricing tiers and feature comparison */
 export const pricingIcons = {
   // Tier icons (growth progression)
+  footprints: Footprints,
   sprout: Sprout,
   treedeciduous: TreeDeciduous,
   trees: Trees,
@@ -360,6 +362,7 @@ export {
   ArrowLeft,
   MapPin,
   // Growth icons
+  Footprints,
   Sprout,
   Trees,
   TreeDeciduous,

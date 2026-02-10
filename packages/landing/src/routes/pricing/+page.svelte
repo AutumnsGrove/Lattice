@@ -9,7 +9,6 @@
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { PricingGraft } from "@autumnsgrove/groveengine/grafts/pricing";
-	import { GroveTerm } from "@autumnsgrove/groveengine/ui";
 	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();
@@ -38,7 +37,7 @@
 						Pricing
 					</h1>
 					<p class="text-lg text-foreground-subtle font-sans">
-						Simple and honest. One plan to get started.
+						Simple and honest. Free to start, with paid options as you grow.
 					</p>
 					<div class="flex items-center justify-center gap-4 mt-6">
 						<div class="w-12 h-px bg-divider"></div>
@@ -56,14 +55,14 @@
 				{#snippet footer()}
 					<div class="text-center space-y-4">
 						<p class="text-foreground-subtle font-sans text-sm">
-							We're launching with <GroveTerm term="seedling">Seedling</GroveTerm>. More plans are on the way.
+							Upgrade anytime as your garden grows.
 						</p>
 						<p class="font-sans text-sm">
 							<a
 								href="/pricing/full"
 								class="text-primary hover:underline"
 							>
-								See future plans →
+								See all plans →
 							</a>
 						</p>
 					</div>

@@ -20,7 +20,13 @@ import type { TierKey } from "../config/tiers.js";
  * Identifier for UI grafts.
  * Each graft has a unique ID used for registry lookup and feature flag linking.
  */
-export type GraftId = "pricing" | "nav" | "footer" | "hero" | (string & {});
+export type GraftId =
+  | "pricing"
+  | "upgrades"
+  | "nav"
+  | "footer"
+  | "hero"
+  | (string & {});
 
 /**
  * Product identifiers in the Grove ecosystem.

@@ -11,7 +11,6 @@ export interface BillingData {
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
-  trialEnd: string | null;
   paymentMethod: {
     last4: string;
     brand: string | null;

@@ -9,17 +9,17 @@
 
 import {
   TIERS,
-  PAID_TIERS,
-  type PaidTierKey,
+  TIER_ORDER,
+  type TierKey,
   type TierRateLimits,
-  isPaidTier,
+  isValidTier as configIsValidTier,
 } from "../../config/tiers.js";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type SubscriptionTier = PaidTierKey;
+export type SubscriptionTier = TierKey;
 export type RateLimitCategory = keyof TierRateLimits;
 export type EndpointKey = keyof typeof ENDPOINT_RATE_LIMITS;
 
@@ -34,10 +34,10 @@ export interface RateLimitConfig {
 
 /**
  * Rate limits by subscription tier.
- * Derived from the unified tier config (paid tiers only).
+ * Derived from the unified tier config (all tiers including free).
  */
 export const TIER_RATE_LIMITS = Object.fromEntries(
-  PAID_TIERS.map((key) => [key, TIERS[key].rateLimits]),
+  TIER_ORDER.map((key) => [key, TIERS[key].rateLimits]),
 ) as Record<SubscriptionTier, TierRateLimits>;
 
 // ============================================================================
@@ -150,8 +150,8 @@ export function getTierLimit(
 }
 
 /**
- * Check if a tier exists (paid tiers only for rate limiting).
+ * Check if a tier exists (all tiers including free).
  */
 export function isValidTier(tier: string): tier is SubscriptionTier {
-  return isPaidTier(tier);
+  return configIsValidTier(tier);
 }

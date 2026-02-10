@@ -12,6 +12,8 @@ keywords:
   - sapling
   - oak
   - evergreen
+  - wanderer
+  - free
   - plans
 order: 72
 ---
@@ -20,15 +22,30 @@ order: 72
 
 Everyone starts somewhere. Grove's tiers are named for where you are on your journey.
 
-Four subscription levels—Seedling, Sapling, Oak, and Evergreen—each offering more as your grove grows. No hidden upsells. No surprise feature gates. Just clear options for what you need right now.
+Five levels—Wanderer, Seedling, Sapling, Oak, and Evergreen—each offering more as your grove grows. No hidden upsells. No surprise feature gates. Just clear options for where you are right now.
 
 ## The tiers
+
+### Wanderer — Free
+
+**Your first steps in the grove.**
+
+You're curious. Maybe you've been meaning to start a blog for years. Maybe you just want to see what this place feels like. No credit card, no commitment — just a quiet clearing to try your hand at writing.
+
+Wanderer gives you:
+- Up to 5 posts
+- 50 MB storage
+- Your own grove.place address
+- RSS feed
+- Meadow access for browsing and reacting
+
+It's enough to find out if this is home.
 
 ### Seedling — $8/month
 
 **For trying things out.**
 
-You're planting your first blog. You're not sure if you'll stick with it. You want a space without making a big commitment.
+You've decided to put down roots. Wanderer felt right, and now you want more room to grow.
 
 Seedling gives you:
 - Up to 50 posts
@@ -97,13 +114,13 @@ The full-service option for people who value their time.
 
 ## What this means for you
 
-**Start where it makes sense.** If you're trying blogging for the first time, Seedling is fine. You can always grow.
+**Start where it makes sense.** If you're trying blogging for the first time, Wanderer is free — no credit card needed. When you're ready for more room, cultivate to Seedling.
 
 **Clear value at each level.** Every tier adds meaningful features. Nothing is locked away arbitrarily.
 
 **Annual discounts available.** Pay yearly and save. The commitment makes sense once you know you're staying.
 
-**Free isn't an option.** Grove doesn't have a free tier. Running a quality platform costs money. We'd rather charge fairly than sell your data or show ads.
+**Free is where everyone starts.** Wanderer gives you 5 posts and 50 MB — enough to try things out with zero commitment. Running a quality platform costs money, which is why paid tiers exist. But your first steps? Those are on us.
 
 ## Related
 
@@ -113,4 +130,4 @@ The full-service option for people who value their time.
 
 ---
 
-*Seedlings become saplings. Saplings become oaks. Oaks become evergreens—trees that stay green through every season. That's the journey.*
+*Wanderers find their clearing. Seedlings take root. Saplings grow strong. Oaks stand tall. Evergreens stay green through every season. That's the journey.*

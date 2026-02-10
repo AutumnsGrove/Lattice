@@ -282,7 +282,7 @@ export class LemonSqueezyProvider implements PaymentProvider {
     attrs: LemonSqueezySubscriptionAttributes,
   ): Subscription {
     const statusMap: Record<string, SubscriptionStatus> = {
-      on_trial: "trialing",
+      on_trial: "active",
       active: "active",
       past_due: "past_due",
       paused: "paused",
@@ -304,8 +304,6 @@ export class LemonSqueezyProvider implements PaymentProvider {
       currentPeriodEnd: new Date(attrs.renews_at),
       cancelAtPeriodEnd: attrs.cancelled,
       canceledAt: attrs.ends_at ? new Date(attrs.ends_at) : undefined,
-      trialStart: undefined, // LS doesn't expose trial start
-      trialEnd: attrs.trial_ends_at ? new Date(attrs.trial_ends_at) : undefined,
       providerSubscriptionId: id,
       createdAt: new Date(attrs.created_at),
       updatedAt: new Date(attrs.updated_at),
@@ -360,7 +358,7 @@ export class LemonSqueezyProvider implements PaymentProvider {
   async createBillingPortalSession(
     providerCustomerId: string,
     returnUrl: string,
-  ): Promise<{ url: string }> {
+  ): Promise<{ id: string; url: string }> {
     // Lemon Squeezy provides customer portal URLs directly on the subscription
     // We need to get the subscription to find the portal URL
 
@@ -368,7 +366,10 @@ export class LemonSqueezyProvider implements PaymentProvider {
     const customer = await this.client.getCustomer(providerCustomerId);
 
     if (customer?.attributes.urls?.customer_portal) {
-      return { url: customer.attributes.urls.customer_portal };
+      return {
+        id: `ls_${providerCustomerId}`,
+        url: customer.attributes.urls.customer_portal,
+      };
     }
 
     // Fallback: construct the portal URL (this is a known pattern for LS)
@@ -378,6 +379,7 @@ export class LemonSqueezyProvider implements PaymentProvider {
     );
 
     return {
+      id: `ls_fallback_${Date.now()}`,
       url: `https://app.lemonsqueezy.com/my-orders?return_url=${encodeURIComponent(returnUrl)}`,
     };
   }

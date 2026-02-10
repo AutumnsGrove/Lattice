@@ -50,7 +50,7 @@ export interface TestSession {
 export interface TestSubscription {
   id: string;
   tenantId: string;
-  status: "active" | "past_due" | "canceled" | "trialing" | "paused";
+  status: "active" | "past_due" | "canceled" | "paused";
   tier: "seedling" | "sapling" | "oak" | "evergreen";
   lsId: string;
 }

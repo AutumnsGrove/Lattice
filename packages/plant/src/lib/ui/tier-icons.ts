@@ -6,6 +6,7 @@
  */
 
 import {
+  Footprints,
   Sprout,
   TreeDeciduous,
   Trees,
@@ -17,7 +18,8 @@ import type { TierIcon } from "@autumnsgrove/groveengine/config";
  * Map tier icon identifiers to Lucide icon components.
  */
 export const tierIcons: Record<TierIcon, typeof Sprout> = {
-  user: Sprout, // fallback for free tier
+  user: Sprout, // fallback for legacy free tier
+  footprints: Footprints, // Wanderer (free tier)
   sprout: Sprout,
   "tree-deciduous": TreeDeciduous,
   trees: Trees,

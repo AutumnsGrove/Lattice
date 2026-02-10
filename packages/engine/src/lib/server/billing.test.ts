@@ -127,26 +127,6 @@ describe("Billing Module", () => {
       expect(result?.status).toBe("active");
     });
 
-    it("sets isActive=true when tenant.active=1 and status=trialing", async () => {
-      const db = createMockDb();
-      const prepareChain = {
-        bind: vi.fn().mockReturnThis(),
-        first: vi
-          .fn()
-          .mockResolvedValueOnce({ plan: "seedling", active: 1 })
-          .mockResolvedValueOnce({
-            status: "trialing",
-            current_period_end: 2000,
-          }),
-      };
-      (db.prepare as any).mockReturnValue(prepareChain);
-
-      const result = await getTenantSubscription(db, "tenant-1");
-
-      expect(result?.isActive).toBe(true);
-      expect(result?.status).toBe("trialing");
-    });
-
     it("sets isActive=false when tenant.active=0", async () => {
       const db = createMockDb();
       const prepareChain = {
@@ -729,25 +709,6 @@ describe("Billing Module", () => {
           .mockResolvedValueOnce({
             status: "active",
             current_period_end: 1000,
-          }),
-      };
-      (db.prepare as any).mockReturnValue(prepareChain);
-
-      await expect(
-        requireActiveSubscription(db, "tenant-1"),
-      ).resolves.toBeUndefined();
-    });
-
-    it("succeeds silently for trialing subscription", async () => {
-      const db = createMockDb();
-      const prepareChain = {
-        bind: vi.fn().mockReturnThis(),
-        first: vi
-          .fn()
-          .mockResolvedValueOnce({ plan: "seedling", active: 1 })
-          .mockResolvedValueOnce({
-            status: "trialing",
-            current_period_end: 2000,
           }),
       };
       (db.prepare as any).mockReturnValue(prepareChain);

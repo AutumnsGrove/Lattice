@@ -150,12 +150,6 @@ export const POST: RequestHandler = async ({ request, platform }) => {
         break;
       }
 
-      case "customer.subscription.trial_will_end": {
-        // Could send reminder email here
-        console.log(`[Webhook] Trial ending soon for subscription`);
-        break;
-      }
-
       default:
         console.log(`[Webhook] Unhandled event type: ${eventType}`);
     }

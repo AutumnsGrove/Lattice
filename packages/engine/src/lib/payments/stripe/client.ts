@@ -5,8 +5,8 @@
  * Does not depend on the Node.js Stripe SDK.
  */
 
-const STRIPE_API_VERSION = '2024-11-20.acacia';
-const STRIPE_API_BASE = 'https://api.stripe.com/v1';
+const STRIPE_API_VERSION = "2024-11-20.acacia";
+const STRIPE_API_BASE = "https://api.stripe.com/v1";
 
 export interface StripeClientConfig {
   secretKey: string;
@@ -14,10 +14,10 @@ export interface StripeClientConfig {
 }
 
 export interface StripeRequestOptions {
-  method?: 'GET' | 'POST' | 'DELETE';
+  method?: "GET" | "POST" | "DELETE";
   params?: Record<string, unknown>;
   idempotencyKey?: string;
-  stripeAccount?: string;  // For Connect requests
+  stripeAccount?: string; // For Connect requests
 }
 
 export interface StripeError {
@@ -36,7 +36,7 @@ export class StripeAPIError extends Error {
 
   constructor(error: StripeError, statusCode: number) {
     super(error.message);
-    this.name = 'StripeAPIError';
+    this.name = "StripeAPIError";
     this.type = error.type;
     this.code = error.code;
     this.param = error.param;
@@ -70,37 +70,37 @@ export class StripeClient {
    */
   async request<T>(
     endpoint: string,
-    options: StripeRequestOptions = {}
+    options: StripeRequestOptions = {},
   ): Promise<T> {
-    const { method = 'GET', params, idempotencyKey, stripeAccount } = options;
+    const { method = "GET", params, idempotencyKey, stripeAccount } = options;
 
     const url = new URL(`${STRIPE_API_BASE}/${endpoint}`);
 
     // For GET requests, append params as query string
-    if (method === 'GET' && params) {
+    if (method === "GET" && params) {
       this.appendSearchParams(url.searchParams, params);
     }
 
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${this.secretKey}`,
-      'Stripe-Version': this.apiVersion,
+      Authorization: `Bearer ${this.secretKey}`,
+      "Stripe-Version": this.apiVersion,
     };
 
     // For POST requests, encode params as form data
     let body: string | undefined;
-    if (method === 'POST' && params) {
-      headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    if (method === "POST" && params) {
+      headers["Content-Type"] = "application/x-www-form-urlencoded";
       body = this.encodeParams(params);
     }
 
     // Idempotency key for POST requests
     if (idempotencyKey) {
-      headers['Idempotency-Key'] = idempotencyKey;
+      headers["Idempotency-Key"] = idempotencyKey;
     }
 
     // Stripe Connect: make request on behalf of connected account
     if (stripeAccount) {
-      headers['Stripe-Account'] = stripeAccount;
+      headers["Stripe-Account"] = stripeAccount;
     }
 
     const response = await fetch(url.toString(), {
@@ -109,12 +109,12 @@ export class StripeClient {
       body,
     });
 
-    const data = await response.json() as { error?: StripeError };
+    const data = (await response.json()) as { error?: StripeError };
 
     if (!response.ok) {
       throw new StripeAPIError(
-        data.error || { type: 'api_error', message: 'Unknown error' },
-        response.status
+        data.error || { type: "api_error", message: "Unknown error" },
+        response.status,
       );
     }
 
@@ -125,10 +125,7 @@ export class StripeClient {
    * Encode parameters for application/x-www-form-urlencoded
    * Handles nested objects and arrays
    */
-  private encodeParams(
-    params: Record<string, unknown>,
-    prefix = ''
-  ): string {
+  private encodeParams(params: Record<string, unknown>, prefix = ""): string {
     const parts: string[] = [];
 
     for (const [key, value] of Object.entries(params)) {
@@ -138,20 +135,31 @@ export class StripeClient {
 
       if (Array.isArray(value)) {
         value.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            parts.push(this.encodeParams(item as Record<string, unknown>, `${fullKey}[${index}]`));
+          if (typeof item === "object" && item !== null) {
+            parts.push(
+              this.encodeParams(
+                item as Record<string, unknown>,
+                `${fullKey}[${index}]`,
+              ),
+            );
           } else {
-            parts.push(`${encodeURIComponent(`${fullKey}[${index}]`)}=${encodeURIComponent(String(item))}`);
+            parts.push(
+              `${encodeURIComponent(`${fullKey}[${index}]`)}=${encodeURIComponent(String(item))}`,
+            );
           }
         });
-      } else if (typeof value === 'object') {
-        parts.push(this.encodeParams(value as Record<string, unknown>, fullKey));
+      } else if (typeof value === "object") {
+        parts.push(
+          this.encodeParams(value as Record<string, unknown>, fullKey),
+        );
       } else {
-        parts.push(`${encodeURIComponent(fullKey)}=${encodeURIComponent(String(value))}`);
+        parts.push(
+          `${encodeURIComponent(fullKey)}=${encodeURIComponent(String(value))}`,
+        );
       }
     }
 
-    return parts.filter(Boolean).join('&');
+    return parts.filter(Boolean).join("&");
   }
 
   /**
@@ -160,7 +168,7 @@ export class StripeClient {
   private appendSearchParams(
     searchParams: URLSearchParams,
     params: Record<string, unknown>,
-    prefix = ''
+    prefix = "",
   ): void {
     for (const [key, value] of Object.entries(params)) {
       if (value === undefined || value === null) continue;
@@ -169,14 +177,22 @@ export class StripeClient {
 
       if (Array.isArray(value)) {
         value.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            this.appendSearchParams(searchParams, item as Record<string, unknown>, `${fullKey}[${index}]`);
+          if (typeof item === "object" && item !== null) {
+            this.appendSearchParams(
+              searchParams,
+              item as Record<string, unknown>,
+              `${fullKey}[${index}]`,
+            );
           } else {
             searchParams.append(`${fullKey}[${index}]`, String(item));
           }
         });
-      } else if (typeof value === 'object') {
-        this.appendSearchParams(searchParams, value as Record<string, unknown>, fullKey);
+      } else if (typeof value === "object") {
+        this.appendSearchParams(
+          searchParams,
+          value as Record<string, unknown>,
+          fullKey,
+        );
       } else {
         searchParams.append(fullKey, String(value));
       }
@@ -195,23 +211,26 @@ export class StripeClient {
     payload: string,
     signature: string,
     secret: string,
-    tolerance = 300
+    tolerance = 300,
   ): Promise<{ valid: boolean; event?: unknown; error?: string }> {
     try {
       // Parse the signature header
-      const parts = signature.split(',').reduce((acc, part) => {
-        const [key, value] = part.split('=');
-        if (key && value) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, string>);
+      const parts = signature.split(",").reduce(
+        (acc, part) => {
+          const [key, value] = part.split("=");
+          if (key && value) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
 
-      const timestamp = parts['t'];
-      const v1Signature = parts['v1'];
+      const timestamp = parts["t"];
+      const v1Signature = parts["v1"];
 
       if (!timestamp || !v1Signature) {
-        return { valid: false, error: 'Invalid signature format' };
+        return { valid: false, error: "Invalid signature format" };
       }
 
       // Check timestamp tolerance
@@ -219,7 +238,7 @@ export class StripeClient {
       const now = Math.floor(Date.now() / 1000);
 
       if (now - timestampSeconds > tolerance) {
-        return { valid: false, error: 'Webhook timestamp too old' };
+        return { valid: false, error: "Webhook timestamp too old" };
       }
 
       // Compute expected signature
@@ -227,26 +246,26 @@ export class StripeClient {
       const encoder = new TextEncoder();
 
       const key = await crypto.subtle.importKey(
-        'raw',
+        "raw",
         encoder.encode(secret),
-        { name: 'HMAC', hash: 'SHA-256' },
+        { name: "HMAC", hash: "SHA-256" },
         false,
-        ['sign']
+        ["sign"],
       );
 
       const signatureBytes = await crypto.subtle.sign(
-        'HMAC',
+        "HMAC",
         key,
-        encoder.encode(signedPayload)
+        encoder.encode(signedPayload),
       );
 
       const expectedSignature = Array.from(new Uint8Array(signatureBytes))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
       // Constant-time comparison
       if (!this.secureCompare(expectedSignature, v1Signature)) {
-        return { valid: false, error: 'Signature mismatch' };
+        return { valid: false, error: "Signature mismatch" };
       }
 
       // Parse and return the event
@@ -280,7 +299,7 @@ export class StripeClient {
 
 export interface StripeProduct {
   id: string;
-  object: 'product';
+  object: "product";
   active: boolean;
   name: string;
   description?: string;
@@ -293,14 +312,14 @@ export interface StripeProduct {
 
 export interface StripePrice {
   id: string;
-  object: 'price';
+  object: "price";
   active: boolean;
   product: string;
   currency: string;
   unit_amount: number;
-  type: 'one_time' | 'recurring';
+  type: "one_time" | "recurring";
   recurring?: {
-    interval: 'day' | 'week' | 'month' | 'year';
+    interval: "day" | "week" | "month" | "year";
     interval_count: number;
   };
   metadata: Record<string, string>;
@@ -309,15 +328,15 @@ export interface StripePrice {
 
 export interface StripeCheckoutSession {
   id: string;
-  object: 'checkout.session';
+  object: "checkout.session";
   url: string;
-  status: 'open' | 'complete' | 'expired';
-  mode: 'payment' | 'subscription' | 'setup';
+  status: "open" | "complete" | "expired";
+  mode: "payment" | "subscription" | "setup";
   customer?: string;
   customer_email?: string;
   amount_total: number;
   currency: string;
-  payment_status: 'unpaid' | 'paid' | 'no_payment_required';
+  payment_status: "unpaid" | "paid" | "no_payment_required";
   payment_intent?: string;
   subscription?: string;
   metadata: Record<string, string>;
@@ -327,7 +346,7 @@ export interface StripeCheckoutSession {
 
 export interface StripeCustomer {
   id: string;
-  object: 'customer';
+  object: "customer";
   email?: string;
   name?: string;
   phone?: string;
@@ -347,10 +366,17 @@ export interface StripeAddress {
 
 export interface StripePaymentIntent {
   id: string;
-  object: 'payment_intent';
+  object: "payment_intent";
   amount: number;
   currency: string;
-  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded';
+  status:
+    | "requires_payment_method"
+    | "requires_confirmation"
+    | "requires_action"
+    | "processing"
+    | "requires_capture"
+    | "canceled"
+    | "succeeded";
   customer?: string;
   metadata: Record<string, string>;
   latest_charge?: string;
@@ -359,8 +385,16 @@ export interface StripePaymentIntent {
 
 export interface StripeSubscription {
   id: string;
-  object: 'subscription';
-  status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'paused';
+  object: "subscription";
+  status:
+    | "incomplete"
+    | "incomplete_expired"
+    | "trialing"
+    | "active"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "paused";
   customer: string;
   items: {
     data: Array<{
@@ -373,35 +407,33 @@ export interface StripeSubscription {
   current_period_end: number;
   cancel_at_period_end: boolean;
   canceled_at?: number;
-  trial_start?: number;
-  trial_end?: number;
   metadata: Record<string, string>;
   created: number;
 }
 
 export interface StripeRefund {
   id: string;
-  object: 'refund';
+  object: "refund";
   amount: number;
   currency: string;
-  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  status: "pending" | "succeeded" | "failed" | "canceled";
   payment_intent?: string;
-  reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+  reason?: "duplicate" | "fraudulent" | "requested_by_customer";
   metadata: Record<string, string>;
   created: number;
 }
 
 export interface StripeAccount {
   id: string;
-  object: 'account';
-  type: 'standard' | 'express' | 'custom';
+  object: "account";
+  type: "standard" | "express" | "custom";
   email?: string;
   country?: string;
   default_currency?: string;
   charges_enabled: boolean;
   payouts_enabled: boolean;
   details_submitted: boolean;
-  capabilities?: Record<string, 'active' | 'inactive' | 'pending'>;
+  capabilities?: Record<string, "active" | "inactive" | "pending">;
   requirements?: {
     currently_due: string[];
     eventually_due: string[];
@@ -411,21 +443,21 @@ export interface StripeAccount {
 }
 
 export interface StripeAccountLink {
-  object: 'account_link';
+  object: "account_link";
   url: string;
   expires_at: number;
   created: number;
 }
 
 export interface StripeLoginLink {
-  object: 'login_link';
+  object: "login_link";
   url: string;
   created: number;
 }
 
 export interface StripeBillingPortalSession {
   id: string;
-  object: 'billing_portal.session';
+  object: "billing_portal.session";
   url: string;
   customer: string;
   return_url: string;
@@ -434,13 +466,13 @@ export interface StripeBillingPortalSession {
 
 export interface StripeEvent {
   id: string;
-  object: 'event';
+  object: "event";
   type: string;
   data: {
     object: unknown;
     previous_attributes?: Record<string, unknown>;
   };
-  account?: string;  // For Connect events
+  account?: string; // For Connect events
   created: number;
   livemode: boolean;
 }

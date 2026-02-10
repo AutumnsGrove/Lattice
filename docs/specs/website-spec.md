@@ -359,12 +359,11 @@ CREATE TABLE clients (
   plan TEXT DEFAULT 'seedling', -- 'free', 'seedling', 'sapling', 'oak', 'evergreen'
   billing_cycle TEXT DEFAULT 'monthly', -- 'monthly', 'annual'
   status TEXT DEFAULT 'active', -- 'active', 'canceled', 'past_due'
-  
+
   -- Timestamps
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
-  trial_ends_at INTEGER,
-  
+
   -- Support
   support_hours_used INTEGER DEFAULT 0,
   support_hours_limit INTEGER DEFAULT 10, -- Month 1 limit

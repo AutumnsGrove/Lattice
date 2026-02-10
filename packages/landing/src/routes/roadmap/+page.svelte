@@ -124,6 +124,7 @@
 			season: 'winter' as Season,
 			description: 'Grove opens its doors. The first trees take root.',
 			features: [
+				{ name: 'Wanderer Tier', description: 'Free forever — your space on the web', done: true, icon: 'footprints', major: true, termSlug: 'wanderer' },
 				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true, icon: 'sprout', major: true, termSlug: 'seedling' },
 				{ name: 'Sign Up', description: 'Google, email, or Hub account', done: true, icon: 'userplus' },
 				{ name: 'Your Blog', description: 'username.grove.place', done: true, icon: 'globe' },

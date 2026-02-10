@@ -364,7 +364,7 @@ async function handleSubscriptionUpdated(
     past_due: "past_due",
     canceled: "canceled",
     unpaid: "unpaid",
-    trialing: "trialing",
+    trialing: "active",
     paused: "paused",
   };
 

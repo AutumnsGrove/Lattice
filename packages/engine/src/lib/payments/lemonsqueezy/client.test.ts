@@ -113,7 +113,6 @@ function createMockSubscriptionData(): LemonSqueezySubscriptionAttributes {
     card_last_four: "4242",
     pause: null,
     cancelled: false,
-    trial_ends_at: null,
     billing_anchor: 1,
     first_subscription_item: {
       id: 1,

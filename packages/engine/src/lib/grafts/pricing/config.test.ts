@@ -81,12 +81,13 @@ describe("Pricing Graft Configuration", () => {
       const tier = transformTier("free", TIERS.free);
 
       expect(tier.key).toBe("free");
-      expect(tier.name).toBe("Free");
+      expect(tier.name).toBe("Wanderer");
+      expect(tier.standardName).toBe("Free");
       expect(tier.monthlyPrice).toBe(0);
       expect(tier.annualPrice).toBe(0);
       expect(tier.annualSavings).toBe(0);
-      expect(tier.limits.posts).toBe("—");
-      expect(tier.limits.storage).toBe("—");
+      expect(tier.limits.posts).toBe("5");
+      expect(tier.limits.storage).toBe("50 MB");
     });
 
     it("transforms seedling tier with correct limits", () => {

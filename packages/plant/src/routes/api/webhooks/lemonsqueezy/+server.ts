@@ -244,7 +244,6 @@ async function handleSubscriptionCreated(
     status: string;
     renews_at: string;
     ends_at: string | null;
-    trial_ends_at: string | null;
     created_at: string;
     updated_at: string;
   };

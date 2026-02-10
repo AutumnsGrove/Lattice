@@ -1,8 +1,8 @@
 /**
  * Full Pricing Page Server Load
  *
- * Shows all tiers - the complete pricing picture.
- * Main /pricing page shows simplified phase 1 view.
+ * Shows all 5 tiers - the complete pricing picture.
+ * Main /pricing page shows simplified view with Wanderer and Seedling.
  */
 
 import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
@@ -10,9 +10,13 @@ import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
 export function load() {
   // All tiers, no filters
   const tiers = transformAllTiers({
-    highlightTier: "seedling",
+    highlightTier: "free",
     badges: {
-      seedling: "Start Here",
+      free: "Free",
+      seedling: "$8/mo",
+      sapling: "$12/mo",
+      oak: "$25/mo",
+      evergreen: "$35/mo",
     },
   });
 

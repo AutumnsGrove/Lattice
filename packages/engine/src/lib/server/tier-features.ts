@@ -25,6 +25,7 @@ export type FeatureKey = keyof TierFeatures;
 
 export interface TierFeatures {
   posts: number;
+  drafts: number;
   storage: number;
   themes: number;
   navPages: number;
@@ -47,6 +48,7 @@ export const TIER_FEATURE_LIMITS = Object.fromEntries(
     key,
     {
       posts: TIERS[key].limits.posts,
+      drafts: TIERS[key].limits.drafts,
       storage: TIERS[key].limits.storage,
       themes: TIERS[key].limits.themes,
       navPages: TIERS[key].limits.navPages,

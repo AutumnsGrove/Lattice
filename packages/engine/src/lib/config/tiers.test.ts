@@ -78,7 +78,7 @@ describe("Tier Configuration", () => {
     });
 
     it("has increasing post limits", () => {
-      expect(TIERS.free.limits.posts).toBe(0);
+      expect(TIERS.free.limits.posts).toBe(5);
       expect(TIERS.seedling.limits.posts).toBe(50);
       expect(TIERS.sapling.limits.posts).toBe(250);
       expect(TIERS.oak.limits.posts).toBe(Infinity);
@@ -92,11 +92,19 @@ describe("Tier Configuration", () => {
       const oakStorage = TIERS.oak.limits.storage;
       const evergreenStorage = TIERS.evergreen.limits.storage;
 
-      expect(freeStorage).toBe(0);
+      expect(freeStorage).toBe(50 * 1024 * 1024); // 50 MB
       expect(seedlingStorage).toBeGreaterThan(freeStorage);
       expect(saplingStorage).toBeGreaterThan(seedlingStorage);
       expect(oakStorage).toBeGreaterThan(saplingStorage);
       expect(evergreenStorage).toBeGreaterThan(oakStorage);
+    });
+
+    it("has draft limits for free tier and unlimited for paid", () => {
+      expect(TIERS.free.limits.drafts).toBe(100);
+      expect(TIERS.seedling.limits.drafts).toBe(Infinity);
+      expect(TIERS.sapling.limits.drafts).toBe(Infinity);
+      expect(TIERS.oak.limits.drafts).toBe(Infinity);
+      expect(TIERS.evergreen.limits.drafts).toBe(Infinity);
     });
 
     it("has correct pricing in dollars and cents", () => {
@@ -209,10 +217,24 @@ describe("Tier Configuration", () => {
 
     describe("tierHasFeature", () => {
       it("correctly checks feature availability", () => {
-        expect(tierHasFeature("free", "blog")).toBe(false);
+        expect(tierHasFeature("free", "blog")).toBe(true);
         expect(tierHasFeature("seedling", "blog")).toBe(true);
         expect(tierHasFeature("seedling", "customDomain")).toBe(false);
         expect(tierHasFeature("oak", "customDomain")).toBe(true);
+      });
+
+      it("free tier has limited features", () => {
+        expect(tierHasFeature("free", "ai")).toBe(false);
+        expect(tierHasFeature("free", "customDomain")).toBe(false);
+        expect(tierHasFeature("free", "themeCustomizer")).toBe(false);
+        expect(tierHasFeature("free", "emailForwarding")).toBe(false);
+        expect(tierHasFeature("free", "shop")).toBe(false);
+        expect(tierHasFeature("free", "analytics")).toBe(false);
+      });
+
+      it("free tier has blog and meadow", () => {
+        expect(tierHasFeature("free", "blog")).toBe(true);
+        expect(tierHasFeature("free", "meadow")).toBe(true);
       });
     });
 
@@ -231,6 +253,45 @@ describe("Tier Configuration", () => {
         expect(limits.requests.limit).toBe(100);
         expect(limits.requests.windowSeconds).toBe(60);
       });
+    });
+  });
+
+  describe("Wanderer (Free) Tier", () => {
+    it("has correct status and pricing", () => {
+      expect(TIERS.free.status).toBe("available");
+      expect(TIERS.free.pricing.monthlyPrice).toBe(0);
+      expect(TIERS.free.pricing.yearlyPrice).toBe(0);
+    });
+
+    it("has blog enabled with correct limits", () => {
+      expect(TIERS.free.features.blog).toBe(true);
+      expect(TIERS.free.limits.posts).toBe(5);
+      expect(TIERS.free.limits.drafts).toBe(100);
+      expect(TIERS.free.limits.storage).toBe(50 * 1024 * 1024);
+      expect(TIERS.free.limits.themes).toBe(1);
+    });
+
+    it("has correct display strings", () => {
+      expect(TIERS.free.display.name).toBe("Wanderer");
+      expect(TIERS.free.display.standardName).toBe("Free");
+      expect(TIERS.free.display.icon).toBe("footprints");
+      expect(TIERS.free.display.tagline).toBe("Just passing through?");
+      expect(TIERS.free.display.bestFor).toBe("The curious");
+    });
+
+    it("has restrictive rate limits", () => {
+      expect(TIERS.free.rateLimits.requests.limit).toBe(60);
+      expect(TIERS.free.rateLimits.uploads.limit).toBe(5);
+      expect(TIERS.free.rateLimits.ai.limit).toBe(0);
+    });
+
+    it("disables premium features", () => {
+      expect(TIERS.free.features.ai).toBe(false);
+      expect(TIERS.free.features.customDomain).toBe(false);
+      expect(TIERS.free.features.themeCustomizer).toBe(false);
+      expect(TIERS.free.features.emailForwarding).toBe(false);
+      expect(TIERS.free.features.shop).toBe(false);
+      expect(TIERS.free.features.analytics).toBe(false);
     });
   });
 

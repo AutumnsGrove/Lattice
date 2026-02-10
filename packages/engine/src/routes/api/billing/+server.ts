@@ -10,7 +10,11 @@ import {
   rateLimitHeaders,
   type RateLimitResult,
 } from "$lib/server/rate-limits/index.js";
-import { isCompedAccount } from "$lib/server/billing.js";
+import {
+  isCompedAccount,
+  logBillingAudit,
+  type AuditLogEntry,
+} from "$lib/server/billing.js";
 import { Resend } from "resend";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { GROVE_EMAILS } from "$lib/config/emails.js";
@@ -55,63 +59,6 @@ async function checkBillingRateLimit(
   });
 
   return { result, response };
-}
-
-/**
- * Audit log entry for billing operations.
- * Logs are stored in the audit_log table for compliance and debugging.
- */
-interface AuditLogEntry {
-  tenantId: string;
-  action: string;
-  details: Record<string, unknown>;
-  userEmail: string;
-  ipAddress?: string;
-}
-
-/**
- * Log billing operations for audit trail.
- * This helps with compliance, debugging, and dispute resolution.
- *
- * IMPORTANT: Audit log failures are non-blocking to prevent billing operations
- * from failing due to logging issues. However, persistent failures should trigger
- * alerts in the monitoring system. Look for "[Billing Audit] CRITICAL" in logs.
- *
- * Trade-off: We prioritize completing the user's billing action over guaranteed
- * audit logging. For true compliance-critical operations, consider a separate
- * job queue that retries failed audit entries.
- */
-async function logBillingAudit(
-  db: D1Database,
-  entry: AuditLogEntry,
-): Promise<void> {
-  try {
-    await db
-      .prepare(
-        `INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .bind(
-        crypto.randomUUID(),
-        entry.tenantId,
-        "billing",
-        entry.action,
-        JSON.stringify(entry.details),
-        entry.userEmail,
-        Math.floor(Date.now() / 1000),
-      )
-      .run();
-  } catch (e) {
-    // CRITICAL: Audit log failures need monitoring alerts
-    // This log line should trigger alerts in production monitoring
-    console.error("[Billing Audit] CRITICAL - Failed to log billing action:", {
-      error: e instanceof Error ? e.message : String(e),
-      action: entry.action,
-      tenantId: entry.tenantId,
-      userEmail: entry.userEmail,
-      timestamp: new Date().toISOString(),
-    });
-  }
 }
 
 /**
@@ -270,7 +217,6 @@ interface BillingRecord {
   current_period_start: number | null;
   current_period_end: number | null;
   cancel_at_period_end: number;
-  trial_end: number | null;
   payment_method_last4: string | null;
   payment_method_brand: string | null;
   created_at: number;
@@ -332,7 +278,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     const billing = (await platform.env.DB.prepare(
       `SELECT id, plan, status, provider_customer_id, provider_subscription_id,
               current_period_start, current_period_end, cancel_at_period_end,
-              trial_end, payment_method_last4, payment_method_brand,
+              payment_method_last4, payment_method_brand,
               created_at, updated_at
        FROM platform_billing WHERE tenant_id = ?`,
     )
@@ -359,9 +305,6 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
           ? new Date(billing.current_period_end * 1000).toISOString()
           : null,
         cancelAtPeriodEnd: billing.cancel_at_period_end === 1,
-        trialEnd: billing.trial_end
-          ? new Date(billing.trial_end * 1000).toISOString()
-          : null,
         paymentMethod: billing.payment_method_last4
           ? {
               last4: billing.payment_method_last4,
@@ -454,7 +397,6 @@ export const POST: RequestHandler = async ({
       billing_address_collection: "required",
       allow_promotion_codes: true,
       subscription_data: {
-        trial_period_days: data.trialDays || (existingBilling ? 0 : 7),
         metadata: {
           grove_tenant_id: tenantId,
           grove_plan: data.plan,
@@ -595,13 +537,15 @@ export const PATCH: RequestHandler = async ({
     throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
   }
 
-  const requestedTenantId =
-    url.searchParams.get("tenant_id") || locals.tenantId;
+  const tenantId = locals.tenantId;
+  if (!tenantId) {
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+  }
 
   try {
-    const tenantId = await getVerifiedTenantId(
+    const verifiedTenantId = await getVerifiedTenantId(
       platform.env.DB,
-      requestedTenantId,
+      tenantId,
       locals.user,
     );
 
@@ -618,13 +562,13 @@ export const PATCH: RequestHandler = async ({
     const billing = (await platform.env.DB.prepare(
       `SELECT pb.id, pb.plan, pb.status, pb.provider_customer_id, pb.provider_subscription_id,
               pb.current_period_start, pb.current_period_end, pb.cancel_at_period_end,
-              pb.trial_end, pb.payment_method_last4, pb.payment_method_brand,
+              pb.payment_method_last4, pb.payment_method_brand,
               pb.created_at, pb.updated_at, t.subdomain
        FROM platform_billing pb
        JOIN tenants t ON t.id = pb.tenant_id
        WHERE pb.tenant_id = ?`,
     )
-      .bind(tenantId)
+      .bind(verifiedTenantId)
       .first()) as (BillingRecord & { subdomain: string }) | null;
 
     if (!billing || !billing.provider_subscription_id) {
@@ -649,7 +593,7 @@ export const PATCH: RequestHandler = async ({
             updated_at = ?
            WHERE id = ? AND tenant_id = ?`,
         )
-          .bind(Math.floor(Date.now() / 1000), billing.id, tenantId)
+          .bind(Math.floor(Date.now() / 1000), billing.id, verifiedTenantId)
           .run();
 
         // Send cancellation confirmation email (non-blocking)

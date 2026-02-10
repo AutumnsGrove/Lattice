@@ -100,7 +100,7 @@
 			<Sprout class="w-4 h-4" />
 		</a>
 		<p class="text-foreground-subtle text-sm font-sans">
-			Plans start at $8/month. Reading is always free.
+			Start for free, or upgrade to paid plans as you grow.
 		</p>
 	</section>
 

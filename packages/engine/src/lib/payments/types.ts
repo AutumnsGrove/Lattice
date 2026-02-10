@@ -128,7 +128,9 @@ export interface CheckoutOptions {
   billingAddressCollection?: "auto" | "required";
 
   // Subscription specific
-  trialPeriodDays?: number;
+  subscriptionData?: {
+    prorationBehavior?: "create_prorations" | "always_invoice" | "none";
+  };
 
   // Discounts
   allowPromotionCodes?: boolean;
@@ -254,7 +256,6 @@ export interface RefundResult {
 // =============================================================================
 
 export type SubscriptionStatus =
-  | "trialing"
   | "active"
   | "past_due"
   | "paused"
@@ -280,10 +281,6 @@ export interface Subscription {
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
   canceledAt?: Date;
-
-  // Trial
-  trialStart?: Date;
-  trialEnd?: Date;
 
   // Provider reference
   providerSubscriptionId?: string;
@@ -334,7 +331,6 @@ export type WebhookEventType =
   | "subscription.created"
   | "subscription.updated"
   | "subscription.canceled"
-  | "subscription.trial_will_end"
   // Invoices
   | "invoice.paid"
   | "invoice.payment_failed"
@@ -566,7 +562,7 @@ export interface PaymentProvider {
   createBillingPortalSession(
     providerCustomerId: string,
     returnUrl: string,
-  ): Promise<{ url: string }>;
+  ): Promise<{ id: string; url: string }>;
 
   // ==========================================================================
   // WEBHOOKS

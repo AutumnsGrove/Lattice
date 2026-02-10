@@ -9,6 +9,7 @@
 		Trees,
 		Crown,
 		User,
+		Footprints,
 		Check,
 		PenLine,
 		FileText,
@@ -28,6 +29,7 @@
 	// Icon components for tier headers - defined at module level for performance
 	const TIER_ICON_MAP: Record<TierIcon, typeof Sprout> = {
 		user: User,
+		footprints: Footprints,
 		sprout: Sprout,
 		"tree-deciduous": TreeDeciduous,
 		trees: Trees,
