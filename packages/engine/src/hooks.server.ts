@@ -712,7 +712,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     "upgrade-insecure-requests",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' https://cdn.grove.place data:",
+    "img-src 'self' https://cdn.grove.place data: blob:",
     "font-src 'self' https://cdn.grove.place",
     "connect-src 'self' https://api.github.com https://grove.place https://*.grove.place https://challenges.cloudflare.com",
     "frame-src https://challenges.cloudflare.com",

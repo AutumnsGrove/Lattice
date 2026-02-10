@@ -173,7 +173,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' https://cdn.grove.place data:",
+    "img-src 'self' https://cdn.grove.place data: blob:",
     "font-src 'self' https://cdn.grove.place",
     "connect-src 'self' https://*.grove.place https://challenges.cloudflare.com",
     "frame-src https://challenges.cloudflare.com",

@@ -66,7 +66,7 @@ export const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'",
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'",
 };
 
 // Stricter CSP for security-sensitive pages (passkey management, settings)
@@ -74,7 +74,7 @@ export const SECURITY_HEADERS = {
 // - Explicitly denies frame-ancestors to prevent clickjacking on security pages
 // - Adds upgrade-insecure-requests for mixed content protection
 export const SECURITY_PAGE_CSP =
-  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
+  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
 
 // Allowed OAuth scopes
 export const GOOGLE_SCOPES = ["openid", "email", "profile"];
