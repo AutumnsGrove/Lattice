@@ -218,8 +218,8 @@
 					isCurrent={false}
 					isNext={isSelected}
 					available={isAvailable}
-					monthlyPrice={tier.key === 'free' ? 0 : monthlyPrice}
-					annualPrice={tier.key === 'free' ? 0 : yearlyPrice}
+					monthlyPrice={tier.key === 'free' ? 0 : Number(monthlyPrice)}
+					annualPrice={tier.key === 'free' ? 0 : Number(yearlyPrice)}
 					features={displayFeatures}
 					variant={isSelected ? 'primary' : 'secondary'}
 					onCultivate={() => handleSelectPlan(tier)}
@@ -245,7 +245,7 @@
 
 		{#if selectedPlan}
 			{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
-			{@const selectedSavings = billingPeriod === 'annual' && selectedTier?.key !== 'free' ? getYearlySavingsAmount(selectedTier) : 0}
+			{@const selectedSavings = billingPeriod === 'annual' && selectedTier?.key !== 'free' && selectedTier ? getYearlySavingsAmount(selectedTier) : 0}
 			<div class="p-4 rounded-lg bg-grove-100/50 dark:bg-grove-900/30 border border-grove-200 dark:border-grove-800">
 				<div class="flex items-center justify-between">
 					<div>

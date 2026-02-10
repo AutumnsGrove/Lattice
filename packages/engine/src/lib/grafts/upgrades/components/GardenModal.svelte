@@ -8,7 +8,7 @@
 	import { X, Sprout, RefreshCw, Settings } from 'lucide-svelte';
 	import type { GardenModalProps } from './types.js';
 	import type { TierKey } from '$lib/config/tiers';
-	import { transformAllTiers, type PricingTier } from '$lib/grafts/pricing';
+	import { transformAllTiers, type PricingTier, type BillingPeriod } from '$lib/grafts/pricing';
 	import GrowthCard from './GrowthCard.svelte';
 	import PricingToggle from '../../pricing/PricingToggle.svelte';
 
@@ -16,7 +16,7 @@
 		open = false,
 		currentStage = 'free',
 		flourishState = 'active',
-		billingPeriod = 'monthly',
+		billingPeriod = 'monthly' as BillingPeriod,
 		availableStages = ['seedling', 'sapling', 'oak', 'evergreen'],
 		onCultivate,
 		onTend,

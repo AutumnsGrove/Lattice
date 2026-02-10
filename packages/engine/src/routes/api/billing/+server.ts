@@ -544,7 +544,7 @@ export const PATCH: RequestHandler = async ({
 
   const tenantId = locals.tenantId;
   if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_REQUIRED, "API");
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
   try {

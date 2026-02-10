@@ -21,7 +21,8 @@
 		Clock,
 	} from 'lucide-svelte';
 	import type { GardenStatusProps } from './types.js';
-	import type { TierKey, FlourishState } from './types.js';
+	import type { TierKey } from '$lib/config/tiers';
+	import type { FlourishState } from '../types.js';
 
 	let {
 		currentStage = 'free',

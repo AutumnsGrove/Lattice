@@ -24,7 +24,7 @@ export interface UpgradesGraftProps extends BaseGraftProps {
   flourishState?: FlourishState;
 
   /** Callback when cultivation is initiated */
-  onCultivate?: (stage: TierKey, billingCycle: "monthly" | "yearly") => void;
+  onCultivate?: (stage: TierKey, billingCycle: "monthly" | "annual") => void;
 
   /** Callback when garden shed is opened */
   onTend?: () => void;
@@ -97,13 +97,13 @@ export interface GardenModalProps extends BaseGraftProps {
   flourishState?: FlourishState;
 
   /** Current billing period */
-  billingPeriod?: "monthly" | "yearly";
+  billingPeriod?: "monthly" | "annual";
 
   /** Available stages for cultivation */
   availableStages?: TierKey[];
 
   /** Called when cultivation is requested */
-  onCultivate?: (stage: TierKey, billingCycle: "monthly" | "yearly") => void;
+  onCultivate?: (stage: TierKey, billingCycle: "monthly" | "annual") => void;
 
   /** Called when tending is requested */
   onTend?: () => void;

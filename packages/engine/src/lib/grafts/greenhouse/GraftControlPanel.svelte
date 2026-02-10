@@ -167,9 +167,7 @@
 {/if}
 
 <style>
-	.graft-panel {
-		/* Handled by GlassCard */
-	}
+	/* .graft-panel styling handled by GlassCard */
 
 	.panel-header {
 		display: flex;

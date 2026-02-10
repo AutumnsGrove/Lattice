@@ -134,7 +134,7 @@ export const POST: RequestHandler = async ({
       );
     }
   } catch (err) {
-    logPlantError(PLANT_ERRORS.DB_ERROR, {
+    logPlantError(PLANT_ERRORS.DB_UNAVAILABLE, {
       path: "/api/select-plan",
       detail: "Failed to validate onboarding status",
       cause: err,
