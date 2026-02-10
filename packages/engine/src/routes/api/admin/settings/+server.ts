@@ -62,6 +62,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
       "font_family",
       "accent_color",
       "show_grove_logo",
+      "grove_title",
       "canopy_visible",
       "canopy_banner",
       "canopy_categories",
@@ -74,6 +75,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     // Validate show_grove_logo (boolean string)
     if (setting_key === "show_grove_logo") {
       if (setting_value !== "true" && setting_value !== "false") {
+        throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+      }
+    }
+
+    // Validate grove_title (max 50 chars, trimmed)
+    if (setting_key === "grove_title") {
+      const trimmed = setting_value.trim();
+      if (trimmed.length > 50) {
         throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
       }
     }

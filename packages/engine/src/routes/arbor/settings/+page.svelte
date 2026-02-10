@@ -99,6 +99,9 @@
   let colorMessage = $state("");
 
   // Header branding state
+  let groveTitle = $state("");
+  let savingTitle = $state(false);
+  let titleMessage = $state("");
   let showGroveLogo = $state(false);
   let savingLogo = $state(false);
   let logoMessage = $state("");
@@ -177,6 +180,7 @@
       const data = await api.get("/api/settings");
       currentFont = data.font_family || DEFAULT_FONT;
       currentAccentColor = data.accent_color || DEFAULT_ACCENT_COLOR;
+      groveTitle = data.grove_title || "";
       showGroveLogo =
         data.show_grove_logo === true || data.show_grove_logo === "true";
     } catch (error) {
@@ -184,6 +188,7 @@
       console.error("Failed to fetch settings:", error);
       currentFont = DEFAULT_FONT;
       currentAccentColor = DEFAULT_ACCENT_COLOR;
+      groveTitle = "";
       showGroveLogo = false;
     }
     loadingFont = false;
@@ -233,6 +238,28 @@
     }
 
     savingColor = false;
+  }
+
+  // Save Grove title setting
+  async function saveGroveTitle() {
+    savingTitle = true;
+    titleMessage = "";
+
+    try {
+      await api.put("/api/admin/settings", {
+        setting_key: "grove_title",
+        setting_value: groveTitle.trim(),
+      });
+
+      titleMessage = groveTitle.trim()
+        ? "Title saved! Refresh to see it in the header."
+        : "Title cleared — your default name will show instead.";
+    } catch (error) {
+      titleMessage =
+        "Error: " + (error instanceof Error ? error.message : String(error));
+    }
+
+    savingTitle = false;
   }
 
   // Save Grove logo setting
@@ -1136,16 +1163,48 @@
       <h2>Header Branding</h2>
     </div>
     <p class="section-description">
-      Show the <GroveTerm term="grove">Grove</GroveTerm> logo next to your site title. Visitors can tap it to cycle
-      through seasonal themes!
+      Customize what appears in the header of your <GroveTerm term="grove">grove</GroveTerm>.
     </p>
+
+    <div class="canopy-field">
+      <label for="grove-title" class="field-label">Grove Title</label>
+      <input
+        type="text"
+        id="grove-title"
+        bind:value={groveTitle}
+        placeholder="My Grove"
+        maxlength="50"
+        class="canopy-input"
+      />
+      <p class="field-help">
+        The name that appears in the header and browser tab. Leave empty to use your default display name.
+        <span class="char-count">{groveTitle.length}/50</span>
+      </p>
+    </div>
+
+    {#if titleMessage}
+      <div
+        class="message"
+        class:success={!titleMessage.includes("Error")}
+        class:error={titleMessage.includes("Error")}
+      >
+        {titleMessage}
+      </div>
+    {/if}
+
+    <div class="button-row">
+      <Button onclick={saveGroveTitle} variant="primary" disabled={savingTitle}>
+        {savingTitle ? "Saving..." : "Save Title"}
+      </Button>
+    </div>
 
     <label class="logo-toggle">
       <input type="checkbox" bind:checked={showGroveLogo} />
       <span class="toggle-label">
         <span class="toggle-title">Show Grove Logo</span>
         <span class="toggle-description">
-          Displays the seasonal Grove tree icon next to your site title
+          Displays the seasonal Grove tree icon next to your site title. Visitors can tap it to cycle
+          through seasonal themes!
         </span>
       </span>
     </label>
@@ -1162,7 +1221,7 @@
 
     <div class="button-row">
       <Button onclick={saveGroveLogo} variant="primary" disabled={savingLogo}>
-        {savingLogo ? "Saving..." : "Save Header Setting"}
+        {savingLogo ? "Saving..." : "Save Logo Setting"}
       </Button>
     </div>
   </GlassCard>

@@ -1,7 +1,7 @@
 <svelte:head>
 	{#if context?.type === 'tenant'}
-		<title>{context.tenant.name}</title>
-		<link rel="alternate" type="application/rss+xml" title="{context.tenant.name} RSS Feed" href="/api/feed" />
+		<title>{siteName}</title>
+		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
 	{:else}
 		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
 	{/if}
@@ -26,10 +26,13 @@
 	const context = $derived(data.context);
 
 	// Derive site name based on context
+	// grove_title from site_settings takes priority over the tenant display_name
 	const siteName = $derived(
-		context?.type === 'tenant' ? context.tenant.name :
-		context?.type === 'app' ? `Grove ${context.app.charAt(0).toUpperCase() + context.app.slice(1)}` :
-		'The Grove'
+		context?.type === 'tenant'
+			? (data.siteSettings?.grove_title || context.tenant.name)
+			: context?.type === 'app'
+				? `Grove ${context.app.charAt(0).toUpperCase() + context.app.slice(1)}`
+				: 'The Grove'
 	);
 
 	// Track if optional fonts CSS has been loaded
