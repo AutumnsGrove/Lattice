@@ -105,6 +105,24 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Sanitize email header values
+ *
+ * Removes characters that are invalid in email headers:
+ * - Newlines (\n, \r)
+ * - Control characters
+ * - Leading/trailing whitespace
+ *
+ * This prevents "Invalid header value" errors from Resend.
+ */
+function sanitizeHeader(value: string): string {
+  return value
+    .replace(/[\r\n\t]/g, " ") // Replace newlines and tabs with spaces
+    .replace(/[^\x20-\x7E]/g, "") // Remove non-printable ASCII characters
+    .replace(/\s+/g, " ") // Collapse multiple spaces
+    .trim(); // Remove leading/trailing whitespace
+}
+
+/**
  * Send email with retry logic
  *
  * Retry config:
@@ -132,13 +150,20 @@ export async function sendWithRetry(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
+      // Sanitize email headers to prevent "Invalid header value" errors
+      const fromName = sanitizeHeader(options.fromName);
+      const from = sanitizeHeader(options.from);
+      const toName = options.toName ? sanitizeHeader(options.toName) : undefined;
+      const subject = sanitizeHeader(options.subject);
+      const replyTo = options.replyTo ? sanitizeHeader(options.replyTo) : undefined;
+
       const result = await resend.emails.send({
-        from: `${options.fromName} <${options.from}>`,
-        to: options.toName ? `${options.toName} <${options.to}>` : options.to,
-        subject: options.subject,
+        from: `${fromName} <${from}>`,
+        to: toName ? `${toName} <${options.to}>` : options.to,
+        subject,
         html: options.html,
         text: options.text,
-        replyTo: options.replyTo,
+        replyTo,
         scheduledAt: options.scheduledAt,
         headers: {
           ...(options.headers || {}),

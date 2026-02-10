@@ -331,6 +331,44 @@ describe("sendWithRetry", () => {
     const callArgs = mockResend.emails.send.mock.calls[0][0];
     expect(callArgs.replyTo).toBe("reply@grove.place");
   });
+
+  it("should sanitize email headers with newlines and control characters", async () => {
+    const mockResend = {
+      emails: {
+        send: vi.fn().mockResolvedValue({
+          data: { id: "msg_sanitized" },
+          error: null,
+        }),
+      },
+    };
+    vi.mocked(Resend).mockReturnValue(mockResend as any);
+
+    const optionsWithInvalidHeaders: SendOptions = {
+      from: "test@grove.place",
+      fromName: "Test\nSender\r\nWith Newlines",
+      to: "user@example.com",
+      toName: "Test\tUser\nWith\rControl\x00Chars",
+      subject: "Test\nSubject\rWith\nNewlines",
+      html: "<p>Test HTML</p>",
+      text: "Test text",
+      replyTo: "reply\n@grove.place",
+    };
+
+    await sendWithRetry("test-sanitize-key", optionsWithInvalidHeaders);
+
+    const callArgs = mockResend.emails.send.mock.calls[0][0];
+    // Sanitized headers should have newlines/tabs replaced with spaces and collapsed
+    // Note: \x00 (null char) is removed entirely, bringing "Control" and "Chars" together
+    expect(callArgs.from).toBe("Test Sender With Newlines <test@grove.place>");
+    expect(callArgs.to).toBe("Test User With ControlChars <user@example.com>");
+    expect(callArgs.subject).toBe("Test Subject With Newlines");
+    expect(callArgs.replyTo).toBe("reply @grove.place");
+    // Headers should not contain any newlines or control characters
+    expect(callArgs.from).not.toMatch(/[\r\n\t\x00-\x1F]/);
+    expect(callArgs.to).not.toMatch(/[\r\n\t\x00-\x1F]/);
+    expect(callArgs.subject).not.toMatch(/[\r\n\t\x00-\x1F]/);
+    expect(callArgs.replyTo).not.toMatch(/[\r\n\t\x00-\x1F]/);
+  });
 });
 
 describe("getCircuitStatus", () => {
