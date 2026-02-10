@@ -107,8 +107,8 @@
 		});
 
 		if (!res.ok) {
-			const err = await res.json().catch(() => ({ error: 'Review failed' }));
-			throw new Error(err.error || 'Review failed');
+			const body = await res.json().catch(() => ({ error: 'Review failed' })) as { error?: string };
+			throw new Error(body.error || 'Review failed');
 		}
 
 		// Re-fetch data to update the view
