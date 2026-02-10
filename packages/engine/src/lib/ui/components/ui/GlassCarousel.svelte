@@ -385,7 +385,7 @@
 			<button
 				type="button"
 				class={cn(
-					"absolute left-3 top-1/2 -translate-y-1/2 z-20",
+					"absolute left-4 bottom-4 z-20",
 					"w-11 h-11 rounded-full flex items-center justify-center",
 					"bg-black/15 hover:bg-black/30 active:bg-black/40",
 					"backdrop-blur-sm text-white/90 hover:text-white",
@@ -401,7 +401,7 @@
 			<button
 				type="button"
 				class={cn(
-					"absolute right-3 top-1/2 -translate-y-1/2 z-20",
+					"absolute right-4 bottom-4 z-20",
 					"w-11 h-11 rounded-full flex items-center justify-center",
 					"bg-black/15 hover:bg-black/30 active:bg-black/40",
 					"backdrop-blur-sm text-white/90 hover:text-white",
