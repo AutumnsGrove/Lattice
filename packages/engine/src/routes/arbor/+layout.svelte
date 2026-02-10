@@ -780,6 +780,15 @@
       left: 0;
       bottom: 0;
       border-radius: 0;
+      /* Reset desktop constraints so sidebar fills full viewport height */
+      height: 100vh;
+      height: 100dvh; /* Dynamic viewport height — accounts for mobile browser chrome */
+      max-height: none;
+      /* Remove the floating-card border on mobile — edge-to-edge panel */
+      border-right: 1px solid var(--grove-overlay-15);
+      border-top: none;
+      border-bottom: none;
+      border-left: none;
     }
 
     .sidebar.open {
