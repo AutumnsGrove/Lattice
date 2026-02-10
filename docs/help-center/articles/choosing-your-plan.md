@@ -13,6 +13,7 @@ keywords:
   - oak
   - evergreen
   - free
+  - wanderer
   - upgrade
   - subscription
 order: 2
@@ -26,15 +27,18 @@ Grove has a few plans, each designed for different needs. Here's what you get at
 
 ## The plans
 
-### Free
+### Wanderer
 
-**$0/month**: Browse Meadow, comment on posts, explore the community.
+**$0/month**: Your first steps in the grove.
 
-This isn't a blog plan. You can't publish posts on Free. But you can participate in [[meadow]]: upvote posts, leave reactions, reply to others. It's a way to be part of Grove without running a blog yourself.
+A quiet clearing to try your hand at writing — no credit card, no commitment. Wanderer is a real blog, not just community access. You get your own grove.place address and everything you need to start.
 
-- Access to [[meadow]] community feed
-- 20 public comments per week on other blogs
-- Unlimited private replies to authors
+- Up to 5 blog posts
+- 50 MB storage for images
+- Your own grove.place address
+- RSS feed
+- [[meadow]] access for browsing and reacting
+- No credit card needed
 
 ### Seedling
 
@@ -45,7 +49,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 - Up to 50 posts
 - 1 GB storage for images and media
 - All 10 fonts + accent color customization
-- 3 curated themes (coming in Foliage First Buds)
+- 3 curated themes (coming soon)
 - Unlimited comments on your blog
 - RSS feed
 - Share posts to Meadow
@@ -59,7 +63,7 @@ More room to grow. If you're posting frequently or building up an archive, Sapli
 - Up to 250 posts
 - 5 GB storage
 - All 10 fonts + accent color
-- All 10 curated themes (coming in Foliage Full Bloom)
+- All 10 curated themes (coming soon)
 - Email forwarding (`you@grove.place`)
 - **Centennial eligible** — after 12 months, your site stays online for 100 years
 - Everything in Seedling
@@ -73,7 +77,7 @@ Bring your own domain. Customize your theme fully. This is for bloggers who want
 - Unlimited posts
 - 20 GB storage
 - All 10 fonts + accent color
-- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
+- All 10 curated themes + theme customizer (coming soon)
 - Custom domain support (bring your own domain)
 - Analytics
 - Priority support
@@ -87,8 +91,8 @@ Everything Grove offers, including a domain on us.
 
 - Unlimited posts
 - 100 GB storage
-- All 10 fonts + custom font uploads (coming in Foliage Full Bloom)
-- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
+- All 10 fonts + custom font uploads (coming soon)
+- All 10 curated themes + theme customizer (coming soon)
 - Domain included (we register it for you)
 - Analytics
 - 8 hours/month dedicated support
@@ -96,17 +100,13 @@ Everything Grove offers, including a domain on us.
 
 ## How to think about it
 
-**Just starting out?** Seedling has everything you need. You can always upgrade later—your content comes with you.
+**Just curious?** Start with Wanderer — it's free, no credit card needed. Five posts, your own address, a real blog.
 
 **Posting regularly?** Sapling's 250 post limit and extra storage handles most active blogs comfortably.
 
 **Want a custom domain?** That's Oak territory. Bring a domain you already own, or upgrade to Evergreen and we'll register one for you.
 
-**Not sure?** Start with Seedling. It's not a trial; it's a real plan with real features. See how it fits before committing to more.
-
-## What about the Free tier?
-
-Free accounts can't blog, but they're not second-class citizens. You get full access to Meadow, which means you can discover posts, vote, react, and participate in conversations. If you're here to read and engage rather than write, Free works fine.
+**Not sure?** Start with Wanderer for free. When you're ready for more room, cultivate to Seedling. Your content comes with you.
 
 ## Changing plans
 
@@ -136,4 +136,4 @@ All plans include:
 
 ---
 
-*Questions about which plan fits? [Ask us](/contact). We'll give you an honest answer, even if it's "Seedling is probably enough."*
+*Questions about which plan fits? [Ask us](/contact). We'll give you an honest answer, even if it's "Wanderer is probably enough."*

@@ -37,9 +37,8 @@
 	// Shared icon mapping
 	import { tierIcons } from '$lib/ui/tier-icons';
 
-	// Phase 1: Only Seedling available at launch
-	// Shows just Seedling - keeps onboarding focused and simple
-	const allTiers = transformAllTiers({ includeTiers: ['seedling'] });
+	// Available tiers: Wanderer (free) and Seedling ($8/mo)
+	const allTiers = transformAllTiers({ includeTiers: ['free', 'seedling'] });
 	const planPreviews = allTiers.map((tier) => ({
 		key: tier.key,
 		name: tier.name,
@@ -286,7 +285,6 @@
 	<section>
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Simple, honest pricing</h2>
 
-		<!-- Phase 1: Single tier centered. When more tiers launch, use grid-cols-2 -->
 		<div class="flex justify-center gap-6 stagger-children">
 			{#each planPreviews as plan (plan.key)}
 				{@const PlanIcon = tierIcons[plan.icon]}

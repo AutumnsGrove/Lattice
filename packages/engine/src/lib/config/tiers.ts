@@ -161,7 +161,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     },
     display: {
       name: "Wanderer",
-      tagline: "Just passing through?",
+      tagline: "Your first steps in the grove",
       description:
         "A quiet clearing to try your hand at writing. No commitment, no credit card.",
       icon: "footprints",
@@ -235,7 +235,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       featureStrings: [
         "50 blooms",
         "1 GB storage",
-        "3 curated themes",
+        // TODO(foliage): uncomment when themes launch
+        // "3 curated themes",
         "Meadow access",
         "RSS feed",
         "No ads ever",
@@ -244,7 +245,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       standardFeatureStrings: [
         "50 posts",
         "1 GB storage",
-        "3 curated themes",
+        // TODO(foliage): uncomment when themes launch
+        // "3 curated themes",
         "Community feed access",
         "RSS feed",
         "No ads ever",
@@ -302,7 +304,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       featureStrings: [
         "250 blooms",
         "5 GB storage",
-        "10 themes",
+        // TODO(foliage): uncomment when themes launch
+        // "10 themes",
         "3 nav pages",
         "Email forwarding",
         "Centennial eligible",
@@ -312,7 +315,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       standardFeatureStrings: [
         "250 posts",
         "5 GB storage",
-        "10 themes",
+        // TODO(foliage): uncomment when themes launch
+        // "10 themes",
         "3 nav pages",
         "Email forwarding",
         "100-year preservation eligible",
@@ -371,7 +375,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       featureStrings: [
         "Unlimited blooms",
         "20 GB storage",
-        "Theme customizer",
+        // TODO(foliage): uncomment when themes launch
+        // "Theme customizer",
         "5 nav pages",
         "Bring your own domain",
         "Centennial eligible",
@@ -381,7 +386,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
       standardFeatureStrings: [
         "Unlimited posts",
         "20 GB storage",
-        "Theme customizer",
+        // TODO(foliage): uncomment when themes launch
+        // "Theme customizer",
         "5 nav pages",
         "Bring your own domain",
         "100-year preservation eligible",

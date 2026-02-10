@@ -12,6 +12,7 @@ keywords:
   - subscription
   - billing
   - tier
+  - wanderer
 order: 2
 ---
 
@@ -39,9 +40,10 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 
 | Upgrade to | You gain |
 |------------|----------|
-| Seedling → Sapling | 200 more posts, 4 GB storage, 7 more curated themes (coming in Foliage Full Bloom), email forwarding, Centennial eligibility |
-| Sapling → Oak | Unlimited posts, 15 GB more storage, theme customizer (coming in Foliage Full Bloom), custom domain, Analytics |
-| Oak → Evergreen | 80 GB more storage, custom font uploads (coming in Foliage Full Bloom), domain included (we register it), dedicated support hours |
+| Wanderer → Seedling | 45 more posts, ~950 MB more storage, Meadow sharing, unlimited comments, no ads guarantee |
+| Seedling → Sapling | 200 more posts, 4 GB storage, 7 more curated themes (coming soon), email forwarding, Centennial eligibility |
+| Sapling → Oak | Unlimited posts, 15 GB more storage, theme customizer (coming soon), custom domain, Analytics |
+| Oak → Evergreen | 80 GB more storage, custom font uploads (coming soon), domain included (we register it), dedicated support hours |
 
 ## When you downgrade
 
@@ -52,9 +54,9 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 **Example:** You have 100 posts on Sapling (250 limit) and downgrade to Seedling (50 limit). All 100 posts remain published and visible. You just can't create post #101 until you delete or unpublish some.
 
 **Features revert.** When the billing period ends:
-- Theme customizer settings revert to defaults (if downgrading from Oak/Evergreen, once Foliage launches)
+- Theme customizer settings revert to defaults (if downgrading from Oak/Evergreen)
 - Custom domain stops working (if downgrading from Oak/Evergreen)
-- Some curated themes become unavailable (if downgrading to Seedling's 3 themes, once Foliage launches)
+- Some curated themes become unavailable (if downgrading to Seedling's 3 themes)
 - Analytics access is removed (if downgrading from Oak/Evergreen)
 
 ## What happens to my data?
@@ -76,13 +78,13 @@ You never lose content because of a plan change.
 
 **Tip:** If you're approaching your post limit on Seedling and not sure if you want to commit to Sapling, you can always upgrade for a month, see how it feels, and downgrade later. Your posts stay either way.
 
-## If you're on Free
+## If you're on Wanderer
 
-Free accounts can browse Meadow and comment on posts, but can't publish a blog. To start blogging, upgrade to Seedling or above.
+Wanderer is your free starting point — 5 posts, 50 MB storage, your own grove.place address. When you're ready for more room, cultivate to any paid tier.
 
-The upgrade path: **Free → Seedling → Sapling → Oak → Evergreen**
+The growth path: **Wanderer → Seedling → Sapling → Oak → Evergreen**
 
-You can jump to any paid tier directly—you don't have to go through them in order.
+You can jump to any tier directly — you don't have to go through them in order.
 
 ## Payment method
 

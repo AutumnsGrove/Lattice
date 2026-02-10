@@ -13,6 +13,7 @@ keywords:
   - what's included
   - subscription
   - tier
+  - wanderer
 order: 1
 ---
 
@@ -22,20 +23,20 @@ Here's what each Grove plan includes—and what happens when you approach your l
 
 ## Plan limits at a glance
 
-| | Seedling | Sapling | Oak | Evergreen |
-|---|:---:|:---:|:---:|:---:|
-| **Price** | $8/mo | $12/mo | $25/mo | $35/mo |
-| **Posts** | 50 | 250 | Unlimited | Unlimited |
-| **Storage** | 1 GB | 5 GB | 20 GB | 100 GB |
-| **Fonts** | All 10 | All 10 | All 10 | All 10 + custom uploads |
-| **Themes** | 3 curated | All 10 | All 10 + customizer | All 10 + customizer |
-| **Custom domain** | — | — | BYOD | Included |
-| **Email** | — | Forwarding | Full mailbox | Full mailbox |
-| **Centennial** | — | ✓ | ✓ | ✓ |
+| | Wanderer | Seedling | Sapling | Oak | Evergreen |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Price** | Free | $8/mo | $12/mo | $25/mo | $35/mo |
+| **Posts** | 5 | 50 | 250 | Unlimited | Unlimited |
+| **Storage** | 50 MB | 1 GB | 5 GB | 20 GB | 100 GB |
+| **Fonts** | — | All 10 | All 10 | All 10 | All 10 + custom uploads |
+| **Themes** | — | 3 curated | All 10 | All 10 + customizer | All 10 + customizer |
+| **Custom domain** | — | — | — | BYOD | Included |
+| **Email** | — | — | Forwarding | Full mailbox | Full mailbox |
+| **Centennial** | — | — | ✓ | ✓ | ✓ |
 
 ## What counts toward limits
 
-### Post limits (Seedling and Sapling)
+### Post limits (Wanderer, Seedling, and Sapling)
 
 Every published post counts toward your limit. Drafts don't count until you publish them.
 
@@ -70,9 +71,9 @@ You'll see:
 - How much storage you've used vs. your limit
 - Your current plan and billing date
 
-## What's included on every paid plan
+## What's included on every plan
 
-Regardless of which plan you choose:
+Whether you're on Wanderer or Evergreen, every Grove blog includes:
 
 - **Markdown editor** with live preview and drag-drop images
 - **Autosave** so you never lose drafts
@@ -88,12 +89,24 @@ Regardless of which plan you choose:
 
 ## Features by tier
 
+### Wanderer (Free)
+
+Your first steps:
+- 5 posts, 50 MB storage
+- Your own grove.place address
+- Markdown editor with live preview and autosave
+- RSS feed
+- Meadow access for browsing and reacting
+- No credit card needed
+
+Good for: The curious, first-time bloggers, seeing if Grove is home.
+
 ### Seedling ($8/month)
 
 The essentials for starting a blog:
 - 50 posts, 1 GB storage
 - All 10 fonts plus accent color customization
-- 3 curated themes (coming in Foliage)
+- 3 curated themes (coming soon)
 - Community support via help documentation
 
 Good for: Trying blogging out, personal journals, occasional posting.
@@ -103,7 +116,7 @@ Good for: Trying blogging out, personal journals, occasional posting.
 Room to grow:
 - 250 posts, 5 GB storage
 - All 10 fonts plus accent color
-- All 10 curated themes (coming in Foliage Full Bloom)
+- All 10 curated themes (coming soon)
 - Email forwarding to `you@grove.place`
 - Email support
 - Centennial eligible
@@ -115,7 +128,7 @@ Good for: Regular bloggers, building an archive, hobbyist writers.
 Full control:
 - Unlimited posts, 20 GB storage
 - All 10 fonts plus accent color
-- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
+- All 10 curated themes + theme customizer (coming soon)
 - Bring your own domain
 - Full @grove.place email (send and receive)
 - Analytics
@@ -129,7 +142,7 @@ Good for: Serious bloggers, professionals, anyone who wants a custom domain.
 Everything:
 - Unlimited posts, 100 GB storage
 - All 10 fonts plus custom font uploads
-- All 10 curated themes + theme customizer (coming in Foliage Full Bloom)
+- All 10 curated themes + theme customizer (coming soon)
 - Domain registration included (we find and register it for you)
 - 8 hours/month dedicated support time
 - Analytics
@@ -157,4 +170,4 @@ A hundred years is roughly how long an oak tree lives. Some trees outlive the pe
 
 ---
 
-*Not sure what plan is right? Start with Seedling. It's a real plan, not a trial. Upgrade when you need more.*
+*Not sure what plan is right? Start with Wanderer — it's free, and it's a real blog. Cultivate to Seedling when you're ready for more room.*

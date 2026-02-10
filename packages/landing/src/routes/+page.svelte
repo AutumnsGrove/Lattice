@@ -187,7 +187,7 @@
 		</p>
 
 		<!-- Primary CTA -->
-		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-3">
 			<a
 				href="https://plant.grove.place"
 				class="btn-primary inline-flex items-center gap-2 text-base px-6 py-3"
@@ -203,6 +203,7 @@
 				<ArrowRight class="w-4 h-4" aria-hidden="true" />
 			</a>
 		</div>
+		<p class="text-sm text-foreground-subtle mb-6">Free to start. No credit card needed.</p>
 
 	</section>
 
