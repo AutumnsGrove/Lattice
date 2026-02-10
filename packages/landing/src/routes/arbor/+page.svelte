@@ -21,7 +21,8 @@
 		CircleDot,
 		ExternalLink,
 		Trees,
-		Kanban
+		Kanban,
+		Eye
 	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -330,6 +331,21 @@
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">My Arbor</p>
 							<p class="text-xs text-foreground-muted font-sans">autumn.grove.place</p>
+						</div>
+						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
+					</div>
+				</GlassCard>
+			</a>
+
+			<a href="https://us.cloud.langfuse.com/project/cmlf7boc10248ad070td8wrpu" target="_blank" rel="noopener noreferrer" class="block">
+				<GlassCard hoverable class="p-4 h-full">
+					<div class="flex items-center gap-3">
+						<div class="w-9 h-9 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+							<Eye class="w-5 h-5 text-teal-600 dark:text-teal-400" />
+						</div>
+						<div class="flex-1 min-w-0">
+							<p class="text-sm font-sans font-medium text-foreground">Langfuse</p>
+							<p class="text-xs text-foreground-muted font-sans">Observability</p>
 						</div>
 						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />
 					</div>

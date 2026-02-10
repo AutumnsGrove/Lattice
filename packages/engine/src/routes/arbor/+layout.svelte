@@ -167,10 +167,6 @@
           <Shield class="nav-icon" />
           <span class="nav-label" class:hidden={!showExpanded}>Reserved Names</span>
         </a>
-        <a href="https://us.cloud.langfuse.com/project/cmlf7boc10248ad070td8wrpu" target="_blank" rel="noopener" class="nav-item" onclick={closeSidebar} title="Langfuse (Observability)">
-          <Eye class="nav-icon" />
-          <span class="nav-label" class:hidden={!showExpanded}>Langfuse</span>
-        </a>
       {/if}
     </nav>
 
