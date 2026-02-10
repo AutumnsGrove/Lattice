@@ -3,9 +3,10 @@
 import click
 
 from .read import diff, log, show, status, blame
-from .write import add, branch, commit, pull, push, stash, switch, unstage
+from .write import add, branch, cherry_pick, commit, pull, push, stash, switch, unstage
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
+from .workflows import prep, ship
 from .worktree import worktree
 
 
@@ -49,6 +50,7 @@ git.add_command(branch)
 git.add_command(stash)
 git.add_command(switch)
 git.add_command(unstage)
+git.add_command(cherry_pick, name="cherry-pick")
 
 # Register dangerous commands
 git.add_command(reset)
@@ -63,6 +65,10 @@ git.add_command(wip)
 git.add_command(undo)
 git.add_command(amend)
 git.add_command(fast)
+
+# Register workflow commands
+git.add_command(ship)
+git.add_command(prep)
 
 # Register worktree commands
 git.add_command(worktree)

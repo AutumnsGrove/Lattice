@@ -122,6 +122,8 @@ OPERATION_TIERS: dict[str, GitSafetyTier] = {
     "undo": GitSafetyTier.WRITE,  # Grove shortcut
     "amend": GitSafetyTier.WRITE,  # Grove shortcut
     "sync": GitSafetyTier.WRITE,  # Grove shortcut
+    "cherry_pick": GitSafetyTier.WRITE,
+    "ship": GitSafetyTier.WRITE,  # Grove workflow
     # Worktree operations
     "worktree_list": GitSafetyTier.READ,
     "worktree_create": GitSafetyTier.WRITE,
@@ -224,8 +226,11 @@ def check_git_safety(
         return
 
     # Tier 2: Write operations require --write flag
+    # Auto-imply --write for interactive sessions (human at terminal).
+    # Non-interactive contexts (agents, CI, MCP) still require explicit --write.
     if tier == GitSafetyTier.WRITE:
-        if not write_flag:
+        effective_write = write_flag or (os.isatty(0) and not agent_mode)
+        if not effective_write:
             raise GitSafetyError(
                 f"Operation '{operation}' requires --write flag",
                 tier=tier,

@@ -740,3 +740,76 @@ def stash(
     except GitError as e:
         console.print(f"[red]Git error:[/red] {e.message}")
         raise SystemExit(1)
+
+
+@click.command("cherry-pick")
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.argument("commits", nargs=-1, required=True)
+@click.pass_context
+def cherry_pick(ctx: click.Context, write: bool, commits: tuple[str, ...]) -> None:
+    """Cherry-pick one or more commits onto the current branch.
+
+    Requires --write flag. Validates that commits exist before applying.
+
+    \b
+    Examples:
+        gw git cherry-pick --write abc1234
+        gw git cherry-pick --write abc1234 def5678
+    """
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_git_safety("commit", write_flag=write)
+    except GitSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    try:
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        # Validate commits exist before attempting cherry-pick
+        for commit_ref in commits:
+            try:
+                git.execute(["cat-file", "-t", commit_ref])
+            except GitError:
+                console.print(f"[red]Commit not found:[/red] {commit_ref}")
+                console.print("[dim]Verify the commit hash exists with: gw git log[/dim]")
+                raise SystemExit(1)
+
+        # Apply cherry-pick
+        applied = []
+        for commit_ref in commits:
+            git.execute(["cherry-pick", commit_ref])
+            short_hash = git.execute(["rev-parse", "--short", commit_ref]).strip()
+            applied.append(short_hash)
+
+        if output_json:
+            console.print(json.dumps({
+                "cherry_picked": applied,
+                "count": len(applied),
+            }))
+        else:
+            for h in applied:
+                console.print(f"[green]Cherry-picked:[/green] {h}")
+            if len(applied) > 1:
+                console.print(f"[dim]Applied {len(applied)} commits[/dim]")
+
+    except GitError as e:
+        stderr = e.stderr.lower()
+        if "conflict" in stderr:
+            console.print("[red]Cherry-pick conflict[/red]")
+            console.print(
+                "[dim]Resolve conflicts, then:\n"
+                "  git add <resolved-files>\n"
+                "  git cherry-pick --continue\n\n"
+                "Or abort with: git cherry-pick --abort[/dim]"
+            )
+        else:
+            console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)

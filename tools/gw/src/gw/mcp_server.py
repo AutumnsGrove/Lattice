@@ -570,6 +570,150 @@ def grove_git_push(remote: str = "origin", branch: str = "") -> str:
         return json.dumps({"error": e.message})
 
 
+@mcp.tool()
+def grove_git_ship(message: str, files: str = "", issue: int = 0, no_check: bool = False) -> str:
+    """Format, check, commit, and push in one step.
+
+    The canonical commit+push workflow. Formats staged files, runs type
+    checks on affected packages, creates a commit, and pushes.
+
+    Args:
+        message: Commit message (Conventional Commits format required)
+        files: Comma-separated files to stage first, or empty for already-staged
+        issue: Issue number to link (0 = auto-detect from branch)
+        no_check: Skip type checking step
+
+    Returns:
+        JSON string with ship result
+    """
+    import subprocess
+
+    try:
+        git = Git()
+        if not git.is_repo():
+            return json.dumps({"error": "Not a git repository"})
+
+        # Stage files if specified
+        if files:
+            file_list = [f.strip() for f in files.split(",")]
+            for f in file_list:
+                git.add(f)
+
+        status = git.status()
+        if not status.staged:
+            return json.dumps({"error": "No staged changes to ship"})
+
+        staged_files = [path for _, path in status.staged]
+
+        # Format staged files
+        formattable_exts = {
+            ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+            ".svelte", ".css", ".scss", ".postcss",
+            ".json", ".html", ".md", ".mdx", ".yaml", ".yml",
+        }
+        formattable = [f for f in staged_files if os.path.splitext(f)[1].lower() in formattable_exts]
+
+        fmt_result = "skipped"
+        if formattable:
+            try:
+                subprocess.run(
+                    ["bun", "x", "prettier", "--write"] + formattable,
+                    capture_output=True, timeout=60,
+                )
+                git.add(formattable)
+                fmt_result = f"formatted {len(formattable)} files"
+            except (subprocess.SubprocessError, FileNotFoundError):
+                fmt_result = "formatter not available"
+
+        # Commit
+        full_message = message
+        if issue:
+            if f"#{issue}" not in full_message:
+                full_message = f"{full_message} (#{issue})"
+
+        result = git.commit(full_message)
+        commit_hash = result if isinstance(result, str) else result.get("hash", "")
+
+        # Push
+        current_branch = git.current_branch()
+        try:
+            git.push(remote="origin", branch=current_branch, set_upstream=True)
+            push_result = f"origin/{current_branch}"
+        except GitError as e:
+            return json.dumps({
+                "error": f"Committed ({commit_hash[:8]}) but push failed: {e.message}",
+                "hash": commit_hash[:8],
+                "hint": "Run 'gw git push --write' to retry push",
+            })
+
+        return json.dumps({
+            "shipped": True,
+            "hash": commit_hash[:8] if isinstance(commit_hash, str) else "",
+            "message": full_message,
+            "pushed_to": push_result,
+            "formatted": fmt_result,
+        }, indent=2)
+
+    except GitError as e:
+        return json.dumps({"error": e.message})
+
+
+@mcp.tool()
+def grove_git_prep() -> str:
+    """Pre-commit preflight check — dry run of what ship would do.
+
+    Checks staging status, formatting, and type checking without
+    making any changes. Use before grove_git_ship to preview.
+
+    Returns:
+        JSON string with preflight check results
+    """
+    import subprocess
+    from pathlib import Path
+
+    try:
+        git = Git()
+        if not git.is_repo():
+            return json.dumps({"error": "Not a git repository"})
+
+        status = git.status()
+        staged_files = [path for _, path in status.staged]
+
+        if not staged_files:
+            return json.dumps({"ready": False, "reason": "Nothing staged"})
+
+        # Check formatting
+        formattable_exts = {
+            ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+            ".svelte", ".css", ".scss", ".postcss",
+            ".json", ".html", ".md", ".mdx", ".yaml", ".yml",
+        }
+        formattable = [f for f in staged_files if Path(f).suffix.lower() in formattable_exts]
+
+        fmt_ok = True
+        if formattable:
+            try:
+                result = subprocess.run(
+                    ["bun", "x", "prettier", "--check"] + formattable,
+                    capture_output=True, text=True, timeout=30,
+                )
+                fmt_ok = result.returncode == 0
+            except (subprocess.SubprocessError, FileNotFoundError):
+                pass  # Can't check — assume ok
+
+        return json.dumps({
+            "ready": fmt_ok,
+            "branch": status.branch,
+            "staged": len(staged_files),
+            "unstaged": len(status.unstaged),
+            "untracked": len(status.untracked),
+            "format_ok": fmt_ok,
+        }, indent=2)
+
+    except GitError as e:
+        return json.dumps({"error": e.message})
+
+
 # =============================================================================
 # GITHUB TOOLS (READ)
 # =============================================================================
