@@ -23,6 +23,8 @@
 		X,
 		Loader2,
 		Mail,
+		MailPlus,
+		Link2,
 		CheckCircle,
 		Clock,
 		Eye,
@@ -46,6 +48,22 @@
 	let revokeNotes = $state('');
 	let isRevoking = $state(false);
 	let showPreview = $state(false);
+
+	// Resend state
+	let isResending = $state<string | null>(null); // invite ID currently being resent
+
+	// Copy link state
+	let copiedId = $state<string | null>(null);
+
+	function copyInviteLink(inviteToken: string, inviteId: string) {
+		const url = `https://plant.grove.place/invited?token=${encodeURIComponent(inviteToken)}`;
+		navigator.clipboard.writeText(url).then(() => {
+			copiedId = inviteId;
+			setTimeout(() => {
+				if (copiedId === inviteId) copiedId = null;
+			}, 2000);
+		});
+	}
 
 	// Promote state
 	let promoteTier = $state<string>('seedling');
@@ -446,6 +464,9 @@
 											Used {formatDate(invite.used_at)}
 										{:else}
 											Created {formatDate(invite.created_at)} by {invite.invited_by}
+											{#if !invite.email_sent_at}
+												<span class="text-amber-500 ml-1">· email not sent</span>
+											{/if}
 										{/if}
 									</div>
 									{#if invite.custom_message}
@@ -458,6 +479,45 @@
 
 							<div class="flex items-center gap-2 flex-shrink-0">
 								{#if !invite.used_at}
+									<button
+										type="button"
+										onclick={() => copyInviteLink(invite.invite_token, invite.id)}
+										class="p-1.5 rounded text-foreground-muted hover:text-grove-600 hover:bg-grove-500/10 transition-colors"
+										title={copiedId === invite.id ? 'Copied!' : 'Copy invite link'}
+									>
+										{#if copiedId === invite.id}
+											<Check class="w-4 h-4 text-grove-600" />
+										{:else}
+											<Link2 class="w-4 h-4" />
+										{/if}
+									</button>
+									{#if !invite.email_sent_at}
+										<form
+											method="POST"
+											action="?/resend"
+											use:enhance={() => {
+												isResending = invite.id;
+												return async ({ update }) => {
+													await update();
+													isResending = null;
+												};
+											}}
+										>
+											<input type="hidden" name="invite_id" value={invite.id} />
+											<button
+												type="submit"
+												disabled={isResending === invite.id}
+												class="p-1.5 rounded text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+												title="Resend invite email"
+											>
+												{#if isResending === invite.id}
+													<Loader2 class="w-4 h-4 animate-spin" />
+												{:else}
+													<MailPlus class="w-4 h-4" />
+												{/if}
+											</button>
+										</form>
+									{/if}
 									<button
 										type="button"
 										onclick={() => (revokeInvite = { id: invite.id, email: invite.email })}

@@ -18,9 +18,11 @@ interface CompedInvite {
   invite_type: "comped" | "beta";
   custom_message: string | null;
   invited_by: string;
+  invite_token: string;
   created_at: number;
   used_at: number | null;
   used_by_tenant_id: string | null;
+  email_sent_at: number | null;
 }
 
 interface AuditLogEntry {
@@ -347,6 +349,118 @@ export const actions: Actions = {
       // Surface D1 error details to admin for debugging
       return fail(500, {
         error: `Failed to create comped invite (${step}): ${message}`,
+      });
+    }
+  },
+
+  resend: async ({ request, locals, platform }) => {
+    const user = locals.user;
+    if (!user) {
+      return fail(403, { error: "Not authenticated" });
+    }
+    if (!isWayfinder(user.email)) {
+      return fail(403, { error: "Access denied" });
+    }
+
+    if (!platform?.env?.DB) {
+      return fail(500, { error: "Database not available" });
+    }
+
+    const { DB } = platform.env;
+    const formData = await request.formData();
+    const inviteId = formData.get("invite_id")?.toString();
+
+    if (!inviteId) {
+      return fail(400, { error: "Invite ID is required" });
+    }
+
+    try {
+      const invite = await DB.prepare(
+        "SELECT id, email, tier, invite_type, custom_message, invited_by, invite_token, used_at FROM comped_invites WHERE id = ?",
+      )
+        .bind(inviteId)
+        .first<CompedInvite>();
+
+      if (!invite) {
+        return fail(404, { error: "Invite not found" });
+      }
+
+      if (invite.used_at) {
+        return fail(400, {
+          error: "Cannot resend — this invite has already been used",
+        });
+      }
+
+      if (!invite.invite_token) {
+        return fail(400, {
+          error: "Invite has no token — it may need to be recreated",
+        });
+      }
+
+      const zephyrApiKey =
+        platform?.env?.ZEPHYR_API_KEY || platform?.env?.RESEND_API_KEY;
+
+      if (!zephyrApiKey) {
+        return fail(500, {
+          error: "No email API key configured — cannot send email",
+        });
+      }
+
+      const emailResult = await sendInviteEmail({
+        email: invite.email,
+        tier: invite.tier,
+        inviteType: invite.invite_type,
+        customMessage: invite.custom_message,
+        inviteToken: invite.invite_token,
+        invitedBy: invite.invited_by,
+        zephyrApiKey,
+        zephyrUrl: platform?.env?.ZEPHYR_URL,
+      });
+
+      if (emailResult.success) {
+        await DB.prepare(
+          `UPDATE comped_invites SET email_sent_at = unixepoch() WHERE id = ?`,
+        )
+          .bind(inviteId)
+          .run();
+
+        // Audit the resend
+        await DB.prepare(
+          `INSERT INTO comped_invites_audit (id, action, invite_id, email, tier, invite_type, actor_email, notes, created_at)
+           VALUES (?, 'resend', ?, ?, ?, ?, ?, 'Email resent', unixepoch())`,
+        )
+          .bind(
+            crypto.randomUUID(),
+            inviteId,
+            invite.email,
+            invite.tier,
+            invite.invite_type,
+            user.email,
+          )
+          .run();
+
+        return {
+          success: true,
+          emailStatus: "sent" as const,
+          message: `Resent invite email to ${invite.email}`,
+        };
+      } else {
+        console.error(
+          `[Comped Invites] Resend failed for ${invite.email}:`,
+          emailResult.error,
+        );
+        return {
+          success: true,
+          emailStatus: "failed" as const,
+          emailError: emailResult.error,
+          message: `Resend attempted for ${invite.email}, but email delivery failed`,
+        };
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      console.error("[Comped Invites] Error resending invite:", message, err);
+      return fail(500, {
+        error: `Failed to resend invite email: ${message}`,
       });
     }
   },
