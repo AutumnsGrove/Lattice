@@ -8,7 +8,8 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
-  import { ExternalLink } from "lucide-svelte";
+  import { clickOutside } from "$lib/actions/clickOutside";
+  import { ExternalLink, Ellipsis, Trash2, ChevronRight, ChevronLeft, ArrowLeft, ArrowRight } from "lucide-svelte";
 
   let { data } = $props();
 
@@ -49,6 +50,7 @@
   let hasUnsavedChanges = $state(false);
   let showGutter = $state(false); // Start hidden for cleaner first-time experience
   let showDeleteDialog = $state(false);
+  let showMoreMenu = $state(false);
   let detailsCollapsed = $state(true); // Start collapsed for focused writing
 
   // Load collapsed state from localStorage
@@ -223,6 +225,7 @@
         "You have unsaved changes. Are you sure you want to leave?");
     }
   }
+
 </script>
 
 <svelte:window onbeforeunload={handleBeforeUnload} />
@@ -230,7 +233,7 @@
 <div class="edit-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
+      <a href="/arbor/garden" class="back-link"><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <div class="title-row">
         <h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
         {#if hasUnsavedChanges}
@@ -239,37 +242,62 @@
       </div>
     </div>
     <div class="header-actions">
-      <!-- Prominent Publish/Draft Toggle - Auto-saves on click -->
-      <button
-        class="status-toggle {status === 'published' ? 'published' : 'draft'}"
-        onclick={handleStatusToggle}
-        disabled={saving}
-        title={status === "published"
-          ? "Click to unpublish (save as draft)"
-          : "Click to publish (goes live immediately)"}
-      >
-        {#if saving}
-          <span class="status-icon">⏳</span> Saving...
-        {:else if status === "published"}
-          <span class="status-icon">✓</span> Published
+      <!-- Status indicator (non-interactive) -->
+      <span class="status-badge {status}">
+        {#if status === "published"}
+          <span class="status-dot published"></span> Published
         {:else}
-          <span class="status-icon">○</span> Draft — Click to Publish
+          <span class="status-dot draft"></span> Draft
         {/if}
-      </button>
+      </span>
 
-      <Button
-        variant="danger"
-        onclick={confirmDelete}
-        disabled={saving}
-        title="Delete this bloom"
-      >
-        Delete
-      </Button>
-      <Button variant="outline" href="/garden/{slug}">
-        View Live <ExternalLink size={16} class="inline-block ml-1" />
-      </Button>
+      <!-- View Live (icon-only, only when published) -->
+      {#if status === "published"}
+        <Button variant="ghost" size="icon" href="/garden/{slug}" title="View live post">
+          <ExternalLink size={16} />
+        </Button>
+      {/if}
+
+      <!-- More menu (contains Delete) -->
+      <div class="more-menu">
+        <Button
+          variant="ghost"
+          size="icon"
+          onclick={() => showMoreMenu = !showMoreMenu}
+          title="More actions"
+          aria-expanded={showMoreMenu}
+          aria-haspopup="true"
+        >
+          <Ellipsis size={16} />
+        </Button>
+        {#if showMoreMenu}
+          <div class="more-menu-dropdown" role="menu" use:clickOutside={() => showMoreMenu = false}>
+            <button
+              class="menu-item danger"
+              role="menuitem"
+              onclick={() => { showMoreMenu = false; confirmDelete(); }}
+            >
+              <Trash2 size={14} />
+              Delete {resolveTermString('Bloom', 'Post')}
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Publish / Unpublish (secondary action) -->
+      {#if status === "draft"}
+        <Button variant="outline" onclick={handleStatusToggle} disabled={saving}>
+          {saving ? "Publishing..." : "Publish"}
+        </Button>
+      {:else}
+        <Button variant="ghost" onclick={handleStatusToggle} disabled={saving}>
+          {saving ? "Unpublishing..." : "Unpublish"}
+        </Button>
+      {/if}
+
+      <!-- Save (primary action, always rightmost) -->
       <Button onclick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save Changes"}
+        {saving ? "Saving..." : "Save"}
       </Button>
     </div>
   </header>
@@ -290,7 +318,7 @@
           title={detailsCollapsed ? "Expand details" : "Collapse details"}
           aria-expanded={!detailsCollapsed}
         >
-          {#if detailsCollapsed}»{:else}«{/if}
+          {#if detailsCollapsed}<ChevronRight size={14} />{:else}<ChevronLeft size={14} />{/if}
         </button>
       </div>
 
@@ -362,7 +390,7 @@
               class="form-input"
             />
             <span class="form-hint">
-              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first →</a>
+              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first <ArrowRight size={12} class="inline-block" /></a>
             </span>
             {#if featuredImage}
               <div class="cover-preview">
@@ -427,19 +455,6 @@
               </optgroup>
             </select>
             <span class="form-hint">Choose a font for this bloom's content</span>
-          </div>
-
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" bind:value={status} class="form-input">
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-            <span class="form-hint">
-              {status === "draft"
-                ? "This bloom will be hidden from public view"
-                : "This bloom will be visible to all visitors"}
-            </span>
           </div>
 
           <div class="metadata-info">
@@ -579,90 +594,104 @@
   }
   .header-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
     align-items: center;
   }
 
-  /* Prominent Status Toggle Button */
-  .status-toggle {
+  /* Status badge (non-interactive indicator) */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    user-select: none;
+  }
+  .status-badge.draft {
+    background: rgba(245, 158, 11, 0.1);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .status-badge.published {
+    background: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  :global(.dark) .status-badge.draft {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fcd34d;
+    border-color: rgba(251, 191, 36, 0.25);
+  }
+  :global(.dark) .status-badge.published {
+    background: rgba(16, 185, 129, 0.12);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.25);
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.draft {
+    background: #f59e0b;
+  }
+  .status-dot.published {
+    background: #10b981;
+  }
+
+  /* More menu (overflow) */
+  .more-menu {
+    position: relative;
+  }
+  .more-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    min-width: 180px;
+    padding: 0.25rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-small);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+  }
+  :global(.dark) .more-menu-dropdown {
+    background: var(--color-bg-secondary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .menu-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.25rem;
-    border-radius: var(--border-radius-button);
-    font-size: 0.95rem;
-    font-weight: 600;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: calc(var(--border-radius-small) - 2px);
+    background: transparent;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    border: 2px solid;
+    color: var(--color-text);
+    transition: background 0.15s ease;
   }
-
-  .status-toggle.draft {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-color: #f59e0b;
-    color: #92400e;
+  .menu-item:hover {
+    background: var(--color-bg-secondary);
   }
-
-  .status-toggle.draft:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
-    transform: scale(1.02);
+  .menu-item.danger {
+    color: #dc2626;
   }
-
-  .status-toggle.published {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border-color: #10b981;
-    color: #065f46;
+  .menu-item.danger:hover {
+    background: rgba(220, 38, 38, 0.08);
   }
-
-  .status-toggle.published:hover {
-    background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  :global(.dark) .menu-item.danger {
+    color: #f87171;
   }
-
-  .status-toggle:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .status-icon {
-    font-size: 1.1rem;
-  }
-
-  :global(.dark) .status-toggle.draft {
-    background: linear-gradient(
-      135deg,
-      rgba(251, 191, 36, 0.2) 0%,
-      rgba(245, 158, 11, 0.3) 100%
-    );
-    border-color: #f59e0b;
-    color: #fcd34d;
-  }
-
-  :global(.dark) .status-toggle.draft:hover {
-    background: linear-gradient(
-      135deg,
-      rgba(251, 191, 36, 0.3) 0%,
-      rgba(245, 158, 11, 0.4) 100%
-    );
-  }
-
-  :global(.dark) .status-toggle.published {
-    background: linear-gradient(
-      135deg,
-      rgba(16, 185, 129, 0.2) 0%,
-      rgba(52, 211, 153, 0.3) 100%
-    );
-    border-color: #10b981;
-    color: #6ee7b7;
-  }
-
-  :global(.dark) .status-toggle.published:hover {
-    background: linear-gradient(
-      135deg,
-      rgba(16, 185, 129, 0.3) 0%,
-      rgba(52, 211, 153, 0.4) 100%
-    );
+  :global(.dark) .menu-item.danger:hover {
+    background: rgba(248, 113, 113, 0.1);
   }
 
   /* Editor Layout */
@@ -716,12 +745,13 @@
     border: 1px solid var(--color-border);
     border-radius: 4px;
     color: var(--color-text-muted);
-    font-size: 0.9rem;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    font-family: monospace;
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.15s ease;
-    flex-shrink: 0; /* Prevent button from being squeezed */
+    flex-shrink: 0;
   }
   .collapse-details-btn:hover {
     background: var(--color-bg-secondary);

@@ -13,7 +13,7 @@
   import { getActionableUploadError, isConvertibleFormat } from "$lib/utils/upload-validation";
   import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "lucide-svelte";
+  import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check } from "lucide-svelte";
   import FiresideChat from "./FiresideChat.svelte";
   import VoiceInput from "./VoiceInput.svelte";
   import { browser } from "$app/environment";
@@ -1098,7 +1098,7 @@
         <span class="status-draft-saving">Saving draft...</span>
       {:else if draftKey && draftManager.saveStatus === "saved"}
         <span class="status-divider">|</span>
-        <span class="status-draft-saved">Draft saved ✓</span>
+        <span class="status-draft-saved">Draft saved <Check size={12} class="inline-block" /></span>
       {:else if draftKey && draftManager.hasUnsavedChanges(content)}
         <span class="status-divider">|</span>
         <span class="status-draft-unsaved">Unsaved</span>

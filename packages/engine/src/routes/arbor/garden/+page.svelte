@@ -1,7 +1,7 @@
 <script>
   import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
   import { api } from '$lib/utils';
-  import { Trash2 } from 'lucide-svelte';
+  import { Trash2, Sparkles } from 'lucide-svelte';
 
   let { data } = $props();
 
@@ -54,7 +54,7 @@
   {#if data.isExampleSite}
     <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
       <p class="m-0 text-amber-800 dark:text-amber-200 text-sm">
-        <strong>✨ Welcome to the Example Site!</strong> This <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> is publicly accessible so you can explore Grove's features.
+        <strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> is publicly accessible so you can explore Grove's features.
         On your own site, this panel is private and only accessible to you.
       </p>
     </div>

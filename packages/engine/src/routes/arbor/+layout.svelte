@@ -16,6 +16,7 @@
     ShieldAlert,
     Gift,
     Eye,
+    X,
   } from "lucide-svelte";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
@@ -105,7 +106,7 @@
         <ChevronLeft class="collapse-icon{sidebarCollapsed ? ' rotated' : ''}" />
       </button>
       <button class="close-sidebar" onclick={closeSidebar} aria-label="Close menu">
-        &times;
+        <X size={16} />
       </button>
     </div>
 

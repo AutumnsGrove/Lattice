@@ -7,6 +7,7 @@
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
+  import { ArrowLeft, ArrowRight, ChevronRight, ChevronLeft, X, AlertCircle } from "lucide-svelte";
 
   // Page data from admin layout (includes grafts cascade)
   let { data } = $props();
@@ -148,7 +149,7 @@
 <div class="new-post-page">
   <header class="page-header">
     <div class="header-content">
-      <a href="/arbor/garden" class="back-link">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
+      <a href="/arbor/garden" class="back-link"><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <h1>New <GroveSwap term="blooms">Bloom</GroveSwap></h1>
       <GroveIntro term="blooms" />
     </div>
@@ -163,9 +164,9 @@
 
   {#if error}
     <Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-4 rounded-lg mb-4 flex items-center gap-3">
-      <span class="flex items-center justify-center w-5 h-5 bg-red-500 text-white rounded-full text-xs font-bold">!</span>
+      <AlertCircle class="w-5 h-5 text-red-500 shrink-0" />
       <span class="flex-1 text-red-600 dark:text-red-400">{error}</span>
-      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xl leading-none" onclick={() => (error = null)} aria-label="Dismiss error">&times;</button>
+      <button class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 leading-none" onclick={() => (error = null)} aria-label="Dismiss error"><X size={16} /></button>
     </Glass>
   {/if}
 
@@ -180,7 +181,7 @@
           title={detailsCollapsed ? "Expand details" : "Collapse details"}
           aria-expanded={!detailsCollapsed}
         >
-          {#if detailsCollapsed}»{:else}«{/if}
+          {#if detailsCollapsed}<ChevronRight size={14} />{:else}<ChevronLeft size={14} />{/if}
         </button>
       </div>
 
@@ -254,7 +255,7 @@
               class="form-input"
             />
             <span class="form-hint">
-              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first →</a>
+              URL to a cover image. <a href="/arbor/images" target="_blank">Upload one first <ArrowRight size={12} class="inline-block" /></a>
             </span>
             {#if featuredImage}
               <div class="cover-preview">
@@ -481,10 +482,11 @@
     border: 1px solid var(--color-border);
     border-radius: 4px;
     color: var(--color-text-muted);
-    font-size: 0.9rem;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    font-family: monospace;
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.15s ease;
   }
   .collapse-details-btn:hover {

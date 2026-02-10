@@ -21,6 +21,7 @@
     Loader2,
     Sparkles,
     XCircle,
+    ArrowRight,
   } from "lucide-svelte";
 
   const { data, form }: { data: PageData; form: ActionData } = $props();
@@ -448,7 +449,7 @@
         <p class="field-help">
           Needs <code>repo</code> scope to read your commit history.
           <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">
-            Create a token →
+            Create a token <ArrowRight size={12} class="inline-block" />
           </a>
           <Waystone slug="how-grove-protects-your-secrets" label="How we protect your tokens" inline />
         </p>
@@ -523,7 +524,7 @@
         <p class="field-help">
           Your own OpenRouter key (BYOK).
           <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">
-            Get a key →
+            Get a key <ArrowRight size={12} class="inline-block" />
           </a>
           <Waystone slug="how-grove-protects-your-secrets" label="How we protect your keys" inline />
         </p>

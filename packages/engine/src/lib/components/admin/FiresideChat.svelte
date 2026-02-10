@@ -10,7 +10,7 @@
    */
 
   import { tick } from "svelte";
-  import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame } from "lucide-svelte";
+  import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame, X } from "lucide-svelte";
 
   // ============================================================================
   // Props & Events
@@ -294,7 +294,7 @@
     <div class="draft-view">
       <header class="draft-header">
         <button class="back-button" onclick={backToChat} type="button">
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
           Back to chat
         </button>
         <h2>Your Draft</h2>
@@ -337,7 +337,7 @@
       <h2>Fireside with Wisp</h2>
       <p class="fireside-subtitle">sit by the fire and tell me what's on your mind</p>
       <button class="close-button" onclick={handleClose} type="button" aria-label="Exit Fireside">
-        &times;
+        <X size={16} />
       </button>
     </header>
 
@@ -381,7 +381,7 @@
         </button>
       {:else if messages.length > 0}
         <p class="draft-hint" title="Share a few more thoughts and I'll be able to help shape them into a draft">
-          <Sparkles size={14} />
+          <Sparkles size={16} />
           <span>Keep chatting - drafting unlocks after a few exchanges</span>
         </p>
       {/if}

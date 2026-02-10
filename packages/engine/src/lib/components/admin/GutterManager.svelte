@@ -3,7 +3,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import Select from "$lib/ui/components/ui/Select.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
-  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X, Link2, Loader2 } from "lucide-svelte";
+  import { MessageSquare, ImageIcon, Images, Pin, Plus, ChevronUp, ChevronDown, Pencil, X, Link2, Loader2, Check, Anchor, Pilcrow } from "lucide-svelte";
   import { debounce } from '$lib/utils/debounce';
 
   /**
@@ -516,9 +516,9 @@
                 {#if anchor.isHeading}
                   <span class="anchor-badge heading-badge" aria-hidden="true">H{anchor.headingLevel}</span>
                 {:else if anchor.isAnchorTag}
-                  <span class="anchor-badge tag-badge" aria-hidden="true">⚓</span>
+                  <span class="anchor-badge tag-badge" aria-hidden="true"><Anchor size={12} /></span>
                 {:else}
-                  <span class="anchor-badge para-badge" aria-hidden="true">¶</span>
+                  <span class="anchor-badge para-badge" aria-hidden="true"><Pilcrow size={12} /></span>
                 {/if}
                 <span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
                 <span class="visually-hidden">Anchored to {anchor.type}: {anchor.displayText}</span>
@@ -627,13 +627,13 @@
             {#if anchor.isHeading}
               <span class="anchor-icon heading-icon" aria-hidden="true">H{anchor.headingLevel}</span>
             {:else if anchor.isAnchorTag}
-              <span class="anchor-icon tag-icon" aria-hidden="true">⚓</span>
+              <span class="anchor-icon tag-icon" aria-hidden="true"><Anchor size={12} /></span>
             {:else}
-              <span class="anchor-icon para-icon" aria-hidden="true">¶</span>
+              <span class="anchor-icon para-icon" aria-hidden="true"><Pilcrow size={12} /></span>
             {/if}
             <span class="anchor-text">{anchor.displayText}</span>
             {#if itemAnchor === anchor.raw}
-              <span class="selected-check" aria-hidden="true">✓</span>
+              <span class="selected-check" aria-hidden="true"><Check size={12} /></span>
             {/if}
           </button>
         {/each}
@@ -721,7 +721,7 @@
               type="button"
               class="remove-btn"
               onclick={() => removeGalleryImage(i)}
-            >×</button>
+            ><X size={14} /></button>
           </div>
         {/each}
       </div>

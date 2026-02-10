@@ -1,6 +1,6 @@
 <script>
 	import { GlassCard, Waystone, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
-	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout } from 'lucide-svelte';
+	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout, Check, Circle, CircleDot, Diamond } from 'lucide-svelte';
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -51,7 +51,7 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Status Tracking</h3>
-						<p class="text-xs text-foreground-muted">○ Planned, ◐ In Progress, ✓ Complete, ◇ Deferred—clear visual indicators of where you are.</p>
+						<p class="text-xs text-foreground-muted"><Circle class="w-3 h-3 inline-block" /> Planned, <CircleDot class="w-3 h-3 inline-block" /> In Progress, <Check class="w-3 h-3 inline-block" /> Complete, <Diamond class="w-3 h-3 inline-block" /> Deferred—clear visual indicators of where you are.</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -91,19 +91,19 @@
 				<div>
 					<div class="flex items-center gap-2 mb-3">
 						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Foundation</h3>
-						<span class="text-xs text-success">✓ Complete</span>
+						<span class="text-xs text-success inline-flex items-center gap-1"><Check class="w-3 h-3" /> Complete</span>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<span class="text-success">✓</span>
+							<Check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Set up project structure</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<span class="text-success">✓</span>
+							<Check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Configure development environment</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<span class="text-success">✓</span>
+							<Check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Write initial documentation</span>
 						</div>
 					</div>
@@ -113,19 +113,19 @@
 				<div>
 					<div class="flex items-center gap-2 mb-3">
 						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Core Features</h3>
-						<span class="text-xs text-accent-muted">◐ In Progress</span>
+						<span class="text-xs text-accent-muted inline-flex items-center gap-1"><CircleDot class="w-3 h-3" /> In Progress</span>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<span class="text-success">✓</span>
+							<Check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>User authentication</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-accent-muted">
-							<span>◐</span>
+							<CircleDot class="w-3.5 h-3.5 shrink-0" />
 							<span>Dashboard implementation</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<span>○</span>
+							<Circle class="w-3.5 h-3.5 shrink-0" />
 							<span>API endpoints</span>
 						</div>
 					</div>
@@ -135,15 +135,15 @@
 				<div>
 					<div class="flex items-center gap-2 mb-3">
 						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Future Dreams</h3>
-						<span class="text-xs text-foreground-subtle">○ Planned</span>
+						<span class="text-xs text-foreground-subtle inline-flex items-center gap-1"><Circle class="w-3 h-3" /> Planned</span>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<span>○</span>
+							<Circle class="w-3.5 h-3.5 shrink-0" />
 							<span>Mobile app</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<span>○</span>
+							<Circle class="w-3.5 h-3.5 shrink-0" />
 							<span>Third-party integrations</span>
 						</div>
 					</div>
