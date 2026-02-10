@@ -53,7 +53,7 @@
 
 			<!-- Content -->
 			<div class="flex-1 min-w-0">
-				<h3 class="text-lg font-serif text-bark dark:text-cream">
+				<h3 class="text-lg font-semibold" style="color: var(--color-text)">
 					{#if inGreenhouse}
 						Greenhouse Member
 					{:else}
@@ -61,7 +61,7 @@
 					{/if}
 				</h3>
 
-				<p class="text-sm text-bark/60 dark:text-cream/60 mt-1">
+				<p class="text-sm mt-1" style="color: var(--color-text-muted)">
 					{#if inGreenhouse}
 						You're part of Grove's greenhouse program! You'll get early access
 						to experimental features before they're released to everyone.
@@ -72,7 +72,7 @@
 				</p>
 
 				{#if inGreenhouse && formattedDate}
-					<p class="text-xs text-bark/40 dark:text-cream/40 mt-2">
+					<p class="text-xs mt-2" style="color: var(--color-text-subtle)">
 						Enrolled since {formattedDate}
 					</p>
 				{/if}

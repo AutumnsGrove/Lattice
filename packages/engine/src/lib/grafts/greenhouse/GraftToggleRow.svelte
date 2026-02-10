@@ -16,6 +16,7 @@
 
 	import type { GraftToggleRowProps } from "./types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
+	import { Sprout, Leaf } from "lucide-svelte";
 
 	let {
 		graft,
@@ -42,9 +43,9 @@
 	<div class="graft-content">
 		<div class="graft-icon" class:enabled={graft.enabled}>
 			{#if graft.enabled}
-				<span title="Enabled">🌿</span>
+				<Sprout size={18} />
 			{:else}
-				<span title="Disabled">🌱</span>
+				<Leaf size={18} />
 			{/if}
 		</div>
 
@@ -108,17 +109,18 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.25rem;
 		flex-shrink: 0;
 		width: 32px;
 		height: 32px;
 		border-radius: var(--border-radius-button);
 		background: var(--grove-overlay-10);
+		color: var(--color-text-muted);
 		transition: all 0.2s ease;
 	}
 
 	.graft-icon.enabled {
 		background: rgba(16, 185, 129, 0.15);
+		color: var(--color-primary);
 	}
 
 	.graft-info {

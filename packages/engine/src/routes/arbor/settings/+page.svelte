@@ -247,7 +247,7 @@
       });
 
       logoMessage = showGroveLogo
-        ? "Grove logo enabled! Tap it to cycle through seasons. 🌲"
+        ? "Grove logo enabled! Tap it to cycle through seasons."
         : "Grove logo hidden from header.";
     } catch (error) {
       logoMessage =
@@ -387,8 +387,8 @@
       if (result.type === "success") {
         toast.success(
           enabled
-            ? `🌿 ${graftId.replace(/_/g, " ")} enabled!`
-            : `🌱 ${graftId.replace(/_/g, " ")} disabled`,
+            ? `${graftId.replace(/_/g, " ")} enabled`
+            : `${graftId.replace(/_/g, " ")} disabled`,
         );
         await invalidateAll();
       } else {
@@ -414,7 +414,7 @@
 
       const result = await response.json();
       if (result.type === "success") {
-        toast.success("🌱 Reset to default settings");
+        toast.success("Reset to default settings");
         await invalidateAll();
       } else {
         toast.error(result.data?.error || "Failed to reset preferences");
@@ -451,7 +451,7 @@
 
       const result = await response.json();
       if (result.type === "success") {
-        toast.success("🌱 Tenant enrolled in greenhouse");
+        toast.success("Tenant enrolled in greenhouse");
         adminFormResult = { success: true, message: result.data?.message };
         await invalidateAll();
       } else {
@@ -490,8 +490,8 @@
       if (result.type === "success") {
         toast.success(
           enabled
-            ? "🌿 Greenhouse access enabled"
-            : "🌱 Greenhouse access disabled",
+            ? "Greenhouse access enabled"
+            : "Greenhouse access disabled",
         );
         await invalidateAll();
       } else {
@@ -550,7 +550,7 @@
 
       const result = await response.json();
       if (result.type === "success") {
-        toast.success(`🌿 ${flagId} is now cultivated`);
+        toast.success(`${flagId} is now cultivated`);
         await invalidateAll();
       } else {
         toast.error(result.data?.error || "Failed to cultivate flag");
@@ -580,7 +580,7 @@
 
       const result = await response.json();
       if (result.type === "success") {
-        toast.success(`🍂 ${flagId} is now pruned`);
+        toast.success(`${flagId} is now pruned`);
         await invalidateAll();
       } else {
         toast.error(result.data?.error || "Failed to prune flag");

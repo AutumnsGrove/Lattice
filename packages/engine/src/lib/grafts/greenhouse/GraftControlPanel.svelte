@@ -20,7 +20,7 @@
 	import type { GraftControlPanelProps } from "./types.js";
 	import GraftToggleRow from "./GraftToggleRow.svelte";
 	import { GlassCard, Button, Waystone } from "$lib/ui";
-	import { Sprout, RotateCcw, Sparkles, FlaskConical } from "lucide-svelte";
+	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf } from "lucide-svelte";
 
 	let {
 		grafts,
@@ -82,12 +82,12 @@
 			<!-- Stats -->
 			<div class="stats">
 				<span class="stat enabled">
-					<span class="stat-icon">🌿</span>
+					<span class="stat-icon"><Sprout size={20} /></span>
 					<span class="stat-value">{enabledCount}</span>
 					<span class="stat-label">Enabled</span>
 				</span>
 				<span class="stat total">
-					<span class="stat-icon">🌱</span>
+					<span class="stat-icon"><Leaf size={20} /></span>
 					<span class="stat-value">{grafts.length}</span>
 					<span class="stat-label">Available</span>
 				</span>
@@ -240,7 +240,14 @@
 	}
 
 	.stat-icon {
-		font-size: 1.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-text-muted);
+	}
+
+	.stat.enabled .stat-icon {
+		color: var(--color-primary);
 	}
 
 	.stat-value {
