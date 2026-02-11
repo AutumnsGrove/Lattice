@@ -107,17 +107,19 @@
   <section
     class="relative w-full overflow-hidden transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-transparent' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-transparent dark:from-bark-900 dark:via-bark-800 dark:to-transparent' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-transparent dark:from-bark-900 dark:via-amber-950 dark:to-transparent' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-transparent dark:from-bark-900 dark:via-pink-950 dark:to-transparent' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-transparent dark:from-bark-900 dark:via-bark-800 dark:to-transparent'}"
   >
-    <!-- Three pine trees -->
-    <div class="relative w-full canopy-forest-scene flex items-end justify-center gap-6 sm:gap-10 pb-4" aria-hidden="true" role="presentation">
-      <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-        <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-      </div>
-      <div style="width: 62px; height: 88px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-        <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-      </div>
-      <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-        <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-      </div>
+    <!-- Three pine trees on a glass platform -->
+    <div class="relative w-full canopy-forest-scene flex items-end justify-center pb-4" aria-hidden="true" role="presentation">
+      <Glass variant="tint" intensity="light" class="inline-flex items-end justify-center gap-6 sm:gap-10 px-8 sm:px-12 pt-4 pb-3 rounded-2xl">
+        <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
+          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
+        </div>
+        <div style="width: 62px; height: 88px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
+          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
+        </div>
+        <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
+          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
+        </div>
+      </Glass>
     </div>
 
     <!-- Title overlay — floats above the forest -->
