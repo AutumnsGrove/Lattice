@@ -23,6 +23,7 @@ def r2(ctx: click.Context) -> None:
     \b
     Examples:
         gw r2 list                      # List all buckets
+        gw r2 create --write new-bucket # Create a bucket
         gw r2 ls grove-media            # List objects in bucket
         gw r2 get grove-media path/file # Download an object
         gw r2 put --write bucket file   # Upload an object
@@ -85,6 +86,47 @@ def r2_list(ctx: click.Context) -> None:
         console.print(bucket_table)
     else:
         info("No buckets found")
+
+
+@r2.command("create")
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.argument("bucket")
+@click.pass_context
+def r2_create(ctx: click.Context, write: bool, bucket: str) -> None:
+    """Create a new R2 bucket.
+
+    Requires --write flag.
+
+    \b
+    Examples:
+        gw r2 create --write grove-exports
+        gw r2 create --write my-new-bucket
+    """
+    config: GWConfig = ctx.obj["config"]
+    output_json: bool = ctx.obj.get("output_json", False)
+    wrangler = Wrangler(config)
+
+    if not write:
+        if output_json:
+            console.print(json.dumps({"error": "R2 create requires --write flag"}))
+        else:
+            error("R2 create requires --write flag")
+            info("Add --write to confirm this operation")
+        raise SystemExit(1)
+
+    try:
+        wrangler.execute(["r2", "bucket", "create", bucket])
+    except WranglerError as e:
+        if output_json:
+            console.print(json.dumps({"error": str(e)}))
+        else:
+            error(f"Failed to create bucket: {e}")
+        raise SystemExit(1)
+
+    if output_json:
+        console.print(json.dumps({"bucket": bucket, "created": True}))
+    else:
+        success(f"Created R2 bucket '{bucket}'")
 
 
 @r2.command("ls")
