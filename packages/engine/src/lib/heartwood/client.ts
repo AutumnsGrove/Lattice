@@ -26,7 +26,7 @@ import type {
 } from "./types.js";
 import { GroveAuthError } from "./types.js";
 
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "../config/auth.js";
 
 /**
  * Standard error response shape from GroveAuth API.
@@ -139,7 +139,7 @@ export class GroveAuthClient {
   constructor(config: GroveAuthConfig & { cacheTTL?: number }) {
     this.config = {
       ...config,
-      authBaseUrl: config.authBaseUrl || DEFAULT_AUTH_URL,
+      authBaseUrl: config.authBaseUrl || AUTH_HUB_URL,
     };
     // Default cache TTL: 5 minutes (300000ms)
     this.cacheTTL = config.cacheTTL ?? 300000;

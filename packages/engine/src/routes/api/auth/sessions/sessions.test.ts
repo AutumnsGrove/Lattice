@@ -130,7 +130,7 @@ describe("GET /api/auth/sessions", () => {
     expect(data.sessions).toHaveLength(2);
     expect(data.sessions[0].id).toBe("session-1");
     expect(authService.fetch).toHaveBeenCalledWith(
-      "https://auth-api.grove.place/session/list",
+      "https://login.grove.place/session/list",
       expect.objectContaining({
         method: "GET",
         headers: { Cookie: "grove_session=valid-session-token" },
@@ -240,7 +240,7 @@ describe("DELETE /api/auth/sessions/:sessionId", () => {
     const data = await response.json();
     expect(data.success).toBe(true);
     expect(authService.fetch).toHaveBeenCalledWith(
-      `https://auth-api.grove.place/session/${sessionId}`,
+      `https://login.grove.place/session/${sessionId}`,
       expect.objectContaining({
         method: "DELETE",
         headers: { Cookie: "grove_session=valid-session-token" },
@@ -326,7 +326,7 @@ describe("POST /api/auth/sessions/revoke-all", () => {
     expect(data.success).toBe(true);
     expect(data.revokedCount).toBe(3);
     expect(authService.fetch).toHaveBeenCalledWith(
-      "https://auth-api.grove.place/session/revoke-all",
+      "https://login.grove.place/session/revoke-all",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ keepCurrent: true }),

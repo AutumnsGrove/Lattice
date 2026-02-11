@@ -11,7 +11,7 @@ workers_dev = true
 
 # Production environment variables
 [vars]
-AUTH_BASE_URL = "https://auth-api.grove.place"
+AUTH_BASE_URL = "https://login.grove.place"
 ENVIRONMENT = "production"
 CDN_URL = "https://cdn.grove.place"
 

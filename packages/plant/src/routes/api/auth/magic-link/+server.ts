@@ -9,9 +9,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
 
 interface MagicLinkRequest {
   email: string;
@@ -41,7 +39,7 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
   }
 
   const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
   // Determine the callback URL - where users land after clicking the magic link
   const isProduction =

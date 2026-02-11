@@ -59,7 +59,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             GROVEAUTH_URL: "https://auth.grove.place",
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -81,7 +81,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             GROVEAUTH_URL: "https://auth.grove.place",
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -106,7 +106,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             GROVEAUTH_URL: "https://auth.grove.place",
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -131,7 +131,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             GROVEAUTH_URL: "https://auth.grove.place",
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -153,7 +153,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             GROVEAUTH_URL: "https://auth.grove.place",
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -186,7 +186,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -218,7 +218,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -248,7 +248,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -281,7 +281,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -325,7 +325,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -368,7 +368,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -401,7 +401,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -454,7 +454,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             DB: mockDB,
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -494,7 +494,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -543,7 +543,7 @@ describe("Auth Callback Endpoint", () => {
         platform: {
           env: {
             DB: mockDB,
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -586,7 +586,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -628,7 +628,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -671,7 +671,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -711,7 +711,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -742,7 +742,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -762,7 +762,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -786,7 +786,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -807,7 +807,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -876,7 +876,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -897,7 +897,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -920,7 +920,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -960,7 +960,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },
@@ -983,7 +983,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
             CACHE_KV: {
@@ -1017,7 +1017,7 @@ describe("Auth Callback Endpoint", () => {
         },
         platform: {
           env: {
-            GROVEAUTH_API_URL: "https://auth-api.grove.place",
+            GROVEAUTH_API_URL: "https://login.grove.place",
             GROVEAUTH_CLIENT_ID: "test-client-id",
             GROVEAUTH_CLIENT_SECRET: "test-secret",
           },

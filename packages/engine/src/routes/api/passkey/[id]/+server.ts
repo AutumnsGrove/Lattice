@@ -14,8 +14,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-
-const AUTH_API_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * DELETE /api/passkey/[id] - Delete a passkey
@@ -49,7 +48,7 @@ export const DELETE: RequestHandler = async ({
     if (groveSession && platform?.env?.AUTH) {
       // Use service binding with grove_session
       response = await platform.env.AUTH.fetch(
-        `${AUTH_API_URL}/api/auth/passkey/delete-passkey`,
+        `${AUTH_HUB_URL}/api/auth/passkey/delete-passkey`,
         {
           method: "POST",
           headers: {
@@ -62,7 +61,7 @@ export const DELETE: RequestHandler = async ({
     } else if (accessToken) {
       // Fallback to direct fetch with access_token
       response = await fetch(
-        `${AUTH_API_URL}/api/auth/passkey/delete-passkey`,
+        `${AUTH_HUB_URL}/api/auth/passkey/delete-passkey`,
         {
           method: "POST",
           headers: {

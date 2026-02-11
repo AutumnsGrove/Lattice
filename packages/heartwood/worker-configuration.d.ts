@@ -8,7 +8,7 @@ declare namespace Cloudflare {
   }
   interface Env {
     SESSION_KV: KVNamespace;
-    AUTH_BASE_URL: "https://auth-api.grove.place";
+    AUTH_BASE_URL: "https://login.grove.place";
     ENVIRONMENT: "production";
     CDN_URL: "https://cdn.grove.place";
     PUBLIC_SIGNUP_ENABLED: "false";

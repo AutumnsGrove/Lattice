@@ -31,7 +31,8 @@ import { passkeyClient } from "@better-auth/passkey/client";
 
 // Auth base URL - configurable for different environments
 // This file is intended for browser use; for server-side, import directly from better-auth
-const AUTH_BASE_URL = "https://auth-api.grove.place";
+// Canonical source: @autumnsgrove/groveengine/config AUTH_HUB_URL
+const AUTH_BASE_URL = "https://login.grove.place";
 
 /**
  * Create the Heartwood auth client

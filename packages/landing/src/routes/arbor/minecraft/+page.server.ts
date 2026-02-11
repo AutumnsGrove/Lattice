@@ -21,7 +21,7 @@ async function heartwoodFetch(
   init?: RequestInit,
 ): Promise<Response> {
   return platform.env.AUTH.fetch(
-    new Request(`https://auth-api.grove.place${path}`, {
+    new Request(`https://login.grove.place${path}`, {
       ...init,
       headers: {
         ...Object.fromEntries(new Headers(init?.headers).entries()),

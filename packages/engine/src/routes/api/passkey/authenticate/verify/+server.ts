@@ -28,9 +28,7 @@ import {
   getClientIP,
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits/index.js";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /** Session cookie duration: 30 days */
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 30;
@@ -131,7 +129,7 @@ export const POST: RequestHandler = async ({
   // Clear the returnTo cookie
   cookies.delete("passkey_return_to", { path: "/" });
 
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
   try {
     // Send assertion to GroveAuth for verification

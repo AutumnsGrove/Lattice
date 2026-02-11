@@ -21,7 +21,7 @@ import { createSession, getOrCreateUser } from "$lib/server/db";
 // Constants
 // =============================================================================
 
-const GROVEAUTH_API_URL = "https://auth-api.grove.place";
+const GROVEAUTH_API_URL = "https://login.grove.place";
 
 /** Better Auth session cookie names (production uses __Secure- prefix) */
 const BETTER_AUTH_COOKIE = "better-auth.session_token";

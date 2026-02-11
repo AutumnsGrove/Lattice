@@ -39,7 +39,7 @@ describe("Login Graft Configuration", () => {
 
     it("exports GroveAuth URLs", () => {
       expect(GROVEAUTH_URLS.auth).toBe("https://auth.grove.place");
-      expect(GROVEAUTH_URLS.api).toBe("https://auth-api.grove.place");
+      expect(GROVEAUTH_URLS.api).toBe("https://login.grove.place");
     });
   });
 

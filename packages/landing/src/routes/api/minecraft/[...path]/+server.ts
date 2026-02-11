@@ -53,7 +53,7 @@ async function proxy(event: Parameters<RequestHandler>[0]): Promise<Response> {
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
   const res = await platform.env.AUTH.fetch(
-    new Request(`https://auth-api.grove.place${heartwoodPath}`, {
+    new Request(`https://login.grove.place${heartwoodPath}`, {
       method: request.method,
       headers,
       body,

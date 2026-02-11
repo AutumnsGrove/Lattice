@@ -3,6 +3,7 @@ import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
 import type { Passkey } from "$lib/heartwood";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * Account & Subscription Management Page
@@ -39,9 +40,6 @@ interface TenantRecord {
   plan: string;
   created_at: number;
 }
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
 
 /**
  * Fetch user passkeys from GroveAuth.
@@ -127,7 +125,7 @@ export const load: PageServerLoad = async ({
   const betterAuthSession =
     cookies.get("__Secure-better-auth.session_token") ||
     cookies.get("better-auth.session_token");
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
   // ISOLATED QUERIES: D1 queries and external API calls are separated
   // D1 queries (billing, tenant) are fast (~50ms) and critical for page render

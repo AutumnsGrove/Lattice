@@ -105,7 +105,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     try {
       // Pass full cookie header so GroveAuth can find whichever session cookie exists
       const response = await event.platform.env.AUTH.fetch(
-        "https://auth-api.grove.place/session/validate",
+        "https://login.grove.place/session/validate",
         {
           method: "POST",
           headers: { Cookie: cookieHeader || "" },
@@ -176,7 +176,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       // Token is expiring soon, try to refresh it
       try {
         const authBaseUrl =
-          event.platform.env.GROVEAUTH_URL || "https://auth-api.grove.place";
+          event.platform.env.GROVEAUTH_URL || "https://login.grove.place";
         const clientId = event.platform.env.GROVEAUTH_CLIENT_ID;
         const clientSecret = event.platform.env.GROVEAUTH_CLIENT_SECRET;
 

@@ -28,9 +28,7 @@ const mockEnv = {
 describe("Session Bridge: Request Registration", () => {
   describe("registerRequestForBridge", () => {
     it("should register a request with environment context", () => {
-      const request = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in",
-      );
+      const request = new Request("https://login.grove.place/api/auth/sign-in");
 
       registerRequestForBridge(request, mockEnv);
 
@@ -42,10 +40,10 @@ describe("Session Bridge: Request Registration", () => {
 
     it("should track each request independently", () => {
       const request1 = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in/google",
+        "https://login.grove.place/api/auth/sign-in/google",
       );
       const request2 = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in/magic-link",
+        "https://login.grove.place/api/auth/sign-in/magic-link",
       );
 
       const env1 = { ...mockEnv, id: "env1" };
@@ -65,7 +63,7 @@ describe("Session Bridge: Request Registration", () => {
   describe("getRequestContext", () => {
     it("should return undefined for unregistered requests", () => {
       const request = new Request(
-        "https://auth-api.grove.place/api/auth/unregistered",
+        "https://login.grove.place/api/auth/unregistered",
       );
 
       const context = getRequestContext(request);
@@ -73,9 +71,7 @@ describe("Session Bridge: Request Registration", () => {
     });
 
     it("should expire stale requests after 5 minutes", async () => {
-      const request = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in",
-      );
+      const request = new Request("https://login.grove.place/api/auth/sign-in");
 
       // Register with a timestamp in the past
       registerRequestForBridge(request, mockEnv);
@@ -94,7 +90,7 @@ describe("Session Bridge: Result Tracking", () => {
   describe("setSessionBridgeResult / getSessionBridgeResult", () => {
     it("should store and retrieve session bridge result", () => {
       const request = new Request(
-        "https://auth-api.grove.place/api/auth/callback",
+        "https://login.grove.place/api/auth/callback",
       );
       const result: SessionBridgeResult = {
         sessionId: "sess_abc123",
@@ -109,7 +105,7 @@ describe("Session Bridge: Result Tracking", () => {
 
     it("should store error results", () => {
       const request = new Request(
-        "https://auth-api.grove.place/api/auth/callback",
+        "https://login.grove.place/api/auth/callback",
       );
       const errorResult: SessionBridgeResult = {
         sessionId: "",
@@ -126,7 +122,7 @@ describe("Session Bridge: Result Tracking", () => {
 
     it("should return undefined for requests without results", () => {
       const request = new Request(
-        "https://auth-api.grove.place/api/auth/no-result",
+        "https://login.grove.place/api/auth/no-result",
       );
 
       const retrieved = getSessionBridgeResult(request);
@@ -134,12 +130,8 @@ describe("Session Bridge: Result Tracking", () => {
     });
 
     it("should isolate results per request", () => {
-      const request1 = new Request(
-        "https://auth-api.grove.place/api/auth/req1",
-      );
-      const request2 = new Request(
-        "https://auth-api.grove.place/api/auth/req2",
-      );
+      const request1 = new Request("https://login.grove.place/api/auth/req1");
+      const request2 = new Request("https://login.grove.place/api/auth/req2");
 
       const result1: SessionBridgeResult = {
         sessionId: "sess_1",
@@ -162,9 +154,7 @@ describe("Session Bridge: Result Tracking", () => {
 describe("Session Bridge: Cleanup", () => {
   describe("cleanupRequestContext", () => {
     it("should remove request context after cleanup", () => {
-      const request = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in",
-      );
+      const request = new Request("https://login.grove.place/api/auth/sign-in");
 
       registerRequestForBridge(request, mockEnv);
       expect(getRequestContext(request)).not.toBeUndefined();
@@ -174,9 +164,7 @@ describe("Session Bridge: Cleanup", () => {
     });
 
     it("should remove bridge result after cleanup", () => {
-      const request = new Request(
-        "https://auth-api.grove.place/api/auth/sign-in",
-      );
+      const request = new Request("https://login.grove.place/api/auth/sign-in");
       const result: SessionBridgeResult = {
         sessionId: "sess_123",
         userId: "user_456",
@@ -193,7 +181,7 @@ describe("Session Bridge: Cleanup", () => {
 
     it("should handle cleanup of non-existent request gracefully", () => {
       const request = new Request(
-        "https://auth-api.grove.place/api/auth/never-registered",
+        "https://login.grove.place/api/auth/never-registered",
       );
 
       // Should not throw
@@ -204,7 +192,7 @@ describe("Session Bridge: Cleanup", () => {
 
 describe("Session Bridge: WeakMap Behavior", () => {
   it("should use request object as key (referential identity)", () => {
-    const url = "https://auth-api.grove.place/api/auth/sign-in";
+    const url = "https://login.grove.place/api/auth/sign-in";
 
     // Two different Request objects with same URL
     const request1 = new Request(url);
@@ -232,7 +220,7 @@ describe("Session Bridge: WeakMap Behavior", () => {
     // WeakMaps automatically allow GC of keys that are no longer referenced
 
     let request: Request | null = new Request(
-      "https://auth-api.grove.place/api/auth/temp",
+      "https://login.grove.place/api/auth/temp",
     );
     const result: SessionBridgeResult = {
       sessionId: "sess_temp",
@@ -257,7 +245,7 @@ describe("Session Bridge: Complete Flow Simulation", () => {
   it("should handle successful OAuth flow", async () => {
     // Simulate: Route handler registers request
     const request = new Request(
-      "https://auth-api.grove.place/api/auth/callback/google",
+      "https://login.grove.place/api/auth/callback/google",
     );
     registerRequestForBridge(request, mockEnv);
 
@@ -295,7 +283,7 @@ describe("Session Bridge: Complete Flow Simulation", () => {
 
   it("should handle failed SessionDO creation gracefully", async () => {
     const request = new Request(
-      "https://auth-api.grove.place/api/auth/callback/google",
+      "https://login.grove.place/api/auth/callback/google",
     );
     registerRequestForBridge(request, mockEnv);
 
@@ -321,7 +309,7 @@ describe("Session Bridge: Complete Flow Simulation", () => {
     // (shouldn't happen in normal flow, but we should handle it gracefully)
 
     const request = new Request(
-      "https://auth-api.grove.place/api/auth/magic-link",
+      "https://login.grove.place/api/auth/magic-link",
     );
 
     // Hook tries to get context without prior registration

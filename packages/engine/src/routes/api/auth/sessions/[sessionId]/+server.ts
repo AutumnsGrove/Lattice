@@ -8,6 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError } from "$lib/errors";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const DELETE: RequestHandler = async ({ params, cookies, platform }) => {
   const { sessionId } = params;
@@ -59,7 +60,7 @@ export const DELETE: RequestHandler = async ({ params, cookies, platform }) => {
 
   try {
     const response = await platform.env.AUTH.fetch(
-      `https://auth-api.grove.place/session/${sessionId}`,
+      `${AUTH_HUB_URL}/session/${sessionId}`,
       {
         method: "DELETE",
         headers: { Cookie: `grove_session=${groveSession}` },

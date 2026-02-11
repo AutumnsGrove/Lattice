@@ -26,9 +26,7 @@ import {
   getClientIP,
   getEndpointLimitByKey,
 } from "$lib/server/rate-limits/index.js";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 interface RequestBody {
   returnTo?: string;
@@ -85,7 +83,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     );
   }
 
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
   try {
     // Request authentication options from GroveAuth

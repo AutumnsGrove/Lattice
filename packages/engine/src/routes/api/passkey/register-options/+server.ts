@@ -15,9 +15,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-
-/** GroveAuth API URL (not the frontend URL!) */
-const AUTH_API_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate CSRF (origin-based for API endpoints)
@@ -40,7 +38,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
       // Use service binding with grove_session (preferred for tenant subdomains)
       // Note: generate-register-options is a GET endpoint in Better Auth
       response = await platform.env.AUTH.fetch(
-        `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
+        `${AUTH_HUB_URL}/api/auth/passkey/generate-register-options`,
         {
           method: "GET",
           headers: {
@@ -51,7 +49,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     } else if (accessToken) {
       // Fallback to direct fetch with access_token (legacy JWT)
       response = await fetch(
-        `${AUTH_API_URL}/api/auth/passkey/generate-register-options`,
+        `${AUTH_HUB_URL}/api/auth/passkey/generate-register-options`,
         {
           method: "GET",
           headers: {

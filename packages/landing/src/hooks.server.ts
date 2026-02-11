@@ -72,7 +72,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     try {
       // Pass full cookie header so GroveAuth can find whichever session cookie exists
       const response = await event.platform.env.AUTH.fetch(
-        "https://auth-api.grove.place/session/validate",
+        "https://login.grove.place/session/validate",
         {
           method: "POST",
           headers: { Cookie: cookieHeader || "" },

@@ -134,7 +134,7 @@ describe("GroveAuthClient", () => {
   describe("Configuration", () => {
     it("should use default auth URL", async () => {
       const result = await client.getLoginUrl();
-      expect(result.url).toContain("https://auth-api.grove.place");
+      expect(result.url).toContain("https://login.grove.place");
     });
 
     it("should allow custom auth URL", async () => {

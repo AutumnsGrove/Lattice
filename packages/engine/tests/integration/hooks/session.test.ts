@@ -98,7 +98,7 @@ function createMockEvent(
   // Mock AUTH service binding
   const mockAuthService = {
     fetch: vi.fn(async (url: string, fetchOptions: RequestInit) => {
-      if (url === "https://auth-api.grove.place/session/validate") {
+      if (url === "https://login.grove.place/session/validate") {
         if (
           options.authServiceResponse === null ||
           options.authServiceResponse === undefined
@@ -132,7 +132,7 @@ function createMockEvent(
         TENANTS: undefined,
         AUTH: mockAuthService,
         TURNSTILE_SECRET_KEY: undefined,
-        GROVEAUTH_URL: "https://auth-api.grove.place",
+        GROVEAUTH_URL: "https://login.grove.place",
       },
     } as any,
   };
@@ -237,7 +237,7 @@ describe("Session Hook Orchestration", () => {
       ) {
         // Simulating what the hook does with the response
         const response = await mockEvent.platform.env.AUTH.fetch(
-          "https://auth-api.grove.place/session/validate",
+          "https://login.grove.place/session/validate",
           { method: "POST", headers: { Cookie: "grove_session=session-123" } },
         );
 

@@ -8,6 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError } from "$lib/errors";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const GET: RequestHandler = async ({ cookies, platform }) => {
   const groveSession = cookies.get("grove_session");
@@ -29,7 +30,7 @@ export const GET: RequestHandler = async ({ cookies, platform }) => {
 
   try {
     const response = await platform.env.AUTH.fetch(
-      "https://auth-api.grove.place/session/list",
+      `${AUTH_HUB_URL}/session/list`,
       {
         method: "GET",
         headers: { Cookie: `grove_session=${groveSession}` },

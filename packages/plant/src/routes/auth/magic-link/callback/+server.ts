@@ -16,9 +16,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
 
 /**
  * Helper: redirect with a structured error.
@@ -35,7 +33,7 @@ function errorRedirect(
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = env?.GROVEAUTH_URL || AUTH_HUB_URL;
   const db = platform?.env?.DB;
   const path = url.pathname;
 

@@ -8,6 +8,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * POST is the primary logout handler (CSRF-safe).
@@ -34,13 +35,10 @@ export const POST: RequestHandler = async ({
   const groveSession = cookies.get("grove_session");
   if (groveSession && platform?.env?.AUTH) {
     try {
-      await platform.env.AUTH.fetch(
-        "https://auth-api.grove.place/session/revoke",
-        {
-          method: "POST",
-          headers: { Cookie: `grove_session=${groveSession}` },
-        },
-      );
+      await platform.env.AUTH.fetch(`${AUTH_HUB_URL}/session/revoke`, {
+        method: "POST",
+        headers: { Cookie: `grove_session=${groveSession}` },
+      });
     } catch (err) {
       // Log but don't fail - we still want to clear cookies
       console.error("[Logout] Failed to revoke SessionDO session:", err);

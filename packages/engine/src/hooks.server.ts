@@ -461,7 +461,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     try {
       // Pass the full cookie header so GroveAuth can find whichever session cookie exists
       const response = await event.platform.env.AUTH.fetch(
-        "https://auth-api.grove.place/session/validate",
+        "https://login.grove.place/session/validate",
         {
           method: "POST",
           headers: { Cookie: cookieHeader || "" },
@@ -519,11 +519,11 @@ export const handle: Handle = async ({ event, resolve }) => {
         // Falls back to bare fetch only when AUTH binding is unavailable (e.g., local dev)
         const authBinding = event.platform?.env?.AUTH;
         const userInfoResponse = authBinding
-          ? await authBinding.fetch("https://auth-api.grove.place/userinfo", {
+          ? await authBinding.fetch("https://login.grove.place/userinfo", {
               headers: { Authorization: `Bearer ${accessToken}` },
             })
           : await fetch(
-              `${event.platform?.env?.GROVEAUTH_URL || "https://auth-api.grove.place"}/userinfo`,
+              `${event.platform?.env?.GROVEAUTH_URL || "https://login.grove.place"}/userinfo`,
               {
                 headers: { Authorization: `Bearer ${accessToken}` },
               },

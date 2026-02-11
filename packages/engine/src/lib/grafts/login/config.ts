@@ -6,6 +6,7 @@
  */
 
 import type { AuthProvider, ProviderConfig } from "./types.js";
+import { AUTH_HUB_URL } from "../../config/auth.js";
 
 // =============================================================================
 // PROVIDER REGISTRY
@@ -98,8 +99,7 @@ export const DEFAULT_RETURN_TO = "/arbor";
  * in .env.local to override the production auth API base URL.
  * @example VITE_AUTH_API_URL=https://dev.grove.place
  */
-const AUTH_API_BASE =
-  import.meta.env.VITE_AUTH_API_URL ?? "https://auth-api.grove.place";
+const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_URL ?? AUTH_HUB_URL;
 
 export const GROVEAUTH_URLS = {
   /** Frontend login page (legacy - kept for reference) */

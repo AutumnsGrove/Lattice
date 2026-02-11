@@ -1,13 +1,14 @@
 /**
- * Auth API Proxy — Heartwood Service Binding
+ * Session Proxy — Heartwood Service Binding
  *
- * Catch-all route that proxies all /api/auth/* requests to Heartwood
- * via Cloudflare service binding (Worker-to-Worker, no public internet).
+ * Proxies /session/* requests to Heartwood for session management:
+ * - /session/validate (POST) — session validation
+ * - /session/revoke (POST) — logout / session revocation
+ * - /session/list (POST) — list user sessions
+ * - /session/revoke-all (POST) — revoke all sessions
+ * - /session/{id} (GET/DELETE) — individual session operations
  *
  * Security hardening is centralized in $lib/proxy.ts (HAWK-005/006/007).
- *
- * By running on login.grove.place (same origin as the auth UI pages),
- * all cookies are first-party and WebAuthn origin matches automatically.
  */
 
 import type { RequestHandler } from "./$types";
@@ -27,11 +28,9 @@ const handler: RequestHandler = async (event) => {
     });
   }
 
-  return proxyToHeartwood(event, `/api/auth/${path}`);
+  return proxyToHeartwood(event, `/session/${path}`);
 };
 
 export const GET: RequestHandler = handler;
 export const POST: RequestHandler = handler;
-export const PUT: RequestHandler = handler;
 export const DELETE: RequestHandler = handler;
-export const PATCH: RequestHandler = handler;

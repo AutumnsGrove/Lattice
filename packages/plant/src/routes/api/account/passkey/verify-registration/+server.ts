@@ -11,9 +11,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { isValidCredential } from "@autumnsgrove/groveengine/heartwood";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   const accessToken = cookies.get("access_token");
@@ -32,7 +30,7 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
     return json({ error: "Auth service unavailable" }, { status: 503 });
   }
 
-  const authBaseUrl = platform.env.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = platform.env.GROVEAUTH_URL || AUTH_HUB_URL;
 
   // Forward all BA cookies so Better Auth can identify the session
   const allCookies = cookies.getAll();

@@ -42,6 +42,8 @@ export const COMPONENTS: ComponentConfig[] = [
   {
     id: "comp_auth",
     name: "Authentication",
+    // Direct Heartwood health check (bypasses login proxy — /health is not under /api/auth/)
+    // TODO: Add /health proxy to login.grove.place, then switch this URL
     url: "https://auth-api.grove.place/health",
     checkType: "deep",
     method: "GET",

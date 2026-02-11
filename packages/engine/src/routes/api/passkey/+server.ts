@@ -14,9 +14,7 @@ import {
   throwGroveError,
   logGroveError,
 } from "$lib/errors/index.js";
-
-/** Default GroveAuth API URL */
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const GET: RequestHandler = async ({ request, cookies, platform }) => {
   // Validate origin - this endpoint returns sensitive security data
@@ -30,7 +28,7 @@ export const GET: RequestHandler = async ({ request, cookies, platform }) => {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  const authBaseUrl = platform?.env?.GROVEAUTH_URL || DEFAULT_AUTH_URL;
+  const authBaseUrl = platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL;
 
   try {
     // Fetch passkeys from GroveAuth

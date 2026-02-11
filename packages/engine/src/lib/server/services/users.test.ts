@@ -307,7 +307,7 @@ describe("User Service", () => {
       await getUserFromSession(db, "test-token");
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://auth-api.grove.place/userinfo",
+        "https://login.grove.place/userinfo",
         expect.objectContaining({
           headers: { Authorization: "Bearer test-token" },
         }),

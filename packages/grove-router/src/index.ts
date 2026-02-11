@@ -37,11 +37,11 @@ interface RouteTarget {
  * RouteTarget = proxy with optional Service Binding (Workers)
  */
 const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
-  // Auth subdomains
-  auth: "groveauth-frontend.pages.dev",
-  admin: "groveauth-frontend.pages.dev",
-  login: "grove-login.pages.dev", // New unified auth hub (packages/login)
-  heartwood: "groveauth-frontend.pages.dev",
+  // Auth subdomains — all redirect to the unified login hub
+  auth: "REDIRECT_TO_LOGIN",
+  admin: "REDIRECT_TO_LOGIN",
+  login: "grove-login.pages.dev", // Unified auth hub (packages/login)
+  heartwood: "REDIRECT_TO_LOGIN",
 
   // Grove internal Pages projects
   amber: "amber-4x2.pages.dev", // Amber storage
@@ -183,6 +183,24 @@ export default {
       const redirectUrl = new URL(request.url);
       redirectUrl.hostname = "grove.place";
       return Response.redirect(redirectUrl.toString(), 301);
+    }
+
+    // Handle legacy auth subdomain redirects to login hub
+    if (routeTarget === "REDIRECT_TO_LOGIN") {
+      const redirectUrl = new URL(request.url);
+      redirectUrl.hostname = "login.grove.place";
+      return Response.redirect(redirectUrl.toString(), 301);
+    }
+
+    // auth-api: redirect browser requests to login hub, proxy API requests during transition
+    if (subdomain === "auth-api") {
+      const accept = request.headers.get("Accept") || "";
+      if (accept.includes("text/html")) {
+        const redirectUrl = new URL(request.url);
+        redirectUrl.hostname = "login.grove.place";
+        return Response.redirect(redirectUrl.toString(), 301);
+      }
+      // API requests continue to Heartwood via service binding (backward compat for in-flight magic links)
     }
 
     // Handle R2 CDN - serve directly from R2 bucket

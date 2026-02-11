@@ -25,7 +25,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   if (groveSession && platform?.env?.AUTH) {
     try {
       await platform.env.AUTH.fetch(
-        "https://auth-api.grove.place/session/revoke",
+        "https://login.grove.place/session/revoke",
         {
           method: "POST",
           headers: { Cookie: `grove_session=${groveSession}` },
