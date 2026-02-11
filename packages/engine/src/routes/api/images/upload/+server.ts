@@ -1,6 +1,5 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import {
   checkRateLimit,
@@ -92,11 +91,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Tenant check (CRITICAL for security)
   if (!locals.tenantId) {
     throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // ========================================================================

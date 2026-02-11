@@ -12,7 +12,6 @@
  */
 
 import { json, type RequestHandler } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { API_ERRORS, logGroveError } from "$lib/errors";
 import { RATE_LIMIT } from "$lib/config/wisp.js";
 import { secureUserContent } from "$lib/server/inference-client.js";
@@ -66,17 +65,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
-    );
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
     );
   }
 

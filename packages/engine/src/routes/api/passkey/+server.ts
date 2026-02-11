@@ -8,7 +8,6 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -17,11 +16,6 @@ import {
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 export const GET: RequestHandler = async ({ request, cookies, platform }) => {
-  // Validate origin - this endpoint returns sensitive security data
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   // Get access token from cookie
   const accessToken = cookies.get("access_token");
   if (!accessToken) {

@@ -1,5 +1,4 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
@@ -76,11 +75,6 @@ export const POST: RequestHandler = async ({
   platform,
   locals,
 }) => {
-  // CSRF check for state-changing operation
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.POST_META) {
     throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }
@@ -146,11 +140,6 @@ export const DELETE: RequestHandler = async ({
   platform,
   locals,
 }) => {
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.POST_META) {
     throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
   }

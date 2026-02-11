@@ -1,6 +1,5 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import {
   getVariantById,
@@ -48,11 +47,6 @@ export const POST: RequestHandler = async ({
 }) => {
   if (SHOP_DISABLED) {
     throwGroveError(503, API_ERRORS.FEATURE_DISABLED, "API");
-  }
-
-  // CSRF check - validate origin for public checkout
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

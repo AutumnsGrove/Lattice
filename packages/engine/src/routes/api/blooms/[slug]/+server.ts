@@ -1,6 +1,5 @@
 import { json, error, isHttpError } from "@sveltejs/kit";
 import { getPostBySlug, renderMarkdown } from "$lib/utils/markdown.js";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -193,11 +192,6 @@ export const PUT: RequestHandler = async ({
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.DB) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
@@ -228,25 +222,23 @@ export const PUT: RequestHandler = async ({
         // Fetch plan, current post status, and published count in parallel
         // (D1 has no transactions, so soft limits with minimal TOCTOU are by design)
         const [tenant, currentPost, publishedCount] = await Promise.all([
-          platform.env.DB
-            .prepare("SELECT plan FROM tenants WHERE id = ?")
+          platform.env.DB.prepare("SELECT plan FROM tenants WHERE id = ?")
             .bind(tenantId)
             .first<{ plan: string }>(),
-          platform.env.DB
-            .prepare("SELECT status FROM posts WHERE tenant_id = ? AND slug = ?")
+          platform.env.DB.prepare(
+            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
+          )
             .bind(tenantId, slug)
             .first<{ status: string }>(),
-          platform.env.DB
-            .prepare(
-              "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
-            )
+          platform.env.DB.prepare(
+            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
+          )
             .bind(tenantId)
             .first<{ count: number }>(),
         ]);
 
-        const tierKey: TierKey = (tenant?.plan && isValidTier(tenant.plan))
-          ? tenant.plan
-          : "seedling";
+        const tierKey: TierKey =
+          tenant?.plan && isValidTier(tenant.plan) ? tenant.plan : "seedling";
         const tierConfig = TIERS[tierKey];
 
         // Only enforce limit on draft→published transitions
@@ -409,11 +401,6 @@ export const DELETE: RequestHandler = async ({
   // Auth check
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

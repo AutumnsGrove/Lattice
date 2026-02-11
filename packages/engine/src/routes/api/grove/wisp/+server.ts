@@ -8,7 +8,6 @@
  */
 
 import { json, error, type RequestHandler } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { API_ERRORS, logGroveError } from "$lib/errors";
 import {
   MAX_CONTENT_LENGTH,
@@ -42,17 +41,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
-    );
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
     );
   }
 

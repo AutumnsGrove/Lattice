@@ -1,5 +1,4 @@
 import { json, error } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -35,11 +34,6 @@ export const PUT: RequestHandler = async ({
   // Tenant check
   if (!locals.tenantId) {
     throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
@@ -156,11 +150,6 @@ export const PATCH: RequestHandler = async ({
   // Tenant check
   if (!locals.tenantId) {
     throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
-
-  // CSRF check (skip for example tenant since they don't have session cookies)
-  if (!isExampleTenant && !validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

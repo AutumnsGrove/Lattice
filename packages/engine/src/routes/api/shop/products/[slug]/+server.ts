@@ -1,6 +1,5 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   getProductBySlug,
   updateProduct,
@@ -127,17 +126,6 @@ export const PATCH: RequestHandler = async ({
         error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
-    );
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
     );
   }
 
@@ -351,17 +339,6 @@ export const DELETE: RequestHandler = async ({
         error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
-    );
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
     );
   }
 

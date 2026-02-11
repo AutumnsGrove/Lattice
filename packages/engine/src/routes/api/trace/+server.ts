@@ -11,7 +11,6 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { validateTracePath } from "$lib/utils/trace-path.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { generateId } from "$lib/server/services/database.js";
@@ -47,17 +46,6 @@ const MAX_COMMENT_LENGTH = 500;
  * - { error: string } on failure
  */
 export const POST: RequestHandler = async ({ request, platform }) => {
-  // Validate CSRF (origin-based)
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
-    );
-  }
-
   if (!platform?.env?.DB) {
     return json(
       {

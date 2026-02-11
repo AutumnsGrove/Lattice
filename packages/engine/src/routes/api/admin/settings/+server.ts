@@ -1,5 +1,4 @@
 import { json, error } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -20,11 +19,6 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Use the correct D1 database binding (multi-tenant architecture)

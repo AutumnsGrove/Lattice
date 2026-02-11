@@ -6,7 +6,6 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -47,7 +46,13 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 
   // Gate: reeds_comments graft
-  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
+  if (
+    !(await isReedsEnabled(
+      platform.env.DB,
+      platform?.env?.CACHE_KV,
+      locals.tenantId,
+    ))
+  ) {
     throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 
@@ -64,7 +69,12 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   }
 };
 
-const VALID_WHO_CAN_COMMENT = ["anyone", "grove_members", "paid_only", "nobody"];
+const VALID_WHO_CAN_COMMENT = [
+  "anyone",
+  "grove_members",
+  "paid_only",
+  "nobody",
+];
 
 interface SettingsInput {
   comments_enabled?: number;
@@ -73,17 +83,9 @@ interface SettingsInput {
   show_comment_count?: number;
 }
 
-export const PATCH: RequestHandler = async ({
-  request,
-  platform,
-  locals,
-}) => {
+export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB || !locals.tenantId) {
@@ -91,7 +93,13 @@ export const PATCH: RequestHandler = async ({
   }
 
   // Gate: reeds_comments graft
-  if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
+  if (
+    !(await isReedsEnabled(
+      platform.env.DB,
+      platform?.env?.CACHE_KV,
+      locals.tenantId,
+    ))
+  ) {
     throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
   }
 

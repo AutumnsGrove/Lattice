@@ -11,7 +11,6 @@
  */
 
 import { json, error } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createSecretsManager } from "$lib/server/secrets";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
@@ -85,10 +84,6 @@ export async function PUT({
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.DB) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
@@ -157,10 +152,6 @@ export async function DELETE({
 }) {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

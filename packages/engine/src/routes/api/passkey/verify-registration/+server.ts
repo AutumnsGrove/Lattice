@@ -9,7 +9,6 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -34,10 +33,6 @@ interface VerifyRegistrationRequest {
  * POST /api/passkey/verify-registration - Verify credential and complete registration
  */
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   const groveSession = cookies.get("grove_session");
   const accessToken = cookies.get("access_token");
 

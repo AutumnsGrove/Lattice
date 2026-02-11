@@ -1,14 +1,8 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sendWelcomeEmail } from "$lib/email/send";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json({ error: "Invalid origin" }, { status: 403 });
-  }
-
   if (!platform?.env?.DB) {
     return json({ error: "Service temporarily unavailable" }, { status: 503 });
   }

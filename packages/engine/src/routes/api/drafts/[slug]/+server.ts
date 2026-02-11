@@ -1,5 +1,4 @@
 import { json, error, type RequestHandler } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
@@ -105,11 +104,6 @@ export const PUT: RequestHandler = async ({
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.DB) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
@@ -195,11 +189,6 @@ export const DELETE: RequestHandler = async ({
   // Auth check
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

@@ -4,7 +4,6 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import {
@@ -147,11 +146,6 @@ export const POST: RequestHandler = async ({
   // Auth check
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

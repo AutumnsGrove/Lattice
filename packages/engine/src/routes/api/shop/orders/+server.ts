@@ -1,6 +1,5 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getOrders, getOrderById, updateOrderStatus } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { OrderStatus, PaymentStatus } from "$lib/payments/types";
@@ -82,10 +81,6 @@ export const PATCH: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

@@ -1,6 +1,5 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import {
   checkRateLimit,
@@ -41,10 +40,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!locals.tenantId) {
     throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   // Upload gate: check if this tenant can upload images (fail-closed)
@@ -261,10 +256,6 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!locals.tenantId) {
     throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   const envValidation = validateEnv(platform?.env, ["DB", "IMAGES"]);

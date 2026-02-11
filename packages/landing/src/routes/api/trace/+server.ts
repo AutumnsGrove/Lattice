@@ -7,7 +7,6 @@
 
 import { json, error } from "@sveltejs/kit";
 import {
-  validateCSRF,
   validateTracePath,
   sanitizeObject,
 } from "@autumnsgrove/groveengine/utils";
@@ -49,11 +48,6 @@ async function hashIP(ip: string): Promise<string> {
 }
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-  // Validate CSRF (origin-based)
-  if (!validateCSRF(request)) {
-    throw error(403, "Invalid origin");
-  }
-
   if (!platform?.env?.DB) {
     throw error(500, "Database not configured");
   }

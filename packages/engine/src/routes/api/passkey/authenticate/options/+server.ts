@@ -13,7 +13,6 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -33,11 +32,6 @@ interface RequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
-  // Validate CSRF (origin-based for API endpoints)
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   // Rate limit to prevent abuse
   const kv = platform?.env?.CACHE_KV;
   if (kv) {

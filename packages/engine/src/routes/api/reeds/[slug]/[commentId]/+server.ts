@@ -4,7 +4,6 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
@@ -31,10 +30,6 @@ export const PATCH: RequestHandler = async ({
 }) => {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
@@ -108,10 +103,6 @@ export const DELETE: RequestHandler = async ({
 }) => {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

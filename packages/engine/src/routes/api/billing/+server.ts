@@ -1,6 +1,5 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { TIERS, type TierKey } from "$lib/config/tiers";
@@ -334,10 +333,6 @@ export const POST: RequestHandler = async ({
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   if (!platform?.env?.DB) {
     throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
   }
@@ -523,10 +518,6 @@ export const PATCH: RequestHandler = async ({
 }) => {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {
@@ -748,10 +739,6 @@ export const PUT: RequestHandler = async ({
 }) => {
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
-
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
   }
 
   if (!platform?.env?.DB) {

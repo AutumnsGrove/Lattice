@@ -1,6 +1,5 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import { getProducts, createProduct, createVariant } from "$lib/payments/shop";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { API_ERRORS, logGroveError } from "$lib/errors";
@@ -142,17 +141,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         error_code: API_ERRORS.UNAUTHORIZED.code,
       },
       { status: 401 },
-    );
-  }
-
-  // CSRF check
-  if (!validateCSRF(request)) {
-    return json(
-      {
-        error: API_ERRORS.INVALID_ORIGIN.userMessage,
-        error_code: API_ERRORS.INVALID_ORIGIN.code,
-      },
-      { status: 403 },
     );
   }
 

@@ -8,7 +8,6 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { validateCSRF } from "$lib/utils/csrf.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -25,10 +24,6 @@ export const DELETE: RequestHandler = async ({
   cookies,
   platform,
 }) => {
-  if (!validateCSRF(request)) {
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
-
   const passkeyId = params.id;
   if (!passkeyId) {
     throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
