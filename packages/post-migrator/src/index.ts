@@ -326,7 +326,7 @@ async function runMigration(env: Env): Promise<MigrationResult> {
 
     for (const post of hotPosts.results || []) {
       const thresholds = getStorageThresholds(post.tier);
-      const publishedAt = new Date(post.published_at!).getTime();
+      const publishedAt = post.published_at! * 1000; // seconds → milliseconds
       const ageDays = (now - publishedAt) / (24 * 60 * 60 * 1000);
 
       // Check tier-specific criteria
@@ -384,7 +384,7 @@ async function runMigration(env: Env): Promise<MigrationResult> {
 
     for (const post of warmPosts.results || []) {
       const thresholds = getStorageThresholds(post.tier);
-      const publishedAt = new Date(post.published_at!).getTime();
+      const publishedAt = post.published_at! * 1000; // seconds → milliseconds
       const ageDays = (now - publishedAt) / (24 * 60 * 60 * 1000);
 
       // Check tier-specific criteria

@@ -23,7 +23,7 @@ interface TagRow {
 }
 
 interface UserRow {
-  created_at: string;
+  created_at: number;
 }
 
 /**
@@ -147,7 +147,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
   // Process account age
   let accountAgeDays = 30; // Default fallback
   if (tenantResult?.created_at) {
-    const createdAt = new Date(tenantResult.created_at);
+    const createdAt = new Date(tenantResult.created_at * 1000);
     const now = new Date();
     accountAgeDays = Math.floor(
       (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
