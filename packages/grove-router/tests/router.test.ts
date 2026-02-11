@@ -99,27 +99,23 @@ describe("Grove Router", () => {
   // ==========================================================================
 
   describe("Subdomain routing", () => {
-    it("routes auth subdomain to groveauth-frontend", async () => {
+    it("redirects auth subdomain to login hub", async () => {
       const request = createRequest("auth", "/login");
-      await router.fetch(request, env);
+      const response = await router.fetch(request, env);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: expect.stringContaining("groveauth-frontend.pages.dev/login"),
-        }),
+      expect(response.status).toBe(301);
+      expect(response.headers.get("Location")).toBe(
+        "https://login.grove.place/login",
       );
     });
 
-    it("routes admin subdomain to groveauth-frontend", async () => {
+    it("redirects admin subdomain to login hub", async () => {
       const request = createRequest("admin", "/dashboard");
-      await router.fetch(request, env);
+      const response = await router.fetch(request, env);
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: expect.stringContaining(
-            "groveauth-frontend.pages.dev/dashboard",
-          ),
-        }),
+      expect(response.status).toBe(301);
+      expect(response.headers.get("Location")).toBe(
+        "https://login.grove.place/dashboard",
       );
     });
 
