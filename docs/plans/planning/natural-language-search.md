@@ -10,7 +10,7 @@ Right now, each blog has its own search. But Grove isn't just isolated sites —
 **Key Decisions Made:**
 
 - ✅ **Architecture:** Orama hybrid search (Option C) from the start
-- ✅ **Privacy Model:** Opt-OUT by default (discoverable unless you opt out)
+- ✅ **Privacy Model:** Opt-IN by default (NOT discoverable unless you enable it)
 - ✅ **Gating:** Two levels - account opt-out + per-post frontmatter
 - ✅ **Naming:** `discover.grove.place`
 - ✅ **Design:** Glassmorphism for search results
@@ -328,7 +328,7 @@ Response:
 ```sql
 CREATE TABLE IF NOT EXISTS discovery_settings (
   tenant_id TEXT PRIMARY KEY,
-  discoverable INTEGER DEFAULT 1,  -- 1 = discoverable by default (opt-out model)
+  discoverable INTEGER DEFAULT 0,  -- 0 = NOT discoverable by default (opt-in model)
   indexed_at TEXT,
   last_sync TEXT,
   post_count INTEGER DEFAULT 0
@@ -346,9 +346,19 @@ CREATE TABLE IF NOT EXISTS discovery_settings (
     {#if discoverable}
       Wanderers can find your posts on <a href="https://discover.grove.place">discover.grove.place</a>.
     {:else}
-      Your posts won't appear in cross-site search.
+      Your posts are private and won't appear in cross-site search.
     {/if}
   </p>
+
+  {#if !discoverable}
+    <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+      <p class="text-sm font-medium mb-2">Want to be found?</p>
+      <p class="text-sm text-foreground-muted">
+        Enable Grove Discovery to let wanderers find your writing across the network.
+        You can always change this later, and exclude specific posts using frontmatter.
+      </p>
+    </div>
+  {/if}
 
   <!-- Toggle -->
   <label class="flex items-center gap-3 cursor-pointer">
@@ -358,7 +368,7 @@ CREATE TABLE IF NOT EXISTS discovery_settings (
       onchange={handleToggle}
       class="w-5 h-5"
     />
-    <span>Make my blog discoverable in Grove search</span>
+    <span>Enable Grove Discovery (make my blog searchable)</span>
   </label>
 
   {#if discoverable}
@@ -553,16 +563,17 @@ export async function POST({ request, locals }) {
 
 ### Tenant Controls
 
-**Default: Opt-OUT (Discoverable by Default)**
+**Default: Opt-IN (NOT Discoverable by Default)**
 
-**Why opt-out is privacy-first:**
+**Why opt-in is privacy-first:**
 
-- Wanderers WANT to be discovered — that's why they're on Grove
-- Clearly show this during signup: "Your blog is discoverable. You can change this in settings."
-- One-click opt-out available in Arbor settings
-- No hidden indexing — transparent about what's searchable
+- New blogs start private — no surprises
+- Wanderers explicitly choose to be discovered
+- Clear call-to-action in Arbor: "Want to be found? Enable Grove Discovery"
+- No indexing happens unless you say yes
+- Respects privacy by default
 
-**Important:** This isn't extractive. We show wanderers exactly what's happening and give them control.
+**Important:** This is privacy-first. We never index without explicit permission.
 
 **Two-Level Gating System:**
 
@@ -587,7 +598,7 @@ discoverable: false
 
 **How the gates work together:**
 
-- Account opted OUT → No posts indexed, frontmatter ignored
+- Account NOT opted in → No posts indexed, frontmatter ignored (default)
 - Account opted IN + post `discoverable: false` → This post excluded
 - Account opted IN + no frontmatter → Post is searchable
 
