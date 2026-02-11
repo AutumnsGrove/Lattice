@@ -72,14 +72,41 @@ def _run_fd(args: list[str], cwd: Path) -> str:
     return result.stdout
 
 
-def search_command(pattern: str, path: Optional[str] = None) -> None:
+def search_command(pattern: str, path: Optional[str] = None, file_type: Optional[str] = None) -> None:
     """General search across the codebase."""
     config = get_config()
     search_path = Path(path) if path else config.grove_root
 
     print_section(f"Searching for: {pattern}", "")
 
-    output = _run_rg([pattern, str(search_path)], cwd=config.grove_root)
+    # Build ripgrep args with optional type filter
+    rg_args = [pattern]
+    if file_type:
+        # Map common extensions to ripgrep types or globs
+        type_map = {
+            "svelte": ["--glob", "*.svelte"],
+            "ts": ["--type", "ts"],
+            "typescript": ["--type", "ts"],
+            "js": ["--type", "js"],
+            "javascript": ["--type", "js"],
+            "py": ["--type", "py"],
+            "python": ["--type", "py"],
+            "rust": ["--type", "rust"],
+            "go": ["--type", "go"],
+            "md": ["--type", "markdown"],
+            "markdown": ["--type", "markdown"],
+        }
+
+        # Use mapping if available, otherwise assume it's a ripgrep type
+        if file_type.lower() in type_map:
+            rg_args.extend(type_map[file_type.lower()])
+        else:
+            # Pass through to ripgrep --type (e.g., "java", "ruby", etc.)
+            rg_args.extend(["--type", file_type.lower()])
+
+    rg_args.append(str(search_path))
+
+    output = _run_rg(rg_args, cwd=config.grove_root)
     if output:
         console.print_raw(output.rstrip())
     else:
@@ -92,9 +119,12 @@ def search_cmd(
     path: Optional[str] = typer.Option(
         None, "--path", "-p", help="Limit search to path"
     ),
+    file_type: Optional[str] = typer.Option(
+        None, "--type", "-t", help="Filter by file type (svelte, ts, js, py, etc.)"
+    ),
 ) -> None:
     """General search across the codebase."""
-    search_command(pattern, path)
+    search_command(pattern, path, file_type)
 
 
 def class_command(name: str) -> None:

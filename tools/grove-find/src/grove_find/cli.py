@@ -133,16 +133,20 @@ def search_cmd(
     path: Optional[str] = typer.Option(
         None, "--path", "-p", help="Limit search to path"
     ),
+    file_type: Optional[str] = typer.Option(
+        None, "--type", "-t", help="Filter by file type (svelte, ts, js, py, etc.)"
+    ),
 ) -> None:
     """Search for a pattern across the codebase.
 
     This is the main search command. Examples:
         gf search "TODO"
         gf search "function handleClick" --path src/
+        gf search "useEffect" --type ts
     """
     from grove_find.commands.search import search_command
 
-    search_command(pattern, path)
+    search_command(pattern, path, file_type)
 
 
 # Add top-level shortcuts for common commands
