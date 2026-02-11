@@ -71,7 +71,7 @@
 <div
 	class="
     inline-flex items-center gap-3 px-4 py-2 rounded-full
-    bg-white/60 dark:bg-grove-950/40 backdrop-blur-sm
+    bg-white/60 dark:bg-grove-950/70 backdrop-blur-sm
     border border-white/40 dark:border-grove-800/30
     {className}
   "
