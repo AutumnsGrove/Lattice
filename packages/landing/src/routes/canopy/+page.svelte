@@ -8,12 +8,6 @@
     CANOPY_CATEGORY_LABELS,
     type CanopyCategory,
   } from '@autumnsgrove/groveengine';
-  import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
-  import {
-    TreePine,
-    greens, bark, spring, winter,
-    midnightBloom,
-  } from '@autumnsgrove/groveengine/ui/nature';
 
   // Types derived from engine - defined locally for Svelte 5 runes compatibility
   interface CanopyWanderer {
@@ -42,23 +36,6 @@
   // Reactive state
   let searchQuery = $state('');
   let selectedCategory = $state<CanopyCategory | null>(null);
-
-  // --- Season state ---
-  const isSpring = $derived(seasonStore.current === 'spring');
-  const isAutumn = $derived(seasonStore.current === 'autumn');
-  const isWinter = $derived(seasonStore.current === 'winter');
-  const isMidnight = $derived(seasonStore.current === 'midnight');
-
-  // --- Three pine trees ---
-  const trunkColor = bark.warmBark;
-
-  const treeColor = $derived.by(() => {
-    const s = seasonStore.current;
-    if (s === 'spring') return spring.freshGreen;
-    if (s === 'winter') return winter.frostedPine;
-    if (s === 'midnight') return midnightBloom.violet;
-    return greens.grove;
-  });
 
   // Filter wanderers based on search and category
   let filteredWanderers = $derived.by(() => {
@@ -104,26 +81,8 @@
 
 <main class="min-h-screen">
   <!-- Canopy Header -->
-  <section
-    class="relative w-full overflow-hidden transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-transparent' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-transparent dark:from-bark-900 dark:via-bark-800 dark:to-transparent' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-transparent dark:from-bark-900 dark:via-amber-950 dark:to-transparent' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-transparent dark:from-bark-900 dark:via-pink-950 dark:to-transparent' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-transparent dark:from-bark-900 dark:via-bark-800 dark:to-transparent'}"
-  >
-    <!-- Three pine trees on a glass platform -->
-    <div class="relative w-full canopy-forest-scene flex items-end justify-center pb-4" aria-hidden="true" role="presentation">
-      <Glass variant="tint" intensity="light" class="inline-flex items-end justify-center gap-6 sm:gap-10 px-8 sm:px-12 pt-4 pb-3 rounded-2xl">
-        <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-        </div>
-        <div style="width: 62px; height: 88px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-        </div>
-        <div style="width: 48px; height: 68px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));">
-          <TreePine class="w-full h-full" color={treeColor} trunkColor={trunkColor} season={seasonStore.current} animate={true} />
-        </div>
-      </Glass>
-    </div>
-
-    <!-- Title overlay — floats above the forest -->
-    <div class="relative z-30 text-center px-6 -mt-16 sm:-mt-20 pb-8">
+  <section class="relative w-full pt-8 pb-8">
+    <div class="text-center px-6">
       <Glass variant="tint" intensity="medium" class="inline-block px-8 py-6 rounded-2xl max-w-xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
           The <GroveTerm term="canopy" />
@@ -268,23 +227,6 @@
 <Footer />
 
 <style>
-  /* Three-tree canopy header */
-  .canopy-forest-scene {
-    height: 140px;
-  }
-
-  @media (min-width: 640px) {
-    .canopy-forest-scene {
-      height: 160px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .canopy-forest-scene {
-      height: 180px;
-    }
-  }
-
   /* Category pills — kept as scoped CSS for the interactive state transitions */
   .category-pill {
     display: inline-flex;
