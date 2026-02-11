@@ -297,7 +297,8 @@ def _interactive_commit(config: GitSafetyConfig, issue: Optional[int]) -> str:
 @click.command()
 @click.option("--write", is_flag=True, help="Confirm write operation")
 @click.option("--set-upstream", "-u", is_flag=True, help="Set upstream tracking")
-@click.option("--force-with-lease", is_flag=True, help="Force with lease (safer)")
+@click.option("--force", "-f", is_flag=True, help="Force push (uses --force-with-lease for safety)")
+@click.option("--force-with-lease", is_flag=True, help="Force with lease (same as --force)")
 @click.argument("remote", default="origin")
 @click.argument("branch", required=False)
 @click.pass_context
@@ -305,21 +306,25 @@ def push(
     ctx: click.Context,
     write: bool,
     set_upstream: bool,
+    force: bool,
     force_with_lease: bool,
     remote: str,
     branch: Optional[str],
 ) -> None:
     """Push commits to remote.
 
-    Requires --write flag. Use 'gw git force-push' for force push.
+    Requires --write flag. --force always uses --force-with-lease under the
+    hood — gw never does a bare force push.
 
     \b
     Examples:
         gw git push --write
         gw git push --write -u origin feature/new-thing
-        gw git push --write --force-with-lease
+        gw git push --write --force
     """
     output_json = ctx.obj.get("output_json", False)
+    # --force and --force-with-lease both map to force-with-lease
+    use_force_with_lease = force or force_with_lease
 
     try:
         check_git_safety("push", write_flag=write)
@@ -341,7 +346,7 @@ def push(
         git.push(
             remote=remote,
             branch=current_branch if set_upstream else branch,
-            force_with_lease=force_with_lease,
+            force_with_lease=use_force_with_lease,
             set_upstream=set_upstream,
         )
 
