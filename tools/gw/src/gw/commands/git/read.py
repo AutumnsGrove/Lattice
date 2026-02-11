@@ -1,6 +1,7 @@
 """Read-only Git commands (Tier 1 - Always Safe)."""
 
 import json
+import re
 from typing import Optional
 
 import click
@@ -13,6 +14,19 @@ from rich.text import Text
 from ...git_wrapper import Git, GitError
 
 console = Console()
+
+
+class NumericShorthandCommand(click.Command):
+    """Click command that supports git-style -N shorthand for -n N."""
+
+    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        new_args = []
+        for arg in args:
+            if re.match(r"^-\d+$", arg):
+                new_args.extend(["-n", arg[1:]])
+            else:
+                new_args.append(arg)
+        return super().parse_args(ctx, new_args)
 
 
 @click.command()
@@ -167,7 +181,7 @@ def _print_rich_status(status) -> None:
         console.print(table)
 
 
-@click.command()
+@click.command(cls=NumericShorthandCommand)
 @click.option("--limit", "-n", default=10, help="Number of commits to show")
 @click.option("--oneline", is_flag=True, help="One line per commit")
 @click.option("--author", help="Filter by author")
@@ -191,6 +205,7 @@ def log(
     \b
     Examples:
         gw git log                    # Last 10 commits
+        gw git log -5                 # Last 5 commits (git-style shorthand)
         gw git log --limit 25         # More commits
         gw git log --oneline          # Compact format
         gw git log --author autumn    # Filter by author
