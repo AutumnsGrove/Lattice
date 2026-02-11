@@ -37,10 +37,10 @@ interface RouteTarget {
  * RouteTarget = proxy with optional Service Binding (Workers)
  */
 const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
-  // Auth subdomains → groveauth-frontend Pages
+  // Auth subdomains
   auth: "groveauth-frontend.pages.dev",
   admin: "groveauth-frontend.pages.dev",
-  login: "groveauth-frontend.pages.dev",
+  login: "grove-login.pages.dev", // New unified auth hub (packages/login)
   heartwood: "groveauth-frontend.pages.dev",
 
   // Grove internal Pages projects
