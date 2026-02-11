@@ -12,6 +12,22 @@ import type { FeatureFlagsEnv } from "./types.js";
 
 const UPLOADS_SUSPENDED_FLAG = "uploads_suspended";
 
+/**
+ * Derive a unique priority from a tenant ID.
+ *
+ * The flag_rules table has UNIQUE(flag_id, priority), so each per-tenant
+ * rule needs a distinct priority. We hash the tenant ID to a number in
+ * the 1000–65535 range (well above any manually-set priorities).
+ */
+function tenantIdToPriority(tenantId: string): number {
+  let hash = 0;
+  for (let i = 0; i < tenantId.length; i++) {
+    hash = (hash * 31 + tenantId.charCodeAt(i)) | 0;
+  }
+  // Map to 1000–65535 range to avoid collisions with manual priorities
+  return 1000 + (Math.abs(hash) % 64536);
+}
+
 export interface TenantUploadStatus {
   tenantId: string;
   /** True if uploads are suspended (default state) */
@@ -71,17 +87,6 @@ export async function getUploadSuspensionStatus(
   }
 }
 
-/**
- * Set upload suspension for a specific tenant.
- *
- * - Unsuspend: INSERT a flag_rules row with result_value='false'
- * - Re-suspend: DELETE that rule (falls back to default 'true')
- *
- * @param tenantId - The tenant to modify
- * @param suspended - True to suspend, false to unsuspend
- * @param env - Cloudflare environment bindings
- * @returns True if the operation succeeded
- */
 /**
  * Get upload suspension status for a single tenant.
  *
@@ -167,21 +172,25 @@ export async function setUploadSuspension(
       if (existing) {
         // Update existing rule to ensure it's enabled and result is false
         await env.DB.prepare(
-          `UPDATE flag_rules SET enabled = 1, result_value = 'false', updated_at = datetime('now')
+          `UPDATE flag_rules SET enabled = 1, result_value = 'false'
            WHERE id = ?`,
         )
           .bind(existing.id)
           .run();
       } else {
-        // Insert new unsuspend rule
+        // Insert new unsuspend rule with a unique priority derived from
+        // a hash of the tenant ID. The UNIQUE(flag_id, priority) constraint
+        // requires each tenant's rule to have a distinct priority value.
+        const priority = tenantIdToPriority(tenantId);
         await env.DB.prepare(
           `INSERT INTO flag_rules (
-            flag_id, rule_type, rule_value, result_value, priority, enabled, created_at, updated_at
-          ) VALUES (?, 'tenant', ?, 'false', 100, 1, datetime('now'), datetime('now'))`,
+            flag_id, rule_type, rule_value, result_value, priority, enabled, created_at
+          ) VALUES (?, 'tenant', ?, 'false', ?, 1, datetime('now'))`,
         )
           .bind(
             UPLOADS_SUSPENDED_FLAG,
             JSON.stringify({ tenantIds: [tenantId] }),
+            priority,
           )
           .run();
       }
