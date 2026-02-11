@@ -66,7 +66,7 @@
 			// FIX: Use pre-computed tagsLower for case-insensitive comparison (better performance)
 			const tagLower = selectedTag.toLowerCase();
 			return searchResults.filter(post =>
-				post.tagsLower.some(tag => tag === tagLower)
+				post.tagsLower.some((/** @type {string} */ tag) => tag === tagLower)
 			);
 		}
 		return searchResults;
