@@ -237,6 +237,13 @@ export {
   type KnownGraftId,
 } from "./grafts.js";
 
+// Upload Admin (suspension management)
+export {
+  getUploadSuspensionStatus,
+  setUploadSuspension,
+  type TenantUploadStatus,
+} from "./upload-admin.js";
+
 // Tenant Graft Overrides (Self-serve controls)
 export {
   getTenantControllableGrafts,

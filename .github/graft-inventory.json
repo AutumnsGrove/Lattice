@@ -2,16 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-  "lastUpdated": "2026-02-08",
-  "lastAuditedBy": "claude/explore-blog-comments-wPeu7",
+  "lastUpdated": "2026-02-11",
+  "lastAuditedBy": "claude/upload-gate-redesign",
   "grafts": {
-    "total": 13,
+    "total": 15,
     "breakdown": {
-      "platform": 9,
+      "platform": 11,
       "greenhouse": 4
     },
     "byType": {
-      "boolean": 12,
+      "boolean": 14,
       "number": 1
     }
   },
@@ -25,12 +25,20 @@
       "description": "AI-assisted writing prompts in the blog editor"
     },
     {
+      "id": "image_uploads",
+      "name": "Image Uploads",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "055_upload_gate_redesign.sql",
+      "description": "Master switch for image upload functionality"
+    },
+    {
       "id": "image_uploads_enabled",
-      "name": "Image Uploads Enabled",
+      "name": "Image Uploads Enabled (Legacy)",
       "type": "boolean",
       "greenhouseOnly": false,
       "migration": "031_petal_upload_gate.sql",
-      "description": "Master gate for image uploads (disabled until PhotoDNA integrated)"
+      "description": "Legacy master gate for image uploads (superseded by image_uploads + uploads_suspended)"
     },
     {
       "id": "jxl_encoding",
@@ -90,11 +98,12 @@
     },
     {
       "id": "photo_gallery",
-      "name": "Photo Gallery",
+      "name": "Photo Gallery (Deprecated)",
       "type": "boolean",
       "greenhouseOnly": true,
       "migration": "049_photo_gallery_graft.sql",
-      "description": "Upload photos and display a public gallery on your site"
+      "description": "DEPRECATED: Disabled by migration 055. Superseded by image_uploads + uploads_suspended",
+      "deprecated": true
     },
     {
       "id": "reeds_comments",
@@ -119,6 +128,14 @@
       "greenhouseOnly": false,
       "migration": "044_thorn_moderation_log.sql",
       "description": "AI-powered text content moderation"
+    },
+    {
+      "id": "uploads_suspended",
+      "name": "Uploads Suspended",
+      "type": "boolean",
+      "greenhouseOnly": false,
+      "migration": "055_upload_gate_redesign.sql",
+      "description": "Per-tenant upload suspension. Default true (suspended). Add tenant rule with result_value=false to unsuspend."
     }
   ],
   "migrations": {

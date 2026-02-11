@@ -71,7 +71,7 @@
   // Derived graft flags - add new ones here as they're created
   const firesideEnabled = $derived(grafts?.fireside_mode ?? false);
   const scribeEnabled = $derived(grafts?.scribe_mode ?? false);
-  const uploadsEnabled = $derived(grafts?.photo_gallery ?? false);
+  const uploadsEnabled = $derived(grafts?.image_uploads ?? true);
 
   // Core refs and state
   /** @type {HTMLTextAreaElement | null} */

@@ -2,7 +2,7 @@ import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
 import { getNavPageLimit } from "$lib/server/tier-features.js";
-import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags";
+import { canUploadImages } from "$lib/server/upload-gate.js";
 import { emailsMatch } from "$lib/utils/user.js";
 
 interface SiteSettings {
@@ -55,7 +55,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
             settingsResult,
             navResult,
             timelineResult,
-            greenhouseCheck,
+            uploadGateResult,
             journeyResult,
           ] = await Promise.all([
             // Site settings query
@@ -91,10 +91,11 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .first<{ enabled: number }>()
               .catch(() => null), // Timeline table might not exist - that's OK
 
-            // Gallery: check greenhouse status (photo_gallery is greenhouse-only)
-            // Replaces gallery_curio_config query — gallery is now graft-gated
+            // Gallery: check upload gate (image_uploads + uploads_suspended)
             flagsEnv
-              ? isInGreenhouse(tenantId, flagsEnv).catch(() => false)
+              ? canUploadImages(tenantId, undefined, flagsEnv)
+                  .then((gate) => gate.allowed)
+                  .catch(() => false)
               : Promise.resolve(false),
 
             // Journey curio config query
@@ -107,15 +108,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
               .catch(() => null), // Journey table might not exist - that's OK
           ]);
 
-          // Step 2: If tenant is in greenhouse, check photo_gallery graft
-          // Only runs for greenhouse tenants (most requests skip this entirely)
-          if (greenhouseCheck && flagsEnv) {
-            galleryEnabled = await isFeatureEnabled(
-              "photo_gallery",
-              { tenantId, inGreenhouse: true },
-              flagsEnv,
-            ).catch(() => false);
-          }
+          // Gallery is enabled if the upload gate allows it
+          galleryEnabled = uploadGateResult;
 
           // Process settings results
           if (settingsResult?.results) {

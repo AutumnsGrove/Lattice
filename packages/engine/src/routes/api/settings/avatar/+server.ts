@@ -14,6 +14,7 @@ import {
   MIME_TO_EXTENSIONS,
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
+import { canUploadImages } from "$lib/server/upload-gate.js";
 import { classifyWithLumen } from "$lib/server/petal/lumen-classify.js";
 import { createLumenClient } from "$lib/lumen/index.js";
 import {
@@ -44,6 +45,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   if (!validateCSRF(request)) {
     throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
+  }
+
+  // Upload gate: check if this tenant can upload images (fail-closed)
+  const flagsEnv = platform?.env?.CACHE_KV
+    ? { DB: platform.env.DB!, FLAGS_KV: platform.env.CACHE_KV }
+    : null;
+
+  if (!flagsEnv) {
+    throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
+  }
+
+  const uploadGate = await canUploadImages(
+    locals.tenantId,
+    locals.user.id,
+    flagsEnv,
+  );
+  if (!uploadGate.allowed) {
+    throwGroveError(403, API_ERRORS.FEATURE_DISABLED, "API");
   }
 
   // Validate required bindings

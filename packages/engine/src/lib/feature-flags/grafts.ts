@@ -43,6 +43,8 @@ export type KnownGraftId =
   | "jxl_encoding"
   | "jxl_kill_switch"
   | "image_uploads_enabled"
+  | "image_uploads"
+  | "uploads_suspended"
   | "photo_gallery"
   | "reeds_comments"
   | "thorn_moderation";

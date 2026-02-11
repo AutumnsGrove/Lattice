@@ -10,7 +10,7 @@
 
 import type { PageServerLoad } from "./$types";
 import { SITE_ERRORS, throwGroveError } from "$lib/errors";
-import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags";
+import { canUploadImages } from "$lib/server/upload-gate.js";
 import {
   getAvailableYears,
   getAvailableCategories,
@@ -91,28 +91,15 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     throwGroveError(400, SITE_ERRORS.TENANT_CONTEXT_REQUIRED, "Site");
   }
 
-  // Gate: photo_gallery graft (greenhouse-only)
+  // Gate: image_uploads + uploads_suspended
   if (!kv) {
     throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
   }
 
   const flagsEnv = { DB: db, FLAGS_KV: kv };
 
-  const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
-    () => false,
-  );
-
-  if (!inGreenhouse) {
-    throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
-  }
-
-  const galleryEnabled = await isFeatureEnabled(
-    "photo_gallery",
-    { tenantId, inGreenhouse: true },
-    flagsEnv,
-  ).catch(() => false);
-
-  if (!galleryEnabled) {
+  const uploadGate = await canUploadImages(tenantId, undefined, flagsEnv);
+  if (!uploadGate.allowed) {
     throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
   }
 
@@ -128,10 +115,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         `SELECT gallery_title, gallery_description FROM gallery_curio_config WHERE tenant_id = ?`,
       )
       .bind(tenantId)
-      .first<{ gallery_title: string | null; gallery_description: string | null }>();
+      .first<{
+        gallery_title: string | null;
+        gallery_description: string | null;
+      }>();
 
     if (configRow?.gallery_title) title = configRow.gallery_title;
-    if (configRow?.gallery_description) description = configRow.gallery_description;
+    if (configRow?.gallery_description)
+      description = configRow.gallery_description;
   } catch {
     // No curio config — sensible defaults are fine
   }

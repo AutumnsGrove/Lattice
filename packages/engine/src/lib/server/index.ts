@@ -30,3 +30,9 @@ export {
   type CategoryCount,
   type CanopyDirectoryResult,
 } from "./canopy-directory.js";
+
+// ============================================================================
+// Upload Gate
+// ============================================================================
+
+export { canUploadImages, type UploadGateResult } from "./upload-gate.js";

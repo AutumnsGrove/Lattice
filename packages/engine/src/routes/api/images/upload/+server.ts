@@ -17,7 +17,7 @@ import {
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
-import { isFeatureEnabled, isInGreenhouse } from "$lib/feature-flags/index.js";
+import { canUploadImages } from "$lib/server/upload-gate.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 import { updateLastActivity } from "$lib/server/activity-tracking.js";
 
@@ -100,13 +100,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // ========================================================================
-  // Feature Flag Gate: Photo Gallery (greenhouse-only)
+  // Upload Gate: image_uploads + uploads_suspended
   // ========================================================================
-  // Photo uploads are gated behind the photo_gallery graft, which is
-  // greenhouse-only. Tenants must be enrolled in greenhouse and have
-  // the graft enabled to upload images.
-  //
-  // @see migrations/049_photo_gallery_graft.sql
   const flagsEnv = platform?.env?.CACHE_KV
     ? { DB: platform.env.DB!, FLAGS_KV: platform.env.CACHE_KV }
     : null;
@@ -122,21 +117,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  const inGreenhouse = await isInGreenhouse(locals.tenantId, flagsEnv).catch(
-    () => false,
-  );
-
-  const uploadsEnabled = await isFeatureEnabled(
-    "photo_gallery",
-    {
-      tenantId: locals.tenantId,
-      userId: locals.user.id,
-      inGreenhouse,
-    },
+  const uploadGate = await canUploadImages(
+    locals.tenantId,
+    locals.user.id,
     flagsEnv,
   );
-
-  if (!uploadsEnabled) {
+  if (!uploadGate.allowed) {
     return json(
       {
         error: API_ERRORS.FEATURE_DISABLED.code,
