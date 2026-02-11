@@ -900,21 +900,19 @@
           </button>
         </div>
 
-        {#if uploadsEnabled}
-          <div class="toolbar-divider-line"></div>
-          <div class="toolbar-group formatting-group">
-            <button
-              type="button"
-              class="toolbar-icon-btn fmt-btn"
-              onclick={() => showPhotoPicker = true}
-              disabled={readonly}
-              title="Insert photo from gallery"
-              aria-label="Insert photo from gallery"
-            >
-              <Images class="toolbar-icon" />
-            </button>
-          </div>
-        {/if}
+        <div class="toolbar-divider-line"></div>
+        <div class="toolbar-group formatting-group">
+          <button
+            type="button"
+            class="toolbar-icon-btn fmt-btn"
+            onclick={() => showPhotoPicker = true}
+            disabled={readonly}
+            title="Insert photo from gallery"
+            aria-label="Insert photo from gallery"
+          >
+            <Images class="toolbar-icon" />
+          </button>
+        </div>
 
         <div class="toolbar-divider-line"></div>
 
@@ -1150,7 +1148,7 @@
 
 <!-- Photo Picker -->
 {#if showPhotoPicker}
-  <PhotoPicker onInsert={handlePhotoInsert} onClose={() => showPhotoPicker = false} />
+  <PhotoPicker onInsert={handlePhotoInsert} onClose={() => showPhotoPicker = false} galleryEnabled={uploadsEnabled} />
 {/if}
 
 <!-- Full Preview Modal -->
