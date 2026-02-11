@@ -1,6 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import {
+		TenantGreenhouseSection,
+		TenantUploadSection,
+		TenantGraftSection
+	} from '@autumnsgrove/groveengine/grafts/greenhouse';
 	import {
 		ArrowLeft,
 		Globe,
@@ -11,13 +16,41 @@
 		Copy,
 		Check,
 		AlertTriangle,
-		ExternalLink
+		ExternalLink,
+		CheckCircle,
+		XCircle
 	} from 'lucide-svelte';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let copiedCommand = $state<string | null>(null);
 
+	// ── Hidden form refs ──────────────────────────────────────────────
+	let enrollFormRef = $state<HTMLFormElement | null>(null);
+	let unenrollFormRef = $state<HTMLFormElement | null>(null);
+	let toggleGreenhouseFormRef = $state<HTMLFormElement | null>(null);
+	let updateNotesFormRef = $state<HTMLFormElement | null>(null);
+	let toggleUploadFormRef = $state<HTMLFormElement | null>(null);
+	let toggleGraftFormRef = $state<HTMLFormElement | null>(null);
+	let resetGraftsFormRef = $state<HTMLFormElement | null>(null);
+
+	// ── Hidden input values ───────────────────────────────────────────
+	let enrollNotes = $state('');
+	let toggleGreenhouseEnabled = $state('');
+	let updateNotesValue = $state('');
+	let toggleUploadSuspended = $state('');
+	let toggleGraftFlagId = $state('');
+	let toggleGraftEnabled = $state('');
+
+	// ── Loading states ────────────────────────────────────────────────
+	let greenhouseLoading = $state(false);
+	let uploadLoading = $state(false);
+	let loadingGraftId = $state<string | undefined>(undefined);
+	let resettingGrafts = $state(false);
+
+	// ── Plan and storage config ───────────────────────────────────────
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
 		seedling: {
 			label: 'Seedling',
@@ -42,10 +75,10 @@
 	};
 
 	const storageLimits: Record<string, number> = {
-		seedling: 1 * 1024 * 1024 * 1024, // 1 GB
-		sapling: 5 * 1024 * 1024 * 1024, // 5 GB
-		oak: 20 * 1024 * 1024 * 1024, // 20 GB
-		evergreen: 100 * 1024 * 1024 * 1024 // 100 GB
+		seedling: 1 * 1024 * 1024 * 1024,
+		sapling: 5 * 1024 * 1024 * 1024,
+		oak: 20 * 1024 * 1024 * 1024,
+		evergreen: 100 * 1024 * 1024 * 1024
 	};
 
 	function formatStorage(bytes: number): string {
@@ -80,14 +113,145 @@
 		}
 	}
 
+	// ── Derived values ────────────────────────────────────────────────
 	let plan = $derived(planConfig[data.tenant.plan] || planConfig.seedling);
 	let storageLimit = $derived(storageLimits[data.tenant.plan] || storageLimits.seedling);
 	let storagePct = $derived(storagePercent(data.tenant.storage_used, data.tenant.plan));
+
+	// ── Admin control handlers ────────────────────────────────────────
+	function handleEnroll(notes: string) {
+		greenhouseLoading = true;
+		enrollNotes = notes;
+		requestAnimationFrame(() => enrollFormRef?.requestSubmit());
+	}
+
+	function handleUnenroll() {
+		greenhouseLoading = true;
+		requestAnimationFrame(() => unenrollFormRef?.requestSubmit());
+	}
+
+	function handleToggleGreenhouse(enabled: boolean) {
+		greenhouseLoading = true;
+		toggleGreenhouseEnabled = enabled.toString();
+		requestAnimationFrame(() => toggleGreenhouseFormRef?.requestSubmit());
+	}
+
+	function handleUpdateNotes(notes: string) {
+		greenhouseLoading = true;
+		updateNotesValue = notes;
+		requestAnimationFrame(() => updateNotesFormRef?.requestSubmit());
+	}
+
+	function handleToggleUpload(suspended: boolean) {
+		uploadLoading = true;
+		toggleUploadSuspended = suspended.toString();
+		requestAnimationFrame(() => toggleUploadFormRef?.requestSubmit());
+	}
+
+	function handleToggleGraft(graftId: string, enabled: boolean) {
+		loadingGraftId = graftId;
+		toggleGraftFlagId = graftId;
+		toggleGraftEnabled = enabled.toString();
+		requestAnimationFrame(() => toggleGraftFormRef?.requestSubmit());
+	}
+
+	function handleResetGrafts() {
+		resettingGrafts = true;
+		requestAnimationFrame(() => resetGraftsFormRef?.requestSubmit());
+	}
+
+	function enhanceCallback() {
+		return async ({ update }: { update: () => Promise<void> }) => {
+			await update();
+			greenhouseLoading = false;
+			uploadLoading = false;
+			loadingGraftId = undefined;
+			resettingGrafts = false;
+			await invalidateAll();
+		};
+	}
 </script>
 
 <svelte:head>
 	<title>{data.tenant.subdomain} - Grove Admin</title>
 </svelte:head>
+
+<!-- Hidden forms with progressive enhancement -->
+<form
+	bind:this={enrollFormRef}
+	method="POST"
+	action="?/enroll"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+	<input type="hidden" name="notes" value={enrollNotes} />
+</form>
+
+<form
+	bind:this={unenrollFormRef}
+	method="POST"
+	action="?/unenroll"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+</form>
+
+<form
+	bind:this={toggleGreenhouseFormRef}
+	method="POST"
+	action="?/toggleGreenhouse"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+	<input type="hidden" name="enabled" value={toggleGreenhouseEnabled} />
+</form>
+
+<form
+	bind:this={updateNotesFormRef}
+	method="POST"
+	action="?/updateNotes"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+	<input type="hidden" name="notes" value={updateNotesValue} />
+</form>
+
+<form
+	bind:this={toggleUploadFormRef}
+	method="POST"
+	action="?/toggleUploadSuspension"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+	<input type="hidden" name="suspended" value={toggleUploadSuspended} />
+</form>
+
+<form
+	bind:this={toggleGraftFormRef}
+	method="POST"
+	action="?/toggleGraft"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+	<input type="hidden" name="flagId" value={toggleGraftFlagId} />
+	<input type="hidden" name="enabled" value={toggleGraftEnabled} />
+</form>
+
+<form
+	bind:this={resetGraftsFormRef}
+	method="POST"
+	action="?/resetGrafts"
+	use:enhance={enhanceCallback}
+	class="hidden"
+	aria-hidden="true"
+>
+</form>
 
 <div class="mb-8">
 	<a
@@ -210,6 +374,50 @@
 		></div>
 	</div>
 </GlassCard>
+
+<!-- Admin Controls -->
+<h2 class="text-xl font-serif text-foreground mb-4">Admin Controls</h2>
+
+{#if form?.success || form?.error}
+	<GlassCard class="mb-4 p-4">
+		<div class="flex items-center gap-2 text-sm font-sans">
+			{#if form?.success}
+				<CheckCircle class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+				<span class="text-foreground">{form.message || 'Action completed'}</span>
+			{:else}
+				<XCircle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+				<span class="text-red-700 dark:text-red-400">{form.error}</span>
+			{/if}
+		</div>
+	</GlassCard>
+{/if}
+
+<div class="space-y-4 mb-8">
+	<TenantGreenhouseSection
+		greenhouse={data.greenhouse}
+		onEnroll={handleEnroll}
+		onUnenroll={handleUnenroll}
+		onToggle={handleToggleGreenhouse}
+		onUpdateNotes={handleUpdateNotes}
+		loading={greenhouseLoading}
+	/>
+
+	<TenantUploadSection
+		suspended={data.uploadSuspended}
+		onToggle={handleToggleUpload}
+		loading={uploadLoading}
+	/>
+
+	{#if data.greenhouse}
+		<TenantGraftSection
+			grafts={data.tenantGrafts}
+			onToggle={handleToggleGraft}
+			onReset={handleResetGrafts}
+			{loadingGraftId}
+			resetting={resettingGrafts}
+		/>
+	{/if}
+</div>
 
 <!-- Danger Zone -->
 <GlassCard class="p-6 border-red-200 dark:border-red-800/50">

@@ -240,6 +240,7 @@ export {
 // Upload Admin (suspension management)
 export {
   getUploadSuspensionStatus,
+  getTenantUploadSuspension,
   setUploadSuspension,
   type TenantUploadStatus,
 } from "./upload-admin.js";

@@ -82,6 +82,59 @@ export async function getUploadSuspensionStatus(
  * @param env - Cloudflare environment bindings
  * @returns True if the operation succeeded
  */
+/**
+ * Get upload suspension status for a single tenant.
+ *
+ * Checks if the tenant has an active unsuspend rule. Fails closed —
+ * returns suspended: true if anything goes wrong.
+ *
+ * @param tenantId - The tenant to check
+ * @param env - Cloudflare environment bindings
+ * @returns Upload suspension status for this tenant
+ */
+export async function getTenantUploadSuspension(
+  tenantId: string,
+  env: FeatureFlagsEnv,
+): Promise<TenantUploadStatus> {
+  try {
+    const row = await env.DB.prepare(
+      `SELECT fr.id as rule_id, fr.result_value
+       FROM flag_rules fr
+       WHERE fr.flag_id = ?
+         AND fr.rule_type = 'tenant'
+         AND fr.enabled = 1
+         AND json_extract(fr.rule_value, '$.tenantIds') LIKE '%' || ? || '%'
+       LIMIT 1`,
+    )
+      .bind(UPLOADS_SUSPENDED_FLAG, tenantId)
+      .first<{ rule_id: number; result_value: string }>();
+
+    if (row && row.result_value === "false") {
+      return { tenantId, suspended: false, ruleId: row.rule_id };
+    }
+
+    return { tenantId, suspended: true, ruleId: row?.rule_id ?? null };
+  } catch (error) {
+    console.error(
+      `[UploadAdmin] Failed to check suspension for ${tenantId}:`,
+      error,
+    );
+    // Fail closed — assume suspended
+    return { tenantId, suspended: true, ruleId: null };
+  }
+}
+
+/**
+ * Set upload suspension for a specific tenant.
+ *
+ * - Unsuspend: INSERT a flag_rules row with result_value='false'
+ * - Re-suspend: DELETE that rule (falls back to default 'true')
+ *
+ * @param tenantId - The tenant to modify
+ * @param suspended - True to suspend, false to unsuspend
+ * @param env - Cloudflare environment bindings
+ * @returns True if the operation succeeded
+ */
 export async function setUploadSuspension(
   tenantId: string,
   suspended: boolean,

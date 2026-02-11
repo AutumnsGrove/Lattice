@@ -263,6 +263,70 @@ export interface GraftToggleRowProps extends BaseGraftProps {
 }
 
 // =============================================================================
+// TENANT DETAIL SECTION TYPES (Wayfinder admin per-tenant controls)
+// =============================================================================
+
+/**
+ * Props for TenantGreenhouseSection component.
+ * Greenhouse enrollment controls for a single tenant in the detail page.
+ */
+export interface TenantGreenhouseSectionProps extends BaseGraftProps {
+  /** Current greenhouse enrollment (null if not enrolled) */
+  greenhouse: GreenhouseTenant | null;
+
+  /** Called when enrolling the tenant */
+  onEnroll: (notes: string) => void;
+
+  /** Called when removing the tenant from greenhouse */
+  onUnenroll: () => void;
+
+  /** Called when toggling enabled/disabled */
+  onToggle: (enabled: boolean) => void;
+
+  /** Called when updating enrollment notes */
+  onUpdateNotes: (notes: string) => void;
+
+  /** Whether an action is in progress */
+  loading?: boolean;
+}
+
+/**
+ * Props for TenantUploadSection component.
+ * Upload suspension toggle for a single tenant.
+ */
+export interface TenantUploadSectionProps extends BaseGraftProps {
+  /** Whether uploads are currently suspended */
+  suspended: boolean;
+
+  /** Called when toggling suspension */
+  onToggle: (suspended: boolean) => void;
+
+  /** Whether the toggle action is in progress */
+  loading?: boolean;
+}
+
+/**
+ * Props for TenantGraftSection component.
+ * Graft override controls for a single tenant (only shown when in greenhouse).
+ */
+export interface TenantGraftSectionProps extends BaseGraftProps {
+  /** Array of grafts the tenant can control */
+  grafts: TenantGraftInfo[];
+
+  /** Called when toggling a graft */
+  onToggle: (graftId: string, enabled: boolean) => void;
+
+  /** Called when resetting all overrides */
+  onReset: () => void;
+
+  /** Graft ID currently being toggled (for loading state) */
+  loadingGraftId?: string;
+
+  /** Whether a reset is in progress */
+  resetting?: boolean;
+}
+
+// =============================================================================
 // GREENHOUSE ADMIN PANEL TYPES (Wayfinder-only)
 // =============================================================================
 
