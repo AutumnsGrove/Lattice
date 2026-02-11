@@ -9,11 +9,6 @@
   } from "$lib/ui";
   import { Smartphone, Laptop, Monitor, Leaf } from "lucide-svelte";
   import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
-  import {
-    GreenhouseStatusCard,
-    GraftControlPanel,
-    GreenhouseAdminPanel,
-  } from "$lib/grafts/greenhouse";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api, apiRequest } from "$lib/utils";
   import {
@@ -34,25 +29,6 @@
   import "$lib/styles/fonts-optional.css";
 
   /**
-   * @typedef {Object} HealthStatus
-   * @property {string} [status]
-   * @property {string} [error]
-   * @property {boolean} [r2_configured]
-   * @property {boolean} [d1_configured]
-   * @property {boolean} [kv_configured]
-   * @property {boolean} [github_token_configured]
-   * @property {string} [timestamp]
-   */
-
-  /**
-   * @typedef {Object} CacheStats
-   * @property {number} [posts]
-   * @property {number} [pages]
-   * @property {number} [images]
-   * @property {number} [total]
-   */
-
-  /**
    * @typedef {Object} Session
    * @property {string} id
    * @property {string} deviceId
@@ -67,25 +43,6 @@
 
   // Props from parent layout (user data)
   let { data } = $props();
-
-  // Only show system health to the Wayfinder (platform owner)
-  // Regular blog owners don't need to see infrastructure status
-  const isPlatformAdmin = $derived(data.isWayfinder === true);
-
-  // Greenhouse status from server
-  const greenhouseStatus = $derived(
-    data.greenhouseStatus ?? { inGreenhouse: false },
-  );
-
-  let clearingCache = $state(false);
-  let cacheMessage = $state("");
-  let showClearCacheDialog = $state(false);
-  /** @type {CacheStats | null} */
-  let cacheStats = $state(null);
-  let loadingCacheStats = $state(false);
-  /** @type {HealthStatus | null} */
-  let healthStatus = $state(null);
-  let loadingHealth = $state(true);
 
   // Font settings state
   let currentFont = $state(DEFAULT_FONT);
@@ -114,18 +71,6 @@
   const oauthAvatarUrl = $derived(data.oauthAvatarUrl ?? null);
   const displayAvatar = $derived(avatarUrl || oauthAvatarUrl);
 
-  // Graft control state (for greenhouse members)
-  let togglingGraftId = $state(/** @type {string | undefined} */ (undefined));
-  let resettingGrafts = $state(false);
-  const tenantGrafts = $derived(data.tenantGrafts ?? []);
-
-  // Wayfinder greenhouse admin state
-  let enrollingTenant = $state(false);
-  let togglingTenantId = $state(/** @type {string | undefined} */ (undefined));
-  let loadingFlagId = $state(/** @type {string | undefined} */ (undefined));
-  /** @type {{ success?: boolean; error?: string; message?: string } | undefined} */
-  let adminFormResult = $state(undefined);
-
   // Active sessions state
   /** @type {Session[]} */
   let sessions = $state([]);
@@ -134,52 +79,6 @@
   let revokingSessionId = $state(null);
   let revokingAllSessions = $state(false);
   let showRevokeAllDialog = $state(false);
-
-  async function fetchHealth() {
-    loadingHealth = true;
-    try {
-      healthStatus = await api.get("/api/git/health");
-    } catch (error) {
-      toast.error("Failed to check system health");
-      console.error("Failed to fetch health:", error);
-      healthStatus = {
-        status: "error",
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-    loadingHealth = false;
-  }
-
-  function handleClearCacheClick() {
-    showClearCacheDialog = true;
-  }
-
-  async function fetchCacheStats() {
-    loadingCacheStats = true;
-    try {
-      cacheStats = await api.get("/api/admin/cache/stats");
-    } catch (error) {
-      console.error("Failed to fetch cache stats:", error);
-      cacheStats = null;
-    }
-    loadingCacheStats = false;
-  }
-
-  async function clearCache() {
-    clearingCache = true;
-    cacheMessage = "";
-
-    try {
-      await api.post("/api/admin/cache/clear", {});
-      cacheMessage = "Cache cleared successfully!";
-      cacheStats = null; // Reset stats after clearing
-    } catch (error) {
-      cacheMessage =
-        "Error: " + (error instanceof Error ? error.message : String(error));
-    }
-
-    clearingCache = false;
-  }
 
   // Fetch current settings (font, accent color, header branding)
   async function fetchCurrentSettings() {
@@ -451,243 +350,9 @@
   }
 
   $effect(() => {
-    // Only fetch health status for platform admins
-    if (isPlatformAdmin) {
-      fetchHealth();
-    }
     fetchCurrentSettings();
-    fetchCacheStats();
     fetchSessions();
   });
-
-  /**
-   * Handle graft toggle via form action
-   * @param {string} graftId
-   * @param {boolean} enabled
-   */
-  async function handleGraftToggle(graftId, enabled) {
-    togglingGraftId = graftId;
-    try {
-      const formData = new FormData();
-      formData.append("graftId", graftId);
-      formData.append("enabled", String(enabled));
-
-      const response = await fetch("?/toggleGraft", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success(
-          enabled
-            ? `${graftId.replace(/_/g, " ")} enabled`
-            : `${graftId.replace(/_/g, " ")} disabled`,
-        );
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to update preference");
-      }
-    } catch (error) {
-      toast.error("Failed to update preference");
-      console.error("Graft toggle error:", error);
-    } finally {
-      togglingGraftId = undefined;
-    }
-  }
-
-  /**
-   * Handle reset all grafts to defaults
-   */
-  async function handleResetGrafts() {
-    resettingGrafts = true;
-    try {
-      const response = await fetch("?/resetGrafts", {
-        method: "POST",
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success("Reset to default settings");
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to reset preferences");
-      }
-    } catch (error) {
-      toast.error("Failed to reset preferences");
-      console.error("Reset grafts error:", error);
-    } finally {
-      resettingGrafts = false;
-    }
-  }
-
-  // =========================================================================
-  // WAYFINDER GREENHOUSE ADMIN HANDLERS
-  // =========================================================================
-
-  /**
-   * Handle tenant enrollment (Wayfinder-only)
-   * @param {string} tenantId
-   * @param {string} notes
-   */
-  async function handleEnrollTenant(tenantId, notes) {
-    enrollingTenant = true;
-    adminFormResult = undefined;
-    try {
-      const formData = new FormData();
-      formData.append("tenantId", tenantId);
-      if (notes) formData.append("notes", notes);
-
-      const response = await fetch("?/enrollTenant", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success("Tenant enrolled in greenhouse");
-        adminFormResult = { success: true, message: result.data?.message };
-        await invalidateAll();
-      } else {
-        const errorMsg = result.data?.error || "Failed to enroll tenant";
-        adminFormResult = { error: errorMsg };
-        toast.error(errorMsg);
-      }
-    } catch (error) {
-      adminFormResult = { error: "Failed to enroll tenant" };
-      toast.error("Failed to enroll tenant");
-      console.error("Enroll tenant error:", error);
-    } finally {
-      enrollingTenant = false;
-    }
-  }
-
-  /**
-   * Handle tenant toggle (Wayfinder-only)
-   * @param {string} tenantId
-   * @param {boolean} enabled
-   */
-  async function handleToggleTenant(tenantId, enabled) {
-    togglingTenantId = tenantId;
-    adminFormResult = undefined;
-    try {
-      const formData = new FormData();
-      formData.append("tenantId", tenantId);
-      formData.append("enabled", String(enabled));
-
-      const response = await fetch("?/toggleTenant", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success(
-          enabled
-            ? "Greenhouse access enabled"
-            : "Greenhouse access disabled",
-        );
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to toggle tenant");
-      }
-    } catch (error) {
-      toast.error("Failed to toggle tenant");
-      console.error("Toggle tenant error:", error);
-    } finally {
-      togglingTenantId = undefined;
-    }
-  }
-
-  /**
-   * Handle tenant removal (Wayfinder-only)
-   * @param {string} tenantId
-   */
-  async function handleRemoveTenant(tenantId) {
-    adminFormResult = undefined;
-    try {
-      const formData = new FormData();
-      formData.append("tenantId", tenantId);
-
-      const response = await fetch("?/removeTenant", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success("Tenant removed from greenhouse");
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to remove tenant");
-      }
-    } catch (error) {
-      toast.error("Failed to remove tenant");
-      console.error("Remove tenant error:", error);
-    }
-  }
-
-  /**
-   * Handle cultivate flag (Wayfinder-only)
-   * @param {string} flagId
-   */
-  async function handleCultivateFlag(flagId) {
-    loadingFlagId = flagId;
-    try {
-      const formData = new FormData();
-      formData.append("flagId", flagId);
-
-      const response = await fetch("?/cultivateFlag", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success(`${flagId} is now cultivated`);
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to cultivate flag");
-      }
-    } catch (error) {
-      toast.error("Failed to cultivate flag");
-      console.error("Cultivate flag error:", error);
-    } finally {
-      loadingFlagId = undefined;
-    }
-  }
-
-  /**
-   * Handle prune flag (Wayfinder-only)
-   * @param {string} flagId
-   */
-  async function handlePruneFlag(flagId) {
-    loadingFlagId = flagId;
-    try {
-      const formData = new FormData();
-      formData.append("flagId", flagId);
-
-      const response = await fetch("?/pruneFlag", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (result.type === "success") {
-        toast.success(`${flagId} is now pruned`);
-        await invalidateAll();
-      } else {
-        toast.error(result.data?.error || "Failed to prune flag");
-      }
-    } catch (error) {
-      toast.error("Failed to prune flag");
-      console.error("Prune flag error:", error);
-    } finally {
-      loadingFlagId = undefined;
-    }
-  }
-
-  // =========================================================================
   // CANOPY SETTINGS
   // =========================================================================
 
@@ -852,125 +517,6 @@
     </div>
   </GlassCard>
 
-  <!-- System Health - Only visible to platform admins -->
-  {#if isPlatformAdmin}
-    <GlassCard variant="frosted" class="mb-6">
-      <h2>System Health</h2>
-      {#if loadingHealth}
-        <div class="health-grid">
-          <Spinner />
-        </div>
-      {:else}
-        <div class="health-grid">
-          <div class="health-item">
-            <span class="health-label">Overall Status</span>
-            <span
-              class="health-value"
-              class:healthy={healthStatus?.status === "healthy"}
-              class:error={healthStatus?.status !== "healthy"}
-            >
-              {healthStatus?.status === "healthy"
-                ? "Healthy"
-                : "Issues Detected"}
-            </span>
-          </div>
-
-          <div class="health-item">
-            <span class="health-label">GitHub Token</span>
-            <span
-              class="health-value"
-              class:healthy={healthStatus?.github_token_configured}
-              class:error={!healthStatus?.github_token_configured}
-            >
-              {healthStatus?.github_token_configured ? "Configured" : "Missing"}
-            </span>
-          </div>
-
-          <div class="health-item">
-            <span class="health-label">KV Cache</span>
-            <span
-              class="health-value"
-              class:healthy={healthStatus?.kv_configured}
-              class:error={!healthStatus?.kv_configured}
-            >
-              {healthStatus?.kv_configured ? "Connected" : "Not Configured"}
-            </span>
-          </div>
-
-          <div class="health-item">
-            <span class="health-label">D1 Database</span>
-            <span
-              class="health-value"
-              class:healthy={healthStatus?.d1_configured}
-              class:error={!healthStatus?.d1_configured}
-            >
-              {healthStatus?.d1_configured ? "Connected" : "Not Configured"}
-            </span>
-          </div>
-
-          {#if healthStatus?.timestamp}
-            <div class="health-item full-width">
-              <span class="health-label">Last Check</span>
-              <span class="health-value"
-                >{new Date(healthStatus.timestamp).toLocaleString()}</span
-              >
-            </div>
-          {/if}
-        </div>
-      {/if}
-
-      <Button
-        onclick={fetchHealth}
-        variant="secondary"
-        disabled={loadingHealth}
-      >
-        {loadingHealth ? "Checking..." : "Refresh Status"}
-      </Button>
-    </GlassCard>
-  {/if}
-
-  <!-- Greenhouse Status - Only visible to greenhouse members -->
-  {#if greenhouseStatus.inGreenhouse}
-    <div class="mb-6">
-      <GreenhouseStatusCard
-        inGreenhouse={greenhouseStatus.inGreenhouse}
-        enrolledAt={greenhouseStatus.enrolledAt}
-        notes={greenhouseStatus.notes}
-      />
-    </div>
-
-    <!-- Graft Control Panel - Self-serve feature toggles -->
-    <div class="mb-6">
-      <GraftControlPanel
-        grafts={tenantGrafts}
-        currentValues={data.grafts}
-        onToggle={handleGraftToggle}
-        onReset={handleResetGrafts}
-        loadingGraftId={togglingGraftId}
-        resetting={resettingGrafts}
-      />
-    </div>
-  {/if}
-
-  <!-- Greenhouse Admin Panel - Wayfinder only -->
-  {#if isPlatformAdmin}
-    <GlassCard variant="frosted" class="mb-6">
-      <GreenhouseAdminPanel
-        tenants={data.greenhouseTenants ?? []}
-        tenantNames={data.tenantNames ?? {}}
-        availableTenants={data.availableTenants ?? {}}
-        featureFlags={data.featureFlags ?? []}
-        onEnroll={handleEnrollTenant}
-        onToggle={handleToggleTenant}
-        onRemove={handleRemoveTenant}
-        onCultivate={handleCultivateFlag}
-        onPrune={handlePruneFlag}
-        enrollLoading={enrollingTenant}
-        {loadingFlagId}
-        formResult={adminFormResult}
-      />
-    </GlassCard>
-  {/if}
 
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">
@@ -1512,88 +1058,7 @@
     {/if}
   </GlassCard>
 
-  <GlassCard variant="frosted" class="mb-6">
-    <div class="section-header">
-      <h2>Cache Management</h2>
-    </div>
-    <p class="section-description">
-      The site uses KV for caching API responses. Clearing resets all cached
-      data.
-    </p>
-
-    {#if loadingCacheStats}
-      <div class="cache-summary">
-        <Spinner />
-      </div>
-    {:else if cacheStats}
-      <div class="cache-summary">
-        {#if cacheStats.posts}
-          <span class="cache-stat">Posts: {cacheStats.posts}</span>
-        {/if}
-        {#if cacheStats.pages}
-          <span class="cache-stat">Pages: {cacheStats.pages}</span>
-        {/if}
-        {#if cacheStats.images}
-          <span class="cache-stat">Images: {cacheStats.images}</span>
-        {/if}
-        {#if cacheStats.total}
-          <span class="cache-stat total">Total: {cacheStats.total}</span>
-        {/if}
-      </div>
-    {/if}
-
-    {#if cacheMessage}
-      <div
-        class="message"
-        class:success={cacheMessage.includes("success")}
-        class:error={!cacheMessage.includes("success")}
-      >
-        {cacheMessage}
-      </div>
-    {/if}
-
-    <div class="cache-actions">
-      <Button
-        onclick={handleClearCacheClick}
-        variant="danger"
-        disabled={clearingCache}
-      >
-        {clearingCache ? "Clearing..." : "Clear Cache"}
-      </Button>
-      <Button
-        onclick={fetchCacheStats}
-        variant="secondary"
-        disabled={loadingCacheStats}
-      >
-        Refresh Stats
-      </Button>
-    </div>
-  </GlassCard>
-
-  <GlassCard variant="frosted" class="mb-6">
-    <h2>Environment</h2>
-    <div class="env-info">
-      <div class="env-item">
-        <span class="env-label">Cache TTL</span>
-        <span class="env-value">1 hour (3600 seconds)</span>
-      </div>
-      <div class="env-item">
-        <span class="env-label">AI Cache TTL</span>
-        <span class="env-value">6 hours (21600 seconds)</span>
-      </div>
-    </div>
-  </GlassCard>
 </div>
-
-<GlassConfirmDialog
-  bind:open={showClearCacheDialog}
-  title="Clear Cache"
-  message="This will clear all cached data. The next requests will be slower while data is refetched from the source."
-  confirmLabel="Clear Cache"
-  variant="warning"
-  loading={clearingCache}
-  onconfirm={clearCache}
-/>
 
 <GlassConfirmDialog
   bind:open={showRevokeAllDialog}
@@ -1657,34 +1122,6 @@
   .canopy-link:hover {
     text-decoration: underline;
   }
-  .health-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  .health-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .health-item.full-width {
-    grid-column: 1 / -1;
-  }
-  .health-label {
-    font-size: 0.85rem;
-    color: var(--color-text-muted);
-    transition: color 0.3s ease;
-  }
-  .health-value {
-    font-weight: 600;
-  }
-  .health-value.healthy {
-    color: var(--accent-success);
-  }
-  .health-value.error {
-    color: var(--accent-danger);
-  }
   .message {
     padding: 0.75rem 1rem;
     border-radius: var(--border-radius-button);
@@ -1704,29 +1141,6 @@
     font-size: 0.8rem;
     color: var(--color-text-subtle);
     transition: color 0.3s ease;
-  }
-  .env-info {
-    display: grid;
-    gap: 0.75rem;
-  }
-  .env-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--color-border);
-    transition: border-color 0.3s ease;
-  }
-  .env-item:last-child {
-    border-bottom: none;
-  }
-  .env-label {
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
-  }
-  .env-value {
-    font-weight: 500;
-    font-size: 0.9rem;
   }
   /* Font selector styles */
   .font-selector {
@@ -1863,28 +1277,6 @@
   .preset-btn:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
-  }
-  /* Cache management styles */
-  .cache-summary {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    padding: 0.75rem 0;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-  }
-  .cache-stat {
-    color: var(--color-text);
-    transition: color 0.3s ease;
-  }
-  .cache-stat.total {
-    font-weight: 600;
-    color: var(--color-primary);
-  }
-  .cache-actions {
-    display: flex;
-    gap: 0.75rem;
   }
   /* Logo toggle styles */
   .logo-toggle {
