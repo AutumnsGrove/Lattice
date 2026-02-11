@@ -349,10 +349,13 @@
 	.grove-mode-btn.active {
 		color: var(--color-primary);
 	}
+	main {
+		padding: 2.5rem 2rem 0;
+	}
 	/* Mobile-specific layout adjustments */
 	@media (max-width: 768px) {
 		main {
-			padding: 1rem;
+			padding: 1.5rem 1rem 0;
 		}
 	}
 </style>

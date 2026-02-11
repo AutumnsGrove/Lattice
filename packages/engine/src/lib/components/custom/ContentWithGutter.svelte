@@ -139,8 +139,11 @@
 				}
 
 				// Check if this item would overflow past the content
+				// Only overflow if the item's top is pushed entirely past the content area
+				// (e.g., by collision resolution). Items whose anchors are within the content
+				// should always display, even if they extend slightly past the bottom edge.
 				const effectiveContentHeight = contentHeight > 0 ? contentHeight : Infinity;
-				if (desiredTop + groupHeight > effectiveContentHeight - BOTTOM_PADDING) {
+				if (desiredTop > effectiveContentHeight) {
 					// This item overflows - mark it and hide it in the gutter
 					newOverflowingAnchors.push(key);
 					newPositions[key] = HIDDEN_POSITION;
@@ -289,6 +292,16 @@
 		// Track contentBodyElement outside untrack() so effect re-runs when element becomes available
 		const contentEl = contentBodyElement;
 		if (!contentEl) return;
+
+		// Track dependencies that should trigger re-positioning of mobile gutter items.
+		// These are read here (outside untrack) so changes cause the effect to re-run,
+		// but the actual DOM manipulation happens inside untrack() to avoid loops.
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		uniqueAnchors;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		headers;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		sanitizedContent;
 
 		// Track moved elements for cleanup
 		const movedElements: Array<{ element: HTMLElement; originalParent: HTMLElement | null; originalNextSibling: Node | null }> = [];
@@ -484,7 +497,7 @@
 	// Sanitize HTML content to prevent XSS attacks (browser-only for SSR compatibility)
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let DOMPurify = $state<any>(null);
-	let isPurifyReady = $state(false);
+	let isPurifyReady = $state(true);
 
 	// Load DOMPurify only in browser (avoids jsdom dependency for SSR)
 	// Content is already sanitized server-side, so we mark ready immediately

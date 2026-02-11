@@ -1570,6 +1570,90 @@
     to { transform: rotate(360deg); }
   }
 
+  /* Dark mode for form elements inside Dialog */
+  :global(.dark) .form-group label,
+  :global(.dark) .gallery-label {
+    color: #d1d5db;
+  }
+
+  :global(.dark) .form-input {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(74, 222, 128, 0.15);
+    color: #e5e7eb;
+  }
+
+  :global(.dark) .form-input:focus {
+    border-color: #86efac;
+  }
+
+  :global(.dark) .form-hint {
+    color: #9ca3af;
+  }
+
+  :global(.dark) .form-hint code {
+    background: rgba(15, 23, 42, 0.6);
+    color: #86efac;
+  }
+
+  :global(.dark) .anchors-label {
+    color: #9ca3af;
+  }
+
+  :global(.dark) .no-anchors-hint {
+    background: rgba(15, 23, 42, 0.3);
+    border-color: rgba(74, 222, 128, 0.1);
+  }
+
+  :global(.dark) .no-anchors-hint p {
+    color: #9ca3af;
+  }
+
+  :global(.dark) .image-preview {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
+  :global(.dark) .gallery-image-item {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
+  :global(.dark) .image-grid {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
+  :global(.dark) .loading,
+  :global(.dark) .no-images {
+    color: #9ca3af;
+  }
+
+  :global(.dark) .image-option {
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  :global(.dark) .image-name {
+    color: #9ca3af;
+  }
+
+  :global(.dark) .embed-resolving {
+    background: rgba(15, 23, 42, 0.4);
+    color: #d1d5db;
+  }
+
+  :global(.dark) .embed-resolved-title {
+    color: #d1d5db;
+  }
+
+  :global(.dark) .embed-thumbnail-preview {
+    background: rgba(15, 23, 42, 0.6);
+  }
+
+  :global(.dark) .add-image-btn {
+    color: #9ca3af;
+    border-color: rgba(74, 222, 128, 0.15);
+  }
+
   /* Screen reader only utility */
   .visually-hidden {
     position: absolute;
