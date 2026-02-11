@@ -57,6 +57,10 @@ vi.mock("$lib/server/petal/index.js", () => ({
   scanImage: vi.fn(async () => ({ approved: true })),
 }));
 
+vi.mock("$lib/server/upload-gate.js", () => ({
+  canUploadImages: vi.fn(async () => ({ allowed: true })),
+}));
+
 vi.mock("$lib/utils/upload-validation.js", () => ({
   ALLOWED_IMAGE_TYPES: [
     "image/jpeg",
@@ -187,6 +191,7 @@ import {
 } from "$lib/server/rate-limits/middleware.js";
 import { isFeatureEnabled } from "$lib/feature-flags/index.js";
 import { scanImage } from "$lib/server/petal/index.js";
+import { canUploadImages } from "$lib/server/upload-gate.js";
 import {
   isAllowedImageType,
   validateFileSignature,
@@ -203,6 +208,7 @@ const mockCheckRateLimit = vi.mocked(checkRateLimit);
 const mockBuildRateLimitKey = vi.mocked(buildRateLimitKey);
 const mockIsFeatureEnabled = vi.mocked(isFeatureEnabled);
 const mockScanImage = vi.mocked(scanImage);
+const mockCanUploadImages = vi.mocked(canUploadImages);
 const mockIsAllowedImageType = vi.mocked(isAllowedImageType);
 const mockValidateFileSignature = vi.mocked(validateFileSignature);
 
@@ -222,6 +228,7 @@ beforeEach(() => {
   );
   mockIsFeatureEnabled.mockResolvedValue(true);
   mockScanImage.mockResolvedValue({ approved: true });
+  mockCanUploadImages.mockResolvedValue({ allowed: true });
   mockIsAllowedImageType.mockImplementation((type: unknown) =>
     [
       "image/jpeg",
@@ -308,7 +315,10 @@ describe("Image Upload Endpoint - Authentication", () => {
 
 describe("Image Upload Endpoint - Feature Flag", () => {
   it("should return 403 with feature_disabled code when feature is disabled", async () => {
-    mockIsFeatureEnabled.mockResolvedValue(false);
+    mockCanUploadImages.mockResolvedValue({
+      allowed: false,
+      reason: "Image uploads are disabled",
+    });
 
     const event = createAuthenticatedTenantEvent("tenant-1", "user-1", {
       url: "https://test-tenant.grove.place/api/images/upload",
