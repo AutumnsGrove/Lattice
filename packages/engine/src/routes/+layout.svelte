@@ -14,7 +14,7 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { Button, GroveSwap } from '$lib/ui';
+	import { Button, GroveSwap, PassageTransition } from '$lib/ui';
 	import { fontMap, DEFAULT_FONT } from '$lib/ui/tokens/fonts';
 	import { Header, buildTenantNavItems, themeStore } from '$lib/ui/components/chrome';
 	import { groveModeStore } from '$lib/ui/stores/grove-mode.svelte';
@@ -177,6 +177,8 @@
 	</footer>
 </div>
 {/if}
+
+<PassageTransition />
 
 <style>
 	/* Not found page styles */

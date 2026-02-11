@@ -2,7 +2,7 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
-  import { Glass, GlassCard, Button, Input, GroveTerm, PassageTransition } from '@autumnsgrove/groveengine/ui';
+  import { Glass, GlassCard, Button, Input, GroveTerm } from '@autumnsgrove/groveengine/ui';
   import { Search, Users, Leaf } from '@autumnsgrove/groveengine/ui/icons';
   import {
     CANOPY_CATEGORY_LABELS,
@@ -573,8 +573,6 @@
     {/if}
   </div>
 </main>
-
-<PassageTransition />
 
 <Footer />
 

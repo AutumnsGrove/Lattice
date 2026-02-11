@@ -3,6 +3,7 @@
 	// Import theme store from engine to initialize it on page load
 	// The store is self-managing via $effect.root() - just importing it triggers initialization
 	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { PassageTransition } from '@autumnsgrove/groveengine/ui';
 
 	let { children } = $props();
 
@@ -21,3 +22,5 @@
 		{@render children()}
 	</div>
 </div>
+
+<PassageTransition />
