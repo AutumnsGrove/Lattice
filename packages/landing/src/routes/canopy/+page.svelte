@@ -11,7 +11,9 @@
   import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
   import {
     Logo,
-    TreePine, TreeCherry, TreeAspen, TreeBirch,
+    TreePine,
+    Lantern,
+    Firefly,
     FallingLeavesLayer,
     FallingPetalsLayer,
     SnowfallLayer,
@@ -57,8 +59,8 @@
   const isMidnight = $derived(seasonStore.current === 'midnight');
 
   // --- Miniature forest ---
-  type TreeType = 'logo' | 'pine' | 'aspen' | 'birch' | 'cherry';
-  const treeTypes: TreeType[] = ['logo', 'pine', 'aspen', 'birch', 'cherry'];
+  type TreeType = 'logo' | 'pine';
+  const treeTypes: TreeType[] = ['pine'];
 
   // Compact viewBox for the mini forest hills
   const hillViewBox = { width: 1200, height: 300 };
@@ -85,7 +87,7 @@
       brightness: 'dark' as const,
       zIndex: 1,
       opacity: 0.85,
-      treeCount: 6,
+      treeCount: 4,
       treeSize: { min: 28, max: 42 },
     },
     {
@@ -95,7 +97,7 @@
       brightness: 'mid' as const,
       zIndex: 2,
       opacity: 0.9,
-      treeCount: 5,
+      treeCount: 4,
       treeSize: { min: 38, max: 58 },
     },
     {
@@ -105,7 +107,7 @@
       brightness: 'light' as const,
       zIndex: 3,
       opacity: 0.95,
-      treeCount: 4,
+      treeCount: 3,
       treeSize: { min: 50, max: 75 },
     },
   ];
@@ -186,7 +188,6 @@
     const pickFromArray = <T>(arr: T[]): T => arr[Math.floor(hashSeed(seed)) % arr.length];
 
     if (treeType === 'logo' && currentSeason === 'spring') return pickFromArray(depthPinks);
-    if (treeType === 'cherry') return pickFromArray(depthPinks);
     if (treeType === 'pine' && currentSeason === 'autumn') return pickFromArray([greens.deepGreen, greens.grove, greens.darkForest]);
     if (treeType === 'pine' && currentSeason === 'winter') return pickFromArray([winter.frostedPine, winter.winterGreen, winter.coldSpruce]);
     return pickFromArray(depthColors);
@@ -391,17 +392,43 @@
               background={false}
               rotation={0}
             />
-          {:else if tree.treeType === 'pine'}
+          {:else}
             <TreePine class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
-          {:else if tree.treeType === 'aspen'}
-            <TreeAspen class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
-          {:else if tree.treeType === 'birch'}
-            <TreeBirch class="w-full h-full" color={tree.color} season={seasonStore.current} animate={true} />
-          {:else if tree.treeType === 'cherry'}
-            <TreeCherry class="w-full h-full" color={tree.color} trunkColor={tree.trunkColor} season={seasonStore.current} animate={true} />
           {/if}
         </div>
       {/each}
+
+      <!-- Lanterns -->
+      <div
+        class="absolute pointer-events-none"
+        style="left: 22%; top: 60%; z-index: 14; transform: translateX(-50%) translateY(-90%);"
+        aria-hidden="true"
+      >
+        <Lantern class="w-5 h-8 sm:w-6 sm:h-10" variant="standing" animate={true} />
+      </div>
+      <div
+        class="absolute pointer-events-none"
+        style="left: 78%; top: 72%; z-index: 14; transform: translateX(-50%) translateY(-90%);"
+        aria-hidden="true"
+      >
+        <Lantern class="w-6 h-10 sm:w-7 sm:h-12" variant="standing" animate={true} />
+      </div>
+
+      <!-- Fireflies -->
+      <div
+        class="absolute pointer-events-none"
+        style="left: 35%; top: 40%; z-index: 15;"
+        aria-hidden="true"
+      >
+        <Firefly class="w-4 h-4" intensity="subtle" animate={true} />
+      </div>
+      <div
+        class="absolute pointer-events-none"
+        style="left: 68%; top: 48%; z-index: 15;"
+        aria-hidden="true"
+      >
+        <Firefly class="w-3 h-3" intensity="subtle" animate={true} />
+      </div>
     </div>
 
     <!-- Title overlay — floats above the forest -->
