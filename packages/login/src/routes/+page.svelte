@@ -13,6 +13,7 @@
 	import { browser } from '$app/environment';
 	import { authClient } from '$lib/auth-client';
 	import { validateRedirectUrl } from '$lib/redirect';
+	import { Waystone } from '@autumnsgrove/groveengine/ui';
 
 	// Read redirect param from URL
 	const redirectTo = $derived(
@@ -166,29 +167,34 @@
 				</button>
 
 				<!-- Passkey -->
-				<button
-					onclick={signInWithPasskey}
-					disabled={loadingProvider !== null}
-					class="btn-auth"
-				>
-					{#if loadingProvider === 'passkey'}
-						<div class="spinner"></div>
-						<span>Authenticating...</span>
-					{:else}
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
-							<path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
-							<path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
-							<path d="M2 12a10 10 0 0 1 18-6"/>
-							<path d="M2 16h.01"/>
-							<path d="M21.8 16c.2-2 .131-5.354 0-6"/>
-							<path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/>
-							<path d="M8.65 22c.21-.66.45-1.32.57-2"/>
-							<path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
-						</svg>
-						<span>Continue with Passkey</span>
-					{/if}
-				</button>
+				<div class="relative">
+					<button
+						onclick={signInWithPasskey}
+						disabled={loadingProvider !== null}
+						class="btn-auth w-full"
+					>
+						{#if loadingProvider === 'passkey'}
+							<div class="spinner"></div>
+							<span>Authenticating...</span>
+						{:else}
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+								<path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+								<path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+								<path d="M2 12a10 10 0 0 1 18-6"/>
+								<path d="M2 16h.01"/>
+								<path d="M21.8 16c.2-2 .131-5.354 0-6"/>
+								<path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/>
+								<path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+								<path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+							</svg>
+							<span>Continue with Passkey</span>
+						{/if}
+					</button>
+					<div class="absolute right-2 top-1/2 -translate-y-1/2">
+						<Waystone slug="what-are-passkeys" label="What's a passkey?" size="sm" />
+					</div>
+				</div>
 
 				<!-- Divider -->
 				<div class="relative py-2">
@@ -240,6 +246,7 @@
 				<a href="https://grove.place/knowledge/legal/terms-of-service" class="underline hover:text-foreground-muted" target="_blank" rel="noopener noreferrer">Terms</a>
 				and
 				<a href="https://grove.place/knowledge/legal/privacy-policy" class="underline hover:text-foreground-muted" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+				<Waystone slug="understanding-your-privacy" label="How we protect your data" size="sm" inline />
 			</p>
 		{/if}
 	</div>
