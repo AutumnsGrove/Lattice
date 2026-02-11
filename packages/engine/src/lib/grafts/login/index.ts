@@ -53,6 +53,9 @@ export {
   GROVEAUTH_URLS,
   AUTH_COOKIE_NAMES,
   AUTH_COOKIE_OPTIONS,
+  LOGIN_URL,
+  buildLoginUrl,
+  buildPasskeyUrl,
 } from "./config.js";
 
 // Components

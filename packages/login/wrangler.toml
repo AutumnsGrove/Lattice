@@ -1,0 +1,13 @@
+name = "grove-login"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# GroveAuth Service Binding (Heartwood - auth API)
+# No D1 binding — login is a UI + proxy layer only (least privilege)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+# Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# - GROVEAUTH_URL = https://auth-api.grove.place

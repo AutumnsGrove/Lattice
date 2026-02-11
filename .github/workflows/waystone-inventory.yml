@@ -1,0 +1,338 @@
+name: Waystone Inventory Check
+
+on:
+  # Run on PRs that touch Svelte files (waystones can be added anywhere)
+  pull_request:
+    paths:
+      - "packages/**/*.svelte"
+
+  # Run weekly on Thursday mornings
+  schedule:
+    - cron: "0 9 * * 4"
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-waystone-inventory:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count waystones and compare to inventory
+        id: count-waystones
+        shell: bash
+        run: |
+          #!/bin/bash
+          set -e
+
+          echo "Counting Waystone instances across all packages..."
+          echo ""
+
+          # Read expected count from inventory
+          EXPECTED_TOTAL=$(jq -r '.waystones.total' .github/waystone-inventory.json)
+          EXPECTED_SLUGS=$(jq -r '.waystones.bySlugs' .github/waystone-inventory.json)
+          LAST_UPDATED=$(jq -r '.lastUpdated' .github/waystone-inventory.json)
+
+          # Count actual <Waystone instances across all packages
+          ACTUAL_TOTAL=$(grep -r '<Waystone' packages/ --include="*.svelte" | wc -l | tr -d ' ') || ACTUAL_TOTAL=0
+
+          # Count unique slugs
+          ACTUAL_SLUGS=$(grep -roP 'slug="[^"]+"' packages/ --include="*.svelte" | grep -oP '"[^"]+"' | sort -u | wc -l | tr -d ' ') || ACTUAL_SLUGS=0
+
+          echo "Waystone Count Results"
+          echo "======================"
+          echo "Expected instances (from inventory): $EXPECTED_TOTAL"
+          echo "Actual instances (from codebase):    $ACTUAL_TOTAL"
+          echo "Expected slugs (from inventory):     $EXPECTED_SLUGS"
+          echo "Actual slugs (from codebase):        $ACTUAL_SLUGS"
+          echo "Inventory last updated:              $LAST_UPDATED"
+          echo ""
+
+          # Calculate difference
+          DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
+          SLUG_DIFF=$((ACTUAL_SLUGS - EXPECTED_SLUGS))
+
+          # Generate per-package breakdown
+          BREAKDOWN=""
+          for pkg in engine login landing plant meadow; do
+            EXPECTED=$(jq -r ".waystones.breakdown.$pkg // 0" .github/waystone-inventory.json)
+            ACTUAL=0
+            if [ -d "packages/$pkg" ]; then
+              ACTUAL=$(grep -r '<Waystone' "packages/$pkg" --include="*.svelte" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL=0
+            fi
+            PKG_DIFF=$((ACTUAL - EXPECTED))
+
+            if [ "$PKG_DIFF" -ne 0 ]; then
+              SIGN="+"
+              [ "$PKG_DIFF" -lt 0 ] && SIGN=""
+              BREAKDOWN="${BREAKDOWN}| $pkg | $EXPECTED | $ACTUAL | ${SIGN}${PKG_DIFF} |\n"
+            fi
+          done
+
+          # Determine status
+          if [ "$DIFF" -eq 0 ] && [ "$SLUG_DIFF" -eq 0 ]; then
+            echo "Waystone count matches inventory"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "diff=0" >> $GITHUB_OUTPUT
+          elif [ "$DIFF" -gt 0 ]; then
+            echo "Found $DIFF NEW waystone(s) not in inventory"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=added" >> $GITHUB_OUTPUT
+          else
+            echo "Found $((DIFF * -1)) FEWER waystone(s) than inventory (possible removal)"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "diff=$DIFF" >> $GITHUB_OUTPUT
+            echo "change_type=removed" >> $GITHUB_OUTPUT
+          fi
+
+          # Export values for later steps
+          echo "expected=$EXPECTED_TOTAL" >> $GITHUB_OUTPUT
+          echo "actual=$ACTUAL_TOTAL" >> $GITHUB_OUTPUT
+          echo "expected_slugs=$EXPECTED_SLUGS" >> $GITHUB_OUTPUT
+          echo "actual_slugs=$ACTUAL_SLUGS" >> $GITHUB_OUTPUT
+          echo "slug_diff=$SLUG_DIFF" >> $GITHUB_OUTPUT
+          echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+
+          if [ -n "$BREAKDOWN" ]; then
+            echo "breakdown<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$BREAKDOWN" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find new waystone files in PR
+        if: github.event_name == 'pull_request' && steps.count-waystones.outputs.has_changes == 'true'
+        id: find-new-waystones
+        shell: bash
+        run: |
+          # Get list of changed .svelte files in this PR that now contain <Waystone
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'packages/**/*.svelte' 2>/dev/null || echo "")
+
+          NEW_WAYSTONE_FILES=""
+          if [ -n "$CHANGED_FILES" ]; then
+            while IFS= read -r file; do
+              if [ -f "$file" ] && grep -q '<Waystone' "$file" 2>/dev/null; then
+                # Check if this file had waystones before
+                HAD_BEFORE=$(git show "origin/${{ github.base_ref }}:$file" 2>/dev/null | grep -c '<Waystone' || echo "0")
+                HAS_NOW=$(grep -c '<Waystone' "$file" || echo "0")
+                if [ "$HAS_NOW" -gt "$HAD_BEFORE" ]; then
+                  NEW_WAYSTONE_FILES="${NEW_WAYSTONE_FILES}${file}\n"
+                fi
+              fi
+            done <<< "$CHANGED_FILES"
+          fi
+
+          if [ -n "$NEW_WAYSTONE_FILES" ]; then
+            echo "new_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$NEW_WAYSTONE_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "has_new_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_new_files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if waystones changed)
+        if: github.event_name == 'pull_request' && steps.count-waystones.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-waystones.outputs.expected }}
+          ACTUAL: ${{ steps.count-waystones.outputs.actual }}
+          DIFF: ${{ steps.count-waystones.outputs.diff }}
+          CHANGE_TYPE: ${{ steps.count-waystones.outputs.change_type }}
+          SLUG_DIFF: ${{ steps.count-waystones.outputs.slug_diff }}
+          BREAKDOWN: ${{ steps.count-waystones.outputs.breakdown }}
+          NEW_FILES: ${{ steps.find-new-waystones.outputs.new_files }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const changeType = process.env.CHANGE_TYPE;
+            const slugDiff = parseInt(process.env.SLUG_DIFF || '0');
+            const breakdown = process.env.BREAKDOWN || '';
+            const newFiles = process.env.NEW_FILES || '';
+
+            const emoji = changeType === 'added' ? '🪨' : '⚠️';
+            const verb = changeType === 'added' ? 'added' : 'removed';
+            const absDiff = Math.abs(diff);
+
+            let newFilesList = '';
+            if (newFiles) {
+              const files = newFiles.trim().split('\n').filter(Boolean).map(f => `- \`${f}\``).join('\n');
+              newFilesList = `
+
+            ### Files with New Waystones
+            ${files}`;
+            }
+
+            let breakdownTable = '';
+            if (breakdown) {
+              breakdownTable = `
+
+            ### Package Breakdown
+            | Package | Expected | Actual | Diff |
+            |---------|----------|--------|------|
+            ${breakdown}`;
+            }
+
+            let slugNote = '';
+            if (slugDiff !== 0) {
+              slugNote = `\n| Slug difference | ${slugDiff > 0 ? '+' : ''}${slugDiff} |`;
+            }
+
+            const body = `## ${emoji} Waystone Inventory Change Detected
+
+            This PR appears to have **${verb} ${absDiff} waystone(s)**.
+
+            | Metric | Count |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (codebase) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |${slugNote}
+            ${breakdownTable}${newFilesList}
+
+            ### Action Required
+
+            If this PR adds new waystones, please:
+            1. Update \`.github/waystone-inventory.json\` with the new instance(s)
+            2. Ensure the KB article for the slug exists (or create a tracking issue)
+            3. Verify the waystone renders correctly in both light and dark mode
+
+            See \`docs/specs/waystone-spec.md\` for the full waystone system specification.
+
+            ---
+            *This check helps keep our waystone documentation accurate.*`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue for inventory drift (scheduled run only)
+        if: github.event_name == 'schedule' && steps.count-waystones.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED: ${{ steps.count-waystones.outputs.expected }}
+          ACTUAL: ${{ steps.count-waystones.outputs.actual }}
+          DIFF: ${{ steps.count-waystones.outputs.diff }}
+          LAST_UPDATED: ${{ steps.count-waystones.outputs.last_updated }}
+          BREAKDOWN: ${{ steps.count-waystones.outputs.breakdown }}
+        with:
+          script: |
+            const expected = process.env.EXPECTED;
+            const actual = process.env.ACTUAL;
+            const diff = parseInt(process.env.DIFF);
+            const lastUpdated = process.env.LAST_UPDATED;
+            const breakdown = process.env.BREAKDOWN || '';
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if there's already an open issue for this
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,waystones'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Waystone Inventory')
+            );
+
+            if (hasExisting) {
+              console.log('Existing waystone inventory issue found, skipping creation');
+              return;
+            }
+
+            const absDiff = Math.abs(diff);
+            const changeType = diff > 0 ? 'added' : 'removed';
+            const emoji = diff > 0 ? '🪨' : '⚠️';
+
+            let breakdownTable = '';
+            if (breakdown) {
+              breakdownTable = `
+
+            ### Package Breakdown
+            | Package | Expected | Actual | Diff |
+            |---------|----------|--------|------|
+            ${breakdown}`;
+            }
+
+            const body = `## ${emoji} Waystone Inventory Drift Detected
+
+            The automated waystone count found a **${absDiff} waystone difference** since the last inventory update.
+
+            | Metric | Value |
+            |--------|-------|
+            | Expected (inventory) | ${expected} |
+            | Actual (codebase) | ${actual} |
+            | Difference | ${diff > 0 ? '+' : ''}${diff} |
+            | Inventory Last Updated | ${lastUpdated} |
+            ${breakdownTable}
+
+            ### Action Required
+
+            1. Review which waystones were ${changeType}
+            2. Update \`.github/waystone-inventory.json\` with accurate counts
+            3. Ensure all slug references point to existing KB articles
+
+            ### How to Get Current Counts
+
+            \`\`\`bash
+            # Total count
+            grep -r '<Waystone' packages/ --include="*.svelte" | wc -l
+
+            # Per-package counts
+            for pkg in engine login landing plant meadow; do
+              echo "$pkg: $(grep -r '<Waystone' "packages/$pkg" --include="*.svelte" 2>/dev/null | wc -l)"
+            done
+
+            # List unique slugs
+            grep -roP 'slug="[^"]+"' packages/ --include="*.svelte" | sort -u
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the waystone-inventory workflow.*`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${emoji} Waystone Inventory Update Needed - ${today}`,
+              body: body,
+              labels: ['documentation', 'waystones']
+            });
+
+      - name: Summary
+        shell: bash
+        env:
+          HAS_CHANGES: ${{ steps.count-waystones.outputs.has_changes }}
+          EXPECTED: ${{ steps.count-waystones.outputs.expected }}
+          ACTUAL: ${{ steps.count-waystones.outputs.actual }}
+          DIFF: ${{ steps.count-waystones.outputs.diff }}
+        run: |
+          echo "## Waystone Inventory Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Expected (inventory) | $EXPECTED |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actual (codebase) | $ACTUAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| Difference | $DIFF |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "**Waystone count has drifted from inventory**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Update \`.github/waystone-inventory.json\` to match current state." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Waystone count matches inventory" >> $GITHUB_STEP_SUMMARY
+          fi

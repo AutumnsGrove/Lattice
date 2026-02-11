@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════
+   GROVE LOGIN — CSS Custom Properties
+   Unified auth hub styling
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Primary: Grove Green */
+  --grove-50: 240 253 244;
+  --grove-100: 220 252 231;
+  --grove-200: 187 247 208;
+  --grove-300: 134 239 172;
+  --grove-400: 74 222 128;
+  --grove-500: 34 197 94;
+  --grove-600: 22 163 74;
+  --grove-700: 21 128 61;
+  --grove-800: 22 101 52;
+  --grove-900: 20 83 45;
+  --grove-950: 5 46 22;
+
+  /* Neutral: Cream (Light Mode) */
+  --cream: 254 253 251;
+  --bark: 61 41 20;
+
+  /* Semantic Colors */
+  --color-background: rgb(var(--cream));
+  --color-foreground: rgb(var(--bark));
+  --color-foreground-muted: rgba(61, 41, 20, 0.7);
+  --color-foreground-subtle: rgba(61, 41, 20, 0.5);
+  --color-foreground-faint: rgba(61, 41, 20, 0.4);
+
+  --color-primary: rgb(var(--grove-600));
+  --color-primary-hover: rgb(var(--grove-700));
+  --color-primary-foreground: #ffffff;
+
+  --color-border: rgb(var(--grove-200));
+  --color-border-subtle: rgb(var(--grove-100));
+
+  --color-surface: rgba(255, 255, 255, 0.5);
+  --color-surface-elevated: #ffffff;
+  --color-glass-grove: rgba(255, 255, 255, 0.7);
+
+  --color-accent-bg: rgb(var(--grove-50));
+  --color-accent-border: rgb(var(--grove-200));
+  --color-accent-text: rgb(var(--grove-800));
+  --color-accent-subtle: rgb(var(--grove-100));
+  --color-accent-muted: rgb(var(--grove-600));
+  --color-divider: rgb(var(--grove-200));
+
+  --color-error: #dc2626;
+  --color-error-bg: #fee2e2;
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+
+  --shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(61 41 20 / 0.1);
+  --shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px rgb(var(--grove-500));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════ */
+
+.dark {
+  --cream: 23 26 30;
+  --bark: 245 242 234;
+
+  --color-background: rgb(var(--cream));
+  --color-foreground: rgb(var(--bark));
+  --color-foreground-muted: rgba(245, 242, 234, 0.7);
+  --color-foreground-subtle: rgba(245, 242, 234, 0.5);
+  --color-foreground-faint: rgba(245, 242, 234, 0.4);
+
+  --color-border: #363c44;
+  --color-border-subtle: #282d33;
+
+  --color-surface: rgba(37, 35, 32, 0.5);
+  --color-surface-elevated: #1e2227;
+  --color-glass-grove: rgba(30, 34, 39, 0.75);
+
+  --color-accent-bg: rgb(var(--grove-950));
+  --color-accent-border: rgb(var(--grove-900));
+  --color-accent-text: rgb(var(--grove-200));
+  --color-accent-subtle: rgb(var(--grove-900));
+  --color-accent-muted: rgb(var(--grove-400));
+  --color-divider: #363c44;
+
+  --color-error: #f87171;
+  --color-error-bg: rgba(220, 38, 38, 0.15);
+  --color-success: #4ade80;
+  --color-success-bg: rgba(22, 163, 74, 0.15);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FONTS
+   ═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: "Lexend";
+  src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+@layer base {
+  html {
+    font-family:
+      "Lexend",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENT STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+@layer components {
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--color-foreground);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-surface);
+    border-color: var(--color-primary);
+  }
+
+  .btn-auth {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-elevated);
+    color: var(--color-foreground);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .btn-auth:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    background-color: var(--color-accent-bg);
+  }
+
+  .btn-auth:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-elevated);
+    color: var(--color-foreground);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .input-field::placeholder {
+    color: var(--color-foreground-faint);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════ */
+
+.text-foreground {
+  color: var(--color-foreground);
+}
+.text-foreground-muted {
+  color: var(--color-foreground-muted);
+}
+.text-foreground-subtle {
+  color: var(--color-foreground-subtle);
+}
+.text-primary {
+  color: var(--color-primary);
+}
+.text-error {
+  color: var(--color-error);
+}
+.text-success {
+  color: var(--color-success);
+}
+
+.bg-page {
+  background-color: var(--color-background);
+}
+.bg-surface {
+  background-color: var(--color-surface);
+}
+.bg-surface-elevated {
+  background-color: var(--color-surface-elevated);
+}
+
+.border-default {
+  border-color: var(--color-border);
+}
+
+.glass-grove {
+  background: var(--color-glass-grove);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-auth:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,13 +1,17 @@
 /**
  * Passkey Setup Page - Server
  *
- * Ensures user is authenticated before showing passkey setup.
+ * Redirects to login.grove.place/passkey for same-origin WebAuthn ceremony.
+ * The passkey registration must happen on login.grove.place because:
+ * 1. WebAuthn origin must match the passkey config (login.grove.place)
+ * 2. Challenge cookies need to be same-origin
+ * 3. better-auth's client library handles the ceremony properly
  */
 
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ parent, cookies }) => {
+export const load: PageServerLoad = async ({ parent }) => {
   const { user, onboarding } = await parent();
 
   // Must be authenticated
@@ -20,8 +24,10 @@ export const load: PageServerLoad = async ({ parent, cookies }) => {
     redirect(302, "/plans");
   }
 
-  return {
-    user,
-    email: user.email,
-  };
+  // Redirect to login.grove.place for passkey creation
+  // After creation (or skip), user returns to /profile on Plant
+  redirect(
+    302,
+    `https://login.grove.place/passkey?redirect=${encodeURIComponent("https://plant.grove.place/profile")}`,
+  );
 };

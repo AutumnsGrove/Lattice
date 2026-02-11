@@ -15,6 +15,9 @@ AUTH_BASE_URL = "https://auth-api.grove.place"
 ENVIRONMENT = "production"
 CDN_URL = "https://cdn.grove.place"
 
+# Passkey (WebAuthn) allowed origins — comma-separated for multi-origin support
+PASSKEY_ORIGIN = "https://login.grove.place"
+
 # Feature flags
 PUBLIC_SIGNUP_ENABLED = "false"  # Set to "true" to allow public signup (bypass email allowlist)
 

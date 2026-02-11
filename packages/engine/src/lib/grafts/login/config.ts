@@ -119,6 +119,29 @@ export const GROVEAUTH_URLS = {
 export const DEFAULT_LOGIN_URL = "/auth/login";
 
 /**
+ * Unified login hub URL.
+ * All auth flows (sign-in, passkey creation) go through this origin.
+ * Overridable via VITE_LOGIN_URL for local development.
+ */
+export const LOGIN_URL =
+  import.meta.env.VITE_LOGIN_URL ?? "https://login.grove.place";
+
+/**
+ * Build a URL to the login hub with a redirect parameter.
+ * After auth completes, the user will be sent back to `redirectTo`.
+ */
+export function buildLoginUrl(redirectTo: string): string {
+  return `${LOGIN_URL}?redirect=${encodeURIComponent(redirectTo)}`;
+}
+
+/**
+ * Build a URL to the passkey registration page on the login hub.
+ */
+export function buildPasskeyUrl(redirectTo: string): string {
+  return `${LOGIN_URL}/passkey?redirect=${encodeURIComponent(redirectTo)}`;
+}
+
+/**
  * Cookie names used in OAuth flow.
  *
  * With Better Auth migration:

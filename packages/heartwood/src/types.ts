@@ -33,8 +33,9 @@ export interface Env {
   // Feature flags
   PUBLIC_SIGNUP_ENABLED?: string; // 'true' to allow public signup (bypass allowlist)
 
-  // Passkey configuration (optional - defaults to 'grove.place')
-  PASSKEY_RP_ID?: string;
+  // Passkey configuration
+  PASSKEY_RP_ID?: string; // defaults to 'grove.place'
+  PASSKEY_ORIGIN?: string; // comma-separated allowed origins, defaults to 'https://login.grove.place'
 
   // Service-to-service authentication (optional — defense-in-depth for validate-service)
   SERVICE_SECRET?: string;
