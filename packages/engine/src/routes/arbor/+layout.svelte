@@ -155,12 +155,10 @@
           <span>Get Support</span>
         </a>
         {#if data.user}
-          <form method="POST" action="/auth/logout" class="logout-form">
-            <button type="submit" class="logout-btn">
-              <LogOut class="logout-icon" />
-              <span>Logout</span>
-            </button>
-          </form>
+          <a href="/auth/logout" class="logout-btn">
+            <LogOut class="logout-icon" />
+            <span>Logout</span>
+          </a>
         {:else}
           <a href="/auth/login" class="logout-btn">
             <LogOut class="logout-icon" />
@@ -177,11 +175,9 @@
           <MessageCircle class="help-icon" />
         </a>
         {#if data.user}
-          <form method="POST" action="/auth/logout" class="logout-form">
-            <button type="submit" class="logout-btn-icon" title="Logout" aria-label="Logout">
-              <LogOut class="logout-icon" />
-            </button>
-          </form>
+          <a href="/auth/logout" class="logout-btn-icon" title="Logout" aria-label="Logout">
+            <LogOut class="logout-icon" />
+          </a>
         {:else}
           <a href="/auth/login" class="logout-btn-icon" title="Sign In" aria-label="Sign In">
             <LogOut class="logout-icon" />
@@ -570,10 +566,6 @@
 
   :global(.dark) .email {
     color: var(--grove-text-muted);
-  }
-
-  .logout-form {
-    display: contents;
   }
 
   .logout-btn {
