@@ -24,11 +24,4 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # =============================================================================
 [[r2_buckets]]
 binding = "IMAGES"
-bucket_name = "grove-images"
-
-# =============================================================================
-# R2 Bucket - For deleting expired export zip files
-# =============================================================================
-[[r2_buckets]]
-binding = "IMAGES"
 bucket_name = "grove-media"
