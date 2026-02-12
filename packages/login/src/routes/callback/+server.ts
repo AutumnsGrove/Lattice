@@ -13,7 +13,17 @@ import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-  const redirectTo = validateRedirectUrl(url.searchParams.get("redirect"));
+  // Try query param first, then fall back to cookie.
+  // The cookie fallback handles the case where Better Auth's OAuth redirect
+  // drops the ?redirect= query parameter from the callbackURL.
+  const redirectParam = url.searchParams.get("redirect");
+  const redirectCookie = cookies.get("grove_auth_redirect");
+  const redirectTo = validateRedirectUrl(redirectParam || redirectCookie);
+
+  // Clean up the fallback cookie now that we've read it
+  if (redirectCookie) {
+    cookies.delete("grove_auth_redirect", { path: "/" });
+  }
 
   // Verify that a BA session cookie exists (presence check only).
   // We don't validate the token here — Heartwood handles session validation

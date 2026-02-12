@@ -147,6 +147,10 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   );
 
   // ─── Step 3: Check existing onboarding record ──────────────────────
+  // Identity resolution: try groveauth_id first, then fall back to email.
+  // This handles two cases where the primary lookup fails:
+  // 1. Better Auth assigned a new ba_user.id after migration (ID mismatch)
+  // 2. User existed before Plant's onboarding system was built (no record)
   let existingOnboarding: {
     id: string;
     tenant_id: string | null;
@@ -168,9 +172,94 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     errorRedirect(PLANT_ERRORS.ONBOARDING_QUERY_FAILED, {
       path,
       userId: user.id,
-      detail: "SELECT user_onboarding failed",
+      detail: "SELECT user_onboarding by groveauth_id failed",
       cause: err,
     });
+  }
+
+  // Fallback: look up by email if groveauth_id lookup failed.
+  // This catches users whose ba_user.id changed (e.g., after Better Auth migration).
+  if (!existingOnboarding) {
+    try {
+      existingOnboarding = (await db
+        .prepare(
+          "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE email = ?",
+        )
+        .bind(user.email.toLowerCase())
+        .first()) as {
+        id: string;
+        tenant_id: string | null;
+        profile_completed_at: number | null;
+      } | null;
+
+      if (existingOnboarding) {
+        // Found by email — update groveauth_id to the current user.id so future
+        // logins resolve on the primary lookup without hitting this fallback.
+        console.log(
+          `[Auth Callback] Found onboarding by email, updating groveauth_id for ${user.id.slice(0, 8)}...`,
+        );
+        await db
+          .prepare(
+            "UPDATE user_onboarding SET groveauth_id = ?, updated_at = unixepoch() WHERE id = ?",
+          )
+          .bind(user.id, existingOnboarding.id)
+          .run();
+      }
+    } catch (err) {
+      // Non-fatal: if fallback query fails, continue to next fallback
+      console.warn("[Auth Callback] Email fallback query failed:", err);
+    }
+  }
+
+  // Final fallback: check if this user already has a tenant (pre-Plant users).
+  // Users created before the onboarding system have records in the `users` or
+  // `tenants` tables but no user_onboarding row. Redirect them to Arbor directly.
+  if (!existingOnboarding) {
+    try {
+      // Check the users table (links groveauth_id/email to tenant_id)
+      const existingUser = (await db
+        .prepare(
+          "SELECT tenant_id FROM users WHERE email = ? AND tenant_id IS NOT NULL",
+        )
+        .bind(user.email.toLowerCase())
+        .first()) as { tenant_id: string } | null;
+
+      if (existingUser) {
+        const tenant = (await db
+          .prepare("SELECT subdomain FROM tenants WHERE id = ? AND active = 1")
+          .bind(existingUser.tenant_id)
+          .first()) as { subdomain: string } | null;
+
+        if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
+          console.log(
+            `[Auth Callback] Pre-Plant user detected, redirecting to ${tenant.subdomain}.grove.place/arbor`,
+          );
+          redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
+        }
+      }
+
+      // Also check tenants table directly by email (covers edge cases
+      // where users table doesn't exist or isn't populated)
+      if (!existingUser) {
+        const tenant = (await db
+          .prepare(
+            "SELECT subdomain FROM tenants WHERE email = ? AND active = 1",
+          )
+          .bind(user.email.toLowerCase())
+          .first()) as { subdomain: string } | null;
+
+        if (tenant && /^[a-z0-9-]+$/.test(tenant.subdomain)) {
+          console.log(
+            `[Auth Callback] Tenant found by email, redirecting to ${tenant.subdomain}.grove.place/arbor`,
+          );
+          redirect(302, `https://${tenant.subdomain}.grove.place/arbor`);
+        }
+      }
+    } catch (err) {
+      if (isRedirect(err)) throw err;
+      // Non-fatal: if tenant lookup fails, continue to onboarding as new user
+      console.warn("[Auth Callback] Tenant fallback lookup failed:", err);
+    }
   }
 
   // ─── Step 4: Create or update onboarding record ────────────────────
