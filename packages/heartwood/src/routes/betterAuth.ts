@@ -186,7 +186,8 @@ betterAuthRoutes.all("/*", async (c) => {
 
     if (isBrowserNavigation && isMagicVerify && !isRedirectResponse) {
       const reqUrl = new URL(c.req.url);
-      const callbackURL = reqUrl.searchParams.get("callbackURL") || "/";
+      const callbackURL =
+        reqUrl.searchParams.get("callbackURL") || "https://login.grove.place/";
 
       try {
         const cloned = response.clone();
@@ -347,12 +348,8 @@ betterAuthRoutes.all("/*", async (c) => {
     if (isGetNavigation && (isMagicLinkVerify || isOAuthCallback)) {
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
-      const callbackURL = new URL(c.req.url).searchParams.get("callbackURL");
-      // Redirect to Heartwood frontend error page, or Plant if callbackURL hints at it
-      const errorBase = callbackURL?.includes("plant.grove.place")
-        ? "https://plant.grove.place"
-        : "https://heartwood.grove.place";
-      const errorUrl = new URL("/login", errorBase);
+      // Redirect to the login hub with the error — all auth flows go through login.grove.place now
+      const errorUrl = new URL("https://login.grove.place/");
       errorUrl.searchParams.set("error", errorMessage);
       return c.redirect(errorUrl.toString());
     }

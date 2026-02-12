@@ -20,11 +20,27 @@
 		validateRedirectUrl(page.url.searchParams.get('redirect'))
 	);
 
+	// Read error from URL (e.g., callback returned ?error=no_session)
+	const urlError = $derived(page.url.searchParams.get('error'));
+
 	// UI state
 	let loadingProvider = $state<'google' | 'passkey' | 'email' | null>(null);
-	let error = $state<string | null>(null);
+	let actionError = $state<string | null>(null);
 	let emailSent = $state(false);
 	let email = $state('');
+
+	// Map URL error codes to friendly messages
+	function friendlyErrorMessage(code: string): string {
+		switch (code) {
+			case 'no_session':
+				return 'Sign-in didn\u2019t complete. Please try again.';
+			default:
+				return code;
+		}
+	}
+
+	// Combined error: action errors take priority over URL errors
+	const error = $derived(actionError || (urlError ? friendlyErrorMessage(urlError) : null));
 
 	/**
 	 * Sign in with Google OAuth.
@@ -33,15 +49,18 @@
 	async function signInWithGoogle() {
 		if (!browser || loadingProvider) return;
 		loadingProvider = 'google';
-		error = null;
+		actionError = null;
 
 		try {
+			// callbackURL must be absolute — after OAuth, Better Auth redirects
+			// from auth-api.grove.place, so a relative "/callback" would resolve
+			// to the wrong host. Using page origin ensures we land back here.
 			await authClient.signIn.social({
 				provider: 'google',
-				callbackURL: `/callback?redirect=${encodeURIComponent(redirectTo)}`,
+				callbackURL: `${page.url.origin}/callback?redirect=${encodeURIComponent(redirectTo)}`,
 			});
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Google sign-in failed';
+			actionError = err instanceof Error ? err.message : 'Google sign-in failed';
 			loadingProvider = null;
 		}
 	}
@@ -53,7 +72,7 @@
 	async function signInWithPasskey() {
 		if (!browser || loadingProvider) return;
 		loadingProvider = 'passkey';
-		error = null;
+		actionError = null;
 
 		try {
 			const result = await authClient.signIn.passkey();
@@ -64,9 +83,9 @@
 			window.location.href = redirectTo;
 		} catch (err) {
 			if (err instanceof Error && err.name === 'NotAllowedError') {
-				error = 'Passkey sign-in was cancelled or timed out.';
+				actionError = 'Passkey sign-in was cancelled or timed out.';
 			} else {
-				error = err instanceof Error ? err.message : 'Passkey sign-in failed';
+				actionError = err instanceof Error ? err.message : 'Passkey sign-in failed';
 			}
 			loadingProvider = null;
 		}
@@ -78,19 +97,22 @@
 	async function signInWithEmail() {
 		if (!browser || loadingProvider || !email.trim()) return;
 		loadingProvider = 'email';
-		error = null;
+		actionError = null;
 
 		try {
+			// callbackURL must be absolute — the magic link verification URL lives
+			// on auth-api.grove.place, so a relative "/callback" would resolve there
+			// instead of back to login.grove.place.
 			const result = await authClient.signIn.magicLink({
 				email: email.trim(),
-				callbackURL: `/callback?redirect=${encodeURIComponent(redirectTo)}`,
+				callbackURL: `${page.url.origin}/callback?redirect=${encodeURIComponent(redirectTo)}`,
 			});
 			if (result.error) {
 				throw new Error(result.error.message || 'Failed to send magic link');
 			}
 			emailSent = true;
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to send magic link';
+			actionError = err instanceof Error ? err.message : 'Failed to send magic link';
 		} finally {
 			loadingProvider = null;
 		}
