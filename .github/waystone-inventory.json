@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
-  "lastUpdated": "2026-02-10",
-  "lastAuditedBy": "claude/waystone-inventory-creation",
+  "lastUpdated": "2026-02-12",
+  "lastAuditedBy": "claude/fix-waystone-inventory-CS8hN",
   "waystones": {
     "total": 17,
     "breakdown": {
@@ -166,7 +166,7 @@
       "instances": [
         {
           "file": "packages/engine/src/lib/grafts/greenhouse/GraftControlPanel.svelte",
-          "label": "Learn more",
+          "label": "Learn about experimental features",
           "placement": "panel-header",
           "size": "sm"
         }
