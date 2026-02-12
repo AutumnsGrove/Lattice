@@ -98,7 +98,7 @@ async function checkHeartwood(
   try {
     // Ping Heartwood health endpoint via service binding
     const response = await authBinding.fetch(
-      "https://auth-api.grove.place/health",
+      "https://login.grove.place/health",
     );
     const latency = Date.now() - start;
 

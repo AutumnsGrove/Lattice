@@ -120,7 +120,7 @@ export async function getUserByTenantId(
  *
  * @example
  * ```typescript
- * const user = await getUserFromSession(db, accessToken, 'https://auth-api.grove.place');
+ * const user = await getUserFromSession(db, accessToken, 'https://login.grove.place');
  * if (!user) {
  *   return redirect(302, '/auth/login');
  * }

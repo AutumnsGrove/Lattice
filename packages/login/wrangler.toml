@@ -10,4 +10,4 @@ binding = "AUTH"
 service = "groveauth"
 
 # Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
-# - GROVEAUTH_URL = https://auth-api.grove.place
+# - GROVEAUTH_URL = https://login.grove.place

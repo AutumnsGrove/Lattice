@@ -1,31 +1,20 @@
 /**
  * Login Graft
  *
- * Unified login UI component for all Grove properties.
- * Provides consistent authentication experience via Better Auth.
+ * Auth UI and utilities for the Grove login system.
  *
- * With Better Auth, LoginGraft redirects directly to GroveAuth's
- * /api/auth/sign-in/social endpoint—no custom login handler needed.
+ * AUTH ARCHITECTURE: All auth flows go through login.grove.place.
+ * Engine tenant sites redirect to the login hub — they do NOT render
+ * LoginGraft or make cross-origin auth API calls. Use buildLoginUrl()
+ * to redirect users to the login hub.
  *
- * @example Client-side usage
- * ```svelte
- * <script>
- *   import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
- * </script>
+ * The LoginGraft component itself is only used ON login.grove.place
+ * where auth API calls are same-origin.
  *
- * <LoginGraft
- *   providers={['google']}
- *   returnTo="/dashboard"
- * >
- *   {#snippet header()}
- *     <h1>Welcome back, Wanderer</h1>
- *   {/snippet}
- * </LoginGraft>
- * ```
- *
- * @example Compact variant for embedding
- * ```svelte
- * <LoginGraft variant="compact" providers={['google']} />
+ * @example Redirect to login hub (engine tenant sites)
+ * ```typescript
+ * import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
+ * throw redirect(302, buildLoginUrl(`${url.origin}/auth/callback?returnTo=/arbor`));
  * ```
  */
 

@@ -4,7 +4,7 @@
 	 *
 	 * Handles the complete magic link authentication flow:
 	 * - Shows email input when clicked
-	 * - Sends magic link via GroveAuth
+	 * - Sends magic link via Heartwood
 	 * - Shows "check your email" confirmation
 	 *
 	 * After clicking the magic link, users are redirected to a callback
@@ -91,7 +91,8 @@
 			const origin = window.location.origin;
 			const callbackURL = `${origin}/auth/magic-link/callback?returnTo=${encodeURIComponent(returnTo)}`;
 
-			// csrf-ok: cross-origin POST to GroveAuth, not an internal API
+			// Same-origin fetch on login.grove.place. Do NOT use this component
+			// cross-origin from tenant sites — redirect to login.grove.place instead.
 			const response = await fetch(GROVEAUTH_URLS.magicLink, {
 				method: "POST",
 				credentials: "include",

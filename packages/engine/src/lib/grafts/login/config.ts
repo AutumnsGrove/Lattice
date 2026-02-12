@@ -88,12 +88,13 @@ export const DEFAULT_PROVIDERS: AuthProvider[] = ["google", "passkey", "email"];
 export const DEFAULT_RETURN_TO = "/arbor";
 
 /**
- * Default GroveAuth URLs.
+ * Heartwood API URLs.
  *
- * With Better Auth migration:
- * - OAuth flows redirect directly to Better Auth's /api/auth/sign-in/social
- * - No more intermediate PKCE dance - Better Auth handles everything
- * - Session cookie (better-auth.session_token) is set by Better Auth
+ * AUTH ARCHITECTURE: All auth flows go through login.grove.place.
+ * Engine tenant sites (*.grove.place) redirect to login.grove.place
+ * via buildLoginUrl() — they do NOT make cross-origin API calls.
+ * These URLs are used by the login hub itself (same-origin) and by
+ * service binding calls (where the host is cosmetic).
  *
  * For local development with Cloudflare Tunnel, set VITE_AUTH_API_URL
  * in .env.local to override the production auth API base URL.

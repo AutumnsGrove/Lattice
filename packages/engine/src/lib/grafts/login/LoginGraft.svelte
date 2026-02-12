@@ -1,43 +1,20 @@
 <script lang="ts">
 	/**
-	 * LoginGraft - Unified login component for all Grove properties
+	 * LoginGraft - Login UI component for the Login Hub (login.grove.place)
 	 *
-	 * Main orchestrator component that provides consistent login UI.
-	 * Uses Better Auth for OAuth flows - POSTs JSON to GroveAuth's
-	 * Better Auth endpoints which handle the full OAuth dance.
+	 * IMPORTANT: This component is intended for use ON login.grove.place only,
+	 * where auth API calls are same-origin. Engine tenant sites (*.grove.place)
+	 * should NOT render this component — they should redirect to login.grove.place
+	 * via buildLoginUrl() instead. The engine's /auth/login route does this
+	 * automatically with a server-side redirect in +page.server.ts.
 	 *
-	 * IMPORTANT: Better Auth's /api/auth/sign-in/social endpoint requires:
-	 * - POST method
-	 * - Content-Type: application/json
-	 * - JSON body with { provider, callbackURL }
+	 * Uses Better Auth for OAuth, passkeys, and magic link flows.
+	 * POSTs JSON to /api/auth/sign-in/social (same-origin on login.grove.place).
 	 *
 	 * Supports three variants:
 	 * - default: Card with providers and optional header/footer
 	 * - compact: Minimal button only (for embedding)
 	 * - fullpage: Centered card with logo and branding
-	 *
-	 * @example Default variant with header
-	 * ```svelte
-	 * <LoginGraft providers={['google']} returnTo="/dashboard">
-	 *   {#snippet header()}
-	 *     <h1 class="text-2xl font-bold">Welcome back, Wanderer</h1>
-	 *   {/snippet}
-	 * </LoginGraft>
-	 * ```
-	 *
-	 * @example Compact variant for embedding
-	 * ```svelte
-	 * <LoginGraft variant="compact" providers={['google']} />
-	 * ```
-	 *
-	 * @example Fullpage variant with logo
-	 * ```svelte
-	 * <LoginGraft variant="fullpage" providers={['google']}>
-	 *   {#snippet logo()}
-	 *     <GroveLogo class="w-16 h-16" />
-	 *   {/snippet}
-	 * </LoginGraft>
-	 * ```
 	 */
 
 	import { browser } from "$app/environment";
@@ -95,9 +72,11 @@
 		error = null;
 
 		try {
-			const response = await fetch(GROVEAUTH_URLS.socialSignIn, { // csrf-ok: cross-origin POST to GroveAuth
+			// Same-origin fetch on login.grove.place. Do NOT use this component
+			// cross-origin from tenant sites — redirect to login.grove.place instead.
+			const response = await fetch(GROVEAUTH_URLS.socialSignIn, {
 				method: "POST",
-				credentials: "include",  // Required for cross-origin cookies
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},

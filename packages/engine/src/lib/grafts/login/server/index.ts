@@ -4,20 +4,16 @@
  * Server-side exports for the LoginGraft system.
  * Provides handler factories and utilities for OAuth authentication.
  *
- * NOTE: With Better Auth migration, createLoginHandler is removed.
- * LoginGraft now redirects directly to Better Auth's /api/auth/sign-in/social
- * endpoint, so no custom login handler is needed.
+ * AUTH ARCHITECTURE: All auth flows go through login.grove.place.
+ * Engine tenant sites redirect to the login hub via buildLoginUrl().
+ * After authentication, the login hub redirects back to the engine's
+ * /auth/callback route, which verifies the session cookie and sends
+ * the user to their destination.
  *
- * @example
+ * @example Redirect to login hub
  * ```typescript
- * // In routes/auth/callback/+server.ts
- * import { createCallbackHandler } from '@autumnsgrove/groveengine/grafts/login/server';
- *
- * export const GET = createCallbackHandler({
- *   clientId: 'my-app',
- *   authApiUrl: 'https://auth-api.grove.place',
- *   defaultReturnTo: '/dashboard'
- * });
+ * import { buildLoginUrl } from '$lib/grafts/login/config.js';
+ * throw redirect(302, buildLoginUrl(`${url.origin}/auth/callback?returnTo=/arbor`));
  * ```
  */
 

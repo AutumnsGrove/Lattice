@@ -187,7 +187,7 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 # GroveAuth Secrets (Heartwood OAuth)
 # =============================================================================
 # GROVEAUTH_CLIENT_ID     - OAuth client ID for this application
-#                           Register at: auth-api.grove.place
+#                           Register at: login.grove.place
 #
 # GROVEAUTH_CLIENT_SECRET - OAuth client secret
 #                           Keep this secure!

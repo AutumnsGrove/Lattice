@@ -211,8 +211,8 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
         sameSite: "lax", // Must be 'lax' for OAuth redirects to work
         path: "/",
       },
-      // OAuth state cookie needs SameSite=None because it's set via cross-origin POST
-      // (autumn.grove.place POSTs to auth-api.grove.place/api/auth/sign-in/social)
+      // OAuth state cookie — SameSite=None retained for compatibility.
+      // Auth flows now go through login.grove.place (same-origin), so Lax would work.
       cookies: {
         oauth_state: {
           name: "better-auth.oauth_state",

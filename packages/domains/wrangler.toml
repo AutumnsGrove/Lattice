@@ -7,7 +7,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 [vars]
 SITE_NAME = "Forage"
 SITE_URL = "http://localhost:5174"
-GROVEAUTH_URL = "https://auth-api.grove.place"
+GROVEAUTH_URL = "https://login.grove.place"
 
 # D1 Database binding (shared with main platform)
 [[d1_databases]]

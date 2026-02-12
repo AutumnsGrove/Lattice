@@ -13,7 +13,7 @@
 
 import type { Cookies, RequestEvent } from "@sveltejs/kit";
 
-const DEFAULT_AUTH_URL = "https://auth-api.grove.place";
+const DEFAULT_AUTH_URL = "https://login.grove.place";
 
 /** Max request body size for auth endpoints (1MB — generous for JSON payloads) */
 const MAX_BODY_SIZE = 1_048_576;
