@@ -1,0 +1,22 @@
+[
+  {
+    "source_file": "/home/user/GroveEngine/docs/developer/architecture/diagrams.md",
+    "diagram_files": [
+      "/home/user/GroveEngine/diagrams/docs/diagram_1_monorepo_package_map.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_2_request_routing.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_3_cloudflare_infrastructure.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_4_service_binding_communication.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_5_heartwood_authentication_flow.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_6_multi_tenant_data_isolation.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_7_core_database_schema.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_8_heartwood_database_schema.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_9_durable_objects_loom_pattern.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_10_email_infrastructure_zephyr.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_11_engine_export_map.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_12_curios_grafts.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_13_ci_cd_deployment.png",
+      "/home/user/GroveEngine/diagrams/docs/diagram_14_storage_media_pipeline.png"
+    ],
+    "timestamp": "2026-02-12 02:20:01.868463"
+  }
+]
