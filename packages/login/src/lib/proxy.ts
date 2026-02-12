@@ -83,7 +83,7 @@ export async function proxyToHeartwood(
   event: RequestEvent,
   targetPath: string,
 ): Promise<Response> {
-  const { request, cookies, platform } = event;
+  const { request, cookies, platform, url } = event;
 
   if (!platform?.env?.AUTH) {
     return new Response(JSON.stringify({ error: "Auth service unavailable" }), {
@@ -104,7 +104,9 @@ export async function proxyToHeartwood(
   }
 
   const authBaseUrl = platform.env.GROVEAUTH_URL || DEFAULT_AUTH_URL;
-  const targetUrl = `${authBaseUrl}${targetPath}`;
+  // Forward query parameters from the original request (critical for OAuth
+  // callbacks where Google sends ?state=...&code=... that Better Auth needs)
+  const targetUrl = `${authBaseUrl}${targetPath}${url.search}`;
 
   // Forward only auth-related cookies for session identification. (HAWK-007)
   const authCookies = cookies.getAll().filter((c) => isAuthCookie(c.name));
