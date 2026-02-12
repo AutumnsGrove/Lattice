@@ -23,16 +23,17 @@ import type { Handle } from "@sveltejs/kit";
  */
 
 /**
- * Check if an origin is an HTTPS *.grove.place subdomain.
+ * Check if an origin is a valid HTTPS *.grove.place subdomain.
  * Matches the same origin validation used in Heartwood's CORS middleware.
+ *
+ * Uses a strict regex to ensure only single-level subdomains match
+ * (e.g., autumn.grove.place) — prevents nested subdomain abuse
+ * (e.g., evil.autumn.grove.place).
  */
+const GROVE_ORIGIN_RE = /^https:\/\/[a-z0-9-]+\.grove\.place$/;
+
 function isGroveOrigin(origin: string): boolean {
-  try {
-    const url = new URL(origin);
-    return url.protocol === "https:" && url.hostname.endsWith(".grove.place");
-  } catch {
-    return false;
-  }
+  return GROVE_ORIGIN_RE.test(origin);
 }
 
 /** Also allow localhost for local development */
@@ -84,6 +85,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     for (const [key, value] of Object.entries(corsHeaders)) {
       response.headers.set(key, value);
     }
+    // Vary: Origin ensures CDN/proxies don't serve cached CORS headers
+    // intended for one origin to a different origin
+    response.headers.append("Vary", "Origin");
   }
 
   // Security headers (CSP is handled by SvelteKit's kit.csp config with nonces)
