@@ -134,6 +134,7 @@ export async function proxyToHeartwood(
     body: ["GET", "HEAD"].includes(request.method)
       ? undefined
       : await request.arrayBuffer(),
+    redirect: "manual",
   });
 
   // Forward only allowed response headers (HAWK-005)
