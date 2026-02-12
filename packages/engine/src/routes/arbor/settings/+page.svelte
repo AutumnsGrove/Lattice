@@ -224,6 +224,10 @@
         if (result?.url) {
           avatarUrl = result.url;
           toast.success("Profile photo updated!");
+        } else {
+          toast.error(
+            "Upload completed but no photo URL was returned. Please try again.",
+          );
         }
       } catch (error) {
         toast.error(

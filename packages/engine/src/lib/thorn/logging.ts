@@ -134,7 +134,7 @@ export async function logModerationEvent(
       .run();
   } catch (err) {
     // Log to console but don't fail the request
-    console.error("[Thorn] Failed to log moderation event");
+    console.error("[Thorn] Failed to log moderation event:", err);
   }
 }
 
@@ -167,7 +167,7 @@ export async function flagContent(
       )
       .run();
   } catch (err) {
-    console.error("[Thorn] Failed to flag content");
+    console.error("[Thorn] Failed to flag content:", err);
   }
 }
 
@@ -195,7 +195,7 @@ export async function updateFlagStatus(
 
     return (result.meta?.changes || 0) > 0;
   } catch (err) {
-    console.error("[Thorn] Failed to update flag status");
+    console.error("[Thorn] Failed to update flag status:", err);
     return false;
   }
 }
@@ -227,7 +227,7 @@ export async function getRecentEvents(
 
     return (result.results || []) as unknown as ThornModerationLogRow[];
   } catch (err) {
-    console.error("[Thorn] Failed to get recent events");
+    console.error("[Thorn] Failed to get recent events:", err);
     return [];
   }
 }
@@ -261,7 +261,7 @@ export async function getFlaggedContent(
 
     return (result.results || []) as unknown as ThornFlaggedContentRow[];
   } catch (err) {
-    console.error("[Thorn] Failed to get flagged content");
+    console.error("[Thorn] Failed to get flagged content:", err);
     return [];
   }
 }
@@ -348,7 +348,7 @@ export async function getStats(
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count);
     } catch (err) {
-      console.error("[Thorn] Failed to get category stats");
+      console.error("[Thorn] Failed to get category stats:", err);
     }
 
     // By-content-type breakdown
@@ -368,7 +368,7 @@ export async function getStats(
         count: number;
       }>;
     } catch (err) {
-      console.error("[Thorn] Failed to get content type stats");
+      console.error("[Thorn] Failed to get content type stats:", err);
     }
 
     return {
@@ -382,7 +382,7 @@ export async function getStats(
       byContentType,
     };
   } catch (err) {
-    console.error("[Thorn] Failed to get stats");
+    console.error("[Thorn] Failed to get stats:", err);
     return empty;
   }
 }
@@ -410,7 +410,7 @@ export async function cleanupOldLogs(
 
     return result.meta?.changes || 0;
   } catch (err) {
-    console.error("[Thorn] Failed to cleanup old logs");
+    console.error("[Thorn] Failed to cleanup old logs:", err);
     return 0;
   }
 }

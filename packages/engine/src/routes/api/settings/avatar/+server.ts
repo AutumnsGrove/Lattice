@@ -14,15 +14,8 @@ import {
   type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { canUploadImages } from "$lib/server/upload-gate.js";
-import { classifyWithLumen } from "$lib/server/petal/lumen-classify.js";
-import { createLumenClient } from "$lib/lumen/index.js";
-import {
-  getRejectionMessage,
-  BLOCKED_CATEGORIES,
-  REVIEW_CATEGORIES,
-  CONFIDENCE_THRESHOLDS,
-} from "$lib/config/petal.js";
-import type { PetalCategory } from "$lib/server/petal/types.js";
+import { scanImage } from "$lib/server/petal/index.js";
+import type { PetalEnv } from "$lib/server/petal/types.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 /** Maximum avatar file size (5MB — smaller than general 10MB) */
@@ -31,7 +24,7 @@ const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 /**
  * Upload a custom profile photo.
  *
- * Flow: auth → CSRF → rate limit → validate → Lumen classify → cleanup old → R2 store → site_settings upsert
+ * Flow: auth → CSRF → rate limit → validate → Petal scan → cleanup old → R2 store → site_settings upsert
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   if (!locals.user) {
@@ -142,38 +135,33 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // ========================================================================
-    // Content Moderation via Lumen
+    // Content Moderation via Petal (4-layer pipeline)
     // ========================================================================
-    const openrouterApiKey = platform?.env?.OPENROUTER_API_KEY as
-      | string
-      | undefined;
-    const hasLumenProvider = platform?.env?.AI || openrouterApiKey;
+    const hasPetalProvider =
+      platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
 
-    if (hasLumenProvider) {
-      const lumen = createLumenClient({
-        openrouterApiKey: openrouterApiKey ?? "",
-        ai: platform!.env!.AI,
-        db,
-      });
+    if (hasPetalProvider) {
+      const petalEnv: PetalEnv = {
+        AI: platform!.env!.AI,
+        DB: db,
+        CACHE_KV: kv,
+        TOGETHER_API_KEY: platform?.env?.TOGETHER_API_KEY as string | undefined,
+      };
 
-      const classification = await classifyWithLumen(
-        buffer,
-        file.type,
-        lumen,
-        tenantId,
+      const petalResult = await scanImage(
+        {
+          imageData: buffer,
+          mimeType: file.type,
+          context: "profile",
+          userId: locals.user.id,
+          tenantId,
+        },
+        petalEnv,
       );
 
-      const isBlocked =
-        BLOCKED_CATEGORIES.includes(classification.category) &&
-        classification.confidence >= CONFIDENCE_THRESHOLDS.block;
-      const isReviewBlocked =
-        REVIEW_CATEGORIES.includes(classification.category) &&
-        classification.confidence >= CONFIDENCE_THRESHOLDS.block;
-
-      if (isBlocked || isReviewBlocked) {
-        const message = getRejectionMessage(classification.category);
+      if (!petalResult.allowed) {
         logGroveError("API", API_ERRORS.INVALID_FILE, {
-          detail: `Avatar rejected: ${classification.category} (${classification.confidence})`,
+          detail: `Avatar rejected by Petal: ${petalResult.decision} (${petalResult.code || "no code"})`,
           tenantId,
           userId: locals.user.id,
         });
@@ -182,11 +170,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           {
             error: API_ERRORS.INVALID_FILE.code,
             error_code: API_ERRORS.INVALID_FILE.code,
-            message,
+            message: petalResult.message || "This image could not be accepted.",
           },
           { status: 400 },
         );
       }
+    } else {
+      console.warn(
+        "[Avatar] No Petal provider available — upload proceeding unmoderated",
+        { tenantId },
+      );
     }
 
     // ========================================================================
