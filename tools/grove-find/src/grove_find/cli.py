@@ -551,5 +551,36 @@ def engine_cmd(
     engine_command(module)
 
 
+# Impact analysis commands (agent-optimized)
+@app.command("impact")
+def impact_cmd(
+    file_path: str = typer.Argument(..., help="File path to analyze"),
+) -> None:
+    """Full impact analysis — who imports, what tests, which routes."""
+    from grove_find.commands.impact import impact_command
+
+    impact_command(file_path)
+
+
+@app.command("test-for")
+def test_for_cmd(
+    file_path: str = typer.Argument(..., help="File path to find tests for"),
+) -> None:
+    """Find tests that cover a specific file."""
+    from grove_find.commands.impact import test_for_command
+
+    test_for_command(file_path)
+
+
+@app.command("diff-summary")
+def diff_summary_cmd(
+    base: str = typer.Argument("HEAD", help="Base ref to compare against"),
+) -> None:
+    """Structured diff summary with per-file line counts and package breakdown."""
+    from grove_find.commands.impact import diff_summary_command
+
+    diff_summary_command(base)
+
+
 if __name__ == "__main__":
     app()

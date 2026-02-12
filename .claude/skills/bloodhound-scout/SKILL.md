@@ -33,12 +33,13 @@ Scent    Trail   Dive     Territory Knowledge
 
 ### Phase 1: SCENT
 
-*The nose twitches. Something's been here...*
+_The nose twitches. Something's been here..._
 
 Establish what we're tracking:
 
 **The Starting Point:**
 What scent do we have?
+
 - **Function name** — `getUserById`, `validateToken`
 - **Component** — `UserProfile`, `PaymentForm`
 - **Pattern** — error handling, API calls, state management
@@ -46,22 +47,28 @@ What scent do we have?
 - **File** — Where does `utils/helpers.ts` get used?
 
 **Search Strategy Selection:**
+
+Grove Find (`gf`) is the bloodhound's primary nose -- fast, agent-friendly, purpose-built:
+
 ```bash
-# Exact matches (fastest)
-grep -r "functionName" src/
+# PRIMARY — Grove Find (the bloodhound's best tools)
+gf --agent search "functionName"   # Pick up the scent across the codebase
+gf --agent func "getUserById"      # Track down a function's definition
+gf --agent usage "UserProfile"     # Follow every trail this name leaves
+gf --agent class "PaymentService"  # Find where a class/component lives
+gf --agent impact "src/lib/auth.ts" # What trembles when this file changes?
 
-# Pattern matches (broader)
+# Git context — orient before tracking
+gw context                         # Where are we? Branch, recent changes, state
+
+# FALLBACK — when the scent needs a finer grain
 grep -r "useState.*user" src/ --include="*.tsx"
-
-# Import tracking (dependency graph)
-grep -r "from.*user-service" src/
-
-# File type filtering
 glob "**/*.svelte"  # Just Svelte components
 glob "**/api/**/*.ts"  # Just API routes
 ```
 
 **Scope Definition:**
+
 - **Deep dive** — Trace every call, follow every import
 - **Surface scan** — Find main entry points, understand boundaries
 - **Pattern search** — Find all instances of a specific technique
@@ -72,11 +79,12 @@ glob "**/api/**/*.ts"  # Just API routes
 
 ### Phase 2: TRACK
 
-*Paws pad softly, following the trail as it winds through the underbrush...*
+_Paws pad softly, following the trail as it winds through the underbrush..._
 
 Follow connections systematically:
 
 **Import Tracing:**
+
 ```typescript
 // Found: Component imports UserService
 import { getUserById } from '$lib/services/user';
@@ -93,6 +101,7 @@ export const db = createPool({...});
 ```
 
 **Call Graph Mapping:**
+
 ```
 UserProfile.svelte
     ↓ calls
@@ -104,19 +113,20 @@ mysql.execute()
 ```
 
 **Reference Finding:**
+
 ```bash
-# Who calls this function?
-grep -r "getUserById" src/ --include="*.ts" -B 2 -A 2
+# Grove Find — the bloodhound's fastest nose
+gf --agent usage "getUserById"      # Who calls this function?
+gf --agent impact "src/lib/user.ts" # What depends on this file?
+gf --agent search "UserProfile"     # Where is this type used?
 
-# What imports this module?
+# Finer-grained tracking (fallback)
 grep -r "from.*user" src/ --include="*.ts" -l
-
-# Where is this type used?
-grep -r "UserProfile" src/ --include="*.ts" -n
 ```
 
 **Pattern Recognition:**
 As you track, notice patterns:
+
 - "Every API route uses this middleware"
 - "Error handling is inconsistent between modules"
 - "This pattern repeats in 5 different files"
@@ -127,11 +137,12 @@ As you track, notice patterns:
 
 ### Phase 3: HUNT
 
-*The trail goes cold, but the bloodhound circles, finding it again in unexpected places...*
+_The trail goes cold, but the bloodhound circles, finding it again in unexpected places..._
 
 Deep dive into the most important findings:
 
 **Code Archaeology:**
+
 ```bash
 # When was this file last changed?
 git log -p src/lib/auth.ts | head -100
@@ -144,6 +155,7 @@ git show HEAD~5:src/lib/auth.ts | grep -A 10 "verifyToken"
 ```
 
 **Cross-Reference Analysis:**
+
 ```typescript
 // Find: Authentication is checked in 3 different ways
 
@@ -165,6 +177,7 @@ if (!user.isAuthenticated) {
 
 **Edge Case Hunting:**
 Look for:
+
 - Error paths (often neglected)
 - Race conditions
 - Unhandled promise rejections
@@ -172,6 +185,7 @@ Look for:
 - Magic numbers and strings
 
 **Dependency Mapping:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                    DEPENDENCY WEB                            │
@@ -194,33 +208,37 @@ Look for:
 
 ### Phase 4: REPORT
 
-*The bloodhound returns, dropping a map at the hunter's feet...*
+_The bloodhound returns, dropping a map at the hunter's feet..._
 
 Document findings for others (and your future self):
 
 **The Territory Map:**
+
 ```markdown
 ## 🐕 BLOODHOUND SCOUT REPORT
 
 ### Target: User Authentication Flow
 
 #### Entry Points
+
 1. `src/routes/login/+page.svelte` — Login form
 2. `src/routes/api/auth/login/+server.ts` — API endpoint
 3. `src/lib/components/LoginForm.svelte` — Reusable component
 
 #### Core Trail
 ```
+
 LoginForm.svelte
-    ↓ submit
+↓ submit
 +page.svelte#handleSubmit
-    ↓ POST /api/auth/login
+↓ POST /api/auth/login
 +server.ts
-    ↓ validateCredentials
+↓ validateCredentials
 auth.service.ts
-    ↓ verifyPassword
+↓ verifyPassword
 password.utils.ts
-    ↓ bcrypt.compare
+↓ bcrypt.compare
+
 ```
 
 #### Key Files
@@ -243,8 +261,10 @@ password.utils.ts
 ```
 
 **Quick Reference Card:**
+
 ```markdown
 ### When working with auth:
+
 - Check middleware: `src/lib/middleware.ts`
 - Service layer: `src/lib/services/auth.ts`
 - Types: `src/lib/types/auth.ts`
@@ -257,28 +277,33 @@ password.utils.ts
 
 ### Phase 5: RETURN
 
-*The hunt is complete. The knowledge stays, ready for the next tracker...*
+_The hunt is complete. The knowledge stays, ready for the next tracker..._
 
 Prepare for handoff:
 
 **Knowledge Transfer:**
-```markdown
+
+````markdown
 ## Summary for Next Developer
 
 ### The Big Picture
+
 [2-3 sentences explaining the system's purpose and architecture]
 
 ### Where to Start
+
 - New feature? → Look at `src/lib/services/`
 - Bug fix? → Check `src/lib/errors/` first
 - UI change? → Components in `src/lib/components/`
 
 ### Gotchas
+
 - Database migrations run automatically in dev, manually in prod
 - Auth tokens expire in 15 minutes, refresh tokens in 7 days
 - Don't import from `src/lib/server/` in client code
 
 ### Useful Commands
+
 ```bash
 # Run just the auth tests
 npm test auth
@@ -289,7 +314,9 @@ npm run db:reset
 # See API documentation
 npm run docs:api
 ```
-```
+````
+
+````
 
 **Bookmark Creation:**
 Create quick access points:
@@ -304,7 +331,7 @@ Create quick access points:
 2. [ ] Add rate limiting to login endpoint
 3. [ ] Document the event bus pattern for auth events
 4. [ ] Write integration tests for token refresh flow
-```
+````
 
 **Output:** Team-ready documentation with actionable next steps
 
@@ -313,16 +340,21 @@ Create quick access points:
 ## Bloodhound Rules
 
 ### Persistence
+
 Never lose the scent. If the trail goes cold, circle back. Check imports, exports, configuration files. The code is there—keep hunting.
 
 ### Method
+
 Track systematically. Don't jump around randomly. Follow the call graph, document as you go, build the map piece by piece.
 
 ### Detail
+
 Notice the small things. That inconsistent error message, the commented-out code, the TODO from six months ago. These are signposts.
 
 ### Communication
+
 Use tracking metaphors:
+
 - "Picking up the scent..." (starting the search)
 - "Following the trail..." (tracing connections)
 - "The hunt goes deep..." (deep dive analysis)
@@ -333,6 +365,7 @@ Use tracking metaphors:
 ## Anti-Patterns
 
 **The bloodhound does NOT:**
+
 - Guess without verifying ("it's probably in utils/")
 - Stop at the first occurrence (find ALL the trails)
 - Assume code does what comments say (trust the code, not comments)
@@ -361,31 +394,34 @@ Use tracking metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Approach |
-|-----------|----------|
-| Bug in production | Track from error location backwards to root cause |
-| Adding feature | Find similar features, follow their pattern |
-| Refactoring | Map all dependencies, identify safe change boundaries |
-| Code review prep | Scout changed files, understand context |
-| New team member | Territory map of entire codebase, entry points |
-| Performance issue | Hunt for hot paths, trace execution flow |
+| Situation         | Approach                                              |
+| ----------------- | ----------------------------------------------------- |
+| Bug in production | Track from error location backwards to root cause     |
+| Adding feature    | Find similar features, follow their pattern           |
+| Refactoring       | Map all dependencies, identify safe change boundaries |
+| Code review prep  | Scout changed files, understand context               |
+| New team member   | Territory map of entire codebase, entry points        |
+| Performance issue | Hunt for hot paths, trace execution flow              |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Scouting:**
+
 - `eagle-architect` — If you need to understand high-level design first
 
 **During Scouting:**
+
 - `raccoon-audit` — If you find security issues while tracking
 - `beaver-build` — To understand testing patterns
 
 **After Scouting:**
+
 - `panther-strike` — To fix specific issues found
 - `elephant-build` — To implement changes across mapped territory
 - `swan-design` — To document architectural decisions
 
 ---
 
-*Every codebase is a forest. The bloodhound knows how to navigate.* 🐕
+_Every codebase is a forest. The bloodhound knows how to navigate._ 🐕

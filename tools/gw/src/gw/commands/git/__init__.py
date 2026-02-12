@@ -6,7 +6,7 @@ from .read import diff, log, show, status, blame, fetch, reflog, shortlog
 from .write import add, branch, cherry_pick, commit, pull, push, stash, switch, unstage, restore, clean
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
-from .workflows import prep, ship
+from .workflows import prep, pr_prep, ship
 from .worktree import worktree
 from .remote import remote
 from .tag import tag
@@ -78,6 +78,7 @@ git.add_command(fast)
 # Register workflow commands
 git.add_command(ship)
 git.add_command(prep)
+git.add_command(pr_prep, name="pr-prep")
 
 # Register worktree commands
 git.add_command(worktree)

@@ -207,6 +207,10 @@ cd tools/gw && uv run gw --help
 #### Command Categories
 
 ```bash
+# AGENT — Start every session here
+gw context                              # One-shot session snapshot (branch, changes, packages)
+gw --json context                       # JSON snapshot for structured parsing
+
 # DATABASE (D1, KV, R2) — Read-only by default
 gw db query "SELECT * FROM tenants"     # Safe read
 gw db query --write "UPDATE..."         # Requires --write flag
@@ -224,12 +228,15 @@ gw git commit --write -m "feat: ..."    # Requires --write
 gw git push --write                     # Requires --write
 gw git save --write                     # Quick add + WIP commit
 gw git sync --write                     # Fetch + rebase + push
+gw git ship --write -a -m "type: msg"   # Auto-stage + format + check + commit + push
+gw git pr-prep                          # Full PR readiness report
 
 # GITHUB — Rate-limit aware
 gw gh pr list                           # Always safe
 gw gh pr view 123                       # Always safe
 gw gh pr create --write                 # Requires --write
 gw gh issue list                        # Always safe
+gw gh issue batch --write --from-json f # Batch create issues from JSON
 gw gh run list                          # CI status
 
 # DEV TOOLS — Auto-detects package from cwd
@@ -238,6 +245,9 @@ gw build                                # Build package
 gw check                                # Type check
 gw lint                                 # Lint
 gw ci                                   # Full CI pipeline locally
+gw ci --affected                        # CI only for changed packages
+gw ci --affected --fail-fast            # Fast feedback: stop on first failure
+gw ci --diagnose                        # Structured error diagnostics on failure
 
 # DIAGNOSTICS
 gw status                               # Infrastructure overview
@@ -260,7 +270,7 @@ gw db query --write "DELETE FROM users" # Protected tables
 
 #### MCP Server Integration
 
-gw runs as an MCP server for Claude Code, exposing 28 tools directly (including `grove_git_ship` and `grove_git_prep`):
+gw runs as an MCP server for Claude Code, exposing 34+ tools including git operations, codebase search, impact analysis, and session context:
 
 ```json
 {
@@ -272,6 +282,8 @@ gw runs as an MCP server for Claude Code, exposing 28 tools directly (including 
   }
 }
 ```
+
+Key MCP tools: `grove_context` (session snapshot), `grove_git_ship` (commit+push), `grove_git_prep` (preflight), `grove_search` (codebase search), `grove_impact` (file impact analysis), `grove_find_usage`/`grove_find_definition`/`grove_find_routes` (code navigation).
 
 When using the MCP server, all safety restrictions apply automatically.
 
@@ -293,18 +305,25 @@ gw gh pr create --write --title "feat: add feature"
 
 #### Quick Reference
 
-| Task             | Command                              |
-| ---------------- | ------------------------------------ |
-| See all commands | `gw --help`                          |
-| Database help    | `gw db --help`                       |
-| Git help         | `gw git --help`                      |
-| GitHub help      | `gw gh --help`                       |
-| MCP tools list   | `gw mcp tools`                       |
-| Check health     | `gw doctor`                          |
-| Commit + push    | `gw git ship --write -m "type: msg"` |
-| Preflight check  | `gw git prep`                        |
-| Cherry-pick      | `gw git cherry-pick --write <hash>`  |
-| Format code      | `gw fmt`                             |
+| Task                | Command                                   |
+| ------------------- | ----------------------------------------- |
+| Session snapshot    | `gw context` (start every session here)   |
+| See all commands    | `gw --help`                               |
+| Database help       | `gw db --help`                            |
+| Git help            | `gw git --help`                           |
+| GitHub help         | `gw gh --help`                            |
+| MCP tools list      | `gw mcp tools`                            |
+| Check health        | `gw doctor`                               |
+| Commit + push       | `gw git ship --write -a -m "type: msg"`   |
+| PR readiness        | `gw git pr-prep`                          |
+| Preflight check     | `gw git prep`                             |
+| Cherry-pick         | `gw git cherry-pick --write <hash>`       |
+| Format code         | `gw fmt`                                  |
+| CI (changed only)   | `gw ci --affected --fail-fast`            |
+| Batch create issues | `gw gh issue batch --write --from-json f` |
+| Impact analysis     | `gf impact src/lib/auth.ts`               |
+| Find tests for file | `gf test-for src/lib/auth.ts`             |
+| Diff summary        | `gf diff-summary`                         |
 
 ---
 
@@ -340,10 +359,19 @@ gw gh pr create --write --title "feat: add feature"
 
 > **⚠️ MANDATORY:** Use `gw git` commands, not raw git. See the gw section above.
 
-**After completing major changes, you MUST commit your work using gw:**
+**Start every session with context:**
 
 ```bash
-# Stage and commit with conventional commits (enforced by gw)
+gw context                        # One-shot snapshot: branch, changes, packages, TODOs
+```
+
+**After completing major changes, commit your work using gw:**
+
+```bash
+# The fastest path: auto-stage all + format + check + commit + push
+gw git ship --write -a -m "feat(auth): add session refresh"
+
+# Or step by step:
 gw git add --write src/lib/auth.ts
 gw git commit --write -m "feat(auth): add session refresh"
 gw git push --write
@@ -371,12 +399,20 @@ gw git commit --write -m "docs: update README"
 gw git save --write              # Stage all + WIP commit
 gw git sync --write              # Fetch + rebase + push
 gw git wip --write               # WIP commit (skips hooks)
-gw git ship --write -m "type: x" # Format → check → commit → push
+gw git ship --write -a -m "t: x" # Auto-stage + format + check + commit + push
+gw git pr-prep                   # Full PR readiness report
 gw git prep                      # Preflight check (dry run of ship)
 gw git cherry-pick --write <hash> # Cherry-pick commits safely
 ```
 
-> **Preferred workflow:** Use `gw git ship` for everyday commit+push. Use `gw git fast` only as an emergency escape hatch when hooks need bypassing.
+> **Preferred workflow:** Start with `gw context`, use `gw git ship -a` for everyday commit+push, and `gw git pr-prep` before creating PRs. Use `gw git fast` only as an emergency escape hatch when hooks need bypassing.
+
+**Before creating a PR:**
+
+```bash
+gw git pr-prep                   # Checks: commits, diff stats, push status, suggested title
+gw ci --affected --fail-fast     # Run CI only for changed packages
+```
 
 **For complete details:** See `AgentUsage/git_guide.md` and `gw git --help`
 
@@ -751,6 +787,8 @@ validation doesn't use it — you must explicitly whitelist trusted origins.
 
 - **To run tests** → Use `gw test` (auto-detects package from cwd)
 - **To run full CI locally** → Use `gw ci`
+- **CI for changed packages only** → Use `gw ci --affected --fail-fast`
+- **Structured error output on failure** → Use `gw ci --diagnose`
 - **When deciding what to test or reviewing test quality** → Use skill: `grove-testing`
 - **Before writing JavaScript/TypeScript tests** → Use skill: `javascript-testing`
 - **Before writing Python tests** → Use skill: `python-testing`
@@ -1050,5 +1088,5 @@ For in-depth reference beyond what skills provide, see:
 
 ---
 
-_Last updated: 2026-02-10_
+_Last updated: 2026-02-12_
 _Model: Claude Opus 4.6_

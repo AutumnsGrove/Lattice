@@ -79,6 +79,13 @@ CATEGORIES: Dict[str, Tuple[str, str, List[Tuple[str, str]]]] = {
             ("secret", "Encrypted secrets vault"),
         ],
     ),
+    "agent": (
+        "🤖 Agent Tools",
+        GROVE_COLORS["moss"],
+        [
+            ("context", "Work session snapshot (start here)"),
+        ],
+    ),
     "system": (
         "📊 System & Info",
         GROVE_COLORS["river_cyan"],

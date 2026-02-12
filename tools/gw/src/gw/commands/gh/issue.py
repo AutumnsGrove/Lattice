@@ -503,3 +503,119 @@ def issue_milestones(ctx: click.Context, state: str) -> None:
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")
         raise SystemExit(1)
+
+
+@issue.command("batch")
+@click.option("--write", is_flag=True, help="Confirm write operation")
+@click.option("--from-json", "json_input", help="JSON file path or '-' for stdin")
+@click.pass_context
+def issue_batch(
+    ctx: click.Context,
+    write: bool,
+    json_input: Optional[str],
+) -> None:
+    """Create multiple issues from JSON.
+
+    Accepts a JSON array of issue objects. Each object can have:
+    title (required), body, labels (array), assignees (array), milestone.
+
+    Requires --write flag.
+
+    \\b
+    Examples:
+        gw gh issue batch --write --from-json issues.json
+        echo '[{"title": "Bug: thing"}]' | gw gh issue batch --write --from-json -
+    """
+    import sys
+
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        check_github_safety("issue_create", write_flag=write)
+    except GitHubSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+
+    if not json_input:
+        console.print("[red]--from-json required. Provide a file path or '-' for stdin.[/red]")
+        raise SystemExit(1)
+
+    try:
+        if json_input == "-":
+            raw = sys.stdin.read()
+        else:
+            from pathlib import Path
+            raw = Path(json_input).read_text()
+
+        issues_data = json.loads(raw)
+    except (json.JSONDecodeError, OSError) as e:
+        console.print(f"[red]Failed to read JSON:[/red] {e}")
+        raise SystemExit(1)
+
+    if not isinstance(issues_data, list):
+        console.print("[red]JSON must be an array of issue objects[/red]")
+        raise SystemExit(1)
+
+    for i, item in enumerate(issues_data):
+        if not isinstance(item, dict) or "title" not in item:
+            console.print(f"[red]Issue #{i + 1} missing required 'title' field[/red]")
+            raise SystemExit(1)
+
+    if len(issues_data) > 25:
+        console.print(f"[red]Batch limited to 25 issues (got {len(issues_data)})[/red]")
+        raise SystemExit(1)
+
+    if not output_json:
+        console.print(f"[bold]Creating {len(issues_data)} issues...[/bold]\n")
+
+    created = []
+    batch_errors = []
+
+    try:
+        gh = GitHub()
+
+        for item in issues_data:
+            title = item["title"]
+            body = item.get("body", "")
+            labels = item.get("labels")
+            assignees = item.get("assignees")
+            milestone = item.get("milestone")
+
+            try:
+                result = gh.issue_create(
+                    title=title,
+                    body=body,
+                    labels=labels,
+                    assignees=assignees,
+                    milestone=milestone,
+                )
+                created.append({
+                    "number": result.number,
+                    "title": title,
+                    "url": result.url,
+                })
+                if not output_json:
+                    console.print(f"  [green]>[/green] #{result.number}: {title}")
+            except GitHubError as e:
+                batch_errors.append({"title": title, "error": e.message})
+                if not output_json:
+                    console.print(f"  [red]x[/red] {title}: {e.message}")
+
+    except GitHubError as e:
+        console.print(f"[red]GitHub error:[/red] {e.message}")
+        raise SystemExit(1)
+
+    if output_json:
+        console.print(json.dumps({
+            "created": created,
+            "errors": batch_errors,
+            "total": len(issues_data),
+            "success_count": len(created),
+            "error_count": len(batch_errors),
+        }, indent=2))
+    else:
+        console.print(f"\n[bold]Created {len(created)}/{len(issues_data)} issues[/bold]")
+        if batch_errors:
+            console.print(f"[red]{len(batch_errors)} failed[/red]")

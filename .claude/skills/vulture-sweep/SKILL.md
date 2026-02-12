@@ -34,7 +34,7 @@ CIRCLE → SPOT → DESCEND → CLEAN → REPORT
 
 ### Phase 1: CIRCLE
 
-*The vulture rises on thermal currents, patient eyes scanning the landscape below...*
+_The vulture rises on thermal currents, patient eyes scanning the landscape below..._
 
 Survey the entire issue board:
 
@@ -46,6 +46,7 @@ gh issue list --repo AutumnsGrove/GroveEngine --state open --limit 200 --json nu
 ```
 
 **Build the mental map:**
+
 - Group by age (>90 days old = potential decay)
 - Group by labels (component clusters)
 - Group by keywords in titles (similar work patterns)
@@ -65,12 +66,13 @@ gh issue list --repo AutumnsGrove/GroveEngine --state open --limit 200 --json nu
 
 ### Phase 2: SPOT
 
-*Sharp eyes catch movement. Something dead lies in the grass...*
+_Sharp eyes catch movement. Something dead lies in the grass..._
 
 Identify candidates for cleanup:
 
 **Category 1: Likely Implemented (Dead)**
 Look for signals that work may be done:
+
 - Old issues with recent related commits
 - Issues mentioning features that now exist
 - Bug reports for bugs that may be fixed
@@ -78,6 +80,7 @@ Look for signals that work may be done:
 
 **Category 2: Stale/Outdated (Decaying)**
 Look for signals of irrelevance:
+
 - References to deprecated technology
 - Issues about removed features
 - Problems that no longer apply to current architecture
@@ -85,6 +88,7 @@ Look for signals of irrelevance:
 
 **Category 3: Fragmented (Scattered Bones)**
 Look for consolidation opportunities:
+
 - Multiple issues about the same component
 - Overlapping acceptance criteria
 - Issues that are subtasks of a larger effort
@@ -96,19 +100,22 @@ Look for consolidation opportunities:
 ## Candidates Spotted
 
 ### Likely Implemented
-| # | Title | Age | Signal |
-|---|-------|-----|--------|
+
+| #    | Title                | Age  | Signal                    |
+| ---- | -------------------- | ---- | ------------------------- |
 | #234 | Add dark mode toggle | 120d | Feature exists in Foliage |
-| #267 | Fix login redirect | 85d | Recent auth commits |
+| #267 | Fix login redirect   | 85d  | Recent auth commits       |
 
 ### Potentially Stale
-| # | Title | Age | Signal |
-|---|-------|-----|--------|
+
+| #    | Title                 | Age  | Signal         |
+| ---- | --------------------- | ---- | -------------- |
 | #189 | Update webpack config | 200d | Now using Vite |
 
 ### Consolidation Candidates
-| Issues | Theme | Recommendation |
-|--------|-------|----------------|
+
+| Issues           | Theme               | Recommendation            |
+| ---------------- | ------------------- | ------------------------- |
 | #301, #305, #312 | Accessibility fixes | Combine into "A11y audit" |
 ```
 
@@ -118,24 +125,25 @@ Look for consolidation opportunities:
 
 ### Phase 3: DESCEND
 
-*The vulture folds its wings and drops, examining closely what it found from above...*
+_The vulture folds its wings and drops, examining closely what it found from above..._
 
 Verify each candidate in the codebase:
 
 **For "Likely Implemented" candidates:**
 
 ```bash
-# Search for implementation evidence
-grep -r "darkMode" src/ --include="*.ts" --include="*.svelte"
-glob "**/dark-mode*.{ts,svelte}"
-glob "**/theme*.{ts,svelte}"
+# Grove Find — verify implementation exists
+gf --agent search "darkMode"          # Does the feature exist in code?
+gf --agent search "ThemeToggle"       # Find the component
+gf --agent func "toggleDarkMode"      # Find the function
 
-# Check git history
+# Check git history for evidence
 git log --oneline --all --grep="dark mode" -10
 git log --oneline --all -- "src/lib/stores/theme*"
 ```
 
 **Verification Checklist:**
+
 - [ ] Core functionality exists in code
 - [ ] No TODO comments indicating incomplete work
 - [ ] Tests pass (if applicable)
@@ -143,14 +151,15 @@ git log --oneline --all -- "src/lib/stores/theme*"
 
 **Verification Outcomes:**
 
-| Outcome | Evidence Required | Action |
-|---------|-------------------|--------|
-| Fully Done | Code exists, tests pass, feature works | Close with detailed comment |
-| Partially Done | Some code exists, more needed | Keep open, update description |
-| Not Started | No evidence found | Keep open |
-| Obsolete | Feature no longer relevant | Close as "won't do" with explanation |
+| Outcome        | Evidence Required                      | Action                               |
+| -------------- | -------------------------------------- | ------------------------------------ |
+| Fully Done     | Code exists, tests pass, feature works | Close with detailed comment          |
+| Partially Done | Some code exists, more needed          | Keep open, update description        |
+| Not Started    | No evidence found                      | Keep open                            |
+| Obsolete       | Feature no longer relevant             | Close as "won't do" with explanation |
 
 **For "Fragmented" candidates:**
+
 - Read all related issues
 - Identify the unifying theme
 - Draft consolidated issue description
@@ -162,11 +171,21 @@ git log --oneline --all -- "src/lib/stores/theme*"
 
 ### Phase 4: CLEAN
 
-*The vulture consumes what is dead, leaving the ecosystem healthier...*
+_The vulture consumes what is dead, leaving the ecosystem healthier..._
 
 Execute the cleanup:
 
-**Closing Implemented Issues:**
+**Grove Tools for bulk cleanup:**
+
+```bash
+# Single issue close
+gw gh issue close --write NUMBER --comment "Verified complete — evidence in src/lib/..."
+
+# Bulk operations — close multiple verified issues at once
+gw gh issue batch --write --close 234,267,289 --comment "Vulture sweep: verified implemented"
+```
+
+**Closing Implemented Issues (with detailed comments):**
 
 ```bash
 gh issue close NUMBER --comment "$(cat <<'EOF'
@@ -246,7 +265,7 @@ gh issue close 312 --comment "🦅 Consolidated into #NEW_NUMBER"
 
 ### Phase 5: REPORT
 
-*The vulture rises again, circling once more to survey the cleaner landscape...*
+_The vulture rises again, circling once more to survey the cleaner landscape..._
 
 Report the sweep results:
 
@@ -255,53 +274,54 @@ Report the sweep results:
 
 ## Summary
 
-| Action | Count |
-|--------|-------|
-| Issues Closed (Implemented) | 7 |
-| Issues Closed (Obsolete) | 3 |
-| Consolidations Created | 2 |
-| Issues Kept (Verified Incomplete) | 5 |
+| Action                            | Count |
+| --------------------------------- | ----- |
+| Issues Closed (Implemented)       | 7     |
+| Issues Closed (Obsolete)          | 3     |
+| Consolidations Created            | 2     |
+| Issues Kept (Verified Incomplete) | 5     |
 
 ## Issues Closed as Implemented
 
-| # | Title | Evidence |
-|---|-------|----------|
-| #234 | Add dark mode toggle | Feature in theme.ts |
-| #267 | Fix login redirect | Verified in auth flow |
-| #289 | Add loading states | Skeleton components exist |
-| ... | ... | ... |
+| #    | Title                | Evidence                  |
+| ---- | -------------------- | ------------------------- |
+| #234 | Add dark mode toggle | Feature in theme.ts       |
+| #267 | Fix login redirect   | Verified in auth flow     |
+| #289 | Add loading states   | Skeleton components exist |
+| ...  | ...                  | ...                       |
 
 ## Issues Closed as Obsolete
 
-| # | Title | Reason |
-|---|-------|--------|
-| #189 | Update webpack config | Migrated to Vite |
-| #201 | Fix IE11 support | IE11 no longer supported |
-| #215 | Update Node 14 deps | Now on Node 20 |
+| #    | Title                 | Reason                   |
+| ---- | --------------------- | ------------------------ |
+| #189 | Update webpack config | Migrated to Vite         |
+| #201 | Fix IE11 support      | IE11 no longer supported |
+| #215 | Update Node 14 deps   | Now on Node 20           |
 
 ## Consolidations
 
-| New Issue | Absorbed | Theme |
-|-----------|----------|-------|
-| #534 | #301, #305, #312 | Accessibility |
-| #535 | #298, #303 | Mobile navigation |
+| New Issue | Absorbed         | Theme             |
+| --------- | ---------------- | ----------------- |
+| #534      | #301, #305, #312 | Accessibility     |
+| #535      | #298, #303       | Mobile navigation |
 
 ## Remaining Cleanup Opportunities
 
 These issues may need attention but require human decision:
+
 - #245 "Improve performance" — too vague to verify
 - #278 "Consider alternative auth" — needs design decision
 - #291 "Maybe add feature X" — unclear if still wanted
 
 ## Backlog Health
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Open Issues | 87 | 72 |
-| Average Age | 95 days | 67 days |
-| Issues > 180 days | 12 | 3 |
+| Metric            | Before  | After   |
+| ----------------- | ------- | ------- |
+| Open Issues       | 87      | 72      |
+| Average Age       | 95 days | 67 days |
+| Issues > 180 days | 12      | 3       |
 
-*The carrion is cleared. The forest breathes easier.*
+_The carrion is cleared. The forest breathes easier._
 ```
 
 ---
@@ -309,19 +329,25 @@ These issues may need attention but require human decision:
 ## Vulture Rules
 
 ### Patience
+
 Circle first. Never swoop without surveying. The full picture matters.
 
 ### Verification
+
 **Always verify before closing.** The vulture's reputation depends on accuracy. Never close an issue without codebase evidence that it's truly complete or obsolete.
 
 ### Respect
-Close with detailed comments. The original reporter deserves to know *why* their issue is being closed and *what* was found.
+
+Close with detailed comments. The original reporter deserves to know _why_ their issue is being closed and _what_ was found.
 
 ### Consolidation Over Fragmentation
+
 When you find scattered related issues, consolidate them. One clear issue beats five overlapping ones.
 
 ### Communication
+
 Use sweep metaphors:
+
 - "Circling the board..." (surveying)
 - "Spotting candidates..." (identifying)
 - "Descending to verify..." (checking codebase)
@@ -333,6 +359,7 @@ Use sweep metaphors:
 ## Anti-Patterns
 
 **The vulture does NOT:**
+
 - Close issues without codebase verification
 - Assume something is done because it's old
 - Touch issues marked "in progress" or assigned
@@ -369,31 +396,34 @@ Use sweep metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Approach |
-|-----------|----------|
-| Issue clearly done | Verify in code, close with evidence |
-| Issue partially done | Keep open, update description with findings |
-| Issue obsolete | Close as "not planned" with explanation |
-| Multiple related issues | Consolidate into one, close originals with reference |
-| Issue vague/unclear | Keep open, flag for human review |
-| Issue has assignee | Skip (someone's working on it) |
-| Recent issue (< 30 days) | Skip unless clearly implemented |
+| Situation                | Approach                                             |
+| ------------------------ | ---------------------------------------------------- |
+| Issue clearly done       | Verify in code, close with evidence                  |
+| Issue partially done     | Keep open, update description with findings          |
+| Issue obsolete           | Close as "not planned" with explanation              |
+| Multiple related issues  | Consolidate into one, close originals with reference |
+| Issue vague/unclear      | Keep open, flag for human review                     |
+| Issue has assignee       | Skip (someone's working on it)                       |
+| Recent issue (< 30 days) | Skip unless clearly implemented                      |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Sweeping:**
+
 - `bloodhound-scout` — If you need to understand the codebase first
 
 **During Sweeping:**
+
 - `bee-collect` — If you find new work that needs issues
 - `badger-triage` — If remaining issues need organizing
 
 **After Sweeping:**
+
 - `owl-archive` — To document any patterns discovered
 - `gathering-planning` — If cleanup revealed planning needs
 
 ---
 
-*Nature's cleanup crew. Patient, thorough, necessary.* 🦅
+_Nature's cleanup crew. Patient, thorough, necessary._ 🦅

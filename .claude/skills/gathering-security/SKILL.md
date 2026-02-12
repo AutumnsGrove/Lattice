@@ -20,6 +20,21 @@ The drum echoes in the shadows. The Spider weaves intricate webs of authenticati
 
 ---
 
+## Grove Tools for This Gathering
+
+Use `gw` and `gf` throughout. Quick reference for security work:
+
+```bash
+# Find security-relevant code patterns
+gf --agent search "sanitize|escape|validate"  # Security patterns
+gf --agent auth                     # Find auth code and middleware
+
+# Verify security changes don't break anything
+gw ci --affected --diagnose         # Run CI on affected packages
+```
+
+---
+
 ## The Gathering
 
 ```
@@ -39,11 +54,12 @@ Request   Animals      Work        Check       Hardened
 
 ### Phase 1: SUMMON
 
-*The drum sounds. The shadows shift...*
+_The drum sounds. The shadows shift..._
 
 Receive and parse the request:
 
 **Clarify the Security Work:**
+
 - Adding new auth provider? (OAuth, SSO)
 - Securing routes and APIs?
 - General security audit?
@@ -53,6 +69,7 @@ Receive and parse the request:
 
 **Error Codes as Security Posture:**
 All errors MUST use Signpost codes — this is a security requirement, not just a convention:
+
 - All server errors use codes from the appropriate catalog (`API_ERRORS`, `AUTH_ERRORS`, etc.)
 - `userMessage` is always generic and warm — no technical details leak to clients
 - `adminMessage` is detailed — stays in server logs only
@@ -60,9 +77,11 @@ All errors MUST use Signpost codes — this is a security requirement, not just 
 - `logGroveError()` for all server errors — never `console.error` alone
 
 **Scope Check:**
+
 > "I'll mobilize a security gathering for: **[security work]**
 >
 > This will involve:
+>
 > - 🕷️ Spider weaving authentication
 >   - OAuth/PKCE flow
 >   - Session management
@@ -85,19 +104,19 @@ All errors MUST use Signpost codes — this is a security requirement, not just 
 **Selective Mobilization:**
 Not every gathering needs all three animals:
 
-| Situation | Animals Needed |
-|-----------|---------------|
-| New auth system + full security | All three: Spider → Raccoon → Turtle |
-| Auth already exists, need hardening | Raccoon → Turtle |
-| New feature, ensure secure by design | Turtle only (or Turtle → Raccoon) |
-| Secrets leak / incident response | Raccoon → Spider (rotate creds) → Turtle (verify) |
-| Pre-production deploy | Raccoon → Turtle |
+| Situation                            | Animals Needed                                    |
+| ------------------------------------ | ------------------------------------------------- |
+| New auth system + full security      | All three: Spider → Raccoon → Turtle              |
+| Auth already exists, need hardening  | Raccoon → Turtle                                  |
+| New feature, ensure secure by design | Turtle only (or Turtle → Raccoon)                 |
+| Secrets leak / incident response     | Raccoon → Spider (rotate creds) → Turtle (verify) |
+| Pre-production deploy                | Raccoon → Turtle                                  |
 
 ---
 
 ### Phase 2: ORGANIZE
 
-*The animals take their positions in the shadows...*
+_The animals take their positions in the shadows..._
 
 Dispatch in sequence:
 
@@ -112,6 +131,7 @@ Auth       Secrets     Defenses
 ```
 
 **Dependencies:**
+
 - Spider must complete before Raccoon (needs auth to audit)
 - Raccoon should complete before Turtle (clean first, then harden)
 - May iterate: Turtle findings → Spider/Raccoon fixes → Turtle re-verify
@@ -143,6 +163,7 @@ Auth       Secrets     Defenses
 ```
 
 **Iteration Rules:**
+
 - Turtle finds auth vulnerability → Spider patches → Turtle re-verifies
 - Turtle finds non-auth vulnerability → Fix directly → Turtle re-verifies
 - Raccoon finds secrets → Raccoon cleans → Turtle verifies no residual exposure
@@ -154,7 +175,7 @@ Auth       Secrets     Defenses
 
 ### Phase 3: EXECUTE
 
-*The web is woven. The audit begins. The shell hardens...*
+_The web is woven. The audit begins. The shell hardens..._
 
 Execute each animal's phase:
 
@@ -283,7 +304,7 @@ Output:
 
 ### Phase 4: VALIDATE
 
-*The web holds. The audit confirms. The shell endures...*
+_The web holds. The audit confirms. The shell endures..._
 
 **Validation Checklist:**
 
@@ -339,7 +360,7 @@ Hardening:
 
 ### Phase 5: COMPLETE
 
-*The gathering ends. The forest is fortified...*
+_The gathering ends. The forest is fortified..._
 
 **Completion Report:**
 
@@ -349,15 +370,18 @@ Hardening:
 ### Security Work: [Description]
 
 ### Animals Mobilized
+
 🕷️ Spider → 🦝 Raccoon → 🐢 Turtle
 
 ### Authentication Implemented
+
 - **Provider:** [OAuth 2.0 / GitHub / Google / etc.]
 - **Flow:** [PKCE / Authorization Code]
 - **Session Type:** [Token / Session Cookie]
 - **Routes Protected:** [count]
 
 ### Security Audit Results
+
 - Secrets found: [count] (all rotated/removed)
 - Dependencies patched: [count]
 - Dead code removed: [lines]
@@ -365,51 +389,54 @@ Hardening:
 
 ### Hardening Applied
 
-| Defense Layer | Status | Details |
-|---------------|--------|---------|
-| Input Validation | [PASS/FAIL] | Zod schemas on all endpoints |
-| Output Encoding | [PASS/FAIL] | Context-aware, DOMPurify for rich text |
-| SQL Injection | [PASS/FAIL] | All queries parameterized |
-| Security Headers | [PASS/FAIL] | CSP, HSTS, X-Frame, etc. |
-| CORS | [PASS/FAIL] | Exact origin allowlist |
-| Session Security | [PASS/FAIL] | HttpOnly, Secure, SameSite |
-| CSRF Protection | [PASS/FAIL] | Tokens + SameSite |
-| Rate Limiting | [PASS/FAIL] | Per-endpoint limits configured |
-| Multi-Tenant | [PASS/FAIL/N/A] | Tenant scoping verified |
-| File Uploads | [PASS/FAIL/N/A] | Type/size/rename enforced |
+| Defense Layer    | Status          | Details                                |
+| ---------------- | --------------- | -------------------------------------- |
+| Input Validation | [PASS/FAIL]     | Zod schemas on all endpoints           |
+| Output Encoding  | [PASS/FAIL]     | Context-aware, DOMPurify for rich text |
+| SQL Injection    | [PASS/FAIL]     | All queries parameterized              |
+| Security Headers | [PASS/FAIL]     | CSP, HSTS, X-Frame, etc.               |
+| CORS             | [PASS/FAIL]     | Exact origin allowlist                 |
+| Session Security | [PASS/FAIL]     | HttpOnly, Secure, SameSite             |
+| CSRF Protection  | [PASS/FAIL]     | Tokens + SameSite                      |
+| Rate Limiting    | [PASS/FAIL]     | Per-endpoint limits configured         |
+| Multi-Tenant     | [PASS/FAIL/N/A] | Tenant scoping verified                |
+| File Uploads     | [PASS/FAIL/N/A] | Type/size/rename enforced              |
 
 ### Exotic Attack Vectors Tested
 
-| Vector | Status |
-|--------|--------|
+| Vector              | Status        |
+| ------------------- | ------------- |
 | Prototype Pollution | [CLEAR/FOUND] |
-| Timing Attacks | [CLEAR/FOUND] |
-| Race Conditions | [CLEAR/FOUND] |
-| ReDoS | [CLEAR/FOUND] |
-| SSRF | [CLEAR/FOUND] |
-| Unicode Attacks | [CLEAR/FOUND] |
-| Cache Poisoning | [CLEAR/FOUND] |
-| SVG XSS | [CLEAR/FOUND] |
+| Timing Attacks      | [CLEAR/FOUND] |
+| Race Conditions     | [CLEAR/FOUND] |
+| ReDoS               | [CLEAR/FOUND] |
+| SSRF                | [CLEAR/FOUND] |
+| Unicode Attacks     | [CLEAR/FOUND] |
+| Cache Poisoning     | [CLEAR/FOUND] |
+| SVG XSS             | [CLEAR/FOUND] |
 
 ### Defense-in-Depth Compliance
+
 - **Layers verified:** [X/5] (Network, Application, Data, Infrastructure, Process)
 - **Critical functions with 2+ layers:** [X/Y]
 
 ### Vulnerabilities Found & Fixed
-| Severity | Count | Status |
-|----------|-------|--------|
-| CRITICAL | [n] | All fixed |
-| HIGH | [n] | All fixed |
-| MEDIUM | [n] | [fixed/accepted] |
-| LOW | [n] | [fixed/deferred] |
+
+| Severity | Count | Status           |
+| -------- | ----- | ---------------- |
+| CRITICAL | [n]   | All fixed        |
+| HIGH     | [n]   | All fixed        |
+| MEDIUM   | [n]   | [fixed/accepted] |
+| LOW      | [n]   | [fixed/deferred] |
 
 ### Files Created/Modified
+
 - Auth routes: [files]
 - Middleware: [files]
 - Configuration: [files]
 - Security tests: [files]
 
-*Woven tight, audited clean, hardened deep — the forest endures.* 🌲
+_Woven tight, audited clean, hardened deep — the forest endures._ 🌲
 ```
 
 ---
@@ -437,15 +464,15 @@ Hardening:
 
 ## Quick Decision Guide
 
-| Situation | Animals to Mobilize |
-|-----------|-------------------|
-| New auth + full security | Spider → Raccoon → Turtle |
-| Auth exists, need deep hardening | Raccoon → Turtle |
-| New feature, secure by design | Turtle (optionally + Raccoon) |
-| Incident response | Raccoon → Spider → Turtle |
-| Pre-production deploy | Raccoon → Turtle |
-| Auth-only work | Spider → Raccoon (no Turtle needed) |
+| Situation                        | Animals to Mobilize                 |
+| -------------------------------- | ----------------------------------- |
+| New auth + full security         | Spider → Raccoon → Turtle           |
+| Auth exists, need deep hardening | Raccoon → Turtle                    |
+| New feature, secure by design    | Turtle (optionally + Raccoon)       |
+| Incident response                | Raccoon → Spider → Turtle           |
+| Pre-production deploy            | Raccoon → Turtle                    |
+| Auth-only work                   | Spider → Raccoon (no Turtle needed) |
 
 ---
 
-*Woven tight, audited clean, hardened deep — the forest endures.* 🌲
+_Woven tight, audited clean, hardened deep — the forest endures._ 🌲

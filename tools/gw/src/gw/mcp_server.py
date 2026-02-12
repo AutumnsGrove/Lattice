@@ -25,6 +25,7 @@ Claude Code settings.json:
 import json
 import os
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
@@ -33,7 +34,8 @@ from .config import GWConfig
 from .wrangler import Wrangler, WranglerError
 from .git_wrapper import Git, GitError
 from .gh_wrapper import GitHub, GitHubError
-from .packages import load_monorepo, detect_current_package
+from .packages import load_monorepo, detect_current_package, find_monorepo_root
+from .commands.context import _get_affected_packages, _count_todos_in_files
 
 # Enable agent mode for all MCP operations
 os.environ["GW_AGENT_MODE"] = "1"
@@ -1114,6 +1116,306 @@ def grove_bindings(
         }, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)})
+
+
+# =============================================================================
+# CONTEXT TOOLS (READ) — Agent-optimized session snapshots
+# =============================================================================
+
+
+@mcp.tool()
+def grove_context() -> str:
+    """Get a one-shot work session snapshot — branch, changes, packages, issues, recent commits.
+
+    This is the first tool an agent should call at session start. Eliminates
+    the need for 3-5 separate commands to orient.
+
+    Returns JSON with: branch, upstream, staged/unstaged/untracked files,
+    affected packages, issue number (from branch), recent commits, TODO count.
+    """
+    try:
+        git = Git()
+        if not git.is_repo():
+            return json.dumps({"error": "Not a git repository"})
+
+        status = git.status()
+        commits = git.log(limit=5)
+        stashes = git.stash_list()
+
+        all_changed = (
+            [path for _, path in status.staged]
+            + [path for _, path in status.unstaged]
+            + status.untracked
+        )
+
+        affected = _get_affected_packages(all_changed)
+        issue = git.extract_issue_from_branch(status.branch)
+
+        root = find_monorepo_root() or Path.cwd()
+        todo_count = _count_todos_in_files(all_changed, root)
+
+        return json.dumps({
+            "branch": status.branch,
+            "upstream": status.upstream,
+            "ahead": status.ahead,
+            "behind": status.behind,
+            "is_clean": status.is_clean,
+            "issue": issue,
+            "staged": [{"status": s, "path": p} for s, p in status.staged],
+            "unstaged": [{"status": s, "path": p} for s, p in status.unstaged],
+            "untracked": status.untracked,
+            "affected_packages": affected,
+            "recent_commits": [
+                {"hash": c.short_hash, "message": c.subject, "author": c.author}
+                for c in commits
+            ],
+            "stash_count": len(stashes),
+            "todos_in_changed_files": todo_count,
+        }, indent=2)
+
+    except GitError as e:
+        return json.dumps({"error": str(e)})
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+# =============================================================================
+# CODEBASE SEARCH TOOLS (READ) — gf capabilities via MCP
+# =============================================================================
+
+
+@mcp.tool()
+def grove_search(pattern: str, file_type: str = "", path: str = "") -> str:
+    """Search the codebase using ripgrep.
+
+    Fast full-text search across all source files, excluding
+    node_modules, dist, build, and lock files.
+
+    Args:
+        pattern: Search pattern (regex supported)
+        file_type: Optional file type filter (ts, svelte, py, css, etc.)
+        path: Optional path to limit search to
+    """
+    import subprocess
+    args = [
+        "rg", "--line-number", "--no-heading", "--smart-case",
+        "--color=never", "--max-count=50",
+        "--glob", "!node_modules", "--glob", "!.git",
+        "--glob", "!dist", "--glob", "!build",
+        "--glob", "!*.lock", "--glob", "!pnpm-lock.yaml",
+    ]
+    if file_type:
+        args.extend(["--type", file_type])
+    args.append(pattern)
+    if path:
+        args.append(path)
+
+    try:
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=30,
+        )
+        output = result.stdout.strip()
+        if not output:
+            return json.dumps({"matches": [], "total": 0})
+
+        matches = []
+        for line in output.split("\n")[:50]:
+            parts = line.split(":", 2)
+            if len(parts) >= 3:
+                matches.append({
+                    "file": parts[0],
+                    "line": int(parts[1]) if parts[1].isdigit() else 0,
+                    "content": parts[2].strip(),
+                })
+        return json.dumps({"matches": matches, "total": len(matches)}, indent=2)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        return json.dumps({"error": "Search failed or timed out"})
+
+
+@mcp.tool()
+def grove_find_usage(name: str) -> str:
+    """Find where a component, function, or module is used (imported/referenced).
+
+    Searches for import statements and direct references across
+    TypeScript, JavaScript, and Svelte files.
+
+    Args:
+        name: Component or function name to find usages of
+    """
+    import subprocess
+    args = [
+        "rg", "--line-number", "--no-heading", "--smart-case",
+        "--color=never", "--max-count=30",
+        "--glob", "!node_modules", "--glob", "!.git",
+        "--glob", "!dist", "--glob", "!build",
+        "--type", "ts", "--type", "svelte",
+        name,
+    ]
+    try:
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=30,
+        )
+        output = result.stdout.strip()
+        if not output:
+            return json.dumps({"usages": [], "total": 0})
+
+        usages = []
+        for line in output.split("\n")[:30]:
+            parts = line.split(":", 2)
+            if len(parts) >= 3:
+                usages.append({
+                    "file": parts[0],
+                    "line": int(parts[1]) if parts[1].isdigit() else 0,
+                    "content": parts[2].strip(),
+                })
+        return json.dumps({"name": name, "usages": usages, "total": len(usages)}, indent=2)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        return json.dumps({"error": "Search failed or timed out"})
+
+
+@mcp.tool()
+def grove_find_definition(name: str) -> str:
+    """Find class, function, or type definitions by name.
+
+    Searches for definition patterns: class Name, function name,
+    const name, export function name, interface Name, type Name.
+
+    Args:
+        name: Name to find the definition of
+    """
+    import subprocess
+    patterns = [
+        f"(class|interface|type|enum)\\s+{re.escape(name)}",
+        f"(export\\s+)?(function|const|let|var)\\s+{re.escape(name)}",
+        f"export\\s+default\\s+(class|function)\\s+{re.escape(name)}",
+    ]
+    combined_pattern = "|".join(f"({p})" for p in patterns)
+
+    args = [
+        "rg", "--line-number", "--no-heading", "--smart-case",
+        "--color=never", "--max-count=20",
+        "--glob", "!node_modules", "--glob", "!.git",
+        "--glob", "!dist", "--glob", "!*.test.*", "--glob", "!*.spec.*",
+        combined_pattern,
+    ]
+    try:
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=30,
+        )
+        output = result.stdout.strip()
+        if not output:
+            return json.dumps({"definitions": [], "total": 0})
+
+        definitions = []
+        for line in output.split("\n")[:20]:
+            parts = line.split(":", 2)
+            if len(parts) >= 3:
+                definitions.append({
+                    "file": parts[0],
+                    "line": int(parts[1]) if parts[1].isdigit() else 0,
+                    "content": parts[2].strip(),
+                })
+        return json.dumps({"name": name, "definitions": definitions, "total": len(definitions)}, indent=2)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        return json.dumps({"error": "Search failed or timed out"})
+
+
+@mcp.tool()
+def grove_find_routes(pattern: str = "") -> str:
+    """Find SvelteKit routes in the codebase.
+
+    Lists route directories and their server/page files.
+    Optionally filter by a pattern.
+
+    Args:
+        pattern: Optional pattern to filter routes
+    """
+    import subprocess
+    args = [
+        "rg", "--files", "--color=never",
+        "--glob", "!node_modules", "--glob", "!.git",
+        "--glob", "**/routes/**/{+page,+layout,+server,+page.server,+layout.server}.*",
+    ]
+    try:
+        result = subprocess.run(
+            args, capture_output=True, text=True, timeout=30,
+        )
+        output = result.stdout.strip()
+        if not output:
+            return json.dumps({"routes": [], "total": 0})
+
+        routes = []
+        for line in output.split("\n"):
+            line = line.strip()
+            if line and (not pattern or pattern.lower() in line.lower()):
+                routes.append(line)
+
+        return json.dumps({"routes": sorted(routes), "total": len(routes)}, indent=2)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        return json.dumps({"error": "Search failed or timed out"})
+
+
+@mcp.tool()
+def grove_impact(file_path: str) -> str:
+    """Analyze the impact of changing a file — who imports it, what tests cover it, which routes use it.
+
+    Args:
+        file_path: Path to the file to analyze (relative to repo root)
+    """
+    import subprocess
+    from pathlib import Path
+
+    stem = Path(file_path).stem
+    results = {"target": file_path, "importers": [], "tests": [], "routes": []}
+
+    # Find importers
+    try:
+        result = subprocess.run(
+            ["rg", "-l", "--color=never", "--type", "ts", "--type", "svelte",
+             "--glob", "!node_modules", "--glob", "!.git",
+             f"(from|import).*{re.escape(stem)}"],
+            capture_output=True, text=True, timeout=30,
+        )
+        for line in result.stdout.strip().split("\n"):
+            line = line.strip()
+            if line and line != file_path:
+                results["importers"].append(line)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        pass
+
+    # Find tests
+    try:
+        result = subprocess.run(
+            ["rg", "-l", "--color=never",
+             "--glob", "*.test.*", "--glob", "*.spec.*",
+             "--glob", "!node_modules", "--glob", "!.git",
+             stem],
+            capture_output=True, text=True, timeout=30,
+        )
+        for line in result.stdout.strip().split("\n"):
+            line = line.strip()
+            if line:
+                results["tests"].append(line)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        pass
+
+    # Find route usage
+    try:
+        result = subprocess.run(
+            ["rg", "-l", "--color=never",
+             "--glob", "**/routes/**",
+             "--glob", "!node_modules", "--glob", "!.git",
+             stem],
+            capture_output=True, text=True, timeout=30,
+        )
+        for line in result.stdout.strip().split("\n"):
+            line = line.strip()
+            if line and line != file_path:
+                results["routes"].append(line)
+    except (subprocess.SubprocessError, subprocess.TimeoutExpired):
+        pass
+
+    return json.dumps(results, indent=2)
 
 
 # =============================================================================

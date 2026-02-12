@@ -30,6 +30,7 @@ Once installed, `gf` and `gw` are available directly — no `uv run` prefix need
 `gf` is a fast codebase search tool. Use `--agent` for clean output (no colors/emoji).
 
 **Key commands:**
+
 - `gf --agent search "pattern"` — Search entire codebase
 - `gf --agent usage "Name"` — Find where a component is used
 - `gf --agent func "name"` — Find function definitions
@@ -39,6 +40,9 @@ Once installed, `gf` and `gw` are available directly — no `uv run` prefix need
 - `gf --agent engine` — Find engine imports
 - `gf --agent todo` — Find TODO/FIXME/HACK comments
 - `gf --agent git churn` — Most frequently changed files
+- `gf impact src/lib/auth.ts` — Impact analysis (importers, tests, routes, packages)
+- `gf test-for src/lib/auth.ts` — Find tests covering a file
+- `gf diff-summary` — Structured diff with per-file stats and categories
 
 Run `gf --help` for full command list.
 
@@ -49,15 +53,22 @@ All `gf` commands work in any environment — when `fd` is not installed, file-t
 `gw` wraps git, GitHub, Cloudflare, and dev tools with safety guards. Write operations require `--write`.
 
 **Key commands:**
+
+- `gw context` — Session snapshot (start every session here)
 - `gw git status` / `gw git log` / `gw git diff` — Safe git reads
 - `gw git commit --write -m "feat: ..."` — Commit (requires `--write`)
 - `gw git push --write` — Push (requires `--write`)
+- `gw git ship --write -a -m "feat: ..."` — Auto-stage + format + check + commit + push
+- `gw git pr-prep` — Full PR readiness report
+- `gw ci --affected --fail-fast` — CI only for changed packages
+- `gw ci --diagnose` — Structured error diagnostics on failure
 - `gw packages list` — List all monorepo packages
 - `gw bindings` — Show all Cloudflare bindings (D1, KV, R2, DO)
 - `gw doctor` — Diagnose environment issues
 - `gw whoami` — Show current auth context
 - `gw d1 tables` / `gw d1 schema <table>` — Database introspection
 - `gw gh pr list` / `gw gh issue list` — GitHub reads
+- `gw gh issue batch --write --from-json f` — Batch create issues from JSON
 
 Run `gw --help` for full command list, `gw <command> --help` for details.
 
@@ -66,33 +77,40 @@ Run `gw --help` for full command list, `gw <command> --help` for details.
 ---
 
 All project instructions, tech stack details, architecture notes, and workflow guidelines are in:
+
 - **`AGENT.md`** - Main project instructions (read this first)
 - **`AgentUsage/`** - Detailed workflow guides and best practices
 - Special Reminder from the user:
-> This site is my authentic voice—warm, introspective, queer, unapologetically building something meaningful; write like you're helping me speak, not perform.
+  > This site is my authentic voice—warm, introspective, queer, unapologetically building something meaningful; write like you're helping me speak, not perform.
 - Reminder from the User for when we Work:
-> Write with the warmth of a midnight tea shop and the clarity of good documentation—this is my space, make it feel like home.
+  > Write with the warmth of a midnight tea shop and the clarity of good documentation—this is my space, make it feel like home.
 
 ---
 
 ## Design Context
 
 ### Users
-Grove serves friends, queer creators, independent writers, and indie web enthusiasts who want their own space online—away from big tech algorithms and extractive platforms. Users arrive seeking refuge: a cozy, authentic place to write, share, and belong. They value ownership, community, and spaces that feel *genuinely* theirs.
+
+Grove serves friends, queer creators, independent writers, and indie web enthusiasts who want their own space online—away from big tech algorithms and extractive platforms. Users arrive seeking refuge: a cozy, authentic place to write, share, and belong. They value ownership, community, and spaces that feel _genuinely_ theirs.
 
 ### Brand Personality
+
 **Warm, introspective, queer.** Grove speaks like a trusted friend who runs a midnight tea shop—never performative, always sincere. The voice is:
+
 - **Welcoming** — Every visitor should feel they've found somewhere safe
 - **Grounded** — Confident without being loud, capable without being corporate
 - **Authentic** — This is your space; we help you speak, not perform
 
 ### Emotional Goals
+
 When someone lands on Grove, they should feel:
+
 1. **Safe refuge** — A cozy shelter from the hostile internet
 2. **Creative sanctuary** — An inspiring space to express freely
 3. **Community belonging** — Part of something bigger, not alone
 
 ### Aesthetic Direction
+
 **Nature-themed glassmorphism with seasonal depth.** The visual language evokes a forest clearing where digital and organic coexist peacefully.
 
 **Core palette:** Grove greens, warm bark browns, soft cream neutrals
@@ -116,4 +134,4 @@ When someone lands on Grove, they should feel:
 
 ---
 
-*This structure aligns with industry-standard agentic coding practices.*
+_This structure aligns with industry-standard agentic coding practices._

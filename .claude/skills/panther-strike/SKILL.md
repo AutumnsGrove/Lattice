@@ -5,7 +5,7 @@ description: Lock in on a single GitHub issue and STRIKE to fix it. High-energy,
 
 # Panther Strike 🐆
 
-The panther doesn't ask permission. It watches. It waits. Then — *swiftness*.
+The panther doesn't ask permission. It watches. It waits. Then — _swiftness_.
 
 Lock onto a single issue. Melt into the shadows. Weave through the branches. Strike with deadly silence. Leave nothing but a clean commit in your wake and the fading echo of a hunt well-had.
 
@@ -26,7 +26,7 @@ Lock onto a single issue. Melt into the shadows. Weave through the branches. Str
 
 ### Phase 1: TARGET
 
-*The panther freezes at the edge of the clearing. Rain-damp leaves. Air thick with scent. Eyes fixed. The prey identified.*
+_The panther freezes at the edge of the clearing. Rain-damp leaves. Air thick with scent. Eyes fixed. The prey identified._
 
 Lock onto the target. Fetch the issue details:
 
@@ -40,7 +40,7 @@ Read it carefully. Understand what draws breath in this forest. Know what "done"
 
 ### Phase 2: SHADOWS
 
-*The great cat slips between the trees, coat dark as the space between stars. The canopy swallows its shape whole...*
+_The great cat slips between the trees, coat dark as the space between stars. The canopy swallows its shape whole..._
 
 Search the codebase for relevant files. Use the issue description as your trail through the undergrowth:
 
@@ -48,13 +48,23 @@ Search the codebase for relevant files. Use the issue description as your trail 
 - Search for related functions/components — distant voices carried on the humid wind
 - Identify the crime scene — where the struggle began, where the code broke open
 
-Use Glob, Grep, and Read tools. Move through the undergrowth without snapping a single twig.
+**Grove Tools (primary investigation):**
+
+```bash
+gw context                    # Orient — see where you are in the grove
+gf --agent search "keyword"  # Track the scent through the codebase
+gf --agent func "name"       # Find the function's den
+gf --agent usage "Name"      # Where does this creature roam?
+gf --agent impact "file"     # What trembles when this tree falls?
+```
+
+Use Glob, Grep, and Read tools as backup. Move through the undergrowth without snapping a single twig.
 
 **Output:** List of files in the strike zone — the hunting ground mapped in darkness.
 
 ### Phase 3: STALK
 
-*The panther crouches low. Muscles coiled like rope. Breath held. Watching. Waiting. The forest holds its breath too...*
+_The panther crouches low. Muscles coiled like rope. Breath held. Watching. Waiting. The forest holds its breath too..._
 
 Read the relevant files. Understand the landscape of the hunt:
 
@@ -69,7 +79,7 @@ Look for root causes, not symptoms. The panther doesn't scratch at leaves — it
 
 ### Phase 4: AMBUSH
 
-*The panther calculates the trajectory. One perfect leap. Air to fill the lungs. No second chances. No hesitation. Just action.*
+_The panther calculates the trajectory. One perfect leap. Air to fill the lungs. No second chances. No hesitation. Just action._
 
 Write a brief, focused plan:
 
@@ -87,7 +97,7 @@ docs/plans/planned/issue-{number}-{slug}.md
 
 ### Phase 5: LEAP
 
-*THE PANTHER LEAPS! CLAWS OUT! Air screams. The forest explodes into motion—*
+_THE PANTHER LEAPS! CLAWS OUT! Air screams. The forest explodes into motion—_
 
 Make the changes with surgical precision:
 
@@ -108,25 +118,21 @@ Use Edit tool for precision. Write tool only for new files.
 
 ### Phase 6: SILENCE
 
-*The grove falls still. A distant branch cracks. Then — nothing. The kill is complete. The panther licks its paws.*
+_The grove falls still. A distant branch cracks. Then — nothing. The kill is complete. The panther licks its paws._
 
-Commit and push:
+Verify the kill is clean:
 
 ```bash
-git add {files} && git commit -m "$(cat <<'EOF'
-fix(component): brief description of fix
-
-[1-2 sentences explaining the root cause and solution]
-
-Fixes #{number}
-Hunted by: {agent_name}
-EOF
-)"
+gw ci --affected --diagnose   # Ensure nothing else bleeds from the strike
 ```
 
-The "Hunted by" trailer lets you trace the panther's path through your git history.
+Commit and push — one motion, one breath:
 
-Push to origin. The forest remembers nothing but the echo of the kill and the fading warmth of fresh tracks in the mud.
+```bash
+gw git ship --write -a -m "fix(component): brief description of fix — Fixes #{number}"
+```
+
+The "Hunted by" trailer lets you trace the panther's path through your git history. The forest remembers nothing but the echo of the kill and the fading warmth of fresh tracks in the mud.
 
 **Output:** Summary table of the hunt:
 
@@ -199,4 +205,4 @@ If this happens, explain what's blocking. Fade back. Don't force a flawed kill. 
 
 ---
 
-*The panther melts back into the shadows. One issue entered the grove. Zero issues leave. The forest inhales. Exhales. And moves on.*
+_The panther melts back into the shadows. One issue entered the grove. Zero issues leave. The forest inhales. Exhales. And moves on._

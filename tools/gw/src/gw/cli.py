@@ -13,6 +13,7 @@ from .commands.metrics import metrics
 from .commands.config_validate import config_validate
 from .commands.env_audit import env_audit
 from .commands.monorepo_size import monorepo_size
+from .commands.context import context
 from .commands.git import git
 from .commands.gh import gh
 from .commands.dev import dev
@@ -165,6 +166,9 @@ main.add_command(metrics)
 main.add_command(config_validate)
 main.add_command(env_audit)
 main.add_command(monorepo_size)
+
+# Agent-optimized commands
+main.add_command(context)
 
 
 if __name__ == "__main__":

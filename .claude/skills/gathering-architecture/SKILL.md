@@ -17,6 +17,26 @@ The drum echoes high in the canopy. The Eagle soars above, seeing the forest's p
 
 ---
 
+## Grove Tools for This Gathering
+
+Use `gw` and `gf` throughout. Quick reference for architecture work:
+
+```bash
+# Orientation — understand the project before designing
+gw context
+
+# Explore the existing architecture
+gf --agent search "pattern"         # Find code patterns
+gf --agent class "ServiceName"      # Find class/component definitions
+gf --agent routes                   # Map route structure
+
+# Understand dependencies and change impact
+gf --agent deps                     # Dependency graph
+gf --agent impact "module"          # Blast radius of changes
+```
+
+---
+
 ## The Gathering
 
 ```
@@ -36,38 +56,43 @@ Request  Animals    Work       Design   Defined
 
 ### Phase 1: SUMMON
 
-*The drum sounds. The canopy rustles...*
+_The drum sounds. The canopy rustles..._
 
 Receive and parse the request:
 
 **Clarify the System:**
+
 - What problem does this solve?
 - What are the scale requirements?
 - What are the constraints?
 - What's the growth trajectory?
 
 **Nature Metaphor:**
+
 > "Every architecture needs a nature metaphor. What does this system resemble?
+>
 > - Heartwood (core that holds everything)
 > - Wisp (gentle guiding light)
 > - Porch (place to gather and talk)
 > - Something else?"
 
 **Confirm:**
+
 > "I'll mobilize an architecture gathering for: **[system description]**
-> 
+>
 > This will involve:
+>
 > - 🦅 Eagle designing the high-level architecture
 > - 🦢 Swan writing the detailed specification
 > - 🐘 Elephant implementing the foundation
-> 
+>
 > Proceed with the gathering?"
 
 ---
 
 ### Phase 2: ORGANIZE
 
-*The birds circle. The elephant waits below...*
+_The birds circle. The elephant waits below..._
 
 Dispatch in sequence:
 
@@ -82,6 +107,7 @@ System    Spec       Foundation
 ```
 
 **Dependencies:**
+
 - Eagle must complete before Swan (needs architecture vision)
 - Swan must complete before Elephant (needs detailed spec)
 
@@ -89,7 +115,7 @@ System    Spec       Foundation
 
 ### Phase 3: EXECUTE
 
-*The architecture takes form from sky to earth...*
+_The architecture takes form from sky to earth..._
 
 Execute each phase:
 
@@ -152,7 +178,7 @@ Artifacts:
 
 ### Phase 4: VALIDATE
 
-*The structure stands. Each animal verifies their work...*
+_The structure stands. Each animal verifies their work..._
 
 **Validation Checklist:**
 
@@ -183,7 +209,7 @@ After Elephant:
 
 ### Phase 5: COMPLETE
 
-*The gathering ends. Architecture stands ready...*
+_The gathering ends. Architecture stands ready..._
 
 **Completion Report:**
 
@@ -193,14 +219,17 @@ After Elephant:
 ### System: [Name]
 
 ### Animals Mobilized
+
 🦅 Eagle → 🦢 Swan → 🐘 Elephant
 
 ### Architecture Decisions
+
 - **Pattern:** [e.g., Event-driven microservices]
 - **Scale Target:** [e.g., 10k concurrent users]
 - **Key Trade-offs:** [summary]
 
 ### Artifacts Created
+
 - Architecture Overview (`docs/architecture/[system].md`)
 - Technical Specification (`docs/specs/[system]-spec.md`)
 - ADRs ([list])
@@ -208,14 +237,16 @@ After Elephant:
 - Base Tests ([location])
 
 ### Ready for
+
 - Feature development on this foundation
 - Team onboarding using the spec
 - Future architecture reviews
 
 ### Time Elapsed
+
 [Duration]
 
-*The forest has a new landmark.* 🌲
+_The forest has a new landmark._ 🌲
 ```
 
 ---
@@ -241,4 +272,4 @@ After Elephant:
 
 ---
 
-*From vision to foundation, the forest grows.* 🌲
+_From vision to foundation, the forest grows._ 🌲

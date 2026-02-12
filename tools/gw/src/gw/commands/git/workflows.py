@@ -26,6 +26,7 @@ from ...safety.git import (
     extract_issue_number,
     validate_conventional_commit,
 )
+from ..context import _get_affected_packages
 
 console = Console()
 
@@ -35,25 +36,6 @@ def _get_staged_file_paths(git: Git) -> list[str]:
     status = git.status()
     return [path for _, path in status.staged]
 
-
-def _get_affected_packages(staged_files: list[str]) -> list[str]:
-    """Determine which packages are affected by staged files.
-
-    Returns package directory names (e.g., ['engine', 'landing']).
-    """
-    packages = set()
-    for filepath in staged_files:
-        # Match packages/<name>/... pattern
-        parts = Path(filepath).parts
-        if len(parts) >= 2 and parts[0] == "packages":
-            packages.add(parts[1])
-        # Match tools/<name>/... pattern
-        elif len(parts) >= 2 and parts[0] == "tools":
-            packages.add(f"tools/{parts[1]}")
-        # Root-level files affect everything
-        elif len(parts) == 1:
-            packages.add("root")
-    return sorted(packages)
 
 
 def _run_format_on_staged(git: Git, output_json: bool) -> tuple[bool, str]:
@@ -163,6 +145,7 @@ def _run_type_check(staged_files: list[str], output_json: bool) -> tuple[bool, s
 @click.option("--issue", type=int, help="Link to issue number")
 @click.option("--no-check", is_flag=True, help="Skip type checking")
 @click.option("--no-format", is_flag=True, help="Skip formatting")
+@click.option("--all", "-a", "stage_all", is_flag=True, help="Auto-stage all changes before shipping")
 @click.argument("remote", default="origin")
 @click.pass_context
 def ship(
@@ -172,6 +155,7 @@ def ship(
     issue: Optional[int],
     no_check: bool,
     no_format: bool,
+    stage_all: bool,
     remote: str,
 ) -> None:
     """Format, check, commit, and push in one step.
@@ -179,14 +163,15 @@ def ship(
     The canonical commit+push workflow. Runs all safety checks before
     committing, then pushes to the current branch.
 
-    Requires --write flag.
+    Requires --write flag. Use -a/--all to auto-stage all changes.
 
     \b
     Steps:
-    1. Format staged files with Prettier
-    2. Type-check affected packages
-    3. Commit with Conventional Commits message
-    4. Push to current branch (auto --set-upstream if new)
+    1. Auto-stage (if --all)
+    2. Format staged files with Prettier
+    3. Type-check affected packages
+    4. Commit with Conventional Commits message
+    5. Push to current branch (auto --set-upstream if new)
 
     \b
     Examples:
@@ -212,11 +197,20 @@ def ship(
             console.print("[red]Not a git repository[/red]")
             raise SystemExit(1)
 
+        # Auto-stage if --all is passed
+        if stage_all:
+            git.add([], all_files=True)
+            if not output_json:
+                console.print("[dim]Auto-staged all changes[/dim]")
+
         # Check for staged changes
         status = git.status()
         if not status.staged:
-            console.print("[yellow]No staged changes to ship[/yellow]")
-            console.print("[dim]Stage changes first: gw git add --write <files>[/dim]")
+            if status.unstaged or status.untracked:
+                console.print("[yellow]No staged changes to ship[/yellow]")
+                console.print("[dim]Use --all / -a to auto-stage, or stage manually: gw git add --write <files>[/dim]")
+            else:
+                console.print("[yellow]Nothing to ship — working directory clean[/yellow]")
             raise SystemExit(1)
 
         config = GitSafetyConfig()
@@ -492,4 +486,165 @@ def prep(ctx: click.Context) -> None:
 
     except GitError as e:
         console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command("pr-prep")
+@click.option("--base", default="main", help="Base branch to compare against")
+@click.pass_context
+def pr_prep(ctx: click.Context, base: str) -> None:
+    """PR preparation report — everything needed to create a great PR.
+
+    Analyzes all changes since branching from base, summarizes affected
+    packages, counts files/lines, checks push status, and suggests
+    a PR title based on commit history.
+
+    This is a READ operation (no --write needed).
+
+    \\b
+    Examples:
+        gw git pr-prep                 # Compare against main
+        gw git pr-prep --base develop  # Compare against develop
+    """
+    import re as _re
+
+    output_json = ctx.obj.get("output_json", False)
+
+    try:
+        git = Git()
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        status = git.status()
+        current_branch = git.current_branch()
+
+        if current_branch == base:
+            msg = f"Already on {base} — switch to a feature branch first"
+            if output_json:
+                console.print(json.dumps({"error": msg}))
+            else:
+                console.print(f"[yellow]{msg}[/yellow]")
+            raise SystemExit(1)
+
+        # Get merge base
+        try:
+            merge_base = git.execute(["merge-base", base, "HEAD"]).strip()
+        except GitError:
+            merge_base = base
+
+        # Get commits since merge base
+        branch_commits = []
+        try:
+            commit_output = git.execute([
+                "log", f"{merge_base}..HEAD",
+                "--format=%h%x00%an%x00%aI%x00%s%x00%x1e",
+            ])
+            for entry in commit_output.split("\x1e"):
+                entry = entry.strip()
+                if not entry:
+                    continue
+                parts = entry.split("\x00")
+                if len(parts) >= 4:
+                    branch_commits.append({
+                        "hash": parts[0],
+                        "author": parts[1],
+                        "date": parts[2],
+                        "message": parts[3],
+                    })
+        except GitError:
+            pass
+
+        # Get diff stats against base
+        try:
+            diff = git.diff(ref=f"{merge_base}...HEAD" if merge_base != base else base, stat_only=True)
+        except GitError:
+            diff = git.diff(stat_only=True)
+
+        # Affected packages from changed files
+        changed_files = [f["path"] for f in diff.files]
+        affected = _get_affected_packages(changed_files)
+
+        # Issue from branch name
+        issue = git.extract_issue_from_branch(current_branch)
+
+        # Issues referenced in commit messages
+        referenced_issues = set()
+        if issue:
+            referenced_issues.add(issue)
+        for c in branch_commits:
+            for m in _re.finditer(r'#(\d+)', c.get("message", "")):
+                referenced_issues.add(int(m.group(1)))
+
+        # Suggest title from first commit or branch name
+        suggested_title = ""
+        if branch_commits:
+            suggested_title = branch_commits[-1]["message"]
+        elif "/" in current_branch:
+            parts = current_branch.split("/", 1)
+            slug = parts[1] if len(parts) > 1 else parts[0]
+            slug = _re.sub(r'^\d+-', '', slug).replace("-", " ").replace("_", " ")
+            suggested_title = f"{parts[0]}: {slug}"
+
+        # Check push status
+        pushed = status.ahead == 0 and status.upstream is not None
+        uncommitted = not status.is_clean
+        ready = pushed and not uncommitted
+
+        if output_json:
+            console.print(json.dumps({
+                "branch": current_branch,
+                "base": base,
+                "commits": len(branch_commits),
+                "files_changed": diff.stats["files_changed"],
+                "insertions": diff.stats["additions"],
+                "deletions": diff.stats["deletions"],
+                "affected_packages": affected,
+                "issues_referenced": sorted(referenced_issues),
+                "suggested_title": suggested_title,
+                "pushed": pushed,
+                "uncommitted": uncommitted,
+                "ready": ready,
+                "ahead": status.ahead,
+            }, indent=2))
+        else:
+            console.print(Panel(
+                f"Branch: [cyan]{current_branch}[/cyan] -> [dim]{base}[/dim]\n"
+                f"Commits: [bold]{len(branch_commits)}[/bold]  |  "
+                f"Files: [bold]{diff.stats['files_changed']}[/bold]  |  "
+                f"[green]+{diff.stats['additions']}[/green] [red]-{diff.stats['deletions']}[/red]\n"
+                f"Packages: {', '.join(affected) if affected else '[dim]none[/dim]'}\n"
+                f"Issues: {', '.join(f'#{i}' for i in sorted(referenced_issues)) if referenced_issues else '[dim]none[/dim]'}",
+                title="[bold]PR Preparation[/bold]",
+                border_style="blue",
+            ))
+
+            console.print()
+            checks = [
+                ("Committed", status.is_clean, "All changes committed" if status.is_clean else "Uncommitted changes exist"),
+                ("Pushed", pushed, "All commits pushed" if pushed else f"{status.ahead} commit(s) not yet pushed"),
+            ]
+            for label, ok, msg in checks:
+                icon = "[green]>[/green]" if ok else "[yellow]~[/yellow]"
+                console.print(f"  {icon} {label}: {msg}")
+
+            if suggested_title:
+                console.print(f"\n[dim]Suggested title:[/dim] [bold]{suggested_title}[/bold]")
+
+            console.print()
+            if ready:
+                console.print("[bold green]Ready to create PR![/bold green]")
+                title_flag = f'--title "{suggested_title}"' if suggested_title else ''
+                console.print(f'[dim]Run: gw gh pr create --write {title_flag}[/dim]')
+            else:
+                if uncommitted:
+                    console.print("[dim]Ship changes first: gw git ship --write -a -m \"...\"[/dim]")
+                elif not pushed:
+                    console.print("[dim]Push first: gw git push --write[/dim]")
+
+    except GitError as e:
+        if output_json:
+            console.print(json.dumps({"error": e.message}))
+        else:
+            console.print(f"[red]Git error:[/red] {e.message}")
         raise SystemExit(1)

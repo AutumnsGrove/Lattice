@@ -17,6 +17,23 @@ The drum echoes through the glade. The Chameleon shifts its colors, painting the
 
 ---
 
+## Grove Tools for This Gathering
+
+Use `gw` and `gf` throughout. Quick reference for UI work:
+
+```bash
+# Find existing UI patterns and components
+gf --agent search "GlassCard|GlassButton"  # Find glass component usage
+gf --agent glass                    # Find glassmorphism patterns
+gf --agent store                    # Find store usage (season, theme)
+gf --agent routes                   # Understand route structure
+
+# Test UI changes
+gw ci --affected                    # Run CI on affected packages
+```
+
+---
+
 ## The Gathering
 
 ```
@@ -35,20 +52,23 @@ Request  Animals    Work       Design   Complete
 
 ### Phase 1: SUMMON
 
-*The drum sounds. The glade awaits...*
+_The drum sounds. The glade awaits..._
 
 Receive and parse the request:
 
 **Clarify the UI Work:**
+
 - What page/component are we designing?
 - What's the emotional tone?
 - Which season should it reflect?
 - What's the content structure?
 
 **Scope Check:**
+
 > "I'll mobilize a UI gathering for: **[UI description]**
-> 
+>
 > This will involve:
+>
 > - 🦎 Chameleon designing with Grove aesthetics
 >   - Glassmorphism containers
 >   - Seasonal colors and themes
@@ -59,14 +79,14 @@ Receive and parse the request:
 >   - Screen reader compatibility
 >   - Color contrast
 >   - Reduced motion support
-> 
+>
 > Proceed with the gathering?"
 
 ---
 
 ### Phase 2: ORGANIZE
 
-*The animals take their positions...*
+_The animals take their positions..._
 
 Dispatch in sequence:
 
@@ -81,6 +101,7 @@ UI             Accessibility
 ```
 
 **Dependencies:**
+
 - Chameleon must complete before Deer (needs UI to audit)
 - May iterate: Deer findings → Chameleon fixes → Deer re-audit
 
@@ -88,7 +109,7 @@ UI             Accessibility
 
 ### Phase 3: EXECUTE
 
-*The glade transforms...*
+_The glade transforms..._
 
 Execute each phase:
 
@@ -171,7 +192,7 @@ Output:
 
 ### Phase 4: VALIDATE
 
-*The design stands. Both animals verify...*
+_The design stands. Both animals verify..._
 
 **Validation Checklist:**
 
@@ -207,7 +228,7 @@ Chameleon completes → Deer audits
 
 ### Phase 5: COMPLETE
 
-*The gathering ends. A welcoming space awaits...*
+_The gathering ends. A welcoming space awaits..._
 
 **Completion Report:**
 
@@ -217,20 +238,24 @@ Chameleon completes → Deer audits
 ### UI: [Name]
 
 ### Animals Mobilized
+
 🦎 Chameleon → 🦌 Deer
 
 ### Design Decisions
+
 - **Season:** [spring/summer/autumn/winter/midnight]
 - **Decoration Level:** [minimal/moderate/full]
 - **Glass Variants Used:** [surface/tint/card/accent]
 
 ### Visual Elements
+
 - Randomized forests: [count] trees
 - Weather effects: [snow/petals/leaves/none]
 - Seasonal birds: [species]
 - Icons: Lucide ([list])
 
 ### Accessibility Features
+
 - Keyboard navigation: ✅
 - Screen reader tested: [VoiceOver/NVDA]
 - Color contrast: ✅ [ratios]
@@ -238,14 +263,16 @@ Chameleon completes → Deer audits
 - Touch targets: ✅ [44px minimum]
 
 ### Files Created
+
 - [Component files]
 - [Style files]
 - [Accessibility documentation]
 
 ### Time Elapsed
+
 [Duration]
 
-*The glade welcomes all wanderers.* 🌲
+_The glade welcomes all wanderers._ 🌲
 ```
 
 ---
@@ -270,4 +297,4 @@ Chameleon completes → Deer audits
 
 ---
 
-*Beautiful and accessible—the forest welcomes all.* 🌲
+_Beautiful and accessible—the forest welcomes all._ 🌲
