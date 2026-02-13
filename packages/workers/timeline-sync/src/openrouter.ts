@@ -76,7 +76,7 @@ export async function callOpenRouter(
         model,
         messages,
         max_tokens: 2048,
-        temperature: 0.5,
+        temperature: 0.7,
       }),
     },
   );
@@ -113,6 +113,34 @@ export async function callOpenRouter(
 }
 
 /**
+ * Strip hallucinated links from AI output.
+ *
+ * The AI sometimes invents URLs for section headers or repos that don't exist.
+ * The Timeline component handles repo linking itself, so we strip all
+ * AI-generated links except those pointing to specific resources.
+ */
+function stripHallucinatedLinks(text: string): string {
+  return text.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    (match, linkText: string, url: string) => {
+      // Keep links to specific resources (commits, PRs, issues, files)
+      const isSpecificResource =
+        /\/(commit|pull|issues|blob|tree|compare|releases)\/[a-zA-Z0-9]/.test(
+          url,
+        );
+      const hasNoSpaces = !/ /.test(url);
+      const isValidUrl = /^https?:\/\//.test(url);
+
+      if (isSpecificResource && hasNoSpaces && isValidUrl) {
+        return match;
+      }
+
+      return linkText;
+    },
+  );
+}
+
+/**
  * Parse AI response into structured summary data.
  */
 export function parseAIResponse(response: string): ParsedAIResponse {
@@ -126,22 +154,30 @@ export function parseAIResponse(response: string): ParsedAIResponse {
 
     const parsed = JSON.parse(jsonStr);
 
-    // Validate gutter items
+    // Validate gutter items and strip hallucinated links from anchors
     const validGutter: GutterComment[] = (parsed.gutter || [])
       .filter(
         (item: { anchor?: string; content?: unknown }) =>
           item.anchor && item.content && typeof item.content === "string",
       )
       .map((item: { anchor: string; type?: string; content: string }) => ({
-        anchor: item.anchor,
+        anchor: stripHallucinatedLinks(item.anchor),
         type: "comment" as const,
         content: item.content.trim(),
       }));
 
+    // Sanitize brief and detailed to remove hallucinated links
+    const brief = stripHallucinatedLinks(
+      parsed.brief || "Worked on a few things today.",
+    );
+    const detailed = stripHallucinatedLinks(
+      parsed.detailed || "## Projects\n\nSome progress was made.",
+    );
+
     return {
       success: true,
-      brief: parsed.brief || "Worked on a few things today.",
-      detailed: parsed.detailed || "## Projects\n\nSome progress was made.",
+      brief,
+      detailed,
       gutter: validGutter,
     };
   } catch (error) {

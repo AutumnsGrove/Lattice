@@ -308,7 +308,7 @@ export function detectContinuation(
 
 /**
  * Format historical context for prompt inclusion.
- * Creates a human-readable summary of recent activity.
+ * Condensed single-line format to minimize token usage.
  */
 export function formatHistoricalContextForPrompt(
   historicalContext: HistoricalContextEntry[],
@@ -317,20 +317,20 @@ export function formatHistoricalContextForPrompt(
     return "";
   }
 
+  // Condensed format: one line per day to save tokens
   const lines = historicalContext.map((ctx) => {
     const brief = ctx.brief;
     const focus = brief?.mainFocus || ctx.briefSummary || "Various work";
     const repos = brief?.repos?.join(", ") || "multiple repos";
-    const loc = brief?.linesChanged || 0;
     const task = ctx.focus?.task || brief?.detectedTask;
+    // Truncate focus to ~80 chars to keep context lean
+    const shortFocus =
+      focus.length > 80 ? focus.substring(0, 77) + "..." : focus;
 
-    return `**${ctx.date}:**
-- Focus: ${focus}
-- Repos: ${repos}
-- Lines changed: ~${loc}${task ? `\n- Detected task: ${task}` : ""}`;
+    return `- ${ctx.date}: ${shortFocus} (${repos}${task ? `, ${task}` : ""})`;
   });
 
-  return lines.join("\n\n");
+  return lines.join("\n");
 }
 
 /**

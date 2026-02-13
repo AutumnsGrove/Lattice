@@ -585,52 +585,77 @@
 
 	/* Detailed Section */
 	.detailed-section {
-		margin-top: 0.75rem;
+		margin-top: 1rem;
+		padding-top: 0.75rem;
+		border-top: 1px dashed var(--bark-400, #a89078);
+	}
+	:global(.dark) .detailed-section {
+		border-top-color: var(--color-border-strong, #444);
 	}
 
-	/* Inline Gutter Comments */
+	/* Inline Gutter Comments — vine-like margin notes with glass effect */
 	.markdown-content :global(.header-gutter-group) {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
-		margin: 0.35rem 0 0.75rem;
+		margin: 0.5rem 0 1rem;
+		padding-left: 0.25rem;
 	}
 	.markdown-content :global(.inline-gutter-comment) {
 		display: inline-flex;
 		align-items: flex-start;
-		gap: 0.35rem;
-		padding: 0.4rem 0.6rem;
-		background: linear-gradient(135deg, #f0f7f0 0%, #e8f5e9 100%);
-		border-left: 2px solid var(--grove-500, #4ade80);
-		border-radius: 0 4px 4px 0;
+		gap: 0.4rem;
+		padding: 0.45rem 0.75rem;
+		background: rgba(74, 222, 128, 0.08);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border-left: 3px solid var(--grove-500, #4ade80);
+		border-radius: 0 8px 8px 0;
 		font-size: 0.8rem;
 		color: #2c5f2d;
-		line-height: 1.35;
+		line-height: 1.4;
 		font-style: italic;
+		box-shadow: 0 1px 4px rgba(44, 95, 45, 0.08);
+		transition: background 0.15s ease;
+	}
+	.markdown-content :global(.inline-gutter-comment:hover) {
+		background: rgba(74, 222, 128, 0.14);
 	}
 	:global(.dark) .markdown-content :global(.inline-gutter-comment) {
-		background: linear-gradient(135deg, var(--cream-200, #3a3a3a) 0%, var(--cream-200, #3a3a3a) 100%);
+		background: rgba(74, 222, 128, 0.06);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
 		border-left-color: var(--grove-500, #4ade80);
-		color: var(--grove-600, #22c55e);
+		color: var(--grove-400, #4ade80);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+	}
+	:global(.dark) .markdown-content :global(.inline-gutter-comment:hover) {
+		background: rgba(74, 222, 128, 0.12);
 	}
 	.markdown-content :global(.inline-gutter-comment svg) {
 		flex-shrink: 0;
 		color: var(--grove-500, #4ade80);
-		opacity: 0.7;
-		margin-top: 0.1rem;
+		opacity: 0.75;
+		margin-top: 0.15rem;
 	}
 
-	/* Detailed Timeline Markdown */
+	/* Detailed Timeline Markdown — glassmorphism container */
 	.detailed-timeline {
-		padding: 1rem;
-		background: var(--cream-200, #f5f5f0);
-		border-radius: 8px;
+		padding: 1.25rem;
+		background: rgba(245, 245, 240, 0.7);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-radius: 12px;
+		border: 1px solid rgba(44, 95, 45, 0.08);
 		font-size: 0.9rem;
 		color: var(--color-foreground, #333);
-		line-height: 1.6;
+		line-height: 1.65;
 	}
 	:global(.dark) .detailed-timeline {
-		background: var(--cream-300, #2a2a2a);
+		background: rgba(42, 42, 42, 0.65);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-color: rgba(74, 222, 128, 0.08);
 		color: var(--bark, #f5f2ea);
 	}
 	.markdown-content :global(h2) {
@@ -647,11 +672,19 @@
 	.markdown-content :global(h3) {
 		font-size: 1rem;
 		color: var(--color-foreground, #333);
-		margin: 1rem 0 0.5rem;
+		margin: 1.25rem 0 0.5rem;
+		padding-top: 0.75rem;
+		border-top: 1px dashed rgba(168, 144, 120, 0.25);
 		font-weight: 600;
+	}
+	.markdown-content :global(h3:first-of-type) {
+		margin-top: 0.5rem;
+		padding-top: 0;
+		border-top: none;
 	}
 	:global(.dark) .markdown-content :global(h3) {
 		color: var(--bark, #f5f2ea);
+		border-top-color: rgba(255, 255, 255, 0.06);
 	}
 	.markdown-content :global(h3 a) {
 		color: #2c5f2d;
@@ -669,23 +702,36 @@
 	}
 	.markdown-content :global(ul) {
 		margin: 0.5rem 0;
-		padding-left: 1.25rem;
+		padding-left: 1.5rem;
+		list-style-type: disc;
 	}
 	.markdown-content :global(li) {
-		margin-bottom: 0.25rem;
+		margin-bottom: 0.4rem;
+		padding-left: 0.25rem;
 		color: var(--color-foreground, #333);
+		line-height: 1.5;
+	}
+	.markdown-content :global(li::marker) {
+		color: var(--grove-500, #4ade80);
 	}
 	:global(.dark) .markdown-content :global(li) {
 		color: var(--bark, #f5f2ea);
 	}
+	:global(.dark) .markdown-content :global(li::marker) {
+		color: var(--grove-500, #4ade80);
+	}
+	/* Paragraphs within the detailed section */
+	.markdown-content :global(p) {
+		margin: 0.5rem 0;
+	}
 	.markdown-content :global(code) {
-		background: var(--color-border-strong, #e0e0e0);
-		padding: 0.15rem 0.35rem;
-		border-radius: 3px;
+		background: rgba(0, 0, 0, 0.06);
+		padding: 0.15rem 0.4rem;
+		border-radius: 4px;
 		font-size: 0.85em;
 	}
 	:global(.dark) .markdown-content :global(code) {
-		background: var(--color-border-strong, #444);
+		background: rgba(255, 255, 255, 0.08);
 	}
 
 	/* Load More */

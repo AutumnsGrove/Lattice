@@ -352,7 +352,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         model: config.openrouter_model,
         tenantApiKey: openrouterKey,
         maxTokens: 2048,
-        temperature: 0.5,
+        temperature: 0.7,
         skipQuota: true, // User pays via their own key
       },
     });

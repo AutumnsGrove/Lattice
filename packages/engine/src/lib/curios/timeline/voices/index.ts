@@ -189,13 +189,13 @@ export function buildVoicedPrompt(
 
   let userPrompt = voice.buildPrompt(commits, date, ownerName);
 
-  // Append long-horizon context if provided
+  // Append long-horizon context if provided (condensed to save tokens)
   if (context) {
     let contextSection = "";
 
     if (context.historicalContext) {
       contextSection += `
-RECENT CONTEXT (for awareness, not recapping):
+RECENT CONTEXT (brief awareness only — do NOT recap these):
 ${context.historicalContext}
 
 `;
@@ -208,9 +208,13 @@ ${context.historicalContext}
     }
 
     // Insert context before the commit list
-    // Most voice prompts have a structure like "...on {date}.\n\nCOMMITS TODAY..."
+    // Voice prompts use either "COMMITS TODAY" or "WHAT HAPPENED" as markers
     const commitsMarker = "COMMITS TODAY";
-    const insertIndex = userPrompt.indexOf(commitsMarker);
+    const whatHappenedMarker = "WHAT HAPPENED";
+    let insertIndex = userPrompt.indexOf(commitsMarker);
+    if (insertIndex <= 0) {
+      insertIndex = userPrompt.indexOf(whatHappenedMarker);
+    }
     if (insertIndex > 0) {
       userPrompt =
         userPrompt.slice(0, insertIndex) +

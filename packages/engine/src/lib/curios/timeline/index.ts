@@ -169,34 +169,39 @@ export interface TimelineActivity {
 // =============================================================================
 
 /**
- * Strip hallucinated GitHub links from AI output.
+ * Strip hallucinated links from AI output.
  *
  * The AI sometimes invents URLs for section headers like:
  * [Sentinel Stress Testing System](https://github.com/AutumnsGrove/Sentinel Stress Testing System)
+ * or creates links to repo roots that don't exist.
  *
- * This function strips fake links while preserving real commit/PR links.
- * Real links have patterns like /commit/abc123 or /pull/123
+ * The Timeline component handles repo linking itself via renderMarkdownWithGutter,
+ * so we aggressively strip all AI-generated links. We only preserve links that:
+ * 1. Point to specific resources (commit, PR, issue, file)
+ * 2. Don't have spaces in the URL (a hallucination giveaway)
  */
 function stripHallucinatedLinks(text: string): string {
-  // Match markdown links to github.com/AutumnsGrove/...
-  const githubLinkPattern =
-    /\[([^\]]+)\]\((https?:\/\/github\.com\/AutumnsGrove\/[^)]+)\)/g;
+  // Strip ALL markdown links, keeping only the link text
+  // The component adds proper repo links; AI-generated ones are unreliable
+  return text.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    (match, linkText: string, url: string) => {
+      // Keep links to specific resources (commits, PRs, issues, files)
+      const isSpecificResource =
+        /\/(commit|pull|issues|blob|tree|compare|releases)\/[a-zA-Z0-9]/.test(
+          url,
+        );
+      const hasNoSpaces = !/ /.test(url);
+      const isValidUrl = /^https?:\/\//.test(url);
 
-  return text.replace(githubLinkPattern, (match, linkText, url) => {
-    // Real links contain: /commit/, /pull/, /issues/, /blob/, /tree/
-    const isRealLink =
-      /\/(commit|pull|issues|blob|tree|compare)\//.test(url) &&
-      // And shouldn't have spaces in the URL (hallucinated links often do)
-      !/ /.test(url);
+      if (isSpecificResource && hasNoSpaces && isValidUrl) {
+        return match; // Keep genuinely useful links
+      }
 
-    if (isRealLink) {
-      return match; // Keep valid links
-    }
-
-    // Strip fake links, keep just the text
-    console.warn(`[Timeline] Stripped hallucinated link: ${url}`);
-    return linkText;
-  });
+      // Strip everything else — repo root links, invented URLs, etc.
+      return linkText;
+    },
+  );
 }
 
 /**
