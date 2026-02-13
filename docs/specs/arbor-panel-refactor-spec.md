@@ -197,38 +197,48 @@ The top-level shell. This is what consumers call. It:
 
 ```typescript
 interface ArborPanelProps {
-  /** Navigation items for the sidebar */
-  navItems: ArborNavItem[];
-  /** Footer links (Help, Support, etc.) */
+  /** Navigation entries for the sidebar (items and optional dividers) */
+  navItems: ArborNavEntry[];
+  /** Footer links (Help, Support, etc.) — used by default footer only */
   footerLinks?: ArborFooterLink[];
-  /** Utility actions in sidebar footer (above footer links) */
-  footerActions?: ArborFooterAction[];
-  /** User info for footer display */
+  /** User info for footer display — used by default footer only */
   user?: { email?: string; name?: string } | null;
   /** Brand title in sidebar header */
   brandTitle?: string;
   /** Whether to show the Grove logo in sidebar header */
   showLogo?: boolean;
-  /** Logout href or callback */
+  /** Logout href or callback — used by default footer only */
   logoutHref?: string;
   onLogout?: () => void;
-  /** Messages to show above content (GroveMessages) */
+  /** Messages to show above content (auto-renders GroveMessages) */
   messages?: ChannelMessage[];
-  /** Whether this is demo mode */
+  /** Whether this is demo mode (shows floating banner) */
   isDemoMode?: boolean;
+  /** Whether to show the leaf pattern background (default: true) */
+  showLeafPattern?: boolean;
   /** Custom snippet for sidebar header (replaces default logo+title) */
   sidebarHeader?: Snippet;
-  /** Custom snippet for sidebar footer (replaces default) */
+  /** Custom snippet for sidebar footer (replaces default user+logout) */
   sidebarFooter?: Snippet;
   /** Content slot */
   children: Snippet;
 }
 ```
 
-#### `ArborNavItem` (type, not a standalone component)
+#### `ArborNavEntry` (union type)
 
 ```typescript
+/** Nav entries can be a link item or a section divider */
+type ArborNavEntry = ArborNavItem | ArborNavDivider;
+
+interface ArborNavDivider {
+  kind: "divider";
+  /** Optional group label (e.g., "Wayfinder Tools") */
+  label?: string;
+}
+
 interface ArborNavItem {
+  kind?: "item"; // Default, can be omitted
   href: string;
   label: string;
   icon?: IconComponent;
@@ -240,8 +250,6 @@ interface ArborNavItem {
   termSlug?: string;
   /** Condition: only show when true (for feature gating) */
   visible?: boolean;
-  /** Callback when clicked (useful for closing sidebar on mobile) */
-  onclick?: () => void;
 }
 ```
 
@@ -507,14 +515,15 @@ The engine route files (`/arbor/+layout.svelte`) become thin wrappers that impor
 ```
 packages/engine/src/lib/ui/components/arbor/
   ├── index.ts               # Barrel exports
-  ├── types.ts               # ArborNavItem, ArborFooterLink, ArborPanelProps
+  ├── types.ts               # ArborNavEntry, ArborNavItem, ArborNavDivider, ArborFooterLink, etc.
   ├── defaults.ts            # Default footer links, default config
   ├── ArborPanel.svelte      # The main shell component
-  ├── ArborSection.svelte    # Section page wrapper
+  ├── ArborSection.svelte    # Section page wrapper (exported)
+  ├── ArborToggle.svelte     # Standalone sidebar toggle button (exported)
   ├── ArborSidebar.svelte    # Internal: sidebar element
   ├── ArborSidebarHeader.svelte   # Internal: header area
   ├── ArborSidebarFooter.svelte   # Internal: footer area
-  ├── ArborNav.svelte        # Internal: nav list
+  ├── ArborNav.svelte        # Internal: nav list (renders items + dividers)
   └── ArborOverlay.svelte    # Internal: mobile overlay
 ```
 
@@ -522,11 +531,17 @@ packages/engine/src/lib/ui/components/arbor/
 
 ```typescript
 // Components
-import { ArborPanel, ArborSection } from "@autumnsgrove/groveengine/ui/arbor";
+import {
+  ArborPanel,
+  ArborSection,
+  ArborToggle,
+} from "@autumnsgrove/groveengine/ui/arbor";
 
 // Types (for TypeScript consumers)
 import type {
+  ArborNavEntry,
   ArborNavItem,
+  ArborNavDivider,
   ArborFooterLink,
   ArborPanelProps,
 } from "@autumnsgrove/groveengine/ui/arbor";
@@ -628,49 +643,113 @@ These pieces from the engine Arbor can be extracted into the component with zero
 
 ---
 
-## 12. Open Questions
+## 12. Design Decisions (Resolved)
 
-### Q1: Should ArborPanel include GroveMessages?
+All design questions have been answered. These are locked in for implementation.
 
-**Option A:** ArborPanel renders `<GroveMessages>` automatically if `messages` prop is provided.
-**Option B:** Consumer renders `<GroveMessages>` in their content area.
+### D1: Built-ins — GroveMessages auto, Toast manual
 
-_Leaning A_ — it's consistent behavior that every Arbor panel would want.
+ArborPanel renders `<GroveMessages>` automatically when a `messages` prop is provided (consistent placement above content in every Arbor panel). `<Toast />` is **not** included — consumers place it themselves since it's a global singleton that may already exist in a parent layout.
 
-### Q2: Should ArborPanel include Toast?
+**Impact on props:** `messages?: ChannelMessage[]` stays. No `toast` prop needed.
 
-**Option A:** ArborPanel renders `<Toast />` (the toast container).
-**Option B:** Consumer handles their own Toast placement.
+### D2: Leaf pattern — baked in with opt-out
 
-_Leaning A_ — engine Arbor already renders `<Toast />` in the layout.
+ArborPanel applies the `.leaf-pattern` background by default. Consumers can pass `showLeafPattern={false}` to disable it. The leaf pattern is part of what makes Arbor feel like Arbor, but some contexts (e.g., a future minimal tool) might want a clean background.
 
-### Q3: Should the leaf pattern background be part of ArborPanel?
+**Impact on props:** `showLeafPattern?: boolean` (default `true`).
 
-The engine Arbor has a `.leaf-pattern` class. Should the component apply this automatically?
+### D3: Header integration — ArborPanel exports a toggle component
 
-_Leaning yes_ — it's part of the Arbor identity. Consumers could opt out with a prop.
+ArborPanel does **not** include its own header. Instead, it exports an `<ArborToggle>` component (or action) that consumers can place inside any existing header. This is the most flexible approach — the landing can drop the toggle into its existing header without replacing it entirely.
 
-### Q4: What about AdminHeader — does it survive?
+The toggle component calls `sidebarStore.toggle()` on mobile and `sidebarStore.toggleCollapse()` on desktop, same as the engine's Chrome Header does today. It renders as a hamburger/menu icon button.
 
-`AdminHeader` still has a use case for truly simple admin tools (3-4 tabs, no sidebar). It shouldn't be removed. But it should no longer be the default for anything called "Arbor."
+**Impact on exports:**
 
-### Q5: Landing footer — should Arbor panel have its own footer component?
+```typescript
+// New export
+export { default as ArborToggle } from "./ArborToggle.svelte";
+```
 
-The engine Arbor has a sidebar footer (user info + links). The landing currently has no footer in its Arbor. Should the landing get the same sidebar footer treatment?
+**Impact on component tree:**
 
-_Yes_ — that's the whole point. The sidebar footer replaces the need for a separate footer component inside Arbor.
+```
+packages/engine/src/lib/ui/components/arbor/
+  ├── ArborToggle.svelte    ← NEW: standalone toggle button for any header
+  └── ... (rest of components)
+```
 
-### Q6: Header integration — does landing need Chrome Header changes?
+### D4: Nav depth — flat with section dividers
 
-The landing currently uses its own Header wrapper. For the sidebar toggle to work, the landing's Arbor routes need `showSidebarToggle={true}` on whatever Header they use. This might require the landing to use a different header on Arbor pages (Chrome Header with sidebar toggle) vs public pages (standard Header).
+Navigation stays flat (no nested/expandable items). But nav items support optional **section dividers** — group labels like "Content", "Settings", "Admin" that visually separate nav items into categories.
 
-The engine already handles this by using the root layout Header with `showSidebarToggle` only when the route is under `/arbor/`. The landing should follow the same pattern.
+This keeps navigation simple while handling the landing's 14+ Wayfinder tabs gracefully. Sub-pages (e.g., Status > Incidents > New Incident) are navigated within the content area; the sidebar highlights the parent section.
 
-### Q7: Sub-navigation within sidebar sections?
+**Impact on types:**
 
-Some Arbor sections have sub-pages (e.g., Garden → New Post, Edit Post; Status → Incidents → New Incident). Should the sidebar support expandable/nested navigation?
+```typescript
+// Nav items can be a link OR a divider
+type ArborNavEntry = ArborNavItem | ArborNavDivider;
 
-_Not in v1_ — keep it flat. Sub-navigation happens within the content area. The sidebar highlights the parent section.
+interface ArborNavDivider {
+  kind: "divider";
+  label?: string; // Optional group label (e.g., "Wayfinder Tools")
+}
+
+interface ArborNavItem {
+  kind?: "item"; // Default, can be omitted
+  href: string;
+  label: string;
+  icon?: IconComponent;
+  badge?: number;
+  showActivity?: boolean;
+  termSlug?: string;
+  visible?: boolean;
+}
+```
+
+**Impact on props:** `navItems` becomes `navItems: ArborNavEntry[]`.
+
+### D5: AdminHeader — deprecate
+
+`AdminHeader` is marked as **deprecated**. Everything should use `ArborPanel` going forward. The component stays in the codebase for now (no breaking removal) but gets a `@deprecated` JSDoc annotation pointing consumers to `ArborPanel`.
+
+If a truly simple 3-tab admin tool comes along, `ArborPanel` with a short nav list is still the right answer — the sidebar collapses gracefully at any scale.
+
+**Impact:** Add `@deprecated` to `AdminHeader.svelte`. No removal in this refactor.
+
+### D6: Sidebar footer — fully customizable via snippet slot
+
+The sidebar footer is a **snippet slot**. Engine and landing each provide their own footer content. ArborPanel provides a `sidebarFooter` snippet prop — if omitted, it renders a sensible default (user email + logout).
+
+This means:
+
+- Engine Arbor provides: user email, Help Center, Get Support, Logout
+- Landing Arbor provides: whatever makes sense for the landing admin (maybe just Logout, maybe links to docs)
+- Future consumers: whatever they need
+
+**Impact on props:**
+
+```typescript
+interface ArborPanelProps {
+  // ...existing props...
+
+  /** Custom sidebar footer content. If omitted, renders default (user email + logout). */
+  sidebarFooter?: Snippet;
+
+  /** Custom sidebar header content. If omitted, renders default (logo + title). */
+  sidebarHeader?: Snippet;
+}
+```
+
+Both `sidebarHeader` and `sidebarFooter` are snippet slots with sensible defaults. The default footer uses `user`, `logoutHref`/`onLogout`, and `footerLinks` props. Custom snippets override the entire section.
+
+### D7: Demo mode banner — built in
+
+ArborPanel renders the demo mode banner when `isDemoMode={true}` is passed. This is engine-specific behavior today, but it's lightweight enough to include in the shared component. Non-demo consumers simply don't pass the prop.
+
+**Impact on props:** `isDemoMode?: boolean` (default `false`). Renders the floating "Demo Mode — Screenshots enabled" banner.
 
 ---
 
