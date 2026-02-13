@@ -18,6 +18,7 @@
 		AlertCircle,
 		CheckCircle2,
 		Clock,
+		ArrowRight,
 	} from 'lucide-svelte';
 	import type { GardenStatusProps } from './types.js';
 	import type { TierKey } from '$lib/config/tiers';
@@ -32,6 +33,7 @@
 		paymentLast4 = '',
 		showDetails = true,
 		onTend,
+		onNurture,
 		class: className = '',
 	}: GardenStatusProps = $props();
 
@@ -69,9 +71,19 @@
 		pruned: { label: 'Ended', color: 'text-gray-600', bg: 'bg-gray-100 dark:bg-gray-900/30' },
 	};
 
+	// Next stage for nurture CTA
+	const nextStage: Record<TierKey, TierKey | null> = {
+		free: 'seedling',
+		seedling: 'sapling',
+		sapling: 'oak',
+		oak: 'evergreen',
+		evergreen: null,
+	};
+
 	let IconComponent = $derived(iconComponents[currentStage] || Sprout);
 	let StateIcon = $derived(stateIcons[flourishState]);
 	let stateInfo = $derived(stateConfig[flourishState]);
+	let canNurture = $derived(nextStage[currentStage] !== null);
 
 	// Format period end date
 	let formattedPeriodEnd = $derived.by(() => {
@@ -150,18 +162,25 @@
 				</div>
 			{/if}
 
-			<!-- Wanderer special case -->
-			{#if currentStage === 'free' && flourishState === 'active'}
+			<!-- Nurture CTA for users who can upgrade -->
+			{#if canNurture && flourishState === 'active'}
 				<div class="mt-2 p-3 rounded-lg bg-grove-50 dark:bg-grove-900/30 text-sm">
 					<p class="text-foreground-muted">
-						Free tier. <button
+						{#if currentStage === 'free'}
+							Free tier.
+						{/if}
+						<button
 							type="button"
-							class="text-accent hover:underline"
-							onclick={() => onTend?.()}
+							class="inline-flex items-center gap-1 text-accent hover:underline"
+							onclick={() => onNurture?.()}
 						>
-							Cultivate to Seedling
+							<Sprout class="w-3.5 h-3.5" />
+							{currentStage === 'free' ? 'Cultivate to Seedling' : 'Nurture your garden'}
+							<ArrowRight class="w-3 h-3" />
 						</button>
-						to unlock more features.
+						{#if currentStage === 'free'}
+							to unlock more features.
+						{/if}
 					</p>
 				</div>
 			{/if}

@@ -15,7 +15,7 @@
   import FeaturesCard from "./FeaturesCard.svelte";
 
   // Import UpgradesGraft components for garden status
-  import { CurrentStageBadge, GardenStatus } from '$lib/grafts/upgrades';
+  import { GardenStatus } from '$lib/grafts/upgrades';
   import type { FlourishState } from '$lib/grafts/upgrades';
 
   // Import types and utils
@@ -266,17 +266,6 @@
   <header class="page-header">
     <h1>Account & Subscription</h1>
     <p class="subtitle">Manage your subscription, billing, and data</p>
-    <!-- Current Stage Badge - shows growth stage with nurture CTA -->
-    <div class="mt-4">
-      <CurrentStageBadge
-        currentStage={data.currentPlan as TierKey}
-        {flourishState}
-        showNurture={true}
-        showTend={true}
-        onNurture={handleNurture}
-        onTend={handleTend}
-      />
-    </div>
   </header>
 
   <!-- Garden Status Overview -->
@@ -289,6 +278,7 @@
     paymentLast4={data.billing?.paymentMethod?.last4 ?? ''}
     showDetails={true}
     onTend={handleTend}
+    onNurture={handleNurture}
     class="mb-6"
   />
 

@@ -162,4 +162,7 @@ export interface GardenStatusProps extends BaseGraftProps {
 
   /** Called when tending is requested */
   onTend?: () => void;
+
+  /** Called when nurture (upgrade) is requested */
+  onNurture?: () => void;
 }
