@@ -118,12 +118,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
-  // Rate limit generation (expensive AI + GitHub API operation)
+  // Rate limit generation (admin-only, tenant pays via BYOK)
+  // Limit is generous since this is an admin endpoint and costs are borne by the tenant
   if (platform?.env?.CACHE_KV) {
     const { response } = await checkRateLimit({
       kv: platform.env.CACHE_KV,
       key: buildRateLimitKey("ai/timeline-generate", user.id),
-      limit: 20,
+      limit: 100,
       windowSeconds: 86400, // 24 hours
       namespace: "ai-ratelimit",
       failClosed: true,

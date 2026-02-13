@@ -236,10 +236,27 @@
             failed: [...generateProgress!.failed, { date, error: errorMsg }],
           };
 
-          // If this is a config/key issue, stop early — every date will fail the same way
+          // Stop early on errors where every subsequent date will fail the same way
           const errorType = result.error as string | undefined;
           if (errorType === "github_token_missing" || errorType === "openrouter_key_missing") {
             toast.error("Configuration issue", { description: errorMsg });
+            break;
+          }
+          if (errorType === "rate_limited") {
+            const retryAfter = result.retryAfter as number | undefined;
+            const waitMsg = retryAfter
+              ? `Rate limit reached. Try again in ${Math.ceil(retryAfter / 60)} minutes.`
+              : "Rate limit reached. Try again later.";
+            toast.error(waitMsg);
+            // Mark remaining dates as failed with the same reason
+            const remaining = dates.slice(dates.indexOf(date) + 1);
+            for (const d of remaining) {
+              generateProgress = {
+                ...generateProgress!,
+                current: generateProgress!.current + 1,
+                failed: [...generateProgress!.failed, { date: d, error: "Skipped (rate limited)" }],
+              };
+            }
             break;
           }
         }
