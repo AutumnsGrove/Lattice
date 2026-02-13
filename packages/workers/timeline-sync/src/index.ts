@@ -14,6 +14,7 @@
 
 import type { Env, GenerationResult } from "./config";
 import { getEnabledTenants, processTenantTimeline } from "./generator";
+import { createSecretsManager } from "./secrets-manager";
 
 export default {
   /**
@@ -135,6 +136,186 @@ export default {
         return Response.json(
           {
             success: false,
+            error: err instanceof Error ? err.message : "Unknown error",
+          },
+          { status: 500 },
+        );
+      }
+    }
+
+    // GET /debug - Diagnostic info for debugging cron and key issues
+    if (request.method === "GET" && url.pathname === "/debug") {
+      try {
+        // Check KEK availability
+        const kekPresent = !!env.GROVE_KEK;
+        const kekLength = env.GROVE_KEK?.length ?? 0;
+
+        // Check DB connectivity
+        let dbConnected = false;
+        let tenantCount = 0;
+        let enabledTenants: Array<{
+          tenantId: string;
+          githubUsername: string;
+          model: string;
+        }> = [];
+
+        try {
+          const tenants = await getEnabledTenants(env.DB);
+          dbConnected = true;
+          tenantCount = tenants.length;
+          enabledTenants = tenants.map((t) => ({
+            tenantId: t.tenantId,
+            githubUsername: t.githubUsername,
+            model: t.openrouterModel,
+          }));
+        } catch (dbErr) {
+          dbConnected = false;
+        }
+
+        // Check SecretsManager initialization
+        let secretsManagerOk = false;
+        let secretsManagerError: string | null = null;
+        const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
+        if (secrets) {
+          secretsManagerOk = true;
+        } else {
+          secretsManagerError = kekPresent
+            ? "SecretsManager creation failed despite KEK being present"
+            : "GROVE_KEK not configured — SecretsManager unavailable";
+        }
+
+        // Check legacy encrypted columns for each tenant
+        const legacyStatus: Record<
+          string,
+          { hasLegacyGithub: boolean; hasLegacyOpenrouter: boolean }
+        > = {};
+        if (dbConnected) {
+          for (const t of enabledTenants) {
+            try {
+              const legacy = await env.DB.prepare(
+                `SELECT github_token_encrypted, openrouter_key_encrypted
+                 FROM timeline_curio_config WHERE tenant_id = ?`,
+              )
+                .bind(t.tenantId)
+                .first<{
+                  github_token_encrypted: string | null;
+                  openrouter_key_encrypted: string | null;
+                }>();
+              legacyStatus[t.tenantId] = {
+                hasLegacyGithub: !!legacy?.github_token_encrypted,
+                hasLegacyOpenrouter: !!legacy?.openrouter_key_encrypted,
+              };
+            } catch {
+              legacyStatus[t.tenantId] = {
+                hasLegacyGithub: false,
+                hasLegacyOpenrouter: false,
+              };
+            }
+          }
+        }
+
+        // For each tenant, check if their secrets exist in the tenant_secrets table
+        const tenantSecretStatus: Array<{
+          tenantId: string;
+          hasGithubSecret: boolean;
+          hasOpenrouterSecret: boolean;
+          hasDEK: boolean;
+          canDecryptGithub: boolean;
+          canDecryptOpenrouter: boolean;
+        }> = [];
+
+        if (dbConnected) {
+          for (const t of enabledTenants) {
+            try {
+              // Check DEK existence
+              const dekRow = await env.DB.prepare(
+                "SELECT encrypted_dek FROM tenants WHERE id = ?",
+              )
+                .bind(t.tenantId)
+                .first<{ encrypted_dek: string | null }>();
+
+              // Check secret rows exist (without decrypting)
+              const secretRows = await env.DB.prepare(
+                `SELECT key_name FROM tenant_secrets WHERE tenant_id = ? AND key_name IN ('timeline_github_token', 'timeline_openrouter_key')`,
+              )
+                .bind(t.tenantId)
+                .all<{ key_name: string }>();
+
+              const secretKeys = new Set(
+                secretRows.results?.map((r) => r.key_name) ?? [],
+              );
+
+              // Try actual decryption if SecretsManager is available
+              let canDecryptGithub = false;
+              let canDecryptOpenrouter = false;
+              if (secrets) {
+                try {
+                  const ghToken = await secrets.safeGetSecret(
+                    t.tenantId,
+                    "timeline_github_token",
+                  );
+                  canDecryptGithub = !!ghToken;
+                } catch {
+                  /* decryption failed */
+                }
+                try {
+                  const orKey = await secrets.safeGetSecret(
+                    t.tenantId,
+                    "timeline_openrouter_key",
+                  );
+                  canDecryptOpenrouter = !!orKey;
+                } catch {
+                  /* decryption failed */
+                }
+              }
+
+              tenantSecretStatus.push({
+                tenantId: t.tenantId,
+                hasGithubSecret: secretKeys.has("timeline_github_token"),
+                hasOpenrouterSecret: secretKeys.has("timeline_openrouter_key"),
+                hasDEK: !!dekRow?.encrypted_dek,
+                canDecryptGithub,
+                canDecryptOpenrouter,
+              });
+            } catch {
+              tenantSecretStatus.push({
+                tenantId: t.tenantId,
+                hasGithubSecret: false,
+                hasOpenrouterSecret: false,
+                hasDEK: false,
+                canDecryptGithub: false,
+                canDecryptOpenrouter: false,
+              });
+            }
+          }
+        }
+
+        return Response.json({
+          worker: "grove-timeline-sync",
+          timestamp: new Date().toISOString(),
+          cron: "0 1 * * * (1 AM UTC daily)",
+          targetDate: getYesterdayUTC(),
+          environment: {
+            kekPresent,
+            kekLength,
+            kekValid: kekLength === 64,
+            dbConnected,
+          },
+          secretsManager: {
+            initialized: secretsManagerOk,
+            error: secretsManagerError,
+          },
+          tenants: {
+            enabledCount: tenantCount,
+            configs: enabledTenants,
+            legacyTokens: legacyStatus,
+            secrets: tenantSecretStatus,
+          },
+        });
+      } catch (err) {
+        return Response.json(
+          {
+            worker: "grove-timeline-sync",
             error: err instanceof Error ? err.message : "Unknown error",
           },
           { status: 500 },

@@ -104,7 +104,7 @@
     currentDate: string;
     completed: string[];
     skipped: string[];
-    failed: string[];
+    failed: Array<{ date: string; error: string }>;
     totalCost: number;
   } | null>(null);
   let generateResult = $state<{ success: boolean; message: string } | null>(null);
@@ -195,6 +195,9 @@
       totalCost: 0,
     };
 
+    // Track the first error to show a clear message if all dates fail for the same reason
+    let firstError: string | null = null;
+
     for (const date of dates) {
       if (generateCancelled) break;
 
@@ -216,7 +219,7 @@
 
         const result = await response.json() as Record<string, unknown>;
 
-        if (response.ok) {
+        if (response.ok && result.success !== false) {
           if (result.summary) {
             generateProgress = {
               ...generateProgress!,
@@ -231,15 +234,27 @@
             };
           }
         } else {
+          // Extract the actual error message from the API response
+          const errorMsg = (result.message as string) || `HTTP ${response.status}`;
+          if (!firstError) firstError = errorMsg;
           generateProgress = {
             ...generateProgress!,
-            failed: [...generateProgress!.failed, date],
+            failed: [...generateProgress!.failed, { date, error: errorMsg }],
           };
+
+          // If this is a config/key issue, stop early — every date will fail the same way
+          const errorType = result.error as string | undefined;
+          if (errorType === "github_token_missing" || errorType === "openrouter_key_missing") {
+            toast.error("Configuration issue", { description: errorMsg });
+            break;
+          }
         }
-      } catch {
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Network error";
+        if (!firstError) firstError = errorMsg;
         generateProgress = {
           ...generateProgress!,
-          failed: [...generateProgress!.failed, date],
+          failed: [...generateProgress!.failed, { date, error: errorMsg }],
         };
       }
     }
@@ -248,11 +263,19 @@
     const skippedCount = generateProgress!.skipped.length;
     const failedCount = generateProgress!.failed.length;
 
+    let resultMessage: string;
+    if (generateCancelled) {
+      resultMessage = `Cancelled. Generated ${completedCount} summaries before stopping.`;
+    } else if (failedCount > 0 && completedCount === 0 && firstError) {
+      // All failed — show the underlying error
+      resultMessage = `All ${failedCount} dates failed: ${firstError}`;
+    } else {
+      resultMessage = `Done! ${completedCount} generated, ${skippedCount} skipped (no commits), ${failedCount} failed.`;
+    }
+
     generateResult = {
       success: failedCount === 0,
-      message: generateCancelled
-        ? `Cancelled. Generated ${completedCount} summaries before stopping.`
-        : `Done! ${completedCount} generated, ${skippedCount} skipped (no commits), ${failedCount} failed.`,
+      message: resultMessage,
     };
 
     if (completedCount > 0) {
@@ -805,7 +828,7 @@
               <span class="stat-skipped">{generateProgress.skipped.length} skipped</span>
             {/if}
             {#if generateProgress.failed.length > 0}
-              <span class="stat-failed">{generateProgress.failed.length} failed</span>
+              <span class="stat-failed" title={generateProgress.failed.map(f => `${f.date}: ${f.error}`).join('\n')}>{generateProgress.failed.length} failed</span>
             {/if}
             {#if generateProgress.totalCost > 0}
               <span class="stat-cost">${generateProgress.totalCost.toFixed(4)}</span>
@@ -822,7 +845,19 @@
         {:else}
           <AlertCircle class="alert-icon" />
         {/if}
-        <span>{generateResult.message}</span>
+        <div class="generate-result-content">
+          <span>{generateResult.message}</span>
+          {#if generateProgress && generateProgress.failed.length > 0 && generateProgress.failed.length <= 5}
+            <details class="failed-details">
+              <summary>Show failed dates</summary>
+              <ul class="failed-list">
+                {#each generateProgress.failed as failure}
+                  <li><strong>{failure.date}</strong>: {failure.error}</li>
+                {/each}
+              </ul>
+            </details>
+          {/if}
+        </div>
       </div>
     {/if}
 
@@ -1323,6 +1358,35 @@
   .stat-cost {
     color: var(--color-primary);
     font-weight: 500;
+  }
+
+  .generate-result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .failed-details {
+    font-size: 0.8rem;
+    opacity: 0.9;
+  }
+
+  .failed-details summary {
+    cursor: pointer;
+    color: var(--color-text-muted);
+  }
+
+  .failed-list {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .failed-list li {
+    word-break: break-word;
   }
 
   @media (max-width: 640px) {

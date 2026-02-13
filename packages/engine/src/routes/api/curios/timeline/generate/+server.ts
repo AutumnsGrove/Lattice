@@ -199,18 +199,51 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const openrouterKey = openrouterResult.token;
 
   if (!githubToken) {
-    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
-      detail: "GitHub token missing",
-    });
-    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
+    console.error(
+      `[Timeline Generate] GitHub token not found. Source attempted: ${githubResult.source}. GROVE_KEK present: ${!!platform?.env?.GROVE_KEK}`,
+    );
+    return json(
+      {
+        success: false,
+        error: "github_token_missing",
+        message:
+          "GitHub token could not be retrieved. Check that it's saved in Timeline settings.",
+        debug: {
+          secretSource: githubResult.source,
+          kekConfigured: !!platform?.env?.GROVE_KEK,
+          legacyKeyConfigured: !!platform?.env?.TOKEN_ENCRYPTION_KEY,
+          legacyColumnPresent: !!config.github_token_encrypted,
+        },
+      },
+      { status: 400 },
+    );
   }
 
   if (!openrouterKey) {
-    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
-      detail: "OpenRouter key missing",
-    });
-    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
+    console.error(
+      `[Timeline Generate] OpenRouter key not found. Source attempted: ${openrouterResult.source}. GROVE_KEK present: ${!!platform?.env?.GROVE_KEK}`,
+    );
+    return json(
+      {
+        success: false,
+        error: "openrouter_key_missing",
+        message:
+          "OpenRouter API key could not be retrieved. Check that it's saved in Timeline settings.",
+        debug: {
+          secretSource: openrouterResult.source,
+          kekConfigured: !!platform?.env?.GROVE_KEK,
+          legacyKeyConfigured: !!platform?.env?.TOKEN_ENCRYPTION_KEY,
+          legacyColumnPresent: !!config.openrouter_key_encrypted,
+        },
+      },
+      { status: 400 },
+    );
   }
+
+  // Log token retrieval diagnostics (helps debug key issues without exposing values)
+  console.log(
+    `[Timeline Generate] Token sources: github=${githubResult.source}, openrouter=${openrouterResult.source}`,
+  );
 
   try {
     // Fetch commits from GitHub (uses Commits API, with fast path from backfill data)
@@ -499,8 +532,49 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       },
     });
   } catch (err) {
-    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+    // Extract actionable error details instead of returning generic message
+    const errorMessage = err instanceof Error ? err.message : String(err);
+
+    // Check for Lumen-specific errors with provider details
+    const isLumenError =
+      err instanceof Error && "code" in err && "attempts" in err;
+    const attempts = isLumenError
+      ? (
+          err as {
+            attempts?: Array<{
+              provider: string;
+              model: string;
+              error: string;
+            }>;
+          }
+        ).attempts
+      : undefined;
+
+    console.error(
+      `[Timeline Generate] Failed for ${targetDate}:`,
+      errorMessage,
+    );
+    if (attempts) {
+      console.error(
+        `[Timeline Generate] Provider attempts:`,
+        JSON.stringify(attempts),
+      );
+    }
+
+    // Return detailed error so the UI can show what actually went wrong
+    return json(
+      {
+        success: false,
+        error: "generation_failed",
+        message: errorMessage,
+        debug: {
+          date: targetDate,
+          model: config.openrouter_model,
+          providerAttempts: attempts ?? null,
+        },
+      },
+      { status: 500 },
+    );
   }
 };
 
