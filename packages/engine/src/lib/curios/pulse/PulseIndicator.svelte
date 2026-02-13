@@ -65,8 +65,8 @@
   }
 
   .dot.active {
-    background: #22c55e;
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+    background: var(--grove-500, #22c55e);
+    box-shadow: 0 0 8px var(--grove-overlay-50, rgba(34, 197, 94, 0.5));
   }
 
   .dot.inactive {
@@ -78,7 +78,7 @@
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    border: 2px solid #22c55e;
+    border: 2px solid var(--grove-500, #22c55e);
     opacity: 0;
     animation: pulse-ripple 2s ease-out infinite;
   }
@@ -115,12 +115,12 @@
   }
 
   .active-text {
-    color: #22c55e;
+    color: var(--grove-500, #22c55e);
     font-weight: 500;
   }
 
   :global(.dark) .active-text {
-    color: #4ade80;
+    color: var(--grove-400, #4ade80);
   }
 
   .commit-message {

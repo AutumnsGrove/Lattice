@@ -104,19 +104,22 @@
   }
 
   .streak-badge {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--color-warning, #f59e0b);
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.15);
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
+    letter-spacing: 0.02em;
   }
 
   .section-title {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-muted-foreground, var(--color-text-muted));
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     margin: 0 0 1rem;
   }
 
