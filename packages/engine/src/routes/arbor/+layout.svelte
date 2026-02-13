@@ -15,14 +15,10 @@
     X,
   } from "lucide-svelte";
   import { page } from "$app/state";
-  import { navigating } from "$app/stores";
   import { sidebarStore } from "$lib/ui/stores/sidebar.svelte";
   import { resolveTerm } from "$lib/ui/utils/grove-term-resolve";
 
   let { data, children } = $props();
-
-  // Navigation loading state — shows a progress bar during page transitions
-  let isNavigating = $derived(!!$navigating);
 
   // Current path for active nav item highlighting
   let currentPath = $derived(page.url.pathname);
@@ -196,11 +192,6 @@
   </aside>
 
   <main class="content" class:expanded={sidebarCollapsed}>
-    {#if isNavigating}
-      <div class="nav-loading-bar" role="progressbar" aria-label="Loading page">
-        <div class="nav-loading-bar-fill"></div>
-      </div>
-    {/if}
     {#if data.messages?.length}
       <div class="mb-6">
         <GroveMessages messages={data.messages} dismissible={true} />
@@ -721,55 +712,6 @@
   :global(.logout-icon) {
     width: 1rem;
     height: 1rem;
-  }
-
-  /* Navigation loading bar — visible during page transitions */
-  .nav-loading-bar {
-    position: fixed;
-    top: 76px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    z-index: 1100;
-    background: var(--grove-overlay-8);
-    overflow: hidden;
-  }
-
-  .nav-loading-bar-fill {
-    height: 100%;
-    background: var(--user-accent, var(--color-primary, #2c5f2d));
-    animation: nav-loading 1.5s ease-in-out infinite;
-    transform-origin: left;
-  }
-
-  :global(.dark) .nav-loading-bar-fill {
-    background: var(--grove-300, #86efac);
-  }
-
-  @keyframes nav-loading {
-    0% {
-      transform: translateX(-100%) scaleX(0.3);
-    }
-    50% {
-      transform: translateX(0%) scaleX(0.6);
-    }
-    100% {
-      transform: translateX(100%) scaleX(0.3);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nav-loading-bar-fill {
-      animation: none;
-      width: 100%;
-      opacity: 0.5;
-      animation: nav-loading-pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes nav-loading-pulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.7; }
-    }
   }
 
   .content {

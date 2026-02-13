@@ -12,6 +12,7 @@
 	import '$lib/styles/tokens.css';
 	import '$lib/styles/vine-pattern.css';
 	import { page } from '$app/state';
+	import { navigating } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { Button, GroveSwap, PassageTransition } from '$lib/ui';
@@ -21,6 +22,9 @@
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
+
+	// Navigation loading state — shows a progress bar during all page transitions
+	let isNavigating = $derived(!!$navigating);
 
 	// Get context from layout data (set in hooks.server.ts)
 	const context = $derived(data.context);
@@ -116,6 +120,12 @@
 		user={headerUser}
 		signInHref="/auth/login"
 	/>
+
+	{#if isNavigating}
+		<div class="nav-loading-bar" role="progressbar" aria-label="Loading page">
+			<div class="nav-loading-bar-fill"></div>
+		</div>
+	{/if}
 
 	<main>
 		{#if isAdminPage}
@@ -364,5 +374,40 @@
 		main {
 			padding: 1.5rem 1rem 0;
 		}
+	}
+	/* Navigation loading bar — visible during all page transitions */
+	.nav-loading-bar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		z-index: 9999;
+		background: var(--grove-overlay-8);
+		overflow: hidden;
+	}
+	.nav-loading-bar-fill {
+		height: 100%;
+		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		animation: nav-loading 1.5s ease-in-out infinite;
+		transform-origin: left;
+	}
+	:global(.dark) .nav-loading-bar-fill {
+		background: var(--grove-300, #86efac);
+	}
+	@keyframes nav-loading {
+		0% { transform: translateX(-100%) scaleX(0.3); }
+		50% { transform: translateX(0%) scaleX(0.6); }
+		100% { transform: translateX(100%) scaleX(0.3); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.nav-loading-bar-fill {
+			animation: nav-loading-pulse 1.5s ease-in-out infinite;
+			width: 100%;
+		}
+	}
+	@keyframes nav-loading-pulse {
+		0%, 100% { opacity: 0.3; }
+		50% { opacity: 0.7; }
 	}
 </style>
