@@ -13,10 +13,18 @@ import { isWayfinder } from "@autumnsgrove/groveengine/config";
  * `parentData.isWayfinder` before allowing access.
  */
 
-export const load: LayoutServerLoad = async ({ locals, platform }) => {
+export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
+  // Allow access to login page (its +page.server.ts handles the redirect to login hub)
+  if (url.pathname === "/arbor/login") {
+    return { user: locals.user, isWayfinder: false, messages: [] };
+  }
+
   // Auth check - redirect to login if not authenticated
   if (!locals.user) {
-    throw redirect(302, "/arbor/login");
+    throw redirect(
+      302,
+      `/arbor/login?redirect=${encodeURIComponent(url.pathname)}`,
+    );
   }
 
   // Admin check - only admins can access /arbor/*
