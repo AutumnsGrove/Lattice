@@ -5,8 +5,8 @@
 	 * Provides consistent sidebar navigation and theming for all admin pages.
 	 * Uses the engine's ArborPanel component for the full sidebar experience.
 	 *
-	 * Note: Login page (/arbor/login) uses LoginGraft with its own layout,
-	 * so we conditionally render based on route.
+	 * Note: Login page (/arbor/login) redirects to login.grove.place via
+	 * +page.server.ts, so it bypasses ArborPanel chrome.
 	 */
 
 	import { page } from '$app/state';
@@ -81,7 +81,7 @@
 </script>
 
 {#if isLoginPage}
-	<!-- Login page manages its own layout via LoginGraft -->
+	<!-- Login page redirects to login.grove.place (fallback renders without ArborPanel) -->
 	{@render children()}
 {:else}
 	<ArborPanel

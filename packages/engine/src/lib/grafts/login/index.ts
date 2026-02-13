@@ -11,7 +11,13 @@
  * The LoginGraft component itself is only used ON login.grove.place
  * where auth API calls are same-origin.
  *
- * @example Redirect to login hub (engine tenant sites)
+ * @example Redirect button (any Grove property — the easy way)
+ * ```svelte
+ * import { LoginRedirectButton } from '@autumnsgrove/groveengine/grafts/login';
+ * <LoginRedirectButton returnTo="/profile" />
+ * ```
+ *
+ * @example Redirect via server load (for login routes)
  * ```typescript
  * import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
  * throw redirect(302, buildLoginUrl(`${url.origin}/auth/callback?returnTo=/arbor`));
@@ -49,6 +55,7 @@ export {
 
 // Components
 export { default as LoginGraft } from "./LoginGraft.svelte";
+export { default as LoginRedirectButton } from "./LoginRedirectButton.svelte";
 export { default as ProviderIcon } from "./ProviderIcon.svelte";
 export { default as PasskeyButton } from "./PasskeyButton.svelte";
 export { default as EmailButton } from "./EmailButton.svelte";

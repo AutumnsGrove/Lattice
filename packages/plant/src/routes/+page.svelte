@@ -5,11 +5,8 @@
 		Logo,
 		RoadmapPreview
 	} from '@autumnsgrove/groveengine/ui';
-	import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
+	import { LoginRedirectButton } from '@autumnsgrove/groveengine/grafts/login';
 	import {
-		// Auth icons
-		LogIn,
-		ChevronDown,
 		// Feature icons
 		Leaf,
 		Shield,
@@ -26,7 +23,6 @@
 		ArrowRight,
 		Clock,
 		Lock,
-		Sprout,
 		// Notice icon
 		AlertTriangle
 	} from '@autumnsgrove/groveengine/ui/icons';
@@ -48,9 +44,6 @@
 		status: tier.status,
 		icon: tier.icon,
 	}));
-
-	// Auth section state
-	let authExpanded = $state(false);
 
 	// Check for signup gate redirect notice
 	const showSignupGateNotice = $derived(page.url.searchParams.get('notice') === 'coming_soon');
@@ -104,21 +97,17 @@
 <div class="space-y-12 animate-fade-in">
 	<!-- Returning user banner -->
 	<div class="flex justify-center">
-		<button
-			onclick={() => {
-				authExpanded = true;
-				// Scroll to auth section smoothly
-				document.querySelector('#auth-section')?.scrollIntoView({ behavior: 'smooth' });
-			}}
-			class="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full
-				bg-bark-100/60 dark:bg-bark-800/40 backdrop-blur-md
-				border border-bark-200/50 dark:border-bark-700/40
-				text-foreground-muted hover:text-foreground hover:border-primary/50
-				transition-all cursor-pointer"
-		>
-			<LogIn class="w-4 h-4" />
-			<span>Already have a blog? <span class="text-primary font-medium">Sign in</span></span>
-		</button>
+		<LoginRedirectButton
+			returnTo="/profile"
+			label="Already have a blog? Sign in"
+			variant="ghost"
+			size="sm"
+			showLogo={false}
+			class="!rounded-full !px-4 !py-2 !text-sm
+				bg-bark-100/60 dark:bg-bark-800/40
+				border-bark-200/50 dark:border-bark-700/40
+				text-foreground-muted hover:text-foreground hover:border-primary/50"
+		/>
 	</div>
 
 	<!-- Auth Error Notice (shown when auth callback redirects with ?error=) -->
@@ -136,15 +125,14 @@
 					{authErrorCode}
 				</p>
 			{/if}
-			<button
-				onclick={() => {
-					authExpanded = true;
-					document.querySelector('#auth-section')?.scrollIntoView({ behavior: 'smooth' });
-				}}
-				class="mt-3 text-sm text-primary hover:underline"
-			>
-				Try again
-			</button>
+			<LoginRedirectButton
+				returnTo="/profile"
+				label="Try again"
+				variant="ghost"
+				size="sm"
+				showLogo={false}
+				class="mt-3 !text-sm !text-primary hover:underline"
+			/>
 		</GlassCard>
 	{/if}
 
@@ -387,41 +375,26 @@
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Begin your journey</h2>
 
 		<GlassCard variant="frosted" class="max-w-lg mx-auto">
-			{#if !authExpanded}
-				<!-- Collapsed: Get Started button -->
-				<div class="text-center space-y-5 py-2">
-					<p class="text-foreground-muted">
-						Ready to plant your blog? We'll walk you through the rest.
-					</p>
-					<button
-						onclick={() => authExpanded = true}
-						class="btn-primary w-full flex items-center justify-center gap-2"
-					>
-						<Sprout class="w-5 h-5" />
-						Get Started
-						<ChevronDown class="w-4 h-4" />
-					</button>
-				</div>
-			{:else}
-				<!-- Expanded: Auth options (Passkey first for users who prefer it) -->
-				<p class="text-center text-foreground-muted mb-6">
-					Sign in to get started.
+			<div class="text-center space-y-5 py-2">
+				<p class="text-foreground-muted">
+					Ready to plant your blog? We'll walk you through the rest.
 				</p>
 
-				<LoginGraft
-					providers={['email', 'passkey', 'google']}
+				<LoginRedirectButton
 					returnTo="/profile"
-					variant="default"
-					class="!p-0 !bg-transparent !border-none !shadow-none"
+					label="Get Started"
+					variant="accent"
+					size="lg"
+					class="w-full"
 				/>
 
-				<p class="text-xs text-foreground-subtle text-center mt-6">
+				<p class="text-xs text-foreground-subtle">
 					By continuing, you agree to our
 					<a href="https://grove.place/knowledge/legal/terms-of-service" class="text-primary hover:underline">Terms of Service</a>
 					and
 					<a href="https://grove.place/knowledge/legal/privacy-policy" class="text-primary hover:underline">Privacy Policy</a>.
 				</p>
-			{/if}
+			</div>
 		</GlassCard>
 	</section>
 
