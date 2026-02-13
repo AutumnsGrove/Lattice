@@ -39,11 +39,12 @@ WITHDRAW --> LAYER --> FORTIFY --> SIEGE --> SEAL
 
 ### Phase 1: WITHDRAW
 
-*The turtle withdraws into its shell, eyes watchful, studying the world from safety...*
+_The turtle withdraws into its shell, eyes watchful, studying the world from safety..._
 
 Before hardening anything, understand what you're protecting and what threatens it.
 
 **Identify the Scope:**
+
 - What code/feature/system is being reviewed?
 - Is this new code (secure-by-design) or existing code (audit)?
 - What is the threat model? (public-facing? internal? multi-tenant?)
@@ -79,6 +80,7 @@ EXIT POINTS (Where data goes out):
 
 **Catalog Data Flows:**
 For each piece of sensitive data (credentials, PII, tokens, payment info):
+
 1. Where does it enter the system?
 2. Where is it stored?
 3. Where is it transmitted?
@@ -87,6 +89,7 @@ For each piece of sensitive data (credentials, PII, tokens, payment info):
 
 **Tech Stack Assessment:**
 Check for known vulnerability patterns in the stack:
+
 - SvelteKit: Layout bypass, server-only module leaks, CSP nonce handling
 - Cloudflare Workers: Secret storage, subrequest limits, V8 isolate boundaries
 - TypeScript/JavaScript: Prototype pollution, type coercion, eval patterns
@@ -98,7 +101,7 @@ Check for known vulnerability patterns in the stack:
 
 ### Phase 2: LAYER
 
-*Layer by layer, the shell grows stronger. Keratin over bone, bone over spine...*
+_Layer by layer, the shell grows stronger. Keratin over bone, bone over spine..._
 
 Apply the foundational defenses. These are non-negotiable — every piece of code must have these layers.
 
@@ -121,23 +124,27 @@ VALIDATION CHECKLIST:
 ```
 
 **SvelteKit pattern:**
+
 ```typescript
 // +page.server.ts or +server.ts
-import { z } from 'zod';
+import { z } from "zod";
 
 const CreatePostSchema = z.object({
   title: z.string().min(1).max(200).trim(),
   content: z.string().min(1).max(50000),
-  slug: z.string().regex(/^[a-z0-9-]+$/).max(100),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/)
+    .max(100),
 });
 
 export const actions = {
   default: async ({ request, locals }) => {
     const formData = await request.formData();
     const result = CreatePostSchema.safeParse({
-      title: formData.get('title'),
-      content: formData.get('content'),
-      slug: formData.get('slug'),
+      title: formData.get("title"),
+      content: formData.get("content"),
+      slug: formData.get("slug"),
     });
 
     if (!result.success) {
@@ -145,7 +152,7 @@ export const actions = {
     }
 
     // result.data is now typed and validated
-  }
+  },
 };
 ```
 
@@ -166,6 +173,7 @@ ENCODING CHECKLIST:
 ```
 
 **SvelteKit pattern:**
+
 ```svelte
 <!-- DANGEROUS: Never do this with user input -->
 {@html userContent}
@@ -190,15 +198,21 @@ DATABASE CHECKLIST:
 ```
 
 **Pattern:**
+
 ```typescript
 // NEVER: String concatenation
-const results = await db.prepare(`SELECT * FROM posts WHERE slug = '${slug}'`).all();
+const results = await db
+  .prepare(`SELECT * FROM posts WHERE slug = '${slug}'`)
+  .all();
 
 // ALWAYS: Parameterized
-const results = await db.prepare('SELECT * FROM posts WHERE slug = ?').bind(slug).all();
+const results = await db
+  .prepare("SELECT * FROM posts WHERE slug = ?")
+  .bind(slug)
+  .all();
 
 // BEST: Typed query helper
-const post = await findById<Post>(db, 'posts', postId);
+const post = await findById<Post>(db, "posts", postId);
 ```
 
 **2D. Type Safety & Secure Defaults**
@@ -245,7 +259,7 @@ See `AgentUsage/error_handling.md` for the complete Signpost reference.
 
 ### Phase 3: FORTIFY
 
-*Each plate of the shell interlocks with the next. No gaps. No seams. No way through...*
+_Each plate of the shell interlocks with the next. No gaps. No seams. No way through..._
 
 Apply deep, layered hardening. These are the defenses that make the difference between "has authentication" and "is actually secure."
 
@@ -272,16 +286,19 @@ REMOVE / DISABLE:
 ```
 
 **SvelteKit pattern (hooks.server.ts):**
+
 ```typescript
 export const handle: Handle = async ({ event, resolve }) => {
   const response = await resolve(event);
 
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), payment=()');
-  response.headers.delete('X-Powered-By');
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=()",
+  );
+  response.headers.delete("X-Powered-By");
 
   return response;
 };
@@ -308,6 +325,7 @@ CSP CHECKLIST:
 ```
 
 **SvelteKit CSP config (svelte.config.js):**
+
 ```javascript
 kit: {
   csp: {
@@ -343,25 +361,30 @@ CORS CHECKLIST:
 ```
 
 **Bad CORS (common mistake):**
+
 ```typescript
 // DANGEROUS: Reflects any origin
-response.headers.set('Access-Control-Allow-Origin', request.headers.get('Origin'));
+response.headers.set(
+  "Access-Control-Allow-Origin",
+  request.headers.get("Origin"),
+);
 
 // DANGEROUS: Allows all origins with credentials
-response.headers.set('Access-Control-Allow-Origin', '*');
+response.headers.set("Access-Control-Allow-Origin", "*");
 ```
 
 **Safe CORS:**
+
 ```typescript
 const ALLOWED_ORIGINS = new Set([
-  'https://grove.place',
-  'https://meadow.grove.place',
+  "https://grove.place",
+  "https://meadow.grove.place",
 ]);
 
-const origin = request.headers.get('Origin');
+const origin = request.headers.get("Origin");
 if (origin && ALLOWED_ORIGINS.has(origin)) {
-  response.headers.set('Access-Control-Allow-Origin', origin);
-  response.headers.set('Vary', 'Origin');
+  response.headers.set("Access-Control-Allow-Origin", origin);
+  response.headers.set("Vary", "Origin");
 }
 ```
 
@@ -404,6 +427,7 @@ CSRF CHECKLIST:
 ```
 
 **Grove-specific CSRF (svelte.config.js):**
+
 ```javascript
 kit: {
   csrf: {
@@ -531,7 +555,7 @@ DATA PROTECTION CHECKLIST:
 
 ### Phase 4: SIEGE
 
-*Test the shell. Strike it. Push it. Try every angle. What holds is worthy. What breaks is found before the enemy finds it...*
+_Test the shell. Strike it. Push it. Try every angle. What holds is worthy. What breaks is found before the enemy finds it..._
 
 Think like an attacker. This phase checks for the subtle, exotic vulnerabilities that slip through standard reviews. For each category, attempt the attack mentally (or practically if safe to do so) and verify defenses hold.
 
@@ -548,6 +572,7 @@ CHECK:
 ```
 
 **What to look for:**
+
 ```typescript
 // DANGEROUS: Deep merging user input
 const config = deepMerge(defaults, userInput);
@@ -557,7 +582,8 @@ const config = deepMerge(defaults, userInput);
 // SAFE: Validate keys before merging
 function safeMerge(target, source) {
   for (const key of Object.keys(source)) {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    if (key === "__proto__" || key === "constructor" || key === "prototype")
+      continue;
     target[key] = source[key];
   }
   return target;
@@ -576,6 +602,7 @@ CHECK:
 ```
 
 **What to look for:**
+
 ```typescript
 // DANGEROUS: Early-exit comparison leaks information
 if (providedToken === storedToken) { ... }
@@ -601,19 +628,23 @@ CHECK:
 ```
 
 **What to look for:**
+
 ```typescript
 // DANGEROUS: Check-then-act (race condition)
-const coupon = await db.query('SELECT * FROM coupons WHERE code = ? AND used = 0', [code]);
+const coupon = await db.query(
+  "SELECT * FROM coupons WHERE code = ? AND used = 0",
+  [code],
+);
 if (coupon) {
   await applyDiscount(coupon);
-  await db.query('UPDATE coupons SET used = 1 WHERE code = ?', [code]);
+  await db.query("UPDATE coupons SET used = 1 WHERE code = ?", [code]);
   // Two concurrent requests can both pass the check before either updates!
 }
 
 // SAFE: Atomic operation
 const result = await db.query(
-  'UPDATE coupons SET used = 1 WHERE code = ? AND used = 0 RETURNING *',
-  [code]
+  "UPDATE coupons SET used = 1 WHERE code = ? AND used = 0 RETURNING *",
+  [code],
 );
 if (result.rows.length > 0) {
   await applyDiscount(result.rows[0]);
@@ -634,6 +665,7 @@ CHECK:
 ```
 
 **What to look for:**
+
 ```typescript
 // DANGEROUS: Catastrophic backtracking
 const emailRegex = /^([a-zA-Z0-9]+)*@([a-zA-Z0-9]+)*\.([a-zA-Z]+)*$/;
@@ -832,7 +864,7 @@ CHECK:
 
 ### Phase 5: SEAL
 
-*The shell is complete. Every gap sealed. Every plate aligned. The turtle endures...*
+_The shell is complete. Every gap sealed. Every plate aligned. The turtle endures..._
 
 Final verification and reporting.
 
@@ -851,14 +883,14 @@ DEFENSE-IN-DEPTH VERIFICATION:
 
 **For each critical function, verify at least 2 layers of defense:**
 
-| Function | Layer 1 | Layer 2 | Layer 3 |
-|----------|---------|---------|---------|
-| Prevent XSS | Output encoding | CSP nonce-based | Input validation |
-| Prevent CSRF | SameSite cookies | CSRF tokens | Origin validation |
-| Prevent SQLi | Parameterized queries | Input validation | Least-privilege DB |
-| Prevent auth bypass | Session validation | Rate limiting | Brute-force lockout |
-| Prevent data leakage | Encryption in transit | Encryption at rest | Access control |
-| Tenant isolation | App-level scoping | DB-level RLS | Cache key isolation |
+| Function             | Layer 1               | Layer 2            | Layer 3             |
+| -------------------- | --------------------- | ------------------ | ------------------- |
+| Prevent XSS          | Output encoding       | CSP nonce-based    | Input validation    |
+| Prevent CSRF         | SameSite cookies      | CSRF tokens        | Origin validation   |
+| Prevent SQLi         | Parameterized queries | Input validation   | Least-privilege DB  |
+| Prevent auth bypass  | Session validation    | Rate limiting      | Brute-force lockout |
+| Prevent data leakage | Encryption in transit | Encryption at rest | Access control      |
+| Tenant isolation     | App-level scoping     | DB-level RLS       | Cache key isolation |
 
 **5B. Logging & Monitoring Verification**
 
@@ -874,11 +906,23 @@ LOGGING CHECKLIST:
 [ ] Alerting configured for: brute force, mass data access, error rate spikes
 ```
 
-**5C. Final Scan**
+**5C. Build Verification (MANDATORY)**
+
+**Before generating the hardening report, verify the hardened code still builds and passes all checks:**
 
 ```bash
-# Run these checks as a final verification:
+# Sync dependencies
+pnpm install
 
+# Verify ONLY the packages the turtle touched — lint, check, test, build
+gw ci --affected --fail-fast --diagnose
+```
+
+**If verification fails:** Hardening introduced a regression. Read the diagnostics, fix the issue (type errors from stricter validation, test failures from tighter security, etc.), re-run verification. The turtle does not seal a broken shell.
+
+**5D. Security-Specific Scan**
+
+```bash
 # Check for secrets in code
 grep -r "sk-live\|sk-test\|AKIA\|ghp_\|password\s*=" --include="*.{ts,js,json}" .
 
@@ -890,9 +934,6 @@ grep -r "nocheck\|no-verify\|unsafe-inline\|unsafe-eval" --include="*.{ts,js,jso
 
 # Audit dependencies
 pnpm audit
-
-# Type check (catches many issues)
-bun x tsc --noEmit
 ```
 
 **5D. Generate Hardening Report**
@@ -901,66 +942,69 @@ bun x tsc --noEmit
 ## TURTLE HARDENING REPORT
 
 ### Scope
+
 - **Target:** [Feature/system/files reviewed]
 - **Mode:** [Secure-by-design review / Existing code audit]
 - **Threat model:** [Public-facing / Internal / Multi-tenant]
 
 ### Defense Layers Applied
 
-| Layer | Status | Notes |
-|-------|--------|-------|
-| Input Validation | [PASS/FAIL/PARTIAL] | [Details] |
-| Output Encoding | [PASS/FAIL/PARTIAL] | [Details] |
-| SQL Injection Prevention | [PASS/FAIL/PARTIAL] | [Details] |
-| Security Headers | [PASS/FAIL/PARTIAL] | [Details] |
-| CSP | [PASS/FAIL/PARTIAL] | [Details] |
-| CORS | [PASS/FAIL/PARTIAL] | [Details] |
-| Session Security | [PASS/FAIL/PARTIAL] | [Details] |
-| CSRF Protection | [PASS/FAIL/PARTIAL] | [Details] |
-| Rate Limiting | [PASS/FAIL/PARTIAL] | [Details] |
-| Auth Hardening | [PASS/FAIL/PARTIAL] | [Details] |
-| Authorization | [PASS/FAIL/PARTIAL] | [Details] |
-| Multi-Tenant Isolation | [PASS/FAIL/PARTIAL] | [N/A if not multi-tenant] |
-| File Upload Security | [PASS/FAIL/PARTIAL] | [N/A if no uploads] |
-| Data Protection | [PASS/FAIL/PARTIAL] | [Details] |
+| Layer                    | Status              | Notes                     |
+| ------------------------ | ------------------- | ------------------------- |
+| Input Validation         | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Output Encoding          | [PASS/FAIL/PARTIAL] | [Details]                 |
+| SQL Injection Prevention | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Security Headers         | [PASS/FAIL/PARTIAL] | [Details]                 |
+| CSP                      | [PASS/FAIL/PARTIAL] | [Details]                 |
+| CORS                     | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Session Security         | [PASS/FAIL/PARTIAL] | [Details]                 |
+| CSRF Protection          | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Rate Limiting            | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Auth Hardening           | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Authorization            | [PASS/FAIL/PARTIAL] | [Details]                 |
+| Multi-Tenant Isolation   | [PASS/FAIL/PARTIAL] | [N/A if not multi-tenant] |
+| File Upload Security     | [PASS/FAIL/PARTIAL] | [N/A if no uploads]       |
+| Data Protection          | [PASS/FAIL/PARTIAL] | [Details]                 |
 
 ### Exotic Attack Vectors Tested
 
-| Vector | Status | Notes |
-|--------|--------|-------|
-| Prototype Pollution | [CLEAR/FOUND/N/A] | |
-| Timing Attacks | [CLEAR/FOUND/N/A] | |
-| Race Conditions | [CLEAR/FOUND/N/A] | |
-| ReDoS | [CLEAR/FOUND/N/A] | |
-| SSRF | [CLEAR/FOUND/N/A] | |
-| CRLF Injection | [CLEAR/FOUND/N/A] | |
-| Unicode Attacks | [CLEAR/FOUND/N/A] | |
-| Deserialization | [CLEAR/FOUND/N/A] | |
-| postMessage | [CLEAR/FOUND/N/A] | |
-| WebSocket Hijacking | [CLEAR/FOUND/N/A] | |
-| CSS Injection | [CLEAR/FOUND/N/A] | |
-| SVG XSS | [CLEAR/FOUND/N/A] | |
-| Cache Poisoning | [CLEAR/FOUND/N/A] | |
-| Open Redirects | [CLEAR/FOUND/N/A] | |
-| Verb Tampering | [CLEAR/FOUND/N/A] | |
-| Second-Order Attacks | [CLEAR/FOUND/N/A] | |
-| Supply Chain | [CLEAR/FOUND/N/A] | |
+| Vector               | Status            | Notes |
+| -------------------- | ----------------- | ----- |
+| Prototype Pollution  | [CLEAR/FOUND/N/A] |       |
+| Timing Attacks       | [CLEAR/FOUND/N/A] |       |
+| Race Conditions      | [CLEAR/FOUND/N/A] |       |
+| ReDoS                | [CLEAR/FOUND/N/A] |       |
+| SSRF                 | [CLEAR/FOUND/N/A] |       |
+| CRLF Injection       | [CLEAR/FOUND/N/A] |       |
+| Unicode Attacks      | [CLEAR/FOUND/N/A] |       |
+| Deserialization      | [CLEAR/FOUND/N/A] |       |
+| postMessage          | [CLEAR/FOUND/N/A] |       |
+| WebSocket Hijacking  | [CLEAR/FOUND/N/A] |       |
+| CSS Injection        | [CLEAR/FOUND/N/A] |       |
+| SVG XSS              | [CLEAR/FOUND/N/A] |       |
+| Cache Poisoning      | [CLEAR/FOUND/N/A] |       |
+| Open Redirects       | [CLEAR/FOUND/N/A] |       |
+| Verb Tampering       | [CLEAR/FOUND/N/A] |       |
+| Second-Order Attacks | [CLEAR/FOUND/N/A] |       |
+| Supply Chain         | [CLEAR/FOUND/N/A] |       |
 
 ### Vulnerabilities Found
 
-| ID | Severity | Description | Fix Applied | Verified |
-|----|----------|-------------|-------------|----------|
-| | CRITICAL/HIGH/MEDIUM/LOW | | YES/NO | YES/NO |
+| ID  | Severity                 | Description | Fix Applied | Verified |
+| --- | ------------------------ | ----------- | ----------- | -------- |
+|     | CRITICAL/HIGH/MEDIUM/LOW |             | YES/NO      | YES/NO   |
 
 ### Defense-in-Depth Compliance
+
 - **Layers verified:** [X/5]
 - **Critical functions with 2+ defense layers:** [X/Y]
 
 ### Recommendations
+
 - [Any remaining hardening steps]
 - [Future considerations]
 
-*The shell holds. Defense runs deep.* 🐢
+_The shell holds. Defense runs deep._ 🐢
 ```
 
 **Output:** Complete hardening report with defense-in-depth verification
@@ -970,19 +1014,25 @@ bun x tsc --noEmit
 ## Turtle Rules
 
 ### Patience
+
 The turtle never rushes. Check every layer. Verify every defense. A shell with gaps protects nothing. If a phase feels too fast, you're skipping something.
 
 ### Layering
+
 One defense is not enough. Two is better. Three is the turtle way. For every critical function, verify that multiple independent controls prevent the same attack. If any single layer fails, the system must still be safe.
 
 ### Secure by Design
+
 Defense is not what you add — it's what you are. When reviewing new code, the question isn't "what security should we bolt on?" but "is security inherent in the design?" The shell grows from within.
 
 ### Thoroughness Over Speed
+
 The turtle wins the race. Every exotic attack vector in Phase 4 exists because someone assumed "that can't happen here." Check anyway. The attacks that seem unlikely are the ones that succeed.
 
 ### Communication
+
 Use shell metaphors:
+
 - "Withdrawing to study the terrain..." (surveying attack surface)
 - "Layering the foundation..." (applying base defenses)
 - "Fortifying the plates..." (deep hardening)
@@ -995,6 +1045,7 @@ Use shell metaphors:
 ## Anti-Patterns
 
 **The turtle does NOT:**
+
 - Skip phases because "it's just a small change" (small changes create big holes)
 - Assume any input is safe because it comes from "trusted" sources (trust nothing)
 - Apply security only at the perimeter (defense in depth means EVERY layer)
@@ -1027,37 +1078,40 @@ Use shell metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Approach |
-|-----------|----------|
-| Building a new feature | Full WITHDRAW->SEAL flow, secure-by-design mode |
-| Reviewing existing code | Full flow, audit mode — document what's missing |
-| Quick security check | At minimum: LAYER (input/output/queries) + FORTIFY (headers/CORS/CSRF) |
-| After Spider wove auth | FORTIFY Phase 3D-3H (session, auth, authz hardening) |
-| After Raccoon found issues | SIEGE phase — go deeper than the Raccoon went |
-| Multi-tenant boundary work | Focus: FORTIFY 3I + SIEGE 4C (race conditions) + 4P (second-order) |
-| File upload feature | Focus: FORTIFY 3J + SIEGE 4L (SVG XSS) + 4E (SSRF) |
-| API endpoint | Focus: LAYER + FORTIFY 3A-3F + SIEGE 4O (verb tampering) |
-| Pre-production deploy | Full flow, verify defense-in-depth compliance |
+| Situation                  | Approach                                                               |
+| -------------------------- | ---------------------------------------------------------------------- |
+| Building a new feature     | Full WITHDRAW->SEAL flow, secure-by-design mode                        |
+| Reviewing existing code    | Full flow, audit mode — document what's missing                        |
+| Quick security check       | At minimum: LAYER (input/output/queries) + FORTIFY (headers/CORS/CSRF) |
+| After Spider wove auth     | FORTIFY Phase 3D-3H (session, auth, authz hardening)                   |
+| After Raccoon found issues | SIEGE phase — go deeper than the Raccoon went                          |
+| Multi-tenant boundary work | Focus: FORTIFY 3I + SIEGE 4C (race conditions) + 4P (second-order)     |
+| File upload feature        | Focus: FORTIFY 3J + SIEGE 4L (SVG XSS) + 4E (SSRF)                     |
+| API endpoint               | Focus: LAYER + FORTIFY 3A-3F + SIEGE 4O (verb tampering)               |
+| Pre-production deploy      | Full flow, verify defense-in-depth compliance                          |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Hardening:**
+
 - `bloodhound-scout` — Understand the codebase before hardening it
 - `eagle-architect` — For security architecture decisions
 - `raccoon-audit` — Let the Raccoon find secrets first, then Turtle hardens
 
 **During Hardening:**
+
 - `spider-weave` — If auth needs implementation (not just hardening)
 - `elephant-build` — If hardening requires multi-file changes
 - `beaver-build` — Write security regression tests alongside hardening
 
 **After Hardening:**
+
 - `raccoon-audit` — Final sweep for anything missed
 - `fox-optimize` — If rate limiting or security checks impact performance
 - `owl-archive` — Document the security architecture
 
 ---
 
-*The shell grows from within. Defense is not what you add — it's what you are.* 🐢
+_The shell grows from within. Defense is not what you add — it's what you are._ 🐢

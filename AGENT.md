@@ -334,6 +334,50 @@ gw gh pr create --write --title "feat: add feature"
 - ALWAYS prefer editing existing files to creating new ones
 - NEVER proactively create documentation files (\*.md) or README files unless explicitly requested
 
+### ⚠️ MANDATORY: Agent Self-Verification Protocol
+
+**After making ANY code changes, you MUST verify your work before committing.** Do not commit broken code. Do not assume your changes are correct. CI catches errors that cost the user time to circle back and fix — verify locally first.
+
+**The Verification Sequence:**
+
+```bash
+# Step 1: Ensure dependencies are in sync (catches missing/outdated packages)
+pnpm install
+
+# Step 2: Run affected-only CI — lint, check, test, build on ONLY the packages you touched
+gw ci --affected --fail-fast --diagnose
+```
+
+**What this does:**
+
+- `pnpm install` — Syncs `node_modules` with `pnpm-lock.yaml`. Required after adding/removing deps or changing `package.json`.
+- `gw ci --affected` — Detects which packages have changes on the current branch and runs the full pipeline (lint → check → test → build) only on those packages. Not all 10+ packages — just the ones you touched.
+- `--fail-fast` — Stops on the first failure so you get fast feedback instead of waiting for everything.
+- `--diagnose` — Provides structured error output with file:line locations so you can fix issues quickly.
+
+**When verification fails:**
+
+1. Read the diagnostic output carefully
+2. Fix the errors in your code
+3. Re-run verification (`gw ci --affected --fail-fast --diagnose`)
+4. Repeat until clean
+5. THEN commit
+
+**When to run verification:**
+
+- After completing all code changes for a feature or fix (before committing)
+- After addressing PR review feedback (before pushing)
+- After any refactoring that touches multiple files
+- Before running `gw git ship` or `gw git commit`
+
+**When you can skip verification:**
+
+- Documentation-only changes (`.md` files only, no code)
+- Configuration-only changes where no build/check applies
+- When `gw git ship` is used (it runs format + check automatically, but does NOT run tests or build — so prefer the full verification)
+
+**This is non-negotiable.** Every animal skill, every gathering, every code-modifying workflow must end with verification before commit. If you skip this and CI fails, you've wasted the user's time.
+
 ### Naming Conventions
 
 - **Directories**: Use CamelCase (e.g., `VideoProcessor`, `AudioTools`, `DataAnalysis`)

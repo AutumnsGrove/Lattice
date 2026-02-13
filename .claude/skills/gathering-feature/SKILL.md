@@ -247,8 +247,23 @@ Output:
 
 _The work is done. Each animal verifies their contribution..._
 
-**Validation Checklist:**
+**MANDATORY: Run full affected-package verification before the gathering concludes.**
 
+This is the final quality gate — the moment the entire gathering's work is proven sound:
+
+```bash
+# Step 1: Sync all dependencies
+pnpm install
+
+# Step 2: Run affected-only CI — lint, check, test, build on ONLY packages the gathering touched
+gw ci --affected --fail-fast --diagnose
+```
+
+**If verification fails:** Identify which animal's work caused the failure. Return to that phase, fix the issue, and re-run verification. The gathering does not conclude on broken code.
+
+**Validation Checklist (after CI passes):**
+
+- [ ] CI: `gw ci --affected` passes clean (lint, check, test, build)
 - [ ] Bloodhound: All integration points mapped
 - [ ] Elephant: Feature functional end-to-end
 - [ ] Turtle: Input validation on all entry points
@@ -264,10 +279,17 @@ _The work is done. Each animal verifies their contribution..._
 **Quality Gates:**
 
 ```
+If CI fails:
+  → Read diagnostics (--diagnose output)
+  → Identify the responsible animal phase
+  → Fix the issue
+  → Re-run: gw ci --affected --fail-fast --diagnose
+  → Repeat until clean
+
 If any animal finds critical issues:
   → Return to that phase
   → Fix the issue
-  → Re-run dependent phases
+  → Re-run CI verification
   → Continue validation
 
 If all gates pass:

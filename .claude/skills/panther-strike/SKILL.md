@@ -120,13 +120,19 @@ Use Edit tool for precision. Write tool only for new files.
 
 _The grove falls still. A distant branch cracks. Then — nothing. The kill is complete. The panther licks its paws._
 
-Verify the kill is clean:
+**Verify the kill is clean — MANDATORY before committing:**
 
 ```bash
-gw ci --affected --diagnose   # Ensure nothing else bleeds from the strike
+# Sync dependencies (catches anything the strike disturbed)
+pnpm install
+
+# Verify ONLY the packages the panther touched — lint, check, test, build
+gw ci --affected --fail-fast --diagnose
 ```
 
-Commit and push — one motion, one breath:
+**If verification fails:** The kill is NOT clean. Read the diagnostics, fix the wounds, re-run verification. A panther does not leave a messy kill. Repeat until the grove is silent and clean.
+
+**Only when verification passes**, commit and push — one motion, one breath:
 
 ```bash
 gw git ship --write -a -m "fix(component): brief description of fix — Fixes #{number}"

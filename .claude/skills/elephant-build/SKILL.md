@@ -314,19 +314,19 @@ See `AgentUsage/error_handling.md` for the full Signpost reference.
 
 _The elephant tests each stone, ensuring the structure holds..._
 
-Validate the build thoroughly:
-
-**Test Strategy:**
+**MANDATORY: Verify the build before committing. The elephant does not ship broken structures.**
 
 ```bash
-# Targeted CI — test only what the elephant touched
-gw ci --affected --diagnose
+# Step 1: Sync dependencies (catches new/changed packages)
+pnpm install
 
-# Or run individual steps
-gw test                      # Run tests
-gw check                     # Type check
-gw lint                      # Lint
+# Step 2: Run affected-only CI — lint, check, test, build on ONLY the packages the elephant touched
+gw ci --affected --fail-fast --diagnose
 ```
+
+**If verification fails:** Read the diagnostics. Fix the errors. Re-run verification. The elephant does not move forward on a cracked foundation. Repeat until the structure holds.
+
+**Only when CI passes**, proceed to manual verification:
 
 **Manual Testing Checklist:**
 
