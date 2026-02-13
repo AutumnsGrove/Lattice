@@ -3,7 +3,7 @@ title: Choosing Your Plan
 description: Understanding Grove's pricing tiers and features
 category: help
 section: getting-started
-lastUpdated: '2025-12-01'
+lastUpdated: "2025-12-01"
 keywords:
   - plan
   - pricing
@@ -21,7 +21,7 @@ order: 2
 
 # Choosing Your Plan
 
-**First, the important bit:** Reading Grove blogs is free. Always. Every blog is publicly accessible. Just visit and read, no account needed. You only need a plan if you want to *write* your own blog.
+**First, the important bit:** Reading Grove blogs is free. Always. Every blog is publicly accessible. Just visit and read, no account needed. You only need a plan if you want to _write_ your own blog.
 
 Grove has a few plans, each designed for different needs. Here's what you get at each level.
 
@@ -33,8 +33,8 @@ Grove has a few plans, each designed for different needs. Here's what you get at
 
 A quiet clearing to try your hand at writing — no credit card, no commitment. Wanderer is a real blog, not just community access. You get your own grove.place address and everything you need to start.
 
-- Up to 5 blog posts
-- 50 MB storage for images
+- Up to 25 blog posts
+- 100 MB storage for images
 - Your own grove.place address
 - RSS feed
 - [[meadow]] access for browsing and reacting
@@ -46,7 +46,7 @@ A quiet clearing to try your hand at writing — no credit card, no commitment. 
 
 Everything you need to start writing. No feature walls, no "upgrade to unlock basic functionality." Seedling is a real plan.
 
-- Up to 50 posts
+- Up to 100 posts
 - 1 GB storage for images and media
 - All 10 fonts + accent color customization
 - 3 curated themes (coming soon)
@@ -60,7 +60,7 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 
 More room to grow. If you're posting frequently or building up an archive, Sapling gives you space.
 
-- Up to 250 posts
+- Unlimited posts
 - 5 GB storage
 - All 10 fonts + accent color
 - All 10 curated themes (coming soon)
@@ -100,9 +100,9 @@ Everything Grove offers, including a domain on us.
 
 ## How to think about it
 
-**Just curious?** Start with Wanderer — it's free, no credit card needed. Five posts, your own address, a real blog.
+**Just curious?** Start with Wanderer — it's free, no credit card needed. Twenty-five posts, your own address, a real blog.
 
-**Posting regularly?** Sapling's 250 post limit and extra storage handles most active blogs comfortably.
+**Posting regularly?** Sapling's unlimited posts and extra storage handles most active blogs comfortably.
 
 **Want a custom domain?** That's Oak territory. Bring a domain you already own, or upgrade to Evergreen and we'll register one for you.
 
@@ -114,7 +114,7 @@ You can upgrade or downgrade anytime from **Settings → Plan**.
 
 When you upgrade, you get immediate access to new features. When you downgrade, you keep access through the end of your current billing period.
 
-If you're over the limits of your new plan (say, you have 100 posts and downgrade to Seedling's 50), your existing content stays. You just can't publish new posts until you're under the limit.
+If you're over the limits of your new plan (say, you have 150 posts and downgrade to Seedling's 100), your existing content stays. You just can't publish new posts until you're under the limit.
 
 ## Centennial: Your grove can outlive you
 
@@ -129,6 +129,7 @@ You can opt out anytime if you'd rather your site not persist. But we think your
 The price listed is the price you pay. No setup fees, no surprise charges, no "actually it's more if you want X."
 
 All plans include:
+
 - SSL certificate (your site is secure)
 - Cloudflare CDN (your site loads fast)
 - Daily backups (your content is safe)
@@ -136,4 +137,4 @@ All plans include:
 
 ---
 
-*Questions about which plan fits? [Ask us](/contact). We'll give you an honest answer, even if it's "Wanderer is probably enough."*
+_Questions about which plan fits? [Ask us](/contact). We'll give you an honest answer, even if it's "Wanderer is probably enough."_

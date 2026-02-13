@@ -4,7 +4,7 @@ description: A free, limited blog tier that lets anyone try Grove before committ
 category: specs
 specCategory: platform-services
 icon: footprints
-lastUpdated: '2026-02-09'
+lastUpdated: "2026-02-09"
 aliases: []
 tags:
   - pricing
@@ -29,25 +29,27 @@ tags:
                          ╰────┬────╯
                               │
                          ╭────┴────╮
-                         │ 📝 📝  │
-                         │ 📝 📝  │
-                         │ 📝     │
-                         ╰─────── ╯
-                          5 blooms
+                         │ 📝 📝 📝 📝 📝 │
+                         │ 📝 📝 📝 📝 📝 │
+                         │ 📝 📝 📝 📝 📝 │
+                         │ 📝 📝 📝 📝 📝 │
+                         │ 📝 📝 📝 📝 📝 │
+                         ╰─────────────────╯
+                             25 blooms
 
               the gate is open. come write.
 ```
 
-> *The gate is open. Come write.*
+> _The gate is open. Come write._
 
-A free blog tier for anyone who wants to try Grove. No credit card. No trial countdown. Just a subdomain, five posts, and a little room to breathe. If you like it here, take root. If not, no hard feelings.
+A free blog tier for anyone who wants to try Grove. No credit card. No trial countdown. Just a subdomain, twenty-five posts, and room to breathe. If you like it here, take root. If not, no hard feelings.
 
 **Public Name:** Wanderer Plan
 **Internal Name:** free tier (`free` in tiers.ts)
 **Status:** Proposed
 **Last Updated:** February 2026
 
-Every forest has a clearing where travelers can rest. Set down your pack, sit by the fire, look around. The Wanderer Plan is that clearing. You get enough space to write, enough room to see if this place feels like home. Five blooms. Fifty megabytes. One theme. A `username.grove.place` address that's yours for as long as you're here.
+Every forest has a clearing where travelers can rest. Set down your pack, sit by the fire, look around. The Wanderer Plan is that clearing. You get enough space to write, enough room to see if this place feels like home. Twenty-five blooms. A hundred megabytes. One theme. A `username.grove.place` address that's yours for as long as you're here.
 
 The catch? There isn't one. Just one gentle condition: if you leave and don't come back for a year, we'll reclaim the space for someone who needs it.
 
@@ -65,13 +67,14 @@ The result: people who would love Grove never find out, because they can't affor
 
 You don't need a 14-day trial with a credit card form. You need a front door that's actually open.
 
-Five blog posts is enough to:
+Twenty-five blog posts is enough to:
+
 - Feel the editor
-- See your words on a real URL
-- Share a link with a friend
+- Build a real blog, not just a demo
+- Share links with friends and find your voice
 - Know whether this is your place
 
-And it costs us almost nothing. Five text posts in D1 is fractions of a cent. 50MB in R2 is barely measurable. The subdomain routing already works. The rate limiting already exists.
+And it costs us almost nothing. Twenty-five text posts in D1 is fractions of a cent. 100MB in R2 is barely measurable. The subdomain routing already works. The rate limiting already exists.
 
 ### The Goal
 
@@ -83,28 +86,28 @@ Turn "I've heard of Grove" into "I have a Grove." Remove every barrier between c
 
 ### Included
 
-| Feature | Wanderer (Free) | Seedling ($8/mo) |
-|---------|-----------------|-------------------|
-| Blog | Yes | Yes |
-| Published posts | 5 | 50 |
-| Drafts | 100 | Unlimited |
-| Storage | 50 MB | 1 GB |
-| Themes | 1 (default) | 3 |
-| Subdomain | `username.grove.place` | `username.grove.place` |
-| RSS feed | Yes | Yes |
-| Meadow access | Browse + reply | Full participation |
-| Comments/replies | 20/week (shared reed counter) | Unlimited |
-| Nav pages | 0 | 0 |
-| AI features | No | Yes (750 words/mo) |
-| Custom domain | No | No |
-| Email forwarding | No | No |
-| Shop | No | No |
-| Analytics | No | No |
-| Credit card required | No | Yes |
+| Feature              | Wanderer (Free)               | Seedling ($8/mo)       |
+| -------------------- | ----------------------------- | ---------------------- |
+| Blog                 | Yes                           | Yes                    |
+| Published posts      | 25                            | 100                    |
+| Drafts               | 100                           | Unlimited              |
+| Storage              | 100 MB                        | 1 GB                   |
+| Themes               | 1 (default)                   | 3                      |
+| Subdomain            | `username.grove.place`        | `username.grove.place` |
+| RSS feed             | Yes                           | Yes                    |
+| Meadow access        | Browse + reply                | Full participation     |
+| Comments/replies     | 20/week (shared reed counter) | Unlimited              |
+| Nav pages            | 0                             | 0                      |
+| AI features          | No                            | Yes (750 words/mo)     |
+| Custom domain        | No                            | No                     |
+| Email forwarding     | No                            | No                     |
+| Shop                 | No                            | No                     |
+| Analytics            | No                            | No                     |
+| Credit card required | No                            | Yes                    |
 
 ### Drafts
 
-Drafts do **not** count toward the 5-post limit. Only published posts count. Wanderers can have up to **100 drafts**. Paid tiers get unlimited drafts.
+Drafts do **not** count toward the 25-post limit. Only published posts count. Wanderers can have up to **100 drafts**. Paid tiers get unlimited drafts.
 
 This keeps the creative process frictionless. Write as much as you want. The limit is on what's live, not what's in progress. And 100 drafts is generous enough that nobody hits it by accident, but it prevents someone from using Grove as a free infinite note-taking app.
 
@@ -138,7 +141,7 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
   ╭──────────────────────────────────────────────────────────╮
   │                    Wanderer (Free)                       │
   │                                                          │
-  │    📝 📝 📝 📝 📝    ← "You've used 5 of 5 blooms"     │
+  │    📝 📝 📝 ...      ← "You've used 25 of 25 blooms"    │
   │                                                          │
   │    ┌──────────────────────────────────────────────┐      │
   │    │  🌱 Ready to grow?                           │      │
@@ -146,7 +149,7 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
   │    │  You've filled your garden. Take root      │      │
   │    │  and get room to keep writing.               │      │
   │    │                                              │      │
-  │    │  Seedling: $8/mo · 50 posts · 1 GB · AI     │      │
+  │    │  Seedling: $8/mo · 100 posts · 1 GB · AI    │      │
   │    │                                              │      │
   │    │        [ Take Root ]    [ Maybe Later ]      │      │
   │    └──────────────────────────────────────────────┘      │
@@ -155,9 +158,9 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
 
 ### Upgrade Triggers (Gentle, Never Pushy)
 
-1. **Post limit reached (5/5):** Soft banner in the editor. "You've filled your garden. Take root and get room to keep writing." They can still edit existing posts. They just can't create new ones.
+1. **Post limit reached (25/25):** Soft banner in the editor. "You've filled your garden. Take root and get room to keep writing." They can still edit existing posts. They just can't create new ones.
 
-2. **Storage limit approaching (40/50 MB):** Subtle notice. "Your storage is getting cozy. Seedling gives you 1 GB to spread out."
+2. **Storage limit approaching (80/100 MB):** Subtle notice. "Your storage is getting cozy. Seedling gives you 1 GB to spread out."
 
 3. **Theme browsing:** When they look at other themes, show them locked with a warm "Available with Seedling" label. Let them preview but not apply.
 
@@ -165,7 +168,7 @@ The Wanderer Plan is designed to make upgrading feel natural, never forced.
 
 ### What Carries Over on Upgrade
 
-Everything. All five posts, all uploaded images, their subdomain, their theme settings. Nothing is lost. Taking root means growing from where you already are.
+Everything. All posts, all uploaded images, their subdomain, their theme settings. Nothing is lost. Taking root means growing from where you already are.
 
 ---
 
@@ -180,6 +183,7 @@ Free accounts without expiration attract squatters. Someone grabs `coolname.grov
 If a free-tier account has **no activity for 365 consecutive days**, the account enters a reclamation process.
 
 **What counts as "activity":**
+
 - Logging in
 - Creating or editing a post
 - Uploading media
@@ -187,6 +191,7 @@ If a free-tier account has **no activity for 365 consecutive days**, the account
 - Receiving a comment (someone visited, your blog matters)
 
 **What does NOT count:**
+
 - Automated crawlers hitting the subdomain
 - RSS feed fetches
 - Password reset emails sent but not acted on
@@ -280,7 +285,7 @@ Free tiers attract abuse. Here's how we handle it.
 
 ### What We're NOT Worried About
 
-- **Someone happily using 5 posts forever:** That's fine. Their blog existing at `username.grove.place` is free advertising. Every free blog is a potential referral. The cost to us is effectively zero.
+- **Someone happily using 25 posts forever:** That's fine. Their blog existing at `username.grove.place` is free advertising. Every free blog is a potential referral. The cost to us is effectively zero.
 - **Lots of free accounts:** Good. That means people are trying Grove. Most will either upgrade or leave. Both are fine outcomes.
 
 ---
@@ -295,8 +300,8 @@ The free tier already exists in `packages/engine/src/lib/config/tiers.ts` with `
   Current Free Tier          Wanderer Plan (Proposed)
   ─────────────────          ────────────────────────
   blog: false          →     blog: true
-  posts: 0             →     posts: 5
-  storage: 0           →     storage: 50 MB
+  posts: 0             →     posts: 25
+  storage: 0           →     storage: 100 MB
   themes: 0            →     themes: 1
   status: coming_soon  →     status: available
   uploads: 0/day       →     uploads: 5/day
@@ -314,8 +319,8 @@ The free tier already exists in `packages/engine/src/lib/config/tiers.ts` with `
   Icon:         footprints
   Best For:     "The curious"
   Feature List:
-    - "5 blooms"
-    - "50 MB storage"
+    - "25 blooms"
+    - "100 MB storage"
     - "Your own grove.place address"
     - "RSS feed"
     - "No credit card needed"
@@ -426,27 +431,29 @@ Once launched, track:
 
 All open questions have been resolved:
 
-| Question | Decision |
-|----------|----------|
+| Question          | Decision                                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
 | Canopy visibility | Yes, with 1+ published post. Account age icons shown (see `docs/plans/planned/account-age-icons.md`). |
-| Meadow access | Browse + reply. Cannot start new feed posts. Replies share the 20/week reed counter. |
-| Drafts vs. limit | Drafts don't count. Only published posts. Max 100 drafts (unlimited for paid). |
-| Theme | 1 default theme (Foliage not yet integrated). Can preview others, can't apply. |
-| Receive comments | Yes, 20/week via reed counter. |
-| Auth method | Identical to all other Grove login points. Same Heartwood flow, no restrictions. |
+| Meadow access     | Browse + reply. Cannot start new feed posts. Replies share the 20/week reed counter.                  |
+| Drafts vs. limit  | Drafts don't count. Only published posts. Max 100 drafts (unlimited for paid).                        |
+| Theme             | 1 default theme (Foliage not yet integrated). Can preview others, can't apply.                        |
+| Receive comments  | Yes, 20/week via reed counter.                                                                        |
+| Auth method       | Identical to all other Grove login points. Same Heartwood flow, no restrictions.                      |
 
 ---
 
 ## Implementation Checklist
 
 ### Tier Config & Limits
-- [ ] Update free tier config in `tiers.ts` (blog: true, posts: 5, storage: 50MB, themes: 1, status: available)
+
+- [ ] Update free tier config in `tiers.ts` (blog: true, posts: 25, storage: 100MB, themes: 1, status: available)
 - [ ] Update free tier display strings (name: "Wanderer", tagline, description, feature list)
 - [ ] Update rate limits for free tier (uploads: 5/day, requests: 60/min)
 - [ ] Add draft limit enforcement (100 drafts for free tier, unlimited for paid)
-- [ ] Update post limit enforcement to handle 5-post limit (published only, drafts excluded)
+- [ ] Update post limit enforcement to handle 25-post limit (published only, drafts excluded)
 
 ### Database & Infra
+
 - [ ] Add `last_activity_at` column to tenants table (migration)
 - [ ] Add `reclamation_status` column to tenants table (migration)
 - [ ] Create `reclaimed_accounts` table (migration)
@@ -455,20 +462,23 @@ All open questions have been resolved:
 - [ ] Write "We miss you" and "Final notice" email templates
 
 ### Onboarding & Plans
+
 - [ ] Update onboarding flow to support free signups (skip payment, same Heartwood auth)
 - [ ] Update plans page to show Wanderer Plan first
 - [ ] Add IP-based free account creation limits (3 per IP per 30 days)
 
 ### Upgrade Experience
+
 - [ ] Add upgrade prompts (post limit reached, storage warning, theme preview)
 - [ ] Add draft limit upgrade prompt (approaching 100 drafts)
 - [ ] Test free → Seedling upgrade path (content preservation)
 
 ### Community Integration
+
 - [ ] Update Canopy to show Wanderers with 1+ published post
 - [ ] Meadow: allow browse + reply for free tier, block starting new feed posts
 - [ ] Ensure reed counter is shared across blog comments and Meadow replies
 
 ---
 
-*The gate is open. Come write.*
+_The gate is open. Come write._

@@ -111,18 +111,18 @@ export const TIERS: Record<TierKey, TierConfig> = {
   free: {
     id: "free",
     order: 0,
-    status: "coming_soon",
+    status: "available",
     limits: {
-      posts: 0,
-      storage: 0,
-      storageDisplay: "0 MB",
-      themes: 0,
+      posts: 25,
+      storage: 100 * 1024 * 1024, // 100 MB
+      storageDisplay: "100 MB",
+      themes: 1,
       navPages: 0,
       commentsPerWeek: 20,
       aiWordsPerMonth: 0,
     },
     features: {
-      blog: false,
+      blog: true,
       meadow: true,
       emailForwarding: false,
       fullEmail: false,
@@ -136,9 +136,9 @@ export const TIERS: Record<TierKey, TierConfig> = {
       analytics: false,
     },
     rateLimits: {
-      requests: { limit: 50, windowSeconds: 60 },
+      requests: { limit: 60, windowSeconds: 60 },
       writes: { limit: 20, windowSeconds: 3600 },
-      uploads: { limit: 0, windowSeconds: 86400 },
+      uploads: { limit: 5, windowSeconds: 86400 },
       ai: { limit: 0, windowSeconds: 86400 },
     },
     pricing: {
@@ -148,16 +148,18 @@ export const TIERS: Record<TierKey, TierConfig> = {
       yearlyPriceCents: 0,
     },
     display: {
-      name: "Free",
-      tagline: "Just visiting",
-      description: "Hang out in Meadow, follow blogs, react and comment.",
-      icon: "user",
-      bestFor: "Readers",
+      name: "Wanderer",
+      tagline: "Your first steps in the grove",
+      description:
+        "A quiet clearing to try your hand at writing. No commitment, no credit card.",
+      icon: "footprints",
+      bestFor: "The curious",
       featureStrings: [
-        "Meadow access",
-        "20 comments/week",
-        "Follow blogs",
-        "React to blooms",
+        "25 blooms",
+        "100 MB storage",
+        "Your own grove.place address",
+        "RSS feed",
+        "No credit card needed",
       ],
     },
     support: { level: "help_center", displayString: "Help Center" },
@@ -168,7 +170,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     order: 1,
     status: "available",
     limits: {
-      posts: 50,
+      posts: 100,
       storage: 1 * 1024 * 1024 * 1024, // 1 GB
       storageDisplay: "1 GB",
       themes: 3,
@@ -210,7 +212,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "sprout",
       bestFor: "Curious",
       featureStrings: [
-        "50 blooms",
+        "100 blooms",
         "1 GB storage",
         "3 curated themes",
         "Meadow access",
@@ -226,7 +228,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     order: 2,
     status: "coming_soon",
     limits: {
-      posts: 250,
+      posts: Infinity,
       storage: 5 * 1024 * 1024 * 1024, // 5 GB
       storageDisplay: "5 GB",
       themes: 10,
@@ -267,7 +269,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "tree-deciduous",
       bestFor: "Hobbyists",
       featureStrings: [
-        "250 blooms",
+        "Unlimited blooms",
         "5 GB storage",
         "10 themes",
         "3 nav pages",

@@ -3,7 +3,7 @@ title: Upgrading or Downgrading Your Plan
 description: How to change your Grove subscription plan
 category: help
 section: account-billing
-lastUpdated: '2025-12-24'
+lastUpdated: "2025-12-24"
 keywords:
   - upgrade
   - downgrade
@@ -38,12 +38,12 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 
 **What unlocks by plan:**
 
-| Upgrade to | You gain |
-|------------|----------|
-| Wanderer → Seedling | 45 more posts, ~950 MB more storage, Meadow sharing, unlimited comments, no ads guarantee |
-| Seedling → Sapling | 200 more posts, 4 GB storage, 7 more curated themes (coming soon), email forwarding, Centennial eligibility |
-| Sapling → Oak | Unlimited posts, 15 GB more storage, theme customizer (coming soon), custom domain, Analytics |
-| Oak → Evergreen | 80 GB more storage, custom font uploads (coming soon), domain included (we register it), dedicated support hours |
+| Upgrade to          | You gain                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Wanderer → Seedling | 75 more posts, ~900 MB more storage, Meadow sharing, unlimited comments, no ads guarantee                        |
+| Seedling → Sapling  | Unlimited posts, 4 GB storage, 7 more curated themes (coming soon), email forwarding, Centennial eligibility     |
+| Sapling → Oak       | 15 GB more storage, theme customizer (coming soon), custom domain, Analytics                                     |
+| Oak → Evergreen     | 80 GB more storage, custom font uploads (coming soon), domain included (we register it), dedicated support hours |
 
 ## When you downgrade
 
@@ -51,9 +51,10 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 
 **Your content stays.** If you're over the new plan's limits, your existing content isn't deleted. You just can't publish new posts until you're under the limit.
 
-**Example:** You have 100 posts on Sapling (250 limit) and downgrade to Seedling (50 limit). All 100 posts remain published and visible. You just can't create post #101 until you delete or unpublish some.
+**Example:** You have 150 posts on Sapling (unlimited) and downgrade to Seedling (100 limit). All 150 posts remain published and visible. You just can't create post #151 until you delete or unpublish some.
 
 **Features revert.** When the billing period ends:
+
 - Theme customizer settings revert to defaults (if downgrading from Oak/Evergreen)
 - Custom domain stops working (if downgrading from Oak/Evergreen)
 - Some curated themes become unavailable (if downgrading to Seedling's 3 themes)
@@ -80,7 +81,7 @@ You never lose content because of a plan change.
 
 ## If you're on Wanderer
 
-Wanderer is your free starting point — 5 posts, 50 MB storage, your own grove.place address. When you're ready for more room, cultivate to any paid tier.
+Wanderer is your free starting point — 25 posts, 100 MB storage, your own grove.place address. When you're ready for more room, cultivate to any paid tier.
 
 The growth path: **Wanderer → Seedling → Sapling → Oak → Evergreen**
 
@@ -96,4 +97,4 @@ Downgrades don't trigger refunds for the current period. You keep access to your
 
 ---
 
-*Questions about which plan fits? [Ask us](/contact)—we'll give you an honest recommendation.*
+_Questions about which plan fits? [Ask us](/contact)—we'll give you an honest recommendation._

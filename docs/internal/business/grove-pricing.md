@@ -2,7 +2,7 @@
 
 Grove.place
 
-*Effective December 2025*
+_Effective December 2025_
 
 ---
 
@@ -16,23 +16,23 @@ Your content is yours. Your domain is yours. No lock-in, no hostage situations.
 
 ## Subscription Tiers
 
-| Feature | Free | Seedling | Sapling | Oak | Evergreen |
-|---------|:----:|:--------:|:-------:|:---:|:---------:|
-| **Monthly** | **$0** | **$8** | **$12** | **$25** | **$35** |
-| **Yearly** | — | **$82** | **$122** | **$255** | **$357** |
-| Blog | — | ✓ | ✓ | ✓ | ✓ |
-| Blog Posts | — | 50 | 250 | Unlimited | Unlimited |
-| Storage | — | 1 GB | 5 GB | 20 GB | 100 GB |
-| Themes | — | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
-| Community Themes | — | — | — | ✓ | ✓ |
-| Meadow | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
-| Custom Domain | — | — | — | BYOD | ✓ |
-| @grove.place Email | — | — | Forward | Full | Full |
-| Centennial Status | — | — | ✓ | ✓ | ✓ |
-| Privacy Controls | — | — | — | — | Login-required option |
-| Support | Community | Community | Email | Priority | 8hrs + Priority |
-| **Best For** | *Readers* | *Curious* | *Hobbyists* | *Serious Bloggers* | *Professionals* |
+| Feature            |   Free    |  Seedling  |   Sapling   |        Oak         |         Evergreen         |
+| ------------------ | :-------: | :--------: | :---------: | :----------------: | :-----------------------: |
+| **Monthly**        |  **$0**   |   **$8**   |   **$12**   |      **$25**       |          **$35**          |
+| **Yearly**         |     —     |  **$82**   |  **$122**   |      **$255**      |         **$357**          |
+| Blog               |     ✓     |     ✓      |      ✓      |         ✓          |             ✓             |
+| Blog Posts         |    25     |    100     |  Unlimited  |     Unlimited      |         Unlimited         |
+| Storage            |  100 MB   |    1 GB    |    5 GB     |       20 GB        |          100 GB           |
+| Themes             |     —     | 3 + accent | 10 + accent |     Customizer     | Customizer + Custom Fonts |
+| Community Themes   |     —     |     —      |      —      |         ✓          |             ✓             |
+| Meadow             |     ✓     |     ✓      |      ✓      |         ✓          |             ✓             |
+| Public Comments    |  20/week  | Unlimited  |  Unlimited  |     Unlimited      |         Unlimited         |
+| Custom Domain      |     —     |     —      |      —      |        BYOD        |             ✓             |
+| @grove.place Email |     —     |     —      |   Forward   |        Full        |           Full            |
+| Centennial Status  |     —     |     —      |      ✓      |         ✓          |             ✓             |
+| Privacy Controls   |     —     |     —      |      —      |         —          |   Login-required option   |
+| Support            | Community | Community  |    Email    |      Priority      |      8hrs + Priority      |
+| **Best For**       | _Readers_ | _Curious_  | _Hobbyists_ | _Serious Bloggers_ |      _Professionals_      |
 
 **Yearly plans save 15%**: pay for 10 months, get 12.
 
@@ -61,26 +61,31 @@ This is by design. Grove is about sharing your voice with the world. If you need
 
 ---
 
-## Free Tier
+## Free Tier (Wanderer)
 
-*Browse, engage, and be part of the community.*
+_Your first steps in the grove._
 
 Free accounts get:
-- **Meadow access:** Browse the community feed, curate your following, react to posts
+
+- **Blog:** 25 published posts at `username.grove.place`
+- **100 MB storage** for images and media
+- **Meadow access:** Browse the community feed, react to posts, leave replies
 - **Comment on posts:** Leave replies (private) and comments (public) on blogs you follow
 - **Public comment limit:** 20 per week (private replies are rate-limited)
-- **No blog:** Free accounts can't publish posts
+- **RSS feed** included
+- **No credit card required**
 
-Free is for readers and community members. When you're ready to write, upgrade to Seedling.
+Free is for the curious. Write, share, see if this is home. When you're ready to grow, take root with Seedling.
 
 ---
 
 ## What Each Tier Includes
 
 ### Seedling: $8/month
-*Try it. See if blogging is for you.*
 
-- 50 blog posts
+_Try it. See if blogging is for you._
+
+- 100 blog posts
 - 1 GB storage for images and media
 - Your blog at `username.grove.place`
 - **3 themes** + custom accent color
@@ -89,9 +94,10 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - Community support via documentation
 
 ### Sapling: $12/month
-*You blog regularly. This is your space.*
 
-- 250 blog posts
+_You blog regularly. This is your space._
+
+- **Unlimited** blog posts
 - 5 GB storage
 - Your blog at `username.grove.place`
 - **10 themes** + custom accent color
@@ -100,7 +106,8 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - Email support
 
 ### Oak: $25/month
-*Your blog is part of your identity.*
+
+_Your blog is part of your identity._
 
 - **Unlimited** blog posts
 - 20 GB storage
@@ -112,7 +119,8 @@ Free is for readers and community members. When you're ready to write, upgrade t
 - Priority email support
 
 ### Evergreen: $35/month
-*Your blog is your business. We handle everything.*
+
+_Your blog is your business. We handle everything._
 
 - **Unlimited** blog posts
 - 100 GB storage
@@ -132,12 +140,12 @@ Free is for readers and community members. When you're ready to write, upgrade t
 
 Grove offers hand-curated themes that you can customize with your own accent color.
 
-| Tier | Theme Access |
-|------|--------------|
-| Seedling | 3 themes (Grove, Minimal, Night Garden) + custom accent color |
-| Sapling | All 10 themes + custom accent color |
-| Oak | All 10 themes + full theme customizer + community themes |
-| Evergreen | Everything Oak gets + custom font uploads |
+| Tier      | Theme Access                                                  |
+| --------- | ------------------------------------------------------------- |
+| Seedling  | 3 themes (Grove, Minimal, Night Garden) + custom accent color |
+| Sapling   | All 10 themes + custom accent color                           |
+| Oak       | All 10 themes + full theme customizer + community themes      |
+| Evergreen | Everything Oak gets + custom font uploads                     |
 
 **Theme Customizer (Oak+):** Adjust colors, fonts, spacing, layout, and add custom CSS.
 
@@ -160,10 +168,10 @@ Grove supports two types of interaction on blog posts:
 - **Replies (private):** Only the blog author sees these
 - **Comments (public):** Visible to everyone after author approval
 
-| Tier | Public Comments | Private Replies |
-|------|-----------------|-----------------|
-| Free | 20/week | Rate limited |
-| Seedling+ | Unlimited | Unlimited |
+| Tier      | Public Comments | Private Replies |
+| --------- | --------------- | --------------- |
+| Free      | 20/week         | Rate limited    |
+| Seedling+ | Unlimited       | Unlimited       |
 
 Blog authors control who can comment on their posts and moderate all public comments before they appear.
 
@@ -179,11 +187,11 @@ Already have a domain? Connect it to your Grove blog at no extra cost. Available
 
 Don't have a domain yet? Our AI-powered domain search tool finds the perfect domain for your blog—turning what's normally a 2-week search into 1-2 hours.
 
-| Turnaround | Setup Fee | Credited As |
-|:----------:|:---------:|:-----------:|
-| Same Day | $200 | 4 months Evergreen |
-| 3 Days | $100 | 2 months Evergreen |
-| 1 Week | $50 | 1 month Evergreen |
+| Turnaround | Setup Fee |    Credited As     |
+| :--------: | :-------: | :----------------: |
+|  Same Day  |   $200    | 4 months Evergreen |
+|   3 Days   |   $100    | 2 months Evergreen |
+|   1 Week   |    $50    | 1 month Evergreen  |
 
 **Setup fees are credited toward your subscription**: you're not losing money, you're prepaying for service.
 
@@ -192,6 +200,7 @@ Don't have a domain yet? Our AI-powered domain search tool finds the perfect dom
 ### Your Domain, Your Ownership
 
 When we register a domain for you, **you own it**. If you ever leave Grove:
+
 - Transfer your domain to any registrar
 - We provide authorization codes within 48 hours
 - No transfer fees, no hostage situations
@@ -202,17 +211,17 @@ See our [Data Portability & Separation Policy](https://grove.place/knowledge/leg
 
 ## Centennial Status
 
-*Some trees outlive the people who planted them.*
+_Some trees outlive the people who planted them._
 
 Centennial is Grove's promise that your words can have the same longevity. After 12 cumulative months on Sapling tier or above, your grove earns **Centennial status** — your site stays online for 100 years from the day you planted it.
 
 ### How It Works
 
-| Path to Centennial | Timeline |
-|-------------------|----------|
-| Yearly subscription (Sapling+) | Instant upon first renewal |
-| Monthly subscription (Sapling+) | After 12 monthly payments |
-| Mixed (upgrade/downgrade) | Cumulative months counted |
+| Path to Centennial              | Timeline                   |
+| ------------------------------- | -------------------------- |
+| Yearly subscription (Sapling+)  | Instant upon first renewal |
+| Monthly subscription (Sapling+) | After 12 monthly payments  |
+| Mixed (upgrade/downgrade)       | Cumulative months counted  |
 
 ### What Centennial Means
 
@@ -237,11 +246,11 @@ For full technical details, see the [Centennial Specification](/knowledge/specs/
 
 ## @grove.place Email
 
-| Tier | Email Feature | What You Get |
-|------|---------------|--------------|
-| Sapling | Forwarding | Emails to `you@grove.place` forward to your personal inbox |
-| Oak | Full mailbox | Send AND receive as `you@grove.place` |
-| Evergreen | Full mailbox | Send AND receive as `you@grove.place` |
+| Tier      | Email Feature | What You Get                                               |
+| --------- | ------------- | ---------------------------------------------------------- |
+| Sapling   | Forwarding    | Emails to `you@grove.place` forward to your personal inbox |
+| Oak       | Full mailbox  | Send AND receive as `you@grove.place`                      |
+| Evergreen | Full mailbox  | Send AND receive as `you@grove.place`                      |
 
 A professional email address for your blog—no extra cost, no separate service to manage.
 
@@ -249,13 +258,13 @@ A professional email address for your blog—no extra cost, no separate service 
 
 ## Support
 
-| Tier | What's Included | Additional Hours |
-|------|-----------------|------------------|
-| Free | Help Center only | — |
-| Seedling | Help Center & community | $100/hour |
-| Sapling | Email support | $100/hour |
-| Oak | Priority email support | $100/hour |
-| Evergreen | 8 hours free (first month) + priority | $75/hour |
+| Tier      | What's Included                       | Additional Hours |
+| --------- | ------------------------------------- | ---------------- |
+| Free      | Help Center only                      | —                |
+| Seedling  | Help Center & community               | $100/hour        |
+| Sapling   | Email support                         | $100/hour        |
+| Oak       | Priority email support                | $100/hour        |
+| Evergreen | 8 hours free (first month) + priority | $75/hour         |
 
 ---
 
@@ -295,4 +304,4 @@ No venture capital. No investor pressure to maximize extraction. Just a service 
 
 ---
 
-*Build it. They will come. Let the roots intermingle.*
+_Build it. They will come. Let the roots intermingle._

@@ -5,7 +5,7 @@
  * This file consolidates feature limits, rate limits, pricing, and display info.
  *
  * Tier progression:
- * - free: Wanderer Plan — 5 posts, 50 MB, no credit card
+ * - free: Wanderer Plan — 25 posts, 100 MB, no credit card
  * - seedling: $8/mo entry tier
  * - sapling: $12/mo mid tier - coming soon
  * - oak: $25/mo with BYOD domain - future
@@ -124,10 +124,10 @@ export const TIERS: Record<TierKey, TierConfig> = {
     order: 0,
     status: "available",
     limits: {
-      posts: 5,
+      posts: 25,
       drafts: 100,
-      storage: 50 * 1024 * 1024, // 50 MB
-      storageDisplay: "50 MB",
+      storage: 100 * 1024 * 1024, // 100 MB
+      storageDisplay: "100 MB",
       themes: 1,
       navPages: 0,
       commentsPerWeek: 20,
@@ -167,16 +167,16 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "footprints",
       bestFor: "The curious",
       featureStrings: [
-        "5 blooms",
-        "50 MB storage",
+        "25 blooms",
+        "100 MB storage",
         "Your own grove.place address",
         "RSS feed",
         "No credit card needed",
       ],
       standardName: "Free",
       standardFeatureStrings: [
-        "5 posts",
-        "50 MB storage",
+        "25 posts",
+        "100 MB storage",
         "Your own grove.place address",
         "RSS feed",
         "No credit card needed",
@@ -190,7 +190,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     order: 1,
     status: "available",
     limits: {
-      posts: 50,
+      posts: 100,
       drafts: Infinity,
       storage: 1 * 1024 * 1024 * 1024, // 1 GB
       storageDisplay: "1 GB",
@@ -233,7 +233,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "sprout",
       bestFor: "Curious",
       featureStrings: [
-        "50 blooms",
+        "100 blooms",
         "1 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "3 curated themes",
@@ -243,7 +243,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       ],
       standardName: "Starter",
       standardFeatureStrings: [
-        "50 posts",
+        "100 posts",
         "1 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "3 curated themes",
@@ -260,7 +260,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
     order: 2,
     status: "coming_soon",
     limits: {
-      posts: 250,
+      posts: Infinity,
       drafts: Infinity,
       storage: 5 * 1024 * 1024 * 1024, // 5 GB
       storageDisplay: "5 GB",
@@ -302,7 +302,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       icon: "tree-deciduous",
       bestFor: "Hobbyists",
       featureStrings: [
-        "250 blooms",
+        "Unlimited blooms",
         "5 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "10 themes",
@@ -313,7 +313,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       ],
       standardName: "Growth",
       standardFeatureStrings: [
-        "250 posts",
+        "Unlimited posts",
         "5 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "10 themes",
@@ -481,7 +481,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
  *
  * Seedling is the default because:
  * - It's the entry-level paid tier with reasonable limits
- * - Free tier (Wanderer) has tight limits (5 posts, 50 MB), so defaulting
+ * - Free tier (Wanderer) has tight limits (25 posts, 100 MB), so defaulting
  *   to it could unexpectedly restrict users with unknown/invalid tier data
  * - It provides a good baseline without being overly permissive
  */

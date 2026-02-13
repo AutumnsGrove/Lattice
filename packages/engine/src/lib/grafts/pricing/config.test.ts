@@ -86,8 +86,8 @@ describe("Pricing Graft Configuration", () => {
       expect(tier.monthlyPrice).toBe(0);
       expect(tier.annualPrice).toBe(0);
       expect(tier.annualSavings).toBe(0);
-      expect(tier.limits.posts).toBe("5");
-      expect(tier.limits.storage).toBe("50 MB");
+      expect(tier.limits.posts).toBe("25");
+      expect(tier.limits.storage).toBe("100 MB");
     });
 
     it("transforms seedling tier with correct limits", () => {
@@ -97,7 +97,7 @@ describe("Pricing Graft Configuration", () => {
       expect(tier.name).toBe("Seedling");
       expect(tier.monthlyPrice).toBe(8);
       expect(tier.annualSavings).toBe(15);
-      expect(tier.limits.posts).toBe("50");
+      expect(tier.limits.posts).toBe("100");
     });
 
     it("transforms oak tier with unlimited posts", () => {

@@ -30,7 +30,7 @@
 		free: {
 			title: "Wanderer Accounts",
 			content:
-				"Wanderer accounts get 5 blog posts and 50 MB storage — enough to try your hand at writing with no commitment. [[meadow|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling|Seedling]].",
+				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. [[meadow|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling|Seedling]].",
 		},
 		// TODO(foliage): update content when themes launch
 		themes: {

@@ -3,7 +3,7 @@ title: What are Tiers?
 description: Understanding Grove's subscription tiers from Seedling to Evergreen
 category: help
 section: how-it-works
-lastUpdated: '2026-01-28'
+lastUpdated: "2026-01-28"
 keywords:
   - tiers
   - pricing
@@ -33,8 +33,9 @@ Five levels—Wanderer, Seedling, Sapling, Oak, and Evergreen—each offering mo
 You're curious. Maybe you've been meaning to start a blog for years. Maybe you just want to see what this place feels like. No credit card, no commitment — just a quiet clearing to try your hand at writing.
 
 Wanderer gives you:
-- Up to 5 posts
-- 50 MB storage
+
+- Up to 25 posts
+- 100 MB storage
 - Your own grove.place address
 - RSS feed
 - Meadow access for browsing and reacting
@@ -48,7 +49,8 @@ It's enough to find out if this is home.
 You've decided to put down roots. Wanderer felt right, and now you want more room to grow.
 
 Seedling gives you:
-- Up to 50 posts
+
+- Up to 100 posts
 - 1 GB storage
 - Basic theming with accent colors
 - Access to the community
@@ -62,7 +64,8 @@ It's enough to genuinely explore whether Grove is right for you.
 You've decided this is your space. You post regularly. You want more room to grow.
 
 Sapling includes everything in Seedling, plus:
-- Up to 250 posts
+
+- Unlimited posts
 - 5 GB storage
 - Full theming options
 - Email forwarding to your `@grove.place` address
@@ -80,6 +83,7 @@ Most hobbyist bloggers live comfortably here.
 Your blog is part of your identity. Maybe it supports your work or side business. You need professional features.
 
 Oak includes everything in Sapling, plus:
+
 - Unlimited posts
 - 20 GB storage
 - Theme customizer (full control over colors, typography, spacing)
@@ -96,6 +100,7 @@ No more limits. Your grove grows as big as you need.
 You want Grove to handle everything. Domain search, registration, priority support, all the bells and whistles.
 
 Evergreen includes everything in Oak, plus:
+
 - 100 GB storage
 - Custom fonts
 - [[forage]] domain discovery (included)
@@ -120,7 +125,7 @@ The full-service option for people who value their time.
 
 **Annual discounts available.** Pay yearly and save. The commitment makes sense once you know you're staying.
 
-**Free is where everyone starts.** Wanderer gives you 5 posts and 50 MB — enough to try things out with zero commitment. Running a quality platform costs money, which is why paid tiers exist. But your first steps? Those are on us.
+**Free is where everyone starts.** Wanderer gives you 25 posts and 100 MB — enough to build a real blog with zero commitment. Running a quality platform costs money, which is why paid tiers exist. But your first steps? Those are on us.
 
 ## Related
 
@@ -130,4 +135,4 @@ The full-service option for people who value their time.
 
 ---
 
-*Wanderers find their clearing. Seedlings take root. Saplings grow strong. Oaks stand tall. Evergreens stay green through every season. That's the journey.*
+_Wanderers find their clearing. Seedlings take root. Saplings grow strong. Oaks stand tall. Evergreens stay green through every season. That's the journey._

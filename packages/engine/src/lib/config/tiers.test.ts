@@ -78,9 +78,9 @@ describe("Tier Configuration", () => {
     });
 
     it("has increasing post limits", () => {
-      expect(TIERS.free.limits.posts).toBe(5);
-      expect(TIERS.seedling.limits.posts).toBe(50);
-      expect(TIERS.sapling.limits.posts).toBe(250);
+      expect(TIERS.free.limits.posts).toBe(25);
+      expect(TIERS.seedling.limits.posts).toBe(100);
+      expect(TIERS.sapling.limits.posts).toBe(Infinity);
       expect(TIERS.oak.limits.posts).toBe(Infinity);
       expect(TIERS.evergreen.limits.posts).toBe(Infinity);
     });
@@ -92,7 +92,7 @@ describe("Tier Configuration", () => {
       const oakStorage = TIERS.oak.limits.storage;
       const evergreenStorage = TIERS.evergreen.limits.storage;
 
-      expect(freeStorage).toBe(50 * 1024 * 1024); // 50 MB
+      expect(freeStorage).toBe(100 * 1024 * 1024); // 100 MB
       expect(seedlingStorage).toBeGreaterThan(freeStorage);
       expect(saplingStorage).toBeGreaterThan(seedlingStorage);
       expect(oakStorage).toBeGreaterThan(saplingStorage);
@@ -240,7 +240,7 @@ describe("Tier Configuration", () => {
 
     describe("getTierLimit", () => {
       it("returns correct limits", () => {
-        expect(getTierLimit("seedling", "posts")).toBe(50);
+        expect(getTierLimit("seedling", "posts")).toBe(100);
         expect(getTierLimit("sapling", "navPages")).toBe(3);
         expect(getTierLimit("oak", "posts")).toBe(Infinity);
       });
@@ -265,9 +265,9 @@ describe("Tier Configuration", () => {
 
     it("has blog enabled with correct limits", () => {
       expect(TIERS.free.features.blog).toBe(true);
-      expect(TIERS.free.limits.posts).toBe(5);
+      expect(TIERS.free.limits.posts).toBe(25);
       expect(TIERS.free.limits.drafts).toBe(100);
-      expect(TIERS.free.limits.storage).toBe(50 * 1024 * 1024);
+      expect(TIERS.free.limits.storage).toBe(100 * 1024 * 1024);
       expect(TIERS.free.limits.themes).toBe(1);
     });
 
