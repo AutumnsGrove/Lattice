@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard, GlassButton, Badge, Waystone, GroveTerm, GroveSwap, GroveIntro } from "$lib/ui/components/ui";
-  import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse } from "lucide-svelte";
+  import { Calendar, Sparkles, GitBranch, Construction, Image, Warehouse, Activity } from "lucide-svelte";
 
   // Available curios with their status
   const curios = [
@@ -44,6 +44,20 @@
         "Code composition",
         "Growth timeline",
         "AI release notes"
+      ]
+    },
+    {
+      id: "pulse",
+      name: "Pulse",
+      description: "Live development heartbeat — real-time activity from your GitHub repos",
+      icon: Activity,
+      status: "greenhouse",
+      href: "/arbor/curios/pulse",
+      features: [
+        "Real-time webhooks",
+        "Activity heatmap",
+        "Event feed with filters",
+        "Trend sparklines"
       ]
     }
   ];
