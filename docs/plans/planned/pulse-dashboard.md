@@ -1,27 +1,30 @@
-# Pulse Dashboard — Architecture Plan
+# Pulse Curio — Architecture Plan
 
 ## Vision
 
-Pulse is a live development heartbeat page at `grove.place/pulse` — a real-time window into how Grove is being built. Fed by GitHub webhooks, it shows the rhythm of development: commits flowing in, PRs merging, issues moving, releases shipping. Where `/journey` tells the story of _what_ was built, `/pulse` shows the story of _how it's being built, right now_.
+Pulse is a **curio** — a per-tenant live development heartbeat that any Grove user can add to their site. Drop a webhook URL into your GitHub repo settings, and your blog gets a `/pulse` page showing your development rhythm in real time: commits flowing, PRs merging, issues moving, releases shipping.
 
-Transparency as trust. A living heartbeat that says "we're here, we're building, come watch."
+Where **Timeline** narrates your daily work through AI-voiced summaries, and **Journey** tracks your repository's evolution through snapshots, **Pulse** shows the raw heartbeat — what's happening _right now_, no AI needed, no polling, just live webhooks.
+
+**The setup is dead simple**: Enable Pulse in Arbor, copy the generated webhook URL + secret, paste into GitHub. Done. Events start flowing in seconds.
 
 ---
 
 ## Architecture Overview
 
 ```
-GitHub (org-level webhook)
+GitHub Repo (user configures webhook)
     │
-    ▼ POST (X-Hub-Signature-256)
-┌─────────────────────────────┐
-│  grove-pulse (Worker)       │  ← New dedicated Cloudflare Worker
-│  • Verify HMAC signature    │
-│  • Normalize event payload  │
-│  • Write to D1 (events)     │
-│  • Update KV hot cache      │
-│  • Cron: hourly/daily stats │
-└─────────────────────────────┘
+    ▼ POST https://grove-pulse.workers.dev/webhook/{tenant_id}
+┌──────────────────────────────────┐
+│  grove-pulse (Worker)            │
+│  • Look up tenant's webhook_secret
+│  • Verify X-Hub-Signature-256    │
+│  • Normalize event payload       │
+│  • Write to D1 (pulse_events)    │
+│  • Update KV hot cache           │
+│  • Cron: hourly/daily rollups    │
+└──────────────────────────────────┘
     │           │
     ▼           ▼
   ┌───┐     ┌────┐
@@ -29,144 +32,138 @@ GitHub (org-level webhook)
   └───┘     └────┘
     │           │
     ▼           ▼
-┌─────────────────────────────┐
-│  grove-landing (Pages)      │
-│  /pulse route               │
-│  • +page.server.ts → D1/KV  │
-│  • +page.svelte → Dashboard │
-└─────────────────────────────┘
+┌──────────────────────────────────┐
+│  grove-engine (tenant site)      │
+│  /{tenant}.grove.place/pulse     │
+│  • API: /api/curios/pulse/*      │
+│  • Arbor: /arbor/curios/pulse    │
+│  • Public: /pulse page           │
+└──────────────────────────────────┘
 ```
+
+### Key Difference from Timeline/Journey
+
+Timeline and Journey use **polling** (cron workers calling GitHub API with stored tokens). Pulse uses **push** (GitHub sends events to us via webhooks). This means:
+
+- **No GitHub token needed** — webhooks are configured on GitHub's side, not ours
+- **No API rate limits** — events come to us, we don't fetch them
+- **Truly real-time** — events arrive within seconds of the action
+- **Simpler config** — just enable + copy a URL, no secrets to encrypt
+- **Works with any repo** — public or private, the webhook fires regardless
 
 ---
 
-## Component 1: Webhook Receiver Worker
+## Component 1: Curio Registration
 
-**Location:** `workers/pulse/`
+**File:** `packages/engine/src/lib/curios/registry.ts`
 
-A dedicated Cloudflare Worker that receives GitHub webhook POST requests, validates them, normalizes payloads, stores events in D1, and updates KV hot caches.
-
-### Why a Dedicated Worker (Not an API Route in Landing)
-
-- **Isolation**: Webhook processing shouldn't be coupled to the marketing site
-- **Cron support**: Workers support `[triggers]` cron for scheduled aggregation — Pages cannot
-- **Performance**: Direct worker execution, no SvelteKit routing overhead
-- **Follows existing pattern**: `workers/email-catchup/`, `packages/workers/timeline-sync/`, `packages/workers/webhook-cleanup/` all use this pattern
-
-### Webhook Events to Handle
-
-| Event          | Action                         | What We Store                                             |
-| -------------- | ------------------------------ | --------------------------------------------------------- |
-| `push`         | —                              | Commit count, authors, messages, files changed, lines +/- |
-| `pull_request` | opened/closed/merged/reopened  | Title, state, draft status, labels, merge time            |
-| `issues`       | opened/closed/reopened/labeled | Title, state, labels                                      |
-| `release`      | published                      | Tag name, title, prerelease flag                          |
-| `create`       | —                              | Branch/tag creation (ref_type)                            |
-| `delete`       | —                              | Branch/tag deletion (ref_type)                            |
-| `workflow_run` | completed                      | Conclusion (success/failure), workflow name               |
-| `star`         | created/deleted                | Cumulative count                                          |
-| `fork`         | —                              | Cumulative count                                          |
-
-### Security
-
-- **Signature verification**: HMAC-SHA256 via `X-Hub-Signature-256` header with shared `WEBHOOK_SECRET`
-- **Idempotency**: Store `X-GitHub-Delivery` header as delivery_id, skip duplicates
-- **Payload sanitization**: Strip unnecessary nested data (only store what we display)
-- **No PII concerns**: GitHub webhook payloads are public repo data (usernames, commit messages, etc.) — not sensitive
-
-### Worker Implementation Structure
-
-```
-workers/pulse/
-├── src/
-│   ├── index.ts           # Worker entry: fetch() + scheduled()
-│   ├── verify.ts          # HMAC-SHA256 signature verification
-│   ├── handlers/
-│   │   ├── push.ts        # Push event handler
-│   │   ├── pull-request.ts
-│   │   ├── issues.ts
-│   │   ├── release.ts
-│   │   ├── workflow.ts
-│   │   └── community.ts   # Stars, forks
-│   ├── store.ts           # D1 writes + KV cache updates
-│   └── aggregate.ts       # Cron aggregation logic
-├── wrangler.toml
-├── package.json
-└── tsconfig.json
-```
-
-### Wrangler Config
-
-```toml
-name = "grove-pulse"
-main = "src/index.ts"
-compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
-
-[triggers]
-crons = [
-  "0 * * * *",    # Hourly: update hourly_activity rollups
-  "5 0 * * *",    # Daily at 00:05 UTC: finalize daily_stats
-]
-
-[[d1_databases]]
-binding = "DB"
-database_name = "grove-engine-db"
-database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
-
-[[kv_namespaces]]
-binding = "KV"
-id = "514e91e81cc44d128a82ec6f668303e4"  # Shared CACHE_KV
-
-[vars]
-# WEBHOOK_SECRET configured as secret in Cloudflare Dashboard
+```typescript
+const pulse: CurioDefinition = {
+  id: "pulse",
+  name: "Pulse",
+  description:
+    "Live development heartbeat — real-time activity from your GitHub repos",
+  category: "integration",
+  minTier: "seedling", // Available to all tiers
+  placements: ["dedicated", "left-vine", "right-vine"],
+  defaultPlacement: "dedicated",
+  hasAdminPanel: true,
+  hasDedicatedPage: true,
+  icon: "activity", // Lucide "activity" (heartbeat line)
+};
 ```
 
 ---
 
 ## Component 2: D1 Schema
 
-**Migration location:** `packages/landing/migrations/0007_pulse.sql`
+**Migration:** `packages/engine/migrations/XXX_pulse_curio.sql`
 
-Using the landing package's migration chain since /pulse lives in landing, and we want the tables queryable from both the worker and the landing app (shared D1 database).
+Following the engine migration chain (like Timeline 024, Journey 025). Next available number.
+
+### Table: `pulse_config` — Per-tenant settings
+
+```sql
+CREATE TABLE IF NOT EXISTS pulse_config (
+    tenant_id TEXT PRIMARY KEY,
+    enabled INTEGER DEFAULT 0,
+    webhook_secret TEXT NOT NULL,      -- HMAC secret (generated on enable)
+    -- Display preferences
+    show_heatmap INTEGER DEFAULT 1,
+    show_feed INTEGER DEFAULT 1,
+    show_stats INTEGER DEFAULT 1,
+    show_trends INTEGER DEFAULT 1,
+    show_ci INTEGER DEFAULT 1,
+    -- Filtering
+    repos_include TEXT,                -- JSON array: only these repos (null = all)
+    repos_exclude TEXT,                -- JSON array: ignore these repos
+    -- Settings
+    timezone TEXT DEFAULT 'America/New_York',
+    feed_max_items INTEGER DEFAULT 100,
+    created_at INTEGER DEFAULT (strftime('%s', 'now')),
+    updated_at INTEGER DEFAULT (strftime('%s', 'now')),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+```
+
+**Note on `webhook_secret`**: Unlike Timeline/Journey tokens (which are user-provided API keys that need encryption), the webhook secret is _generated by us_ and only needs to be shown once to the user during setup. It's stored plaintext because:
+
+1. It's not a credential for an external service — it's a shared HMAC key we generated
+2. The worker needs to read it on every request for verification (no decryption overhead)
+3. If the DB is compromised, the attacker can only _send_ fake webhook events, not access GitHub
+
+If we want to be extra cautious, we can encrypt it with envelope encryption like Timeline tokens. Decision: **encrypt it** — follows the principle of least surprise and matches existing curio patterns.
 
 ### Table: `pulse_events` — Normalized webhook events
 
 ```sql
-CREATE TABLE pulse_events (
+CREATE TABLE IF NOT EXISTS pulse_events (
     id TEXT PRIMARY KEY,
-    delivery_id TEXT UNIQUE,          -- GitHub X-GitHub-Delivery (idempotency)
-    event_type TEXT NOT NULL,         -- push, pull_request, issues, release, etc.
-    action TEXT,                      -- opened, closed, merged, created, etc.
-    repo_name TEXT NOT NULL,          -- Short name (e.g., "GroveEngine")
-    repo_full_name TEXT NOT NULL,     -- Full name (e.g., "AutumnsGrove/GroveEngine")
-    actor TEXT NOT NULL,              -- GitHub username
-    title TEXT,                       -- Commit message / PR title / issue title
-    ref TEXT,                         -- Branch name or tag
-    data TEXT,                        -- JSON: event-specific details
-    occurred_at INTEGER NOT NULL,     -- Event timestamp (unix seconds)
-    created_at INTEGER DEFAULT (strftime('%s', 'now'))
+    tenant_id TEXT NOT NULL,
+    delivery_id TEXT,                  -- GitHub X-GitHub-Delivery (idempotency)
+    event_type TEXT NOT NULL,          -- push, pull_request, issues, release, etc.
+    action TEXT,                       -- opened, closed, merged, created, etc.
+    repo_name TEXT NOT NULL,           -- Short name (e.g., "GroveEngine")
+    repo_full_name TEXT NOT NULL,      -- Full name (e.g., "AutumnsGrove/GroveEngine")
+    actor TEXT NOT NULL,               -- GitHub username
+    title TEXT,                        -- Commit message / PR title / issue title
+    ref TEXT,                          -- Branch name or tag
+    data TEXT,                         -- JSON: event-specific normalized details
+    occurred_at INTEGER NOT NULL,      -- Event timestamp (unix seconds)
+    created_at INTEGER DEFAULT (strftime('%s', 'now')),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_pulse_events_type ON pulse_events(event_type);
-CREATE INDEX idx_pulse_events_repo ON pulse_events(repo_name);
-CREATE INDEX idx_pulse_events_occurred ON pulse_events(occurred_at);
-CREATE INDEX idx_pulse_events_actor ON pulse_events(actor);
+CREATE UNIQUE INDEX idx_pulse_events_delivery
+    ON pulse_events(tenant_id, delivery_id);
+CREATE INDEX idx_pulse_events_tenant_time
+    ON pulse_events(tenant_id, occurred_at DESC);
+CREATE INDEX idx_pulse_events_tenant_type
+    ON pulse_events(tenant_id, event_type, occurred_at DESC);
+CREATE INDEX idx_pulse_events_tenant_repo
+    ON pulse_events(tenant_id, repo_name, occurred_at DESC);
 ```
 
-**`data` column (JSON) varies by event type:**
+**`data` JSON varies by event type:**
 
-- **push**: `{ commits: number, additions: number, deletions: number, files_changed: number, head_sha: string }`
-- **pull_request**: `{ number: number, state: string, draft: boolean, labels: string[], merged: boolean, merge_time_hours: number | null }`
-- **issues**: `{ number: number, state: string, labels: string[] }`
-- **release**: `{ tag: string, prerelease: boolean }`
-- **workflow_run**: `{ name: string, conclusion: string, branch: string }`
-- **star/fork**: `{ total_count: number }`
+| Event          | `data` shape                                                                                    |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| `push`         | `{ commits: number, additions: number, deletions: number, files_changed: number, sha: string }` |
+| `pull_request` | `{ number: number, draft: boolean, labels: string[], merged: boolean, merge_hours: number? }`   |
+| `issues`       | `{ number: number, labels: string[] }`                                                          |
+| `release`      | `{ tag: string, prerelease: boolean, name: string }`                                            |
+| `workflow_run` | `{ name: string, conclusion: string, branch: string }`                                          |
+| `star`         | `{ total: number }`                                                                             |
+| `fork`         | `{ total: number, forker: string }`                                                             |
+| `create`       | `{ ref_type: string }`                                                                          |
+| `delete`       | `{ ref_type: string }`                                                                          |
 
 ### Table: `pulse_daily_stats` — Aggregated daily metrics
 
 ```sql
-CREATE TABLE pulse_daily_stats (
+CREATE TABLE IF NOT EXISTS pulse_daily_stats (
     id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
     date TEXT NOT NULL,                -- YYYY-MM-DD
     repo_name TEXT,                    -- NULL = all repos combined
     commits INTEGER DEFAULT 0,
@@ -181,297 +178,674 @@ CREATE TABLE pulse_daily_stats (
     releases INTEGER DEFAULT 0,
     ci_passes INTEGER DEFAULT 0,
     ci_failures INTEGER DEFAULT 0,
-    stars_total INTEGER,               -- Snapshot of total stars
-    forks_total INTEGER,               -- Snapshot of total forks
+    stars_total INTEGER,
+    forks_total INTEGER,
     created_at INTEGER DEFAULT (strftime('%s', 'now')),
     updated_at INTEGER DEFAULT (strftime('%s', 'now')),
-    UNIQUE(date, repo_name)
+    UNIQUE(tenant_id, date, repo_name),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_pulse_daily_date ON pulse_daily_stats(date);
+CREATE INDEX idx_pulse_daily_tenant_date
+    ON pulse_daily_stats(tenant_id, date DESC);
 ```
 
 ### Table: `pulse_hourly_activity` — Heatmap data
 
 ```sql
-CREATE TABLE pulse_hourly_activity (
+CREATE TABLE IF NOT EXISTS pulse_hourly_activity (
     id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
     date TEXT NOT NULL,                -- YYYY-MM-DD
     hour INTEGER NOT NULL,            -- 0-23 (UTC)
     commits INTEGER DEFAULT 0,
-    events INTEGER DEFAULT 0,         -- Total events of any type
+    events INTEGER DEFAULT 0,
     created_at INTEGER DEFAULT (strftime('%s', 'now')),
-    UNIQUE(date, hour)
+    UNIQUE(tenant_id, date, hour),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_pulse_hourly_date ON pulse_hourly_activity(date);
+CREATE INDEX idx_pulse_hourly_tenant_date
+    ON pulse_hourly_activity(tenant_id, date DESC);
 ```
 
 ### Retention
 
-- `pulse_events`: 90 days (add to webhook-cleanup worker's cron job)
-- `pulse_daily_stats`: Indefinite (small rows, historical value)
-- `pulse_hourly_activity`: 90 days (add to cleanup)
+- `pulse_events`: **90 days** (add to existing webhook-cleanup worker cron)
+- `pulse_daily_stats`: **Indefinite** (small rows, valuable for long-term trends)
+- `pulse_hourly_activity`: **90 days** (add to cleanup)
 
 ---
 
-## Component 3: KV Hot Cache
+## Component 3: Webhook Receiver Worker
 
-Keys in the shared `CACHE_KV` namespace, prefixed with `pulse:` to avoid collisions.
+**Location:** `workers/pulse/`
 
-| Key                   | Value                                                                | TTL   | Updated On              |
-| --------------------- | -------------------------------------------------------------------- | ----- | ----------------------- |
-| `pulse:latest:commit` | `{ repo, message, author, sha, time }`                               | 24h   | Every push event        |
-| `pulse:latest:pr`     | `{ repo, title, number, action, author, time }`                      | 24h   | Every PR event          |
-| `pulse:latest:event`  | `{ type, repo, title, time }`                                        | 24h   | Every event             |
-| `pulse:today`         | `{ commits, prs_merged, issues_closed, lines_added, lines_removed }` | 2h    | Every event (increment) |
-| `pulse:active`        | `{ active: true, last_commit: timestamp, author }`                   | 30min | Every push event        |
-| `pulse:streak`        | `{ days: number, since: date }`                                      | 24h   | Daily cron              |
-| `pulse:week`          | `{ commits, prs_merged, issues_closed }`                             | 6h    | Hourly cron             |
+A dedicated Cloudflare Worker. Same pattern as `workers/email-catchup/` and `packages/workers/timeline-sync/`.
 
-### Why KV + D1 (Not Just D1)
+### Why a Dedicated Worker
 
-- KV reads are ~1ms from the edge. D1 queries are 100-300ms.
-- The /pulse page will likely get more traffic than /journey — it's the "live" page.
-- KV serves the "current state" fast; D1 serves historical queries for charts.
-- The "currently active" indicator needs sub-second response.
+- **Cron triggers** for aggregation (Pages can't do cron)
+- **Isolation** from the engine — webhook processing shouldn't affect tenant sites
+- **No SvelteKit overhead** — raw Worker for maximum speed on hot path
+- **Independent scaling** — webhook volume is unpredictable
 
----
+### Routing: Per-Tenant Webhook URLs
 
-## Component 4: Frontend — `/pulse` Route
+Each tenant gets a unique URL:
 
-**Location:** `packages/landing/src/routes/pulse/`
-
-### Data Loading (`+page.server.ts`)
-
-```typescript
-// Parallel queries: KV for hot data, D1 for historical
-const [kvData, dailyStats, recentEvents, hourlyActivity] = await Promise.all([
-  loadKVCache(platform.env.CACHE_KV), // pulse:today, pulse:active, pulse:streak
-  loadDailyStats(platform.env.DB, 30), // Last 30 days
-  loadRecentEvents(platform.env.DB, 50), // Last 50 events
-  loadHourlyActivity(platform.env.DB, 7), // Last 7 days of hourly data
-]);
+```
+POST https://grove-pulse.workers.dev/webhook/{tenant_id}
 ```
 
-### Page Sections (Top to Bottom)
+The worker:
 
-#### 1. Hero — "The Heartbeat of Grove"
+1. Extracts `tenant_id` from the URL path
+2. Looks up `pulse_config` for that tenant (confirms `enabled = 1`)
+3. Decrypts `webhook_secret` for that tenant
+4. Verifies `X-Hub-Signature-256` using that tenant's secret
+5. Processes the event
 
-- Large pulsing dot animation when `pulse:active` is true
-- "Currently building..." with last commit message when active
-- "Last seen building X hours ago" when inactive
-- Current streak badge
+**Why tenant_id in URL (not just secret matching)?**
 
-#### 2. Today's Pulse — Stats Cards
+- O(1) lookup instead of scanning all tenants
+- Tenant isolation — one tenant's events can't collide with another's
+- The URL isn't sensitive — the HMAC secret provides authentication
+- GitHub webhook settings show the URL clearly, making debugging easy
 
-- 4 glassmorphism cards in a responsive grid:
-  - **Commits today** (with sparkline of hourly distribution)
-  - **PRs merged** (with total open count)
-  - **Issues closed** (with net change: opened vs closed)
-  - **Lines changed** (+additions / -deletions)
+### Worker Structure
 
-#### 3. Activity Heatmap — "When We Build"
+```
+workers/pulse/
+├── src/
+│   ├── index.ts              # fetch() + scheduled()
+│   ├── types.ts              # Env, event types
+│   ├── verify.ts             # HMAC-SHA256 verification
+│   ├── normalize.ts          # Event payload normalization (all handlers)
+│   ├── store.ts              # D1 writes + KV updates
+│   └── aggregate.ts          # Cron: hourly/daily stat rollups
+├── wrangler.toml
+├── package.json
+└── tsconfig.json
+```
 
-- 7-day x 24-hour grid (GitHub contribution chart style)
-- Color intensity based on commit count per hour
-- Uses the existing `ActivityOverview` chart component from engine as reference
-- Timezone-aware (display in visitor's local time)
+**Design choice**: One `normalize.ts` file with a switch statement instead of separate handler files. Webhook normalization is lightweight — each handler is 10-20 lines of field extraction. Separate files would be over-engineering for what amounts to a mapping function.
 
-#### 4. Live Feed — "What's Happening"
+### Wrangler Config
 
-- Chronological event feed (most recent first)
-- Each event type has its own icon and color:
-  - Push (commits) — green
-  - PR merged — purple
-  - PR opened — blue
-  - Issue opened — amber
-  - Issue closed — gray
-  - CI failed — red
-  - Release — gold
-- Filterable by event type (toggle chips)
-- "Load more" pagination (50 at a time)
-- Relative timestamps ("2 hours ago", "yesterday")
+```toml
+name = "grove-pulse"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
 
-#### 5. Trends — "The Bigger Picture"
+[triggers]
+crons = [
+  "0 * * * *",    # Hourly: rollup hourly_activity from events
+  "5 0 * * *",    # Daily at 00:05 UTC: finalize daily_stats
+]
 
-- 30-day rolling charts:
-  - Commit velocity (daily commits line chart)
-  - Code churn (additions vs deletions stacked area)
-  - Issue health (opened vs closed, burn-down style)
-- Weekly comparison: "This week vs last week" delta badges
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
-#### 6. Build Health — "CI & Releases"
+[[kv_namespaces]]
+binding = "KV"
+id = "514e91e81cc44d128a82ec6f668303e4"  # Shared CACHE_KV
 
-- Latest CI status badge (green/red/yellow)
-- CI pass rate (last 30 days)
-- Recent releases timeline
-- Link to latest release notes
+[vars]
+GROVE_KEK = ""  # Set via wrangler secret — for envelope encryption
+```
 
-### UI Design
+### Webhook Events to Handle
 
-- **Glassmorphism** cards with nature-themed accents (following Grove design system)
-- **Seasonal awareness** via `seasonStore` — heatmap colors shift with season
-- **Dark mode support** — "nature at night" warmth maintained
-- **Responsive**: Mobile-first, 1-column on mobile -> 2-column -> 4-column grid
-- **Reduced motion**: All animations respect `prefers-reduced-motion`
-- **Accessibility**: WCAG AA, proper ARIA labels on charts, screen-reader-friendly event feed
+| Event          | Action(s)                      | What We Normalize & Store                              |
+| -------------- | ------------------------------ | ------------------------------------------------------ |
+| `push`         | —                              | Commit count, head commit message, additions/deletions |
+| `pull_request` | opened/closed/merged/reopened  | Title, state, draft, labels, merge time calculation    |
+| `issues`       | opened/closed/reopened/labeled | Title, state, labels                                   |
+| `release`      | published                      | Tag name, release name, prerelease flag                |
+| `create`       | —                              | ref_type (branch/tag), ref name                        |
+| `delete`       | —                              | ref_type (branch/tag), ref name                        |
+| `workflow_run` | completed                      | Workflow name, conclusion (success/failure), branch    |
+| `star`         | created/deleted                | New total count                                        |
+| `fork`         | created                        | New total count, forker username                       |
 
-### Engine Components to Build
+### Signature Verification
 
-These go in the engine (engine-first pattern), importable by any app:
+```typescript
+async function verifySignature(
+  payload: string,
+  signature: string | null,
+  secret: string,
+): Promise<boolean> {
+  if (!signature?.startsWith("sha256=")) return false;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(payload),
+  );
+  const expected =
+    "sha256=" +
+    Array.from(new Uint8Array(sig))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  return signature === expected;
+}
+```
 
-| Component        | Path                              | Purpose                         |
-| ---------------- | --------------------------------- | ------------------------------- |
-| `PulseHeatmap`   | `ui/charts/PulseHeatmap.svelte`   | 7x24 activity heatmap           |
-| `PulseEventFeed` | `ui/charts/PulseEventFeed.svelte` | Chronological event list        |
-| `PulseStat`      | `ui/charts/PulseStat.svelte`      | Single stat card with sparkline |
-| `PulseIndicator` | `ui/charts/PulseIndicator.svelte` | Pulsing "active" dot            |
-| `TrendChart`     | `ui/charts/TrendChart.svelte`     | Line/area chart for trends      |
-
-Reuse existing: `Sparkline`, `GlassCard`, `GlassButton` from engine.
-
----
-
-## Component 5: GitHub Setup
-
-### Organization-Level Webhook (Recommended)
-
-Instead of per-repo webhooks, configure a single org-level webhook on `AutumnsGrove`:
-
-- **URL**: `https://grove-pulse.<account>.workers.dev/webhook` (or custom domain later)
-- **Content type**: `application/json`
-- **Secret**: Shared HMAC secret (stored as `WEBHOOK_SECRET` in worker)
-- **Events**: Push, Pull requests, Issues, Releases, Create, Delete, Workflow runs, Stars, Forks
-- **Active**: Yes
+Uses Web Crypto API (available in Workers), not Node crypto.
 
 ### Repo Filtering
 
-The worker can filter by repository if needed (only process events from configured repos), but initially accept all events from the org — more data is better for the dashboard.
+If `repos_include` is set in config, only process events from those repos. If `repos_exclude` is set, skip events from those repos. If neither is set, accept all. Checked after signature verification, before D1 write.
+
+---
+
+## Component 4: KV Hot Cache
+
+Keys prefixed with `pulse:{tenant_id}:` for multi-tenant isolation.
+
+| Key                         | Value                                                      | TTL   | Updated                 |
+| --------------------------- | ---------------------------------------------------------- | ----- | ----------------------- |
+| `pulse:{tid}:latest:commit` | `{ repo, message, author, sha, time }`                     | 24h   | Every push              |
+| `pulse:{tid}:latest:event`  | `{ type, action, repo, title, time }`                      | 24h   | Every event             |
+| `pulse:{tid}:today`         | `{ commits, prs_merged, issues_closed, lines_added, ... }` | 2h    | Every event (increment) |
+| `pulse:{tid}:active`        | `{ active: true, last_commit: timestamp, author }`         | 30min | Every push              |
+| `pulse:{tid}:streak`        | `{ days: number, since: date }`                            | 24h   | Daily cron              |
+
+### Why KV + D1
+
+- KV reads are ~1ms at the edge; D1 queries take 100-300ms
+- The "currently active" pulsing indicator needs sub-second response
+- Today's stats increment on every event — KV write is cheaper than D1 UPDATE
+- D1 serves historical queries (charts, feed, trends); KV serves "right now"
+
+### KV Update Strategy for `pulse:{tid}:today`
+
+On each event, the worker:
+
+1. Reads current `pulse:{tid}:today` from KV
+2. Increments the relevant counter
+3. Writes back with 2h TTL
+
+If the KV key has expired (stale), recompute from D1 `pulse_events` for today. This is an eventual-consistency tradeoff — the counters might be slightly off if two webhooks arrive simultaneously, but for a dashboard this is perfectly acceptable.
+
+---
+
+## Component 5: Engine Library Module
+
+**Location:** `packages/engine/src/lib/curios/pulse/`
+
+### Types & Defaults
+
+```typescript
+// packages/engine/src/lib/curios/pulse/index.ts
+
+export interface PulseConfig {
+  tenantId: string;
+  enabled: boolean;
+  webhookSecret: string;       // Generated, encrypted at rest
+  showHeatmap: boolean;
+  showFeed: boolean;
+  showStats: boolean;
+  showTrends: boolean;
+  showCi: boolean;
+  reposInclude: string[] | null;
+  reposExclude: string[] | null;
+  timezone: string;
+  feedMaxItems: number;
+}
+
+export interface PulseEvent {
+  id: string;
+  tenantId: string;
+  deliveryId: string;
+  eventType: string;
+  action: string | null;
+  repoName: string;
+  repoFullName: string;
+  actor: string;
+  title: string | null;
+  ref: string | null;
+  data: Record<string, unknown>;
+  occurredAt: number;
+}
+
+export interface PulseDailyStats { ... }
+export interface PulseHourlyActivity { ... }
+
+export interface PulsePageData {
+  config: PulseConfig;
+  active: { isActive: boolean; lastCommit?: number; author?: string };
+  today: { commits: number; prsMerged: number; issuesClosed: number; linesAdded: number; linesRemoved: number };
+  streak: { days: number; since: string };
+  events: PulseEvent[];
+  dailyStats: PulseDailyStats[];
+  hourlyActivity: PulseHourlyActivity[];
+}
+
+export const PULSE_DEFAULTS = {
+  showHeatmap: true,
+  showFeed: true,
+  showStats: true,
+  showTrends: true,
+  showCi: true,
+  timezone: 'America/New_York',
+  feedMaxItems: 100,
+} as const;
+```
+
+---
+
+## Component 6: API Endpoints
+
+**Location:** `packages/engine/src/routes/api/curios/pulse/`
+
+Following the exact pattern of Timeline and Journey.
+
+### GET /api/curios/pulse/config
+
+Returns config for the current tenant. Secrets are returned as boolean flags (`hasWebhookSecret`), not raw values. Also returns the generated webhook URL.
+
+### PUT /api/curios/pulse/config
+
+Updates config. On first enable:
+
+1. Generate a random webhook secret (32 bytes, hex)
+2. Encrypt and store it
+3. Return the webhook URL + plaintext secret (shown once)
+
+On subsequent updates: only update display prefs, repo filters, etc. Secret can be regenerated explicitly.
+
+### POST /api/curios/pulse/config/regenerate-secret
+
+Generates a new webhook secret. Returns the new plaintext secret (shown once). Invalidates the old one. User must update GitHub webhook settings.
+
+### GET /api/curios/pulse
+
+Public data endpoint. Returns events + stats for display.
+
+```typescript
+GET /api/curios/pulse?limit=50&offset=0&type=push,pull_request&since=2026-02-01
+
+Response: {
+  events: PulseEvent[],
+  pagination: { total, limit, offset, hasMore },
+  today: { commits, prsMerged, ... },
+  active: { isActive, lastCommit, author },
+  streak: { days, since }
+}
+```
+
+- Checks `enabled` gate first (404 if disabled)
+- KV for hot data (today, active, streak)
+- D1 for events with pagination
+- Supports type filtering and date range
+- Cache-Control: `public, max-age=60, stale-while-revalidate=300`
+
+### GET /api/curios/pulse/stats
+
+Returns aggregated stats for charts.
+
+```typescript
+GET /api/curios/pulse/stats?days=30
+
+Response: {
+  daily: PulseDailyStats[],     // Last N days
+  hourly: PulseHourlyActivity[] // Last 7 days
+}
+```
+
+---
+
+## Component 7: Arbor Admin UI
+
+**Location:** `packages/engine/src/routes/arbor/curios/pulse/`
+
+### Sections
+
+#### 1. Enable & Webhook Setup
+
+- Toggle: Enable/disable Pulse
+- **Webhook URL** (read-only, copyable): `https://grove-pulse.workers.dev/webhook/{tenant_id}`
+- **Webhook Secret** (shown once on generate, then hidden): Copy button
+- "Regenerate Secret" button (with confirmation)
+- **Setup instructions**: Step-by-step for adding to GitHub (with screenshots/links)
+  1. Go to your repo Settings > Webhooks > Add webhook
+  2. Paste this URL
+  3. Set content type to `application/json`
+  4. Paste this secret
+  5. Select events: Pushes, Pull requests, Issues, Releases, Workflow runs, Stars, Forks
+  6. Save
+
+#### 2. Repository Filtering
+
+- Include list: Only track these repos (text input, comma-separated)
+- Exclude list: Ignore these repos
+- "Leave both empty to track all repos"
+
+#### 3. Display Options
+
+- Toggle: Show activity heatmap
+- Toggle: Show event feed
+- Toggle: Show stats cards
+- Toggle: Show trend charts
+- Toggle: Show CI health
+- Timezone selector
+
+#### 4. Status & Health
+
+- Last event received: timestamp + event type
+- Events received today: count
+- Webhook health: green/yellow/red based on recent activity
+- "Test Webhook" button that sends a ping event
+
+---
+
+## Component 8: Public Page & Components
+
+### Svelte Components (Engine)
+
+**Location:** `packages/engine/src/lib/curios/pulse/`
+
+| Component               | Purpose                                    |
+| ----------------------- | ------------------------------------------ |
+| `Pulse.svelte`          | Full dedicated page layout                 |
+| `PulseCompact.svelte`   | Vine-sized widget (stats + last event)     |
+| `PulseIndicator.svelte` | Pulsing dot (active/inactive)              |
+| `PulseStats.svelte`     | Today's stats cards row                    |
+| `PulseHeatmap.svelte`   | 7-day x 24-hour activity grid              |
+| `PulseFeed.svelte`      | Chronological event feed with type filters |
+| `PulseTrends.svelte`    | 30-day trend sparklines/charts             |
+
+Following the engine-first pattern — components live in the engine, imported by the site route.
+
+### Page Route (Tenant Site)
+
+**Location:** `packages/engine/src/routes/(site)/pulse/`
+
+```typescript
+// +page.server.ts
+export const load: PageServerLoad = async ({ platform, locals }) => {
+  const db = platform?.env?.DB;
+  const kv = platform?.env?.CACHE_KV;
+
+  // Check enabled
+  const config = await db
+    .prepare("SELECT * FROM pulse_config WHERE tenant_id = ? AND enabled = 1")
+    .bind(locals.tenantId)
+    .first();
+  if (!config) error(404, "Pulse is not enabled");
+
+  // Parallel: KV hot data + D1 historical
+  const [active, today, streak, events, dailyStats, hourlyActivity] =
+    await Promise.all([
+      kv.get(`pulse:${locals.tenantId}:active`, "json"),
+      kv.get(`pulse:${locals.tenantId}:today`, "json"),
+      kv.get(`pulse:${locals.tenantId}:streak`, "json"),
+      loadRecentEvents(db, locals.tenantId, 50),
+      loadDailyStats(db, locals.tenantId, 30),
+      loadHourlyActivity(db, locals.tenantId, 7),
+    ]);
+
+  return { config, active, today, streak, events, dailyStats, hourlyActivity };
+};
+```
+
+### Page Sections
+
+#### 1. Hero — Heartbeat
+
+- Pulsing `PulseIndicator` (green dot with ripple animation when active)
+- "Currently building..." with last commit message when `active.isActive`
+- "Last seen X hours ago" when inactive
+- Streak badge when > 1 day
+
+#### 2. Today's Stats
+
+- 4 glassmorphism cards: Commits, PRs Merged, Issues Closed, Lines Changed
+- Each with a mini sparkline (hourly distribution)
+- Reuses existing `Sparkline` from engine charts
+
+#### 3. Activity Heatmap
+
+- 7 rows (days) x 24 columns (hours)
+- Seasonal color intensity (spring greens, summer golds, autumn ambers, winter blues)
+- Tooltip on hover: "Tuesday 3pm: 8 commits"
+- Timezone-aware display (UTC data -> visitor's local time via client JS)
+
+#### 4. Event Feed
+
+- Chronological list, newest first
+- Event type icons with color coding:
+  - Push — grove green
+  - PR merged — purple
+  - PR opened — blue
+  - Issue opened — amber
+  - Issue closed — muted
+  - CI failed — warm red
+  - Release — gold
+- Filter chips (toggle by event type)
+- "Show more" pagination
+- Relative timestamps
+
+#### 5. Trends (30-day)
+
+- Commit velocity line
+- Code churn (additions/deletions)
+- Issue burn-down
+- "This week vs last week" deltas
+
+#### 6. CI & Releases
+
+- Latest CI badge
+- Pass rate
+- Recent releases list
+
+### UI Design
+
+All components follow Grove design system:
+
+- **Glassmorphism** via `GlassCard` wrappers
+- **Seasonal** colors from `seasonStore`
+- **Dark mode**: "nature at night" warmth
+- **Responsive**: Mobile-first (1-col -> 2-col -> 4-col)
+- **Reduced motion**: All pulse animations respect `prefers-reduced-motion`
+- **Accessible**: WCAG AA, ARIA labels on heatmap cells, semantic event feed
+
+---
+
+## Component 9: grove.place/pulse (Landing Page)
+
+The curio lives on tenant sites (`{user}.grove.place/pulse`), but `grove.place/pulse` serves as a **showcase page** on the marketing site:
+
+- Shows Autumn's own Pulse data (Autumn's tenant is the dogfood)
+- Explains the feature: "Add a live heartbeat to your Grove site"
+- Setup instructions
+- CTA: "Enable Pulse in your dashboard"
+
+This is a simple landing route, not a curio route — it reads from Autumn's tenant data via D1 directly.
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Plumbing (This PR)
+### Phase 1: Foundation
 
-1. Create `workers/pulse/` worker with webhook receiver
-2. Write D1 migration (`0007_pulse.sql`) with all three tables
-3. Implement signature verification + event normalization
-4. Handle `push` and `pull_request` events (most common)
-5. KV hot cache updates for latest commit + today's stats
-6. Create basic `/pulse` route in landing with server-side data loading
-7. Build initial page: hero + today's stats + recent events feed
+1. Register Pulse in curio registry
+2. Write D1 migration (pulse_config, pulse_events, pulse_daily_stats, pulse_hourly_activity)
+3. Create `workers/pulse/` webhook receiver worker
+4. Implement HMAC signature verification with per-tenant secrets
+5. Handle `push` and `pull_request` events (most common, highest value)
+6. KV hot cache: latest commit, today's stats, active indicator
+7. API endpoints: config GET/PUT, events GET
+8. Arbor admin page: enable toggle, webhook URL display, secret generation
+9. Basic `/pulse` page on tenant site: hero + stats + feed
 
-### Phase 2: Heatmap & Trends
+### Phase 2: All Events + Heatmap
 
-1. Implement cron aggregation (hourly + daily rollups)
-2. Handle remaining events (issues, releases, workflow_run, stars, forks)
-3. Build `PulseHeatmap` component
-4. Build `TrendChart` component
-5. Add heatmap section and trends section to page
-6. Add event type filtering to the feed
+1. Handle remaining events: issues, release, workflow_run, star, fork, create, delete
+2. Cron aggregation: hourly activity rollups, daily stats finalization
+3. `PulseHeatmap` component
+4. `PulseTrends` component with sparklines
+5. Event type filtering in feed
+6. Repo filtering support in config + worker
 
-### Phase 3: Polish & Live Feel
+### Phase 3: Polish
 
-1. "Currently active" pulsing indicator with 30-min window
-2. Streak tracking (consecutive days with commits)
-3. CI health section
-4. Glassmorphism polish, seasonal color shifts
-5. SEO + OG image for /pulse
-6. Add cleanup rules to webhook-cleanup worker (90-day retention)
-7. Nature elements: subtle forest backdrop matching /journey's vibe
+1. Streak tracking (daily cron)
+2. CI health section
+3. Vine-sized `PulseCompact` widget
+4. Seasonal heatmap colors
+5. SEO + OG image
+6. 90-day cleanup rules (add to webhook-cleanup worker)
+7. `grove.place/pulse` showcase page
+8. Waystone help markers in Arbor
 
-### Phase 4: Future (Not This PR)
+### Phase 4: Future
 
-- Auto-generated daily standup summaries (using existing AI stack)
-- Contributor ecosystem view (when community grows)
-- Integration with Mycelium MCP / Forage
-- WebSocket or SSE for true real-time updates
+- Timeline integration: "this commit triggered this AI summary"
+- Journey integration: "this release created a new snapshot"
+- WebSocket/SSE for true real-time feed updates
+- Daily digest: AI-summarized "pulse report" (reuse Timeline's OpenRouter integration)
+- Multi-org support (multiple GitHub orgs/users)
+- Contributor leaderboard
 - "First commit of the day" badge
-- PR review time analytics
 
 ---
 
-## Files to Create / Modify
+## Files to Create
 
-### New Files
+### Worker
 
-| File                                                                 | Purpose                          |
-| -------------------------------------------------------------------- | -------------------------------- |
-| `workers/pulse/src/index.ts`                                         | Worker entry (fetch + scheduled) |
-| `workers/pulse/src/verify.ts`                                        | HMAC-SHA256 verification         |
-| `workers/pulse/src/handlers/push.ts`                                 | Push event handler               |
-| `workers/pulse/src/handlers/pull-request.ts`                         | PR event handler                 |
-| `workers/pulse/src/handlers/issues.ts`                               | Issues event handler             |
-| `workers/pulse/src/handlers/release.ts`                              | Release event handler            |
-| `workers/pulse/src/handlers/workflow.ts`                             | CI workflow handler              |
-| `workers/pulse/src/handlers/community.ts`                            | Stars/forks handler              |
-| `workers/pulse/src/store.ts`                                         | D1 writes + KV updates           |
-| `workers/pulse/src/aggregate.ts`                                     | Cron aggregation                 |
-| `workers/pulse/wrangler.toml`                                        | Worker config                    |
-| `workers/pulse/package.json`                                         | Package config                   |
-| `workers/pulse/tsconfig.json`                                        | TypeScript config                |
-| `packages/landing/migrations/0007_pulse.sql`                         | D1 migration                     |
-| `packages/landing/src/routes/pulse/+page.server.ts`                  | Server data loader               |
-| `packages/landing/src/routes/pulse/+page.svelte`                     | Dashboard UI                     |
-| `packages/engine/src/lib/ui/components/charts/PulseHeatmap.svelte`   | Heatmap component                |
-| `packages/engine/src/lib/ui/components/charts/PulseEventFeed.svelte` | Event feed component             |
-| `packages/engine/src/lib/ui/components/charts/PulseStat.svelte`      | Stat card component              |
-| `packages/engine/src/lib/ui/components/charts/PulseIndicator.svelte` | Active indicator                 |
-| `packages/engine/src/lib/ui/components/charts/TrendChart.svelte`     | Trend line/area chart            |
+| File                             | Purpose                               |
+| -------------------------------- | ------------------------------------- |
+| `workers/pulse/src/index.ts`     | Worker entry: fetch() + scheduled()   |
+| `workers/pulse/src/types.ts`     | Env interface, event types            |
+| `workers/pulse/src/verify.ts`    | HMAC-SHA256 signature verification    |
+| `workers/pulse/src/normalize.ts` | Event normalization (all event types) |
+| `workers/pulse/src/store.ts`     | D1 writes + KV cache updates          |
+| `workers/pulse/src/aggregate.ts` | Cron: hourly/daily rollups            |
+| `workers/pulse/wrangler.toml`    | Worker config with cron triggers      |
+| `workers/pulse/package.json`     | Package config                        |
+| `workers/pulse/tsconfig.json`    | TypeScript config                     |
 
-### Modified Files
+### Engine (Curio Module)
 
-| File                                                    | Change                           |
-| ------------------------------------------------------- | -------------------------------- |
-| `packages/engine/src/lib/ui/components/charts/index.ts` | Export new chart components      |
-| `packages/engine/package.json`                          | Ensure charts export path exists |
-| `packages/landing/src/app.d.ts`                         | Add Env types if needed          |
-| `pnpm-workspace.yaml`                                   | Add `workers/pulse` to workspace |
+| File                                                         | Purpose                         |
+| ------------------------------------------------------------ | ------------------------------- |
+| `packages/engine/src/lib/curios/pulse/index.ts`              | Types, defaults, config helpers |
+| `packages/engine/src/lib/curios/pulse/Pulse.svelte`          | Full page component             |
+| `packages/engine/src/lib/curios/pulse/PulseCompact.svelte`   | Vine widget                     |
+| `packages/engine/src/lib/curios/pulse/PulseIndicator.svelte` | Active/inactive dot             |
+| `packages/engine/src/lib/curios/pulse/PulseStats.svelte`     | Stats card row                  |
+| `packages/engine/src/lib/curios/pulse/PulseHeatmap.svelte`   | Activity heatmap                |
+| `packages/engine/src/lib/curios/pulse/PulseFeed.svelte`      | Event feed                      |
+| `packages/engine/src/lib/curios/pulse/PulseTrends.svelte`    | Trend charts                    |
+
+### Engine (Routes)
+
+| File                                                            | Purpose              |
+| --------------------------------------------------------------- | -------------------- |
+| `packages/engine/src/routes/api/curios/pulse/+server.ts`        | Public events API    |
+| `packages/engine/src/routes/api/curios/pulse/config/+server.ts` | Config GET/PUT       |
+| `packages/engine/src/routes/api/curios/pulse/stats/+server.ts`  | Aggregated stats API |
+| `packages/engine/src/routes/(site)/pulse/+page.server.ts`       | Page data loader     |
+| `packages/engine/src/routes/(site)/pulse/+page.svelte`          | Public page          |
+| `packages/engine/src/routes/arbor/curios/pulse/+page.svelte`    | Admin config UI      |
+| `packages/engine/src/routes/arbor/curios/pulse/+page.server.ts` | Admin data loader    |
+
+### Migration
+
+| File                                             | Purpose                |
+| ------------------------------------------------ | ---------------------- |
+| `packages/engine/migrations/XXX_pulse_curio.sql` | All 4 tables + indexes |
+
+## Files to Modify
+
+| File                                                   | Change                              |
+| ------------------------------------------------------ | ----------------------------------- |
+| `packages/engine/src/lib/curios/registry.ts`           | Register pulse curio                |
+| `packages/engine/src/routes/arbor/curios/+page.svelte` | Add Pulse card to hub               |
+| `packages/workers/webhook-cleanup/src/index.ts`        | Add 90-day cleanup for pulse tables |
+| `pnpm-workspace.yaml`                                  | Add `workers/pulse`                 |
 
 ---
 
 ## Key Design Decisions
 
-### Why Dedicated Worker (Not Landing API Route)
+### Why Webhooks (Not API Polling Like Timeline)
 
-- Cron triggers for aggregation (Pages can't do cron)
-- Isolation from marketing site
-- Follows established pattern (timeline-sync, webhook-cleanup, email-catchup)
-- Can scale independently
+- **Real-time**: Events arrive in seconds, not on a cron schedule
+- **No token needed**: User doesn't share GitHub credentials with us
+- **No rate limits**: GitHub pushes to us; we don't hit their API
+- **Simpler setup**: Copy URL + secret, done
+- **Works everywhere**: Public repos, private repos, org repos, personal repos
 
-### Why Shared D1 + KV (Not New Database)
+### Why Per-Tenant Webhook URLs
 
-- Landing already queries grove-engine-db
-- All pulse data renders in landing — no cross-service queries needed
-- KV namespace already shared across services
-- One database = one migration chain = simpler ops
+- O(1) tenant lookup (not scanning all secrets)
+- Clear isolation between tenants
+- Easy debugging (the URL tells you which tenant)
+- Tenant ID isn't sensitive — the HMAC secret provides auth
 
-### Why Store Raw Events + Aggregate (Not Just Aggregate)
+### Why Encrypt the Webhook Secret
+
+- Follows principle of least privilege (even though it's our generated key)
+- Matches existing curio patterns (Timeline/Journey encrypt tokens)
+- Envelope encryption via SecretsManager + GROVE_KEK is already built
+
+### Why a Curio (Not a Landing-Only Feature)
+
+- **Any user can have it** — not just grove.place
+- **Multi-tenant by design** — each user's Pulse is isolated
+- **Fits the ecosystem** — Timeline narrates, Journey tracks, Pulse beats
+- **Vine placement** — can appear as a compact widget in sidebars
+- **Admin UI** — managed through Arbor like every other curio
+- **Tier gating** — seedling tier means everyone gets it (great for adoption)
+
+### Why Raw Events + Aggregation (Not Just Aggregation)
 
 - Raw events power the chronological feed
-- Enables future filtering/search without re-processing
-- Historical raw data enables new aggregation dimensions later
+- Future: search, filter, export
+- Aggregation happens in cron, not on the hot webhook path
 - 90-day retention keeps storage bounded
-
-### Why KV Hot Cache Exists
-
-- Sub-millisecond reads for "currently active" check
-- Today's stats update on every event (cheap KV write vs D1 query)
-- /pulse page loads should feel instant
-- Edge-cached = fast globally
 
 ---
 
-## Strategic Value
+## The User Experience
 
-This isn't just a dashboard — it's a statement:
+### Setup (30 seconds)
 
-- **Transparency as trust**: 30-50 commits/day is extraordinary velocity. Show it.
-- **Build-in-public proof**: Not "we're working on it" — here's the live data.
-- **Waitlist conversion**: 70+ people watching. Give them something alive to look at.
-- **Your narrative**: Post-job-quit, building something meaningful. Pulse _is_ the heartbeat of that story.
-- **Community template**: When contributors join, Pulse already shows their work too.
+1. Open Arbor > Curios > Pulse
+2. Toggle "Enable"
+3. Copy the webhook URL and secret
+4. Go to GitHub repo > Settings > Webhooks > Add
+5. Paste URL, set JSON content type, paste secret
+6. Select events (or "Send me everything")
+7. Save
 
-The /journey page tells where you've been. The /pulse page shows where you are _right now_.
+### What They See
+
+Their `/pulse` page lights up within seconds of the first push:
+
+> A gentle green dot pulses steadily.
+>
+> "Currently building... _fix: resolve auth redirect on mobile_"
+>
+> **Today**: 12 commits | 2 PRs merged | 3 issues closed | +847/-203 lines
+>
+> A warm heatmap shows the rhythm of their day — morning burst, quiet lunch, afternoon flow.
+>
+> Below, a feed scrolls: each commit, each PR, each issue, each release — the living story of their work, told in real time, on _their_ site, in _their_ space.
+
+That's Pulse. The heartbeat of someone building something they care about.
