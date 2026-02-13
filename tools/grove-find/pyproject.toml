@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-gf = "grove_find.cli:app"
+gf-py = "grove_find.cli:app"
 grove-find = "grove_find.cli:app"
 
 [project.optional-dependencies]

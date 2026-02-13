@@ -1,6 +1,6 @@
 .PHONY: build install clean test
 
-BINARY := gf-go
+BINARY := gf
 MODULE := github.com/AutumnsGrove/GroveEngine/tools/grove-find-go
 
 build:

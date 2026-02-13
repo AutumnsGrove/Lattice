@@ -10,7 +10,7 @@ The `AGENT.md` file contains all project-specific instructions, workflows, and g
 
 ## Grove Tools Setup
 
-**After reading AGENT.md**, install the two core CLI tools. Check if they're already available:
+**After reading AGENT.md**, install the core CLI tools. Check if they're already available:
 
 ```bash
 gf --help && gw --help
@@ -19,11 +19,17 @@ gf --help && gw --help
 If either command is not found, install them:
 
 ```bash
+# gf — Go binary (primary, fast startup)
+cd tools/grove-find-go && go build -o ~/.local/bin/gf . && cd -
+
+# gf-py — Python fallback (if Go isn't available)
 uv tool install --editable tools/grove-find
+
+# gw — Infrastructure CLI
 uv tool install --editable tools/gw
 ```
 
-Once installed, `gf` and `gw` are available directly — no `uv run` prefix needed.
+`gf` is the Go version (sub-10ms startup). `gf-py` is the Python fallback. `gw` is the infrastructure CLI. All available directly — no prefixes needed.
 
 ### Codebase Search (gf)
 
