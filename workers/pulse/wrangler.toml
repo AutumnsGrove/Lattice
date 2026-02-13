@@ -1,0 +1,48 @@
+# Grove Pulse Worker
+# Webhook receiver for live development heartbeat data from GitHub
+#
+# Endpoints:
+#   POST /webhook/{tenant_id}  — Receive GitHub webhook events
+#   GET  /                     — Health check
+#
+# Cron triggers:
+#   Hourly — Roll up hourly_activity from events
+#   Daily  — Finalize daily_stats and update streaks
+
+name = "grove-pulse"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# Cron Triggers
+# =============================================================================
+[triggers]
+crons = [
+  "0 * * * *",    # Hourly: rollup hourly_activity from events
+  "5 0 * * *",    # Daily at 00:05 UTC: finalize daily_stats
+]
+
+# =============================================================================
+# D1 Database - Same database as engine
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# KV Namespace - Shared cache
+# =============================================================================
+[[kv_namespaces]]
+binding = "KV"
+id = "514e91e81cc44d128a82ec6f668303e4"
+
+# =============================================================================
+# Envelope Encryption - Key Encryption Key (KEK)
+# =============================================================================
+# The KEK decrypts per-tenant DEKs which decrypt webhook secrets.
+# Set via: wrangler secret put GROVE_KEK --name grove-pulse
+#
+# IMPORTANT: Must be the EXACT same value as grove-lattice and grove-timeline-sync
+# since they share the same D1 database.
