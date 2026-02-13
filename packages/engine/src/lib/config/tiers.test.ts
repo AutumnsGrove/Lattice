@@ -276,7 +276,7 @@ describe("Tier Configuration", () => {
       expect(TIERS.free.display.standardName).toBe("Free");
       expect(TIERS.free.display.icon).toBe("footprints");
       expect(TIERS.free.display.tagline).toBe("Your first steps in the grove");
-      expect(TIERS.free.display.bestFor).toBe("The curious");
+      expect(TIERS.free.display.bestFor).toBe("Trying it out");
     });
 
     it("has restrictive rate limits", () => {

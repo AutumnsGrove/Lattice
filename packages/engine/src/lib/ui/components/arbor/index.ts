@@ -21,8 +21,11 @@
  */
 
 // Public components
+export { default as ArborOverlay } from "./ArborOverlay.svelte";
 export { default as ArborPanel } from "./ArborPanel.svelte";
 export { default as ArborSection } from "./ArborSection.svelte";
+export { default as ArborSidebarFooter } from "./ArborSidebarFooter.svelte";
+export { default as ArborSidebarHeader } from "./ArborSidebarHeader.svelte";
 export { default as ArborToggle } from "./ArborToggle.svelte";
 
 // Types
