@@ -65,7 +65,14 @@
 		}
 	}
 
+	// Minimum time (ms) to hold the overlay before navigating, so wanderers
+	// actually see the full experience — backdrop (300ms) + label (200ms delay
+	// + 400ms fade) + a beat to breathe.
+	const PASSAGE_HOLD_MS = 800;
+
 	onMount(() => {
+		let navigationTimer: ReturnType<typeof setTimeout> | null = null;
+
 		function handleClick(e: MouseEvent) {
 			// Don't intercept modified clicks (new tab, middle-click, etc.)
 			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
@@ -86,16 +93,34 @@
 				undefined;
 			active = true;
 
-			// Double rAF ensures the overlay paints before navigation begins
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					window.location.href = href;
-				});
-			});
+			// Hold the overlay long enough for the full animation to play,
+			// then navigate to the destination
+			if (navigationTimer) clearTimeout(navigationTimer);
+			navigationTimer = setTimeout(() => {
+				window.location.href = href;
+			}, PASSAGE_HOLD_MS);
+		}
+
+		// When the browser restores this page from bfcache (back/forward nav),
+		// dismiss the overlay so the page is interactive again
+		function handlePageShow(e: PageTransitionEvent) {
+			if (e.persisted) {
+				active = false;
+				name = undefined;
+				if (navigationTimer) {
+					clearTimeout(navigationTimer);
+					navigationTimer = null;
+				}
+			}
 		}
 
 		document.addEventListener("click", handleClick);
-		return () => document.removeEventListener("click", handleClick);
+		window.addEventListener("pageshow", handlePageShow);
+		return () => {
+			document.removeEventListener("click", handleClick);
+			window.removeEventListener("pageshow", handlePageShow);
+			if (navigationTimer) clearTimeout(navigationTimer);
+		};
 	});
 </script>
 
