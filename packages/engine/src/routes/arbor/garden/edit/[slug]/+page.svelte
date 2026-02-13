@@ -3,13 +3,13 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { Input, Button, GlassCard, GroveSwap } from "$lib/ui";
+  import { Button, GroveSwap } from "$lib/ui";
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
   import { clickOutside } from "$lib/actions/clickOutside";
-  import { ExternalLink, Ellipsis, Trash2, ChevronRight, ChevronLeft, ArrowLeft, ArrowRight } from "lucide-svelte";
+  import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft, ArrowRight } from "lucide-svelte";
 
   let { data } = $props();
 
@@ -48,17 +48,29 @@
   // UI state
   let saving = $state(false);
   let hasUnsavedChanges = $state(false);
-  let showGutter = $state(false); // Start hidden for cleaner first-time experience
+  let showGutter = $state(false);
   let showDeleteDialog = $state(false);
   let showMoreMenu = $state(false);
-  let detailsCollapsed = $state(true); // Start collapsed for focused writing
+  let detailsExpanded = $state(false);
 
-  // Load collapsed state from localStorage
+  // Details summary — shows populated metadata at a glance when collapsed
+  let detailsSummary = $derived.by(() => {
+    /** @type {string[]} */
+    const parts = [];
+    if (featuredImage) parts.push("cover image");
+    if (description.trim()) parts.push("description");
+    const tagCount = parseTags(tagsInput).length;
+    if (tagCount > 0) parts.push(`${tagCount} tag${tagCount > 1 ? "s" : ""}`);
+    if (font && font !== "default") parts.push(font);
+    return parts.join(" \u00b7 ");
+  });
+
+  // Load UI state from localStorage
   $effect(() => {
     if (browser) {
       const savedDetails = localStorage.getItem("editor-details-collapsed");
       if (savedDetails !== null) {
-        detailsCollapsed = savedDetails === "true";
+        detailsExpanded = savedDetails === "false";
       }
       const savedGutter = localStorage.getItem("editor-gutter-visible");
       if (savedGutter !== null) {
@@ -67,13 +79,10 @@
     }
   });
 
-  function toggleDetailsCollapsed() {
-    detailsCollapsed = !detailsCollapsed;
+  function toggleDetails() {
+    detailsExpanded = !detailsExpanded;
     if (browser) {
-      localStorage.setItem(
-        "editor-details-collapsed",
-        String(detailsCollapsed),
-      );
+      localStorage.setItem("editor-details-collapsed", String(!detailsExpanded));
     }
   }
 
@@ -86,7 +95,6 @@
 
   // Track changes
   $effect(() => {
-    // Simple dirty check - could be more sophisticated
     const hasChanges =
       title !== data.post.title ||
       description !== data.post.description ||
@@ -94,7 +102,6 @@
     hasUnsavedChanges = hasChanges;
   });
 
-  // Parse tags from comma-separated input
   /** @param {string} input */
   function parseTags(input) {
     return input
@@ -103,22 +110,24 @@
       .filter((/** @type {string} */ tag) => tag.length > 0);
   }
 
+  /** Save — for drafts, zero validation; for published, title + content required */
   async function handleSave() {
-    // Validation
-    if (!title.trim()) {
-      toast.error("Title is required");
-      return;
-    }
-    if (!content.trim()) {
-      toast.error("Content is required");
-      return;
+    if (status === "published") {
+      if (!title.trim()) {
+        toast.error("Title is required for published posts");
+        return;
+      }
+      if (!content.trim()) {
+        toast.error("Content is required for published posts");
+        return;
+      }
     }
 
     saving = true;
 
     try {
       await api.put(`/api/blooms/${slug}`, {
-        title: title.trim(),
+        title: title.trim() || "",
         date,
         description: description.trim(),
         tags: parseTags(tagsInput),
@@ -129,9 +138,7 @@
         featured_image: featuredImage.trim() || null,
       });
 
-      // Clear draft on successful save
       editorRef?.clearDraft();
-
       toast.success(`${resolveTermString('Bloom', 'Post')} saved successfully!`);
       hasUnsavedChanges = false;
     } catch (err) {
@@ -147,11 +154,11 @@
    */
   async function handleStatusToggle() {
     const newStatus = status === "published" ? "draft" : "published";
-    const action = newStatus === "published" ? "Publishing" : "Unpublishing";
 
     // Validation before publish
     if (newStatus === "published") {
       if (!title.trim()) {
+        if (!detailsExpanded) detailsExpanded = true;
         toast.error("Title is required before publishing");
         return;
       }
@@ -166,7 +173,7 @@
 
     try {
       await api.put(`/api/blooms/${slug}`, {
-        title: title.trim(),
+        title: title.trim() || "",
         date,
         description: description.trim(),
         tags: parseTags(tagsInput),
@@ -177,7 +184,6 @@
         featured_image: featuredImage.trim() || null,
       });
 
-      // Clear draft on successful save
       editorRef?.clearDraft();
 
       if (newStatus === "published") {
@@ -189,7 +195,7 @@
     } catch (err) {
       // Revert on failure
       status = status === "published" ? "draft" : "published";
-      toast.error(err instanceof Error ? err.message : `Failed to ${action.toLowerCase()}`);
+      toast.error(err instanceof Error ? err.message : `Failed to ${newStatus === "published" ? "publish" : "unpublish"}`);
     } finally {
       saving = false;
     }
@@ -205,9 +211,7 @@
 
     try {
       await api.delete(`/api/blooms/${slug}`);
-
       toast.success(`${resolveTermString('Bloom', 'Post')} deleted successfully`);
-      // Redirect to blog admin
       goto("/arbor/garden");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : `Failed to delete ${resolveTermString('bloom', 'post')}`);
@@ -225,7 +229,6 @@
         "You have unsaved changes. Are you sure you want to leave?");
     }
   }
-
 </script>
 
 <svelte:window onbeforeunload={handleBeforeUnload} />
@@ -284,7 +287,7 @@
         {/if}
       </div>
 
-      <!-- Publish / Unpublish (secondary action) -->
+      <!-- Publish / Unpublish -->
       {#if status === "draft"}
         <Button variant="outline" onclick={handleStatusToggle} disabled={saving}>
           {saving ? "Publishing..." : "Publish"}
@@ -303,61 +306,31 @@
   </header>
 
   <div class="editor-layout">
-    <!-- Metadata Panel -->
-    <GlassCard
-      variant="frosted"
-      class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}"
-    >
-      <div class="panel-header">
-        <h2 class="panel-title">
-          {#if detailsCollapsed}Details{:else}<GroveSwap term="blooms">Bloom</GroveSwap> Details{/if}
-        </h2>
-        <button
-          class="collapse-details-btn"
-          onclick={toggleDetailsCollapsed}
-          title={detailsCollapsed ? "Expand details" : "Collapse details"}
-          aria-expanded={!detailsCollapsed}
-        >
-          {#if detailsCollapsed}<ChevronRight size={14} />{:else}<ChevronLeft size={14} />{/if}
-        </button>
-      </div>
+    <!-- Inline title -->
+    <input
+      type="text"
+      class="inline-title"
+      bind:value={title}
+      placeholder="Untitled"
+      aria-label="Post title"
+    />
 
-      {#if !detailsCollapsed}
-        <div class="panel-content">
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input
-              type="text"
-              id="title"
-              bind:value={title}
-              placeholder={resolveTermString("Your Bloom Title", "Your Post Title")}
-              class="form-input"
-            />
-          </div>
+    <!-- Add details strip -->
+    <div class="details-strip">
+      <button class="details-toggle" onclick={toggleDetails}>
+        <ChevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+        <span class="details-label">Add details</span>
+        {#if !detailsExpanded && detailsSummary}
+          <span class="details-summary">{detailsSummary}</span>
+        {/if}
+      </button>
 
-          <div class="form-group">
-            <label for="slug">Slug</label>
-            <div class="slug-display">
-              <span class="slug-prefix">/garden/</span>
-              <span class="slug-value">{slug}</span>
-            </div>
-            <span class="form-hint">Slug cannot be changed after creation</span>
-          </div>
-
-          <div class="form-group">
-            <label for="date">Date</label>
-            <input type="date" id="date" bind:value={date} class="form-input" />
-          </div>
-
-          <div class="form-group">
+      {#if detailsExpanded}
+        <div class="details-fields">
+          <div class="form-group field-description">
             <label for="description">
               Description
-              <span
-                class="char-count"
-                class:warning={description.length > 160}
-                class:good={description.length >= 120 &&
-                  description.length <= 160}
-              >
+              <span class="char-count" class:warning={description.length > 160} class:good={description.length >= 120 && description.length <= 160}>
                 {description.length}/160
               </span>
             </label>
@@ -370,17 +343,13 @@
               class:char-warning={description.length > 160}
             ></textarea>
             {#if description.length > 160}
-              <span class="form-warning"
-                >Description exceeds recommended SEO length</span
-              >
+              <span class="form-warning">Description exceeds recommended SEO length</span>
             {:else if description.length > 0 && description.length < 120}
-              <span class="form-hint"
-                >Add {120 - description.length} more chars for optimal SEO</span
-              >
+              <span class="form-hint">Add {120 - description.length} more chars for optimal SEO</span>
             {/if}
           </div>
 
-          <div class="form-group">
+          <div class="form-group field-cover">
             <label for="featured-image">Cover Image</label>
             <input
               type="url"
@@ -409,15 +378,23 @@
               class="form-input"
             />
             <span class="form-hint">Separate tags with commas</span>
+            {#if tagsInput}
+              <div class="tags-preview">
+                {#each parseTags(tagsInput) as tag}
+                  <span class="tag-preview">{tag}</span>
+                {/each}
+              </div>
+            {/if}
           </div>
 
-          {#if tagsInput}
-            <div class="tags-preview">
-              {#each parseTags(tagsInput) as tag}
-                <span class="tag-preview">{tag}</span>
-              {/each}
+          <div class="form-group">
+            <label for="slug">Slug</label>
+            <div class="slug-display">
+              <span class="slug-prefix">/garden/</span>
+              <span class="slug-value">{slug}</span>
             </div>
-          {/if}
+            <span class="form-hint">Slug cannot be changed after creation</span>
+          </div>
 
           <div class="form-group">
             <label for="font">Font</label>
@@ -457,14 +434,18 @@
             <span class="form-hint">Choose a font for this bloom's content</span>
           </div>
 
-          <div class="metadata-info">
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" bind:value={date} class="form-input" />
+          </div>
+
+          <!-- Metadata info -->
+          <div class="metadata-info field-full">
             {#if "last_synced" in data.post && data.post.last_synced}
               <p class="info-item">
                 <span class="info-label">Last synced:</span>
                 <span class="info-value">
-                  {new Date(
-                    /** @type {any} */ (data.post).last_synced,
-                  ).toLocaleString()}
+                  {new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
                 </span>
               </p>
             {/if}
@@ -472,18 +453,16 @@
               <p class="info-item">
                 <span class="info-label">Last updated:</span>
                 <span class="info-value">
-                  {new Date(
-                    /** @type {any} */ (data.post).updated_at,
-                  ).toLocaleString()}
+                  {new Date(/** @type {any} */ (data.post).updated_at).toLocaleString()}
                 </span>
               </p>
             {/if}
           </div>
         </div>
       {/if}
-    </GlassCard>
+    </div>
 
-    <!-- Editor Panel -->
+    <!-- Editor -->
     <main class="editor-main">
       <div class="editor-with-gutter">
         <div class="editor-section">
@@ -526,9 +505,7 @@
 <Dialog bind:open={showDeleteDialog} title={`Delete ${resolveTermString('Bloom', 'Post')}`}>
   <p>Are you sure you want to delete "{title}"? This cannot be undone.</p>
   {#snippet footer()}
-    <Button variant="outline" onclick={() => (showDeleteDialog = false)}
-      >Cancel</Button
-    >
+    <Button variant="outline" onclick={() => (showDeleteDialog = false)}>Cancel</Button>
     <Button variant="danger" onclick={handleDelete}>Delete</Button>
   {/snippet}
 </Dialog>
@@ -694,82 +671,98 @@
     background: rgba(248, 113, 113, 0.1);
   }
 
-  /* Editor Layout */
+  /* Editor Layout — vertical flow, no sidebar */
   .editor-layout {
     display: flex;
-    gap: 1.5rem;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
   }
-  /* Metadata Panel - Now using GlassCard */
-  :global(.metadata-panel) {
-    width: 280px;
-    flex-shrink: 0;
-    overflow-y: auto;
-    transition: width 0.2s ease;
-  }
-  :global(.metadata-panel.collapsed) {
-    width: 50px;
-  }
-  .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 1.25rem;
-    transition: border-color 0.3s ease;
-  }
-  :global(.metadata-panel.collapsed .panel-header) {
-    flex-direction: column;
-    gap: 0.5rem;
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-  .panel-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
+
+  /* Inline title — big, clean, heading-style */
+  .inline-title {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading, "Lexend", sans-serif);
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 0.25rem 0;
+    outline: none;
     color: var(--color-text);
     transition: color 0.3s ease;
   }
-  :global(.metadata-panel.collapsed .panel-title) {
-    font-size: 0.7rem;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-  }
-  .collapse-details-btn {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+  .inline-title::placeholder {
     color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 0.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
+    opacity: 0.5;
   }
-  .collapse-details-btn:hover {
-    background: var(--color-bg-secondary);
+  .inline-title:focus {
+    border-bottom: 2px solid var(--color-primary);
+  }
+
+  /* Details strip */
+  .details-strip {
+    margin: 0.5rem 0 1rem;
+  }
+  .details-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    width: 100%;
+    text-align: left;
+  }
+  .details-toggle:hover {
     color: var(--color-primary);
   }
-  /* Mobile touch target - WCAG 2.5.5 requires 44×44px minimum */
-  @media (max-width: 900px) {
-    .collapse-details-btn {
-      min-width: 44px;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem;
-    }
+  :global(.details-chevron) {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
   }
+  :global(.details-chevron.rotated) {
+    transform: rotate(90deg);
+  }
+  .details-label {
+    flex-shrink: 0;
+  }
+  .details-summary {
+    color: var(--color-text-subtle);
+    font-size: 0.8rem;
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Details fields — responsive grid */
+  .details-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--color-border);
+    transition: border-color 0.3s ease;
+  }
+  .field-description {
+    grid-column: 1 / -1;
+  }
+  .field-cover {
+    grid-column: 1 / -1;
+  }
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  /* Form fields (shared) */
   .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
   }
   .form-group label {
     display: block;
@@ -787,10 +780,7 @@
     font-size: 0.9rem;
     background: var(--color-bg-secondary);
     color: var(--color-text);
-    transition:
-      border-color 0.2s,
-      background-color 0.3s,
-      color 0.3s;
+    transition: border-color 0.2s, background-color 0.3s, color 0.3s;
   }
   .form-input:focus {
     outline: none;
@@ -808,9 +798,7 @@
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-small);
-    transition:
-      background-color 0.3s,
-      border-color 0.3s;
+    transition: background-color 0.3s, border-color 0.3s;
   }
   .slug-prefix {
     color: var(--color-text-subtle);
@@ -856,7 +844,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    margin-top: -0.5rem;
+    margin-top: 0.5rem;
   }
   .tag-preview {
     padding: 0.2rem 0.6rem;
@@ -868,7 +856,6 @@
     font-weight: 500;
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  /* Cover image preview */
   .cover-preview {
     margin-top: 0.75rem;
     border-radius: var(--border-radius-small);
@@ -883,8 +870,7 @@
     display: block;
   }
   .metadata-info {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--color-border);
     transition: border-color 0.3s;
   }
@@ -905,6 +891,7 @@
     font-size: 0.75rem;
     transition: color 0.3s;
   }
+
   /* Editor Main */
   .editor-main {
     flex: 1;
@@ -955,35 +942,25 @@
     background: rgba(74, 222, 128, 0.2);
     border-color: rgba(74, 222, 128, 0.35);
   }
+
   /* Responsive */
   @media (max-width: 1200px) {
     .gutter-section {
       width: 250px;
     }
   }
+  @media (max-width: 768px) {
+    .details-fields {
+      grid-template-columns: 1fr;
+    }
+  }
   @media (max-width: 900px) {
-    .editor-layout {
-      flex-direction: column;
-    }
-    :global(.metadata-panel) {
-      width: 100% !important;
-      max-height: none;
-    }
-    :global(.metadata-panel.collapsed) {
-      width: 100% !important;
-      padding: 1rem;
-    }
-    :global(.metadata-panel.collapsed .panel-header) {
-      flex-direction: row;
-    }
-    :global(.metadata-panel.collapsed .panel-title) {
-      writing-mode: horizontal-tb;
-      transform: none;
-      font-size: 1rem;
-    }
     .edit-post-page {
       height: auto;
       min-height: auto;
+    }
+    .inline-title {
+      font-size: 1.5rem;
     }
     .editor-main {
       min-height: 500px;

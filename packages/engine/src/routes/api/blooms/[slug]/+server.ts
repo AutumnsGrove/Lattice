@@ -260,18 +260,27 @@ export const PUT: RequestHandler = async ({
       }
     }
 
-    // Validate required fields
-    if (!data.title || !data.markdown_content) {
-      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+    // Published posts require title + content; drafts accept anything
+    const isPublishing = data.status === "published";
+    if (isPublishing) {
+      if (!data.title?.trim()) {
+        throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+      }
+      if (!data.markdown_content?.trim()) {
+        throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+      }
     }
+
+    const title = data.title?.trim() || "";
+    const markdownContent = data.markdown_content || "";
 
     // Validation constants
     const MAX_TITLE_LENGTH = 200;
     const MAX_DESCRIPTION_LENGTH = 500;
     const MAX_MARKDOWN_LENGTH = 1024 * 1024; // 1MB
 
-    // Validate lengths
-    if (data.title.length > MAX_TITLE_LENGTH) {
+    // Validate lengths (only when values are present)
+    if (title.length > MAX_TITLE_LENGTH) {
       throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
@@ -279,7 +288,7 @@ export const PUT: RequestHandler = async ({
       throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
-    if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
+    if (markdownContent.length > MAX_MARKDOWN_LENGTH) {
       throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
 
@@ -320,7 +329,7 @@ export const PUT: RequestHandler = async ({
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
-    const html_content = renderMarkdown(data.markdown_content);
+    const html_content = markdownContent ? renderMarkdown(markdownContent) : "";
 
     const tags = JSON.stringify(data.tags || []);
     const unixNow = Math.floor(Date.now() / 1000);
@@ -334,10 +343,10 @@ export const PUT: RequestHandler = async ({
 
     // Build update object - only include published_at if we're publishing
     const updateData: Record<string, unknown> = {
-      title: data.title,
+      title,
       tags,
       description: data.description || "",
-      markdown_content: data.markdown_content,
+      markdown_content: markdownContent,
       html_content,
       gutter_content: data.gutter_content || "[]",
       font: data.font || "default",
@@ -364,7 +373,7 @@ export const PUT: RequestHandler = async ({
     if (platform?.env?.AI && data.status === "published" && platform.context) {
       platform.context.waitUntil(
         moderatePublishedContent({
-          content: `${data.title}\n\n${data.markdown_content}`,
+          content: `${title}\n\n${markdownContent}`,
           ai: platform.env.AI,
           db: platform.env.DB,
           openrouterApiKey: platform.env.OPENROUTER_API_KEY,

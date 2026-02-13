@@ -1,6 +1,6 @@
 # Flow Editor — Progressive Details Migration
 
-> **Status:** Planned
+> **Status:** Implemented
 > **Filed:** 2026-02-13
 > **Priority:** High — Core authoring experience
 > **Affects:** `/arbor/garden/new`, `/arbor/garden/edit/[slug]`

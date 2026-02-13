@@ -3,11 +3,11 @@
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
-  import { GlassCard, Glass, GroveSwap, GroveIntro } from '$lib/ui';
+  import { Glass, GroveSwap, GroveIntro } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
-  import { ArrowLeft, ArrowRight, ChevronRight, ChevronLeft, X, AlertCircle } from "lucide-svelte";
+  import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "lucide-svelte";
 
   // Page data from admin layout (includes grafts cascade)
   let { data } = $props();
@@ -23,7 +23,6 @@
   /** @type {any[]} */
   let gutterItems = $state([]);
   let firesideAssisted = $state(false);
-  let status = $state("draft");
   let featuredImage = $state("");
 
   // Editor reference for anchor insertion
@@ -36,14 +35,27 @@
   let error = $state(null);
   let slugManuallyEdited = $state(false);
   let showGutter = $state(false);
-  let detailsCollapsed = $state(true);
+  let detailsExpanded = $state(false);
 
-  // Load collapsed state from localStorage (using separate keys for new post page)
+  // Details summary — shows populated metadata at a glance when collapsed
+  let detailsSummary = $derived.by(() => {
+    /** @type {string[]} */
+    const parts = [];
+    if (featuredImage) parts.push("cover image");
+    if (description.trim()) parts.push("description");
+    const tagCount = parseTags(tagsInput).length;
+    if (tagCount > 0) parts.push(`${tagCount} tag${tagCount > 1 ? "s" : ""}`);
+    if (slug && slugManuallyEdited) parts.push("custom slug");
+    if (font && font !== "default") parts.push(font);
+    return parts.join(" \u00b7 ");
+  });
+
+  // Load UI state from localStorage
   $effect(() => {
     if (browser) {
       const savedDetails = localStorage.getItem("new-post-details-collapsed");
       if (savedDetails !== null) {
-        detailsCollapsed = savedDetails === "true";
+        detailsExpanded = savedDetails === "false";
       }
       const savedGutter = localStorage.getItem("new-post-gutter-visible");
       if (savedGutter !== null) {
@@ -52,10 +64,10 @@
     }
   });
 
-  function toggleDetailsCollapsed() {
-    detailsCollapsed = !detailsCollapsed;
+  function toggleDetails() {
+    detailsExpanded = !detailsExpanded;
     if (browser) {
-      localStorage.setItem("new-post-details-collapsed", String(detailsCollapsed));
+      localStorage.setItem("new-post-details-collapsed", String(!detailsExpanded));
     }
   }
 
@@ -93,18 +105,53 @@
       .filter((/** @type {string} */ tag) => tag.length > 0);
   }
 
+  /** Save as draft — zero validation, API handles untitled naming */
   async function handleSave() {
-    // Validation
-    if (!title.trim()) {
-      error = "Title is required";
-      return;
+    error = null;
+    saving = true;
+
+    try {
+      const result = await api.post("/api/blooms", {
+        title: title.trim() || "",
+        slug: slug.trim() || "",
+        date,
+        description: description.trim(),
+        tags: parseTags(tagsInput),
+        font,
+        markdown_content: content,
+        gutter_content: JSON.stringify(gutterItems),
+        fireside_assisted: firesideAssisted ? 1 : 0,
+        status: "draft",
+        featured_image: featuredImage.trim() || null,
+      });
+
+      editorRef?.clearDraft();
+
+      toast.success(`Draft saved!`, {
+        description: `"${result.title}" has been saved.`,
+      });
+
+      goto(`/arbor/garden/edit/${result.slug}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      error = errorMessage;
+      toast.error(`Failed to save draft`, { description: errorMessage });
+    } finally {
+      saving = false;
     }
-    if (!slug.trim()) {
-      error = "Slug is required";
+  }
+
+  /** Publish — validates title + content before sending */
+  async function handlePublish() {
+    if (!title.trim()) {
+      if (!detailsExpanded) detailsExpanded = true;
+      error = "Title is required to publish";
+      toast.error("Title is required to publish");
       return;
     }
     if (!content.trim()) {
-      error = "Content is required";
+      error = "Content is required to publish";
+      toast.error("Content is required to publish");
       return;
     }
 
@@ -114,7 +161,7 @@
     try {
       const result = await api.post("/api/blooms", {
         title: title.trim(),
-        slug: slug.trim(),
+        slug: slug.trim() || "",
         date,
         description: description.trim(),
         tags: parseTags(tagsInput),
@@ -122,24 +169,21 @@
         markdown_content: content,
         gutter_content: JSON.stringify(gutterItems),
         fireside_assisted: firesideAssisted ? 1 : 0,
-        status,
+        status: "published",
         featured_image: featuredImage.trim() || null,
       });
 
-      // Clear draft on successful save
       editorRef?.clearDraft();
 
-      // Show success toast
-      toast.success(`${resolveTermString('Bloom', 'Post')} created!`, {
-        description: `"${result.title}" has been saved.`,
+      toast.success(`${resolveTermString('Bloom', 'Post')} published!`, {
+        description: `"${result.title}" is now live.`,
       });
 
-      // Redirect to the edit page
       goto(`/arbor/garden/edit/${result.slug}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       error = errorMessage;
-      toast.error(`Failed to create ${resolveTermString('bloom', 'post')}`, { description: errorMessage });
+      toast.error(`Failed to publish`, { description: errorMessage });
     } finally {
       saving = false;
     }
@@ -153,13 +197,22 @@
       <h1>New <GroveSwap term="blooms">Bloom</GroveSwap></h1>
       <GroveIntro term="blooms" />
     </div>
-    <button
-      class="save-btn"
-      onclick={handleSave}
-      disabled={saving}
-    >
-      {saving ? "Saving..." : `Save ${resolveTermString('Bloom', 'Post')}`}
-    </button>
+    <div class="header-actions">
+      <button
+        class="save-draft-btn"
+        onclick={handleSave}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Save Draft"}
+      </button>
+      <button
+        class="publish-btn"
+        onclick={handlePublish}
+        disabled={saving}
+      >
+        {saving ? "Publishing..." : "Publish"}
+      </button>
+    </div>
   </header>
 
   {#if error}
@@ -171,71 +224,28 @@
   {/if}
 
   <div class="editor-layout">
-    <!-- External toggle for metadata panel (visible when panel is hidden) -->
-    {#if detailsCollapsed}
-      <button
-        class="show-details-btn"
-        onclick={toggleDetailsCollapsed}
-        title="Show details panel"
-        aria-label="Show details panel"
-      >
-        <ChevronRight size={16} />
+    <!-- Inline title -->
+    <input
+      type="text"
+      class="inline-title"
+      bind:value={title}
+      placeholder="Untitled"
+      aria-label="Post title"
+    />
+
+    <!-- Add details strip -->
+    <div class="details-strip">
+      <button class="details-toggle" onclick={toggleDetails}>
+        <ChevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+        <span class="details-label">Add details</span>
+        {#if !detailsExpanded && detailsSummary}
+          <span class="details-summary">{detailsSummary}</span>
+        {/if}
       </button>
-    {/if}
 
-    <!-- Metadata Panel -->
-    <GlassCard variant="frosted" class="metadata-panel {detailsCollapsed ? 'collapsed' : ''}">
-      <div class="panel-header">
-        <h2 class="panel-title">{#if detailsCollapsed}Details{:else}<GroveSwap term="blooms">Bloom</GroveSwap> Details{/if}</h2>
-        <button
-          class="collapse-details-btn"
-          onclick={toggleDetailsCollapsed}
-          title={detailsCollapsed ? "Expand details" : "Collapse details"}
-          aria-expanded={!detailsCollapsed}
-        >
-          {#if detailsCollapsed}<ChevronRight size={14} />{:else}<ChevronLeft size={14} />{/if}
-        </button>
-      </div>
-
-      {#if !detailsCollapsed}
-        <div class="panel-content">
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input
-              type="text"
-              id="title"
-              bind:value={title}
-              placeholder={resolveTermString("Your Bloom Title", "Your Post Title")}
-              class="form-input"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="slug">Slug</label>
-            <div class="slug-input-wrapper">
-              <span class="slug-prefix">/garden/</span>
-              <input
-                type="text"
-                id="slug"
-                bind:value={slug}
-                oninput={handleSlugInput}
-                placeholder="your-bloom-slug"
-                class="form-input slug-input"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              bind:value={date}
-              class="form-input"
-            />
-          </div>
-
-          <div class="form-group">
+      {#if detailsExpanded}
+        <div class="details-fields">
+          <div class="form-group field-description">
             <label for="description">
               Description
               <span class="char-count" class:warning={description.length > 160} class:good={description.length >= 120 && description.length <= 160}>
@@ -257,7 +267,7 @@
             {/if}
           </div>
 
-          <div class="form-group">
+          <div class="form-group field-cover">
             <label for="featured-image">Cover Image</label>
             <input
               type="url"
@@ -286,15 +296,29 @@
               class="form-input"
             />
             <span class="form-hint">Separate tags with commas</span>
+            {#if tagsInput}
+              <div class="tags-preview">
+                {#each parseTags(tagsInput) as tag}
+                  <span class="tag-preview">{tag}</span>
+                {/each}
+              </div>
+            {/if}
           </div>
 
-          {#if tagsInput}
-            <div class="tags-preview">
-              {#each parseTags(tagsInput) as tag}
-                <span class="tag-preview">{tag}</span>
-              {/each}
+          <div class="form-group">
+            <label for="slug">Slug</label>
+            <div class="slug-input-wrapper">
+              <span class="slug-prefix">/garden/</span>
+              <input
+                type="text"
+                id="slug"
+                bind:value={slug}
+                oninput={handleSlugInput}
+                placeholder="your-bloom-slug"
+                class="form-input slug-input"
+              />
             </div>
-          {/if}
+          </div>
 
           <div class="form-group">
             <label for="font">Font</label>
@@ -335,20 +359,19 @@
           </div>
 
           <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" bind:value={status} class="form-input">
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-            <span class="form-hint">
-              {status === "draft" ? "This bloom will be hidden from public view" : "This bloom will be visible to all visitors"}
-            </span>
+            <label for="date">Date</label>
+            <input
+              type="date"
+              id="date"
+              bind:value={date}
+              class="form-input"
+            />
           </div>
         </div>
       {/if}
-    </GlassCard>
+    </div>
 
-    <!-- Editor Panel -->
+    <!-- Editor -->
     <main class="editor-main">
       <div class="editor-with-gutter">
         <div class="editor-section">
@@ -399,6 +422,8 @@
     align-items: flex-start;
     margin-bottom: 1.5rem;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   .header-content {
     display: flex;
@@ -425,7 +450,32 @@
     color: var(--color-text);
     transition: color 0.3s ease;
   }
-  .save-btn {
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .save-draft-btn {
+    padding: 0.6rem 1.25rem;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-button);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .save-draft-btn:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+  .save-draft-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .publish-btn {
     padding: 0.6rem 1.25rem;
     background: var(--color-primary);
     color: white;
@@ -436,78 +486,108 @@
     cursor: pointer;
     transition: background-color 0.2s, opacity 0.2s;
   }
-  .save-btn:hover:not(:disabled) {
+  .publish-btn:hover:not(:disabled) {
     background: var(--color-primary-hover);
   }
-  .save-btn:disabled {
+  .publish-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  /* Editor Layout */
+
+  /* Editor Layout — vertical flow, no sidebar */
   .editor-layout {
     display: flex;
-    gap: 1.5rem;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
-    position: relative;
   }
-  /* Metadata Panel - Now using GlassCard */
-  :global(.metadata-panel) {
-    width: 280px;
-    flex-shrink: 0;
-    overflow-y: auto;
-    transition: all 0.2s ease;
-  }
-  :global(.metadata-panel.collapsed) {
-    display: none;
-  }
-  .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 1.25rem;
-    transition: border-color 0.3s ease;
-  }
-  :global(.metadata-panel.collapsed .panel-header) {
-    flex-direction: column;
-    gap: 0.5rem;
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-  .panel-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
+
+  /* Inline title — big, clean, heading-style */
+  .inline-title {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading, "Lexend", sans-serif);
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 0.25rem 0;
+    outline: none;
     color: var(--color-text);
     transition: color 0.3s ease;
   }
-  :global(.metadata-panel.collapsed .panel-title) {
-    font-size: 0.7rem;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-  }
-  .collapse-details-btn {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+  .inline-title::placeholder {
     color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 0.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s ease;
+    opacity: 0.5;
   }
-  .collapse-details-btn:hover {
-    background: var(--color-bg-secondary);
+  .inline-title:focus {
+    border-bottom: 2px solid var(--color-primary);
+  }
+
+  /* Details strip */
+  .details-strip {
+    margin: 0.5rem 0 1rem;
+  }
+  .details-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    width: 100%;
+    text-align: left;
+  }
+  .details-toggle:hover {
     color: var(--color-primary);
   }
+  :global(.details-chevron) {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  :global(.details-chevron.rotated) {
+    transform: rotate(90deg);
+  }
+  .details-label {
+    flex-shrink: 0;
+  }
+  .details-summary {
+    color: var(--color-text-subtle);
+    font-size: 0.8rem;
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Details fields — responsive grid */
+  .details-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--color-border);
+    transition: border-color 0.3s ease;
+  }
+  .details-fields :global(.field-description),
+  .details-fields :global(.field-cover) {
+    grid-column: 1 / -1;
+  }
+  /* Svelte scoped class targeting */
+  .field-description {
+    grid-column: 1 / -1;
+  }
+  .field-cover {
+    grid-column: 1 / -1;
+  }
+
+  /* Form fields (shared) */
   .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
   }
   .form-group label {
     display: block;
@@ -596,7 +676,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    margin-top: -0.5rem;
+    margin-top: 0.5rem;
   }
   .tag-preview {
     padding: 0.2rem 0.6rem;
@@ -608,7 +688,6 @@
     font-weight: 500;
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  /* Cover image preview */
   .cover-preview {
     margin-top: 0.75rem;
     border-radius: var(--border-radius-small);
@@ -622,6 +701,7 @@
     object-fit: cover;
     display: block;
   }
+
   /* Editor Main */
   .editor-main {
     flex: 1;
@@ -672,63 +752,25 @@
     background: rgba(74, 222, 128, 0.2);
     border-color: rgba(74, 222, 128, 0.35);
   }
-  /* Show details button (external toggle, visible when panel hidden) */
-  .show-details-btn {
-    position: absolute;
-    left: 0;
-    top: 0;
-    padding: 0.5rem;
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-left: none;
-    border-radius: 0 var(--border-radius-button) var(--border-radius-button) 0;
-    color: var(--color-primary);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    z-index: 10;
-  }
-  .show-details-btn:hover {
-    background: rgba(34, 197, 94, 0.18);
-    border-color: rgba(34, 197, 94, 0.35);
-  }
-  :global(.dark) .show-details-btn {
-    background: rgba(74, 222, 128, 0.12);
-    border-color: rgba(74, 222, 128, 0.2);
-    color: #86efac;
-  }
-  :global(.dark) .show-details-btn:hover {
-    background: rgba(74, 222, 128, 0.2);
-    border-color: rgba(74, 222, 128, 0.35);
-  }
+
   /* Responsive */
   @media (max-width: 1200px) {
     .gutter-section {
       width: 250px;
     }
   }
+  @media (max-width: 768px) {
+    .details-fields {
+      grid-template-columns: 1fr;
+    }
+  }
   @media (max-width: 900px) {
-    .editor-layout {
-      flex-direction: column;
-    }
-    :global(.metadata-panel) {
-      width: 100% !important;
-      max-height: none;
-    }
-    :global(.metadata-panel.collapsed) {
-      display: none !important;
-    }
-    :global(.metadata-panel.collapsed .panel-header) {
-      flex-direction: row;
-    }
-    :global(.metadata-panel.collapsed .panel-title) {
-      writing-mode: horizontal-tb;
-      transform: none;
-      font-size: 1rem;
-    }
     .new-post-page {
       height: auto;
       min-height: auto;
+    }
+    .inline-title {
+      font-size: 1.5rem;
     }
     .editor-main {
       min-height: 500px;
@@ -739,6 +781,10 @@
     .gutter-section {
       width: 100%;
       max-height: 300px;
+    }
+    .header-actions {
+      width: 100%;
+      justify-content: flex-end;
     }
   }
 </style>

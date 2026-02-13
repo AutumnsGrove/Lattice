@@ -40,6 +40,36 @@ interface PostInput {
 }
 
 /**
+ * Generate the next sequential "Untitled" title for a tenant.
+ * Returns "Untitled", "Untitled 2", "Untitled 3", etc.
+ */
+async function getNextUntitledTitle(
+  db: D1Database,
+  tenantId: string,
+): Promise<string> {
+  const result = await db
+    .prepare(
+      "SELECT title FROM posts WHERE tenant_id = ? AND title LIKE 'Untitled%'",
+    )
+    .bind(tenantId)
+    .all();
+
+  const existingNumbers = result.results
+    .map((r) => r.title as string)
+    .map((t) => {
+      if (t === "Untitled") return 1;
+      const match = t.match(/^Untitled (\d+)$/);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .filter((n) => n > 0);
+
+  if (existingNumbers.length === 0) return "Untitled";
+
+  const maxNumber = Math.max(...existingNumbers);
+  return `Untitled ${maxNumber + 1}`;
+}
+
+/**
  * GET /api/posts - List posts from D1
  *
  * Access levels:
@@ -213,10 +243,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       console.error("[Blooms] [FAIL_OPEN] Tier limit check failed:", err);
     }
 
-    // Validate required fields
-    if (!data.title || !data.slug || !data.markdown_content) {
-      throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+    const isDraft = !data.status || data.status === "draft";
+
+    // Published posts require title + content; drafts generate defaults
+    if (!isDraft) {
+      if (!data.title?.trim()) {
+        throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+      }
+      if (!data.markdown_content?.trim()) {
+        throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+      }
     }
+
+    // Generate defaults for missing fields on drafts
+    let title = data.title?.trim() || "";
+    if (!title) {
+      title = await getNextUntitledTitle(platform.env.DB, tenantId);
+    }
+    let markdownContent = data.markdown_content || "";
 
     // Validation constants
     const MAX_TITLE_LENGTH = 200;
@@ -224,8 +268,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const MAX_MARKDOWN_LENGTH = 1024 * 1024; // 1MB
     const MAX_SLUG_LENGTH = 100;
 
-    // Validate lengths
-    if (data.title.length > MAX_TITLE_LENGTH) {
+    // Validate lengths (only when values are present)
+    if (title.length > MAX_TITLE_LENGTH) {
       throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
@@ -233,12 +277,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
-    if (data.markdown_content.length > MAX_MARKDOWN_LENGTH) {
+    if (markdownContent.length > MAX_MARKDOWN_LENGTH) {
       throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
-    }
-
-    if (data.slug.length > MAX_SLUG_LENGTH) {
-      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
     }
 
     // Validate gutter_content is valid JSON if provided
@@ -267,12 +307,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       }
     }
 
-    // Sanitize slug
-    const slug = data.slug
+    // Generate slug from title if not provided
+    const rawSlug = data.slug?.trim() || title;
+    const slug = rawSlug
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
+
+    if (slug.length > MAX_SLUG_LENGTH) {
+      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+    }
 
     // Use TenantDb for automatic tenant isolation
     const tenantDb = getTenantDb(platform.env.DB, { tenantId });
@@ -285,22 +330,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Generate HTML from markdown (renderMarkdown handles sanitization)
-    const html_content = renderMarkdown(data.markdown_content);
+    const html_content = markdownContent ? renderMarkdown(markdownContent) : "";
 
     const tags = JSON.stringify(data.tags || []);
 
     // Calculate word count and reading time
-    const wordCount = data.markdown_content.split(/\s+/).filter(Boolean).length;
+    const wordCount = markdownContent
+      ? markdownContent.split(/\s+/).filter(Boolean).length
+      : 0;
     const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
 
     // Insert using TenantDb (automatically adds tenant_id and generates id)
     // Note: created_at and updated_at are auto-added by TenantDb.insert()
     await tenantDb.insert("posts", {
       slug,
-      title: data.title,
+      title,
       tags,
       description: data.description || "",
-      markdown_content: data.markdown_content,
+      markdown_content: markdownContent,
       html_content,
       gutter_content: data.gutter_content || "[]",
       font: data.font || "default",
@@ -327,7 +374,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (platform?.env?.AI && data.status === "published" && platform.context) {
       platform.context.waitUntil(
         moderatePublishedContent({
-          content: `${data.title}\n\n${data.markdown_content}`,
+          content: `${title}\n\n${markdownContent}`,
           ai: platform.env.AI,
           db: platform.env.DB,
           openrouterApiKey: platform.env.OPENROUTER_API_KEY,
@@ -343,6 +390,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     return json({
       success: true,
       slug,
+      title,
       message: "Post created successfully",
     });
   } catch (err) {
