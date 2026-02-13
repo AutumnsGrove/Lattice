@@ -12,7 +12,7 @@
 
   interface Props {
     showExpanded: boolean;
-    user?: { email?: string; name?: string } | null;
+    user?: { email?: string; name?: string | null; [key: string]: unknown } | null;
     footerLinks?: ArborFooterLink[];
     logoutHref?: string;
     onLogout?: () => void;
@@ -50,13 +50,13 @@
     {/if}
     {#if footerLinks}
       {#each footerLinks as link}
+        {@const Icon = getIcon(link)}
         <a
           href={link.href}
           target={link.external ? "_blank" : undefined}
           rel={link.external ? "noopener noreferrer" : undefined}
           class="arbor-help-link"
         >
-          {@const Icon = getIcon(link)}
           <Icon class="arbor-help-icon" />
           <span>{link.label}</span>
         </a>
@@ -93,6 +93,7 @@
   <div class="arbor-footer-collapsed">
     {#if footerLinks}
       {#each footerLinks as link}
+        {@const Icon = getIcon(link)}
         <a
           href={link.href}
           target={link.external ? "_blank" : undefined}
@@ -101,7 +102,6 @@
           title={link.label}
           aria-label={link.label}
         >
-          {@const Icon = getIcon(link)}
           <Icon class="arbor-help-icon" />
         </a>
       {/each}

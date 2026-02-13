@@ -83,8 +83,9 @@ export interface ArborPanelProps {
   navItems: ArborNavEntry[];
   /** Footer links (Help, Support, etc.) — used by the default footer */
   footerLinks?: ArborFooterLink[];
-  /** User info for footer display — used by the default footer */
-  user?: { email?: string; name?: string } | null;
+  /** User info for footer display — used by the default footer.
+   *  Accepts any user object with at least email/name (extra fields are ignored). */
+  user?: { email?: string; name?: string | null; [key: string]: unknown } | null;
   /** Brand title in sidebar header (default: "Arbor") */
   brandTitle?: string;
   /** Whether to show the Grove logo in sidebar header (default: true) */
