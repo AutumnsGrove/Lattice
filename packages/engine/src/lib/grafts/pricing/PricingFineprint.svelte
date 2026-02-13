@@ -83,18 +83,16 @@
 				"Grove is designed around portability. Export everything at any time. If we ever register a domain for you, you own it — transfer it whenever you want, no fees, no questions.",
 		},
 		ai: {
-			title: "AI Features",
+			title: "AI Protection",
 			content:
-				"Every Grove blog is protected by [[shade|Shade]] — our 8-layer defense against AI crawlers, scrapers, and training bots. Your words are never used to train AI models. Paid tiers include [[wisp|Wisp]], a writing assistant that polishes your voice without replacing it: grammar fixes, tone analysis, readability scores, and [[fireside|Fireside]] mode. [[seedling|Seedling]]: 100 assists/day. [[sapling|Sapling]]: 500/day. [[oak|Oak]]: 2,000/day. [[evergreen|Evergreen]]: 10,000/day.",
+				"Every Grove blog is protected by [[shade|Shade]] — our defense against AI crawlers, scrapers, and training bots. Your words are yours, and they're never used to train AI models. This protection is active on every tier, free and paid.",
 			detail:
-				"[[wisp|Wisp]] is a helper, not a writer — it never generates content from scratch. [[fireside|Fireside]] mode asks you thoughtful questions, then organizes your answers into a draft using only your words. Every Fireside post is marked '~ written fireside with Wisp ~' for transparency. Content moderation ([[thorn|Thorn]]) runs automatically on all posts to keep the community safe — no human surveillance, zero data retention.",
+				"We're building writing tools that help polish your voice without replacing it — grammar checks, readability scoring, and more. They're not ready yet, and when they arrive, they'll be available to paid tiers. For now, [[shade|Shade]] keeps your content safe.",
 		},
 		api: {
 			title: "API Access",
 			content:
-				"[[oak|Oak]] and [[evergreen|Evergreen]] tiers include API access for building custom integrations, automated publishing, and programmatic blog management. [[oak|Oak]]: REST API with standard rate limits and webhook support. [[evergreen|Evergreen]]: Priority API access with higher rate limits and dedicated endpoints.",
-			detail:
-				"[[seedling|Seedling]] and [[sapling|Sapling]] blogs are accessible via RSS feeds and standard web protocols. Full programmatic API access is reserved for [[oak|Oak]]+ to ensure platform stability. API documentation will be available at launch.",
+				"API access for custom integrations and automated publishing is planned for [[oak|Oak]] and [[evergreen|Evergreen]] tiers. All blogs are accessible via RSS feeds and standard web protocols today.",
 		},
 	};
 

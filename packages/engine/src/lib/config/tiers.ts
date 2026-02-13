@@ -165,7 +165,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       description:
         "A quiet clearing to try your hand at writing. No commitment, no credit card.",
       icon: "footprints",
-      bestFor: "The curious",
+      bestFor: "Trying it out",
       featureStrings: [
         "25 blooms",
         "100 MB storage",
@@ -229,17 +229,17 @@ export const TIERS: Record<TierKey, TierConfig> = {
       name: "Seedling",
       tagline: "Just planted",
       description:
-        "Perfect for getting started. A quiet corner to call your own.",
+        "Your own corner of the internet. Room to write, no distractions, no ads.",
       icon: "sprout",
-      bestFor: "Curious",
+      bestFor: "Writers finding their voice",
       featureStrings: [
         "100 blooms",
         "1 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "3 curated themes",
+        "Unlimited comments",
         "Meadow access",
-        "RSS feed",
-        "No ads ever",
+        "No ads, no tracking",
       ],
       standardName: "Starter",
       standardFeatureStrings: [
@@ -247,9 +247,9 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "1 GB storage",
         // TODO(foliage): uncomment when themes launch
         // "3 curated themes",
+        "Unlimited comments",
         "Community feed access",
-        "RSS feed",
-        "No ads ever",
+        "No ads, no tracking",
       ],
     },
     support: { level: "community", displayString: "Community" },
@@ -300,7 +300,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
       tagline: "Growing strong",
       description: "For blogs finding their voice. Room to stretch and grow.",
       icon: "tree-deciduous",
-      bestFor: "Hobbyists",
+      bestFor: "Regular writers",
       featureStrings: [
         "Unlimited blooms",
         "5 GB storage",
@@ -369,9 +369,10 @@ export const TIERS: Record<TierKey, TierConfig> = {
     display: {
       name: "Oak",
       tagline: "Deep roots",
-      description: "Full creative control. Your blog, your rules.",
+      description:
+        "Your own domain, full email, and complete creative control.",
       icon: "trees",
-      bestFor: "Serious Bloggers",
+      bestFor: "Established writers",
       featureStrings: [
         "Unlimited blooms",
         "20 GB storage",
@@ -440,7 +441,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
     display: {
       name: "Evergreen",
       tagline: "Always flourishing",
-      description: "The complete package. Everything Grove has to offer.",
+      description:
+        "Domain included, dedicated support, and everything Grove has to offer.",
       icon: "crown",
       bestFor: "Professionals",
       featureStrings: [
