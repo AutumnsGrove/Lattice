@@ -133,7 +133,16 @@ function sanitizeServerSafe(html: string): string {
     ]),
     disallowedTagsMode: "discard",
     allowedAttributes: {
-      a: ["href", "title", "target", "rel", "class", "id"],
+      a: [
+        "href",
+        "title",
+        "target",
+        "rel",
+        "class",
+        "id",
+        "data-passage-name",
+        "data-mention",
+      ],
       img: ["src", "alt", "title", "width", "height", "class"],
       "*": ["class", "id"],
       span: ["class", "id", "data-anchor"],
@@ -460,6 +469,9 @@ export function sanitizeMarkdown(markdownHTML: string): string {
       // Hum: music link preview placeholders
       "data-hum-url",
       "data-hum-provider",
+      // Mentions: @username grove links with passage animation
+      "data-passage-name",
+      "data-mention",
     ],
     FORBID_TAGS: [
       "script",

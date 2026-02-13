@@ -3,6 +3,7 @@ import matter from "@11ty/gray-matter";
 import { sanitizeMarkdown } from "./sanitize.js";
 import { humPlugin } from "./markdown-hum.js";
 import { groveDirectivePlugin } from "./markdown-directives.js";
+import { mentionsPlugin } from "./markdown-mentions.js";
 
 // ============================================================================
 // Type Definitions
@@ -229,6 +230,9 @@ md.use(humPlugin);
 
 // Grove directives: ::name[content]:: fenced blocks (gallery, etc.)
 md.use(groveDirectivePlugin);
+
+// Mentions: @username → linked grove mention with passage animation
+md.use(mentionsPlugin);
 
 // Add IDs to headings for table of contents linking
 // In markdown-it, heading_open/heading_close are separate tokens.

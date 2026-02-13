@@ -50,6 +50,9 @@ export * from "./webauthn";
 export * from "./webhook-sanitizer";
 export * from "./grove-url";
 
+// Mentions - @username grove links
+export { mentionsPlugin, processMentions } from "./markdown-mentions";
+
 // Rehype GroveTerm plugin - explicit exports
 export {
   rehypeGroveTerm,
