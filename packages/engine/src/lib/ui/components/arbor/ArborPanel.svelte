@@ -24,6 +24,7 @@
 
   let {
     navItems,
+    userPermissions,
     footerLinks,
     user,
     brandTitle = "Arbor",
@@ -96,7 +97,7 @@
       customHeader={sidebarHeader}
     />
 
-    <ArborNav items={navItems} {showExpanded} />
+    <ArborNav items={navItems} {showExpanded} {userPermissions} />
 
     <ArborSidebarFooter
       {showExpanded}

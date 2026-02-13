@@ -15,9 +15,17 @@
   interface Props {
     items: ArborNavEntry[];
     showExpanded: boolean;
+    userPermissions?: string[];
   }
 
-  let { items, showExpanded }: Props = $props();
+  let { items, showExpanded, userPermissions }: Props = $props();
+
+  /** Returns true when the user has all permissions required by the item */
+  function hasPermissions(required?: string[]): boolean {
+    if (!required || required.length === 0) return true;
+    if (!userPermissions) return false;
+    return required.every((p) => userPermissions!.includes(p));
+  }
 
   let currentPath = $derived(page.url.pathname);
 
@@ -59,7 +67,7 @@
           <hr class="arbor-divider-line" />
         {/if}
       </div>
-    {:else if entry.visible !== false}
+    {:else if entry.visible !== false && hasPermissions(entry.requiredPermissions)}
       {@const active = isActive(entry.href)}
       <a
         href={entry.href}
@@ -72,7 +80,7 @@
         {#if entry.icon}
           {@const Icon = entry.icon}
           {#if entry.badge && entry.badge > 0}
-            <span class="arbor-nav-icon-wrap">
+            <span class="arbor-nav-icon-wrap" aria-live="polite">
               <Icon class="arbor-nav-icon" />
               <span
                 class="arbor-activity-dot"
@@ -80,7 +88,7 @@
               ></span>
             </span>
           {:else if entry.showActivity}
-            <span class="arbor-nav-icon-wrap">
+            <span class="arbor-nav-icon-wrap" aria-live="polite">
               <Icon class="arbor-nav-icon" />
               <span class="arbor-activity-dot" aria-label="Activity"></span>
             </span>

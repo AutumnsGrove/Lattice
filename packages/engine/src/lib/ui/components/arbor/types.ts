@@ -34,6 +34,8 @@ export interface ArborNavItem {
   showActivity?: boolean;
   /** Grove Mode term slug for label resolution (e.g., "reeds", "arbor") */
   termSlug?: string;
+  /** Permission strings the user must have to see this item (all required) */
+  requiredPermissions?: string[];
   /** When `false`, the item is hidden (useful for feature gating) */
   visible?: boolean;
 }
@@ -81,11 +83,17 @@ export interface ArborFooterLink {
 export interface ArborPanelProps {
   /** Navigation entries for the sidebar (items and optional dividers) */
   navItems: ArborNavEntry[];
+  /** User permission strings — items with `requiredPermissions` are hidden unless all are present */
+  userPermissions?: string[];
   /** Footer links (Help, Support, etc.) — used by the default footer */
   footerLinks?: ArborFooterLink[];
   /** User info for footer display — used by the default footer.
    *  Accepts any user object with at least email/name (extra fields are ignored). */
-  user?: { email?: string; name?: string | null; [key: string]: unknown } | null;
+  user?: {
+    email?: string;
+    name?: string | null;
+    [key: string]: unknown;
+  } | null;
   /** Brand title in sidebar header (default: "Arbor") */
   brandTitle?: string;
   /** Whether to show the Grove logo in sidebar header (default: true) */

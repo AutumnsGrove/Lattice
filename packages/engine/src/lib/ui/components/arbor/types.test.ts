@@ -48,6 +48,23 @@ describe("Arbor Types", () => {
       };
       expect(item.visible).toBe(false);
     });
+
+    it("should accept requiredPermissions for CRUD permission gating", () => {
+      const item: ArborNavItem = {
+        href: "/arbor/settings",
+        label: "Settings",
+        requiredPermissions: ["admin", "settings:write"],
+      };
+      expect(item.requiredPermissions).toEqual(["admin", "settings:write"]);
+    });
+
+    it("should default requiredPermissions to undefined (visible to all)", () => {
+      const item: ArborNavItem = {
+        href: "/arbor/garden",
+        label: "Garden",
+      };
+      expect(item.requiredPermissions).toBeUndefined();
+    });
   });
 
   describe("ArborNavDivider", () => {
