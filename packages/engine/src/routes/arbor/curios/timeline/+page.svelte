@@ -311,8 +311,13 @@
         credentials: "include",
         headers: {
           "x-sveltekit-action": "true",
+          "x-csrf-token": data.csrfToken ?? "",
         },
       });
+
+      if (!response.ok && response.headers.get("content-type")?.includes("text/html")) {
+        throw new Error(`Server returned ${response.status} — check token value and try again`);
+      }
 
       // SvelteKit actions use devalue serialization, not plain JSON
       const result = deserialize(await response.text()) as {
