@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData, ActionData } from "./$types";
-  import { enhance, deserialize } from "$app/forms";
+  import { enhance } from "$app/forms";
   import { GlassCard, GlassButton, Badge, Waystone } from "$lib/ui/components/ui";
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils/api";
@@ -301,33 +301,22 @@
     }
 
     try {
-      const formData = new FormData();
-      formData.append("tokenType", type);
-      formData.append("tokenValue", value.trim());
-
-      const response = await fetch("?/saveToken", { // csrf-ok
-        method: "POST",
-        body: formData,
-        credentials: "include",
-        headers: {
-          "x-sveltekit-action": "true",
-          "x-csrf-token": data.csrfToken ?? "",
-        },
+      const result = await api.post<{
+        success: boolean;
+        tokenSource?: string;
+        verified?: boolean;
+        error?: string;
+      }>("/api/curios/timeline/save-token", {
+        tokenType: type,
+        tokenValue: value.trim(),
       });
 
-      if (!response.ok && response.headers.get("content-type")?.includes("text/html")) {
-        throw new Error(`Server returned ${response.status} — check token value and try again`);
+      if (!result) {
+        throw new Error("No response from server");
       }
 
-      // SvelteKit actions use devalue serialization, not plain JSON
-      const result = deserialize(await response.text()) as {
-        type: string;
-        data?: Record<string, unknown>;
-      };
-      const actionData = result?.data;
-
-      if (result?.type === "success" && actionData?.tokenSaved) {
-        const msg = `Saved and verified (${actionData.tokenSource as string})`;
+      if (result.success) {
+        const msg = `Saved and verified (${result.tokenSource})`;
         if (type === "github") {
           githubTokenResult = { ok: true, message: msg };
           githubToken = "";
@@ -339,7 +328,7 @@
           description: msg,
         });
       } else {
-        const errorMsg = (actionData?.tokenError as string) || "Save failed";
+        const errorMsg = result.error || "Save failed";
         if (type === "github") {
           githubTokenResult = { ok: false, message: errorMsg };
         } else {
