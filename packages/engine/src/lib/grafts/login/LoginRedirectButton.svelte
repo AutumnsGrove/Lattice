@@ -79,7 +79,7 @@
 	class="inline-flex items-center justify-center gap-2.5 {className}"
 >
 	{#if showLogo}
-		<Logo size="xs" showBackground={false} />
+		<Logo size="xs" background={false} />
 	{/if}
 	<span>{label}</span>
 </GlassButton>
