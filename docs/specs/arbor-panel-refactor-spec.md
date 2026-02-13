@@ -1,3 +1,18 @@
+---
+title: Arbor Panel Refactor — Architecture & Planning Spec
+description: Extract the engine's 787-line Arbor sidebar layout into a first-class ArborPanel component family
+category: specs
+specCategory: ui-components
+icon: layout
+lastUpdated: "2026-02-13"
+aliases: []
+tags:
+  - arbor
+  - ui
+  - components
+  - admin-panel
+---
+
 # Arbor Panel Refactor — Architecture & Planning Spec
 
 > **Status:** Implemented (Phases 1-3)
