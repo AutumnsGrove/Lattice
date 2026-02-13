@@ -95,7 +95,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
     kv?.get(`pulse:${tenantId}:today`, "json").catch(() => null) ?? null,
     kv?.get(`pulse:${tenantId}:streak`, "json").catch(() => null) ?? null,
 
-    // Recent events
+    // Recent events (graceful degradation — empty on failure)
     db
       .prepare(
         `SELECT id, delivery_id, event_type, action, repo_name, repo_full_name,
@@ -104,7 +104,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
            ORDER BY occurred_at DESC LIMIT ?`,
       )
       .bind(tenantId, Math.min(config.feed_max_items, 100))
-      .all<EventRow>(),
+      .all<EventRow>()
+      .catch(() => ({ results: [] as EventRow[] })),
 
     // Daily stats (30 days)
     db
@@ -116,7 +117,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
            ORDER BY date ASC`,
       )
       .bind(tenantId)
-      .all<DailyStatsRow>(),
+      .all<DailyStatsRow>()
+      .catch(() => ({ results: [] as DailyStatsRow[] })),
 
     // Hourly activity (7 days)
     db
@@ -126,7 +128,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
            ORDER BY date ASC, hour ASC`,
       )
       .bind(tenantId)
-      .all<HourlyRow>(),
+      .all<HourlyRow>()
+      .catch(() => ({ results: [] as HourlyRow[] })),
   ]);
 
   const active = (activeData as any) ?? { isActive: false };

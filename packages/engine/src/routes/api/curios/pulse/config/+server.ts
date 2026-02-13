@@ -117,10 +117,16 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   const showStats = body.showStats !== false;
   const showTrends = body.showTrends !== false;
   const showCi = body.showCi !== false;
-  const timezone =
-    typeof body.timezone === "string"
-      ? body.timezone.slice(0, 100)
-      : "America/New_York";
+  let timezone = "America/New_York";
+  if (typeof body.timezone === "string") {
+    try {
+      // Validate against IANA timezone database
+      Intl.DateTimeFormat(undefined, { timeZone: body.timezone });
+      timezone = body.timezone.slice(0, 100);
+    } catch {
+      // Invalid timezone — use default
+    }
+  }
   const feedMaxItems = Math.max(
     10,
     Math.min(500, Number(body.feedMaxItems) || 100),
@@ -130,16 +136,18 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     Array.isArray(body.reposInclude) && body.reposInclude.length > 0
       ? JSON.stringify(
           body.reposInclude
+            .filter((r: unknown): r is string => typeof r === "string")
             .slice(0, 50)
-            .map((r: unknown) => String(r).slice(0, 200)),
+            .map((r) => r.slice(0, 200)),
         )
       : null;
   const reposExclude =
     Array.isArray(body.reposExclude) && body.reposExclude.length > 0
       ? JSON.stringify(
           body.reposExclude
+            .filter((r: unknown): r is string => typeof r === "string")
             .slice(0, 50)
-            .map((r: unknown) => String(r).slice(0, 200)),
+            .map((r) => r.slice(0, 200)),
         )
       : null;
 

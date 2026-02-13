@@ -216,8 +216,10 @@ async function handleWebhook(
     "pulse_webhook_secret",
   );
 
-  if (!webhookSecret) {
-    console.error(`[Pulse] No webhook secret for tenant ${tenantId}`);
+  if (!webhookSecret || webhookSecret.length < 32) {
+    console.error(
+      `[Pulse] Missing or weak webhook secret for tenant ${tenantId}`,
+    );
     return Response.json({ error: "Webhook not configured" }, { status: 500 });
   }
 

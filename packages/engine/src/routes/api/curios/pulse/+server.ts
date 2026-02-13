@@ -56,12 +56,12 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
   const limit = Math.min(Math.max(isNaN(rawLimit) ? 50 : rawLimit, 1), 100);
   const offset = Math.max(isNaN(rawOffset) ? 0 : rawOffset, 0);
 
-  // Only allow known event types (prevents query abuse)
+  // Only allow known event types with format validation (defense-in-depth)
   const allowedTypes = new Set(PULSE_EVENT_TYPES as readonly string[]);
   const typeFilter = (
     url.searchParams.get("type")?.split(",").filter(Boolean) ?? []
   )
-    .filter((t) => allowedTypes.has(t))
+    .filter((t) => /^[a-z_]+$/.test(t) && allowedTypes.has(t))
     .slice(0, 10); // Cap at 10 filter types
 
   const sinceParam = url.searchParams.get("since");
