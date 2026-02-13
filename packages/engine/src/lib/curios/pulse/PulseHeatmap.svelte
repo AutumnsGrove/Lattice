@@ -124,41 +124,41 @@
     z-index: 1;
   }
 
-  /* Seasonal-aware intensity levels */
+  /* Grove-green intensity levels — uses CSS tokens with fallbacks */
   .level-0 {
     background: var(--grove-overlay-4, rgba(0, 0, 0, 0.04));
   }
 
   .level-1 {
-    background: rgba(34, 197, 94, 0.2);
+    background: var(--grove-overlay-15, rgba(34, 197, 94, 0.15));
   }
 
   .level-2 {
-    background: rgba(34, 197, 94, 0.4);
+    background: var(--grove-overlay-30, rgba(34, 197, 94, 0.3));
   }
 
   .level-3 {
-    background: rgba(34, 197, 94, 0.6);
+    background: var(--grove-overlay-50, rgba(34, 197, 94, 0.5));
   }
 
   .level-4 {
-    background: rgba(34, 197, 94, 0.85);
+    background: var(--grove-overlay-70, rgba(34, 197, 94, 0.75));
   }
 
   :global(.dark) .level-1 {
-    background: rgba(74, 222, 128, 0.15);
+    background: rgba(74, 222, 128, 0.12);
   }
 
   :global(.dark) .level-2 {
-    background: rgba(74, 222, 128, 0.3);
+    background: rgba(74, 222, 128, 0.25);
   }
 
   :global(.dark) .level-3 {
-    background: rgba(74, 222, 128, 0.5);
+    background: rgba(74, 222, 128, 0.45);
   }
 
   :global(.dark) .level-4 {
-    background: rgba(74, 222, 128, 0.75);
+    background: rgba(74, 222, 128, 0.7);
   }
 
   @media (prefers-reduced-motion: reduce) {

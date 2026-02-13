@@ -93,12 +93,12 @@
   }
 
   .streak-value {
-    color: #f59e0b;
+    color: var(--color-warning, #f59e0b);
   }
 
   :global(.streak-card) {
-    background: rgba(245, 158, 11, 0.05) !important;
-    border-color: rgba(245, 158, 11, 0.15) !important;
+    background: rgba(245, 158, 11, 0.04) !important;
+    border-color: rgba(245, 158, 11, 0.12) !important;
   }
 
   @media (max-width: 640px) {
