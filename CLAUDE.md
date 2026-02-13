@@ -31,8 +31,8 @@ uv tool install --editable tools/gw
 
 **About gf:**
 
-- `gf` is the Go version with pre-compiled binaries (5 platforms: linux-x86_64, linux-arm64, darwin-x86_64, darwin-arm64, windows-x86_64)
-- Binaries are included in `tools/grove-find-go/dist/` (~3.5MB each, ~18MB total)
+- `gf` is the Go version with pre-compiled binaries (4 platforms: linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64)
+- Binaries are included in `tools/grove-find-go/dist/` (~3.5MB each, ~14MB total)
 - The installer script auto-detects your platform and installs to `~/.local/bin/`
 - Average performance: ~40ms for git operations, ~650ms for search operations
 - ~2x faster than the Python fallback

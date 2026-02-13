@@ -45,9 +45,6 @@ jobs:
             goarch: arm64
             binary: gf-linux-arm64
           - goos: darwin
-            goarch: amd64
-            binary: gf-darwin-x86_64
-          - goos: darwin
             goarch: arm64
             binary: gf-darwin-arm64
           - goos: windows
@@ -133,9 +130,9 @@ jobs:
           git add tools/grove-find-go/dist/
           git commit -m "chore: rebuild gf binaries for latest Go changes
 
-- Rebuilt cross-platform binaries (linux-x86_64, linux-arm64, darwin-x86_64, darwin-arm64, windows-x86_64)
+- Rebuilt cross-platform binaries (linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64)
 - Triggered by Go source or dependency changes
-- Binary size: ~3.5MB each, ~18MB total"
+- Binary size: ~3.5MB each, ~14MB total"
 
       - name: Push
         if: steps.changes.outputs.has_changes == 'true'
