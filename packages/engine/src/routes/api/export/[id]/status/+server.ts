@@ -31,9 +31,20 @@ interface StorageExport {
   file_size_bytes: number | null;
   item_counts: string | null;
   created_at: number;
+  updated_at: number;
   completed_at: number | null;
   expires_at: number | null;
 }
+
+/** Exports stuck in an active phase for longer than this are marked failed */
+const STALE_THRESHOLD_SECONDS = 15 * 60; // 15 minutes
+const ACTIVE_PHASES = [
+  "pending",
+  "querying",
+  "assembling",
+  "uploading",
+  "notifying",
+];
 
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   if (!locals.user) {
@@ -61,7 +72,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
     // Query export record
     const record = await platform.env.DB.prepare(
-      `SELECT id, status, progress, error_message, file_size_bytes, item_counts, created_at, completed_at, expires_at
+      `SELECT id, status, progress, error_message, file_size_bytes, item_counts, created_at, updated_at, completed_at, expires_at
        FROM storage_exports
        WHERE id = ? AND tenant_id = ?`,
     )
@@ -74,8 +85,41 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
       });
     }
 
-    // Check if export has expired
     const now = Math.floor(Date.now() / 1000);
+
+    // Staleness detection: if an export has been in an active phase
+    // for longer than the threshold without progress, mark it failed.
+    // This catches DO evictions, crashes, or resource limit kills.
+    let status = record.status;
+    if (
+      ACTIVE_PHASES.includes(status) &&
+      now - record.updated_at > STALE_THRESHOLD_SECONDS
+    ) {
+      status = "failed";
+      try {
+        await platform.env.DB.prepare(
+          "UPDATE storage_exports SET status = ?, error_message = ?, updated_at = ? WHERE id = ?",
+        )
+          .bind("failed", "Export timed out. Please try again.", now, record.id)
+          .run();
+      } catch {
+        // Best-effort — if this fails, next poll will retry
+      }
+      return json({
+        id: record.id,
+        status: "failed",
+        progress: record.progress,
+        error: "Export timed out. Please try again.",
+        fileSize: null,
+        itemCounts: null,
+        createdAt: record.created_at,
+        updatedAt: now,
+        completedAt: null,
+        expiresAt: record.expires_at || null,
+      });
+    }
+
+    // Check if export has expired
     const isExpired =
       record.expires_at &&
       record.expires_at < now &&
@@ -94,12 +138,13 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 
     return json({
       id: record.id,
-      status: isExpired ? "expired" : record.status,
+      status: isExpired ? "expired" : status,
       progress: record.progress,
       error: record.error_message || null,
       fileSize: record.file_size_bytes || null,
       itemCounts,
       createdAt: record.created_at,
+      updatedAt: record.updated_at,
       completedAt: record.completed_at || null,
       expiresAt: record.expires_at || null,
     });

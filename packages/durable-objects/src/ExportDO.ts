@@ -189,6 +189,13 @@ export class ExportDO implements DurableObject {
     await this.persistState();
     await this.state.storage.setAlarm(Date.now() + 100);
 
+    // Update D1 status to reflect that the DO has started work
+    await this.env.DB.prepare(
+      "UPDATE storage_exports SET status = ?, updated_at = ? WHERE id = ?",
+    )
+      .bind("querying", Math.floor(Date.now() / 1000), this.jobState.exportId)
+      .run();
+
     this.log("Export job started", {
       exportId: this.jobState.exportId,
       includeImages: this.jobState.includeImages,
@@ -295,11 +302,16 @@ export class ExportDO implements DurableObject {
       images: this.jobState.includeImages ? media.length : 0,
     };
 
-    // Update D1 progress
+    // Update D1 progress and status
     await this.env.DB.prepare(
-      "UPDATE storage_exports SET progress = ?, updated_at = ? WHERE id = ?",
+      "UPDATE storage_exports SET status = ?, progress = ?, updated_at = ? WHERE id = ?",
     )
-      .bind(10, Math.floor(Date.now() / 1000), this.jobState.exportId)
+      .bind(
+        "assembling",
+        10,
+        Math.floor(Date.now() / 1000),
+        this.jobState.exportId,
+      )
       .run();
 
     // Transition to assembling
@@ -390,11 +402,16 @@ export class ExportDO implements DurableObject {
     await this.state.storage.put("zipData", zipData);
     this.jobState.fileSizeBytes = zipData.length;
 
-    // Update D1 progress
+    // Update D1 progress and status
     await this.env.DB.prepare(
-      "UPDATE storage_exports SET progress = ?, updated_at = ? WHERE id = ?",
+      "UPDATE storage_exports SET status = ?, progress = ?, updated_at = ? WHERE id = ?",
     )
-      .bind(70, Math.floor(Date.now() / 1000), this.jobState.exportId)
+      .bind(
+        "uploading",
+        70,
+        Math.floor(Date.now() / 1000),
+        this.jobState.exportId,
+      )
       .run();
 
     // Transition to uploading
@@ -452,9 +469,10 @@ export class ExportDO implements DurableObject {
     const imageProgress = Math.floor((endOffset / media.length) * 60); // 10-70% range
     this.jobState.progress = 10 + imageProgress;
     await this.env.DB.prepare(
-      "UPDATE storage_exports SET progress = ?, updated_at = ? WHERE id = ?",
+      "UPDATE storage_exports SET status = ?, progress = ?, updated_at = ? WHERE id = ?",
     )
       .bind(
+        "assembling",
         this.jobState.progress,
         Math.floor(Date.now() / 1000),
         this.jobState.exportId,
@@ -493,10 +511,11 @@ export class ExportDO implements DurableObject {
     const itemCountsJson = JSON.stringify(this.jobState.itemCounts);
     await this.env.DB.prepare(
       `UPDATE storage_exports
-       SET r2_key = ?, file_size_bytes = ?, item_counts = ?, progress = ?, updated_at = ?
+       SET status = ?, r2_key = ?, file_size_bytes = ?, item_counts = ?, progress = ?, updated_at = ?
        WHERE id = ?`,
     )
       .bind(
+        "uploading",
         r2Key,
         zipData.length,
         itemCountsJson,
@@ -528,11 +547,13 @@ export class ExportDO implements DurableObject {
       this.jobState.phase = "notifying";
     } else {
       this.jobState.phase = "complete";
+      this.jobState.progress = 100;
       await this.env.DB.prepare(
-        "UPDATE storage_exports SET status = ?, completed_at = ?, updated_at = ? WHERE id = ?",
+        "UPDATE storage_exports SET status = ?, progress = ?, completed_at = ?, updated_at = ? WHERE id = ?",
       )
         .bind(
           "complete",
+          100,
           Math.floor(Date.now() / 1000),
           Math.floor(Date.now() / 1000),
           this.jobState.exportId,
@@ -589,10 +610,11 @@ export class ExportDO implements DurableObject {
 
     // Update D1
     await this.env.DB.prepare(
-      "UPDATE storage_exports SET status = ?, completed_at = ?, updated_at = ? WHERE id = ?",
+      "UPDATE storage_exports SET status = ?, progress = ?, completed_at = ?, updated_at = ? WHERE id = ?",
     )
       .bind(
         "complete",
+        100,
         Math.floor(Date.now() / 1000),
         Math.floor(Date.now() / 1000),
         this.jobState.exportId,
@@ -600,6 +622,7 @@ export class ExportDO implements DurableObject {
       .run();
 
     this.jobState.phase = "complete";
+    this.jobState.progress = 100;
     await this.persistState();
 
     this.log("Notifying phase complete", {
@@ -638,16 +661,22 @@ export class ExportDO implements DurableObject {
     await this.persistState();
     await this.state.storage.deleteAlarm();
 
-    await this.env.DB.prepare(
-      "UPDATE storage_exports SET status = ?, error_message = ?, updated_at = ? WHERE id = ?",
-    )
-      .bind(
-        "failed",
-        userMessage,
-        Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+    try {
+      await this.env.DB.prepare(
+        "UPDATE storage_exports SET status = ?, error_message = ?, progress = ?, updated_at = ? WHERE id = ?",
       )
-      .run();
+        .bind(
+          "failed",
+          userMessage,
+          this.jobState.progress,
+          Math.floor(Date.now() / 1000),
+          this.jobState.exportId,
+        )
+        .run();
+    } catch (dbError) {
+      // DB update failed — DO storage has the truth, D1 will be reconciled by staleness check
+      this.log("Failed to update D1 on error", { error: String(dbError) });
+    }
 
     // Log the full internal error for debugging — never expose to users
     this.log("Export failed", { error: internalError });

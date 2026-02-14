@@ -130,8 +130,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     const expiresAt = now + 7 * 24 * 60 * 60; // 7 days
 
     await platform.env.DB.prepare(
-      `INSERT INTO storage_exports (id, tenant_id, user_email, include_images, delivery_method, status, progress, created_at, expires_at)
-       VALUES (?, ?, ?, ?, ?, 'pending', 0, ?, ?)`,
+      `INSERT INTO storage_exports (id, tenant_id, user_email, include_images, delivery_method, status, progress, created_at, updated_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, 'pending', 0, ?, ?, ?)`,
     )
       .bind(
         exportId,
@@ -140,27 +140,38 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         includeImages ? 1 : 0,
         deliveryMethod,
         now,
+        now,
         expiresAt,
       )
       .run();
 
     // Get Durable Object and start job
-    if (platform.env.EXPORTS) {
-      const doId = platform.env.EXPORTS.idFromName(
-        `export:${tenantId}:${exportId}`,
-      );
-      const stub = platform.env.EXPORTS.get(doId);
-      await stub.fetch("https://export/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exportId,
-          tenantId,
-          userEmail: locals.user.email,
-          username: tenant.subdomain,
-          includeImages,
-          deliveryMethod,
-        }),
+    if (!platform.env.EXPORTS) {
+      throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: "Export service not available",
+      });
+    }
+
+    const doId = platform.env.EXPORTS.idFromName(
+      `export:${tenantId}:${exportId}`,
+    );
+    const stub = platform.env.EXPORTS.get(doId);
+    const doResponse = await stub.fetch("https://export/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        exportId,
+        tenantId,
+        userEmail: locals.user.email,
+        username: tenant.subdomain,
+        includeImages,
+        deliveryMethod,
+      }),
+    });
+
+    if (!doResponse.ok) {
+      throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", {
+        detail: "Failed to start export job",
       });
     }
 
