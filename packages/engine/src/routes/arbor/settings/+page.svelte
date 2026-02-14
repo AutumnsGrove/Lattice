@@ -7,6 +7,7 @@
     Waystone,
     GroveTerm,
   } from "$lib/ui";
+  import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
   import { Smartphone, Laptop, Monitor, Leaf } from "lucide-svelte";
   import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
@@ -79,6 +80,17 @@
   let revokingSessionId = $state(null);
   let revokingAllSessions = $state(false);
   let showRevokeAllDialog = $state(false);
+
+  // Greenhouse graft toggle state
+  /** @type {string | undefined} */
+  let loadingGraftId = $state(undefined);
+  let resettingGrafts = $state(false);
+  /** @type {HTMLFormElement | undefined} */
+  let toggleGraftForm = $state();
+  /** @type {HTMLFormElement | undefined} */
+  let resetGraftsForm = $state();
+  let toggleGraftId = $state("");
+  let toggleGraftEnabled = $state("");
 
   // Fetch current settings (font, accent color, header branding)
   async function fetchCurrentSettings() {
@@ -545,6 +557,79 @@
       </span>
     </label>
   </GlassCard>
+
+  <!-- Greenhouse Status -->
+  <GreenhouseStatusCard
+    inGreenhouse={data.greenhouseStatus?.inGreenhouse ?? false}
+    enrolledAt={data.greenhouseStatus?.enrolledAt}
+    notes={data.greenhouseStatus?.notes}
+    class="mb-6"
+  />
+
+  <!-- Graft Control Panel (greenhouse members with available grafts) -->
+  {#if data.greenhouseStatus?.inGreenhouse && data.tenantGrafts?.length > 0}
+    <!-- Hidden form for toggling individual grafts -->
+    <form
+      method="POST"
+      action="?/toggleGraft"
+      bind:this={toggleGraftForm}
+      class="hidden"
+      use:enhance={() => {
+        return async ({ result, update }) => {
+          if (result.type === 'success') {
+            toast.success(String(result.data?.message || 'Feature updated'));
+            await invalidateAll();
+          } else if (result.type === 'failure') {
+            toast.error(String(result.data?.error || 'Failed to toggle feature'));
+          }
+          loadingGraftId = undefined;
+          await update({ reset: false });
+        };
+      }}
+    >
+      <input type="hidden" name="graftId" bind:value={toggleGraftId} />
+      <input type="hidden" name="enabled" bind:value={toggleGraftEnabled} />
+    </form>
+
+    <!-- Hidden form for resetting all grafts -->
+    <form
+      method="POST"
+      action="?/resetGrafts"
+      bind:this={resetGraftsForm}
+      class="hidden"
+      use:enhance={() => {
+        return async ({ result, update }) => {
+          if (result.type === 'success') {
+            toast.success(String(result.data?.message || 'Preferences reset'));
+            await invalidateAll();
+          } else if (result.type === 'failure') {
+            toast.error(String(result.data?.error || 'Failed to reset preferences'));
+          }
+          resettingGrafts = false;
+          await update({ reset: false });
+        };
+      }}
+    />
+
+    <div class="mb-6">
+      <GraftControlPanel
+        grafts={data.tenantGrafts}
+        currentValues={data.grafts}
+        onToggle={(graftId, enabled) => {
+          loadingGraftId = graftId;
+          toggleGraftId = graftId;
+          toggleGraftEnabled = String(enabled);
+          toggleGraftForm?.requestSubmit();
+        }}
+        onReset={() => {
+          resettingGrafts = true;
+          resetGraftsForm?.requestSubmit();
+        }}
+        {loadingGraftId}
+        resetting={resettingGrafts}
+      />
+    </div>
+  {/if}
 
   <GlassCard variant="frosted" class="mb-6">
     <div class="section-header">

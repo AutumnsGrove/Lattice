@@ -141,16 +141,17 @@ export const load: LayoutServerLoad = async ({
             try {
               const flagsEnv = { DB: db, FLAGS_KV: kv };
               const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv);
-              return await getEnabledGrafts(
+              const grafts = await getEnabledGrafts(
                 { tenantId, inGreenhouse },
                 flagsEnv,
               );
+              return { grafts, inGreenhouse };
             } catch (error) {
               console.error("[Admin Layout] Failed to load grafts:", error);
-              return {} as GraftsRecord;
+              return { grafts: {} as GraftsRecord, inGreenhouse: false };
             }
           })()
-        : Promise.resolve({} as GraftsRecord),
+        : Promise.resolve({ grafts: {} as GraftsRecord, inGreenhouse: false }),
 
       // Beta invite check
       tenantId && db
@@ -206,7 +207,7 @@ export const load: LayoutServerLoad = async ({
     tenant = demoTenant;
   }
 
-  const grafts = graftsResult;
+  const { grafts, inGreenhouse } = graftsResult;
   const isBeta = !!betaResult;
   const messages = messagesResult;
 
@@ -226,6 +227,7 @@ export const load: LayoutServerLoad = async ({
     user: locals.user,
     tenant,
     grafts,
+    inGreenhouse,
     isBeta,
     isDemoMode,
     csrfToken: locals.csrfToken,

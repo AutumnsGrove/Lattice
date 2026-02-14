@@ -16,7 +16,8 @@
     ArrowRight,
     Megaphone,
     TreeDeciduous,
-    Users
+    Users,
+    Sprout
   } from 'lucide-svelte';
 
   /**
@@ -93,6 +94,15 @@
         <TreeDeciduous class="w-3.5 h-3.5" />
         <GroveTerm term="rooted">Rooted</GroveTerm>
       </a>
+      {#if data.inGreenhouse}
+        <span
+          class="greenhouse-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          title="You're in the greenhouse — early access to experimental features"
+        >
+          <Sprout class="w-3.5 h-3.5" />
+          Greenhouse
+        </span>
+      {/if}
       {#if data.isBeta}
         <BetaBadge />
       {/if}
@@ -452,5 +462,16 @@
 
   :global(.dark) .rooted-badge {
     color: var(--grove-400, #4ade80);
+  }
+
+  /* Greenhouse badge in header */
+  .greenhouse-badge {
+    background: rgba(16, 185, 129, 0.15);
+    color: #065f46;
+  }
+
+  :global(.dark) .greenhouse-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
   }
 </style>
