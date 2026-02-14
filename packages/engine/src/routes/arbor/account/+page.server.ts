@@ -194,6 +194,7 @@ export const load: PageServerLoad = async ({
       timelineCurio,
       galleryCurio,
       journeyCurio,
+      pulseCurio,
     ] = await Promise.all([
       platform.env.DB.prepare(
         "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
@@ -235,6 +236,12 @@ export const load: PageServerLoad = async ({
         .bind(locals.tenantId)
         .first<{ enabled: number }>()
         .catch(() => null),
+      platform.env.DB.prepare(
+        "SELECT enabled FROM pulse_curio_config WHERE tenant_id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ enabled: number }>()
+        .catch(() => null),
     ]);
     storageUsedBytes = storageResult?.total_bytes ?? 0;
     exportCounts = {
@@ -249,7 +256,8 @@ export const load: PageServerLoad = async ({
     curiosCount =
       (timelineCurio?.enabled === 1 ? 1 : 0) +
       (galleryCurio?.enabled === 1 ? 1 : 0) +
-      (journeyCurio?.enabled === 1 ? 1 : 0);
+      (journeyCurio?.enabled === 1 ? 1 : 0) +
+      (pulseCurio?.enabled === 1 ? 1 : 0);
   } catch (e) {
     console.error("[Account] Failed to load export counts:", e);
     // Non-critical - continue without counts

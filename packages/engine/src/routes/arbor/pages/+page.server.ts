@@ -31,43 +31,55 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
   // Try D1 first
   if (platform?.env?.DB) {
     // Run pages and curio queries in parallel
-    const [pagesResult, timelineResult, galleryResult, journeyResult] =
-      await Promise.all([
-        platform.env.DB.prepare(
-          `SELECT slug, title, description, type, updated_at, created_at, COALESCE(show_in_nav, 0) as show_in_nav
+    const [
+      pagesResult,
+      timelineResult,
+      galleryResult,
+      journeyResult,
+      pulseResult,
+    ] = await Promise.all([
+      platform.env.DB.prepare(
+        `SELECT slug, title, description, type, updated_at, created_at, COALESCE(show_in_nav, 0) as show_in_nav
          FROM pages
          WHERE tenant_id = ?
          ORDER BY slug ASC`,
-        )
-          .bind(tenantId)
-          .all<PageRecord>()
-          .catch((err) => {
-            console.error("D1 fetch error for pages:", err);
-            pagesLoadError = true;
-            return { results: [] };
-          }),
+      )
+        .bind(tenantId)
+        .all<PageRecord>()
+        .catch((err) => {
+          console.error("D1 fetch error for pages:", err);
+          pagesLoadError = true;
+          return { results: [] };
+        }),
 
-        platform.env.DB.prepare(
-          `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?`,
-        )
-          .bind(tenantId)
-          .first<CurioConfig>()
-          .catch(() => null),
+      platform.env.DB.prepare(
+        `SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?`,
+      )
+        .bind(tenantId)
+        .first<CurioConfig>()
+        .catch(() => null),
 
-        platform.env.DB.prepare(
-          `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?`,
-        )
-          .bind(tenantId)
-          .first<CurioConfig>()
-          .catch(() => null),
+      platform.env.DB.prepare(
+        `SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?`,
+      )
+        .bind(tenantId)
+        .first<CurioConfig>()
+        .catch(() => null),
 
-        platform.env.DB.prepare(
-          `SELECT enabled FROM journey_curio_config WHERE tenant_id = ?`,
-        )
-          .bind(tenantId)
-          .first<CurioConfig>()
-          .catch(() => null),
-      ]);
+      platform.env.DB.prepare(
+        `SELECT enabled FROM journey_curio_config WHERE tenant_id = ?`,
+      )
+        .bind(tenantId)
+        .first<CurioConfig>()
+        .catch(() => null),
+
+      platform.env.DB.prepare(
+        `SELECT enabled FROM pulse_curio_config WHERE tenant_id = ?`,
+      )
+        .bind(tenantId)
+        .first<CurioConfig>()
+        .catch(() => null),
+    ]);
 
     pages = pagesResult.results || [];
 
@@ -90,6 +102,12 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         name: "Journey",
         enabled: journeyResult?.enabled === 1,
         configUrl: "/arbor/curios/journey",
+      },
+      {
+        slug: "pulse",
+        name: "Pulse",
+        enabled: pulseResult?.enabled === 1,
+        configUrl: "/arbor/curios/pulse",
       },
     ];
   }
