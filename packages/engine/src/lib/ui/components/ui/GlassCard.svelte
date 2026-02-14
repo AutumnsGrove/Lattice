@@ -163,11 +163,11 @@
 	// See grove-ui-design skill for opacity guidelines:
 	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
 	//
-	// Dark mode uses cream (cool dark grays in dark mode) for glass tinting.
+	// Dark mode uses grove-950 (deep forest green) for glass tinting.
 	// The /XX alpha modifier works because CSS vars store RGB channels.
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/80 dark:bg-cream-100/65
+			bg-white/80 dark:bg-grove-950/65
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
@@ -177,18 +177,18 @@
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-bark-900/40 dark:bg-cream-50/50
+			bg-bark-900/40 dark:bg-grove-950/50
 			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/60 dark:bg-cream-100/40
+			bg-white/60 dark:bg-grove-950/40
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/90 dark:bg-cream-100/80
+			bg-white/90 dark:bg-grove-950/75
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
@@ -204,11 +204,11 @@
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-grove-700/40",
+		default: "hover:bg-white/90 dark:hover:bg-grove-950/75 hover:shadow-lg hover:border-white/50 dark:hover:border-grove-700/40",
 		accent: "hover:bg-accent/30 dark:hover:bg-grove-900/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
-		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-grove-700/35",
-		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-grove-700/40"
+		dark: "hover:bg-bark-900/50 dark:hover:bg-grove-950/60 hover:shadow-xl hover:border-bark-600/40",
+		muted: "hover:bg-white/70 dark:hover:bg-grove-950/50 hover:shadow-md hover:border-white/30 dark:hover:border-grove-700/35",
+		frosted: "hover:bg-white/95 dark:hover:bg-grove-950/80 hover:shadow-lg hover:border-white/60 dark:hover:border-grove-700/40"
 	};
 
 	const computedClass = $derived(
