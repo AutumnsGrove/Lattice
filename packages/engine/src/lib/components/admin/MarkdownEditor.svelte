@@ -1854,6 +1854,33 @@
       display: none;
     }
   }
+  @media (max-width: 600px) {
+    .toolbar {
+      padding: 0.35rem 0.5rem;
+      gap: 0.1rem;
+    }
+    .toolbar-divider-line {
+      margin: 0 0.25rem;
+    }
+    .toolbar-icon-btn {
+      padding: 0.35rem;
+    }
+    .formatting-group {
+      padding: 1px;
+      gap: 0.1rem;
+    }
+    .line-numbers {
+      min-width: 2.25rem;
+    }
+    .line-numbers span {
+      padding: 0 0.4rem;
+      font-size: 0.75rem;
+    }
+    .editor-textarea {
+      padding: 0.75rem;
+      font-size: 0.85rem;
+    }
+  }
   @media (max-width: 480px) {
     .status-left .status-item:nth-child(n+3),
     .status-left .status-divider:nth-child(n+3) {

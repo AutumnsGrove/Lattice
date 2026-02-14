@@ -977,4 +977,32 @@
       justify-content: flex-end;
     }
   }
+
+  /* Mobile-specific refinements */
+  @media (max-width: 600px) {
+    .page-header {
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-header h1 {
+      font-size: 1.35rem;
+    }
+    .inline-title {
+      font-size: 1.35rem;
+    }
+    .header-actions {
+      gap: 0.35rem;
+    }
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+    }
+    .details-strip {
+      margin: 0.25rem 0 0.75rem;
+    }
+    .toggle-vines-btn {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.75rem;
+    }
+  }
 </style>

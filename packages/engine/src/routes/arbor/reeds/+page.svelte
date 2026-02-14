@@ -997,11 +997,43 @@
     }
   }
 
-  @media (max-width: 540px) {
+  @media (max-width: 640px) {
     .setting-group {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.75rem;
+    }
+
+    .setting-select {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tab {
+      padding: 0.625rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .comment-card {
+      padding: 0.75rem 0.875rem;
+    }
+
+    .comment-actions {
+      flex-wrap: wrap;
+    }
+
+    .mod-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .setting-group {
+      padding: 0.875rem 1rem;
+    }
+
+    .setting-actions {
+      padding: 1rem;
     }
   }
 </style>
