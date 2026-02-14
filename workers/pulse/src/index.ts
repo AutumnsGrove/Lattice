@@ -18,6 +18,7 @@ import { verifySignature } from "./verify";
 import { normalizeEvent } from "./normalize";
 import { storeEvent } from "./store";
 import { runHourlyAggregation, runDailyAggregation } from "./aggregate";
+import { checkRateLimit } from "./rate-limit";
 
 // SecretsManager for reading webhook secrets (envelope encryption)
 // Simplified read-only version for the worker
@@ -195,6 +196,18 @@ async function handleWebhook(
     return Response.json(
       { error: "Pulse not enabled for this tenant" },
       { status: 404 },
+    );
+  }
+
+  // Rate limit — check before expensive signature verification / D1 writes
+  const rl = await checkRateLimit(env, tenantId);
+  if (!rl.allowed) {
+    return Response.json(
+      { error: "Rate limit exceeded", retryAfter: rl.retryAfter },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfter ?? 300) },
+      },
     );
   }
 
