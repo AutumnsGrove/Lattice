@@ -693,7 +693,7 @@
   async function uploadImage(file) {
     // Pre-check: is the feature enabled via grafts?
     if (!uploadsEnabled) {
-      toast.warning("Image uploads aren't available yet. This feature is being rolled out gradually.");
+      toast.warning("Your grove needs a little time to sprout before photo uploads are available. You can paste external image URLs using the link button instead!");
       return;
     }
 

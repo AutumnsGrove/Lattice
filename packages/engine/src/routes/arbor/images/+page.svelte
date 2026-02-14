@@ -482,7 +482,11 @@
     {#if !uploadsEnabled}
       <div class="uploads-disabled-banner">
         <span class="banner-icon">~</span>
-        <span>Image uploads are being rolled out gradually and aren't available for your grove yet. You can still browse your existing gallery below.</span>
+        <div>
+          <p>Your grove needs a little time to sprout before photo uploads are available. In the meantime, you can use external image links in your posts with markdown:</p>
+          <code class="block mt-2 text-xs opacity-80">![description](https://your-image-url.jpg)</code>
+          <p class="mt-2 text-xs opacity-70">Free image hosting: <a href="https://imgbb.com" target="_blank" rel="noopener" class="underline">ImgBB</a> &middot; <a href="https://postimages.org" target="_blank" rel="noopener" class="underline">Postimages</a> &middot; <a href="https://imgur.com" target="_blank" rel="noopener" class="underline">Imgur</a></p>
+        </div>
       </div>
     {/if}
     <Glass variant="tint" intensity="light"
