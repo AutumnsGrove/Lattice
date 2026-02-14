@@ -159,17 +159,8 @@ async function updateHourlyActivity(
      VALUES (?, ?, ?, ?, ?, 1)
      ON CONFLICT(tenant_id, date, hour) DO UPDATE SET
        commits = commits + ?,
-       events = events + 1
-     WHERE tenant_id = ?`,
+       events = events + 1`,
   )
-    .bind(
-      crypto.randomUUID(),
-      tenantId,
-      dateStr,
-      hour,
-      isCommit,
-      isCommit,
-      tenantId,
-    )
+    .bind(crypto.randomUUID(), tenantId, dateStr, hour, isCommit, isCommit)
     .run();
 }
