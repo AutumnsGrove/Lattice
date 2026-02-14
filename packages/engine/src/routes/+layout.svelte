@@ -140,7 +140,8 @@
 		{/if}
 	</main>
 
-	<footer class:admin-page-footer={isAdminPage}>
+	{#if !isAdminPage}
+	<footer>
 		<p>Powered by <a href="https://grove.place/knowledge/help/what-is-lattice" target="_blank" rel="noopener noreferrer">Lattice</a>, from <a href="https://grove.place" target="_blank" rel="noopener noreferrer">The Grove</a></p>
 		<div class="footer-actions">
 			{#if data?.user}
@@ -190,6 +191,7 @@
 			</Button>
 		</div>
 	</footer>
+	{/if}
 </div>
 {/if}
 
@@ -305,15 +307,6 @@
 		position: relative;
 		z-index: 1003;
 		transition: background-color 0.3s ease, border-color 0.3s ease;
-	}
-	/* Footer margin on admin pages to avoid sidebar overlap */
-	footer.admin-page-footer {
-		margin-left: calc(250px + 0.75rem); /* Sidebar width + left margin */
-	}
-	@media (max-width: 768px) {
-		footer.admin-page-footer {
-			margin-left: 0;
-		}
 	}
 	footer p {
 		margin: 0;
