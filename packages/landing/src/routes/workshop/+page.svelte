@@ -330,7 +330,8 @@
 					subComponents: [
 						{ name: 'Guestbook', icon: 'notebook-pen', description: 'Visitor signatures' },
 						{ name: 'Shrines', icon: 'gallery-horizontal-end', description: 'Personal dedications' },
-						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' }
+						{ name: 'Artifacts', icon: 'shell', description: 'Interactive oddities' },
+						{ name: 'Pulse', icon: 'activity', description: 'GitHub activity heartbeat', href: '/knowledge/help/what-is-pulse' }
 					]
 				},
 				{
