@@ -100,8 +100,8 @@
 <div
 	class="
     p-5 rounded-xl
-    bg-white/60 dark:bg-grove-950/85 backdrop-blur-sm
-    border border-white/40 dark:border-grove-700/40
+    bg-white/60 dark:bg-grove-50/85 backdrop-blur-sm
+    border border-white/40 dark:border-grove-300/40
     {className}
   "
 >

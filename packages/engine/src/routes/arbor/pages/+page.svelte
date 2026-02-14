@@ -118,11 +118,11 @@
     <table class="w-full border-collapse">
       <thead>
         <tr>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-950/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-950/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
-          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-950/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-950/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
-          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-950/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-50/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Page</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-50/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Type</th>
+          <th class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-50/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden" title="Show in navigation menu">Nav</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-50/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden">Updated</th>
+          <th class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-grove-50/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3">Actions</th>
         </tr>
       </thead>
       <tbody>

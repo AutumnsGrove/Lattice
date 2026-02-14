@@ -163,52 +163,54 @@
 	// See grove-ui-design skill for opacity guidelines:
 	// surface: 95%, tint: 60/50%, card: 80/70%, muted: 40/30%, overlay: 50/60%
 	//
-	// Dark mode uses grove-950 (deep forest green) for glass tinting.
+	// Dark mode uses grove-50 (deep forest green in dark mode) for glass tinting.
+	// NOTE: The grove scale is INVERTED in dark mode (grove-50 = darkest, grove-950 = lightest).
 	// The /XX alpha modifier works because CSS vars store RGB channels.
 	const variantClasses: Record<GlassVariant, string> = {
 		default: `
-			bg-white/80 dark:bg-grove-950/65
+			bg-white/80 dark:bg-grove-50/65
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		accent: `
-			bg-accent/20 dark:bg-grove-950/25
+			bg-accent/20 dark:bg-grove-50/25
 			backdrop-blur-md
 		`.trim().replace(/\s+/g, ' '),
 
 		dark: `
-			bg-bark-900/40 dark:bg-grove-950/50
+			bg-bark-900/40 dark:bg-grove-50/50
 			backdrop-blur-md
 			text-white
 		`.trim().replace(/\s+/g, ' '),
 
 		muted: `
-			bg-white/60 dark:bg-grove-950/40
+			bg-white/60 dark:bg-grove-50/40
 			backdrop-blur
 		`.trim().replace(/\s+/g, ' '),
 
 		frosted: `
-			bg-white/90 dark:bg-grove-950/75
+			bg-white/90 dark:bg-grove-50/75
 			backdrop-blur-lg
 		`.trim().replace(/\s+/g, ' ')
 	};
 
 	// Border colors per variant - subtle, warm borders
+	// Dark mode: grove-200 = 22 101 52 (dark green), grove-100 = 20 83 45
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-grove-800/30",
-		accent: "border-accent/30 dark:border-grove-900/30",
+		default: "border-white/40 dark:border-grove-200/30",
+		accent: "border-accent/30 dark:border-grove-100/30",
 		dark: "border-bark-700/30 dark:border-cream-400/30",
-		muted: "border-white/20 dark:border-grove-800/25",
-		frosted: "border-white/50 dark:border-grove-800/30"
+		muted: "border-white/20 dark:border-grove-200/25",
+		frosted: "border-white/50 dark:border-grove-200/30"
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/90 dark:hover:bg-grove-950/75 hover:shadow-lg hover:border-white/50 dark:hover:border-grove-700/40",
-		accent: "hover:bg-accent/30 dark:hover:bg-grove-900/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
-		dark: "hover:bg-bark-900/50 dark:hover:bg-grove-950/60 hover:shadow-xl hover:border-bark-600/40",
-		muted: "hover:bg-white/70 dark:hover:bg-grove-950/50 hover:shadow-md hover:border-white/30 dark:hover:border-grove-700/35",
-		frosted: "hover:bg-white/95 dark:hover:bg-grove-950/80 hover:shadow-lg hover:border-white/60 dark:hover:border-grove-700/40"
+		default: "hover:bg-white/90 dark:hover:bg-grove-50/75 hover:shadow-lg hover:border-white/50 dark:hover:border-grove-300/40",
+		accent: "hover:bg-accent/30 dark:hover:bg-grove-100/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
+		dark: "hover:bg-bark-900/50 dark:hover:bg-grove-50/60 hover:shadow-xl hover:border-bark-600/40",
+		muted: "hover:bg-white/70 dark:hover:bg-grove-50/50 hover:shadow-md hover:border-white/30 dark:hover:border-grove-300/35",
+		frosted: "hover:bg-white/95 dark:hover:bg-grove-50/80 hover:shadow-lg hover:border-white/60 dark:hover:border-grove-300/40"
 	};
 
 	const computedClass = $derived(

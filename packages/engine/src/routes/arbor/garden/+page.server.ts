@@ -27,7 +27,9 @@ interface BlogPost {
  * Fetch posts from D1 database (multi-tenant)
  */
 export const load: PageServerLoad = async ({ platform, locals }) => {
-  const isExampleSite = locals.tenantId === "example-tenant-001";
+  // SECURITY: Example tenant special-casing removed for launch (tracked in #1120)
+  // const isExampleSite = locals.tenantId === "example-tenant-001";
+  const isExampleSite = false;
 
   // Require tenant context
   if (!locals.tenantId) {

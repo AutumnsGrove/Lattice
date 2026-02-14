@@ -136,14 +136,11 @@ export const PATCH: RequestHandler = async ({
   platform,
   locals,
 }) => {
-  // SECURITY: Example tenant bypass for public demo (S2-F2 documented risk)
-  // This allows unauthenticated visitors to interact with the demo admin panel.
-  // Risk accepted: demo data only, queries still scoped to example tenant's own data.
-  // TODO: Consider making example tenant read-only or gating behind feature flag
-  const isExampleTenant = locals.tenantId === "example-tenant-001";
+  // SECURITY: Example tenant bypass removed for launch (tracked in #1120)
+  // const isExampleTenant = locals.tenantId === "example-tenant-001";
 
-  // Auth check (skip for example tenant)
-  if (!locals.user && !isExampleTenant) {
+  // Auth check — all tenants require authentication
+  if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
   }
 
