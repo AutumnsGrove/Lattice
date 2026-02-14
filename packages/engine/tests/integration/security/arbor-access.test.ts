@@ -41,12 +41,10 @@ vi.mock("$lib/server/tier-features.js", () => ({
 }));
 
 // Import the load function AFTER mocks are set up
-const { load: arborLayoutLoad } = await import(
-  "../../../src/routes/arbor/+layout.server.js"
-);
-const { load: rootLayoutLoad } = await import(
-  "../../../src/routes/+layout.server.js"
-);
+const { load: arborLayoutLoad } =
+  await import("../../../src/routes/arbor/+layout.server.js");
+const { load: rootLayoutLoad } =
+  await import("../../../src/routes/+layout.server.js");
 
 // ============================================================================
 // Helpers
@@ -292,9 +290,10 @@ describe("Arbor Panel: Cross-Account Access Control", () => {
     });
   });
 
-  describe("Example tenant bypass (documented S2-F2 risk)", () => {
-    it("should allow unauthenticated access to example tenant", async () => {
-      // The example tenant is intentionally public for demo purposes
+  describe("Example tenant bypass removed (S2-F2 resolved)", () => {
+    it("should require authentication for example tenant like all others", async () => {
+      // The example tenant bypass was removed at public launch —
+      // all tenants now require authentication to access arbor
       const exampleTenantRow = {
         id: "example-tenant-001",
         subdomain: "example",
@@ -308,9 +307,14 @@ describe("Arbor Panel: Cross-Account Access Control", () => {
         tenantRow: exampleTenantRow,
       });
 
-      // Act: Should load without authentication
-      const result = await arborLayoutLoad(event as any);
-      expect(result.tenant).toBeDefined();
+      // Act & Assert: Should redirect to login like any other tenant
+      try {
+        await arborLayoutLoad(event as any);
+        expect.unreachable("Should have thrown redirect");
+      } catch (error: any) {
+        expect(error.status).toBe(302);
+        expect(error.location).toContain("/auth/login");
+      }
     });
   });
 
