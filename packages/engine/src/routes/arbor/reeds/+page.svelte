@@ -982,7 +982,7 @@
   }
 
   :global(.dark) .save-btn {
-    background: var(--grove-400, #4ade80);
+    background: #10b981; /* emerald-500 — hardcoded because CSS vars store RGB channels */
     color: #1a1a1a;
   }
 
