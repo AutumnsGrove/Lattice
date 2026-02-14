@@ -76,7 +76,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       .run();
 
     console.log(
-      `[Timeline Config] Token ${tokenType} saved via ${saveResult.system}`,
+      `[Timeline Config] Token ${tokenType} saved via ${saveResult.system}` +
+        (saveResult.fallbackReason
+          ? ` (fallback reason: ${saveResult.fallbackReason})`
+          : ""),
     );
 
     // Read it back to verify it's retrievable
@@ -101,6 +104,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         tokenType,
         tokenSource: readBack.source,
         verified: true,
+        ...(saveResult.fallbackReason && {
+          warning: `Used ${saveResult.system} storage (${saveResult.fallbackReason})`,
+        }),
       });
     } else {
       console.error(
@@ -118,11 +124,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       );
     }
   } catch (err) {
+    const errMsg = err instanceof Error ? err.message : "Unknown error";
     console.error(`[Timeline Config] save-token failed:`, err);
     return json(
       {
         success: false,
-        error: `Failed to save ${tokenType} token`,
+        error: `Failed to save ${tokenType} token: ${errMsg}`,
         tokenType,
       },
       { status: 500 },

@@ -66,7 +66,11 @@ export class SecretsManager {
   ) {
     // Validate KEK format immediately
     if (kekHex.length !== 64 || !/^[0-9a-fA-F]+$/.test(kekHex)) {
-      throw new Error("KEK must be 64 hex characters (256 bits)");
+      const hasNonHex = /[^0-9a-fA-F]/.test(kekHex);
+      throw new Error(
+        `KEK must be 64 hex characters (256 bits). ` +
+          `Got ${kekHex.length} chars${hasNonHex ? " with non-hex characters (was this generated with --format hex?)" : ""}.`,
+      );
     }
   }
 
@@ -168,7 +172,11 @@ export class SecretsManager {
   ): Promise<string | null> {
     try {
       return await this.getSecret(tenantId, keyName);
-    } catch {
+    } catch (error) {
+      console.error(
+        `[SecretsManager] safeGetSecret failed for ${tenantId}/${keyName}:`,
+        error instanceof Error ? error.message : error,
+      );
       return null;
     }
   }

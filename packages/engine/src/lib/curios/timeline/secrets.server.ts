@@ -40,6 +40,42 @@ export interface TokenResult {
   migrated: boolean;
 }
 
+/** Tag for consistent log grepping */
+const TAG = "[Timeline Secrets]";
+
+/**
+ * Format an error for logging without leaking secret values.
+ * Extracts the message string so catch blocks produce useful output.
+ */
+function errorDetail(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
+/**
+ * Summarize which encryption bindings are available for diagnostics.
+ * NEVER logs actual key values — only presence/absence and basic format info.
+ */
+function envDiagnostic(env: TokenEnv): string {
+  const parts: string[] = [];
+
+  if (env.GROVE_KEK) {
+    const len = env.GROVE_KEK.length;
+    const isHex = /^[0-9a-fA-F]+$/.test(env.GROVE_KEK);
+    parts.push(
+      `GROVE_KEK: ${len} chars, ${isHex ? "hex" : "NOT hex (wrong format!)"}`,
+    );
+  } else {
+    parts.push("GROVE_KEK: missing");
+  }
+
+  parts.push(
+    `TOKEN_ENCRYPTION_KEY: ${env.TOKEN_ENCRYPTION_KEY ? "present" : "missing"}`,
+  );
+
+  return parts.join(", ");
+}
+
 /**
  * Get a Timeline token with graceful migration from legacy encryption.
  *
@@ -72,12 +108,16 @@ export async function getTimelineToken(
         return { token, source: "secrets_manager", migrated: false };
       }
     } catch (error) {
-      console.warn(
-        `[Timeline Secrets] SecretsManager failed for ${keyName}:`,
-        error,
+      console.error(
+        `${TAG} SecretsManager.get FAILED for ${keyName}: ${errorDetail(error)}. ` +
+          `Env: ${envDiagnostic(env)}. Falling back to legacy.`,
       );
       // Continue to legacy fallback
     }
+  } else {
+    console.warn(
+      `${TAG} getTimelineToken(${keyName}): GROVE_KEK not configured, skipping SecretsManager`,
+    );
   }
 
   // Fall back to legacy column + TOKEN_ENCRYPTION_KEY
@@ -99,14 +139,13 @@ export async function getTimelineToken(
           await secrets.setSecret(tenantId, keyName, token);
           migrated = true;
           console.log(
-            `[Timeline Secrets] Auto-migrated ${keyName} for tenant ${tenantId}`,
+            `${TAG} Auto-migrated ${keyName} for tenant ${tenantId} from legacy to SecretsManager`,
           );
         } catch (error) {
           console.warn(
-            `[Timeline Secrets] Failed to auto-migrate ${keyName}:`,
-            error,
+            `${TAG} Failed to auto-migrate ${keyName}: ${errorDetail(error)}. ` +
+              `Token still works from legacy, will retry next read.`,
           );
-          // Non-fatal: token still works from legacy
         }
       }
 
@@ -119,16 +158,18 @@ export async function getTimelineToken(
     // Check if it looks like an unencrypted token (no v1: prefix)
     if (!legacyColumnValue.startsWith("v1:")) {
       console.warn(
-        `[Timeline Secrets] Using unencrypted legacy token for ${keyName} (TOKEN_ENCRYPTION_KEY not set)`,
+        `${TAG} Using PLAINTEXT legacy token for ${keyName} — no encryption configured. ` +
+          `Env: ${envDiagnostic(env)}`,
       );
       return { token: legacyColumnValue, source: "legacy", migrated: false };
     }
 
     // v1: encrypted token but no decryption key — permanently unreadable
     console.error(
-      `[Timeline Secrets] Found v1: encrypted ${keyName} but TOKEN_ENCRYPTION_KEY is not configured. ` +
+      `${TAG} UNREADABLE TOKEN: Found v1: encrypted ${keyName} but TOKEN_ENCRYPTION_KEY is missing. ` +
         `This token was encrypted with a key that is no longer available. ` +
-        `The user must re-save a new token value to overwrite it.`,
+        `The user must re-save a new token value to overwrite it. ` +
+        `Env: ${envDiagnostic(env)}`,
     );
   }
 
@@ -142,7 +183,7 @@ export async function getTimelineToken(
  * @param tenantId - The tenant ID
  * @param keyName - Which secret to store
  * @param plainToken - The plaintext token value
- * @returns Object indicating which system was used
+ * @returns Object indicating which system was used and why
  */
 export async function setTimelineToken(
   env: TokenEnv,
@@ -152,6 +193,7 @@ export async function setTimelineToken(
 ): Promise<{
   system: "secrets_manager" | "legacy";
   legacyValue: string | null;
+  fallbackReason?: string;
 }> {
   // Prefer SecretsManager if available
   if (env.GROVE_KEK) {
@@ -162,29 +204,66 @@ export async function setTimelineToken(
       });
       await secrets.setSecret(tenantId, keyName, plainToken);
 
+      console.log(
+        `${TAG} Token ${keyName} saved via SecretsManager (envelope encryption)`,
+      );
       // Return null for legacy column to clear it
       return { system: "secrets_manager", legacyValue: null };
     } catch (error) {
+      const reason = errorDetail(error);
       console.error(
-        `[Timeline Secrets] SecretsManager.setSecret failed for ${keyName}:`,
-        error,
+        `${TAG} SecretsManager.set FAILED for ${keyName}: ${reason}. ` +
+          `Env: ${envDiagnostic(env)}. Falling back to legacy storage.`,
       );
-      // Fall through to legacy
+      // Fall through to legacy, but carry the reason
+      return await setTimelineTokenLegacy(env, keyName, plainToken, reason);
     }
+  } else {
+    console.warn(
+      `${TAG} setTimelineToken(${keyName}): GROVE_KEK not configured, using legacy storage`,
+    );
   }
 
-  // Fall back to legacy encryption
+  return await setTimelineTokenLegacy(
+    env,
+    keyName,
+    plainToken,
+    "GROVE_KEK not configured",
+  );
+}
+
+/**
+ * Internal: Legacy token storage path. Extracted so the fallback reason
+ * can be threaded through for diagnostics.
+ */
+async function setTimelineTokenLegacy(
+  env: TokenEnv,
+  keyName: TimelineSecretKey,
+  plainToken: string,
+  fallbackReason: string,
+): Promise<{
+  system: "legacy";
+  legacyValue: string;
+  fallbackReason: string;
+}> {
   if (env.TOKEN_ENCRYPTION_KEY) {
     const { encryptToken } = await import("$lib/server/encryption");
     const encrypted = await encryptToken(plainToken, env.TOKEN_ENCRYPTION_KEY);
-    return { system: "legacy", legacyValue: encrypted };
+    console.log(
+      `${TAG} Token ${keyName} saved via legacy encryption (TOKEN_ENCRYPTION_KEY). ` +
+        `Reason for legacy: ${fallbackReason}`,
+    );
+    return { system: "legacy", legacyValue: encrypted, fallbackReason };
   }
 
   // No encryption available - store plaintext (dev only, with warning)
   console.warn(
-    `[Timeline Secrets] No encryption available for ${keyName} - storing plaintext (development only!)`,
+    `${TAG} PLAINTEXT STORAGE for ${keyName} — no encryption available! ` +
+      `Reason for legacy: ${fallbackReason}. ` +
+      `Env: ${envDiagnostic(env)}. ` +
+      `This is only acceptable in development.`,
   );
-  return { system: "legacy", legacyValue: plainToken };
+  return { system: "legacy", legacyValue: plainToken, fallbackReason };
 }
 
 /**
@@ -197,6 +276,9 @@ export async function deleteTimelineToken(
   keyName: TimelineSecretKey,
 ): Promise<boolean> {
   if (!env.GROVE_KEK) {
+    console.warn(
+      `${TAG} deleteTimelineToken(${keyName}): GROVE_KEK not configured, cannot delete from SecretsManager`,
+    );
     return false;
   }
 
@@ -205,9 +287,16 @@ export async function deleteTimelineToken(
       DB: env.DB,
       GROVE_KEK: env.GROVE_KEK,
     });
-    return await secrets.deleteSecret(tenantId, keyName);
+    const deleted = await secrets.deleteSecret(tenantId, keyName);
+    console.log(
+      `${TAG} Deleted ${keyName} from SecretsManager: ${deleted ? "found and removed" : "not found"}`,
+    );
+    return deleted;
   } catch (error) {
-    console.warn(`[Timeline Secrets] Failed to delete ${keyName}:`, error);
+    console.error(
+      `${TAG} deleteTimelineToken FAILED for ${keyName}: ${errorDetail(error)}. ` +
+        `Env: ${envDiagnostic(env)}`,
+    );
     return false;
   }
 }
@@ -231,8 +320,11 @@ export async function hasTimelineToken(
       if (await secrets.hasSecret(tenantId, keyName)) {
         return true;
       }
-    } catch {
-      // Continue to legacy check
+    } catch (error) {
+      console.error(
+        `${TAG} hasTimelineToken SecretsManager check FAILED for ${keyName}: ${errorDetail(error)}. ` +
+          `Env: ${envDiagnostic(env)}. Falling back to legacy column check.`,
+      );
     }
   }
 
@@ -240,6 +332,9 @@ export async function hasTimelineToken(
   // are permanently unreadable, so don't report them as "present"
   if (!legacyColumnValue) return false;
   if (legacyColumnValue.startsWith("v1:") && !env.TOKEN_ENCRYPTION_KEY) {
+    console.warn(
+      `${TAG} hasTimelineToken(${keyName}): v1: encrypted value exists but TOKEN_ENCRYPTION_KEY missing — reporting as absent`,
+    );
     return false;
   }
   return true;
@@ -253,6 +348,7 @@ export async function maybeCreateSecretsManager(
   env: TokenEnv,
 ): Promise<SecretsManager | null> {
   if (!env.GROVE_KEK) {
+    console.warn(`${TAG} maybeCreateSecretsManager: GROVE_KEK not configured`);
     return null;
   }
 
@@ -262,7 +358,10 @@ export async function maybeCreateSecretsManager(
       GROVE_KEK: env.GROVE_KEK,
     });
   } catch (error) {
-    console.warn("[Timeline Secrets] Failed to create SecretsManager:", error);
+    console.error(
+      `${TAG} maybeCreateSecretsManager FAILED: ${errorDetail(error)}. ` +
+        `Env: ${envDiagnostic(env)}`,
+    );
     return null;
   }
 }

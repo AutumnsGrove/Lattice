@@ -322,6 +322,7 @@
         success: boolean;
         tokenSource?: string;
         verified?: boolean;
+        warning?: string;
         error?: string;
       }>("/api/curios/timeline/save-token", {
         tokenType: type,
@@ -333,17 +334,25 @@
       }
 
       if (result.success) {
-        const msg = `Saved and verified (${result.tokenSource})`;
+        const msg = result.warning
+          ? `Saved (${result.tokenSource}) — ${result.warning}`
+          : `Saved and verified (${result.tokenSource})`;
         if (type === "github") {
-          githubTokenResult = { ok: true, message: msg };
+          githubTokenResult = { ok: !result.warning, message: msg };
           githubToken = "";
         } else {
-          openrouterKeyResult = { ok: true, message: msg };
+          openrouterKeyResult = { ok: !result.warning, message: msg };
           openrouterKey = "";
         }
-        toast.success(`${type === "github" ? "GitHub" : "OpenRouter"} token saved!`, {
-          description: msg,
-        });
+        if (result.warning) {
+          toast.warning(`${type === "github" ? "GitHub" : "OpenRouter"} token saved with warning`, {
+            description: result.warning,
+          });
+        } else {
+          toast.success(`${type === "github" ? "GitHub" : "OpenRouter"} token saved!`, {
+            description: msg,
+          });
+        }
       } else {
         const errorMsg = result.error || "Save failed";
         if (type === "github") {
