@@ -10,9 +10,9 @@
 	let { data }: { data: PageData } = $props();
 
 	const statusConfig = {
-		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100' },
-		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100' },
-		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100' },
+		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
+		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
+		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30' },
 	} as const;
 
 	const categoryLabels: Record<string, string> = {
@@ -55,7 +55,7 @@
 		<!-- Not authenticated -->
 		{#if !data.user}
 			<GlassCard class="text-center">
-				<AlertCircle class="w-12 h-12 mx-auto text-amber-500 mb-4" />
+				<AlertCircle class="w-12 h-12 mx-auto text-amber-500 dark:text-amber-400 mb-4" />
 				<h2 class="text-xl font-serif text-foreground mb-2">Sign in to view your visits</h2>
 				<p class="text-foreground-muted font-sans mb-4">
 					Visit history is available for signed-in wanderers.
@@ -89,7 +89,7 @@
 				{#each data.visits as visit}
 					{@const config = statusConfig[visit.status as keyof typeof statusConfig] || statusConfig.open}
 					<a href="/porch/visits/{visit.id}" class="block">
-						<GlassCard class="hover:border-grove-300 transition-colors">
+						<GlassCard class="hover:border-grove-300 dark:hover:border-grove-700 transition-colors">
 							<div class="flex items-start gap-4">
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 mb-1">

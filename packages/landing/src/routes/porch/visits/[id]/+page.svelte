@@ -14,9 +14,9 @@
 	let submitting = $state(false);
 
 	const statusConfig = {
-		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100' },
-		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100' },
-		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100' },
+		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
+		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
+		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30' },
 	} as const;
 
 	const categoryLabels: Record<string, string> = {
@@ -94,8 +94,8 @@
 						<div class="max-w-[85%] {message.sender_type === 'autumn' ? 'order-2' : 'order-1'}">
 							<GlassCard
 								class={message.sender_type === 'autumn'
-									? 'bg-grove-50/80 border-grove-200'
-									: 'bg-white/80'}
+									? 'bg-grove-50/80 border-grove-200 dark:bg-grove-900/20 dark:border-grove-800'
+									: 'bg-white/80 dark:bg-cream-200/50'}
 							>
 								<div class="flex items-center gap-2 mb-2">
 									<span class="text-sm font-medium text-foreground">
@@ -115,14 +115,14 @@
 			<!-- Reply Form -->
 			{#if data.visit.status !== 'resolved'}
 				{#if form?.success}
-					<GlassCard class="bg-green-50/80 border-green-200 mb-4">
-						<p class="text-sm text-green-800 font-sans">Reply sent! Autumn will see it soon.</p>
+					<GlassCard class="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800 mb-4">
+						<p class="text-sm text-green-800 dark:text-green-300 font-sans">Reply sent! Autumn will see it soon.</p>
 					</GlassCard>
 				{/if}
 
 				{#if form?.error}
-					<GlassCard class="bg-red-50/80 border-red-200 mb-4">
-						<p class="text-sm text-red-800 font-sans">{form.error}</p>
+					<GlassCard class="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800 mb-4">
+						<p class="text-sm text-red-800 dark:text-red-300 font-sans">{form.error}</p>
 					</GlassCard>
 				{/if}
 
@@ -152,7 +152,7 @@
 							rows="4"
 							required
 							maxlength="5000"
-							class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
 							disabled={submitting}
 						></textarea>
 						<div class="flex justify-between items-center mt-3">
@@ -160,7 +160,7 @@
 							<button
 								type="submit"
 								disabled={submitting || !isValidLength}
-								class="inline-flex items-center gap-2 px-4 py-2 bg-grove-600 text-white rounded-lg font-sans text-sm hover:bg-grove-700 disabled:bg-grove-300 disabled:cursor-not-allowed transition-colors"
+								class="inline-flex items-center gap-2 px-4 py-2 bg-grove-600 text-white rounded-lg font-sans text-sm hover:bg-grove-700 disabled:bg-grove-300 dark:disabled:bg-grove-800 disabled:cursor-not-allowed transition-colors"
 							>
 								{#if submitting}
 									<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -177,8 +177,8 @@
 					</form>
 				</GlassCard>
 			{:else}
-				<GlassCard class="text-center bg-grove-50/50">
-					<CheckCircle class="w-8 h-8 mx-auto text-grove-600 mb-2" />
+				<GlassCard class="text-center bg-grove-50/50 dark:bg-grove-900/20">
+					<CheckCircle class="w-8 h-8 mx-auto text-grove-600 dark:text-grove-400 mb-2" />
 					<p class="text-sm text-foreground-muted font-sans">
 						This conversation has been resolved. Need more help?
 						<a href="/porch/new" class="text-primary hover:text-primary/80 underline">Start a new visit</a>

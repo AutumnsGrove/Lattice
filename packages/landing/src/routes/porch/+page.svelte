@@ -34,7 +34,7 @@
 		<!-- Main Action -->
 		<GlassCard class="mb-6 text-center">
 			<div class="py-4">
-				<MessageCircle class="w-12 h-12 mx-auto text-grove-600 mb-4" />
+				<MessageCircle class="w-12 h-12 mx-auto text-grove-600 dark:text-grove-400 mb-4" />
 				<h2 class="text-xl font-serif text-foreground mb-2">Start a Visit</h2>
 				<p class="text-foreground-muted font-sans mb-6 max-w-md mx-auto">
 					Tell me what's going on. I read everything personally and respond as quickly as I can.
@@ -50,7 +50,7 @@
 		{#if data.user}
 			<GlassCard class="mb-6">
 				<div class="flex items-start gap-4">
-					<div class="w-10 h-10 bg-grove-100 rounded-lg flex items-center justify-center text-grove-600 flex-shrink-0">
+					<div class="w-10 h-10 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center text-grove-600 dark:text-grove-400 flex-shrink-0">
 						<Clock class="w-5 h-5" />
 					</div>
 					<div class="flex-1">
