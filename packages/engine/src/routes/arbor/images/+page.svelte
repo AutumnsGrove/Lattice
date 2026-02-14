@@ -831,7 +831,18 @@
 <Dialog bind:open={deleteModalOpen} title="Delete Image">
   {#if imageToDelete}
     <div class="delete-preview">
-      <img src={imageToDelete.url} alt="Preview" />
+      <img
+        src={imageToDelete.url}
+        alt="Preview"
+        onerror={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+      />
+      <div class="delete-preview-fallback hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+      </div>
     </div>
     <p class="delete-filename">{getFileName(imageToDelete.key)}</p>
   {/if}
@@ -1686,6 +1697,25 @@
     max-width: 100%;
     max-height: 130px;
     object-fit: contain;
+  }
+
+  .delete-preview-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80px;
+    color: var(--color-text-muted);
+    opacity: 0.5;
+  }
+
+  .delete-preview-fallback svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .delete-preview-fallback.hidden {
+    display: none;
   }
 
   .delete-filename {

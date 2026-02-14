@@ -86,13 +86,18 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
       limit: Math.min(limit, 100), // Cap at 100
     });
 
+    // Build CDN URL - uses environment variable for flexibility
+    // Defaults to production CDN if not configured (matches upload endpoint)
+    const cdnBaseUrl =
+      (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
+
     // Transform and parse filenames
     let images: ImageWithMetadata[] = listResult.objects.map((obj) => {
       const parsed = parseImageFilename(obj.key);
 
       return {
         key: obj.key,
-        url: `https://cdn.grove.place/${obj.key}`,
+        url: `${cdnBaseUrl}/${obj.key}`,
         size: obj.size,
         uploaded: obj.uploaded,
 
