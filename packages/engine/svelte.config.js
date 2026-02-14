@@ -14,16 +14,17 @@ const config = {
   kit: {
     adapter: adapter(),
 
-    // SvelteKit's built-in CSRF protection needs explicit trusted origins because
-    // behind grove-router proxy, Origin and Host headers mismatch. Our hooks.server.ts
-    // provides additional proxy-aware CSRF validation for all requests.
+    // Disable SvelteKit's built-in CSRF origin check. It uses exact string matching
+    // for trustedOrigins (no wildcard support), so "https://*.grove.place" is treated
+    // literally and never matches "https://autumn.grove.place". This causes 403 errors
+    // on multipart/form-data uploads (images) behind the grove-router proxy.
+    //
+    // Our hooks.server.ts provides comprehensive proxy-aware CSRF validation:
+    // - Origin vs X-Forwarded-Host matching (proxy-safe)
+    // - Session-bound HMAC tokens (timing-safe comparison)
+    // - Token fallback when Origin is absent (fail-closed)
     csrf: {
-      trustedOrigins: [
-        "https://grove.place",
-        "https://*.grove.place",
-        "http://localhost:*",
-        "http://127.0.0.1:*",
-      ],
+      checkOrigin: false,
     },
     prerender: {
       // In CI, skip prerendering - the AI binding requires remote auth

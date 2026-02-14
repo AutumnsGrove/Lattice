@@ -49,6 +49,7 @@ export async function apiRequest<T = any>(
 
   // Build headers - don't set Content-Type for FormData (browser sets it with boundary)
   const headers: Record<string, string> = {
+    Accept: "application/json",
     ...((options.headers as Record<string, string>) || {}),
   };
 
