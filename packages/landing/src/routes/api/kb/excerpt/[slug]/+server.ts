@@ -110,6 +110,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
   "sessions-and-cookies",
   "image-upload-failures", // Used in Arbor image upload error state
   "what-is-hum", // Hum music link previews
+  "what-is-pulse", // Pulse GitHub activity curio
 ];
 
 // Generate entries for all waystone-linked articles
