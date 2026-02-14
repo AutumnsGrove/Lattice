@@ -9,7 +9,6 @@ import {
 } from "$lib/curios/timeline";
 import {
   setTimelineToken,
-  getTimelineToken,
   deleteTimelineToken,
   hasTimelineToken,
   TIMELINE_SECRET_KEYS,
@@ -318,119 +317,6 @@ export const actions: Actions = {
       return fail(500, {
         error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
         error_code: ARBOR_ERRORS.SAVE_FAILED.code,
-      });
-    }
-  },
-
-  saveToken: async ({ request, platform, locals }) => {
-    const db = platform?.env?.DB;
-    const tenantId = locals.tenantId;
-
-    if (!db || !tenantId) {
-      return fail(500, {
-        tokenError: "Database not available",
-        tokenType: "unknown",
-      });
-    }
-
-    const formData = await request.formData();
-    const tokenType = formData.get("tokenType") as string;
-    const tokenValue = (formData.get("tokenValue") as string)?.trim();
-
-    if (!tokenType || !["github", "openrouter"].includes(tokenType)) {
-      return fail(400, {
-        tokenError: "Invalid token type",
-        tokenType: tokenType || "unknown",
-      });
-    }
-
-    if (!tokenValue) {
-      return fail(400, {
-        tokenError: "Token value is required",
-        tokenType,
-      });
-    }
-
-    const env = {
-      DB: db,
-      GROVE_KEK: platform?.env?.GROVE_KEK,
-      TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
-    };
-
-    const keyName =
-      tokenType === "github"
-        ? TIMELINE_SECRET_KEYS.GITHUB_TOKEN
-        : TIMELINE_SECRET_KEYS.OPENROUTER_KEY;
-
-    const columnName =
-      tokenType === "github"
-        ? "github_token_encrypted"
-        : "openrouter_key_encrypted";
-
-    try {
-      // Save the token
-      const saveResult = await setTimelineToken(
-        env,
-        tenantId,
-        keyName,
-        tokenValue,
-      );
-
-      // Write to legacy column (overwrite any old v1: value)
-      await db
-        .prepare(
-          `UPDATE timeline_curio_config
-           SET ${columnName} = ?, updated_at = strftime('%s', 'now')
-           WHERE tenant_id = ?`,
-        )
-        .bind(saveResult.legacyValue, tenantId)
-        .run();
-
-      console.log(
-        `[Timeline Config] Token ${tokenType} saved via ${saveResult.system}`,
-      );
-
-      // Read it back to verify it's retrievable
-      const row = await db
-        .prepare(
-          `SELECT ${columnName} FROM timeline_curio_config WHERE tenant_id = ?`,
-        )
-        .bind(tenantId)
-        .first();
-
-      const legacyValue = row?.[columnName] as string | null;
-      const readBack = await getTimelineToken(
-        env,
-        tenantId,
-        keyName,
-        legacyValue,
-      );
-
-      if (readBack.token) {
-        return {
-          tokenSaved: true,
-          tokenType,
-          tokenSource: readBack.source,
-          tokenVerified: true,
-        };
-      } else {
-        // Saved but can't read back — something went wrong
-        console.error(
-          `[Timeline Config] Token ${tokenType} saved but read-back failed. ` +
-            `Source: ${readBack.source}, Legacy column value prefix: ${legacyValue?.substring(0, 4) ?? "null"}`,
-        );
-        return fail(500, {
-          tokenError:
-            "Token was saved but could not be verified. " +
-            "Check server logs for details.",
-          tokenType,
-        });
-      }
-    } catch (error) {
-      console.error(`[Timeline Config] saveToken failed:`, error);
-      return fail(500, {
-        tokenError: `Failed to save ${tokenType} token`,
-        tokenType,
       });
     }
   },
