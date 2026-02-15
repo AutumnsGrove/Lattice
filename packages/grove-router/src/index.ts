@@ -215,11 +215,12 @@ export default {
       }
 
       // Route to the correct R2 bucket:
-      // - User-uploaded media (UUID-prefixed paths) → grove-media
+      // - User-uploaded media ({tenantId}/photos/... or {tenantId}/profile/...) → grove-media
       // - Static assets (fonts, admin uploads, etc.) → grove-cdn
-      const UUID_PREFIX =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\//i;
-      const bucket = UUID_PREFIX.test(key) ? env.MEDIA : env.CDN;
+      // Tenant IDs can be UUIDs or slugs (e.g. "autumn-primary"), so we match
+      // on the path segments that user uploads use, not the tenant ID format.
+      const isUserMedia = /^[^/]+\/(photos|profile)\//.test(key);
+      const bucket = isUserMedia ? env.MEDIA : env.CDN;
       const object = await bucket.get(key);
 
       if (!object) {
