@@ -1247,16 +1247,6 @@
               disabled={readonly}
               class="editor-textarea"
             ></textarea>
-            {#if showCurioAutocomplete}
-              <CurioAutocomplete
-                bind:this={curioAutocompleteRef}
-                query={curioQuery}
-                {configuredCurios}
-                position={curioAutocompletePos}
-                onselect={handleCurioSelect}
-                onclose={closeCurioAutocomplete}
-              />
-            {/if}
           </div>
         </div>
       {/if}
@@ -1282,6 +1272,18 @@
         </div>
       {/if}
     </div>
+  {/if}
+
+  <!-- Curio Autocomplete (rendered at editor-container level to avoid overflow:hidden clipping) -->
+  {#if showCurioAutocomplete}
+    <CurioAutocomplete
+      bind:this={curioAutocompleteRef}
+      query={curioQuery}
+      {configuredCurios}
+      position={curioAutocompletePos}
+      onselect={handleCurioSelect}
+      onclose={closeCurioAutocomplete}
+    />
   {/if}
 
   <!-- Status Bar (hidden in Fireside mode) -->
