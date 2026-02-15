@@ -10,6 +10,7 @@
   import { api } from "$lib/utils";
   import { clickOutside } from "$lib/actions/clickOutside";
   import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft, ArrowRight } from "lucide-svelte";
+  import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
   let { data } = $props();
 
@@ -239,6 +240,7 @@
       <a href="/arbor/garden" class="back-link"><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <div class="title-row">
         <h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
+        <Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
         {#if hasUnsavedChanges}
           <span class="unsaved-badge">Unsaved changes</span>
         {/if}

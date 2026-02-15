@@ -8,6 +8,7 @@
   import { resolveTermString } from '$lib/ui/utils/grove-term-resolve';
   import { api } from "$lib/utils";
   import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "lucide-svelte";
+  import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
   // Page data from admin layout (includes grafts cascade)
   let { data } = $props();
@@ -195,6 +196,7 @@
     <div class="header-content">
       <a href="/arbor/garden" class="back-link"><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden">Garden</GroveSwap></a>
       <h1>New <GroveSwap term="blooms">Bloom</GroveSwap></h1>
+      <Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
       <GroveIntro term="blooms" />
     </div>
     <div class="header-actions">

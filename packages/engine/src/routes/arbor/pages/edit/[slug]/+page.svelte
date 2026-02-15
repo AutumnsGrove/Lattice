@@ -5,6 +5,7 @@
   import { Input, Textarea, Button, GlassCard, GlassConfirmDialog } from '$lib/ui';
   import { toast } from "$lib/ui/components/ui/toast";
   import { api } from "$lib/utils";
+  import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
   /**
    * @typedef {Object} PageData
@@ -187,6 +188,7 @@
     <div>
       <h1 class="m-0 mb-1 text-3xl text-foreground">
         Edit Page: {data.page.title}
+        <Waystone slug="using-curios-in-content" label="Curio directives" size="sm" inline />
       </h1>
       <p class="m-0 text-sm text-foreground-muted">
         Slug: {slug}

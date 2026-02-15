@@ -1,6 +1,13 @@
 <script>
   import { Button, Badge, GlassCard, toast, GroveTerm } from '$lib/ui';
-  import { Plus, AlertCircle, Sparkles, Calendar, Image, Map } from 'lucide-svelte';
+  import {
+    Plus, AlertCircle, Sparkles,
+    Calendar, Image, Map, Activity,
+    BookOpen, Hash, Music, BarChart3,
+    Circle, Award, Rss, Globe,
+    TreePine, Radio, Shield, Bookmark,
+    Package, Star, MousePointer, Wind,
+  } from 'lucide-svelte';
   import { api } from '$lib/utils';
 
   // Map curio slugs to icons
@@ -9,6 +16,23 @@
     timeline: Calendar,
     gallery: Image,
     journey: Map,
+    pulse: Activity,
+    guestbook: BookOpen,
+    ambient: Wind,
+    hitcounter: Hash,
+    nowplaying: Music,
+    polls: BarChart3,
+    moodring: Circle,
+    badges: Award,
+    blogroll: Rss,
+    webring: Globe,
+    linkgarden: TreePine,
+    activitystatus: Radio,
+    statusbadge: Shield,
+    bookmarkshelf: Bookmark,
+    artifacts: Package,
+    shrines: Star,
+    cursors: MousePointer,
   };
 
   let { data } = $props();
@@ -182,7 +206,7 @@
       <p class="text-sm text-foreground-muted mb-4">
         <GroveTerm term="curios">Curios</GroveTerm> are special page types that add dynamic functionality to your site.
       </p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {#each data.curios as curio (curio.slug)}
           {@const CurioIcon = curioIcons[curio.slug] || Sparkles}
           <a
