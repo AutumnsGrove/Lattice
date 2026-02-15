@@ -333,7 +333,22 @@
 
       // Step 4: Upload to CDN
       const formData = new FormData();
-      formData.append('file', new File([processedBlob], file.name, { type: processedBlob.type }));
+      // Update filename extension to match the processed format (e.g., .jpeg → .webp)
+      // Without this, the server rejects the upload because the extension doesn't match the MIME type
+      let uploadName = file.name;
+      if (processedBlob.type && processedBlob.type !== file.type) {
+        const extForMime = { 'image/webp': '.webp', 'image/jxl': '.jxl', 'image/gif': '.gif', 'image/jpeg': '.jpg', 'image/png': '.png', 'image/avif': '.avif' };
+        const newExt = extForMime[processedBlob.type];
+        if (newExt) {
+          const lastDot = uploadName.lastIndexOf('.');
+          if (lastDot > 0) {
+            uploadName = uploadName.substring(0, lastDot) + newExt;
+          } else {
+            uploadName = uploadName + newExt;
+          }
+        }
+      }
+      formData.append('file', new File([processedBlob], uploadName, { type: processedBlob.type }));
       formData.append('hash', hash);
 
       // Include format metadata for analytics
