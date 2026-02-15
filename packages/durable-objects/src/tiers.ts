@@ -19,7 +19,13 @@
 export type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 export type PaidTierKey = Exclude<TierKey, "free">;
 export type TierStatus = "available" | "coming_soon" | "future" | "deprecated";
-export type TierIcon = "user" | "sprout" | "tree-deciduous" | "trees" | "crown";
+export type TierIcon =
+  | "user"
+  | "sprout"
+  | "tree-deciduous"
+  | "trees"
+  | "crown"
+  | "footprints";
 
 // =============================================================================
 // INTERFACES
