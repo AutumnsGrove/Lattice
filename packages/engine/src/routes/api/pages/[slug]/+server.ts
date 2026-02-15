@@ -5,6 +5,9 @@ import { getVerifiedTenantId } from "$lib/auth/session.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
+/** System pages that cannot be deleted */
+const PROTECTED_SLUGS = ["home", "about"];
+
 interface PageInput {
   title?: string;
   markdown_content?: string;
@@ -216,6 +219,74 @@ export const PATCH: RequestHandler = async ({
   } catch (err) {
     if ((err as { status?: number }).status) throw err;
     console.error("Error patching page:", err);
+    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+  }
+};
+
+/**
+ * DELETE /api/pages/[slug] - Delete a custom page from D1
+ * Protected pages (home, about) cannot be deleted.
+ */
+export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
+  // Auth check
+  if (!locals.user) {
+    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+  }
+
+  // Tenant check
+  if (!locals.tenantId) {
+    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+  }
+
+  if (!platform?.env?.DB) {
+    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+  }
+
+  const { slug } = params;
+
+  if (!slug) {
+    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+  }
+
+  // Prevent deletion of system pages
+  if (PROTECTED_SLUGS.includes(slug)) {
+    throwGroveError(403, API_ERRORS.OPERATION_FAILED, "API");
+  }
+
+  try {
+    // Verify the authenticated user owns this tenant
+    const tenantId = await getVerifiedTenantId(
+      platform.env.DB,
+      locals.tenantId,
+      locals.user,
+    );
+
+    // Check if page exists and belongs to tenant
+    const existing = await platform.env.DB.prepare(
+      "SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?",
+    )
+      .bind(slug, tenantId)
+      .first();
+
+    if (!existing) {
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+    }
+
+    // Delete the page
+    await platform.env.DB.prepare(
+      "DELETE FROM pages WHERE slug = ? AND tenant_id = ?",
+    )
+      .bind(slug, tenantId)
+      .run();
+
+    return json({
+      success: true,
+      slug,
+      message: "Page deleted successfully",
+    });
+  } catch (err) {
+    if ((err as { status?: number }).status) throw err;
+    console.error("Error deleting page:", err);
     throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
   }
 };

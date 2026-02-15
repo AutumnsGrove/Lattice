@@ -1,7 +1,7 @@
 <script>
-  import { Button, Badge, GlassCard, toast, GroveTerm } from '$lib/ui';
+  import { Button, Badge, GlassCard, GlassConfirmDialog, toast, GroveTerm } from '$lib/ui';
   import {
-    Plus, AlertCircle, Sparkles,
+    Plus, AlertCircle, Sparkles, Trash2,
     Calendar, Image, Map, Activity,
     BookOpen, Hash, Music, BarChart3,
     Circle, Award, Rss, Globe,
@@ -39,6 +39,44 @@
 
   /** @type {Record<string, boolean>} */
   let togglingNav = $state({});
+
+  /** @type {{ slug: string, title: string } | null} */
+  let pageToDelete = $state(null);
+  let showDeleteDialog = $state(false);
+  let deleting = $state(false);
+
+  /** System pages that cannot be deleted */
+  const PROTECTED_SLUGS = ['home', 'about'];
+
+  /** @param {{ slug: string, title: string }} page */
+  function confirmDelete(page) {
+    pageToDelete = page;
+    showDeleteDialog = true;
+  }
+
+  async function handleDelete() {
+    if (!pageToDelete) return;
+
+    deleting = true;
+    try {
+      await api.delete(`/api/pages/${pageToDelete.slug}`);
+      // Remove from local list
+      data.pages = data.pages.filter((/** @type {{ slug: string }} */ p) => p.slug !== pageToDelete?.slug);
+      showDeleteDialog = false;
+      pageToDelete = null;
+      toast.success('Page deleted');
+    } catch (error) {
+      console.error('Failed to delete page:', error);
+      toast.error('Failed to delete page', { description: 'Please try again.' });
+    } finally {
+      deleting = false;
+    }
+  }
+
+  function handleCancelDelete() {
+    showDeleteDialog = false;
+    pageToDelete = null;
+  }
 
   // Count pages currently in nav (excluding home/about which are hardcoded)
   let navPagesUsed = $derived(
@@ -183,6 +221,17 @@
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/{page.slug === 'home' ? '' : page.slug}" target="_blank" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
               <a href="/arbor/pages/edit/{page.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
+              {#if !PROTECTED_SLUGS.includes(page.slug)}
+                <button
+                  onclick={() => confirmDelete({ slug: page.slug, title: page.title })}
+                  disabled={deleting}
+                  class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                  aria-label="Delete {page.title}"
+                >
+                  <Trash2 class="w-3.5 h-3.5" />
+                  <span class="max-md:hidden">Delete</span>
+                </button>
+              {/if}
             </td>
           </tr>
         {:else}
@@ -244,6 +293,19 @@
     </p>
   </GlassCard>
 </div>
+
+<!-- Delete Confirmation Dialog -->
+<GlassConfirmDialog
+  bind:open={showDeleteDialog}
+  title="Delete Page"
+  message={`Are you sure you want to delete "${pageToDelete?.title}"? This action cannot be undone.`}
+  confirmLabel="Delete Page"
+  cancelLabel="Cancel"
+  variant="danger"
+  loading={deleting}
+  onconfirm={handleDelete}
+  oncancel={handleCancelDelete}
+/>
 
 <style>
   :global(.max-w-screen-xl .glass-card) {
