@@ -93,6 +93,13 @@
   let imageToDelete = $state(null);
   let deleting = $state(false);
 
+  // Multi-select state
+  let selectionMode = $state(false);
+  /** @type {Set<string>} */
+  let selectedImages = $state(new Set());
+  let bulkDeleteModalOpen = $state(false);
+  let bulkDeleting = $state(false);
+
   // Initialize gallery and check JXL support on mount
   $effect(() => {
     loadGallery();
@@ -443,6 +450,69 @@
     imageToDelete = null;
   }
 
+  function toggleSelectionMode() {
+    selectionMode = !selectionMode;
+    if (!selectionMode) {
+      selectedImages = new Set();
+    }
+  }
+
+  /** @param {string} key */
+  function toggleImageSelection(key) {
+    const next = new Set(selectedImages);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    selectedImages = next;
+  }
+
+  function selectAll() {
+    if (selectedImages.size === galleryImages.length) {
+      selectedImages = new Set();
+    } else {
+      selectedImages = new Set(galleryImages.map((/** @type {any} */ img) => img.key));
+    }
+  }
+
+  function confirmBulkDelete() {
+    if (selectedImages.size === 0) return;
+    bulkDeleteModalOpen = true;
+  }
+
+  function cancelBulkDelete() {
+    bulkDeleteModalOpen = false;
+  }
+
+  async function executeBulkDelete() {
+    const keys = Array.from(selectedImages);
+    if (keys.length === 0) return;
+
+    bulkDeleting = true;
+
+    try {
+      const result = await api.post('/api/images/delete-batch', { keys });
+
+      // Remove successfully deleted images from gallery
+      const deletedKeys = new Set(result?.deleted ?? keys);
+      galleryImages = galleryImages.filter((/** @type {any} */ img) => !deletedKeys.has(img.key));
+
+      const failedCount = result?.failed?.length ?? 0;
+      if (failedCount > 0) {
+        toast.warning(`Deleted ${deletedKeys.size} images, ${failedCount} failed`);
+      } else {
+        toast.success(`Deleted ${deletedKeys.size} image${deletedKeys.size === 1 ? '' : 's'}`);
+      }
+    } catch (err) {
+      toast.error('Bulk delete failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      bulkDeleting = false;
+      bulkDeleteModalOpen = false;
+      selectedImages = new Set();
+    }
+  }
+
   async function executeDelete() {
     if (!imageToDelete) return;
     deleting = true;
@@ -748,6 +818,13 @@
             <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
           </svg>
         </Button>
+        <Button
+          variant={selectionMode ? 'primary' : 'secondary'}
+          size="sm"
+          onclick={toggleSelectionMode}
+        >
+          {selectionMode ? 'Cancel' : 'Select'}
+        </Button>
       </div>
     </div>
 
@@ -770,9 +847,47 @@
         <p>No images found</p>
       </div>
     {:else}
+      {#if selectionMode}
+        <div class="selection-bar">
+          <div class="selection-bar-left">
+            <button class="select-all-btn" onclick={selectAll}>
+              {selectedImages.size === galleryImages.length ? 'Deselect All' : 'Select All'}
+            </button>
+            <span class="selection-count">
+              {selectedImages.size} selected
+            </span>
+          </div>
+          {#if selectedImages.size > 0}
+            <Button variant="danger" size="sm" onclick={confirmBulkDelete}>
+              Delete {selectedImages.size} image{selectedImages.size === 1 ? '' : 's'}
+            </Button>
+          {/if}
+        </div>
+      {/if}
       <div class="gallery-grid">
         {#each galleryImages as image (image.key)}
-          <div class="gallery-card">
+          <div
+            class="gallery-card {selectionMode && selectedImages.has(image.key) ? 'selected' : ''}"
+            onclick={selectionMode ? () => toggleImageSelection(image.key) : undefined}
+            role={selectionMode ? 'checkbox' : undefined}
+            aria-checked={selectionMode ? selectedImages.has(image.key) : undefined}
+            tabindex={selectionMode ? 0 : undefined}
+            onkeydown={selectionMode ? (/** @type {KeyboardEvent} */ e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleImageSelection(image.key);
+              }
+            } : undefined}
+          >
+            {#if selectionMode}
+              <div class="selection-checkbox" class:checked={selectedImages.has(image.key)}>
+                {#if selectedImages.has(image.key)}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                {/if}
+              </div>
+            {/if}
             <div class="gallery-image">
               <img src={image.url} alt={getFileName(image.key)} loading="lazy" />
             </div>
@@ -785,33 +900,35 @@
                 {/if}
               </div>
             </div>
-            <div class="gallery-actions">
-              <button
-                class="action-btn copy"
-                onclick={() => copyToClipboard(getCopyTextForGallery(image), image.key)}
-                title="Copy {copyFormat.toUpperCase()}"
-              >
-                {#if copiedItem === image.key}
+            {#if !selectionMode}
+              <div class="gallery-actions">
+                <button
+                  class="action-btn copy"
+                  onclick={() => copyToClipboard(getCopyTextForGallery(image), image.key)}
+                  title="Copy {copyFormat.toUpperCase()}"
+                >
+                  {#if copiedItem === image.key}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  {:else}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/>
+                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                    </svg>
+                  {/if}
+                </button>
+                <button
+                  class="action-btn delete"
+                  onclick={() => confirmDelete(image)}
+                  title="Delete"
+                >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 6L9 17l-5-5"/>
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
                   </svg>
-                {:else}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2"/>
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                  </svg>
-                {/if}
-              </button>
-              <button
-                class="action-btn delete"
-                onclick={() => confirmDelete(image)}
-                title="Delete"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                </svg>
-              </button>
-            </div>
+                </button>
+              </div>
+            {/if}
           </div>
         {/each}
       </div>
@@ -853,6 +970,28 @@
       <Button variant="secondary" onclick={cancelDelete} disabled={deleting}>Cancel</Button>
       <Button variant="danger" onclick={executeDelete} disabled={deleting}>
         {deleting ? 'Deleting...' : 'Delete'}
+      </Button>
+    </div>
+  {/snippet}
+</Dialog>
+
+<!-- Bulk Delete Modal -->
+<Dialog bind:open={bulkDeleteModalOpen} title="Delete {selectedImages.size} Image{selectedImages.size === 1 ? '' : 's'}">
+  <div class="bulk-delete-content">
+    <p class="bulk-delete-count">
+      You are about to delete <strong>{selectedImages.size}</strong> image{selectedImages.size === 1 ? '' : 's'} from your grove.
+    </p>
+    {#if bulkDeleting}
+      <p class="bulk-deleting-status">Deleting&hellip;</p>
+    {/if}
+  </div>
+  <p class="delete-warning">This action cannot be undone.</p>
+
+  {#snippet footer()}
+    <div class="modal-actions">
+      <Button variant="secondary" onclick={cancelBulkDelete} disabled={bulkDeleting}>Cancel</Button>
+      <Button variant="danger" onclick={executeBulkDelete} disabled={bulkDeleting}>
+        {bulkDeleting ? 'Deleting...' : `Delete ${selectedImages.size} Image${selectedImages.size === 1 ? '' : 's'}`}
       </Button>
     </div>
   {/snippet}
@@ -1739,6 +1878,101 @@
     justify-content: flex-end;
   }
 
+  /* Selection Mode */
+  .selection-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    background: var(--glass-bg-medium);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-standard);
+  }
+
+  .selection-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .select-all-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-small);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .select-all-btn:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  .selection-count {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .gallery-card.selected {
+    border-color: var(--color-primary);
+    background: var(--grove-overlay-10, rgba(var(--color-primary-rgb, 76, 133, 87), 0.1));
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+
+  .gallery-card.selected .gallery-image {
+    opacity: 0.85;
+  }
+
+  .selection-checkbox {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+
+  .selection-checkbox.checked {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .selection-checkbox svg {
+    width: 14px;
+    height: 14px;
+    color: white;
+  }
+
+  /* Bulk Delete Modal */
+  .bulk-delete-content {
+    margin-bottom: 1rem;
+  }
+
+  .bulk-delete-count {
+    font-size: 0.95rem;
+    color: var(--color-text);
+    margin: 0 0 1rem 0;
+  }
+
+  .bulk-deleting-status {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin: 0.5rem 0 0;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
     .page-header {
@@ -1767,6 +2001,16 @@
     .gallery-grid {
       grid-template-columns: repeat(3, 1fr);
       gap: 0.75rem;
+    }
+
+    .selection-bar {
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .selection-bar-left {
+      justify-content: center;
     }
   }
 </style>
