@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import { GlassCard, GlassButton, GlassOverlay } from "$lib/ui/components/ui";
   import { Input, Button, Badge, Select } from "$lib/ui/components/ui";
   import { getImageTitle, getImageDate, debounce } from "$lib/utils";
@@ -92,22 +93,28 @@
     })),
   ]);
 
-  // Initialize with first batch
+  // When filteredImages changes (any filter, or fresh data), reset to the first batch.
+  // untrack prevents the state writes from being tracked as dependencies,
+  // which would otherwise cause an infinite re-run loop.
   $effect(() => {
-    loadMoreImages();
-    setupInfiniteScroll();
+    const images = filteredImages;
+    const batchSize = BATCH_SIZE;
+    untrack(() => {
+      const batch = images.slice(0, batchSize);
+      visibleImages = batch;
+      loadedCount = batch.length;
+    });
   });
 
   function loadMoreImages() {
     const nextBatch = filteredImages.slice(loadedCount, loadedCount + BATCH_SIZE);
+    if (nextBatch.length === 0) return;
     visibleImages = [...visibleImages, ...nextBatch];
     loadedCount += nextBatch.length;
   }
 
-  function setupInfiniteScroll() {
-    const sentinel = document.getElementById("load-sentinel");
-    if (!sentinel) return;
-
+  /** Svelte action: observes the sentinel element for infinite scroll */
+  function observeSentinel(node: HTMLElement) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (
@@ -118,16 +125,11 @@
           loadMoreImages();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
-    observer.observe(sentinel);
-  }
-
-  function resetPagination() {
-    visibleImages = [];
-    loadedCount = 0;
-    loadMoreImages();
+    observer.observe(node);
+    return { destroy: () => observer.disconnect() };
   }
 
   function toggleTag(tagSlug: string) {
@@ -136,7 +138,6 @@
     } else {
       selectedTags = [...selectedTags, tagSlug];
     }
-    resetPagination();
   }
 
   function resetFilters() {
@@ -144,20 +145,11 @@
     selectedTags = [];
     selectedCategory = "";
     selectedYear = "";
-    resetPagination();
   }
 
   const handleSearchInput = (e: Event) => {
     searchQuery = (e.target as HTMLInputElement).value;
-    resetPagination();
   };
-
-  // Watch for filter changes
-  $effect(() => {
-    if (selectedYear || selectedCategory) {
-      resetPagination();
-    }
-  });
 
   function openLightbox(image: (typeof data.images)[0], index: number) {
     if (!data.config.enableLightbox) return;
@@ -377,7 +369,7 @@
 
     <!-- Infinite scroll sentinel -->
     {#if loadedCount < AUTO_LOAD_LIMIT && loadedCount < filteredImages.length}
-      <div id="load-sentinel" class="load-sentinel">
+      <div use:observeSentinel class="load-sentinel">
         <div class="loading-spinner"></div>
         <span>Loading more...</span>
       </div>
