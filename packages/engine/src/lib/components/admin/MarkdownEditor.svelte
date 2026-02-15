@@ -304,7 +304,7 @@
 
       // Approximate position: line height × line number, adjusted for scroll
       const lineHeight = parseFloat(getComputedStyle(textareaRef).lineHeight) || 24;
-      const lineNumberGutterWidth = textareaRef.offsetLeft - (containerRect?.left || 0);
+      const textareaPadding = 16; // 1rem padding inside textarea
 
       // Current line of the cursor
       const linesBeforeCursor = textBefore.split("\n");
@@ -313,8 +313,14 @@
 
       // Position relative to editor container
       const top = textareaRect.top - containerRect.top + (currentLine * lineHeight) - textareaRef.scrollTop + 4;
+
+      // Left: start from textarea's left edge (after line numbers), add cursor column offset
+      const textareaLeftInContainer = textareaRect.left - containerRect.left;
       const charWidth = 8; // approximate monospace char width at 0.9rem
-      const left = lineNumberGutterWidth + 16 + Math.min(currentCol * charWidth, textareaRect.width - 260);
+      const cursorLeft = textareaLeftInContainer + textareaPadding + (currentCol * charWidth);
+      // Clamp so the dropdown (240-320px wide) doesn't overflow the right edge
+      const maxLeft = containerRect.width - 260;
+      const left = Math.max(textareaLeftInContainer + textareaPadding, Math.min(cursorLeft, maxLeft));
 
       curioAutocompletePos = { top, left };
     }
