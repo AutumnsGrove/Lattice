@@ -284,5 +284,6 @@ export function formatPlayedAt(dateString: string): string {
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }

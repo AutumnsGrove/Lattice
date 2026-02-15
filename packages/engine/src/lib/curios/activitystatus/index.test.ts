@@ -44,7 +44,7 @@ describe("getPreset", () => {
     const preset = getPreset("writing");
     expect(preset).toBeDefined();
     expect(preset!.text).toBe("Writing");
-    expect(preset!.emoji).toBe("✍️");
+    expect(preset!.emoji).toBe("✎");
   });
 
   it("should return undefined for invalid ID", () => {
