@@ -22,6 +22,7 @@
     isConvertibleFormat,
     getUploadStrategy,
     getActionableUploadError,
+    normalizeFileForUpload,
   } from "$lib/utils/upload-validation";
 
   /** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean }; grafts?: Record<string, boolean> } }} */
@@ -196,11 +197,24 @@
 
   /** @param {File[]} files */
   async function uploadFiles(files) {
-    // Validate each file against allowed types
+    // Normalize and validate each file against allowed types
     const validFiles = [];
     const rejectedFiles = [];
 
-    for (const file of files) {
+    for (let file of files) {
+      // Normalize: detect actual format from magic bytes, fix MIME/extension mismatches
+      try {
+        const normalized = await normalizeFileForUpload(file);
+        file = normalized.file;
+        // If it's actually HEIF (e.g., iPad .jpeg that's really HEIC), treat as convertible
+        if (normalized.needsHeicConversion) {
+          validFiles.push(file);
+          continue;
+        }
+      } catch {
+        // Normalization failed — fall through to standard validation
+      }
+
       // HEIC/HEIF files bypass standard validation — they'll be converted to JPEG
       if (isConvertibleFormat(file)) {
         validFiles.push(file);

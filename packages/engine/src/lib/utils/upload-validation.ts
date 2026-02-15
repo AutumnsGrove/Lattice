@@ -63,14 +63,17 @@ export const MIME_TO_EXTENSIONS: Record<AllowedImageType, string[]> = {
 /**
  * File signatures (magic bytes) for validating file contents.
  * Prevents MIME type spoofing by checking actual file bytes.
+ *
+ * JPEG note: All valid JPEGs start with SOI marker (0xFF 0xD8) followed by
+ * a marker segment (0xFF + marker byte). We check the 2-byte SOI prefix here,
+ * and validateFileSignature() verifies byte 2 is 0xFF for the full 3-byte check.
+ * This catches ALL valid JPEG variants (JFIF, Exif, ICC, SOF0, progressive, etc.)
+ * rather than enumerating specific APP markers which misses uncommon but valid ones
+ * like APP2/ICC Profile (0xE2) common on phone cameras.
  */
 export const FILE_SIGNATURES: Record<AllowedImageType, number[][]> = {
   "image/jpeg": [
-    [0xff, 0xd8, 0xff, 0xe0], // JPEG/JFIF
-    [0xff, 0xd8, 0xff, 0xe1], // JPEG/Exif
-    [0xff, 0xd8, 0xff, 0xe8], // JPEG/SPIFF
-    [0xff, 0xd8, 0xff, 0xdb], // JPEG raw
-    [0xff, 0xd8, 0xff, 0xee], // JPEG ADOBE
+    [0xff, 0xd8], // JPEG SOI (Start of Image) — universal across all JPEG variants
   ],
   "image/png": [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]], // PNG signature
   "image/gif": [
@@ -165,6 +168,14 @@ export function validateFileSignature(
   );
 
   if (!matchesSignature) return false;
+
+  // Additional JPEG validation: byte 2 must be 0xFF (marker segment prefix).
+  // All JPEG marker segments start with 0xFF followed by a non-zero marker byte.
+  // This ensures we have a valid SOI (0xFF, 0xD8) + marker (0xFF, XX) sequence.
+  if (mimeType === "image/jpeg") {
+    if (buffer.length < 3) return false;
+    if (buffer[2] !== 0xff) return false;
+  }
 
   // Additional WebP validation: check for WEBP marker at offset 8
   if (mimeType === "image/webp") {
@@ -518,6 +529,210 @@ export function getActionableUploadError(serverMessage: string): string {
 
   // Fall back to the original message
   return serverMessage;
+}
+
+// ============================================================================
+// File Normalization (Universal Converter)
+// ============================================================================
+
+/**
+ * MIME type inferred from file magic bytes.
+ * Returns null if unrecognized.
+ */
+function detectMimeFromBytes(buffer: Uint8Array): AllowedImageType | null {
+  if (buffer.length < 3) return null;
+
+  // JPEG: SOI marker (0xFF 0xD8) + marker prefix (0xFF)
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+
+  // PNG: 8-byte signature
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+
+  // GIF: GIF87a or GIF89a
+  if (
+    buffer.length >= 6 &&
+    buffer[0] === 0x47 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x38 &&
+    (buffer[4] === 0x37 || buffer[4] === 0x39) &&
+    buffer[5] === 0x61
+  ) {
+    return "image/gif";
+  }
+
+  // WebP: RIFF + WEBP marker at offset 8
+  if (
+    buffer.length >= 12 &&
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+
+  // JXL: naked codestream or ISOBMFF container
+  if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0x0a) {
+    return "image/jxl";
+  }
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x00 &&
+    buffer[1] === 0x00 &&
+    buffer[2] === 0x00 &&
+    buffer[3] === 0x0c &&
+    buffer[4] === 0x4a &&
+    buffer[5] === 0x58 &&
+    buffer[6] === 0x4c &&
+    buffer[7] === 0x20
+  ) {
+    return "image/jxl";
+  }
+
+  // AVIF: ISOBMFF ftyp box with avif/avis brand
+  if (buffer.length >= 12) {
+    const hasFtyp =
+      buffer[4] === 0x66 &&
+      buffer[5] === 0x74 &&
+      buffer[6] === 0x79 &&
+      buffer[7] === 0x70;
+    if (hasFtyp) {
+      const brand = String.fromCharCode(
+        buffer[8],
+        buffer[9],
+        buffer[10],
+        buffer[11],
+      );
+      if (brand === "avif" || brand === "avis") {
+        return "image/avif";
+      }
+    }
+  }
+
+  return null;
+}
+
+/** Canonical extension for each MIME type (used when correcting mismatches) */
+const CANONICAL_EXTENSION: Record<AllowedImageType, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/jxl": "jxl",
+  "image/avif": "avif",
+};
+
+/**
+ * HEIF brand identifiers — if we detect these in the ftyp box, the file is
+ * actually HEIF/HEIC regardless of its extension or claimed MIME type.
+ */
+const HEIF_BRANDS = ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1"];
+
+/**
+ * Detect if a file is actually HEIF/HEIC by reading magic bytes.
+ * Catches iPad photos saved with wrong .jpeg extension.
+ */
+function isHeifByBytes(buffer: Uint8Array): boolean {
+  if (buffer.length < 12) return false;
+  const hasFtyp =
+    buffer[4] === 0x66 &&
+    buffer[5] === 0x74 &&
+    buffer[6] === 0x79 &&
+    buffer[7] === 0x70;
+  if (!hasFtyp) return false;
+  const brand = String.fromCharCode(
+    buffer[8],
+    buffer[9],
+    buffer[10],
+    buffer[11],
+  );
+  return HEIF_BRANDS.includes(brand);
+}
+
+/**
+ * Normalize a file for upload by detecting actual format from magic bytes
+ * and correcting MIME type / extension mismatches.
+ *
+ * This is the "universal converter" — it ensures any valid image file
+ * will have matching MIME type, extension, and magic bytes so the server
+ * won't reject it for validation mismatches.
+ *
+ * Returns { file, needsHeicConversion } where:
+ * - file: the normalized File (may be the original if no changes needed)
+ * - needsHeicConversion: true if the file is actually HEIF and needs
+ *   client-side WASM conversion before upload
+ */
+export async function normalizeFileForUpload(file: File): Promise<{
+  file: File;
+  needsHeicConversion: boolean;
+}> {
+  // Read enough bytes for magic byte detection
+  const headerSize = 12; // Enough for all format checks
+  const slice = file.slice(0, headerSize);
+  const buffer = new Uint8Array(await slice.arrayBuffer());
+
+  // Check if the file is actually HEIF disguised as something else
+  // (common on iPad — camera apps save HEIF data with .jpeg extension)
+  if (isHeifByBytes(buffer)) {
+    return { file, needsHeicConversion: true };
+  }
+
+  // Detect actual format from magic bytes
+  const detectedMime = detectMimeFromBytes(buffer);
+
+  // If we can't detect the format, pass through as-is
+  // (server will do its own validation)
+  if (!detectedMime) {
+    return { file, needsHeicConversion: false };
+  }
+
+  // Check if MIME type and extension already match
+  const ext = getFileExtension(file.name);
+  const mimeMatches = file.type === detectedMime;
+  const extMatches =
+    ext !== null && extensionMatchesMimeType(ext, detectedMime);
+
+  if (mimeMatches && extMatches) {
+    // Everything already consistent — no normalization needed
+    return { file, needsHeicConversion: false };
+  }
+
+  // Normalize: create a new File with corrected MIME type and extension
+  let correctedName = file.name;
+  if (!extMatches && ext !== null) {
+    const correctExt = CANONICAL_EXTENSION[detectedMime];
+    const lastDot = correctedName.lastIndexOf(".");
+    if (lastDot > 0) {
+      correctedName = correctedName.substring(0, lastDot) + "." + correctExt;
+    } else {
+      correctedName = correctedName + "." + correctExt;
+    }
+  }
+
+  const normalizedFile = new File([file], correctedName, {
+    type: detectedMime,
+  });
+
+  return { file: normalizedFile, needsHeicConversion: false };
 }
 
 // ============================================================================
