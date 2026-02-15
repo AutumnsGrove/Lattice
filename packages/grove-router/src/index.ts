@@ -12,6 +12,7 @@
 
 export interface Env {
   CDN: R2Bucket;
+  MEDIA: R2Bucket;
   // Service Bindings for direct Worker-to-Worker communication
   SCOUT?: Fetcher;
   AUTH_API?: Fetcher;
@@ -213,7 +214,13 @@ export default {
         key = "index.html";
       }
 
-      const object = await env.CDN.get(key);
+      // Route to the correct R2 bucket:
+      // - User-uploaded media (UUID-prefixed paths) → grove-media
+      // - Static assets (fonts, admin uploads, etc.) → grove-cdn
+      const UUID_PREFIX =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\//i;
+      const bucket = UUID_PREFIX.test(key) ? env.MEDIA : env.CDN;
+      const object = await bucket.get(key);
 
       if (!object) {
         return new Response("Not Found", { status: 404 });

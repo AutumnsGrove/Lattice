@@ -15,10 +15,16 @@ routes = [
   { pattern = "*.grove.place/*", zone_name = "grove.place" }
 ]
 
-# R2 binding for CDN
+# R2 bindings for CDN
+# grove-cdn: static assets, fonts, admin-uploaded files
 [[r2_buckets]]
 binding = "CDN"
 bucket_name = "grove-cdn"
+
+# grove-media: user-uploaded images (tenant-prefixed paths)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "grove-media"
 
 # =============================================================================
 # Service Bindings - Direct Worker-to-Worker communication
