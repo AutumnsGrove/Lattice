@@ -13,8 +13,8 @@ interface DeleteBody {
 }
 
 /**
- * DELETE endpoint for removing images from CDN (R2)
- * Includes CSRF protection via origin/host header validation
+ * DELETE endpoint for removing images from R2 + D1 metadata cleanup
+ * CSRF protection handled by SvelteKit's trustedOrigins config
  */
 export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
   // Authentication check
@@ -39,32 +39,10 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     if (response) return response;
   }
 
-  // CSRF Protection: Validate origin header against host
-  // Check X-Forwarded-Host first (set by grove-router proxy), then fall back to host
-  const origin = request.headers.get("origin");
-  const host =
-    request.headers.get("x-forwarded-host") || request.headers.get("host");
-
-  if (origin) {
-    try {
-      const originUrl = new URL(origin);
-      // Allow localhost for development, otherwise validate host matches
-      const isLocalhost =
-        originUrl.hostname === "localhost" ||
-        originUrl.hostname === "127.0.0.1";
-      const hostMatches = host && originUrl.host === host;
-
-      if (!isLocalhost && !hostMatches) {
-        console.warn(
-          `CSRF violation: origin ${origin} does not match host ${host}`,
-        );
-        throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-      }
-    } catch (err) {
-      if (err instanceof Error && "status" in err) throw err;
-      throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-    }
-  }
+  // CSRF is handled by SvelteKit's built-in csrf.trustedOrigins (supports *.grove.place)
+  // A previous custom check here failed behind grove-router proxy because it compared
+  // the browser Origin (e.g. autumn.grove.place) against the worker Host
+  // (grove-lattice.pages.dev) without wildcard support. Removed per #869.
 
   // Check for R2 binding
   if (!platform?.env?.IMAGES) {
@@ -110,12 +88,6 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
       });
     }
 
-    // Check if the object exists before attempting deletion
-    const existingObject = await platform.env.IMAGES.head(sanitizedKey);
-    if (!existingObject) {
-      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-    }
-
     // Verify the key belongs to this tenant (CRITICAL: prevents cross-tenant access)
     // New images use `${tenantId}/...` prefix. Legacy/migrated images may lack
     // a tenant prefix — allow those unless they belong to a different tenant.
@@ -135,8 +107,25 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
       throwGroveError(403, API_ERRORS.FORBIDDEN, "API");
     }
 
-    // Delete from R2
+    // Delete from R2 (idempotent — succeeds even if object already gone)
+    // Previous code used head() pre-check which blocked deletion of orphaned
+    // D1 records when R2 objects were already removed. Removed per #869.
     await platform.env.IMAGES.delete(sanitizedKey);
+
+    // Clean up D1 metadata (isolated try/catch — R2 deletion already succeeded)
+    try {
+      await platform.env.DB.prepare(
+        "DELETE FROM gallery_images WHERE r2_key = ? AND tenant_id = ?",
+      )
+        .bind(sanitizedKey, tenantId)
+        .run();
+    } catch (dbErr) {
+      // D1 cleanup failed — log but don't fail the request since R2 is already deleted
+      logGroveError("API", API_ERRORS.OPERATION_FAILED, {
+        detail: "D1 gallery_images cleanup failed after R2 deletion",
+        cause: dbErr,
+      });
+    }
 
     return json({
       success: true,
