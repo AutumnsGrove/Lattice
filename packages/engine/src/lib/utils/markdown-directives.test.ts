@@ -155,4 +155,24 @@ describe("groveDirectivePlugin - edge cases", () => {
     const result = md.render("::HitCounter[]::");
     expect(result).toContain('data-grove-curio="hitcounter"');
   });
+
+  it("supports shorthand without brackets: ::name::", () => {
+    const result = md.render("::hitcounter::");
+    expect(result).toContain('class="grove-curio"');
+    expect(result).toContain('data-grove-curio="hitcounter"');
+    expect(result).not.toContain("data-curio-arg");
+  });
+
+  it("supports shorthand for all curio directives", () => {
+    for (const name of CURIO_DIRECTIVES) {
+      const result = md.render(`::${name}::`);
+      expect(result).toContain(`data-grove-curio="${name}"`);
+    }
+  });
+
+  it("shorthand is equivalent to empty brackets", () => {
+    const withBrackets = md.render("::guestbook[]::");
+    const withoutBrackets = md.render("::guestbook::");
+    expect(withBrackets).toBe(withoutBrackets);
+  });
 });

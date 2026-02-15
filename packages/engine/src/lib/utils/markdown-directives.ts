@@ -116,8 +116,8 @@ export { CURIO_DIRECTIVES };
 // Block Rule
 // ============================================================================
 
-/** Regex matching a directive line: ::name[content]:: */
-const DIRECTIVE_RE = /^::(\w+)\[([^\]]*)\]::$/;
+/** Regex matching a directive line: ::name:: or ::name[content]:: */
+const DIRECTIVE_RE = /^::(\w+)(?:\[([^\]]*)\])?::$/;
 
 /**
  * markdown-it block rule for Grove fenced directives.
@@ -142,7 +142,7 @@ function directiveBlockRule(
   if (silent) return true;
 
   const directiveName = match[1].toLowerCase();
-  const directiveContent = match[2];
+  const directiveContent = match[2] ?? "";
 
   const handler = directiveHandlers[directiveName];
   if (!handler) return false;
