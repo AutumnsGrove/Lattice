@@ -12,7 +12,7 @@
   import Dialog from "$lib/ui/components/ui/Dialog.svelte";
   import { toast } from "$lib/ui/components/ui/toast";
   import { apiRequest } from "$lib/utils/api";
-  import { getActionableUploadError, isConvertibleFormat } from "$lib/utils/upload-validation";
+  import { getActionableUploadError, isConvertibleFormat, normalizeFileForUpload } from "$lib/utils/upload-validation";
   import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
   import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
   import { Eye, EyeOff, Maximize2, PenLine, Columns2, BookOpen, Focus, Minimize2, Flame, Mic, Bold, Italic, Code, Link, Heading1, Heading2, Heading3, Check, Images } from "lucide-svelte";
@@ -848,8 +848,13 @@
     lastFailedFile = null;
 
     try {
+      // Normalize file: detect actual format from magic bytes, fix MIME/extension
+      // mismatches, and flag HEIF files disguised as JPEG (common on iPads)
+      const normalized = await normalizeFileForUpload(file);
+      file = normalized.file;
+
       // Convert HEIC/HEIF to JPEG before uploading
-      if (isConvertibleFormat(file)) {
+      if (normalized.needsHeicConversion || isConvertibleFormat(file)) {
         uploadProgress = `Converting ${file.name}...`;
         file = await convertHeicToJpeg(file);
       }

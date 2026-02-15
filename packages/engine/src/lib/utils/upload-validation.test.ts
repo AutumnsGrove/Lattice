@@ -15,6 +15,7 @@ import {
   validateImageFile,
   validateImageFileDeep,
   getActionableUploadError,
+  normalizeFileForUpload,
 } from "./upload-validation";
 
 // ============================================================================
@@ -121,37 +122,11 @@ describe("upload-validation constants", () => {
   describe("FILE_SIGNATURES", () => {
     it("contains signatures for image/jpeg", () => {
       expect(FILE_SIGNATURES["image/jpeg"]).toBeDefined();
-      expect(FILE_SIGNATURES["image/jpeg"]).toHaveLength(5);
+      expect(FILE_SIGNATURES["image/jpeg"]).toHaveLength(1);
     });
 
-    it("JPEG signatures include JFIF [0xFF, 0xD8, 0xFF, 0xE0]", () => {
-      expect(FILE_SIGNATURES["image/jpeg"][0]).toEqual([
-        0xff, 0xd8, 0xff, 0xe0,
-      ]);
-    });
-
-    it("JPEG signatures include Exif [0xFF, 0xD8, 0xFF, 0xE1]", () => {
-      expect(FILE_SIGNATURES["image/jpeg"][1]).toEqual([
-        0xff, 0xd8, 0xff, 0xe1,
-      ]);
-    });
-
-    it("JPEG signatures include SPIFF [0xFF, 0xD8, 0xFF, 0xE8]", () => {
-      expect(FILE_SIGNATURES["image/jpeg"][2]).toEqual([
-        0xff, 0xd8, 0xff, 0xe8,
-      ]);
-    });
-
-    it("JPEG signatures include raw [0xFF, 0xD8, 0xFF, 0xDB]", () => {
-      expect(FILE_SIGNATURES["image/jpeg"][3]).toEqual([
-        0xff, 0xd8, 0xff, 0xdb,
-      ]);
-    });
-
-    it("JPEG signatures include ADOBE [0xFF, 0xD8, 0xFF, 0xEE]", () => {
-      expect(FILE_SIGNATURES["image/jpeg"][4]).toEqual([
-        0xff, 0xd8, 0xff, 0xee,
-      ]);
+    it("JPEG signature is SOI marker [0xFF, 0xD8]", () => {
+      expect(FILE_SIGNATURES["image/jpeg"][0]).toEqual([0xff, 0xd8]);
     });
 
     it("contains PNG signature [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]", () => {
@@ -516,6 +491,33 @@ describe("validateFileSignature - SECURITY CRITICAL", () => {
       expect(validateFileSignature(JPEG_BYTES_ADOBE, "image/jpeg")).toBe(true);
     });
 
+    it("accepts ICC Profile JPEG (APP2 0xE2) — common on phone cameras", () => {
+      const iccJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe2, 0x00, 0x10]);
+      expect(validateFileSignature(iccJpeg, "image/jpeg")).toBe(true);
+    });
+
+    it("accepts APP3 JPEG (0xE3)", () => {
+      const app3Jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe3, 0x00, 0x10]);
+      expect(validateFileSignature(app3Jpeg, "image/jpeg")).toBe(true);
+    });
+
+    it("accepts SOF0 JPEG (baseline 0xC0)", () => {
+      const sof0Jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xc0, 0x00, 0x10]);
+      expect(validateFileSignature(sof0Jpeg, "image/jpeg")).toBe(true);
+    });
+
+    it("accepts Progressive JPEG (SOF2 0xC2)", () => {
+      const progressiveJpeg = new Uint8Array([
+        0xff, 0xd8, 0xff, 0xc2, 0x00, 0x10,
+      ]);
+      expect(validateFileSignature(progressiveJpeg, "image/jpeg")).toBe(true);
+    });
+
+    it("accepts JPEG with comment marker (0xFE)", () => {
+      const commentJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xfe, 0x00, 0x10]);
+      expect(validateFileSignature(commentJpeg, "image/jpeg")).toBe(true);
+    });
+
     it("rejects PNG bytes labeled as JPEG", () => {
       expect(validateFileSignature(PNG_BYTES, "image/jpeg")).toBe(false);
     });
@@ -524,9 +526,14 @@ describe("validateFileSignature - SECURITY CRITICAL", () => {
       expect(validateFileSignature(GIF89A_BYTES, "image/jpeg")).toBe(false);
     });
 
-    it("rejects buffer too short", () => {
+    it("rejects buffer too short (only SOI, no marker)", () => {
       const shortBuffer = new Uint8Array([0xff, 0xd8]);
       expect(validateFileSignature(shortBuffer, "image/jpeg")).toBe(false);
+    });
+
+    it("rejects SOI without valid marker prefix", () => {
+      const badMarker = new Uint8Array([0xff, 0xd8, 0x00, 0xe0]);
+      expect(validateFileSignature(badMarker, "image/jpeg")).toBe(false);
     });
 
     it("rejects empty buffer", () => {
@@ -1225,5 +1232,114 @@ describe("getActionableUploadError", () => {
       const result = getActionableUploadError("RATE_LIMITED");
       expect(result).toContain("too quickly");
     });
+  });
+});
+
+// ============================================================================
+// normalizeFileForUpload Tests
+// ============================================================================
+
+describe("normalizeFileForUpload", () => {
+  it("passes through a correctly labeled JPEG file unchanged", async () => {
+    const file = new File([JPEG_BYTES_JFIF], "photo.jpg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("photo.jpg");
+    expect(result.file.type).toBe("image/jpeg");
+  });
+
+  it("passes through a .jpeg extension without changing it", async () => {
+    const file = new File([JPEG_BYTES_EXIF], "photo.jpeg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("photo.jpeg");
+    expect(result.file.type).toBe("image/jpeg");
+  });
+
+  it("corrects a PNG file mislabeled as JPEG", async () => {
+    const file = new File([PNG_BYTES], "image.jpg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.type).toBe("image/png");
+    expect(result.file.name).toBe("image.png");
+  });
+
+  it("corrects a JPEG file with .png extension", async () => {
+    const file = new File([JPEG_BYTES_JFIF], "photo.png", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("photo.jpg");
+  });
+
+  it("detects HEIF disguised as JPEG and flags for conversion", async () => {
+    // HEIF ftyp box: [size 4 bytes][ftyp][heic]
+    const heifAsJpeg = new Uint8Array([
+      0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63,
+    ]);
+    const file = new File([heifAsJpeg], "photo.jpeg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(true);
+  });
+
+  it("passes through a correctly labeled PNG file unchanged", async () => {
+    const file = new File([PNG_BYTES], "screenshot.png", {
+      type: "image/png",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("screenshot.png");
+    expect(result.file.type).toBe("image/png");
+  });
+
+  it("passes through a correctly labeled WebP file unchanged", async () => {
+    const file = new File([WEBP_BYTES], "image.webp", {
+      type: "image/webp",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("image.webp");
+    expect(result.file.type).toBe("image/webp");
+  });
+
+  it("handles files too small for magic byte detection", async () => {
+    const tiny = new Uint8Array([0x00]);
+    const file = new File([tiny], "tiny.jpg", { type: "image/jpeg" });
+    const result = await normalizeFileForUpload(file);
+    // Too small to detect, passes through as-is
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.name).toBe("tiny.jpg");
+  });
+
+  it("corrects MIME type when magic bytes don't match claimed type", async () => {
+    // GIF bytes but claimed as JPEG
+    const file = new File([GIF89A_BYTES], "animation.jpg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.file.type).toBe("image/gif");
+    expect(result.file.name).toBe("animation.gif");
+  });
+
+  it("accepts ICC Profile JPEG (APP2 0xE2) without modification", async () => {
+    const iccJpeg = new Uint8Array([
+      0xff, 0xd8, 0xff, 0xe2, 0x00, 0x10, 0x49, 0x43, 0x43, 0x5f, 0x50, 0x52,
+    ]);
+    const file = new File([iccJpeg], "iphone-photo.jpeg", {
+      type: "image/jpeg",
+    });
+    const result = await normalizeFileForUpload(file);
+    expect(result.needsHeicConversion).toBe(false);
+    expect(result.file.type).toBe("image/jpeg");
+    expect(result.file.name).toBe("iphone-photo.jpeg");
   });
 });
