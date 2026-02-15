@@ -834,7 +834,7 @@
       <img
         src={imageToDelete.url}
         alt="Preview"
-        onerror={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+        onerror={(e) => { const el = /** @type {HTMLImageElement} */ (e.currentTarget); el.style.display = 'none'; el.nextElementSibling?.classList.remove('hidden'); }}
       />
       <div class="delete-preview-fallback hidden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
