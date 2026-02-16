@@ -8,6 +8,29 @@
 import { json } from "@sveltejs/kit";
 import type { ThresholdResult } from "../types.js";
 import type { Threshold } from "../threshold.js";
+import { createThreshold } from "../factory.js";
+
+/**
+ * Convenience: create a DO-backed threshold for the current user.
+ * Falls back to KV if THRESHOLD binding is unavailable or userId is empty.
+ *
+ * @example
+ * ```typescript
+ * const threshold = createThresholdForUser(platform?.env, locals.user?.id);
+ * if (threshold) {
+ *   const denied = await thresholdCheck(threshold, { ... });
+ *   if (denied) return denied;
+ * }
+ * ```
+ */
+export function createThresholdForUser(
+  env:
+    | { THRESHOLD?: DurableObjectNamespace; CACHE_KV?: KVNamespace }
+    | undefined,
+  userId: string | undefined,
+): Threshold | null {
+  return createThreshold(env, userId ? { identifier: userId } : undefined);
+}
 
 /**
  * SvelteKit middleware helper. Returns a Response if rate limited, or null to continue.

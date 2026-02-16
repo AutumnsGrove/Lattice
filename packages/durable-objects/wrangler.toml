@@ -45,6 +45,11 @@ class_name = "ExportDO"
 name = "TRIAGE"
 class_name = "TriageDO"
 
+# ThresholdDO: Per-identifier rate limiting (Loom pattern)
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
 # =============================================================================
@@ -67,6 +72,10 @@ new_sqlite_classes = ["ExportDO"]
 [[migrations]]
 tag = "v5"
 new_sqlite_classes = ["TriageDO"]
+
+[[migrations]]
+tag = "v6"
+new_sqlite_classes = ["ThresholdDO"]
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)

@@ -15,6 +15,7 @@ export { PostContentDO } from "./PostContentDO.js";
 export { SentinelDO } from "./sentinel/SentinelDO.js";
 export { ExportDO } from "./ExportDO.js";
 export { TriageDO } from "./TriageDO.js";
+export { ThresholdDO } from "./ThresholdDO.js";
 
 // Minimal fetch handler for health checks
 export default {
@@ -32,6 +33,7 @@ export default {
           "SentinelDO",
           "ExportDO",
           "TriageDO",
+          "ThresholdDO",
         ],
       });
     }

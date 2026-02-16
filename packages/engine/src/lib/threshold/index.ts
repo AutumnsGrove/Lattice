@@ -20,6 +20,7 @@ export { Threshold, categorizeRequest } from "./threshold.js";
 export type { ThresholdOptions } from "./threshold.js";
 
 // Storage adapters
+export { ThresholdDOStore } from "./stores/do.js";
 export { ThresholdKVStore } from "./stores/kv.js";
 export { ThresholdD1Store } from "./stores/d1.js";
 

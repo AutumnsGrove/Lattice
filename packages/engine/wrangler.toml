@@ -122,6 +122,12 @@ name = "EXPORTS"
 class_name = "ExportDO"
 script_name = "grove-durable-objects"
 
+# ThresholdDO: Per-identifier rate limiting (Loom pattern)
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"
+
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.
 # Pages projects reference external DOs via script_name.
 
