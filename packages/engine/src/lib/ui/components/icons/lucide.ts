@@ -92,6 +92,8 @@ import {
   Copy,
   Trash2,
   RefreshCw,
+  Hash,
+  RotateCcw,
   // Metrics
   Clock,
   TrendingUp,
@@ -431,6 +433,8 @@ export {
   Copy,
   Trash2,
   RefreshCw,
+  Hash,
+  RotateCcw,
   // Authentication
   Fingerprint,
   Key,

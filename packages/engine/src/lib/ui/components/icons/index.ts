@@ -95,6 +95,8 @@ export {
   Copy,
   Trash2,
   RefreshCw,
+  Hash,
+  RotateCcw,
   // Authentication
   Fingerprint,
   Key,
