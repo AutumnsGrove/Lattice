@@ -9,6 +9,8 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { addReaction, removeReaction } from "$lib/server/reactions";
 import { isValidReaction } from "$lib/constants/reactions";
+import { createThreshold } from "@autumnsgrove/groveengine/threshold";
+import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
 export const POST: RequestHandler = async ({
   params,
@@ -55,6 +57,18 @@ export const POST: RequestHandler = async ({
       },
       { status: 400 },
     );
+  }
+
+  // Rate limit
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `meadow/reaction:${locals.user.id}`,
+      limit: 60,
+      windowSeconds: 3600,
+      failMode: "open",
+    });
+    if (denied) return denied;
   }
 
   const created = await addReaction(db, locals.user.id, params.id, body.emoji);
@@ -106,6 +120,18 @@ export const DELETE: RequestHandler = async ({
       },
       { status: 400 },
     );
+  }
+
+  // Rate limit
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `meadow/reaction:${locals.user.id}`,
+      limit: 60,
+      windowSeconds: 3600,
+      failMode: "open",
+    });
+    if (denied) return denied;
   }
 
   const removed = await removeReaction(

@@ -9,6 +9,8 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { VALID_REPORT_REASONS } from "$lib/server/types";
+import { createThreshold } from "@autumnsgrove/groveengine/threshold";
+import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
 
 export const POST: RequestHandler = async ({
   params,
@@ -30,6 +32,18 @@ export const POST: RequestHandler = async ({
   const db = platform?.env?.DB;
   if (!db) {
     return json({ error: "Service unavailable" }, { status: 503 });
+  }
+
+  // Rate limit — check early before parsing body or hitting DB
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `meadow/report:${locals.user.id}`,
+      limit: 10,
+      windowSeconds: 3600,
+      failMode: "open",
+    });
+    if (denied) return denied;
   }
 
   let body: { reason?: string; details?: string };
@@ -84,26 +98,23 @@ export const POST: RequestHandler = async ({
       );
     }
 
-    await db
-      .prepare(
-        `INSERT INTO meadow_reports (id, user_id, post_id, reason, details)
-         VALUES (?, ?, ?, ?, ?)`,
-      )
-      .bind(id, locals.user.id, params.id, body.reason, details)
-      .run();
-
-    // Auto-hide: if 3+ reports, set visible = 0
-    const reportCount = await db
-      .prepare(`SELECT COUNT(*) as count FROM meadow_reports WHERE post_id = ?`)
-      .bind(params.id)
-      .first<{ count: number }>();
-
-    if (reportCount && reportCount.count >= 3) {
-      await db
-        .prepare(`UPDATE meadow_posts SET visible = 0 WHERE id = ?`)
-        .bind(params.id)
-        .run();
-    }
+    // Batch the INSERT + conditional auto-hide atomically.
+    // The UPDATE uses a subquery so the count reflects the newly inserted
+    // report — no race window between checking and acting.
+    await db.batch([
+      db
+        .prepare(
+          `INSERT INTO meadow_reports (id, user_id, post_id, reason, details)
+           VALUES (?, ?, ?, ?, ?)`,
+        )
+        .bind(id, locals.user.id, params.id, body.reason, details),
+      db
+        .prepare(
+          `UPDATE meadow_posts SET visible = 0
+           WHERE id = ? AND (SELECT COUNT(*) FROM meadow_reports WHERE post_id = ?) >= 3`,
+        )
+        .bind(params.id, params.id),
+    ]);
   } catch (err) {
     console.error("[Meadow Report] Insert failed:", err);
     return json(

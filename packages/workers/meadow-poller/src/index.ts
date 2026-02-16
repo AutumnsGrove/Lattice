@@ -12,6 +12,7 @@
  * - No secrets required: all feeds are public HTTPS
  */
 import { parseFeed } from "./parser.js";
+import { sanitizeFeedHtml } from "./sanitize.js";
 import type { Env, TenantInfo, PollState, ParsedFeedItem } from "./config.js";
 import {
   MAX_CONCURRENT_POLLS,
@@ -225,8 +226,13 @@ async function upsertPosts(
       }
     }
 
-    // Content hash for change detection
-    const contentSource = item.contentEncoded || item.description || "";
+    // Sanitize HTML content before storage — defense at ingest means
+    // every downstream consumer gets safe HTML by default
+    const sanitizedContent = sanitizeFeedHtml(item.contentEncoded);
+
+    // Content hash for change detection (hash the sanitized version
+    // so re-sanitization with identical output doesn't trigger updates)
+    const contentSource = sanitizedContent || item.description || "";
     const contentHash = await hashContent(contentSource);
 
     const id = crypto.randomUUID();
@@ -251,7 +257,7 @@ async function upsertPosts(
           item.guid,
           item.title,
           item.description,
-          item.contentEncoded,
+          sanitizedContent,
           item.link,
           tenant.display_name,
           tenant.subdomain,
