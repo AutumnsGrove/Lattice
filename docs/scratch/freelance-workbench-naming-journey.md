@@ -303,137 +303,346 @@ grown over years of practice, rooted in the oldest wood?
 
 ---
 
-## The Decision
+## Codex: Back Pocket
 
-**Codex** stands above the rest.
-
-Here's why:
-
-**The etymology is too perfect to ignore.** Latin _cōdex_
-means "tree trunk." The word itself grew from wood. It was
-born in the grove — literally. A codex is what happens when
-a tree becomes knowledge. Bark becomes page. Wood becomes
-wisdom. The most Grove word imaginable, and it predates
-Grove by two thousand years.
-
-**The Da Vinci connection is direct.** When people hear
-"Codex," many think of Da Vinci's notebooks. The Codex
-Atlanticus. The Codex Leicester. Bound collections of an
-inventor's sketches, calculations, and procedures. That's
-EXACTLY what this repo is — your sketches (skills), your
-calculations (Osprey), your procedures (runbook).
-
-**It captures what the repo actually IS.** Not a workshop
-(you don't build things here — you build in CLIENT repos).
-Not a forge (nothing is smelted). It's a reference. A bound
-collection. A codex you consult before every engagement and
-annotate after every one.
-
-**It sounds right.**
-
-- "Check the Codex." ✓
-- "I added a new template to the Codex." ✓
-- "The Codex has the pricing tables." ✓
-- "Open the Codex and run the Raven protocol." ✓
-
-```
-            🕯️                        🕯️
-       ┌────────────────────────────────┐
-       │                                │
-       │   ╔══════════════════════╗     │
-       │   ║      C O D E X      ║     │
-       │   ╠══════════════════════╣     │
-       │   ║                      ║     │
-       │   ║  📜 Services Agreement║     │
-       │   ║  📜 Proposal Template ║     │
-       │   ║  📜 Scope Cheat Sheet ║     │
-       │   ║  📜 Engagement Runbook║     │
-       │   ║  ──────────────────  ║     │
-       │   ║  🔮 /raven-investigate║     │
-       │   ║  🔮 /osprey-appraise  ║     │
-       │   ║  ──────────────────  ║     │
-       │   ║  📁 Client Archives   ║     │
-       │   ║  📁 Quote History     ║     │
-       │   ║                      ║     │
-       │   ╚══════════════════════╝     │
-       │                                │
-       │      Leather-bound.            │
-       │      Tree-trunk origin.        │
-       │      Annotated in the margins. │
-       │                                │
-       └────────────────────────────────┘
-         cōdex (Latin): "tree trunk"
-         → wooden tablet → bound book
-         → collected knowledge
-```
+Codex is a beautiful word. The tree-trunk etymology is
+perfect. But OpenAI speared it — "Codex" now means "AI
+coding platform" in most developers' minds. Standing in
+the middle of that fight isn't worth it. The word is
+preserved but not chosen.
 
 ---
 
-## The Name: Codex
+## Speaking with Da Vinci
 
-**The collected works.** · `AutumnsGrove/Codex`
+I need to stop naming from a DISTANCE and get INTO the
+workshop. What was it actually LIKE?
 
-In Latin, _cōdex_ means "tree trunk" — the block of wood
-from which writing tablets were carved. Wood became page.
-Page became book. Book became the master's collected knowledge.
-Two thousand years later, the word still means what it always
-meant: everything the practitioner knows, bound and organized.
+Leonardo's workshop in Milan. The Corte Vecchia, 1490s.
 
-Da Vinci kept codices. His sketches, calculations, procedures,
-inventions — all bound together, annotated in the margins,
-referenced constantly. The Codex Atlanticus alone spans forty
-years of work. Every engagement taught him something new. The
-new knowledge went into the codex.
+Picture the room. It's not organized. It's a majestic
+mess. On the workbench: a half-dissected bird wing pinned
+open next to a sketch of a flying machine. Mathematical
+tables stacked on top of anatomical drawings. A human skull
+sits next to a glass of wine. Mirrors everywhere — he
+writes backwards, left-handed, everything mirrored so no
+one can read his notes over his shoulder.
 
-Codex is the Wayfinder's bound collection of freelance
-knowledge. The Raven's investigation protocols. The Osprey's
-estimation tables. The services agreement. The proposal
-template. The scope cheat sheet. The engagement runbook.
-Client archives. Quote history. Everything needed to run a
-security consulting practice, organized and precious.
+In one corner: a wooden model of a gear mechanism, half
+assembled. The gears don't mesh yet. He's working out a
+problem in three dimensions.
 
-You don't work IN the codex. You consult it before every
-engagement and annotate it after every one. It grows with
-experience. Some pages are worn thin from reference. The
-pricing tables have pencil marks in the margins. The red
-flags section gains new entries in different inks, from
-different seasons.
+On the wall: a preparatory cartoon for a painting that
+was commissioned two years ago and still isn't finished.
+The client has written three letters. Leonardo hasn't
+responded to any of them. (He will, eventually. The work
+will be transcendent. But not today.)
 
-It was born from a tree. It lives in the grove.
+Scattered across every surface: NOTEBOOKS. Not organized
+by topic. A single page might contain:
 
-_Open the Codex. The knowledge is there._
+- A study of water flowing around a stone
+- A note about purchasing linseed oil
+- A sketch of a siege weapon
+- A diagram of the muscles of the human arm
+- A reminder that "the sun does not move"
+
+The notebooks are the thing. Not the workshop. Not the
+tools. THE NOTEBOOKS. They're where Leonardo THINKS.
+Where observations become connections. Where a bird's
+wing becomes a flying machine. Where a river's current
+becomes a hydraulic pump.
+
+But we can't use "codex."
+
+So what ELSE was in that workshop?
+
+---
+
+## The Things in the Workshop
+
+Not names yet. Just things. Objects. Qualities. Feelings.
+
+**The Instruments:**
+
+- Calipers (measuring precisely)
+- Compasses (drawing perfect arcs)
+- Scales (weighing, balancing)
+- Astrolabes (navigating by the stars)
+- Armillary spheres (modeling the cosmos)
+
+**The Materials:**
+
+- Vellum (prepared animal skin for writing)
+- Gesso (the primer coat on a canvas)
+- Verdigris (the green patina on copper)
+- Lapis lazuli (ground stone for blue pigment)
+- Oak gall ink (made from tree growths)
+
+**The Products:**
+
+- Cartone (full-size preparatory drawings)
+- Trattato (a treatise — formal written work)
+- Disegno (drawing — but also "design," the
+  intellectual foundation of all visual art)
+- Sfumato (smoky, soft transitions)
+- Imprimatura (the tinted ground layer)
+
+**The Processes:**
+
+- Chiaroscuro (light and shadow)
+- Contrapposto (the twist that gives a figure life)
+- Pentimento (where the artist changed their mind
+  and the old version shows through)
+
+**The Spaces:**
+
+- Bottega (the master's workshop)
+- Studiolo (a private study room)
+- Camerino (a small chamber)
+- Loggia (a covered outdoor gallery)
+
+**The Books:**
+
+- Bestiary (a catalog of beasts)
+- Herbarium (a catalog of plants)
+- Formulary (a collection of procedures)
+- Breviary (a daily reference)
+
+Wait.
+
+---
+
+## BESTIARY.
+
+A bestiary is a medieval illustrated compendium of beasts.
+
+Each page: a creature. Drawn in detail. Its nature
+described. Its habits cataloged. Its meaning explained.
+Real animals alongside mythical ones — the lion and the
+unicorn shared the same pages. What mattered wasn't
+whether the creature was "real." What mattered was what
+it MEANT. What it could DO. How to work with it.
+
+Bestiaries were among the most popular books in medieval
+Europe. Second only to the Bible. Monks illustrated them
+with gold leaf. Scholars annotated them in the margins.
+Travelers carried them. Every educated person owned one.
+
+Da Vinci drew animals obsessively. Horses, birds, cats,
+dragons. He studied their anatomy, their movement, their
+mechanics. He understood: to build a flying machine, you
+must first understand the beast that flies.
+
+Now look at what's in this repo:
+
+```
+THE BESTIARY
+┌──────────────────────────────────────┐
+│                                      │
+│  🐦‍⬛ THE RAVEN                       │
+│     Nature: Detective. Investigator. │
+│     Habits: Fans out six agents,     │
+│       probes every corner, grades    │
+│       the security posture.          │
+│     Invoke: /raven-investigate       │
+│                                      │
+│  🦅 THE OSPREY                       │
+│     Nature: Appraiser. Calculator.   │
+│     Habits: Hovers, measures the     │
+│       true depth, accounts for       │
+│       refraction, never misses.      │
+│     Invoke: /osprey-appraise         │
+│                                      │
+│  🦝 THE RACCOON                      │
+│     Nature: Auditor. Rummager.       │
+│     Habits: Inspects every corner    │
+│       for secrets and risk.          │
+│                                      │
+│  🐢 THE TURTLE                       │
+│     Nature: Defender. Hardener.      │
+│     Habits: Builds layered defense,  │
+│       bone-deep protection.          │
+│                                      │
+│  🕷️ THE SPIDER                       │
+│     Nature: Weaver. Auth architect.  │
+│     Habits: Spins authentication     │
+│       webs with patient precision.   │
+│                                      │
+│  🦫 THE BEAVER                       │
+│     Nature: Builder. Test writer.    │
+│     Habits: Builds test dams that    │
+│       catch bugs before they flood.  │
+│                                      │
+│  ═══════════════════════════════     │
+│                                      │
+│  📜 DOCUMENTS                        │
+│     Services Agreement               │
+│     Proposal Template                │
+│     Scope Cheat Sheet                │
+│     Engagement Runbook               │
+│                                      │
+│  📁 ARCHIVES                         │
+│     Client Records                   │
+│     Quote History                    │
+│                                      │
+└──────────────────────────────────────┘
+     Illustrated. Annotated.
+     Every beast, cataloged.
+```
+
+It's not a codex of knowledge. It's not a workshop of
+tools. It's a BESTIARY. A catalog of creatures — each
+one illustrated, each one described, each one invoked
+for a specific purpose.
+
+The skills ARE the beasts. The Raven. The Osprey. The
+Raccoon. The Turtle. The Spider. The Beaver. Each one
+has a nature. Each one has habits. Each one has a page
+in the book.
+
+And the documents? They're the MARGINALIA. The
+practitioner's annotations. The notes scrawled between
+the beast entries: "When facing a Django app, invoke
+the Raven first, then the Osprey. Budget 15% extra.
+Here is the agreement template. Here is the cheat
+sheet for red flags."
+
+**This is the only name that bridges BOTH naming worlds
+in the Grove ecosystem:** the animal skills AND the
+medieval workshop. A bestiary is LITERALLY a medieval
+book of animals. It's the intersection of everything.
+
+---
+
+## Testing "Bestiary"
+
+**Sentence tests:**
+
+- "Open the Bestiary." ✓ Evocative. Immediate.
+- "Check the Bestiary for the Raven protocol." ✓
+- "I added a new beast to the Bestiary." ✓ LOVE this.
+- "The Bestiary has the engagement runbook." ✓
+- "Consult the Bestiary before the client call." ✓
+
+**Tagline tests:**
+
+- "A book of beasts." — Clean. Perfect. Done.
+- "Every creature, cataloged." — Precise.
+- "Know your beasts." — Punchy.
+- "The creatures within." — Mysterious.
+
+**Repo name:** `AutumnsGrove/Bestiary` — distinctive,
+memorable, immediately evocative.
+
+**The vibe:** You pull a heavy, leather-bound book from
+the shelf. The cover is embossed with animal figures.
+Inside, each page is an illustration: the Raven with
+its magnifying glass, the Osprey hovering over a river
+of numbers, the Turtle carrying its shell of defenses.
+Between the beast entries, handwritten notes in the
+margins — pricing tables, red flag lists, client
+scripts. Dog-eared pages where you always turn first.
+Gold leaf on the section dividers.
+
+Medieval. Da Vinci. Animals. Documents. One word.
+
+---
+
+## Why Bestiary Wins
+
+| Quality                      | Bestiary | Codex | Bottega | Grimoire |
+| ---------------------------- | -------- | ----- | ------- | -------- |
+| Medieval ✓                   | YES      | YES   | YES     | YES      |
+| Da Vinci connection          | YES      | YES   | YES     | partial  |
+| Contains animals             | **YES**  | no    | no      | partial  |
+| Contains documents           | YES      | YES   | YES     | YES      |
+| Bridges both Grove worlds    | **YES**  | no    | no      | no       |
+| Unpoisoned by tech companies | **YES**  | NO    | yes     | yes      |
+| Warm/inviting                | YES      | yes   | YES     | iffy     |
+| Memorable                    | YES      | yes   | yes     | YES      |
+| Natural repo name            | YES      | yes   | yes     | yes      |
+
+The only name that lives in BOTH the animal kingdom AND
+the medieval workshop. The bridge word. The one that was
+always there, waiting.
+
+---
+
+## The Name: Bestiary
+
+**A book of beasts.** · `AutumnsGrove/Bestiary`
+
+In medieval Europe, a bestiary was an illustrated
+compendium of creatures — each one drawn in careful
+detail, its nature described, its purpose explained.
+Real animals alongside mythical ones. Lions and unicorns
+shared the same gilt-edged pages. What mattered wasn't
+taxonomy. What mattered was: what does this creature DO?
+How does it behave? When do you call upon it?
+
+Da Vinci filled his notebooks with animal studies.
+Horses in motion. Birds in flight. Cats in repose.
+He understood that to build a flying machine, you must
+first study the beast that flies. The observation
+precedes the invention. The bestiary precedes the work.
+
+The Bestiary is the Wayfinder's illustrated catalog of
+freelance creatures. Each beast has a page: its nature,
+its habits, its invocation. The Raven investigates. The
+Osprey appraises. The Raccoon audits. The Turtle hardens.
+The Spider weaves. The Beaver builds. Between the beast
+entries: the practitioner's marginalia. Pricing tables.
+Red flag lists. Client scripts. The services agreement.
+The engagement runbook. Everything annotated in different
+inks from different seasons.
+
+You don't just READ the Bestiary. You INVOKE it. Open
+the page. Speak the name. The beast appears and does
+its work. When the work is done, the beast returns to
+its page. You annotate what you learned. The Bestiary
+grows.
+
+_A book of beasts._
 
 ---
 
 ## Tagline Options
 
-1. "The collected works."
-2. "Open the Codex."
-3. "Born from wood. Bound in knowledge."
-4. "Every engagement, annotated."
-5. "The practitioner's manual."
+1. "A book of beasts."
+2. "Every creature, cataloged."
+3. "Know your beasts."
+4. "Illustrated. Annotated. Invoked."
+5. "The creatures within."
 
-My pick: **"The collected works."**
+My pick: **"A book of beasts."**
 
 ---
 
-## Runners Up
+## Runners Up (Full Journey)
 
-| Name         | Why It Almost Worked                   | Why Codex Wins                          |
-| ------------ | -------------------------------------- | --------------------------------------- |
-| **Bottega**  | Warm, Italian, "where the craft lives" | This is more reference than workshop    |
-| **Grimoire** | Skills as invocations — very fun       | Too dark/occult for the tone            |
-| **Almanac**  | Practical reference, seasonal, beloved | Codex has the tree etymology + Da Vinci |
-| **Forge**    | Transformation, fire, medieval         | Too common in tech, too aggressive      |
+| Name         | Direction | Why It Didn't Land                        |
+| ------------ | --------- | ----------------------------------------- |
+| **Roost**    | Bird      | Wrong metaphor — birds are inside, not it |
+| **Codex**    | Medieval  | OpenAI poisoned the well                  |
+| **Bottega**  | Medieval  | Workshop, but this is more catalog        |
+| **Forge**    | Medieval  | Too common in tech, too aggressive        |
+| **Grimoire** | Medieval  | Fun but too dark/occult for Grove         |
+| **Almanac**  | Medieval  | Warm but lacks the animal bridge          |
+| **Mews**     | Bird      | Too obscure, London real estate           |
+| **Aerie**    | Bird      | Too serious, not cute enough              |
+| **Bower**    | Bird      | Too gentle for security work              |
+| **Rookery**  | Bird      | Also means "slum"                         |
 
 ---
 
 ## Conflict Check
 
-- "Codex" does not appear as an existing Grove service name
+- "Bestiary" does not appear as an existing Grove service name
 - Does not conflict with any existing concept
-- Two syllables (COH-dex), clean pronunciation
-- `AutumnsGrove/Codex` — strong, distinctive repo name
-- The Latin "tree trunk" etymology places it firmly in the grove
-- Da Vinci's codices give it the medieval workshop energy
-- Common enough to be recognizable, specific enough to be meaningful
+- Four syllables (BEST-ee-air-ee) — same length as Terrarium
+- `AutumnsGrove/Bestiary` — strong, distinctive repo name
+- Bridges the animal skill names with medieval workshop energy
+- No tech company has claimed this word
+- Immediately evocative — everyone knows what a bestiary is
+- The "best" in "bestiary" is a nice accident
