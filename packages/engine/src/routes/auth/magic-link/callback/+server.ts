@@ -14,12 +14,10 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-  getClientIP,
-  getEndpointLimitByKey,
-} from "$lib/server/rate-limits";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
+import { getEndpointLimitByKey } from "$lib/threshold/config.js";
 import { AUTH_COOKIE_NAMES } from "$lib/grafts/login";
 import {
   AUTH_ERRORS,
@@ -36,26 +34,18 @@ export const GET: RequestHandler = async ({
   request,
 }) => {
   // Rate limiting
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
     const clientIp = getClientIP(request);
     const limitConfig = getEndpointLimitByKey("auth/callback");
-    const rateLimitKey = buildRateLimitKey(
-      "auth/magic-link-callback",
-      clientIp,
-    );
-
-    const { response: rateLimitResponse } = await checkRateLimit({
-      kv,
-      key: rateLimitKey,
-      limit: limitConfig.limit,
-      windowSeconds: limitConfig.windowSeconds,
-      namespace: "auth-ratelimit",
+    const denied = await thresholdCheck(threshold, {
+      key: `magic-link/callback:${clientIp}`,
+      ...limitConfig,
+      failMode: "closed",
     });
-
-    if (rateLimitResponse) {
+    if (denied) {
       console.warn("[Magic Link Callback] Rate limited:", { ip: clientIp });
-      return rateLimitResponse;
+      return denied;
     }
   }
 

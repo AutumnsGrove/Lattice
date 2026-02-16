@@ -6,10 +6,8 @@
 import { json } from "@sveltejs/kit";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { getTenantDb } from "$lib/server/services/database.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 import { isPaidTier } from "$lib/config/tiers.js";
@@ -170,16 +168,15 @@ export const POST: RequestHandler = async ({
   const { slug } = params;
 
   // Rate limit comment creation
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const { response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("comments/create", locals.user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `comments/create:${locals.user.id}`,
       limit: 60,
       windowSeconds: 3600, // 60 comments per hour (burst protection)
-      namespace: "content-ratelimit",
+      failMode: "open",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   try {

@@ -1,11 +1,12 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  getEndpointLimitByKey,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/index.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
+import { getEndpointLimitByKey } from "$lib/threshold/config.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
@@ -147,20 +148,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Check rate limit after size validation (so oversized exports don't consume quota)
-    // Uses centralized rate limiting from $lib/server/rate-limits
+    // Uses Threshold SDK from $lib/threshold
+    const threshold = createThreshold(platform?.env);
     let rateLimitResult = {
       allowed: true,
       remaining: EXPORT_RATE_LIMIT.limit,
       resetAt: 0,
     };
 
-    if (platform.env.CACHE_KV) {
-      const { result, response } = await checkRateLimit({
-        kv: platform.env.CACHE_KV,
+    if (threshold) {
+      const { result, response } = await thresholdCheckWithResult(threshold, {
         key: `export:${tenantId}`,
         limit: EXPORT_RATE_LIMIT.limit,
         windowSeconds: EXPORT_RATE_LIMIT.windowSeconds,
-        namespace: "export",
       });
       rateLimitResult = result;
       if (response) {
@@ -313,7 +313,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="grove-export-${exportType}-${new Date().toISOString().split("T")[0]}.json"`,
         "Cache-Control": "no-cache",
-        ...rateLimitHeaders(rateLimitResult, EXPORT_RATE_LIMIT.limit),
+        ...thresholdHeaders(rateLimitResult, EXPORT_RATE_LIMIT.limit),
       },
     });
   } catch (err) {

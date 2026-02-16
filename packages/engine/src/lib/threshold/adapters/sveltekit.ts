@@ -54,6 +54,48 @@ export async function thresholdCheck(
 }
 
 /**
+ * SvelteKit middleware helper that returns both the result and an optional Response.
+ * Use this when you need access to the ThresholdResult for success response headers.
+ *
+ * @example
+ * ```typescript
+ * const { result, response } = await thresholdCheckWithResult(threshold, {
+ *   key: `billing:${tenantId}`,
+ *   limit: 20,
+ *   windowSeconds: 3600,
+ * });
+ * if (response) return response;
+ * // ... later, attach headers to success response:
+ * return json(data, { headers: thresholdHeaders(result, 20) });
+ * ```
+ */
+export async function thresholdCheckWithResult(
+  threshold: Threshold,
+  options: Parameters<Threshold["check"]>[0],
+): Promise<{ result: ThresholdResult; response?: Response }> {
+  const result = await threshold.check(options);
+
+  if (!result.allowed) {
+    const response = json(
+      {
+        error: "rate_limited",
+        message:
+          "You're moving faster than we can keep up! Take a moment and try again soon.",
+        retryAfter: result.retryAfter,
+        resetAt: new Date(result.resetAt * 1000).toISOString(),
+      },
+      {
+        status: 429,
+        headers: thresholdHeaders(result, options.limit),
+      },
+    );
+    return { result, response };
+  }
+
+  return { result };
+}
+
+/**
  * Generate rate limit headers for any response.
  */
 export function thresholdHeaders(

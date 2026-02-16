@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { thresholdCheck, thresholdHeaders } from "./sveltekit.js";
+import {
+  thresholdCheck,
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "./sveltekit.js";
 import { Threshold } from "../threshold.js";
 import { createMockStore } from "../test-utils.js";
 
@@ -67,6 +71,61 @@ describe("SvelteKit adapter", () => {
       expect(response!.headers.get("X-RateLimit-Limit")).toBe("5");
       expect(response!.headers.get("X-RateLimit-Remaining")).toBe("0");
       expect(response!.headers.get("Retry-After")).toBeDefined();
+    });
+  });
+
+  describe("thresholdCheckWithResult()", () => {
+    it("returns result without response when allowed", async () => {
+      const { result, response } = await thresholdCheckWithResult(threshold, {
+        key: "test:user1",
+        limit: 10,
+        windowSeconds: 60,
+      });
+
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(9);
+      expect(response).toBeUndefined();
+    });
+
+    it("returns result with 429 response when denied", async () => {
+      // Exhaust limit
+      for (let i = 0; i < 10; i++) {
+        await threshold.check({
+          key: "test:user1",
+          limit: 10,
+          windowSeconds: 60,
+        });
+      }
+
+      const { result, response } = await thresholdCheckWithResult(threshold, {
+        key: "test:user1",
+        limit: 10,
+        windowSeconds: 60,
+      });
+
+      expect(result.allowed).toBe(false);
+      expect(result.remaining).toBe(0);
+      expect(response).toBeDefined();
+      expect(response!.status).toBe(429);
+
+      const body = await response!.json();
+      expect(body.error).toBe("rate_limited");
+      expect(body.retryAfter).toBeGreaterThan(0);
+      expect(body.message).toContain("moving faster");
+    });
+
+    it("result can be used for success headers after passing", async () => {
+      const { result, response } = await thresholdCheckWithResult(threshold, {
+        key: "test:user1",
+        limit: 10,
+        windowSeconds: 60,
+      });
+
+      expect(response).toBeUndefined();
+
+      const headers = thresholdHeaders(result, 10);
+      expect(headers["X-RateLimit-Limit"]).toBe("10");
+      expect(headers["X-RateLimit-Remaining"]).toBe("9");
     });
   });
 

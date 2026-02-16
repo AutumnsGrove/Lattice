@@ -3,12 +3,13 @@ import type { RequestHandler } from "./$types";
 import { createPaymentProvider } from "$lib/payments";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { TIERS, type TierKey } from "$lib/config/tiers";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  getEndpointLimitByKey,
-  rateLimitHeaders,
-  type RateLimitResult,
-} from "$lib/server/rate-limits/index.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
+import type { ThresholdResult } from "$lib/threshold/types.js";
+import { getEndpointLimitByKey } from "$lib/threshold/config.js";
 import {
   isCompedAccount,
   logBillingAudit,
@@ -26,7 +27,7 @@ interface BillingRateLimitCheckResult {
   /** If set, return this 429 response immediately */
   response?: Response;
   /** Rate limit result for adding headers to successful responses */
-  result: RateLimitResult;
+  result: ThresholdResult;
 }
 
 /**
@@ -34,30 +35,27 @@ interface BillingRateLimitCheckResult {
  * Returns a 429 response if rate limited, or the result for adding headers.
  */
 async function checkBillingRateLimit(
-  kv: KVNamespace | undefined,
+  env: { CACHE_KV?: KVNamespace } | undefined,
   tenantId: string,
 ): Promise<BillingRateLimitCheckResult> {
   // Default result when KV not available
-  const defaultResult: RateLimitResult = {
+  const defaultResult: ThresholdResult = {
     allowed: true,
     remaining: BILLING_RATE_LIMIT.limit,
     resetAt: 0,
   };
 
-  if (!kv) {
+  const threshold = createThreshold(env);
+  if (!threshold) {
     console.warn("[Billing] KV not configured, rate limiting disabled");
     return { result: defaultResult };
   }
 
-  const { result, response } = await checkRateLimit({
-    kv,
+  return thresholdCheckWithResult(threshold, {
     key: `billing:${tenantId}`,
     limit: BILLING_RATE_LIMIT.limit,
     windowSeconds: BILLING_RATE_LIMIT.windowSeconds,
-    namespace: "billing",
   });
-
-  return { result, response };
 }
 
 /**
@@ -351,9 +349,9 @@ export const POST: RequestHandler = async ({
       locals.user,
     );
 
-    // Check rate limit before processing (centralized in $lib/server/rate-limits)
+    // Check rate limit before processing (Threshold SDK)
     const { result: rateLimitResult, response: rateLimitResponse } =
-      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
+      await checkBillingRateLimit(platform.env, tenantId);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -467,7 +465,7 @@ export const POST: RequestHandler = async ({
         sessionId: session.id,
       },
       {
-        headers: rateLimitHeaders(rateLimitResult, BILLING_RATE_LIMIT.limit),
+        headers: thresholdHeaders(rateLimitResult, BILLING_RATE_LIMIT.limit),
       },
     );
   } catch (err) {
@@ -540,9 +538,9 @@ export const PATCH: RequestHandler = async ({
       locals.user,
     );
 
-    // Check rate limit before processing (centralized in $lib/server/rate-limits)
+    // Check rate limit before processing (Threshold SDK)
     const { result: rateLimitResult, response: rateLimitResponse } =
-      await checkBillingRateLimit(platform.env.CACHE_KV, tenantId);
+      await checkBillingRateLimit(platform.env, tenantId);
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
@@ -627,7 +625,7 @@ export const PATCH: RequestHandler = async ({
             message: "Subscription will cancel at period end",
           },
           {
-            headers: rateLimitHeaders(
+            headers: thresholdHeaders(
               rateLimitResult,
               BILLING_RATE_LIMIT.limit,
             ),
@@ -660,7 +658,7 @@ export const PATCH: RequestHandler = async ({
             message: "Subscription resumed",
           },
           {
-            headers: rateLimitHeaders(
+            headers: thresholdHeaders(
               rateLimitResult,
               BILLING_RATE_LIMIT.limit,
             ),

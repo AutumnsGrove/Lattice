@@ -3,10 +3,8 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getTenantDb, now } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
@@ -38,17 +36,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit content creation to prevent spam
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const { response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("pages/create", locals.user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `pages/create:${locals.user.id}`,
       limit: 20,
       windowSeconds: 3600, // 20 pages per hour
-      namespace: "content-ratelimit",
+      failMode: "open",
     });
 
-    if (response) return response;
+    if (denied) return denied;
   }
 
   try {

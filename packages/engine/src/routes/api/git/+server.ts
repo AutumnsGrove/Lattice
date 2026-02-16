@@ -12,11 +12,12 @@ import {
   CLEAR_TOKEN_VALUE,
 } from "$lib/git";
 import { queryOne, execute } from "$lib/server/services/database.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  rateLimitHeaders,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/index.js";
+  thresholdCheckWithResult,
+  thresholdCheck,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
 import { encryptToken } from "$lib/server/encryption";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
@@ -94,7 +95,6 @@ async function getConfigForTenant(
 // GET - Get git dashboard config
 export const GET: RequestHandler = async ({ platform, locals }) => {
   const db = platform?.env?.DB;
-  const kv = platform?.env?.CACHE_KV;
   const tenantId = locals.tenantId;
 
   if (!db) {
@@ -105,12 +105,12 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
-  // Rate limiting (only if KV available)
+  // Rate limiting using Threshold SDK
+  const threshold = createThreshold(platform?.env);
   let rateLimitResult = null;
-  if (kv) {
-    const { result, response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("git/config", tenantId),
+  if (threshold) {
+    const { result, response } = await thresholdCheckWithResult(threshold, {
+      key: `git/config:${tenantId}`,
       ...READ_LIMIT,
     });
     if (response) return response;
@@ -124,7 +124,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
     { config },
     {
       headers: rateLimitResult
-        ? rateLimitHeaders(rateLimitResult, READ_LIMIT.limit)
+        ? thresholdHeaders(rateLimitResult, READ_LIMIT.limit)
         : undefined,
     },
   );
@@ -133,7 +133,6 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 // PUT - Update git dashboard config
 export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   const db = platform?.env?.DB;
-  const kv = platform?.env?.CACHE_KV;
   const tenantId = locals.tenantId;
 
   // Check authentication
@@ -149,14 +148,14 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
     throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
-  // Rate limiting
-  if (kv) {
-    const { response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("git/config/write", tenantId),
+  // Rate limiting using Threshold SDK
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `git/config/write:${tenantId}`,
       ...WRITE_LIMIT,
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   interface UpdateConfigBody {

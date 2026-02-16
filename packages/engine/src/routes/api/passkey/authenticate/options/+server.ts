@@ -19,12 +19,10 @@ import {
   logGroveError,
 } from "$lib/errors/index.js";
 import { sanitizeReturnTo } from "$lib/utils/grove-url.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-  getClientIP,
-  getEndpointLimitByKey,
-} from "$lib/server/rate-limits/index.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
+import { getEndpointLimitByKey } from "$lib/threshold/config.js";
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 interface RequestBody {
@@ -33,24 +31,20 @@ interface RequestBody {
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   // Rate limit to prevent abuse
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
     const clientIp = getClientIP(request);
     // Use same limits as auth/callback since this is part of auth flow
     const limitConfig = getEndpointLimitByKey("auth/callback");
-    const rateLimitKey = buildRateLimitKey("passkey/auth/options", clientIp);
-
-    const { response: rateLimitResponse } = await checkRateLimit({
-      kv,
-      key: rateLimitKey,
-      limit: limitConfig.limit,
-      windowSeconds: limitConfig.windowSeconds,
-      namespace: "passkey-ratelimit",
+    const denied = await thresholdCheck(threshold, {
+      key: `passkey/auth/options:${clientIp}`,
+      ...limitConfig,
+      failMode: "closed",
     });
 
-    if (rateLimitResponse) {
+    if (denied) {
       console.warn("[Passkey Auth] Rate limited:", { ip: clientIp });
-      return rateLimitResponse;
+      return denied;
     }
   }
 

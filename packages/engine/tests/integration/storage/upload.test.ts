@@ -34,13 +34,15 @@ vi.mock("$lib/auth/session.js", () => ({
   getVerifiedTenantId: vi.fn(async (db, tid) => tid),
 }));
 
-vi.mock("$lib/server/rate-limits/middleware.js", () => ({
-  checkRateLimit: vi.fn(async () => ({
-    result: { remaining: 49, resetAt: Date.now() / 1000 + 3600 },
-    response: null,
+vi.mock("$lib/threshold/factory.js", () => ({
+  createThreshold: vi.fn(() => ({ _mock: true })),
+}));
+
+vi.mock("$lib/threshold/adapters/sveltekit.js", () => ({
+  thresholdCheckWithResult: vi.fn(async () => ({
+    result: { allowed: true, remaining: 49, resetAt: Date.now() / 1000 + 3600 },
   })),
-  buildRateLimitKey: vi.fn((...args) => args.join(":")),
-  rateLimitHeaders: vi.fn(() => ({})),
+  thresholdHeaders: vi.fn(() => ({})),
 }));
 
 vi.mock("$lib/server/env-validation.js", () => ({
@@ -185,10 +187,11 @@ function createWebpFormData(fileBuffer?: Uint8Array): FormData {
 
 import { validateCSRF } from "$lib/utils/csrf.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
 import { isFeatureEnabled } from "$lib/feature-flags/index.js";
 import { scanImage } from "$lib/server/petal/index.js";
 import { canUploadImages } from "$lib/server/upload-gate.js";
@@ -204,8 +207,8 @@ import { validateEnv } from "$lib/server/env-validation.js";
 
 const mockValidateCSRF = vi.mocked(validateCSRF);
 const mockGetVerifiedTenantId = vi.mocked(getVerifiedTenantId);
-const mockCheckRateLimit = vi.mocked(checkRateLimit);
-const mockBuildRateLimitKey = vi.mocked(buildRateLimitKey);
+const mockCreateThreshold = vi.mocked(createThreshold);
+const mockThresholdCheckWithResult = vi.mocked(thresholdCheckWithResult);
 const mockIsFeatureEnabled = vi.mocked(isFeatureEnabled);
 const mockScanImage = vi.mocked(scanImage);
 const mockCanUploadImages = vi.mocked(canUploadImages);
@@ -219,13 +222,14 @@ beforeEach(() => {
   // Set default behavior
   mockValidateCSRF.mockReturnValue(true);
   mockGetVerifiedTenantId.mockResolvedValue("tenant-1");
-  mockCheckRateLimit.mockResolvedValue({
-    result: { remaining: 49, resetAt: Math.floor(Date.now() / 1000) + 3600 },
-    response: null,
+  mockCreateThreshold.mockReturnValue({ _mock: true } as any);
+  mockThresholdCheckWithResult.mockResolvedValue({
+    result: {
+      allowed: true,
+      remaining: 49,
+      resetAt: Math.floor(Date.now() / 1000) + 3600,
+    },
   });
-  mockBuildRateLimitKey.mockImplementation((...args: unknown[]) =>
-    (args as string[]).join(":"),
-  );
   mockIsFeatureEnabled.mockResolvedValue(true);
   mockScanImage.mockResolvedValue({ approved: true });
   mockCanUploadImages.mockResolvedValue({ allowed: true });
@@ -325,23 +329,30 @@ describe("Image Upload Endpoint - Feature Flag", () => {
 
 describe("Image Upload Endpoint - Rate Limiting", () => {
   it("should return 429 when rate limit is exceeded", async () => {
-    mockCheckRateLimit.mockResolvedValue({
-      result: { remaining: 0, resetAt: Math.floor(Date.now() / 1000) + 3600 },
+    mockThresholdCheckWithResult.mockResolvedValue({
+      result: {
+        allowed: false,
+        remaining: 0,
+        resetAt: Math.floor(Date.now() / 1000) + 3600,
+        retryAfter: 3600,
+      },
       response: new Response(
         JSON.stringify({
           error: "rate_limited",
           message:
-            "Upload limit reached. Please wait before uploading more images.",
-          remaining: 0,
-          resetAt: new Date(Math.floor(Date.now() / 1000) + 3600).toISOString(),
+            "You're moving faster than we can keep up! Take a moment and try again soon.",
+          retryAfter: 3600,
+          resetAt: new Date(
+            (Math.floor(Date.now() / 1000) + 3600) * 1000,
+          ).toISOString(),
         }),
         {
           status: 429,
           headers: {
             "Content-Type": "application/json",
-            "RateLimit-Limit": "50",
-            "RateLimit-Remaining": "0",
-            "RateLimit-Reset": String(Math.floor(Date.now() / 1000) + 3600),
+            "X-RateLimit-Limit": "50",
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(Math.floor(Date.now() / 1000) + 3600),
           },
         },
       ),
@@ -357,7 +368,7 @@ describe("Image Upload Endpoint - Rate Limiting", () => {
     const data = await response.json();
 
     expect(response.status).toBe(429);
-    expect(data.error_code).toBe("GROVE-API-060");
+    expect(data.error).toBe("rate_limited");
   });
 });
 
@@ -855,37 +866,35 @@ describe("Image Upload Endpoint - Content Moderation", () => {
 
 describe("Image Upload Endpoint - Abuse Detection", () => {
   it("should return 429 when rejected upload count exceeds limit", async () => {
-    mockCheckRateLimit.mockImplementation(async ({ namespace, key }) => {
+    let callCount = 0;
+    mockThresholdCheckWithResult.mockImplementation(async () => {
+      callCount++;
       // First call: normal rate limit check (passes)
-      if (namespace === "upload-ratelimit") {
+      if (callCount === 1) {
         return {
           result: {
+            allowed: true,
             remaining: 49,
             resetAt: Math.floor(Date.now() / 1000) + 3600,
           },
-          response: null,
         };
       }
-      // Second call: rejected uploads check (fails)
-      if (namespace === "upload-abuse") {
-        return {
-          result: {
-            remaining: 0,
-            resetAt: Math.floor(Date.now() / 1000) + 3600,
-          },
-          response: new Response(
-            JSON.stringify({
-              error: true,
-              code: "upload_restricted",
-              message: "Upload access temporarily restricted.",
-            }),
-            { status: 429, headers: { "Content-Type": "application/json" } },
-          ),
-        };
-      }
+      // Second call: rejected uploads abuse check (fails)
       return {
-        result: { remaining: 0, resetAt: Math.floor(Date.now() / 1000) + 3600 },
-        response: null,
+        result: {
+          allowed: false,
+          remaining: 0,
+          resetAt: Math.floor(Date.now() / 1000) + 3600,
+          retryAfter: 3600,
+        },
+        response: new Response(
+          JSON.stringify({
+            error: "rate_limited",
+            message:
+              "You're moving faster than we can keep up! Take a moment and try again soon.",
+          }),
+          { status: 429, headers: { "Content-Type": "application/json" } },
+        ),
       };
     });
 

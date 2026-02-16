@@ -72,8 +72,12 @@ vi.mock("$lib/auth/session", () => ({
   getVerifiedTenantId: vi.fn(),
 }));
 
-vi.mock("$lib/server/rate-limits", () => ({
-  checkRateLimit: vi.fn(),
+vi.mock("$lib/threshold/factory.js", () => ({
+  createThreshold: vi.fn(),
+}));
+
+vi.mock("$lib/threshold/adapters/sveltekit.js", () => ({
+  thresholdCheck: vi.fn(),
 }));
 
 vi.mock("$lib/payments", () => ({
@@ -88,7 +92,8 @@ vi.mock("$lib/server/billing", () => ({
 // Import mocked modules
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { checkRateLimit } from "$lib/server/rate-limits";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { createPaymentProvider } from "$lib/payments";
 import { logBillingAudit, isCompedAccount } from "$lib/server/billing";
 
@@ -112,11 +117,11 @@ function createMockDB(mockData: Record<string, unknown> = {}) {
 describe("UpgradesGraft API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: rate limit passes
-    vi.mocked(checkRateLimit).mockResolvedValue({
-      result: { allowed: true },
-      response: null,
-    });
+    // Default: rate limit passes (threshold returns a mock, check returns null = allowed)
+    vi.mocked(createThreshold).mockReturnValue(
+      {} as ReturnType<typeof createThreshold>,
+    );
+    vi.mocked(thresholdCheck).mockResolvedValue(null);
   });
 
   afterAll(() => {

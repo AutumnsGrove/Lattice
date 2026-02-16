@@ -18,13 +18,13 @@ import {
   getCacheKey,
   DEFAULT_GIT_CONFIG,
 } from "$lib/git";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  rateLimitHeaders,
-  buildRateLimitKey,
-  getClientIP,
-  type RateLimitResult,
-} from "$lib/server/rate-limits/index.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
+import type { ThresholdResult } from "$lib/threshold/types.js";
 import { safeDecryptToken } from "$lib/server/encryption";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
@@ -86,13 +86,13 @@ export const GET: RequestHandler = async ({
     throwGroveError(503, API_ERRORS.GITHUB_TOKEN_NOT_CONFIGURED, "API");
   }
 
-  // Rate limiting by IP (public endpoint)
-  let rateLimitResult: RateLimitResult | null = null;
-  if (kv) {
+  // Rate limiting by IP using Threshold SDK
+  let rateLimitResult: ThresholdResult | null = null;
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
     const clientIP = getClientIP(request);
-    const { result, response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("git/contributions", clientIP),
+    const { result, response } = await thresholdCheckWithResult(threshold, {
+      key: `git/contributions:${clientIP}`,
       ...RATE_LIMIT,
     });
     if (response) return response;
@@ -105,7 +105,7 @@ export const GET: RequestHandler = async ({
   // Helper to get response headers
   const getHeaders = () =>
     rateLimitResult
-      ? rateLimitHeaders(rateLimitResult, RATE_LIMIT.limit)
+      ? thresholdHeaders(rateLimitResult, RATE_LIMIT.limit)
       : undefined;
 
   // Check cache first

@@ -10,7 +10,9 @@ import {
   type OEmbedResponse,
 } from "$lib/server/services/oembed-providers.js";
 import { fetchOGMetadata } from "$lib/server/services/og-fetcher.js";
-import { rateLimit } from "$lib/server/services/cache.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /**
@@ -42,35 +44,15 @@ export const GET: RequestHandler = async ({ url, platform, request }) => {
   }
 
   // ── Rate Limiting ──────────────────────────────────────────────────
-  const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const clientIp =
-      request.headers.get("cf-connecting-ip") ||
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      "unknown";
-
-    const rateLimitResult = await rateLimit(kv, `oembed:${clientIp}`, {
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const clientIp = getClientIP(request);
+    const denied = await thresholdCheck(threshold, {
+      key: `oembed:${clientIp}`,
       limit: 20,
       windowSeconds: 60,
-      namespace: "ratelimit",
     });
-
-    if (!rateLimitResult.allowed) {
-      return json(
-        { error: "Too many requests. Try again shortly." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(
-              Math.max(
-                1,
-                rateLimitResult.resetAt - Math.floor(Date.now() / 1000),
-              ),
-            ),
-          },
-        },
-      );
-    }
+    if (denied) return denied;
   }
 
   // ── Security Headers (applied to all responses) ────────────────────

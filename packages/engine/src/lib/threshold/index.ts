@@ -42,6 +42,9 @@ export {
 } from "./abuse.js";
 export type { AbuseState, ViolationResult } from "./abuse.js";
 
+// Factory
+export { createThreshold } from "./factory.js";
+
 // Errors
 export { THRESHOLD_ERRORS, logThresholdError } from "./errors.js";
 export type { ThresholdErrorKey } from "./errors.js";

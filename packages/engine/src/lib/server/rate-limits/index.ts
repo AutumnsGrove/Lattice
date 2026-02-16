@@ -1,89 +1,62 @@
 /**
- * Threshold Rate Limiting Module
+ * @deprecated Use $lib/threshold/ modules instead.
+ * This barrel is a compatibility shim — all real logic lives in threshold/.
  *
- * Provides a complete rate limiting solution for Grove applications:
- * - Tier-based limits (seedling, sapling, oak, evergreen)
- * - Endpoint-specific limits
- * - Middleware helpers for SvelteKit
- * - Abuse tracking with graduated response
- *
- * @example
- * ```typescript
- * import {
- *   checkRateLimit,
- *   rateLimitHeaders,
- *   TIER_RATE_LIMITS
- * } from '@autumnsgrove/groveengine/server';
- *
- * // In a SvelteKit route
- * const { result, response } = await checkRateLimit({
- *   kv: platform.env.CACHE,
- *   key: `endpoint:${userId}`,
- *   limit: 10,
- *   windowSeconds: 60,
- * });
- * if (response) return response;
- * ```
- *
- * @see docs/patterns/threshold-pattern.md
+ * Migration paths:
+ *   $lib/server/rate-limits         → $lib/threshold
+ *   $lib/server/rate-limits/config  → $lib/threshold/config
+ *   $lib/server/rate-limits/abuse   → $lib/threshold/abuse
+ *   checkRateLimit(...)             → createThreshold() + thresholdCheck()
  */
 
-// ============================================================================
-// Configuration
-// ============================================================================
-
+// Configuration (re-exported from threshold)
 export {
-	TIER_RATE_LIMITS,
-	ENDPOINT_RATE_LIMITS,
-	ENDPOINT_MAP,
-	getEndpointLimit,
-	getEndpointLimitByKey,
-	getTierLimit,
-	isValidTier
-} from './config.js';
+  ENDPOINT_RATE_LIMITS,
+  ENDPOINT_MAP,
+  getEndpointLimit,
+  getEndpointLimitByKey,
+} from "../../threshold/config.js";
+
+export type { EndpointKey } from "../../threshold/config.js";
+
+// Legacy config exports still from local files
+export { TIER_RATE_LIMITS, getTierLimit, isValidTier } from "./config.js";
 
 export type {
-	SubscriptionTier,
-	RateLimitCategory,
-	EndpointKey,
-	RateLimitConfig
-} from './config.js';
+  SubscriptionTier,
+  RateLimitCategory,
+  RateLimitConfig,
+} from "./config.js";
 
-// ============================================================================
-// Core Rate Limiting (re-exported from cache for convenience)
-// ============================================================================
+// Core rate limiting (shim re-exports)
+export type { ThresholdResult as RateLimitResult } from "../../threshold/types.js";
 
-export { rateLimit, type RateLimitResult } from '../services/cache.js';
-
-// ============================================================================
-// Middleware Helpers
-// ============================================================================
-
-export { checkRateLimit, rateLimitHeaders, buildRateLimitKey, getClientIP } from './middleware.js';
-
-export type { RateLimitMiddlewareOptions, RateLimitCheckResult } from './middleware.js';
-
-// ============================================================================
-// Tenant Rate Limiting
-// ============================================================================
-
+// Middleware helpers (shim)
 export {
-	checkTenantRateLimit,
-	categorizeRequest,
-	getTenantLimitInfo,
-	formatLimit
-} from './tenant.js';
+  checkRateLimit,
+  rateLimitHeaders,
+  buildRateLimitKey,
+  getClientIP,
+} from "./middleware.js";
 
-// ============================================================================
-// Abuse Tracking (Graduated Response)
-// ============================================================================
+// RateLimitMiddlewareOptions and RateLimitCheckResult removed —
+// use ThresholdResult (re-exported as RateLimitResult above)
 
+// Tenant rate limiting (still local — not yet in threshold)
 export {
-	getAbuseState,
-	recordViolation,
-	isBanned,
-	getBanRemaining,
-	clearAbuseState
-} from './abuse.js';
+  checkTenantRateLimit,
+  categorizeRequest,
+  getTenantLimitInfo,
+  formatLimit,
+} from "./tenant.js";
 
-export type { AbuseState, ViolationResult } from './abuse.js';
+// Abuse tracking (re-exported from threshold)
+export {
+  getAbuseState,
+  recordViolation,
+  isBanned,
+  getBanRemaining,
+  clearAbuseState,
+} from "../../threshold/abuse.js";
+
+export type { AbuseState, ViolationResult } from "../../threshold/abuse.js";

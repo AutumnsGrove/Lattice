@@ -1,11 +1,11 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  buildRateLimitKey,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/middleware.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
 import { validateEnv, hasAnyEnv } from "$lib/server/env-validation.js";
 import {
   ALLOWED_IMAGE_TYPES,
@@ -142,33 +142,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const db = platform!.env!.DB;
   const images = platform!.env!.IMAGES;
   const kv = platform!.env!.CACHE_KV;
+  const threshold = createThreshold(platform?.env);
 
   // Rate limit uploads (fail-closed to prevent storage abuse)
-  const { result, response } = await checkRateLimit({
-    kv,
-    key: buildRateLimitKey("upload/image", locals.user.id),
-    limit: 50,
-    windowSeconds: 3600, // 1 hour
-    namespace: "upload-ratelimit",
-  });
+  if (threshold) {
+    const { result, response } = await thresholdCheckWithResult(threshold, {
+      key: `upload/image:${locals.user.id}`,
+      limit: 50,
+      windowSeconds: 3600, // 1 hour
+    });
 
-  if (response) {
-    return new Response(
-      JSON.stringify({
-        error: API_ERRORS.RATE_LIMITED.code,
-        error_code: API_ERRORS.RATE_LIMITED.code,
-        message: API_ERRORS.RATE_LIMITED.userMessage,
-        remaining: 0,
-        resetAt: new Date(result.resetAt * 1000).toISOString(),
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          ...rateLimitHeaders(result, 50),
-        },
-      },
-    );
+    if (response) {
+      return response;
+    }
   }
 
   try {
@@ -257,24 +243,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Check if user has too many recent rejected uploads BEFORE running
     // expensive AI scans. This prevents cost abuse from malicious users
     // repeatedly uploading violating content.
-    const rejectedKey = buildRateLimitKey("upload/rejected", locals.user.id);
-    const rejectedCheck = await checkRateLimit({
-      kv,
-      key: rejectedKey,
-      limit: 5, // Max 5 rejected uploads per hour before temporary block
-      windowSeconds: 3600,
-      namespace: "upload-abuse",
-    });
+    const rejectedKey = `upload/rejected:${locals.user.id}`;
+    if (threshold) {
+      const rejectedCheck = await thresholdCheckWithResult(threshold, {
+        key: rejectedKey,
+        limit: 5, // Max 5 rejected uploads per hour before temporary block
+        windowSeconds: 3600,
+      });
 
-    if (rejectedCheck.response) {
-      return json(
-        {
-          error: API_ERRORS.UPLOAD_RESTRICTED.code,
-          error_code: API_ERRORS.UPLOAD_RESTRICTED.code,
-          message: API_ERRORS.UPLOAD_RESTRICTED.userMessage,
-        },
-        { status: 429 },
-      );
+      if (rejectedCheck.response) {
+        return json(
+          {
+            error: API_ERRORS.UPLOAD_RESTRICTED.code,
+            error_code: API_ERRORS.UPLOAD_RESTRICTED.code,
+            message: API_ERRORS.UPLOAD_RESTRICTED.userMessage,
+          },
+          { status: 429 },
+        );
+      }
     }
 
     // ========================================================================
@@ -319,16 +305,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       if (!petalResult.allowed) {
         // Increment rejected uploads counter for abuse detection
         // This is best-effort - don't block the rejection if it fails
-        try {
-          await checkRateLimit({
-            kv,
-            key: rejectedKey,
-            limit: 5,
-            windowSeconds: 3600,
-            namespace: "upload-abuse",
-          });
-        } catch {
-          // Non-critical - continue with rejection
+        if (threshold) {
+          try {
+            await threshold.check({
+              key: rejectedKey,
+              limit: 5,
+              windowSeconds: 3600,
+            });
+          } catch {
+            // Non-critical - continue with rejection
+          }
         }
 
         // Return user-friendly rejection

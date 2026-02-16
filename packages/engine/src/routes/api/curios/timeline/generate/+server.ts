@@ -28,10 +28,8 @@ import {
   TIMELINE_SECRET_KEYS,
 } from "$lib/curios/timeline/secrets.server";
 import { createLumenClient } from "$lib/lumen/index.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */
@@ -120,16 +118,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   // Rate limit generation (admin-only, tenant pays via BYOK)
   // Limit is generous since this is an admin endpoint and costs are borne by the tenant
-  if (platform?.env?.CACHE_KV) {
-    const { response } = await checkRateLimit({
-      kv: platform.env.CACHE_KV,
-      key: buildRateLimitKey("ai/timeline-generate", user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `ai/timeline-generate:${user.id}`,
       limit: 100,
       windowSeconds: 86400, // 24 hours
-      namespace: "ai-ratelimit",
-      failClosed: true,
+      failMode: "closed",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   // Parse request body

@@ -1,11 +1,11 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  buildRateLimitKey,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/middleware.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
 import { validateEnv } from "$lib/server/env-validation.js";
 import {
   isAllowedImageType,
@@ -66,34 +66,16 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
   const db = platform!.env!.DB;
   const images = platform!.env!.IMAGES;
-  const kv = platform!.env!.CACHE_KV;
 
   // Rate limit: 5 uploads per hour per user
-  const { result, response } = await checkRateLimit({
-    kv,
-    key: buildRateLimitKey("avatar/upload", locals.user.id),
-    limit: 5,
-    windowSeconds: 3600,
-    namespace: "avatar-ratelimit",
-  });
-
-  if (response) {
-    return new Response(
-      JSON.stringify({
-        error: API_ERRORS.RATE_LIMITED.code,
-        error_code: API_ERRORS.RATE_LIMITED.code,
-        message: API_ERRORS.RATE_LIMITED.userMessage,
-        remaining: 0,
-        resetAt: new Date(result.resetAt * 1000).toISOString(),
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          ...rateLimitHeaders(result, 5),
-        },
-      },
-    );
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const { result, response } = await thresholdCheckWithResult(threshold, {
+      key: `avatar/upload:${locals.user.id}`,
+      limit: 5,
+      windowSeconds: 3600,
+    });
+    if (response) return response;
   }
 
   try {
@@ -144,7 +126,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       const petalEnv: PetalEnv = {
         AI: platform!.env!.AI,
         DB: db,
-        CACHE_KV: kv,
+        CACHE_KV: platform!.env!.CACHE_KV,
         TOGETHER_API_KEY: platform?.env?.TOGETHER_API_KEY as string | undefined,
       };
 

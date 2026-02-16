@@ -16,10 +16,8 @@ import { getTenantSubscription } from "$lib/server/billing.js";
 import { validateEnv } from "$lib/server/env-validation.js";
 import { createLumenClient } from "$lib/lumen/client.js";
 import type { ScribeMode } from "$lib/lumen/types.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 // Maximum audio file size (25MB as per plan)
@@ -49,16 +47,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit transcriptions (expensive AI operation)
-  if (platform?.env?.CACHE_KV) {
-    const { response } = await checkRateLimit({
-      kv: platform.env.CACHE_KV,
-      key: buildRateLimitKey("ai/transcribe", locals.user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `ai/transcribe:${locals.user.id}`,
       limit: 20,
       windowSeconds: 86400, // 24 hours
-      namespace: "ai-ratelimit",
-      failClosed: true,
+      failMode: "closed",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   // Validate required environment variables

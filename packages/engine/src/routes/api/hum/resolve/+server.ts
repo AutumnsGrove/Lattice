@@ -18,12 +18,12 @@ import {
   logGroveError,
   buildErrorJson,
 } from "$lib/errors/index.js";
+import { createThreshold } from "$lib/threshold/factory.js";
 import {
-  checkRateLimit,
-  buildRateLimitKey,
-  getClientIP,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/middleware.js";
+  thresholdCheckWithResult,
+  thresholdHeaders,
+} from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
 import * as cache from "$lib/server/services/cache.js";
 import {
   detectProvider,
@@ -379,23 +379,22 @@ export const GET: RequestHandler = async ({
   }
 
   const provider = detectProvider(rawUrl);
-  const kv = platform?.env?.CACHE_KV;
+  const threshold = createThreshold(platform?.env);
 
   // Rate limiting (per-IP)
-  if (kv) {
+  if (threshold) {
     const clientIP = getClientIP(request);
-    const { result, response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("hum/resolve", clientIP),
+    const { result, response } = await thresholdCheckWithResult(threshold, {
+      key: `hum/resolve:${clientIP}`,
       limit: 30,
       windowSeconds: 60,
-      namespace: "hum-ratelimit",
     });
 
     if (response) return response;
   }
 
   // Try KV cache first
+  const kv = platform?.env?.CACHE_KV;
   if (kv) {
     try {
       const cacheKey = await buildCacheKey(rawUrl);

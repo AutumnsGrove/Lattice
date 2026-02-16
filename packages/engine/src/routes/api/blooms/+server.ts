@@ -3,10 +3,8 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import { renderMarkdown } from "$lib/utils/markdown.js";
 import { getTenantDb } from "$lib/server/services/database.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import * as cache from "$lib/server/services/cache.js";
 import { moderatePublishedContent } from "$lib/thorn/hooks.js";
 import { updateLastActivity } from "$lib/server/activity-tracking.js";
@@ -171,18 +169,19 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
-  // Rate limit content creation to prevent spam
   const kv = platform?.env?.CACHE_KV;
-  if (kv) {
-    const { response } = await checkRateLimit({
-      kv,
-      key: buildRateLimitKey("posts/create", locals.user.id),
+
+  // Rate limit content creation to prevent spam
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `posts/create:${locals.user.id}`,
       limit: 30,
       windowSeconds: 3600, // 30 posts per hour
-      namespace: "content-ratelimit",
+      failMode: "open",
     });
 
-    if (response) return response;
+    if (denied) return denied;
   }
 
   try {

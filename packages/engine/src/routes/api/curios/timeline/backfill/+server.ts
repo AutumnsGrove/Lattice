@@ -20,10 +20,8 @@ import {
   getTimelineToken,
   TIMELINE_SECRET_KEYS,
 } from "$lib/curios/timeline/secrets.server";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
@@ -80,16 +78,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit backfill (bulk GitHub API operation)
-  if (platform?.env?.CACHE_KV) {
-    const { response } = await checkRateLimit({
-      kv: platform.env.CACHE_KV,
-      key: buildRateLimitKey("ai/timeline-backfill", user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `ai/timeline-backfill:${user.id}`,
       limit: 5,
       windowSeconds: 86400, // 24 hours
-      namespace: "ai-ratelimit",
-      failClosed: true,
+      failMode: "closed",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   const body = (await request.json()) as BackfillRequest;

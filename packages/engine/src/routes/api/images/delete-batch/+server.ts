@@ -1,10 +1,8 @@
 import { json, error } from "@sveltejs/kit";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
@@ -30,15 +28,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit deletions (prevent deletion storms)
-  if (platform?.env?.CACHE_KV) {
-    const { response } = await checkRateLimit({
-      kv: platform.env.CACHE_KV,
-      key: buildRateLimitKey("images/delete-batch", locals.user.id),
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `images/delete-batch:${locals.user.id}`,
       limit: 10,
       windowSeconds: 3600, // 1 hour — separate from single delete (counts per batch call)
-      namespace: "upload-ratelimit",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   // Check for R2 binding

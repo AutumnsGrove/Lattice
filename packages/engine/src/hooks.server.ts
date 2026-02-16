@@ -606,21 +606,25 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (event.url.pathname.startsWith("/api/")) {
     const kv = event.platform?.env?.CACHE_KV;
     if (kv) {
-      const { checkRateLimit, getClientIP, buildRateLimitKey } =
-        await import("$lib/server/rate-limits/middleware.js");
-      const clientIp = getClientIP(event.request);
-      const isWrite = ["POST", "PUT", "PATCH", "DELETE"].includes(
-        event.request.method,
-      );
+      const { createThreshold } = await import("$lib/threshold/factory.js");
+      const { thresholdCheck } =
+        await import("$lib/threshold/adapters/sveltekit.js");
+      const { getClientIP } = await import("$lib/threshold/adapters/worker.js");
+      const threshold = createThreshold(event.platform?.env);
+      if (threshold) {
+        const clientIp = getClientIP(event.request);
+        const isWrite = ["POST", "PUT", "PATCH", "DELETE"].includes(
+          event.request.method,
+        );
 
-      const { response: rateLimitResponse } = await checkRateLimit({
-        kv,
-        key: buildRateLimitKey(isWrite ? "api:write" : "api:read", clientIp),
-        limit: isWrite ? 30 : 120,
-        windowSeconds: 60,
-      });
+        const denied = await thresholdCheck(threshold, {
+          key: `${isWrite ? "api:write" : "api:read"}:${clientIp}`,
+          limit: isWrite ? 30 : 120,
+          windowSeconds: 60,
+        });
 
-      if (rateLimitResponse) return rateLimitResponse;
+        if (denied) return denied;
+      }
     }
   }
 
