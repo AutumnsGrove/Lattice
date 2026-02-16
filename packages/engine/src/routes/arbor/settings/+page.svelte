@@ -236,6 +236,8 @@
         if (result?.url) {
           avatarUrl = result.url;
           toast.success("Profile photo updated!");
+          // Refresh layout data so the nav avatar updates immediately
+          invalidateAll();
         } else {
           toast.error(
             "Upload completed but no photo URL was returned. Please try again.",
@@ -258,6 +260,8 @@
       await apiRequest("/api/settings/avatar", { method: "DELETE" });
       avatarUrl = null;
       toast.success("Profile photo removed");
+      // Refresh layout data so the nav avatar reverts immediately
+      invalidateAll();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to remove photo",

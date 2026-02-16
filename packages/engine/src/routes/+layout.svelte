@@ -77,11 +77,12 @@
 	}
 
 	// Map server user data to HeaderUser shape (picture → avatarUrl)
+	// Prefer custom avatar from site_settings over OAuth provider picture
 	const headerUser = $derived(data.user ? {
 		id: data.user.id,
 		name: data.user.name,
 		email: data.user.email,
-		avatarUrl: data.user.picture
+		avatarUrl: data.siteSettings?.avatar_url || data.user.picture
 	} : null);
 
 	// Theme is handled by themeStore in chrome components
