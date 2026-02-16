@@ -39,10 +39,8 @@ export {
   getClientIP,
 } from "./middleware.js";
 
-export type {
-  RateLimitMiddlewareOptions,
-  RateLimitCheckResult,
-} from "./middleware.js";
+// RateLimitMiddlewareOptions and RateLimitCheckResult removed —
+// use ThresholdResult (re-exported as RateLimitResult above)
 
 // Tenant rate limiting (still local — not yet in threshold)
 export {

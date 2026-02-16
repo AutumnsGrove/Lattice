@@ -438,18 +438,34 @@ export function createMockKV(): KVNamespace & { _store: Map<string, KVEntry> } {
   const kv = {
     _store: store,
 
-    get: vi.fn(async (key: string, options?: { type?: string }) => {
-      const entry = store.get(key);
-      if (!entry) return null;
+    get: vi.fn(
+      async (key: string, typeOrOptions?: string | { type?: string }) => {
+        const entry = store.get(key);
+        if (!entry) return null;
 
-      // Check expiration
-      if (entry.expiresAt && entry.expiresAt < Date.now()) {
-        store.delete(key);
-        return null;
-      }
+        // Check expiration
+        if (entry.expiresAt && entry.expiresAt < Date.now()) {
+          store.delete(key);
+          return null;
+        }
 
-      return entry.value;
-    }),
+        // Handle type parameter (positional string or options object)
+        const type =
+          typeof typeOrOptions === "string"
+            ? typeOrOptions
+            : typeOrOptions?.type;
+
+        if (type === "json") {
+          try {
+            return JSON.parse(entry.value);
+          } catch {
+            return null;
+          }
+        }
+
+        return entry.value;
+      },
+    ),
 
     getWithMetadata: vi.fn(async (key: string) => {
       const entry = store.get(key);
