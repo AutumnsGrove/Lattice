@@ -99,7 +99,7 @@ like that too.
 
 **Email:** autumn@grove.place
 **GitHub:** [AutumnsGrove](https://github.com/AutumnsGrove)
-**Bluesky:** (your handle here)
+**Bluesky:** [@groveplace.bsky.social](https://bsky.app/profile/groveplace.bsky.social)
 
 I usually respond within a day. Tell me what you're working on — even if
 you're not sure what you need yet, I'm happy to take a look.
@@ -107,7 +107,7 @@ you're not sure what you need yet, I'm happy to take a look.
 ---
 
 <!-- NOTE TO SELF:
-- Update Bluesky handle when ready
+- ~~Update Bluesky handle when ready~~ DONE
 - Consider adding 1-2 testimonials once you have clients
 - "Security Auditing" can become its own section when you're ready to tier up
 - LATER: templatize this for other Grove users (don't get distracted now)
