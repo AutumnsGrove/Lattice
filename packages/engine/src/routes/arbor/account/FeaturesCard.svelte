@@ -1,6 +1,6 @@
 <script lang="ts">
   import { GlassCard, Waystone, GroveTerm, GroveSwap } from "$lib/ui";
-  import { BarChart3, Calendar, Sparkles } from "lucide-svelte";
+  import { BarChart3, Calendar, Sparkles } from "$lib/ui/components/icons";
 
   interface Props {
     curiosCount?: number;
@@ -61,7 +61,7 @@
           <Waystone slug="what-are-curios" label="Learn about Curios" />
         </div>
         <p class="feature-description">
-          Special page types like Gallery, Timeline, and Journey.
+          Guestbooks, counters, polls, shrines, ambient sounds, and more — 19 curios that make your site feel alive.
           {#if curiosCount > 0}
             <span class="curio-count">{curiosCount} active</span>
           {/if}

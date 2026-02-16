@@ -89,6 +89,8 @@ export {
   TrendingUp,
   Users,
   Activity,
+  BarChart3,
+  Calendar,
   // Actions
   Megaphone,
   Plus,

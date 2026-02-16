@@ -102,6 +102,7 @@ import {
   Users,
   ShieldUser,
   BarChart3,
+  Calendar,
   // Pricing
   Globe,
   CalendarDays,
@@ -427,6 +428,8 @@ export {
   TrendingUp,
   Users,
   Activity,
+  BarChart3,
+  Calendar,
   // Actions
   Megaphone,
   Plus,

@@ -21,15 +21,15 @@
     {
       id: "hitcounter",
       name: "Hit Counter",
-      description: "Nostalgic page view counter — zero tracking, just a number going up",
+      description: "Nostalgic page view counter with grove-ified styles — frosted glass, brass odometer, LCD, or minimal",
       icon: Hash,
       status: "available",
       href: "/arbor/curios/hitcounter",
       features: [
-        "4 display styles",
-        "No visitor tracking",
-        "Animated digits",
-        "Custom labels"
+        "4 grove-ified styles",
+        "Daily visitor dedup",
+        "Label presets + custom",
+        "Dark mode + animations"
       ]
     },
     {
