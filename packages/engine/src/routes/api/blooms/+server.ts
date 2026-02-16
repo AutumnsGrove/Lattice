@@ -169,6 +169,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     throwGroveError(401, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
   }
 
+  const kv = platform?.env?.CACHE_KV;
+
   // Rate limit content creation to prevent spam
   const threshold = createThreshold(platform?.env);
   if (threshold) {

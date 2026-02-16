@@ -151,11 +151,11 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
   // Rate limiting using Threshold SDK
   const threshold = createThreshold(platform?.env);
   if (threshold) {
-    const { response } = await thresholdCheck(threshold, {
+    const denied = await thresholdCheck(threshold, {
       key: `git/config/write:${tenantId}`,
       ...WRITE_LIMIT,
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   interface UpdateConfigBody {
