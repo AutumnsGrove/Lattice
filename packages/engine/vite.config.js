@@ -15,8 +15,7 @@ export default defineConfig({
   optimizeDeps: {
     // Exclude workers-og from dependency pre-bundling to prevent issues with Web Workers
     // Workers need to be loaded as separate files and Vite's optimization breaks worker functionality
-    // @autumnsgrove/zig-core contains WASM that needs special handling
-    exclude: ["workers-og", "@jsquash/jxl", "@autumnsgrove/zig-core"],
+    exclude: ["workers-og", "@jsquash/jxl"],
   },
   assetsInclude: ["**/*.wasm"],
   server: {

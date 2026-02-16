@@ -72,7 +72,6 @@ flowchart TB
     subgraph libs["Libraries & Tools"]
         VINEYARD["Vineyard<br/>Component docs"]
         TERRARIUM["Terrarium<br/>Showcase"]
-        ZIG["zig-core<br/>WASM validation"]
         MIGRATOR["post-migrator<br/>Data migration"]
     end
 
