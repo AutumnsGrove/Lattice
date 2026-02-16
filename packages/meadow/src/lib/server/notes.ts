@@ -11,6 +11,8 @@ import type { MeadowPost } from "$lib/types/post";
  * Create a new Note in the meadow.
  *
  * @param contentHtml - Sanitized HTML from the NoteEditor (null for plain-text notes)
+ * @param tenantId - The user's tenant ID (required for FK constraint)
+ * @param authorSubdomain - The user's blog subdomain (for attribution)
  */
 export async function createNote(
   db: D1Database,
@@ -19,11 +21,14 @@ export async function createNote(
   body: string,
   tags?: string[],
   contentHtml?: string | null,
+  tenantId?: string,
+  authorSubdomain?: string,
 ): Promise<MeadowPost> {
   const id = crypto.randomUUID();
   const guid = `note:${id}`;
   const now = Math.floor(Date.now() / 1000);
   const trimmedBody = body.trim();
+  const subdomain = authorSubdomain ?? "";
 
   await db
     .prepare(
@@ -32,16 +37,18 @@ export async function createNote(
          author_name, author_subdomain, tags, featured_image,
          published_at, fetched_at, score, reaction_counts, visible,
          post_type, user_id, body)
-      VALUES (?, '', ?, '', '', ?, '',
-              ?, '', ?, NULL,
+      VALUES (?, ?, ?, '', '', ?, '',
+              ?, ?, ?, NULL,
               ?, ?, 0, '{}', 1,
               'note', ?, ?)`,
     )
     .bind(
       id,
+      tenantId ?? "",
       guid,
       contentHtml ?? null,
       authorName,
+      subdomain,
       JSON.stringify(tags || []),
       now,
       now,
@@ -58,7 +65,7 @@ export async function createNote(
     description: "",
     link: "",
     authorName,
-    authorSubdomain: "",
+    authorSubdomain: subdomain,
     tags: tags || [],
     featuredImage: null,
     publishedAt: now,

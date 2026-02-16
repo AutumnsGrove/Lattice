@@ -82,14 +82,58 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       ? sanitizeNoteHtml(payload.content_html)
       : null;
 
-  const post = await createNote(
-    db,
-    locals.user.id,
-    locals.user.name ?? null,
-    body,
-    tags,
-    contentHtml,
-  );
+  // Resolve the user's tenant for FK constraint on meadow_posts.tenant_id
+  let tenantId = "";
+  let authorSubdomain = "";
+  try {
+    const tenant = await db
+      .prepare(
+        "SELECT id, subdomain FROM tenants WHERE user_id = ? AND active = 1 LIMIT 1",
+      )
+      .bind(locals.user.id)
+      .first<{ id: string; subdomain: string }>();
+    if (tenant) {
+      tenantId = tenant.id;
+      authorSubdomain = tenant.subdomain ?? "";
+    }
+  } catch (err) {
+    console.error("[Notes API] Tenant lookup failed:", err);
+  }
 
-  return json({ success: true, post }, { status: 201 });
+  if (!tenantId) {
+    return json(
+      {
+        error: "GROVE-API-041",
+        error_code: "NO_TENANT",
+        error_description:
+          "You need a Grove blog before you can leave notes. Plant one at plant.grove.place!",
+      },
+      { status: 403 },
+    );
+  }
+
+  try {
+    const post = await createNote(
+      db,
+      locals.user.id,
+      locals.user.name ?? null,
+      body,
+      tags,
+      contentHtml,
+      tenantId,
+      authorSubdomain,
+    );
+
+    return json({ success: true, post }, { status: 201 });
+  } catch (err) {
+    console.error("[Notes API] Create failed:", err);
+    return json(
+      {
+        error: "GROVE-API-080",
+        error_code: "INTERNAL_ERROR",
+        error_description: "Failed to create note. Please try again.",
+      },
+      { status: 500 },
+    );
+  }
 };
