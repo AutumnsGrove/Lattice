@@ -86,195 +86,354 @@ they return. They need a home base. This is it.
 
 ---
 
-## Walking Through...
+## Direction Change: Da Vinci's Workshop
 
-I enter the grove. I walk past the Meadow where others gather.
-I check on my tree — my blog, my space, my home.
+Roost didn't land. Birds are the wrong metaphor for the
+CONTAINER. The animals are what's inside — the Raven, the
+Osprey — but the space itself should evoke something different.
 
-But today I'm not writing. Today I'm working.
+New direction: **the machinery of Da Vinci's workshop.**
+Medieval. Gears and parchment. Candlelight on brass instruments.
+The inventor's table where mechanisms are designed, where
+blueprints become reality.
 
-I walk to the edge of the grove, where the forest meets open
-sky. There's a structure here — not quite a cabin, not quite
-a tower. Something built for a purpose.
+Not a nest. A **workshop**. A place of craft and invention.
 
-The Raven is perched outside, preening. It just got back from
-investigating a client's Django app. The Osprey is inside,
-turning the case file into a proposal.
+```
+                        🕯️           🕯️
+            ┌─────────────────────────────┐
+            │  ⚙️                    📜   │
+            │     ┌─────────────┐        │
+            │     │  BLUEPRINTS │  📐    │
+            │     │  & SCHEMAS  │        │
+            │     └─────────────┘        │
+            │                            │
+            │  🔧 Tools    📋 Ledgers    │
+            │  ⚖️ Scales    🗝️ Keys      │
+            │  🧭 Compass   📏 Calipers  │
+            │                            │
+            │     The Wayfinder's        │
+            │       Workshop             │
+            └─────────────────────────────┘
+                  Stone walls. Oak beams.
+                  Candlelight on brass.
+```
 
-I step inside. My tools are organized on hooks. My documents
-are filed. The runbook is pinned to the wall. There's a desk
-where I do my planning.
+---
 
-This is where I prepare before flying out. Where the birds
-come home. Where the catches are sorted and the next hunt
-is planned.
+## Walking Through... (Take Two)
 
-What is this place?
+I enter the grove. I walk past the Meadow, past the trees,
+past everything familiar.
+
+At the edge of the forest, where the old oaks lean apart,
+there's a stone building half-hidden by ivy. Older than the
+grove itself. A heavy oak door, iron-banded, slightly ajar.
+
+I push it open. Candlelight. The smell of parchment and
+linseed oil. A long workbench runs the length of the room,
+covered in documents — agreements, proposals, case files.
+Brass instruments gleam in the light: calipers for measuring
+scope, scales for weighing estimates.
+
+On the wall, a mechanism — gears interlocking. The pipeline.
+Each gear turns the next: Inquiry drives Assessment, which
+drives the Audit, which drives the Quote. Clockwork.
+
+In the corner, leather-bound volumes. The Codex of past
+engagements. The Grimoire of skills. The Ledger of hours.
+
+This isn't a nest. It's a WORKSHOP. A place where the
+Wayfinder crafts the instruments of her trade. Medieval in
+its bones. Da Vinci in its ambition. Every tool designed
+with precision, every document written with care.
+
+The animals come and go — the Raven with its case files,
+the Osprey with its estimates — but the WORKSHOP endures.
+It was here before them. It will outlast any single engagement.
+
+What is this place called?
 
 ---
 
 ## Candidates
 
-### 1. Roost
+### 1. Codex
 
-**The home base where the birds return.**
+**The master's collected knowledge, bound and organized.**
 
-- In nature: Where birds rest, sleep, and shelter between flights.
-  Communal — multiple birds share a roost. Protected. High up.
-- Why it fits: The Raven and Osprey are birds. They hunt (audit,
-  estimate), they return to the Roost with their catches (case
-  files, proposals). It's the home base.
-- The vibe: Cozy, warm, competent. Like a well-organized workshop
-  with birds perched on the rafters.
-- Tagline test: "Roost is where the birds come home."
-- Potential issues: Could sound sleepy? But "roosting" also implies
-  watchfulness — birds roost in high places to keep watch.
+- In history: Da Vinci's Codex Atlanticus, Codex Leicester,
+  Codex Arundel — his most famous legacy. Each one a bound
+  collection of notes, sketches, plans, and inventions. The
+  organized knowledge of the master.
+- **The etymology:** Latin _cōdex_ literally means "tree trunk"
+  or "block of wood." Wood → writing tablet → bound book →
+  collected knowledge. The word itself bridges TREE and
+  MANUSCRIPT. It was born in the grove.
+- Why it fits: Your freelance toolkit IS a codex — a bound
+  collection of professional knowledge. The runbook, the
+  agreement, the cheat sheet, the proposal template. Every
+  skill, every document, every pipeline step. Organized.
+  Precious. Referenced constantly.
+- The vibe: Scholarly, warm, weighty. Something you'd find
+  on a shelf in a candlelit workshop, spine cracked from use.
+- Tagline test: "Codex — the collected works."
+- `AutumnsGrove/Codex` — clean, strong.
+- Potential issues: Common in gaming/tech. But in Grove's
+  ecosystem, where every name has a nature etymology, the
+  tree-trunk origin recontextualizes it completely.
 
-### 2. Mews
+### 2. Bottega
 
-**Where trained hunting birds are kept between hunts.**
+**The Italian Renaissance workshop.**
 
-- In nature: In falconry, the mews is the building where hawks
-  and falcons live between hunts. They're fed, cared for, and
-  prepared for the next flight. The word comes from "mew" meaning
-  to molt — a place of transformation and renewal.
-- Why it fits: THE most precise metaphor. The Raven and Osprey
-  are trained hunting birds. The Mews is where they're kept
-  between client engagements. Historical, specific, perfect.
-- The vibe: Sophisticated, professional, niche knowledge.
-  Falconry meets freelancing.
-- Tagline test: "The Mews — where the hunting birds wait."
-- Potential issues: Might be too obscure. Also associated with
-  London real estate (mews houses). Autumn might not know the
-  word, which could make it feel disconnected.
+- In history: A _bottega_ was the workshop of a master artist
+  in Renaissance Italy. Da Vinci trained in Verrocchio's bottega
+  in Florence. Apprentices learned, tools were shared, and
+  masterworks were born from a single room. The word itself
+  means "shop" or "workshop" — the place where the craft lives.
+- Why it fits: This IS a workshop. Not a library, not a vault —
+  a working space where things are made. Proposals are drafted.
+  Estimates are calculated. Skills are honed. The bottega is
+  alive with work.
+- The vibe: Warm, Italian, artisanal. Sawdust and linseed oil.
+  The master at her bench. Inviting without being precious.
+- Tagline test: "Bottega — where the craft lives."
+- `AutumnsGrove/Bottega` — distinctive, memorable.
+- Potential issues: Italian word — might need pronunciation
+  help (boh-TAY-gah). Also: Bottega Veneta (fashion brand)
+  might create associations. But the Renaissance meaning is
+  stronger and older.
 
-### 3. Bower
+### 3. Forge
 
-**A carefully constructed space, curated with intention.**
+**Where raw material becomes something useful.**
 
-- In nature: Bowerbirds build elaborate decorated structures to
-  attract mates — the most architecturally ambitious birds in
-  nature. Also: a sheltered garden alcove, or a lady's private
-  chamber in medieval times.
-- Why it fits: The freelance workbench IS a carefully curated
-  collection of tools, documents, and workflows designed to
-  attract clients and demonstrate professionalism. Built with
-  care. Decorated with intention.
-- The vibe: Artistic, intentional, quietly impressive.
-- Tagline test: "Bower is where you build something worth seeing."
-- Potential issues: The bowerbird connection is about attracting
-  mates, which could feel weird for a professional context.
-  Also "bower" can feel overly gentle for security work.
+- In history: The blacksmith's forge — fire, anvil, hammer.
+  Where ore becomes blade. Where raw findings become polished
+  proposals. Medieval, universal, elemental.
+- Why it fits: The Raven brings raw findings. The Osprey forges
+  them into proposals. The documents are forged — shaped by
+  heat and precision into something clients can hold. The forge
+  is transformation.
+- The vibe: Strong, elemental, warm (literally — fire). Simple.
+  One syllable.
+- Tagline test: "Forge — shape the work."
+- `AutumnsGrove/Forge` — clean, punchy.
+- Potential issues: VERY common in tech (GitHub had Forge,
+  Atlassian has Forge, SourceForge...). Might feel generic.
+  Also leans aggressive — hammers and fire might clash with
+  Grove's gentle nature aesthetic.
 
-### 4. Aerie
+### 4. Grimoire
 
-**A raptor's high nest.**
+**A book of invocations.**
 
-- In nature: The nest of a bird of prey, typically on a cliff
-  edge or tall tree. Eagles, hawks, osprey all build aeries.
-  A vantage point. Commanding. Safe.
-- Why it fits: The Osprey literally builds aeries. The Raven
-  nests high. It's a bird-of-prey specific word that captures
-  "home base with a view." Professional, elevated.
-- The vibe: Strong, elevated, clear-sighted. Like standing
-  on a cliff edge looking out at the landscape of opportunity.
-- Tagline test: "The Aerie — your vantage point above the work."
-- Potential issues: Might feel too serious/corporate for "cute."
-  Also pronounced "AIR-ee" or "EER-ee" — potential confusion.
+- In history: A grimoire is a medieval textbook of magic —
+  instructions for invoking spirits, crafting talismans, and
+  performing rituals. Each entry is a detailed procedure.
+  Follow the steps exactly. The invocation works.
+- Why it fits: Your skills ARE invocations. `/raven-investigate`
+  — invoke the Raven. `/osprey-appraise` — invoke the Osprey.
+  The runbook is literally a step-by-step ritual. The cheat
+  sheet is a protection spell. The proposal template is a
+  summoning circle for client trust. You open the grimoire,
+  follow the procedure, and the magic happens.
+- The vibe: Mysterious, powerful, a little witchy. Candlelight
+  on old pages. Handwritten marginalia. Dog-eared from use.
+- Tagline test: "Grimoire — invoke the craft."
+- `AutumnsGrove/Grimoire` — atmospheric, memorable.
+- Potential issues: "Magic" framing might undercut the
+  professionalism. Also slightly dark/occult — though Grove
+  already has Thorn, Shade, and animal invocations, so the
+  ecosystem can hold it. Three syllables (GRIM-wahr).
 
-### 5. Rookery
+### 5. Almanac
 
-**A colony of crows/ravens.**
+**The practitioner's reference for all seasons.**
 
-- In nature: A rookery is a nesting colony of rooks (corvids,
-  like ravens) or other social birds. A bustling, organized,
-  noisy base of operations.
-- Why it fits: Directly connects to the Raven. A rookery is
-  where ravens gather, plan, and prepare. It's communal and
-  busy — fitting for a workspace with multiple tools and docs.
-- The vibe: Atmospheric, slightly mysterious, Victorian-gothic.
-- Tagline test: "The Rookery — where the ravens gather."
-- Potential issues: "Rookery" historically also means a slum
-  or crowded tenement (Victorian England). Slightly dark connotation.
+- In history: Medieval almanacs were indispensable reference
+  books — astronomical tables, planting calendars, weather
+  predictions, medical advice. Farmers, sailors, and merchants
+  carried them everywhere. A practical compendium for
+  navigating the year's work.
+- Why it fits: Your toolkit IS an almanac — a reference for
+  every season of client work. When to quote (the Osprey
+  tables). When to audit (the Raven procedures). What to
+  charge (the pricing tables). How to handle scope creep
+  (the defense scripts). Consult the almanac before every
+  engagement. It has the answer.
+- The vibe: Practical, worn, beloved. Tucked into a coat
+  pocket. Referenced so often the spine is soft. Annotated
+  in the margins with personal notes.
+- Tagline test: "Almanac — for every season of work."
+- `AutumnsGrove/Almanac` — warm, familiar.
+- Potential issues: Might feel too "book" and not enough
+  "workshop." An almanac is something you READ. A workshop
+  is something you WORK IN. But the freelance toolkit is
+  honestly more reference-book than workshop — you consult
+  it, follow its procedures, use its templates.
 
 ---
 
 ## The Walk Continues...
 
-I'm standing at the edge of the grove. The Raven caws from
-the rafters. The Osprey shifts on its perch, eyes on the river.
+I'm standing in the workshop. Candlelight flickers on the
+walls. The gears of the pipeline mechanism turn slowly.
 
-This place is practical. It's not fancy. It's organized.
-Everything has its hook, its shelf, its purpose.
+On the workbench: a leather-bound volume. Heavy. The cover
+is embossed. Inside: sketches and procedures. The Raven's
+investigation protocol. The Osprey's estimation tables.
+The scope cheat sheet. The client agreement. Everything
+the Wayfinder needs, bound together.
 
-It's a ROOST.
+I pick it up. It's warm in my hands. Well-used. Annotated.
+Some pages are worn thin from reference. The pricing tables
+have pencil marks in the margins — adjustments from past
+engagements. The red flags section has new entries added in
+different inks, from different seasons.
 
-Not an aerie — that's too dramatic.
-Not a mews — that's too obscure.
-Not a bower — that's too artistic.
-Not a rookery — that's too dark.
+This isn't just a toolkit. It's a living document. A
+practitioner's manual that grows with experience. Every
+engagement teaches something new, and the new knowledge
+gets added.
 
-A roost is simple. Warm. Functional. One syllable.
-The birds come home to the roost.
-You come home to the roost between gigs.
-Your tools live in the roost.
+What do you call a bound collection of a master's knowledge,
+grown over years of practice, rooted in the oldest wood?
+
+---
+
+## The Decision
+
+**Codex** stands above the rest.
+
+Here's why:
+
+**The etymology is too perfect to ignore.** Latin _cōdex_
+means "tree trunk." The word itself grew from wood. It was
+born in the grove — literally. A codex is what happens when
+a tree becomes knowledge. Bark becomes page. Wood becomes
+wisdom. The most Grove word imaginable, and it predates
+Grove by two thousand years.
+
+**The Da Vinci connection is direct.** When people hear
+"Codex," many think of Da Vinci's notebooks. The Codex
+Atlanticus. The Codex Leicester. Bound collections of an
+inventor's sketches, calculations, and procedures. That's
+EXACTLY what this repo is — your sketches (skills), your
+calculations (Osprey), your procedures (runbook).
+
+**It captures what the repo actually IS.** Not a workshop
+(you don't build things here — you build in CLIENT repos).
+Not a forge (nothing is smelted). It's a reference. A bound
+collection. A codex you consult before every engagement and
+annotate after every one.
+
+**It sounds right.**
+
+- "Check the Codex." ✓
+- "I added a new template to the Codex." ✓
+- "The Codex has the pricing tables." ✓
+- "Open the Codex and run the Raven protocol." ✓
 
 ```
-   🐦‍⬛  🦅
-  ┌──────────────┐
-  │   THE ROOST  │
-  │              │
-  │  🗂️ Docs     │  ← Agreement, Proposal, Cheat Sheet
-  │  📋 Runbook  │  ← The complete pipeline
-  │  🔍 Raven    │  ← Security audit skill
-  │  🎯 Osprey   │  ← Estimation skill
-  │  📁 Quotes   │  ← Client archives
-  │              │
-  └──────────────┘
-     At the edge of the grove,
-     facing outward.
+            🕯️                        🕯️
+       ┌────────────────────────────────┐
+       │                                │
+       │   ╔══════════════════════╗     │
+       │   ║      C O D E X      ║     │
+       │   ╠══════════════════════╣     │
+       │   ║                      ║     │
+       │   ║  📜 Services Agreement║     │
+       │   ║  📜 Proposal Template ║     │
+       │   ║  📜 Scope Cheat Sheet ║     │
+       │   ║  📜 Engagement Runbook║     │
+       │   ║  ──────────────────  ║     │
+       │   ║  🔮 /raven-investigate║     │
+       │   ║  🔮 /osprey-appraise  ║     │
+       │   ║  ──────────────────  ║     │
+       │   ║  📁 Client Archives   ║     │
+       │   ║  📁 Quote History     ║     │
+       │   ║                      ║     │
+       │   ╚══════════════════════╝     │
+       │                                │
+       │      Leather-bound.            │
+       │      Tree-trunk origin.        │
+       │      Annotated in the margins. │
+       │                                │
+       └────────────────────────────────┘
+         cōdex (Latin): "tree trunk"
+         → wooden tablet → bound book
+         → collected knowledge
 ```
 
 ---
 
-## The Name: Roost
+## The Name: Codex
 
-**Where the birds come home.** · `AutumnsGrove/Roost`
+**The collected works.** · `AutumnsGrove/Codex`
 
-At the edge of the grove, where the forest meets open sky,
-there's a sturdy structure with wide eaves and high perches.
-The Raven returns here after investigating unfamiliar codebases,
-dropping its case file on the desk. The Osprey brings the catch
-— client proposals, priced with precision. Between engagements,
-the Wayfinder sits here, sharpening tools, organizing documents,
-preparing for the next flight.
+In Latin, _cōdex_ means "tree trunk" — the block of wood
+from which writing tablets were carved. Wood became page.
+Page became book. Book became the master's collected knowledge.
+Two thousand years later, the word still means what it always
+meant: everything the practitioner knows, bound and organized.
 
-The Roost isn't part of the grove's infrastructure. It faces
-outward. It's where you do the work that happens beyond your
-own forest — freelance security consulting, code audits,
-client engagements. Everything you need is here: the skills,
-the documents, the pipeline, the archives.
+Da Vinci kept codices. His sketches, calculations, procedures,
+inventions — all bound together, annotated in the margins,
+referenced constantly. The Codex Atlanticus alone spans forty
+years of work. Every engagement taught him something new. The
+new knowledge went into the codex.
 
-_The birds always come home._
+Codex is the Wayfinder's bound collection of freelance
+knowledge. The Raven's investigation protocols. The Osprey's
+estimation tables. The services agreement. The proposal
+template. The scope cheat sheet. The engagement runbook.
+Client archives. Quote history. Everything needed to run a
+security consulting practice, organized and precious.
+
+You don't work IN the codex. You consult it before every
+engagement and annotate it after every one. It grows with
+experience. Some pages are worn thin from reference. The
+pricing tables have pencil marks in the margins. The red
+flags section gains new entries in different inks, from
+different seasons.
+
+It was born from a tree. It lives in the grove.
+
+_Open the Codex. The knowledge is there._
 
 ---
 
 ## Tagline Options
 
-1. "Where the birds come home."
-2. "Sharpen your talons."
-3. "The Wayfinder's freelance toolkit."
-4. "Prepare. Fly. Return."
-5. "Home base for the hunt."
+1. "The collected works."
+2. "Open the Codex."
+3. "Born from wood. Bound in knowledge."
+4. "Every engagement, annotated."
+5. "The practitioner's manual."
 
-My pick: **"Where the birds come home."**
+My pick: **"The collected works."**
+
+---
+
+## Runners Up
+
+| Name         | Why It Almost Worked                   | Why Codex Wins                          |
+| ------------ | -------------------------------------- | --------------------------------------- |
+| **Bottega**  | Warm, Italian, "where the craft lives" | This is more reference than workshop    |
+| **Grimoire** | Skills as invocations — very fun       | Too dark/occult for the tone            |
+| **Almanac**  | Practical reference, seasonal, beloved | Codex has the tree etymology + Da Vinci |
+| **Forge**    | Transformation, fire, medieval         | Too common in tech, too aggressive      |
 
 ---
 
 ## Conflict Check
 
-- "Roost" does not appear as an existing Grove service name
+- "Codex" does not appear as an existing Grove service name
 - Does not conflict with any existing concept
-- One syllable, clean, memorable
-- `AutumnsGrove/Roost` — clean GitHub repo name
-- The word "roost" connects naturally to Raven + Osprey
+- Two syllables (COH-dex), clean pronunciation
+- `AutumnsGrove/Codex` — strong, distinctive repo name
+- The Latin "tree trunk" etymology places it firmly in the grove
+- Da Vinci's codices give it the medieval workshop energy
+- Common enough to be recognizable, specific enough to be meaningful
