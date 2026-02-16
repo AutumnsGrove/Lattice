@@ -4,7 +4,6 @@
   Uses the same PostCard list pattern as the feed.
 -->
 <script lang="ts">
-  import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
   import PostCard from '$lib/components/PostCard.svelte';
   import SEO from '$lib/components/SEO.svelte';
   import type { MeadowPost } from '$lib/types/post';

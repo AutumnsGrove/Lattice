@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
   import { formatRelativeTime } from '$lib/utils/time';
   import ReactionPicker from '$lib/components/ReactionPicker.svelte';
@@ -42,7 +43,7 @@
 
   function requireAuth(): boolean {
     if (loggedIn) return true;
-    window.location.href = buildLoginUrl(`/feed/${post.id}`);
+    window.location.href = buildLoginUrl(`${page.url.origin}/feed/${post.id}`);
     return false;
   }
 

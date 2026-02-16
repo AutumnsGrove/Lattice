@@ -6,8 +6,13 @@
  * a login link that redirects to a malicious site after auth.
  */
 
-/** Default redirect when none specified or validation fails */
-export const DEFAULT_REDIRECT = "https://plant.grove.place/auth/callback";
+/**
+ * Default redirect when none specified or validation fails.
+ * Goes to the main landing page rather than Plant's onboarding flow,
+ * so existing users don't get funneled into account creation again.
+ * New users signing up via Plant will have an explicit redirect set.
+ */
+export const DEFAULT_REDIRECT = "https://grove.place";
 
 /** Allowed redirect patterns */
 const ALLOWED_PATTERNS = [

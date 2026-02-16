@@ -6,7 +6,7 @@
 	 * Supports Google OAuth, passkey sign-in, and email magic links.
 	 *
 	 * Reads ?redirect=URL to know where to send the user after auth.
-	 * Defaults to plant.grove.place/auth/callback for new signups.
+	 * Defaults to grove.place when no redirect is specified.
 	 */
 
 	import { page } from '$app/state';

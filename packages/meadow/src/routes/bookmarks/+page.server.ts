@@ -7,9 +7,9 @@ import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
 import type { PageServerLoad } from "./$types";
 import { getFeed } from "$lib/server/feed";
 
-export const load: PageServerLoad = async ({ platform, locals }) => {
+export const load: PageServerLoad = async ({ url, platform, locals }) => {
   if (!locals.user) {
-    redirect(302, buildLoginUrl("/bookmarks"));
+    redirect(302, buildLoginUrl(`${url.origin}/bookmarks`));
   }
 
   const db = platform?.env?.DB;

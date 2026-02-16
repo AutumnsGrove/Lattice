@@ -183,7 +183,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     try {
       existingOnboarding = (await db
         .prepare(
-          "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE email = ?",
+          "SELECT id, tenant_id, profile_completed_at FROM user_onboarding WHERE LOWER(email) = ?",
         )
         .bind(user.email.toLowerCase())
         .first()) as {
@@ -219,7 +219,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       // Check the users table (links groveauth_id/email to tenant_id)
       const existingUser = (await db
         .prepare(
-          "SELECT tenant_id FROM users WHERE email = ? AND tenant_id IS NOT NULL",
+          "SELECT tenant_id FROM users WHERE LOWER(email) = ? AND tenant_id IS NOT NULL",
         )
         .bind(user.email.toLowerCase())
         .first()) as { tenant_id: string } | null;
@@ -243,7 +243,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       if (!existingUser) {
         const tenant = (await db
           .prepare(
-            "SELECT subdomain FROM tenants WHERE email = ? AND active = 1",
+            "SELECT subdomain FROM tenants WHERE LOWER(email) = ? AND active = 1",
           )
           .bind(user.email.toLowerCase())
           .first()) as { subdomain: string } | null;

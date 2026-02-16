@@ -18,7 +18,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
   // drops the ?redirect= query parameter from the callbackURL.
   const redirectParam = url.searchParams.get("redirect");
   const redirectCookie = cookies.get("grove_auth_redirect");
-  const redirectTo = validateRedirectUrl(redirectParam || redirectCookie);
+  // The cookie value is stored with encodeURIComponent() by the login page,
+  // so we must decode it before validation (e.g. "%2Ffeed" → "/feed").
+  const decodedCookie = redirectCookie
+    ? decodeURIComponent(redirectCookie)
+    : undefined;
+  const redirectTo = validateRedirectUrl(redirectParam || decodedCookie);
 
   // Clean up the fallback cookie now that we've read it
   if (redirectCookie) {

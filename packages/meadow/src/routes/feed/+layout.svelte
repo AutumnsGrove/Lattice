@@ -2,6 +2,7 @@
   Feed Layout — Header with auth nav + Footer
 -->
 <script lang="ts">
+  import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
   import { Trees, Bookmark, Rss } from 'lucide-svelte';
@@ -39,7 +40,7 @@
   {navItems}
   brandTitle="Meadow"
   showSignIn={true}
-  signInHref={buildLoginUrl('/feed')}
+  signInHref={buildLoginUrl(`${page.url.origin}/feed`)}
   user={headerUser}
   {userHref}
 />

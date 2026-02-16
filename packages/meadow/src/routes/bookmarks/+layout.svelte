@@ -2,6 +2,7 @@
   Bookmarks Layout — Reuses the same chrome as feed
 -->
 <script lang="ts">
+  import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
   import { Trees, Bookmark } from 'lucide-svelte';
@@ -25,7 +26,7 @@
   {navItems}
   brandTitle="Meadow"
   showSignIn={true}
-  signInHref={buildLoginUrl('/bookmarks')}
+  signInHref={buildLoginUrl(`${page.url.origin}/bookmarks`)}
   user={headerUser}
 />
 
