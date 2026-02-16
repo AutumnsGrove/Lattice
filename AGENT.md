@@ -910,6 +910,18 @@ Grove's development workflow is organized as a forest ecosystem. Each animal has
 
 - **When designing Grove UI with glassmorphism** → Use skill: `chameleon-adapt`
 
+**Investigators (Cross-Codebase Security):**
+
+- **When auditing ANY codebase's security posture** → Use skill: `raven-investigate`
+- **When offering security review services** → Use skill: `raven-investigate`
+- **When needing a rapid, parallel security assessment** → Use skill: `raven-investigate`
+
+**Appraisers (Business & Estimation):**
+
+- **When quoting remediation or repair work** → Use skill: `osprey-appraise`
+- **When producing a client proposal from audit findings** → Use skill: `osprey-appraise`
+- **When estimating project scope and timeline** → Use skill: `osprey-appraise`
+
 **Scouts (Exploration):**
 
 - **When exploring unfamiliar codebases** → Use skill: `bloodhound-scout`
@@ -1006,6 +1018,8 @@ Skills are invoked using the Skill tool. When a situation matches a skill trigge
 | `grove-issues`              | Parse brain dumps into structured GitHub issues        |
 | `npm-publish`               | npm package publishing workflow                        |
 | `turtle-harden`             | Security hardening, defense in depth, secure by design |
+| `raven-investigate`         | Cross-codebase security audit with parallel fan-out    |
+| `osprey-appraise`           | Project estimation, quoting, and client proposals      |
 | `research-strategy`         | Systematic research                                    |
 
 ---
