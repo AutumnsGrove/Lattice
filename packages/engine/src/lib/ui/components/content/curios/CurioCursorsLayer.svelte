@@ -35,8 +35,8 @@
 			.then((d) => {
 				if (d?.config) config = d.config;
 			})
-			.catch(() => {
-				// Silent fail — cursors are cosmetic
+			.catch((err) => {
+				console.warn('[CurioCursorsLayer] Failed to load config:', err);
 			});
 	});
 

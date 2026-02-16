@@ -113,12 +113,12 @@ export const GET: RequestHandler = async ({
       throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
     }
     // Legacy session exists and within migration window - allow through
-    console.log(
+    console.warn(
       "[Auth Callback] Using legacy session (migration period), redirecting to:",
       returnTo,
     );
   } else {
-    console.log(
+    console.warn(
       "[Auth Callback] Better Auth session found, redirecting to:",
       returnTo,
     );

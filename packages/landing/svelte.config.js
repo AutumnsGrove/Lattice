@@ -11,6 +11,15 @@ const config = {
         exclude: ["<all>"],
       },
     }),
+    csrf: {
+      checkOrigin: true,
+      trustedOrigins: [
+        "https://grove.place",
+        "https://*.grove.place",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+      ],
+    },
     prerender: {
       handleMissingId: "warn",
       handleHttpError: ({ status, path, referrer, referenceType }) => {

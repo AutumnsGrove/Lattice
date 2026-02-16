@@ -111,40 +111,55 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     // Check export size BEFORE rate limit (don't consume quota for oversized exports)
     // Tenants with >5000 items should contact support for bulk exports
     const MAX_EXPORT_ITEMS = 5000;
-    if (exportType === "full" || exportType === "posts") {
-      const postCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
-      )
-        .bind(tenantId)
-        .first<{ count: number }>();
+    const needsPosts = exportType === "full" || exportType === "posts";
+    const needsMedia = exportType === "full" || exportType === "media";
+    const needsPages = exportType === "full" || exportType === "pages";
 
-      if (postCount && postCount.count > MAX_EXPORT_ITEMS) {
-        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
-      }
+    // Parallelize count queries — each has individual error handling
+    const [postCount, mediaCount, pageCount] = await Promise.all([
+      needsPosts
+        ? platform.env.DB.prepare(
+            "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?",
+          )
+            .bind(tenantId)
+            .first<{ count: number }>()
+            .catch((err) => {
+              console.warn("[Export] Post count failed:", err);
+              return null;
+            })
+        : Promise.resolve(null),
+      needsMedia
+        ? platform.env.DB.prepare(
+            "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?",
+          )
+            .bind(tenantId)
+            .first<{ count: number }>()
+            .catch((err) => {
+              console.warn("[Export] Media count failed:", err);
+              return null;
+            })
+        : Promise.resolve(null),
+      needsPages
+        ? platform.env.DB.prepare(
+            "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?",
+          )
+            .bind(tenantId)
+            .first<{ count: number }>()
+            .catch((err) => {
+              console.warn("[Export] Page count failed:", err);
+              return null;
+            })
+        : Promise.resolve(null),
+    ]);
+
+    if (postCount && postCount.count > MAX_EXPORT_ITEMS) {
+      throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
     }
-
-    if (exportType === "full" || exportType === "media") {
-      const mediaCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM media WHERE tenant_id = ?",
-      )
-        .bind(tenantId)
-        .first<{ count: number }>();
-
-      if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {
-        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
-      }
+    if (mediaCount && mediaCount.count > MAX_EXPORT_ITEMS) {
+      throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
     }
-
-    if (exportType === "full" || exportType === "pages") {
-      const pageCount = await platform.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?",
-      )
-        .bind(tenantId)
-        .first<{ count: number }>();
-
-      if (pageCount && pageCount.count > MAX_EXPORT_ITEMS) {
-        throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
-      }
+    if (pageCount && pageCount.count > MAX_EXPORT_ITEMS) {
+      throwGroveError(413, API_ERRORS.EXPORT_TOO_LARGE, "API");
     }
 
     // Check rate limit after size validation (so oversized exports don't consume quota)

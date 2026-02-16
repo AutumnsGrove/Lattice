@@ -38,7 +38,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioPoll] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

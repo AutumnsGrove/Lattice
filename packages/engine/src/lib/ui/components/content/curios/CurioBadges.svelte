@@ -34,7 +34,8 @@
 				badges = d.badges || [];
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioBadges] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

@@ -39,7 +39,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioBookmarkshelf] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

@@ -37,8 +37,8 @@
 			.then((d) => {
 				if (d?.config?.enabled) config = d.config;
 			})
-			.catch(() => {
-				// Silent fail — ambient is cosmetic
+			.catch((err) => {
+				console.warn('[CurioAmbientLayer] Failed to load config:', err);
 			});
 	});
 

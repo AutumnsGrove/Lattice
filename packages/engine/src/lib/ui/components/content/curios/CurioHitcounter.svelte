@@ -37,7 +37,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioHitcounter] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

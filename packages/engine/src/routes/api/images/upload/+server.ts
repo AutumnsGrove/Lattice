@@ -17,7 +17,12 @@ import {
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
 import { canUploadImages } from "$lib/server/upload-gate.js";
-import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
+import {
+  API_ERRORS,
+  buildErrorJson,
+  logGroveError,
+  throwGroveError,
+} from "$lib/errors";
 import { updateLastActivity } from "$lib/server/activity-tracking.js";
 
 /** Maximum file size (10MB) */
@@ -101,14 +106,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     : null;
 
   if (!flagsEnv) {
-    return json(
-      {
-        error: API_ERRORS.FEATURE_DISABLED.code,
-        error_code: API_ERRORS.FEATURE_DISABLED.code,
-        message: API_ERRORS.FEATURE_DISABLED.userMessage,
-      },
-      { status: 403 },
-    );
+    return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
   }
 
   const uploadGate = await canUploadImages(
@@ -117,14 +115,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     flagsEnv,
   );
   if (!uploadGate.allowed) {
-    return json(
-      {
-        error: API_ERRORS.FEATURE_DISABLED.code,
-        error_code: API_ERRORS.FEATURE_DISABLED.code,
-        message: API_ERRORS.FEATURE_DISABLED.userMessage,
-      },
-      { status: 403 },
-    );
+    return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
   }
 
   // Validate required environment variables (fail-fast with actionable errors)
@@ -254,14 +245,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       });
 
       if (rejectedCheck.response) {
-        return json(
-          {
-            error: API_ERRORS.UPLOAD_RESTRICTED.code,
-            error_code: API_ERRORS.UPLOAD_RESTRICTED.code,
-            message: API_ERRORS.UPLOAD_RESTRICTED.userMessage,
-          },
-          { status: 429 },
-        );
+        return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), {
+          status: 429,
+        });
       }
     }
 
@@ -323,10 +309,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         // IMPORTANT: Never reveal CSAM detection reason
         return json(
           {
-            error: API_ERRORS.INVALID_FILE.code,
-            error_code: API_ERRORS.INVALID_FILE.code,
-            message: petalResult.message,
-            // Include processing time for debugging (not the reason)
+            ...buildErrorJson(API_ERRORS.INVALID_FILE),
+            error_description: petalResult.message,
             processingTimeMs: petalResult.processingTimeMs,
           },
           { status: 400 },
@@ -355,7 +339,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
         }
       } catch (dbError) {
         // Table might not exist yet, continue with upload
-        console.log("Duplicate check skipped:", (dbError as Error).message);
+        console.warn(
+          "[ImageUpload] Duplicate check skipped:",
+          (dbError as Error).message,
+        );
       }
     }
 
@@ -453,7 +440,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
           .run();
       } catch (dbError) {
         // Non-critical, continue
-        console.log("Hash storage skipped:", (dbError as Error).message);
+        console.warn(
+          "[ImageUpload] Hash storage skipped:",
+          (dbError as Error).message,
+        );
       }
     }
 

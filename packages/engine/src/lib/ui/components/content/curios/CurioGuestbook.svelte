@@ -25,7 +25,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioGuestbook] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

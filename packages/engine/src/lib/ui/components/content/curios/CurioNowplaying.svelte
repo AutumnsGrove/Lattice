@@ -34,7 +34,8 @@
 				data = d.nowPlaying;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioNowplaying] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

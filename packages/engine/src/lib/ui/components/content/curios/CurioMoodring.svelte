@@ -28,7 +28,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioMoodring] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

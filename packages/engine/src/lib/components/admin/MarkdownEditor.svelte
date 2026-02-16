@@ -584,10 +584,7 @@
     });
 
     // TODO: Handle gutterContent when Vine integration is ready
-    // For now, gutterContent is available but not yet merged with gutterItems prop
-    if (gutterContent && gutterContent.length > 0) {
-      console.log("[MarkdownEditor] Draft mode produced Vines:", gutterContent);
-    }
+    // gutterContent is available but not yet merged with gutterItems prop
   }
 
   /**

@@ -113,7 +113,7 @@ export async function recordViolation(
   }
 
   // Structured log for monitoring
-  console.log(
+  console.warn(
     JSON.stringify({
       event: "rate_limit_violation",
       userId,
@@ -156,7 +156,7 @@ export async function clearAbuseState(
 ): Promise<void> {
   try {
     await kv.delete(`abuse:${userId}`);
-    console.log(
+    console.warn(
       JSON.stringify({
         event: "abuse_state_cleared",
         userId,

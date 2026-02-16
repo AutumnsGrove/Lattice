@@ -323,7 +323,6 @@
     },
     "./zephyr": {
       "types": "./dist/zephyr/index.d.ts",
-      "import": "./dist/zephyr/index.js",
       "default": "./dist/zephyr/index.js"
     },
     "./errors": {
@@ -419,7 +418,6 @@
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
-    "vibe-kanban-web-companion": "^0.0.5",
     "vite": "^5.4.21",
     "vitest": "^4.0.18"
   },

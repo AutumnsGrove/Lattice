@@ -6,7 +6,7 @@
  * Public access - used for embedding timeline on public pages.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
@@ -84,18 +84,9 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     params.push(endDate);
   }
 
-  query += ` ORDER BY summary_date DESC LIMIT ? OFFSET ?`;
-  params.push(limit, offset);
-
-  const results = await db
-    .prepare(query)
-    .bind(...params)
-    .all<TimelineSummaryRow>();
-
-  // Get total count for pagination
+  // Build count query from same base filters
   let countQuery = `SELECT COUNT(*) as count FROM timeline_summaries WHERE tenant_id = ? AND summary_date IS NOT NULL`;
   const countParams: (string | number)[] = [tenantId];
-
   if (startDate) {
     countQuery += ` AND summary_date >= ?`;
     countParams.push(startDate);
@@ -105,10 +96,24 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     countParams.push(endDate);
   }
 
-  const countResult = await db
-    .prepare(countQuery)
-    .bind(...countParams)
-    .first<{ count: number }>();
+  query += ` ORDER BY summary_date DESC LIMIT ? OFFSET ?`;
+  params.push(limit, offset);
+
+  // Parallelize results + count queries (independent, ~100-300ms each)
+  const [results, countResult] = await Promise.all([
+    db
+      .prepare(query)
+      .bind(...params)
+      .all<TimelineSummaryRow>(),
+    db
+      .prepare(countQuery)
+      .bind(...countParams)
+      .first<{ count: number }>()
+      .catch((err) => {
+        console.warn("[Timeline] Count query failed:", err);
+        return null;
+      }),
+  ]);
 
   // Transform results
   const summaries = results.results.map((row) => ({

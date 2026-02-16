@@ -81,7 +81,10 @@ export const GET: RequestHandler = async ({
     );
   }
 
-  console.log("[Magic Link Callback] Session found, redirecting to:", returnTo);
+  console.warn(
+    "[Magic Link Callback] Session found, redirecting to:",
+    returnTo,
+  );
 
   // Success! Redirect to the requested destination
   throw redirect(302, returnTo);

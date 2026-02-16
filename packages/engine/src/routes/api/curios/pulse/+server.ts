@@ -85,25 +85,29 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
     }
   }
 
-  // Count total
+  // Parallelize count + events queries (independent, ~100-300ms each)
   const countQuery = query.replace(
     /SELECT .+? FROM/,
     "SELECT COUNT(*) as total FROM",
   );
-  const countResult = await db
-    .prepare(countQuery)
-    .bind(...bindings)
-    .first<{ total: number }>();
+  const eventsQuery = `${query} ORDER BY occurred_at DESC LIMIT ? OFFSET ?`;
+  const eventsBindings = [...bindings, limit, offset];
+
+  const [countResult, eventsResult] = await Promise.all([
+    db
+      .prepare(countQuery)
+      .bind(...bindings)
+      .first<{ total: number }>()
+      .catch((err) => {
+        console.warn("[Pulse] Count query failed:", err);
+        return null;
+      }),
+    db
+      .prepare(eventsQuery)
+      .bind(...eventsBindings)
+      .all<EventRow>(),
+  ]);
   const total = countResult?.total ?? 0;
-
-  // Fetch events
-  query += ` ORDER BY occurred_at DESC LIMIT ? OFFSET ?`;
-  bindings.push(limit, offset);
-
-  const eventsResult = await db
-    .prepare(query)
-    .bind(...bindings)
-    .all<EventRow>();
 
   const events = eventsResult.results.map((row) => {
     let data: Record<string, unknown> = {};

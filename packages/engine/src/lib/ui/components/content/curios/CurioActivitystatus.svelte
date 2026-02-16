@@ -30,7 +30,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioActivitystatus] Failed to load:', err);
 				error = true;
 				loading = false;
 			});

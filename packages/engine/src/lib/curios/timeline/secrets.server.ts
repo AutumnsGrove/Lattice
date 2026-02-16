@@ -138,7 +138,7 @@ export async function getTimelineToken(
           });
           await secrets.setSecret(tenantId, keyName, token);
           migrated = true;
-          console.log(
+          console.warn(
             `${TAG} Auto-migrated ${keyName} for tenant ${tenantId} from legacy to SecretsManager`,
           );
         } catch (error) {
@@ -204,7 +204,7 @@ export async function setTimelineToken(
       });
       await secrets.setSecret(tenantId, keyName, plainToken);
 
-      console.log(
+      console.warn(
         `${TAG} Token ${keyName} saved via SecretsManager (envelope encryption)`,
       );
       // Return null for legacy column to clear it
@@ -249,7 +249,7 @@ async function setTimelineTokenLegacy(
   if (env.TOKEN_ENCRYPTION_KEY) {
     const { encryptToken } = await import("$lib/server/encryption");
     const encrypted = await encryptToken(plainToken, env.TOKEN_ENCRYPTION_KEY);
-    console.log(
+    console.warn(
       `${TAG} Token ${keyName} saved via legacy encryption (TOKEN_ENCRYPTION_KEY). ` +
         `Reason for legacy: ${fallbackReason}`,
     );
@@ -288,7 +288,7 @@ export async function deleteTimelineToken(
       GROVE_KEK: env.GROVE_KEK,
     });
     const deleted = await secrets.deleteSecret(tenantId, keyName);
-    console.log(
+    console.warn(
       `${TAG} Deleted ${keyName} from SecretsManager: ${deleted ? "found and removed" : "not found"}`,
     );
     return deleted;

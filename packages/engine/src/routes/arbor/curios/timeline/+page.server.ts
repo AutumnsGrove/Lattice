@@ -119,13 +119,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 export const actions: Actions = {
   save: async ({ request, platform, locals }) => {
-    console.log("[Timeline Config] Save action called");
+    console.warn("[Timeline Config] Save action called");
     const db = platform?.env?.DB;
     const tenantId = locals.tenantId;
-    console.log("[Timeline Config] tenantId:", tenantId, "db:", !!db);
+    console.warn("[Timeline Config] tenantId:", tenantId, "db:", !!db);
 
     if (!db || !tenantId) {
-      console.log("[Timeline Config] Missing db or tenantId");
+      console.warn("[Timeline Config] Missing db or tenantId");
       return fail(500, {
         error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
         error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
@@ -133,7 +133,7 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    console.log(
+    console.warn(
       "[Timeline Config] Form data received, enabled:",
       formData.get("enabled"),
     );
@@ -221,7 +221,7 @@ export const actions: Actions = {
         );
         // If using SecretsManager, clear legacy column; otherwise store encrypted value
         githubTokenForDb = result.legacyValue;
-        console.log(
+        console.warn(
           `[Timeline Config] GitHub token saved via ${result.system}`,
         );
       }
@@ -245,7 +245,7 @@ export const actions: Actions = {
           rawKey,
         );
         openrouterKeyForDb = result.legacyValue;
-        console.log(
+        console.warn(
           `[Timeline Config] OpenRouter key saved via ${result.system}`,
         );
       }
@@ -309,7 +309,7 @@ export const actions: Actions = {
         )
         .run();
 
-      console.log("[Timeline Config] Save successful!");
+      console.warn("[Timeline Config] Save successful!");
       return { success: true };
     } catch (error) {
       console.error("[Timeline Config] Failed to save:", error);

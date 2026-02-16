@@ -121,23 +121,27 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const faviconUrl = buildFaviconUrl(url);
   const id = generateBlogrollId();
 
-  // Enforce per-tenant item limit
-  const countResult = await db
-    .prepare(`SELECT COUNT(*) as count FROM blogroll_items WHERE tenant_id = ?`)
-    .bind(tenantId)
-    .first<{ count: number }>();
+  // Parallelize count + max sort queries (independent, ~100-300ms each)
+  const [countResult, maxSort] = await Promise.all([
+    db
+      .prepare(
+        `SELECT COUNT(*) as count FROM blogroll_items WHERE tenant_id = ?`,
+      )
+      .bind(tenantId)
+      .first<{ count: number }>(),
+    db
+      .prepare(
+        `SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM blogroll_items WHERE tenant_id = ?`,
+      )
+      .bind(tenantId)
+      .first<{ max_sort: number }>(),
+  ]);
+
   if ((countResult?.count ?? 0) >= MAX_BLOGROLL_ENTRIES_PER_TENANT) {
     throwGroveError(400, API_ERRORS.RATE_LIMITED, "API");
   }
 
   try {
-    const maxSort = await db
-      .prepare(
-        `SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM blogroll_items WHERE tenant_id = ?`,
-      )
-      .bind(tenantId)
-      .first<{ max_sort: number }>();
-
     const sortOrder = (maxSort?.max_sort ?? -1) + 1;
 
     await db

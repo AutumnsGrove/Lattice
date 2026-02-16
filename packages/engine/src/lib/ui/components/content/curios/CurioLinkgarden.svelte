@@ -38,7 +38,8 @@
 				data = d;
 				loading = false;
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.warn('[CurioLinkgarden] Failed to load:', err);
 				error = true;
 				loading = false;
 			});
