@@ -88,17 +88,16 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 };
 
 /**
- * PUT /api/drafts/[slug] - Update or create a draft
- *
- * Upsert semantics - creates if doesn't exist, updates if it does.
+ * Shared upsert logic for PUT and POST (sendBeacon) draft saves.
+ * Creates if doesn't exist, updates if it does.
  * Includes deviceId for conflict detection.
  */
-export const PUT: RequestHandler = async ({
+async function handleDraftUpsert({
   params,
   request,
   platform,
   locals,
-}) => {
+}: Parameters<RequestHandler>[0]): Promise<Response> {
   // Auth check
   if (!locals.user) {
     throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
@@ -129,14 +128,14 @@ export const PUT: RequestHandler = async ({
 
     const data = (await request.json()) as {
       content: string;
-      metadata: { title: string; description?: string; tags?: string[] };
+      metadata: { title?: string; description?: string; tags?: string[] };
       deviceId: string;
     };
 
-    // Validate required fields
-    if (!data.content || !data.metadata?.title || !data.deviceId) {
+    // Validate required fields (title defaults to "Untitled" for auto-save before user types)
+    if (!data.content || !data.deviceId) {
       throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
-        detail: "content, metadata.title, deviceId required",
+        detail: "content, deviceId required",
       });
     }
 
@@ -144,6 +143,12 @@ export const PUT: RequestHandler = async ({
     if (data.content.length > 1024 * 1024) {
       throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
     }
+
+    // Default title if empty/missing (auto-save fires before user types a title)
+    const metadata = {
+      ...data.metadata,
+      title: data.metadata?.title || "Untitled",
+    };
 
     const stub = await getTenantStub(platform, tenantId);
     const response = await stub.fetch(
@@ -153,7 +158,7 @@ export const PUT: RequestHandler = async ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: data.content,
-          metadata: data.metadata,
+          metadata,
           deviceId: data.deviceId,
         }),
       },
@@ -173,6 +178,25 @@ export const PUT: RequestHandler = async ({
     logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
     throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
   }
+}
+
+/**
+ * PUT /api/drafts/[slug] - Update or create a draft
+ *
+ * Upsert semantics - creates if doesn't exist, updates if it does.
+ */
+export const PUT: RequestHandler = async (event) => {
+  return handleDraftUpsert(event);
+};
+
+/**
+ * POST /api/drafts/[slug] - Update or create a draft (sendBeacon path)
+ *
+ * Identical to PUT — needed because navigator.sendBeacon() always sends POST.
+ * CSRF is validated via origin-based fallback in hooks.server.ts.
+ */
+export const POST: RequestHandler = async (event) => {
+  return handleDraftUpsert(event);
 };
 
 /**

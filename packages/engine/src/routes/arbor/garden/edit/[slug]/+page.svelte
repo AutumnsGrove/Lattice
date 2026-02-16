@@ -1,5 +1,5 @@
 <script>
-  import { goto } from "$app/navigation";
+  import { goto, beforeNavigate } from "$app/navigation";
   import { browser } from "$app/environment";
   import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
   import GutterManager from "$lib/components/admin/GutterManager.svelte";
@@ -271,6 +271,17 @@
         "You have unsaved changes. Are you sure you want to leave?");
     }
   }
+
+  // Guard SvelteKit client-side navigations (beforeunload only covers tab close / hard nav)
+  beforeNavigate((navigation) => {
+    editorRef?.flushDraft();
+
+    if (hasUnsavedChanges) {
+      if (!confirm("You have unsaved changes. Leave this page?")) {
+        navigation.cancel();
+      }
+    }
+  });
 </script>
 
 <svelte:window onbeforeunload={handleBeforeUnload} />
@@ -528,6 +539,7 @@
             {saving}
             onSave={handleSave}
             draftKey={`edit-${slug}`}
+            serverDraftSlug={`edit-${slug}`}
             previewTitle={title}
             previewDate={date}
             previewTags={parseTags(tagsInput)}

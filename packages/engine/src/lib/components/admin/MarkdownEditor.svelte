@@ -1,6 +1,6 @@
 <script>
   import MarkdownIt from "markdown-it";
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
 
   // Local instance for admin editor preview
   const editorMd = new MarkdownIt({ html: false, linkify: true });
@@ -69,6 +69,8 @@
     grafts = /** @type {GraftsRecord} */ ({}),
     /** Curio configuration status for autocomplete — loaded server-side */
     configuredCurios = /** @type {{ slug: string, name: string, enabled: boolean }[]} */ ([]),
+    /** Server-side draft slug for cross-device sync (null disables server sync) */
+    serverDraftSlug = /** @type {string | null} */ (null),
   } = $props();
 
   // Derived graft flags - add new ones here as they're created
@@ -147,13 +149,15 @@
   // Initialize composables
   const editorTheme = useEditorTheme();
 
-  // svelte-ignore state_referenced_locally - draftKey, readonly, onDraftRestored don't change during lifecycle
+  // svelte-ignore state_referenced_locally - draftKey, readonly, onDraftRestored, serverDraftSlug don't change during lifecycle
   const draftManager = useDraftManager({
     draftKey,
     getContent: () => content,
     setContent: (/** @type {string} */ c) => (content = c),
     onDraftRestored,
     readonly,
+    getMetadata: () => ({ title: previewTitle }),
+    serverSlug: serverDraftSlug,
   });
 
   // Note: Slash commands and command palette removed for simplified Medium-style UX
@@ -932,11 +936,11 @@
     }
   }
 
-  // Initialize editor on mount
+  // Initialize editor on mount — untrack(content) prevents re-running on every keystroke
   $effect(() => {
     updateCursorPosition();
     editorTheme.loadTheme();
-    draftManager.init(content);
+    draftManager.init(untrack(() => content));
     // Note: editorMode is now initialized synchronously at declaration time
     // to avoid flash of wrong mode on initial render
 
@@ -1319,6 +1323,16 @@
       {:else if draftKey && draftManager.hasUnsavedChanges(content)}
         <span class="status-divider">|</span>
         <span class="status-draft-unsaved">Unsaved</span>
+      {/if}
+      {#if serverDraftSlug && draftManager.serverSyncStatus === "syncing"}
+        <span class="status-divider">|</span>
+        <span class="status-server-syncing" title="Syncing to server">Syncing...</span>
+      {:else if serverDraftSlug && draftManager.serverSyncStatus === "synced"}
+        <span class="status-divider">|</span>
+        <span class="status-server-synced" title="Synced to server">Synced</span>
+      {:else if serverDraftSlug && draftManager.serverSyncStatus === "error"}
+        <span class="status-divider">|</span>
+        <span class="status-server-error" title="Server sync failed (local draft is safe)">Sync error</span>
       {/if}
     </div>
   </div>
@@ -1990,6 +2004,17 @@
   }
   .status-draft-unsaved {
     color: #e0a050;
+    font-style: italic;
+  }
+  .status-server-syncing {
+    color: #8bafc4;
+    font-style: italic;
+  }
+  .status-server-synced {
+    color: var(--editor-accent, #8bc48b);
+  }
+  .status-server-error {
+    color: #e07050;
     font-style: italic;
   }
   .status-mode-indicator {
