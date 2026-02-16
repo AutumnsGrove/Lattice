@@ -11,8 +11,16 @@
  * ID Pattern: tenant:{subdomain}
  *
  * Part of the Loom pattern - Grove's coordination layer.
+ *
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
+import {
+  LoomDO,
+  type LoomRoute,
+  type LoomConfig,
+  type LoomRequestContext,
+} from "@autumnsgrove/groveengine/loom";
 import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
 
 // ============================================================================
@@ -24,6 +32,12 @@ import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
  * Prevents memory leak if alarm mechanism fails.
  */
 const MAX_ANALYTICS_BUFFER = 1000;
+
+/** Config staleness threshold: 5 minutes */
+const STALE_THRESHOLD_MS = 5 * 60 * 1000;
+
+/** Analytics flush alarm delay: 1 minute */
+const ANALYTICS_ALARM_MS = 60_000;
 
 // ============================================================================
 // Types
@@ -65,43 +79,28 @@ export interface AnalyticsEvent {
   timestamp: number;
 }
 
+interface TenantEnv extends Record<string, unknown> {
+  DB: D1Database;
+}
+
 // ============================================================================
 // TenantDO Class
 // ============================================================================
 
-export class TenantDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: Env;
-
+export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
   // In-memory caches (faster than storage for hot data)
-  private config: TenantConfig | null = null;
   private configLoadedAt: number = 0;
   private analyticsBuffer: AnalyticsEvent[] = [];
-  private initialized: boolean = false;
-
-  // Race condition prevention: only one refresh at a time
-  private refreshPromise: Promise<void> | null = null;
 
   // Subdomain extracted from DO name (set on first request)
   private subdomain: string | null = null;
 
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-
-    // Block concurrent requests while initializing storage
-    this.state.blockConcurrencyWhile(async () => {
-      await this.initializeStorage();
-    });
+  config(): LoomConfig {
+    return { name: "TenantDO" };
   }
 
-  /**
-   * Initialize SQLite tables in DO storage
-   */
-  private async initializeStorage(): Promise<void> {
-    if (this.initialized) return;
-
-    await this.state.storage.sql.exec(`
+  protected schema(): string {
+    return `
       CREATE TABLE IF NOT EXISTS config (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
@@ -122,70 +121,76 @@ export class TenantDO implements DurableObject {
         event_data TEXT,
         timestamp INTEGER NOT NULL
       );
-    `);
-
-    this.initialized = true;
+    `;
   }
 
-  /**
-   * Main request handler - routes to appropriate method
-   */
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+  protected async loadState(): Promise<TenantConfig | null> {
+    // Use queryAll to avoid .one() throwing on empty table
+    const rows = this.sql.queryAll<{ value: string }>(
+      "SELECT value FROM config WHERE key = 'tenant_config'",
+    );
+    if (!rows.length || !rows[0].value) return null;
+    try {
+      return JSON.parse(rows[0].value);
+    } catch {
+      return null;
+    }
+  }
 
+  routes(): LoomRoute[] {
+    return [
+      // Config endpoints
+      {
+        method: "GET",
+        path: "/config",
+        handler: () => this.handleGetConfig(),
+      },
+      {
+        method: "PUT",
+        path: "/config",
+        handler: (ctx) => this.handleUpdateConfig(ctx),
+      },
+      // Draft endpoints
+      {
+        method: "GET",
+        path: "/drafts",
+        handler: () => this.handleListDrafts(),
+      },
+      {
+        method: "GET",
+        path: "/drafts/:slug",
+        handler: (ctx) => this.handleGetDraft(ctx),
+      },
+      {
+        method: "PUT",
+        path: "/drafts/:slug",
+        handler: (ctx) => this.handleSaveDraft(ctx),
+      },
+      {
+        method: "DELETE",
+        path: "/drafts/:slug",
+        handler: (ctx) => this.handleDeleteDraft(ctx),
+      },
+      // Analytics endpoint
+      {
+        method: "POST",
+        path: "/analytics",
+        handler: (ctx) => this.handleRecordEvent(ctx),
+      },
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Custom fetch override — extract subdomain header
+  // ════════════════════════════════════════════════════════════════════
+
+  async fetch(request: Request): Promise<Response> {
     // Extract subdomain from request header (set by hooks.server.ts)
-    // This is passed on every request to ensure we always know our identity
     const subdomainHeader = request.headers.get("X-Tenant-Subdomain");
     if (subdomainHeader && !this.subdomain) {
       this.subdomain = subdomainHeader;
     }
-
-    try {
-      // Config endpoints
-      if (path === "/config" && request.method === "GET") {
-        return this.handleGetConfig();
-      }
-
-      if (path === "/config" && request.method === "PUT") {
-        return this.handleUpdateConfig(request);
-      }
-
-      // Draft endpoints
-      if (path === "/drafts" && request.method === "GET") {
-        return this.handleListDrafts();
-      }
-
-      if (path.startsWith("/drafts/") && request.method === "GET") {
-        const slug = path.split("/").pop();
-        return this.handleGetDraft(slug!);
-      }
-
-      if (path.startsWith("/drafts/") && request.method === "PUT") {
-        const slug = path.split("/").pop();
-        return this.handleSaveDraft(slug!, request);
-      }
-
-      if (path.startsWith("/drafts/") && request.method === "DELETE") {
-        const slug = path.split("/").pop();
-        return this.handleDeleteDraft(slug!);
-      }
-
-      // Analytics endpoint
-      if (path === "/analytics" && request.method === "POST") {
-        return this.handleRecordEvent(request);
-      }
-
-      return new Response("Not found", { status: 404 });
-    } catch (err) {
-      console.error("[TenantDO] Error:", err);
-      return new Response(
-        JSON.stringify({
-          error: err instanceof Error ? err.message : "Internal error",
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
+    return super.fetch(request);
   }
 
   // ============================================================================
@@ -195,28 +200,23 @@ export class TenantDO implements DurableObject {
   /**
    * Get tenant config (cached in memory, refreshed from D1 if stale)
    *
-   * Uses a promise lock pattern to prevent race conditions where multiple
+   * Uses PromiseLockMap to prevent race conditions where multiple
    * concurrent requests all trigger D1 queries simultaneously.
    */
   private async handleGetConfig(): Promise<Response> {
-    const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
-
-    // Refresh if stale or not loaded (with race condition prevention)
-    if (!this.config || Date.now() - this.configLoadedAt > STALE_THRESHOLD_MS) {
-      // Only start one refresh at a time - other requests wait for it
-      if (!this.refreshPromise) {
-        this.refreshPromise = this.refreshConfig().finally(() => {
-          this.refreshPromise = null;
-        });
-      }
-      await this.refreshPromise;
+    // Refresh if stale or not loaded (with race condition prevention via locks)
+    if (
+      !this.state_data ||
+      Date.now() - this.configLoadedAt > STALE_THRESHOLD_MS
+    ) {
+      await this.locks.withLock("refresh", () => this.refreshConfig());
     }
 
-    if (!this.config) {
+    if (!this.state_data) {
       return new Response("Tenant not found", { status: 404 });
     }
 
-    return Response.json(this.config);
+    return Response.json(this.state_data);
   }
 
   /**
@@ -227,37 +227,33 @@ export class TenantDO implements DurableObject {
    */
   private async refreshConfig(): Promise<void> {
     // Try DO storage first (fastest)
-    // Use toArray()[0] instead of .one() because .one() throws when no rows exist
-    // (expected for new or health-check tenants that have no config yet)
-    const stored = this.state.storage.sql
-      .exec("SELECT value FROM config WHERE key = 'tenant_config'")
-      .toArray()[0];
+    const rows = this.sql.queryAll<{ value: string }>(
+      "SELECT value FROM config WHERE key = 'tenant_config'",
+    );
 
-    if (stored?.value) {
+    if (rows.length > 0 && rows[0].value) {
       try {
-        this.config = JSON.parse(stored.value as string);
+        this.state_data = JSON.parse(rows[0].value);
         // Also set subdomain from cached config if we don't have it
-        if (this.config?.subdomain && !this.subdomain) {
-          this.subdomain = this.config.subdomain;
+        if (this.state_data?.subdomain && !this.subdomain) {
+          this.subdomain = this.state_data.subdomain;
         }
         this.configLoadedAt = Date.now();
         return;
       } catch (err) {
         // Corrupted cache - clear it and fall through to D1
-        console.warn(
-          "[TenantDO] Failed to parse cached config, clearing:",
-          err instanceof Error ? err.message : err,
+        this.log.warn(
+          "Failed to parse cached config, clearing",
+          err instanceof Error ? { error: err.message } : {},
         );
-        await this.state.storage.sql.exec(
-          "DELETE FROM config WHERE key = 'tenant_config'",
-        );
+        this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
       }
     }
 
     // Fall back to D1 - need subdomain to query
     const subdomain = this.getSubdomain();
     if (!subdomain) {
-      console.error("[TenantDO] Cannot refresh config: no subdomain available");
+      this.log.error("Cannot refresh config: no subdomain available");
       return;
     }
 
@@ -282,15 +278,15 @@ export class TenantDO implements DurableObject {
         try {
           theme = JSON.parse(row.theme as string);
         } catch (err) {
-          console.warn(
-            `[TenantDO] Failed to parse theme JSON for ${this.subdomain}:`,
-            err instanceof Error ? err.message : err,
+          this.log.warn(
+            "Failed to parse theme JSON",
+            err instanceof Error ? { error: err.message } : {},
           );
         }
       }
 
-      this.config = {
-        id: row.id as string, // Include tenant ID to eliminate hooks.server.ts D1 query
+      this.state_data = {
+        id: row.id as string,
         subdomain: row.subdomain as string,
         displayName: row.displayName as string,
         theme,
@@ -300,10 +296,10 @@ export class TenantDO implements DurableObject {
       };
 
       // Cache in DO storage for next time
-      await this.state.storage.sql.exec(
+      this.sql.exec(
         "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
         "tenant_config",
-        JSON.stringify(this.config),
+        JSON.stringify(this.state_data),
         Date.now(),
       );
 
@@ -313,34 +309,26 @@ export class TenantDO implements DurableObject {
 
   /**
    * Update tenant config
-   *
-   * Uses the same promise lock pattern as handleGetConfig to prevent
-   * race conditions where concurrent updates could clobber each other.
    */
-  private async handleUpdateConfig(request: Request): Promise<Response> {
-    const updates = (await request.json()) as Partial<TenantConfig>;
+  private async handleUpdateConfig(ctx: LoomRequestContext): Promise<Response> {
+    const updates = (await ctx.request.json()) as Partial<TenantConfig>;
 
     // Ensure config is loaded with race condition prevention
-    if (!this.config) {
-      if (!this.refreshPromise) {
-        this.refreshPromise = this.refreshConfig().finally(() => {
-          this.refreshPromise = null;
-        });
-      }
-      await this.refreshPromise;
+    if (!this.state_data) {
+      await this.locks.withLock("refresh", () => this.refreshConfig());
     }
 
-    if (!this.config) {
+    if (!this.state_data) {
       return new Response("Tenant not found", { status: 404 });
     }
 
-    this.config = { ...this.config, ...updates };
+    this.state_data = { ...this.state_data, ...updates };
 
     // Update DO storage
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
       "tenant_config",
-      JSON.stringify(this.config),
+      JSON.stringify(this.state_data),
       Date.now(),
     );
 
@@ -355,8 +343,8 @@ export class TenantDO implements DurableObject {
       `,
       )
         .bind(
-          this.config.displayName,
-          this.config.theme ? JSON.stringify(this.config.theme) : null,
+          this.state_data.displayName,
+          this.state_data.theme ? JSON.stringify(this.state_data.theme) : null,
           subdomain,
         )
         .run();
@@ -369,12 +357,8 @@ export class TenantDO implements DurableObject {
 
   /**
    * Get tier limits from centralized tiers.ts config
-   *
-   * This ensures TenantDO limits match the single source of truth,
-   * preventing drift between DO cached limits and actual tier configuration.
    */
   private getTierLimits(tier: TenantConfig["tier"]): TierLimits {
-    // Map TenantConfig tier to TierKey (they're compatible)
     const tierConfig = TIERS[tier as TierKey] ?? TIERS.seedling;
 
     return {
@@ -382,7 +366,6 @@ export class TenantDO implements DurableObject {
       postsPerMonth:
         tierConfig.limits.posts === Infinity ? -1 : tierConfig.limits.posts,
       storageBytes: tierConfig.limits.storage,
-      // Custom domains based on tier features
       customDomains: tierConfig.features.customDomain
         ? tier === "evergreen"
           ? 10
@@ -397,24 +380,24 @@ export class TenantDO implements DurableObject {
   // Draft Methods
   // ============================================================================
 
-  /**
-   * List all drafts for this tenant
-   */
   private async handleListDrafts(): Promise<Response> {
-    const rows = this.state.storage.sql
-      .exec(
-        "SELECT slug, metadata, last_saved, device_id FROM drafts ORDER BY last_saved DESC",
-      )
-      .toArray();
+    const rows = this.sql.queryAll<{
+      slug: string;
+      metadata: string;
+      last_saved: number;
+      device_id: string;
+    }>(
+      "SELECT slug, metadata, last_saved, device_id FROM drafts ORDER BY last_saved DESC",
+    );
 
     const drafts = rows.map((row) => {
       let metadata: DraftMetadata = { title: "Untitled" };
       try {
         metadata = JSON.parse(row.metadata as string);
       } catch (err) {
-        console.warn(
-          `[TenantDO] Failed to parse draft metadata for ${row.slug}:`,
-          err instanceof Error ? err.message : err,
+        this.log.warn(
+          `Failed to parse draft metadata for ${row.slug}`,
+          err instanceof Error ? { error: err.message } : {},
         );
       }
       return {
@@ -428,13 +411,16 @@ export class TenantDO implements DurableObject {
     return Response.json(drafts);
   }
 
-  /**
-   * Get a specific draft
-   */
-  private async handleGetDraft(slug: string): Promise<Response> {
-    const row = this.state.storage.sql
-      .exec("SELECT * FROM drafts WHERE slug = ?", slug)
-      .one();
+  private async handleGetDraft(ctx: LoomRequestContext): Promise<Response> {
+    const { slug } = ctx.params;
+
+    const row = this.sql.queryOne<{
+      slug: string;
+      content: string;
+      metadata: string;
+      last_saved: number;
+      device_id: string;
+    }>("SELECT * FROM drafts WHERE slug = ?", slug);
 
     if (!row) {
       return new Response("Draft not found", { status: 404 });
@@ -444,9 +430,9 @@ export class TenantDO implements DurableObject {
     try {
       metadata = JSON.parse(row.metadata as string);
     } catch (err) {
-      console.warn(
-        `[TenantDO] Failed to parse draft metadata for ${slug}:`,
-        err instanceof Error ? err.message : err,
+      this.log.warn(
+        `Failed to parse draft metadata for ${slug}`,
+        err instanceof Error ? { error: err.message } : {},
       );
     }
 
@@ -459,17 +445,15 @@ export class TenantDO implements DurableObject {
     });
   }
 
-  /**
-   * Save or update a draft
-   */
-  private async handleSaveDraft(
-    slug: string,
-    request: Request,
-  ): Promise<Response> {
-    const draft = (await request.json()) as Omit<Draft, "slug" | "lastSaved">;
+  private async handleSaveDraft(ctx: LoomRequestContext): Promise<Response> {
+    const { slug } = ctx.params;
+    const draft = (await ctx.request.json()) as Omit<
+      Draft,
+      "slug" | "lastSaved"
+    >;
     const now = Date.now();
 
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       `
       INSERT OR REPLACE INTO drafts (slug, content, metadata, last_saved, device_id)
       VALUES (?, ?, ?, ?, ?)
@@ -484,14 +468,9 @@ export class TenantDO implements DurableObject {
     return Response.json({ success: true, lastSaved: now });
   }
 
-  /**
-   * Delete a draft
-   */
-  private async handleDeleteDraft(slug: string): Promise<Response> {
-    await this.state.storage.sql.exec(
-      "DELETE FROM drafts WHERE slug = ?",
-      slug,
-    );
+  private async handleDeleteDraft(ctx: LoomRequestContext): Promise<Response> {
+    const { slug } = ctx.params;
+    this.sql.exec("DELETE FROM drafts WHERE slug = ?", slug);
     return Response.json({ success: true });
   }
 
@@ -499,11 +478,8 @@ export class TenantDO implements DurableObject {
   // Analytics Methods
   // ============================================================================
 
-  /**
-   * Record an analytics event (buffered)
-   */
-  private async handleRecordEvent(request: Request): Promise<Response> {
-    const event = (await request.json()) as AnalyticsEvent;
+  private async handleRecordEvent(ctx: LoomRequestContext): Promise<Response> {
+    const event = (await ctx.request.json()) as AnalyticsEvent;
 
     // Add to memory buffer
     this.analyticsBuffer.push({
@@ -516,8 +492,8 @@ export class TenantDO implements DurableObject {
     // 2. MAX_ANALYTICS_BUFFER: safety net if alarm mechanism fails
     if (this.analyticsBuffer.length >= MAX_ANALYTICS_BUFFER) {
       // Force flush - buffer is dangerously large
-      console.warn(
-        `[TenantDO] Analytics buffer hit max (${MAX_ANALYTICS_BUFFER}), forcing flush`,
+      this.log.warn(
+        `Analytics buffer hit max (${MAX_ANALYTICS_BUFFER}), forcing flush`,
       );
       await this.flushAnalytics();
     } else if (this.analyticsBuffer.length >= 100) {
@@ -525,25 +501,20 @@ export class TenantDO implements DurableObject {
       await this.flushAnalytics();
     } else {
       // Schedule flush via alarm if not already set
-      const currentAlarm = await this.state.storage.getAlarm();
-      if (!currentAlarm) {
-        await this.state.storage.setAlarm(Date.now() + 60_000); // 1 minute
-      }
+      await this.alarms.ensureScheduled(ANALYTICS_ALARM_MS);
     }
 
     return Response.json({ success: true });
   }
 
-  /**
-   * Alarm handler - flush analytics buffer
-   */
-  async alarm(): Promise<void> {
+  // ============================================================================
+  // Alarm Handler
+  // ============================================================================
+
+  protected async onAlarm(): Promise<void> {
     await this.flushAnalytics();
   }
 
-  /**
-   * Flush analytics buffer to D1
-   */
   private async flushAnalytics(): Promise<void> {
     if (this.analyticsBuffer.length === 0) return;
 
@@ -551,8 +522,8 @@ export class TenantDO implements DurableObject {
     const subdomain = this.getSubdomain() || "unknown";
 
     // For now, just log - analytics table implementation deferred to Rings
-    console.log(
-      `[TenantDO] Flushing ${events.length} analytics events for ${subdomain}`,
+    this.log.info(
+      `Flushing ${events.length} analytics events for ${subdomain}`,
     );
 
     // TODO: When Rings is implemented, batch insert to analytics table
@@ -570,29 +541,8 @@ export class TenantDO implements DurableObject {
    * 1. Subdomain passed via X-Tenant-Subdomain header (set on every request)
    * 2. Cached subdomain from previous request
    * 3. Subdomain from cached config
-   *
-   * Returns null if subdomain is not yet known (shouldn't happen in practice
-   * since hooks.server.ts always sends the header).
    */
   private getSubdomain(): string | null {
-    return this.subdomain || this.config?.subdomain || null;
+    return this.subdomain || this.state_data?.subdomain || null;
   }
-
-  /**
-   * Get the tenant ID (UUID) for this tenant
-   *
-   * Returns the cached ID from config, or null if not yet loaded.
-   * The ID is fetched from D1 on first config load and cached.
-   */
-  private getTenantId(): string | null {
-    return this.config?.id || null;
-  }
-}
-
-// ============================================================================
-// Environment Type (for DO constructor)
-// ============================================================================
-
-interface Env {
-  DB: D1Database;
 }

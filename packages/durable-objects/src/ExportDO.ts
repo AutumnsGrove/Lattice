@@ -8,15 +8,23 @@
  * - Email delivery via Zephyr service binding
  *
  * State machine: pending → querying → assembling → uploading → notifying → complete (or failed)
+ *
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
+import {
+  LoomDO,
+  type LoomRoute,
+  type LoomConfig,
+  type LoomRequestContext,
+} from "@autumnsgrove/groveengine/loom";
 import { zipSync, strToU8 } from "fflate";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-interface ExportDOEnv {
+interface ExportDOEnv extends Record<string, unknown> {
   DB: D1Database;
   KV: KVNamespace;
   IMAGES: R2Bucket;
@@ -93,57 +101,60 @@ interface MediaRecord {
 // EXPORT DURABLE OBJECT
 // =============================================================================
 
-export class ExportDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: ExportDOEnv;
-  private jobState: ExportJobState | null = null;
-
-  constructor(state: DurableObjectState, env: ExportDOEnv) {
-    this.state = state;
-    this.env = env;
+export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
+  config(): LoomConfig {
+    return { name: "ExportDO", blockOnInit: false };
   }
 
-  /**
-   * Handle incoming requests
-   * - POST /start - Initialize job state and schedule first alarm
-   * - GET /status - Return current phase and progress
-   * - POST /cancel - Cancel in-progress export
-   */
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
+  protected async loadState(): Promise<ExportJobState | null> {
+    return (await this.state.storage.get<ExportJobState>("jobState")) ?? null;
+  }
 
-    switch (url.pathname) {
-      case "/start":
-        return this.handleStart(request);
-      case "/status":
-        return this.handleStatus();
-      case "/cancel":
-        return this.handleCancel();
-      default:
-        return new Response("Not found", { status: 404 });
+  protected async persistState(): Promise<void> {
+    if (this.state_data) {
+      await this.state.storage.put("jobState", this.state_data);
     }
   }
 
-  /**
-   * Handle alarm - process phases sequentially
-   */
-  async alarm(): Promise<void> {
-    await this.loadState();
+  routes(): LoomRoute[] {
+    return [
+      {
+        method: "POST",
+        path: "/start",
+        handler: (ctx) => this.handleStart(ctx),
+      },
+      {
+        method: "GET",
+        path: "/status",
+        handler: () => this.handleStatus(),
+      },
+      {
+        method: "POST",
+        path: "/cancel",
+        handler: () => this.handleCancel(),
+      },
+    ];
+  }
 
-    if (!this.jobState) {
-      this.log("No job state on alarm", { phase: "unknown" });
+  // ════════════════════════════════════════════════════════════════════
+  // Alarm Handler — Phase Dispatcher
+  // ════════════════════════════════════════════════════════════════════
+
+  protected async onAlarm(): Promise<void> {
+    if (!this.state_data) {
+      this.log.warn("No job state on alarm");
       return;
     }
 
     if (
-      this.jobState.phase === "complete" ||
-      this.jobState.phase === "failed"
+      this.state_data.phase === "complete" ||
+      this.state_data.phase === "failed"
     ) {
       return;
     }
 
     try {
-      switch (this.jobState.phase) {
+      switch (this.state_data.phase) {
         case "querying":
           await this.phaseQuerying();
           break;
@@ -162,12 +173,12 @@ export class ExportDO implements DurableObject {
     }
   }
 
-  // ===========================================================================
-  // REQUEST HANDLERS
-  // ===========================================================================
+  // ════════════════════════════════════════════════════════════════════
+  // Request Handlers
+  // ════════════════════════════════════════════════════════════════════
 
-  private async handleStart(request: Request): Promise<Response> {
-    const body = (await request.json()) as Omit<
+  private async handleStart(ctx: LoomRequestContext): Promise<Response> {
+    const body = (await ctx.request.json()) as Omit<
       ExportJobState,
       | "phase"
       | "progress"
@@ -177,7 +188,7 @@ export class ExportDO implements DurableObject {
       | "itemCounts"
     >;
 
-    this.jobState = {
+    this.state_data = {
       ...body,
       phase: "querying",
       progress: 0,
@@ -187,50 +198,46 @@ export class ExportDO implements DurableObject {
     };
 
     await this.persistState();
-    await this.state.storage.setAlarm(Date.now() + 100);
+    await this.alarms.schedule(100);
 
     // Update D1 status to reflect that the DO has started work
     await this.env.DB.prepare(
       "UPDATE storage_exports SET status = ?, updated_at = ? WHERE id = ?",
     )
-      .bind("querying", Math.floor(Date.now() / 1000), this.jobState.exportId)
+      .bind("querying", Math.floor(Date.now() / 1000), this.state_data.exportId)
       .run();
 
-    this.log("Export job started", {
-      exportId: this.jobState.exportId,
-      includeImages: this.jobState.includeImages,
+    this.log.info("Export job started", {
+      exportId: this.state_data.exportId,
+      includeImages: this.state_data.includeImages,
     });
 
     return Response.json({ success: true, phase: "querying" });
   }
 
   private async handleStatus(): Promise<Response> {
-    await this.loadState();
-
-    if (!this.jobState) {
+    if (!this.state_data) {
       return Response.json({ status: "idle" });
     }
 
     return Response.json({
-      exportId: this.jobState.exportId,
-      phase: this.jobState.phase,
-      progress: this.jobState.progress,
-      errorMessage: this.jobState.errorMessage,
+      exportId: this.state_data.exportId,
+      phase: this.state_data.phase,
+      progress: this.state_data.progress,
+      errorMessage: this.state_data.errorMessage,
     });
   }
 
   private async handleCancel(): Promise<Response> {
-    await this.loadState();
-
-    if (!this.jobState) {
+    if (!this.state_data) {
       return Response.json(
         { success: false, error: "No active export" },
         { status: 400 },
       );
     }
 
-    this.jobState.phase = "failed";
-    this.jobState.errorMessage = "Export cancelled by user";
+    this.state_data.phase = "failed";
+    this.state_data.errorMessage = "Export cancelled by user";
     await this.persistState();
     await this.state.storage.deleteAlarm();
 
@@ -242,30 +249,32 @@ export class ExportDO implements DurableObject {
         "failed",
         "Export cancelled by user",
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
-    this.log("Export cancelled");
+    this.log.info("Export cancelled");
 
     return Response.json({ success: true, status: "cancelled" });
   }
 
-  // ===========================================================================
-  // PHASE HANDLERS
-  // ===========================================================================
+  // ════════════════════════════════════════════════════════════════════
+  // Phase Handlers
+  // ════════════════════════════════════════════════════════════════════
 
   private async phaseQuerying(): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
-    this.log("Starting querying phase", { exportId: this.jobState.exportId });
+    this.log.info("Starting querying phase", {
+      exportId: this.state_data.exportId,
+    });
 
     // Query posts
     const postsResult = await this.env.DB.prepare(
       `SELECT id, slug, title, description, markdown_content, tags, status, featured_image, published_at, created_at, updated_at
        FROM posts WHERE tenant_id = ? ORDER BY created_at DESC`,
     )
-      .bind(this.jobState.tenantId)
+      .bind(this.state_data.tenantId)
       .all<PostRecord>();
 
     const posts = postsResult.results || [];
@@ -275,7 +284,7 @@ export class ExportDO implements DurableObject {
       `SELECT id, slug, title, description, markdown_content, type, created_at, updated_at
        FROM pages WHERE tenant_id = ? ORDER BY display_order ASC`,
     )
-      .bind(this.jobState.tenantId)
+      .bind(this.state_data.tenantId)
       .all<PageRecord>();
 
     const pages = pagesResult.results || [];
@@ -285,7 +294,7 @@ export class ExportDO implements DurableObject {
       `SELECT id, filename, original_name, r2_key, url, size, mime_type, alt_text, uploaded_at
        FROM media WHERE tenant_id = ? ORDER BY uploaded_at DESC`,
     )
-      .bind(this.jobState.tenantId)
+      .bind(this.state_data.tenantId)
       .all<MediaRecord>();
 
     const media = mediaResult.results || [];
@@ -296,10 +305,10 @@ export class ExportDO implements DurableObject {
     await this.state.storage.put("media", media);
 
     // Update item counts
-    this.jobState.itemCounts = {
+    this.state_data.itemCounts = {
       posts: posts.length,
       pages: pages.length,
-      images: this.jobState.includeImages ? media.length : 0,
+      images: this.state_data.includeImages ? media.length : 0,
     };
 
     // Update D1 progress and status
@@ -310,19 +319,19 @@ export class ExportDO implements DurableObject {
         "assembling",
         10,
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
     // Transition to assembling
-    this.jobState.phase = "assembling";
-    this.jobState.progress = 10;
+    this.state_data.phase = "assembling";
+    this.state_data.progress = 10;
     await this.persistState();
 
     // Schedule next alarm
-    await this.state.storage.setAlarm(Date.now() + 100);
+    await this.alarms.schedule(100);
 
-    this.log("Querying phase complete", {
+    this.log.info("Querying phase complete", {
       posts: posts.length,
       pages: pages.length,
       media: media.length,
@@ -330,11 +339,11 @@ export class ExportDO implements DurableObject {
   }
 
   private async phaseAssembling(): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
-    this.log("Starting assembling phase", {
-      exportId: this.jobState.exportId,
-      imageOffset: this.jobState.imageOffset,
+    this.log.info("Starting assembling phase", {
+      exportId: this.state_data.exportId,
+      imageOffset: this.state_data.imageOffset,
     });
 
     // Load data from storage
@@ -350,8 +359,8 @@ export class ExportDO implements DurableObject {
 
     // Handle images if enabled - fetch and store separately
     if (
-      this.jobState.includeImages &&
-      this.jobState.imageOffset < media.length
+      this.state_data.includeImages &&
+      this.state_data.imageOffset < media.length
     ) {
       await this.fetchImageBatch(media);
       return; // Will reschedule alarm from fetchImageBatch
@@ -379,7 +388,7 @@ export class ExportDO implements DurableObject {
 
     // Add images from storage (already fetched in previous alarm cycles)
     // Use level 0 (store) for pre-compressed image formats (JPEG, PNG, WebP)
-    if (this.jobState.includeImages) {
+    if (this.state_data.includeImages) {
       for (const m of media) {
         const imageData = await this.state.storage.get<Uint8Array>(
           `image:${m.r2_key}`,
@@ -400,7 +409,7 @@ export class ExportDO implements DurableObject {
 
     // Store zip in DO storage
     await this.state.storage.put("zipData", zipData);
-    this.jobState.fileSizeBytes = zipData.length;
+    this.state_data.fileSizeBytes = zipData.length;
 
     // Update D1 progress and status
     await this.env.DB.prepare(
@@ -410,19 +419,19 @@ export class ExportDO implements DurableObject {
         "uploading",
         70,
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
     // Transition to uploading
-    this.jobState.phase = "uploading";
-    this.jobState.progress = 70;
+    this.state_data.phase = "uploading";
+    this.state_data.progress = 70;
     await this.persistState();
 
     // Schedule next alarm
-    await this.state.storage.setAlarm(Date.now() + 100);
+    await this.alarms.schedule(100);
 
-    this.log("Assembling phase complete", {
+    this.log.info("Assembling phase complete", {
       files: Object.keys(zipFiles).length,
       zipSizeBytes: zipData.length,
     });
@@ -432,14 +441,14 @@ export class ExportDO implements DurableObject {
    * Fetch a batch of images from R2 (25 per cycle to avoid memory/timeout issues)
    */
   private async fetchImageBatch(media: MediaRecord[]): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
     const BATCH_SIZE = 25;
-    const startOffset = this.jobState.imageOffset;
+    const startOffset = this.state_data.imageOffset;
     const endOffset = Math.min(startOffset + BATCH_SIZE, media.length);
     const batch = media.slice(startOffset, endOffset);
 
-    this.log("Fetching image batch", {
+    this.log.info("Fetching image batch", {
       startOffset,
       endOffset,
       total: media.length,
@@ -452,42 +461,44 @@ export class ExportDO implements DurableObject {
           const imageData = new Uint8Array(await r2Object.arrayBuffer());
           await this.state.storage.put(`image:${m.r2_key}`, imageData);
         } else {
-          this.log("Image not found in R2", { r2Key: m.r2_key });
-          this.jobState.skippedImages.push(m.original_name);
+          this.log.warn("Image not found in R2", { r2Key: m.r2_key });
+          this.state_data.skippedImages.push(m.original_name);
         }
       } catch (error) {
-        this.log("Failed to fetch image", {
+        this.log.warn("Failed to fetch image", {
           r2Key: m.r2_key,
           error: String(error),
         });
-        this.jobState.skippedImages.push(m.original_name);
+        this.state_data.skippedImages.push(m.original_name);
       }
     }
 
     // Update offset and progress
-    this.jobState.imageOffset = endOffset;
+    this.state_data.imageOffset = endOffset;
     const imageProgress = Math.floor((endOffset / media.length) * 60); // 10-70% range
-    this.jobState.progress = 10 + imageProgress;
+    this.state_data.progress = 10 + imageProgress;
     await this.env.DB.prepare(
       "UPDATE storage_exports SET status = ?, progress = ?, updated_at = ? WHERE id = ?",
     )
       .bind(
         "assembling",
-        this.jobState.progress,
+        this.state_data.progress,
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
     // Persist and schedule next batch
     await this.persistState();
-    await this.state.storage.setAlarm(Date.now() + 1000); // 1 second between batches
+    await this.alarms.schedule(1000); // 1 second between batches
   }
 
   private async phaseUploading(): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
-    this.log("Starting uploading phase", { exportId: this.jobState.exportId });
+    this.log.info("Starting uploading phase", {
+      exportId: this.state_data.exportId,
+    });
 
     const zipData = await this.state.storage.get<Uint8Array>("zipData");
     if (!zipData) {
@@ -498,8 +509,8 @@ export class ExportDO implements DurableObject {
     const now = new Date();
     const dateStr = now.toISOString().split("T")[0]; // YYYY-MM-DD
     // Sanitize username to prevent path traversal in R2 key
-    const safeUsername = this.sanitizeForPath(this.jobState.username);
-    const r2Key = `exports/${this.jobState.tenantId}/${this.jobState.exportId}/grove-export-${safeUsername}-${dateStr}.zip`;
+    const safeUsername = this.sanitizeForPath(this.state_data.username);
+    const r2Key = `exports/${this.state_data.tenantId}/${this.state_data.exportId}/grove-export-${safeUsername}-${dateStr}.zip`;
 
     // Upload to R2
     await this.env.EXPORTS_BUCKET.put(r2Key, zipData);
@@ -508,7 +519,7 @@ export class ExportDO implements DurableObject {
     const media = await this.state.storage.get<MediaRecord[]>("media");
 
     // Update D1
-    const itemCountsJson = JSON.stringify(this.jobState.itemCounts);
+    const itemCountsJson = JSON.stringify(this.state_data.itemCounts);
     await this.env.DB.prepare(
       `UPDATE storage_exports
        SET status = ?, r2_key = ?, file_size_bytes = ?, item_counts = ?, progress = ?, updated_at = ?
@@ -521,7 +532,7 @@ export class ExportDO implements DurableObject {
         itemCountsJson,
         90,
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
@@ -532,22 +543,22 @@ export class ExportDO implements DurableObject {
     await this.state.storage.delete("media");
 
     // Clean up image data
-    if (this.jobState.includeImages && media) {
+    if (this.state_data.includeImages && media) {
       for (const m of media) {
         await this.state.storage.delete(`image:${m.r2_key}`);
       }
     }
 
-    this.jobState.r2Key = r2Key;
-    this.jobState.fileSizeBytes = zipData.length;
-    this.jobState.progress = 90;
+    this.state_data.r2Key = r2Key;
+    this.state_data.fileSizeBytes = zipData.length;
+    this.state_data.progress = 90;
 
     // Determine next phase
-    if (this.jobState.deliveryMethod === "email") {
-      this.jobState.phase = "notifying";
+    if (this.state_data.deliveryMethod === "email") {
+      this.state_data.phase = "notifying";
     } else {
-      this.jobState.phase = "complete";
-      this.jobState.progress = 100;
+      this.state_data.phase = "complete";
+      this.state_data.progress = 100;
       await this.env.DB.prepare(
         "UPDATE storage_exports SET status = ?, progress = ?, completed_at = ?, updated_at = ? WHERE id = ?",
       )
@@ -556,35 +567,37 @@ export class ExportDO implements DurableObject {
           100,
           Math.floor(Date.now() / 1000),
           Math.floor(Date.now() / 1000),
-          this.jobState.exportId,
+          this.state_data.exportId,
         )
         .run();
     }
 
     await this.persistState();
 
-    if (this.jobState.phase === "notifying") {
+    if (this.state_data.phase === "notifying") {
       // Schedule next alarm for notifying
-      await this.state.storage.setAlarm(Date.now() + 100);
+      await this.alarms.schedule(100);
     }
 
-    this.log("Uploading phase complete", {
+    this.log.info("Uploading phase complete", {
       r2Key,
       fileSizeBytes: zipData.length,
     });
   }
 
   private async phaseNotifying(): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
-    this.log("Starting notifying phase", { exportId: this.jobState.exportId });
+    this.log.info("Starting notifying phase", {
+      exportId: this.state_data.exportId,
+    });
 
     const zephyrBaseUrl =
       this.env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev";
     const doFetch = this.env.ZEPHYR?.fetch ?? fetch;
 
-    const htmlContent = buildExportEmailHtml(this.jobState);
-    const textContent = buildExportEmailText(this.jobState);
+    const htmlContent = buildExportEmailHtml(this.state_data);
+    const textContent = buildExportEmailText(this.state_data);
 
     const response = await doFetch(`${zephyrBaseUrl}/send`, {
       method: "POST",
@@ -595,7 +608,7 @@ export class ExportDO implements DurableObject {
       body: JSON.stringify({
         type: "transactional",
         template: "raw",
-        to: this.jobState.userEmail,
+        to: this.state_data.userEmail,
         subject: "Your Grove export is ready",
         html: htmlContent,
         text: textContent,
@@ -617,46 +630,31 @@ export class ExportDO implements DurableObject {
         100,
         Math.floor(Date.now() / 1000),
         Math.floor(Date.now() / 1000),
-        this.jobState.exportId,
+        this.state_data.exportId,
       )
       .run();
 
-    this.jobState.phase = "complete";
-    this.jobState.progress = 100;
+    this.state_data.phase = "complete";
+    this.state_data.progress = 100;
     await this.persistState();
 
-    this.log("Notifying phase complete", {
-      email: this.jobState.userEmail,
+    this.log.info("Notifying phase complete", {
+      email: this.state_data.userEmail,
     });
   }
 
-  // ===========================================================================
-  // UTILITIES
-  // ===========================================================================
-
-  private async loadState(): Promise<void> {
-    if (!this.jobState) {
-      const stored = await this.state.storage.get<ExportJobState>("jobState");
-      if (stored) {
-        this.jobState = stored;
-      }
-    }
-  }
-
-  private async persistState(): Promise<void> {
-    if (this.jobState) {
-      await this.state.storage.put("jobState", this.jobState);
-    }
-  }
+  // ════════════════════════════════════════════════════════════════════
+  // Utilities
+  // ════════════════════════════════════════════════════════════════════
 
   private async handleError(error: unknown): Promise<void> {
-    if (!this.jobState) return;
+    if (!this.state_data) return;
 
     const internalError = String(error);
     const userMessage = "Export processing failed. Please try again.";
 
-    this.jobState.phase = "failed";
-    this.jobState.errorMessage = userMessage;
+    this.state_data.phase = "failed";
+    this.state_data.errorMessage = userMessage;
 
     await this.persistState();
     await this.state.storage.deleteAlarm();
@@ -668,18 +666,20 @@ export class ExportDO implements DurableObject {
         .bind(
           "failed",
           userMessage,
-          this.jobState.progress,
+          this.state_data.progress,
           Math.floor(Date.now() / 1000),
-          this.jobState.exportId,
+          this.state_data.exportId,
         )
         .run();
     } catch (dbError) {
       // DB update failed — DO storage has the truth, D1 will be reconciled by staleness check
-      this.log("Failed to update D1 on error", { error: String(dbError) });
+      this.log.error("Failed to update D1 on error", {
+        error: String(dbError),
+      });
     }
 
     // Log the full internal error for debugging — never expose to users
-    this.log("Export failed", { error: internalError });
+    this.log.error("Export failed", { error: internalError });
   }
 
   private buildPostFrontmatter(
@@ -699,7 +699,7 @@ export class ExportDO implements DurableObject {
     let featuredImage = post.featured_image;
     if (
       featuredImage &&
-      this.jobState?.includeImages &&
+      this.state_data?.includeImages &&
       mediaMap.has(featuredImage)
     ) {
       featuredImage = `images/${mediaMap.get(featuredImage)}`;
@@ -781,14 +781,14 @@ export class ExportDO implements DurableObject {
   }
 
   private buildReadme(): string {
-    const counts = this.jobState?.itemCounts || {
+    const counts = this.state_data?.itemCounts || {
       posts: 0,
       pages: 0,
       images: 0,
     };
     const skippedMsg =
-      this.jobState && this.jobState.skippedImages.length > 0
-        ? `\nNote: ${this.jobState.skippedImages.length} images couldn't be included — they may have been deleted.\n`
+      this.state_data && this.state_data.skippedImages.length > 0
+        ? `\nNote: ${this.state_data.skippedImages.length} images couldn't be included — they may have been deleted.\n`
         : "";
 
     const now = new Date().toISOString().split("T")[0];
@@ -819,18 +819,6 @@ This is your data. You own it. Always have, always will.
 
 Exported from [Grove](https://grove.place) on ${now}
 `;
-  }
-
-  private log(message: string, data?: object): void {
-    console.log(
-      JSON.stringify({
-        do: "ExportDO",
-        id: this.state.id.toString(),
-        message,
-        ...data,
-        timestamp: new Date().toISOString(),
-      }),
-    );
   }
 }
 

@@ -93,4 +93,11 @@ export interface LoomConfig {
    * @default true
    */
   blockOnInit?: boolean;
+  /**
+   * Whether to use hibernation-aware WebSocket API.
+   * When true, WebSocketManager uses `state.acceptWebSocket()` instead
+   * of `server.accept()`, enabling the DO to hibernate between messages.
+   * @default false
+   */
+  hibernation?: boolean;
 }

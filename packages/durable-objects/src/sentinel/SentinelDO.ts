@@ -4,14 +4,20 @@
  * Following the Loom pattern, SentinelDO provides:
  * - Long-running test execution (bypasses Worker CPU limits)
  * - Batched D1 writes for metrics
- * - Real-time progress via WebSocket
+ * - Real-time progress via WebSocket (hibernation-aware)
  * - Persistent state across hibernation
  *
  * ID Pattern: `sentinel:{tenantId}:{runId}`
  *
- * @see docs/patterns/loom-durable-objects-pattern.md
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
+import {
+  LoomDO,
+  type LoomRoute,
+  type LoomConfig,
+  type LoomRequestContext,
+} from "@autumnsgrove/groveengine/loom";
 import type {
   LoadProfile,
   RunResults,
@@ -25,13 +31,13 @@ import { executeOperation } from "./operations.js";
 // TYPES
 // =============================================================================
 
-interface SentinelDOEnv {
+interface SentinelDOEnv extends Record<string, unknown> {
   DB: D1Database;
   KV: KVNamespace;
   IMAGES: R2Bucket;
 }
 
-interface SentinelDOState {
+interface SentinelState {
   runId: string;
   tenantId: string;
   profile: LoadProfile;
@@ -49,93 +55,119 @@ interface SentinelDOState {
 
   // Retry counter for metrics flush (prevents infinite accumulation on persistent D1 issues)
   metricsFlushRetries: number;
-
-  // WebSocket connections for real-time updates
-  // Note: This Set is recreated after hibernation as Sets cannot be serialized
-  connections: Set<WebSocket>;
 }
+
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+/** Max samples to keep for latency tracking (reservoir sampling above this) */
+const MAX_LATENCY_SAMPLES = 10_000;
+
+/** Max flush retries before discarding metrics */
+const MAX_FLUSH_RETRIES = 3;
+
+/** Metrics flush threshold */
+const METRICS_FLUSH_THRESHOLD = 100;
+
+/** Checkpoint interval: 30 seconds */
+const CHECKPOINT_INTERVAL_MS = 30_000;
 
 // =============================================================================
 // SENTINEL DURABLE OBJECT
 // =============================================================================
 
-export class SentinelDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: SentinelDOEnv;
-  private runState: SentinelDOState | null = null;
-
-  constructor(state: DurableObjectState, env: SentinelDOEnv) {
-    this.state = state;
-    this.env = env;
+export class SentinelDO extends LoomDO<SentinelState, SentinelDOEnv> {
+  config(): LoomConfig {
+    return { name: "SentinelDO", blockOnInit: false, hibernation: true };
   }
 
-  /**
-   * Handle incoming requests
-   * - POST /start - Start test execution
-   * - POST /cancel - Cancel running test
-   * - GET /status - Get current status
-   * - GET /ws - WebSocket upgrade for real-time updates
-   */
+  protected async loadState(): Promise<SentinelState | null> {
+    const stored = await this.state.storage.get<SentinelState>("runState");
+    if (stored) {
+      // Reset retry counter on load (fresh start after hibernation)
+      return {
+        ...stored,
+        metricsFlushRetries: stored.metricsFlushRetries ?? 0,
+      };
+    }
+    return null;
+  }
+
+  protected async persistState(): Promise<void> {
+    if (this.state_data) {
+      await this.state.storage.put("runState", this.state_data);
+    }
+  }
+
+  routes(): LoomRoute[] {
+    return [
+      {
+        method: "POST",
+        path: "/start",
+        handler: (ctx) => this.handleStart(ctx),
+      },
+      {
+        method: "POST",
+        path: "/cancel",
+        handler: () => this.handleCancel(),
+      },
+      {
+        method: "GET",
+        path: "/status",
+        handler: () => this.handleStatus(),
+      },
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Custom fetch override — WebSocket upgrade
+  // ════════════════════════════════════════════════════════════════════
+
   async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-
-    // WebSocket upgrade
     if (request.headers.get("Upgrade") === "websocket") {
-      return this.handleWebSocket();
+      return this.sockets.accept(request);
     }
+    return super.fetch(request);
+  }
 
-    // REST endpoints
-    switch (url.pathname) {
-      case "/start":
-        return this.handleStart(request);
-      case "/cancel":
-        return this.handleCancel();
-      case "/status":
-        return this.handleStatus();
-      default:
-        return new Response("Not found", { status: 404 });
+  // ════════════════════════════════════════════════════════════════════
+  // WebSocket Handlers (Hibernation-aware)
+  // ════════════════════════════════════════════════════════════════════
+
+  protected async onWebSocketMessage(
+    _ws: WebSocket,
+    message: string | ArrayBuffer,
+  ): Promise<void> {
+    try {
+      const data = JSON.parse(message as string);
+      this.log.debug("WebSocket message", data);
+    } catch {
+      this.log.warn("Invalid WebSocket message");
     }
   }
 
-  /**
-   * Handle alarm - used for periodic operations during test
-   */
-  async alarm(): Promise<void> {
-    if (!this.runState || this.runState.status !== "running") {
-      return;
-    }
-
-    // Execute batch of operations
-    await this.executeBatch();
-
-    // Check if test should continue
-    const elapsed =
-      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
-    if (
-      elapsed < this.runState.profile.durationSeconds &&
-      this.runState.status === "running"
-    ) {
-      // Schedule next batch
-      await this.state.storage.setAlarm(Date.now() + 1000); // 1 second intervals
-    } else {
-      // Test complete
-      await this.finishTest();
-    }
+  protected async onWebSocketClose(
+    ws: WebSocket,
+    code: number,
+    reason: string,
+  ): Promise<void> {
+    ws.close(code, reason);
   }
 
-  // ===========================================================================
-  // REQUEST HANDLERS
-  // ===========================================================================
+  // ════════════════════════════════════════════════════════════════════
+  // Request Handlers
+  // ════════════════════════════════════════════════════════════════════
 
-  private async handleStart(request: Request): Promise<Response> {
-    const body = (await request.json()) as {
+  private async handleStart(ctx: LoomRequestContext): Promise<Response> {
+    const body = (await ctx.request.json()) as {
       runId: string;
       tenantId: string;
       profile: LoadProfile;
     };
 
     // Initialize state
-    this.runState = {
+    this.state_data = {
       runId: body.runId,
       tenantId: body.tenantId,
       profile: body.profile,
@@ -147,10 +179,8 @@ export class SentinelDO implements DurableObject {
       metricsBuffer: [],
       latencies: [],
       metricsFlushRetries: 0,
-      connections: new Set(),
     };
 
-    // Persist initial state (without connections Set - it's not serializable)
     await this.persistState();
 
     // Update run status in D1
@@ -166,22 +196,22 @@ export class SentinelDO implements DurableObject {
       .run();
 
     // Schedule first batch
-    await this.state.storage.setAlarm(Date.now() + 100);
+    await this.alarms.schedule(100);
 
-    this.log("Test started", { runId: body.runId });
+    this.log.info("Test started", { runId: body.runId });
 
     return Response.json({ success: true, status: "running" });
   }
 
   private async handleCancel(): Promise<Response> {
-    if (!this.runState) {
+    if (!this.state_data) {
       return Response.json(
         { success: false, error: "No active test" },
         { status: 400 },
       );
     }
 
-    this.runState.status = "cancelled";
+    this.state_data.status = "cancelled";
     await this.persistState();
     await this.state.storage.deleteAlarm();
 
@@ -189,100 +219,86 @@ export class SentinelDO implements DurableObject {
     await this.env.DB.prepare(
       "UPDATE sentinel_runs SET status = ?, updated_at = ? WHERE id = ?",
     )
-      .bind("cancelled", Math.floor(Date.now() / 1000), this.runState.runId)
+      .bind("cancelled", Math.floor(Date.now() / 1000), this.state_data.runId)
       .run();
 
-    this.broadcast({ type: "cancelled" });
-    this.log("Test cancelled");
+    this.sockets.broadcast({ type: "cancelled" });
+    this.log.info("Test cancelled");
 
     return Response.json({ success: true, status: "cancelled" });
   }
 
   private async handleStatus(): Promise<Response> {
-    await this.loadState();
-
-    if (!this.runState) {
+    if (!this.state_data) {
       return Response.json({ status: "idle" });
     }
 
-    const elapsed = this.runState.startedAt
-      ? (Date.now() - this.runState.startedAt) / 1000
+    const elapsed = this.state_data.startedAt
+      ? (Date.now() - this.state_data.startedAt) / 1000
       : 0;
 
     return Response.json({
-      status: this.runState.status,
-      runId: this.runState.runId,
+      status: this.state_data.status,
+      runId: this.state_data.runId,
       elapsed,
-      completedOps: this.runState.completedOps,
-      failedOps: this.runState.failedOps,
+      completedOps: this.state_data.completedOps,
+      failedOps: this.state_data.failedOps,
       progress: Math.min(
         100,
-        (elapsed / this.runState.profile.durationSeconds) * 100,
+        (elapsed / this.state_data.profile.durationSeconds) * 100,
       ),
     });
   }
 
-  private handleWebSocket(): Response {
-    const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
+  // ════════════════════════════════════════════════════════════════════
+  // Alarm Handler
+  // ════════════════════════════════════════════════════════════════════
 
-    this.state.acceptWebSocket(server);
+  protected async onAlarm(): Promise<void> {
+    if (!this.state_data || this.state_data.status !== "running") {
+      return;
+    }
 
-    return new Response(null, {
-      status: 101,
-      webSocket: client,
-    });
-  }
+    // Execute batch of operations
+    await this.executeBatch();
 
-  // ===========================================================================
-  // HIBERNATION-AWARE WEBSOCKET (Loom Pattern)
-  // ===========================================================================
-
-  async webSocketMessage(
-    ws: WebSocket,
-    message: string | ArrayBuffer,
-  ): Promise<void> {
-    // Handle client messages (e.g., subscription preferences)
-    try {
-      const data = JSON.parse(message as string);
-      this.log("WebSocket message", data);
-    } catch (error) {
-      this.log("Invalid WebSocket message", { error: String(error) });
+    // Check if test should continue
+    const elapsed =
+      (Date.now() - (this.state_data.startedAt ?? Date.now())) / 1000;
+    if (
+      elapsed < this.state_data.profile.durationSeconds &&
+      this.state_data.status === "running"
+    ) {
+      // Schedule next batch (1 second intervals)
+      await this.alarms.schedule(1000);
+    } else {
+      // Test complete
+      await this.finishTest();
     }
   }
 
-  async webSocketClose(
-    ws: WebSocket,
-    code: number,
-    reason: string,
-  ): Promise<void> {
-    // Connection closed
-    ws.close(code, reason);
-  }
-
-  // ===========================================================================
-  // TEST EXECUTION (Following Loom Batching Pattern)
-  // ===========================================================================
+  // ════════════════════════════════════════════════════════════════════
+  // Test Execution (Following Loom Batching Pattern)
+  // ════════════════════════════════════════════════════════════════════
 
   private async executeBatch(): Promise<void> {
-    if (!this.runState || this.runState.status !== "running") return;
-
-    await this.loadState();
+    if (!this.state_data || this.state_data.status !== "running") return;
 
     const elapsed =
-      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
-    const targetOps = getOpsPerSecondAt(this.runState.profile, elapsed);
+      (Date.now() - (this.state_data.startedAt ?? Date.now())) / 1000;
+    const targetOps = getOpsPerSecondAt(this.state_data.profile, elapsed);
     const batchSize = Math.min(
       Math.ceil(targetOps),
-      this.runState.profile.concurrency,
+      this.state_data.profile.concurrency,
     );
 
-    const { tenantId, profile } = this.runState;
+    const { tenantId, profile } = this.state_data;
     const promises: Promise<void>[] = [];
 
     for (let i = 0; i < batchSize; i++) {
       const system = selectWeightedSystem(profile.targetSystems);
-      const index = this.runState.completedOps + this.runState.failedOps + i;
+      const index =
+        this.state_data.completedOps + this.state_data.failedOps + i;
       const operationStartedAt = new Date();
 
       promises.push(
@@ -296,17 +312,17 @@ export class SentinelDO implements DurableObject {
         )
           .then((result) => {
             if (result.success) {
-              this.runState!.completedOps++;
+              this.state_data!.completedOps++;
               if (result.latencyMs) {
-                const MAX_LATENCY_SAMPLES = 10_000;
-                const latencies = this.runState!.latencies;
+                const latencies = this.state_data!.latencies;
                 if (latencies.length < MAX_LATENCY_SAMPLES) {
                   latencies.push(result.latencyMs);
                 } else {
                   // Reservoir sampling: replace a random entry to maintain representative distribution
                   const idx = Math.floor(
                     Math.random() *
-                      (this.runState!.completedOps + this.runState!.failedOps),
+                      (this.state_data!.completedOps +
+                        this.state_data!.failedOps),
                   );
                   if (idx < MAX_LATENCY_SAMPLES) {
                     latencies[idx] = result.latencyMs;
@@ -314,13 +330,13 @@ export class SentinelDO implements DurableObject {
                 }
               }
             } else {
-              this.runState!.failedOps++;
+              this.state_data!.failedOps++;
             }
 
             // Add to metrics buffer (batched write)
-            this.runState!.metricsBuffer.push({
+            this.state_data!.metricsBuffer.push({
               id: crypto.randomUUID(),
-              runId: this.runState!.runId,
+              runId: this.state_data!.runId,
               tenantId,
               operationType: system,
               operationName: result.operationName,
@@ -336,7 +352,7 @@ export class SentinelDO implements DurableObject {
             });
           })
           .catch(() => {
-            this.runState!.failedOps++;
+            this.state_data!.failedOps++;
           }),
       );
     }
@@ -344,25 +360,28 @@ export class SentinelDO implements DurableObject {
     await Promise.all(promises);
 
     // Flush metrics buffer if large enough (Loom batching pattern)
-    if (this.runState.metricsBuffer.length >= 100) {
+    if (this.state_data.metricsBuffer.length >= METRICS_FLUSH_THRESHOLD) {
       await this.flushMetrics();
     }
 
     // Record checkpoint every 30 seconds
-    if (Date.now() - this.runState.lastCheckpointAt >= 30000) {
+    if (
+      Date.now() - this.state_data.lastCheckpointAt >=
+      CHECKPOINT_INTERVAL_MS
+    ) {
       await this.recordCheckpoint(elapsed);
-      this.runState.lastCheckpointAt = Date.now();
+      this.state_data.lastCheckpointAt = Date.now();
     }
 
     // Persist state
     await this.persistState();
 
     // Broadcast progress
-    this.broadcast({
+    this.sockets.broadcast({
       type: "progress",
       elapsed,
-      completedOps: this.runState.completedOps,
-      failedOps: this.runState.failedOps,
+      completedOps: this.state_data.completedOps,
+      failedOps: this.state_data.failedOps,
       progress: Math.min(100, (elapsed / profile.durationSeconds) * 100),
     });
   }
@@ -371,10 +390,10 @@ export class SentinelDO implements DurableObject {
    * Flush metrics to D1 in batch (Loom pattern)
    */
   private async flushMetrics(): Promise<void> {
-    if (!this.runState || this.runState.metricsBuffer.length === 0) return;
+    if (!this.state_data || this.state_data.metricsBuffer.length === 0) return;
 
-    const metrics = this.runState.metricsBuffer;
-    this.runState.metricsBuffer = [];
+    const metrics = this.state_data.metricsBuffer;
+    this.state_data.metricsBuffer = [];
 
     // Batch insert using D1 batch()
     const statements = metrics.map((m) =>
@@ -404,30 +423,29 @@ export class SentinelDO implements DurableObject {
 
     try {
       await this.env.DB.batch(statements);
-      this.log("Flushed metrics", { count: metrics.length });
+      this.log.info("Flushed metrics", { count: metrics.length });
       // Reset retry counter on successful flush
-      this.runState.metricsFlushRetries = 0;
+      this.state_data.metricsFlushRetries = 0;
     } catch (error) {
-      this.log("Failed to flush metrics", { error: String(error) });
-      this.runState.metricsFlushRetries++;
+      this.log.error("Failed to flush metrics", { error: String(error) });
+      this.state_data.metricsFlushRetries++;
 
       // Re-add to buffer for retry, but discard after max retries to prevent infinite growth
-      const MAX_FLUSH_RETRIES = 3;
-      if (this.runState.metricsFlushRetries < MAX_FLUSH_RETRIES) {
-        this.runState.metricsBuffer.push(...metrics);
+      if (this.state_data.metricsFlushRetries < MAX_FLUSH_RETRIES) {
+        this.state_data.metricsBuffer.push(...metrics);
       } else {
-        this.log("Discarding metrics after max retries", {
+        this.log.warn("Discarding metrics after max retries", {
           count: metrics.length,
-          retries: this.runState.metricsFlushRetries,
+          retries: this.state_data.metricsFlushRetries,
         });
       }
     }
   }
 
   private async recordCheckpoint(elapsedSeconds: number): Promise<void> {
-    if (!this.runState) return;
+    if (!this.state_data) return;
 
-    const latencies = this.runState.latencies.sort((a, b) => a - b);
+    const latencies = this.state_data.latencies.sort((a, b) => a - b);
     const avgLatency =
       latencies.length > 0
         ? latencies.reduce((a, b) => a + b, 0) / latencies.length
@@ -435,19 +453,19 @@ export class SentinelDO implements DurableObject {
 
     const checkpoint: SentinelCheckpoint = {
       id: crypto.randomUUID(),
-      runId: this.runState.runId,
-      tenantId: this.runState.tenantId,
+      runId: this.state_data.runId,
+      tenantId: this.state_data.tenantId,
       checkpointIndex: Math.floor(elapsedSeconds / 30),
       recordedAt: new Date(),
       elapsedSeconds: Math.floor(elapsedSeconds),
-      operationsCompleted: this.runState.completedOps,
-      operationsFailed: this.runState.failedOps,
+      operationsCompleted: this.state_data.completedOps,
+      operationsFailed: this.state_data.failedOps,
       currentThroughput:
-        this.runState.completedOps / Math.max(elapsedSeconds, 1),
+        this.state_data.completedOps / Math.max(elapsedSeconds, 1),
       avgLatencyMs: avgLatency,
       errorRate:
-        this.runState.failedOps /
-        Math.max(this.runState.completedOps + this.runState.failedOps, 1),
+        this.state_data.failedOps /
+        Math.max(this.state_data.completedOps + this.state_data.failedOps, 1),
     };
 
     await this.env.DB.prepare(
@@ -473,21 +491,21 @@ export class SentinelDO implements DurableObject {
   }
 
   private async finishTest(): Promise<void> {
-    if (!this.runState) return;
+    if (!this.state_data) return;
 
     // Flush remaining metrics
     await this.flushMetrics();
 
     // Calculate final results
-    const latencies = this.runState.latencies.sort((a, b) => a - b);
-    const totalOps = this.runState.completedOps + this.runState.failedOps;
+    const latencies = this.state_data.latencies.sort((a, b) => a - b);
+    const totalOps = this.state_data.completedOps + this.state_data.failedOps;
     const elapsed =
-      (Date.now() - (this.runState.startedAt ?? Date.now())) / 1000;
+      (Date.now() - (this.state_data.startedAt ?? Date.now())) / 1000;
 
     const results: RunResults = {
       totalOperations: totalOps,
-      successfulOperations: this.runState.completedOps,
-      failedOperations: this.runState.failedOps,
+      successfulOperations: this.state_data.completedOps,
+      failedOperations: this.state_data.failedOps,
       avgLatencyMs:
         latencies.length > 0
           ? latencies.reduce((a, b) => a + b, 0) / latencies.length
@@ -497,8 +515,8 @@ export class SentinelDO implements DurableObject {
       p99LatencyMs: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
       maxLatencyMs: latencies[latencies.length - 1] ?? 0,
       minLatencyMs: latencies[0] ?? 0,
-      throughputOpsPerSec: this.runState.completedOps / Math.max(elapsed, 1),
-      errorCount: this.runState.failedOps,
+      throughputOpsPerSec: this.state_data.completedOps / Math.max(elapsed, 1),
+      errorCount: this.state_data.failedOps,
       errorTypes: {},
     };
 
@@ -526,81 +544,24 @@ export class SentinelDO implements DurableObject {
         results.throughputOpsPerSec,
         results.errorCount,
         Math.floor(Date.now() / 1000),
-        this.runState.runId,
+        this.state_data.runId,
       )
       .run();
 
-    this.runState.status = "completed";
+    this.state_data.status = "completed";
     await this.persistState();
 
     // Broadcast completion
-    this.broadcast({ type: "completed", results });
+    this.sockets.broadcast({ type: "completed", results });
 
-    this.log("Test completed", {
-      runId: this.runState.runId,
+    this.log.info("Test completed", {
+      runId: this.state_data.runId,
       totalOps,
       successRate:
         totalOps > 0
-          ? ((this.runState.completedOps / totalOps) * 100).toFixed(1)
+          ? ((this.state_data.completedOps / totalOps) * 100).toFixed(1)
           : "0.0",
       throughput: results.throughputOpsPerSec.toFixed(1),
     });
-  }
-
-  // ===========================================================================
-  // UTILITIES
-  // ===========================================================================
-
-  private async loadState(): Promise<void> {
-    if (!this.runState) {
-      const stored =
-        await this.state.storage.get<Omit<SentinelDOState, "connections">>(
-          "runState",
-        );
-      if (stored) {
-        // Re-initialize connections Set after hibernation - Sets cannot be serialized
-        // Also reset retry counter on load (fresh start after hibernation)
-        this.runState = {
-          ...stored,
-          metricsFlushRetries: stored.metricsFlushRetries ?? 0,
-          connections: new Set(),
-        };
-      }
-    }
-  }
-
-  private async persistState(): Promise<void> {
-    if (this.runState) {
-      // Store state without the connections Set (not serializable)
-      const { connections, ...persistable } = this.runState;
-      await this.state.storage.put("runState", persistable);
-    }
-  }
-
-  private broadcast(message: object): void {
-    const data = JSON.stringify(message);
-    for (const ws of this.state.getWebSockets()) {
-      try {
-        ws.send(data);
-      } catch {
-        try {
-          ws.close();
-        } catch {
-          /* already closed */
-        }
-      }
-    }
-  }
-
-  private log(message: string, data?: object): void {
-    console.log(
-      JSON.stringify({
-        do: "SentinelDO",
-        id: this.state.id.toString(),
-        message,
-        ...data,
-        timestamp: new Date().toISOString(),
-      }),
-    );
   }
 }

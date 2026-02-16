@@ -74,7 +74,9 @@ export abstract class LoomDO<
     // Initialize utilities
     this.log = new LoomLogger(this._config.name, state.id.toString());
     this.alarms = new AlarmScheduler(state.storage, this.log);
-    this.sockets = new WebSocketManager(state, this.log);
+    this.sockets = new WebSocketManager(state, this.log, {
+      hibernation: this._config.hibernation,
+    });
     this.locks = new PromiseLockMap();
     this.sql = new SqlHelper(state.storage.sql, this.log);
     this.store = new JsonStore(this.sql, this.log);

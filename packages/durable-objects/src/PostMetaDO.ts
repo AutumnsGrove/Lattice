@@ -13,8 +13,16 @@
  *
  * Part of the Loom pattern - Grove's coordination layer.
  * Split from PostContentDO for optimal hibernation behavior.
+ *
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
+import {
+  LoomDO,
+  type LoomRoute,
+  type LoomConfig,
+  type LoomRequestContext,
+} from "@autumnsgrove/groveengine/loom";
 import { DEFAULT_TIER, type TierKey } from "./tiers.js";
 
 // ============================================================================
@@ -63,6 +71,18 @@ const MAX_VIEW_LOG_ROWS = 50_000;
  */
 const VIEW_LOG_CHECK_INTERVAL = 100;
 
+/** Alarm interval: 1 hour */
+const ALARM_INTERVAL_MS = 60 * 60 * 1000;
+
+/** Presence timeout: 5 minutes */
+const PRESENCE_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** View dedup window: 5 minutes per session */
+const VIEW_DEDUP_MS = 5 * 60 * 1000;
+
+/** Dirty-flag persist throttle: 60 seconds */
+const PERSIST_THROTTLE_MS = 60_000;
+
 export interface PostMeta {
   tenantId: string;
   slug: string;
@@ -90,43 +110,31 @@ export interface PresenceInfo {
   lastActivity: number;
 }
 
-interface WSMessage {
+interface WSMessage extends Record<string, unknown> {
   type: "reaction" | "presence" | "view";
   data: unknown;
+}
+
+interface MetaEnv extends Record<string, unknown> {
+  DB: D1Database;
 }
 
 // ============================================================================
 // PostMetaDO Class
 // ============================================================================
 
-export class PostMetaDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: Env;
-
-  private meta: PostMeta | null = null;
+export class PostMetaDO extends LoomDO<PostMeta, MetaEnv> {
   private presence: Map<string, number> = new Map();
-  private connections: Set<WebSocket> = new Set();
-  private initialized: boolean = false;
-
-  private isDirty: boolean = false;
-  private lastPersist: number = 0;
 
   // Track view inserts for inline growth check
   private viewInsertsSinceCheck: number = 0;
 
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-
-    this.state.blockConcurrencyWhile(async () => {
-      await this.initializeStorage();
-    });
+  config(): LoomConfig {
+    return { name: "PostMetaDO" };
   }
 
-  private async initializeStorage(): Promise<void> {
-    if (this.initialized) return;
-
-    await this.state.storage.sql.exec(`
+  protected schema(): string {
+    return `
       CREATE TABLE IF NOT EXISTS meta (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
@@ -145,88 +153,89 @@ export class PostMetaDO implements DurableObject {
         timestamp INTEGER NOT NULL,
         session_id TEXT
       );
-    `);
-
-    const stored = this.state.storage.sql
-      .exec("SELECT value FROM meta WHERE key = 'post_meta'")
-      .one();
-
-    if (stored?.value) {
-      this.meta = JSON.parse(stored.value as string);
-    }
-
-    this.initialized = true;
+    `;
   }
+
+  protected async loadState(): Promise<PostMeta | null> {
+    const stored = this.sql.queryOne<{ value: string }>(
+      "SELECT value FROM meta WHERE key = 'post_meta'",
+    );
+    if (!stored?.value) return null;
+    return JSON.parse(stored.value);
+  }
+
+  routes(): LoomRoute[] {
+    return [
+      { method: "GET", path: "/meta", handler: () => this.handleGetMeta() },
+      {
+        method: "POST",
+        path: "/meta/init",
+        handler: (ctx) => this.handleInitMeta(ctx),
+      },
+      {
+        method: "POST",
+        path: "/view",
+        handler: (ctx) => this.handleRecordView(ctx),
+      },
+      {
+        method: "GET",
+        path: "/reactions",
+        handler: () => this.handleGetReactions(),
+      },
+      {
+        method: "POST",
+        path: "/reactions",
+        handler: (ctx) => this.handleAddReaction(ctx),
+      },
+      {
+        method: "DELETE",
+        path: "/reactions",
+        handler: (ctx) => this.handleRemoveReaction(ctx),
+      },
+      {
+        method: "GET",
+        path: "/presence",
+        handler: () => this.handleGetPresence(),
+      },
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Custom fetch override — WebSocket upgrade needs special handling
+  // ════════════════════════════════════════════════════════════════════
 
   async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    try {
-      if (request.headers.get("Upgrade") === "websocket") {
-        return this.handleWebSocket();
-      }
-
-      if (path === "/meta" && request.method === "GET") {
-        return this.handleGetMeta();
-      }
-
-      if (path === "/meta/init" && request.method === "POST") {
-        return this.handleInitMeta(request);
-      }
-
-      if (path === "/view" && request.method === "POST") {
-        return this.handleRecordView(request);
-      }
-
-      if (path === "/reactions" && request.method === "GET") {
-        return this.handleGetReactions();
-      }
-
-      if (path === "/reactions" && request.method === "POST") {
-        return this.handleAddReaction(request);
-      }
-
-      if (path === "/reactions" && request.method === "DELETE") {
-        return this.handleRemoveReaction(request);
-      }
-
-      if (path === "/presence" && request.method === "GET") {
-        return this.handleGetPresence();
-      }
-
-      return new Response("Not found", { status: 404 });
-    } catch (err) {
-      console.error("[PostMetaDO] Error:", err);
-      return new Response(
-        JSON.stringify({
-          error: err instanceof Error ? err.message : "Internal error",
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
+    // WebSocket upgrade bypasses normal routing
+    if (request.headers.get("Upgrade") === "websocket") {
+      return this.handleWebSocket();
     }
+    return super.fetch(request);
   }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Route Handlers
+  // ════════════════════════════════════════════════════════════════════
 
   private async handleGetMeta(): Promise<Response> {
-    if (!this.meta) {
+    if (!this.state_data) {
       return new Response("Post not initialized", { status: 404 });
     }
-    return Response.json(this.meta);
+    return Response.json(this.state_data);
   }
 
-  private async handleInitMeta(request: Request): Promise<Response> {
-    const data = (await request.json()) as {
+  private async handleInitMeta(ctx: LoomRequestContext): Promise<Response> {
+    const data = (await ctx.request.json()) as {
       tenantId: string;
       slug: string;
-      tier?: TierKey; // Optional tier for popular threshold calculation
+      tier?: TierKey;
     };
 
     if (!data.tenantId || !data.slug) {
       return new Response("Missing tenantId or slug", { status: 400 });
     }
 
-    if (!this.meta) {
-      this.meta = {
+    if (!this.state_data) {
+      this.state_data = {
         tenantId: data.tenantId,
         slug: data.slug,
         tier: data.tier,
@@ -238,21 +247,21 @@ export class PostMetaDO implements DurableObject {
       await this.persistMeta();
 
       // Schedule initial cleanup alarm (with dedup check)
-      await this.ensureAlarmScheduled();
-    } else if (data.tier && this.meta.tier !== data.tier) {
+      await this.alarms.ensureScheduled(ALARM_INTERVAL_MS);
+    } else if (data.tier && this.state_data.tier !== data.tier) {
       // Update tier if it changed (e.g., tenant upgraded)
-      this.meta.tier = data.tier;
+      this.state_data.tier = data.tier;
       this.updatePopularStatus(); // Recalculate with new threshold
       await this.persistMeta();
     }
 
-    return Response.json({ success: true, meta: this.meta });
+    return Response.json({ success: true, meta: this.state_data });
   }
 
-  private async handleRecordView(request: Request): Promise<Response> {
-    const data = (await request.json()) as { sessionId?: string };
+  private async handleRecordView(ctx: LoomRequestContext): Promise<Response> {
+    const data = (await ctx.request.json()) as { sessionId?: string };
 
-    if (!this.meta) {
+    if (!this.state_data) {
       return new Response("Post not initialized", { status: 400 });
     }
 
@@ -260,13 +269,13 @@ export class PostMetaDO implements DurableObject {
     const sessionKey = data.sessionId || "anonymous";
     const lastView = this.presence.get(sessionKey) || 0;
 
-    if (now - lastView > 5 * 60 * 1000) {
-      this.meta.viewCount++;
-      this.meta.lastViewed = now;
+    if (now - lastView > VIEW_DEDUP_MS) {
+      this.state_data.viewCount++;
+      this.state_data.lastViewed = now;
       this.presence.set(sessionKey, now);
-      this.isDirty = true;
+      this.markDirty();
 
-      await this.state.storage.sql.exec(
+      this.sql.exec(
         "INSERT INTO view_log (timestamp, session_id) VALUES (?, ?)",
         now,
         sessionKey,
@@ -275,35 +284,36 @@ export class PostMetaDO implements DurableObject {
       // Inline growth check - prevents unbounded growth between alarms
       this.viewInsertsSinceCheck++;
       if (this.viewInsertsSinceCheck >= VIEW_LOG_CHECK_INTERVAL) {
-        await this.trimViewLogIfNeeded();
+        this.trimViewLogIfNeeded();
         this.viewInsertsSinceCheck = 0;
       }
 
       this.updatePopularStatus();
-      this.broadcast({
+      this.broadcastMessage({
         type: "view",
-        data: { viewCount: this.meta.viewCount },
+        data: { viewCount: this.state_data.viewCount },
       });
 
-      if (this.isDirty && now - this.lastPersist > 60_000) {
-        await this.persistMeta();
-      }
+      await this.persistIfDirty(PERSIST_THROTTLE_MS);
     }
 
-    return Response.json({ success: true, viewCount: this.meta.viewCount });
+    return Response.json({
+      success: true,
+      viewCount: this.state_data.viewCount,
+    });
   }
 
   private async handleGetReactions(): Promise<Response> {
-    if (!this.meta) {
+    if (!this.state_data) {
       return new Response("Post not initialized", { status: 404 });
     }
-    return Response.json(this.meta.reactions);
+    return Response.json(this.state_data.reactions);
   }
 
-  private async handleAddReaction(request: Request): Promise<Response> {
-    const data = (await request.json()) as ReactionEvent;
+  private async handleAddReaction(ctx: LoomRequestContext): Promise<Response> {
+    const data = (await ctx.request.json()) as ReactionEvent;
 
-    if (!this.meta) {
+    if (!this.state_data) {
       return new Response("Post not initialized", { status: 400 });
     }
 
@@ -314,7 +324,7 @@ export class PostMetaDO implements DurableObject {
     const userId = data.userId || "anonymous";
     const now = Date.now();
 
-    const existing = this.state.storage.sql
+    const existing = this.sql
       .exec(
         "SELECT 1 FROM reactions WHERE user_id = ? AND reaction_type = ?",
         userId,
@@ -326,11 +336,11 @@ export class PostMetaDO implements DurableObject {
       return Response.json({
         success: false,
         message: "Already reacted",
-        reactions: this.meta.reactions,
+        reactions: this.state_data.reactions,
       });
     }
 
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       "INSERT INTO reactions (user_id, reaction_type, created_at) VALUES (?, ?, ?)",
       userId,
       data.type,
@@ -338,26 +348,31 @@ export class PostMetaDO implements DurableObject {
     );
 
     if (data.type === "like") {
-      this.meta.reactions.likes++;
+      this.state_data.reactions.likes++;
     } else if (data.type === "bookmark") {
-      this.meta.reactions.bookmarks++;
+      this.state_data.reactions.bookmarks++;
     }
 
-    this.isDirty = true;
+    this.markDirty();
     this.updatePopularStatus();
-    this.broadcast({
+    this.broadcastMessage({
       type: "reaction",
-      data: { reactions: this.meta.reactions },
+      data: { reactions: this.state_data.reactions },
     });
     await this.persistMeta();
 
-    return Response.json({ success: true, reactions: this.meta.reactions });
+    return Response.json({
+      success: true,
+      reactions: this.state_data.reactions,
+    });
   }
 
-  private async handleRemoveReaction(request: Request): Promise<Response> {
-    const data = (await request.json()) as ReactionEvent;
+  private async handleRemoveReaction(
+    ctx: LoomRequestContext,
+  ): Promise<Response> {
+    const data = (await ctx.request.json()) as ReactionEvent;
 
-    if (!this.meta) {
+    if (!this.state_data) {
       return new Response("Post not initialized", { status: 400 });
     }
 
@@ -367,33 +382,39 @@ export class PostMetaDO implements DurableObject {
 
     const userId = data.userId || "anonymous";
 
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       "DELETE FROM reactions WHERE user_id = ? AND reaction_type = ?",
       userId,
       data.type,
     );
 
     if (data.type === "like") {
-      this.meta.reactions.likes = Math.max(0, this.meta.reactions.likes - 1);
-    } else if (data.type === "bookmark") {
-      this.meta.reactions.bookmarks = Math.max(
+      this.state_data.reactions.likes = Math.max(
         0,
-        this.meta.reactions.bookmarks - 1,
+        this.state_data.reactions.likes - 1,
+      );
+    } else if (data.type === "bookmark") {
+      this.state_data.reactions.bookmarks = Math.max(
+        0,
+        this.state_data.reactions.bookmarks - 1,
       );
     }
 
-    this.isDirty = true;
-    this.broadcast({
+    this.markDirty();
+    this.broadcastMessage({
       type: "reaction",
-      data: { reactions: this.meta.reactions },
+      data: { reactions: this.state_data.reactions },
     });
     await this.persistMeta();
 
-    return Response.json({ success: true, reactions: this.meta.reactions });
+    return Response.json({
+      success: true,
+      reactions: this.state_data.reactions,
+    });
   }
 
-  private async handleGetPresence(): Promise<Response> {
-    const cutoff = Date.now() - 5 * 60 * 1000;
+  private handleGetPresence(): Response {
+    const cutoff = Date.now() - PRESENCE_TIMEOUT_MS;
     for (const [sessionId, lastSeen] of this.presence) {
       if (lastSeen < cutoff) {
         this.presence.delete(sessionId);
@@ -408,6 +429,10 @@ export class PostMetaDO implements DurableObject {
     return Response.json(presence);
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // WebSocket Handling
+  // ════════════════════════════════════════════════════════════════════
+
   /**
    * Handle WebSocket connection for real-time presence updates.
    *
@@ -419,102 +444,129 @@ export class PostMetaDO implements DurableObject {
    * - No sensitive data is transmitted
    * - No state-changing operations are available via WebSocket
    * - Presence tracking uses anonymous session IDs, not user identities
-   *
-   * If private analytics are needed in the future, that would go through
-   * authenticated API endpoints, not this WebSocket.
    */
   private handleWebSocket(): Response {
-    const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
+    const response = this.sockets.accept(
+      new Request("http://internal/ws", {
+        headers: { Upgrade: "websocket" },
+      }),
+    );
 
-    this.state.acceptWebSocket(server);
-    this.connections.add(server);
-
-    if (this.meta) {
-      server.send(
-        JSON.stringify({
-          type: "init",
-          data: {
-            meta: this.meta,
-            presence: { activeReaders: this.connections.size },
-          },
-        }),
-      );
+    // Send initial state to the new connection
+    if (this.state_data) {
+      const connections = this.sockets.getConnections();
+      const newest = connections[connections.length - 1];
+      if (newest) {
+        try {
+          newest.send(
+            JSON.stringify({
+              type: "init",
+              data: {
+                meta: this.state_data,
+                presence: { activeReaders: this.sockets.connectionCount },
+              },
+            }),
+          );
+        } catch {
+          // Connection may have closed immediately
+        }
+      }
     }
 
-    return new Response(null, { status: 101, webSocket: client });
+    return response;
   }
 
-  async webSocketMessage(
-    ws: WebSocket,
+  protected async onWebSocketMessage(
+    _ws: WebSocket,
     message: string | ArrayBuffer,
   ): Promise<void> {
-    try {
-      const msg = JSON.parse(message.toString()) as WSMessage;
+    const msg = JSON.parse(message.toString()) as WSMessage;
 
-      if (msg.type === "presence") {
-        const data = msg.data as { sessionId?: string };
-        if (data.sessionId) {
-          this.presence.set(data.sessionId, Date.now());
-        }
-        this.broadcast({
-          type: "presence",
-          data: { activeReaders: this.connections.size },
-        });
+    if (msg.type === "presence") {
+      const data = msg.data as { sessionId?: string };
+      if (data.sessionId) {
+        this.presence.set(data.sessionId, Date.now());
       }
-    } catch (err) {
-      console.error("[PostMetaDO] WebSocket message error:", err);
+      this.broadcastMessage({
+        type: "presence",
+        data: { activeReaders: this.sockets.connectionCount },
+      });
     }
   }
 
-  async webSocketClose(ws: WebSocket): Promise<void> {
-    this.connections.delete(ws);
-    this.broadcast({
+  protected async onWebSocketClose(): Promise<void> {
+    this.broadcastMessage({
       type: "presence",
-      data: { activeReaders: this.connections.size },
+      data: { activeReaders: this.sockets.connectionCount },
     });
   }
 
-  private broadcast(message: WSMessage): void {
-    const payload = JSON.stringify(message);
-    for (const ws of this.connections) {
-      try {
-        ws.send(payload);
-      } catch (err) {
-        // Log WebSocket errors for debugging instead of silent swallow
-        console.debug(
-          "[PostMetaDO] WebSocket send failed, removing connection:",
-          err instanceof Error ? err.message : "Unknown error",
-        );
-        this.connections.delete(ws);
+  private broadcastMessage(message: WSMessage): void {
+    this.sockets.broadcast(message);
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Alarm Handler
+  // ════════════════════════════════════════════════════════════════════
+
+  protected async onAlarm(): Promise<void> {
+    // Flush any dirty state
+    if (this.state_data) {
+      await this.persistIfDirty();
+    }
+
+    // Clean up view_log: remove entries older than 7 days
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    this.sql.exec("DELETE FROM view_log WHERE timestamp < ?", cutoff);
+
+    // Enforce max row limit
+    this.trimViewLogIfNeeded();
+
+    // Clean up stale presence entries
+    const presenceCutoff = Date.now() - PRESENCE_TIMEOUT_MS;
+    for (const [sessionId, lastSeen] of this.presence) {
+      if (lastSeen < presenceCutoff) {
+        this.presence.delete(sessionId);
       }
     }
+
+    // Reschedule
+    await this.alarms.schedule(ALARM_INTERVAL_MS);
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Persistence
+  // ════════════════════════════════════════════════════════════════════
+
+  protected async persistState(): Promise<void> {
+    await this.persistMeta();
   }
 
   private async persistMeta(): Promise<void> {
-    if (!this.meta) return;
+    if (!this.state_data) return;
 
-    await this.state.storage.sql.exec(
+    this.sql.exec(
       "INSERT OR REPLACE INTO meta (key, value, updated_at) VALUES (?, ?, ?)",
       "post_meta",
-      JSON.stringify(this.meta),
+      JSON.stringify(this.state_data),
       Date.now(),
     );
-
-    this.isDirty = false;
-    this.lastPersist = Date.now();
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // Private Helpers
+  // ════════════════════════════════════════════════════════════════════
+
   private updatePopularStatus(): void {
-    if (!this.meta) return;
+    if (!this.state_data) return;
     const dailyViews = this.calculateDailyViews();
-    const threshold = getPopularThreshold(this.meta.tier);
-    this.meta.isPopular = dailyViews >= threshold;
+    const threshold = getPopularThreshold(this.state_data.tier);
+    this.state_data.isPopular = dailyViews >= threshold;
   }
 
   private calculateDailyViews(): number {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    const result = this.state.storage.sql
+    const result = this.sql
       .exec(
         "SELECT COUNT(*) as count FROM view_log WHERE timestamp > ?",
         cutoff,
@@ -524,70 +576,27 @@ export class PostMetaDO implements DurableObject {
   }
 
   /**
-   * Ensure an alarm is scheduled (with deduplication).
-   * Prevents redundant setAlarm() calls which waste resources.
-   */
-  private async ensureAlarmScheduled(): Promise<void> {
-    const currentAlarm = await this.state.storage.getAlarm();
-    if (!currentAlarm) {
-      // Schedule cleanup alarm for 1 hour from now
-      await this.state.storage.setAlarm(Date.now() + 60 * 60 * 1000);
-    }
-    // If alarm already exists, don't reschedule (dedup)
-  }
-
-  /**
    * Trim view_log if it exceeds MAX_VIEW_LOG_ROWS.
    * Called both by alarm() (hourly) and inline during view recording (every 100 inserts).
    * This dual approach prevents unbounded growth on viral posts.
    */
-  private async trimViewLogIfNeeded(): Promise<void> {
-    const countResult = this.state.storage.sql
+  private trimViewLogIfNeeded(): void {
+    const countResult = this.sql
       .exec("SELECT COUNT(*) as count FROM view_log")
       .one();
     const rowCount = (countResult?.count as number) || 0;
 
     if (rowCount > MAX_VIEW_LOG_ROWS) {
       const deleteCount = rowCount - MAX_VIEW_LOG_ROWS;
-      await this.state.storage.sql.exec(
+      this.sql.exec(
         `DELETE FROM view_log WHERE id IN (
           SELECT id FROM view_log ORDER BY timestamp ASC LIMIT ?
         )`,
         deleteCount,
       );
-      console.log(
-        `[PostMetaDO] Trimmed ${deleteCount} old view_log entries (was ${rowCount}, now ${MAX_VIEW_LOG_ROWS})`,
+      this.log.info(
+        `Trimmed ${deleteCount} old view_log entries (was ${rowCount}, now ${MAX_VIEW_LOG_ROWS})`,
       );
     }
   }
-
-  async alarm(): Promise<void> {
-    if (this.isDirty) {
-      await this.persistMeta();
-    }
-
-    // Clean up view_log: remove entries older than 7 days
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    await this.state.storage.sql.exec(
-      "DELETE FROM view_log WHERE timestamp < ?",
-      cutoff,
-    );
-
-    // Enforce max row limit (uses shared helper)
-    await this.trimViewLogIfNeeded();
-
-    // Clean up stale presence entries
-    const presenceCutoff = Date.now() - 5 * 60 * 1000;
-    for (const [sessionId, lastSeen] of this.presence) {
-      if (lastSeen < presenceCutoff) {
-        this.presence.delete(sessionId);
-      }
-    }
-
-    await this.state.storage.setAlarm(Date.now() + 60 * 60 * 1000);
-  }
-}
-
-interface Env {
-  DB: D1Database;
 }

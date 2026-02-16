@@ -1,7 +1,7 @@
 /**
  * TriageDO - Durable Object for Email Triage Processing
  *
- * Following the Loom pattern (like ExportDO), TriageDO provides:
+ * Following the Loom pattern, TriageDO provides:
  * - Email classification via Lumen AI (bypasses Worker CPU limits)
  * - Alarm-based digest scheduling (8am / 1pm / 6pm, configurable)
  * - Processing queue: ~10 emails per alarm invocation
@@ -9,8 +9,16 @@
  *
  * State machine for processing: idle → processing → idle
  * Digest flow: alarm fires → query unread → generate summary → send via Zephyr
+ *
+ * Migrated to LoomDO base class — see packages/engine/src/lib/loom/
  */
 
+import {
+  LoomDO,
+  type LoomRoute,
+  type LoomConfig,
+  type LoomRequestContext,
+} from "@autumnsgrove/groveengine/loom";
 import {
   createLumenClient,
   type LumenClient,
@@ -31,7 +39,7 @@ import {
 // TYPES
 // =============================================================================
 
-interface TriageDOEnv {
+interface TriageDOEnv extends Record<string, unknown> {
   /** Ivy's D1 database (separate from grove-engine DB) */
   IVY_DB: D1Database;
   /** Ivy's R2 bucket for email body storage */
@@ -64,16 +72,58 @@ interface TriageState {
 // TRIAGE DURABLE OBJECT
 // =============================================================================
 
-export class TriageDO implements DurableObject {
-  private state: DurableObjectState;
-  private env: TriageDOEnv;
-  private triageState: TriageState | null = null;
+export class TriageDO extends LoomDO<TriageState, TriageDOEnv> {
   private lumen: LumenClient | null = null;
 
-  constructor(state: DurableObjectState, env: TriageDOEnv) {
-    this.state = state;
-    this.env = env;
+  config(): LoomConfig {
+    return { name: "TriageDO", blockOnInit: false };
   }
+
+  routes(): LoomRoute[] {
+    return [
+      {
+        method: "POST",
+        path: "/process",
+        handler: (ctx) => this.handleProcess(ctx),
+      },
+      {
+        method: "POST",
+        path: "/digest",
+        handler: () => this.handleDigestTrigger(),
+      },
+      {
+        method: "POST",
+        path: "/schedule",
+        handler: (ctx) => this.handleScheduleDigest(ctx),
+      },
+      {
+        method: "GET",
+        path: "/status",
+        handler: () => this.handleStatus(),
+      },
+    ];
+  }
+
+  protected async loadState(): Promise<TriageState | null> {
+    const stored = await this.state.storage.get<TriageState>("triageState");
+    return (
+      stored ?? {
+        processingQueue: [],
+        digestScheduled: false,
+        nextDigestAt: null,
+      }
+    );
+  }
+
+  protected async persistState(): Promise<void> {
+    if (this.state_data) {
+      await this.state.storage.put("triageState", this.state_data);
+    }
+  }
+
+  // ===========================================================================
+  // LAZY INIT
+  // ===========================================================================
 
   /**
    * Initialize Lumen client lazily (only when needed for classification)
@@ -90,35 +140,12 @@ export class TriageDO implements DurableObject {
   }
 
   // ===========================================================================
-  // FETCH HANDLER
-  // ===========================================================================
-
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-
-    switch (url.pathname) {
-      case "/process":
-        return this.handleProcess(request);
-      case "/digest":
-        return this.handleDigestTrigger();
-      case "/schedule":
-        return this.handleScheduleDigest(request);
-      case "/status":
-        return this.handleStatus();
-      default:
-        return new Response("Not found", { status: 404 });
-    }
-  }
-
-  // ===========================================================================
   // ALARM HANDLER
   // ===========================================================================
 
-  async alarm(): Promise<void> {
-    await this.loadState();
-
-    if (!this.triageState) {
-      this.triageState = {
+  protected async onAlarm(): Promise<void> {
+    if (!this.state_data) {
+      this.state_data = {
         processingQueue: [],
         digestScheduled: false,
         nextDigestAt: null,
@@ -126,8 +153,8 @@ export class TriageDO implements DurableObject {
     }
 
     // Check if this alarm is for digest delivery
-    if (this.triageState.digestScheduled && this.triageState.nextDigestAt) {
-      const nextDigestTime = new Date(this.triageState.nextDigestAt).getTime();
+    if (this.state_data.digestScheduled && this.state_data.nextDigestAt) {
+      const nextDigestTime = new Date(this.state_data.nextDigestAt).getTime();
       const now = Date.now();
 
       // If we're within 2 minutes of the scheduled digest time, send it
@@ -140,7 +167,7 @@ export class TriageDO implements DurableObject {
     }
 
     // Process queued emails (up to 10 per alarm)
-    if (this.triageState.processingQueue.length > 0) {
+    if (this.state_data.processingQueue.length > 0) {
       await this.processQueueBatch();
     }
   }
@@ -152,12 +179,11 @@ export class TriageDO implements DurableObject {
   /**
    * POST /process — Add a buffer entry to the processing queue
    */
-  private async handleProcess(request: Request): Promise<Response> {
-    const body = (await request.json()) as ProcessRequest;
+  private async handleProcess(ctx: LoomRequestContext): Promise<Response> {
+    const body = (await ctx.request.json()) as ProcessRequest;
 
-    await this.loadState();
-    if (!this.triageState) {
-      this.triageState = {
+    if (!this.state_data) {
+      this.state_data = {
         processingQueue: [],
         digestScheduled: false,
         nextDigestAt: null,
@@ -165,7 +191,7 @@ export class TriageDO implements DurableObject {
     }
 
     // Add to queue
-    this.triageState.processingQueue.push({
+    this.state_data.processingQueue.push({
       bufferId: body.bufferId,
       addedAt: new Date().toISOString(),
     });
@@ -173,9 +199,11 @@ export class TriageDO implements DurableObject {
     await this.persistState();
 
     // Schedule alarm to process (100ms from now)
-    await this.state.storage.setAlarm(Date.now() + 100);
+    await this.alarms.schedule(100);
 
-    this.log("Email queued for processing", { bufferId: body.bufferId });
+    this.log.info("Email queued for processing", {
+      bufferId: body.bufferId,
+    });
 
     return Response.json({ success: true, queued: true });
   }
@@ -196,16 +224,17 @@ export class TriageDO implements DurableObject {
   /**
    * POST /schedule — Update digest schedule
    */
-  private async handleScheduleDigest(request: Request): Promise<Response> {
-    const body = (await request.json()) as {
+  private async handleScheduleDigest(
+    ctx: LoomRequestContext,
+  ): Promise<Response> {
+    const body = (await ctx.request.json()) as {
       times: string[];
       timezone: string;
       enabled: boolean;
     };
 
-    await this.loadState();
-    if (!this.triageState) {
-      this.triageState = {
+    if (!this.state_data) {
+      this.state_data = {
         processingQueue: [],
         digestScheduled: false,
         nextDigestAt: null,
@@ -215,25 +244,26 @@ export class TriageDO implements DurableObject {
     if (body.enabled && body.times.length > 0) {
       const nextAlarmMs = calculateNextAlarm(body.times, body.timezone);
       if (nextAlarmMs) {
-        this.triageState.digestScheduled = true;
-        this.triageState.nextDigestAt = new Date(nextAlarmMs).toISOString();
+        this.state_data.digestScheduled = true;
+        this.state_data.nextDigestAt = new Date(nextAlarmMs).toISOString();
         await this.persistState();
+        // Absolute timestamp for digest scheduling
         await this.state.storage.setAlarm(nextAlarmMs);
 
-        this.log("Digest scheduled", {
-          nextAt: this.triageState.nextDigestAt,
+        this.log.info("Digest scheduled", {
+          nextAt: this.state_data.nextDigestAt,
         });
 
         return Response.json({
           success: true,
-          nextDigestAt: this.triageState.nextDigestAt,
+          nextDigestAt: this.state_data.nextDigestAt,
         });
       }
     }
 
     // Disable digest
-    this.triageState.digestScheduled = false;
-    this.triageState.nextDigestAt = null;
+    this.state_data.digestScheduled = false;
+    this.state_data.nextDigestAt = null;
     await this.persistState();
 
     return Response.json({ success: true, digestDisabled: true });
@@ -243,12 +273,10 @@ export class TriageDO implements DurableObject {
    * GET /status — Return current triage state
    */
   private async handleStatus(): Promise<Response> {
-    await this.loadState();
-
     return Response.json({
-      queueLength: this.triageState?.processingQueue.length ?? 0,
-      digestScheduled: this.triageState?.digestScheduled ?? false,
-      nextDigestAt: this.triageState?.nextDigestAt ?? null,
+      queueLength: this.state_data?.processingQueue.length ?? 0,
+      digestScheduled: this.state_data?.digestScheduled ?? false,
+      nextDigestAt: this.state_data?.nextDigestAt ?? null,
     });
   }
 
@@ -260,19 +288,19 @@ export class TriageDO implements DurableObject {
    * Process a batch of queued emails (up to 10 per alarm)
    */
   private async processQueueBatch(): Promise<void> {
-    if (!this.triageState) return;
+    if (!this.state_data) return;
 
     const BATCH_SIZE = 10;
-    const batch = this.triageState.processingQueue.splice(0, BATCH_SIZE);
+    const batch = this.state_data.processingQueue.splice(0, BATCH_SIZE);
 
-    this.log("Processing batch", { count: batch.length });
+    this.log.info("Processing batch", { count: batch.length });
 
     for (const entry of batch) {
       try {
         await this.processBufferEntry(entry.bufferId);
       } catch (error) {
-        console.error(
-          `[TriageDO] Failed to process buffer ${entry.bufferId}:`,
+        this.log.errorWithCause(
+          `Failed to process buffer ${entry.bufferId}`,
           error,
         );
         // Mark buffer as failed
@@ -287,8 +315,8 @@ export class TriageDO implements DurableObject {
     await this.persistState();
 
     // If there are more items in the queue, schedule another alarm
-    if (this.triageState.processingQueue.length > 0) {
-      await this.state.storage.setAlarm(Date.now() + 1000);
+    if (this.state_data.processingQueue.length > 0) {
+      await this.alarms.schedule(1000);
     }
   }
 
@@ -314,7 +342,9 @@ export class TriageDO implements DurableObject {
       }>();
 
     if (!bufferEntry) {
-      this.log("Buffer entry not found or already processed", { bufferId });
+      this.log.debug("Buffer entry not found or already processed", {
+        bufferId,
+      });
       return;
     }
 
@@ -364,7 +394,7 @@ export class TriageDO implements DurableObject {
       confidence = 1;
       suggestedAction = "delete";
       reason = `Blocked by filter: ${filterResult.rule.pattern}`;
-      this.log("Auto-junked by filter", {
+      this.log.info("Auto-junked by filter", {
         from,
         pattern: filterResult.rule.pattern,
       });
@@ -383,10 +413,7 @@ export class TriageDO implements DurableObject {
         reason = result.reason;
         classificationModel = "deepseek-v3";
       } catch (error) {
-        console.error(
-          "[TriageDO] Classification failed, using default:",
-          error,
-        );
+        this.log.errorWithCause("Classification failed, using default", error);
       }
     }
 
@@ -439,7 +466,7 @@ export class TriageDO implements DurableObject {
       .bind(now, bufferId)
       .run();
 
-    this.log("Email processed", {
+    this.log.info("Email processed", {
       emailId,
       category,
       confidence,
@@ -455,7 +482,7 @@ export class TriageDO implements DurableObject {
    * Execute a digest: query unread → summarize → deliver via Zephyr
    */
   private async executeDigest(): Promise<void> {
-    this.log("Executing digest");
+    this.log.info("Executing digest");
 
     // Get digest settings
     const settings = await this.env.IVY_DB.prepare(
@@ -463,7 +490,7 @@ export class TriageDO implements DurableObject {
     ).first<DigestSettings>();
 
     if (!settings || !settings.digest_enabled || !settings.digest_recipient) {
-      this.log("Digest disabled or no recipient configured");
+      this.log.info("Digest disabled or no recipient configured");
       return;
     }
 
@@ -474,7 +501,7 @@ export class TriageDO implements DurableObject {
     );
 
     if (emails.length === 0) {
-      this.log("No emails for digest, skipping");
+      this.log.info("No emails for digest, skipping");
       return;
     }
 
@@ -501,7 +528,7 @@ export class TriageDO implements DurableObject {
     const digestId = `digest-${Date.now()}`;
     const categoryCounts = getCategoryCounts(emails);
 
-    const now = new Date().toISOString();
+    const digestNow = new Date().toISOString();
 
     await this.env.IVY_DB.prepare(
       `INSERT INTO ivy_digest_log (id, sent_at, recipient, email_count, categories, zephyr_message_id, digest_type)
@@ -509,7 +536,7 @@ export class TriageDO implements DurableObject {
     )
       .bind(
         digestId,
-        now,
+        digestNow,
         settings.digest_recipient,
         emails.length,
         JSON.stringify(categoryCounts),
@@ -521,10 +548,10 @@ export class TriageDO implements DurableObject {
     await this.env.IVY_DB.prepare(
       "UPDATE ivy_settings SET last_digest_at = ? WHERE rowid = 1",
     )
-      .bind(now)
+      .bind(digestNow)
       .run();
 
-    this.log("Digest sent", {
+    this.log.info("Digest sent", {
       emailCount: emails.length,
       success: result.success,
       messageId: result.messageId,
@@ -553,53 +580,17 @@ export class TriageDO implements DurableObject {
     }
 
     const nextAlarmMs = calculateNextAlarm(times, settings.digest_timezone);
-    if (nextAlarmMs && this.triageState) {
-      this.triageState.nextDigestAt = new Date(nextAlarmMs).toISOString();
-      this.triageState.digestScheduled = true;
+    if (nextAlarmMs && this.state_data) {
+      this.state_data.nextDigestAt = new Date(nextAlarmMs).toISOString();
+      this.state_data.digestScheduled = true;
       await this.persistState();
+      // Absolute timestamp for next digest
       await this.state.storage.setAlarm(nextAlarmMs);
 
-      this.log("Next digest scheduled", {
-        nextAt: this.triageState.nextDigestAt,
+      this.log.info("Next digest scheduled", {
+        nextAt: this.state_data.nextDigestAt,
       });
     }
-  }
-
-  // ===========================================================================
-  // UTILITIES
-  // ===========================================================================
-
-  private async loadState(): Promise<void> {
-    if (!this.triageState) {
-      const stored = await this.state.storage.get<TriageState>("triageState");
-      if (stored) {
-        this.triageState = stored;
-      } else {
-        this.triageState = {
-          processingQueue: [],
-          digestScheduled: false,
-          nextDigestAt: null,
-        };
-      }
-    }
-  }
-
-  private async persistState(): Promise<void> {
-    if (this.triageState) {
-      await this.state.storage.put("triageState", this.triageState);
-    }
-  }
-
-  private log(message: string, data?: object): void {
-    console.log(
-      JSON.stringify({
-        do: "TriageDO",
-        id: this.state.id.toString(),
-        message,
-        ...data,
-        timestamp: new Date().toISOString(),
-      }),
-    );
   }
 }
 
