@@ -218,20 +218,26 @@ export const PUT: RequestHandler = async ({
 
     const data = sanitizeObject(await request.json()) as PostInput;
 
+    // Fetch current post state early — needed for transition detection and tier checks
+    const currentPost = await platform.env.DB.prepare(
+      "SELECT status, published_at FROM posts WHERE tenant_id = ? AND slug = ?",
+    )
+      .bind(tenantId, slug)
+      .first<{ status: string; published_at: number | null }>();
+
+    if (!currentPost) {
+      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+    }
+
     // If publishing a draft, enforce published post limit (isolated — DB failures fail open)
-    if (data.status === "published") {
+    if (data.status === "published" && currentPost.status !== "published") {
       try {
-        // Fetch plan, current post status, and published count in parallel
+        // Fetch plan and published count in parallel
         // (D1 has no transactions, so soft limits with minimal TOCTOU are by design)
-        const [tenant, currentPost, publishedCount] = await Promise.all([
+        const [tenant, publishedCount] = await Promise.all([
           platform.env.DB.prepare("SELECT plan FROM tenants WHERE id = ?")
             .bind(tenantId)
             .first<{ plan: string }>(),
-          platform.env.DB.prepare(
-            "SELECT status FROM posts WHERE tenant_id = ? AND slug = ?",
-          )
-            .bind(tenantId, slug)
-            .first<{ status: string }>(),
           platform.env.DB.prepare(
             "SELECT COUNT(*) as count FROM posts WHERE tenant_id = ? AND status = 'published'",
           )
@@ -243,11 +249,9 @@ export const PUT: RequestHandler = async ({
           tenant?.plan && isValidTier(tenant.plan) ? tenant.plan : "seedling";
         const tierConfig = TIERS[tierKey];
 
-        // Only enforce limit on draft→published transitions
+        // Enforce limit on draft→published transitions
         if (
           tierConfig.limits.posts !== Infinity &&
-          currentPost &&
-          currentPost.status !== "published" &&
           publishedCount &&
           publishedCount.count >= tierConfig.limits.posts
         ) {
@@ -347,27 +351,24 @@ export const PUT: RequestHandler = async ({
       }
     }
 
-    // Check if post exists for this tenant
-    const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
-
-    if (!existing) {
-      throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-    }
-
     // Generate HTML from markdown (renderMarkdown handles sanitization)
     const html_content = markdownContent ? renderMarkdown(markdownContent) : "";
 
     const tags = JSON.stringify(data.tags || []);
     const unixNow = Math.floor(Date.now() / 1000);
 
-    // Convert date string to Unix timestamp for published_at
-    // Only set published_at when publishing (status changes to published)
+    // Only set published_at on draft→published transition (first publish).
+    // Editing an already-published post must NOT overwrite the original date.
     let published_at: number | undefined;
-    if (data.status === "published" && data.date) {
+    const isFirstPublish =
+      data.status === "published" && currentPost.status !== "published";
+    if (isFirstPublish && data.date) {
       published_at = Math.floor(new Date(data.date).getTime() / 1000);
+    } else if (isFirstPublish && !data.date) {
+      published_at = unixNow;
     }
 
-    // Build update object - only include published_at if we're publishing
+    // Build update object
     const updateData: Record<string, unknown> = {
       title,
       tags,
@@ -391,7 +392,7 @@ export const PUT: RequestHandler = async ({
       updateData.slug = newSlug;
     }
 
-    // Set published_at when publishing
+    // Set published_at only on first publish (draft→published)
     if (published_at !== undefined) {
       updateData.published_at = published_at;
     }
