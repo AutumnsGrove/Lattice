@@ -290,45 +290,51 @@ import type {
  *   CREATE TABLE IF NOT EXISTS rate_limits (
  *     key TEXT PRIMARY KEY,
  *     count INTEGER NOT NULL DEFAULT 0,
- *     window_start TEXT NOT NULL
+ *     window_start INTEGER NOT NULL
  *   );
  */
 export class ThresholdD1Store implements ThresholdStore {
   constructor(private db: D1Database) {}
 
   async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
-    const now = new Date();
-    const nowSeconds = Math.floor(now.getTime() / 1000);
-    const windowStart = new Date(
-      now.getTime() - options.windowSeconds * 1000,
-    ).toISOString();
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const windowStart = nowSeconds - options.windowSeconds;
 
     try {
-      const existing = await this.db
-        .prepare("SELECT count, window_start FROM rate_limits WHERE key = ?")
-        .bind(options.key)
-        .first<{ count: number; window_start: string }>();
+      // Single atomic statement: insert-or-increment with window expiry.
+      // If the key doesn't exist or the window has expired, start fresh at count=1.
+      // If the key exists within the current window, increment count.
+      // Returns the resulting row so we can compute remaining/resetAt.
+      const row = await this.db
+        .prepare(
+          `INSERT INTO rate_limits (key, count, window_start)
+           VALUES (?, 1, ?)
+           ON CONFLICT(key) DO UPDATE SET
+             count = CASE
+               WHEN window_start < ? THEN 1
+               ELSE count + 1
+             END,
+             window_start = CASE
+               WHEN window_start < ? THEN excluded.window_start
+               ELSE window_start
+             END
+           RETURNING count, window_start`,
+        )
+        .bind(options.key, nowSeconds, windowStart, windowStart)
+        .first<{ count: number; window_start: number }>();
 
-      if (!existing || existing.window_start < windowStart) {
-        // New window
-        await this.db
-          .prepare(
-            "INSERT OR REPLACE INTO rate_limits (key, count, window_start) VALUES (?, 1, ?)",
-          )
-          .bind(options.key, now.toISOString())
-          .run();
-
-        return {
-          allowed: true,
-          remaining: options.limit - 1,
-          resetAt: nowSeconds + options.windowSeconds,
-        };
+      if (!row) {
+        // Should never happen with RETURNING, but fail safely
+        return this.handleError(
+          new Error("RETURNING clause returned no row"),
+          options,
+          nowSeconds,
+        );
       }
 
-      if (existing.count >= options.limit) {
-        const resetAt =
-          Math.floor(new Date(existing.window_start).getTime() / 1000) +
-          options.windowSeconds;
+      const resetAt = row.window_start + options.windowSeconds;
+
+      if (row.count > options.limit) {
         return {
           allowed: false,
           remaining: 0,
@@ -337,35 +343,37 @@ export class ThresholdD1Store implements ThresholdStore {
         };
       }
 
-      // Increment
-      await this.db
-        .prepare("UPDATE rate_limits SET count = count + 1 WHERE key = ?")
-        .bind(options.key)
-        .run();
-
-      const resetAt =
-        Math.floor(new Date(existing.window_start).getTime() / 1000) +
-        options.windowSeconds;
-
       return {
         allowed: true,
-        remaining: options.limit - existing.count - 1,
+        remaining: options.limit - row.count,
         resetAt,
       };
     } catch (error) {
-      console.error("[threshold:d1] Storage error:", error);
-
-      if (options.failMode === "closed") {
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt: nowSeconds + 30,
-          retryAfter: 30,
-        };
-      }
-
-      return { allowed: true, remaining: options.limit, resetAt: 0 };
+      return this.handleError(error, options, nowSeconds);
     }
+  }
+
+  private handleError(
+    error: unknown,
+    options: ThresholdCheckOptions,
+    nowSeconds: number,
+  ): ThresholdResult {
+    console.error(
+      "[threshold:d1] Storage error, failing",
+      options.failMode ?? "open",
+      error,
+    );
+
+    if (options.failMode === "closed") {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: nowSeconds + 30,
+        retryAfter: 30,
+      };
+    }
+
+    return { allowed: true, remaining: options.limit, resetAt: 0 };
   }
 }
 ```
