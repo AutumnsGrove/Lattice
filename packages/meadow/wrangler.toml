@@ -13,3 +13,14 @@ SITE_URL = "http://localhost:5175"
 binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# KV namespace for feed page caching (2-min TTL)
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "meadow-cache-kv-id"
+preview_id = "meadow-cache-kv-preview-id"
+
+# Service binding to Heartwood auth service
+[[services]]
+binding = "AUTH"
+service = "grove-heartwood"

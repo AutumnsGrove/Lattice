@@ -1,0 +1,22 @@
+{
+  "name": "grove-meadow-poller",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RSS feed poller for Meadow social feed — fetches tenant posts every 15 minutes",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251128.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^4.63.0"
+  }
+}

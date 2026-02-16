@@ -1,0 +1,32 @@
+# Grove Meadow Poller
+# Fetches RSS feeds from opted-in tenants every 15 minutes, parses content,
+# and upserts into meadow_posts for the community feed.
+#
+# Manual trigger: curl https://grove-meadow-poller.<account>.workers.dev/trigger
+# Uses no secrets — all feeds are public HTTPS.
+
+name = "grove-meadow-poller"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# =============================================================================
+# Cron Triggers — every 15 minutes
+# =============================================================================
+[triggers]
+crons = ["*/15 * * * *"]
+
+# =============================================================================
+# D1 Database — shared grove-engine-db
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# KV Namespace — poll state (ETags, last poll times, error counts)
+# =============================================================================
+[[kv_namespaces]]
+binding = "POLL_STATE"
+id = "meadow-poll-state-id"
+preview_id = "meadow-poll-state-preview-id"
