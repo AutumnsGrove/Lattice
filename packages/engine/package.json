@@ -260,6 +260,22 @@
       "types": "./dist/lumen/index.d.ts",
       "default": "./dist/lumen/index.js"
     },
+    "./threshold": {
+      "types": "./dist/threshold/index.d.ts",
+      "default": "./dist/threshold/index.js"
+    },
+    "./threshold/sveltekit": {
+      "types": "./dist/threshold/adapters/sveltekit.d.ts",
+      "default": "./dist/threshold/adapters/sveltekit.js"
+    },
+    "./threshold/hono": {
+      "types": "./dist/threshold/adapters/hono.d.ts",
+      "default": "./dist/threshold/adapters/hono.js"
+    },
+    "./threshold/worker": {
+      "types": "./dist/threshold/adapters/worker.d.ts",
+      "default": "./dist/threshold/adapters/worker.js"
+    },
     "./thorn": {
       "types": "./dist/thorn/index.d.ts",
       "default": "./dist/thorn/index.js"
