@@ -10,7 +10,8 @@ import type { CultivateRequest, CultivateResponse } from "../../types";
 import { createUpgradeConfig, getPlantingUrl } from "../../config";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { checkRateLimit } from "$lib/server/rate-limits";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { createPaymentProvider } from "$lib/payments";
 import { logBillingAudit, isCompedAccount } from "$lib/server/billing";
 
@@ -64,16 +65,17 @@ export const POST: RequestHandler = async ({
   );
 
   // Rate limiting
-  const { response } = await checkRateLimit({
-    kv: platform.env.CACHE_KV,
-    key: `cultivate:${verifiedTenantId}`,
-    limit: CULTIVATE_RATE_LIMIT.limit,
-    windowSeconds: CULTIVATE_RATE_LIMIT.windowSeconds,
-    namespace: "cultivate",
-  });
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `cultivate:${verifiedTenantId}`,
+      limit: CULTIVATE_RATE_LIMIT.limit,
+      windowSeconds: CULTIVATE_RATE_LIMIT.windowSeconds,
+    });
 
-  if (response) {
-    return response;
+    if (denied) {
+      return denied;
+    }
   }
 
   // Parse request body

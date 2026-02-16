@@ -1,9 +1,6 @@
 import { json, error } from "@sveltejs/kit";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-  rateLimitHeaders,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
@@ -54,7 +51,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   // Safe to access after validation (non-null assertion is safe here)
   const db = platform!.env!.DB;
   const apiKey = platform!.env!.ANTHROPIC_API_KEY as string;
-  const kv = platform!.env!.CACHE_KV;
 
   // Verify tenant ownership
   try {
@@ -72,31 +68,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limit expensive AI operations (fail-closed - already validated above)
-  const { result, response } = await checkRateLimit({
-    kv,
-    key: buildRateLimitKey("ai/analyze", locals.user.id),
-    limit: 20,
-    windowSeconds: 86400, // 24 hours
-    namespace: "ai-ratelimit",
-  });
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `ai/analyze:${locals.user.id}`,
+      limit: 20,
+      windowSeconds: 86400, // 24 hours
+    });
 
-  if (response) {
-    return new Response(
-      JSON.stringify({
-        error: API_ERRORS.RATE_LIMITED.code,
-        error_code: API_ERRORS.RATE_LIMITED.code,
-        message: API_ERRORS.RATE_LIMITED.userMessage,
-        remaining: 0,
-        resetAt: new Date(result.resetAt * 1000).toISOString(),
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          ...rateLimitHeaders(result, 20),
-        },
-      },
-    );
+    if (denied) {
+      return denied;
+    }
   }
 
   try {

@@ -16,7 +16,8 @@ import { API_ERRORS, logGroveError } from "$lib/errors";
 import { RATE_LIMIT } from "$lib/config/wisp.js";
 import { secureUserContent } from "$lib/server/inference-client.js";
 import { createLumenClient, type LumenClient } from "$lib/lumen/index.js";
-import { checkRateLimit } from "$lib/server/rate-limits/index.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
 import {
   queryOne,
@@ -69,7 +70,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   const db = platform?.env?.DB;
-  const kv = platform?.env?.CACHE_KV;
 
   // ==========================================================================
   // FAIL-OPEN/FAIL-CLOSED DECISION TREE
@@ -195,7 +195,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   // Rate limiting (fail-closed for AI operations)
-  if (!kv) {
+  const threshold = createThreshold(platform?.env);
+  if (!threshold) {
     logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
     return json(
       {
@@ -206,15 +207,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  const { response: rateLimitResponse } = await checkRateLimit({
-    kv,
+  const denied = await thresholdCheck(threshold, {
     key: `wisp:${locals.user.id}`,
     limit: RATE_LIMIT.maxRequestsPerHour,
     windowSeconds: RATE_LIMIT.windowSeconds,
-    namespace: "wisp",
+    failMode: "closed",
   });
 
-  if (rateLimitResponse) return rateLimitResponse;
+  if (denied) return denied;
 
   // Create Lumen client
   const openrouterApiKey = platform?.env?.OPENROUTER_API_KEY;

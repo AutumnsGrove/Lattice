@@ -20,10 +20,11 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import {
-  checkRateLimit,
   getEndpointLimitByKey,
   rateLimitHeaders,
 } from "$lib/server/rate-limits/index.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import {
   API_ERRORS,
   throwGroveError,
@@ -80,16 +81,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
       resetAt: 0,
     };
 
-    if (platform.env.CACHE_KV) {
-      const { result, response } = await checkRateLimit({
-        kv: platform.env.CACHE_KV,
+    const threshold = createThreshold(platform?.env);
+    if (threshold) {
+      const denied = await thresholdCheck(threshold, {
         key: `export-zip:${tenantId}`,
         limit: RATE_LIMIT.limit,
         windowSeconds: RATE_LIMIT.windowSeconds,
-        namespace: "export-zip",
       });
-      rateLimitResult = result;
-      if (response) return response;
+      if (denied) return denied;
     }
 
     // Check for in-progress export

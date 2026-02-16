@@ -9,7 +9,8 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { GrowthStatus, FlourishState } from "../../types";
 import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
-import { checkRateLimit } from "$lib/server/rate-limits";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { isCompedAccount } from "$lib/server/billing";
 
 const GROWTH_RATE_LIMIT = { limit: 100, windowSeconds: 3600 }; // 100 per hour
@@ -41,16 +42,17 @@ export const GET: RequestHandler = async ({
   );
 
   // Rate limiting
-  const { response } = await checkRateLimit({
-    kv: platform.env.CACHE_KV,
-    key: `growth:${verifiedTenantId}`,
-    limit: GROWTH_RATE_LIMIT.limit,
-    windowSeconds: GROWTH_RATE_LIMIT.windowSeconds,
-    namespace: "growth",
-  });
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
+      key: `growth:${verifiedTenantId}`,
+      limit: GROWTH_RATE_LIMIT.limit,
+      windowSeconds: GROWTH_RATE_LIMIT.windowSeconds,
+    });
 
-  if (response) {
-    return response;
+    if (denied) {
+      return denied;
+    }
   }
 
   try {

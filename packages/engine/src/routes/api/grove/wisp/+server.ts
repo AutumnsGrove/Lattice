@@ -23,7 +23,8 @@ import {
 } from "$lib/server/inference-client.js";
 import { createLumenClient } from "$lib/lumen/index.js";
 import { calculateReadability } from "$lib/utils/readability.js";
-import { checkRateLimit } from "$lib/server/rate-limits/index.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
 
 export const prerender = false;
@@ -45,7 +46,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
   }
 
   const db = platform?.env?.DB;
-  const kv = platform?.env?.CACHE_KV;
 
   // Guard checks are intentionally sequential: if Wisp is disabled (common during
   // onboarding), skip the subscription check entirely to avoid a wasted D1 query.
@@ -178,8 +178,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
   }
 
-  // Rate limiting using Threshold middleware (fail-closed to prevent cost overruns)
-  if (!kv) {
+  // Rate limiting using Threshold (fail-closed to prevent cost overruns)
+  const threshold = createThreshold(platform?.env);
+  if (!threshold) {
     // Fail closed: AI operations are expensive, so we reject if we can't enforce limits
     logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE);
     return json(
@@ -191,16 +192,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     );
   }
 
-  const { result: rateLimitResult, response: rateLimitResponse } =
-    await checkRateLimit({
-      kv,
-      key: `wisp:${locals.user.id}`,
-      limit: RATE_LIMIT.maxRequestsPerHour,
-      windowSeconds: RATE_LIMIT.windowSeconds,
-      namespace: "wisp",
-    });
+  const denied = await thresholdCheck(threshold, {
+    key: `wisp:${locals.user.id}`,
+    limit: RATE_LIMIT.maxRequestsPerHour,
+    windowSeconds: RATE_LIMIT.windowSeconds,
+    failMode: "closed",
+  });
 
-  if (rateLimitResponse) return rateLimitResponse; // 429 with proper headers
+  if (denied) return denied; // 429 with proper headers
 
   // Monthly cost cap check (fail-closed: reject if we can't verify limits)
   if (db && COST_CAP.enabled) {

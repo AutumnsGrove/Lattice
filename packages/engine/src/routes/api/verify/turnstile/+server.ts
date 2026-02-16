@@ -14,10 +14,9 @@ import {
   createVerificationCookie,
   TURNSTILE_COOKIE_NAME,
 } from "$lib/server/services/turnstile";
-import {
-  checkRateLimit,
-  getClientIP,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -36,15 +35,15 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   // Rate limit Turnstile verification (each call hits Cloudflare API)
-  if ((platform?.env as Record<string, unknown>)?.CACHE_KV) {
-    const { response } = await checkRateLimit({
-      kv: (platform!.env as Record<string, unknown>).CACHE_KV as KVNamespace,
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
+    const denied = await thresholdCheck(threshold, {
       key: `turnstile:${getClientIP(request)}`,
       limit: 10,
       windowSeconds: 60, // 1 minute
-      namespace: "turnstile-ratelimit",
+      failMode: "open",
     });
-    if (response) return response;
+    if (denied) return denied;
   }
 
   // Get the secret key from environment

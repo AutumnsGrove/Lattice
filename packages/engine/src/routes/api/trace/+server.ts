@@ -14,10 +14,9 @@ import { json } from "@sveltejs/kit";
 import { validateTracePath } from "$lib/utils/trace-path.js";
 import { sanitizeObject } from "$lib/utils/validation.js";
 import { generateId } from "$lib/server/services/database.js";
-import {
-  checkRateLimit,
-  getClientIP,
-} from "$lib/server/rate-limits/middleware.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
 import { sendTraceNotification } from "$lib/server/services/trace-email.js";
 import { API_ERRORS, logGroveError } from "$lib/errors";
 import type { RequestHandler } from "./$types.js";
@@ -63,17 +62,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   const clientIP = getClientIP(request);
 
   // Rate limit by IP hash (prevents spam while preserving privacy)
-  if (kv) {
+  const threshold = createThreshold(platform?.env);
+  if (threshold) {
     const ipHash = await hashIP(clientIP);
-    const { response } = await checkRateLimit({
-      kv,
+    const denied = await thresholdCheck(threshold, {
       key: `trace/submit:${ipHash}`,
       limit: TRACE_RATE_LIMIT,
       windowSeconds: TRACE_RATE_WINDOW,
-      namespace: "trace-ratelimit",
+      failMode: "open",
     });
 
-    if (response) return response;
+    if (denied) return denied;
   }
 
   try {
