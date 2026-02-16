@@ -3,6 +3,7 @@
 import os
 import sys
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from typing import Generator
 
 from rich.console import Console
@@ -12,6 +13,45 @@ from rich.table import Table
 from rich.text import Text
 
 console = Console()
+
+
+def relative_time(iso_str: str) -> str:
+    """Convert an ISO 8601 timestamp to a human-friendly relative string.
+
+    Args:
+        iso_str: ISO 8601 timestamp (e.g. "2026-02-16T12:00:00Z")
+
+    Returns:
+        Relative time string like "2 min ago", "1 hr ago", "3 days ago"
+    """
+    if not iso_str:
+        return ""
+    try:
+        # Handle Z suffix for Python < 3.11 compat
+        ts = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        now = datetime.now(timezone.utc)
+        delta = now - ts
+        seconds = int(delta.total_seconds())
+
+        if seconds < 0:
+            return "just now"
+        if seconds < 60:
+            return "just now"
+        if seconds < 3600:
+            m = seconds // 60
+            return f"{m} min ago"
+        if seconds < 86400:
+            h = seconds // 3600
+            return f"{h} hr ago" if h == 1 else f"{h} hrs ago"
+        days = seconds // 86400
+        if days == 1:
+            return "yesterday"
+        if days < 30:
+            return f"{days} days ago"
+        months = days // 30
+        return f"{months} mo ago" if months == 1 else f"{months} mos ago"
+    except (ValueError, TypeError):
+        return iso_str
 
 
 def is_interactive() -> bool:

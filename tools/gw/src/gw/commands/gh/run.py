@@ -1,6 +1,7 @@
 """Workflow run commands for GitHub integration."""
 
 import json
+from collections import OrderedDict
 from typing import Optional
 
 import click
@@ -9,8 +10,8 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ...gh_wrapper import GitHub, GitHubError
-from ...ui import is_interactive
+from ...gh_wrapper import GitHub, GitHubError, WorkflowRun
+from ...ui import is_interactive, relative_time
 from ...safety.github import (
     GitHubSafetyError,
     check_github_safety,
@@ -34,11 +35,119 @@ def run() -> None:
     pass
 
 
+def _conclusion_icon(conclusion: Optional[str], status: str) -> tuple[str, str]:
+    """Return (icon, style) for a run's conclusion/status."""
+    if status.lower() == "in_progress":
+        return "◐", "blue"
+    if status.lower() == "queued":
+        return "○", "yellow"
+    c = (conclusion or "").lower()
+    return {
+        "success": ("✓", "green"),
+        "failure": ("✗", "red"),
+        "cancelled": ("⊘", "yellow"),
+        "skipped": ("–", "dim"),
+    }.get(c, ("?", "white"))
+
+
+def _group_color(runs: list[WorkflowRun]) -> str:
+    """Determine the overall color for a group of runs."""
+    statuses = {r.status.lower() for r in runs}
+    conclusions = {(r.conclusion or "").lower() for r in runs}
+
+    if "in_progress" in statuses or "queued" in statuses:
+        return "blue"
+    if "failure" in conclusions:
+        return "red"
+    if conclusions <= {"success", "skipped", ""}:
+        return "green"
+    return "yellow"
+
+
+def _display_grouped(runs: list[WorkflowRun]) -> None:
+    """Display runs grouped by commit SHA."""
+    # Group by head_sha, preserving first-occurrence order
+    groups: OrderedDict[str, list[WorkflowRun]] = OrderedDict()
+    for r in runs:
+        key = r.head_sha or f"unknown-{r.id}"
+        groups.setdefault(key, []).append(r)
+
+    console.print("[bold]Workflow Runs[/bold]\n")
+
+    for sha, group_runs in groups.items():
+        # Header: colored dot + short SHA + commit title + relative time
+        first = group_runs[0]
+        short_sha = sha[:7] if len(sha) >= 7 else sha
+        color = _group_color(group_runs)
+        time_str = relative_time(first.created_at)
+        time_display = f"  [dim]{time_str}[/dim]" if time_str else ""
+
+        # Use the displayTitle from the first run as the commit message
+        title = first.name or ""
+        console.print(
+            f"[{color}]●[/{color}] [bold cyan]{short_sha}[/bold cyan]"
+            f" {title}{time_display}"
+        )
+
+        # Each run within the group
+        for r in group_runs:
+            icon, style = _conclusion_icon(r.conclusion, r.status)
+            workflow = r.workflow_name or r.name
+            conclusion_text = r.conclusion or r.status
+            # Dotted leader between workflow name and conclusion
+            padding = max(1, 40 - len(workflow) - len(conclusion_text))
+            dots = " " + "·" * padding + " "
+            console.print(
+                f"  [{style}]{icon}[/{style}] {workflow}"
+                f"[dim]{dots}[/dim]"
+                f"[{style}]{conclusion_text}[/{style}]"
+            )
+
+        console.print()  # blank line between groups
+
+
+def _display_flat(runs: list[WorkflowRun]) -> None:
+    """Display runs as a flat table (legacy view)."""
+    table = Table(title="Workflow Runs", border_style="green")
+    table.add_column("ID", style="cyan", width=12)
+    table.add_column("Workflow")
+    table.add_column("Branch", style="dim")
+    table.add_column("Status")
+    table.add_column("Conclusion")
+
+    for r in runs:
+        status_style = {
+            "queued": "yellow",
+            "in_progress": "blue",
+            "completed": "green",
+        }.get(r.status.lower(), "white")
+
+        conclusion_style = {
+            "success": "green",
+            "failure": "red",
+            "cancelled": "yellow",
+            "skipped": "dim",
+        }.get((r.conclusion or "").lower(), "white")
+
+        conclusion_text = r.conclusion or "-"
+
+        table.add_row(
+            str(r.id),
+            r.workflow_name or r.name,
+            r.branch,
+            f"[{status_style}]{r.status}[/{status_style}]",
+            f"[{conclusion_style}]{conclusion_text}[/{conclusion_style}]",
+        )
+
+    console.print(table)
+
+
 @run.command("list")
 @click.option("--workflow", "-w", help="Filter by workflow file name")
 @click.option("--branch", "-b", help="Filter by branch")
 @click.option("--status", "-s", help="Filter by status (queued, in_progress, completed)")
 @click.option("--limit", default=20, help="Maximum number to return")
+@click.option("--flat", is_flag=True, help="Show flat table instead of grouped view")
 @click.pass_context
 def run_list(
     ctx: click.Context,
@@ -46,14 +155,18 @@ def run_list(
     branch: Optional[str],
     status: Optional[str],
     limit: int,
+    flat: bool,
 ) -> None:
-    """List workflow runs.
+    """List workflow runs grouped by commit.
 
-    Always safe - no --write flag required.
+    Shows runs organized by the commit that triggered them, making it
+    easy to see if a push succeeded at a glance. Use --flat for the
+    traditional table view.
 
     \b
     Examples:
-        gw gh run list
+        gw gh run list                    # Grouped by commit
+        gw gh run list --flat             # Flat table
         gw gh run list --workflow ci.yml
         gw gh run list --branch main --limit 10
         gw gh run list --status failure
@@ -80,15 +193,16 @@ def run_list(
         if output_json:
             data = [
                 {
-                    "id": run.id,
-                    "name": run.name,
-                    "status": run.status,
-                    "conclusion": run.conclusion,
-                    "workflow": run.workflow_name,
-                    "branch": run.branch,
-                    "event": run.event,
+                    "id": r.id,
+                    "name": r.name,
+                    "status": r.status,
+                    "conclusion": r.conclusion,
+                    "workflow": r.workflow_name,
+                    "branch": r.branch,
+                    "event": r.event,
+                    "sha": r.head_sha,
                 }
-                for run in runs
+                for r in runs
             ]
             console.print(json.dumps(data, indent=2))
             return
@@ -97,39 +211,10 @@ def run_list(
             console.print("[dim]No workflow runs found[/dim]")
             return
 
-        table = Table(title="Workflow Runs", border_style="green")
-        table.add_column("ID", style="cyan", width=12)
-        table.add_column("Workflow")
-        table.add_column("Branch", style="dim")
-        table.add_column("Status")
-        table.add_column("Conclusion")
-
-        for run in runs:
-            # Color code status/conclusion
-            status_style = {
-                "queued": "yellow",
-                "in_progress": "blue",
-                "completed": "green",
-            }.get(run.status.lower(), "white")
-
-            conclusion_style = {
-                "success": "green",
-                "failure": "red",
-                "cancelled": "yellow",
-                "skipped": "dim",
-            }.get((run.conclusion or "").lower(), "white")
-
-            conclusion_text = run.conclusion or "-"
-
-            table.add_row(
-                str(run.id),
-                run.workflow_name or run.name,
-                run.branch,
-                f"[{status_style}]{run.status}[/{status_style}]",
-                f"[{conclusion_style}]{conclusion_text}[/{conclusion_style}]",
-            )
-
-        console.print(table)
+        if flat:
+            _display_flat(runs)
+        else:
+            _display_grouped(runs)
 
     except GitHubError as e:
         console.print(f"[red]GitHub error:[/red] {e.message}")

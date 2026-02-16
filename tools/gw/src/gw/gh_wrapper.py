@@ -136,6 +136,7 @@ class WorkflowRun:
     event: str
     created_at: str
     url: str
+    head_sha: str = ""
     jobs: list[JobInfo] | None = None
 
 
@@ -960,7 +961,7 @@ class GitHub:
             "run", "list",
             "--repo", self.repo,
             "--limit", str(limit),
-            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url",
+            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,headSha",
         ]
 
         if workflow:
@@ -985,7 +986,7 @@ class GitHub:
         args = [
             "run", "view", str(run_id),
             "--repo", self.repo,
-            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url",
+            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,headSha",
         ]
 
         data = self.execute_json(args)
@@ -1003,7 +1004,7 @@ class GitHub:
         args = [
             "run", "view", str(run_id),
             "--repo", self.repo,
-            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,jobs",
+            "--json", "databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,headSha,jobs",
         ]
 
         data = self.execute_json(args)
@@ -1092,6 +1093,7 @@ class GitHub:
             event=data.get("event", ""),
             created_at=data.get("createdAt", ""),
             url=data.get("url", ""),
+            head_sha=data.get("headSha", ""),
         )
 
     # =========================================================================
