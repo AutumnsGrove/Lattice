@@ -850,7 +850,7 @@
       </div>
 
       <p class="note">
-        See <a href="/credits">font credits and licenses</a> for attribution.
+        See <a href="https://grove.place/credits">font credits and licenses</a> for attribution.
       </p>
     {/if}
   </GlassCard>

@@ -60,9 +60,6 @@
 	</section>
 {/if}
 
-<footer class="home-footer">
-	<a href="/credits">Font Credits & Attribution</a>
-</footer>
 
 <style>
 	.setup-page {
@@ -110,23 +107,6 @@
 		margin: 0;
 		opacity: 0.8;
 		transition: color 0.3s ease;
-	}
-	.home-footer {
-		text-align: center;
-		padding: 2rem 0;
-		margin-top: 3rem;
-		border-top: 1px solid var(--color-border);
-		transition: border-color 0.3s ease;
-	}
-	.home-footer a {
-		color: var(--color-text-muted);
-		text-decoration: none;
-		font-size: 0.9rem;
-		transition: color 0.2s ease;
-	}
-	.home-footer a:hover {
-		color: var(--color-primary);
-		text-decoration: underline;
 	}
 	.hero {
 		text-align: center;
