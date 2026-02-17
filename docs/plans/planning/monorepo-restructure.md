@@ -64,7 +64,8 @@ GroveEngine/
 │   └── zephyr/
 ├── tools/                       # Dev tools
 ├── scripts/                     # Automation
-├── landing/                     # Stale reference (packages/landing is canonical)
+├── landing/                     # Root landing assets (2 static icons, different versions from packages/landing)
+│   └── static/                  #   icon-192.png, icon-512.png (smaller/older variants)
 └── docs/
 ```
 
@@ -85,7 +86,7 @@ packages:
 GroveEngine/
 │
 ├── apps/                        # SvelteKit applications (serve UI to users)
-│   ├── landing/                 #   grove.place marketing site
+│   ├── landing/                 #   ⭐ grove.place — the home page, the heart of Grove
 │   ├── plant/                   #   plant.grove.place onboarding
 │   ├── clearing/                #   status.grove.place status page
 │   ├── meadow/                  #   meadow.grove.place community feed
@@ -149,15 +150,15 @@ packages:
 
 All depend on `@autumnsgrove/groveengine` via `workspace:*`. Serve UI to Wanderers.
 
-| Current Location     | New Location     | Package Name    |
-| -------------------- | ---------------- | --------------- |
-| `packages/landing`   | `apps/landing`   | grove-landing   |
-| `packages/plant`     | `apps/plant`     | grove-plant     |
-| `packages/clearing`  | `apps/clearing`  | grove-clearing  |
-| `packages/meadow`    | `apps/meadow`    | grove-meadow    |
-| `packages/terrarium` | `apps/terrarium` | grove-terrarium |
-| `packages/login`     | `apps/login`     | grove-login     |
-| `packages/domains`   | `apps/domains`   | grove-domains   |
+| Current Location     | New Location     | Package Name    | Notes                           |
+| -------------------- | ---------------- | --------------- | ------------------------------- |
+| `packages/landing`   | `apps/landing`   | grove-landing   | **grove.place** — the home page |
+| `packages/plant`     | `apps/plant`     | grove-plant     |                                 |
+| `packages/clearing`  | `apps/clearing`  | grove-clearing  |                                 |
+| `packages/meadow`    | `apps/meadow`    | grove-meadow    |                                 |
+| `packages/terrarium` | `apps/terrarium` | grove-terrarium |                                 |
+| `packages/login`     | `apps/login`     | grove-login     |                                 |
+| `packages/domains`   | `apps/domains`   | grove-domains   |                                 |
 
 ### services/ — Core Infrastructure Workers
 
@@ -366,10 +367,24 @@ mkdir -p apps services libs
 # workers/ already exists, tools/ already exists
 ```
 
-**Step 1.2 — Move apps (7 packages):**
+**Step 1.2 — Move landing first (the grove.place home page):**
+
+> Landing is the heart of Grove — grove.place itself. It gets moved first and verified independently before everything else. This isn't just another package; it's the front door.
 
 ```bash
 git mv packages/landing    apps/landing
+```
+
+After moving, verify landing's critical integration points:
+
+- `apps/landing/wrangler.toml` — Cloudflare Pages project binding
+- `apps/landing/tailwind.config.js` — Engine preset import path (updates in Step 1.8)
+- `apps/landing/static/data/` — Auto-tag workflow syncs snapshot data here (workflow update in Step 1.10)
+- `.github/workflows/deploy-landing.yml` — Path trigger and working directory (update in Step 1.10)
+
+**Step 1.2b — Move remaining apps (6 packages):**
+
+```bash
 git mv packages/plant       apps/plant
 git mv packages/clearing    apps/clearing
 git mv packages/meadow      apps/meadow
@@ -410,7 +425,7 @@ git mv packages/engine    libs/engine
 git mv packages/vineyard  libs/vineyard
 ```
 
-**Step 1.6 — Clean up empty directories:**
+**Step 1.6 — Clean up empty directories and reconcile root `landing/`:**
 
 ```bash
 # packages/ directory should now be empty (or contain only stale files)
@@ -419,17 +434,33 @@ ls packages/workers  # confirm empty
 rmdir packages/workers
 ls packages          # confirm empty
 rmdir packages
-
-# Root landing/ is a real directory (NOT a symlink) with static assets:
-#   landing/static/icon-192.png
-#   landing/static/icon-512.png
-# Before removing, diff against apps/landing/static/ to check for divergence:
-diff -r landing/static apps/landing/static
-# If identical → safe to remove via git rm:
-git rm -r landing
-# If diverged → move to _deprecated/ for manual review:
-git mv landing _deprecated/landing-root-stale
 ```
+
+**Root `landing/` directory — handle with care:**
+
+Root `landing/` contains 2 static icons that are **different versions** from what's in `apps/landing/static/` (the canonical landing site):
+
+| File           | Root `landing/static/` | `apps/landing/static/` | Notes                         |
+| -------------- | ---------------------- | ---------------------- | ----------------------------- |
+| `icon-192.png` | 6,999 bytes            | 16,504 bytes           | Root version is smaller/older |
+| `icon-512.png` | 20,431 bytes           | 50,893 bytes           | Root version is smaller/older |
+
+These are NOT identical files — the root versions appear to be older/smaller variants. Since landing is the grove.place home page and a very special folder, do NOT silently delete these. Instead:
+
+```bash
+# Visually compare the icons to confirm they're just older versions
+# (open both side by side, or use ImageMagick identify)
+
+# If confirmed as older versions that aren't needed:
+git rm -r landing
+# The canonical icons live in apps/landing/static/
+
+# If they're intentionally different (e.g., separate PWA manifest targets):
+git mv landing _deprecated/landing-root-icons
+# Then investigate whether apps/landing/ needs these specific sizes
+```
+
+**Important:** The auto-tag workflow (`auto-tag.yml`) syncs snapshot data to `packages/landing/static/data/` — after the move, this becomes `apps/landing/static/data/`. This is handled in the workflow update (Step 1.10), but verify the data sync still works after the move.
 
 > **Safety rule:** Never `rm -rf` during migration. Use `git mv` to preserve history, `git rm` to remove tracked files, and `rmdir` only on confirmed-empty directories.
 
@@ -506,6 +537,7 @@ Extract shared deploy logic into a reusable workflow, then slim each `deploy-*.y
    - Each file becomes ~10 lines: trigger, path filter, reusable workflow call with 3 inputs
 3. Update `ci.yml` to scan across `apps/`, `services/`, `workers/`, `libs/` instead of `packages/*`
 4. Update non-deploy workflows (`claude.yml`, `codeql.yml`, `semgrep.yml`, etc.) — fix any `packages/` path references individually
+5. **Update `auto-tag.yml`** — this workflow syncs snapshot data directly into landing's static directory (`packages/landing/static/data/` → `apps/landing/static/data/`). There are 10+ path references to update. This is critical because landing is the grove.place home page — stale snapshot data means the knowledge base breaks.
 
 **Step 1.11 — Update root package.json:**
 
@@ -817,6 +849,8 @@ After Phase 1 (restructure):
 - [ ] `pnpm -r run build` succeeds for all packages
 - [ ] `pnpm -r run check` succeeds (TypeScript)
 - [ ] `pnpm -r run test:run` passes
+- [ ] **Landing specifically:** `pnpm --filter grove-landing build` succeeds (grove.place must always build)
+- [ ] **Landing specifically:** `auto-tag.yml` snapshot data paths point to `apps/landing/static/data/`
 - [ ] `gw context` reports correct packages under new directories (not zero)
 - [ ] `gw packages list` shows correct paths
 - [ ] `gf --agent search "test"` still finds files correctly
@@ -824,6 +858,7 @@ After Phase 1 (restructure):
 - [ ] `gf --agent migrations` finds D1 migrations in new paths
 - [ ] No remaining references to `packages/` in workspace config
 - [ ] All deploy workflows point to new paths
+- [ ] Root `landing/` icons resolved (removed or moved to `_deprecated/`)
 
 After Phase 2 (imports):
 
