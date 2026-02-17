@@ -3,7 +3,7 @@ title: What is Firefly?
 description: How Grove uses temporary servers that appear when needed and vanish when done
 category: help
 section: how-it-works
-lastUpdated: '2026-01-23'
+lastUpdated: "2026-01-23"
 keywords:
   - firefly
   - ephemeral
@@ -41,7 +41,9 @@ Every Firefly server follows three phases:
 
 **Outpost** (Minecraft) spins up a game server when someone wants to play. No 24/7 hosting fees for a world that sits empty overnight. When the last player leaves and thirty minutes pass, the server saves the world and shuts down. Next time someone connects, it's back in under a minute.
 
-**Bloom** (AI coding) creates a temporary development server when you text it a task. The agent works on your code, syncs the result to cloud storage, and the server self-destructs. You get the finished work without maintaining any infrastructure.
+**Verge** (AI coding) creates a temporary development server when you text it a task. The agent works on your code, syncs the result to cloud storage, and the server self-destructs. You get the finished work without maintaining any infrastructure.
+
+The infrastructure underneath is pluggable. Grove can provision servers from different cloud providers depending on what makes sense for the workload: one provider for cost, another for speed, another for regional proximity. You don't need to think about which cloud is running your server. The experience stays identical regardless.
 
 ## Why this matters
 
@@ -66,4 +68,4 @@ If you enjoy technical architecture, the complete specification covers provision
 
 ---
 
-*A brief light in the darkness. It appears, does its work, and fades away.*
+_A brief light in the darkness. It appears, does its work, and fades away._

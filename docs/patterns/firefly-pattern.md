@@ -1,13 +1,19 @@
 ---
-title: Firefly — Ephemeral Server Pattern
-description: 'On-demand infrastructure that ignites, illuminates, and fades away'
-category: patterns
-icon: webhook
-lastUpdated: '2026-01-01'
+aliases: []
+date created: Wednesday, January 1st 2026
+date modified: Tuesday, February 17th 2026
+tags:
+  - infrastructure
+  - ephemeral-compute
+  - patterns
+type: tech-spec
 ---
+
 # Firefly — Ephemeral Server Pattern
 
-> *A brief light in the darkness. It appears, does its work, and fades away.*
+> **Note:** The authoritative technical reference is now [[firefly-sdk-spec|Firefly SDK Spec]]. This document is preserved for design philosophy and historical context. For implementation details, provider catalog, and consumer configurations, see the SDK spec.
+
+> _A brief light in the darkness. It appears, does its work, and fades away._
 
 **Public Name:** Firefly
 **Internal Name:** GroveFirefly
@@ -30,6 +36,7 @@ The Firefly pattern defines a three-phase lifecycle for ephemeral server infrast
 3. **Fade** — Tear down gracefully when complete or idle
 
 This pattern is ideal for workloads that are:
+
 - **Bursty** — High activity followed by long periods of nothing
 - **Session-based** — Discrete units of work with clear start/end
 - **Cost-sensitive** — Can't justify 24/7 hosting for occasional use
@@ -37,7 +44,7 @@ This pattern is ideal for workloads that are:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         FIREFLY LIFECYCLE                                │
+│                         FIREFLY LIFECYCLE                               │
 └─────────────────────────────────────────────────────────────────────────┘
 
      DORMANT                    ACTIVE                      DORMANT
@@ -93,17 +100,18 @@ This pattern is ideal for workloads that are:
 
 Traditional server hosting presents a dilemma:
 
-| Approach | Cost | Availability | Waste |
-|----------|------|--------------|-------|
-| **Always-on VPS** | $5-50/mo | Instant | 95%+ idle time |
-| **Serverless** | Per-request | Instant | Low, but limited capabilities |
-| **Manual spin-up** | Minimal | Minutes of delay | None, but friction-heavy |
+| Approach           | Cost        | Availability     | Waste                         |
+| ------------------ | ----------- | ---------------- | ----------------------------- |
+| **Always-on VPS**  | $5-50/mo    | Instant          | 95%+ idle time                |
+| **Serverless**     | Per-request | Instant          | Low, but limited capabilities |
+| **Manual spin-up** | Minimal     | Minutes of delay | None, but friction-heavy      |
 
 For workloads like AI coding agents or gaming servers, you need full VM capabilities (not serverless) but can't justify 24/7 costs for occasional use.
 
 ### The Solution
 
 Firefly provides:
+
 - **Near-zero idle cost** — Pay only when actively used
 - **Sub-minute availability** — Modern cloud APIs provision in 30-60 seconds
 - **Full VM capabilities** — Run anything you'd run on a VPS
@@ -119,22 +127,22 @@ The mechanism that detects demand and initiates the Ignite phase.
 
 ```typescript
 interface FireflyTrigger {
-  type: 'webhook' | 'schedule' | 'queue' | 'manual';
-  source: string;           // Where the trigger originated
-  metadata: Record<string, unknown>;  // Trigger-specific data
-  priority?: 'low' | 'normal' | 'high';
-  timeout?: number;         // Max session duration (ms)
+  type: "webhook" | "schedule" | "queue" | "manual";
+  source: string; // Where the trigger originated
+  metadata: Record<string, unknown>; // Trigger-specific data
+  priority?: "low" | "normal" | "high";
+  timeout?: number; // Max session duration (ms)
 }
 ```
 
 **Trigger Types:**
 
-| Type | Example | Use Case |
-|------|---------|----------|
-| **Webhook** | GitHub push event | Bloom: code task received |
-| **Queue** | Message in task queue | Bloom: async job processing |
-| **Manual** | User clicks "Start" | Outpost: player requests server |
-| **Schedule** | Cron expression | Pre-warming for expected demand |
+| Type         | Example               | Use Case                        |
+| ------------ | --------------------- | ------------------------------- |
+| **Webhook**  | GitHub push event     | Bloom: code task received       |
+| **Queue**    | Message in task queue | Bloom: async job processing     |
+| **Manual**   | User clicks "Start"   | Outpost: player requests server |
+| **Schedule** | Cron expression       | Pre-warming for expected demand |
 
 ### 2. Server Provisioner
 
@@ -156,14 +164,14 @@ interface ServerProvisioner {
 }
 
 interface ServerConfig {
-  provider: 'hetzner' | 'digitalocean' | 'aws' | 'vultr';
-  size: string;             // e.g., 'cx22', 's-1vcpu-1gb'
-  region: string;           // e.g., 'fsn1', 'nyc1'
-  image: string;            // OS image or snapshot
-  userData?: string;        // Cloud-init script
-  sshKeys?: string[];       // SSH key IDs
-  tags?: string[];          // For organization and cleanup
-  maxLifetime?: number;     // Hard cap on session duration (ms)
+  provider: "hetzner" | "digitalocean" | "aws" | "vultr";
+  size: string; // e.g., 'cx22', 's-1vcpu-1gb'
+  region: string; // e.g., 'fsn1', 'nyc1'
+  image: string; // OS image or snapshot
+  userData?: string; // Cloud-init script
+  sshKeys?: string[]; // SSH key IDs
+  tags?: string[]; // For organization and cleanup
+  maxLifetime?: number; // Hard cap on session duration (ms)
 }
 
 interface ServerInstance {
@@ -171,7 +179,7 @@ interface ServerInstance {
   provider: string;
   publicIp: string;
   privateIp?: string;
-  status: 'provisioning' | 'ready' | 'running' | 'terminating' | 'terminated';
+  status: "provisioning" | "ready" | "running" | "terminating" | "terminated";
   createdAt: number;
   metadata: Record<string, unknown>;
 }
@@ -197,7 +205,7 @@ interface ConflictResult {
   hasConflict: boolean;
   localVersion?: string;
   remoteVersion?: string;
-  resolution?: 'use_local' | 'use_remote' | 'manual';
+  resolution?: "use_local" | "use_remote" | "manual";
 }
 ```
 
@@ -221,17 +229,17 @@ interface IdleDetector {
 }
 
 interface IdleConfig {
-  checkInterval: number;    // How often to check (ms)
-  idleThreshold: number;    // How long before considered idle (ms)
-  activitySignals: ActivitySignal[];  // What counts as activity
+  checkInterval: number; // How often to check (ms)
+  idleThreshold: number; // How long before considered idle (ms)
+  activitySignals: ActivitySignal[]; // What counts as activity
 }
 
 type ActivitySignal =
-  | 'ssh_session_active'
-  | 'process_cpu_above_threshold'
-  | 'network_traffic'
-  | 'player_connected'      // Outpost
-  | 'agent_task_running';   // Bloom
+  | "ssh_session_active"
+  | "process_cpu_above_threshold"
+  | "network_traffic"
+  | "player_connected" // Outpost
+  | "agent_task_running"; // Bloom
 ```
 
 ---
@@ -245,29 +253,29 @@ Bloom uses Firefly for ephemeral AI coding agents.
 ```typescript
 const bloomFireflyConfig: FireflyConfig = {
   trigger: {
-    type: 'queue',
-    source: 'bloom-task-queue',
+    type: "queue",
+    source: "bloom-task-queue",
   },
 
   provisioner: {
-    provider: 'hetzner',
-    size: 'cx22',           // 2 vCPU, 4GB RAM
-    region: 'fsn1',         // Falkenstein, Germany
-    image: 'bloom-agent-v1', // Pre-configured with Claude CLI
-    maxLifetime: 4 * 60 * 60 * 1000,  // 4 hours max
+    provider: "hetzner",
+    size: "cx22", // 2 vCPU, 4GB RAM
+    region: "fsn1", // Falkenstein, Germany
+    image: "bloom-agent-v1", // Pre-configured with Claude CLI
+    maxLifetime: 4 * 60 * 60 * 1000, // 4 hours max
   },
 
   stateSync: {
-    storage: 'r2',           // Cloudflare R2
-    bucket: 'bloom-workspaces',
-    syncOnActivity: true,    // Sync after each task completion
-    syncInterval: 5 * 60 * 1000,  // Also sync every 5 minutes
+    storage: "r2", // Cloudflare R2
+    bucket: "bloom-workspaces",
+    syncOnActivity: true, // Sync after each task completion
+    syncInterval: 5 * 60 * 1000, // Also sync every 5 minutes
   },
 
   idle: {
-    threshold: 15 * 60 * 1000,  // 15 minutes idle
-    signals: ['agent_task_running', 'ssh_session_active'],
-    warningAt: 10 * 60 * 1000,  // Warn user at 10 minutes
+    threshold: 15 * 60 * 1000, // 15 minutes idle
+    signals: ["agent_task_running", "ssh_session_active"],
+    warningAt: 10 * 60 * 1000, // Warn user at 10 minutes
   },
 };
 ```
@@ -314,30 +322,30 @@ Outpost uses Firefly for on-demand Minecraft servers.
 ```typescript
 const outpostFireflyConfig: FireflyConfig = {
   trigger: {
-    type: 'manual',
-    source: 'outpost-dashboard',
+    type: "manual",
+    source: "outpost-dashboard",
     // Also supports: webhook from Discord bot
   },
 
   provisioner: {
-    provider: 'hetzner',
-    size: 'cx32',            // 4 vCPU, 8GB RAM (Minecraft needs more)
-    region: 'ash',           // Ashburn for US players
-    image: 'outpost-mc-v2',  // Pre-configured with Paper, plugins
-    maxLifetime: 12 * 60 * 60 * 1000,  // 12 hours max
+    provider: "hetzner",
+    size: "cx32", // 4 vCPU, 8GB RAM (Minecraft needs more)
+    region: "ash", // Ashburn for US players
+    image: "outpost-mc-v2", // Pre-configured with Paper, plugins
+    maxLifetime: 12 * 60 * 60 * 1000, // 12 hours max
   },
 
   stateSync: {
-    storage: 'r2',
-    bucket: 'outpost-worlds',
-    syncOnActivity: false,   // Sync only on shutdown (world files are large)
-    syncInterval: 30 * 60 * 1000,  // Backup every 30 minutes
+    storage: "r2",
+    bucket: "outpost-worlds",
+    syncOnActivity: false, // Sync only on shutdown (world files are large)
+    syncInterval: 30 * 60 * 1000, // Backup every 30 minutes
   },
 
   idle: {
-    threshold: 30 * 60 * 1000,  // 30 minutes with no players
-    signals: ['player_connected'],
-    warningAt: 25 * 60 * 1000,  // Discord notification at 25 minutes
+    threshold: 30 * 60 * 1000, // 30 minutes with no players
+    signals: ["player_connected"],
+    warningAt: 25 * 60 * 1000, // Discord notification at 25 minutes
   },
 };
 ```
@@ -378,27 +386,28 @@ const outpostFireflyConfig: FireflyConfig = {
 
 ### Bloom (AI Coding)
 
-| Scenario | Traditional VPS | Firefly |
-|----------|-----------------|---------|
-| 4 hours/day coding | $5/mo (always on) | ~$0.50/mo |
-| 20 hours/week heavy use | $5/mo | ~$2/mo |
-| Occasional weekend projects | $5/mo | ~$0.20/mo |
+| Scenario                    | Traditional VPS   | Firefly   |
+| --------------------------- | ----------------- | --------- |
+| 4 hours/day coding          | $5/mo (always on) | ~$0.50/mo |
+| 20 hours/week heavy use     | $5/mo             | ~$2/mo    |
+| Occasional weekend projects | $5/mo             | ~$0.20/mo |
 
 **Calculation:** Hetzner cx22 = €0.0076/hr ≈ $0.008/hr
 
 ### Outpost (Gaming)
 
-| Scenario | Traditional VPS | Firefly |
-|----------|-----------------|---------|
-| Weekend sessions (8hr/week) | $10/mo | ~$1.50/mo |
-| Occasional gaming (4hr/week) | $10/mo | ~$0.75/mo |
-| One-off game night | $10/mo | ~$0.10 |
+| Scenario                     | Traditional VPS | Firefly   |
+| ---------------------------- | --------------- | --------- |
+| Weekend sessions (8hr/week)  | $10/mo          | ~$1.50/mo |
+| Occasional gaming (4hr/week) | $10/mo          | ~$0.75/mo |
+| One-off game night           | $10/mo          | ~$0.10    |
 
 **Calculation:** Hetzner cx32 = €0.0152/hr ≈ $0.016/hr
 
 ### Break-Even Analysis
 
 Firefly is more cost-effective when usage is below:
+
 - **cx22 (Bloom):** ~650 hours/month (27 hours/day — always use Firefly)
 - **cx32 (Outpost):** ~650 hours/month (27 hours/day — always use Firefly)
 
@@ -424,23 +433,23 @@ When multiple sessions might modify the same state:
 ```typescript
 interface ConflictStrategy {
   // Bloom: Last-write-wins with version history
-  bloom: 'lww_with_history';
+  bloom: "lww_with_history";
 
   // Outpost: Single-server lock (only one instance per world)
-  outpost: 'exclusive_lock';
+  outpost: "exclusive_lock";
 }
 
 // Bloom implementation
 async function handleBloomConflict(conflict: ConflictResult): Promise<void> {
   // Store both versions
-  await storeVersion(conflict.localVersion, 'local');
-  await storeVersion(conflict.remoteVersion, 'remote');
+  await storeVersion(conflict.localVersion, "local");
+  await storeVersion(conflict.remoteVersion, "remote");
 
   // Use local (more recent work), but preserve history
   await persist(conflict.localVersion);
 
   // Notify user of potential conflict
-  await notifyUser('State conflict resolved. Check history if needed.');
+  await notifyUser("State conflict resolved. Check history if needed.");
 }
 
 // Outpost implementation
@@ -465,8 +474,8 @@ Ensure clean termination:
 ```typescript
 async function gracefulFade(instance: ServerInstance): Promise<void> {
   // 1. Stop accepting new work
-  await instance.exec('systemctl stop bloom-agent || true');
-  await instance.exec('minecraft-server stop || true');
+  await instance.exec("systemctl stop bloom-agent || true");
+  await instance.exec("minecraft-server stop || true");
 
   // 2. Wait for in-progress work to complete (with timeout)
   await waitForQuiet(instance, 60000);
@@ -475,7 +484,7 @@ async function gracefulFade(instance: ServerInstance): Promise<void> {
   await stateSynchronizer.persist(instance, getStateKey(instance));
 
   // 4. Cleanup sensitive data
-  await instance.exec('shred -u /root/.claude-credentials || true');
+  await instance.exec("shred -u /root/.claude-credentials || true");
 
   // 5. Terminate
   await provisioner.terminate(instance);
@@ -498,14 +507,14 @@ async function gracefulFade(instance: ServerInstance): Promise<void> {
 
 ### Key Metrics
 
-| Metric | Description | Alert Threshold |
-|--------|-------------|-----------------|
-| `firefly.ignite.duration` | Time to provision and ready | > 120s |
-| `firefly.session.duration` | Total session time | > maxLifetime |
-| `firefly.idle.duration` | Time in idle state | Informational |
-| `firefly.sync.failures` | State sync errors | > 0 |
-| `firefly.orphaned.instances` | Running but untracked | > 0 |
-| `firefly.cost.daily` | Daily infrastructure cost | > budget |
+| Metric                       | Description                 | Alert Threshold |
+| ---------------------------- | --------------------------- | --------------- |
+| `firefly.ignite.duration`    | Time to provision and ready | > 120s          |
+| `firefly.session.duration`   | Total session time          | > maxLifetime   |
+| `firefly.idle.duration`      | Time in idle state          | Informational   |
+| `firefly.sync.failures`      | State sync errors           | > 0             |
+| `firefly.orphaned.instances` | Running but untracked       | > 0             |
+| `firefly.cost.daily`         | Daily infrastructure cost   | > budget        |
 
 ### Orphan Detection
 
@@ -517,12 +526,12 @@ async function orphanSweep(): Promise<void> {
   const trackedInstances = await db.getActiveFireflySessions();
 
   for (const cloud of cloudInstances) {
-    const tracked = trackedInstances.find(t => t.id === cloud.id);
+    const tracked = trackedInstances.find((t) => t.id === cloud.id);
 
     if (!tracked) {
       console.warn(`Orphaned instance detected: ${cloud.id}`);
       await provisioner.terminate(cloud);
-      await alertOps('Orphaned instance terminated', cloud);
+      await alertOps("Orphaned instance terminated", cloud);
     }
 
     if (tracked && Date.now() - tracked.createdAt > tracked.maxLifetime) {
@@ -533,7 +542,7 @@ async function orphanSweep(): Promise<void> {
 }
 
 // Run every 5 minutes
-schedule('*/5 * * * *', orphanSweep);
+schedule("*/5 * * * *", orphanSweep);
 ```
 
 ---
@@ -547,17 +556,17 @@ Firefly exposes controls through Mycelium:
 ```typescript
 // MCP tools for Firefly control
 const fireflyTools = {
-  'firefly.ignite': {
-    description: 'Start a Bloom coding session',
-    parameters: { project: 'string', task: 'string' },
+  "firefly.ignite": {
+    description: "Start a Bloom coding session",
+    parameters: { project: "string", task: "string" },
   },
-  'firefly.status': {
-    description: 'Check if a Firefly session is active',
-    parameters: { sessionId: 'string' },
+  "firefly.status": {
+    description: "Check if a Firefly session is active",
+    parameters: { sessionId: "string" },
   },
-  'firefly.fade': {
-    description: 'Gracefully end a Firefly session',
-    parameters: { sessionId: 'string' },
+  "firefly.fade": {
+    description: "Gracefully end a Firefly session",
+    parameters: { sessionId: "string" },
   },
 };
 ```
@@ -588,16 +597,16 @@ Firefly reports metrics to Vista:
 
 ```typescript
 await vista.record({
-  metric: 'firefly.session.completed',
+  metric: "firefly.session.completed",
   tags: {
-    product: 'bloom',
-    provider: 'hetzner',
-    region: 'fsn1',
-    size: 'cx22',
+    product: "bloom",
+    provider: "hetzner",
+    region: "fsn1",
+    size: "cx22",
   },
   fields: {
     duration: sessionDurationMs,
-    cost: calculateCost(sessionDurationMs, 'cx22'),
+    cost: calculateCost(sessionDurationMs, "cx22"),
     syncCount: stateSyncCount,
     idleDuration: totalIdleMs,
   },
@@ -609,6 +618,7 @@ await vista.record({
 ## Implementation Checklist
 
 ### Shared Infrastructure
+
 - [ ] Create `packages/firefly/` shared library
 - [ ] Implement generic `ServerProvisioner` interface
 - [ ] Implement `StateSynchronizer` with R2 backend
@@ -617,6 +627,7 @@ await vista.record({
 - [ ] Integrate with Vista for metrics
 
 ### Bloom Integration
+
 - [ ] Create Bloom-specific Firefly configuration
 - [ ] Build Bloom agent image (Hetzner snapshot)
 - [ ] Implement task queue trigger
@@ -624,6 +635,7 @@ await vista.record({
 - [ ] Integrate with Mycelium MCP tools
 
 ### Outpost Integration
+
 - [ ] Create Outpost-specific Firefly configuration
 - [ ] Build Minecraft server image (Hetzner snapshot)
 - [ ] Implement manual start trigger (dashboard)
@@ -644,5 +656,5 @@ await vista.record({
 
 ---
 
-*Pattern created: January 2026*
-*For use by: Bloom, Outpost, future ephemeral infrastructure*
+_Pattern created: January 2026_
+_For use by: Bloom, Outpost, future ephemeral infrastructure_

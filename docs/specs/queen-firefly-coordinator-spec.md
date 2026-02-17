@@ -1,150 +1,659 @@
 ---
-title: Queen Firefly Coordinator Specification
-description: The sovereign orchestrator of ephemeral CI runners
-category: specs
-status: draft
-lastUpdated: '2026-02-05'
+aliases: []
+date created: Wednesday, February 5th 2026
+date modified: Tuesday, February 17th 2026
+tags:
+  - infrastructure
+  - ci-cd
+  - durable-objects
+  - cloudflare-workers
+type: tech-spec
 ---
 
-# Queen Firefly Coordinator Specification
+# Queen Firefly: Pool Coordinator
 
-> *She commands the swarm. Jobs arrive, runners ignite, work completes, and the swarm fades—all at her bidding.*
+```
+                                  ┌───────────┐
+                                  │  Codeberg │
+                                  │  webhook  │
+                                  └─────┬─────┘
+                                        │
+                     ┌──────────────────▼──────────────────┐
+                     │          CF Worker (router)         │
+                     └──────────────────┬──────────────────┘
+                                        │
+                     ╔══════════════════▼══════════════════╗
+                     ║                                     ║
+                     ║           👑 Queen DO               ║
+                     ║           extends LoomDO            ║
+                     ║                                     ║
+                     ║   jobs ─── runners ─── consumers    ║
+                     ║   queue    pool        profiles     ║
+                     ║                                     ║
+                     ╚═══════════╤═══════════╤═════════════╝
+                                 │           │
+                     ┌───────────▼───┐ ┌─────▼───────────┐
+                     │  Warm Pool    │ │  Ephemeral Pool │
+                     │  ┌──┐ ┌──┐    │ │  ┌──┐ ┌──┐ ┌──┐ │
+                     │  │🔥│ │🔥 │    │ │  │✨│ │✨│ │ ✨│ │
+                     │  └──┘ └──┘    │ │  └──┘ └──┘ └──┘ │
+                     └───────────────┘ └─────────────────┘
+                                 │           │
+                     ┌───────────▼───────────▼───────────┐
+                     │    Firefly SDK (any provider)     │
+                     │    hetzner · fly · railway · do   │
+                     └───────────────────────────────────┘
 
-## Overview
+              She commands the swarm. The SDK provisions it.
+```
 
-The Queen is a Cloudflare Durable Object that coordinates Firefly CI. She receives webhooks from Codeberg, maintains the job queue, manages the runner pool, and orchestrates the ignite/fade lifecycle of ephemeral CI runners on Hetzner Cloud.
+> _She commands the swarm. Jobs arrive, runners ignite, work completes, and the swarm fades. All at her bidding._
 
-Unlike traditional CI servers that run 24/7, the Queen only wakes when needed. She hibernates between jobs, consuming zero compute. Yet she never forgets—her state persists in the Durable Object's SQLite storage.
+The Queen is a Cloudflare Durable Object that coordinates pools of Firefly instances. She receives triggers from consumers, maintains job queues, manages runner pools, and orchestrates the ignite/illuminate/fade lifecycle. The Queen decides _what_ to provision and _when_. The Firefly SDK handles _how_.
+
+**Public Name:** Queen Firefly
+**Internal Name:** GroveQueenFirefly
+**Extends:** `LoomDO` (from `@autumnsgrove/lattice/loom`)
+**Uses:** [[firefly-sdk-spec|Firefly SDK]] (from `@autumnsgrove/lattice/firefly`)
+**Primary Consumer:** CI (Codeberg webhooks)
+**Future Consumers:** Bloom pool management, Outpost coordination
+
+Unlike traditional CI servers that run around the clock, the Queen only wakes when needed. She hibernates between jobs, consuming zero compute. Yet she never forgets. Her state persists in the Durable Object's SQLite storage. When a webhook arrives, she wakes, evaluates the swarm, and acts.
+
+---
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         Queen Firefly System                            │
+│                       Queen Firefly System                              │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐      │
-│  │   Codeberg  │     │   CF Worker      │     │   Queen DO       │      │
-│  │             │────▶│   (webhook       │────▶│   (Coordinator)  │      │
-│  │             │     │    receiver)     │     │                  │      │
-│  └─────────────┘     └──────────────────┘     └────────┬─────────┘      │
-│                                                        │                │
-│                                 ┌──────────────────────┼──────────┐     │
-│                                 │                      │          │     │
-│                                 ▼                      ▼          ▼     │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │                        Job Queue (SQLite)                       │    │
-│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐                            │    │
-│  │  │ pending │ │ running │ │ done    │                            │    │
-│  │  │ #127  │ │ #125  │ │ #120-24 │                          │    │
-│  │  │ #126  │ │         │ │         │                            │    │
-│  │  └─────────┘ └─────────┘ └─────────┘                            │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                 │                                       │
-│                                 ▼                                       │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │                      Runner Pool (SQLite)                       │    │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │    │
-│  │  │ warm-1   │ │ warm-2   │ │ eph-abc  │ │ eph-def  │            │    │
-│  │  │ ready    │ │ ready    │ │ working  │ │ working  │            │    │
-│  │  │ 10m idle │ │ 2m idle  │ │ job #125 │ │ job #127 │          │  │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                 │                                       │
-│                                 ▼                                       │
-│                        Hetzner Cloud API                                │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │                    Firefly Runners (VPS)                        │    │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │    │
-│  │  │ Runner 1 │ │ Runner 2 │ │ Runner 3 │ │ Runner 4 │            │    │
-│  │  │ (warm)   │ │ (warm)   │ │ (ephem)  │ │ (ephem)  │            │    │
-│  │  │ CX21     │ │ CX21     │ │ CX21     │ │ CX21     │            │    │
-│  │  │ €6/mo    │ │ €6/mo    │ │ €0.006/h │ │ €0.006/h │            │    │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │    │
+│           TRIGGER LAYER                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                      │
+│  │  Codeberg   │  │  Schedule   │  │  Manual     │                      │
+│  │  webhook    │  │  (cron)     │  │  (gw CLI)   │                      │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘                      │
+│         └────────────────┼────────────────┘                             │
+│                          ▼                                              │
+│           COORDINATION LAYER                                            │
+│  ╔═══════════════════════════════════════════════════════════════╗      │
+│  ║                    Queen DO (LoomDO)                          ║      │
+│  ║  ┌────────────┐  ┌────────────┐  ┌──────────────────────┐     ║      │
+│  ║  │ Job Queue  │  │ Runner     │  │ Consumer Profiles    │     ║      │
+│  ║  │ (SQLite)   │  │ Pool       │  │ ci · bloom · outpost │     ║      │
+│  ║  │            │  │ (SQLite)   │  │                      │     ║      │
+│  ║  └────────────┘  └────────────┘  └──────────────────────┘     ║      │
+│  ║                                                               ║      │
+│  ║  Loom Features:                                               ║      │
+│  ║  • this.sql      SQLite queries                               ║      │
+│  ║  • this.sockets  WebSocket (hibernation)                      ║      │
+│  ║  • this.alarms   60s alarm cycle                              ║      │
+│  ║  • this.locks    Double-ignition prevention                   ║      │
+│  ║  • this.log      Structured logging                           ║      │
+│  ╚════════════════════════════════════╤══════════════════════════╝      │
+│                                       │                                 │
+│           PROVISIONING LAYER          │                                 │
+│  ┌────────────────────────────────────▼────────────────────────────┐    │
+│  │                   Firefly SDK                                   │    │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐         │    │
+│  │  │ Hetzner  │  │ Fly.io   │  │ Railway  │  │ DO       │         │    │
+│  │  │ Provider │  │ Provider │  │ Provider │  │ Provider │         │    │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘         │    │
 │  └─────────────────────────────────────────────────────────────────┘    │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## The Queen's Domain
+Three distinct layers. The trigger layer sends signals. The coordination layer (Queen DO) makes decisions. The provisioning layer (Firefly SDK) talks to cloud APIs. This separation means the Queen never calls Hetzner directly. She asks the SDK. Swapping providers requires zero changes to the Queen.
 
-### Responsibilities
+---
 
-1. **Webhook Reception** — Accept push/PR webhooks from Codeberg
-2. **Job Queuing** — Parse webhooks into CI jobs, enqueue with priority
-3. **Runner Management** — Track warm pool and ephemeral runners
-4. **Ignition Control** — Trigger Hetzner API to create new runners
-5. **Fade Control** — Destroy idle runners after timeout
-6. **Log Streaming** — WebSocket relay from runners to clients
-7. **State Persistence** — SQLite storage for jobs, runners, history
+## Extends LoomDO
 
-### State Schema
+The Queen is built on the Loom SDK, the same framework running 7 production DOs across Grove. Here's the complete scaffold.
+
+### config()
 
 ```typescript
-// Durable Object SQLite Schema
-
-interface Job {
-  id: string;                    // UUID
-  commit: string;                // Git commit SHA
-  branch: string;                // Git branch
-  repository: string;            // codeberg.org/owner/repo
-  author: string;                // Codeberg username
-  message: string;               // Commit message
-  status: 'pending' | 'claimed' | 'running' | 'success' | 'failure' | 'cancelled';
-  runnerId?: string;             // Assigned runner
-  startedAt?: Date;
-  completedAt?: Date;
-  logs: string[];                // Log lines (truncated)
-  pipeline: PipelineConfig;      // Parsed .woodpecker.yml
-  priority: number;              // 0 = normal, 1 = high (main branch)
-  createdAt: Date;
-}
-
-interface Runner {
-  id: string;                    // Unique runner ID (uuid or hostname)
-  hetznerId: number;             // Hetzner server ID
-  status: 'igniting' | 'ready' | 'working' | 'fading' | 'faded';
-  type: 'warm' | 'ephemeral';    // Pool type
-  ip?: string;                   // Server IP
-  websocket?: WebSocket;         // Active connection
-  currentJobId?: string;         // Job being executed
-  lastActivityAt: Date;
-  igniteCost?: number;           // Hetzner hourly rate
-  labels: string[];              // e.g., ['node:20', 'docker']
-}
-
-interface PoolConfig {
-  minWarmRunners: number;        // Always keep N warm
-  maxWarmRunners: number;        // Don't exceed N warm
-  maxTotalRunners: number;       // Hard limit (including ephemeral)
-  fadeAfterIdleMinutes: number;  // Fade warm runners after N min idle
-  ephemeralFadeAfterMinutes: number; // Fade ephemeral immediately after job
-  scaleUpThreshold: number;      // Queue depth to trigger new runner
-}
-
-interface UserSession {
-  websocket: WebSocket;
-  watchingJobs: string[];
-  watchingRunners: string[];
+config(): LoomConfig {
+  return {
+    name: 'QueenDO',
+    hibernation: true,     // Sleep between WebSocket messages
+    blockOnInit: true,     // Schema runs before first request
+  };
 }
 ```
 
+Hibernation mode means the Queen consumes zero compute between events. When a webhook arrives or a runner sends a heartbeat, she wakes, processes, and sleeps again.
+
+### schema()
+
+```typescript
+schema(): string {
+  return `
+    CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      consumer TEXT NOT NULL DEFAULT 'ci',
+      commit_sha TEXT,
+      branch TEXT,
+      repository TEXT,
+      author TEXT,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      runner_id TEXT,
+      started_at INTEGER,
+      completed_at INTEGER,
+      exit_code INTEGER,
+      metadata TEXT DEFAULT '{}',
+      priority INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
+
+    CREATE TABLE IF NOT EXISTS runners (
+      id TEXT PRIMARY KEY,
+      provider_server_id TEXT,
+      provider TEXT NOT NULL DEFAULT 'hetzner',
+      consumer TEXT NOT NULL DEFAULT 'ci',
+      status TEXT NOT NULL DEFAULT 'igniting',
+      type TEXT NOT NULL DEFAULT 'ephemeral',
+      ip TEXT,
+      current_job_id TEXT,
+      last_activity_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
+      hourly_cost REAL,
+      labels TEXT DEFAULT '[]',
+      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
+
+    CREATE TABLE IF NOT EXISTS consumer_profiles (
+      id TEXT PRIMARY KEY,
+      provider TEXT NOT NULL DEFAULT 'hetzner',
+      size TEXT NOT NULL,
+      region TEXT NOT NULL,
+      image TEXT NOT NULL,
+      min_warm INTEGER NOT NULL DEFAULT 0,
+      max_warm INTEGER NOT NULL DEFAULT 2,
+      max_total INTEGER NOT NULL DEFAULT 5,
+      fade_after_idle_minutes INTEGER NOT NULL DEFAULT 10,
+      ephemeral_fade_after_minutes INTEGER NOT NULL DEFAULT 5,
+      scale_up_threshold INTEGER NOT NULL DEFAULT 1,
+      config_json TEXT DEFAULT '{}',
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+    CREATE INDEX IF NOT EXISTS idx_jobs_consumer ON jobs(consumer);
+    CREATE INDEX IF NOT EXISTS idx_runners_status ON runners(status);
+    CREATE INDEX IF NOT EXISTS idx_runners_consumer ON runners(consumer);
+  `;
+}
+```
+
+Key change from the previous spec: `provider_server_id TEXT` replaces `hetznerId INTEGER`. The `provider` column tracks which cloud created the runner. The `consumer` column tracks who requested it.
+
+### routes()
+
+```typescript
+routes(): LoomRoute[] {
+  return [
+    // Webhook endpoints (Worker -> Queen)
+    { method: 'POST', path: '/webhook/codeberg/push',         handler: (ctx) => this.handlePush(ctx) },
+    { method: 'POST', path: '/webhook/codeberg/pull_request',  handler: (ctx) => this.handlePR(ctx) },
+
+    // Runner endpoints (Runner -> Queen via WebSocket)
+    { method: 'GET',  path: '/ws/runner',                      handler: (ctx) => this.handleRunnerWS(ctx) },
+
+    // Client API (gw CLI -> Queen)
+    { method: 'GET',  path: '/api/status',                     handler: (ctx) => this.getStatus(ctx) },
+    { method: 'GET',  path: '/api/jobs',                       handler: (ctx) => this.listJobs(ctx) },
+    { method: 'GET',  path: '/api/jobs/:id',                   handler: (ctx) => this.getJob(ctx) },
+    { method: 'POST', path: '/api/jobs/:id/cancel',            handler: (ctx) => this.cancelJob(ctx) },
+    { method: 'POST', path: '/api/jobs/:id/rerun',             handler: (ctx) => this.rerunJob(ctx) },
+    { method: 'GET',  path: '/api/runners',                    handler: (ctx) => this.listRunners(ctx) },
+    { method: 'POST', path: '/api/runners/warm',               handler: (ctx) => this.warmPool(ctx) },
+    { method: 'POST', path: '/api/runners/freeze',             handler: (ctx) => this.freezePool(ctx) },
+    { method: 'GET',  path: '/api/costs',                      handler: (ctx) => this.getCosts(ctx) },
+    { method: 'GET',  path: '/api/costs/:jobId',               handler: (ctx) => this.getJobCost(ctx) },
+
+    // Consumer profile management
+    { method: 'GET',  path: '/api/consumers',                  handler: (ctx) => this.listConsumers(ctx) },
+    { method: 'PUT',  path: '/api/consumers/:id',              handler: (ctx) => this.updateConsumer(ctx) },
+
+    // Log streaming
+    { method: 'GET',  path: '/ws/logs',                        handler: (ctx) => this.handleLogWS(ctx) },
+  ];
+}
+```
+
+### onAlarm()
+
+The Queen's heartbeat. Fires every 60 seconds while there's work to do.
+
+```typescript
+async onAlarm(): Promise<void> {
+  // 1. Check for idle warm runners that should fade
+  await this.fadeIdleRunners();
+
+  // 2. Check queue depth, ignite if needed
+  await this.scalePool();
+
+  // 3. Orphan sweep (via Firefly SDK)
+  await this.sweepOrphans();
+
+  // 4. Re-arm alarm if there are active runners or pending jobs
+  const hasWork = await this.hasActiveWork();
+  if (hasWork) {
+    await this.alarms.schedule(60_000);
+  }
+}
+```
+
+### Double-Ignition Prevention
+
+When two webhooks arrive simultaneously, the Queen must not ignite two runners for the same demand spike. The Loom `PromiseLockMap` handles this.
+
+```typescript
+async igniteRunner(consumer: string): Promise<Runner | null> {
+  return this.locks.withLock(`ignite:${consumer}`, async () => {
+    // Re-check pool state inside the lock
+    const profile = await this.getConsumerProfile(consumer);
+    const activeCount = await this.countActiveRunners(consumer);
+
+    if (activeCount >= profile.maxTotal) {
+      this.log.info('At max capacity, queuing', { consumer, activeCount });
+      return null;
+    }
+
+    // Provision via Firefly SDK
+    const instance = await this.firefly.ignite({
+      size: profile.size,
+      region: profile.region,
+      image: profile.image,
+      tags: [`queen-${consumer}`, 'managed'],
+    });
+
+    // Track in SQLite
+    this.sql.exec(`
+      INSERT INTO runners (id, provider_server_id, provider, consumer, status, ip, hourly_cost)
+      VALUES (?, ?, ?, ?, 'igniting', ?, ?)
+    `, [instance.id, instance.providerServerId, instance.provider, consumer, instance.publicIp, profile.hourlyCost]);
+
+    return instance;
+  });
+}
+```
+
+### WebSocket Handling (Hibernation Mode)
+
+Runners connect via WebSocket to report status, claim jobs, and stream logs. The Queen uses hibernation-aware WebSockets, so she sleeps between messages.
+
+```typescript
+async onWebSocketMessage(ws: WebSocket, raw: string | ArrayBuffer): Promise<void> {
+  const { json } = this.sockets.parseMessage(raw);
+  if (!json || typeof json !== 'object') return;
+
+  const msg = json as RunnerMessage;
+
+  switch (msg.type) {
+    case 'register':
+      await this.handleRunnerRegister(ws, msg);
+      break;
+    case 'heartbeat':
+      await this.handleHeartbeat(ws, msg);
+      break;
+    case 'claim':
+      await this.handleClaim(ws, msg);
+      break;
+    case 'log':
+      await this.relayLog(msg);
+      break;
+    case 'complete':
+      await this.handleJobComplete(ws, msg);
+      break;
+  }
+}
+
+async onWebSocketClose(ws: WebSocket): Promise<void> {
+  // Mark runner as disconnected, start grace period before fade
+  const runnerId = this.getRunnerIdFromSocket(ws);
+  if (runnerId) {
+    this.log.info('Runner disconnected', { runnerId });
+    // Don't fade immediately; runner might reconnect
+    await this.alarms.ensureScheduled(60_000);
+  }
+}
+```
+
+---
+
+## Consumer Profiles
+
+Each consumer registers a profile that tells the Queen how to manage its pool. CI runners have different needs than Bloom agents or Outpost servers.
+
+```typescript
+interface ConsumerProfile {
+  id: string; // 'ci' | 'bloom' | 'outpost'
+  provider: string; // Which FireflyProvider to use
+  size: string; // Server size
+  region: string; // Preferred region
+  image: string; // OS image or snapshot
+  pool: PoolConfig;
+  idle: IdleConfig;
+}
+
+interface PoolConfig {
+  minWarm: number; // Always keep N warm
+  maxWarm: number; // Don't exceed N warm runners
+  maxTotal: number; // Hard limit (warm + ephemeral)
+  fadeAfterIdleMinutes: number; // Fade warm runners after N min idle
+  ephemeralFadeAfterMinutes: number; // Fade ephemeral after job
+  scaleUpThreshold: number; // Queue depth that triggers ignition
+}
+```
+
+### Profile Comparison
+
+| Setting             | CI                     | Bloom                | Outpost              |
+| ------------------- | ---------------------- | -------------------- | -------------------- |
+| **Provider**        | hetzner                | hetzner              | hetzner              |
+| **Size**            | cx22 (2 vCPU, 4 GB)    | cx22 (2 vCPU, 4 GB)  | cx32 (4 vCPU, 8 GB)  |
+| **Region**          | fsn1                   | fsn1                 | ash (US)             |
+| **Image**           | ci-runner-v1           | bloom-agent-v1       | outpost-mc-v2        |
+| **Min Warm**        | 0 (quiet) / 1 (active) | 0                    | 0                    |
+| **Max Warm**        | 2                      | 1                    | 1                    |
+| **Max Total**       | 5                      | 3                    | 2                    |
+| **Idle Fade**       | 10 min                 | 15 min               | 30 min               |
+| **Ephemeral Fade**  | Immediate after job    | After idle threshold | After idle threshold |
+| **Scale Threshold** | 1 pending job          | 1 pending task       | Manual only          |
+
+Profiles are stored in the `consumer_profiles` table and editable via the API. The Queen reads them on each alarm cycle, so changes take effect within 60 seconds.
+
+---
+
+## Job Queue
+
+Jobs track work requests from any consumer. CI jobs come from Codeberg webhooks. Bloom jobs come from task queues. The shape is the same.
+
+```typescript
+interface Job {
+  id: string; // UUID
+  consumer: string; // 'ci' | 'bloom' | 'outpost'
+  commit?: string; // Git commit SHA (CI)
+  branch?: string; // Git branch (CI)
+  repository?: string; // Repository identifier
+  author?: string; // Who triggered it
+  message?: string; // Commit message or task description
+  status:
+    | "pending"
+    | "claimed"
+    | "running"
+    | "success"
+    | "failure"
+    | "cancelled";
+  runnerId?: string; // Assigned runner
+  startedAt?: number; // Unix ms
+  completedAt?: number; // Unix ms
+  exitCode?: number;
+  metadata: Record<string, unknown>; // Consumer-specific data
+  priority: number; // 0 = normal, 1 = high (main branch)
+  createdAt: number; // Unix ms
+}
+```
+
+The previous spec used `pipeline: PipelineConfig` for CI-specific pipeline data. The new `metadata: Record<string, unknown>` field is consumer-agnostic. CI stores its parsed pipeline config there. Bloom stores task details. The Queen doesn't care about the contents.
+
+---
+
+## Runner Pool Management
+
+### Warm Pool Strategy
+
+**Active Development Hours (9am-6pm or manual trigger):**
+
+- Keep 1-2 runners warm for instant job pickup
+- Scale up to max based on queue depth
+- Fade warm runners after idle timeout
+
+**Quiet Hours:**
+
+- Zero warm runners
+- Ignite on demand (30-60s cold start)
+- Immediate fade after job completion
+
+**Manual Overrides:**
+
+```bash
+gw queen swarm warm --count 3 --duration 4h   # Pre-warm for a big push
+gw queen swarm freeze                          # Zero everything (vacation mode)
+```
+
+### Pool Scaling Flow
+
+```
+Every 60 seconds (Queen alarm):
+   │
+   ├─ Check warm runners
+   │  └─ For each 'ready' runner:
+   │     ├─ idle > fadeAfterIdleMinutes AND count > minWarm?
+   │     │  └─ Yes: trigger fade
+   │     └─ No: keep warm
+   │
+   ├─ Check queue depth
+   │  └─ pendingJobs >= scaleUpThreshold AND totalRunners < maxTotal?
+   │     └─ Yes: ignite new runner (with lock)
+   │
+   └─ Orphan sweep
+      └─ For each cloud instance with no matching runner row:
+         └─ Terminate via Firefly SDK
+```
+
+### Job Execution Flow
+
+```
+1. Trigger arrives (webhook, queue message, manual)
+   │
+2. Queen creates Job record (status: pending)
+   │
+3. Queen checks pool for ready runner
+   ├─ Found? Assign job, notify runner via WebSocket
+   └─ None?  Check capacity
+      ├─ Below max? Ignite new runner (via Firefly SDK)
+      └─ At max?    Job stays queued
+   │
+4. Runner boots, connects via WebSocket, registers
+   │
+5. Runner claims pending job
+   │
+6. Runner executes (streams logs via WebSocket)
+   │
+7. Job completes
+   ├─ Runner sends 'complete' with exit code
+   ├─ Queen updates job status
+   └─ Runner fate:
+      ├─ Ephemeral? Trigger fade
+      └─ Warm?      Return to pool
+```
+
+---
+
+## WebSocket Protocol
+
+### Runner Messages (Runner -> Queen)
+
+```typescript
+interface RunnerRegister {
+  type: "register";
+  runnerId: string;
+  providerServerId: string; // Was: hetznerId
+  labels: string[];
+  ip: string;
+}
+
+interface RunnerClaim {
+  type: "claim";
+  runnerId: string;
+}
+
+interface RunnerHeartbeat {
+  type: "heartbeat";
+  runnerId: string;
+  status: "ready" | "working";
+  currentJobId?: string;
+  cpuPercent?: number;
+  memPercent?: number;
+}
+
+interface RunnerLog {
+  type: "log";
+  runnerId: string;
+  jobId: string;
+  line: string;
+  timestamp: number;
+}
+
+interface JobComplete {
+  type: "complete";
+  runnerId: string;
+  jobId: string;
+  exitCode: number;
+  durationMs: number;
+}
+```
+
+### Queen Messages (Queen -> Runner)
+
+```typescript
+interface AssignJob {
+  type: "assign";
+  job: {
+    id: string;
+    repository: string;
+    commit: string;
+    branch: string;
+    metadata: Record<string, unknown>;
+  };
+}
+
+interface FadeCommand {
+  type: "fade";
+  reason: "idle" | "manual" | "max_lifetime" | "orphan";
+  gracePeriodMs: number;
+}
+```
+
+---
+
 ## API Surface
 
-### Webhook Endpoints (Worker → Queen)
+### Status Endpoint
+
+```typescript
+// GET /api/status
+interface StatusResponse {
+  queue: {
+    pending: number;
+    running: number;
+    completed: number; // Last 24 hours
+  };
+  runners: {
+    warm: { ready: number; working: number };
+    ephemeral: { igniting: number; working: number; fading: number };
+  };
+  costs: {
+    today: number; // USD
+    thisMonth: number;
+  };
+  consumers: string[]; // Active consumer profiles
+}
+```
+
+### Jobs Endpoints
+
+```typescript
+// GET /api/jobs?consumer=ci&status=pending&limit=50
+interface JobsResponse {
+  jobs: Job[];
+  total: number;
+}
+
+// GET /api/jobs/:id
+interface JobDetailResponse {
+  job: Job;
+  logs: string[]; // Truncated log lines
+  runner?: Runner;
+}
+
+// POST /api/jobs/:id/cancel
+interface CancelResponse {
+  success: boolean;
+  message?: string;
+}
+
+// POST /api/jobs/:id/rerun
+interface RerunResponse {
+  success: boolean;
+  newJobId: string;
+}
+```
+
+### Runner Management
+
+```typescript
+// POST /api/runners/warm
+interface WarmRequest {
+  consumer: string; // Which consumer profile to use
+  count: number;
+  durationMinutes?: number; // Auto-fade after N minutes
+}
+
+// POST /api/runners/freeze
+interface FreezeRequest {
+  consumer?: string; // Freeze specific consumer, or all if omitted
+}
+
+interface FreezeResponse {
+  faded: string[]; // Runner IDs that were faded
+}
+```
+
+### Cost Tracking
+
+```typescript
+// GET /api/costs?period=month&consumer=ci
+interface CostResponse {
+  period: "day" | "week" | "month";
+  consumer?: string;
+  total: number; // USD
+  breakdown: {
+    provider: string;
+    hours: number;
+    cost: number;
+  }[];
+  jobCount: number;
+  avgCostPerJob: number;
+}
+```
+
+---
+
+## CI Consumer: Codeberg Integration
+
+The Queen's primary consumer. Codeberg sends webhooks on push and PR events.
+
+### Webhook Interfaces
 
 ```typescript
 // POST /webhook/codeberg/push
 interface PushWebhook {
-  ref: string;                   // "refs/heads/main"
-  before: string;                // Previous commit SHA
-  after: string;                 // New commit SHA
+  ref: string; // "refs/heads/main"
+  before: string; // Previous commit SHA
+  after: string; // New commit SHA
   repository: {
-    full_name: string;           // "AutumnsGrove/GroveEngine"
-    clone_url: string;           // "https://codeberg.org/AutumnsGrove/GroveEngine.git"
+    full_name: string; // "AutumnsGrove/GroveEngine"
+    clone_url: string;
   };
   pusher: {
-    login: string;               // "AutumnsGrove"
+    login: string;
   };
   commits: Array<{
     id: string;
@@ -155,16 +664,11 @@ interface PushWebhook {
 
 // POST /webhook/codeberg/pull_request
 interface PRWebhook {
-  action: 'opened' | 'synchronize' | 'closed';
+  action: "opened" | "synchronize" | "closed";
   number: number;
   pull_request: {
-    head: {
-      ref: string;
-      sha: string;
-    };
-    base: {
-      ref: string;
-    };
+    head: { ref: string; sha: string };
+    base: { ref: string };
   };
   repository: {
     full_name: string;
@@ -172,340 +676,303 @@ interface PRWebhook {
 }
 ```
 
-### Runner Endpoints (Runner → Queen)
+### Pipeline Configuration
 
-```typescript
-// WebSocket /ws/runner
-interface RunnerRegistration {
-  type: 'register';
-  runnerId: string;
-  hetznerId: number;
-  labels: string[];
-  ip: string;
-}
+CI jobs parse a `.woodpecker.yml` from the repository. The pipeline config goes into the job's `metadata` field.
 
-interface RunnerClaim {
-  type: 'claim';
-  runnerId: string;
-}
+```yaml
+# .woodpecker.yml
+workspace:
+  base: /app
+  path: .
 
-interface RunnerHeartbeat {
-  type: 'heartbeat';
-  runnerId: string;
-  status: 'ready' | 'working';
-  currentJobId?: string;
-}
+steps:
+  install:
+    image: node:20
+    commands:
+      - pnpm install --frozen-lockfile
 
-interface RunnerLog {
-  type: 'log';
-  runnerId: string;
-  jobId: string;
-  line: string;
-  timestamp: Date;
-}
+  typecheck:
+    image: node:20
+    commands:
+      - pnpm run typecheck --filter='./packages/*'
 
-interface JobComplete {
-  type: 'complete';
-  runnerId: string;
-  jobId: string;
-  exitCode: number;
-  duration: number;
-}
+  test:
+    image: node:20
+    commands:
+      - pnpm test --filter='./packages/*'
+
+  deploy:
+    image: node:20
+    commands:
+      - npx wrangler deploy
+    secrets:
+      - CLOUDFLARE_API_TOKEN
+    when:
+      branch: main
+      event: push
 ```
 
-### Client Endpoints (gw CLI → Queen)
+### CI Open Questions
 
-```typescript
-// GET /api/status
-interface StatusResponse {
-  queue: {
-    pending: number;
-    running: number;
-    completed: number;
-  };
-  runners: {
-    warm: { ready: number; working: number };
-    ephemeral: { igniting: number; working: number; fading: number };
-  };
-  costs: {
-    today: number;     // EUR
-    thisMonth: number;
-  };
-}
+These remain from the original planning. Each needs its own investigation before Phase 2.
 
-// GET /api/jobs
-interface JobsResponse {
-  jobs: Job[];
-}
+1. **Artifacts:** Where do build artifacts live? R2 bucket with per-job prefixes? Ephemeral runner disk with upload step?
+  R2 bucket.
+2. **Caching:** How to cache `node_modules` and build outputs between jobs? Shared R2 bucket with content-addressed keys?
+  YES. shared R2 bucket.
+3. **Secrets:** Woodpecker secrets vs. Worker env bindings vs. dedicated secrets store? How do secrets reach the runner securely?
+  Accessed via the upcoming Warden SDK.
+4. **Networking:** Private registry access for Docker images? Docker Hub rate limit mitigation?
+5. **Debugging:** SSH access to a failed ephemeral runner before it fades? Configurable grace period on failure?
+  Yes, we need a way in, to check status of things or execute commands. Access for 5 mins is available.
 
-// GET /api/jobs/:id
-interface JobResponse {
-  job: Job;
-  logs: string[];
-}
-
-// POST /api/jobs/:id/cancel
-interface CancelResponse {
-  success: boolean;
-}
-
-// POST /api/runners/warm
-interface WarmRequest {
-  count: number;
-  durationMinutes?: number;  // Auto-fade after N minutes
-}
-
-// POST /api/runners/freeze
-interface FreezeResponse {
-  faded: string[];  // Runner IDs that were faded
-}
-
-// WebSocket /ws/logs?job=:id
-// Streams real-time log lines
-```
-
-## Lifecycle Flows
-
-### Job Execution Flow
-
-```
-1. Codeberg Push
-   ↓
-2. CF Worker receives webhook
-   ↓
-3. Worker fetches Queen DO via idFromName('main')
-   ↓
-4. Queen parses webhook → creates Job
-   ↓
-5. Queen checks Pool for ready runner
-   ├─ Found? → Assign job → Notify runner via WebSocket
-   └─ None?  → Check if below maxTotalRunners
-      ├─ Yes → Call Hetzner API (ignite) → Runner boots
-      └─ No  → Job stays queued
-   ↓
-6. Runner (on Hetzner VPS) boots
-   - Cloud-init runs setup script
-   - Runner binary starts
-   - Registers with Queen via WebSocket
-   ↓
-7. Runner claims job from Queen
-   ↓
-8. Runner executes job (docker run, npm test, etc.)
-   - Streams logs to Queen via WebSocket
-   - Queen relays to watching clients
-   ↓
-9. Job completes
-   - Runner sends 'complete' message
-   - Queen updates job status
-   - Queen decides runner fate:
-     ├─ Ephemeral? → Trigger fade (Hetzner destroy)
-     └─ Warm?      → Return to pool
-   ↓
-10. If ephemeral, runner self-destructs after N minutes idle
-```
-
-### Warm Pool Management
-
-```
-Every 60 seconds (alarm in Durable Object):
-   ↓
-Check all warm runners
-   ↓
-For each runner with status 'ready':
-   ├─ idleTime > fadeAfterIdleMinutes?
-   │  ├─ Yes → Trigger fade (if above minWarmRunners)
-   │  └─ No  → Keep warm
-   ↓
-Check queue depth
-   ↓
-If pendingJobs > 0 AND warmRunners < minWarmRunners:
-   → Ignite new warm runner
-```
+---
 
 ## Implementation Phases
 
-### Phase 0: The Queen's Birth (Week 1)
+### Phase 0: The Queen Wakes
 
-**Goal:** Basic webhook → job creation → manual runner assignment
+**Goal:** Webhook -> job creation -> manual runner assignment. Provider-agnostic skeleton.
 
-**Components:**
-1. Cloudflare Worker (webhook receiver)
-2. Queen Durable Object (state machine)
-3. Simple SQLite schema (jobs only)
-4. Manual runner ignition (no auto-scale)
+- Cloudflare Worker (webhook receiver, routes to Queen DO)
+- Queen DO extending LoomDO (schema, routes, basic job queue)
+- Manual ignition via `gw queen ignite`
+- Hetzner provider via Firefly SDK
 
-**API:**
 ```bash
-# Webhook automatically creates job
+# Webhook creates job automatically
 curl -X POST https://queen.grove.place/webhook/codeberg/push \
   -H "Content-Type: application/json" \
-  -d '{...push payload...}'
+  -d '{...}'
 
-# Manually check status
+# Check status
 gw queen status
 # Jobs: 1 pending, 0 running
 
-# Manually ignite runner
-gw queen ignite --type ci-runner
-# Igniting server on Hetzner...
-# Server ready: 168.119.XXX.XXX
+# Manually ignite
+gw queen ignite --consumer ci
+# Igniting runner via Hetzner... ready at 168.119.XXX.XXX
 
-# Runner connects and claims job
-
-# Watch logs
+# Runner connects, claims job, executes, completes
 gw queen logs --follow
 ```
 
-### Phase 1: The Swarm Awakens (Week 2-3)
+### Phase 1: The Swarm Stirs
 
-**Goal:** Warm pool, auto-ignition, auto-fade
+**Goal:** Warm pool, auto-ignition, auto-fade. Self-managing pool.
 
-**Add:**
-- Pool configuration (min/max runners)
-- Auto-ignition on queue depth
+- Pool configuration per consumer profile
+- Auto-ignition on queue depth (with double-ignition prevention via locks)
 - Auto-fade after idle timeout
-- Hetzner API integration
-- Runner bootstrap script
+- Runner bootstrap script (cloud-init)
+- 60-second alarm cycle for pool management
 
-**Commands:**
 ```bash
-# Configure pool
-gw queen config --min-warm 1 --max-total 5 --fade-after 10
+gw queen config --consumer ci --min-warm 1 --max-total 5 --fade-after 10
 
-# Check swarm status
 gw queen swarm status
 # Warm: 1 ready, 0 working
 # Ephemeral: 0 igniting, 2 working, 1 fading
 # Queue: 3 pending
 
-# Force warm pool
 gw queen swarm warm --count 2 --duration 4h
-
-# Freeze all (vacation mode)
 gw queen swarm freeze
 ```
 
-### Phase 2: The Hive Mind (Week 4)
+### Phase 2: The Hive Mind
 
-**Goal:** Pipeline parsing, .woodpecker.yml support, secrets
+**Goal:** Pipeline parsing, secrets injection, CI consumer complete.
 
-**Add:**
-- Parse `.woodpecker.yml` from repo
-- Fetch secrets from CF Secrets store
-- Matrix builds
-- Step dependencies
+- Parse `.woodpecker.yml` from repository
+- Secrets injection from Worker env bindings
+- Step dependencies and matrix builds
 - Artifact upload to R2
+- Pipeline validation (`gw ci pipeline validate`)
 
-**Commands:**
+### Phase 3: The Sovereign's Court
+
+**Goal:** Multi-consumer support, additional providers, full gw integration.
+
+- Consumer profile management via API
+- Bloom pool management (second consumer)
+- Fly.io provider integration (fast US cold starts)
+- Cost tracking and budget alerts
+- Web dashboard for job and runner visibility
+
+---
+
+## gw CLI Integration
+
+Three command tiers, each at a different abstraction level.
+
+### `gw firefly` (SDK-level)
+
+Cross-consumer, provider-focused commands.
+
 ```bash
-# Pipeline now auto-parses .woodpecker.yml
-gw queen pipeline validate  # Dry-run parse
+gw firefly providers           # List configured providers
+gw firefly status              # All Firefly instances across consumers
+gw firefly orphans             # Check for orphaned instances
+gw firefly costs --breakdown   # Cost by provider and consumer
 ```
 
-### Phase 3: The Sovereign's Court (Month 2)
+### `gw queen` (Pool management)
 
-**Goal:** Full GW integration, cost tracking, observability
+Queen DO coordination commands.
 
-**Add:**
-- `gw ci` commands (familiar GitHub Actions-like interface)
-- Cost tracking per job/day/month
-- Web dashboard (view jobs, logs, runners)
-- Slack/Discord notifications
-- Integration with existing `gw` workflows
-
-**Commands:**
 ```bash
-# Familiar CI commands
-gw ci list                    # List recent jobs
-gw ci view 127               # View job #127
-gw ci rerun 127              # Re-run failed job
-gw ci cancel 127             # Cancel running job
+gw queen status                # Queue depth, runner counts, costs
+gw queen swarm status          # Detailed pool breakdown
+gw queen swarm warm --count N  # Pre-warm runners
+gw queen swarm freeze          # Fade all runners
+gw queen config --show         # Current pool configuration
+gw queen config --consumer ci --min-warm 1 --max-total 5
+gw queen consumers             # List consumer profiles
+```
 
-# Firefly-specific
-gw ci costs                  # Show cost breakdown
+### `gw ci` (Job management)
+
+CI-specific commands with a familiar interface.
+
+```bash
+gw ci list                     # Recent CI jobs
+gw ci view 127                 # Job #127 details and logs
+gw ci run                      # Manually trigger CI for current branch
+gw ci rerun 127                # Re-run failed job
+gw ci cancel 127               # Cancel running job
+gw ci logs 127 --follow        # Stream job logs
+gw ci costs                    # CI cost breakdown
 gw ci costs --this-month
-gw ci costs --job 127        # Cost of specific job
+gw ci costs --job 127          # Cost of specific job
+gw ci pipeline validate        # Dry-run parse of .woodpecker.yml
 ```
+
+---
 
 ## Cost Model
 
 ### Cloudflare (The Queen)
 
-| Component | Cost |
-|-----------|------|
-| Worker requests | $0.50/million (mostly free tier) |
-| Durable Object compute | $12.50/million GB-seconds |
-| Durable Object storage | $1/GB-month |
-| WebSocket connections | Included |
+| Component              | Cost                             |
+| ---------------------- | -------------------------------- |
+| Worker requests        | $0.50/million (mostly free tier) |
+| Durable Object compute | $12.50/million GB-seconds        |
+| Durable Object storage | $1/GB-month                      |
+| WebSocket messages     | Included in DO compute           |
 
-**Estimated:** $0-5/month for typical usage
+**Estimated:** $0-5/month for typical usage. The Queen hibernates between events, so GB-seconds stay minimal.
 
-### Hetzner (The Swarm)
+### Cloud Runners (The Swarm)
 
-| Type | Specs | Cost |
-|------|-------|------|
-| CX21 | 2 vCPU, 4GB RAM | €0.006/hour (~€4.32/month if always-on) |
-| CPX21 | 4 vCPU, 8GB RAM | €0.012/hour (~€8.64/month if always-on) |
+| Provider          | Size           | Hourly  | Monthly (always-on) |
+| ----------------- | -------------- | ------- | ------------------- |
+| Hetzner cx22      | 2 vCPU, 4 GB   | ~$0.008 | ~$5.50              |
+| Hetzner cx32      | 4 vCPU, 8 GB   | ~$0.016 | ~$11.50             |
+| Fly shared-cpu-1x | 1 vCPU, 256 MB | ~$0.02  | ~$14.40             |
 
-**With Firefly pattern:**
-- Warm pool (1 runner, business hours only): ~€2-3/month
-- Ephemeral runners: €0.006/hour × actual runtime
-- Typical usage: €3-8/month total
+### Usage Scenarios
 
-### Comparison
+| Pattern                                  | Monthly Cost |
+| ---------------------------------------- | ------------ |
+| Pure ephemeral (10 jobs/day, 5 min each) | ~$1.20       |
+| Warm pool (1 runner, business hours)     | ~$3.00       |
+| Medium load (50 jobs/day, 10 min each)   | ~$6.60       |
+| Heavy load (100+ jobs/day, parallel)     | ~$15-25      |
+| Always-on equivalent (1 VPS 24/7)        | ~$5.50       |
 
-| Approach | Monthly Cost |
-|----------|-------------|
-| GitHub Actions (public repo) | $0 |
-| Always-on VPS (1 runner) | €6-12 |
-| Firefly CI (Queen + minimal warm) | €3-8 |
-| Firefly CI (pure ephemeral) | €0.50-2 |
+Firefly CI breaks even with always-on at roughly 23 hours/day of continuous usage. For any realistic development pattern, Firefly wins.
+
+---
 
 ## Files to Create
 
 ```
 workers/queen-firefly/
 ├── src/
-│   ├── index.ts              # Worker entry point
-│   ├── queen.ts              # Durable Object implementation
-│   ├── hetzner.ts            # Hetzner API client
-│   ├── schema.sql            # SQLite schema
+│   ├── index.ts              # Worker entry point (routes to DO)
+│   ├── queen.ts              # QueenDO extends LoomDO
+│   ├── handlers/
+│   │   ├── webhooks.ts       # Codeberg push/PR handlers
+│   │   ├── runners.ts        # Runner WebSocket + lifecycle
+│   │   ├── jobs.ts           # Job queue management
+│   │   ├── pool.ts           # Pool scaling logic
+│   │   └── costs.ts          # Cost tracking queries
+│   ├── consumers/
+│   │   ├── ci.ts             # CI-specific job creation + pipeline parsing
+│   │   ├── bloom.ts          # Bloom task queue integration (future)
+│   │   └── outpost.ts        # Outpost manual trigger (future)
 │   ├── types.ts              # TypeScript interfaces
 │   └── runner/
-│       └── bootstrap.sh      # Cloud-init script for runners
+│       └── bootstrap.sh      # Cloud-init script for runner VPS
 ├── wrangler.toml
 └── README.md
 
-tools/gw/src/gw/commands/queen/
-├── __init__.py
-├── status.py                 # gw queen status
-├── swarm.py                  # gw queen swarm *
-├── ignite.py                 # gw queen ignite
-├── fade.py                   # gw queen fade
-├── logs.py                   # gw queen logs
-└── ci.py                     # gw ci * (high-level commands)
+tools/gw/src/gw/commands/
+├── queen/
+│   ├── __init__.py
+│   ├── status.py             # gw queen status
+│   ├── swarm.py              # gw queen swarm *
+│   ├── config.py             # gw queen config
+│   └── ignite.py             # gw queen ignite
+├── ci/
+│   ├── __init__.py
+│   ├── list.py               # gw ci list
+│   ├── view.py               # gw ci view
+│   ├── run.py                # gw ci run / rerun
+│   ├── cancel.py             # gw ci cancel
+│   ├── logs.py               # gw ci logs
+│   ├── costs.py              # gw ci costs
+│   └── pipeline.py           # gw ci pipeline validate
+└── firefly/
+    ├── __init__.py
+    ├── status.py              # gw firefly status
+    ├── providers.py           # gw firefly providers
+    ├── orphans.py             # gw firefly orphans
+    └── costs.py               # gw firefly costs
 ```
-
-## Next Steps
-
-1. [ ] Create Cloudflare Worker project
-2. [ ] Implement basic webhook receiver
-3. [ ] Design Queen Durable Object state machine
-4. [ ] Create SQLite schema
-5. [ ] Test webhook → job creation flow
-6. [ ] Implement Hetzner ignition
-7. [ ] Build runner bootstrap script
-8. [ ] Integrate with `gw` CLI
-
-## References
-
-- [Firefly Pattern](/knowledge/patterns/firefly-pattern)
-- [Loom Pattern](/knowledge/patterns/loom-durable-objects-pattern)
-- [Firefly CI Spec](/knowledge/specs/firefly-ci-spec)
-- [Woodpecker Codeberg Setup](/knowledge/guides/woodpecker-codeberg-setup)
-- Outpost source (reference implementation)
-- Verge source (Hetzner API patterns)
 
 ---
 
-*Long live the Queen.*
+## Implementation Checklist
+
+### Phase 0: The Queen Wakes
+
+- [ ] Create `workers/queen-firefly/` project structure
+- [ ] Implement QueenDO extending LoomDO (schema, routes, config)
+- [ ] Build webhook receiver (push, PR parsing)
+- [ ] Implement basic job queue (create, claim, complete)
+- [ ] Wire Firefly SDK with HetznerProvider
+- [ ] Manual ignition endpoint
+- [ ] Runner bootstrap script (cloud-init)
+- [ ] Basic `gw queen status` command
+
+### Phase 1: The Swarm Stirs
+
+- [ ] Consumer profiles (SQLite storage, API endpoints)
+- [ ] Warm pool management (min/max, fade timers)
+- [ ] Auto-ignition on queue depth (with PromiseLockMap)
+- [ ] 60-second alarm cycle
+- [ ] Runner WebSocket protocol (register, heartbeat, claim, complete)
+- [ ] Log streaming via WebSocket relay
+- [ ] `gw queen swarm` commands
+
+### Phase 2: The Hive Mind
+
+- [ ] Pipeline parsing (`.woodpecker.yml`)
+- [ ] Secrets injection from Worker env
+- [ ] Artifact upload to R2
+- [ ] `gw ci` command suite
+- [ ] Pipeline validation dry-run
+
+### Phase 3: The Sovereign's Court
+
+- [ ] Multi-consumer profile management
+- [ ] Fly.io provider integration
+- [ ] Cost tracking and budget alerts
+- [ ] Web dashboard (read-only job/runner view)
+- [ ] `gw firefly` cross-consumer commands
+
+---
+
+_Long live the Queen._
