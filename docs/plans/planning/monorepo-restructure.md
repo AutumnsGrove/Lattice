@@ -210,10 +210,9 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 **Source:** `AutumnsGrove/Foliage`
 **What it is:** Full theme customization system — 10 curated themes, accent colors, custom fonts, live preview customizer, community theme sharing.
 **Why it stalled:** Cross-repo coordination with Lattice was too complex. Theme changes require touching both Foliage and the engine simultaneously.
-**What changes:** Gets its own workspace package in `libs/foliage/` with a proper `package.json`. The engine imports from it via `workspace:*`. The existing `packages/engine/src/lib/foliage/` becomes either:
+**What changes:** Gets its own workspace package in `libs/foliage/` with a proper `package.json`. The engine imports from it via `workspace:*`.
 
-- A thin re-export layer (engine re-exports Foliage for convenience), or
-- Gets replaced entirely by imports from `@autumnsgrove/foliage`
+**Reconciliation decision (pinned):** The engine's existing `src/lib/foliage/` becomes a **thin re-export layer** — it imports from `@autumnsgrove/foliage` and re-exports through the existing `./foliage` export path. This preserves the engine's public API (`@autumnsgrove/groveengine/foliage`) without breaking any consumers, while the real implementation lives in `libs/foliage/`. The re-export layer can be removed later as a separate cleanup if/when consumers migrate to importing `@autumnsgrove/foliage` directly.
 
 **Integration points:**
 
@@ -313,9 +312,52 @@ These don't need to happen during the migration, but become possible afterward:
 
 ## Migration Phases
 
+### Phase 0: Preparatory Tooling Updates
+
+> **Goal:** Make gw and gf work with _both_ old and new directory layouts. This lands as its own commit _before_ any packages move, so it's a safe no-op if we need to abort Phase 1.
+
+**Step 0.1 — Update `gw` tool to scan both old and new directories:**
+
+> gw's `discover_packages()` hardcodes `root / "packages"` for detection. Update it to scan `apps/`, `services/`, `workers/`, `libs/` **in addition to** `packages/`. This way it works both before and after the move.
+
+- `tools/gw/src/gw/packages.py` → Update `discover_packages()` (lines 260-273) to scan both `packages/` and `apps/`, `services/`, `workers/`, `libs/`
+- `tools/gw/src/gw/commands/db.py` — Make D1 migration path detection flexible (check both old and new)
+- `tools/gw/src/gw/commands/dev/format.py` — Same treatment
+- Update tests: `tools/gw/tests/test_packages.py`
+
+**Step 0.2 — Update `gf` tool to handle both old and new paths:**
+
+> gf hardcodes `packages/` in 20+ locations. Update these to check both layouts, so the tool works before and after the move.
+
+- **Go version (`tools/grove-find-go/cmd/`):**
+  - `impact.go` — hardcodes `packages/` for import path conversion and package detection (lines 66, 201, 481)
+  - `infra.go` — hardcodes `packages/` for migration discovery and package paths (lines 381, 929, 1035, 1135)
+  - `quality.go` — hardcodes `!packages/engine` exclusion pattern (line 435)
+- **Python version (`tools/grove-find/src/grove_find/commands/`):**
+  - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
+  - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
+  - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
+- **Rebuild gf Go binaries** for all 4 platforms:
+  - Run `tools/grove-find-go/build-all.sh` (or equivalent cross-compile script)
+  - Verify new binaries in `tools/grove-find-go/dist/` for linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64
+
+**Step 0.3 — Verify Phase 0 is a no-op on current layout:**
+
+```bash
+gw context           # still works with packages/
+gf --agent impact packages/engine/src/lib/ui/GlassCard.svelte  # still resolves
+gf --agent migrations  # still finds migrations
+```
+
+**Step 0.4 — Commit Phase 0:**
+
+This commit is safe to land independently. If Phase 1 gets delayed or aborted, gw and gf still work fine — they just also understand the new layout for when it arrives.
+
+---
+
 ### Phase 1: Create Structure & Move Existing Packages
 
-> **Goal:** Reorganize without breaking anything. No new code.
+> **Goal:** Reorganize without breaking anything. No new code. Tooling already updated in Phase 0.
 
 **Step 1.1 — Create directories:**
 
@@ -378,11 +420,15 @@ rmdir packages/workers
 ls packages          # confirm empty
 rmdir packages
 
-# If root landing/ is stale (symlink or duplicate of packages/landing):
-# Move it to _deprecated/ for safety rather than deleting
+# Root landing/ is a real directory (NOT a symlink) with static assets:
+#   landing/static/icon-192.png
+#   landing/static/icon-512.png
+# Before removing, diff against apps/landing/static/ to check for divergence:
+diff -r landing/static apps/landing/static
+# If identical → safe to remove via git rm:
+git rm -r landing
+# If diverged → move to _deprecated/ for manual review:
 git mv landing _deprecated/landing-root-stale
-# Or if it's a symlink:
-git rm landing
 ```
 
 > **Safety rule:** Never `rm -rf` during migration. Use `git mv` to preserve history, `git rm` to remove tracked files, and `rmdir` only on confirmed-empty directories.
@@ -473,34 +519,9 @@ The root `package.json` has test scripts with `--filter` flags. These use packag
 - `CLAUDE.md` — Tailwind preset path example
 - Any other docs referencing `packages/`
 
-**Step 1.13 — Update `gw` tool (REQUIRED — breaks immediately after moves):**
+**Step 1.13 — Verify:**
 
-> gw's `discover_packages()` hardcodes `root / "packages"` for detection. After Step 1.2–1.5, `gw context` and `gw packages list` return zero packages.
-
-- `tools/gw/src/gw/packages.py` → Update `discover_packages()` (lines 260-273) to scan `apps/`, `services/`, `workers/`, `libs/` instead of `packages/`
-- `tools/gw/src/gw/commands/db.py` — Update `packages/` references in D1 migration paths
-- `tools/gw/src/gw/commands/dev/format.py` — Update `packages/` references
-- Update tests: `tools/gw/tests/test_packages.py`
-
-**Step 1.14 — Update `gf` tool (REQUIRED — breaks immediately after moves):**
-
-> gf hardcodes `packages/` in 20+ locations across Go and Python. After Step 1.2–1.5, `gf impact`, `gf migrations`, and quality commands return wrong results silently.
-
-- **Go version (`tools/grove-find-go/cmd/`):**
-  - `impact.go` — hardcodes `packages/` for import path conversion and package detection (lines 66, 201, 481)
-  - `infra.go` — hardcodes `packages/` for migration discovery and package paths (lines 381, 929, 1035, 1135)
-  - `quality.go` — hardcodes `!packages/engine` exclusion pattern (line 435)
-- **Python version (`tools/grove-find/src/grove_find/commands/`):**
-  - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
-  - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
-  - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
-- **Rebuild gf Go binaries** for all 4 platforms:
-  - Run `tools/grove-find-go/build-all.sh` (or equivalent cross-compile script)
-  - Verify new binaries in `tools/grove-find-go/dist/` for linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64
-  - **This blocks the Phase 1 commit.** Stale binaries mean `gf impact` and `gf migrations` silently return wrong results.
-  - Commit the rebuilt binaries as part of the Phase 1 atomic commit.
-
-**Step 1.15 — Verify:**
+> gw and gf tooling was already updated in Phase 0. This verification confirms they work with the new layout.
 
 ```bash
 pnpm install
@@ -578,7 +599,7 @@ pnpm -r run check
 
 > **Goal:** All documentation reflects the new structure.
 >
-> **Note:** gw and gf tooling updates are in Phase 1 (Steps 1.13–1.14), not here. Those are structural breakages, not documentation sync.
+> **Note:** gw and gf tooling updates landed in Phase 0, not here. Those are structural, not documentation.
 
 1. **Update `AGENT.md`:**
    - Directory structure references
@@ -594,9 +615,13 @@ pnpm -r run check
 3. **Update `CLAUDE.md`:**
    - Tailwind preset import path example
 
-4. **Clean up stale references:**
+4. **Update `CONTRIBUTING.md`:**
+   - Dev setup instructions: `cd packages/engine && pnpm dev` → `cd libs/engine && pnpm dev` (line 86)
+   - Any other `packages/` path references in setup or build steps
+
+5. **Clean up stale references:**
    - Search entire codebase for remaining `packages/` path references
-   - Move root `landing/` directory safely if stale (git mv to `_deprecated/`, never rm -rf)
+   - Root `landing/` was already handled in Phase 1 Step 1.6
 
 ---
 
@@ -685,7 +710,7 @@ jobs:
 
       # SvelteKit → build + pages deploy
       - if: inputs.deploy-type == 'pages'
-        run: pnpm --filter ./{{ inputs.package-path }} build
+        run: pnpm --filter ./${{ inputs.package-path }} build
       - if: inputs.deploy-type == 'pages'
         run: wrangler pages deploy ...
         working-directory: ${{ inputs.package-path }}
@@ -778,18 +803,25 @@ Same pattern for `ci.yml`. Create a reusable `_ci.yml` with the test/check/lint 
 
 ## Verification Checklist
 
-After Phase 1 (restructure + tooling):
+After Phase 0 (tooling prep):
+
+- [ ] gw and gf updated to handle both old and new directory layouts
+- [ ] gf Go binaries rebuilt for all 4 platforms and committed
+- [ ] `gw context` still works with current `packages/` layout
+- [ ] `gf --agent impact packages/engine/src/lib/ui/GlassCard.svelte` still resolves
+- [ ] `gf --agent migrations` still finds migrations
+
+After Phase 1 (restructure):
 
 - [ ] `pnpm install` succeeds
 - [ ] `pnpm -r run build` succeeds for all packages
 - [ ] `pnpm -r run check` succeeds (TypeScript)
 - [ ] `pnpm -r run test:run` passes
-- [ ] `gw context` reports correct packages (not zero)
-- [ ] `gw packages list` shows correct paths under new directories
+- [ ] `gw context` reports correct packages under new directories (not zero)
+- [ ] `gw packages list` shows correct paths
 - [ ] `gf --agent search "test"` still finds files correctly
 - [ ] `gf --agent impact libs/engine/src/lib/ui/GlassCard.svelte` resolves correctly (not empty)
 - [ ] `gf --agent migrations` finds D1 migrations in new paths
-- [ ] gf Go binaries rebuilt for all 4 platforms and committed
 - [ ] No remaining references to `packages/` in workspace config
 - [ ] All deploy workflows point to new paths
 
@@ -805,15 +837,16 @@ After Phase 3 (docs):
 
 - [ ] `AGENT.md` reflects new structure
 - [ ] `project-organization.md` updated
+- [ ] `CONTRIBUTING.md` dev setup paths updated (line 86: `cd libs/engine`)
 - [ ] No stale `packages/` references in docs
 - [ ] `CLAUDE.md` examples use correct paths
-- [ ] `CONTRIBUTING.md` dev setup paths updated
 
 ---
 
 ## Execution Notes
 
-- **Do Phase 1 as a single atomic commit.** This includes the directory moves (1.1–1.6), config updates (1.7–1.12), **and** the gw/gf tooling fixes + binary rebuild (1.13–1.14). Moving packages without updating the tools that scan them creates a broken-but-silent state.
+- **Phase 0 lands first as its own commit.** Tooling updates that handle both old and new layouts. Safe no-op on the current structure — if Phase 1 gets delayed, nothing breaks.
+- **Phase 1 is a single atomic commit.** Directory moves (1.1–1.6), config updates (1.7–1.12), verification (1.13). Tooling already prepared in Phase 0, so the blast radius is just the structural changes.
 - **Phase 2 can be one commit per import** (Foliage, Gossamer, Shutter, Forage separately). This keeps the blame history clean and makes rollback granular.
 - **Phase 3 is safe to do incrementally.** Docs updates can land as follow-ups without breaking anything.
 - **Test locally before pushing.** The full `pnpm install && pnpm -r run build && pnpm -r run check` cycle is non-negotiable. Also verify `gw context` and `gf --agent impact` return non-empty results.
