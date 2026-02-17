@@ -1,7 +1,7 @@
 # Grove Find (gf) — Python to Go Port
 
 **Created**: 2026-02-13
-**Status**: In Progress
+**Status**: Completed (Python version archived 2026-02-17)
 **Priority**: High (developer tooling performance)
 
 ## Goal

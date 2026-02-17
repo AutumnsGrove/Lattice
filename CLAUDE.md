@@ -22,23 +22,18 @@ If either command is not found, install them:
 # gf — Go binary (pre-compiled, included in repo, ~40ms for git operations)
 bash tools/grove-find-go/install.sh
 
-# gf-py — Python fallback (if Go binary unavailable)
-uv tool install --editable tools/grove-find
-
 # gw — Infrastructure CLI
 uv tool install --editable tools/gw
 ```
 
 **About gf:**
 
-- `gf` is the Go version with pre-compiled binaries (4 platforms: linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64)
+- `gf` is a Go binary with pre-compiled builds for 4 platforms (linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64)
 - Binaries are included in `tools/grove-find-go/dist/` (~3.5MB each, ~14MB total)
 - The installer script auto-detects your platform and installs to `~/.local/bin/`
 - Average performance: ~40ms for git operations, ~650ms for search operations
-- ~2x faster than the Python fallback
-- `gf-py` is the Python fallback (slower, but works if Go build environment unavailable)
 - `gw` is the infrastructure CLI (git, GitHub, Cloudflare wrapper)
-- All available directly — no prefixes needed
+- Both available directly — no prefixes needed
 
 ### Codebase Search (gf)
 

@@ -1,7 +1,7 @@
 # Archived: Grove Find (Bash Version)
 
 **Archived:** 2026-02-02
-**Replaced by:** `tools/grove-find` (Python CLI)
+**Replaced by:** `tools/grove-find-go/` (Go CLI)
 
 ## Why Archived
 
@@ -14,14 +14,16 @@ The original bash implementation had UX issues:
 
 ## Replacement
 
-The new Python `gf` CLI (`tools/grove-find/`) provides:
+The Go `gf` CLI (`tools/grove-find-go/`) provides:
 
-- Proper CLI invocation (no sourcing needed)
+- Pre-compiled binaries for 4 platforms — no runtime dependencies
+- Sub-10ms startup (vs 300-600ms for the intermediate Python version)
 - Built-in `--agent` and `--json` flags
-- Type-safe Python with rich terminal output
-- Pytest-based testing
+- Parallel subprocess execution via goroutines
 
-Install with: `uv tool install tools/grove-find`
+Install with: `bash tools/grove-find-go/install.sh`
+
+The intermediate Python version (`tools/grove-find/`) served as the bridge from bash to Go and has been archived to `_deprecated/grove-find-py-deprecated-2026-02-17/`.
 
 ## Contents
 
@@ -30,4 +32,4 @@ Install with: `uv tool install tools/grove-find`
 
 ## Historical Note
 
-This was a good first attempt! The bash functions worked well for quick searches, but the requirement to source the script and manage shell state made it awkward for both humans and agents. The Python rewrite keeps the same command semantics while being much more portable.
+This was a good first attempt! The bash functions worked well for quick searches, but the requirement to source the script and manage shell state made it awkward for both humans and agents. The Python rewrite kept the same command semantics while being much more portable, and the Go port completed the journey to a fast, dependency-free binary.

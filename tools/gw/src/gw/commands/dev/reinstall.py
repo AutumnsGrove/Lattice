@@ -6,25 +6,22 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from ...ui import success, error, info, warning
+from ...ui import success, error, info
 
 console = Console()
 
 
 @click.command()
-@click.option("--tool", "-t", multiple=True, help="Specific tool to reinstall (gw, gf). Default: all")
 @click.pass_context
-def reinstall(ctx: click.Context, tool: tuple[str, ...]) -> None:
-    """Reinstall gw/gf as global UV tools.
+def reinstall(ctx: click.Context) -> None:
+    """Reinstall gw as a global UV tool.
 
-    After making changes to tools/gw or tools/grove-find, the global
-    commands won't see your changes until you reinstall them.
+    After making changes to tools/gw, the global command won't see
+    your changes until you reinstall it.
 
     \b
     Examples:
-        gw dev reinstall              # Reinstall all tools
-        gw dev reinstall -t gw        # Reinstall just gw
-        gw dev reinstall -t gf        # Reinstall just gf
+        gw dev reinstall              # Reinstall gw
     """
     # Find the tools directory by locating the git repository root
     # This works both when running from source and from the installed tool
@@ -56,73 +53,38 @@ def reinstall(ctx: click.Context, tool: tuple[str, ...]) -> None:
     # In that case, verify we have valid source directories (they should have pyproject.toml)
     if not found_via_git:
         gw_path = tools_root / "gw"
-        gf_path = tools_root / "grove-find"
-        valid_sources = (
-            (gw_path.exists() and (gw_path / "pyproject.toml").exists()) or
-            (gf_path.exists() and (gf_path / "pyproject.toml").exists())
-        )
-        if not valid_sources:
+        if not (gw_path.exists() and (gw_path / "pyproject.toml").exists()):
             error(f"Not running from a valid source directory")
             info(f"Current directory: {cwd}")
             info(f"Please run this command from within the GroveEngine repository")
             ctx.exit(1)
 
-    tools_to_install = {
-        "gw": tools_root / "gw",
-        "gf": tools_root / "grove-find",
-    }
+    gw_path = tools_root / "gw"
 
-    # Filter if specific tools requested
-    if tool:
-        tools_to_install = {
-            name: path for name, path in tools_to_install.items()
-            if name in tool
-        }
-        if not tools_to_install:
-            error(f"Unknown tool(s): {', '.join(tool)}")
-            info("Available tools: gw, gf")
+    if not gw_path.exists():
+        error(f"Tool directory not found: {gw_path}")
+        ctx.exit(1)
+
+    info(f"Reinstalling gw from {gw_path}...")
+
+    try:
+        result = subprocess.run(
+            ["uv", "tool", "install", str(gw_path), "--force", "--reinstall"],
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            console.print()
+            success("Reinstalled gw!")
+            info("Run 'gw --help' to verify")
+        else:
+            error(f"Failed to reinstall gw: {result.stderr.strip()}")
             ctx.exit(1)
 
-    results = []
-
-    for name, path in tools_to_install.items():
-        if not path.exists():
-            warning(f"Tool directory not found: {path}")
-            results.append((name, False, "Directory not found"))
-            continue
-
-        info(f"Reinstalling {name} from {path}...")
-
-        try:
-            # Use --force and --reinstall to ensure a complete refresh
-            result = subprocess.run(
-                ["uv", "tool", "install", str(path), "--force", "--reinstall"],
-                capture_output=True,
-                text=True,
-            )
-
-            if result.returncode == 0:
-                success(f"Reinstalled {name}")
-                results.append((name, True, None))
-            else:
-                error(f"Failed to reinstall {name}: {result.stderr.strip()}")
-                results.append((name, False, result.stderr.strip()))
-
-        except FileNotFoundError:
-            error("UV not found. Install it from https://docs.astral.sh/uv/")
-            ctx.exit(1)
-        except Exception as e:
-            error(f"Failed to reinstall {name}: {e}")
-            results.append((name, False, str(e)))
-
-    # Summary
-    succeeded = sum(1 for _, ok, _ in results if ok)
-    failed = sum(1 for _, ok, _ in results if not ok)
-
-    if failed == 0:
-        console.print()
-        success(f"All {succeeded} tool(s) reinstalled!")
-        info("Run 'gw --help' or 'gf --help' to verify")
-    else:
-        console.print()
-        warning(f"{succeeded} succeeded, {failed} failed")
+    except FileNotFoundError:
+        error("UV not found. Install it from https://docs.astral.sh/uv/")
+        ctx.exit(1)
+    except Exception as e:
+        error(f"Failed to reinstall gw: {e}")
+        ctx.exit(1)
