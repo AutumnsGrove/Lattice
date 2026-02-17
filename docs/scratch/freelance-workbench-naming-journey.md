@@ -927,3 +927,214 @@ THE GROVE ECOSYSTEM
 **The Repo:** `AutumnsGrove/Bottega`
 **The Sub-concept:** The Bestiary (the catalog of beasts
 within the Bottega)
+
+---
+
+## Leaving the Workshop
+
+Autumn says: let's get out of Da Vinci's workshop.
+Let's move to a library. The Library of Alexandria.
+
+Good. The bottega was getting small. Four walls.
+One window. The smell of linseed oil was nice but
+I was circling the same table. Let me step outside,
+cross the Mediterranean, and walk into the largest
+building the ancient world ever knew.
+
+---
+
+## The Library of Alexandria
+
+Picture it. Not the Hollywood version — not a single
+room with scrolls on shelves. The REAL thing.
+
+The Library of Alexandria wasn't a library. It was a
+CAMPUS. The Mouseion (Μουσεῖον) — the "Seat of the
+Muses." A research institution. A university. A think
+tank. The greatest concentration of knowledge the
+ancient world ever assembled.
+
+Founded around 283 BCE by Ptolemy I. Part of the royal
+palace complex in the Bruchion quarter of Alexandria.
+
+What it contained:
+
+- The Great Library (the main collection)
+- The Serapeum (the "daughter library")
+- Lecture halls and meeting rooms
+- Gardens and covered walkways (colonnades)
+- A dining hall where scholars ate together
+- A zoo (for studying animals!)
+- A botanical garden (for studying plants!)
+- An observatory
+- Rooms for dissection and study
+
+At its peak: 400,000 to 700,000 scrolls. Every ship
+that docked in Alexandria's harbor had its scrolls
+confiscated, copied, and (sometimes) returned. The
+library kept the originals.
+
+Scholars LIVED there. The Ptolemaic kings paid their
+salaries, fed them, housed them. In exchange, the
+scholars researched, wrote, organized, and — crucially
+— CATALOGED. Callimachus created the Pinakes, the
+first library catalog. 120 scrolls just to INDEX the
+other scrolls.
+
+The parallels are strong. But what NAME does this
+place give us?
+
+---
+
+## Words from Alexandria
+
+**Mouseion / Museum** — "Seat of the Muses." The
+original meaning was a research institution, not a
+display hall. But "museum" has been domesticated —
+it means "place where old things sit behind glass."
+Can't reclaim it.
+
+**Athenaeum** — Temple of Athena. Place of learning.
+Three or four syllables. Testing: "Check the
+Athenaeum." — Too grand. You're wearing a toga. Not
+cozy enough for Grove.
+
+**Stoa** — A covered walkway where philosophers taught.
+Open on one side (facing outward!). But too open —
+a stoa doesn't contain things. It's a fancy porch.
+
+**Lyceum** — Aristotle's school. But "lyceum" means
+"school" in most people's minds. Too institutional.
+
+**Pinakes** — Callimachus's catalog. But we need a
+place, not a document. And too obscure.
+
+**Bibliotheca** — Greek for "book repository." Five
+syllables. Beautiful but too long.
+
+None of these land. Let me look at the STRUCTURE.
+
+---
+
+## Inside the Library
+
+The scrolls were stored in **armaria** — closed
+cabinets or pigeonholes. From Latin arma (tools,
+equipment). The armarium was a ROOM in medieval
+monasteries — the book storage room tended by the
+armarius (the librarian-monk).
+
+This leads to: **Armory** — a place where arms and
+tools are stored. Where you gear up before going out.
+Medieval. Three syllables.
+
+Testing:
+
+- "I'm in the Armory gearing up." ✓
+- "The Bestiary is in the Armory." ✓
+
+But: too military. Too aggressive. An armory is stone
+and iron, not wood and candlelight. The Grove is warm.
+
+---
+
+## The Apothecary Detour
+
+From Alexandria, through the Arabic Golden Age, the
+knowledge migrated. And something interesting emerges:
+
+**Apothecary** — A medieval/Renaissance pharmacy.
+Floor to ceiling: labeled wooden drawers. Glass jars
+of dried herbs, minerals, tinctures. A mortar and
+pestle. Scales for precise measurement. A reference
+book on a stand. One practitioner who knows her craft.
+
+The parallel is startling:
+
+- Client arrives with an ailment (security problem)
+- Apothecary consults references (Bestiary)
+- Selects remedies (Raven, Osprey, Turtle)
+- Measures precisely (Osprey's estimation)
+- Prepares treatment (proposal, engagement)
+- Dispenses the cure (remediation)
+- Records the treatment (archives)
+
+The VIBE is perfect. But six syllables. And the
+direction is wrong — an apothecary's clients come
+to HER. Autumn goes to THEM.
+
+Hold the feeling. Release the word.
+
+---
+
+## What the Alexandria Walk Taught Us
+
+The Library of Alexandria didn't give us THE name.
+But it clarified what we're looking for:
+
+The right word must be:
+
+1. A PLACE (a room, a building, a structure)
+2. Where a single practitioner PREPARES
+3. That contains organized tools and references
+4. With the feeling of: warm, candlelit, personal,
+   curated, precise, organized-but-alive
+5. 1-3 syllables (4 maximum)
+6. Not poisoned by tech/pop culture
+7. Works as `AutumnsGrove/___`
+
+And the Alexandria walk gave us a new image to add
+to the Da Vinci workshop: the apothecary. Labeled
+drawers. Glass jars. Precise measurement. Remedies
+for specific ailments. One practitioner.
+
+The room we're naming is a Da Vinci workshop crossed
+with an apothecary shop. Tools AND remedies. Invention
+AND healing. Preparation AND dispensing.
+
+---
+
+## The Full Rejection List
+
+**Explored and set aside (with reasons):**
+
+| Name        | Why It Didn't Land                           |
+| ----------- | -------------------------------------------- |
+| Roost       | Birds aren't the container                   |
+| Codex       | OpenAI poisoned it                           |
+| Bestiary    | A book, not a room (but great sub-concept)   |
+| Grimoire    | Too dark/occult for Grove                    |
+| Forge       | Too common in tech                           |
+| Almanac     | Too practical, no magic                      |
+| Mews        | Too obscure, London real estate              |
+| Aerie       | Too serious                                  |
+| Bower       | Too gentle for security work                 |
+| Rookery     | Also means "slum"                            |
+| Studiolo    | Too obscure, too many syllables              |
+| Scriptorium | Implies copying, five syllables              |
+| Sanctum     | Doctor Strange                               |
+| Chamber     | Harry Potter                                 |
+| Hollow      | The word means "empty"                       |
+| Den         | Too generic                                  |
+| Lodge       | Too communal                                 |
+| Holt        | Too obscure                                  |
+| Hearth      | Too close to "Heartwood"                     |
+| Keep        | Too military, not warm                       |
+| Athenaeum   | Too grand, too formal                        |
+| Armory      | Too aggressive for Grove                     |
+| Apothecary  | Perfect vibe, six syllables, wrong direction |
+| Alcove/Nook | Too small                                    |
+| Vault       | HashiCorp                                    |
+| Study       | Too generic, no magic                        |
+| Bench       | Too simple, too many tech meanings           |
+| Museum      | Display, not work                            |
+| Stoa        | Too open                                     |
+| Lyceum      | Too institutional                            |
+
+**Still standing:**
+
+| Name    | Why It's Still Here                             |
+| ------- | ----------------------------------------------- |
+| Bottega | Literally "workshop." Da Vinci. Musical. PLACE. |
+
+The walk continues.
