@@ -323,17 +323,24 @@ git mv packages/engine    libs/engine
 git mv packages/vineyard  libs/vineyard
 ```
 
-**Step 1.6 — Clean up:**
+**Step 1.6 — Clean up empty directories:**
 
 ```bash
 # packages/ directory should now be empty (or contain only stale files)
-# Remove it after confirming
-rmdir packages/workers  # should be empty
-rmdir packages          # should be empty
+# Verify first, then remove empty dirs
+ls packages/workers  # confirm empty
+rmdir packages/workers
+ls packages          # confirm empty
+rmdir packages
 
-# Remove stale root landing/ reference if it exists
-rm -rf landing          # only if it's just a symlink/stale reference
+# If root landing/ is stale (symlink or duplicate of packages/landing):
+# Move it to _deprecated/ for safety rather than deleting
+git mv landing _deprecated/landing-root-stale
+# Or if it's a symlink:
+git rm landing
 ```
+
+> **Safety rule:** Never `rm -rf` during migration. Use `git mv` to preserve history, `git rm` to remove tracked files, and `rmdir` only on confirmed-empty directories.
 
 **Step 1.7 — Update pnpm-workspace.yaml:**
 
@@ -479,9 +486,15 @@ pnpm -r run check
 2. Copy the Worker source into `services/forage/`
 3. Set up `package.json` with name `grove-forage`
 4. Set up `wrangler.toml` for the worker
-5. Update `apps/domains/wrangler.toml` service binding to use the local worker
-6. Add deploy workflow: `.github/workflows/deploy-forage.yml`
-7. Verify: build, type-check
+5. **Migrate secrets/env vars:** Forage requires several API keys that need wiring into the monorepo's Cloudflare config:
+   - `OPENROUTER_API_KEY` (DeepSeek v3.2 via OpenRouter)
+   - `RESEND_API_KEY` (result emails)
+   - Any other service-specific secrets from the external repo's wrangler.toml or `.dev.vars`
+   - Document these in `services/forage/.dev.vars.example`
+   - Ensure `wrangler secret put` commands are run for production
+6. Update `apps/domains/wrangler.toml` service binding to use the local worker
+7. Add deploy workflow: `.github/workflows/deploy-forage.yml`
+8. Verify: build, type-check
 
 ---
 
@@ -503,16 +516,27 @@ pnpm -r run check
 3. **Update `CLAUDE.md`:**
    - Tailwind preset import path example
 
-4. **Update `gw` tool if needed:**
-   - Package detection logic (if it relies on `packages/` path)
-   - Context command output
+4. **Update `gw` tool (REQUIRED — will break without this):**
+   - `tools/gw/src/gw/packages.py` → `discover_packages()` hardcodes `root / "packages"` for package detection. Must be updated to scan `apps/`, `services/`, `workers/`, `libs/` instead.
+   - Specifically: lines 260-273 iterate `packages_dir = root / "packages"` and its children. Replace with iteration over all four workspace directories.
+   - `tools/gw/src/gw/commands/db.py` — references `packages/` in D1 migration paths
+   - `tools/gw/src/gw/commands/dev/format.py` — references `packages/`
+   - Update tests: `tools/gw/tests/test_packages.py`
 
-5. **Update `gf` tool if needed:**
-   - Any hardcoded path patterns
+5. **Update `gf` tool (REQUIRED — will break without this):**
+   - **Go version (`tools/grove-find-go/cmd/`):**
+     - `impact.go` — hardcodes `packages/` for import path conversion and package detection (lines 66, 201, 481)
+     - `infra.go` — hardcodes `packages/` for migration discovery and package paths (lines 381, 929, 1035, 1135)
+     - `quality.go` — hardcodes `!packages/engine` exclusion pattern (line 435)
+   - **Python version (`tools/grove-find/src/grove_find/commands/`):**
+     - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
+     - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
+     - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
+   - After updating source, **rebuild gf Go binaries** for all platforms
 
 6. **Clean up stale references:**
    - Search entire codebase for `packages/` path references
-   - Remove root `landing/` directory if stale
+   - Move root `landing/` directory safely if stale (git mv to `_deprecated/`, never rm -rf)
 
 ---
 
@@ -551,7 +575,16 @@ Every deploy workflow has `packages/<name>` in path triggers and working directo
 
 ### wrangler.toml Files
 
-These reference their own package — the file moves with the package, so relative internal paths are unchanged. Only cross-package references (like Forage URL in domains) need review.
+**Requires explicit audit.** While most wrangler.toml files reference their own package (so internal paths are unchanged after the move), some workers may reference sibling packages via relative paths in `[build]` commands, `tsconfig` references, or custom build scripts with `../` prefixes.
+
+**Step:** Before declaring Phase 1 complete, run:
+
+```bash
+grep -r '\.\.\/' **/wrangler.toml
+grep -r 'packages/' **/wrangler.toml
+```
+
+Verify zero hits, or update any that reference old paths. Also check any `build.ts` or `build.sh` scripts referenced from wrangler configs.
 
 ---
 
@@ -573,14 +606,18 @@ Rewrite CI to detect packages by workspace membership rather than hardcoded path
 
 ## Risk Assessment
 
-| Risk                                  | Impact                                  | Mitigation                                                |
-| ------------------------------------- | --------------------------------------- | --------------------------------------------------------- |
-| **Broken relative paths**             | High — builds fail                      | Comprehensive search-and-replace; verify with full build  |
-| **CI deploy paths wrong**             | High — deploys stop working             | Update all workflow files; test with dry-run before merge |
-| **Git history fragmentation**         | Medium — blame/log harder to trace      | `git log --follow` still works; accept trade-off          |
-| **Stale path references in docs**     | Low — confusion but no breakage         | Global search for `packages/` after migration             |
-| **Foliage/Gossamer import conflicts** | Medium — existing code vs imported code | Reconcile carefully in Phase 2; engine foliage re-exports |
-| **npm publish pipeline break**        | Medium — can't release engine           | Verify publish workflow uses correct new path             |
+| Risk                                  | Impact                                   | Mitigation                                                             |
+| ------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- |
+| **Broken relative paths**             | High — builds fail                       | Comprehensive search-and-replace; verify with full build               |
+| **CI deploy paths wrong**             | High — deploys stop working              | Update all workflow files; test with dry-run before merge              |
+| **gw package detection breaks**       | High — `gw context`, `gw packages` fail  | Update `packages.py` discover logic to scan new dirs (confirmed)       |
+| **gf impact/infra commands break**    | High — `gf impact`, `gf migrations` fail | Update hardcoded `packages/` in Go + Python (confirmed, 20+ refs)      |
+| **wrangler.toml cross-references**    | Medium — workers can't build             | Explicit audit step; grep for `../` and `packages/` in all configs     |
+| **Forage secrets not wired**          | Medium — worker deploys fail silently    | Document all required secrets; run `wrangler secret put` before deploy |
+| **Git history fragmentation**         | Medium — blame/log harder to trace       | `git log --follow` still works; accept trade-off                       |
+| **Foliage/Gossamer import conflicts** | Medium — existing code vs imported code  | Reconcile carefully in Phase 2; engine foliage re-exports              |
+| **npm publish pipeline break**        | Medium — can't release engine            | Verify publish workflow uses correct new path                          |
+| **Stale path references in docs**     | Low — confusion but no breakage          | Global search for `packages/` after migration                          |
 
 ---
 
@@ -615,12 +652,17 @@ After Phase 2 (imports):
 - [ ] Shutter library type-checks and exports work
 - [ ] No circular dependencies
 
-After Phase 3 (docs):
+After Phase 3 (docs + tooling):
 
 - [ ] `AGENT.md` reflects new structure
 - [ ] `project-organization.md` updated
 - [ ] No stale `packages/` references in docs
 - [ ] `CLAUDE.md` examples use correct paths
+- [ ] `gw context` reports all packages correctly
+- [ ] `gw packages list` shows correct paths
+- [ ] `gf --agent impact <file>` resolves packages correctly
+- [ ] `gf --agent migrations` finds D1 migrations in new paths
+- [ ] gf Go binaries rebuilt for all 4 platforms
 
 ---
 
