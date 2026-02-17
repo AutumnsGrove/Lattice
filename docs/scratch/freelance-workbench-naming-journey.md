@@ -1138,3 +1138,198 @@ AND healing. Preparation AND dispensing.
 | Bottega | Literally "workshop." Da Vinci. Musical. PLACE. |
 
 The walk continues.
+
+---
+
+## The Rice Fields of China
+
+Leave the library. Leave the Mediterranean entirely.
+Walk east. Past Constantinople, past the Silk Road
+caravanserais, past the Himalayas. Into southern China.
+Yunnan province. The Honghe Hani Rice Terraces.
+
+Stand at the top. It's early morning.
+
+Mist rises from the flooded paddies. Each terrace
+reflects the sky — hundreds of irregular mirrors
+stepping down the mountainside. The forest is above
+you, dark and ancient. Below, the terraces cascade
+toward the valley floor. A heron stands in the shallow
+water of one paddy, perfectly still, watching for fish.
+
+This landscape was built by hand. Not in one season.
+Not in one generation. Over CENTURIES. Each terrace
+dug, leveled, walled with stone, connected to the
+irrigation system. The water starts at the top and
+flows down through every level, feeding each paddy
+in turn, until it reaches the bottom and returns to
+the stream.
+
+No single person designed this. No Leonardo sketched
+it on vellum. It grew. Generation after generation of
+farmers, each one adding a terrace, reinforcing a wall,
+deepening a channel. The system is older than any
+individual memory. And it will outlive every person
+working it today.
+
+The energy here is completely different from Da Vinci's
+workshop. That was INVENTION — a single genius with a
+candle, sketching a flying machine. This is CULTIVATION.
+Patient. Cyclical. Seasonal. Water-based, not fire-based.
+The same work, done well, year after year, building on
+what came before.
+
+---
+
+## The Cultivator's Building
+
+At the top of the terraces, where the forest meets
+the fields, there's a building. Not grand. Not a
+library. Not a workshop with brass instruments. A
+solid, weathered structure. Thick walls — stone and
+timber. A heavy door.
+
+Inside: tools hang from pegs on the wall. A sickle.
+A flail. Winnowing baskets. Rope. On a shelf: jars
+of seed stock for next season, labeled by variety and
+year. A logbook — handwritten, going back decades.
+Notes about drainage patterns, pest outbreaks, which
+terrace needs reinforcing. A map of the entire terrace
+system pinned to the wall, annotated in different inks
+from different seasons.
+
+This is where the cultivator prepares. Where she
+records. Where she plans the next season based on the
+last one. Where the tools are maintained and the
+knowledge is kept.
+
+And when the rice is harvested, it comes HERE first.
+Raw and rough, still in the husk. She threshes it.
+Winnows it. Husks it. The refined grain goes into
+storage. The chaff goes back to the fields as mulch.
+
+Raw material comes in. Refined product goes out.
+The building is the PROCESSING space.
+
+That's the freelance workshop:
+
+- Client repo comes in (raw, in the husk)
+- The Raven investigates (threshing — separating
+  what matters from what doesn't)
+- The Osprey appraises (measuring the yield)
+- Documents are prepared (refined grain — proposals,
+  agreements, reports)
+- Deliverables go out (clean rice, packaged)
+- Records are archived (the logbook grows)
+
+---
+
+## The Scholar's Study
+
+In Chinese literati culture, there's a parallel
+tradition: the scholar's 書房 (shū fáng) — literally
+"book room." Private. Contemplative. Sacred.
+
+The scholar's study held the 文房四寶 — the Four
+Treasures of the Study: brush, ink, paper, inkstone.
+Without any one of them, the scholar cannot work.
+
+The Wayfinder's Four Treasures:
+
+1. The Bestiary (the animal skills)
+2. The Documents (agreement, proposal, cheat sheet)
+3. The Runbook (engagement playbook)
+4. The Archives (client records, history)
+
+These four things live in the room we're naming.
+The room holds the treasures. The treasures enable
+the practice. The practice sustains the practitioner.
+
+---
+
+## What the Rice Fields Teach
+
+Da Vinci's workshop: precision, craft, tools. Fire.
+Alexandria: organization, cataloging, remedies. Stone.
+Rice fields teach something new: patience, cycles,
+cultivation. Water.
+
+**1. The work is cyclical, not one-time.**
+Each engagement is a season. You prepare, plant, tend,
+harvest. Then you prepare again.
+
+**2. Patience matters more than speed.**
+The Raven doesn't rush. The Osprey hovers. The work
+takes the time it takes.
+
+**3. Water, not fire.**
+The freelance practice is more water than fire. It
+flows around obstacles. It finds the level. It reflects
+the sky.
+
+**4. The landscape is engineered but looks natural.**
+The terraces are artificial — dug by hand. But they
+curve with the mountain. Engineered nature. The Grove
+aesthetic, exactly.
+
+**5. Each season builds on the last.**
+The logbook grows. The terrace walls strengthen. The
+seed stock improves. Each engagement makes the next
+one smoother.
+
+**6. The practitioner tends the same space.**
+She doesn't move to a new field. She tends the same
+terraces, year after year. The workshop stays. The
+tools stay. The knowledge accumulates.
+
+---
+
+## But What's the WORD?
+
+The rice field walk gave us atmosphere and philosophy.
+It shifted the energy from invention to cultivation,
+from fire to water, from one-time genius to seasonal
+practice. But it didn't hand us a single word.
+
+Testing rice-field-adjacent words:
+
+**Granary** — where harvested rice is stored. A PLACE.
+But too storage-focused. You don't WORK in a granary.
+
+**Mill** — where raw grain is processed. A PLACE.
+But too industrial. Mass production, not craft.
+
+**Terrace** — one level of the engineered landscape.
+But "terrace" in English means restaurant patio.
+
+**Paddy** — a flooded rice field. Too casual, and
+it's where the WORK happens, not where you PREPARE.
+
+The Chinese words for workshop (工坊, 書房, 庄) are
+beautiful in their language but don't carry warmth
+into English.
+
+---
+
+## Where We Stand After Three Walks
+
+| Walk                | Taught Us            | Gave Us            |
+| ------------------- | -------------------- | ------------------ |
+| Da Vinci's workshop | Craft, precision     | Bottega, Bestiary  |
+| Alexandria          | Cataloging, remedies | Apothecary (vibe)  |
+| Rice fields         | Patience, cycles     | Cultivation energy |
+
+The combined feeling for this room:
+Patient. Precise. Organized but alive. Warm. Personal.
+Where a practice is cultivated over seasons. Not grand.
+Not institutional. Not a single burst of genius. The
+cultivator returns to the same space, year after year,
+refining her craft. Each engagement is a season. The
+logbook grows.
+
+The word we need lives at the intersection of:
+**workshop + sanctuary + seasonal practice**
+
+**Still standing:** Bottega (the master's workshop)
+
+The walk continues.
