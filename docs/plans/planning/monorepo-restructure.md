@@ -295,13 +295,18 @@ Co-location isn't just about file organization — it simplifies architecture. W
 
 **After (monorepo):** A single PR can touch the theme definition (Foliage), its visual effects (Gossamer), and the engine integration — all type-checked and built together. `workspace:*` means no version mismatches, no publish-wait-install cycles.
 
+### Unified Deploy: One Workflow to Rule Them All
+
+**Before:** 17+ nearly identical `deploy-*.yml` workflows, each hardcoding a package path and running the same wrangler deploy logic. Adding a new service means copying a workflow file and updating paths.
+
+**After:** A single `deploy.yml` that detects which directories changed, spins up parallel matrix jobs, and runs the right deploy command per package type (Pages for SvelteKit, Workers for everything else). Adding a new service means... nothing. It auto-deploys. See [CI Workflow Strategy](#ci-workflow-strategy-unified-deploy-workflow) for design.
+
 ### Future Opportunities
 
 These don't need to happen during the migration, but become possible afterward:
 
 - **Shared D1 migrations:** A single migration pipeline that knows about all services' schema needs
 - **Cross-service type safety:** Services can share TypeScript types directly instead of duplicating them
-- **Unified CI:** One build graph that understands the dependency tree, only rebuilding what changed
 - **Service binding mesh:** Any service can talk to any other service without external API keys or auth tokens
 
 ---
@@ -444,35 +449,19 @@ grep -r 'packages/' apps/*/wrangler.toml services/*/wrangler.toml workers/*/wran
 
 Also check any `build.ts`, `build.sh`, or custom build scripts referenced from wrangler `[build]` sections. Verify zero hits referencing old paths, or fix any that do.
 
-**Step 1.10 — Update CI workflows:**
+**Step 1.10 — Replace deploy workflows with unified system:**
 
-All deploy workflows in `.github/workflows/` reference `packages/<name>` paths for:
+Instead of updating 17+ individual `deploy-*.yml` workflows to point at new paths, replace them all with a single unified deploy workflow. See [CI Workflow Strategy](#ci-workflow-strategy-unified-deploy-workflow) for full design.
 
-- `on.push.paths` triggers
-- `working-directory` in steps
-- Deploy commands
-
-Workflows to update:
-
-| Workflow                      | Path Change                                                              |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `deploy-engine.yml`           | `packages/engine` → `libs/engine`, `packages/vineyard` → `libs/vineyard` |
-| `deploy-landing.yml`          | `packages/landing` → `apps/landing`                                      |
-| `deploy-plant.yml`            | `packages/plant` → `apps/plant`                                          |
-| `deploy-clearing.yml`         | `packages/clearing` → `apps/clearing`                                    |
-| `deploy-meadow.yml`           | `packages/meadow` → `apps/meadow`                                        |
-| `deploy-terrarium.yml`        | `packages/terrarium` → `apps/terrarium`                                  |
-| `deploy-login.yml`            | `packages/login` → `apps/login`                                          |
-| `deploy-domains.yml`          | `packages/domains` → `apps/domains`                                      |
-| `deploy-heartwood.yml`        | `packages/heartwood` → `services/heartwood`                              |
-| `deploy-router.yml`           | `packages/grove-router` → `services/grove-router`                        |
-| `deploy-durable-objects.yml`  | `packages/durable-objects` → `services/durable-objects`                  |
-| `deploy-zephyr.yml`           | `workers/zephyr` → `services/zephyr`                                     |
-| `deploy-clearing-monitor.yml` | `packages/workers/clearing-monitor` → `workers/clearing-monitor`         |
-| `deploy-meadow-poller.yml`    | `packages/workers/meadow-poller` → `workers/meadow-poller`               |
-| `deploy-post-migrator.yml`    | `packages/post-migrator` → `workers/post-migrator`                       |
-| `deploy-timeline-sync.yml`    | `packages/workers/timeline-sync` → `workers/timeline-sync`               |
-| `ci.yml`                      | `packages/*` → glob across all categories                                |
+1. Create `.github/workflows/deploy.yml` — unified deploy with change detection + matrix dispatch
+2. Create `.github/workflows/ci.yml` (updated) — unified CI with dynamic package detection
+3. Delete all individual `deploy-*.yml` workflows (17+ files):
+   - `deploy-engine.yml`, `deploy-landing.yml`, `deploy-plant.yml`, `deploy-clearing.yml`
+   - `deploy-meadow.yml`, `deploy-terrarium.yml`, `deploy-login.yml`, `deploy-domains.yml`
+   - `deploy-heartwood.yml`, `deploy-router.yml`, `deploy-durable-objects.yml`
+   - `deploy-zephyr.yml`, `deploy-clearing-monitor.yml`, `deploy-meadow-poller.yml`
+   - `deploy-post-migrator.yml`, `deploy-timeline-sync.yml`, and any others
+4. Keep non-deploy workflows (`claude.yml`, `codeql.yml`, `semgrep.yml`, etc.) — update any `packages/` path references in those individually
 
 **Step 1.11 — Update root package.json:**
 
@@ -652,19 +641,87 @@ Promoted to an explicit pre-commit step (Step 1.9). See Phase 1 above.
 
 ---
 
-## CI Workflow Strategy
+## CI Workflow Strategy: Unified Deploy Workflow
 
-Two approaches for updating CI:
+The migration is the perfect moment to consolidate 17+ individual deploy workflows into a single unified deployment system. Instead of updating each `deploy-*.yml` file to point at new paths (and maintaining 17+ near-identical workflows forever), we replace them all with one smart workflow.
 
-### Option A: Update Each Workflow Individually (Recommended)
+### Current State: 17+ Individual Deploy Workflows
 
-Simple, predictable. Each deploy workflow gets its path updated. The `ci.yml` gets updated to glob across all categories.
+```
+.github/workflows/
+├── deploy-engine.yml
+├── deploy-landing.yml
+├── deploy-plant.yml
+├── deploy-clearing.yml
+├── deploy-meadow.yml
+├── deploy-terrarium.yml
+├── deploy-login.yml
+├── deploy-domains.yml
+├── deploy-heartwood.yml
+├── deploy-router.yml
+├── deploy-durable-objects.yml
+├── deploy-zephyr.yml
+├── deploy-clearing-monitor.yml
+├── deploy-meadow-poller.yml
+├── deploy-post-migrator.yml
+├── deploy-timeline-sync.yml
+└── ... (more)
+```
 
-### Option B: Path-Agnostic CI
+Each one is nearly identical: detect path change → install deps → run wrangler deploy. 17 copies of the same logic with different paths and project names.
 
-Rewrite CI to detect packages by workspace membership rather than hardcoded paths. More resilient but more complex.
+### Target State: One Unified Workflow
 
-**Recommendation:** Option A for this migration. Option B as a future improvement.
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    # Use path-based change detection to figure out which packages changed
+    # Output: list of changed package directories
+
+  deploy:
+    needs: detect-changes
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
+    steps:
+      # Each package knows how to deploy itself via its wrangler.toml
+      # The workflow just runs the right command in the right directory
+```
+
+**How it works:**
+
+1. **Change detection:** On push to main, diff against previous commit to find which directories under `apps/`, `services/`, `workers/`, `libs/` changed
+2. **Matrix dispatch:** Spin up parallel deploy jobs for each changed package
+3. **Package-local config:** Each package's `wrangler.toml` (or `wrangler.json`) already knows its project name, routes, and bindings — the workflow just runs `wrangler deploy` in the right directory
+4. **SvelteKit apps:** Detected by presence of `svelte.config.js` → run `pnpm build` then `wrangler pages deploy`
+5. **Workers:** Detected by `wrangler.toml` without `svelte.config.js` → run `wrangler deploy`
+6. **Libs:** Engine deploy triggered when `libs/engine/` changes → build + publish
+
+**Benefits:**
+
+- Add a new service → it auto-deploys. No new workflow file needed.
+- One place to update deploy logic, not 17.
+- Matrix strategy gives parallel deploys with clear per-package status.
+- Path-based detection is resilient to future directory changes.
+
+**Implementation:** This should be built as part of Phase 1's Step 1.10 instead of individually updating 17 workflow files. The old `deploy-*.yml` files get deleted, replaced by a single `deploy.yml`.
+
+### CI (Non-Deploy) Workflow
+
+The `ci.yml` workflow also needs updating. Similar approach:
+
+```yaml
+# .github/workflows/ci.yml — detect changed packages, run their tests/checks in matrix
+```
+
+Instead of hardcoding `for config in packages/*/svelte.config.*`, detect SvelteKit apps dynamically across `apps/`, `services/`, `workers/`, `libs/`.
 
 ---
 
